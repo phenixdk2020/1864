@@ -1,3 +1,3 @@
 PROJECT 1864 - Unreal kanal: CAMPAIGN (kampagnekort)
-Prototype version: UE-CAMPAIGN v00.00.16 3D BYER, GÅRDE OG SKOVE
+Prototype version: UE-CAMPAIGN v00.00.17 VEJE OG MARKER
 Branch: channel-campaign

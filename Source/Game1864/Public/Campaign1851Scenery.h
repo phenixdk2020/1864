@@ -29,5 +29,11 @@ namespace Campaign1851Scenery
 
 	UStaticMesh* Build(EPiece Piece, UMaterialInterface* Material);
 
+	/**
+	 * A flat ribbon along each polyline (points in map-local units, already on the terrain):
+	 * darker edges, lighter crown, like a dirt road.
+	 */
+	UStaticMesh* BuildRibbons(const TArray<TArray<FVector>>& Lines, float HalfWidth, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* Name);
+
 	const TCHAR* Name(EPiece Piece);
 }

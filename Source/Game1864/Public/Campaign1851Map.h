@@ -99,7 +99,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Map")
 	float HeightRangeKm = 3.f;
 
-	/** Camera distance (km) below which the 3D towns, farms and woods are shown. */
+	/** Camera distance (km) below which the main roads are shown. */
+	UPROPERTY(EditAnywhere, Category = "Map")
+	float RoadsMaxDistanceKm = 250.f;
+
+	/** Camera distance (km) below which the 3D towns, farms, woods and village lanes are shown. */
 	UPROPERTY(EditAnywhere, Category = "Map")
 	float SceneryMaxDistanceKm = 100.f;
 
@@ -134,6 +138,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> Backdrop;
 
+	/** Main roads between the towns (routed by build_map.py). */
+	UPROPERTY(Transient)
+	TObjectPtr<UStaticMeshComponent> Roads;
+
+	/** Village lanes, generated with the scenery. */
+	UPROPERTY(Transient)
+	TObjectPtr<UStaticMeshComponent> Lanes;
+
 	/** One instanced component per Campaign1851Scenery::EPiece, created at BeginPlay. */
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> Scenery;
@@ -146,6 +158,8 @@ private:
 	void BuildMarkers();
 	bool LoadFeatures();
 	void BuildScenery();
+	/** Drapes polylines (projected km) on the terrain as a ribbon mesh. */
+	UStaticMeshComponent* BuildRibbons(const TArray<TArray<FVector2D>>& Lines, float WidthKm, const FLinearColor& Colour, const TCHAR* Name, UMaterialInterface* Material);
 
 	/** Map-local position of a projected-km point, on the terrain mesh surface. */
 	FVector LocalAtKm(const FVector2D& Km) const;
@@ -162,6 +176,7 @@ private:
 	float DetailTileKm = 2.5f;
 	TArray<FCampaign1851City> Cities;
 	TArray<FCampaign1851Label> Labels;
+	TArray<TArray<FVector2D>> RoadLines;   // projected km
 
 	TArray<uint16> Height;
 	int32 HeightW = 0, HeightH = 0;
@@ -169,5 +184,6 @@ private:
 	TArray<FColor> Features;           // R = monarchy land, G = woodland
 	int32 FeaturesW = 0, FeaturesH = 0;
 	bool bSceneryVisible = false;
+	bool bRoadsVisible = false;
 	bool bReady = false;
 };

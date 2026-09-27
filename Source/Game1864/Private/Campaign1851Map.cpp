@@ -33,6 +33,8 @@ namespace
 	}
 
 	const TCHAR* FlatColourPath = TEXT("/Game/Materials/M_FlatColor.M_FlatColor");
+	FLinearColor Srgb(uint8 R, uint8 G, uint8 B) { return FLinearColor::FromSRGBColor(FColor(R, G, B)); }
+
 	const TCHAR* SceneryMaterialPath = TEXT("/Game/Campaign1851/M_Campaign1851Scenery.M_Campaign1851Scenery");
 }
 
@@ -165,6 +167,20 @@ bool ACampaign1851Map::LoadData()
 	};
 	ReadCities(Json->GetArrayField(TEXT("cities")), false);
 	ReadCities(Json->GetArrayField(TEXT("foreignCities")), true);
+
+	const TArray<TSharedPtr<FJsonValue>>* RoadArray = nullptr;
+	if (Json->TryGetArrayField(TEXT("roads"), RoadArray))
+	{
+		for (const TSharedPtr<FJsonValue>& Road : *RoadArray)
+		{
+			TArray<FVector2D>& Line = RoadLines.AddDefaulted_GetRef();
+			for (const TSharedPtr<FJsonValue>& Point : Road->AsObject()->GetArrayField(TEXT("km")))
+			{
+				const TArray<TSharedPtr<FJsonValue>>& XY = Point->AsArray();
+				Line.Add(FVector2D(XY[0]->AsNumber(), XY[1]->AsNumber()));
+			}
+		}
+	}
 
 	for (const TSharedPtr<FJsonValue>& Value : Json->GetArrayField(TEXT("labels")))
 	{
@@ -363,6 +379,16 @@ void ACampaign1851Map::UpdateMarkers(float CameraDistanceKm)
 			Part->SetVisibility(bShowScenery);
 		}
 	}
+	if (Lanes)
+	{
+		Lanes->SetVisibility(bShowScenery);
+	}
+	const bool bShowRoads = CameraDistanceKm < RoadsMaxDistanceKm;
+	if (Roads && bShowRoads != bRoadsVisible)
+	{
+		bRoadsVisible = bShowRoads;
+		Roads->SetVisibility(bShowRoads);
+	}
 	// Close in, the dot floats above the roofs and church towers so the town never hides it.
 	const float Lift = FMath::GetMappedRangeValueClamped(FVector2D(40.f, 120.f), FVector2D(24.f, 0.f), CameraDistanceKm);
 
@@ -509,6 +535,35 @@ void ACampaign1851Map::BuildScenery()
 	};
 	auto Take = [&](const FVector2D& Km, float Radius) { Taken.FindOrAdd(CellOf(Km)).Add({ Km, Radius * PieceScale }); };
 
+	// ---- Main roads: keep buildings and woods off them (sampled every 100 m).
+	auto Resample = [](const TArray<FVector2D>& Line, double StepKm)
+	{
+		TArray<FVector2D> Out;
+		for (int32 i = 0; i + 1 < Line.Num(); ++i)
+		{
+			const double Len = FVector2D::Distance(Line[i], Line[i + 1]);
+			const int32 Steps = FMath::Max(1, FMath::CeilToInt(Len / StepKm));
+			for (int32 s = 0; s < Steps; ++s)
+			{
+				Out.Add(FMath::Lerp(Line[i], Line[i + 1], double(s) / Steps));
+			}
+		}
+		if (Line.Num() > 0)
+		{
+			Out.Add(Line.Last());
+		}
+		return Out;
+	};
+	TArray<FVector2D> RoadSamples;
+	for (const TArray<FVector2D>& Line : RoadLines)
+	{
+		for (const FVector2D& P : Resample(Line, 0.1))
+		{
+			Take(P, 0.026f);
+			RoadSamples.Add(P);
+		}
+	}
+
 	// ---- Towns: whitewashed and yellow houses with red roofs along a street grid, churches in the core.
 	struct FTown { FVector2D Km; float RadiusKm; };
 	TArray<FTown> Towns;
@@ -569,46 +624,139 @@ void ACampaign1851Map::BuildScenery()
 	};
 
 	// ---- Countryside: villages with a church, four-winged farms and cottages on a jittered grid.
+	enum class ESite : uint8 { Village, Farm, Cottage };
+	struct FSite { FVector2D Km; ESite Kind; };
+	TArray<FSite> Sites;
 	constexpr double FarmCellKm = 2.0;
 	for (double Y = Extent.YMin; Y < Extent.YMax; Y += FarmCellKm)
 	{
 		for (double X = Extent.XMin; X < Extent.XMax; X += FarmCellKm)
 		{
 			const FVector2D Km(X + Rng.FRand() * FarmCellKm, Y + Rng.FRand() * FarmCellKm);
-			if (!IsMonarchyLand(Km) || Woodland(Km) > 0.3f || InTown(Km, 0.5f) || !IsFree(Km, 0.1f))
+			if (!IsMonarchyLand(Km) || Woodland(Km) > 0.3f || InTown(Km, 0.5f))
 			{
 				continue;
 			}
 			const float Roll = Rng.FRand();
-			if (Roll < 0.06f)
+			if (Roll < 0.72f)
+			{
+				Sites.Add({ Km, Roll < 0.06f ? ESite::Village : Roll < 0.55f ? ESite::Farm : ESite::Cottage });
+			}
+		}
+	}
+
+	// Village lanes: each village to the nearest main road and to its nearest neighbour village,
+	// gently winding, and only over land.
+	TArray<TArray<FVector2D>> LaneLines;
+	auto AddLane = [&](const FVector2D& A, const FVector2D& B)
+	{
+		const FVector2D D = B - A;
+		const double Len = D.Size();
+		if (Len < 0.3)
+		{
+			return;
+		}
+		const FVector2D Normal = FVector2D(-D.Y, D.X) / Len;
+		const float Bend = Rng.FRandRange(-0.08f, 0.08f) * float(Len), Wiggle = Rng.FRandRange(-0.03f, 0.03f) * float(Len);
+		TArray<FVector2D> Line;
+		const int32 Steps = FMath::Max(2, FMath::CeilToInt(Len / 0.2));
+		for (int32 s = 0; s <= Steps; ++s)
+		{
+			const double T = double(s) / Steps;
+			const FVector2D P = A + D * T + Normal * (Bend * FMath::Sin(T * UE_PI) + Wiggle * FMath::Sin(T * 3.0 * UE_PI));
+			if (s > 0 && s < Steps && !IsMonarchyLand(P))
+			{
+				return;
+			}
+			Line.Add(P);
+		}
+		LaneLines.Add(MoveTemp(Line));
+	};
+	TArray<FVector2D> Villages;
+	for (const FSite& Site : Sites)
+	{
+		if (Site.Kind == ESite::Village)
+		{
+			Villages.Add(Site.Km);
+		}
+	}
+	TSet<TPair<int32, int32>> Linked;
+	for (int32 v = 0; v < Villages.Num(); ++v)
+	{
+		double Best = 8.0 * 8.0;
+		const FVector2D* Nearest = nullptr;
+		for (const FVector2D& P : RoadSamples)
+		{
+			const double D2 = FVector2D::DistSquared(P, Villages[v]);
+			if (D2 < Best)
+			{
+				Best = D2;
+				Nearest = &P;
+			}
+		}
+		if (Nearest)
+		{
+			AddLane(Villages[v], *Nearest);
+		}
+		int32 Other = INDEX_NONE;
+		Best = 6.0 * 6.0;
+		for (int32 w = 0; w < Villages.Num(); ++w)
+		{
+			const double D2 = FVector2D::DistSquared(Villages[w], Villages[v]);
+			if (w != v && D2 < Best)
+			{
+				Best = D2;
+				Other = w;
+			}
+		}
+		if (Other != INDEX_NONE && !Linked.Contains(TPair<int32, int32>(FMath::Min(v, Other), FMath::Max(v, Other))))
+		{
+			Linked.Add(TPair<int32, int32>(FMath::Min(v, Other), FMath::Max(v, Other)));
+			AddLane(Villages[v], Villages[Other]);
+		}
+	}
+	for (const TArray<FVector2D>& Line : LaneLines)
+	{
+		for (const FVector2D& P : Resample(Line, 0.1))
+		{
+			Take(P, 0.016f);
+		}
+	}
+
+	for (const FSite& Site : Sites)
+	{
+		const FVector2D& Km = Site.Km;
+		if (Site.Kind == ESite::Village)
+		{
+			if (IsFree(Km, 0.12f))
 			{
 				Place(EPiece::Church, Km, Rng.FRandRange(0.f, 360.f), 0.85f);
 				Take(Km, 0.12f);
-				const int32 Count = Rng.RandRange(5, 11);
-				for (int32 i = 0, Tries = 0; i < Count && Tries < 60; ++Tries)
+			}
+			const int32 Count = Rng.RandRange(5, 11);
+			for (int32 i = 0, Tries = 0; i < Count && Tries < 60; ++Tries)
+			{
+				const float A = Rng.FRandRange(0.f, UE_TWO_PI), D = Rng.FRandRange(0.35f, 1.3f);
+				const FVector2D P = Km + FVector2D(FMath::Cos(A), FMath::Sin(A)) * D;
+				const bool bFarm = Rng.FRand() < 0.25f;
+				const float R = bFarm ? 0.1f : 0.035f;
+				if (IsMonarchyLand(P) && IsFree(P, R))
 				{
-					const float A = Rng.FRandRange(0.f, UE_TWO_PI), D = Rng.FRandRange(0.35f, 1.3f);
-					const FVector2D P = Km + FVector2D(FMath::Cos(A), FMath::Sin(A)) * D;
-					const bool bFarm = Rng.FRand() < 0.25f;
-					const float R = bFarm ? 0.1f : 0.035f;
-					if (IsMonarchyLand(P) && IsFree(P, R))
-					{
-						Place(bFarm ? EPiece::Farm : EPiece::Cottage, P, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.8f, 1.1f));
-						Take(P, R);
-						++i;
-					}
+					Place(bFarm ? EPiece::Farm : EPiece::Cottage, P, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.8f, 1.1f));
+					Take(P, R);
+					++i;
 				}
 			}
-			else if (Roll < 0.55f)
-			{
-				Place(EPiece::Farm, Km, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.8f, 1.05f));
-				Take(Km, 0.1f);
-			}
-			else if (Roll < 0.72f)
-			{
-				Place(EPiece::Cottage, Km, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.85f, 1.1f));
-				Take(Km, 0.035f);
-			}
+		}
+		else if (Site.Kind == ESite::Farm && IsFree(Km, 0.1f))
+		{
+			Place(EPiece::Farm, Km, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.8f, 1.05f));
+			Take(Km, 0.1f);
+		}
+		else if (Site.Kind == ESite::Cottage && IsFree(Km, 0.035f))
+		{
+			Place(EPiece::Cottage, Km, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.85f, 1.1f));
+			Take(Km, 0.035f);
 		}
 	}
 
@@ -667,4 +815,42 @@ void ACampaign1851Map::BuildScenery()
 	}
 	bSceneryVisible = false;
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|scenery|total=%d"), Total);
+
+	// ---- Road ribbons (the unlit scenery material dims non-instanced meshes to 0.84, hence the bright dirt).
+	TArray<TArray<FVector2D>> Dense;
+	for (const TArray<FVector2D>& Line : RoadLines)
+	{
+		Dense.Add(Resample(Line, 0.2));
+	}
+	Roads = BuildRibbons(Dense, 0.13f, Srgb(176, 136, 92), TEXT("Roads"), Material);
+	Dense.Reset();
+	for (const TArray<FVector2D>& Line : LaneLines)
+	{
+		Dense.Add(Resample(Line, 0.2));
+	}
+	Lanes = BuildRibbons(Dense, 0.075f, Srgb(160, 126, 88), TEXT("Lanes"), Material);
+	bRoadsVisible = false;
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|roads|main=%d|lanes=%d"), RoadLines.Num(), LaneLines.Num());
+}
+
+UStaticMeshComponent* ACampaign1851Map::BuildRibbons(const TArray<TArray<FVector2D>>& Lines, float WidthKm, const FLinearColor& Colour, const TCHAR* Name, UMaterialInterface* Material)
+{
+	// Map-local units on the terrain surface, lifted a little so the ribbon never dips under it.
+	TArray<TArray<FVector>> Local;
+	for (const TArray<FVector2D>& Line : Lines)
+	{
+		TArray<FVector>& Out = Local.AddDefaulted_GetRef();
+		for (const FVector2D& P : Line)
+		{
+			Out.Add(LocalAtKm(P) + FVector(0.0, 0.0, 1.2));
+		}
+	}
+	UStaticMeshComponent* Mesh = NewObject<UStaticMeshComponent>(this, Name);
+	Mesh->SetupAttachment(Root);
+	Mesh->SetStaticMesh(Campaign1851Scenery::BuildRibbons(Local, WidthKm * 0.5f * float(KmToUnits), Colour, Material, *FString::Printf(TEXT("SM_Campaign1851_%s"), Name)));
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Mesh->SetCastShadow(false);
+	Mesh->SetVisibility(false);
+	Mesh->RegisterComponent();
+	return Mesh;
 }

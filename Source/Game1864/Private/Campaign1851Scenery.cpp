@@ -217,12 +217,9 @@ namespace Campaign1851Scenery
 		return Names[FMath::Clamp(int32(Piece), 0, int32(EPiece::Count) - 1)];
 	}
 
-	UStaticMesh* Build(EPiece Piece, UMaterialInterface* Material)
+	static UStaticMesh* Finish(FWriter& Writer, UMaterialInterface* Material, const FString& MeshName)
 	{
-		FWriter Writer;
-		BuildPiece(Writer, Piece);
-
-		UStaticMesh* Mesh = NewObject<UStaticMesh>(GetTransientPackage(), *FString::Printf(TEXT("SM_Campaign1851_%s"), Name(Piece)), RF_Transient);
+		UStaticMesh* Mesh = NewObject<UStaticMesh>(GetTransientPackage(), *MeshName, RF_Transient);
 		Mesh->GetStaticMaterials().Add(FStaticMaterial(Material, TEXT("Scenery")));
 		UStaticMesh::FBuildMeshDescriptionsParams Params;
 		Params.bFastBuild = true;
@@ -230,5 +227,44 @@ namespace Campaign1851Scenery
 		Params.bCommitMeshDescription = false;
 		Mesh->BuildFromMeshDescriptions({ &Writer.Mesh }, Params);
 		return Mesh;
+	}
+
+	UStaticMesh* Build(EPiece Piece, UMaterialInterface* Material)
+	{
+		FWriter Writer;
+		BuildPiece(Writer, Piece);
+		return Finish(Writer, Material, FString::Printf(TEXT("SM_Campaign1851_%s"), Name(Piece)));
+	}
+
+	UStaticMesh* BuildRibbons(const TArray<TArray<FVector>>& Lines, float HalfWidth, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* MeshName)
+	{
+		FWriter Writer;
+		const FLinearColor Edge = Colour * 0.68f;
+		for (const TArray<FVector>& Line : Lines)
+		{
+			if (Line.Num() < 2)
+			{
+				continue;
+			}
+			TArray<FVector3f> L, C, R;
+			for (int32 i = 0; i < Line.Num(); ++i)
+			{
+				// Direction from the neighbours; the side vector is horizontal.
+				const FVector Dir = (Line[FMath::Min(i + 1, Line.Num() - 1)] - Line[FMath::Max(i - 1, 0)]).GetSafeNormal2D();
+				const FVector Side = FVector(-Dir.Y, Dir.X, 0.0) * HalfWidth;
+				C.Add(FVector3f(Line[i] + FVector(0.0, 0.0, 0.25)));
+				L.Add(FVector3f(Line[i] - Side));
+				R.Add(FVector3f(Line[i] + Side));
+			}
+			for (int32 i = 0; i + 1 < Line.Num(); ++i)
+			{
+				const FVector3f Below = C[i] - FVector3f(0.f, 0.f, 50.f);
+				Writer.Tri(L[i], C[i], C[i + 1], Colour, Below);
+				Writer.Tri(L[i], C[i + 1], L[i + 1], Edge, Below);
+				Writer.Tri(C[i], R[i], R[i + 1], Colour, Below);
+				Writer.Tri(C[i], R[i + 1], C[i + 1], Edge, Below);
+			}
+		}
+		return Finish(Writer, Material, FString(MeshName));
 	}
 }

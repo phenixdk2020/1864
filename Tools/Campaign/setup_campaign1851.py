@@ -14,7 +14,7 @@ with open(_PROJECT + "/Data/Campaign1851/Denmark1851_Map.json", encoding="utf-8"
     _meta = _json.load(_f)
 _ext = _meta["extentKm"]
 SIZE_KM = (_ext["xMax"] - _ext["xMin"], _ext["yMax"] - _ext["yMin"])
-DETAIL_TILE_KM = _meta.get("detailTileKm", 2.5)
+PARCEL_TILE_KM = _meta.get("parcelTileKm", 8.0)
 
 lib = unreal.EditorAssetLibrary
 tools = unreal.AssetToolsHelpers.get_asset_tools()
@@ -27,7 +27,7 @@ def log(msg):
 
 # ------------------------------------------------------------------ textures
 tasks = []
-for name in ("Denmark1851_Color", "Fields1851_Detail", "Denmark1851_DetailMask", "Bornholm1851_Color"):
+for name in ("Denmark1851_Color", "Fields1851_Parcels", "Denmark1851_DetailMask", "Bornholm1851_Color"):
     t = unreal.AssetImportTask()
     t.filename = REF + name + ".png"
     t.destination_path = TEX_DEST
@@ -52,9 +52,11 @@ def texture(name, srgb, wrap=False):
 
 
 color_tex = texture("Denmark1851_Color", True)
-detail_tex = texture("Fields1851_Detail", False, wrap=True)  # neutral 0.5 must stay 0.5 for the x2 multiply
-mask_tex = texture("Denmark1851_DetailMask", False)
+parcel_tex = texture("Fields1851_Parcels", True, wrap=True)
+mask_tex = texture("Denmark1851_DetailMask", False)  # alpha = farmland (no heath, dunes or woods)
 texture("Bornholm1851_Color", True)
+if lib.does_asset_exist(TEX_DEST + "/Fields1851_Detail"):  # replaced by the parcels in v00.00.17
+    lib.delete_asset(TEX_DEST + "/Fields1851_Detail")
 
 
 # ------------------------------------------------------------------ materials
@@ -67,30 +69,53 @@ def new_material(name):
     return m
 
 
-# Map: painted colour x lerp(1, detail*2, mask) -> emissive (unlit: the painting already carries its shading).
+# Map (unlit: the painting already carries its shading). Close in, field parcels with hedgerows are laid
+# over the farmland; they take the painted colour's brightness (hillshade) and fade out between
+# 70 and 140 km camera depth so the overview stays the painting:
+#   emissive = lerp(C, P * clamp(luma(C) / 0.14, 0.55, 1.45), mask.a * 0.8 * saturate(2 - depth / 7000))
+def expr(cls, x, y, **props):
+    e = MEL.create_material_expression(m, cls, x, y)
+    for k, v in props.items():
+        e.set_editor_property(k, v)
+    return e
+
+
 m = new_material("M_Campaign1851Map")
-col = MEL.create_material_expression(m, unreal.MaterialExpressionTextureSample, -900, -200)
-col.set_editor_property("texture", color_tex)
-uv = MEL.create_material_expression(m, unreal.MaterialExpressionTextureCoordinate, -1200, 150)
-uv.set_editor_property("u_tiling", SIZE_KM[0] / DETAIL_TILE_KM)
-uv.set_editor_property("v_tiling", SIZE_KM[1] / DETAIL_TILE_KM)
-det = MEL.create_material_expression(m, unreal.MaterialExpressionTextureSample, -900, 150)
-det.set_editor_property("texture", detail_tex)
-det.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
-MEL.connect_material_expressions(uv, "", det, "UVs")
-mask = MEL.create_material_expression(m, unreal.MaterialExpressionTextureSample, -900, 450)
-mask.set_editor_property("texture", mask_tex)
-mask.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
-x2 = MEL.create_material_expression(m, unreal.MaterialExpressionMultiply, -600, 150)
-x2.set_editor_property("const_b", 2.0)
-MEL.connect_material_expressions(det, "RGB", x2, "A")
-blend = MEL.create_material_expression(m, unreal.MaterialExpressionLinearInterpolate, -400, 200)
-blend.set_editor_property("const_a", 1.0)
-MEL.connect_material_expressions(x2, "", blend, "B")
-MEL.connect_material_expressions(mask, "A", blend, "Alpha")
-final = MEL.create_material_expression(m, unreal.MaterialExpressionMultiply, -200, 0)
+col = expr(unreal.MaterialExpressionTextureSample, -1300, -300, texture=color_tex)
+uv = expr(unreal.MaterialExpressionTextureCoordinate, -1600, 100, u_tiling=SIZE_KM[0] / PARCEL_TILE_KM, v_tiling=SIZE_KM[1] / PARCEL_TILE_KM)
+par = expr(unreal.MaterialExpressionTextureSample, -1300, 100, texture=parcel_tex)
+MEL.connect_material_expressions(uv, "", par, "UVs")
+mask = expr(unreal.MaterialExpressionTextureSample, -1300, 450, texture=mask_tex, sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
+
+lum_w = expr(unreal.MaterialExpressionConstant3Vector, -1300, -50, constant=unreal.LinearColor(0.2126, 0.7152, 0.0722, 1.0))
+luma = expr(unreal.MaterialExpressionDotProduct, -1000, -100)
+MEL.connect_material_expressions(col, "RGB", luma, "A")
+MEL.connect_material_expressions(lum_w, "", luma, "B")
+ratio = expr(unreal.MaterialExpressionDivide, -850, -100, const_b=0.14)
+MEL.connect_material_expressions(luma, "", ratio, "A")
+clamp = expr(unreal.MaterialExpressionClamp, -700, -100, min_default=0.55, max_default=1.45)
+MEL.connect_material_expressions(ratio, "", clamp, "")
+lit = expr(unreal.MaterialExpressionMultiply, -550, 50)
+MEL.connect_material_expressions(par, "RGB", lit, "A")
+MEL.connect_material_expressions(clamp, "", lit, "B")
+
+depth = expr(unreal.MaterialExpressionPixelDepth, -1300, 700)
+per = expr(unreal.MaterialExpressionDivide, -1100, 700, const_b=7000.0)
+MEL.connect_material_expressions(depth, "", per, "A")
+fade = expr(unreal.MaterialExpressionSubtract, -950, 700, const_a=2.0)
+MEL.connect_material_expressions(per, "", fade, "B")
+sat = expr(unreal.MaterialExpressionSaturate, -800, 700)
+MEL.connect_material_expressions(fade, "", sat, "")
+alpha = expr(unreal.MaterialExpressionMultiply, -650, 500)
+MEL.connect_material_expressions(mask, "A", alpha, "A")
+MEL.connect_material_expressions(sat, "", alpha, "B")
+strength = expr(unreal.MaterialExpressionMultiply, -500, 500, const_b=0.8)
+MEL.connect_material_expressions(alpha, "", strength, "A")
+
+final = expr(unreal.MaterialExpressionLinearInterpolate, -300, 0)
 MEL.connect_material_expressions(col, "RGB", final, "A")
-MEL.connect_material_expressions(blend, "", final, "B")
+MEL.connect_material_expressions(lit, "", final, "B")
+MEL.connect_material_expressions(strength, "", final, "Alpha")
 MEL.connect_material_property(final, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
 MEL.recompile_material(m)
 lib.save_loaded_asset(m)
