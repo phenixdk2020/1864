@@ -128,6 +128,8 @@ public:
 	/** Starts (or returns the running) barracks project in a town; null if the town has no plot. */
 	ACampaign1851ConstructionSite* StartProject(int32 CityIndex);
 	ACampaign1851ConstructionSite* FindProject(int32 CityIndex) const;
+	/** Starts a garrison module (1..) at a town whose barracks is finished; false if it cannot start. */
+	bool StartModule(int32 CityIndex, int32 Module);
 	const TArray<TObjectPtr<ACampaign1851ConstructionSite>>& GetProjects() const { return Projects; }
 	/** World position of a town's building plot (on the terrain). */
 	FVector PlotWorld(int32 CityIndex) const;

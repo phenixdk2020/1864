@@ -9,13 +9,15 @@ class UMaterialInterface;
 class UStaticMeshComponent;
 
 /**
- * A building project on the campaign map, shown as a live building site (design manual 20.16.6:
- * proposed -> under construction -> finished). v1: the infantry barracks.
+ * A garrison complex on the campaign map, grown as a live building site (design manual 20.16.6
+ * project model, and the modular barracks idea in 20.16.5): the infantry barracks first, then
+ * modules around the parade ground (stables, depot, infirmary), one project at a time.
  *
- * Stages by progress: staking out, foundation (scaffold goes up), walls rising storey by storey,
- * roof, finishing (scaffold comes down, Dannebrog is hoisted). A wagon shuttles materials between
- * the town and the site and a timber crane swings while the walls and roof go up. The building
- * "grows" through M_Campaign1851Construction, which clips everything above BuildTop.
+ * Each module goes through the same stages: staking out, foundation (scaffold goes up), walls
+ * rising, roof, fitting out (scaffold comes down). The building "grows" through
+ * M_Campaign1851Construction, which clips everything above BuildTop. A wagon shuttles materials
+ * between the town and the site and a timber crane swings while walls and roofs go up; Dannebrog
+ * is hoisted when the barracks is finished.
  *
  * The actor is scaled by the map's scenery scale, so its components are modelled in piece units.
  */
@@ -33,30 +35,46 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Construction")
 	float DaysPerSecond = 3.f;
 
-	UPROPERTY(EditAnywhere, Category = "Construction")
-	float DurationDays = 90.f;
+	/** Module 0 is the barracks; the others need it finished. */
+	static int32 NumModules();
+	static FString ModuleName(int32 Module);
+	/** Asset path of the module's card image for the town panel. */
+	static const TCHAR* ModuleCard(int32 Module);
+	static float ModuleDays(int32 Module);
 
-	/** Places the site. WagonPath runs from the town centre to the site gate (world space, on the terrain). */
-	void Setup(int32 InCityIndex, const FString& InName, const TArray<FVector>& InWagonPath, UMaterialInterface* Material);
+	/** Places the site and starts the barracks. WagonPath runs from the town centre to the gate (world space). */
+	void Setup(int32 InCityIndex, const TArray<FVector>& InWagonPath, UMaterialInterface* Material);
+
+	/** True when the barracks is finished, nothing else is being built and the module is not built yet. */
+	bool CanStartModule(int32 Module) const;
+	void StartModule(int32 Module);
 
 	int32 GetCityIndex() const { return CityIndex; }
-	const FString& GetBuildingName() const { return BuildingName; }
-	float GetProgress() const { return FMath::Clamp(ElapsedDays / DurationDays, 0.f, 1.f); }
-	float GetElapsedDays() const { return FMath::Min(ElapsedDays, DurationDays); }
-	bool IsDone() const { return ElapsedDays >= DurationDays; }
+	/** The module under construction, or INDEX_NONE. */
+	int32 GetActiveModule() const { return Active; }
+	bool IsModuleStarted(int32 Module) const { return Elapsed.IsValidIndex(Module) && Elapsed[Module] >= 0.f; }
+	bool IsModuleDone(int32 Module) const { return IsModuleStarted(Module) && Elapsed[Module] >= ModuleDays(Module); }
+	float GetModuleProgress(int32 Module) const;
+	float GetModuleElapsedDays(int32 Module) const { return IsModuleStarted(Module) ? FMath::Min(Elapsed[Module], ModuleDays(Module)) : 0.f; }
 	/** Danish stage name for the UI. */
-	FString GetStageName() const;
+	FString GetStageName(int32 Module) const;
+
+	bool IsBarracksDone() const { return IsModuleDone(0); }
 
 protected:
 	UPROPERTY(VisibleAnywhere) TObjectPtr<USceneComponent> Root;
 	UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Ground;
-	UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Building;
-	UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Scaffold;
 	UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CraneMast;
 	UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CraneJib;
 	UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Wagon;
 	UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Flagpole;
 	UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Flag;
+
+	/** Per module: the building and its scaffold (created in Setup). */
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> Buildings;
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> Scaffolds;
+	UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> BuildingMids;
+	UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInstanceDynamic>> ScaffoldMids;
 
 private:
 	void Apply(float DeltaSeconds);
@@ -64,12 +82,9 @@ private:
 	/** Clip height in piece units above the site origin -> world Z for the material. */
 	void SetClip(UMaterialInstanceDynamic* Mid, float PieceHeight) const;
 
-	UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> BuildingMid;
-	UPROPERTY(Transient) TObjectPtr<UMaterialInstanceDynamic> ScaffoldMid;
-
 	int32 CityIndex = INDEX_NONE;
-	FString BuildingName;
-	float ElapsedDays = 0.f;
+	TArray<float> Elapsed;   // days per module; -1 = not started
+	int32 Active = INDEX_NONE;
 	float Clock = 0.f;
 
 	TArray<FVector> WagonPath;

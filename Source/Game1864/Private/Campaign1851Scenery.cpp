@@ -424,8 +424,118 @@ namespace Campaign1851Scenery
 			}
 			break;
 		}
+		case ESitePiece::Stables:
+		{
+			const float L = 6.f, Wd = 2.2f;
+			W.House(FVector2f(0.f, 0.f), 12.f, 4.4f, 3.2f, 6.4f, Brick, RoofSlate);
+			W.Box(FVector3f(-L - 0.1f, -Wd - 0.1f, 0.f), FVector3f(L + 0.1f, Wd + 0.1f, 0.45f), Stone);
+			const FVector3f In(0.f, 0.f, 1.5f);
+			for (int32 c = 0; c < 7; ++c)
+			{
+				const float X = -5.1f + c * 1.7f;
+				for (float Side : { -1.f, 1.f })
+				{
+					const float Y = Side * (Wd + 0.03f);
+					W.Quad(FVector3f(X - 0.45f, Y, 0.45f), FVector3f(X + 0.45f, Y, 0.45f), FVector3f(X + 0.45f, Y, 2.3f), FVector3f(X - 0.45f, Y, 2.3f), Srgb(70, 52, 36), In);
+				}
+			}
+			W.Box(FVector3f(-0.4f, -0.4f, 5.4f), FVector3f(0.4f, 0.4f, 6.9f), Srgb(214, 204, 186));   // ventilation lantern
+			break;
 		}
-		static const TCHAR* Names[] = { TEXT("Ground"), TEXT("Barracks"), TEXT("Scaffold"), TEXT("CraneMast"), TEXT("CraneJib"), TEXT("Wagon"), TEXT("Flagpole"), TEXT("Flag") };
+		case ESitePiece::Depot:
+		{
+			const float L = 3.5f, Wd = 2.8f;
+			W.House(FVector2f(0.f, 0.f), 7.f, 5.6f, 7.f, 11.6f, Brick, Srgb(176, 76, 50));
+			W.Box(FVector3f(-L - 0.1f, -Wd - 0.1f, 0.f), FVector3f(L + 0.1f, Wd + 0.1f, 0.6f), Stone);
+			const FVector3f In(0.f, 0.f, 3.f);
+			for (int32 Storey = 0; Storey < 3; ++Storey)
+			{
+				const float Z0 = 1.2f + Storey * 2.f, Z1 = Z0 + 1.f;
+				for (float X : { -2.3f, -1.1f, 1.1f, 2.3f })
+				{
+					for (float Side : { -1.f, 1.f })
+					{
+						const float Y = Side * (Wd + 0.03f);
+						W.Quad(FVector3f(X - 0.28f, Y, Z0), FVector3f(X + 0.28f, Y, Z0), FVector3f(X + 0.28f, Y, Z1), FVector3f(X - 0.28f, Y, Z1), Window, In);
+					}
+				}
+			}
+			for (float Side : { -1.f, 1.f })   // cart doors below, hoist doors above, a green-painted stack
+			{
+				const float Y = Side * (Wd + 0.04f);
+				W.Quad(FVector3f(-0.7f, Y, 0.6f), FVector3f(0.7f, Y, 0.6f), FVector3f(0.7f, Y, 3.f), FVector3f(-0.7f, Y, 3.f), Srgb(58, 84, 62), In);
+				W.Quad(FVector3f(-0.45f, Y, 3.6f), FVector3f(0.45f, Y, 3.6f), FVector3f(0.45f, Y, 6.4f), FVector3f(-0.45f, Y, 6.4f), Srgb(58, 84, 62), In);
+			}
+			W.Box(FVector3f(-0.12f, Wd, 7.f), FVector3f(0.12f, Wd + 1.4f, 7.3f), DarkTimber);   // hoist beam
+			break;
+		}
+		case ESitePiece::Infirmary:
+		{
+			const float L = 4.5f, Wd = 2.3f;
+			W.House(FVector2f(0.f, 0.f), 9.f, 4.6f, 4.6f, 7.8f, Brick, RoofSlate);
+			W.Box(FVector3f(-L - 0.1f, -Wd - 0.1f, 0.f), FVector3f(L + 0.1f, Wd + 0.1f, 0.55f), Stone);
+			const FVector3f In(0.f, 0.f, 2.f);
+			for (int32 Storey = 0; Storey < 2; ++Storey)
+			{
+				const float Z0 = 1.1f + Storey * 1.9f, Z1 = Z0 + 1.1f;
+				for (int32 c = 0; c < 6; ++c)
+				{
+					const float X = -3.5f + c * 1.4f;
+					for (float Side : { -1.f, 1.f })
+					{
+						const float Y = Side * (Wd + 0.03f);
+						W.Quad(FVector3f(X - 0.3f, Y, Z0), FVector3f(X + 0.3f, Y, Z0), FVector3f(X + 0.3f, Y, Z1), FVector3f(X - 0.3f, Y, Z1), Window, In);
+					}
+				}
+			}
+			W.Box(FVector3f(-1.f, Wd, 0.f), FVector3f(1.f, Wd + 1.2f, 2.6f), Stone);                 // porch
+			W.Box(FVector3f(-1.2f, Wd - 0.1f, 2.6f), FVector3f(1.2f, Wd + 1.4f, 2.9f), RoofSlate);
+			for (float X : { -2.4f, 2.4f })
+			{
+				W.Box(FVector3f(X - 0.3f, -0.4f, 6.6f), FVector3f(X + 0.3f, 0.4f, 8.2f), Brick);
+			}
+			break;
+		}
+		}
+		static const TCHAR* Names[] = { TEXT("Ground"), TEXT("Barracks"), TEXT("Scaffold"), TEXT("CraneMast"), TEXT("CraneJib"), TEXT("Wagon"), TEXT("Flagpole"), TEXT("Flag"),
+			TEXT("Stables"), TEXT("Depot"), TEXT("Infirmary") };
 		return Finish(W, Material, FString::Printf(TEXT("SM_Campaign1851_Site_%s"), Names[int32(Piece)]));
+	}
+}
+
+namespace Campaign1851Scenery
+{
+	UStaticMesh* BuildScaffold(float Length, float Width, float Top, UMaterialInterface* Material)
+	{
+		const FLinearColor Timber = Srgb(156, 116, 72);
+		const FLinearColor DarkTimber = Srgb(96, 70, 46);
+		const float HL = Length * 0.5f, HW = Width * 0.5f, SX = HL + 0.9f, SY = HW + 0.9f;
+		FWriter W;
+		auto Pole = [&](float X, float Y) { W.Box(FVector3f(X - 0.1f, Y - 0.1f, 0.f), FVector3f(X + 0.1f, Y + 0.1f, Top), Timber); };
+		const int32 Bays = FMath::Max(2, FMath::RoundToInt(Length / 4.f));
+		for (int32 b = 0; b <= Bays; ++b)
+		{
+			const float X = -SX + 2.f * SX * b / Bays;
+			Pole(X, -SY);
+			Pole(X, SY);
+		}
+		for (float Y : { -SY / 3.f, SY / 3.f })
+		{
+			Pole(-SX, Y);
+			Pole(SX, Y);
+		}
+		for (float Z = 2.1f; Z < Top; Z += 2.1f)
+		{
+			for (float Side : { -1.f, 1.f })
+			{
+				W.Box(FVector3f(-SX, Side > 0 ? HW + 0.05f : -SY, Z - 0.08f), FVector3f(SX, Side > 0 ? SY : -HW - 0.05f, Z), DarkTimber);
+				W.Box(FVector3f(-SX, Side * SY - 0.07f, Z + 0.9f), FVector3f(SX, Side * SY + 0.07f, Z + 1.02f), Timber);
+			}
+			for (float End : { -1.f, 1.f })
+			{
+				W.Box(FVector3f(End > 0 ? HL + 0.05f : -SX, -SY, Z - 0.08f), FVector3f(End > 0 ? SX : -HL - 0.05f, SY, Z), DarkTimber);
+			}
+		}
+		return Finish(W, Material, FString::Printf(TEXT("SM_Campaign1851_Scaffold_%.0fx%.0f"), Length, Width));
 	}
 }

@@ -184,8 +184,14 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 
 	if (WasInputKeyJustPressed(EKeys::LeftMouseButton))
 	{
-		const SCampaign1851Overlay::EButton Button = Overlay.IsValid() ? Overlay->HitButton(Mouse) : SCampaign1851Overlay::EButton::None;
-		if (Button == SCampaign1851Overlay::EButton::Build)
+		int32 Module = INDEX_NONE;
+		const SCampaign1851Overlay::EButton Button = Overlay.IsValid() ? Overlay->HitButton(Mouse, &Module) : SCampaign1851Overlay::EButton::None;
+		if (Button == SCampaign1851Overlay::EButton::BuildModule)
+		{
+			Map->StartModule(Overlay->GetSelectedCity(), Module);
+			FocusPlot(Overlay->GetSelectedCity());
+		}
+		else if (Button == SCampaign1851Overlay::EButton::Build)
 		{
 			Map->StartProject(Overlay->GetSelectedCity());
 			FocusPlot(Overlay->GetSelectedCity());

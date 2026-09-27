@@ -47,7 +47,10 @@ namespace Campaign1851Scenery
 		CraneJib,   // its jib and counterweight, turns about the mast
 		Wagon,      // horse and cart loaded with bricks, facing +X
 		Flagpole,
-		Flag        // Dannebrog, hoist at the origin, flying towards +X
+		Flag,       // Dannebrog, hoist at the origin, flying towards +X
+		Stables,    // low brick stable range, slate roof, a row of stall doors (12 x 4.4)
+		Depot,      // tall red-brick magazine with tiled gables, hoist door and cart doors (7 x 5.6)
+		Infirmary   // two-storey brick infirmary with a slate roof and a porch (9 x 4.6)
 	};
 
 	constexpr float BarracksLength = 16.f;
@@ -56,4 +59,7 @@ namespace Campaign1851Scenery
 	constexpr float BarracksTop = 12.3f;   // chimney tops
 
 	UStaticMesh* BuildSitePiece(ESitePiece Piece, UMaterialInterface* Material);
+
+	/** Timber scaffold (poles, boards, ledgers) around a Length x Width building, up to Top. */
+	UStaticMesh* BuildScaffold(float Length, float Width, float Top, UMaterialInterface* Material);
 }

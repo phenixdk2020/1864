@@ -186,7 +186,7 @@ log("material M_Campaign1851Construction")
 # Building cards for the town panel (from the 1851 building illustrations, 512 px).
 BUILDINGS_DEST = "/Game/Campaign1851/Buildings"
 cards = []
-for name in ("T_Barracks_Infantry",):
+for name in ("T_Barracks_Infantry", "T_Module_Stables", "T_Module_Depot", "T_Module_Infirmary"):
     task = unreal.AssetImportTask()
     task.filename = REF + "Buildings/" + name + ".png"
     task.destination_path = BUILDINGS_DEST
@@ -195,7 +195,7 @@ for name in ("T_Barracks_Infantry",):
     task.replace_existing = True
     cards.append(task)
 tools.import_asset_tasks(cards)
-for name in ("T_Barracks_Infantry",):
+for name in ("T_Barracks_Infantry", "T_Module_Stables", "T_Module_Depot", "T_Module_Infirmary"):
     card = lib.load_asset(BUILDINGS_DEST + "/" + name)
     card.set_editor_property("lod_group", unreal.TextureGroup.TEXTUREGROUP_UI)
     card.set_editor_property("mip_gen_settings", unreal.TextureMipGenSettings.TMGS_NO_MIPMAPS)

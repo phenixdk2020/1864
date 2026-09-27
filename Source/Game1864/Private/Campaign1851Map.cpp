@@ -607,12 +607,12 @@ void ACampaign1851Map::BuildScenery()
 				for (float Side : { -1.f, 1.f })
 				{
 					const FVector2D Normal = FVector2D(-Along.Y, Along.X) * Side;
-					const FVector2D P = RoadSamples[s] + Normal * 0.42;
-					bool bOk = IsMonarchyLand(P) && IsFree(P, 0.13f);
+					const FVector2D P = RoadSamples[s] + Normal * 0.6;   // the parade ground reaches back towards the road
+					bool bOk = IsMonarchyLand(P) && IsFree(P, 0.2f);
 					float ZMin = TNumericLimits<float>::Max(), ZMax = -ZMin;
-					for (float A : { -0.25f, 0.25f })
+					for (float A : { -0.42f, 0.42f })
 					{
-						for (float B : { -0.12f, 0.35f })
+						for (float B : { -0.3f, 0.45f })
 						{
 							const FVector2D Q = P + Along * A - Normal * B;
 							bOk &= IsMonarchyLand(Q);
@@ -635,9 +635,13 @@ void ACampaign1851Map::BuildScenery()
 			}
 			if (City.bHasPlot)
 			{
-				Take(City.PlotKm, 0.13f);
+				Take(City.PlotKm, 0.2f);   // the whole garrison complex: barracks, flanking modules, infirmary
 				const FVector2D Gate = FVector2D(-FMath::Sin(FMath::DegreesToRadians(City.PlotYaw)), -FMath::Cos(FMath::DegreesToRadians(City.PlotYaw)));
 				Take(City.PlotKm + Gate * 0.22, 0.09f);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|no garrison plot found for %s"), *City.Name);
 			}
 		}
 
@@ -1006,9 +1010,21 @@ ACampaign1851ConstructionSite* ACampaign1851Map::StartProject(int32 CityIndex)
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	ACampaign1851ConstructionSite* Site = GetWorld()->SpawnActor<ACampaign1851ConstructionSite>(ACampaign1851ConstructionSite::StaticClass(), Xf, Params);
 	Site->SetActorScale3D(FVector(PieceScale));
-	Site->Setup(CityIndex, TEXT("Infanterikaserne"), Path, Material);
+	Site->Setup(CityIndex, Path, Material);
 	Site->SetActorHiddenInGame(!bSceneryVisible);
 	Projects.Add(Site);
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|barracks started"), *City.Name);
 	return Site;
+}
+
+bool ACampaign1851Map::StartModule(int32 CityIndex, int32 Module)
+{
+	ACampaign1851ConstructionSite* Site = FindProject(CityIndex);
+	if (!Site || !Site->CanStartModule(Module))
+	{
+		return false;
+	}
+	Site->StartModule(Module);
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|%s started"), *Cities[CityIndex].Name, *ACampaign1851ConstructionSite::ModuleName(Module));
+	return true;
 }

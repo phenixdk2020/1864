@@ -31,9 +31,9 @@ public:
 	void SetSelectedCity(int32 Index) { SelectedCity = Index; }
 	int32 GetSelectedCity() const { return SelectedCity; }
 
-	enum class EButton : uint8 { None, Build, ShowOnMap };
+	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule };
 	/** The panel button under a viewport pixel (as from APlayerController::GetMousePosition). */
-	EButton HitButton(const FVector2D& ViewportPixel) const;
+	EButton HitButton(const FVector2D& ViewportPixel, int32* OutModule = nullptr) const;
 
 private:
 	struct FPlaced
@@ -54,7 +54,8 @@ private:
 	void PaintInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** Progress rings over towns with a building project. */
 	void PaintProjects(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
-	void PaintButton(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Text, EButton Action) const;
+	void PaintButton(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Text, EButton Action, int32 Module = INDEX_NONE) const;
+	void PaintBar(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, float Width, float Fraction) const;
 	void PaintDot(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Centre, float Diameter, const FLinearColor& Colour) const;
 	FVector2D Measure(const FString& Text, const FSlateFontInfo& Font) const;
 
@@ -63,9 +64,9 @@ private:
 	int32 SelectedCity = INDEX_NONE;
 	TSharedPtr<FSlateBrush> BornholmBrush;
 	TSharedPtr<FSlateBrush> DotBrush;
-	TSharedPtr<FSlateBrush> BarracksBrush;
+	TArray<TSharedPtr<FSlateBrush>> ModuleBrushes;   // card images per garrison module
 
-	struct FButtonRect { FVector2D Min, Max; EButton Action; };
+	struct FButtonRect { FVector2D Min, Max; EButton Action; int32 Module; };
 	mutable TArray<FButtonRect> Buttons;   // local units, rebuilt every paint
 	mutable float PaintScale = 1.f;
 };
