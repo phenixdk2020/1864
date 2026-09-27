@@ -1,0 +1,581 @@
+{
+ "version": "v00.00.15",
+ "region": "denmark1851",
+ "projection": {
+  "type": "laea",
+  "lat0": 52.0,
+  "lon0": 10.0,
+  "radiusKm": 6371.0088
+ },
+ "extentKm": {
+  "xMin": -159.64951105497414,
+  "xMax": 239.41090279616304,
+  "yMin": 138.9912605090965,
+  "yMax": 655.5935299844937
+ },
+ "extent": {
+  "lonMin": 7.6,
+  "lonMax": 13.6,
+  "latMin": 53.25,
+  "latMax": 57.85
+ },
+ "sizeKm": {
+  "width": 399.06,
+  "height": 516.6
+ },
+ "textureSize": {
+  "width": 3164,
+  "height": 4096
+ },
+ "detailTileKm": 2.5,
+ "bornholm": {
+  "lonMin": 14.6,
+  "lonMax": 15.25,
+  "latMin": 54.95,
+  "latMax": 55.35
+ },
+ "bornholmKm": {
+  "xMin": 290.71178179809385,
+  "xMax": 335.0226536716782,
+  "yMin": 337.3755567120229,
+  "yMax": 384.57141181559257
+ },
+ "regions": {
+  "0": "Hav",
+  "1": "Kongeriget",
+  "2": "Hertugdømmet Slesvig",
+  "3": "Holsten og Lauenborg",
+  "4": "Udland"
+ },
+ "cities": [
+  {
+   "name": "København",
+   "lat": 55.676,
+   "lon": 12.568,
+   "pop": 129700,
+   "region": "K",
+   "capital": true
+  },
+  {
+   "name": "Helsingør",
+   "lat": 56.036,
+   "lon": 12.611,
+   "pop": 8000,
+   "region": "K"
+  },
+  {
+   "name": "Roskilde",
+   "lat": 55.642,
+   "lon": 12.08,
+   "pop": 4400,
+   "region": "K"
+  },
+  {
+   "name": "Køge",
+   "lat": 55.458,
+   "lon": 12.182,
+   "pop": 2800,
+   "region": "K"
+  },
+  {
+   "name": "Holbæk",
+   "lat": 55.717,
+   "lon": 11.713,
+   "pop": 2300,
+   "region": "K"
+  },
+  {
+   "name": "Kalundborg",
+   "lat": 55.681,
+   "lon": 11.089,
+   "pop": 2300,
+   "region": "K"
+  },
+  {
+   "name": "Slagelse",
+   "lat": 55.403,
+   "lon": 11.354,
+   "pop": 3500,
+   "region": "K"
+  },
+  {
+   "name": "Næstved",
+   "lat": 55.23,
+   "lon": 11.761,
+   "pop": 3800,
+   "region": "K"
+  },
+  {
+   "name": "Vordingborg",
+   "lat": 55.009,
+   "lon": 11.911,
+   "pop": 1600,
+   "region": "K"
+  },
+  {
+   "name": "Stege",
+   "lat": 54.987,
+   "lon": 12.286,
+   "pop": 1800,
+   "region": "K"
+  },
+  {
+   "name": "Nykøbing F",
+   "lat": 54.766,
+   "lon": 11.874,
+   "pop": 3200,
+   "region": "K"
+  },
+  {
+   "name": "Nakskov",
+   "lat": 54.831,
+   "lon": 11.137,
+   "pop": 3000,
+   "region": "K"
+  },
+  {
+   "name": "Odense",
+   "lat": 55.396,
+   "lon": 10.389,
+   "pop": 11100,
+   "region": "K"
+  },
+  {
+   "name": "Nyborg",
+   "lat": 55.312,
+   "lon": 10.79,
+   "pop": 3900,
+   "region": "K"
+  },
+  {
+   "name": "Svendborg",
+   "lat": 55.06,
+   "lon": 10.607,
+   "pop": 4300,
+   "region": "K"
+  },
+  {
+   "name": "Faaborg",
+   "lat": 55.095,
+   "lon": 10.242,
+   "pop": 2500,
+   "region": "K"
+  },
+  {
+   "name": "Assens",
+   "lat": 55.27,
+   "lon": 9.9,
+   "pop": 2800,
+   "region": "K"
+  },
+  {
+   "name": "Middelfart",
+   "lat": 55.506,
+   "lon": 9.73,
+   "pop": 1900,
+   "region": "K"
+  },
+  {
+   "name": "Bogense",
+   "lat": 55.566,
+   "lon": 10.089,
+   "pop": 1300,
+   "region": "K"
+  },
+  {
+   "name": "Rudkøbing",
+   "lat": 54.936,
+   "lon": 10.71,
+   "pop": 2800,
+   "region": "K"
+  },
+  {
+   "name": "Aalborg",
+   "lat": 57.048,
+   "lon": 9.919,
+   "pop": 8600,
+   "region": "K"
+  },
+  {
+   "name": "Aarhus",
+   "lat": 56.157,
+   "lon": 10.211,
+   "pop": 8500,
+   "region": "K"
+  },
+  {
+   "name": "Randers",
+   "lat": 56.461,
+   "lon": 10.036,
+   "pop": 7600,
+   "region": "K"
+  },
+  {
+   "name": "Horsens",
+   "lat": 55.861,
+   "lon": 9.85,
+   "pop": 5100,
+   "region": "K"
+  },
+  {
+   "name": "Fredericia",
+   "lat": 55.566,
+   "lon": 9.752,
+   "pop": 5900,
+   "region": "K"
+  },
+  {
+   "name": "Vejle",
+   "lat": 55.709,
+   "lon": 9.536,
+   "pop": 3900,
+   "region": "K"
+  },
+  {
+   "name": "Kolding",
+   "lat": 55.491,
+   "lon": 9.472,
+   "pop": 3000,
+   "region": "K"
+  },
+  {
+   "name": "Viborg",
+   "lat": 56.453,
+   "lon": 9.402,
+   "pop": 4400,
+   "region": "K"
+  },
+  {
+   "name": "Skanderborg",
+   "lat": 56.034,
+   "lon": 9.931,
+   "pop": 1000,
+   "region": "K"
+  },
+  {
+   "name": "Grenaa",
+   "lat": 56.415,
+   "lon": 10.878,
+   "pop": 1600,
+   "region": "K"
+  },
+  {
+   "name": "Hjørring",
+   "lat": 57.464,
+   "lon": 9.982,
+   "pop": 1700,
+   "region": "K"
+  },
+  {
+   "name": "Frederikshavn",
+   "lat": 57.441,
+   "lon": 10.537,
+   "pop": 1500,
+   "region": "K"
+  },
+  {
+   "name": "Skagen",
+   "lat": 57.72,
+   "lon": 10.583,
+   "pop": 1600,
+   "region": "K"
+  },
+  {
+   "name": "Thisted",
+   "lat": 56.955,
+   "lon": 8.694,
+   "pop": 2300,
+   "region": "K"
+  },
+  {
+   "name": "Nykøbing M",
+   "lat": 56.793,
+   "lon": 8.853,
+   "pop": 1600,
+   "region": "K"
+  },
+  {
+   "name": "Holstebro",
+   "lat": 56.36,
+   "lon": 8.616,
+   "pop": 1500,
+   "region": "K"
+  },
+  {
+   "name": "Ringkøbing",
+   "lat": 56.09,
+   "lon": 8.244,
+   "pop": 1300,
+   "region": "K"
+  },
+  {
+   "name": "Ribe",
+   "lat": 55.328,
+   "lon": 8.762,
+   "pop": 2800,
+   "region": "K"
+  },
+  {
+   "name": "Varde",
+   "lat": 55.621,
+   "lon": 8.481,
+   "pop": 1600,
+   "region": "K"
+  },
+  {
+   "name": "Rønne",
+   "lat": 55.101,
+   "lon": 14.702,
+   "pop": 5000,
+   "region": "K",
+   "bornholm": true
+  },
+  {
+   "name": "Haderslev",
+   "lat": 55.249,
+   "lon": 9.488,
+   "pop": 6500,
+   "region": "S"
+  },
+  {
+   "name": "Aabenraa",
+   "lat": 55.044,
+   "lon": 9.418,
+   "pop": 4600,
+   "region": "S"
+  },
+  {
+   "name": "Sønderborg",
+   "lat": 54.909,
+   "lon": 9.792,
+   "pop": 3200,
+   "region": "S"
+  },
+  {
+   "name": "Tønder",
+   "lat": 54.933,
+   "lon": 8.864,
+   "pop": 3200,
+   "region": "S"
+  },
+  {
+   "name": "Flensborg",
+   "lat": 54.785,
+   "lon": 9.437,
+   "pop": 18900,
+   "region": "S"
+  },
+  {
+   "name": "Slesvig",
+   "lat": 54.515,
+   "lon": 9.57,
+   "pop": 11200,
+   "region": "S"
+  },
+  {
+   "name": "Husum",
+   "lat": 54.476,
+   "lon": 9.051,
+   "pop": 4400,
+   "region": "S"
+  },
+  {
+   "name": "Egernførde",
+   "lat": 54.473,
+   "lon": 9.837,
+   "pop": 4400,
+   "region": "S"
+  },
+  {
+   "name": "Kiel",
+   "lat": 54.323,
+   "lon": 10.135,
+   "pop": 15700,
+   "region": "H"
+  },
+  {
+   "name": "Rendsborg",
+   "lat": 54.304,
+   "lon": 9.663,
+   "pop": 10000,
+   "region": "H"
+  },
+  {
+   "name": "Itzehoe",
+   "lat": 53.925,
+   "lon": 9.516,
+   "pop": 6000,
+   "region": "H"
+  },
+  {
+   "name": "Glückstadt",
+   "lat": 53.788,
+   "lon": 9.425,
+   "pop": 6000,
+   "region": "H"
+  },
+  {
+   "name": "Altona",
+   "lat": 53.552,
+   "lon": 9.935,
+   "pop": 32300,
+   "region": "H"
+  },
+  {
+   "name": "Neumünster",
+   "lat": 54.074,
+   "lon": 9.984,
+   "pop": 5000,
+   "region": "H"
+  },
+  {
+   "name": "Ratzeburg",
+   "lat": 53.699,
+   "lon": 10.773,
+   "pop": 2800,
+   "region": "H"
+  }
+ ],
+ "foreignCities": [
+  {
+   "name": "Hamborg",
+   "lat": 53.551,
+   "lon": 9.993,
+   "pop": 132000
+  },
+  {
+   "name": "Lübeck",
+   "lat": 53.866,
+   "lon": 10.686,
+   "pop": 26000
+  },
+  {
+   "name": "Malmø",
+   "lat": 55.605,
+   "lon": 13.004,
+   "pop": 13000
+  },
+  {
+   "name": "Helsingborg",
+   "lat": 56.046,
+   "lon": 12.694,
+   "pop": 4500
+  }
+ ],
+ "labels": [
+  {
+   "text": "Skagerrak",
+   "lat": 57.55,
+   "lon": 8.35,
+   "kind": "sea"
+  },
+  {
+   "text": "Kattegat",
+   "lat": 56.85,
+   "lon": 11.45,
+   "kind": "sea"
+  },
+  {
+   "text": "Nordsøen",
+   "lat": 55.75,
+   "lon": 7.85,
+   "kind": "sea"
+  },
+  {
+   "text": "Østersøen",
+   "lat": 54.55,
+   "lon": 12.85,
+   "kind": "sea"
+  },
+  {
+   "text": "Lillebælt",
+   "lat": 55.35,
+   "lon": 9.78,
+   "kind": "strait"
+  },
+  {
+   "text": "Storebælt",
+   "lat": 55.45,
+   "lon": 10.98,
+   "kind": "strait"
+  },
+  {
+   "text": "Øresund",
+   "lat": 55.95,
+   "lon": 12.72,
+   "kind": "strait"
+  },
+  {
+   "text": "Limfjorden",
+   "lat": 56.95,
+   "lon": 9.25,
+   "kind": "strait"
+  },
+  {
+   "text": "Jylland",
+   "lat": 56.2,
+   "lon": 8.95,
+   "kind": "land"
+  },
+  {
+   "text": "Fyn",
+   "lat": 55.28,
+   "lon": 10.35,
+   "kind": "land"
+  },
+  {
+   "text": "Sjælland",
+   "lat": 55.5,
+   "lon": 11.75,
+   "kind": "land"
+  },
+  {
+   "text": "Lolland",
+   "lat": 54.78,
+   "lon": 11.35,
+   "kind": "land"
+  },
+  {
+   "text": "Falster",
+   "lat": 54.8,
+   "lon": 11.98,
+   "kind": "land"
+  },
+  {
+   "text": "Slesvig",
+   "lat": 54.85,
+   "lon": 9.05,
+   "kind": "duchy"
+  },
+  {
+   "text": "Holsten",
+   "lat": 54.05,
+   "lon": 10.15,
+   "kind": "duchy"
+  },
+  {
+   "text": "Lauenborg",
+   "lat": 53.55,
+   "lon": 10.62,
+   "kind": "duchy"
+  },
+  {
+   "text": "Skåne (Sverige)",
+   "lat": 55.85,
+   "lon": 13.35,
+   "kind": "foreign"
+  },
+  {
+   "text": "Hannover",
+   "lat": 53.35,
+   "lon": 9.2,
+   "kind": "foreign"
+  },
+  {
+   "text": "Mecklenburg",
+   "lat": 53.75,
+   "lon": 11.6,
+   "kind": "foreign"
+  }
+ ]
+}
