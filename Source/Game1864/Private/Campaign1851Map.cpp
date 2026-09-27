@@ -1,5 +1,7 @@
 #include "Campaign1851Map.h"
 
+#include "Campaign1851Scenery.h"
+#include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Dom/JsonObject.h"
@@ -31,6 +33,7 @@ namespace
 	}
 
 	const TCHAR* FlatColourPath = TEXT("/Game/Materials/M_FlatColor.M_FlatColor");
+	const TCHAR* SceneryMaterialPath = TEXT("/Game/Campaign1851/M_Campaign1851Scenery.M_Campaign1851Scenery");
 }
 
 ACampaign1851Map::ACampaign1851Map()
@@ -87,6 +90,14 @@ void ACampaign1851Map::BeginPlay()
 	}
 	BuildTerrain();
 	BuildMarkers();
+	if (LoadFeatures())
+	{
+		BuildScenery();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|no Denmark1851_Features.png; the close zoom has no 3D scenery"));
+	}
 	bReady = true;
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|ready|cities=%d|labels=%d|size=%.0fx%.0f km"), Cities.Num(), Labels.Num(), SizeKm.X, SizeKm.Y);
 }
@@ -240,6 +251,7 @@ void ACampaign1851Map::BuildTerrain()
 	TVertexInstanceAttributesRef<FVector2f> UVs = Attributes.GetVertexInstanceUVs();
 
 	const int32 VX = GridX + 1, VY = GridY + 1;
+	GridZ.SetNumUninitialized(VX * VY);
 	TArray<FVertexInstanceID> Instances;
 	Instances.Reserve(VX * VY);
 	for (int32 j = 0; j < VY; ++j)
@@ -248,10 +260,11 @@ void ACampaign1851Map::BuildTerrain()
 		{
 			const FVector2D Uv(double(i) / GridX, double(j) / GridY);
 			const FVertexID V = Mesh.CreateVertex();
+			GridZ[j * VX + i] = SampleHeight01(Uv) * HeightRangeKm * float(KmToUnits);
 			Positions[V] = FVector3f(
 				float((Uv.X - 0.5) * SizeKm.X * KmToUnits),
 				float(-(Uv.Y - 0.5) * SizeKm.Y * KmToUnits),
-				SampleHeight01(Uv) * HeightRangeKm * float(KmToUnits));
+				GridZ[j * VX + i]);
 			const FVertexInstanceID I = Mesh.CreateVertexInstance(V);
 			Normals[I] = FVector3f::UpVector;
 			Tangents[I] = FVector3f::ForwardVector;
@@ -341,6 +354,18 @@ void ACampaign1851Map::UpdateMarkers(float CameraDistanceKm)
 	{
 		return;
 	}
+	const bool bShowScenery = CameraDistanceKm < SceneryMaxDistanceKm;
+	if (bShowScenery != bSceneryVisible)
+	{
+		bSceneryVisible = bShowScenery;
+		for (UHierarchicalInstancedStaticMeshComponent* Part : Scenery)
+		{
+			Part->SetVisibility(bShowScenery);
+		}
+	}
+	// Close in, the dot floats above the roofs and church towers so the town never hides it.
+	const float Lift = FMath::GetMappedRangeValueClamped(FVector2D(40.f, 120.f), FVector2D(24.f, 0.f), CameraDistanceKm);
+
 	// Diameter in km: ~9 px for a 5-10k town on a 1080p screen, growing a little when zoomed in.
 	const float Growth = FMath::Lerp(1.8f, 1.f, FMath::GetMappedRangeValueClamped(FVector2D(25.f, 400.f), FVector2D(0.f, 1.f), CameraDistanceKm));
 	int32 CityIndex = 0, ForeignIndex = 0;
@@ -351,7 +376,7 @@ void ACampaign1851Map::UpdateMarkers(float CameraDistanceKm)
 			continue;
 		}
 		const float DiameterUnits = 0.0042f * CameraDistanceKm * SizeClass(City.Population) * Growth * float(KmToUnits);
-		const FTransform Xf(FQuat::Identity, City.World + FVector(0.0, 0.0, DiameterUnits * 0.35), FVector(DiameterUnits / 100.f));
+		const FTransform Xf(FQuat::Identity, City.World + FVector(0.0, 0.0, DiameterUnits * 0.35 + Lift), FVector(DiameterUnits / 100.f));
 		if (City.bForeign)
 		{
 			ForeignMarkers->UpdateInstanceTransform(ForeignIndex++, Xf, true, false, true);
@@ -363,4 +388,283 @@ void ACampaign1851Map::UpdateMarkers(float CameraDistanceKm)
 	}
 	CityMarkers->MarkRenderStateDirty();
 	ForeignMarkers->MarkRenderStateDirty();
+}
+
+// ------------------------------------------------------------------ 3D scenery (close zoom)
+
+bool ACampaign1851Map::LoadFeatures()
+{
+	TArray<uint8> Png;
+	if (!FFileHelper::LoadFileToArray(Png, *DataPath(TEXT("Denmark1851_Features.png"))))
+	{
+		return false;
+	}
+	IImageWrapperModule& Module = FModuleManager::LoadModuleChecked<IImageWrapperModule>(TEXT("ImageWrapper"));
+	TSharedPtr<IImageWrapper> Wrapper = Module.CreateImageWrapper(EImageFormat::PNG);
+	TArray<uint8> Raw;
+	if (!Wrapper.IsValid() || !Wrapper->SetCompressed(Png.GetData(), Png.Num()) || !Wrapper->GetRaw(ERGBFormat::BGRA, 8, Raw))
+	{
+		return false;
+	}
+	FeaturesW = Wrapper->GetWidth();
+	FeaturesH = Wrapper->GetHeight();
+	Features.SetNumUninitialized(FeaturesW * FeaturesH);
+	FMemory::Memcpy(Features.GetData(), Raw.GetData(), Features.Num() * sizeof(FColor));
+	return true;
+}
+
+FVector2D ACampaign1851Map::UvFromKm(const FVector2D& Km) const
+{
+	return FVector2D((Km.X - Extent.XMin) / SizeKm.X, (Km.Y - Extent.YMin) / SizeKm.Y);
+}
+
+float ACampaign1851Map::TerrainZ(const FVector2D& Uv) const
+{
+	const int32 VX = GridX + 1;
+	const double Gx = FMath::Clamp(Uv.X, 0.0, 1.0) * GridX, Gy = FMath::Clamp(Uv.Y, 0.0, 1.0) * GridY;
+	const int32 I = FMath::Min(int32(Gx), GridX - 1), J = FMath::Min(int32(Gy), GridY - 1);
+	const float Fx = float(Gx - I), Fy = float(Gy - J);
+	const float H00 = GridZ[J * VX + I], H10 = GridZ[J * VX + I + 1], H01 = GridZ[(J + 1) * VX + I], H11 = GridZ[(J + 1) * VX + I + 1];
+	// Same split as BuildTerrain: (i,j)(i+1,j)(i,j+1) and (i+1,j)(i+1,j+1)(i,j+1).
+	return Fx + Fy <= 1.f
+		? H00 + Fx * (H10 - H00) + Fy * (H01 - H00)
+		: H11 + (1.f - Fx) * (H01 - H11) + (1.f - Fy) * (H10 - H11);
+}
+
+FVector ACampaign1851Map::LocalAtKm(const FVector2D& Km) const
+{
+	const FVector2D Uv = UvFromKm(Km);
+	return FVector((Uv.X - 0.5) * SizeKm.X * KmToUnits, -(Uv.Y - 0.5) * SizeKm.Y * KmToUnits, TerrainZ(Uv));
+}
+
+bool ACampaign1851Map::IsMonarchyLand(const FVector2D& Km) const
+{
+	const FVector2D Uv = UvFromKm(Km);
+	if (Uv.X < 0.0 || Uv.X >= 1.0 || Uv.Y < 0.0 || Uv.Y >= 1.0)
+	{
+		return false;
+	}
+	const int32 X = int32(Uv.X * FeaturesW), Y = int32((1.0 - Uv.Y) * FeaturesH);  // row 0 = north
+	return Features[FMath::Clamp(Y, 0, FeaturesH - 1) * FeaturesW + FMath::Clamp(X, 0, FeaturesW - 1)].R > 127;
+}
+
+float ACampaign1851Map::Woodland(const FVector2D& Km) const
+{
+	const FVector2D Uv = UvFromKm(Km);
+	if (Uv.X < 0.0 || Uv.X >= 1.0 || Uv.Y < 0.0 || Uv.Y >= 1.0)
+	{
+		return 0.f;
+	}
+	const int32 X = int32(Uv.X * FeaturesW), Y = int32((1.0 - Uv.Y) * FeaturesH);
+	return Features[FMath::Clamp(Y, 0, FeaturesH - 1) * FeaturesW + FMath::Clamp(X, 0, FeaturesW - 1)].G / 255.f;
+}
+
+void ACampaign1851Map::BuildScenery()
+{
+	using Campaign1851Scenery::EPiece;
+	UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, SceneryMaterialPath);
+	if (!Material)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|missing %s; run Tools/Campaign/setup_campaign1851.py"), SceneryMaterialPath);
+		return;
+	}
+
+	constexpr int32 PieceCount = int32(EPiece::Count);
+	// Pieces (and their footprints) are drawn this much larger than modelled, board-game style,
+	// so a town reads as roofs and church towers from the closest campaign zoom.
+	constexpr float PieceScale = 2.5f;
+	TArray<FTransform> Items[PieceCount];
+	FRandomStream Rng(1851);
+	auto Place = [&](EPiece Piece, const FVector2D& Km, float Yaw, float Scale, float ScaleZ = 1.f)
+	{
+		Items[int32(Piece)].Emplace(FRotator(0.f, Yaw, 0.f), LocalAtKm(Km) - FVector(0.0, 0.0, 0.3), FVector(Scale, Scale, Scale * ScaleZ) * PieceScale);
+	};
+
+	// Spatial hash so buildings keep their distance (radii in km).
+	struct FFootprint { FVector2D Km; float Radius; };
+	TMap<FIntPoint, TArray<FFootprint>> Taken;
+	constexpr double Cell = 0.6;
+	auto CellOf = [](const FVector2D& Km) { return FIntPoint(FMath::FloorToInt(Km.X / Cell), FMath::FloorToInt(Km.Y / Cell)); };
+	auto IsFree = [&](const FVector2D& Km, float Radius)
+	{
+		Radius *= PieceScale;
+		const FIntPoint C = CellOf(Km);
+		for (int32 dy = -1; dy <= 1; ++dy)
+		{
+			for (int32 dx = -1; dx <= 1; ++dx)
+			{
+				if (const TArray<FFootprint>* List = Taken.Find(C + FIntPoint(dx, dy)))
+				{
+					for (const FFootprint& F : *List)
+					{
+						if (FVector2D::DistSquared(F.Km, Km) < FMath::Square(F.Radius + Radius))
+						{
+							return false;
+						}
+					}
+				}
+			}
+		}
+		return true;
+	};
+	auto Take = [&](const FVector2D& Km, float Radius) { Taken.FindOrAdd(CellOf(Km)).Add({ Km, Radius * PieceScale }); };
+
+	// ---- Towns: whitewashed and yellow houses with red roofs along a street grid, churches in the core.
+	struct FTown { FVector2D Km; float RadiusKm; };
+	TArray<FTown> Towns;
+	for (const FCampaign1851City& City : Cities)
+	{
+		if (City.bForeign || City.bBornholm)
+		{
+			continue;
+		}
+		const FVector2D Centre = Extent.Projection.Forward(City.Lat, City.Lon);
+		const float Pop = float(City.Population);
+		const float Radius = FMath::Clamp(0.75f * FMath::Sqrt(Pop / 1000.f), 0.9f, 6.5f);
+		Towns.Add({ Centre, Radius });
+
+		const float Street = Rng.FRandRange(0.f, 90.f);
+		const int32 Churches = FMath::Clamp(1 + int32(Pop / 12000.f), 1, 6);
+		for (int32 c = 0, Tries = 0; c < Churches && Tries < 400; ++Tries)
+		{
+			const float D = (c == 0 ? 0.15f + Tries * 0.02f : Radius * 0.6f * FMath::Sqrt(Rng.FRand()));
+			const float A = Rng.FRandRange(0.f, UE_TWO_PI);
+			const FVector2D Km = Centre + FVector2D(FMath::Cos(A), FMath::Sin(A)) * D;
+			if (IsMonarchyLand(Km) && IsFree(Km, 0.12f))
+			{
+				Place(EPiece::Church, Km, Street + (Rng.FRand() < 0.5f ? 0.f : 180.f), City.bCapital ? 1.25f : 1.05f);
+				Take(Km, 0.12f);
+				++c;
+			}
+		}
+
+		const int32 Houses = FMath::Clamp(int32(Pop / 22.f), 45, 2600);
+		for (int32 h = 0, Tries = 0; h < Houses && Tries < Houses * 8; ++Tries)
+		{
+			const float D = Radius * Rng.FRand();  // uniform radius = dense core, thinning suburbs
+			const float A = Rng.FRandRange(0.f, UE_TWO_PI);
+			const FVector2D Km = Centre + FVector2D(FMath::Cos(A), FMath::Sin(A)) * D;
+			if (!IsMonarchyLand(Km) || !IsFree(Km, 0.04f))
+			{
+				continue;
+			}
+			const float Core = 1.f - D / Radius;  // taller houses in the centre
+			const EPiece Piece = Rng.FRand() < 0.3f ? EPiece::TownHouseOchre : EPiece::TownHouse;
+			Place(Piece, Km, Street + (Rng.FRand() < 0.5f ? 0.f : 90.f) + Rng.FRandRange(-5.f, 5.f),
+				Rng.FRandRange(0.8f, 1.1f), Rng.FRandRange(0.85f, 1.05f) + 0.35f * Core);
+			Take(Km, 0.04f);
+			++h;
+		}
+	}
+	auto InTown = [&Towns](const FVector2D& Km, float Margin)
+	{
+		for (const FTown& T : Towns)
+		{
+			if (FVector2D::DistSquared(T.Km, Km) < FMath::Square(T.RadiusKm + Margin))
+			{
+				return true;
+			}
+		}
+		return false;
+	};
+
+	// ---- Countryside: villages with a church, four-winged farms and cottages on a jittered grid.
+	constexpr double FarmCellKm = 2.0;
+	for (double Y = Extent.YMin; Y < Extent.YMax; Y += FarmCellKm)
+	{
+		for (double X = Extent.XMin; X < Extent.XMax; X += FarmCellKm)
+		{
+			const FVector2D Km(X + Rng.FRand() * FarmCellKm, Y + Rng.FRand() * FarmCellKm);
+			if (!IsMonarchyLand(Km) || Woodland(Km) > 0.3f || InTown(Km, 0.5f) || !IsFree(Km, 0.1f))
+			{
+				continue;
+			}
+			const float Roll = Rng.FRand();
+			if (Roll < 0.06f)
+			{
+				Place(EPiece::Church, Km, Rng.FRandRange(0.f, 360.f), 0.85f);
+				Take(Km, 0.12f);
+				const int32 Count = Rng.RandRange(5, 11);
+				for (int32 i = 0, Tries = 0; i < Count && Tries < 60; ++Tries)
+				{
+					const float A = Rng.FRandRange(0.f, UE_TWO_PI), D = Rng.FRandRange(0.35f, 1.3f);
+					const FVector2D P = Km + FVector2D(FMath::Cos(A), FMath::Sin(A)) * D;
+					const bool bFarm = Rng.FRand() < 0.25f;
+					const float R = bFarm ? 0.1f : 0.035f;
+					if (IsMonarchyLand(P) && IsFree(P, R))
+					{
+						Place(bFarm ? EPiece::Farm : EPiece::Cottage, P, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.8f, 1.1f));
+						Take(P, R);
+						++i;
+					}
+				}
+			}
+			else if (Roll < 0.55f)
+			{
+				Place(EPiece::Farm, Km, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.8f, 1.05f));
+				Take(Km, 0.1f);
+			}
+			else if (Roll < 0.72f)
+			{
+				Place(EPiece::Cottage, Km, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.85f, 1.1f));
+				Take(Km, 0.035f);
+			}
+		}
+	}
+
+	// ---- Trees: woods where the painted map has woodland, plus scattered field trees. Mostly beech;
+	// spruce becomes common towards the west Jutland heath plantations.
+	const double PixelKmX = SizeKm.X / FeaturesW, PixelKmY = SizeKm.Y / FeaturesH;
+	for (int32 Py = 0; Py < FeaturesH; ++Py)
+	{
+		for (int32 Px = 0; Px < FeaturesW; ++Px)
+		{
+			const FColor F = Features[Py * FeaturesW + Px];
+			if (F.R < 128)
+			{
+				continue;
+			}
+			const float Wood = F.G / 255.f;
+			// Outside the painted woods, trees gather in copses and groves (noise ~1-2 km across) instead of an even scatter.
+			const float Copse = FMath::Clamp(FMath::PerlinNoise2D(FVector2D(Px, Py) * 0.19) * 2.6f - 0.35f, 0.f, 1.f);
+			float Expected = Wood > 0.08f ? 2.2f * Wood : 0.02f + 1.4f * Copse;
+			const FVector2D Corner(Extent.XMin + Px * PixelKmX, Extent.YMax - (Py + 1) * PixelKmY);
+			const float Westness = FMath::Clamp(float(-40.0 - Corner.X) / 80.f, 0.f, 1.f);
+			while (Expected > 0.f)
+			{
+				if (Expected < 1.f && Rng.FRand() > Expected)
+				{
+					break;
+				}
+				Expected -= 1.f;
+				const FVector2D Km = Corner + FVector2D(Rng.FRand() * PixelKmX, Rng.FRand() * PixelKmY);
+				if (InTown(Km, 0.1f) || !IsFree(Km, 0.015f))
+				{
+					continue;
+				}
+				const bool bConifer = Rng.FRand() < 0.12f + 0.5f * Westness;
+				Place(bConifer ? EPiece::Conifer : EPiece::Broadleaf, Km, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.75f, 1.3f), Rng.FRandRange(0.85f, 1.15f));
+			}
+		}
+	}
+
+	// ---- One instanced component per piece.
+	int32 Total = 0;
+	for (int32 p = 0; p < PieceCount; ++p)
+	{
+		const EPiece Piece = EPiece(p);
+		UHierarchicalInstancedStaticMeshComponent* Part = NewObject<UHierarchicalInstancedStaticMeshComponent>(this, *FString::Printf(TEXT("Scenery_%s"), Campaign1851Scenery::Name(Piece)));
+		Part->SetupAttachment(Root);
+		Part->SetStaticMesh(Campaign1851Scenery::Build(Piece, Material));
+		Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Part->SetCastShadow(false);
+		Part->SetVisibility(false);
+		Part->RegisterComponent();
+		Part->AddInstances(Items[p], false, false);
+		Scenery.Add(Part);
+		Total += Items[p].Num();
+		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|scenery|%s=%d"), Campaign1851Scenery::Name(Piece), Items[p].Num());
+	}
+	bSceneryVisible = false;
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|scenery|total=%d"), Total);
 }

@@ -6,6 +6,7 @@
 
 class UStaticMeshComponent;
 class UInstancedStaticMeshComponent;
+class UHierarchicalInstancedStaticMeshComponent;
 class UMaterialInterface;
 class UTexture2D;
 
@@ -98,6 +99,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Map")
 	float HeightRangeKm = 3.f;
 
+	/** Camera distance (km) below which the 3D towns, farms and woods are shown. */
+	UPROPERTY(EditAnywhere, Category = "Map")
+	float SceneryMaxDistanceKm = 100.f;
+
 	/** World position of a coordinate, on the terrain surface. */
 	FVector Project(double Lat, double Lon) const;
 
@@ -129,12 +134,27 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> Backdrop;
 
+	/** One instanced component per Campaign1851Scenery::EPiece, created at BeginPlay. */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> Scenery;
+
 private:
 	bool LoadData();
 	bool LoadHeight();
 	float SampleHeight01(const FVector2D& Uv) const;
 	void BuildTerrain();
 	void BuildMarkers();
+	bool LoadFeatures();
+	void BuildScenery();
+
+	/** Map-local position of a projected-km point, on the terrain mesh surface. */
+	FVector LocalAtKm(const FVector2D& Km) const;
+	FVector2D UvFromKm(const FVector2D& Km) const;
+	/** Terrain height (units) exactly as the triangulated terrain mesh has it. */
+	float TerrainZ(const FVector2D& Uv) const;
+	bool IsMonarchyLand(const FVector2D& Km) const;
+	/** Woodland density 0..1. */
+	float Woodland(const FVector2D& Km) const;
 
 	FCampaign1851Extent Extent;
 	FCampaign1851Extent Bornholm;
@@ -145,5 +165,9 @@ private:
 
 	TArray<uint16> Height;
 	int32 HeightW = 0, HeightH = 0;
+	TArray<float> GridZ;               // terrain mesh vertex heights (units)
+	TArray<FColor> Features;           // R = monarchy land, G = woodland
+	int32 FeaturesW = 0, FeaturesH = 0;
+	bool bSceneryVisible = false;
 	bool bReady = false;
 };

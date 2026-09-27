@@ -105,6 +105,27 @@ MEL.recompile_material(b)
 lib.save_loaded_asset(b)
 log("material M_Campaign1851Backdrop")
 
+# Scenery (3D towns, farms, trees): unlit vertex colour with the lighting baked in by C++.
+# Vertex colours are stored as sRGB, so pow 2.2 back to linear; PerInstanceRandom varies each piece a little.
+s = new_material("M_Campaign1851Scenery")
+s.set_editor_property("used_with_instanced_static_meshes", True)
+vc = MEL.create_material_expression(s, unreal.MaterialExpressionVertexColor, -900, 0)
+gamma = MEL.create_material_expression(s, unreal.MaterialExpressionPower, -650, 0)
+gamma.set_editor_property("const_exponent", 2.2)
+MEL.connect_material_expressions(vc, "", gamma, "Base")
+rnd = MEL.create_material_expression(s, unreal.MaterialExpressionPerInstanceRandom, -900, 250)
+vary = MEL.create_material_expression(s, unreal.MaterialExpressionLinearInterpolate, -650, 250)
+vary.set_editor_property("const_a", 0.84)
+vary.set_editor_property("const_b", 1.1)
+MEL.connect_material_expressions(rnd, "", vary, "Alpha")
+lit = MEL.create_material_expression(s, unreal.MaterialExpressionMultiply, -400, 100)
+MEL.connect_material_expressions(gamma, "", lit, "A")
+MEL.connect_material_expressions(vary, "", lit, "B")
+MEL.connect_material_property(lit, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+MEL.recompile_material(s)
+lib.save_loaded_asset(s)
+log("material M_Campaign1851Scenery")
+
 # ------------------------------------------------------------------ level
 level_sub = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 if lib.does_asset_exist(LEVEL):

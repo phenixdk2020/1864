@@ -59,6 +59,30 @@ void ACampaign1851PlayerController::TryInit()
 		GEngine->GameViewport->AddViewportWidgetContent(Overlay.ToSharedRef(), 10);
 	}
 	bInitialised = true;
+
+	FString Start;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignView="), Start, false))
+	{
+		TArray<FString> Parts;
+		Start.ParseIntoArray(Parts, TEXT(","));
+		if (Parts.Num() >= 3)
+		{
+			CampaignView(FCString::Atof(*Parts[0]), FCString::Atof(*Parts[1]), FCString::Atof(*Parts[2]), Parts.Num() > 3 ? FCString::Atof(*Parts[3]) : 0.f);
+		}
+	}
+}
+
+void ACampaign1851PlayerController::CampaignView(float Lat, float Lon, float DistanceKm, float Yaw)
+{
+	ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
+	if (!Map.IsValid() || !Camera)
+	{
+		return;
+	}
+	FVector Target = Map->Project(Lat, Lon);
+	Target.Z = 0.0;
+	Camera->SetView(Target, DistanceKm, Yaw);
+	Map->UpdateMarkers(Camera->GetDistanceKm());
 }
 
 bool ACampaign1851PlayerController::ScreenGround(const FVector2D& Screen, FVector& Out) const

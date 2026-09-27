@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
@@ -20,9 +20,9 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	UPROPERTY(EditAnywhere, Category = "Camera") float MinDistanceKm = 22.f;
+	UPROPERTY(EditAnywhere, Category = "Camera") float MinDistanceKm = 12.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float MaxDistanceKm = 1000.f;
-	UPROPERTY(EditAnywhere, Category = "Camera") float PitchNear = 46.f;
+	UPROPERTY(EditAnywhere, Category = "Camera") float PitchNear = 32.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float PitchFar = 84.f;
 
 	void Init(const FVector& InTarget, float InDistanceKm, const FVector2D& InHalfExtentUnits);
