@@ -1,6 +1,8 @@
 #include "Campaign1851Map.h"
 
+#include "Campaign1851ConstructionSite.h"
 #include "Campaign1851Scenery.h"
+#include "Engine/World.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -35,6 +37,7 @@ namespace
 	const TCHAR* FlatColourPath = TEXT("/Game/Materials/M_FlatColor.M_FlatColor");
 	FLinearColor Srgb(uint8 R, uint8 G, uint8 B) { return FLinearColor::FromSRGBColor(FColor(R, G, B)); }
 
+	const TCHAR* ConstructionMaterialPath = TEXT("/Game/Campaign1851/M_Campaign1851Construction.M_Campaign1851Construction");
 	const TCHAR* SceneryMaterialPath = TEXT("/Game/Campaign1851/M_Campaign1851Scenery.M_Campaign1851Scenery");
 }
 
@@ -173,7 +176,9 @@ bool ACampaign1851Map::LoadData()
 	{
 		for (const TSharedPtr<FJsonValue>& Road : *RoadArray)
 		{
-			TArray<FVector2D>& Line = RoadLines.AddDefaulted_GetRef();
+			FString Kind;
+			Road->AsObject()->TryGetStringField(TEXT("kind"), Kind);
+			TArray<FVector2D>& Line = (Kind == TEXT("ferry") ? FerryLines : RoadLines).AddDefaulted_GetRef();
 			for (const TSharedPtr<FJsonValue>& Point : Road->AsObject()->GetArrayField(TEXT("km")))
 			{
 				const TArray<TSharedPtr<FJsonValue>>& XY = Point->AsArray();
@@ -378,6 +383,13 @@ void ACampaign1851Map::UpdateMarkers(float CameraDistanceKm)
 		{
 			Part->SetVisibility(bShowScenery);
 		}
+		for (ACampaign1851ConstructionSite* Site : Projects)
+		{
+			if (Site)
+			{
+				Site->SetActorHiddenInGame(!bShowScenery);
+			}
+		}
 	}
 	if (Lanes)
 	{
@@ -388,6 +400,10 @@ void ACampaign1851Map::UpdateMarkers(float CameraDistanceKm)
 	{
 		bRoadsVisible = bShowRoads;
 		Roads->SetVisibility(bShowRoads);
+		if (Ferries)
+		{
+			Ferries->SetVisibility(bShowRoads);
+		}
 	}
 	// Close in, the dot floats above the roofs and church towers so the town never hides it.
 	const float Lift = FMath::GetMappedRangeValueClamped(FVector2D(40.f, 120.f), FVector2D(24.f, 0.f), CameraDistanceKm);
@@ -496,9 +512,7 @@ void ACampaign1851Map::BuildScenery()
 	}
 
 	constexpr int32 PieceCount = int32(EPiece::Count);
-	// Pieces (and their footprints) are drawn this much larger than modelled, board-game style,
-	// so a town reads as roofs and church towers from the closest campaign zoom.
-	constexpr float PieceScale = 2.5f;
+
 	TArray<FTransform> Items[PieceCount];
 	FRandomStream Rng(1851);
 	auto Place = [&](EPiece Piece, const FVector2D& Km, float Yaw, float Scale, float ScaleZ = 1.f)
@@ -567,7 +581,7 @@ void ACampaign1851Map::BuildScenery()
 	// ---- Towns: whitewashed and yellow houses with red roofs along a street grid, churches in the core.
 	struct FTown { FVector2D Km; float RadiusKm; };
 	TArray<FTown> Towns;
-	for (const FCampaign1851City& City : Cities)
+	for (FCampaign1851City& City : Cities)
 	{
 		if (City.bForeign || City.bBornholm)
 		{
@@ -577,6 +591,55 @@ void ACampaign1851Map::BuildScenery()
 		const float Pop = float(City.Population);
 		const float Radius = FMath::Clamp(0.75f * FMath::Sqrt(Pop / 1000.f), 0.9f, 6.5f);
 		Towns.Add({ Centre, Radius });
+
+		// Military plot: beside a main road just outside the town, on the flattest ground available.
+		if (Pop >= 2500.f)
+		{
+			float BestScore = TNumericLimits<float>::Max();
+			for (int32 s = 1; s + 1 < RoadSamples.Num(); s += 2)
+			{
+				const double D = FVector2D::Distance(RoadSamples[s], Centre);
+				const FVector2D Along = (RoadSamples[s + 1] - RoadSamples[s - 1]).GetSafeNormal();
+				if (D < Radius + 0.3 || D > Radius + 1.3 || Along.IsNearlyZero())
+				{
+					continue;
+				}
+				for (float Side : { -1.f, 1.f })
+				{
+					const FVector2D Normal = FVector2D(-Along.Y, Along.X) * Side;
+					const FVector2D P = RoadSamples[s] + Normal * 0.42;
+					bool bOk = IsMonarchyLand(P) && IsFree(P, 0.13f);
+					float ZMin = TNumericLimits<float>::Max(), ZMax = -ZMin;
+					for (float A : { -0.25f, 0.25f })
+					{
+						for (float B : { -0.12f, 0.35f })
+						{
+							const FVector2D Q = P + Along * A - Normal * B;
+							bOk &= IsMonarchyLand(Q);
+							const float Z = TerrainZ(UvFromKm(Q));
+							ZMin = FMath::Min(ZMin, Z);
+							ZMax = FMath::Max(ZMax, Z);
+						}
+					}
+					const float Score = (ZMax - ZMin) + 4.f * float(FMath::Abs(D - Radius - 0.6));
+					if (bOk && Score < BestScore)
+					{
+						BestScore = Score;
+						City.bHasPlot = true;
+						City.PlotKm = P;
+						// Local +Y (the gate) must point back at the road; world Y is south.
+						const FVector2D Facing = -Normal;
+						City.PlotYaw = FMath::RadiansToDegrees(FMath::Atan2(-Facing.X, -Facing.Y));
+					}
+				}
+			}
+			if (City.bHasPlot)
+			{
+				Take(City.PlotKm, 0.13f);
+				const FVector2D Gate = FVector2D(-FMath::Sin(FMath::DegreesToRadians(City.PlotYaw)), -FMath::Cos(FMath::DegreesToRadians(City.PlotYaw)));
+				Take(City.PlotKm + Gate * 0.22, 0.09f);
+			}
+		}
 
 		const float Street = Rng.FRandRange(0.f, 90.f);
 		const int32 Churches = FMath::Clamp(1 + int32(Pop / 12000.f), 1, 6);
@@ -829,8 +892,37 @@ void ACampaign1851Map::BuildScenery()
 		Dense.Add(Resample(Line, 0.2));
 	}
 	Lanes = BuildRibbons(Dense, 0.075f, Srgb(160, 126, 88), TEXT("Lanes"), Material);
+	// Ferries: pale dashes across the water, 350 m on / 250 m off.
+	Dense.Reset();
+	for (const TArray<FVector2D>& Line : FerryLines)
+	{
+		const TArray<FVector2D> Points = Resample(Line, 0.05);
+		TArray<FVector2D> Dash;
+		double Along = 0.0;
+		for (int32 i = 0; i < Points.Num(); ++i)
+		{
+			if (i > 0)
+			{
+				Along += FVector2D::Distance(Points[i - 1], Points[i]);
+			}
+			if (FMath::Fmod(Along, 0.6) < 0.35)
+			{
+				Dash.Add(Points[i]);
+			}
+			else if (Dash.Num() > 0)
+			{
+				Dense.Add(MoveTemp(Dash));
+				Dash.Reset();
+			}
+		}
+		if (Dash.Num() > 1)
+		{
+			Dense.Add(MoveTemp(Dash));
+		}
+	}
+	Ferries = BuildRibbons(Dense, 0.07f, Srgb(236, 226, 196), TEXT("Ferries"), Material);
 	bRoadsVisible = false;
-	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|roads|main=%d|lanes=%d"), RoadLines.Num(), LaneLines.Num());
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|roads|main=%d|ferries=%d|lanes=%d"), RoadLines.Num(), FerryLines.Num(), LaneLines.Num());
 }
 
 UStaticMeshComponent* ACampaign1851Map::BuildRibbons(const TArray<TArray<FVector2D>>& Lines, float WidthKm, const FLinearColor& Colour, const TCHAR* Name, UMaterialInterface* Material)
@@ -853,4 +945,70 @@ UStaticMeshComponent* ACampaign1851Map::BuildRibbons(const TArray<TArray<FVector
 	Mesh->SetVisibility(false);
 	Mesh->RegisterComponent();
 	return Mesh;
+}
+
+// ------------------------------------------------------------------ building projects
+
+float ACampaign1851Map::TerrainWorldZ(const FVector& World) const
+{
+	const FVector Local = GetActorTransform().InverseTransformPosition(World);
+	const FVector2D Uv(Local.X / (SizeKm.X * KmToUnits) + 0.5, -Local.Y / (SizeKm.Y * KmToUnits) + 0.5);
+	return float(GetActorTransform().TransformPosition(FVector(Local.X, Local.Y, TerrainZ(Uv))).Z);
+}
+
+FVector ACampaign1851Map::PlotWorld(int32 CityIndex) const
+{
+	return Cities.IsValidIndex(CityIndex) && Cities[CityIndex].bHasPlot
+		? GetActorTransform().TransformPosition(LocalAtKm(Cities[CityIndex].PlotKm))
+		: FVector::ZeroVector;
+}
+
+ACampaign1851ConstructionSite* ACampaign1851Map::FindProject(int32 CityIndex) const
+{
+	for (ACampaign1851ConstructionSite* Site : Projects)
+	{
+		if (Site && Site->GetCityIndex() == CityIndex)
+		{
+			return Site;
+		}
+	}
+	return nullptr;
+}
+
+ACampaign1851ConstructionSite* ACampaign1851Map::StartProject(int32 CityIndex)
+{
+	if (ACampaign1851ConstructionSite* Existing = FindProject(CityIndex))
+	{
+		return Existing;
+	}
+	UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, ConstructionMaterialPath);
+	if (!Cities.IsValidIndex(CityIndex) || !Cities[CityIndex].bHasPlot || !Material)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|no barracks plot or construction material for city %d"), CityIndex);
+		return nullptr;
+	}
+	const FCampaign1851City& City = Cities[CityIndex];
+	// Sunk a little so the parade ground sits on the slope rather than floating over it.
+	const FTransform Xf(FRotator(0.f, City.PlotYaw, 0.f), PlotWorld(CityIndex) - FVector(0.0, 0.0, 0.6), FVector(PieceScale));
+
+	// The wagon runs from the town centre to the gate beside the parade ground, on the terrain.
+	TArray<FVector> Path;
+	const FVector From = City.World, To = Xf.TransformPosition(FVector(Campaign1851Scenery::BarracksLength * 0.5 + 2.5, 11.0, 0.0));
+	const int32 Steps = FMath::Max(2, FMath::CeilToInt(FVector::Dist2D(From, To) / 10.0));
+	for (int32 s = 0; s <= Steps; ++s)
+	{
+		FVector P = FMath::Lerp(From, To, double(s) / Steps);
+		P.Z = TerrainWorldZ(P) + 0.3;
+		Path.Add(P);
+	}
+
+	FActorSpawnParameters Params;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ACampaign1851ConstructionSite* Site = GetWorld()->SpawnActor<ACampaign1851ConstructionSite>(ACampaign1851ConstructionSite::StaticClass(), Xf, Params);
+	Site->SetActorScale3D(FVector(PieceScale));
+	Site->Setup(CityIndex, TEXT("Infanterikaserne"), Path, Material);
+	Site->SetActorHiddenInGame(!bSceneryVisible);
+	Projects.Add(Site);
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|barracks started"), *City.Name);
+	return Site;
 }

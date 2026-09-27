@@ -36,4 +36,24 @@ namespace Campaign1851Scenery
 	UStaticMesh* BuildRibbons(const TArray<TArray<FVector>>& Lines, float HalfWidth, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* Name);
 
 	const TCHAR* Name(EPiece Piece);
+
+	/** Building-site pieces (ACampaign1851ConstructionSite), in piece units; the barracks faces +Y. */
+	enum class ESitePiece : uint8
+	{
+		Ground,     // parade ground, dug footprint and corner stakes
+		Barracks,   // three-storey red-brick infantry barracks, slate roof, chimneys
+		Scaffold,   // timber poles, ledgers and boards around the barracks
+		CraneMast,  // timber derrick mast
+		CraneJib,   // its jib and counterweight, turns about the mast
+		Wagon,      // horse and cart loaded with bricks, facing +X
+		Flagpole,
+		Flag        // Dannebrog, hoist at the origin, flying towards +X
+	};
+
+	constexpr float BarracksLength = 16.f;
+	constexpr float BarracksWidth = 5.5f;
+	constexpr float BarracksEave = 7.5f;
+	constexpr float BarracksTop = 12.3f;   // chimney tops
+
+	UStaticMesh* BuildSitePiece(ESitePiece Piece, UMaterialInterface* Material);
 }

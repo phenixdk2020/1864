@@ -1,5 +1,7 @@
 #include "SCampaign1851Overlay.h"
 
+#include "Campaign1851ConstructionSite.h"
+
 #include "Brushes/SlateRoundedBoxBrush.h"
 #include "Campaign1851Camera.h"
 #include "Campaign1851Map.h"
@@ -98,6 +100,12 @@ void SCampaign1851Overlay::Construct(const FArguments& InArgs)
 	// Always a circle, whatever the drawn size.
 	DotBrush = MakeShared<FSlateRoundedBoxBrush>(FLinearColor::White, 0.f);
 	DotBrush->OutlineSettings.RoundingType = ESlateBrushRoundingType::HalfHeightRadius;
+	BarracksBrush = MakeShared<FSlateBrush>();
+	if (UTexture2D* Barracks = LoadObject<UTexture2D>(nullptr, TEXT("/Game/Campaign1851/Buildings/T_Barracks_Infantry.T_Barracks_Infantry")))
+	{
+		BarracksBrush->SetResourceObject(Barracks);
+		BarracksBrush->ImageSize = FVector2D(Barracks->GetSizeX(), Barracks->GetSizeY());
+	}
 	BornholmBrush = MakeShared<FSlateBrush>();
 	if (Map.IsValid() && Map->BornholmTexture)
 	{
@@ -170,7 +178,10 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(Controller->GetPawn());
 	const float DistanceKm = Camera ? Camera->GetDistanceKm() : 600.f;
 
+	Buttons.Reset();
+	PaintScale = Geometry.Scale;
 	Layer = PaintLabels(Geometry, Out, Layer, DistanceKm) + 2;
+	PaintProjects(Geometry, Out, Layer);
 	PaintTitle(Geometry, Out, Layer);
 	PaintLegend(Geometry, Out, Layer);
 	PaintCompass(Geometry, Out, Layer, Camera ? Camera->GetYaw() : 0.f);
@@ -181,7 +192,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik på en by  ·  Hjul: zoom  ·  Højre/midt-træk eller WASD: panorer  ·  Q/E: drej  ·  Home: hele kortet"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.17 VEJE OG MARKER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.19 AMTER, FÆRGER OG KASERNEBYGGERI — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 4;
 }
 
@@ -207,6 +218,7 @@ int32 SCampaign1851Overlay::PaintLabels(const FGeometry& Geometry, FSlateWindowE
 		else if (L.Kind == TEXT("strait")) { if (D >= 400.f) continue; I.Text = L.Text; I.Font = Serif(11, EFace::Italic); I.Colour = SeaInk; I.Priority = 500; }
 		else if (L.Kind == TEXT("land")) { if (D <= 45.f) continue; I.Text = Spaced(L.Text); I.Font = Serif(20, EFace::Italic); I.Colour = FLinearColor::FromSRGBColor(FColor(245, 237, 204, 200)); I.Priority = 700000; }
 		else if (L.Kind == TEXT("duchy")) { I.Text = Spaced(L.Text.ToUpper()); I.Font = Serif(13); I.Colour = Gold; I.Priority = 800000; }
+		else if (L.Kind == TEXT("amt")) { if (D <= 30.f || D >= 330.f) continue; I.Text = Spaced(L.Text.ToUpper()); I.Font = Serif(10); I.Colour = FLinearColor::FromSRGBColor(FColor(232, 214, 160, 190)); I.Priority = 600; }
 		else { I.Text = L.Text; I.Font = Serif(13, EFace::Italic); I.Colour = MutedInk; I.Priority = 400; }
 		Items.Add(I);
 	}
@@ -421,10 +433,102 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	}
 	const FCampaign1851City& C = Cities[SelectedCity];
 	const FVector2D Size(380.f, 150.f);
-	const FVector2D Pos(28.f, Geometry.GetLocalSize().Y - 190.f - Size.Y);
+	const FVector2D Pos(28.f, Geometry.GetLocalSize().Y - 190.f - Size.Y - (C.bHasPlot ? 146.f : 0.f));
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintText(Geometry, Out, Layer + 2, C.Name, Pos + FVector2D(22.f, 32.f), Serif(24), Ink, 0.f);
 	PaintText(Geometry, Out, Layer + 2, C.bForeign ? TEXT("Udenlandsk by") : C.bCapital ? TEXT("Hovedstad") : TEXT("Købstad"), Pos + FVector2D(22.f, 64.f), Serif(14, EFace::Italic), Gold, 0.f, false);
 	PaintText(Geometry, Out, Layer + 2, C.bForeign ? TEXT("Uden for monarkiet") : RegionName(C.Region), Pos + FVector2D(22.f, 92.f), Serif(13), Ink, 0.f, false);
 	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("ca. %s indbyggere (ca. 1850)"), *Thousands(C.Population)), Pos + FVector2D(22.f, 120.f), Serif(13), Ink, 0.f, false);
+	if (!C.bHasPlot)
+	{
+		return;
+	}
+
+	// Garrison: the barracks card (design manual 20.16.6-7: project, stage, progress, completion).
+	const FVector2D Card = Pos + FVector2D(0.f, Size.Y - 4.f);
+	const FVector2D CardSize(Size.X, 150.f);
+	PaintPanel(Geometry, Out, Layer, Card, CardSize);
+	PaintText(Geometry, Out, Layer + 2, TEXT("G A R N I S O N"), Card + FVector2D(22.f, 22.f), Serif(11), Gold, 0.f, false);
+	const FVector2D ImagePos = Card + FVector2D(18.f, 36.f), ImageSize(100.f, 100.f);
+	if (BarracksBrush->GetResourceObject())
+	{
+		FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(ImageSize, FSlateLayoutTransform(ImagePos)), BarracksBrush.Get());
+	}
+	const FVector2D Text = Card + FVector2D(134.f, 0.f);
+	PaintText(Geometry, Out, Layer + 2, TEXT("Infanterikaserne"), Text + FVector2D(0.f, 50.f), Serif(16), Ink, 0.f, false);
+	const ACampaign1851ConstructionSite* Site = Map->FindProject(SelectedCity);
+	if (!Site)
+	{
+		PaintText(Geometry, Out, Layer + 2, TEXT("Ikke bygget  ·  byggetid 90 dage"), Text + FVector2D(0.f, 76.f), Serif(12, EFace::Italic), MutedInk, 0.f, false);
+		PaintButton(Geometry, Out, Layer + 2, Text + FVector2D(0.f, 98.f), FVector2D(150.f, 30.f), TEXT("BYG KASERNE"), EButton::Build);
+		return;
+	}
+	const FString Status = Site->IsDone()
+		? TEXT("Færdig  ·  garnisonen kan indkvarteres")
+		: FString::Printf(TEXT("%s  ·  dag %d af %d"), *Site->GetStageName(), int32(Site->GetElapsedDays()), int32(Site->DurationDays));
+	PaintText(Geometry, Out, Layer + 2, Status, Text + FVector2D(0.f, 76.f), Serif(12, EFace::Italic), Site->IsDone() ? Gold : Ink, 0.f, false);
+	if (!Site->IsDone())
+	{
+		const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+		const FVector2D Bar = Text + FVector2D(0.f, 92.f);
+		FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(220.f, 6.f), FSlateLayoutTransform(Bar)), White, ESlateDrawEffect::None, Gold.CopyWithNewOpacity(0.25f));
+		FSlateDrawElement::MakeBox(Out, Layer + 3, Geometry.ToPaintGeometry(FVector2D(220.f * Site->GetProgress(), 6.f), FSlateLayoutTransform(Bar)), White, ESlateDrawEffect::None, Gold);
+	}
+	PaintButton(Geometry, Out, Layer + 2, Text + FVector2D(0.f, 106.f), FVector2D(150.f, 26.f), TEXT("VIS PÅ KORTET"), EButton::ShowOnMap);
+}
+
+void SCampaign1851Overlay::PaintButton(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size,
+	const FString& Text, EButton Action) const
+{
+	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(Pos)), White, ESlateDrawEffect::None, FLinearColor::FromSRGBColor(FColor(58, 40, 22, 235)));
+	TArray<FVector2D> Frame = { Pos, Pos + FVector2D(Size.X, 0.f), Pos + Size, Pos + FVector2D(0.f, Size.Y), Pos };
+	FSlateDrawElement::MakeLines(Out, Layer + 1, Geometry.ToPaintGeometry(), Frame, ESlateDrawEffect::None, Gold, true, 1.2f);
+	PaintText(Geometry, Out, Layer + 1, Text, Pos + Size * 0.5f, Serif(11), Ink, 0.5f, false);
+	Buttons.Add({ Pos, Pos + Size, Action });
+}
+
+SCampaign1851Overlay::EButton SCampaign1851Overlay::HitButton(const FVector2D& ViewportPixel) const
+{
+	const FVector2D Local = ViewportPixel / FMath::Max(PaintScale, 0.01f);
+	for (const FButtonRect& B : Buttons)
+	{
+		if (Local.X >= B.Min.X && Local.Y >= B.Min.Y && Local.X <= B.Max.X && Local.Y <= B.Max.Y)
+		{
+			return B.Action;
+		}
+	}
+	return EButton::None;
+}
+
+void SCampaign1851Overlay::PaintProjects(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	const TArray<FCampaign1851City>& Cities = Map->GetCities();
+	for (const ACampaign1851ConstructionSite* Site : Map->GetProjects())
+	{
+		FVector2D P;
+		if (!Site || Site->IsDone() || !Cities.IsValidIndex(Site->GetCityIndex()) || !ToLocal(Geometry, Cities[Site->GetCityIndex()].World, P))
+		{
+			continue;
+		}
+		// A ring above the town dot: faint full circle, gold arc for the progress (clockwise from the top).
+		const FVector2D Centre = P + FVector2D(0.f, -30.f);
+		const float Radius = 12.f;
+		auto Arc = [&](float Fraction, const FLinearColor& Colour, float Thickness)
+		{
+			TArray<FVector2D> Points;
+			const int32 Steps = FMath::Max(2, FMath::CeilToInt(48 * Fraction));
+			for (int32 s = 0; s <= Steps; ++s)
+			{
+				const float A = -UE_HALF_PI + UE_TWO_PI * Fraction * s / Steps;
+				Points.Add(Centre + FVector2D(FMath::Cos(A), FMath::Sin(A)) * Radius);
+			}
+			FSlateDrawElement::MakeLines(Out, Layer, Geometry.ToPaintGeometry(), Points, ESlateDrawEffect::None, Colour, true, Thickness);
+		};
+		PaintDot(Geometry, Out, Layer, Centre, Radius * 2.f + 4.f, Panel.CopyWithNewOpacity(0.8f));
+		Arc(1.f, Gold.CopyWithNewOpacity(0.3f), 2.f);
+		Arc(FMath::Max(Site->GetProgress(), 0.01f), Gold, 3.f);
+		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("%d"), FMath::FloorToInt(Site->GetProgress() * 100.f)), Centre, Serif(9), Ink, 0.5f, false);
+		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("Kaserne · %s"), *Site->GetStageName()), Centre + FVector2D(Radius + 8.f, 0.f), Serif(11, EFace::Italic), Ink, 0.f);
+	}
 }

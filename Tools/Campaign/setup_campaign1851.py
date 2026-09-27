@@ -151,6 +151,57 @@ MEL.recompile_material(s)
 lib.save_loaded_asset(s)
 log("material M_Campaign1851Scenery")
 
+# Construction: the scenery look (unlit vertex colour), masked above the BuildTop world height so
+# a building on a site can rise storey by storey. Two-sided: the cut walls show their inside.
+k = new_material("M_Campaign1851Construction")
+k.set_editor_property("blend_mode", unreal.BlendMode.BLEND_MASKED)
+k.set_editor_property("two_sided", True)
+kvc = MEL.create_material_expression(k, unreal.MaterialExpressionVertexColor, -700, 0)
+kgamma = MEL.create_material_expression(k, unreal.MaterialExpressionPower, -450, 0)
+kgamma.set_editor_property("const_exponent", 2.2)
+MEL.connect_material_expressions(kvc, "", kgamma, "Base")
+MEL.connect_material_property(kgamma, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+top = MEL.create_material_expression(k, unreal.MaterialExpressionScalarParameter, -900, 300)
+top.set_editor_property("parameter_name", "BuildTop")
+top.set_editor_property("default_value", 1.0e7)
+wpos = MEL.create_material_expression(k, unreal.MaterialExpressionWorldPosition, -900, 450)
+wz = MEL.create_material_expression(k, unreal.MaterialExpressionComponentMask, -700, 450)
+wz.set_editor_property("r", False)
+wz.set_editor_property("g", False)
+wz.set_editor_property("b", True)
+MEL.connect_material_expressions(wpos, "", wz, "")
+left = MEL.create_material_expression(k, unreal.MaterialExpressionSubtract, -500, 350)
+MEL.connect_material_expressions(top, "", left, "A")
+MEL.connect_material_expressions(wz, "", left, "B")
+sharp = MEL.create_material_expression(k, unreal.MaterialExpressionMultiply, -350, 350)
+sharp.set_editor_property("const_b", 4.0)
+MEL.connect_material_expressions(left, "", sharp, "A")
+ksat = MEL.create_material_expression(k, unreal.MaterialExpressionSaturate, -200, 350)
+MEL.connect_material_expressions(sharp, "", ksat, "")
+MEL.connect_material_property(ksat, "", unreal.MaterialProperty.MP_OPACITY_MASK)
+MEL.recompile_material(k)
+lib.save_loaded_asset(k)
+log("material M_Campaign1851Construction")
+
+# Building cards for the town panel (from the 1851 building illustrations, 512 px).
+BUILDINGS_DEST = "/Game/Campaign1851/Buildings"
+cards = []
+for name in ("T_Barracks_Infantry",):
+    task = unreal.AssetImportTask()
+    task.filename = REF + "Buildings/" + name + ".png"
+    task.destination_path = BUILDINGS_DEST
+    task.automated = True
+    task.save = True
+    task.replace_existing = True
+    cards.append(task)
+tools.import_asset_tasks(cards)
+for name in ("T_Barracks_Infantry",):
+    card = lib.load_asset(BUILDINGS_DEST + "/" + name)
+    card.set_editor_property("lod_group", unreal.TextureGroup.TEXTUREGROUP_UI)
+    card.set_editor_property("mip_gen_settings", unreal.TextureMipGenSettings.TMGS_NO_MIPMAPS)
+    lib.save_loaded_asset(card)
+    log("texture " + name)
+
 # ------------------------------------------------------------------ level
 level_sub = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 if lib.does_asset_exist(LEVEL):

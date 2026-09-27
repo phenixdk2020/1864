@@ -30,11 +30,16 @@ public:
 	UFUNCTION(Exec)
 	void CampaignView(float Lat, float Lon, float DistanceKm, float Yaw = 0.f);
 
+	/** Starts the barracks in a town and flies to its building site, e.g. "CampaignBuild Aalborg". */
+	UFUNCTION(Exec)
+	void CampaignBuild(const FString& CityName);
+
 private:
 	bool CursorGround(FVector& Out) const;
 	bool ScreenGround(const FVector2D& Screen, FVector& Out) const;
 	void TryInit();
 	void PickCity();
+	void FocusPlot(int32 CityIndex);
 
 	TWeakObjectPtr<ACampaign1851Map> Map;
 	TSharedPtr<SCampaign1851Overlay> Overlay;

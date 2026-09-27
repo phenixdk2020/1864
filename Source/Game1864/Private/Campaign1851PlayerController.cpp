@@ -60,6 +60,12 @@ void ACampaign1851PlayerController::TryInit()
 	}
 	bInitialised = true;
 
+	FString BuildCity;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignBuild="), BuildCity, false))
+	{
+		CampaignBuild(BuildCity);
+	}
+
 	FString Start;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignView="), Start, false))
 	{
@@ -70,6 +76,40 @@ void ACampaign1851PlayerController::TryInit()
 			CampaignView(FCString::Atof(*Parts[0]), FCString::Atof(*Parts[1]), FCString::Atof(*Parts[2]), Parts.Num() > 3 ? FCString::Atof(*Parts[3]) : 0.f);
 		}
 	}
+}
+
+void ACampaign1851PlayerController::CampaignBuild(const FString& CityName)
+{
+	if (!Map.IsValid())
+	{
+		return;
+	}
+	const TArray<FCampaign1851City>& Cities = Map->GetCities();
+	for (int32 i = 0; i < Cities.Num(); ++i)
+	{
+		if (Cities[i].Name.Equals(CityName, ESearchCase::IgnoreCase) && Map->StartProject(i))
+		{
+			if (Overlay.IsValid())
+			{
+				Overlay->SetSelectedCity(i);
+			}
+			FocusPlot(i);
+			return;
+		}
+	}
+}
+
+void ACampaign1851PlayerController::FocusPlot(int32 CityIndex)
+{
+	ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
+	if (!Map.IsValid() || !Camera || !Map->GetCities().IsValidIndex(CityIndex) || !Map->GetCities()[CityIndex].bHasPlot)
+	{
+		return;
+	}
+	// Orbit the site itself (at terrain height), close enough to watch the work, looking at the
+	// front of the building across the parade ground, a little from the side.
+	Camera->SetView(Map->PlotWorld(CityIndex), 7.f, Map->GetCities()[CityIndex].PlotYaw + 25.f);
+	Map->UpdateMarkers(Camera->GetDistanceKm());
 }
 
 void ACampaign1851PlayerController::CampaignView(float Lat, float Lon, float DistanceKm, float Yaw)
@@ -144,7 +184,20 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 
 	if (WasInputKeyJustPressed(EKeys::LeftMouseButton))
 	{
-		PickCity();
+		const SCampaign1851Overlay::EButton Button = Overlay.IsValid() ? Overlay->HitButton(Mouse) : SCampaign1851Overlay::EButton::None;
+		if (Button == SCampaign1851Overlay::EButton::Build)
+		{
+			Map->StartProject(Overlay->GetSelectedCity());
+			FocusPlot(Overlay->GetSelectedCity());
+		}
+		else if (Button == SCampaign1851Overlay::EButton::ShowOnMap)
+		{
+			FocusPlot(Overlay->GetSelectedCity());
+		}
+		else
+		{
+			PickCity();
+		}
 	}
 
 	Map->UpdateMarkers(Camera->GetDistanceKm());

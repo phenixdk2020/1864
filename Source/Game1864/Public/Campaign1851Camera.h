@@ -20,7 +20,7 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	UPROPERTY(EditAnywhere, Category = "Camera") float MinDistanceKm = 12.f;
+	UPROPERTY(EditAnywhere, Category = "Camera") float MinDistanceKm = 6.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float MaxDistanceKm = 1000.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float PitchNear = 32.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float PitchFar = 84.f;

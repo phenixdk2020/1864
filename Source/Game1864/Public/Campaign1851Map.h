@@ -9,6 +9,7 @@ class UInstancedStaticMeshComponent;
 class UHierarchicalInstancedStaticMeshComponent;
 class UMaterialInterface;
 class UTexture2D;
+class ACampaign1851ConstructionSite;
 
 /** Region codes used by the 1851 data: K Kingdom, S Schleswig, H Holstein/Lauenburg. */
 struct FCampaign1851City
@@ -22,6 +23,11 @@ struct FCampaign1851City
 	bool bBornholm = false;
 	bool bForeign = false;
 	FVector World = FVector::ZeroVector;
+
+	/** Military building plot beside a main road at the edge of town (towns of 2,500+). */
+	bool bHasPlot = false;
+	FVector2D PlotKm = FVector2D::ZeroVector;
+	float PlotYaw = 0.f;   // world yaw of the site; its +Y (parade ground, gate) faces the road
 };
 
 struct FCampaign1851Label
@@ -89,6 +95,9 @@ public:
 	/** Unreal units per kilometre. */
 	static constexpr double KmToUnits = 100.0;
 
+	/** Scenery pieces are drawn this much larger than modelled, board-game style. */
+	static constexpr float PieceScale = 2.5f;
+
 	UPROPERTY(EditAnywhere, Category = "Map")
 	TObjectPtr<UMaterialInterface> MapMaterial;
 
@@ -116,6 +125,13 @@ public:
 	FVector2D GetSizeKm() const { return SizeKm; }
 	bool IsReady() const { return bReady; }
 
+	/** Starts (or returns the running) barracks project in a town; null if the town has no plot. */
+	ACampaign1851ConstructionSite* StartProject(int32 CityIndex);
+	ACampaign1851ConstructionSite* FindProject(int32 CityIndex) const;
+	const TArray<TObjectPtr<ACampaign1851ConstructionSite>>& GetProjects() const { return Projects; }
+	/** World position of a town's building plot (on the terrain). */
+	FVector PlotWorld(int32 CityIndex) const;
+
 	/** Screen-size scaling for the city markers; called by the player controller each frame. */
 	void UpdateMarkers(float CameraDistanceKm);
 
@@ -142,9 +158,16 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<UStaticMeshComponent> Roads;
 
+	/** Ferry crossings (dashed over the water), shown with the main roads. */
+	UPROPERTY(Transient)
+	TObjectPtr<UStaticMeshComponent> Ferries;
+
 	/** Village lanes, generated with the scenery. */
 	UPROPERTY(Transient)
 	TObjectPtr<UStaticMeshComponent> Lanes;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<ACampaign1851ConstructionSite>> Projects;
 
 	/** One instanced component per Campaign1851Scenery::EPiece, created at BeginPlay. */
 	UPROPERTY(Transient)
@@ -164,6 +187,8 @@ private:
 	/** Map-local position of a projected-km point, on the terrain mesh surface. */
 	FVector LocalAtKm(const FVector2D& Km) const;
 	FVector2D UvFromKm(const FVector2D& Km) const;
+	/** Terrain height (units) under a world position. */
+	float TerrainWorldZ(const FVector& World) const;
 	/** Terrain height (units) exactly as the triangulated terrain mesh has it. */
 	float TerrainZ(const FVector2D& Uv) const;
 	bool IsMonarchyLand(const FVector2D& Km) const;
@@ -177,6 +202,7 @@ private:
 	TArray<FCampaign1851City> Cities;
 	TArray<FCampaign1851Label> Labels;
 	TArray<TArray<FVector2D>> RoadLines;   // projected km
+	TArray<TArray<FVector2D>> FerryLines;  // projected km, landing to landing
 
 	TArray<uint16> Height;
 	int32 HeightW = 0, HeightH = 0;

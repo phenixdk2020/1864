@@ -239,32 +239,193 @@ namespace Campaign1851Scenery
 	UStaticMesh* BuildRibbons(const TArray<TArray<FVector>>& Lines, float HalfWidth, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* MeshName)
 	{
 		FWriter Writer;
-		const FLinearColor Edge = Colour * 0.68f;
+		const FLinearColor Edge = Colour * 0.74f;
 		for (const TArray<FVector>& Line : Lines)
 		{
 			if (Line.Num() < 2)
 			{
 				continue;
 			}
-			TArray<FVector3f> L, C, R;
+			// Cross-section: dark verge, lighter crown, dark verge (three strips, one colour each).
+			TArray<FVector3f> L, LI, RI, R;
 			for (int32 i = 0; i < Line.Num(); ++i)
 			{
 				// Direction from the neighbours; the side vector is horizontal.
 				const FVector Dir = (Line[FMath::Min(i + 1, Line.Num() - 1)] - Line[FMath::Max(i - 1, 0)]).GetSafeNormal2D();
 				const FVector Side = FVector(-Dir.Y, Dir.X, 0.0) * HalfWidth;
-				C.Add(FVector3f(Line[i] + FVector(0.0, 0.0, 0.25)));
+				const FVector Crown = Line[i] + FVector(0.0, 0.0, 0.2);
 				L.Add(FVector3f(Line[i] - Side));
+				LI.Add(FVector3f(Crown - Side * 0.55));
+				RI.Add(FVector3f(Crown + Side * 0.55));
 				R.Add(FVector3f(Line[i] + Side));
 			}
 			for (int32 i = 0; i + 1 < Line.Num(); ++i)
 			{
-				const FVector3f Below = C[i] - FVector3f(0.f, 0.f, 50.f);
-				Writer.Tri(L[i], C[i], C[i + 1], Colour, Below);
-				Writer.Tri(L[i], C[i + 1], L[i + 1], Edge, Below);
-				Writer.Tri(C[i], R[i], R[i + 1], Colour, Below);
-				Writer.Tri(C[i], R[i + 1], C[i + 1], Edge, Below);
+				const FVector3f Below = LI[i] - FVector3f(0.f, 0.f, 50.f);
+				Writer.Quad(L[i], LI[i], LI[i + 1], L[i + 1], Edge, Below);
+				Writer.Quad(LI[i], RI[i], RI[i + 1], LI[i + 1], Colour, Below);
+				Writer.Quad(RI[i], R[i], R[i + 1], RI[i + 1], Edge, Below);
 			}
 		}
 		return Finish(Writer, Material, FString(MeshName));
+	}
+}
+
+namespace Campaign1851Scenery
+{
+	UStaticMesh* BuildSitePiece(ESitePiece Piece, UMaterialInterface* Material)
+	{
+		const FLinearColor Brick = Srgb(172, 82, 56);
+		const FLinearColor Stone = Srgb(158, 152, 140);
+		const FLinearColor RoofSlate = Srgb(74, 78, 88);
+		const FLinearColor Window = Srgb(38, 44, 54);
+		const FLinearColor Sand = Srgb(198, 178, 132);
+		const FLinearColor Dug = Srgb(128, 100, 70);
+		const FLinearColor Timber = Srgb(156, 116, 72);
+		const FLinearColor DarkTimber = Srgb(96, 70, 46);
+		const float HL = BarracksLength * 0.5f, HW = BarracksWidth * 0.5f;
+
+		FWriter W;
+		switch (Piece)
+		{
+		case ESitePiece::Ground:
+		{
+			const FVector3f Below(0.f, 0.f, -5.f);
+			auto Flat = [&](float X0, float Y0, float X1, float Y1, float Z, const FLinearColor& C)
+			{
+				W.Quad(FVector3f(X0, Y0, Z), FVector3f(X1, Y0, Z), FVector3f(X1, Y1, Z), FVector3f(X0, Y1, Z), C, Below);
+			};
+			Flat(-HL - 1.2f, -HW - 1.2f, HL + 1.2f, HW + 1.2f, 0.12f, Dug);       // dug footprint
+			Flat(-HL - 1.5f, HW + 1.2f, HL + 1.5f, 13.8f, 0.14f, Sand);           // parade ground
+			for (float X : { -HL - 1.f, 0.f, HL + 1.f })                         // corner and middle stakes
+			{
+				for (float Y : { -HW - 1.f, HW + 1.f })
+				{
+					W.Box(FVector3f(X - 0.15f, Y - 0.15f, 0.f), FVector3f(X + 0.15f, Y + 0.15f, 1.3f), DarkTimber);
+				}
+			}
+			break;
+		}
+		case ESitePiece::Barracks:
+		{
+			W.House(FVector2f(0.f, 0.f), BarracksLength, BarracksWidth, BarracksEave, 11.f, Brick, RoofSlate);
+			W.Box(FVector3f(-HL - 0.12f, -HW - 0.12f, 0.f), FVector3f(HL + 0.12f, HW + 0.12f, 0.6f), Stone);
+			// Windows: three storeys on both long facades, two per storey on the gable ends.
+			const FVector3f In(0.f, 0.f, 3.f);
+			for (int32 Storey = 0; Storey < 3; ++Storey)
+			{
+				const float Z0 = 1.3f + Storey * 2.1f, Z1 = Z0 + 1.15f;
+				for (int32 c = 0; c < 11; ++c)
+				{
+					const float X = -7.f + c * 1.4f;
+					if (Storey == 0 && c == 5)
+					{
+						continue;  // the door
+					}
+					for (float Side : { -1.f, 1.f })
+					{
+						const float Y = Side * (HW + 0.03f);
+						W.Quad(FVector3f(X - 0.3f, Y, Z0), FVector3f(X + 0.3f, Y, Z0), FVector3f(X + 0.3f, Y, Z1), FVector3f(X - 0.3f, Y, Z1), Window, In);
+					}
+				}
+				for (float End : { -1.f, 1.f })
+				{
+					const float X = End * (HL + 0.03f);
+					for (float Y : { -1.1f, 1.1f })
+					{
+						W.Quad(FVector3f(X, Y - 0.3f, Z0), FVector3f(X, Y + 0.3f, Z0), FVector3f(X, Y + 0.3f, Z1), FVector3f(X, Y - 0.3f, Z1), Window, In);
+					}
+				}
+			}
+			// Door with a stone surround, and the chimneys along the ridge.
+			W.Box(FVector3f(-0.9f, HW, 0.f), FVector3f(0.9f, HW + 0.35f, 3.1f), Stone);
+			W.Quad(FVector3f(-0.45f, HW + 0.37f, 0.6f), FVector3f(0.45f, HW + 0.37f, 0.6f), FVector3f(0.45f, HW + 0.37f, 2.5f), FVector3f(-0.45f, HW + 0.37f, 2.5f), Window, In);
+			for (float X : { -6.5f, -3.9f, -1.3f, 1.3f, 3.9f, 6.5f })
+			{
+				W.Box(FVector3f(X - 0.35f, -0.45f, 9.6f), FVector3f(X + 0.35f, 0.45f, BarracksTop), Brick);
+			}
+			break;
+		}
+		case ESitePiece::Scaffold:
+		{
+			const float SX = HL + 0.9f, SY = HW + 0.9f, Top = BarracksTop + 1.f;
+			auto Pole = [&](float X, float Y) { W.Box(FVector3f(X - 0.1f, Y - 0.1f, 0.f), FVector3f(X + 0.1f, Y + 0.1f, Top), Timber); };
+			for (float X = -SX; X <= SX + 0.01f; X += SX / 4.f)
+			{
+				Pole(X, -SY);
+				Pole(X, SY);
+			}
+			for (float Y : { -SY / 3.f, SY / 3.f })
+			{
+				Pole(-SX, Y);
+				Pole(SX, Y);
+			}
+			for (float Z = 2.1f; Z < Top; Z += 2.1f)
+			{
+				// Boards between the poles and the wall, with a ledger on the outside.
+				for (float Side : { -1.f, 1.f })
+				{
+					W.Box(FVector3f(-SX, Side > 0 ? HW + 0.05f : -SY, Z - 0.08f), FVector3f(SX, Side > 0 ? SY : -HW - 0.05f, Z), DarkTimber);
+					W.Box(FVector3f(-SX, Side * SY - 0.07f, Z + 0.9f), FVector3f(SX, Side * SY + 0.07f, Z + 1.02f), Timber);
+				}
+				for (float End : { -1.f, 1.f })
+				{
+					W.Box(FVector3f(End > 0 ? HL + 0.05f : -SX, -SY, Z - 0.08f), FVector3f(End > 0 ? SX : -HL - 0.05f, SY, Z), DarkTimber);
+				}
+			}
+			break;
+		}
+		case ESitePiece::CraneMast:
+			W.Box(FVector3f(-0.3f, -0.3f, 0.f), FVector3f(0.3f, 0.3f, 16.f), Timber);
+			W.Box(FVector3f(-1.4f, -1.4f, 0.f), FVector3f(1.4f, 1.4f, 0.5f), DarkTimber);
+			break;
+		case ESitePiece::CraneJib:
+			W.Box(FVector3f(-2.6f, -0.22f, 14.6f), FVector3f(11.f, 0.22f, 15.1f), Timber);
+			W.Box(FVector3f(-2.6f, -0.6f, 13.4f), FVector3f(-1.2f, 0.6f, 14.6f), Stone);     // counterweight
+			W.Box(FVector3f(9.7f, -0.05f, 9.5f), FVector3f(9.8f, 0.05f, 14.6f), DarkTimber); // rope
+			W.Box(FVector3f(9.3f, -0.4f, 8.8f), FVector3f(10.2f, 0.4f, 9.5f), Brick);       // hod of bricks
+			break;
+		case ESitePiece::Wagon:
+			W.DropShadow(3.2f, 1.6f, 0.6f);
+			W.Box(FVector3f(-2.f, -0.9f, 0.7f), FVector3f(1.2f, 0.9f, 1.5f), DarkTimber);
+			W.Box(FVector3f(-1.8f, -0.7f, 1.5f), FVector3f(1.f, 0.7f, 2.2f), Brick);
+			for (float X : { -1.4f, 0.7f })
+			{
+				for (float Y : { -1.f, 0.9f })
+				{
+					W.Box(FVector3f(X - 0.45f, Y, 0.f), FVector3f(X + 0.45f, Y + 0.12f, 0.9f), Srgb(60, 44, 30));
+				}
+			}
+			W.Box(FVector3f(1.9f, -0.35f, 1.f), FVector3f(3.6f, 0.35f, 1.9f), Srgb(104, 70, 44));     // horse
+			W.Box(FVector3f(3.4f, -0.22f, 1.7f), FVector3f(4.2f, 0.22f, 2.5f), Srgb(104, 70, 44));    // neck and head
+			for (float X : { 2.1f, 3.3f })
+			{
+				W.Box(FVector3f(X - 0.12f, -0.3f, 0.f), FVector3f(X + 0.12f, 0.3f, 1.f), Srgb(80, 54, 34));
+			}
+			break;
+		case ESitePiece::Flagpole:
+			W.Box(FVector3f(-0.1f, -0.1f, 0.f), FVector3f(0.1f, 0.1f, 12.6f), Srgb(236, 232, 222));
+			W.Box(FVector3f(-0.18f, -0.18f, 12.6f), FVector3f(0.18f, 0.18f, 12.95f), Srgb(214, 180, 96));
+			break;
+		case ESitePiece::Flag:
+		{
+			// Dannebrog 37:28 with the cross offset to the hoist; cells coloured red or white.
+			const float Xs[] = { 0.f, 1.2f, 1.6f, 3.7f };
+			const float Zs[] = { 0.f, 1.2f, 1.6f, 2.8f };
+			const FLinearColor Red = Srgb(200, 16, 46), White = Srgb(245, 245, 240);
+			for (int32 i = 0; i < 3; ++i)
+			{
+				for (int32 j = 0; j < 3; ++j)
+				{
+					const FLinearColor& C = (i == 1 || j == 1) ? White : Red;
+					W.Tri(FVector3f(Xs[i], 0.f, Zs[j]), FVector3f(Xs[i + 1], 0.f, Zs[j]), FVector3f(Xs[i + 1], 0.f, Zs[j + 1]), C, FVector3f(1.f, -1.f, 1.f), false);
+					W.Tri(FVector3f(Xs[i], 0.f, Zs[j]), FVector3f(Xs[i + 1], 0.f, Zs[j + 1]), FVector3f(Xs[i], 0.f, Zs[j + 1]), C, FVector3f(1.f, -1.f, 1.f), false);
+				}
+			}
+			break;
+		}
+		}
+		static const TCHAR* Names[] = { TEXT("Ground"), TEXT("Barracks"), TEXT("Scaffold"), TEXT("CraneMast"), TEXT("CraneJib"), TEXT("Wagon"), TEXT("Flagpole"), TEXT("Flag") };
+		return Finish(W, Material, FString::Printf(TEXT("SM_Campaign1851_Site_%s"), Names[int32(Piece)]));
 	}
 }

@@ -29,6 +29,11 @@ public:
 
 	/** City to show in the info panel; -1 hides it. */
 	void SetSelectedCity(int32 Index) { SelectedCity = Index; }
+	int32 GetSelectedCity() const { return SelectedCity; }
+
+	enum class EButton : uint8 { None, Build, ShowOnMap };
+	/** The panel button under a viewport pixel (as from APlayerController::GetMousePosition). */
+	EButton HitButton(const FVector2D& ViewportPixel) const;
 
 private:
 	struct FPlaced
@@ -47,6 +52,9 @@ private:
 	void PaintScaleBar(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintBornholm(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	/** Progress rings over towns with a building project. */
+	void PaintProjects(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	void PaintButton(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Text, EButton Action) const;
 	void PaintDot(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Centre, float Diameter, const FLinearColor& Colour) const;
 	FVector2D Measure(const FString& Text, const FSlateFontInfo& Font) const;
 
@@ -55,4 +63,9 @@ private:
 	int32 SelectedCity = INDEX_NONE;
 	TSharedPtr<FSlateBrush> BornholmBrush;
 	TSharedPtr<FSlateBrush> DotBrush;
+	TSharedPtr<FSlateBrush> BarracksBrush;
+
+	struct FButtonRect { FVector2D Min, Max; EButton Action; };
+	mutable TArray<FButtonRect> Buttons;   // local units, rebuilt every paint
+	mutable float PaintScale = 1.f;
 };
