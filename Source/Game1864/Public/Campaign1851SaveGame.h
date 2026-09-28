@@ -25,6 +25,10 @@ struct FCampaign1851ProjectSave
 	UPROPERTY() FString City;
 	UPROPERTY() TArray<float> ModuleDays;
 	UPROPERTY() int32 ActiveModule = INDEX_NONE;
+	/** "Garrison" (or empty in old saves) or a town building key; its plot and heading. */
+	UPROPERTY() FString Kind;
+	UPROPERTY() FVector2D PlotKm = FVector2D::ZeroVector;
+	UPROPERTY() float Yaw = 0.f;
 };
 
 /**
@@ -38,8 +42,8 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
-	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. */
-	static constexpr int32 CurrentVersion = 3;
+	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. */
+	static constexpr int32 CurrentVersion = 4;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;

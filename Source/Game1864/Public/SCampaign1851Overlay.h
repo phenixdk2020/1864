@@ -34,7 +34,7 @@ public:
 	void SetSelectedAmt(int32 Id) { SelectedAmt = Id; }
 	int32 GetSelectedAmt() const { return SelectedAmt; }
 
-	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury };
+	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury, BuildTown, ShowSite };
 	void ToggleLedger() { bLedgerOpen = !bLedgerOpen; }
 
 	/** A row of the game menu (save/load). */
@@ -73,6 +73,8 @@ private:
 	void PaintScaleBar(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintBornholm(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	/** The town's buildings beside the garrison card: built, under way, or what they cost and need. */
+	void PaintTownBuildings(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** The selected amt: region, seat, population, area, towns, taxes, men of military age, garrisons. */
 	void PaintAmtInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** Progress rings over towns with a building project. */
@@ -98,6 +100,7 @@ private:
 	TSharedPtr<FSlateBrush> BornholmBrush;
 	TSharedPtr<FSlateBrush> DotBrush;
 	TArray<TSharedPtr<FSlateBrush>> ModuleBrushes;   // card images per garrison module
+	TArray<TSharedPtr<FSlateBrush>> TownBrushes;     // card images per town building
 
 	struct FButtonRect { FVector2D Min, Max; EButton Action; int32 Module; };
 	mutable TArray<FButtonRect> Buttons;   // local units, rebuilt every paint

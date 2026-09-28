@@ -1,3 +1,3 @@
 PROJECT 1864 - Unreal kanal: CAMPAIGN (kampagnekort)
-Prototype version: UE-CAMPAIGN v00.00.24 AMTER OG SKATTER
+Prototype version: UE-CAMPAIGN v00.00.25 FLERE BYGNINGER
 Branch: channel-campaign

@@ -90,6 +90,20 @@ void ACampaign1851PlayerController::TryInit()
 	{
 		Map->SetCampaignDays((Parsed - ACampaign1851Map::StartDate()).GetTotalDays());
 	}
+	FString TownBuilds;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignBuildTown="), TownBuilds, false))
+	{
+		TArray<FString> Orders;
+		TownBuilds.ParseIntoArray(Orders, TEXT(";"));
+		for (const FString& Order : Orders)
+		{
+			FString Town, Key;
+			if (Order.Split(TEXT(":"), &Town, &Key))
+			{
+				BuildTownBuilding(Map->FindCity(Town), Key);
+			}
+		}
+	}
 	int32 StartAmt = 0;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignSelectAmt="), StartAmt) && Overlay.IsValid())
 	{
@@ -290,6 +304,14 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			Overlay->ToggleLedger();
 		}
+		else if (Button == SCampaign1851Overlay::EButton::BuildTown && ACampaign1851ConstructionSite::TownBuildings().IsValidIndex(Module))
+		{
+			BuildTownBuilding(Overlay->GetSelectedCity(), ACampaign1851ConstructionSite::TownBuildings()[Module].Key);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::ShowSite && ACampaign1851ConstructionSite::TownBuildings().IsValidIndex(Module))
+		{
+			FocusSite(Map->FindBuilding(Overlay->GetSelectedCity(), ACampaign1851ConstructionSite::TownBuildings()[Module].Key));
+		}
 		else if (Button == SCampaign1851Overlay::EButton::BuildModule)
 		{
 			if (Map->StartModule(Overlay->GetSelectedCity(), Module))
@@ -418,12 +440,15 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 		P.City = Cities[Site->GetCityIndex()].Name;
 		P.ModuleDays = Site->GetModuleDaysBuilt();
 		P.ActiveModule = Site->GetActiveModule();
+		P.Kind = Site->GetKind();
+		P.PlotKm = Site->PlotKm;
+		P.Yaw = float(Site->GetActorRotation().Yaw);
 		TArray<FString> Built;
-		for (int32 m = 0; m < ACampaign1851ConstructionSite::NumModules(); ++m)
+		for (int32 m = 0; m < Site->NumModules(); ++m)
 		{
 			if (Site->IsModuleStarted(m))
 			{
-				Built.Add(ACampaign1851ConstructionSite::ModuleName(m).ToLower() + (Site->IsModuleDone(m) ? TEXT("") : TEXT(" (under bygning)")));
+				Built.Add(Site->ModuleName(m).ToLower() + (Site->IsModuleDone(m) ? TEXT("") : TEXT(" (under bygning)")));
 			}
 		}
 		Parts.Add(FString::Printf(TEXT("%s: %s"), *P.City, *FString::Join(Built, TEXT(", "))));
@@ -471,7 +496,7 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	int32 Restored = 0;
 	for (const FCampaign1851ProjectSave& P : Save->Projects)
 	{
-		Restored += Map->RestoreProject(P.City, P.ModuleDays, P.ActiveModule) ? 1 : 0;
+		Restored += Map->RestoreProject(P.City, P.ModuleDays, P.ActiveModule, P.Kind, P.PlotKm, P.Yaw) ? 1 : 0;
 	}
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);
 	if (Overlay.IsValid())
@@ -527,4 +552,38 @@ void ACampaign1851PlayerController::OpenGameMenu()
 		Row.Info = Save ? FString::Printf(TEXT("%s  ·  %s"), *Save->SavedAt.ToString(TEXT("%d-%m-%Y %H:%M")), *Summary) : TEXT("Tom");
 	}
 	Overlay->OpenMenu(Rows);
+}
+
+void ACampaign1851PlayerController::FocusSite(const ACampaign1851ConstructionSite* Site)
+{
+	ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
+	if (!Site || !Camera)
+	{
+		return;
+	}
+	Camera->SetView(Site->GetActorLocation(), 6.5f, float(Site->GetActorRotation().Yaw) + 25.f);
+	Map->UpdateMarkers(Camera->GetDistanceKm());
+}
+
+void ACampaign1851PlayerController::BuildTownBuilding(int32 CityIndex, const FString& Key)
+{
+	if (!Map.IsValid() || CityIndex == INDEX_NONE)
+	{
+		return;
+	}
+	FString Why;
+	if (const ACampaign1851ConstructionSite* Site = Map->StartBuilding(CityIndex, Key, true, nullptr, 0.f, &Why))
+	{
+		if (Overlay.IsValid())
+		{
+			Overlay->SetSelectedCity(CityIndex);
+			Overlay->ShowToast(FString::Printf(TEXT("%s bestilt i %s"), *Site->ModuleName(0), *Map->GetCities()[CityIndex].Name));
+		}
+		FocusSite(Site);
+		SaveToSlot(TEXT("Autosave"), true);
+	}
+	else if (Overlay.IsValid())
+	{
+		Overlay->ShowToast(Why);
+	}
 }

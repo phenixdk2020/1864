@@ -601,7 +601,8 @@ void ACampaign1851Map::BuildScenery()
 		}
 		return Out;
 	};
-	TArray<FVector2D> RoadSamples;
+	TArray<FVector2D>& RoadSamples = RoadSampleKm;
+	RoadSamples.Reset();
 	for (const TArray<FVector2D>& Line : RoadLines)
 	{
 		for (const FVector2D& P : Resample(Line, 0.1))
@@ -1004,7 +1005,7 @@ ACampaign1851ConstructionSite* ACampaign1851Map::FindProject(int32 CityIndex) co
 {
 	for (ACampaign1851ConstructionSite* Site : Projects)
 	{
-		if (Site && Site->GetCityIndex() == CityIndex)
+		if (Site && Site->IsGarrison() && Site->GetCityIndex() == CityIndex)
 		{
 			return Site;
 		}
@@ -1012,29 +1013,41 @@ ACampaign1851ConstructionSite* ACampaign1851Map::FindProject(int32 CityIndex) co
 	return nullptr;
 }
 
-ACampaign1851ConstructionSite* ACampaign1851Map::StartProject(int32 CityIndex, bool bCharge)
+ACampaign1851ConstructionSite* ACampaign1851Map::FindBuilding(int32 CityIndex, const FString& Key) const
 {
-	if (ACampaign1851ConstructionSite* Existing = FindProject(CityIndex))
+	for (ACampaign1851ConstructionSite* Site : Projects)
 	{
-		return Existing;
+		if (Site && !Site->IsGarrison() && Site->GetCityIndex() == CityIndex && Site->GetKind() == Key)
+		{
+			return Site;
+		}
 	}
-	if (bCharge && !CanAffordStart(0))
-	{
-		return nullptr;
-	}
-	UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, ConstructionMaterialPath);
-	if (!Cities.IsValidIndex(CityIndex) || !Cities[CityIndex].bHasPlot || !Material)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|no barracks plot or construction material for city %d"), CityIndex);
-		return nullptr;
-	}
-	const FCampaign1851City& City = Cities[CityIndex];
-	// Sunk a little so the parade ground sits on the slope rather than floating over it.
-	const FTransform Xf(FRotator(0.f, City.PlotYaw, 0.f), PlotWorld(CityIndex) - FVector(0.0, 0.0, 0.6), FVector(PieceScale));
+	return nullptr;
+}
 
-	// The wagon runs from the town centre to the gate beside the parade ground, on the terrain.
+ACampaign1851ConstructionSite* ACampaign1851Map::SpawnSite(int32 CityIndex, const FVector2D& Km, float Yaw, const TArray<FCampaign1851SiteModule>& Modules, bool bGarrison, const FVector2D& GateLocal)
+{
+	UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, ConstructionMaterialPath);
+	if (!Material || !Cities.IsValidIndex(CityIndex))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|no construction material or town %d"), CityIndex);
+		return nullptr;
+	}
+	// Buildings stand on the lowest ground under the plot, so on a slope they sink into the hill
+	// instead of floating. Garrisons and earthworks (which spread wide on the exaggerated relief)
+	// keep the height at their centre.
+	FVector Base = GetActorTransform().TransformPosition(LocalAtKm(Km));
+	const float Reach = (bGarrison || !Modules[0].bScaffold) ? 0.f : Modules[0].PlotRadiusKm * 0.75f;
+	for (int32 a = 0; Reach > 0.f && a < 8; ++a)
+	{
+		const float A = a * UE_TWO_PI / 8.f;
+		Base.Z = FMath::Min(Base.Z, GetActorTransform().TransformPosition(LocalAtKm(Km + FVector2D(FMath::Cos(A), FMath::Sin(A)) * Reach)).Z);
+	}
+	const FTransform Xf(FRotator(0.f, Yaw, 0.f), Base - FVector(0.0, 0.0, 0.6), FVector(PieceScale));
+
+	// The wagon runs from the town centre to the site's gate, on the terrain.
 	TArray<FVector> Path;
-	const FVector From = City.World, To = Xf.TransformPosition(FVector(Campaign1851Scenery::BarracksLength * 0.5 + 2.5, 11.0, 0.0));
+	const FVector From = Cities[CityIndex].World, To = Xf.TransformPosition(FVector(GateLocal.X, GateLocal.Y, 0.0));
 	const int32 Steps = FMath::Max(2, FMath::CeilToInt(FVector::Dist2D(From, To) / 10.0));
 	for (int32 s = 0; s <= Steps; ++s)
 	{
@@ -1047,13 +1060,31 @@ ACampaign1851ConstructionSite* ACampaign1851Map::StartProject(int32 CityIndex, b
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	ACampaign1851ConstructionSite* Site = GetWorld()->SpawnActor<ACampaign1851ConstructionSite>(ACampaign1851ConstructionSite::StaticClass(), Xf, Params);
 	Site->SetActorScale3D(FVector(PieceScale));
-	Site->Setup(CityIndex, Path, Material);
+	Site->Setup(CityIndex, Path, Material, Modules, bGarrison);
+	Site->PlotKm = Km;
+	Site->PlotRadiusKm = Modules[0].PlotRadiusKm;
 	Site->SetActorHiddenInGame(!bSceneryVisible);
 	Projects.Add(Site);
-	if (bCharge)
+	return Site;
+}
+
+ACampaign1851ConstructionSite* ACampaign1851Map::StartProject(int32 CityIndex, bool bCharge)
+{
+	if (ACampaign1851ConstructionSite* Existing = FindProject(CityIndex))
 	{
-		AddTransaction(-ACampaign1851ConstructionSite::ModuleCost(0) * Campaign1851Buildings::DownPayment,
-			FString::Printf(TEXT("Materialer bestilt: %s, infanterikaserne"), *City.Name));
+		return Existing;
+	}
+	const TArray<FCampaign1851SiteModule>& Garrison = ACampaign1851ConstructionSite::GarrisonModules();
+	if (!Cities.IsValidIndex(CityIndex) || !Cities[CityIndex].bHasPlot || (bCharge && !CanAfford(Garrison[0].Cost())))
+	{
+		return nullptr;
+	}
+	const FCampaign1851City& City = Cities[CityIndex];
+	ACampaign1851ConstructionSite* Site = SpawnSite(CityIndex, City.PlotKm, City.PlotYaw, Garrison, true,
+		FVector2D(Campaign1851Scenery::BarracksLength * 0.5 + 2.5, 11.0));
+	if (Site && bCharge)
+	{
+		AddTransaction(-Garrison[0].Cost() * Campaign1851Buildings::DownPayment, FString::Printf(TEXT("Materialer bestilt: %s, infanterikaserne"), *City.Name));
 	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|barracks started"), *City.Name);
 	return Site;
@@ -1062,15 +1093,270 @@ ACampaign1851ConstructionSite* ACampaign1851Map::StartProject(int32 CityIndex, b
 bool ACampaign1851Map::StartModule(int32 CityIndex, int32 Module)
 {
 	ACampaign1851ConstructionSite* Site = FindProject(CityIndex);
-	if (!Site || !Site->CanStartModule(Module) || !CanAffordStart(Module))
+	if (!Site || !Site->CanStartModule(Module) || !CanAfford(Site->ModuleCost(Module)))
 	{
 		return false;
 	}
 	Site->StartModule(Module);
-	AddTransaction(-ACampaign1851ConstructionSite::ModuleCost(Module) * Campaign1851Buildings::DownPayment,
-		FString::Printf(TEXT("Materialer bestilt: %s, %s"), *Cities[CityIndex].Name, *ACampaign1851ConstructionSite::ModuleName(Module).ToLower()));
-	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|%s started"), *Cities[CityIndex].Name, *ACampaign1851ConstructionSite::ModuleName(Module));
+	AddTransaction(-Site->ModuleCost(Module) * Campaign1851Buildings::DownPayment,
+		FString::Printf(TEXT("Materialer bestilt: %s, %s"), *Cities[CityIndex].Name, *Site->ModuleName(Module).ToLower()));
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|%s started"), *Cities[CityIndex].Name, *Site->ModuleName(Module));
 	return true;
+}
+
+// ------------------------------------------------------------------ town buildings
+
+namespace
+{
+	/** Forts go only where the war was fought over them (1848-50, 1864). */
+	struct FStrategicPoint { const TCHAR* Town; double Lat, Lon; };
+	const FStrategicPoint StrategicPoints[] = {
+		{ TEXT("Slesvig"), 54.48, 9.52 },       // Dannevirke
+		{ TEXT("Sønderborg"), 54.905, 9.735 },  // Dybbøl
+		{ TEXT("Fredericia"), 55.568, 9.735 },  // Fredericia's ramparts
+	};
+
+	const FStrategicPoint* StrategicPointFor(const FString& Town)
+	{
+		for (const FStrategicPoint& P : StrategicPoints)
+		{
+			if (Town == P.Town)
+			{
+				return &P;
+			}
+		}
+		return nullptr;
+	}
+
+	/** Local +Y (the building's front) pointing along a direction in projected km (world Y is south). */
+	float YawFacing(const FVector2D& Dir) { return FMath::RadiansToDegrees(FMath::Atan2(-Dir.X, -Dir.Y)); }
+}
+
+bool ACampaign1851Map::IsSea(const FVector2D& Km) const
+{
+	return !IsMonarchyLand(Km) && SampleHeight01(UvFromKm(Km)) < 0.002f;
+}
+
+bool ACampaign1851Map::IsCoastalTown(int32 CityIndex) const
+{
+	if (const bool* Known = CoastalTowns.Find(CityIndex))
+	{
+		return *Known;
+	}
+	const FCampaign1851City& City = Cities[CityIndex];
+	const FVector2D Centre = Extent.Projection.Forward(City.Lat, City.Lon);
+	const float R = TownRadiusKm(City.Population);
+	bool bCoast = false;
+	for (float D = 0.3f; D <= R + 2.5f && !bCoast; D += 0.25f)
+	{
+		for (int32 a = 0; a < 24 && !bCoast; ++a)
+		{
+			const float A = a * UE_TWO_PI / 24.f;
+			bCoast = IsSea(Centre + FVector2D(FMath::Cos(A), FMath::Sin(A)) * D);
+		}
+	}
+	CoastalTowns.Add(CityIndex, bCoast);
+	return bCoast;
+}
+
+FString ACampaign1851Map::BuildingBlockReason(int32 CityIndex, const FString& Key) const
+{
+	const FCampaign1851SiteModule* Def = ACampaign1851ConstructionSite::FindTownBuilding(Key);
+	if (!Def || !Cities.IsValidIndex(CityIndex) || Cities[CityIndex].bForeign || Cities[CityIndex].bBornholm)
+	{
+		return TEXT("-");
+	}
+	const FCampaign1851City& City = Cities[CityIndex];
+	if (Def->Rule == ECampaign1851PlotRule::Strategic && !StrategicPointFor(City.Name))
+	{
+		return TEXT("-");
+	}
+	if (FindBuilding(CityIndex, Key))
+	{
+		return FString();
+	}
+	if (City.Population < Def->MinPopulation)
+	{
+		return FString::Printf(TEXT("kræver over %d.%03d indb."), Def->MinPopulation / 1000, Def->MinPopulation % 1000);
+	}
+	if (Def->bNeedsCoast && !IsCoastalTown(CityIndex))
+	{
+		return TEXT("kræver kyst og havn");
+	}
+	if (Def->FromYear > 0 && GetDate().GetYear() < Def->FromYear)
+	{
+		return FString::Printf(TEXT("kan bygges fra %d"), Def->FromYear);
+	}
+	return FString();
+}
+
+bool ACampaign1851Map::PlotFits(const FVector2D& Km, float RadiusKm) const
+{
+	if (!IsMonarchyLand(Km))
+	{
+		return false;
+	}
+	for (float X : { -0.8f, 0.8f })
+	{
+		for (float Y : { -0.8f, 0.8f })
+		{
+			if (!IsMonarchyLand(Km + FVector2D(X, Y) * RadiusKm))
+			{
+				return false;
+			}
+		}
+	}
+	for (const FVector2D& P : RoadSampleKm)
+	{
+		if (FVector2D::DistSquared(P, Km) < FMath::Square(RadiusKm * 0.8f + 0.05f))
+		{
+			return false;
+		}
+	}
+	for (const FCampaign1851City& C : Cities)
+	{
+		if (C.bHasPlot && FVector2D::DistSquared(C.PlotKm, Km) < FMath::Square(RadiusKm + 0.45f))
+		{
+			return false;
+		}
+	}
+	for (const ACampaign1851ConstructionSite* Site : Projects)
+	{
+		if (Site && !Site->IsGarrison() && FVector2D::DistSquared(Site->PlotKm, Km) < FMath::Square(RadiusKm + Site->PlotRadiusKm))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool ACampaign1851Map::FindBuildingPlot(int32 CityIndex, const FCampaign1851SiteModule& Def, FVector2D& OutKm, float& OutYaw) const
+{
+	const FCampaign1851City& City = Cities[CityIndex];
+	const FVector2D Centre = Extent.Projection.Forward(City.Lat, City.Lon);
+	const float R = TownRadiusKm(City.Population);
+	if (Def.Rule == ECampaign1851PlotRule::Strategic)
+	{
+		const FStrategicPoint* Point = StrategicPointFor(City.Name);
+		OutKm = Point ? Extent.Projection.Forward(Point->Lat, Point->Lon) : Centre;
+		OutYaw = 0.f;   // the front faces south, where the enemy came from
+		return Point != nullptr;
+	}
+	float MinD = R + 0.2f, MaxD = R + 1.2f;
+	switch (Def.Rule)
+	{
+	case ECampaign1851PlotRule::InTown:  MinD = 0.25f * R; MaxD = 0.85f * R; break;
+	case ECampaign1851PlotRule::Outside: MinD = R + 1.2f; MaxD = R + 3.f; break;
+	case ECampaign1851PlotRule::Shore:   MinD = 0.2f * R; MaxD = R + 3.f; break;
+	default: break;
+	}
+	// Nearest fitting plot, searched ring by ring; the start angle varies by town.
+	const float Offset = float(CityIndex) * 0.61f;
+	for (float D = MinD; D <= MaxD; D += 0.1f)
+	{
+		for (int32 a = 0; a < 36; ++a)
+		{
+			const float A = Offset + a * UE_TWO_PI / 36.f;
+			const FVector2D Dir(FMath::Cos(A), FMath::Sin(A));
+			const FVector2D P = Centre + Dir * D;
+			if (!PlotFits(P, Def.PlotRadiusKm))
+			{
+				continue;
+			}
+			if (Def.Rule == ECampaign1851PlotRule::Shore)
+			{
+				if (!IsSea(P + Dir * (Def.PlotRadiusKm + 0.25f)))
+				{
+					continue;
+				}
+				OutYaw = YawFacing(Dir);    // facing the water
+			}
+			else
+			{
+				OutYaw = YawFacing(-Dir);   // facing the town
+			}
+			OutKm = P;
+			return true;
+		}
+	}
+	return false;
+}
+
+void ACampaign1851Map::ClearScenery(const FVector2D& Km, float RadiusKm)
+{
+	const FVector Centre = LocalAtKm(Km);
+	const double Radius2 = FMath::Square(RadiusKm * KmToUnits * 1.1);
+	for (UHierarchicalInstancedStaticMeshComponent* Part : Scenery)
+	{
+		TArray<int32> Remove;
+		for (int32 i = 0; i < Part->GetInstanceCount(); ++i)
+		{
+			FTransform T;
+			if (Part->GetInstanceTransform(i, T, false) && FVector::DistSquared2D(T.GetLocation(), Centre) < Radius2)
+			{
+				Remove.Add(i);
+			}
+		}
+		if (Remove.Num() > 0)
+		{
+			Part->RemoveInstances(Remove);
+		}
+	}
+}
+
+ACampaign1851ConstructionSite* ACampaign1851Map::StartBuilding(int32 CityIndex, const FString& Key, bool bCharge, const FVector2D* ForcedKm, float ForcedYaw, FString* OutReason)
+{
+	auto Fail = [OutReason](const FString& Why) -> ACampaign1851ConstructionSite*
+	{
+		if (OutReason)
+		{
+			*OutReason = Why;
+		}
+		return nullptr;
+	};
+	const FCampaign1851SiteModule* Def = ACampaign1851ConstructionSite::FindTownBuilding(Key);
+	if (!Def || !Cities.IsValidIndex(CityIndex))
+	{
+		return Fail(TEXT("Ukendt bygning"));
+	}
+	if (ACampaign1851ConstructionSite* Existing = FindBuilding(CityIndex, Key))
+	{
+		return Existing;
+	}
+	if (bCharge)
+	{
+		const FString Why = BuildingBlockReason(CityIndex, Key);
+		if (!Why.IsEmpty())
+		{
+			return Fail(Why == TEXT("-") ? FString(TEXT("Kan ikke bygges her")) : Why);
+		}
+		if (!CanAfford(Def->Cost()))
+		{
+			return Fail(TEXT("Ikke råd til materialerne endnu"));
+		}
+	}
+	FVector2D Km;
+	float Yaw = ForcedYaw;
+	if (ForcedKm)
+	{
+		Km = *ForcedKm;
+	}
+	else if (!FindBuildingPlot(CityIndex, *Def, Km, Yaw))
+	{
+		return Fail(TEXT("Ingen ledig byggegrund"));
+	}
+	ClearScenery(Km, Def->PlotRadiusKm);
+	ACampaign1851ConstructionSite* Site = SpawnSite(CityIndex, Km, Yaw, { *Def }, false, FVector2D(Def->Length * 0.5 + 2.5, Def->Width * 0.5 + 2.5));
+	if (!Site)
+	{
+		return Fail(TEXT("Byggepladsen kunne ikke oprettes"));
+	}
+	if (bCharge)
+	{
+		AddTransaction(-Def->Cost() * Campaign1851Buildings::DownPayment, FString::Printf(TEXT("Materialer bestilt: %s, %s"), *Cities[CityIndex].Name, *Def->Name.ToLower()));
+	}
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|%s started at %.1f,%.1f km"), *Cities[CityIndex].Name, *Def->Name, Km.X, Km.Y);
+	return Site;
 }
 
 int32 ACampaign1851Map::FindCity(const FString& Name) const
@@ -1090,13 +1376,17 @@ void ACampaign1851Map::ClearProjects()
 	Projects.Reset();
 }
 
-bool ACampaign1851Map::RestoreProject(const FString& CityName, const TArray<float>& ModuleDays, int32 ActiveModule)
+bool ACampaign1851Map::RestoreProject(const FString& CityName, const TArray<float>& ModuleDays, int32 ActiveModule, const FString& Kind, const FVector2D& PlotKm, float Yaw)
 {
 	const int32 CityIndex = FindCity(CityName);
-	ACampaign1851ConstructionSite* Site = CityIndex != INDEX_NONE ? StartProject(CityIndex, false) : nullptr;
+	ACampaign1851ConstructionSite* Site = nullptr;
+	if (CityIndex != INDEX_NONE)
+	{
+		Site = (Kind.IsEmpty() || Kind == TEXT("Garrison")) ? StartProject(CityIndex, false) : StartBuilding(CityIndex, Kind, false, &PlotKm, Yaw);
+	}
 	if (!Site)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|save|cannot restore the project in '%s'"), *CityName);
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|save|cannot restore '%s' in '%s'"), *Kind, *CityName);
 		return false;
 	}
 	Site->RestoreState(ModuleDays, ActiveModule);
@@ -1159,8 +1449,8 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 		const int32 Module = Site->GetActiveModule();
 		if (Module != INDEX_NONE && DeltaDays > 0.f)
 		{
-			Work = DeltaDays * Campaign1851Buildings::WorkRate(ACampaign1851ConstructionSite::ModuleType(Module), GetDate());
-			const double PerDay = ACampaign1851ConstructionSite::ModuleCostPerDay(Module);
+			Work = DeltaDays * Campaign1851Buildings::WorkRate(Site->ModuleType(Module), GetDate());
+			const double PerDay = Site->ModuleCostPerDay(Module);
 			const bool bShort = Work * PerDay > Treasury;
 			if (bShort)
 			{
@@ -1170,7 +1460,7 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 			const double Spend = Work * PerDay;
 			Treasury -= Spend;
 			MonthSpend.FindOrAdd(FString::Printf(TEXT("Byggeri: %s, %s"), *Cities[Site->GetCityIndex()].Name,
-				*ACampaign1851ConstructionSite::ModuleName(Module).ToLower())) += Spend;
+				*Site->ModuleName(Module).ToLower())) += Spend;
 		}
 		Site->Advance(Work, Speed > 0 ? DeltaSeconds : 0.f);
 	}
@@ -1182,7 +1472,7 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 	static const bool bAutoBuild = FParse::Param(FCommandLine::Get(), TEXT("CampaignAutoBuild"));
 	for (int32 i = 0; bAutoBuild && i < Projects.Num(); ++i)
 	{
-		for (int32 m = 1; Projects[i] && Projects[i]->GetActiveModule() == INDEX_NONE && m < ACampaign1851ConstructionSite::NumModules(); ++m)
+		for (int32 m = 1; Projects[i] && Projects[i]->IsGarrison() && Projects[i]->GetActiveModule() == INDEX_NONE && m < Projects[i]->NumModules(); ++m)
 		{
 			if (Projects[i]->CanStartModule(m) && StartModule(Projects[i]->GetCityIndex(), m))
 			{
@@ -1251,9 +1541,9 @@ void ACampaign1851Map::RestoreEconomy(double InTreasury, const TArray<FCampaign1
 	MonthSpend.Reset();
 }
 
-bool ACampaign1851Map::CanAffordStart(int32 Module) const
+bool ACampaign1851Map::CanAfford(int32 CostRd) const
 {
-	return Treasury >= ACampaign1851ConstructionSite::ModuleCost(Module) * Campaign1851Buildings::DownPayment;
+	return Treasury >= CostRd * Campaign1851Buildings::DownPayment;
 }
 
 void ACampaign1851Map::CloseMonth()

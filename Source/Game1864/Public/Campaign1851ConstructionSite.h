@@ -2,24 +2,67 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Campaign1851Scenery.h"
 #include "Campaign1851ConstructionSite.generated.h"
 
 class UMaterialInstanceDynamic;
 class UMaterialInterface;
 class UStaticMeshComponent;
 
+/** Where a town building goes (ACampaign1851Map::FindBuildingPlot). */
+enum class ECampaign1851PlotRule : uint8
+{
+	Garrison,    // the garrison plot reserved when the map is built
+	InTown,      // inside the town (houses on the plot are cleared)
+	Edge,        // at the edge of town
+	Outside,     // in the country, 1-3 km out
+	Shore,       // on the shore, facing the sea
+	Strategic    // a fixed strategic point (a fort)
+};
+
 /**
- * A garrison complex on the campaign map, grown as a live building site (design manual 20.16.6
- * project model, and the modular barracks idea in 20.16.5): the infantry barracks first, then
- * modules around the parade ground (stables, depot, infirmary), one project at a time.
+ * One building of a site, in piece units (the site is scaled by the map's scenery scale). Price,
+ * days, upkeep and construction type come from Buildings1851.csv under Key.
+ */
+struct FCampaign1851SiteModule
+{
+	FString Key;
+	FString Name;
+	Campaign1851Scenery::ESitePiece Piece = Campaign1851Scenery::ESitePiece::Barracks;
+	FVector2D Slot = FVector2D::ZeroVector;
+	float Yaw = 0.f;
+	float Length = 10.f, Width = 5.f, Eave = 5.f, Top = 8.f;
+	FString Card;               // asset path of the card image for the town panel
+	bool bScaffold = true;      // earthworks rise without scaffold or crane
+	bool bCrane = true;
+	bool bFlag = false;         // Dannebrog at FlagPos when finished
+	FVector2D FlagPos = FVector2D::ZeroVector;
+	// Town buildings only: where and when they may be built.
+	ECampaign1851PlotRule Rule = ECampaign1851PlotRule::Garrison;
+	float PlotRadiusKm = 0.2f;
+	int32 MinPopulation = 0;
+	bool bNeedsCoast = false;
+	int32 FromYear = 0;
+
+	int32 Cost() const;
+	float Days() const;
+	int32 Upkeep() const;
+	FString Type() const;
+	/** Money per full working day once the down payment is made. */
+	double CostPerDay() const;
+};
+
+/**
+ * A building project on the campaign map, shown as a live building site (design manual 20.16.6
+ * project model, and the modular barracks idea in 20.16.5). Either a garrison complex (the infantry
+ * barracks first, then stables, depot and infirmary around the parade ground, one at a time) or a
+ * single town building (arsenal, lazaret, coastal battery, ...).
  *
  * Each module goes through the same stages: staking out, foundation (scaffold goes up), walls
  * rising, roof, fitting out (scaffold comes down). The building "grows" through
  * M_Campaign1851Construction, which clips everything above BuildTop. A wagon shuttles materials
  * between the town and the site and a timber crane swings while walls and roofs go up; Dannebrog
- * is hoisted when the barracks is finished.
- *
- * The actor is scaled by the map's scenery scale, so its components are modelled in piece units.
+ * is hoisted over a finished barracks, battery or fort.
  */
 UCLASS()
 class GAME1864_API ACampaign1851ConstructionSite : public AActor
@@ -29,29 +72,33 @@ class GAME1864_API ACampaign1851ConstructionSite : public AActor
 public:
 	ACampaign1851ConstructionSite();
 
+	/** The garrison complex: barracks (module 0), stables, depot, infirmary. */
+	static const TArray<FCampaign1851SiteModule>& GarrisonModules();
+	/** Buildings a town can raise on their own plots. */
+	static const TArray<FCampaign1851SiteModule>& TownBuildings();
+	static const FCampaign1851SiteModule* FindTownBuilding(const FString& Key);
+
+	/** Places the site and starts module 0. WagonPath runs from the town centre to the gate (world space). */
+	void Setup(int32 InCityIndex, const TArray<FVector>& InWagonPath, UMaterialInterface* Material, const TArray<FCampaign1851SiteModule>& InModules, bool bInGarrison);
+
 	/**
 	 * Driven by the campaign calendar (ACampaign1851Map::AdvanceTime): DeltaDays of work, and
 	 * DeltaSeconds for the animations (0 while the game is paused, so the site freezes too).
 	 */
 	void Advance(float DeltaDays, float DeltaSeconds);
 
-	/** Module 0 is the barracks; the others need it finished. */
-	static int32 NumModules();
-	static FString ModuleName(int32 Module);
-	/** Asset path of the module's card image for the town panel. */
-	static const TCHAR* ModuleCard(int32 Module);
-	static float ModuleDays(int32 Module);
-	/** Price, upkeep and construction type from Buildings1851.csv (Campaign1851Buildings). */
-	static int32 ModuleCost(int32 Module);
-	static int32 ModuleUpkeep(int32 Module);
-	static FString ModuleType(int32 Module);
-	/** Money per full working day once the down payment is made. */
-	static double ModuleCostPerDay(int32 Module);
+	bool IsGarrison() const { return bGarrison; }
+	/** "Garrison" or the town building's key. */
+	FString GetKind() const { return bGarrison ? FString(TEXT("Garrison")) : Modules[0].Key; }
+	int32 NumModules() const { return Modules.Num(); }
+	const FCampaign1851SiteModule& GetModule(int32 Module) const { return Modules[FMath::Clamp(Module, 0, Modules.Num() - 1)]; }
+	FString ModuleName(int32 Module) const { return GetModule(Module).Name; }
+	float ModuleDays(int32 Module) const { return GetModule(Module).Days(); }
+	int32 ModuleCost(int32 Module) const { return GetModule(Module).Cost(); }
+	FString ModuleType(int32 Module) const { return GetModule(Module).Type(); }
+	double ModuleCostPerDay(int32 Module) const { return GetModule(Module).CostPerDay(); }
 
-	/** Places the site and starts the barracks. WagonPath runs from the town centre to the gate (world space). */
-	void Setup(int32 InCityIndex, const TArray<FVector>& InWagonPath, UMaterialInterface* Material);
-
-	/** True when the barracks is finished, nothing else is being built and the module is not built yet. */
+	/** Garrison only: true when the barracks is finished, nothing else is being built and the module is not built yet. */
 	bool CanStartModule(int32 Module) const;
 	void StartModule(int32 Module);
 
@@ -65,6 +112,7 @@ public:
 	/** Danish stage name for the UI. */
 	FString GetStageName(int32 Module) const;
 
+	/** Garrison: barracks finished. Town building: the building finished. */
 	bool IsBarracksDone() const { return IsModuleDone(0); }
 
 	/** Days built per module (-1 = not started), for saving. */
@@ -77,6 +125,10 @@ public:
 	bool IsStalled() const { return bStalled; }
 	/** Upkeep per year of the finished modules. */
 	int32 GetYearlyUpkeep() const;
+
+	/** Plot centre (projected km) and radius, for saving and for keeping plots apart. */
+	FVector2D PlotKm = FVector2D::ZeroVector;
+	float PlotRadiusKm = 0.2f;
 
 protected:
 	UPROPERTY(VisibleAnywhere) TObjectPtr<USceneComponent> Root;
@@ -99,6 +151,9 @@ private:
 	/** Clip height in piece units above the site origin -> world Z for the material. */
 	void SetClip(UMaterialInstanceDynamic* Mid, float PieceHeight) const;
 
+	TArray<FCampaign1851SiteModule> Modules;
+	bool bGarrison = true;
+	FVector FlagSpot = FVector::ZeroVector;
 	int32 CityIndex = INDEX_NONE;
 	TArray<float> Elapsed;   // days per module; -1 = not started
 	int32 Active = INDEX_NONE;

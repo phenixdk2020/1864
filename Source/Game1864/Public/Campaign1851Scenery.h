@@ -50,7 +50,15 @@ namespace Campaign1851Scenery
 		Flag,       // Dannebrog, hoist at the origin, flying towards +X
 		Stables,    // low brick stable range, slate roof, a row of stall doors (12 x 4.4)
 		Depot,      // tall red-brick magazine with tiled gables, hoist door and cart doors (7 x 5.6)
-		Infirmary   // two-storey brick infirmary with a slate roof and a porch (9 x 4.6)
+		Infirmary,  // two-storey brick infirmary with a slate roof and a porch (9 x 4.6)
+		// Town buildings (a single building on its own plot):
+		Arsenal,         // U-shaped brick arsenal around a yard open to +Y (18 x 13)
+		Lazaret,         // two-storey yellow-plastered military hospital (12 x 5.2)
+		Battery,         // coastal battery: earth rampart facing +Y with four guns (16 x 6)
+		PowderMagazine,  // turf-covered brick vault inside a wall, lightning rod (10 x 9)
+		StarFort,        // five-pointed earthwork star fort with a blockhouse (34 x 34)
+		Telegraph,       // station house with a telegraph mast (9 x 4)
+		Granary          // tall yellow-brick grain store with hoist gables (13 x 5.4)
 	};
 
 	constexpr float BarracksLength = 16.f;
@@ -59,6 +67,9 @@ namespace Campaign1851Scenery
 	constexpr float BarracksTop = 12.3f;   // chimney tops
 
 	UStaticMesh* BuildSitePiece(ESitePiece Piece, UMaterialInterface* Material);
+
+	/** A staked-out plot: dug footprint around a Length x Width building and corner stakes. */
+	UStaticMesh* BuildPlotGround(float Length, float Width, UMaterialInterface* Material);
 
 	/** Timber scaffold (poles, boards, ledgers) around a Length x Width building, up to Top. */
 	UStaticMesh* BuildScaffold(float Length, float Width, float Top, UMaterialInterface* Material);

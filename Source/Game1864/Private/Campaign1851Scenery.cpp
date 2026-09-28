@@ -219,7 +219,9 @@ namespace Campaign1851Scenery
 
 	static UStaticMesh* Finish(FWriter& Writer, UMaterialInterface* Material, const FString& MeshName)
 	{
-		UStaticMesh* Mesh = NewObject<UStaticMesh>(GetTransientPackage(), *MeshName, RF_Transient);
+		// Unique names: several sites build the same pieces, and reusing a name would re-create a mesh
+		// that is already on screen (the renderer's ray tracing geometry asserts on that).
+		UStaticMesh* Mesh = NewObject<UStaticMesh>(GetTransientPackage(), MakeUniqueObjectName(GetTransientPackage(), UStaticMesh::StaticClass(), FName(*MeshName)), RF_Transient);
 		Mesh->GetStaticMaterials().Add(FStaticMaterial(Material, TEXT("Scenery")));
 		UStaticMesh::FBuildMeshDescriptionsParams Params;
 		Params.bFastBuild = true;
@@ -496,9 +498,176 @@ namespace Campaign1851Scenery
 			}
 			break;
 		}
+		case ESitePiece::Arsenal:
+		{
+			W.House(FVector2f(0.f, -3.f), 18.f, 6.5f, 6.f, 10.f, Brick, RoofSlate);
+			W.House(FVector2f(-7.2f, 4.f), 8.f, 4.4f, 4.6f, 7.6f, Brick, RoofSlate, true);
+			W.House(FVector2f(7.2f, 4.f), 8.f, 4.4f, 4.6f, 7.6f, Brick, RoofSlate, true);
+			W.Box(FVector3f(-9.1f, -6.35f, 0.f), FVector3f(9.1f, 0.35f, 0.55f), Stone);
+			const FVector3f In(0.f, -3.f, 3.f);
+			for (int32 Storey = 0; Storey < 2; ++Storey)
+			{
+				const float Z0 = 1.2f + Storey * 2.4f, Z1 = Z0 + 1.2f;
+				for (int32 c = 0; c < 11; ++c)
+				{
+					const float X = -7.5f + c * 1.5f, Y = 0.28f;
+					if (Storey == 0 && c == 5)
+					{
+						W.Quad(FVector3f(-0.9f, Y, 0.55f), FVector3f(0.9f, Y, 0.55f), FVector3f(0.9f, Y, 3.4f), FVector3f(-0.9f, Y, 3.4f), Srgb(58, 70, 60), In);   // gate
+						continue;
+					}
+					W.Quad(FVector3f(X - 0.32f, Y, Z0), FVector3f(X + 0.32f, Y, Z0), FVector3f(X + 0.32f, Y, Z1), FVector3f(X - 0.32f, Y, Z1), Window, In);
+				}
+			}
+			for (float X : { -5.f, 0.f, 5.f })
+			{
+				W.Box(FVector3f(X - 0.35f, -3.4f, 8.8f), FVector3f(X + 0.35f, -2.6f, 10.6f), Brick);
+			}
+			break;
+		}
+		case ESitePiece::Lazaret:
+		{
+			const FLinearColor Plastered = Srgb(222, 200, 150);
+			W.House(FVector2f(0.f, 0.f), 12.f, 5.2f, 5.6f, 9.2f, Plastered, Srgb(168, 70, 46));
+			W.Box(FVector3f(-6.1f, -2.7f, 0.f), FVector3f(6.1f, 2.7f, 0.5f), Stone);
+			const FVector3f In(0.f, 0.f, 2.f);
+			for (int32 Storey = 0; Storey < 2; ++Storey)
+			{
+				const float Z0 = 1.1f + Storey * 2.3f, Z1 = Z0 + 1.25f;
+				for (int32 c = 0; c < 8; ++c)
+				{
+					const float X = -4.9f + c * 1.4f;
+					for (float Side : { -1.f, 1.f })
+					{
+						const float Y = Side * 2.63f;
+						W.Quad(FVector3f(X - 0.3f, Y, Z0), FVector3f(X + 0.3f, Y, Z0), FVector3f(X + 0.3f, Y, Z1), FVector3f(X - 0.3f, Y, Z1), Window, In);
+					}
+				}
+			}
+			W.House(FVector2f(0.f, 2.8f), 3.2f, 1.6f, 5.6f, 7.6f, Plastered, Srgb(168, 70, 46), true);   // central gable bay
+			for (float X : { -3.8f, 3.8f })
+			{
+				W.Box(FVector3f(X - 0.3f, -0.4f, 8.f), FVector3f(X + 0.3f, 0.4f, 9.8f), Brick);
+			}
+			break;
+		}
+		case ESitePiece::Battery:
+		{
+			const FLinearColor Turf = Srgb(96, 116, 60), TurfTop = Srgb(110, 128, 66), Gravel = Srgb(170, 156, 124), Iron = Srgb(44, 46, 50);
+			const FVector3f Below(0.f, 0.f, -3.f);
+			const float Half = 8.f;
+			// Profile across the rampart (y, z): back foot, back crest, front crest, front foot (the sea side is +Y).
+			const FVector2f Prof[] = { { -3.f, 0.f }, { -1.4f, 2.2f }, { 1.2f, 2.2f }, { 3.2f, 0.f } };
+			for (int32 i = 0; i < 3; ++i)
+			{
+				const FLinearColor& C = i == 1 ? TurfTop : Turf;
+				W.Quad(FVector3f(-Half, Prof[i].X, Prof[i].Y), FVector3f(Half, Prof[i].X, Prof[i].Y), FVector3f(Half, Prof[i + 1].X, Prof[i + 1].Y), FVector3f(-Half, Prof[i + 1].X, Prof[i + 1].Y), C, Below);
+			}
+			for (float End : { -1.f, 1.f })   // rampart ends
+			{
+				const float X = End * Half;
+				W.Quad(FVector3f(X, -3.f, 0.f), FVector3f(X, -1.4f, 2.2f), FVector3f(X, 1.2f, 2.2f), FVector3f(X, 3.2f, 0.f), Turf, FVector3f(0.f, 0.f, 1.f));
+			}
+			W.Quad(FVector3f(-Half, -6.f, 0.1f), FVector3f(Half, -6.f, 0.1f), FVector3f(Half, -3.f, 0.1f), FVector3f(-Half, -3.f, 0.1f), Gravel, Below);   // gun yard
+			for (float X : { -5.4f, -1.8f, 1.8f, 5.4f })
+			{
+				W.Box(FVector3f(X - 0.6f, -1.2f, 2.2f), FVector3f(X + 0.6f, 0.4f, 2.8f), Srgb(88, 64, 42));     // carriage
+				W.Box(FVector3f(X - 0.22f, -0.6f, 2.6f), FVector3f(X + 0.22f, 2.4f, 3.0f), Iron);               // barrel over the crest
+			}
+			break;
+		}
+		case ESitePiece::PowderMagazine:
+		{
+			const FLinearColor Turf = Srgb(96, 116, 60);
+			W.House(FVector2f(0.f, 0.f), 5.f, 4.f, 2.6f, 4.4f, Brick, Turf);
+			W.Box(FVector3f(-2.6f, -2.1f, 0.f), FVector3f(2.6f, 2.1f, 0.4f), Stone);
+			W.Quad(FVector3f(-0.5f, 2.03f, 0.4f), FVector3f(0.5f, 2.03f, 0.4f), FVector3f(0.5f, 2.03f, 2.1f), FVector3f(-0.5f, 2.03f, 2.1f), Srgb(58, 70, 60), FVector3f(0.f, 0.f, 1.f));
+			// Blast wall round the vault, open at the door.
+			W.Box(FVector3f(-5.f, -4.5f, 0.f), FVector3f(5.f, -4.1f, 1.3f), Brick);
+			W.Box(FVector3f(-5.f, -4.5f, 0.f), FVector3f(-4.6f, 4.5f, 1.3f), Brick);
+			W.Box(FVector3f(4.6f, -4.5f, 0.f), FVector3f(5.f, 4.5f, 1.3f), Brick);
+			W.Box(FVector3f(-5.f, 4.1f, 0.f), FVector3f(-1.4f, 4.5f, 1.3f), Brick);
+			W.Box(FVector3f(1.4f, 4.1f, 0.f), FVector3f(5.f, 4.5f, 1.3f), Brick);
+			W.Box(FVector3f(-0.06f, -0.06f, 4.4f), FVector3f(0.06f, 0.06f, 6.6f), Srgb(60, 60, 64));   // lightning rod
+			break;
+		}
+		case ESitePiece::StarFort:
+		{
+			const FLinearColor Turf = Srgb(96, 116, 60), TurfTop = Srgb(112, 130, 68), Yard = Srgb(150, 140, 110);
+			// Star outline: 5 points (radius 17) and 5 re-entrant angles (radius 10.5).
+			TArray<FVector2f> Outline;
+			for (int32 k = 0; k < 10; ++k)
+			{
+				const float A = UE_HALF_PI + k * UE_PI / 5.f;
+				const float R = (k % 2 == 0) ? 17.f : 10.5f;
+				Outline.Add(FVector2f(FMath::Cos(A) * R, FMath::Sin(A) * R));
+			}
+			const float H = 2.6f;
+			for (int32 i = 0; i < Outline.Num(); ++i)
+			{
+				const FVector2f P0 = Outline[i], P1 = Outline[(i + 1) % Outline.Num()];
+				auto At = [](const FVector2f& P, float S, float Z) { return FVector3f(P.X * S, P.Y * S, Z); };
+				const FVector2f Mid = (P0 + P1) * 0.5f;
+				// Outer slope, flat crest, inner slope.
+				W.Quad(At(P0, 1.f, 0.f), At(P1, 1.f, 0.f), At(P1, 0.86f, H), At(P0, 0.86f, H), Turf, FVector3f(0.f, 0.f, 0.f));
+				W.Quad(At(P0, 0.86f, H), At(P1, 0.86f, H), At(P1, 0.76f, H), At(P0, 0.76f, H), TurfTop, FVector3f(Mid.X * 0.8f, Mid.Y * 0.8f, -1.f));
+				W.Quad(At(P0, 0.76f, H), At(P1, 0.76f, H), At(P1, 0.66f, 0.f), At(P0, 0.66f, 0.f), Turf, FVector3f(Mid.X * 1.5f, Mid.Y * 1.5f, 0.f));
+				// Yard inside the rampart.
+				W.Tri(FVector3f(0.f, 0.f, 0.08f), At(P0, 0.66f, 0.08f), At(P1, 0.66f, 0.08f), Yard, FVector3f(0.f, 0.f, -1.f));
+			}
+			W.House(FVector2f(0.f, -1.f), 6.f, 3.4f, 2.2f, 4.2f, Srgb(118, 88, 58), Srgb(84, 74, 62));   // blockhouse
+			break;
+		}
+		case ESitePiece::Telegraph:
+		{
+			W.House(FVector2f(-1.5f, 0.f), 6.f, 4.f, 3.6f, 6.2f, Brick, RoofSlate);
+			W.Box(FVector3f(-4.55f, -2.05f, 0.f), FVector3f(1.55f, 2.05f, 0.45f), Stone);
+			const FVector3f In(-1.5f, 0.f, 1.5f);
+			for (float X : { -3.3f, -1.5f, 0.3f })
+			{
+				W.Quad(FVector3f(X - 0.3f, 2.03f, 1.1f), FVector3f(X + 0.3f, 2.03f, 1.1f), FVector3f(X + 0.3f, 2.03f, 2.4f), FVector3f(X - 0.3f, 2.03f, 2.4f), Window, In);
+			}
+			const FLinearColor Mast = Srgb(108, 84, 58);
+			W.Box(FVector3f(3.5f, -0.18f, 0.f), FVector3f(3.86f, 0.18f, 11.f), Mast);
+			W.Box(FVector3f(2.4f, -0.1f, 10.1f), FVector3f(4.96f, 0.1f, 10.35f), Mast);
+			W.Box(FVector3f(2.6f, -0.1f, 8.9f), FVector3f(4.76f, 0.1f, 9.1f), Mast);
+			for (float X : { 2.5f, 3.1f, 4.3f, 4.9f })
+			{
+				W.Box(FVector3f(X - 0.07f, -0.07f, 10.35f), FVector3f(X + 0.07f, 0.07f, 10.6f), Srgb(230, 230, 222));   // insulators
+			}
+			break;
+		}
+		case ESitePiece::Granary:
+		{
+			const FLinearColor Yellow = Srgb(200, 160, 100);
+			W.House(FVector2f(0.f, 0.f), 13.f, 5.4f, 6.4f, 10.4f, Yellow, Tile);
+			W.Box(FVector3f(-6.6f, -2.8f, 0.f), FVector3f(6.6f, 2.8f, 0.6f), Stone);
+			const FVector3f In(0.f, 0.f, 3.f);
+			for (int32 Storey = 0; Storey < 3; ++Storey)
+			{
+				const float Z0 = 1.2f + Storey * 1.8f, Z1 = Z0 + 0.8f;
+				for (int32 c = 0; c < 9; ++c)
+				{
+					const float X = -5.6f + c * 1.4f;
+					for (float Side : { -1.f, 1.f })
+					{
+						const float Y = Side * 2.73f;
+						W.Quad(FVector3f(X - 0.25f, Y, Z0), FVector3f(X + 0.25f, Y, Z0), FVector3f(X + 0.25f, Y, Z1), FVector3f(X - 0.25f, Y, Z1), Window, In);
+					}
+				}
+			}
+			for (float X : { -3.f, 3.f })   // hoist gables with doors, and their beams
+			{
+				W.House(FVector2f(X, 2.2f), 1.8f, 2.2f, 8.2f, 9.6f, Yellow, Tile, true);
+				W.Quad(FVector3f(X - 0.45f, 3.33f, 6.6f), FVector3f(X + 0.45f, 3.33f, 6.6f), FVector3f(X + 0.45f, 3.33f, 8.f), FVector3f(X - 0.45f, 3.33f, 8.f), Srgb(58, 84, 62), In);
+				W.Box(FVector3f(X - 0.1f, 3.3f, 8.4f), FVector3f(X + 0.1f, 4.4f, 8.6f), DarkTimber);
+			}
+			break;
+		}
 		}
 		static const TCHAR* Names[] = { TEXT("Ground"), TEXT("Barracks"), TEXT("Scaffold"), TEXT("CraneMast"), TEXT("CraneJib"), TEXT("Wagon"), TEXT("Flagpole"), TEXT("Flag"),
-			TEXT("Stables"), TEXT("Depot"), TEXT("Infirmary") };
+			TEXT("Stables"), TEXT("Depot"), TEXT("Infirmary"), TEXT("Arsenal"), TEXT("Lazaret"), TEXT("Battery"), TEXT("PowderMagazine"), TEXT("StarFort"),
+			TEXT("Telegraph"), TEXT("Granary") };
 		return Finish(W, Material, FString::Printf(TEXT("SM_Campaign1851_Site_%s"), Names[int32(Piece)]));
 	}
 }
@@ -537,5 +706,24 @@ namespace Campaign1851Scenery
 			}
 		}
 		return Finish(W, Material, FString::Printf(TEXT("SM_Campaign1851_Scaffold_%.0fx%.0f"), Length, Width));
+	}
+}
+
+namespace Campaign1851Scenery
+{
+	UStaticMesh* BuildPlotGround(float Length, float Width, UMaterialInterface* Material)
+	{
+		const FLinearColor Dug = Srgb(128, 100, 70), Stake = Srgb(96, 70, 46);
+		const float HL = Length * 0.5f + 1.2f, HW = Width * 0.5f + 1.2f;
+		FWriter W;
+		W.Quad(FVector3f(-HL, -HW, 0.12f), FVector3f(HL, -HW, 0.12f), FVector3f(HL, HW, 0.12f), FVector3f(-HL, HW, 0.12f), Dug, FVector3f(0.f, 0.f, -5.f));
+		for (float X : { -HL + 0.3f, HL - 0.3f })
+		{
+			for (float Y : { -HW + 0.3f, HW - 0.3f })
+			{
+				W.Box(FVector3f(X - 0.15f, Y - 0.15f, 0.f), FVector3f(X + 0.15f, Y + 0.15f, 1.3f), Stake);
+			}
+		}
+		return Finish(W, Material, FString::Printf(TEXT("SM_Campaign1851_Plot_%.0fx%.0f"), Length, Width));
 	}
 }

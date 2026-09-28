@@ -49,6 +49,10 @@ private:
 	void TryInit();
 	void PickCity();
 	void FocusPlot(int32 CityIndex);
+	/** Flies the camera to a building site, looking at its front. */
+	void FocusSite(const class ACampaign1851ConstructionSite* Site);
+	/** Starts a town building from the panel; a message if it cannot. */
+	void BuildTownBuilding(int32 CityIndex, const FString& Key);
 
 	/** Writes the campaign to a save slot; bQuiet skips the on-screen message (autosave). */
 	bool SaveToSlot(const FString& Slot, bool bQuiet = false);

@@ -193,8 +193,8 @@ public:
 	/** A new campaign's cash and an empty account book. */
 	void ResetEconomy();
 	void RestoreEconomy(double InTreasury, const TArray<FCampaign1851Transaction>& InLedger);
-	/** True if the down payment for a module can be paid now. */
-	bool CanAffordStart(int32 Module) const;
+	/** True if the down payment on a building of this price can be paid now. */
+	bool CanAfford(int32 CostRd) const;
 
 	/**
 	 * Starts (or returns the running) barracks project in a town; null if the town has no plot
@@ -202,10 +202,28 @@ public:
 	 */
 	ACampaign1851ConstructionSite* StartProject(int32 CityIndex, bool bCharge = true);
 	ACampaign1851ConstructionSite* FindProject(int32 CityIndex) const;
+
+	// ---- Town buildings (arsenal, lazaret, coastal battery, ...), each on its own plot.
+
+	/** The town's site for a building, if it has been started. */
+	ACampaign1851ConstructionSite* FindBuilding(int32 CityIndex, const FString& Key) const;
+	/**
+	 * Why a town cannot have a building (not counting money): "kræver 10.000 indb.", "fra 1854", ...
+	 * Empty when it can; "-" when the building does not belong to the town at all (the list hides it).
+	 */
+	FString BuildingBlockReason(int32 CityIndex, const FString& Key) const;
+	/**
+	 * Starts a town building: finds a plot by the building's rule (or uses ForcedKm/ForcedYaw from a
+	 * save), clears houses and trees there, pays the down payment when bCharge. Null with OutReason on failure.
+	 */
+	ACampaign1851ConstructionSite* StartBuilding(int32 CityIndex, const FString& Key, bool bCharge = true, const FVector2D* ForcedKm = nullptr, float ForcedYaw = 0.f, FString* OutReason = nullptr);
+	bool IsCoastalTown(int32 CityIndex) const;
+	/** Town radius (km) as the scenery lays the town out. */
+	static float TownRadiusKm(int32 Population) { return FMath::Clamp(0.75f * FMath::Sqrt(Population / 1000.f), 0.9f, 6.5f); }
 	/** Removes every building project (before loading a save). */
 	void ClearProjects();
-	/** Recreates a saved garrison complex; returns false if the town is unknown or has no plot. */
-	bool RestoreProject(const FString& CityName, const TArray<float>& ModuleDays, int32 ActiveModule);
+	/** Recreates a saved project (garrison or town building); returns false if the town is unknown or has no plot. */
+	bool RestoreProject(const FString& CityName, const TArray<float>& ModuleDays, int32 ActiveModule, const FString& Kind, const FVector2D& PlotKm, float Yaw);
 	int32 FindCity(const FString& Name) const;
 
 	/** Starts a garrison module (1..) at a town whose barracks is finished; false if it cannot start. */
@@ -289,6 +307,16 @@ private:
 	bool LoadAmtIds();
 	TArray<TArray<FVector2D>> RoadLines;   // projected km
 	TArray<TArray<FVector2D>> FerryLines;  // projected km, landing to landing
+	TArray<FVector2D> RoadSampleKm;        // main roads every 100 m, to keep plots off them
+	mutable TMap<int32, bool> CoastalTowns;
+
+	/** Spawns a site at a plot; GateLocal is where the supply wagon stops (piece units). */
+	ACampaign1851ConstructionSite* SpawnSite(int32 CityIndex, const FVector2D& Km, float Yaw, const TArray<struct FCampaign1851SiteModule>& Modules, bool bGarrison, const FVector2D& GateLocal);
+	bool FindBuildingPlot(int32 CityIndex, const struct FCampaign1851SiteModule& Def, FVector2D& OutKm, float& OutYaw) const;
+	bool PlotFits(const FVector2D& Km, float RadiusKm) const;
+	bool IsSea(const FVector2D& Km) const;
+	/** Removes scenery instances (houses, farms, trees) on a plot. */
+	void ClearScenery(const FVector2D& Km, float RadiusKm);
 
 	TArray<uint16> Height;
 	int32 HeightW = 0, HeightH = 0;
