@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Widgets/SLeafWidget.h"
@@ -37,7 +37,7 @@ public:
 	int32 GetSelectedAmt() const { return SelectedAmt; }
 
 	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury, BuildTown, ShowSite, BuildLink, ShowLink };
-	/** Module of a BuildLink button: link * 2 + 0 for a chaussÃ©e, + 1 for a railway. */
+	/** Module of a BuildLink button: link * 2 + 0 for a chaussée, + 1 for a railway. */
 	static int32 LinkButton(int32 Link, bool bRailway) { return Link * 2 + (bRailway ? 1 : 0); }
 	void ToggleLedger() { bLedgerOpen = !bLedgerOpen; }
 
@@ -50,7 +50,7 @@ public:
 		FString Info;    // date and summary, or "Tom"
 	};
 	void OpenMenu(const TArray<FSlotInfo>& Slots) { MenuSlots = Slots; bMenuOpen = true; bConfirmNewGame = false; }
-	/** "New game" needs a second click; the button then reads "BEKRÃ†FT: NYT SPIL". */
+	/** "New game" needs a second click; the button then reads "BEKRÆFT: NYT SPIL". */
 	void SetConfirmNewGame(bool bConfirm) { bConfirmNewGame = bConfirm; }
 	bool IsConfirmingNewGame() const { return bConfirmNewGame; }
 	void CloseMenu() { bMenuOpen = false; }
@@ -79,7 +79,7 @@ private:
 	void PaintInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** The town's buildings beside the garrison card: built, under way, or what they cost and need. */
 	void PaintTownBuildings(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
-	/** The town's roads to its neighbours: distance, march or train time, and chaussÃ©e / railway projects. */
+	/** The town's roads to its neighbours: distance, march or train time, and chaussée / railway projects. */
 	void PaintTownLinks(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, float Left) const;
 	/** Progress line for a link project, as ProgressLine for a building. */
 	FString LinkProgressLine(int32 Link) const;

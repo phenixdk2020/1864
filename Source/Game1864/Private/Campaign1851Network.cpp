@@ -1,4 +1,4 @@
-﻿// Roads and railways of the 1851 campaign map: ACampaign1851Map's network (see Campaign1851Network.h).
+// Roads and railways of the 1851 campaign map: ACampaign1851Map's network (see Campaign1851Network.h).
 
 #include "Campaign1851Network.h"
 
@@ -111,11 +111,11 @@ namespace
 		return O.TryGetStringField(Field, Text) && FDateTime::ParseIso8601(*Text, Date) ? Date : Default;
 	}
 
-	/** "Â½", "1", "1Â½", ... */
+	/** "½", "1", "1½", ... */
 	FString HalfDays(float Days)
 	{
 		const int32 Halves = FMath::Max(1, FMath::RoundToInt(Days * 2.f));
-		return Halves == 1 ? FString(TEXT("Â½")) : Halves % 2 == 0 ? FString::FromInt(Halves / 2) : FString::Printf(TEXT("%dÂ½"), Halves / 2);
+		return Halves == 1 ? FString(TEXT("½")) : Halves % 2 == 0 ? FString::FromInt(Halves / 2) : FString::Printf(TEXT("%d½"), Halves / 2);
 	}
 
 	/** Railway map symbol and works: widths (km), colours and heights over the terrain (units). */
@@ -132,7 +132,7 @@ namespace Campaign1851Network
 {
 	const TCHAR* WorkName(ECampaign1851LinkWork Work)
 	{
-		return Work == ECampaign1851LinkWork::Chaussee ? TEXT("chaussÃ©") : Work == ECampaign1851LinkWork::Railway ? TEXT("jernbane") : TEXT("");
+		return Work == ECampaign1851LinkWork::Chaussee ? TEXT("chaussé") : Work == ECampaign1851LinkWork::Railway ? TEXT("jernbane") : TEXT("");
 	}
 }
 
@@ -280,11 +280,11 @@ FString ACampaign1851Map::LinkBlockReason(int32 Link, ECampaign1851LinkWork Work
 	const FCampaign1851Link& L = Links[Link];
 	if (L.Work != ECampaign1851LinkWork::None)
 	{
-		return FString::Printf(TEXT("%s under anlÃ¦g"), Campaign1851Network::WorkName(L.Work));
+		return FString::Printf(TEXT("%s under anlæg"), Campaign1851Network::WorkName(L.Work));
 	}
 	if (Work == ECampaign1851LinkWork::Chaussee)
 	{
-		return L.bChaussee ? TEXT("allerede chaussÃ©") : TEXT("");
+		return L.bChaussee ? TEXT("allerede chaussé") : TEXT("");
 	}
 	if (L.bRailway)
 	{
@@ -292,7 +292,7 @@ FString ACampaign1851Map::LinkBlockReason(int32 Link, ECampaign1851LinkWork Work
 	}
 	if (L.RailPath.Num() < 2)
 	{
-		return L.HasFerry() ? TEXT("ingen bane over fÃ¦rgestedet") : TEXT("terrÃ¦net tillader ingen bane");
+		return L.HasFerry() ? TEXT("ingen bane over færgestedet") : TEXT("terrænet tillader ingen bane");
 	}
 	return TEXT("");
 }
@@ -357,10 +357,10 @@ FString ACampaign1851Map::LinkTravelText(int32 Link) const
 	const float Days = LinkTravelDays(Link);
 	if (L.bRailway)
 	{
-		return FString::Printf(TEXT("jernbane %.0f km  Â·  %s dag med tog"), L.RailKm, *HalfDays(Days));
+		return FString::Printf(TEXT("jernbane %.0f km  ·  %s dag med tog"), L.RailKm, *HalfDays(Days));
 	}
-	return FString::Printf(TEXT("%.0f km %s  Â·  %s dagsmarch%s"), L.RoadKm + L.FerryKm, L.bChaussee ? TEXT("chaussÃ©") : TEXT("landevej"), *HalfDays(Days),
-		L.HasFerry() ? TEXT("  Â·  fÃ¦rge") : TEXT(""));
+	return FString::Printf(TEXT("%.0f km %s  ·  %s dagsmarch%s"), L.RoadKm + L.FerryKm, L.bChaussee ? TEXT("chaussé") : TEXT("landevej"), *HalfDays(Days),
+		L.HasFerry() ? TEXT("  ·  færge") : TEXT(""));
 }
 
 double ACampaign1851Map::NetworkUpkeepPerYear() const
@@ -387,7 +387,7 @@ bool ACampaign1851Map::StartLinkWork(int32 Link, ECampaign1851LinkWork Work, boo
 	{
 		if (OutReason)
 		{
-			*OutReason = !Why.IsEmpty() ? Why : TEXT("Ikke rÃ¥d til udbetalingen endnu");
+			*OutReason = !Why.IsEmpty() ? Why : TEXT("Ikke råd til udbetalingen endnu");
 		}
 		return false;
 	}
@@ -397,7 +397,7 @@ bool ACampaign1851Map::StartLinkWork(int32 Link, ECampaign1851LinkWork Work, boo
 	L.WorkDays = LinkWorkDays(Link, Work);
 	L.WorkCost = Cost;
 	L.bStalled = false;
-	const FString Name = FString::Printf(TEXT("%s %sâ€“%s"), Campaign1851Network::WorkName(Work), *Cities[L.A].Name, *Cities[L.B].Name);
+	const FString Name = FString::Printf(TEXT("%s %s–%s"), Campaign1851Network::WorkName(Work), *Cities[L.A].Name, *Cities[L.B].Name);
 	if (bCharge)
 	{
 		AddTransaction(-Cost * Campaign1851Buildings::DownPayment, FString::Printf(TEXT("Udbetaling: %s"), *Name));
@@ -414,11 +414,11 @@ bool ACampaign1851Map::StartLinkWork(int32 Link, ECampaign1851LinkWork Work, boo
 void ACampaign1851Map::FinishLinkWork(int32 Link)
 {
 	FCampaign1851Link& L = Links[Link];
-	const FString Ends = FString::Printf(TEXT("%sâ€“%s"), *Cities[L.A].Name, *Cities[L.B].Name);
+	const FString Ends = FString::Printf(TEXT("%s–%s"), *Cities[L.A].Name, *Cities[L.B].Name);
 	if (L.Work == ECampaign1851LinkWork::Chaussee)
 	{
 		L.bChaussee = true;
-		News.Add(FString::Printf(TEXT("ChaussÃ©en %s er fÃ¦rdig"), *Ends));
+		News.Add(FString::Printf(TEXT("Chausséen %s er færdig"), *Ends));
 	}
 	else if (L.Work == ECampaign1851LinkWork::Railway)
 	{
@@ -431,7 +431,7 @@ void ACampaign1851Map::FinishLinkWork(int32 Link)
 		R.Begun = R.Opened = GetDate();
 		R.Link = Link;
 		R.bAnnounced = true;
-		News.Add(FString::Printf(TEXT("Jernbanen %s er Ã¥bnet"), *Ends));
+		News.Add(FString::Printf(TEXT("Jernbanen %s er åbnet"), *Ends));
 	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|network|done|%s %s"), Campaign1851Network::WorkName(L.Work), *Ends);
 	L.Work = ECampaign1851LinkWork::None;
@@ -477,7 +477,7 @@ void ACampaign1851Map::UpdateOpenRailways(bool bAnnounce)
 			bChanged = true;
 			if (bAnnounce)
 			{
-				News.Add(FString::Printf(TEXT("%s er Ã¥bnet"), *R.Name));
+				News.Add(FString::Printf(TEXT("%s er åbnet"), *R.Name));
 			}
 		}
 	}
@@ -535,7 +535,7 @@ int32 ACampaign1851Map::RestoreNetwork(const TArray<FCampaign1851LinkSave>& Save
 		const int32 Link = Links.IndexOfByPredicate([A, B](const FCampaign1851Link& L) { return (L.A == A && L.B == B) || (L.A == B && L.B == A); });
 		if (Link == INDEX_NONE)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|save|no link %sâ€“%s"), *S.A, *S.B);
+			UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|save|no link %s–%s"), *S.A, *S.B);
 			continue;
 		}
 		FCampaign1851Link& L = Links[Link];
@@ -587,7 +587,7 @@ void ACampaign1851Map::AdvanceNetwork(float DeltaDays, float DeltaSeconds)
 			Work = PerDay > 0.0 ? float(Treasury / PerDay) : Work;
 		}
 		Treasury -= Work * PerDay;
-		MonthSpend.FindOrAdd(FString::Printf(TEXT("AnlÃ¦g: %s %sâ€“%s"), Campaign1851Network::WorkName(L.Work), *Cities[L.A].Name, *Cities[L.B].Name)) += Work * PerDay;
+		MonthSpend.FindOrAdd(FString::Printf(TEXT("Anlæg: %s %s–%s"), Campaign1851Network::WorkName(L.Work), *Cities[L.A].Name, *Cities[L.B].Name)) += Work * PerDay;
 		L.DaysBuilt += Work;
 		if (L.DaysBuilt >= L.WorkDays)
 		{

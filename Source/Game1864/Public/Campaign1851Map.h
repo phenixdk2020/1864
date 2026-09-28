@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -172,23 +172,26 @@ public:
 	FVector2D GetSizeKm() const { return SizeKm; }
 	bool IsReady() const { return bReady; }
 
-	// ---- Campaign calendar: days since 1 July 1851 and the game speed (0 = paused).
+	// ---- Campaign clock: days since 1 July 1851 00:00, running hour by hour (as Hearts of Iron IV),
+	// and the game speed (0 = paused, 1..5).
 
-	/** Moves the calendar on by the real time passed; drives the building projects and the season. */
+	/** Moves the clock on by the real time passed, in whole hours; drives the projects and the season. */
 	void AdvanceTime(float DeltaSeconds);
 	void SetSpeed(int32 InSpeed) { Speed = FMath::Clamp(InSpeed, 0, NumSpeeds() - 1); }
 	int32 GetSpeed() const { return Speed; }
-	static int32 NumSpeeds() { return 4; }
-	/** Campaign days per real second at a speed step (0, 1, 3, 10). */
-	static float DaysPerSecondAt(int32 InSpeed);
+	static int32 NumSpeeds() { return 6; }
+	/** Campaign hours per real second at a speed step (0, 2, 6, 12, 24, 96). */
+	static float HoursPerSecondAt(int32 InSpeed);
 	static const TCHAR* SpeedLabel(int32 InSpeed);
+	/** "14:00" */
+	static FString FormatHour(const FDateTime& Date) { return FString::Printf(TEXT("%02d:00"), Date.GetHour()); }
 	double GetCampaignDays() const { return CampaignDays; }
-	void SetCampaignDays(double Days) { CampaignDays = FMath::Max(Days, 0.0); UpdateSeason(); }
+	void SetCampaignDays(double Days) { CampaignDays = FMath::Max(FMath::RoundToDouble(Days * 24.0) / 24.0, 0.0); HourCarry = 0.0; UpdateSeason(); }
 	static FDateTime StartDate() { return FDateTime(1851, 7, 1); }
 	FDateTime GetDate() const { return StartDate() + FTimespan::FromDays(CampaignDays); }
 	/** "1. juli 1851", or "1. jul. 1851" with bShort. */
 	static FString FormatDate(const FDateTime& Date, bool bShort = false);
-	/** "Vinter", "ForÃ¥r", "Sommer" or "EfterÃ¥r". */
+	/** "Vinter", "Forår", "Sommer" or "Efterår". */
 	FString GetSeasonName() const;
 
 	// ---- Treasury (design manual 20.2: money / state credit; backlog B-346 budget with a transaction log).
@@ -219,7 +222,7 @@ public:
 	/** The town's site for a building, if it has been started. */
 	ACampaign1851ConstructionSite* FindBuilding(int32 CityIndex, const FString& Key) const;
 	/**
-	 * Why a town cannot have a building (not counting money): "krÃ¦ver 10.000 indb.", "fra 1854", ...
+	 * Why a town cannot have a building (not counting money): "kræver 10.000 indb.", "fra 1854", ...
 	 * Empty when it can; "-" when the building does not belong to the town at all (the list hides it).
 	 */
 	FString BuildingBlockReason(int32 CityIndex, const FString& Key) const;
@@ -249,7 +252,7 @@ public:
 	const TArray<FCampaign1851Railway>& GetRailways() const { return Railways; }
 	/** Links from a town, nearest neighbour first. */
 	TArray<int32> LinksOf(int32 CityIndex) const;
-	/** Why a link cannot get this work ("fÃ¦rgeoverfart", "allerede chaussÃ©", ...); empty if it can (money aside). */
+	/** Why a link cannot get this work ("færgeoverfart", "allerede chaussé", ...); empty if it can (money aside). */
 	FString LinkBlockReason(int32 Link, ECampaign1851LinkWork Work) const;
 	int32 LinkWorkCost(int32 Link, ECampaign1851LinkWork Work) const;
 	float LinkWorkDays(int32 Link, ECampaign1851LinkWork Work) const;
@@ -259,7 +262,7 @@ public:
 	bool HasStation(int32 CityIndex) const;
 	/** Days from one end of a link to the other by the best way open now (march, or train). */
 	float LinkTravelDays(int32 Link) const;
-	/** "68 km landevej Â· 3Â½ dagsmarch", "jernbane 70 km Â· 1 dag med tog", ... */
+	/** "68 km landevej · 3½ dagsmarch", "jernbane 70 km · 1 dag med tog", ... */
 	FString LinkTravelText(int32 Link) const;
 	/** Other town of a link. */
 	int32 LinkOther(int32 Link, int32 CityIndex) const { return Links.IsValidIndex(Link) ? (Links[Link].A == CityIndex ? Links[Link].B : Links[Link].A) : INDEX_NONE; }
@@ -268,7 +271,7 @@ public:
 	/** Built roads and railways and the projects under way, for saving; restored after ResetNetwork. */
 	TArray<FCampaign1851LinkSave> SaveNetwork() const;
 	int32 RestoreNetwork(const TArray<FCampaign1851LinkSave>& Saves);
-	/** Messages for the player ("Jernbanen ... er Ã¥bnet"); the controller shows them. */
+	/** Messages for the player ("Jernbanen ... er åbnet"); the controller shows them. */
 	TArray<FString> TakeNews() { TArray<FString> Out = MoveTemp(News); News.Reset(); return Out; }
 	/** World position of a projected-km point on the terrain. */
 	FVector WorldAtKm(const FVector2D& Km) const;
@@ -374,7 +377,7 @@ private:
 	bool LoadNetwork(const FJsonObject& Json);
 	/** Daily work on the link projects, historical lines opening, trains and work gangs moving. */
 	void AdvanceNetwork(float DeltaDays, float DeltaSeconds);
-	/** Railways, chaussÃ©er and works as ribbons; rebuilt when they change. */
+	/** Railways, chausséer and works as ribbons; rebuilt when they change. */
 	void RebuildNetworkMeshes();
 	void UpdateNetworkVisibility();
 	/** Marks the links an open railway serves, and reports lines opening (bAnnounce). */
@@ -413,6 +416,7 @@ private:
 	/** Season weights for the map materials (MPC_Campaign1851Season): Snow, Bare, Autumn, Spring. */
 	void UpdateSeason();
 	double CampaignDays = 0.0;
+	double HourCarry = 0.0;   // part of an hour of real time not yet ticked
 	int32 Speed = 1;
 
 	/** Closes a month: grant in, upkeep and the month's construction wages out. */

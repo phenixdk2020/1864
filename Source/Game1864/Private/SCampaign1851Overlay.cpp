@@ -221,9 +221,9 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	}
 
 	const FVector2D Size = Geometry.GetLocalSize();
-	PaintText(Geometry, Out, Layer, TEXT("Klik på en by  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Home: hele kortet  ·  M: menu  ·  F5/F9: gem/indlæs"),
+	PaintText(Geometry, Out, Layer, TEXT("Klik på en by  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5, +/−: fart  ·  M: menu  ·  F5/F9: gem/indlæs"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.27 HAV, SKYER OG DIS — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.28 TIMEUR — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -740,18 +740,28 @@ void SCampaign1851Overlay::PaintToast(const FGeometry& Geometry, FSlateWindowEle
 
 void SCampaign1851Overlay::PaintCalendar(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
 {
-	const FVector2D Size(600.f, 56.f);   // clears the title cartouche on a 1526 px wide view
-	const FVector2D Pos((Geometry.GetLocalSize().X - Size.X) * 0.5f, 28.f);
+	// Hour, date and season, then pause and speeds 1-5 (Hearts of Iron IV style). Kept clear of the title cartouche.
+	const FVector2D Size(660.f, 56.f);
+	const FVector2D Pos(FMath::Max((Geometry.GetLocalSize().X - Size.X) * 0.5f, 484.f), 28.f);
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
-	const FString Date = ACampaign1851Map::FormatDate(Map->GetDate());
+	const FDateTime Now = Map->GetDate();
+	const FString Hour = ACampaign1851Map::FormatHour(Now);
+	const FString Date = ACampaign1851Map::FormatDate(Now);
 	const FSlateFontInfo DateFont = Serif(20);
-	PaintText(Geometry, Out, Layer + 2, Date, Pos + FVector2D(24.f, Size.Y * 0.5f), DateFont, Ink, 0.f);
-	PaintText(Geometry, Out, Layer + 2, Map->GetSeasonName(), Pos + FVector2D(24.f + Measure(Date, DateFont).X + 16.f, Size.Y * 0.5f + 2.f), Serif(13, EFace::Italic), Gold, 0.f, false);
-	const float ButtonWidth = 56.f, Gap = 6.f;
-	float X = Pos.X + Size.X - 18.f - ACampaign1851Map::NumSpeeds() * (ButtonWidth + Gap) + Gap;
-	for (int32 s = 0; s < ACampaign1851Map::NumSpeeds(); ++s, X += ButtonWidth + Gap)
+	float TextX = Pos.X + 22.f;
+	PaintText(Geometry, Out, Layer + 2, Hour, FVector2D(TextX, Pos.Y + Size.Y * 0.5f), DateFont, Gold, 0.f);
+	TextX += Measure(TEXT("00:00"), DateFont).X + 14.f;
+	PaintText(Geometry, Out, Layer + 2, Date, FVector2D(TextX, Pos.Y + Size.Y * 0.5f), DateFont, Ink, 0.f);
+	PaintText(Geometry, Out, Layer + 2, Map->GetSeasonName(), FVector2D(TextX + Measure(Date, DateFont).X + 12.f, Pos.Y + Size.Y * 0.5f + 2.f), Serif(13, EFace::Italic), Gold, 0.f, false);
+	const float PauseWidth = 62.f, ButtonWidth = 34.f, Gap = 5.f;
+	float X = Pos.X + Size.X - 16.f - PauseWidth - (ACampaign1851Map::NumSpeeds() - 1) * (ButtonWidth + Gap);
+	for (int32 s = 0; s < ACampaign1851Map::NumSpeeds(); ++s)
 	{
-		PaintButton(Geometry, Out, Layer + 2, FVector2D(X, Pos.Y + 14.f), FVector2D(ButtonWidth, 28.f), ACampaign1851Map::SpeedLabel(s), EButton::Speed, s, Map->GetSpeed() == s);
+		const float W = s == 0 ? PauseWidth : ButtonWidth;
+		// Speeds up to the current one light up, like a speed gauge.
+		const bool bLit = s == 0 ? Map->GetSpeed() == 0 : Map->GetSpeed() >= s;
+		PaintButton(Geometry, Out, Layer + 2, FVector2D(X, Pos.Y + 14.f), FVector2D(W, 28.f), ACampaign1851Map::SpeedLabel(s), EButton::Speed, s, bLit);
+		X += W + Gap;
 	}
 }
 

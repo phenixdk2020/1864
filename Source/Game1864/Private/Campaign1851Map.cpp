@@ -1419,8 +1419,9 @@ bool ACampaign1851Map::RestoreProject(const FString& CityName, const TArray<floa
 
 namespace
 {
-	const float SpeedDays[] = { 0.f, 1.f, 3.f, 10.f };
-	const TCHAR* SpeedLabels[] = { TEXT("PAUSE"), TEXT("1×"), TEXT("3×"), TEXT("10×") };
+	/** Speed 1 shows a day in 12 s, speed 3 in 2 s, speed 5 races through four days a second. */
+	const float SpeedHours[] = { 0.f, 2.f, 6.f, 12.f, 24.f, 96.f };
+	const TCHAR* SpeedLabels[] = { TEXT("PAUSE"), TEXT("1"), TEXT("2"), TEXT("3"), TEXT("4"), TEXT("5") };
 	const TCHAR* MonthNames[] = { TEXT("januar"), TEXT("februar"), TEXT("marts"), TEXT("april"), TEXT("maj"), TEXT("juni"),
 		TEXT("juli"), TEXT("august"), TEXT("september"), TEXT("oktober"), TEXT("november"), TEXT("december") };
 	const TCHAR* MonthShort[] = { TEXT("jan."), TEXT("feb."), TEXT("mar."), TEXT("apr."), TEXT("maj"), TEXT("jun."),
@@ -1436,7 +1437,7 @@ namespace
 	}
 }
 
-float ACampaign1851Map::DaysPerSecondAt(int32 InSpeed) { return SpeedDays[FMath::Clamp(InSpeed, 0, NumSpeeds() - 1)]; }
+float ACampaign1851Map::HoursPerSecondAt(int32 InSpeed) { return SpeedHours[FMath::Clamp(InSpeed, 0, NumSpeeds() - 1)]; }
 const TCHAR* ACampaign1851Map::SpeedLabel(int32 InSpeed) { return SpeedLabels[FMath::Clamp(InSpeed, 0, NumSpeeds() - 1)]; }
 
 FString ACampaign1851Map::FormatDate(const FDateTime& Date, bool bShort)
@@ -1458,8 +1459,12 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 		return;
 	}
 	const int32 MonthBefore = GetDate().GetMonth();
-	const float DeltaDays = DeltaSeconds * DaysPerSecondAt(Speed);
-	CampaignDays += DeltaDays;
+	// The clock ticks in whole hours; the work of those hours is done at once.
+	HourCarry += double(DeltaSeconds) * HoursPerSecondAt(Speed);
+	const double Hours = FMath::FloorToDouble(HourCarry);
+	HourCarry -= Hours;
+	const float DeltaDays = float(Hours / 24.0);
+	CampaignDays = FMath::RoundToDouble((CampaignDays + Hours / 24.0) * 24.0) / 24.0;
 	for (ACampaign1851ConstructionSite* Site : Projects)
 	{
 		if (!Site)

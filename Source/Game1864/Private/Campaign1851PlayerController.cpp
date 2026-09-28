@@ -274,9 +274,14 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	{
 		if (Map->GetSpeed() > 0) { SpeedBeforePause = Map->GetSpeed(); Map->SetSpeed(0); } else { Map->SetSpeed(SpeedBeforePause); }
 	}
-	if (WasInputKeyJustPressed(EKeys::One)) { Map->SetSpeed(1); }
-	if (WasInputKeyJustPressed(EKeys::Two)) { Map->SetSpeed(2); }
-	if (WasInputKeyJustPressed(EKeys::Three)) { Map->SetSpeed(3); }
+	const FKey SpeedKeys[] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five };
+	for (int32 s = 0; s < UE_ARRAY_COUNT(SpeedKeys); ++s)
+	{
+		if (WasInputKeyJustPressed(SpeedKeys[s])) { Map->SetSpeed(s + 1); }
+	}
+	// + / - step the speed (the pause stays on the space bar).
+	if (WasInputKeyJustPressed(EKeys::Add) || WasInputKeyJustPressed(EKeys::Equals)) { Map->SetSpeed(FMath::Max(1, Map->GetSpeed() + 1)); }
+	if (WasInputKeyJustPressed(EKeys::Subtract) || WasInputKeyJustPressed(EKeys::Hyphen)) { Map->SetSpeed(FMath::Max(1, Map->GetSpeed() - 1)); }
 	if (WasInputKeyJustPressed(EKeys::F5)) { SaveToSlot(TEXT("Quicksave")); }
 	if (WasInputKeyJustPressed(EKeys::F9)) { LoadFromSlot(TEXT("Quicksave")); }
 	AutosaveTimer += DeltaTime;
