@@ -193,6 +193,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	PaintBornholm(Geometry, Out, Layer);
 	PaintInfo(Geometry, Out, Layer);
 	PaintButton(Geometry, Out, Layer, FVector2D(28.f, 206.f), FVector2D(150.f, 28.f), TEXT("SPILMENU  (M)"), EButton::Menu);
+	PaintCalendar(Geometry, Out, Layer);
 	PaintToast(Geometry, Out, Layer + 6);
 	if (bMenuOpen)
 	{
@@ -204,7 +205,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik på en by  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Home: hele kortet  ·  M: menu  ·  F5/F9: gem/indlæs"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.21 GEM, INDLÆS OG NYT SPIL — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.22 KALENDER OG ÅRSTIDER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -480,7 +481,8 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	const bool bBarracksDone = Site->IsBarracksDone();
 	const FString Status = bBarracksDone
 		? TEXT("Færdig  ·  klar til garnisonen")
-		: FString::Printf(TEXT("%s  ·  dag %d af %d"), *Site->GetStageName(0), int32(Site->GetModuleElapsedDays(0)), int32(ACampaign1851ConstructionSite::ModuleDays(0)));
+		: FString::Printf(TEXT("%s  ·  klar ca. %s"), *Site->GetStageName(0),
+			*ACampaign1851Map::FormatDate(Map->GetDate() + FTimespan::FromDays(ACampaign1851ConstructionSite::ModuleDays(0) - Site->GetModuleElapsedDays(0)), true));
 	PaintText(Geometry, Out, Layer + 2, Status, Text + FVector2D(0.f, 76.f), Serif(12, EFace::Italic), bBarracksDone ? Gold : Ink, 0.f, false);
 	if (!bBarracksDone)
 	{
@@ -505,7 +507,8 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 		}
 		else if (Site->GetActiveModule() == m)
 		{
-			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s  ·  dag %d af %d"), *Site->GetStageName(m), int32(Site->GetModuleElapsedDays(m)), Days),
+			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s  ·  klar ca. %s"), *Site->GetStageName(m),
+				*ACampaign1851Map::FormatDate(Map->GetDate() + FTimespan::FromDays(Days - Site->GetModuleElapsedDays(m)), true)),
 				Row + FVector2D(74.f, 36.f), Serif(11, EFace::Italic), Ink, 0.f, false);
 			PaintBar(Geometry, Out, Layer + 2, Row + FVector2D(250.f, 13.f), 110.f, Site->GetModuleProgress(m));
 		}
@@ -529,13 +532,14 @@ void SCampaign1851Overlay::PaintBar(const FGeometry& Geometry, FSlateWindowEleme
 }
 
 void SCampaign1851Overlay::PaintButton(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size,
-	const FString& Text, EButton Action, int32 Module) const
+	const FString& Text, EButton Action, int32 Module, bool bHighlight) const
 {
 	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
-	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(Pos)), White, ESlateDrawEffect::None, FLinearColor::FromSRGBColor(FColor(58, 40, 22, 235)));
+	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(Pos)), White, ESlateDrawEffect::None,
+		bHighlight ? Gold.CopyWithNewOpacity(0.85f) : FLinearColor::FromSRGBColor(FColor(58, 40, 22, 235)));
 	TArray<FVector2D> Frame = { Pos, Pos + FVector2D(Size.X, 0.f), Pos + Size, Pos + FVector2D(0.f, Size.Y), Pos };
 	FSlateDrawElement::MakeLines(Out, Layer + 1, Geometry.ToPaintGeometry(), Frame, ESlateDrawEffect::None, Gold, true, 1.2f);
-	PaintText(Geometry, Out, Layer + 1, Text, Pos + Size * 0.5f, Serif(11), Ink, 0.5f, false);
+	PaintText(Geometry, Out, Layer + 1, Text, Pos + Size * 0.5f, Serif(11), bHighlight ? FLinearColor::FromSRGBColor(FColor(30, 22, 12)) : Ink, 0.5f, false);
 	Buttons.Add({ Pos, Pos + Size, Action, Module });
 }
 
@@ -641,10 +645,27 @@ void SCampaign1851Overlay::PaintToast(const FGeometry& Geometry, FSlateWindowEle
 	const FSlateFontInfo Font = Serif(15, EFace::Italic);
 	const FVector2D TextSize = Measure(Toast, Font);
 	const FVector2D Size(TextSize.X + 60.f, 44.f);
-	const FVector2D Pos((Geometry.GetLocalSize().X - Size.X) * 0.5f, 28.f);
+	const FVector2D Pos((Geometry.GetLocalSize().X - Size.X) * 0.5f, 100.f);   // under the date panel
 	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
 	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(Pos)), White, ESlateDrawEffect::None, Panel.CopyWithNewOpacity(Panel.A * Alpha));
 	TArray<FVector2D> Frame = { Pos, Pos + FVector2D(Size.X, 0.f), Pos + Size, Pos + FVector2D(0.f, Size.Y), Pos };
 	FSlateDrawElement::MakeLines(Out, Layer + 1, Geometry.ToPaintGeometry(), Frame, ESlateDrawEffect::None, Gold.CopyWithNewOpacity(Alpha), true, 1.2f);
 	PaintText(Geometry, Out, Layer + 1, Toast, Pos + Size * 0.5f, Font, Ink.CopyWithNewOpacity(Alpha), 0.5f, false);
+}
+
+void SCampaign1851Overlay::PaintCalendar(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	const FVector2D Size(600.f, 56.f);   // clears the title cartouche on a 1526 px wide view
+	const FVector2D Pos((Geometry.GetLocalSize().X - Size.X) * 0.5f, 28.f);
+	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	const FString Date = ACampaign1851Map::FormatDate(Map->GetDate());
+	const FSlateFontInfo DateFont = Serif(20);
+	PaintText(Geometry, Out, Layer + 2, Date, Pos + FVector2D(24.f, Size.Y * 0.5f), DateFont, Ink, 0.f);
+	PaintText(Geometry, Out, Layer + 2, Map->GetSeasonName(), Pos + FVector2D(24.f + Measure(Date, DateFont).X + 16.f, Size.Y * 0.5f + 2.f), Serif(13, EFace::Italic), Gold, 0.f, false);
+	const float ButtonWidth = 56.f, Gap = 6.f;
+	float X = Pos.X + Size.X - 18.f - ACampaign1851Map::NumSpeeds() * (ButtonWidth + Gap) + Gap;
+	for (int32 s = 0; s < ACampaign1851Map::NumSpeeds(); ++s, X += ButtonWidth + Gap)
+	{
+		PaintButton(Geometry, Out, Layer + 2, FVector2D(X, Pos.Y + 14.f), FVector2D(ButtonWidth, 28.f), ACampaign1851Map::SpeedLabel(s), EButton::Speed, s, Map->GetSpeed() == s);
+	}
 }

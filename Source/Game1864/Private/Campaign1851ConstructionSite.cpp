@@ -49,7 +49,7 @@ float ACampaign1851ConstructionSite::ModuleDays(int32 Module) { return Modules[F
 
 ACampaign1851ConstructionSite::ACampaign1851ConstructionSite()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;   // advanced by the map's calendar
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	SetRootComponent(Root);
 	auto Part = [this](const TCHAR* Name)
@@ -150,9 +150,8 @@ FString ACampaign1851ConstructionSite::GetStageName(int32 Module) const
 	return TEXT("Indretning");
 }
 
-void ACampaign1851ConstructionSite::Tick(float DeltaSeconds)
+void ACampaign1851ConstructionSite::Advance(float DeltaDays, float DeltaSeconds)
 {
-	Super::Tick(DeltaSeconds);
 	Clock += DeltaSeconds;
 	// -CampaignAutoBuild: raise the whole complex, module after module (for demos and captures).
 	static const bool bAutoBuild = FParse::Param(FCommandLine::Get(), TEXT("CampaignAutoBuild"));
@@ -169,7 +168,7 @@ void ACampaign1851ConstructionSite::Tick(float DeltaSeconds)
 	}
 	if (Active != INDEX_NONE)
 	{
-		Elapsed[Active] = FMath::Min(Elapsed[Active] + DeltaSeconds * DaysPerSecond, ModuleDays(Active));
+		Elapsed[Active] = FMath::Min(Elapsed[Active] + DeltaDays, ModuleDays(Active));
 		if (IsModuleDone(Active))
 		{
 			// Let the last frame show the finished state before the next project can start.

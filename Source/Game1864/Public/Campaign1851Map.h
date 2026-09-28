@@ -10,6 +10,7 @@ class UHierarchicalInstancedStaticMeshComponent;
 class UMaterialInterface;
 class UTexture2D;
 class ACampaign1851ConstructionSite;
+class UMaterialParameterCollection;
 
 /** Region codes used by the 1851 data: K Kingdom, S Schleswig, H Holstein/Lauenburg. */
 struct FCampaign1851City
@@ -125,6 +126,25 @@ public:
 	FVector2D GetSizeKm() const { return SizeKm; }
 	bool IsReady() const { return bReady; }
 
+	// ---- Campaign calendar: days since 1 July 1851 and the game speed (0 = paused).
+
+	/** Moves the calendar on by the real time passed; drives the building projects and the season. */
+	void AdvanceTime(float DeltaSeconds);
+	void SetSpeed(int32 InSpeed) { Speed = FMath::Clamp(InSpeed, 0, NumSpeeds() - 1); }
+	int32 GetSpeed() const { return Speed; }
+	static int32 NumSpeeds() { return 4; }
+	/** Campaign days per real second at a speed step (0, 1, 3, 10). */
+	static float DaysPerSecondAt(int32 InSpeed);
+	static const TCHAR* SpeedLabel(int32 InSpeed);
+	double GetCampaignDays() const { return CampaignDays; }
+	void SetCampaignDays(double Days) { CampaignDays = FMath::Max(Days, 0.0); UpdateSeason(); }
+	static FDateTime StartDate() { return FDateTime(1851, 7, 1); }
+	FDateTime GetDate() const { return StartDate() + FTimespan::FromDays(CampaignDays); }
+	/** "1. juli 1851", or "1. jul. 1851" with bShort. */
+	static FString FormatDate(const FDateTime& Date, bool bShort = false);
+	/** "Vinter", "Forår", "Sommer" or "Efterår". */
+	FString GetSeasonName() const;
+
 	/** Starts (or returns the running) barracks project in a town; null if the town has no plot. */
 	ACampaign1851ConstructionSite* StartProject(int32 CityIndex);
 	ACampaign1851ConstructionSite* FindProject(int32 CityIndex) const;
@@ -219,5 +239,12 @@ private:
 	int32 FeaturesW = 0, FeaturesH = 0;
 	bool bSceneryVisible = false;
 	bool bRoadsVisible = false;
+
+	/** Season weights for the map materials (MPC_Campaign1851Season): Snow, Bare, Autumn, Spring. */
+	void UpdateSeason();
+	double CampaignDays = 0.0;
+	int32 Speed = 1;
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialParameterCollection> SeasonCollection;
 	bool bReady = false;
 };

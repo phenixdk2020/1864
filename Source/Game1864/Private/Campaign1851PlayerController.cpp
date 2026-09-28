@@ -78,6 +78,18 @@ void ACampaign1851PlayerController::TryInit()
 	{
 		CampaignBuild(BuildCity);
 	}
+	// Test starts: -CampaignSpeed=0..3, -CampaignDate=1852-01-20 (e.g. to see the winter).
+	int32 StartSpeed = 0;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignSpeed="), StartSpeed))
+	{
+		Map->SetSpeed(StartSpeed);
+	}
+	FString StartDate;
+	FDateTime Parsed;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignDate="), StartDate) && FDateTime::ParseIso8601(*StartDate, Parsed))
+	{
+		Map->SetCampaignDays((Parsed - ACampaign1851Map::StartDate()).GetTotalDays());
+	}
 	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignOpenMenu")))
 	{
 		OpenGameMenu();
@@ -203,6 +215,15 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	{
 		if (Overlay.IsValid() && Overlay->IsMenuOpen()) { Overlay->CloseMenu(); } else { OpenGameMenu(); }
 	}
+	// Calendar: the game stands still while the menu is open.
+	Map->AdvanceTime(Overlay.IsValid() && Overlay->IsMenuOpen() ? 0.f : DeltaTime);
+	if (WasInputKeyJustPressed(EKeys::SpaceBar))
+	{
+		if (Map->GetSpeed() > 0) { SpeedBeforePause = Map->GetSpeed(); Map->SetSpeed(0); } else { Map->SetSpeed(SpeedBeforePause); }
+	}
+	if (WasInputKeyJustPressed(EKeys::One)) { Map->SetSpeed(1); }
+	if (WasInputKeyJustPressed(EKeys::Two)) { Map->SetSpeed(2); }
+	if (WasInputKeyJustPressed(EKeys::Three)) { Map->SetSpeed(3); }
 	if (WasInputKeyJustPressed(EKeys::F5)) { SaveToSlot(TEXT("Quicksave")); }
 	if (WasInputKeyJustPressed(EKeys::F9)) { LoadFromSlot(TEXT("Quicksave")); }
 	AutosaveTimer += DeltaTime;
@@ -249,6 +270,10 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		if (Button == SCampaign1851Overlay::EButton::Menu)
 		{
 			OpenGameMenu();
+		}
+		else if (Button == SCampaign1851Overlay::EButton::Speed)
+		{
+			Map->SetSpeed(Module);
 		}
 		else if (Button == SCampaign1851Overlay::EButton::BuildModule)
 		{
@@ -371,7 +396,10 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 		}
 		Parts.Add(FString::Printf(TEXT("%s: %s"), *P.City, *FString::Join(Built, TEXT(", "))));
 	}
-	Save->Summary = Parts.Num() > 0 ? FString::Join(Parts, TEXT("  ·  ")) : TEXT("Ingen byggerier");
+	Save->CampaignDays = Map->GetCampaignDays();
+	Save->Speed = Map->GetSpeed();
+	Save->Summary = FString::Printf(TEXT("%s  ·  %s"), *ACampaign1851Map::FormatDate(Map->GetDate(), true),
+		Parts.Num() > 0 ? *FString::Join(Parts, TEXT("  ·  ")) : TEXT("ingen byggerier"));
 	const bool bOk = UGameplayStatics::SaveGameToSlot(Save, Slot, 0);
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|save|%s|%s|%s"), *Slot, bOk ? TEXT("ok") : TEXT("FAILED"), *Save->Summary);
 	if (!bQuiet && Overlay.IsValid())
@@ -394,6 +422,9 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 		return false;
 	}
 	Map->ClearProjects();
+	// v1 saves had no calendar: they start on 1 July 1851 at normal speed.
+	Map->SetCampaignDays(Save->SaveVersion >= 2 ? Save->CampaignDays : 0.0);
+	Map->SetSpeed(Save->SaveVersion >= 2 ? Save->Speed : 1);
 	int32 Restored = 0;
 	for (const FCampaign1851ProjectSave& P : Save->Projects)
 	{
@@ -419,6 +450,8 @@ void ACampaign1851PlayerController::CampaignNewGame()
 		return;
 	}
 	Map->ClearProjects();
+	Map->SetCampaignDays(0.0);
+	Map->SetSpeed(1);
 	Camera->ResetView();
 	if (Overlay.IsValid())
 	{

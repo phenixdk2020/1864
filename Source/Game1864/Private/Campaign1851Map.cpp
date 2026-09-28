@@ -3,6 +3,8 @@
 #include "Campaign1851ConstructionSite.h"
 #include "Campaign1851Scenery.h"
 #include "Engine/World.h"
+#include "Kismet/KismetMaterialLibrary.h"
+#include "Materials/MaterialParameterCollection.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -95,6 +97,7 @@ void ACampaign1851Map::BeginPlay()
 	}
 	BuildTerrain();
 	BuildMarkers();
+	SeasonCollection = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/Campaign1851/MPC_Campaign1851Season.MPC_Campaign1851Season"));
 	if (LoadFeatures())
 	{
 		BuildScenery();
@@ -104,6 +107,7 @@ void ACampaign1851Map::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|no Denmark1851_Features.png; the close zoom has no 3D scenery"));
 	}
 	bReady = true;
+	UpdateSeason();
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|ready|cities=%d|labels=%d|size=%.0fx%.0f km"), Cities.Num(), Labels.Num(), SizeKm.X, SizeKm.Y);
 }
 
@@ -1057,4 +1061,78 @@ bool ACampaign1851Map::RestoreProject(const FString& CityName, const TArray<floa
 	}
 	Site->RestoreState(ModuleDays, ActiveModule);
 	return true;
+}
+
+// ------------------------------------------------------------------ calendar and seasons
+
+namespace
+{
+	const float SpeedDays[] = { 0.f, 1.f, 3.f, 10.f };
+	const TCHAR* SpeedLabels[] = { TEXT("PAUSE"), TEXT("1×"), TEXT("3×"), TEXT("10×") };
+	const TCHAR* MonthNames[] = { TEXT("januar"), TEXT("februar"), TEXT("marts"), TEXT("april"), TEXT("maj"), TEXT("juni"),
+		TEXT("juli"), TEXT("august"), TEXT("september"), TEXT("oktober"), TEXT("november"), TEXT("december") };
+	const TCHAR* MonthShort[] = { TEXT("jan."), TEXT("feb."), TEXT("mar."), TEXT("apr."), TEXT("maj"), TEXT("jun."),
+		TEXT("jul."), TEXT("aug."), TEXT("sep."), TEXT("okt."), TEXT("nov."), TEXT("dec.") };
+
+	float Ramp(float X, float A, float B) { return FMath::Clamp((X - A) / (B - A), 0.f, 1.f); }
+
+	/** 0..1 over the year: rises Rise0..Rise1, falls Fall0..Fall1 (day of year; past 365 wraps into the next year). */
+	float SeasonWindow(float Day, float Rise0, float Rise1, float Fall0, float Fall1)
+	{
+		auto W = [&](float X) { return FMath::Min(Ramp(X, Rise0, Rise1), 1.f - Ramp(X, Fall0, Fall1)); };
+		return FMath::Max(W(Day), W(Day + 365.f));
+	}
+}
+
+float ACampaign1851Map::DaysPerSecondAt(int32 InSpeed) { return SpeedDays[FMath::Clamp(InSpeed, 0, NumSpeeds() - 1)]; }
+const TCHAR* ACampaign1851Map::SpeedLabel(int32 InSpeed) { return SpeedLabels[FMath::Clamp(InSpeed, 0, NumSpeeds() - 1)]; }
+
+FString ACampaign1851Map::FormatDate(const FDateTime& Date, bool bShort)
+{
+	const int32 M = FMath::Clamp(Date.GetMonth(), 1, 12) - 1;
+	return FString::Printf(TEXT("%d. %s %d"), Date.GetDay(), bShort ? MonthShort[M] : MonthNames[M], Date.GetYear());
+}
+
+FString ACampaign1851Map::GetSeasonName() const
+{
+	const int32 M = GetDate().GetMonth();
+	return M == 12 || M <= 2 ? TEXT("Vinter") : M <= 5 ? TEXT("Forår") : M <= 8 ? TEXT("Sommer") : TEXT("Efterår");
+}
+
+void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
+{
+	if (!bReady)
+	{
+		return;
+	}
+	const float DeltaDays = DeltaSeconds * DaysPerSecondAt(Speed);
+	CampaignDays += DeltaDays;
+	for (ACampaign1851ConstructionSite* Site : Projects)
+	{
+		if (Site)
+		{
+			Site->Advance(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
+		}
+	}
+	UpdateSeason();
+}
+
+void ACampaign1851Map::UpdateSeason()
+{
+	if (!SeasonCollection || !GetWorld())
+	{
+		return;
+	}
+	// Danish seasons by day of year: snow Dec-Mar, bare broadleaves Nov-Apr, autumn colours
+	// Sep-Nov, fresh spring green Apr-Jun. Summer is the painting as it is (harvest gold).
+	const FDateTime Date = GetDate();
+	const float Day = float(Date.GetDayOfYear()) + float(Date.GetTimeOfDay().GetTotalDays());
+	const float Snow = 0.9f * SeasonWindow(Day, 335.f, 370.f, 416.f, 444.f);
+	const float Bare = SeasonWindow(Day, 314.f, 335.f, 465.f, 486.f);
+	const float Autumn = SeasonWindow(Day, 253.f, 288.f, 314.f, 339.f);
+	const float Spring = SeasonWindow(Day, 100.f, 130.f, 150.f, 172.f);
+	UKismetMaterialLibrary::SetScalarParameterValue(this, SeasonCollection, TEXT("Snow"), Snow);
+	UKismetMaterialLibrary::SetScalarParameterValue(this, SeasonCollection, TEXT("Bare"), Bare);
+	UKismetMaterialLibrary::SetScalarParameterValue(this, SeasonCollection, TEXT("Autumn"), Autumn);
+	UKismetMaterialLibrary::SetScalarParameterValue(this, SeasonCollection, TEXT("Spring"), Spring);
 }

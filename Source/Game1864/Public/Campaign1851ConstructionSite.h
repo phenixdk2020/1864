@@ -29,11 +29,11 @@ class GAME1864_API ACampaign1851ConstructionSite : public AActor
 public:
 	ACampaign1851ConstructionSite();
 
-	virtual void Tick(float DeltaSeconds) override;
-
-	/** Campaign days that pass per real second (a stand-in until the campaign has a clock). */
-	UPROPERTY(EditAnywhere, Category = "Construction")
-	float DaysPerSecond = 3.f;
+	/**
+	 * Driven by the campaign calendar (ACampaign1851Map::AdvanceTime): DeltaDays of work, and
+	 * DeltaSeconds for the animations (0 while the game is paused, so the site freezes too).
+	 */
+	void Advance(float DeltaDays, float DeltaSeconds);
 
 	/** Module 0 is the barracks; the others need it finished. */
 	static int32 NumModules();

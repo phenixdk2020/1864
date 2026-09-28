@@ -59,6 +59,81 @@ if lib.does_asset_exist(TEX_DEST + "/Fields1851_Detail"):  # replaced by the par
     lib.delete_asset(TEX_DEST + "/Fields1851_Detail")
 
 
+# ------------------------------------------------------------------ seasons
+# ACampaign1851Map sets these from the campaign date every frame (0..1 each).
+MPC_PATH = MAT_DEST + "/MPC_Campaign1851Season"
+SEASON_PARAMS = ("Snow", "Bare", "Autumn", "Spring")
+if lib.does_asset_exist(MPC_PATH):
+    mpc = lib.load_asset(MPC_PATH)  # keep the parameter ids stable
+else:
+    mpc = tools.create_asset("MPC_Campaign1851Season", MAT_DEST, unreal.MaterialParameterCollection, unreal.MaterialParameterCollectionFactoryNew())
+    scalars = []
+    for name in SEASON_PARAMS:
+        sp = unreal.CollectionScalarParameter()
+        sp.set_editor_property("parameter_name", name)
+        sp.set_editor_property("default_value", 0.0)
+        scalars.append(sp)
+    mpc.set_editor_property("scalar_parameters", scalars)
+    lib.save_loaded_asset(mpc)
+log("collection MPC_Campaign1851Season")
+
+# The painted map: land is told from sea by colour (the sea is blue). Spring freshens the greens,
+# autumn turns them golden, bare winter land goes dun, snow whitens the land and chills the sea.
+MAP_SEASON = """
+float3 c = C;
+float land = saturate((C.g - C.b) * 12.0 + 0.2);
+float l = dot(C, float3(0.2126, 0.7152, 0.0722));
+c = lerp(c, c * float3(0.92, 1.18, 0.85), Spring * land);
+c = lerp(c, float3(l * 1.45, l * 1.05, l * 0.5), Autumn * land * 0.5);
+c = lerp(c, float3(l * 1.1, l * 1.0, l * 0.85), Bare * land * 0.45);
+float3 snow = float3(0.74, 0.77, 0.82) * saturate(0.6 + l * 3.0);
+// Dark ground (woods, hedgerows) keeps showing through the snow, so fields and roads still read.
+c = lerp(c, snow, Snow * land * 0.78 * saturate(0.35 + l * 6.0));
+c = lerp(c, c * float3(0.82, 0.9, 1.0), Snow * (1.0 - land) * 0.6);
+return c;
+"""
+
+# Scenery (vertex colours): foliage is the green; it turns orange-gold in autumn and grey-brown
+# when bare. Snow settles on faces that look up (roofs, tree tops), not on the dark drop shadows.
+SCENERY_SEASON = """
+float l = dot(C, float3(0.2126, 0.7152, 0.0722));
+float green = saturate((C.g - max(C.r, C.b)) * 20.0);
+float3 c = C;
+c = lerp(c, c * float3(0.9, 1.2, 0.8), Spring * green);
+c = lerp(c, float3(C.g * 2.4, C.g * 1.15, C.g * 0.25), Autumn * green * 0.85);
+c = lerp(c, float3(0.09, 0.075, 0.06) * (0.6 + l * 4.0), Bare * green * 0.7);
+float up = saturate((N.z - 0.35) * 3.0) * saturate(l * 8.0);
+// Roofs and tree tops take the most snow; flat ground (roads, parade grounds) stays trodden.
+float flat = step(0.97, N.z);
+c = lerp(c, float3(0.84, 0.86, 0.9), Snow * up * lerp(0.9, 0.5, flat));
+return c;
+"""
+
+
+def season(mat, src, src_pin, code, x, y, normal=False):
+    """Custom HLSL node: colour in, seasonal colour out, weights from MPC_Campaign1851Season."""
+    node = MEL.create_material_expression(mat, unreal.MaterialExpressionCustom, x, y)
+    node.set_editor_property("code", code)
+    node.set_editor_property("output_type", unreal.CustomMaterialOutputType.CMOT_FLOAT3)
+    node.set_editor_property("description", "Season")
+    inputs = []
+    for name in ("C",) + SEASON_PARAMS + (("N",) if normal else ()):
+        ci = unreal.CustomInput()
+        ci.set_editor_property("input_name", name)
+        inputs.append(ci)
+    node.set_editor_property("inputs", inputs)
+    MEL.connect_material_expressions(src, src_pin, node, "C")
+    for i, name in enumerate(SEASON_PARAMS):
+        param = MEL.create_material_expression(mat, unreal.MaterialExpressionCollectionParameter, x - 320, y + 90 + i * 70)
+        param.set_editor_property("collection", mpc)
+        param.set_editor_property("parameter_name", name)
+        MEL.connect_material_expressions(param, "", node, name)
+    if normal:
+        n = MEL.create_material_expression(mat, unreal.MaterialExpressionVertexNormalWS, x - 320, y + 390)
+        MEL.connect_material_expressions(n, "", node, "N")
+    return node
+
+
 # ------------------------------------------------------------------ materials
 def new_material(name):
     path = "%s/%s" % (MAT_DEST, name)
@@ -116,7 +191,8 @@ final = expr(unreal.MaterialExpressionLinearInterpolate, -300, 0)
 MEL.connect_material_expressions(col, "RGB", final, "A")
 MEL.connect_material_expressions(lit, "", final, "B")
 MEL.connect_material_expressions(strength, "", final, "Alpha")
-MEL.connect_material_property(final, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+seasoned = season(m, final, "", MAP_SEASON, -100, 300)
+MEL.connect_material_property(seasoned, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
 MEL.recompile_material(m)
 lib.save_loaded_asset(m)
 log("material M_Campaign1851Map")
@@ -144,7 +220,8 @@ vary.set_editor_property("const_a", 0.84)
 vary.set_editor_property("const_b", 1.1)
 MEL.connect_material_expressions(rnd, "", vary, "Alpha")
 lit = MEL.create_material_expression(s, unreal.MaterialExpressionMultiply, -400, 100)
-MEL.connect_material_expressions(gamma, "", lit, "A")
+seasoned = season(s, gamma, "", SCENERY_SEASON, -520, -300, normal=True)
+MEL.connect_material_expressions(seasoned, "", lit, "A")
 MEL.connect_material_expressions(vary, "", lit, "B")
 MEL.connect_material_property(lit, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
 MEL.recompile_material(s)
@@ -160,7 +237,8 @@ kvc = MEL.create_material_expression(k, unreal.MaterialExpressionVertexColor, -7
 kgamma = MEL.create_material_expression(k, unreal.MaterialExpressionPower, -450, 0)
 kgamma.set_editor_property("const_exponent", 2.2)
 MEL.connect_material_expressions(kvc, "", kgamma, "Base")
-MEL.connect_material_property(kgamma, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+kseasoned = season(k, kgamma, "", SCENERY_SEASON, -250, -300, normal=True)
+MEL.connect_material_property(kseasoned, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
 top = MEL.create_material_expression(k, unreal.MaterialExpressionScalarParameter, -900, 300)
 top.set_editor_property("parameter_name", "BuildTop")
 top.set_editor_property("default_value", 1.0e7)

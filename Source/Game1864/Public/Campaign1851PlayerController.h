@@ -59,6 +59,8 @@ private:
 	/** Save slots in menu order. */
 	static const TArray<FString>& SaveSlots();
 	float AutosaveTimer = 0.f;
+	/** Speed to return to when un-pausing with the space bar. */
+	int32 SpeedBeforePause = 1;
 
 	/** Last camera view, so the autosave on exit works after the camera pawn is gone. */
 	FVector LastCameraTarget = FVector::ZeroVector;

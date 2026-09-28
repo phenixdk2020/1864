@@ -19,7 +19,7 @@ struct FCampaign1851ProjectSave
 /**
  * A saved 1851 campaign (Saved/SaveGames/<slot>.sav). Holds the construction projects, the
  * camera view and the selected town. Bump SaveVersion when the layout changes and migrate in
- * ACampaign1851PlayerController::ApplySave.
+ * ACampaign1851PlayerController::LoadFromSlot.
  */
 UCLASS()
 class GAME1864_API UCampaign1851SaveGame : public USaveGame
@@ -27,7 +27,8 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
-	static constexpr int32 CurrentVersion = 1;
+	/** 1: projects and view. 2: + campaign date and speed. */
+	static constexpr int32 CurrentVersion = 2;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;
@@ -40,4 +41,8 @@ public:
 	UPROPERTY() FString SelectedCity;
 
 	UPROPERTY() TArray<FCampaign1851ProjectSave> Projects;
+
+	/** Days since 1 July 1851, and the game speed step. */
+	UPROPERTY() double CampaignDays = 0.0;
+	UPROPERTY() int32 Speed = 1;
 };
