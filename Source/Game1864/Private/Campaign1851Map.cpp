@@ -1459,12 +1459,12 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 		return;
 	}
 	const int32 MonthBefore = GetDate().GetMonth();
-	// The clock ticks in whole hours; the work of those hours is done at once.
-	HourCarry += double(DeltaSeconds) * HoursPerSecondAt(Speed);
-	const double Hours = FMath::FloorToDouble(HourCarry);
-	HourCarry -= Hours;
-	const float DeltaDays = float(Hours / 24.0);
-	CampaignDays = FMath::RoundToDouble((CampaignDays + Hours / 24.0) * 24.0) / 24.0;
+	// The clock ticks in whole minutes; the work of those minutes is done at once.
+	MinuteCarry += double(DeltaSeconds) * HoursPerSecondAt(Speed) * 60.0;
+	const double Minutes = FMath::FloorToDouble(MinuteCarry);
+	MinuteCarry -= Minutes;
+	const float DeltaDays = float(Minutes / 1440.0);
+	CampaignDays = FMath::RoundToDouble((CampaignDays + Minutes / 1440.0) * 1440.0) / 1440.0;
 	for (ACampaign1851ConstructionSite* Site : Projects)
 	{
 		if (!Site)

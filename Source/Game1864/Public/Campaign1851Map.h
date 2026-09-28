@@ -172,10 +172,10 @@ public:
 	FVector2D GetSizeKm() const { return SizeKm; }
 	bool IsReady() const { return bReady; }
 
-	// ---- Campaign clock: days since 1 July 1851 00:00, running hour by hour (as Hearts of Iron IV),
+	// ---- Campaign clock: days since 1 July 1851 00:00, running minute by minute (a 24-hour clock as in Hearts of Iron IV),
 	// and the game speed (0 = paused, 1..5).
 
-	/** Moves the clock on by the real time passed, in whole hours; drives the projects and the season. */
+	/** Moves the clock on by the real time passed, in whole minutes; drives the projects and the season. */
 	void AdvanceTime(float DeltaSeconds);
 	void SetSpeed(int32 InSpeed) { Speed = FMath::Clamp(InSpeed, 0, NumSpeeds() - 1); }
 	int32 GetSpeed() const { return Speed; }
@@ -183,10 +183,10 @@ public:
 	/** Campaign hours per real second at a speed step (0, 2, 6, 12, 24, 96). */
 	static float HoursPerSecondAt(int32 InSpeed);
 	static const TCHAR* SpeedLabel(int32 InSpeed);
-	/** "14:00" */
-	static FString FormatHour(const FDateTime& Date) { return FString::Printf(TEXT("%02d:00"), Date.GetHour()); }
+	/** "14:37" */
+	static FString FormatClock(const FDateTime& Date) { return FString::Printf(TEXT("%02d:%02d"), Date.GetHour(), Date.GetMinute()); }
 	double GetCampaignDays() const { return CampaignDays; }
-	void SetCampaignDays(double Days) { CampaignDays = FMath::Max(FMath::RoundToDouble(Days * 24.0) / 24.0, 0.0); HourCarry = 0.0; UpdateSeason(); }
+	void SetCampaignDays(double Days) { CampaignDays = FMath::Max(FMath::RoundToDouble(Days * 1440.0) / 1440.0, 0.0); MinuteCarry = 0.0; UpdateSeason(); }
 	static FDateTime StartDate() { return FDateTime(1851, 7, 1); }
 	FDateTime GetDate() const { return StartDate() + FTimespan::FromDays(CampaignDays); }
 	/** "1. juli 1851", or "1. jul. 1851" with bShort. */
@@ -416,7 +416,7 @@ private:
 	/** Season weights for the map materials (MPC_Campaign1851Season): Snow, Bare, Autumn, Spring. */
 	void UpdateSeason();
 	double CampaignDays = 0.0;
-	double HourCarry = 0.0;   // part of an hour of real time not yet ticked
+	double MinuteCarry = 0.0;   // part of a minute of real time not yet ticked
 	int32 Speed = 1;
 
 	/** Closes a month: grant in, upkeep and the month's construction wages out. */
