@@ -25,11 +25,31 @@ struct FCampaign1851City
 	bool bBornholm = false;
 	bool bForeign = false;
 	FVector World = FVector::ZeroVector;
+	/** Amt id (FCampaign1851Amt::Id); 0 for foreign towns. */
+	int32 AmtId = 0;
 
 	/** Military building plot beside a main road at the edge of town (towns of 2,500+). */
 	bool bHasPlot = false;
 	FVector2D PlotKm = FVector2D::ZeroVector;
 	float PlotYaw = 0.f;   // world yaw of the site; its +Y (parade ground, gate) faces the road
+};
+
+/**
+ * An amt c. 1851 (county; Schleswig/Holstein amter and landscapes): the administrative unit
+ * that holds population and pays taxes (design manual 4.2: regions as administrative containers).
+ * Population is an estimate: town figures plus the region's rural population spread by area.
+ */
+struct FCampaign1851Amt
+{
+	int32 Id = 0;
+	FString Name;
+	FString Seat;
+	FString Region;   // K, S, H
+	int32 Population = 0;
+	int32 Urban = 0;
+	int32 Rural = 0;
+	float AreaKm2 = 0.f;
+	TArray<FString> Towns;
 };
 
 struct FCampaign1851Label
@@ -123,6 +143,20 @@ public:
 
 	const TArray<FCampaign1851City>& GetCities() const { return Cities; }
 	const TArray<FCampaign1851Label>& GetLabels() const { return Labels; }
+	const TArray<FCampaign1851Amt>& GetAmter() const { return Amter; }
+	const FCampaign1851Amt* FindAmt(int32 Id) const { return Amter.FindByPredicate([Id](const FCampaign1851Amt& A) { return A.Id == Id; }); }
+	/** Amt under a world position on the main map (0 = sea or foreign). */
+	int32 AmtAtWorld(const FVector& World) const;
+	/** Lights up an amt on the map (0 = none). */
+	void SetHighlightedAmt(int32 Id);
+
+	/** Taxes per head and year that go to construction (the state's development share). */
+	static constexpr double RuralTaxPerHead = 0.2;
+	static constexpr double UrbanTaxPerHead = 0.45;
+	static double AmtYearlyTax(const FCampaign1851Amt& Amt) { return Amt.Rural * RuralTaxPerHead + Amt.Urban * UrbanTaxPerHead; }
+	/** Yearly tax income of a region (K, S, H) or of the whole monarchy (empty). */
+	double YearlyTax(const FString& Region = FString()) const;
+	static FString RegionName(const FString& Code);
 	const FCampaign1851Extent& GetBornholmExtent() const { return Bornholm; }
 	FVector2D GetSizeKm() const { return SizeKm; }
 	bool IsReady() const { return bReady; }
@@ -148,9 +182,8 @@ public:
 
 	// ---- Treasury (design manual 20.2: money / state credit; backlog B-346 budget with a transaction log).
 
-	/** Cash at the start of a campaign and the yearly construction grant from the Finance Act. */
+	/** Cash at the start of a campaign; income comes from the amter's taxes (YearlyTax). */
 	static constexpr double StartingTreasury = 150000.0;
-	static constexpr double YearlyGrant = 500000.0;
 	double GetTreasury() const { return Treasury; }
 	const TArray<FCampaign1851Transaction>& GetLedger() const { return Ledger; }
 	/** Upkeep of finished buildings per month. */
@@ -250,6 +283,10 @@ private:
 	float DetailTileKm = 2.5f;
 	TArray<FCampaign1851City> Cities;
 	TArray<FCampaign1851Label> Labels;
+	TArray<FCampaign1851Amt> Amter;
+	TArray<uint8> AmtIds;   // Denmark1851_Amter.png: amt id per pixel, row 0 = north
+	int32 AmtIdsW = 0, AmtIdsH = 0;
+	bool LoadAmtIds();
 	TArray<TArray<FVector2D>> RoadLines;   // projected km
 	TArray<TArray<FVector2D>> FerryLines;  // projected km, landing to landing
 

@@ -30,6 +30,9 @@ public:
 	/** City to show in the info panel; -1 hides it. */
 	void SetSelectedCity(int32 Index) { SelectedCity = Index; }
 	int32 GetSelectedCity() const { return SelectedCity; }
+	/** Amt to show when no town is selected (0 = none). */
+	void SetSelectedAmt(int32 Id) { SelectedAmt = Id; }
+	int32 GetSelectedAmt() const { return SelectedAmt; }
 
 	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury };
 	void ToggleLedger() { bLedgerOpen = !bLedgerOpen; }
@@ -70,6 +73,8 @@ private:
 	void PaintScaleBar(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintBornholm(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	/** The selected amt: region, seat, population, area, towns, taxes, men of military age, garrisons. */
+	void PaintAmtInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** Progress rings over towns with a building project. */
 	void PaintProjects(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintButton(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Text, EButton Action, int32 Module = INDEX_NONE, bool bHighlight = false, bool bDisabled = false) const;
@@ -89,6 +94,7 @@ private:
 	TWeakObjectPtr<ACampaign1851Map> Map;
 	TWeakObjectPtr<APlayerController> Controller;
 	int32 SelectedCity = INDEX_NONE;
+	int32 SelectedAmt = 0;
 	TSharedPtr<FSlateBrush> BornholmBrush;
 	TSharedPtr<FSlateBrush> DotBrush;
 	TArray<TSharedPtr<FSlateBrush>> ModuleBrushes;   // card images per garrison module

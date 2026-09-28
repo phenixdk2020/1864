@@ -211,7 +211,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik på en by  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Home: hele kortet  ·  M: menu  ·  F5/F9: gem/indlæs"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.23 STATSKASSE OG BYGGEPRISER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.24 AMTER OG SKATTER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -448,10 +448,11 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	const TArray<FCampaign1851City>& Cities = Map->GetCities();
 	if (!Cities.IsValidIndex(SelectedCity))
 	{
+		PaintAmtInfo(Geometry, Out, Layer);
 		return;
 	}
 	const FCampaign1851City& C = Cities[SelectedCity];
-	const FVector2D Size(380.f, 150.f);
+	const FVector2D Size(380.f, C.bForeign ? 150.f : 176.f);
 	const ACampaign1851ConstructionSite* Site = C.bHasPlot ? Map->FindProject(SelectedCity) : nullptr;
 	const int32 ModuleRows = Site && Site->IsBarracksDone() ? ACampaign1851ConstructionSite::NumModules() - 1 : 0;
 	const float RowHeight = 54.f;
@@ -460,8 +461,16 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintText(Geometry, Out, Layer + 2, C.Name, Pos + FVector2D(22.f, 32.f), Serif(24), Ink, 0.f);
 	PaintText(Geometry, Out, Layer + 2, C.bForeign ? TEXT("Udenlandsk by") : C.bCapital ? TEXT("Hovedstad") : TEXT("Købstad"), Pos + FVector2D(22.f, 64.f), Serif(14, EFace::Italic), Gold, 0.f, false);
-	PaintText(Geometry, Out, Layer + 2, C.bForeign ? TEXT("Uden for monarkiet") : RegionName(C.Region), Pos + FVector2D(22.f, 92.f), Serif(13), Ink, 0.f, false);
+	const FCampaign1851Amt* Amt = Map->FindAmt(C.AmtId);
+	PaintText(Geometry, Out, Layer + 2, C.bForeign ? TEXT("Uden for monarkiet") : Amt ? FString::Printf(TEXT("%s  ·  %s"), *Amt->Name, *ACampaign1851Map::RegionName(Amt->Region)) : RegionName(C.Region),
+		Pos + FVector2D(22.f, 92.f), Serif(13), Ink, 0.f, false);
 	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("ca. %s indbyggere (ca. 1850)"), *Thousands(C.Population)), Pos + FVector2D(22.f, 120.f), Serif(13), Ink, 0.f, false);
+	if (!C.bForeign)
+	{
+		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("Skat til anlæg %s rd./år  ·  våbenføre mænd ca. %s"),
+			*Thousands(FMath::RoundToInt(C.Population * ACampaign1851Map::UrbanTaxPerHead)), *Thousands(FMath::RoundToInt(C.Population * 0.09))),
+			Pos + FVector2D(22.f, 146.f), Serif(12, EFace::Italic), Gold, 0.f, false);
+	}
 	if (!C.bHasPlot)
 	{
 		return;
@@ -702,7 +711,7 @@ void SCampaign1851Overlay::PaintTreasury(const FGeometry& Geometry, FSlateWindow
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintText(Geometry, Out, Layer + 2, TEXT("S T A T S K A S S E N"), Pos + FVector2D(18.f, 18.f), Serif(10), Gold, 0.f, false);
 	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s rd."), *Thousands(FMath::FloorToInt(Map->GetTreasury()))), Pos + FVector2D(18.f, 43.f), Serif(20), Ink, 0.f);
-	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("+%s / md."), *Thousands(FMath::RoundToInt(ACampaign1851Map::YearlyGrant / 12.0))),
+	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("skat +%s / md."), *Thousands(FMath::RoundToInt(Map->YearlyTax() / 12.0))),
 		Pos + FVector2D(Size.X - 16.f, 34.f), Serif(11, EFace::Italic), Ink, 1.f, false);
 	const int32 Upkeep = FMath::RoundToInt(Map->GetMonthlyUpkeep());
 	if (Upkeep > 0)
@@ -731,4 +740,46 @@ void SCampaign1851Overlay::PaintLedger(const FGeometry& Geometry, FSlateWindowEl
 		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s%s"), T.Amount >= 0.0 ? TEXT("+") : TEXT("−"), *Thousands(FMath::RoundToInt(FMath::Abs(T.Amount)))),
 			FVector2D(Pos.X + Size.X - 18.f, Y), Serif(11), T.Amount >= 0.0 ? In : OutInk, 1.f, false);
 	}
+}
+
+void SCampaign1851Overlay::PaintAmtInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	const FCampaign1851Amt* A = Map->FindAmt(SelectedAmt);
+	if (!A)
+	{
+		return;
+	}
+	// Garrisons in the amt.
+	TArray<FString> Garrisons;
+	for (const ACampaign1851ConstructionSite* Site : Map->GetProjects())
+	{
+		const TArray<FCampaign1851City>& Cities = Map->GetCities();
+		if (Site && Cities.IsValidIndex(Site->GetCityIndex()) && Cities[Site->GetCityIndex()].AmtId == A->Id)
+		{
+			Garrisons.Add(FString::Printf(TEXT("%s%s"), *Cities[Site->GetCityIndex()].Name, Site->IsBarracksDone() ? TEXT("") : TEXT(" (under bygning)")));
+		}
+	}
+	const FVector2D Size(420.f, 318.f);
+	const FVector2D Pos(28.f, Geometry.GetLocalSize().Y - 190.f - Size.Y);
+	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	float Y = Pos.Y + 32.f;
+	auto Line = [&](const FString& Label, const FString& Value)
+	{
+		PaintText(Geometry, Out, Layer + 2, Label, FVector2D(Pos.X + 22.f, Y), Serif(12, EFace::Italic), Gold, 0.f, false);
+		PaintText(Geometry, Out, Layer + 2, Value, FVector2D(Pos.X + 158.f, Y), Serif(13), Ink, 0.f, false);
+		Y += 24.f;
+	};
+	PaintText(Geometry, Out, Layer + 2, A->Name, FVector2D(Pos.X + 22.f, Y), Serif(24), Ink, 0.f);
+	Y += 32.f;
+	PaintText(Geometry, Out, Layer + 2, ACampaign1851Map::RegionName(A->Region), FVector2D(Pos.X + 22.f, Y), Serif(14, EFace::Italic), Gold, 0.f, false);
+	Y += 32.f;
+	Line(TEXT("Amtsby"), A->Seat);
+	Line(TEXT("Befolkning"), FString::Printf(TEXT("ca. %s  ·  by %s"), *Thousands(A->Population), *Thousands(A->Urban)));
+	Line(TEXT("Areal"), FString::Printf(TEXT("%s km²  ·  %d indb./km²"), *Thousands(FMath::RoundToInt(A->AreaKm2)), FMath::RoundToInt(A->Population / FMath::Max(A->AreaKm2, 1.f))));
+	Line(TEXT("Købstæder"), A->Towns.Num() > 0 ? FString::Join(A->Towns, TEXT(", ")).Left(36) : TEXT("ingen"));
+	Line(TEXT("Skat til anlæg"), FString::Printf(TEXT("%s rd./år"), *Thousands(FMath::RoundToInt(ACampaign1851Map::AmtYearlyTax(*A)))));
+	Line(TEXT("Våbenføre mænd"), FString::Printf(TEXT("ca. %s (skøn)"), *Thousands(FMath::RoundToInt(A->Population * 0.09))));
+	Line(TEXT("Garnisoner"), Garrisons.Num() > 0 ? FString::Join(Garrisons, TEXT(", ")).Left(36) : TEXT("ingen"));
+	PaintText(Geometry, Out, Layer + 2, TEXT("Befolkningstal er skøn ud fra folketællingerne omkring 1850"), FVector2D(Pos.X + Size.X * 0.5f, Pos.Y + Size.Y - 16.f),
+		Serif(9, EFace::Italic), MutedInk, 0.5f, false);
 }

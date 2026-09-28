@@ -99,6 +99,10 @@ void ACampaign1851Map::BeginPlay()
 	BuildTerrain();
 	BuildMarkers();
 	SeasonCollection = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/Campaign1851/MPC_Campaign1851Season.MPC_Campaign1851Season"));
+	if (!LoadAmtIds())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|no Denmark1851_Amter.png; amter cannot be picked on the map"));
+	}
 	if (LoadFeatures())
 	{
 		BuildScenery();
@@ -171,6 +175,7 @@ bool ACampaign1851Map::LoadData()
 			O->TryGetStringField(TEXT("region"), C.Region);
 			O->TryGetBoolField(TEXT("capital"), C.bCapital);
 			O->TryGetBoolField(TEXT("bornholm"), C.bBornholm);
+			O->TryGetNumberField(TEXT("amt"), C.AmtId);
 			C.bForeign = bForeign;
 			Cities.Add(C);
 		}
@@ -191,6 +196,27 @@ bool ACampaign1851Map::LoadData()
 				const TArray<TSharedPtr<FJsonValue>>& XY = Point->AsArray();
 				Line.Add(FVector2D(XY[0]->AsNumber(), XY[1]->AsNumber()));
 			}
+		}
+	}
+
+	const TArray<TSharedPtr<FJsonValue>>* AmtArray = nullptr;
+	if (Json->TryGetArrayField(TEXT("amter"), AmtArray))
+	{
+		for (const TSharedPtr<FJsonValue>& Value : *AmtArray)
+		{
+			const TSharedPtr<FJsonObject> O = Value->AsObject();
+			FCampaign1851Amt& A = Amter.AddDefaulted_GetRef();
+			A.Id = int32(O->GetNumberField(TEXT("id")));
+			A.Name = O->GetStringField(TEXT("name"));
+			A.Seat = O->GetStringField(TEXT("seat"));
+			A.Region = O->GetStringField(TEXT("region"));
+			O->TryGetNumberField(TEXT("population"), A.Population);
+			O->TryGetNumberField(TEXT("urban"), A.Urban);
+			O->TryGetNumberField(TEXT("rural"), A.Rural);
+			double Area = 0.0;
+			O->TryGetNumberField(TEXT("areaKm2"), Area);
+			A.AreaKm2 = float(Area);
+			O->TryGetStringArrayField(TEXT("towns"), A.Towns);
 		}
 	}
 
@@ -1247,5 +1273,67 @@ void ACampaign1851Map::CloseMonth()
 	{
 		AddTransaction(-Upkeep, TEXT("Drift af garnisoner"));
 	}
-	AddTransaction(YearlyGrant / 12.0, TEXT("Finanslovens anlægsbevilling"));
+	for (const TCHAR* Region : { TEXT("K"), TEXT("S"), TEXT("H") })
+	{
+		AddTransaction(YearlyTax(Region) / 12.0, FString::Printf(TEXT("Skatter: %s"), *RegionName(Region)));
+	}
+}
+
+// ------------------------------------------------------------------ amter
+
+bool ACampaign1851Map::LoadAmtIds()
+{
+	TArray<uint8> Png;
+	if (!FFileHelper::LoadFileToArray(Png, *DataPath(TEXT("Denmark1851_Amter.png"))))
+	{
+		return false;
+	}
+	IImageWrapperModule& Module = FModuleManager::LoadModuleChecked<IImageWrapperModule>(TEXT("ImageWrapper"));
+	TSharedPtr<IImageWrapper> Wrapper = Module.CreateImageWrapper(EImageFormat::PNG);
+	if (!Wrapper.IsValid() || !Wrapper->SetCompressed(Png.GetData(), Png.Num()) || !Wrapper->GetRaw(ERGBFormat::Gray, 8, AmtIds))
+	{
+		return false;
+	}
+	AmtIdsW = Wrapper->GetWidth();
+	AmtIdsH = Wrapper->GetHeight();
+	return true;
+}
+
+int32 ACampaign1851Map::AmtAtWorld(const FVector& World) const
+{
+	if (AmtIds.Num() == 0)
+	{
+		return 0;
+	}
+	const FVector Local = GetActorTransform().InverseTransformPosition(World);
+	const double U = Local.X / (SizeKm.X * KmToUnits) + 0.5, V = -Local.Y / (SizeKm.Y * KmToUnits) + 0.5;
+	if (U < 0.0 || U >= 1.0 || V < 0.0 || V >= 1.0)
+	{
+		return 0;
+	}
+	const int32 X = FMath::Clamp(int32(U * AmtIdsW), 0, AmtIdsW - 1), Y = FMath::Clamp(int32((1.0 - V) * AmtIdsH), 0, AmtIdsH - 1);
+	return AmtIds[Y * AmtIdsW + X];
+}
+
+void ACampaign1851Map::SetHighlightedAmt(int32 Id)
+{
+	if (SeasonCollection)
+	{
+		UKismetMaterialLibrary::SetScalarParameterValue(this, SeasonCollection, TEXT("SelectedAmt"), float(Id > 0 ? Id : -1));
+	}
+}
+
+double ACampaign1851Map::YearlyTax(const FString& Region) const
+{
+	double Total = 0.0;
+	for (const FCampaign1851Amt& A : Amter)
+	{
+		Total += (Region.IsEmpty() || A.Region == Region) ? AmtYearlyTax(A) : 0.0;
+	}
+	return Total;
+}
+
+FString ACampaign1851Map::RegionName(const FString& Code)
+{
+	return Code == TEXT("K") ? TEXT("Kongeriget") : Code == TEXT("S") ? TEXT("Slesvig") : Code == TEXT("H") ? TEXT("Holsten og Lauenborg") : TEXT("Udland");
 }

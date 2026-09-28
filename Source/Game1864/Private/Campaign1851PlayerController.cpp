@@ -90,6 +90,13 @@ void ACampaign1851PlayerController::TryInit()
 	{
 		Map->SetCampaignDays((Parsed - ACampaign1851Map::StartDate()).GetTotalDays());
 	}
+	int32 StartAmt = 0;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignSelectAmt="), StartAmt) && Overlay.IsValid())
+	{
+		Overlay->SetSelectedCity(INDEX_NONE);
+		Overlay->SetSelectedAmt(StartAmt);
+		Map->SetHighlightedAmt(StartAmt);
+	}
 	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignOpenLedger")) && Overlay.IsValid())
 	{
 		Overlay->ToggleLedger();
@@ -349,6 +356,11 @@ void ACampaign1851PlayerController::PickCity()
 		}
 	}
 	Overlay->SetSelectedCity(Best);
+	// No town under the cursor: select the amt there instead (and light it up).
+	FVector Ground;
+	const int32 Amt = Best == INDEX_NONE && CursorGround(Ground) ? Map->AmtAtWorld(Ground) : 0;
+	Overlay->SetSelectedAmt(Amt);
+	Map->SetHighlightedAmt(Best != INDEX_NONE ? Map->GetCities()[Best].AmtId : Amt);
 }
 
 // ------------------------------------------------------------------ save / load

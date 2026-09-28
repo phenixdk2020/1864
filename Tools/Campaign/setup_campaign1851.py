@@ -27,7 +27,7 @@ def log(msg):
 
 # ------------------------------------------------------------------ textures
 tasks = []
-for name in ("Denmark1851_Color", "Fields1851_Parcels", "Denmark1851_DetailMask", "Bornholm1851_Color"):
+for name in ("Denmark1851_Color", "Fields1851_Parcels", "Denmark1851_DetailMask", "Bornholm1851_Color", "Denmark1851_Amter"):
     t = unreal.AssetImportTask()
     t.filename = REF + name + ".png"
     t.destination_path = TEX_DEST
@@ -55,6 +55,17 @@ color_tex = texture("Denmark1851_Color", True)
 parcel_tex = texture("Fields1851_Parcels", True, wrap=True)
 mask_tex = texture("Denmark1851_DetailMask", False)  # alpha = farmland (no heath, dunes or woods)
 texture("Bornholm1851_Color", True)
+# Amt ids (1..41) must survive exactly: no sRGB, no compression, no filtering, no mips, no resampling.
+amt_tex = lib.load_asset(TEX_DEST + "/Denmark1851_Amter")
+amt_tex.set_editor_property("srgb", False)
+amt_tex.set_editor_property("compression_settings", unreal.TextureCompressionSettings.TC_GRAYSCALE)
+amt_tex.set_editor_property("filter", unreal.TextureFilter.TF_NEAREST)
+amt_tex.set_editor_property("mip_gen_settings", unreal.TextureMipGenSettings.TMGS_NO_MIPMAPS)
+amt_tex.set_editor_property("power_of_two_mode", unreal.TexturePowerOfTwoSetting.NONE)
+amt_tex.set_editor_property("address_x", unreal.TextureAddress.TA_CLAMP)
+amt_tex.set_editor_property("address_y", unreal.TextureAddress.TA_CLAMP)
+lib.save_loaded_asset(amt_tex)
+log("texture Denmark1851_Amter (ids)")
 if lib.does_asset_exist(TEX_DEST + "/Fields1851_Detail"):  # replaced by the parcels in v00.00.17
     lib.delete_asset(TEX_DEST + "/Fields1851_Detail")
 
@@ -62,16 +73,25 @@ if lib.does_asset_exist(TEX_DEST + "/Fields1851_Detail"):  # replaced by the par
 # ------------------------------------------------------------------ seasons
 # ACampaign1851Map sets these from the campaign date every frame (0..1 each).
 MPC_PATH = MAT_DEST + "/MPC_Campaign1851Season"
-SEASON_PARAMS = ("Snow", "Bare", "Autumn", "Spring")
+SEASON_PARAMS = ("Snow", "Bare", "Autumn", "Spring")   # + SelectedAmt (the highlighted amt, -1 = none)
 if lib.does_asset_exist(MPC_PATH):
-    mpc = lib.load_asset(MPC_PATH)  # keep the parameter ids stable
+    mpc = lib.load_asset(MPC_PATH)  # keep the parameter ids stable; only add what is missing
+    have = [str(sp.get_editor_property("parameter_name")) for sp in mpc.get_editor_property("scalar_parameters")]
+    if "SelectedAmt" not in have:
+        scalars = list(mpc.get_editor_property("scalar_parameters"))
+        sp = unreal.CollectionScalarParameter()
+        sp.set_editor_property("parameter_name", "SelectedAmt")
+        sp.set_editor_property("default_value", -1.0)
+        scalars.append(sp)
+        mpc.set_editor_property("scalar_parameters", scalars)
+        lib.save_loaded_asset(mpc)
 else:
     mpc = tools.create_asset("MPC_Campaign1851Season", MAT_DEST, unreal.MaterialParameterCollection, unreal.MaterialParameterCollectionFactoryNew())
     scalars = []
-    for name in SEASON_PARAMS:
+    for name in SEASON_PARAMS + ("SelectedAmt",):
         sp = unreal.CollectionScalarParameter()
         sp.set_editor_property("parameter_name", name)
-        sp.set_editor_property("default_value", 0.0)
+        sp.set_editor_property("default_value", -1.0 if name == "SelectedAmt" else 0.0)
         scalars.append(sp)
     mpc.set_editor_property("scalar_parameters", scalars)
     lib.save_loaded_asset(mpc)
@@ -192,7 +212,24 @@ MEL.connect_material_expressions(col, "RGB", final, "A")
 MEL.connect_material_expressions(lit, "", final, "B")
 MEL.connect_material_expressions(strength, "", final, "Alpha")
 seasoned = season(m, final, "", MAP_SEASON, -100, 300)
-MEL.connect_material_property(seasoned, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+# The selected amt lights up: its land a little brighter and warmer.
+amt_ids = expr(unreal.MaterialExpressionTextureSample, -700, 900, texture=amt_tex, sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_GRAYSCALE)
+selected = expr(unreal.MaterialExpressionCollectionParameter, -700, 1150, collection=mpc, parameter_name="SelectedAmt")
+glow = expr(unreal.MaterialExpressionCustom, 100, 600, code="""
+float id = round(Id * 255.0);
+float hit = step(abs(id - Sel), 0.4) * step(0.5, Sel);
+return lerp(C, C * 1.3 + float3(0.04, 0.032, 0.01), hit);
+""", output_type=unreal.CustomMaterialOutputType.CMOT_FLOAT3, description="SelectedAmt")
+glow_inputs = []
+for name in ("C", "Id", "Sel"):
+    ci = unreal.CustomInput()
+    ci.set_editor_property("input_name", name)
+    glow_inputs.append(ci)
+glow.set_editor_property("inputs", glow_inputs)
+MEL.connect_material_expressions(seasoned, "", glow, "C")
+MEL.connect_material_expressions(amt_ids, "R", glow, "Id")
+MEL.connect_material_expressions(selected, "", glow, "Sel")
+MEL.connect_material_property(glow, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
 MEL.recompile_material(m)
 lib.save_loaded_asset(m)
 log("material M_Campaign1851Map")

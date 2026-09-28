@@ -55,273 +55,312 @@
    "lon": 12.568,
    "pop": 129700,
    "region": "K",
-   "capital": true
+   "capital": true,
+   "amt": 13
   },
   {
    "name": "Helsingør",
    "lat": 56.036,
    "lon": 12.611,
    "pop": 8000,
-   "region": "K"
+   "region": "K",
+   "amt": 14
   },
   {
    "name": "Roskilde",
    "lat": 55.642,
    "lon": 12.08,
    "pop": 4400,
-   "region": "K"
+   "region": "K",
+   "amt": 13
   },
   {
    "name": "Køge",
    "lat": 55.458,
    "lon": 12.182,
    "pop": 2800,
-   "region": "K"
+   "region": "K",
+   "amt": 13
   },
   {
    "name": "Holbæk",
    "lat": 55.717,
    "lon": 11.713,
    "pop": 2300,
-   "region": "K"
+   "region": "K",
+   "amt": 15
   },
   {
    "name": "Kalundborg",
    "lat": 55.681,
    "lon": 11.089,
    "pop": 2300,
-   "region": "K"
+   "region": "K",
+   "amt": 15
   },
   {
    "name": "Slagelse",
    "lat": 55.403,
    "lon": 11.354,
    "pop": 3500,
-   "region": "K"
+   "region": "K",
+   "amt": 16
   },
   {
    "name": "Næstved",
    "lat": 55.23,
    "lon": 11.761,
    "pop": 3800,
-   "region": "K"
+   "region": "K",
+   "amt": 17
   },
   {
    "name": "Vordingborg",
    "lat": 55.009,
    "lon": 11.911,
    "pop": 1600,
-   "region": "K"
+   "region": "K",
+   "amt": 17
   },
   {
    "name": "Stege",
    "lat": 54.987,
    "lon": 12.286,
    "pop": 1800,
-   "region": "K"
+   "region": "K",
+   "amt": 17
   },
   {
    "name": "Nykøbing F",
    "lat": 54.766,
    "lon": 11.874,
    "pop": 3200,
-   "region": "K"
+   "region": "K",
+   "amt": 18
   },
   {
    "name": "Nakskov",
    "lat": 54.831,
    "lon": 11.137,
    "pop": 3000,
-   "region": "K"
+   "region": "K",
+   "amt": 18
   },
   {
    "name": "Odense",
    "lat": 55.396,
    "lon": 10.389,
    "pop": 11100,
-   "region": "K"
+   "region": "K",
+   "amt": 11
   },
   {
    "name": "Nyborg",
    "lat": 55.312,
    "lon": 10.79,
    "pop": 3900,
-   "region": "K"
+   "region": "K",
+   "amt": 12
   },
   {
    "name": "Svendborg",
    "lat": 55.06,
    "lon": 10.607,
    "pop": 4300,
-   "region": "K"
+   "region": "K",
+   "amt": 12
   },
   {
    "name": "Faaborg",
    "lat": 55.095,
    "lon": 10.242,
    "pop": 2500,
-   "region": "K"
+   "region": "K",
+   "amt": 12
   },
   {
    "name": "Assens",
    "lat": 55.27,
    "lon": 9.9,
    "pop": 2800,
-   "region": "K"
+   "region": "K",
+   "amt": 11
   },
   {
    "name": "Middelfart",
    "lat": 55.506,
    "lon": 9.73,
    "pop": 1900,
-   "region": "K"
+   "region": "K",
+   "amt": 11
   },
   {
    "name": "Bogense",
    "lat": 55.566,
    "lon": 10.089,
    "pop": 1300,
-   "region": "K"
+   "region": "K",
+   "amt": 11
   },
   {
    "name": "Rudkøbing",
    "lat": 54.936,
    "lon": 10.71,
    "pop": 2800,
-   "region": "K"
+   "region": "K",
+   "amt": 12
   },
   {
    "name": "Aalborg",
    "lat": 57.048,
    "lon": 9.919,
    "pop": 8600,
-   "region": "K"
+   "region": "K",
+   "amt": 3
   },
   {
    "name": "Aarhus",
    "lat": 56.157,
    "lon": 10.211,
    "pop": 8500,
-   "region": "K"
+   "region": "K",
+   "amt": 6
   },
   {
    "name": "Randers",
    "lat": 56.461,
    "lon": 10.036,
    "pop": 7600,
-   "region": "K"
+   "region": "K",
+   "amt": 5
   },
   {
    "name": "Horsens",
    "lat": 55.861,
    "lon": 9.85,
    "pop": 5100,
-   "region": "K"
+   "region": "K",
+   "amt": 8
   },
   {
    "name": "Fredericia",
    "lat": 55.566,
    "lon": 9.752,
    "pop": 5900,
-   "region": "K"
+   "region": "K",
+   "amt": 8
   },
   {
    "name": "Vejle",
    "lat": 55.709,
    "lon": 9.536,
    "pop": 3900,
-   "region": "K"
+   "region": "K",
+   "amt": 8
   },
   {
    "name": "Kolding",
    "lat": 55.491,
    "lon": 9.472,
    "pop": 3000,
-   "region": "K"
+   "region": "K",
+   "amt": 8
   },
   {
    "name": "Viborg",
    "lat": 56.453,
    "lon": 9.402,
    "pop": 4400,
-   "region": "K"
+   "region": "K",
+   "amt": 4
   },
   {
    "name": "Skanderborg",
    "lat": 56.034,
    "lon": 9.931,
    "pop": 1000,
-   "region": "K"
+   "region": "K",
+   "amt": 7
   },
   {
    "name": "Grenaa",
    "lat": 56.415,
    "lon": 10.878,
    "pop": 1600,
-   "region": "K"
+   "region": "K",
+   "amt": 5
   },
   {
    "name": "Hjørring",
    "lat": 57.464,
    "lon": 9.982,
    "pop": 1700,
-   "region": "K"
+   "region": "K",
+   "amt": 1
   },
   {
    "name": "Frederikshavn",
    "lat": 57.441,
    "lon": 10.537,
    "pop": 1500,
-   "region": "K"
+   "region": "K",
+   "amt": 1
   },
   {
    "name": "Skagen",
    "lat": 57.72,
    "lon": 10.583,
    "pop": 1600,
-   "region": "K"
+   "region": "K",
+   "amt": 1
   },
   {
    "name": "Thisted",
    "lat": 56.955,
    "lon": 8.694,
    "pop": 2300,
-   "region": "K"
+   "region": "K",
+   "amt": 2
   },
   {
    "name": "Nykøbing M",
    "lat": 56.793,
    "lon": 8.853,
    "pop": 1600,
-   "region": "K"
+   "region": "K",
+   "amt": 2
   },
   {
    "name": "Holstebro",
    "lat": 56.36,
    "lon": 8.616,
    "pop": 1500,
-   "region": "K"
+   "region": "K",
+   "amt": 9
   },
   {
    "name": "Ringkøbing",
    "lat": 56.09,
    "lon": 8.244,
    "pop": 1300,
-   "region": "K"
+   "region": "K",
+   "amt": 9
   },
   {
    "name": "Ribe",
    "lat": 55.328,
    "lon": 8.762,
    "pop": 2800,
-   "region": "K"
+   "region": "K",
+   "amt": 10
   },
   {
    "name": "Varde",
    "lat": 55.621,
    "lon": 8.481,
    "pop": 1600,
-   "region": "K"
+   "region": "K",
+   "amt": 10
   },
   {
    "name": "Rønne",
@@ -329,112 +368,128 @@
    "lon": 14.702,
    "pop": 5000,
    "region": "K",
-   "bornholm": true
+   "bornholm": true,
+   "amt": 19
   },
   {
    "name": "Haderslev",
    "lat": 55.249,
    "lon": 9.488,
    "pop": 6500,
-   "region": "S"
+   "region": "S",
+   "amt": 20
   },
   {
    "name": "Aabenraa",
    "lat": 55.044,
    "lon": 9.418,
    "pop": 4600,
-   "region": "S"
+   "region": "S",
+   "amt": 21
   },
   {
    "name": "Sønderborg",
    "lat": 54.909,
    "lon": 9.792,
    "pop": 3200,
-   "region": "S"
+   "region": "S",
+   "amt": 22
   },
   {
    "name": "Tønder",
    "lat": 54.933,
    "lon": 8.864,
    "pop": 3200,
-   "region": "S"
+   "region": "S",
+   "amt": 23
   },
   {
    "name": "Flensborg",
    "lat": 54.785,
    "lon": 9.437,
    "pop": 18900,
-   "region": "S"
+   "region": "S",
+   "amt": 24
   },
   {
    "name": "Slesvig",
    "lat": 54.515,
    "lon": 9.57,
    "pop": 11200,
-   "region": "S"
+   "region": "S",
+   "amt": 26
   },
   {
    "name": "Husum",
    "lat": 54.476,
    "lon": 9.051,
    "pop": 4400,
-   "region": "S"
+   "region": "S",
+   "amt": 25
   },
   {
    "name": "Egernførde",
    "lat": 54.473,
    "lon": 9.837,
    "pop": 4400,
-   "region": "S"
+   "region": "S",
+   "amt": 27
   },
   {
    "name": "Kiel",
    "lat": 54.323,
    "lon": 10.135,
    "pop": 15700,
-   "region": "H"
+   "region": "H",
+   "amt": 30
   },
   {
    "name": "Rendsborg",
    "lat": 54.304,
    "lon": 9.663,
    "pop": 10000,
-   "region": "H"
+   "region": "H",
+   "amt": 31
   },
   {
    "name": "Itzehoe",
    "lat": 53.925,
    "lon": 9.516,
    "pop": 6000,
-   "region": "H"
+   "region": "H",
+   "amt": 34
   },
   {
    "name": "Glückstadt",
    "lat": 53.788,
    "lon": 9.425,
    "pop": 6000,
-   "region": "H"
+   "region": "H",
+   "amt": 34
   },
   {
    "name": "Altona",
    "lat": 53.552,
    "lon": 9.935,
    "pop": 32300,
-   "region": "H"
+   "region": "H",
+   "amt": 35
   },
   {
    "name": "Neumünster",
    "lat": 54.074,
    "lon": 9.984,
    "pop": 5000,
-   "region": "H"
+   "region": "H",
+   "amt": 36
   },
   {
    "name": "Ratzeburg",
    "lat": 53.699,
    "lon": 10.773,
    "pop": 2800,
-   "region": "H"
+   "region": "H",
+   "amt": 41
   }
  ],
  "foreignCities": [
@@ -188041,8 +188096,16 @@
    "seat": "Hjørring",
    "region": "K",
    "areaKm2": 2448,
+   "towns": [
+    "Hjørring",
+    "Skagen",
+    "Frederikshavn"
+   ],
+   "urban": 4800,
    "lat": 57.3754,
-   "lon": 10.1696
+   "lon": 10.1696,
+   "rural": 73700,
+   "population": 78500
   },
   {
    "id": 2,
@@ -188050,8 +188113,15 @@
    "seat": "Thisted",
    "region": "K",
    "areaKm2": 1865,
+   "towns": [
+    "Thisted",
+    "Nykøbing M"
+   ],
+   "urban": 3900,
    "lat": 56.9576,
-   "lon": 8.771
+   "lon": 8.771,
+   "rural": 56100,
+   "population": 60000
   },
   {
    "id": 3,
@@ -188059,8 +188129,14 @@
    "seat": "Aalborg",
    "region": "K",
    "areaKm2": 2870,
+   "towns": [
+    "Aalborg"
+   ],
+   "urban": 8600,
    "lat": 56.9405,
-   "lon": 9.8083
+   "lon": 9.8083,
+   "rural": 86400,
+   "population": 95000
   },
   {
    "id": 4,
@@ -188068,8 +188144,14 @@
    "seat": "Viborg",
    "region": "K",
    "areaKm2": 2495,
+   "towns": [
+    "Viborg"
+   ],
+   "urban": 4400,
    "lat": 56.5006,
-   "lon": 9.2991
+   "lon": 9.2991,
+   "rural": 75100,
+   "population": 79500
   },
   {
    "id": 5,
@@ -188077,8 +188159,15 @@
    "seat": "Randers",
    "region": "K",
    "areaKm2": 3212,
+   "towns": [
+    "Randers",
+    "Grenaa"
+   ],
+   "urban": 9200,
    "lat": 56.4636,
-   "lon": 10.2681
+   "lon": 10.2681,
+   "rural": 96700,
+   "population": 105900
   },
   {
    "id": 6,
@@ -188086,8 +188175,14 @@
    "seat": "Aarhus",
    "region": "K",
    "areaKm2": 938,
+   "towns": [
+    "Aarhus"
+   ],
+   "urban": 8500,
    "lat": 56.0665,
-   "lon": 10.1557
+   "lon": 10.1557,
+   "rural": 28200,
+   "population": 36700
   },
   {
    "id": 7,
@@ -188095,8 +188190,14 @@
    "seat": "Skanderborg",
    "region": "K",
    "areaKm2": 1547,
+   "towns": [
+    "Skanderborg"
+   ],
+   "urban": 1000,
    "lat": 56.0797,
-   "lon": 9.6338
+   "lon": 9.6338,
+   "rural": 46500,
+   "population": 47500
   },
   {
    "id": 8,
@@ -188104,8 +188205,17 @@
    "seat": "Vejle",
    "region": "K",
    "areaKm2": 2395,
+   "towns": [
+    "Fredericia",
+    "Horsens",
+    "Vejle",
+    "Kolding"
+   ],
+   "urban": 17900,
    "lat": 55.7546,
-   "lon": 9.4817
+   "lon": 9.4817,
+   "rural": 72100,
+   "population": 90000
   },
   {
    "id": 9,
@@ -188113,8 +188223,15 @@
    "seat": "Ringkøbing",
    "region": "K",
    "areaKm2": 4609,
+   "towns": [
+    "Holstebro",
+    "Ringkøbing"
+   ],
+   "urban": 2800,
    "lat": 56.2114,
-   "lon": 8.6276
+   "lon": 8.6276,
+   "rural": 138700,
+   "population": 141500
   },
   {
    "id": 10,
@@ -188122,8 +188239,15 @@
    "seat": "Ribe",
    "region": "K",
    "areaKm2": 2612,
+   "towns": [
+    "Ribe",
+    "Varde"
+   ],
+   "urban": 4400,
    "lat": 55.6468,
-   "lon": 8.6954
+   "lon": 8.6954,
+   "rural": 78600,
+   "population": 83000
   },
   {
    "id": 11,
@@ -188131,8 +188255,17 @@
    "seat": "Odense",
    "region": "K",
    "areaKm2": 1837,
+   "towns": [
+    "Odense",
+    "Assens",
+    "Middelfart",
+    "Bogense"
+   ],
+   "urban": 17100,
    "lat": 55.4184,
-   "lon": 10.2091
+   "lon": 10.2091,
+   "rural": 55300,
+   "population": 72400
   },
   {
    "id": 12,
@@ -188140,8 +188273,17 @@
    "seat": "Svendborg",
    "region": "K",
    "areaKm2": 1459,
+   "towns": [
+    "Svendborg",
+    "Nyborg",
+    "Rudkøbing",
+    "Faaborg"
+   ],
+   "urban": 13500,
    "lat": 55.1383,
-   "lon": 10.5509
+   "lon": 10.5509,
+   "rural": 43900,
+   "population": 57400
   },
   {
    "id": 13,
@@ -188149,8 +188291,16 @@
    "seat": "København",
    "region": "K",
    "areaKm2": 1580,
+   "towns": [
+    "København",
+    "Roskilde",
+    "Køge"
+   ],
+   "urban": 136900,
    "lat": 55.605,
-   "lon": 12.2596
+   "lon": 12.2596,
+   "rural": 47500,
+   "population": 184400
   },
   {
    "id": 14,
@@ -188158,8 +188308,14 @@
    "seat": "Hillerød",
    "region": "K",
    "areaKm2": 1238,
+   "towns": [
+    "Helsingør"
+   ],
+   "urban": 8000,
    "lat": 55.9439,
-   "lon": 12.2285
+   "lon": 12.2285,
+   "rural": 37300,
+   "population": 45300
   },
   {
    "id": 15,
@@ -188167,8 +188323,15 @@
    "seat": "Holbæk",
    "region": "K",
    "areaKm2": 1502,
+   "towns": [
+    "Holbæk",
+    "Kalundborg"
+   ],
+   "urban": 4600,
    "lat": 55.7051,
-   "lon": 11.4763
+   "lon": 11.4763,
+   "rural": 45200,
+   "population": 49800
   },
   {
    "id": 16,
@@ -188176,8 +188339,14 @@
    "seat": "Sorø",
    "region": "K",
    "areaKm2": 1482,
+   "towns": [
+    "Slagelse"
+   ],
+   "urban": 3500,
    "lat": 55.4138,
-   "lon": 11.5395
+   "lon": 11.5395,
+   "rural": 44600,
+   "population": 48100
   },
   {
    "id": 17,
@@ -188185,8 +188354,16 @@
    "seat": "Præstø",
    "region": "K",
    "areaKm2": 1718,
+   "towns": [
+    "Næstved",
+    "Stege",
+    "Vordingborg"
+   ],
+   "urban": 7200,
    "lat": 55.1521,
-   "lon": 11.988
+   "lon": 11.988,
+   "rural": 51700,
+   "population": 58900
   },
   {
    "id": 18,
@@ -188194,15 +188371,28 @@
    "seat": "Maribo",
    "region": "K",
    "areaKm2": 1597,
+   "towns": [
+    "Nykøbing F",
+    "Nakskov"
+   ],
+   "urban": 6200,
    "lat": 54.7872,
-   "lon": 11.5531
+   "lon": 11.5531,
+   "rural": 48100,
+   "population": 54300
   },
   {
    "id": 19,
    "name": "Bornholms Amt",
    "seat": "Rønne",
    "region": "K",
-   "areaKm2": 0
+   "areaKm2": 588,
+   "towns": [
+    "Rønne"
+   ],
+   "urban": 5000,
+   "population": 27000,
+   "rural": 22000
   },
   {
    "id": 20,
@@ -188210,8 +188400,14 @@
    "seat": "Haderslev",
    "region": "S",
    "areaKm2": 1847,
+   "towns": [
+    "Haderslev"
+   ],
+   "urban": 6500,
    "lat": 55.3299,
-   "lon": 9.2161
+   "lon": 9.2161,
+   "rural": 57800,
+   "population": 64300
   },
   {
    "id": 21,
@@ -188219,8 +188415,14 @@
    "seat": "Aabenraa",
    "region": "S",
    "areaKm2": 788,
+   "towns": [
+    "Aabenraa"
+   ],
+   "urban": 4600,
    "lat": 55.0355,
-   "lon": 9.3128
+   "lon": 9.3128,
+   "rural": 24700,
+   "population": 29300
   },
   {
    "id": 22,
@@ -188228,8 +188430,14 @@
    "seat": "Sønderborg",
    "region": "S",
    "areaKm2": 449,
+   "towns": [
+    "Sønderborg"
+   ],
+   "urban": 3200,
    "lat": 54.9612,
-   "lon": 9.798
+   "lon": 9.798,
+   "rural": 14100,
+   "population": 17300
   },
   {
    "id": 23,
@@ -188237,8 +188445,14 @@
    "seat": "Tønder",
    "region": "S",
    "areaKm2": 1584,
+   "towns": [
+    "Tønder"
+   ],
+   "urban": 3200,
    "lat": 55.0215,
-   "lon": 8.8146
+   "lon": 8.8146,
+   "rural": 49600,
+   "population": 52800
   },
   {
    "id": 24,
@@ -188246,8 +188460,14 @@
    "seat": "Flensborg",
    "region": "S",
    "areaKm2": 1212,
+   "towns": [
+    "Flensborg"
+   ],
+   "urban": 18900,
    "lat": 54.7761,
-   "lon": 9.4017
+   "lon": 9.4017,
+   "rural": 37900,
+   "population": 56800
   },
   {
    "id": 25,
@@ -188255,8 +188475,14 @@
    "seat": "Husum",
    "region": "S",
    "areaKm2": 1463,
+   "towns": [
+    "Husum"
+   ],
+   "urban": 4400,
    "lat": 54.5244,
-   "lon": 8.9247
+   "lon": 8.9247,
+   "rural": 45800,
+   "population": 50200
   },
   {
    "id": 26,
@@ -188264,8 +188490,14 @@
    "seat": "Slesvig",
    "region": "S",
    "areaKm2": 1185,
+   "towns": [
+    "Slesvig"
+   ],
+   "urban": 11200,
    "lat": 54.5771,
-   "lon": 9.5807
+   "lon": 9.5807,
+   "rural": 37100,
+   "population": 48300
   },
   {
    "id": 27,
@@ -188273,8 +188505,14 @@
    "seat": "Egernførde",
    "region": "S",
    "areaKm2": 1007,
+   "towns": [
+    "Egernførde"
+   ],
+   "urban": 4400,
    "lat": 54.4143,
-   "lon": 9.7675
+   "lon": 9.7675,
+   "rural": 31500,
+   "population": 35900
   },
   {
    "id": 28,
@@ -188282,8 +188520,12 @@
    "seat": "Ærøskøbing",
    "region": "S",
    "areaKm2": 100,
+   "towns": [],
+   "urban": 0,
    "lat": 54.8882,
-   "lon": 10.3543
+   "lon": 10.3543,
+   "rural": 3100,
+   "population": 3100
   },
   {
    "id": 29,
@@ -188291,8 +188533,12 @@
    "seat": "Burg",
    "region": "S",
    "areaKm2": 162,
+   "towns": [],
+   "urban": 0,
    "lat": 54.4727,
-   "lon": 11.1509
+   "lon": 11.1509,
+   "rural": 5100,
+   "population": 5100
   },
   {
    "id": 30,
@@ -188300,8 +188546,14 @@
    "seat": "Kiel",
    "region": "H",
    "areaKm2": 693,
+   "towns": [
+    "Kiel"
+   ],
+   "urban": 15700,
    "lat": 54.259,
-   "lon": 10.0654
+   "lon": 10.0654,
+   "rural": 29800,
+   "population": 45500
   },
   {
    "id": 31,
@@ -188309,8 +188561,14 @@
    "seat": "Rendsborg",
    "region": "H",
    "areaKm2": 1079,
+   "towns": [
+    "Rendsborg"
+   ],
+   "urban": 10000,
    "lat": 54.1812,
-   "lon": 9.575
+   "lon": 9.575,
+   "rural": 46400,
+   "population": 56400
   },
   {
    "id": 32,
@@ -188318,8 +188576,12 @@
    "seat": "Heide",
    "region": "H",
    "areaKm2": 519,
+   "towns": [],
+   "urban": 0,
    "lat": 54.2225,
-   "lon": 9.0489
+   "lon": 9.0489,
+   "rural": 22300,
+   "population": 22300
   },
   {
    "id": 33,
@@ -188327,8 +188589,12 @@
    "seat": "Meldorf",
    "region": "H",
    "areaKm2": 666,
+   "towns": [],
+   "urban": 0,
    "lat": 54.0211,
-   "lon": 9.123
+   "lon": 9.123,
+   "rural": 28700,
+   "population": 28700
   },
   {
    "id": 34,
@@ -188336,8 +188602,15 @@
    "seat": "Itzehoe",
    "region": "H",
    "areaKm2": 818,
+   "towns": [
+    "Itzehoe",
+    "Glückstadt"
+   ],
+   "urban": 12000,
    "lat": 53.9212,
-   "lon": 9.5237
+   "lon": 9.5237,
+   "rural": 35200,
+   "population": 47200
   },
   {
    "id": 35,
@@ -188345,8 +188618,14 @@
    "seat": "Pinneberg",
    "region": "H",
    "areaKm2": 650,
+   "towns": [
+    "Altona"
+   ],
+   "urban": 32300,
    "lat": 53.7153,
-   "lon": 9.7254
+   "lon": 9.7254,
+   "rural": 28000,
+   "population": 60300
   },
   {
    "id": 36,
@@ -188354,8 +188633,14 @@
    "seat": "Neumünster",
    "region": "H",
    "areaKm2": 359,
+   "towns": [
+    "Neumünster"
+   ],
+   "urban": 5000,
    "lat": 54.0582,
-   "lon": 9.9994
+   "lon": 9.9994,
+   "rural": 15400,
+   "population": 20400
   },
   {
    "id": 37,
@@ -188363,8 +188648,12 @@
    "seat": "Segeberg",
    "region": "H",
    "areaKm2": 1322,
+   "towns": [],
+   "urban": 0,
    "lat": 53.9072,
-   "lon": 10.1977
+   "lon": 10.1977,
+   "rural": 56900,
+   "population": 56900
   },
   {
    "id": 38,
@@ -188372,8 +188661,12 @@
    "seat": "Plön",
    "region": "H",
    "areaKm2": 1075,
+   "towns": [],
+   "urban": 0,
    "lat": 54.2129,
-   "lon": 10.4435
+   "lon": 10.4435,
+   "rural": 46300,
+   "population": 46300
   },
   {
    "id": 39,
@@ -188381,8 +188674,12 @@
    "seat": "Oldenborg",
    "region": "H",
    "areaKm2": 1005,
+   "towns": [],
+   "urban": 0,
    "lat": 54.1564,
-   "lon": 10.8341
+   "lon": 10.8341,
+   "rural": 43200,
+   "population": 43200
   },
   {
    "id": 40,
@@ -188390,8 +188687,12 @@
    "seat": "Reinbek",
    "region": "H",
    "areaKm2": 876,
+   "towns": [],
+   "urban": 0,
    "lat": 53.6721,
-   "lon": 10.3134
+   "lon": 10.3134,
+   "rural": 37700,
+   "population": 37700
   },
   {
    "id": 41,
@@ -188399,8 +188700,14 @@
    "seat": "Ratzeburg",
    "region": "H",
    "areaKm2": 1214,
+   "towns": [
+    "Ratzeburg"
+   ],
+   "urban": 2800,
    "lat": 53.6232,
-   "lon": 10.6534
+   "lon": 10.6534,
+   "rural": 52200,
+   "population": 55000
   }
  ]
 }
