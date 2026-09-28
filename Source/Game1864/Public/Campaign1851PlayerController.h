@@ -30,6 +30,15 @@ public:
 	UFUNCTION(Exec)
 	void CampaignView(float Lat, float Lon, float DistanceKm, float Yaw = 0.f);
 
+	/** Saves / loads the campaign: "CampaignSave Slot1", "CampaignLoad Autosave". */
+	UFUNCTION(Exec)
+	void CampaignSave(const FString& Slot);
+	UFUNCTION(Exec)
+	void CampaignLoad(const FString& Slot);
+	/** Starts over: removes every building project, resets the view and overwrites the autosave. */
+	UFUNCTION(Exec)
+	void CampaignNewGame();
+
 	/** Starts the barracks in a town and flies to its building site, e.g. "CampaignBuild Aalborg". */
 	UFUNCTION(Exec)
 	void CampaignBuild(const FString& CityName);
@@ -40,6 +49,21 @@ private:
 	void TryInit();
 	void PickCity();
 	void FocusPlot(int32 CityIndex);
+
+	/** Writes the campaign to a save slot; bQuiet skips the on-screen message (autosave). */
+	bool SaveToSlot(const FString& Slot, bool bQuiet = false);
+	bool LoadFromSlot(const FString& Slot);
+	void OpenGameMenu();
+	FString SlotLabel(const FString& Slot) const;
+
+	/** Save slots in menu order. */
+	static const TArray<FString>& SaveSlots();
+	float AutosaveTimer = 0.f;
+
+	/** Last camera view, so the autosave on exit works after the camera pawn is gone. */
+	FVector LastCameraTarget = FVector::ZeroVector;
+	float LastCameraDistanceKm = 960.f;
+	float LastCameraYaw = 0.f;
 
 	TWeakObjectPtr<ACampaign1851Map> Map;
 	TSharedPtr<SCampaign1851Overlay> Overlay;

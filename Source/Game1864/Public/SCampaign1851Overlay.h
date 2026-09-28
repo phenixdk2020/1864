@@ -31,7 +31,24 @@ public:
 	void SetSelectedCity(int32 Index) { SelectedCity = Index; }
 	int32 GetSelectedCity() const { return SelectedCity; }
 
-	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule };
+	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame };
+
+	/** A row of the game menu (save/load). */
+	struct FSlotInfo
+	{
+		FString Label;   // "Autogem", "Plads 1", ...
+		bool bExists = false;
+		bool bCanSave = true;
+		FString Info;    // date and summary, or "Tom"
+	};
+	void OpenMenu(const TArray<FSlotInfo>& Slots) { MenuSlots = Slots; bMenuOpen = true; bConfirmNewGame = false; }
+	/** "New game" needs a second click; the button then reads "BEKRÆFT: NYT SPIL". */
+	void SetConfirmNewGame(bool bConfirm) { bConfirmNewGame = bConfirm; }
+	bool IsConfirmingNewGame() const { return bConfirmNewGame; }
+	void CloseMenu() { bMenuOpen = false; }
+	bool IsMenuOpen() const { return bMenuOpen; }
+	/** A short message at the top of the screen (fades after a few seconds). */
+	void ShowToast(const FString& Text) { Toast = Text; ToastTime = FPlatformTime::Seconds(); }
 	/** The panel button under a viewport pixel (as from APlayerController::GetMousePosition). */
 	EButton HitButton(const FVector2D& ViewportPixel, int32* OutModule = nullptr) const;
 
@@ -56,6 +73,8 @@ private:
 	void PaintProjects(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintButton(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Text, EButton Action, int32 Module = INDEX_NONE) const;
 	void PaintBar(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, float Width, float Fraction) const;
+	void PaintMenu(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	void PaintToast(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintDot(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Centre, float Diameter, const FLinearColor& Colour) const;
 	FVector2D Measure(const FString& Text, const FSlateFontInfo& Font) const;
 
@@ -69,4 +88,10 @@ private:
 	struct FButtonRect { FVector2D Min, Max; EButton Action; int32 Module; };
 	mutable TArray<FButtonRect> Buttons;   // local units, rebuilt every paint
 	mutable float PaintScale = 1.f;
+
+	bool bMenuOpen = false;
+	bool bConfirmNewGame = false;
+	TArray<FSlotInfo> MenuSlots;
+	FString Toast;
+	double ToastTime = -100.0;
 };

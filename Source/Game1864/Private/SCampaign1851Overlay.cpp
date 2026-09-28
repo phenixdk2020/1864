@@ -192,12 +192,20 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	PaintScaleBar(Geometry, Out, Layer);
 	PaintBornholm(Geometry, Out, Layer);
 	PaintInfo(Geometry, Out, Layer);
+	PaintButton(Geometry, Out, Layer, FVector2D(28.f, 206.f), FVector2D(150.f, 28.f), TEXT("SPILMENU  (M)"), EButton::Menu);
+	PaintToast(Geometry, Out, Layer + 6);
+	if (bMenuOpen)
+	{
+		// The menu takes the clicks: only its own buttons stay live.
+		Buttons.Reset();
+		PaintMenu(Geometry, Out, Layer + 8);
+	}
 
 	const FVector2D Size = Geometry.GetLocalSize();
-	PaintText(Geometry, Out, Layer, TEXT("Klik på en by  ·  Hjul: zoom  ·  Højre/midt-træk eller WASD: panorer  ·  Q/E: drej  ·  Home: hele kortet"),
+	PaintText(Geometry, Out, Layer, TEXT("Klik på en by  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Home: hele kortet  ·  M: menu  ·  F5/F9: gem/indlæs"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.20 GARNISONSKOMPLEKS — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
-	return Layer + 4;
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.21 GEM, INDLÆS OG NYT SPIL — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	return Layer + 16;
 }
 
 int32 SCampaign1851Overlay::PaintLabels(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, float D) const
@@ -581,4 +589,62 @@ void SCampaign1851Overlay::PaintProjects(const FGeometry& Geometry, FSlateWindow
 		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("%s · %s"), *ACampaign1851ConstructionSite::ModuleName(Module), *Site->GetStageName(Module)),
 			Centre + FVector2D(Radius + 8.f, 0.f), Serif(11, EFace::Italic), Ink, 0.f);
 	}
+}
+
+void SCampaign1851Overlay::PaintMenu(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	const FVector2D Screen = Geometry.GetLocalSize();
+	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Screen, FSlateLayoutTransform(FVector2D::ZeroVector)), White, ESlateDrawEffect::None, FLinearColor(0.f, 0.f, 0.f, 0.45f));
+
+	const float RowHeight = 62.f;
+	const FVector2D Size(720.f, 120.f + MenuSlots.Num() * RowHeight + 60.f);
+	const FVector2D Pos = (Screen - Size) * 0.5f;
+	PaintPanel(Geometry, Out, Layer + 1, Pos, Size);
+	PaintText(Geometry, Out, Layer + 3, TEXT("S P I L L E T"), Pos + FVector2D(Size.X * 0.5f, 40.f), Serif(22), Ink, 0.5f);
+	PaintText(Geometry, Out, Layer + 3, TEXT("Gem og indlæs felttoget"), Pos + FVector2D(Size.X * 0.5f, 72.f), Serif(12, EFace::Italic), Gold, 0.5f, false);
+
+	for (int32 i = 0; i < MenuSlots.Num(); ++i)
+	{
+		const FSlotInfo& S = MenuSlots[i];
+		const FVector2D Row = Pos + FVector2D(0.f, 104.f + i * RowHeight);
+		TArray<FVector2D> Rule = { Row + FVector2D(24.f, 0.f), Row + FVector2D(Size.X - 24.f, 0.f) };
+		FSlateDrawElement::MakeLines(Out, Layer + 3, Geometry.ToPaintGeometry(), Rule, ESlateDrawEffect::None, Gold.CopyWithNewOpacity(0.3f), true, 1.f);
+		PaintText(Geometry, Out, Layer + 3, S.Label, Row + FVector2D(32.f, 22.f), Serif(16), Ink, 0.f, false);
+		PaintText(Geometry, Out, Layer + 3, S.Info, Row + FVector2D(32.f, 46.f), Serif(11, EFace::Italic), S.bExists ? Ink : MutedInk, 0.f, false);
+		if (S.bCanSave)
+		{
+			PaintButton(Geometry, Out, Layer + 3, Row + FVector2D(Size.X - 216.f, 10.f), FVector2D(88.f, 28.f), TEXT("GEM"), EButton::SaveSlot, i);
+		}
+		if (S.bExists)
+		{
+			PaintButton(Geometry, Out, Layer + 3, Row + FVector2D(Size.X - 118.f, 10.f), FVector2D(94.f, 28.f), TEXT("INDLÆS"), EButton::LoadSlot, i);
+		}
+	}
+	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(24.f, Size.Y - 50.f), FVector2D(bConfirmNewGame ? 210.f : 130.f, 30.f),
+		bConfirmNewGame ? TEXT("BEKRÆFT: NYT SPIL") : TEXT("NYT SPIL"), EButton::NewGame);
+	if (bConfirmNewGame)
+	{
+		PaintText(Geometry, Out, Layer + 3, TEXT("Alle byggerier slettes"), Pos + FVector2D(248.f, Size.Y - 35.f), Serif(11, EFace::Italic), Gold, 0.f, false);
+	}
+	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 144.f, Size.Y - 50.f), FVector2D(120.f, 30.f), TEXT("LUK"), EButton::CloseMenu);
+}
+
+void SCampaign1851Overlay::PaintToast(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	const double Age = FPlatformTime::Seconds() - ToastTime;
+	if (Toast.IsEmpty() || Age > 3.0)
+	{
+		return;
+	}
+	const float Alpha = float(FMath::Clamp(3.0 - Age, 0.0, 1.0));
+	const FSlateFontInfo Font = Serif(15, EFace::Italic);
+	const FVector2D TextSize = Measure(Toast, Font);
+	const FVector2D Size(TextSize.X + 60.f, 44.f);
+	const FVector2D Pos((Geometry.GetLocalSize().X - Size.X) * 0.5f, 28.f);
+	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(Pos)), White, ESlateDrawEffect::None, Panel.CopyWithNewOpacity(Panel.A * Alpha));
+	TArray<FVector2D> Frame = { Pos, Pos + FVector2D(Size.X, 0.f), Pos + Size, Pos + FVector2D(0.f, Size.Y), Pos };
+	FSlateDrawElement::MakeLines(Out, Layer + 1, Geometry.ToPaintGeometry(), Frame, ESlateDrawEffect::None, Gold.CopyWithNewOpacity(Alpha), true, 1.2f);
+	PaintText(Geometry, Out, Layer + 1, Toast, Pos + Size * 0.5f, Font, Ink.CopyWithNewOpacity(Alpha), 0.5f, false);
 }

@@ -37,6 +37,7 @@ public:
 	void ResetView();
 
 	float GetDistanceKm() const { return Distance; }
+	const FVector& GetTarget() const { return Target; }
 	float GetYaw() const { return Yaw; }
 	float GetPitch() const;
 

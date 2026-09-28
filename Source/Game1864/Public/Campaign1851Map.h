@@ -128,6 +128,12 @@ public:
 	/** Starts (or returns the running) barracks project in a town; null if the town has no plot. */
 	ACampaign1851ConstructionSite* StartProject(int32 CityIndex);
 	ACampaign1851ConstructionSite* FindProject(int32 CityIndex) const;
+	/** Removes every building project (before loading a save). */
+	void ClearProjects();
+	/** Recreates a saved garrison complex; returns false if the town is unknown or has no plot. */
+	bool RestoreProject(const FString& CityName, const TArray<float>& ModuleDays, int32 ActiveModule);
+	int32 FindCity(const FString& Name) const;
+
 	/** Starts a garrison module (1..) at a town whose barracks is finished; false if it cannot start. */
 	bool StartModule(int32 CityIndex, int32 Module);
 	const TArray<TObjectPtr<ACampaign1851ConstructionSite>>& GetProjects() const { return Projects; }

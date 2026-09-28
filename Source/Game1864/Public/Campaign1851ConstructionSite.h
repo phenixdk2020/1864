@@ -61,6 +61,11 @@ public:
 
 	bool IsBarracksDone() const { return IsModuleDone(0); }
 
+	/** Days built per module (-1 = not started), for saving. */
+	const TArray<float>& GetModuleDaysBuilt() const { return Elapsed; }
+	/** Restores a saved state (after Setup); missing modules count as not started. */
+	void RestoreState(const TArray<float>& InDays, int32 InActive);
+
 protected:
 	UPROPERTY(VisibleAnywhere) TObjectPtr<USceneComponent> Root;
 	UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Ground;

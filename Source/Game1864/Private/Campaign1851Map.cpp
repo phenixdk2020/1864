@@ -1028,3 +1028,33 @@ bool ACampaign1851Map::StartModule(int32 CityIndex, int32 Module)
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|%s started"), *Cities[CityIndex].Name, *ACampaign1851ConstructionSite::ModuleName(Module));
 	return true;
 }
+
+int32 ACampaign1851Map::FindCity(const FString& Name) const
+{
+	return Cities.IndexOfByPredicate([&Name](const FCampaign1851City& C) { return C.Name.Equals(Name, ESearchCase::IgnoreCase); });
+}
+
+void ACampaign1851Map::ClearProjects()
+{
+	for (ACampaign1851ConstructionSite* Site : Projects)
+	{
+		if (Site)
+		{
+			Site->Destroy();
+		}
+	}
+	Projects.Reset();
+}
+
+bool ACampaign1851Map::RestoreProject(const FString& CityName, const TArray<float>& ModuleDays, int32 ActiveModule)
+{
+	const int32 CityIndex = FindCity(CityName);
+	ACampaign1851ConstructionSite* Site = CityIndex != INDEX_NONE ? StartProject(CityIndex) : nullptr;
+	if (!Site)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|save|cannot restore the project in '%s'"), *CityName);
+		return false;
+	}
+	Site->RestoreState(ModuleDays, ActiveModule);
+	return true;
+}

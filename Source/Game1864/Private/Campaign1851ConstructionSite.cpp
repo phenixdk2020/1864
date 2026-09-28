@@ -271,3 +271,13 @@ void ACampaign1851ConstructionSite::MoveWagon(float DeltaSeconds)
 	const FVector Dir = (WagonPath[i] - WagonPath[i - 1]) * WagonDirection;
 	Wagon->SetWorldLocationAndRotation(At, FRotator(0.f, FMath::RadiansToDegrees(FMath::Atan2(Dir.Y, Dir.X)), 0.f));
 }
+
+void ACampaign1851ConstructionSite::RestoreState(const TArray<float>& InDays, int32 InActive)
+{
+	for (int32 m = 0; m < NumModules(); ++m)
+	{
+		Elapsed[m] = InDays.IsValidIndex(m) ? FMath::Min(InDays[m], ModuleDays(m)) : -1.f;
+	}
+	Active = (Elapsed.IsValidIndex(InActive) && IsModuleStarted(InActive) && !IsModuleDone(InActive)) ? InActive : INDEX_NONE;
+	Apply(0.f);
+}
