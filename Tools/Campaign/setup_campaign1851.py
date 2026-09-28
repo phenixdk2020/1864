@@ -77,21 +77,23 @@ SEASON_PARAMS = ("Snow", "Bare", "Autumn", "Spring")   # + SelectedAmt (the high
 if lib.does_asset_exist(MPC_PATH):
     mpc = lib.load_asset(MPC_PATH)  # keep the parameter ids stable; only add what is missing
     have = [str(sp.get_editor_property("parameter_name")) for sp in mpc.get_editor_property("scalar_parameters")]
-    if "SelectedAmt" not in have:
-        scalars = list(mpc.get_editor_property("scalar_parameters"))
-        sp = unreal.CollectionScalarParameter()
-        sp.set_editor_property("parameter_name", "SelectedAmt")
-        sp.set_editor_property("default_value", -1.0)
-        scalars.append(sp)
+    scalars = list(mpc.get_editor_property("scalar_parameters"))
+    for name, default in (("SelectedAmt", -1.0), ("ViewKm", 100.0)):
+        if name not in have:
+            sp = unreal.CollectionScalarParameter()
+            sp.set_editor_property("parameter_name", name)
+            sp.set_editor_property("default_value", default)
+            scalars.append(sp)
+    if len(scalars) != len(have):
         mpc.set_editor_property("scalar_parameters", scalars)
         lib.save_loaded_asset(mpc)
 else:
     mpc = tools.create_asset("MPC_Campaign1851Season", MAT_DEST, unreal.MaterialParameterCollection, unreal.MaterialParameterCollectionFactoryNew())
     scalars = []
-    for name in SEASON_PARAMS + ("SelectedAmt",):
+    for name in SEASON_PARAMS + ("SelectedAmt", "ViewKm"):
         sp = unreal.CollectionScalarParameter()
         sp.set_editor_property("parameter_name", name)
-        sp.set_editor_property("default_value", -1.0 if name == "SelectedAmt" else 0.0)
+        sp.set_editor_property("default_value", -1.0 if name == "SelectedAmt" else 100.0 if name == "ViewKm" else 0.0)
         scalars.append(sp)
     mpc.set_editor_property("scalar_parameters", scalars)
     lib.save_loaded_asset(mpc)
@@ -155,6 +157,80 @@ def season(mat, src, src_pin, code, x, y, normal=False):
 
 
 # ------------------------------------------------------------------ materials
+# Drifting cloud shadows (value-noise fbm, clouds ~7 km across, moving east-north-east), shared by the
+# map and the scenery so towns and woods darken with the land under them. Fade out far away, where
+# the overview should stay the clean painting. Inputs: WP world position, T time, V camera distance (km).
+CLOUD_HLSL = """
+float2 q = WP.xy / 700.0 + float2(T * 0.012, -T * 0.005);
+float n = 0.0, a = 0.5;
+for (int o = 0; o < 4; ++o)
+{
+    float2 i = floor(q), f = frac(q);
+    float2 u = f * f * (3.0 - 2.0 * f);
+    float h00 = frac(sin(dot(i, float2(127.1, 311.7))) * 43758.5453);
+    float h10 = frac(sin(dot(i + float2(1, 0), float2(127.1, 311.7))) * 43758.5453);
+    float h01 = frac(sin(dot(i + float2(0, 1), float2(127.1, 311.7))) * 43758.5453);
+    float h11 = frac(sin(dot(i + float2(1, 1), float2(127.1, 311.7))) * 43758.5453);
+    n += a * lerp(lerp(h00, h10, u.x), lerp(h01, h11, u.x), u.y);
+    q = q * 2.03 + 17.1;
+    a *= 0.5;
+}
+float cloud = smoothstep(0.5, 0.72, n) * saturate(1.3 - V / 260.0);
+"""
+
+# The map: cloud shadows, then the sea's swell and sun glints (closer in: finer waves), then haze on the
+# far side of tilted views. C is linear emissive; D pixel depth (units, 1 km = 100).
+MAP_ATMOS = CLOUD_HLSL + """
+float land = saturate((C.g - C.b) * 12.0 + 0.2);
+float sea = 1.0 - land;
+float3 c = C * (1.0 - 0.3 * cloud);
+float2 km = WP.xy / 100.0;
+float fine = sin(km.x * 13.0 + T * 1.1 + sin(km.y * 6.0 + T * 0.5) * 1.7) * sin(km.y * 16.0 - T * 0.9 + sin(km.x * 5.0) * 1.3);
+float swell = sin(km.x * 1.7 - T * 0.22 + sin(km.y * 1.1) * 2.0) * sin(km.y * 2.3 + T * 0.18 + sin(km.x * 0.7) * 1.5);
+float nearW = saturate(1.0 - V / 70.0);
+float midW = saturate(1.0 - V / 320.0);
+c = lerp(c, c * (1.0 + 0.16 * swell * midW + 0.08 * fine * nearW), sea);
+float glint = pow(saturate(fine), 10.0) * nearW + pow(saturate(swell), 14.0) * midW * 0.7;
+c += sea * glint * float3(0.10, 0.115, 0.13) * (1.0 - 0.8 * cloud);
+float far = saturate((D / 100.0 - 1.25 * V) / (3.0 * V)) * saturate(1.0 - V / 450.0);
+c = lerp(c, float3(0.105, 0.13, 0.16), far * 0.5);
+return c;
+"""
+
+# Scenery: the same cloud shadow and haze (returns the colour).
+SCENERY_ATMOS = CLOUD_HLSL + """
+float3 c = C * (1.0 - 0.3 * cloud);
+float far = saturate((D / 100.0 - 1.25 * V) / (3.0 * V)) * saturate(1.0 - V / 450.0);
+return lerp(c, float3(0.105, 0.13, 0.16), far * 0.5);
+"""
+
+
+def atmosphere(mat, src, src_pin, code, x, y):
+    """Custom HLSL node: colour in, clouds / sea / haze applied, colour out."""
+    node = MEL.create_material_expression(mat, unreal.MaterialExpressionCustom, x, y)
+    node.set_editor_property("code", code)
+    node.set_editor_property("output_type", unreal.CustomMaterialOutputType.CMOT_FLOAT3)
+    node.set_editor_property("description", "Atmosphere")
+    inputs = []
+    for name in ("C", "WP", "T", "D", "V"):
+        ci = unreal.CustomInput()
+        ci.set_editor_property("input_name", name)
+        inputs.append(ci)
+    node.set_editor_property("inputs", inputs)
+    wp = MEL.create_material_expression(mat, unreal.MaterialExpressionWorldPosition, x - 300, y + 150)
+    t = MEL.create_material_expression(mat, unreal.MaterialExpressionTime, x - 300, y + 250)
+    d = MEL.create_material_expression(mat, unreal.MaterialExpressionPixelDepth, x - 300, y + 350)
+    v = MEL.create_material_expression(mat, unreal.MaterialExpressionCollectionParameter, x - 300, y + 450)
+    v.set_editor_property("collection", mpc)
+    v.set_editor_property("parameter_name", "ViewKm")
+    MEL.connect_material_expressions(src, src_pin, node, "C")
+    MEL.connect_material_expressions(wp, "", node, "WP")
+    MEL.connect_material_expressions(t, "", node, "T")
+    MEL.connect_material_expressions(d, "", node, "D")
+    MEL.connect_material_expressions(v, "", node, "V")
+    return node
+
+
 def new_material(name):
     path = "%s/%s" % (MAT_DEST, name)
     if lib.does_asset_exist(path):
@@ -229,7 +305,8 @@ glow.set_editor_property("inputs", glow_inputs)
 MEL.connect_material_expressions(seasoned, "", glow, "C")
 MEL.connect_material_expressions(amt_ids, "R", glow, "Id")
 MEL.connect_material_expressions(selected, "", glow, "Sel")
-MEL.connect_material_property(glow, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+atmos = atmosphere(m, glow, "", MAP_ATMOS, 400, 600)
+MEL.connect_material_property(atmos, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
 MEL.recompile_material(m)
 lib.save_loaded_asset(m)
 log("material M_Campaign1851Map")
@@ -260,7 +337,8 @@ lit = MEL.create_material_expression(s, unreal.MaterialExpressionMultiply, -400,
 seasoned = season(s, gamma, "", SCENERY_SEASON, -520, -300, normal=True)
 MEL.connect_material_expressions(seasoned, "", lit, "A")
 MEL.connect_material_expressions(vary, "", lit, "B")
-MEL.connect_material_property(lit, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+satmos = atmosphere(s, lit, "", SCENERY_ATMOS, -150, 100)
+MEL.connect_material_property(satmos, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
 MEL.recompile_material(s)
 lib.save_loaded_asset(s)
 log("material M_Campaign1851Scenery")
@@ -275,7 +353,8 @@ kgamma = MEL.create_material_expression(k, unreal.MaterialExpressionPower, -450,
 kgamma.set_editor_property("const_exponent", 2.2)
 MEL.connect_material_expressions(kvc, "", kgamma, "Base")
 kseasoned = season(k, kgamma, "", SCENERY_SEASON, -250, -300, normal=True)
-MEL.connect_material_property(kseasoned, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+katmos = atmosphere(k, kseasoned, "", SCENERY_ATMOS, 0, -300)
+MEL.connect_material_property(katmos, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
 top = MEL.create_material_expression(k, unreal.MaterialExpressionScalarParameter, -900, 300)
 top.set_editor_property("parameter_name", "BuildTop")
 top.set_editor_property("default_value", 1.0e7)

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
@@ -24,6 +24,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Camera") float MaxDistanceKm = 1000.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float PitchNear = 32.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float PitchFar = 84.f;
+	/** Lens aperture at the closest zoom (smaller = more miniature blur); it closes to f/32 by 60 km. */
+	UPROPERTY(EditAnywhere, Category = "Camera") float TiltShiftFstop = 2.8f;
 
 	void Init(const FVector& InTarget, float InDistanceKm, const FVector2D& InHalfExtentUnits);
 	void SetView(const FVector& InTarget, float InDistanceKm, float InYaw);

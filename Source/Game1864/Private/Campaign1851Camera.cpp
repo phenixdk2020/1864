@@ -10,6 +10,19 @@ ACampaign1851Camera::ACampaign1851Camera()
 	SetRootComponent(Camera);
 	Camera->SetFieldOfView(50.f);
 	Camera->bConstrainAspectRatio = false;
+	// A light grade for the painted map: a touch more colour and contrast, darker corners.
+	FPostProcessSettings& P = Camera->PostProcessSettings;
+	P.bOverride_ColorSaturation = true;
+	P.ColorSaturation = FVector4(1.08f, 1.08f, 1.08f, 1.f);
+	P.bOverride_ColorContrast = true;
+	P.ColorContrast = FVector4(1.05f, 1.05f, 1.05f, 1.f);
+	P.bOverride_VignetteIntensity = true;
+	P.VignetteIntensity = 0.32f;
+	P.bOverride_DepthOfFieldFocalDistance = true;
+	P.bOverride_DepthOfFieldFstop = true;
+	P.bOverride_DepthOfFieldMinFstop = true;
+	P.DepthOfFieldMinFstop = 0.5f;
+	Camera->PostProcessBlendWeight = 1.f;
 }
 
 void ACampaign1851Camera::Init(const FVector& InTarget, float InDistanceKm, const FVector2D& InHalfExtentUnits)
@@ -90,4 +103,9 @@ void ACampaign1851Camera::Apply()
 	Target.Y = FMath::Clamp(Target.Y, -HalfExtent.Y, HalfExtent.Y);
 	const FRotator Rot(-GetPitch(), -90.f + Yaw, 0.f);
 	SetActorLocationAndRotation(Target - Rot.Vector() * Distance * ACampaign1851Map::KmToUnits, Rot);
+	// Close in, a shallow depth of field focused on the target: the tilt-shift look of a model
+	// landscape (the map is 1:1000 in Unreal units, so a real lens blurs it like a miniature).
+	FPostProcessSettings& P = Camera->PostProcessSettings;
+	P.DepthOfFieldFocalDistance = Distance * ACampaign1851Map::KmToUnits;
+	P.DepthOfFieldFstop = FMath::GetMappedRangeValueClamped(FVector2D(MinDistanceKm, 60.f), FVector2D(TiltShiftFstop, 32.f), Distance);
 }

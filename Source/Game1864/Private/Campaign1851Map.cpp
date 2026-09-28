@@ -444,6 +444,10 @@ void ACampaign1851Map::UpdateMarkers(float CameraDistanceKm)
 		}
 	}
 	LastCameraDistanceKm = CameraDistanceKm;
+	if (SeasonCollection)
+	{
+		UKismetMaterialLibrary::SetScalarParameterValue(this, SeasonCollection, TEXT("ViewKm"), CameraDistanceKm);
+	}
 	UpdateNetworkVisibility();
 	// Close in, the 3D town speaks for itself: the monarchy's dots go (foreign towns have no 3D town).
 	CityMarkers->SetVisibility(CameraDistanceKm > CityDotsMinDistanceKm);
