@@ -31,7 +31,8 @@ public:
 	void SetSelectedCity(int32 Index) { SelectedCity = Index; }
 	int32 GetSelectedCity() const { return SelectedCity; }
 
-	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed };
+	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury };
+	void ToggleLedger() { bLedgerOpen = !bLedgerOpen; }
 
 	/** A row of the game menu (save/load). */
 	struct FSlotInfo
@@ -71,7 +72,12 @@ private:
 	void PaintInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** Progress rings over towns with a building project. */
 	void PaintProjects(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
-	void PaintButton(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Text, EButton Action, int32 Module = INDEX_NONE, bool bHighlight = false) const;
+	void PaintButton(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Text, EButton Action, int32 Module = INDEX_NONE, bool bHighlight = false, bool bDisabled = false) const;
+	/** Cash, monthly grant and upkeep under the game menu button; click for the account book. */
+	void PaintTreasury(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	void PaintLedger(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	/** Stage line for a module under way: stage, money shortage or winter pace, expected date. */
+	FString ProgressLine(const class ACampaign1851ConstructionSite* Site, int32 Module) const;
 	/** Date, season and the speed buttons, top centre. */
 	void PaintCalendar(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintBar(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, float Width, float Fraction) const;
@@ -92,6 +98,7 @@ private:
 	mutable float PaintScale = 1.f;
 
 	bool bMenuOpen = false;
+	bool bLedgerOpen = false;
 	bool bConfirmNewGame = false;
 	TArray<FSlotInfo> MenuSlots;
 	FString Toast;

@@ -1,5 +1,6 @@
 #include "Campaign1851Map.h"
 
+#include "Campaign1851Buildings.h"
 #include "Campaign1851ConstructionSite.h"
 #include "Campaign1851Scenery.h"
 #include "Engine/World.h"
@@ -108,6 +109,8 @@ void ACampaign1851Map::BeginPlay()
 	}
 	bReady = true;
 	UpdateSeason();
+	Campaign1851Buildings::Load();
+	ResetEconomy();
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|ready|cities=%d|labels=%d|size=%.0fx%.0f km"), Cities.Num(), Labels.Num(), SizeKm.X, SizeKm.Y);
 }
 
@@ -983,11 +986,15 @@ ACampaign1851ConstructionSite* ACampaign1851Map::FindProject(int32 CityIndex) co
 	return nullptr;
 }
 
-ACampaign1851ConstructionSite* ACampaign1851Map::StartProject(int32 CityIndex)
+ACampaign1851ConstructionSite* ACampaign1851Map::StartProject(int32 CityIndex, bool bCharge)
 {
 	if (ACampaign1851ConstructionSite* Existing = FindProject(CityIndex))
 	{
 		return Existing;
+	}
+	if (bCharge && !CanAffordStart(0))
+	{
+		return nullptr;
 	}
 	UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, ConstructionMaterialPath);
 	if (!Cities.IsValidIndex(CityIndex) || !Cities[CityIndex].bHasPlot || !Material)
@@ -1017,6 +1024,11 @@ ACampaign1851ConstructionSite* ACampaign1851Map::StartProject(int32 CityIndex)
 	Site->Setup(CityIndex, Path, Material);
 	Site->SetActorHiddenInGame(!bSceneryVisible);
 	Projects.Add(Site);
+	if (bCharge)
+	{
+		AddTransaction(-ACampaign1851ConstructionSite::ModuleCost(0) * Campaign1851Buildings::DownPayment,
+			FString::Printf(TEXT("Materialer bestilt: %s, infanterikaserne"), *City.Name));
+	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|barracks started"), *City.Name);
 	return Site;
 }
@@ -1024,11 +1036,13 @@ ACampaign1851ConstructionSite* ACampaign1851Map::StartProject(int32 CityIndex)
 bool ACampaign1851Map::StartModule(int32 CityIndex, int32 Module)
 {
 	ACampaign1851ConstructionSite* Site = FindProject(CityIndex);
-	if (!Site || !Site->CanStartModule(Module))
+	if (!Site || !Site->CanStartModule(Module) || !CanAffordStart(Module))
 	{
 		return false;
 	}
 	Site->StartModule(Module);
+	AddTransaction(-ACampaign1851ConstructionSite::ModuleCost(Module) * Campaign1851Buildings::DownPayment,
+		FString::Printf(TEXT("Materialer bestilt: %s, %s"), *Cities[CityIndex].Name, *ACampaign1851ConstructionSite::ModuleName(Module).ToLower()));
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|%s started"), *Cities[CityIndex].Name, *ACampaign1851ConstructionSite::ModuleName(Module));
 	return true;
 }
@@ -1053,7 +1067,7 @@ void ACampaign1851Map::ClearProjects()
 bool ACampaign1851Map::RestoreProject(const FString& CityName, const TArray<float>& ModuleDays, int32 ActiveModule)
 {
 	const int32 CityIndex = FindCity(CityName);
-	ACampaign1851ConstructionSite* Site = CityIndex != INDEX_NONE ? StartProject(CityIndex) : nullptr;
+	ACampaign1851ConstructionSite* Site = CityIndex != INDEX_NONE ? StartProject(CityIndex, false) : nullptr;
 	if (!Site)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|save|cannot restore the project in '%s'"), *CityName);
@@ -1105,13 +1119,49 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 	{
 		return;
 	}
+	const int32 MonthBefore = GetDate().GetMonth();
 	const float DeltaDays = DeltaSeconds * DaysPerSecondAt(Speed);
 	CampaignDays += DeltaDays;
 	for (ACampaign1851ConstructionSite* Site : Projects)
 	{
-		if (Site)
+		if (!Site)
 		{
-			Site->Advance(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
+			continue;
+		}
+		// Work done today: slower in frost, and only as far as the treasury can pay the wages.
+		float Work = 0.f;
+		const int32 Module = Site->GetActiveModule();
+		if (Module != INDEX_NONE && DeltaDays > 0.f)
+		{
+			Work = DeltaDays * Campaign1851Buildings::WorkRate(ACampaign1851ConstructionSite::ModuleType(Module), GetDate());
+			const double PerDay = ACampaign1851ConstructionSite::ModuleCostPerDay(Module);
+			const bool bShort = Work * PerDay > Treasury;
+			if (bShort)
+			{
+				Work = PerDay > 0.0 ? float(Treasury / PerDay) : Work;
+			}
+			Site->SetStalled(bShort);
+			const double Spend = Work * PerDay;
+			Treasury -= Spend;
+			MonthSpend.FindOrAdd(FString::Printf(TEXT("Byggeri: %s, %s"), *Cities[Site->GetCityIndex()].Name,
+				*ACampaign1851ConstructionSite::ModuleName(Module).ToLower())) += Spend;
+		}
+		Site->Advance(Work, Speed > 0 ? DeltaSeconds : 0.f);
+	}
+	if (GetDate().GetMonth() != MonthBefore)
+	{
+		CloseMonth();
+	}
+	// -CampaignAutoBuild: raise whole garrison complexes, module after module, paid like any order (demos, captures).
+	static const bool bAutoBuild = FParse::Param(FCommandLine::Get(), TEXT("CampaignAutoBuild"));
+	for (int32 i = 0; bAutoBuild && i < Projects.Num(); ++i)
+	{
+		for (int32 m = 1; Projects[i] && Projects[i]->GetActiveModule() == INDEX_NONE && m < ACampaign1851ConstructionSite::NumModules(); ++m)
+		{
+			if (Projects[i]->CanStartModule(m) && StartModule(Projects[i]->GetCityIndex(), m))
+			{
+				break;
+			}
 		}
 	}
 	UpdateSeason();
@@ -1135,4 +1185,67 @@ void ACampaign1851Map::UpdateSeason()
 	UKismetMaterialLibrary::SetScalarParameterValue(this, SeasonCollection, TEXT("Bare"), Bare);
 	UKismetMaterialLibrary::SetScalarParameterValue(this, SeasonCollection, TEXT("Autumn"), Autumn);
 	UKismetMaterialLibrary::SetScalarParameterValue(this, SeasonCollection, TEXT("Spring"), Spring);
+}
+
+// ------------------------------------------------------------------ treasury
+
+double ACampaign1851Map::GetMonthlyUpkeep() const
+{
+	double Total = 0.0;
+	for (const ACampaign1851ConstructionSite* Site : Projects)
+	{
+		Total += Site ? Site->GetYearlyUpkeep() / 12.0 : 0.0;
+	}
+	return Total;
+}
+
+void ACampaign1851Map::AddTransaction(double Amount, const FString& Text)
+{
+	Treasury += Amount;
+	Ledger.Add({ GetDate(), Amount, Text });
+	if (Ledger.Num() > 200)
+	{
+		Ledger.RemoveAt(0, Ledger.Num() - 200);
+	}
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|treasury|%s|%+.0f|%s|balance %.0f"), *FormatDate(GetDate(), true), Amount, *Text, Treasury);
+}
+
+void ACampaign1851Map::ResetEconomy()
+{
+	Treasury = 0.0;
+	Ledger.Reset();
+	MonthSpend.Reset();
+	AddTransaction(StartingTreasury, TEXT("Kassebeholdning ved felttogets start"));
+}
+
+void ACampaign1851Map::RestoreEconomy(double InTreasury, const TArray<FCampaign1851Transaction>& InLedger)
+{
+	Treasury = InTreasury;
+	Ledger = InLedger;
+	MonthSpend.Reset();
+}
+
+bool ACampaign1851Map::CanAffordStart(int32 Module) const
+{
+	return Treasury >= ACampaign1851ConstructionSite::ModuleCost(Module) * Campaign1851Buildings::DownPayment;
+}
+
+void ACampaign1851Map::CloseMonth()
+{
+	// Wages leave the treasury day by day; the account book gets one line per project and month.
+	for (const TPair<FString, double>& Spend : MonthSpend)
+	{
+		if (Spend.Value >= 1.0)
+		{
+			Treasury += Spend.Value;   // already paid: undo here so booking the line does not charge twice
+			AddTransaction(-Spend.Value, Spend.Key);
+		}
+	}
+	MonthSpend.Reset();
+	const double Upkeep = GetMonthlyUpkeep();
+	if (Upkeep >= 1.0)
+	{
+		AddTransaction(-Upkeep, TEXT("Drift af garnisoner"));
+	}
+	AddTransaction(YearlyGrant / 12.0, TEXT("Finanslovens anlægsbevilling"));
 }

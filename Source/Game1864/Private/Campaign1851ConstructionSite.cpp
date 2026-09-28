@@ -1,5 +1,6 @@
 #include "Campaign1851ConstructionSite.h"
 
+#include "Campaign1851Buildings.h"
 #include "Campaign1851Scenery.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -11,6 +12,7 @@ namespace
 	/** A building of the garrison complex and its slot beside the parade ground (piece units). */
 	struct FModuleDef
 	{
+		const TCHAR* Key;    // row in Buildings1851.csv (price, days, upkeep, type)
 		const TCHAR* Name;
 		ESitePiece Piece;
 		float Days;
@@ -23,13 +25,13 @@ namespace
 	// The parade ground runs along the barracks front (+Y); stables and depot flank it, the
 	// infirmary stands behind the barracks.
 	const FModuleDef Modules[] = {
-		{ TEXT("Infanterikaserne"), ESitePiece::Barracks, 90.f, FVector2D(0.0, 0.0), 0.f, Campaign1851Scenery::BarracksLength, Campaign1851Scenery::BarracksWidth,
+		{ TEXT("Garrison_Barracks"), TEXT("Infanterikaserne"), ESitePiece::Barracks, 150.f, FVector2D(0.0, 0.0), 0.f, Campaign1851Scenery::BarracksLength, Campaign1851Scenery::BarracksWidth,
 			Campaign1851Scenery::BarracksEave, Campaign1851Scenery::BarracksTop, TEXT("/Game/Campaign1851/Buildings/T_Barracks_Infantry.T_Barracks_Infantry") },
-		{ TEXT("Stalde"), ESitePiece::Stables, 45.f, FVector2D(-15.0, 7.5), 90.f, 12.f, 4.4f, 3.2f, 6.4f,
+		{ TEXT("Garrison_Stables"), TEXT("Stalde"), ESitePiece::Stables, 100.f, FVector2D(-15.0, 7.5), 90.f, 12.f, 4.4f, 3.2f, 6.4f,
 			TEXT("/Game/Campaign1851/Buildings/T_Module_Stables.T_Module_Stables") },
-		{ TEXT("Depot og magasin"), ESitePiece::Depot, 60.f, FVector2D(15.0, 7.5), 90.f, 7.f, 5.6f, 7.f, 11.6f,
+		{ TEXT("Garrison_Depot"), TEXT("Depot og magasin"), ESitePiece::Depot, 112.f, FVector2D(15.0, 7.5), 90.f, 7.f, 5.6f, 7.f, 11.6f,
 			TEXT("/Game/Campaign1851/Buildings/T_Module_Depot.T_Module_Depot") },
-		{ TEXT("Sygestue"), ESitePiece::Infirmary, 40.f, FVector2D(0.0, -10.0), 0.f, 9.f, 4.6f, 4.6f, 8.2f,
+		{ TEXT("Garrison_Infirmary"), TEXT("Sygestue"), ESitePiece::Infirmary, 90.f, FVector2D(0.0, -10.0), 0.f, 9.f, 4.6f, 4.6f, 8.2f,
 			TEXT("/Game/Campaign1851/Buildings/T_Module_Infirmary.T_Module_Infirmary") },
 	};
 
@@ -45,7 +47,45 @@ namespace
 int32 ACampaign1851ConstructionSite::NumModules() { return UE_ARRAY_COUNT(Modules); }
 FString ACampaign1851ConstructionSite::ModuleName(int32 Module) { return Modules[FMath::Clamp(Module, 0, NumModules() - 1)].Name; }
 const TCHAR* ACampaign1851ConstructionSite::ModuleCard(int32 Module) { return Modules[FMath::Clamp(Module, 0, NumModules() - 1)].Card; }
-float ACampaign1851ConstructionSite::ModuleDays(int32 Module) { return Modules[FMath::Clamp(Module, 0, NumModules() - 1)].Days; }
+float ACampaign1851ConstructionSite::ModuleDays(int32 Module)
+{
+	const FModuleDef& Def = Modules[FMath::Clamp(Module, 0, NumModules() - 1)];
+	const FCampaign1851BuildingDef* Data = Campaign1851Buildings::Find(Def.Key);
+	return Data ? float(Data->Days) : Def.Days;
+}
+
+int32 ACampaign1851ConstructionSite::ModuleCost(int32 Module)
+{
+	const FCampaign1851BuildingDef* Data = Campaign1851Buildings::Find(Modules[FMath::Clamp(Module, 0, NumModules() - 1)].Key);
+	return Data ? Data->CostRd : 0;
+}
+
+int32 ACampaign1851ConstructionSite::ModuleUpkeep(int32 Module)
+{
+	const FCampaign1851BuildingDef* Data = Campaign1851Buildings::Find(Modules[FMath::Clamp(Module, 0, NumModules() - 1)].Key);
+	return Data ? Data->UpkeepRdPerYear : 0;
+}
+
+FString ACampaign1851ConstructionSite::ModuleType(int32 Module)
+{
+	const FCampaign1851BuildingDef* Data = Campaign1851Buildings::Find(Modules[FMath::Clamp(Module, 0, NumModules() - 1)].Key);
+	return Data ? Data->Type : FString(TEXT("grundmur"));
+}
+
+double ACampaign1851ConstructionSite::ModuleCostPerDay(int32 Module)
+{
+	return ModuleCost(Module) * (1.0 - Campaign1851Buildings::DownPayment) / FMath::Max(ModuleDays(Module), 1.f);
+}
+
+int32 ACampaign1851ConstructionSite::GetYearlyUpkeep() const
+{
+	int32 Total = 0;
+	for (int32 m = 0; m < NumModules(); ++m)
+	{
+		Total += IsModuleDone(m) ? ModuleUpkeep(m) : 0;
+	}
+	return Total;
+}
 
 ACampaign1851ConstructionSite::ACampaign1851ConstructionSite()
 {
@@ -153,19 +193,6 @@ FString ACampaign1851ConstructionSite::GetStageName(int32 Module) const
 void ACampaign1851ConstructionSite::Advance(float DeltaDays, float DeltaSeconds)
 {
 	Clock += DeltaSeconds;
-	// -CampaignAutoBuild: raise the whole complex, module after module (for demos and captures).
-	static const bool bAutoBuild = FParse::Param(FCommandLine::Get(), TEXT("CampaignAutoBuild"));
-	if (bAutoBuild && Active == INDEX_NONE)
-	{
-		for (int32 m = 1; m < NumModules(); ++m)
-		{
-			if (CanStartModule(m))
-			{
-				StartModule(m);
-				break;
-			}
-		}
-	}
 	if (Active != INDEX_NONE)
 	{
 		Elapsed[Active] = FMath::Min(Elapsed[Active] + DeltaDays, ModuleDays(Active));

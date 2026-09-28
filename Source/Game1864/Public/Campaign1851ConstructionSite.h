@@ -41,6 +41,12 @@ public:
 	/** Asset path of the module's card image for the town panel. */
 	static const TCHAR* ModuleCard(int32 Module);
 	static float ModuleDays(int32 Module);
+	/** Price, upkeep and construction type from Buildings1851.csv (Campaign1851Buildings). */
+	static int32 ModuleCost(int32 Module);
+	static int32 ModuleUpkeep(int32 Module);
+	static FString ModuleType(int32 Module);
+	/** Money per full working day once the down payment is made. */
+	static double ModuleCostPerDay(int32 Module);
 
 	/** Places the site and starts the barracks. WagonPath runs from the town centre to the gate (world space). */
 	void Setup(int32 InCityIndex, const TArray<FVector>& InWagonPath, UMaterialInterface* Material);
@@ -65,6 +71,12 @@ public:
 	const TArray<float>& GetModuleDaysBuilt() const { return Elapsed; }
 	/** Restores a saved state (after Setup); missing modules count as not started. */
 	void RestoreState(const TArray<float>& InDays, int32 InActive);
+
+	/** Set by the map's treasury when there was no money for the day's work. */
+	void SetStalled(bool bInStalled) { bStalled = bInStalled; }
+	bool IsStalled() const { return bStalled; }
+	/** Upkeep per year of the finished modules. */
+	int32 GetYearlyUpkeep() const;
 
 protected:
 	UPROPERTY(VisibleAnywhere) TObjectPtr<USceneComponent> Root;
@@ -91,6 +103,7 @@ private:
 	TArray<float> Elapsed;   // days per module; -1 = not started
 	int32 Active = INDEX_NONE;
 	float Clock = 0.f;
+	bool bStalled = false;
 
 	TArray<FVector> WagonPath;
 	TArray<float> WagonDistance;   // cumulative, world units

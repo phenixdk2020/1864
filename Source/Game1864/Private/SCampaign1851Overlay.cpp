@@ -1,5 +1,6 @@
 #include "SCampaign1851Overlay.h"
 
+#include "Campaign1851Buildings.h"
 #include "Campaign1851ConstructionSite.h"
 
 #include "Brushes/SlateRoundedBoxBrush.h"
@@ -194,6 +195,11 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	PaintInfo(Geometry, Out, Layer);
 	PaintButton(Geometry, Out, Layer, FVector2D(28.f, 206.f), FVector2D(150.f, 28.f), TEXT("SPILMENU  (M)"), EButton::Menu);
 	PaintCalendar(Geometry, Out, Layer);
+	PaintTreasury(Geometry, Out, Layer);
+	if (bLedgerOpen)
+	{
+		PaintLedger(Geometry, Out, Layer + 4);
+	}
 	PaintToast(Geometry, Out, Layer + 6);
 	if (bMenuOpen)
 	{
@@ -205,7 +211,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik på en by  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Home: hele kortet  ·  M: menu  ·  F5/F9: gem/indlæs"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.22 KALENDER OG ÅRSTIDER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.23 STATSKASSE OG BYGGEPRISER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -473,16 +479,20 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	PaintText(Geometry, Out, Layer + 2, ACampaign1851ConstructionSite::ModuleName(0), Text + FVector2D(0.f, 50.f), Serif(16), Ink, 0.f, false);
 	if (!Site)
 	{
-		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("Ikke bygget  ·  byggetid %d dage"), int32(ACampaign1851ConstructionSite::ModuleDays(0))),
+		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s rd.  ·  %d dage"), *Thousands(ACampaign1851ConstructionSite::ModuleCost(0)), int32(ACampaign1851ConstructionSite::ModuleDays(0))),
 			Text + FVector2D(0.f, 76.f), Serif(12, EFace::Italic), MutedInk, 0.f, false);
-		PaintButton(Geometry, Out, Layer + 2, Text + FVector2D(0.f, 98.f), FVector2D(150.f, 30.f), TEXT("BYG KASERNE"), EButton::Build);
+		const bool bAfford = Map->CanAffordStart(0);
+		PaintButton(Geometry, Out, Layer + 2, Text + FVector2D(0.f, 98.f), FVector2D(150.f, 30.f), TEXT("BYG KASERNE"), EButton::Build, INDEX_NONE, false, !bAfford);
+		if (!bAfford)
+		{
+			PaintText(Geometry, Out, Layer + 2, TEXT("Ikke råd"), Text + FVector2D(160.f, 113.f), Serif(11, EFace::Italic), Gold, 0.f, false);
+		}
 		return;
 	}
 	const bool bBarracksDone = Site->IsBarracksDone();
 	const FString Status = bBarracksDone
 		? TEXT("Færdig  ·  klar til garnisonen")
-		: FString::Printf(TEXT("%s  ·  klar ca. %s"), *Site->GetStageName(0),
-			*ACampaign1851Map::FormatDate(Map->GetDate() + FTimespan::FromDays(ACampaign1851ConstructionSite::ModuleDays(0) - Site->GetModuleElapsedDays(0)), true));
+		: ProgressLine(Site, 0);
 	PaintText(Geometry, Out, Layer + 2, Status, Text + FVector2D(0.f, 76.f), Serif(12, EFace::Italic), bBarracksDone ? Gold : Ink, 0.f, false);
 	if (!bBarracksDone)
 	{
@@ -507,15 +517,15 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 		}
 		else if (Site->GetActiveModule() == m)
 		{
-			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s  ·  klar ca. %s"), *Site->GetStageName(m),
-				*ACampaign1851Map::FormatDate(Map->GetDate() + FTimespan::FromDays(Days - Site->GetModuleElapsedDays(m)), true)),
-				Row + FVector2D(74.f, 36.f), Serif(11, EFace::Italic), Ink, 0.f, false);
+			PaintText(Geometry, Out, Layer + 2, ProgressLine(Site, m), Row + FVector2D(74.f, 36.f), Serif(11, EFace::Italic), Ink, 0.f, false);
 			PaintBar(Geometry, Out, Layer + 2, Row + FVector2D(250.f, 13.f), 110.f, Site->GetModuleProgress(m));
 		}
 		else if (Site->CanStartModule(m))
 		{
-			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("Byggetid %d dage"), Days), Row + FVector2D(74.f, 36.f), Serif(11, EFace::Italic), MutedInk, 0.f, false);
-			PaintButton(Geometry, Out, Layer + 2, Row + FVector2D(262.f, 12.f), FVector2D(98.f, 26.f), TEXT("BYG"), EButton::BuildModule, m);
+			const bool bAfford = Map->CanAffordStart(m);
+			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s rd.  ·  %d dage%s"), *Thousands(ACampaign1851ConstructionSite::ModuleCost(m)), Days, bAfford ? TEXT("") : TEXT("  ·  ikke råd")),
+				Row + FVector2D(74.f, 36.f), Serif(11, EFace::Italic), MutedInk, 0.f, false);
+			PaintButton(Geometry, Out, Layer + 2, Row + FVector2D(262.f, 12.f), FVector2D(98.f, 26.f), TEXT("BYG"), EButton::BuildModule, m, false, !bAfford);
 		}
 		else
 		{
@@ -532,15 +542,19 @@ void SCampaign1851Overlay::PaintBar(const FGeometry& Geometry, FSlateWindowEleme
 }
 
 void SCampaign1851Overlay::PaintButton(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size,
-	const FString& Text, EButton Action, int32 Module, bool bHighlight) const
+	const FString& Text, EButton Action, int32 Module, bool bHighlight, bool bDisabled) const
 {
 	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
 	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(Pos)), White, ESlateDrawEffect::None,
 		bHighlight ? Gold.CopyWithNewOpacity(0.85f) : FLinearColor::FromSRGBColor(FColor(58, 40, 22, 235)));
 	TArray<FVector2D> Frame = { Pos, Pos + FVector2D(Size.X, 0.f), Pos + Size, Pos + FVector2D(0.f, Size.Y), Pos };
 	FSlateDrawElement::MakeLines(Out, Layer + 1, Geometry.ToPaintGeometry(), Frame, ESlateDrawEffect::None, Gold, true, 1.2f);
-	PaintText(Geometry, Out, Layer + 1, Text, Pos + Size * 0.5f, Serif(11), bHighlight ? FLinearColor::FromSRGBColor(FColor(30, 22, 12)) : Ink, 0.5f, false);
-	Buttons.Add({ Pos, Pos + Size, Action, Module });
+	PaintText(Geometry, Out, Layer + 1, Text, Pos + Size * 0.5f, Serif(11),
+		bHighlight ? FLinearColor::FromSRGBColor(FColor(30, 22, 12)) : bDisabled ? MutedInk.CopyWithNewOpacity(0.45f) : Ink, 0.5f, false);
+	if (!bDisabled)
+	{
+		Buttons.Add({ Pos, Pos + Size, Action, Module });
+	}
 }
 
 SCampaign1851Overlay::EButton SCampaign1851Overlay::HitButton(const FVector2D& ViewportPixel, int32* OutModule) const
@@ -590,7 +604,7 @@ void SCampaign1851Overlay::PaintProjects(const FGeometry& Geometry, FSlateWindow
 		Arc(1.f, Gold.CopyWithNewOpacity(0.3f), 2.f);
 		Arc(FMath::Max(Progress, 0.01f), Gold, 3.f);
 		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("%d"), FMath::FloorToInt(Progress * 100.f)), Centre, Serif(9), Ink, 0.5f, false);
-		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("%s · %s"), *ACampaign1851ConstructionSite::ModuleName(Module), *Site->GetStageName(Module)),
+		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("%s · %s"), *ACampaign1851ConstructionSite::ModuleName(Module), Site->IsStalled() ? TEXT("standset, mangler penge") : *Site->GetStageName(Module)),
 			Centre + FVector2D(Radius + 8.f, 0.f), Serif(11, EFace::Italic), Ink, 0.f);
 	}
 }
@@ -667,5 +681,54 @@ void SCampaign1851Overlay::PaintCalendar(const FGeometry& Geometry, FSlateWindow
 	for (int32 s = 0; s < ACampaign1851Map::NumSpeeds(); ++s, X += ButtonWidth + Gap)
 	{
 		PaintButton(Geometry, Out, Layer + 2, FVector2D(X, Pos.Y + 14.f), FVector2D(ButtonWidth, 28.f), ACampaign1851Map::SpeedLabel(s), EButton::Speed, s, Map->GetSpeed() == s);
+	}
+}
+
+FString SCampaign1851Overlay::ProgressLine(const ACampaign1851ConstructionSite* Site, int32 Module) const
+{
+	if (Site->IsStalled())
+	{
+		return FString::Printf(TEXT("%s  ·  standset, mangler penge"), *Site->GetStageName(Module));
+	}
+	const float Rate = Campaign1851Buildings::WorkRate(ACampaign1851ConstructionSite::ModuleType(Module), Map->GetDate());
+	const float Left = (ACampaign1851ConstructionSite::ModuleDays(Module) - Site->GetModuleElapsedDays(Module)) / FMath::Max(Rate, 0.1f);
+	return FString::Printf(TEXT("%s%s  ·  klar ca. %s"), *Site->GetStageName(Module), Rate < 1.f ? TEXT(" (vintertakt)") : TEXT(""),
+		*ACampaign1851Map::FormatDate(Map->GetDate() + FTimespan::FromDays(Left), true));
+}
+
+void SCampaign1851Overlay::PaintTreasury(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	const FVector2D Pos(28.f, 246.f), Size(300.f, 66.f);
+	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	PaintText(Geometry, Out, Layer + 2, TEXT("S T A T S K A S S E N"), Pos + FVector2D(18.f, 18.f), Serif(10), Gold, 0.f, false);
+	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s rd."), *Thousands(FMath::FloorToInt(Map->GetTreasury()))), Pos + FVector2D(18.f, 43.f), Serif(20), Ink, 0.f);
+	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("+%s / md."), *Thousands(FMath::RoundToInt(ACampaign1851Map::YearlyGrant / 12.0))),
+		Pos + FVector2D(Size.X - 16.f, 34.f), Serif(11, EFace::Italic), Ink, 1.f, false);
+	const int32 Upkeep = FMath::RoundToInt(Map->GetMonthlyUpkeep());
+	if (Upkeep > 0)
+	{
+		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("drift −%s / md."), *Thousands(Upkeep)), Pos + FVector2D(Size.X - 16.f, 52.f), Serif(11, EFace::Italic), MutedInk, 1.f, false);
+	}
+	Buttons.Add({ Pos, Pos + Size, EButton::Treasury, INDEX_NONE });
+}
+
+void SCampaign1851Overlay::PaintLedger(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	const TArray<FCampaign1851Transaction>& Ledger = Map->GetLedger();
+	const int32 Rows = FMath::Min(Ledger.Num(), 14);
+	const FVector2D Size(460.f, 84.f + Rows * 22.f);
+	const FVector2D Pos(Geometry.GetLocalSize().X - Size.X - 28.f, 372.f);   // below the legend
+	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	PaintText(Geometry, Out, Layer + 2, TEXT("R E G N S K A B"), Pos + FVector2D(Size.X * 0.5f, 24.f), Serif(13), Ink, 0.5f, false);
+	PaintText(Geometry, Out, Layer + 2, TEXT("Seneste posteringer  ·  klik på statskassen for at lukke"), Pos + FVector2D(Size.X * 0.5f, 46.f), Serif(10, EFace::Italic), Gold, 0.5f, false);
+	const FLinearColor In = FLinearColor::FromSRGBColor(FColor(170, 214, 150)), OutInk = FLinearColor::FromSRGBColor(FColor(232, 150, 128));
+	for (int32 r = 0; r < Rows; ++r)
+	{
+		const FCampaign1851Transaction& T = Ledger[Ledger.Num() - 1 - r];
+		const float Y = Pos.Y + 72.f + r * 22.f;
+		PaintText(Geometry, Out, Layer + 2, ACampaign1851Map::FormatDate(T.Date, true), FVector2D(Pos.X + 18.f, Y), Serif(11), MutedInk, 0.f, false);
+		PaintText(Geometry, Out, Layer + 2, T.Text.Len() > 40 ? T.Text.Left(39) + TEXT("…") : T.Text, FVector2D(Pos.X + 118.f, Y), Serif(11), Ink, 0.f, false);
+		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s%s"), T.Amount >= 0.0 ? TEXT("+") : TEXT("−"), *Thousands(FMath::RoundToInt(FMath::Abs(T.Amount)))),
+			FVector2D(Pos.X + Size.X - 18.f, Y), Serif(11), T.Amount >= 0.0 ? In : OutInk, 1.f, false);
 	}
 }

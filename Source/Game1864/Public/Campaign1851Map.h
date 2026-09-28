@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Campaign1851SaveGame.h"
 #include "Campaign1851Map.generated.h"
 
 class UStaticMeshComponent;
@@ -145,8 +146,28 @@ public:
 	/** "Vinter", "Forår", "Sommer" or "Efterår". */
 	FString GetSeasonName() const;
 
-	/** Starts (or returns the running) barracks project in a town; null if the town has no plot. */
-	ACampaign1851ConstructionSite* StartProject(int32 CityIndex);
+	// ---- Treasury (design manual 20.2: money / state credit; backlog B-346 budget with a transaction log).
+
+	/** Cash at the start of a campaign and the yearly construction grant from the Finance Act. */
+	static constexpr double StartingTreasury = 150000.0;
+	static constexpr double YearlyGrant = 500000.0;
+	double GetTreasury() const { return Treasury; }
+	const TArray<FCampaign1851Transaction>& GetLedger() const { return Ledger; }
+	/** Upkeep of finished buildings per month. */
+	double GetMonthlyUpkeep() const;
+	/** Books money in or out (negative = spent) with a reason. */
+	void AddTransaction(double Amount, const FString& Text);
+	/** A new campaign's cash and an empty account book. */
+	void ResetEconomy();
+	void RestoreEconomy(double InTreasury, const TArray<FCampaign1851Transaction>& InLedger);
+	/** True if the down payment for a module can be paid now. */
+	bool CanAffordStart(int32 Module) const;
+
+	/**
+	 * Starts (or returns the running) barracks project in a town; null if the town has no plot
+	 * or the treasury cannot pay the down payment. bCharge = false when restoring a save.
+	 */
+	ACampaign1851ConstructionSite* StartProject(int32 CityIndex, bool bCharge = true);
 	ACampaign1851ConstructionSite* FindProject(int32 CityIndex) const;
 	/** Removes every building project (before loading a save). */
 	void ClearProjects();
@@ -244,6 +265,13 @@ private:
 	void UpdateSeason();
 	double CampaignDays = 0.0;
 	int32 Speed = 1;
+
+	/** Closes a month: grant in, upkeep and the month's construction wages out. */
+	void CloseMonth();
+	double Treasury = StartingTreasury;
+	TArray<FCampaign1851Transaction> Ledger;
+	/** Construction spending this month per "town, building", booked at month end. */
+	TMap<FString, double> MonthSpend;
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialParameterCollection> SeasonCollection;
 	bool bReady = false;

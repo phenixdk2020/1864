@@ -90,6 +90,10 @@ void ACampaign1851PlayerController::TryInit()
 	{
 		Map->SetCampaignDays((Parsed - ACampaign1851Map::StartDate()).GetTotalDays());
 	}
+	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignOpenLedger")) && Overlay.IsValid())
+	{
+		Overlay->ToggleLedger();
+	}
 	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignOpenMenu")))
 	{
 		OpenGameMenu();
@@ -275,17 +279,33 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			Map->SetSpeed(Module);
 		}
+		else if (Button == SCampaign1851Overlay::EButton::Treasury)
+		{
+			Overlay->ToggleLedger();
+		}
 		else if (Button == SCampaign1851Overlay::EButton::BuildModule)
 		{
-			Map->StartModule(Overlay->GetSelectedCity(), Module);
-			FocusPlot(Overlay->GetSelectedCity());
-			SaveToSlot(TEXT("Autosave"), true);
+			if (Map->StartModule(Overlay->GetSelectedCity(), Module))
+			{
+				FocusPlot(Overlay->GetSelectedCity());
+				SaveToSlot(TEXT("Autosave"), true);
+			}
+			else
+			{
+				Overlay->ShowToast(TEXT("Ikke råd til materialerne endnu"));
+			}
 		}
 		else if (Button == SCampaign1851Overlay::EButton::Build)
 		{
-			Map->StartProject(Overlay->GetSelectedCity());
-			FocusPlot(Overlay->GetSelectedCity());
-			SaveToSlot(TEXT("Autosave"), true);
+			if (Map->StartProject(Overlay->GetSelectedCity()))
+			{
+				FocusPlot(Overlay->GetSelectedCity());
+				SaveToSlot(TEXT("Autosave"), true);
+			}
+			else
+			{
+				Overlay->ShowToast(TEXT("Ikke råd til materialerne endnu"));
+			}
 		}
 		else if (Button == SCampaign1851Overlay::EButton::ShowOnMap)
 		{
@@ -398,6 +418,8 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	}
 	Save->CampaignDays = Map->GetCampaignDays();
 	Save->Speed = Map->GetSpeed();
+	Save->Treasury = Map->GetTreasury();
+	Save->Ledger = Map->GetLedger();
 	Save->Summary = FString::Printf(TEXT("%s  ·  %s"), *ACampaign1851Map::FormatDate(Map->GetDate(), true),
 		Parts.Num() > 0 ? *FString::Join(Parts, TEXT("  ·  ")) : TEXT("ingen byggerier"));
 	const bool bOk = UGameplayStatics::SaveGameToSlot(Save, Slot, 0);
@@ -425,6 +447,15 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	// v1 saves had no calendar: they start on 1 July 1851 at normal speed.
 	Map->SetCampaignDays(Save->SaveVersion >= 2 ? Save->CampaignDays : 0.0);
 	Map->SetSpeed(Save->SaveVersion >= 2 ? Save->Speed : 1);
+	// v1-2 saves had no treasury: they start with the opening cash.
+	if (Save->SaveVersion >= 3)
+	{
+		Map->RestoreEconomy(Save->Treasury, Save->Ledger);
+	}
+	else
+	{
+		Map->ResetEconomy();
+	}
 	int32 Restored = 0;
 	for (const FCampaign1851ProjectSave& P : Save->Projects)
 	{
@@ -452,6 +483,7 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	Map->ClearProjects();
 	Map->SetCampaignDays(0.0);
 	Map->SetSpeed(1);
+	Map->ResetEconomy();
 	Camera->ResetView();
 	if (Overlay.IsValid())
 	{
