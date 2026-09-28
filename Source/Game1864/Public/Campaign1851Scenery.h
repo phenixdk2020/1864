@@ -58,7 +58,10 @@ namespace Campaign1851Scenery
 		PowderMagazine,  // turf-covered brick vault inside a wall, lightning rod (10 x 9)
 		StarFort,        // five-pointed earthwork star fort with a blockhouse (34 x 34)
 		Telegraph,       // station house with a telegraph mast (9 x 4)
-		Granary          // tall yellow-brick grain store with hoist gables (13 x 5.4)
+		Granary,         // tall yellow-brick grain store with hoist gables (13 x 5.4)
+		// Railways:
+		Train,           // locomotive, tender and three carriages; the front at the origin, running to +X (14.4 long)
+		Station          // small brick station with platform and canopy on the -Y side (8 x 4)
 	};
 
 	constexpr float BarracksLength = 16.f;

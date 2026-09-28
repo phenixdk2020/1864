@@ -1,7 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Widgets/SLeafWidget.h"
+#include "UObject/StrongObjectPtr.h"
+#include "Engine/Texture2D.h"
 
 class ACampaign1851Map;
 class ACampaign1851Camera;
@@ -34,7 +36,9 @@ public:
 	void SetSelectedAmt(int32 Id) { SelectedAmt = Id; }
 	int32 GetSelectedAmt() const { return SelectedAmt; }
 
-	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury, BuildTown, ShowSite };
+	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury, BuildTown, ShowSite, BuildLink, ShowLink };
+	/** Module of a BuildLink button: link * 2 + 0 for a chaussÃ©e, + 1 for a railway. */
+	static int32 LinkButton(int32 Link, bool bRailway) { return Link * 2 + (bRailway ? 1 : 0); }
 	void ToggleLedger() { bLedgerOpen = !bLedgerOpen; }
 
 	/** A row of the game menu (save/load). */
@@ -46,7 +50,7 @@ public:
 		FString Info;    // date and summary, or "Tom"
 	};
 	void OpenMenu(const TArray<FSlotInfo>& Slots) { MenuSlots = Slots; bMenuOpen = true; bConfirmNewGame = false; }
-	/** "New game" needs a second click; the button then reads "BEKRÆFT: NYT SPIL". */
+	/** "New game" needs a second click; the button then reads "BEKRÃ†FT: NYT SPIL". */
 	void SetConfirmNewGame(bool bConfirm) { bConfirmNewGame = bConfirm; }
 	bool IsConfirmingNewGame() const { return bConfirmNewGame; }
 	void CloseMenu() { bMenuOpen = false; }
@@ -75,8 +79,14 @@ private:
 	void PaintInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** The town's buildings beside the garrison card: built, under way, or what they cost and need. */
 	void PaintTownBuildings(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	/** The town's roads to its neighbours: distance, march or train time, and chaussÃ©e / railway projects. */
+	void PaintTownLinks(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, float Left) const;
+	/** Progress line for a link project, as ProgressLine for a building. */
+	FString LinkProgressLine(int32 Link) const;
 	/** The selected amt: region, seat, population, area, towns, taxes, men of military age, garrisons. */
 	void PaintAmtInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	/** Progress rings at the middle of roads and railways under construction. */
+	void PaintLinkWorks(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** Progress rings over towns with a building project. */
 	void PaintProjects(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintButton(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Text, EButton Action, int32 Module = INDEX_NONE, bool bHighlight = false, bool bDisabled = false) const;
@@ -101,6 +111,7 @@ private:
 	TSharedPtr<FSlateBrush> DotBrush;
 	TArray<TSharedPtr<FSlateBrush>> ModuleBrushes;   // card images per garrison module
 	TArray<TSharedPtr<FSlateBrush>> TownBrushes;     // card images per town building
+	TArray<TStrongObjectPtr<UTexture2D>> CardTextures;   // keeps the card images alive
 
 	struct FButtonRect { FVector2D Min, Max; EButton Action; int32 Module; };
 	mutable TArray<FButtonRect> Buttons;   // local units, rebuilt every paint

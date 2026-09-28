@@ -115,6 +115,7 @@ void ACampaign1851Map::BeginPlay()
 	UpdateSeason();
 	Campaign1851Buildings::Load();
 	ResetEconomy();
+	ResetNetwork();
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|ready|cities=%d|labels=%d|size=%.0fx%.0f km"), Cities.Num(), Labels.Num(), SizeKm.X, SizeKm.Y);
 }
 
@@ -229,6 +230,10 @@ bool ACampaign1851Map::LoadData()
 		L.Lon = O->GetNumberField(TEXT("lon"));
 		L.Kind = O->GetStringField(TEXT("kind"));
 		Labels.Add(L);
+	}
+	if (!LoadNetwork(*Json))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|map data has no road links; regenerate it with tools/map1851/build_map.py"));
 	}
 	return true;
 }
@@ -438,6 +443,10 @@ void ACampaign1851Map::UpdateMarkers(float CameraDistanceKm)
 			Ferries->SetVisibility(bShowRoads);
 		}
 	}
+	LastCameraDistanceKm = CameraDistanceKm;
+	UpdateNetworkVisibility();
+	// Close in, the 3D town speaks for itself: the monarchy's dots go (foreign towns have no 3D town).
+	CityMarkers->SetVisibility(CameraDistanceKm > CityDotsMinDistanceKm);
 	// Close in, the dot floats above the roofs and church towers so the town never hides it.
 	const float Lift = FMath::GetMappedRangeValueClamped(FVector2D(40.f, 120.f), FVector2D(24.f, 0.f), CameraDistanceKm);
 
@@ -608,6 +617,15 @@ void ACampaign1851Map::BuildScenery()
 		for (const FVector2D& P : Resample(Line, 0.1))
 		{
 			Take(P, 0.026f);
+			RoadSamples.Add(P);
+		}
+	}
+	// Railways of 1851 likewise (lines the player builds clear their way when work starts).
+	for (const FCampaign1851Railway& Railway : Railways)
+	{
+		for (const FVector2D& P : Resample(Railway.Km, 0.1))
+		{
+			Take(P, 0.03f);
 			RoadSamples.Add(P);
 		}
 	}
@@ -1464,6 +1482,7 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 		}
 		Site->Advance(Work, Speed > 0 ? DeltaSeconds : 0.f);
 	}
+	AdvanceNetwork(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
 	if (GetDate().GetMonth() != MonthBefore)
 	{
 		CloseMonth();
@@ -1512,7 +1531,7 @@ double ACampaign1851Map::GetMonthlyUpkeep() const
 	{
 		Total += Site ? Site->GetYearlyUpkeep() / 12.0 : 0.0;
 	}
-	return Total;
+	return Total + NetworkUpkeepPerYear() / 12.0;
 }
 
 void ACampaign1851Map::AddTransaction(double Amount, const FString& Text)
@@ -1558,10 +1577,15 @@ void ACampaign1851Map::CloseMonth()
 		}
 	}
 	MonthSpend.Reset();
-	const double Upkeep = GetMonthlyUpkeep();
+	const double RoadUpkeep = NetworkUpkeepPerYear() / 12.0;
+	const double Upkeep = GetMonthlyUpkeep() - RoadUpkeep;
 	if (Upkeep >= 1.0)
 	{
-		AddTransaction(-Upkeep, TEXT("Drift af garnisoner"));
+		AddTransaction(-Upkeep, TEXT("Drift af garnisoner og bygninger"));
+	}
+	if (RoadUpkeep >= 1.0)
+	{
+		AddTransaction(-RoadUpkeep, TEXT("Vedligehold af chausséer og jernbaner"));
 	}
 	for (const TCHAR* Region : { TEXT("K"), TEXT("S"), TEXT("H") })
 	{

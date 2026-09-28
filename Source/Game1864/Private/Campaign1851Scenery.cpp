@@ -664,10 +664,62 @@ namespace Campaign1851Scenery
 			}
 			break;
 		}
+		case ESitePiece::Train:
+		{
+			// Locomotive at the front (origin, running towards +X), tender, three carriages behind.
+			const FLinearColor Iron = Srgb(34, 34, 38), Wheel = Srgb(120, 38, 30), Brass = Srgb(206, 170, 90);
+			const FLinearColor Green = Srgb(52, 88, 60), Brown = Srgb(112, 70, 44), Roof = Srgb(70, 70, 74);
+			W.Box(FVector3f(-3.4f, -0.62f, 0.35f), FVector3f(0.f, 0.62f, 0.6f), Iron);        // frame
+			W.Box(FVector3f(-2.4f, -0.52f, 0.6f), FVector3f(-0.15f, 0.52f, 1.55f), Iron);     // boiler
+			W.Box(FVector3f(-0.9f, -0.2f, 1.55f), FVector3f(-0.5f, 0.2f, 2.5f), Iron);        // chimney
+			W.Box(FVector3f(-1.6f, -0.24f, 1.55f), FVector3f(-1.2f, 0.24f, 1.9f), Brass);     // dome
+			W.Box(FVector3f(-3.4f, -0.62f, 0.6f), FVector3f(-2.4f, 0.62f, 2.1f), Iron);       // cab
+			W.Box(FVector3f(-3.5f, -0.7f, 2.1f), FVector3f(-2.3f, 0.7f, 2.25f), Roof);
+			W.Box(FVector3f(0.f, -0.6f, 0.3f), FVector3f(0.12f, 0.6f, 0.6f), Wheel);          // buffer beam
+			for (float X : { -2.9f, -1.8f, -0.7f })
+			{
+				W.Box(FVector3f(X - 0.4f, -0.68f, 0.f), FVector3f(X + 0.4f, 0.68f, 0.8f), Wheel);
+			}
+			W.Box(FVector3f(-5.1f, -0.6f, 0.2f), FVector3f(-3.6f, 0.6f, 1.3f), Iron);         // tender
+			W.Box(FVector3f(-5.f, -0.5f, 1.3f), FVector3f(-3.7f, 0.5f, 1.5f), Srgb(40, 36, 32));
+			for (int32 c = 0; c < 3; ++c)
+			{
+				const float X1 = -5.35f - c * 3.15f, X0 = X1 - 2.9f;
+				const FLinearColor& Body = c == 0 ? Brown : Green;
+				W.Box(FVector3f(X0, -0.62f, 0.3f), FVector3f(X1, 0.62f, 1.6f), Body);
+				W.Box(FVector3f(X0 - 0.08f, -0.7f, 1.6f), FVector3f(X1 + 0.08f, 0.7f, 1.8f), Roof);
+				for (int32 k = 0; k < 4; ++k)
+				{
+					const float X = X0 + 0.45f + k * 0.67f;
+					for (float Side : { -1.f, 1.f })
+					{
+						W.Quad(FVector3f(X, Side * 0.63f, 0.9f), FVector3f(X + 0.4f, Side * 0.63f, 0.9f), FVector3f(X + 0.4f, Side * 0.63f, 1.4f), FVector3f(X, Side * 0.63f, 1.4f),
+							Srgb(222, 206, 150), FVector3f((X0 + X1) * 0.5f, 0.f, 1.f));
+					}
+				}
+				for (float X : { X0 + 0.5f, X1 - 0.5f })
+				{
+					W.Box(FVector3f(X - 0.3f, -0.66f, 0.f), FVector3f(X + 0.3f, 0.66f, 0.45f), Iron);
+				}
+			}
+			break;
+		}
+		case ESitePiece::Station:
+		{
+			// Small brick station house; platform and canopy on the track side (-Y).
+			W.House(FVector2f(0.f, 0.8f), 6.f, 3.2f, 3.f, 5.f, Srgb(178, 96, 66), RoofSlate);
+			W.Box(FVector3f(-4.f, -1.9f, 0.f), FVector3f(4.f, -0.8f, 0.35f), Stone);
+			W.Box(FVector3f(-3.6f, -1.8f, 2.4f), FVector3f(3.6f, -0.8f, 2.6f), RoofSlate);
+			for (float X : { -3.3f, 0.f, 3.3f })
+			{
+				W.Box(FVector3f(X - 0.08f, -1.7f, 0.35f), FVector3f(X + 0.08f, -1.54f, 2.4f), DarkTimber);
+			}
+			break;
+		}
 		}
 		static const TCHAR* Names[] = { TEXT("Ground"), TEXT("Barracks"), TEXT("Scaffold"), TEXT("CraneMast"), TEXT("CraneJib"), TEXT("Wagon"), TEXT("Flagpole"), TEXT("Flag"),
 			TEXT("Stables"), TEXT("Depot"), TEXT("Infirmary"), TEXT("Arsenal"), TEXT("Lazaret"), TEXT("Battery"), TEXT("PowderMagazine"), TEXT("StarFort"),
-			TEXT("Telegraph"), TEXT("Granary") };
+			TEXT("Telegraph"), TEXT("Granary"), TEXT("Train"), TEXT("Station") };
 		return Finish(W, Material, FString::Printf(TEXT("SM_Campaign1851_Site_%s"), Names[int32(Piece)]));
 	}
 }

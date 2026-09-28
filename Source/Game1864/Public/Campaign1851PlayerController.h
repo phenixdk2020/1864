@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Campaign1851Network.h"
 #include "Campaign1851PlayerController.generated.h"
 
 class ACampaign1851Map;
@@ -51,6 +52,10 @@ private:
 	void FocusPlot(int32 CityIndex);
 	/** Flies the camera to a building site, looking at its front. */
 	void FocusSite(const class ACampaign1851ConstructionSite* Site);
+	/** Starts a chaussée or railway on a link from the panel; a message if it cannot. */
+	void BuildLink(int32 Link, ECampaign1851LinkWork Work);
+	/** Flies the camera over a link. */
+	void FocusLink(int32 Link);
 	/** Starts a town building from the panel; a message if it cannot. */
 	void BuildTownBuilding(int32 CityIndex, const FString& Key);
 

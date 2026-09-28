@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Campaign1851SaveGame.h"
+#include "Campaign1851Network.h"
 #include "Campaign1851Map.generated.h"
 
 class UStaticMeshComponent;
@@ -12,6 +13,8 @@ class UMaterialInterface;
 class UTexture2D;
 class ACampaign1851ConstructionSite;
 class UMaterialParameterCollection;
+class UStaticMesh;
+class FJsonObject;
 
 /** Region codes used by the 1851 data: K Kingdom, S Schleswig, H Holstein/Lauenburg. */
 struct FCampaign1851City
@@ -134,6 +137,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Map")
 	float RoadsMaxDistanceKm = 250.f;
 
+	/** Camera distance (km) below which railways show as track rather than as the black-and-white map symbol. */
+	UPROPERTY(EditAnywhere, Category = "Map")
+	float RailTrackMaxDistanceKm = 20.f;
+
+	/** Camera distance (km) below which the monarchy's red town dots are hidden (the 3D towns show instead). */
+	UPROPERTY(EditAnywhere, Category = "Map")
+	float CityDotsMinDistanceKm = 70.f;
+
 	/** Camera distance (km) below which the 3D towns, farms, woods and village lanes are shown. */
 	UPROPERTY(EditAnywhere, Category = "Map")
 	float SceneryMaxDistanceKm = 100.f;
@@ -177,7 +188,7 @@ public:
 	FDateTime GetDate() const { return StartDate() + FTimespan::FromDays(CampaignDays); }
 	/** "1. juli 1851", or "1. jul. 1851" with bShort. */
 	static FString FormatDate(const FDateTime& Date, bool bShort = false);
-	/** "Vinter", "Forår", "Sommer" or "Efterår". */
+	/** "Vinter", "ForÃ¥r", "Sommer" or "EfterÃ¥r". */
 	FString GetSeasonName() const;
 
 	// ---- Treasury (design manual 20.2: money / state credit; backlog B-346 budget with a transaction log).
@@ -208,7 +219,7 @@ public:
 	/** The town's site for a building, if it has been started. */
 	ACampaign1851ConstructionSite* FindBuilding(int32 CityIndex, const FString& Key) const;
 	/**
-	 * Why a town cannot have a building (not counting money): "kræver 10.000 indb.", "fra 1854", ...
+	 * Why a town cannot have a building (not counting money): "krÃ¦ver 10.000 indb.", "fra 1854", ...
 	 * Empty when it can; "-" when the building does not belong to the town at all (the list hides it).
 	 */
 	FString BuildingBlockReason(int32 CityIndex, const FString& Key) const;
@@ -231,6 +242,39 @@ public:
 	const TArray<TObjectPtr<ACampaign1851ConstructionSite>>& GetProjects() const { return Projects; }
 	/** World position of a town's building plot (on the terrain). */
 	FVector PlotWorld(int32 CityIndex) const;
+
+	// ---- Roads and railways (design manual 20.16.1; Campaign1851Network.cpp).
+
+	const TArray<FCampaign1851Link>& GetLinks() const { return Links; }
+	const TArray<FCampaign1851Railway>& GetRailways() const { return Railways; }
+	/** Links from a town, nearest neighbour first. */
+	TArray<int32> LinksOf(int32 CityIndex) const;
+	/** Why a link cannot get this work ("fÃ¦rgeoverfart", "allerede chaussÃ©", ...); empty if it can (money aside). */
+	FString LinkBlockReason(int32 Link, ECampaign1851LinkWork Work) const;
+	int32 LinkWorkCost(int32 Link, ECampaign1851LinkWork Work) const;
+	float LinkWorkDays(int32 Link, ECampaign1851LinkWork Work) const;
+	/** Starts paving or a railway on a link and pays the down payment (bCharge); false with OutReason if it cannot. */
+	bool StartLinkWork(int32 Link, ECampaign1851LinkWork Work, bool bCharge = true, FString* OutReason = nullptr);
+	/** True if an open railway stops in the town. */
+	bool HasStation(int32 CityIndex) const;
+	/** Days from one end of a link to the other by the best way open now (march, or train). */
+	float LinkTravelDays(int32 Link) const;
+	/** "68 km landevej Â· 3Â½ dagsmarch", "jernbane 70 km Â· 1 dag med tog", ... */
+	FString LinkTravelText(int32 Link) const;
+	/** Other town of a link. */
+	int32 LinkOther(int32 Link, int32 CityIndex) const { return Links.IsValidIndex(Link) ? (Links[Link].A == CityIndex ? Links[Link].B : Links[Link].A) : INDEX_NONE; }
+	/** Back to the network of 1851 (new game, or before loading). */
+	void ResetNetwork();
+	/** Built roads and railways and the projects under way, for saving; restored after ResetNetwork. */
+	TArray<FCampaign1851LinkSave> SaveNetwork() const;
+	int32 RestoreNetwork(const TArray<FCampaign1851LinkSave>& Saves);
+	/** Messages for the player ("Jernbanen ... er Ã¥bnet"); the controller shows them. */
+	TArray<FString> TakeNews() { TArray<FString> Out = MoveTemp(News); News.Reset(); return Out; }
+	/** World position of a projected-km point on the terrain. */
+	FVector WorldAtKm(const FVector2D& Km) const;
+	/** Point at a distance along a polyline (km), with the heading there. */
+	static FVector2D AlongLine(const TArray<FVector2D>& Line, double Distance, FVector2D* OutDirection = nullptr);
+	static double LineLength(const TArray<FVector2D>& Line);
 
 	/** Screen-size scaling for the city markers; called by the player controller each frame. */
 	void UpdateMarkers(float CameraDistanceKm);
@@ -325,6 +369,46 @@ private:
 	int32 FeaturesW = 0, FeaturesH = 0;
 	bool bSceneryVisible = false;
 	bool bRoadsVisible = false;
+
+	// ---- Network (Campaign1851Network.cpp)
+	bool LoadNetwork(const FJsonObject& Json);
+	/** Daily work on the link projects, historical lines opening, trains and work gangs moving. */
+	void AdvanceNetwork(float DeltaDays, float DeltaSeconds);
+	/** Railways, chaussÃ©er and works as ribbons; rebuilt when they change. */
+	void RebuildNetworkMeshes();
+	void UpdateNetworkVisibility();
+	/** Marks the links an open railway serves, and reports lines opening (bAnnounce). */
+	void UpdateOpenRailways(bool bAnnounce);
+	void FinishLinkWork(int32 Link);
+	/** Removes scenery instances within RadiusKm of a line (one pass over the instances). */
+	void ClearSceneryAlong(const TArray<FVector2D>& Line, float RadiusKm);
+	UStaticMeshComponent* MakeRibbon(const TArray<TArray<FVector2D>>& Lines, float WidthKm, const FLinearColor& Colour, const TCHAR* Name, float Lift);
+	double NetworkUpkeepPerYear() const;
+	TArray<FCampaign1851Link> Links;
+	TArray<FCampaign1851Railway> Railways;
+	int32 HistoricRailways = 0;   // Railways[0..HistoricRailways) come from the map data
+	TArray<FString> News;
+	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> Chaussees;
+	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> RailBed;
+	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> RailTrack;
+	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> RailWorks;
+	/** Close in: the track itself (gravel, sleepers, two rails) instead of the map symbol. */
+	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> RailGravel;
+	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> RailSleepers;
+	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> RailSteel;
+	float LastCameraDistanceKm = 1000.f;
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> Trains;    // one per open railway (index = Railways)
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> Stations;
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> Gangs;     // one per link (null when idle)
+	UPROPERTY(Transient) TObjectPtr<UStaticMesh> TrainMesh;
+	UPROPERTY(Transient) TObjectPtr<UStaticMesh> GangMesh;
+	UPROPERTY(Transient) TObjectPtr<UStaticMesh> StationMesh;
+	TArray<float> TrainAt;       // km along the line
+	TArray<float> TrainDirection;
+	TArray<float> TrainPause;
+	float GangClock = 0.f;
+	/** Progress (km) drawn at the last mesh rebuild, to rebuild only when the works have grown. */
+	double DrawnWorkKm = -1.0;
 
 	/** Season weights for the map materials (MPC_Campaign1851Season): Snow, Bare, Autumn, Spring. */
 	void UpdateSeason();

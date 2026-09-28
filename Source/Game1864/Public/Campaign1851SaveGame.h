@@ -31,6 +31,22 @@ struct FCampaign1851ProjectSave
 	UPROPERTY() float Yaw = 0.f;
 };
 
+/** A link of the road network with work done on it: paved, railway built, or a project under way. */
+USTRUCT()
+struct FCampaign1851LinkSave
+{
+	GENERATED_BODY()
+
+	/** The link's towns by name. */
+	UPROPERTY() FString A;
+	UPROPERTY() FString B;
+	UPROPERTY() bool bChaussee = false;
+	UPROPERTY() bool bRailway = false;
+	/** ECampaign1851LinkWork of the project under way (0 = none), its days done, and what it costs. */
+	UPROPERTY() uint8 Work = 0;
+	UPROPERTY() float DaysBuilt = 0.f;
+};
+
 /**
  * A saved 1851 campaign (Saved/SaveGames/<slot>.sav). Holds the construction projects, the
  * camera view and the selected town. Bump SaveVersion when the layout changes and migrate in
@@ -42,8 +58,8 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
-	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. */
-	static constexpr int32 CurrentVersion = 4;
+	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. */
+	static constexpr int32 CurrentVersion = 5;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;
@@ -64,4 +80,7 @@ public:
 	/** The state's cash (rigsdaler) and its recent account book. */
 	UPROPERTY() double Treasury = 0.0;
 	UPROPERTY() TArray<FCampaign1851Transaction> Ledger;
+
+	/** Chausséer and railways built by the player, and link projects under way. */
+	UPROPERTY() TArray<FCampaign1851LinkSave> Links;
 };

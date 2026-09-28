@@ -104,6 +104,34 @@ void ACampaign1851PlayerController::TryInit()
 			}
 		}
 	}
+	// -CampaignBuildLink=Aalborg:Randers:bane;Odense:Nyborg:chaussee starts link works (paid like any order).
+	FString LinkBuilds;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignBuildLink="), LinkBuilds, false))
+	{
+		TArray<FString> Orders;
+		LinkBuilds.ParseIntoArray(Orders, TEXT(";"));
+		for (const FString& Order : Orders)
+		{
+			TArray<FString> Parts;
+			Order.ParseIntoArray(Parts, TEXT(":"));
+			const int32 A = Parts.Num() == 3 ? Map->FindCity(Parts[0]) : INDEX_NONE, B = Parts.Num() == 3 ? Map->FindCity(Parts[1]) : INDEX_NONE;
+			const int32 Link = Map->GetLinks().IndexOfByPredicate([A, B](const FCampaign1851Link& L) { return (L.A == A && L.B == B) || (L.A == B && L.B == A); });
+			if (Link != INDEX_NONE)
+			{
+				BuildLink(Link, Parts[2].StartsWith(TEXT("b")) ? ECampaign1851LinkWork::Railway : ECampaign1851LinkWork::Chaussee);
+				FocusLink(Link);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|no link for '%s'"), *Order);
+			}
+		}
+	}
+	FString StartCity;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignSelectCity="), StartCity) && Overlay.IsValid())
+	{
+		Overlay->SetSelectedCity(Map->FindCity(StartCity));
+	}
 	int32 StartAmt = 0;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignSelectAmt="), StartAmt) && Overlay.IsValid())
 	{
@@ -312,6 +340,14 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			FocusSite(Map->FindBuilding(Overlay->GetSelectedCity(), ACampaign1851ConstructionSite::TownBuildings()[Module].Key));
 		}
+		else if (Button == SCampaign1851Overlay::EButton::BuildLink)
+		{
+			BuildLink(Module / 2, Module % 2 ? ECampaign1851LinkWork::Railway : ECampaign1851LinkWork::Chaussee);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::ShowLink)
+		{
+			FocusLink(Module);
+		}
 		else if (Button == SCampaign1851Overlay::EButton::BuildModule)
 		{
 			if (Map->StartModule(Overlay->GetSelectedCity(), Module))
@@ -346,6 +382,14 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 	}
 
+	for (const FString& News : Map->TakeNews())
+	{
+		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|news|%s"), *News);
+		if (Overlay.IsValid())
+		{
+			Overlay->ShowToast(News);
+		}
+	}
 	Map->UpdateMarkers(Camera->GetDistanceKm());
 	LastCameraTarget = Camera->GetTarget();
 	LastCameraDistanceKm = Camera->GetDistanceKm();
@@ -457,6 +501,11 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Speed = Map->GetSpeed();
 	Save->Treasury = Map->GetTreasury();
 	Save->Ledger = Map->GetLedger();
+	Save->Links = Map->SaveNetwork();
+	if (Save->Links.Num() > 0)
+	{
+		Parts.Add(FString::Printf(TEXT("%d vej-/baneanlæg"), Save->Links.Num()));
+	}
 	Save->Summary = FString::Printf(TEXT("%s  ·  %s"), *ACampaign1851Map::FormatDate(Map->GetDate(), true),
 		Parts.Num() > 0 ? *FString::Join(Parts, TEXT("  ·  ")) : TEXT("ingen byggerier"));
 	const bool bOk = UGameplayStatics::SaveGameToSlot(Save, Slot, 0);
@@ -493,6 +542,8 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	{
 		Map->ResetEconomy();
 	}
+	Map->ResetNetwork();
+	const int32 LinksRestored = Save->SaveVersion >= 5 ? Map->RestoreNetwork(Save->Links) : 0;
 	int32 Restored = 0;
 	for (const FCampaign1851ProjectSave& P : Save->Projects)
 	{
@@ -506,7 +557,7 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	}
 	Map->UpdateMarkers(Camera->GetDistanceKm());
 	AutosaveTimer = 0.f;
-	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|load|%s|projects=%d/%d|version=%d"), *Slot, Restored, Save->Projects.Num(), Save->SaveVersion);
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|load|%s|projects=%d/%d|links=%d/%d|version=%d"), *Slot, Restored, Save->Projects.Num(), LinksRestored, Save->Links.Num(), Save->SaveVersion);
 	return true;
 }
 
@@ -521,6 +572,7 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	Map->SetCampaignDays(0.0);
 	Map->SetSpeed(1);
 	Map->ResetEconomy();
+	Map->ResetNetwork();
 	Camera->ResetView();
 	if (Overlay.IsValid())
 	{
@@ -562,6 +614,47 @@ void ACampaign1851PlayerController::FocusSite(const ACampaign1851ConstructionSit
 		return;
 	}
 	Camera->SetView(Site->GetActorLocation(), 6.5f, float(Site->GetActorRotation().Yaw) + 25.f);
+	Map->UpdateMarkers(Camera->GetDistanceKm());
+}
+
+void ACampaign1851PlayerController::BuildLink(int32 Link, ECampaign1851LinkWork Work)
+{
+	if (!Map.IsValid() || !Map->GetLinks().IsValidIndex(Link))
+	{
+		return;
+	}
+	FString Why;
+	if (Map->StartLinkWork(Link, Work, true, &Why))
+	{
+		const FCampaign1851Link& L = Map->GetLinks()[Link];
+		if (Overlay.IsValid())
+		{
+			Overlay->ShowToast(FString::Printf(TEXT("%s %s–%s bestilt"), Work == ECampaign1851LinkWork::Railway ? TEXT("Jernbane") : TEXT("Chaussé"),
+				*Map->GetCities()[L.A].Name, *Map->GetCities()[L.B].Name));
+		}
+		SaveToSlot(TEXT("Autosave"), true);
+	}
+	else if (Overlay.IsValid())
+	{
+		Overlay->ShowToast(Why);
+	}
+}
+
+void ACampaign1851PlayerController::FocusLink(int32 Link)
+{
+	ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
+	if (!Map.IsValid() || !Camera || !Map->GetLinks().IsValidIndex(Link))
+	{
+		return;
+	}
+	const FCampaign1851Link& L = Map->GetLinks()[Link];
+	const TArray<FVector2D>& Line = L.Work == ECampaign1851LinkWork::Railway ? L.RailPath : L.Km;
+	// Over the head of the works, close enough to see the gang and the new line.
+	const double Length = ACampaign1851Map::LineLength(Line);
+	const double Head = L.Work == ECampaign1851LinkWork::None ? Length * 0.5 : FMath::Max(0.3, Length * FMath::Min(1.0, L.Progress() / (L.Work == ECampaign1851LinkWork::Railway ? 0.6 : 1.0)) - 0.3);
+	FVector2D Dir;
+	const FVector Target = Map->WorldAtKm(ACampaign1851Map::AlongLine(Line, Head, &Dir));
+	Camera->SetView(Target, L.Work == ECampaign1851LinkWork::None ? FMath::Clamp(float(Length) * 1.4f, 20.f, 120.f) : 7.f, FMath::RadiansToDegrees(FMath::Atan2(-Dir.Y, Dir.X)) + 60.f);
 	Map->UpdateMarkers(Camera->GetDistanceKm());
 }
 
