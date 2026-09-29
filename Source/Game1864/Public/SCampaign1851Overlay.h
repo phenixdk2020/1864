@@ -46,7 +46,8 @@ public:
 		OfficerPromote, OpenOOB, OOBCommand, CommandGeneralChange, TrainOrder,
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve, FormationDeputy, FormationStaff,
-		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation };
+		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
+		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -60,6 +61,14 @@ public:
 	void ScrollChart(int32 Steps, bool bVertical = false) { float& S = bVertical ? ChartScrollY : ChartScroll; S = FMath::Max(0.f, S + Steps * 60.f); }
 	bool IsOOBOpen() const { return bOOB; }
 	void SetCivilTab(bool bIn) { bCivilTab = bIn; }
+	/** The fort list and the choice of a new fort (the SKANSER button). */
+	void ToggleFortTool() { bFortTool = !bFortTool; }
+	void HideFortTool() { bFortTool = false; }
+	/** The fort shown in its panel (id, 0 = none); placing mode shows the hint. */
+	void SelectFort(int32 Id) { SelectedFort = Id; if (Id != 0) { SelectedCity = INDEX_NONE; SelectedRegiments.Reset(); } }
+	int32 GetSelectedFort() const { return SelectedFort; }
+	void SetFortPlacing(int32 Kind) { FortPlacing = Kind; }   // 0 none, 1 small, 2 large
+	int32 GetFortPlacing() const { return FortPlacing; }
 	/** Drag and drop in the tree: what is dragged, the cursor (viewport pixels) and the row under it. */
 	void SetDrag(bool bOn, int32 Key, const FVector2D& ViewportPixel, int32 Hover) { bDragging = bOn; DragKey = Key; DragPos = ViewportPixel / FMath::Max(PaintScale, 0.01f); HoverKey = Hover; }
 	/** The officer picker for a formation's commander (generals for divisions, officers for brigades). */
@@ -85,7 +94,7 @@ public:
 	FOrderDialog& EditOrder() { return OrderDialog; }
 	const FOrderDialog& GetOrder() const { return OrderDialog; }
 	/** What an X in a panel's corner closes (the Module of EButton::ClosePanel). */
-	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB, CloseOrder };
+	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB, CloseOrder, CloseFortPanel, CloseFort };
 	/** The big windows opened from the menu bar under the calendar (one at a time). */
 	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council };
 	void OpenWindow(EWindow In) { Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
@@ -195,6 +204,9 @@ private:
 		bool bHasChildren = false;
 		bool bOpen = true;
 	};
+	/** The SKANSER panel (new fort, list of forts) and a fort's own panel. */
+	void PaintFortTool(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	void PaintFort(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** The council window: the nations, the player's ministries (delegation) and their decisions. */
 	void PaintCouncil(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const;
 	/** The field army as an organisation chart: HQ boxes, units stacked under them, connecting lines. */
@@ -251,6 +263,9 @@ private:
 	TSet<int32> Collapsed;
 	mutable int32 TreeScroll = 0;
 	mutable float ChartScroll = 0.f;
+	bool bFortTool = false;
+	int32 SelectedFort = 0;
+	int32 FortPlacing = 0;
 	/** The town's building list: military (false) or civil (true). */
 	bool bCivilTab = false;
 	mutable float ChartScrollY = 0.f;

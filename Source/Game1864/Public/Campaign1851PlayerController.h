@@ -101,6 +101,8 @@ private:
 	float AutosaveTimer = 0.f;
 	/** Test: a town building to put the camera on once it stands (-CampaignFocusBuilding=Town:Key). */
 	FString FocusBuildingOrder;
+	/** The fort under the mouse (id, 0 = none). */
+	int32 FortUnderCursor() const;
 	/** Speed to return to when un-pausing with the space bar. */
 	int32 SpeedBeforePause = 1;
 

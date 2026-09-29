@@ -211,6 +211,34 @@ void ACampaign1851PlayerController::TryInit()
 			: WindowName == TEXT("budget") ? SCampaign1851Overlay::EWindow::Budget : WindowName == TEXT("trains") ? SCampaign1851Overlay::EWindow::Trains
 			: WindowName == TEXT("chart") ? SCampaign1851Overlay::EWindow::Chart : WindowName == TEXT("council") ? SCampaign1851Overlay::EWindow::Council : SCampaign1851Overlay::EWindow::Towns);
 	}
+	// -CampaignBuildFort=54.91,9.75,stor,135;54.90,9.72,lille,160 starts forts (lat, lon, size, front bearing);
+	// -CampaignFortsComplete finishes them fully armed and strengthened (to see them).
+	FString FortOrders;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignBuildFort="), FortOrders, false))
+	{
+		TArray<FString> Orders;
+		FortOrders.ParseIntoArray(Orders, TEXT(";"));
+		for (const FString& Order : Orders)
+		{
+			TArray<FString> P;
+			Order.ParseIntoArray(P, TEXT(","));
+			if (P.Num() >= 2)
+			{
+				FString Why;
+				const float Bearing = P.Num() > 3 ? FCString::Atof(*P[3]) : 180.f;
+				const int32 Id = Map->StartFort(Map->KmAtWorld(Map->Project(FCString::Atod(*P[0]), FCString::Atod(*P[1]))), P.Num() > 2 && P[2] == TEXT("stor"), Bearing - 90.f, &Why);
+				UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|fort|%s -> %d %s"), *Order, Id, *Why);
+				if (Id != INDEX_NONE && Overlay.IsValid())
+				{
+					Overlay->SelectFort(Id);
+				}
+			}
+		}
+		if (FParse::Param(FCommandLine::Get(), TEXT("CampaignFortsComplete")))
+		{
+			Map->CompleteForts();
+		}
+	}
 	// -CampaignDelegate=auto|advisory hands every portfolio to the ministries (to watch the AI).
 	FString DelegateMode;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignDelegate="), DelegateMode))
@@ -438,9 +466,14 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			Overlay->OpenWindow(SCampaign1851Overlay::EWindow::None);
 		}
+		else if (Overlay->GetFortPlacing() != 0)
+		{
+			Overlay->SetFortPlacing(0);
+		}
 		else
 		{
 			Overlay->SetSelectedRegiments({});
+			Overlay->SelectFort(0);
 		}
 	}
 
@@ -718,6 +751,8 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			case SCampaign1851Overlay::CloseLedger: Overlay->ToggleLedger(); break;
 			case SCampaign1851Overlay::CloseOOB: Overlay->ToggleOOB(); break;
 			case SCampaign1851Overlay::CloseOrder: Overlay->EditOrder().bOpen = false; break;
+			case SCampaign1851Overlay::CloseFortPanel: Overlay->HideFortTool(); Overlay->SetFortPlacing(0); break;
+			case SCampaign1851Overlay::CloseFort: Overlay->SelectFort(0); break;
 			default:
 				Overlay->SetSelectedRegiments({});
 				Overlay->SetSelectedCity(INDEX_NONE);
@@ -746,6 +781,40 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			const int32 Index = Map->FormationIndex(Module);
 			Overlay->OpenFormationPicker(Module, Index != INDEX_NONE && (Map->GetFormations()[Index].Echelon == ECampaign1851Echelon::Division || Map->GetFormations()[Index].Echelon == ECampaign1851Echelon::Army));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::FortTool)
+		{
+			Overlay->ToggleFortTool();
+			Overlay->SetFortPlacing(0);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::FortChoose)
+		{
+			Overlay->SetFortPlacing(Overlay->GetFortPlacing() == Module ? 0 : Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::FortSelect || Button == SCampaign1851Overlay::EButton::FortShow)
+		{
+			Overlay->SelectFort(Module);
+			const int32 Index = Map->FortIndex(Module);
+			if (Index != INDEX_NONE)
+			{
+				Camera->SetView(Map->FortWorld(Index), 3.f, Camera->GetYaw());
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::FortGuns || Button == SCampaign1851Overlay::EButton::FortDefence)
+		{
+			FString Why;
+			if (Map->UpgradeFort(Module, Button == SCampaign1851Overlay::EButton::FortGuns ? ECampaign1851FortWork::Guns : ECampaign1851FortWork::Defence, &Why))
+			{
+				SaveToSlot(TEXT("Autosave"), true);
+			}
+			else
+			{
+				Overlay->ShowToast(Why);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::FortTurn)
+		{
+			Map->TurnFort(Overlay->GetSelectedFort(), Module * 22.5f);
 		}
 		else if (Button == SCampaign1851Overlay::EButton::TownBuildingsTab)
 		{
@@ -916,8 +985,34 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			FocusPlot(Overlay->GetSelectedCity());
 		}
+		else if (Overlay.IsValid() && Overlay->GetWindow() == SCampaign1851Overlay::EWindow::None && Overlay->GetFortPlacing() != 0)
+		{
+			// Placing a fort: its front faces south, towards the Eider and the German lands (turn it afterwards).
+			FVector Ground;
+			if (CursorGround(Ground))
+			{
+				FString Why;
+				const int32 Id = Map->StartFort(Map->KmAtWorld(Ground), Overlay->GetFortPlacing() == 2, 90.f, &Why);
+				if (Id != INDEX_NONE)
+				{
+					Overlay->SetFortPlacing(0);
+					Overlay->SelectFort(Id);
+					Overlay->ShowToast(FString::Printf(TEXT("%s påbegyndt"), *Map->GetForts()[Map->FortIndex(Id)].Name));
+					SaveToSlot(TEXT("Autosave"), true);
+				}
+				else
+				{
+					Overlay->ShowToast(Why);
+				}
+			}
+		}
+		else if (Overlay.IsValid() && Overlay->GetWindow() == SCampaign1851Overlay::EWindow::None && FortUnderCursor() != 0)
+		{
+			Overlay->SelectFort(FortUnderCursor());
+		}
 		else if (Overlay.IsValid() && Overlay->GetWindow() == SCampaign1851Overlay::EWindow::None)
 		{
+			Overlay->SelectFort(0);
 			PickCity();
 		}
 	}
@@ -934,6 +1029,40 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	LastCameraTarget = Camera->GetTarget();
 	LastCameraDistanceKm = Camera->GetDistanceKm();
 	LastCameraYaw = Camera->GetYaw();
+}
+
+int32 ACampaign1851PlayerController::FortUnderCursor() const
+{
+	float MX, MY;
+	if (!Map.IsValid() || !GetMousePosition(MX, MY))
+	{
+		return 0;
+	}
+	// A fort under the cursor (only where the scenery shows): within its size on screen, at least 20 px.
+	const TArray<FCampaign1851Fort>& Forts = Map->GetForts();
+	int32 Best = 0;
+	float BestScore = 1.f;
+	for (int32 i = 0; i < Forts.Num(); ++i)
+	{
+		const FVector World = Map->FortWorld(i);
+		FVector2D Screen, Edge;
+		if (!ProjectWorldLocationToScreen(World, Screen, false))
+		{
+			continue;
+		}
+		float Radius = 20.f;
+		if (ProjectWorldLocationToScreen(World + FVector((Forts[i].bLarge ? 14.0 : 9.0) * ACampaign1851Map::PieceScale, 0.0, 0.0), Edge, false))
+		{
+			Radius = FMath::Max(Radius, float(FVector2D::Distance(Screen, Edge)));
+		}
+		const float Score = FVector2D::Distance(Screen, FVector2D(MX, MY)) / Radius;
+		if (Score < BestScore)
+		{
+			BestScore = Score;
+			Best = Forts[i].Id;
+		}
+	}
+	return Best;
 }
 
 int32 ACampaign1851PlayerController::CityUnderCursor() const
@@ -1066,6 +1195,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Formations = Map->SaveFormations();
 	Save->TrainOrders = Map->GetTrainOrders();
 	Map->SaveWorld(Save);
+	Save->Forts = Map->SaveForts();
 	if (Save->Links.Num() > 0)
 	{
 		Parts.Add(FString::Printf(TEXT("%d vej-/baneanlæg"), Save->Links.Num()));
@@ -1147,6 +1277,7 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	{
 		Map->RestoreWorld(Save);
 	}
+	Map->RestoreForts(Save->SaveVersion >= 13 ? Save->Forts : TArray<FCampaign1851FortSave>());
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);
 	if (Overlay.IsValid())
 	{
@@ -1178,6 +1309,8 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	FParse::Value(FCommandLine::Get(), TEXT("CampaignDeviation="), DeviationPct);
 	Map->ResetWorld(NewSeed, DeviationPct / 100.f);
 	Map->ResetArmy();
+	Map->ResetForts();
+	Map->ExportForts();
 	if (Overlay.IsValid())
 	{
 		Overlay->SetSelectedRegiments({});

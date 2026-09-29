@@ -6,6 +6,7 @@
 #include "Campaign1851Network.h"
 #include "Campaign1851Army.h"
 #include "Campaign1851Nation.h"
+#include "Campaign1851Fort.h"
 #include "Campaign1851Map.generated.h"
 
 class UStaticMeshComponent;
@@ -100,6 +101,21 @@ struct FCampaign1851Projection
 		const double K = FMath::Sqrt(2.0 / (1.0 + FMath::Sin(Phi0) * FMath::Sin(Phi) + FMath::Cos(Phi0) * FMath::Cos(Phi) * FMath::Cos(Lam)));
 		return FVector2D(RadiusKm * K * FMath::Cos(Phi) * FMath::Sin(Lam),
 			RadiusKm * K * (FMath::Cos(Phi0) * FMath::Sin(Phi) - FMath::Sin(Phi0) * FMath::Cos(Phi) * FMath::Cos(Lam)));
+	}
+
+	/** Projected km -> geographic degrees (latitude X, longitude Y): the inverse Lambert azimuthal equal-area. */
+	FVector2D Inverse(const FVector2D& P) const
+	{
+		const double Phi0 = FMath::DegreesToRadians(Lat0);
+		const double Rho = P.Size();
+		if (Rho < 1e-9)
+		{
+			return FVector2D(Lat0, Lon0);
+		}
+		const double C = 2.0 * FMath::Asin(FMath::Clamp(Rho / (2.0 * RadiusKm), -1.0, 1.0));
+		const double Lat = FMath::Asin(FMath::Cos(C) * FMath::Sin(Phi0) + P.Y * FMath::Sin(C) * FMath::Cos(Phi0) / Rho);
+		const double Lon = FMath::DegreesToRadians(Lon0) + FMath::Atan2(P.X * FMath::Sin(C), Rho * FMath::Cos(Phi0) * FMath::Cos(C) - P.Y * FMath::Sin(Phi0) * FMath::Sin(C));
+		return FVector2D(FMath::RadiansToDegrees(Lat), FMath::RadiansToDegrees(Lon));
 	}
 };
 
@@ -267,6 +283,30 @@ public:
 	const TArray<TObjectPtr<ACampaign1851ConstructionSite>>& GetProjects() const { return Projects; }
 	/** World position of a town's building plot (on the terrain). */
 	FVector PlotWorld(int32 CityIndex) const;
+
+	// ---- Field fortifications, skanser (Campaign1851Forts.cpp).
+
+	const TArray<FCampaign1851Fort>& GetForts() const { return Forts; }
+	int32 FortIndex(int32 Id) const;
+	/** The nearest monarchy town as the crow flies. */
+	int32 NearestTown(const FVector2D& Km) const;
+	/** Why no fort can be raised there (empty if it can): not on the monarchy's land, in a town, too close to another, no money. */
+	FString FortBlockReason(const FVector2D& Km, bool bLarge) const;
+	/** Starts a fort (pays the down payment); returns its id, or INDEX_NONE with the reason. */
+	int32 StartFort(const FVector2D& Km, bool bLarge, float Yaw, FString* OutReason = nullptr);
+	/** Two more guns, or the next level of defence (ECampaign1851FortWork::Guns / Defence). */
+	bool UpgradeFort(int32 Id, ECampaign1851FortWork Work, FString* OutReason = nullptr);
+	/** Turns a fort's front (degrees). */
+	void TurnFort(int32 Id, float DeltaYaw);
+	/** For tests: every fort finished, fully armed and strengthened. */
+	void CompleteForts();
+	FVector FortWorld(int32 Index) const;
+	double FortUpkeepPerYear() const;
+	void ResetForts();
+	TArray<FCampaign1851FortSave> SaveForts() const;
+	void RestoreForts(const TArray<FCampaign1851FortSave>& Saves);
+	/** Writes Saved/Battle/Fortifications.json for the 3D battles. */
+	void ExportForts() const;
 
 	// ---- Nations, growth and the national AI (Campaign1851Nations.cpp).
 
@@ -617,6 +657,16 @@ private:
 	TArray<FCampaign1851Railway> Railways;
 	int32 HistoricRailways = 0;   // Railways[0..HistoricRailways) come from the map data
 	TArray<FString> News;
+
+	// The fort layer (Campaign1851Forts.cpp).
+	void AdvanceForts(float DeltaDays);
+	void UpdateFortVisual(int32 Index);
+	FTransform FortTransform(const FCampaign1851Fort& F) const;
+	TArray<FCampaign1851Fort> Forts;
+	int32 NextFortId = 1;
+	TArray<int32> FortPartOwner;   // fort id per part
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> FortParts;
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMesh>> FortMeshes;
 
 	// The world layer (Campaign1851Nations.cpp).
 	bool LoadNations();

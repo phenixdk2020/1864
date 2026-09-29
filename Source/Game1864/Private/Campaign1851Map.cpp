@@ -436,6 +436,13 @@ void ACampaign1851Map::UpdateMarkers(float CameraDistanceKm)
 				Site->SetActorHiddenInGame(!bShowScenery);
 			}
 		}
+		for (UStaticMeshComponent* Part : FortParts)
+		{
+			if (Part)
+			{
+				Part->SetVisibility(bShowScenery);
+			}
+		}
 	}
 	if (Lanes)
 	{
@@ -1574,6 +1581,7 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 		Site->Advance(Work, Speed > 0 ? DeltaSeconds : 0.f);
 	}
 	AdvanceNetwork(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
+	AdvanceForts(DeltaDays);
 	AdvanceArmy(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
 	if (GetDate().GetMonth() != MonthBefore)
 	{
@@ -1667,7 +1675,7 @@ double ACampaign1851Map::GetMonthlyUpkeep() const
 	{
 		Total += Site && !Site->IsPrivate() ? Site->GetYearlyUpkeep() / 12.0 : 0.0;
 	}
-	return Total + NetworkUpkeepPerYear() / 12.0;
+	return Total + (NetworkUpkeepPerYear() + FortUpkeepPerYear()) / 12.0;
 }
 
 void ACampaign1851Map::AddTransaction(double Amount, const FString& Text)

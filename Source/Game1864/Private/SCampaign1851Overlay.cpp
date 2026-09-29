@@ -211,6 +211,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	PaintInfo(Geometry, Out, Layer);
 	PaintSidePanels(Geometry, Out, Layer + 2);
 	PaintButton(Geometry, Out, Layer, FVector2D(28.f, 206.f), FVector2D(150.f, 28.f), TEXT("SPILMENU  (M)"), EButton::Menu);
+	PaintButton(Geometry, Out, Layer, FVector2D(186.f, 206.f), FVector2D(120.f, 28.f), TEXT("SKANSER"), EButton::FortTool, 0, bFortTool);
 	PaintCalendar(Geometry, Out, Layer);
 	PaintTreasury(Geometry, Out, Layer);
 	if (Window != EWindow::None)
@@ -256,7 +257,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.37 NATIONER, VÆKST OG STATSRÅD — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.38 SKANSER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -504,6 +505,15 @@ void SCampaign1851Overlay::PaintBornholm(const FGeometry& Geometry, FSlateWindow
 void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
 {
 	const TArray<FCampaign1851City>& Cities = Map->GetCities();
+	if (bFortTool)
+	{
+		PaintFortTool(Geometry, Out, Layer);
+	}
+	if (Map->FortIndex(SelectedFort) != INDEX_NONE)
+	{
+		PaintFort(Geometry, Out, Layer);
+		return;
+	}
 	if (SelectedRegiments.Num() > 0)
 	{
 		PaintArmyInfo(Geometry, Out, Layer);
@@ -1221,6 +1231,97 @@ bool SCampaign1851Overlay::IsOverChart(const FVector2D& ViewportPixel) const
 {
 	const FVector2D Local = ViewportPixel / FMath::Max(PaintScale, 0.01f);
 	return Window == EWindow::Chart && Local.X >= ChartMin.X && Local.Y >= ChartMin.Y && Local.X <= ChartMax.X && Local.Y <= ChartMax.Y;
+}
+
+void SCampaign1851Overlay::PaintFortTool(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	const TArray<FCampaign1851Fort>& Forts = Map->GetForts();
+	const int32 Rows = FMath::Min(Forts.Num(), 8);
+	const FVector2D Size(470.f, 200.f + Rows * 28.f);
+	const FVector2D Pos(28.f, 350.f);
+	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseFortPanel);
+	PaintText(Geometry, Out, Layer + 2, TEXT("S K A N S E R"), Pos + FVector2D(22.f, 26.f), Serif(11), Gold, 0.f, false);
+	PaintTextFit(Geometry, Out, Layer + 2, TEXT("Feltbefæstninger hvor som helst i monarkiet: vælg type, klik på kortet"), Pos + FVector2D(22.f, 50.f), Serif(10, EFace::Italic), MutedInk, Size.X - 44.f);
+	for (int32 k = 0; k < 2; ++k)
+	{
+		const bool bLarge = k == 1;
+		const float Y = Pos.Y + 70.f + k * 50.f;
+		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, Y), FVector2D(150.f, 28.f), bLarge ? TEXT("STOR SKANSE") : TEXT("LILLE SKANSE"), EButton::FortChoose, k + 1,
+			FortPlacing == k + 1, !Map->CanAfford(Campaign1851Forts::BuildCost(bLarge)));
+		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s rd.  ·  %.0f dage  ·  %d-%d kanoner  ·  %d mand"), *Thousands(Campaign1851Forts::BuildCost(bLarge)), Campaign1851Forts::BuildDays(bLarge),
+			Campaign1851Forts::StartGuns(bLarge), Campaign1851Forts::MaxGuns(bLarge), Campaign1851Forts::InfantryCapacity(bLarge)), FVector2D(Pos.X + 184.f, Y + 9.f), Serif(11), Ink, Size.X - 206.f);
+		PaintTextFit(Geometry, Out, Layer + 2, bLarge ? TEXT("lukket skanse som Dybbøls skanse IV (12 kanoner)") : TEXT("lunette: to facer, åben bagtil"),
+			FVector2D(Pos.X + 184.f, Y + 26.f), Serif(10, EFace::Italic), MutedInk, Size.X - 206.f);
+	}
+	if (FortPlacing != 0)
+	{
+		PaintText(Geometry, Out, Layer + 2, TEXT("Klik på kortet, hvor skansen skal ligge  ·  Esc: fortryd"), Pos + FVector2D(22.f, 180.f), Serif(12, EFace::Italic), Gold, 0.f, false);
+	}
+	else if (Forts.Num() == 0)
+	{
+		PaintText(Geometry, Out, Layer + 2, TEXT("Ingen skanser endnu"), Pos + FVector2D(22.f, 180.f), Serif(12, EFace::Italic), MutedInk, 0.f, false);
+	}
+	for (int32 r = 0; r < Rows; ++r)
+	{
+		const FCampaign1851Fort& F = Forts[r];
+		const float Y = Pos.Y + 196.f + r * 28.f;
+		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 18.f, Y - 12.f), FVector2D(Size.X - 36.f, 25.f), FString(), EButton::FortSelect, F.Id, SelectedFort == F.Id);
+		PaintTextFit(Geometry, Out, Layer + 3, F.Name, FVector2D(Pos.X + 28.f, Y), Serif(12), SelectedFort == F.Id ? FLinearColor::FromSRGBColor(FColor(30, 22, 12)) : Ink, 220.f);
+		PaintTextFit(Geometry, Out, Layer + 3, F.bBuilt ? FString::Printf(TEXT("%d/%d kanoner  ·  niveau %d"), F.Guns, Campaign1851Forts::MaxGuns(F.bLarge), F.Defence)
+			: FString::Printf(TEXT("under anlæg %.0f %%"), F.Progress() * 100.f), FVector2D(Pos.X + Size.X - 30.f, Y), Serif(10, EFace::Italic), SelectedFort == F.Id ? FLinearColor::FromSRGBColor(FColor(30, 22, 12)) : MutedInk, 200.f, 1.f);
+	}
+}
+
+void SCampaign1851Overlay::PaintFort(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	const int32 Index = Map->FortIndex(SelectedFort);
+	if (Index == INDEX_NONE)
+	{
+		return;
+	}
+	const FCampaign1851Fort& F = Map->GetForts()[Index];
+	const FVector2D Size(440.f, 336.f);
+	const FVector2D Pos(28.f, Geometry.GetLocalSize().Y - 190.f - Size.Y);
+	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseFort);
+	PaintTextFit(Geometry, Out, Layer + 2, F.Name, Pos + FVector2D(22.f, 34.f), Serif(22), Ink, Size.X - 80.f);
+	PaintText(Geometry, Out, Layer + 2, F.bLarge ? TEXT("Stor skanse (lukket)") : TEXT("Lille skanse (lunette)"), Pos + FVector2D(22.f, 62.f), Serif(13, EFace::Italic), Gold, 0.f, false);
+	float Y = Pos.Y + 92.f;
+	auto Line = [&](const TCHAR* Label, const FString& Value)
+	{
+		PaintText(Geometry, Out, Layer + 2, Label, FVector2D(Pos.X + 22.f, Y), Serif(12, EFace::Italic), Gold, 0.f, false);
+		PaintTextFit(Geometry, Out, Layer + 2, Value, FVector2D(Pos.X + 130.f, Y), Serif(12), Ink, Size.X - 152.f);
+		Y += 22.f;
+	};
+	if (F.Work != ECampaign1851FortWork::None)
+	{
+		const TCHAR* What = F.Work == ECampaign1851FortWork::Build ? TEXT("Anlægges") : F.Work == ECampaign1851FortWork::Guns ? TEXT("To kanoner mere") : Campaign1851Forts::DefenceName(F.Defence + 1);
+		Line(TEXT("Arbejde"), FString::Printf(TEXT("%s  ·  %.0f %%  ·  %.0f dage tilbage%s"), What, F.Progress() * 100.f, FMath::Max(0.f, F.WorkDays - F.DaysBuilt), F.bStalled ? TEXT("  ·  ingen penge") : TEXT("")));
+	}
+	Line(TEXT("Kanoner"), FString::Printf(TEXT("%d af %d  ·  %s"), F.Guns, Campaign1851Forts::MaxGuns(F.bLarge), Campaign1851Forts::GunType()));
+	Line(TEXT("Forsvar"), FString::Printf(TEXT("%d  ·  %s"), F.Defence, Campaign1851Forts::DefenceName(F.Defence)));
+	Line(TEXT("Dækning"), FString::Printf(TEXT("%d %%  ·  brystværn %.1f m, grav %.1f m"), Campaign1851Forts::CoverPercent(F.Defence), Campaign1851Forts::ParapetHeightM(F.bLarge, F.Defence), Campaign1851Forts::DitchDepthM(F.bLarge)));
+	Line(TEXT("Besætning"), FString::Printf(TEXT("%d af %d infanterister  ·  %d kanonerer"), F.Garrison, Campaign1851Forts::InfantryCapacity(F.bLarge), F.Guns * Campaign1851Forts::GunnersPerGun));
+	Line(TEXT("Front mod"), Campaign1851Forts::Compass(F.Yaw));
+	Y += 8.f;
+	const bool bIdle = F.bBuilt && F.Work == ECampaign1851FortWork::None;
+	const bool bMoreGuns = F.Guns < Campaign1851Forts::MaxGuns(F.bLarge);
+	const bool bStronger = F.Defence < Campaign1851Forts::MaxDefence;
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, Y), FVector2D(190.f, 28.f),
+		bMoreGuns ? FString::Printf(TEXT("+2 KANONER  %s rd."), *Thousands(Campaign1851Forts::GunsCost)) : FString(TEXT("ALLE KANONER")), EButton::FortGuns, F.Id, false, !bIdle || !bMoreGuns);
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 222.f, Y), FVector2D(196.f, 28.f),
+		bStronger ? FString::Printf(TEXT("FORSTÆRK  %s rd."), *Thousands(Campaign1851Forts::DefenceCost(F.Defence + 1, F.bLarge))) : FString(TEXT("FULDT UDBYGGET")), EButton::FortDefence, F.Id, false, !bIdle || !bStronger);
+	Y += 36.f;
+	if (bStronger)
+	{
+		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Næste: %s: %s"), Campaign1851Forts::DefenceName(F.Defence + 1), Campaign1851Forts::DefenceNote(F.Defence + 1)),
+			FVector2D(Pos.X + 22.f, Y + 4.f), Serif(10, EFace::Italic), MutedInk, Size.X - 44.f);
+	}
+	Y += 22.f;
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, Y), FVector2D(120.f, 26.f), TEXT("DREJ VENSTRE"), EButton::FortTurn, -1);
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 150.f, Y), FVector2D(120.f, 26.f), TEXT("DREJ HØJRE"), EButton::FortTurn, 1);
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 278.f, Y), FVector2D(140.f, 26.f), TEXT("VIS PÅ KORTET"), EButton::FortShow, F.Id);
 }
 
 void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const

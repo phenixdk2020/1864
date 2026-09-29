@@ -91,7 +91,15 @@ namespace Campaign1851Scenery
 		Sawmill,         // mill shed, log piles, boiler stack (12 x 12)
 		Workshop,        // engineering works with north lights and a chimney (18 x 8)
 		Factory,         // four-storey cloth mill with an engine house and chimney (26 x 14)
-		Inn              // thatched country inn with the post horses' stable (16 x 10)
+		Inn,             // thatched country inn with the post horses' stable (16 x 10)
+		// Field fortifications (Campaign1851Fort.h), the front towards +X:
+		RedoubtSmall,    // lunette: two faces and short flanks, open at the rear, parapet and ditch
+		RedoubtLarge,    // closed redoubt with a salient front, parapet and ditch all round
+		FortGun,         // a fortress gun on its carriage, pointing +X
+		PalisadeSmall,   // stakes in the lunette's ditch and across its gorge
+		PalisadeLarge,   // stakes in the redoubt's ditch
+		Blockhouse,      // bomb-proof timber blockhouse under earth
+		Traverse         // an earth traverse between two guns
 	};
 
 	constexpr float BarracksLength = 16.f;

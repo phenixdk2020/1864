@@ -1,5 +1,7 @@
 #include "Campaign1851Scenery.h"
 
+#include "Campaign1851Fort.h"
+
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInterface.h"
 #include "MeshDescription.h"
@@ -1019,6 +1021,154 @@ namespace Campaign1851Scenery
 			}
 			break;
 		}
+		// ---- Field fortifications (skanser): the front towards +X.
+		case ESitePiece::RedoubtSmall:
+		case ESitePiece::RedoubtLarge:
+		{
+			const bool bLarge = Piece == ESitePiece::RedoubtLarge;
+			const FLinearColor Turf = Srgb(104, 118, 62), TurfTop = Srgb(122, 134, 70), Earth = Srgb(120, 98, 66), Ditch = Srgb(64, 56, 42), Plank = Srgb(150, 122, 88);
+			const TArray<FVector2f> Outline = bLarge
+				? TArray<FVector2f>{ FVector2f(14.f, 0.f), FVector2f(4.f, -14.f), FVector2f(-12.f, -14.f), FVector2f(-12.f, 14.f), FVector2f(4.f, 14.f), FVector2f(14.f, 0.f) }
+				: TArray<FVector2f>{ FVector2f(-8.f, -9.f), FVector2f(-4.f, -9.f), FVector2f(8.f, 0.f), FVector2f(-4.f, 9.f), FVector2f(-8.f, 9.f) };
+			const FVector2f Centre = bLarge ? FVector2f(0.f, 0.f) : FVector2f(-2.f, 0.f);
+			const float H = bLarge ? 2.8f : 2.2f, Foot = 2.2f, Crest = 0.8f, DitchW = 3.2f;
+			// The parade inside, trodden earth.
+			if (bLarge)
+			{
+				W.Box(FVector3f(-11.f, -13.f, 0.f), FVector3f(3.f, 13.f, 0.12f), Earth);
+				W.Box(FVector3f(3.f, -8.f, 0.f), FVector3f(9.f, 8.f, 0.12f), Earth);
+			}
+			else
+			{
+				W.Box(FVector3f(-8.f, -7.5f, 0.f), FVector3f(2.f, 7.5f, 0.12f), Earth);
+			}
+			for (int32 s = 0; s + 1 < Outline.Num(); ++s)
+			{
+				const FVector2f A = Outline[s], B = Outline[s + 1];
+				const FVector2f Along = (B - A).GetSafeNormal();
+				FVector2f Out(Along.Y, -Along.X);
+				if (FVector2f::DotProduct(Out, (A + B) * 0.5f - Centre) < 0.f)
+				{
+					Out = -Out;
+				}
+				// Stretch a little along the face so the corners close.
+				const FVector2f A2 = A - Along * 1.2f, B2 = B + Along * 1.2f;
+				auto P = [](const FVector2f& V, float Z) { return FVector3f(V.X, V.Y, Z); };
+				const FVector3f Below = P((A + B) * 0.5f, -2.f);
+				// Parapet: outer slope, crest, inner slope (the gun side), then the ditch in front.
+				W.Quad(P(A2 + Out * Foot, 0.f), P(B2 + Out * Foot, 0.f), P(B2 + Out * Crest, H), P(A2 + Out * Crest, H), Turf, Below);
+				W.Quad(P(A2 + Out * Crest, H), P(B2 + Out * Crest, H), P(B2 - Out * Crest, H), P(A2 - Out * Crest, H), TurfTop, Below);
+				W.Quad(P(A2 - Out * Crest, H), P(B2 - Out * Crest, H), P(B2 - Out * Foot, 0.f), P(A2 - Out * Foot, 0.f), Turf, Below);
+				W.Quad(P(A2 + Out * Foot, 0.04f), P(B2 + Out * Foot, 0.04f), P(B2 + Out * (Foot + DitchW), 0.04f), P(A2 + Out * (Foot + DitchW), 0.04f), Ditch, Below);
+			}
+			// The earth foot: from the outer edge of the ditch down and out to the terrain (the fort stands
+			// on the highest ground under it), all round, across the open rear of a lunette too.
+			TArray<FVector2f> Ring = Outline;
+			if (!bLarge)
+			{
+				Ring.Add(Outline[0]);
+			}
+			for (int32 s = 0; s + 1 < Ring.Num(); ++s)
+			{
+				const FVector2f A = Ring[s], B = Ring[s + 1];
+				const FVector2f Along = (B - A).GetSafeNormal();
+				FVector2f Out(Along.Y, -Along.X);
+				if (FVector2f::DotProduct(Out, (A + B) * 0.5f - Centre) < 0.f)
+				{
+					Out = -Out;
+				}
+				const bool bRear = !bLarge && s == Ring.Num() - 2;
+				const float Edge = bRear ? 0.5f : Foot + DitchW, Drop = 7.f;
+				const FVector2f A2 = A - Along * (Edge + 1.2f), B2 = B + Along * (Edge + 1.2f);
+				const FVector3f Below((A.X + B.X) * 0.5f, (A.Y + B.Y) * 0.5f, -20.f);
+				W.Quad(FVector3f(A2.X + Out.X * Edge, A2.Y + Out.Y * Edge, 0.05f), FVector3f(B2.X + Out.X * Edge, B2.Y + Out.Y * Edge, 0.05f),
+					FVector3f(B2.X + Out.X * (Edge + Drop), B2.Y + Out.Y * (Edge + Drop), -Drop), FVector3f(A2.X + Out.X * (Edge + Drop), A2.Y + Out.Y * (Edge + Drop), -Drop), Srgb(112, 124, 64), Below);
+				if (bRear)
+				{
+					// The open gorge: the parade runs out to the foot.
+					W.Quad(FVector3f(A.X, A.Y, 0.1f), FVector3f(B.X, B.Y, 0.1f), FVector3f(B.X + Out.X * Edge, B.Y + Out.Y * Edge, 0.05f), FVector3f(A.X + Out.X * Edge, A.Y + Out.Y * Edge, 0.05f), Earth, Below);
+				}
+			}
+			// Gun platforms of planks behind the parapet (the guns stand on them as they come).
+			TArray<FVector2f> Slots;
+			TArray<float> Yaws;
+			Campaign1851Forts::GunSlots(bLarge, Slots, Yaws);
+			for (const FVector2f& S : Slots)
+			{
+				W.Box(FVector3f(S.X - 1.1f, S.Y - 1.1f, 0.f), FVector3f(S.X + 1.1f, S.Y + 1.1f, 0.25f), Plank);
+			}
+			// A powder niche and the gate path at the rear.
+			W.Box(FVector3f(Centre.X - 2.f, -0.6f, 0.f), FVector3f(Centre.X - 0.8f, 0.6f, 0.9f), Earth);
+			break;
+		}
+		case ESitePiece::FortGun:
+		{
+			const FLinearColor Carriage = Srgb(96, 72, 48), Iron = Srgb(40, 42, 46);
+			W.Box(FVector3f(-0.9f, -0.35f, 0.25f), FVector3f(0.5f, 0.35f, 0.75f), Carriage);
+			for (float Y : { -0.45f, 0.45f })
+			{
+				W.Box(FVector3f(-0.3f, Y - 0.08f, 0.25f), FVector3f(0.3f, Y + 0.08f, 0.9f), Carriage);   // trunnion wheels
+			}
+			W.Box(FVector3f(-0.5f, -0.15f, 0.8f), FVector3f(1.7f, 0.15f, 1.08f), Iron);                    // the barrel over the parapet
+			break;
+		}
+		case ESitePiece::PalisadeSmall:
+		case ESitePiece::PalisadeLarge:
+		{
+			const bool bLarge = Piece == ESitePiece::PalisadeLarge;
+			const FLinearColor Stake = Srgb(110, 84, 56);
+			const TArray<FVector2f> Outline = bLarge
+				? TArray<FVector2f>{ FVector2f(14.f, 0.f), FVector2f(4.f, -14.f), FVector2f(-12.f, -14.f), FVector2f(-12.f, 14.f), FVector2f(4.f, 14.f), FVector2f(14.f, 0.f) }
+				: TArray<FVector2f>{ FVector2f(-8.f, -9.f), FVector2f(-4.f, -9.f), FVector2f(8.f, 0.f), FVector2f(-4.f, 9.f), FVector2f(-8.f, 9.f), FVector2f(-8.f, 2.f) };
+			const FVector2f Centre = bLarge ? FVector2f(0.f, 0.f) : FVector2f(-2.f, 0.f);
+			for (int32 s = 0; s + 1 < Outline.Num(); ++s)
+			{
+				const FVector2f A = Outline[s], B = Outline[s + 1];
+				const FVector2f Along = (B - A).GetSafeNormal();
+				FVector2f Out(Along.Y, -Along.X);
+				if (FVector2f::DotProduct(Out, (A + B) * 0.5f - Centre) < 0.f)
+				{
+					Out = -Out;
+				}
+				// Stakes in the middle of the ditch (the small fort's rear: across the gorge, a gap for the gate).
+				const bool bGorge = !bLarge && s == Outline.Num() - 2;
+				const float Offset = bGorge ? -1.f : 3.8f;
+				const float Len = (B - A).Size();
+				for (float T = 0.f; T <= Len; T += 0.7f)
+				{
+					const FVector2f Pt = A + Along * T + Out * Offset;
+					W.Box(FVector3f(Pt.X - 0.09f, Pt.Y - 0.09f, 0.f), FVector3f(Pt.X + 0.09f, Pt.Y + 0.09f, 1.9f), Stake);
+				}
+			}
+			break;
+		}
+		case ESitePiece::Blockhouse:
+		{
+			// Heavy timbers under a thick earth cover, loopholes all round.
+			const FLinearColor Log = Srgb(112, 86, 58), EarthCover = Srgb(98, 112, 60);
+			W.Box(FVector3f(-3.f, -1.8f, 0.f), FVector3f(3.f, 1.8f, 1.7f), Log);
+			W.House(FVector2f(0.f, 0.f), 6.8f, 4.4f, 1.7f, 2.6f, Log, EarthCover);
+			const FVector3f In(0.f, 0.f, 0.8f);
+			for (float X : { -2.f, -0.7f, 0.7f, 2.f })
+			{
+				for (float Side : { -1.f, 1.f })
+				{
+					W.Quad(FVector3f(X - 0.2f, Side * 1.82f, 0.9f), FVector3f(X + 0.2f, Side * 1.82f, 0.9f), FVector3f(X + 0.2f, Side * 1.82f, 1.1f), FVector3f(X - 0.2f, Side * 1.82f, 1.1f), Window, In);
+				}
+			}
+			break;
+		}
+		case ESitePiece::Traverse:
+		{
+			// An earth mound between two guns, running from the parapet inwards (-X).
+			const FLinearColor Turf = Srgb(104, 118, 62);
+			const FVector3f Below(-1.5f, 0.f, -2.f);
+			W.Quad(FVector3f(0.5f, -0.9f, 0.f), FVector3f(-3.f, -0.9f, 0.f), FVector3f(-3.f, -0.2f, 1.9f), FVector3f(0.5f, -0.2f, 1.9f), Turf, Below);
+			W.Quad(FVector3f(0.5f, 0.9f, 0.f), FVector3f(-3.f, 0.9f, 0.f), FVector3f(-3.f, 0.2f, 1.9f), FVector3f(0.5f, 0.2f, 1.9f), Turf, Below);
+			W.Quad(FVector3f(0.5f, -0.2f, 1.9f), FVector3f(-3.f, -0.2f, 1.9f), FVector3f(-3.f, 0.2f, 1.9f), FVector3f(0.5f, 0.2f, 1.9f), Turf, Below);
+			W.Quad(FVector3f(-3.f, -0.9f, 0.f), FVector3f(-3.f, 0.9f, 0.f), FVector3f(-3.f, 0.2f, 1.9f), FVector3f(-3.f, -0.2f, 1.9f), Turf, Below);
+			break;
+		}
 		// ---- Civil town buildings (each on its own plot; the long side along X, the front on +Y).
 		case ESitePiece::School:
 		{
@@ -1159,7 +1309,8 @@ namespace Campaign1851Scenery
 			TEXT("FormationInfantry"), TEXT("FormationGuard"), TEXT("FormationJager"), TEXT("FormationCavalry"), TEXT("FormationArtillery"), TEXT("FormationHorseArtillery"),
 			TEXT("TrainEngine"), TEXT("TrainCarBrown"), TEXT("TrainCarGreen"),
 			TEXT("School"), TEXT("TownHall"), TEXT("PostOffice"), TEXT("Hospital"), TEXT("CustomsHouse"), TEXT("Lighthouse"), TEXT("MerchantYard"),
-			TEXT("Brewery"), TEXT("Brickworks"), TEXT("Sawmill"), TEXT("Workshop"), TEXT("Factory"), TEXT("Inn") };
+			TEXT("Brewery"), TEXT("Brickworks"), TEXT("Sawmill"), TEXT("Workshop"), TEXT("Factory"), TEXT("Inn"),
+			TEXT("RedoubtSmall"), TEXT("RedoubtLarge"), TEXT("FortGun"), TEXT("PalisadeSmall"), TEXT("PalisadeLarge"), TEXT("Blockhouse"), TEXT("Traverse") };
 		return Finish(W, Material, FString::Printf(TEXT("SM_Campaign1851_Site_%s"), Names[int32(Piece)]));
 	}
 }
