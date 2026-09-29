@@ -111,7 +111,18 @@ void ACampaign1851Map::ResetOfficers()
 {
 	Officers = GeneralsAtStart;
 	NextOfficerNumber = 1;
-	FRandomStream Rng(1851);
+	// Every campaign its own officer corps (the seed); the historical generals vary a point here and there.
+	FRandomStream Rng(Seed);
+	for (FCampaign1851Officer& G : Officers)
+	{
+		for (uint8& S : G.Stats)
+		{
+			if (Rng.FRand() < Deviation)
+			{
+				S = uint8(FMath::Clamp(int32(S) + (Rng.FRand() < 0.5f ? -1 : 1), 1, 10));
+			}
+		}
+	}
 	for (int32 i = 0; i < Regiments.Num(); ++i)
 	{
 		FCampaign1851Officer Chief = MakeOfficer(Rng, false, ChiefRank(Regiments[i].Arm));
@@ -429,7 +440,7 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 			Officers[Index].CaptainOf = CaptainOf;
 			Officers[Index].Company = S.Company;
 		}
-		if (S.Id.StartsWith(TEXT("R")))
+		if (S.Id.StartsWith(TEXT("R")) || S.Id.StartsWith(TEXT("O")))
 		{
 			NextOfficerNumber = FMath::Max(NextOfficerNumber, FCString::Atoi(*S.Id.RightChop(1)) + 1);
 		}

@@ -1,0 +1,29 @@
+{
+  "note": "Nationerne 1851. Befolkning, jernbane-km og haerens fredsstyrke er skøn (status: estimated) til den abstrakte model, indtil landet faar sit eget kort. Vaegtene er regeringens tilboejeligheder pr. ressort (Indenrigs, Offentlige arbejder, Krigsministeriet, Transport); kampagnens seed og den historiske afvigelse varierer dem, saa hvert spil udvikler sig forskelligt. Danmarks tal kommer fra kortet (amter, byer, regimenter).",
+  "nations": [
+    {
+      "id": "DK", "name": "Danmark", "onMap": true, "controller": "player",
+      "weights": [1.0, 1.1, 1.0, 0.6], "caution": 0.5, "reserve": 100000,
+      "growth": 1.2, "taxPerHead": 0.25,
+      "note": "Helstaten efter treårskrigen: gæld, men ønske om jernbaner og et forsvar mod syd."
+    },
+    {
+      "id": "SE", "name": "Sverige-Norge", "onMap": false, "controller": "ai",
+      "weights": [1.2, 1.0, 0.8, 0.5], "caution": 0.7, "reserve": 150000,
+      "population": 4970000, "railKm": 0, "armyMen": 47000, "growth": 1.1, "taxPerHead": 0.2,
+      "note": "Forsigtig regering, skandinavisme i opinionen; de første jernbaner (Norge 1854, Sverige 1856) er endnu kun planer."
+    },
+    {
+      "id": "PR", "name": "Preussen", "onMap": false, "controller": "ai",
+      "weights": [1.0, 1.2, 1.4, 1.0], "caution": 0.4, "reserve": 400000,
+      "population": 16330000, "railKm": 2900, "armyMen": 127000, "growth": 1.1, "taxPerHead": 0.25,
+      "note": "Industri og jernbaner i hastig vækst; hæren er landets rygrad."
+    },
+    {
+      "id": "AT", "name": "Østrig", "onMap": false, "controller": "ai",
+      "weights": [0.8, 0.9, 1.3, 0.7], "caution": 0.5, "reserve": 500000,
+      "population": 36500000, "railKm": 1400, "armyMen": 350000, "growth": 0.8, "taxPerHead": 0.15,
+      "note": "Et vidtstrakt kejserrige efter 1848-49: stor hær, stram økonomi."
+    }
+  ]
+}

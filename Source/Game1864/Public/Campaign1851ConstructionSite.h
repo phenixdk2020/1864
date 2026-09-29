@@ -125,6 +125,9 @@ public:
 	bool IsStalled() const { return bStalled; }
 	/** Upkeep per year of the finished modules. */
 	int32 GetYearlyUpkeep() const;
+	/** Raised by private investors: the state pays neither wages nor upkeep. */
+	void SetPrivate(bool bIn) { bPrivate = bIn; }
+	bool IsPrivate() const { return bPrivate; }
 
 	/** Plot centre (projected km) and radius, for saving and for keeping plots apart. */
 	FVector2D PlotKm = FVector2D::ZeroVector;
@@ -159,6 +162,7 @@ private:
 	int32 Active = INDEX_NONE;
 	float Clock = 0.f;
 	bool bStalled = false;
+	bool bPrivate = false;
 
 	TArray<FVector> WagonPath;
 	TArray<float> WagonDistance;   // cumulative, world units

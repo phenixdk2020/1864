@@ -29,6 +29,45 @@ struct FCampaign1851ProjectSave
 	UPROPERTY() FString Kind;
 	UPROPERTY() FVector2D PlotKm = FVector2D::ZeroVector;
 	UPROPERTY() float Yaw = 0.f;
+	/** v12: raised by private investors (no wages or upkeep from the state). */
+	UPROPERTY() bool bPrivate = false;
+};
+
+/** A nation's control and (without a map) its abstract state (v12). */
+USTRUCT()
+struct FCampaign1851NationSave
+{
+	GENERATED_BODY()
+
+	UPROPERTY() FString Id;
+	UPROPERTY() bool bPlayer = false;
+	UPROPERTY() TArray<uint8> Modes;
+	UPROPERTY() double Reserve = 0.0;
+	UPROPERTY() double Population = 0.0;
+	UPROPERTY() double Treasury = 0.0;
+	UPROPERTY() double RailKm = 0.0;
+	UPROPERTY() double ArmyMen = 0.0;
+	UPROPERTY() double Industry = 1.0;
+};
+
+/** A decision or recommendation of a ministry (v12). */
+USTRUCT()
+struct FCampaign1851DecisionSave
+{
+	GENERATED_BODY()
+
+	UPROPERTY() double Day = 0.0;
+	UPROPERTY() int32 Nation = 0;
+	UPROPERTY() uint8 Portfolio = 0;
+	UPROPERTY() uint8 Kind = 0;
+	UPROPERTY() FString Action;
+	UPROPERTY() FString Reasons;
+	UPROPERTY() double Cost = 0.0;
+	UPROPERTY() bool bDone = false;
+	UPROPERTY() bool bAdvice = false;
+	UPROPERTY() int32 A = -1;
+	UPROPERTY() int32 B = 0;
+	UPROPERTY() FString Key;
 };
 
 /** A link of the road network with work done on it: paved, railway built, or a project under way. */
@@ -141,7 +180,7 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 
 public:
 	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands. 10: + troop trains on the map. 11: + field formations. */
-	static constexpr int32 CurrentVersion = 11;
+	static constexpr int32 CurrentVersion = 12;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;
@@ -178,4 +217,13 @@ public:
 	/** The field army's formations (v11). */
 	UPROPERTY() TArray<FCampaign1851FormationSave> Formations;
 	UPROPERTY() TArray<FVector2D> TrainOrders;
+
+	/** The world (v12): campaign seed and historical deviation, grown towns and amter, nations, decisions. */
+	UPROPERTY() int32 Seed = 1851;
+	UPROPERTY() float Deviation = 0.f;
+	UPROPERTY() TArray<int32> CityPopulation;
+	UPROPERTY() TArray<int32> AmtUrban;
+	UPROPERTY() TArray<int32> AmtRural;
+	UPROPERTY() TArray<FCampaign1851NationSave> Nations;
+	UPROPERTY() TArray<FCampaign1851DecisionSave> Decisions;
 };

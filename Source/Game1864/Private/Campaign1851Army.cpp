@@ -399,6 +399,12 @@ void ACampaign1851Map::ResetArmy()
 {
 	Regiments = ArmyAtStart;
 	Commands = CommandsAtStart;
+	// The regiments' experience in this campaign: the 1851 figures, varied by the historical deviation.
+	FRandomStream Rng(Seed + 7);
+	for (FCampaign1851Regiment& R : Regiments)
+	{
+		R.Experience = FMath::Clamp(R.Experience + 15.f * Deviation * Rng.FRandRange(-1.f, 1.f), 5.f, 95.f);
+	}
 	Formations.Reset();
 	NextFormationId = 1;
 	ResetOfficers();

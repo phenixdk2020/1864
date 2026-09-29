@@ -45,7 +45,8 @@ public:
 		MainMenu, WindowClose, TableSort, TableRow, TablePage, OfficerFilter, OfficerDismiss, ClosePanel, ExitGame,
 		OfficerPromote, OpenOOB, OOBCommand, CommandGeneralChange, TrainOrder,
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
-		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve, FormationDeputy, FormationStaff };
+		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve, FormationDeputy, FormationStaff,
+		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -58,6 +59,7 @@ public:
 	bool IsOverChart(const FVector2D& ViewportPixel) const;
 	void ScrollChart(int32 Steps, bool bVertical = false) { float& S = bVertical ? ChartScrollY : ChartScroll; S = FMath::Max(0.f, S + Steps * 60.f); }
 	bool IsOOBOpen() const { return bOOB; }
+	void SetCivilTab(bool bIn) { bCivilTab = bIn; }
 	/** Drag and drop in the tree: what is dragged, the cursor (viewport pixels) and the row under it. */
 	void SetDrag(bool bOn, int32 Key, const FVector2D& ViewportPixel, int32 Hover) { bDragging = bOn; DragKey = Key; DragPos = ViewportPixel / FMath::Max(PaintScale, 0.01f); HoverKey = Hover; }
 	/** The officer picker for a formation's commander (generals for divisions, officers for brigades). */
@@ -85,7 +87,7 @@ public:
 	/** What an X in a panel's corner closes (the Module of EButton::ClosePanel). */
 	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB, CloseOrder };
 	/** The big windows opened from the menu bar under the calendar (one at a time). */
-	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart };
+	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council };
 	void OpenWindow(EWindow In) { Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
 	EWindow GetWindow() const { return Window; }
 	/** Sort a table by a column (again: the other way round). */
@@ -193,6 +195,8 @@ private:
 		bool bHasChildren = false;
 		bool bOpen = true;
 	};
+	/** The council window: the nations, the player's ministries (delegation) and their decisions. */
+	void PaintCouncil(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const;
 	/** The field army as an organisation chart: HQ boxes, units stacked under them, connecting lines. */
 	void PaintOOBChart(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const;
 	/** The tree's rows as they are open now: the field army's formations, then the garrisons by command and arm. */
@@ -247,6 +251,8 @@ private:
 	TSet<int32> Collapsed;
 	mutable int32 TreeScroll = 0;
 	mutable float ChartScroll = 0.f;
+	/** The town's building list: military (false) or civil (true). */
+	bool bCivilTab = false;
 	mutable float ChartScrollY = 0.f;
 	mutable FVector2D ChartMin = FVector2D::ZeroVector, ChartMax = FVector2D::ZeroVector;
 	mutable FVector2D TreeMin = FVector2D::ZeroVector, TreeMax = FVector2D::ZeroVector;

@@ -116,6 +116,8 @@ void ACampaign1851Map::BeginPlay()
 	Campaign1851Buildings::Load();
 	ResetEconomy();
 	ResetNetwork();
+	LoadNations();
+	ResetWorld(1851, 0.f);
 	if (LoadArmy())
 	{
 		LoadOfficers();
@@ -1550,7 +1552,11 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 		// Work done today: slower in frost, and only as far as the treasury can pay the wages.
 		float Work = 0.f;
 		const int32 Module = Site->GetActiveModule();
-		if (Module != INDEX_NONE && DeltaDays > 0.f)
+		if (Module != INDEX_NONE && DeltaDays > 0.f && Site->IsPrivate())
+		{
+			Work = DeltaDays * Campaign1851Buildings::WorkRate(Site->ModuleType(Module), GetDate());   // private money
+		}
+		else if (Module != INDEX_NONE && DeltaDays > 0.f)
 		{
 			Work = DeltaDays * Campaign1851Buildings::WorkRate(Site->ModuleType(Module), GetDate());
 			const double PerDay = Site->ModuleCostPerDay(Module);
@@ -1622,7 +1628,7 @@ TArray<FCampaign1851BudgetLine> ACampaign1851Map::MonthlyBudget() const
 	double Building = 0.0, Works = 0.0;
 	for (const ACampaign1851ConstructionSite* Site : Projects)
 	{
-		const int32 Module = Site ? Site->GetActiveModule() : INDEX_NONE;
+		const int32 Module = Site && !Site->IsPrivate() ? Site->GetActiveModule() : INDEX_NONE;
 		if (Module != INDEX_NONE)
 		{
 			Building += Site->ModuleCostPerDay(Module) * 30.0 * Campaign1851Buildings::WorkRate(Site->ModuleType(Module), Now);
@@ -1647,6 +1653,10 @@ TArray<FCampaign1851BudgetLine> ACampaign1851Map::MonthlyBudget() const
 	Lines.Add({ TEXT("Vedligehold af chausséer og jernbaner"), -RoadUpkeep });
 	Lines.Add({ TEXT("Officerslønninger"), -OfficerPayPerMonth() });
 	Lines.Add({ TEXT("Hærens øvelser"), -Training });
+	if (CivilIncomePerYear() > 0.5)
+	{
+		Lines.Insert({ TEXT("Erhverv, told og post"), CivilIncomePerYear() / 12.0 }, 3);
+	}
 	return Lines;
 }
 
@@ -1655,7 +1665,7 @@ double ACampaign1851Map::GetMonthlyUpkeep() const
 	double Total = 0.0;
 	for (const ACampaign1851ConstructionSite* Site : Projects)
 	{
-		Total += Site ? Site->GetYearlyUpkeep() / 12.0 : 0.0;
+		Total += Site && !Site->IsPrivate() ? Site->GetYearlyUpkeep() / 12.0 : 0.0;
 	}
 	return Total + NetworkUpkeepPerYear() / 12.0;
 }
@@ -1731,6 +1741,14 @@ void ACampaign1851Map::CloseMonth()
 	{
 		AddTransaction(YearlyTax(Region) / 12.0, FString::Printf(TEXT("Skatter: %s"), *RegionName(Region)));
 	}
+	if (CivilIncomePerYear() > 0.5)
+	{
+		AddTransaction(CivilIncomePerYear() / 12.0, TEXT("Erhverv, told og post"));
+	}
+	// The world moves on: towns grow, investors build, the ministries (and the other nations) decide.
+	GrowMonth();
+	PrivateInvestment();
+	RunNationalAI();
 }
 
 // ------------------------------------------------------------------ amter

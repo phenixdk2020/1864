@@ -1019,12 +1019,147 @@ namespace Campaign1851Scenery
 			}
 			break;
 		}
+		// ---- Civil town buildings (each on its own plot; the long side along X, the front on +Y).
+		case ESitePiece::School:
+		{
+			const FLinearColor White = Srgb(232, 226, 210);
+			W.House(FVector2f(0.f, 0.f), 10.f, 5.f, 3.4f, 6.4f, White, Tile);
+			W.Facade(FVector2f(0.f, 0.f), 10.f, 5.f, 3.4f, 1, Window, Srgb(70, 90, 60));
+			W.Box(FVector3f(-0.5f, -0.5f, 6.f), FVector3f(0.5f, 0.5f, 7.4f), White);          // bell turret
+			W.House(FVector2f(0.f, 0.f), 1.3f, 1.3f, 7.4f, 8.4f, White, RoofSlate);
+			W.Box(FVector3f(-5.6f, 3.2f, 0.f), FVector3f(5.6f, 3.35f, 1.1f), DarkTimber);      // schoolyard fence
+			break;
+		}
+		case ESitePiece::TownHall:
+		{
+			const FLinearColor Yellow = Srgb(214, 180, 112);
+			W.House(FVector2f(0.f, 0.f), 16.f, 7.f, 7.f, 11.f, Yellow, Tile);
+			W.Facade(FVector2f(0.f, 0.f), 16.f, 7.f, 7.f, 2, Window, Srgb(90, 56, 40));
+			W.Box(FVector3f(-8.2f, -3.7f, 0.f), FVector3f(8.2f, 3.7f, 0.6f), Stone);
+			W.Box(FVector3f(-1.4f, 3.5f, 0.f), FVector3f(1.4f, 4.6f, 1.2f), Stone);          // front steps
+			W.Box(FVector3f(-1.3f, -1.3f, 9.f), FVector3f(1.3f, 1.3f, 14.f), Yellow);          // clock tower
+			W.Box(FVector3f(-0.7f, 1.32f, 12.f), FVector3f(0.7f, 1.36f, 13.4f), Srgb(236, 232, 220));   // clock face
+			W.House(FVector2f(0.f, 0.f), 2.8f, 2.8f, 14.f, 17.f, Yellow, Srgb(80, 120, 100));   // copper spire
+			break;
+		}
+		case ESitePiece::PostOffice:
+		{
+			const FLinearColor Red = Srgb(176, 64, 48);
+			W.House(FVector2f(0.f, 0.f), 9.f, 5.f, 5.4f, 8.6f, Plaster, RoofSlate);
+			W.Facade(FVector2f(0.f, 0.f), 9.f, 5.f, 5.4f, 2, Window, Red);
+			W.Box(FVector3f(-3.9f, 2.52f, 4.7f), FVector3f(3.9f, 2.6f, 5.2f), Red);            // the red post sign band
+			W.Box(FVector3f(-6.5f, -2.f, 0.f), FVector3f(-4.8f, 2.f, 2.8f), Srgb(150, 120, 92)); // coach shed
+			break;
+		}
+		case ESitePiece::Hospital:
+		{
+			const FLinearColor White = Srgb(230, 224, 208);
+			W.House(FVector2f(0.f, -1.5f), 20.f, 7.f, 8.f, 12.f, White, RoofSlate);
+			W.Facade(FVector2f(0.f, -1.5f), 20.f, 7.f, 8.f, 3, Window, Srgb(80, 70, 60));
+			for (float X : { -8.f, 8.f })   // wings towards the front
+			{
+				W.House(FVector2f(X, 4.f), 4.f, 5.f, 7.f, 10.f, White, RoofSlate, true);
+			}
+			W.Box(FVector3f(-10.4f, -5.4f, 0.f), FVector3f(10.4f, 2.4f, 0.6f), Stone);
+			break;
+		}
+		case ESitePiece::CustomsHouse:
+		{
+			W.House(FVector2f(0.f, 0.f), 10.f, 6.f, 6.f, 9.6f, Srgb(206, 164, 96), Tile);
+			W.Facade(FVector2f(0.f, 0.f), 10.f, 6.f, 6.f, 2, Window, Srgb(60, 70, 90));
+			W.Box(FVector3f(-6.f, 3.4f, 0.f), FVector3f(6.f, 6.f, 0.5f), Stone);               // quay
+			W.Box(FVector3f(4.2f, 4.6f, 0.f), FVector3f(4.4f, 4.8f, 8.f), DarkTimber);          // flagstaff
+			break;
+		}
+		case ESitePiece::Lighthouse:
+		{
+			const FLinearColor White = Srgb(236, 232, 222), Lamp = Srgb(250, 226, 150);
+			for (int32 Step = 0; Step < 5; ++Step)   // a tapering white tower
+			{
+				const float R = 2.2f - Step * 0.3f, Z0 = Step * 3.2f;
+				W.Box(FVector3f(-R, -R, Z0), FVector3f(R, R, Z0 + 3.2f), Step == 2 ? Srgb(176, 50, 40) : White);
+			}
+			W.Box(FVector3f(-1.1f, -1.1f, 16.f), FVector3f(1.1f, 1.1f, 17.6f), Lamp);
+			W.House(FVector2f(0.f, 0.f), 2.4f, 2.4f, 17.6f, 19.f, White, Srgb(40, 40, 44));
+			W.House(FVector2f(0.f, 4.5f), 6.f, 3.6f, 2.8f, 5.f, White, Tile);                  // keeper's house
+			break;
+		}
+		case ESitePiece::MerchantYard:
+		{
+			// Four ranges round a yard: the house on the street (+Y), warehouses behind.
+			W.House(FVector2f(0.f, 4.f), 14.f, 5.f, 5.6f, 9.f, Plaster, Tile);
+			W.Facade(FVector2f(0.f, 4.f), 14.f, 5.f, 5.6f, 2, Window, Srgb(100, 60, 40));
+			W.House(FVector2f(0.f, -4.f), 14.f, 4.f, 4.4f, 7.4f, Srgb(150, 120, 92), Tile);
+			W.House(FVector2f(-6.f, 0.f), 4.f, 3.f, 3.6f, 6.f, Srgb(150, 120, 92), Tile, true);
+			W.House(FVector2f(6.f, 0.f), 4.f, 3.f, 3.6f, 6.f, Srgb(150, 120, 92), Tile, true);
+			break;
+		}
+		case ESitePiece::Brewery:
+		{
+			W.House(FVector2f(-2.f, 0.f), 12.f, 6.f, 6.f, 9.4f, Brick, Tile);
+			W.Facade(FVector2f(-2.f, 0.f), 12.f, 6.f, 6.f, 2, Window, Srgb(70, 50, 36));
+			W.House(FVector2f(6.f, 0.f), 4.f, 4.f, 8.f, 11.f, Brick, RoofSlate);               // malt kiln
+			W.Box(FVector3f(6.6f, -0.5f, 10.f), FVector3f(7.4f, 0.5f, 13.f), Brick);
+			W.Box(FVector3f(-7.f, -4.f, 0.f), FVector3f(-4.f, -3.2f, 1.6f), DarkTimber);        // barrels
+			break;
+		}
+		case ESitePiece::Brickworks:
+		{
+			W.House(FVector2f(-3.f, 0.f), 8.f, 6.f, 3.2f, 5.4f, Brick, Tile);                  // ring kiln
+			W.Box(FVector3f(-3.6f, -0.6f, 0.f), FVector3f(-2.4f, 0.6f, 16.f), Brick);           // tall chimney
+			for (float Y : { -5.f, 5.f })   // open drying sheds
+			{
+				W.House(FVector2f(5.f, Y), 12.f, 3.f, 2.2f, 3.6f, Srgb(118, 100, 80), Thatch);
+			}
+			break;
+		}
+		case ESitePiece::Sawmill:
+		{
+			W.House(FVector2f(0.f, 0.f), 12.f, 5.f, 3.6f, 6.f, Srgb(128, 96, 64), Tile);
+			for (int32 k = 0; k < 4; ++k)   // log piles
+			{
+				W.Box(FVector3f(-6.f + k * 3.f, 3.6f, 0.f), FVector3f(-4.f + k * 3.f, 6.f, 1.2f), Srgb(150, 112, 70));
+			}
+			W.Box(FVector3f(5.6f, -0.3f, 0.f), FVector3f(6.2f, 0.3f, 9.f), Brick);             // boiler stack
+			break;
+		}
+		case ESitePiece::Workshop:
+		{
+			W.House(FVector2f(0.f, 0.f), 16.f, 8.f, 5.f, 8.f, Brick, RoofSlate);
+			W.Facade(FVector2f(0.f, 0.f), 16.f, 8.f, 5.f, 1, Window, Srgb(60, 60, 64));
+			for (float X : { -4.f, 0.f, 4.f })   // north lights
+			{
+				W.Box(FVector3f(X - 0.9f, -0.8f, 7.6f), FVector3f(X + 0.9f, 0.8f, 8.6f), Window);
+			}
+			W.Box(FVector3f(8.4f, -0.6f, 0.f), FVector3f(9.6f, 0.6f, 15.f), Brick);             // chimney
+			break;
+		}
+		case ESitePiece::Factory:
+		{
+			W.House(FVector2f(0.f, 0.f), 24.f, 9.f, 11.f, 14.f, Brick, RoofSlate);             // four-storey mill
+			W.Facade(FVector2f(0.f, 0.f), 24.f, 9.f, 11.f, 4, Window, Srgb(60, 50, 44));
+			W.House(FVector2f(-10.f, 7.f), 5.f, 5.f, 5.f, 7.f, Brick, RoofSlate, true);          // engine house
+			W.Box(FVector3f(-13.f, 5.4f, 0.f), FVector3f(-11.4f, 7.f, 22.f), Brick);             // mill chimney
+			break;
+		}
+		case ESitePiece::Inn:
+		{
+			const FLinearColor White = Srgb(230, 222, 200);
+			W.House(FVector2f(0.f, 0.f), 14.f, 6.f, 3.6f, 7.4f, White, Thatch);
+			W.Facade(FVector2f(0.f, 0.f), 14.f, 6.f, 3.6f, 1, Window, Srgb(90, 60, 40));
+			W.House(FVector2f(-8.f, -4.f), 8.f, 4.f, 2.8f, 5.4f, Srgb(150, 120, 92), Thatch, true);   // stable for the post horses
+			W.Box(FVector3f(3.f, 3.2f, 0.f), FVector3f(3.2f, 3.4f, 3.4f), DarkTimber);           // sign post
+			W.Box(FVector3f(3.2f, 3.2f, 2.6f), FVector3f(4.4f, 3.3f, 3.3f), Srgb(176, 150, 90));
+			break;
+		}
 		}
 		static const TCHAR* Names[] = { TEXT("Ground"), TEXT("Barracks"), TEXT("Scaffold"), TEXT("CraneMast"), TEXT("CraneJib"), TEXT("Wagon"), TEXT("Flagpole"), TEXT("Flag"),
 			TEXT("Stables"), TEXT("Depot"), TEXT("Infirmary"), TEXT("Arsenal"), TEXT("Lazaret"), TEXT("Battery"), TEXT("PowderMagazine"), TEXT("StarFort"),
 			TEXT("Telegraph"), TEXT("Granary"), TEXT("Train"), TEXT("Station"),
 			TEXT("FormationInfantry"), TEXT("FormationGuard"), TEXT("FormationJager"), TEXT("FormationCavalry"), TEXT("FormationArtillery"), TEXT("FormationHorseArtillery"),
-			TEXT("TrainEngine"), TEXT("TrainCarBrown"), TEXT("TrainCarGreen") };
+			TEXT("TrainEngine"), TEXT("TrainCarBrown"), TEXT("TrainCarGreen"),
+			TEXT("School"), TEXT("TownHall"), TEXT("PostOffice"), TEXT("Hospital"), TEXT("CustomsHouse"), TEXT("Lighthouse"), TEXT("MerchantYard"),
+			TEXT("Brewery"), TEXT("Brickworks"), TEXT("Sawmill"), TEXT("Workshop"), TEXT("Factory"), TEXT("Inn") };
 		return Finish(W, Material, FString::Printf(TEXT("SM_Campaign1851_Site_%s"), Names[int32(Piece)]));
 	}
 }

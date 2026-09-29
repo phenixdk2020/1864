@@ -77,7 +77,21 @@ namespace Campaign1851Scenery
 		// A train in parts, each centred on its origin and facing +X, so every vehicle follows the curve:
 		TrainEngine,     // locomotive and tender (5.2 long)
 		TrainCarBrown,   // first-class carriage (2.9 long)
-		TrainCarGreen    // second-class carriage (2.9 long)
+		TrainCarGreen,   // second-class carriage (2.9 long)
+		// Civil town buildings (Campaign1851Nations: they make towns grow):
+		School,          // white village school with a bell turret (10 x 5)
+		TownHall,        // yellow two-storey town hall with a clock tower (16 x 7)
+		PostOffice,      // plastered post house with a coach shed (9 x 5)
+		Hospital,        // three-storey white hospital with two wings (20 x 12)
+		CustomsHouse,    // ochre customs house on a quay (10 x 6)
+		Lighthouse,      // white tower with a red band and the keeper's house
+		MerchantYard,    // merchant's house and warehouses round a yard (14 x 13)
+		Brewery,         // brewery and distillery with a malt kiln (16 x 8)
+		Brickworks,      // ring kiln, tall chimney and drying sheds (18 x 13)
+		Sawmill,         // mill shed, log piles, boiler stack (12 x 12)
+		Workshop,        // engineering works with north lights and a chimney (18 x 8)
+		Factory,         // four-storey cloth mill with an engine house and chimney (26 x 14)
+		Inn              // thatched country inn with the post horses' stable (16 x 10)
 	};
 
 	constexpr float BarracksLength = 16.f;

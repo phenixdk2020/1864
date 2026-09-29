@@ -5,6 +5,7 @@
 #include "Campaign1851SaveGame.h"
 #include "Campaign1851Network.h"
 #include "Campaign1851Army.h"
+#include "Campaign1851Nation.h"
 #include "Campaign1851Map.generated.h"
 
 class UStaticMeshComponent;
@@ -25,6 +26,16 @@ struct FCampaign1851BudgetLine
 };
 
 /** Region codes used by the 1851 data: K Kingdom, S Schleswig, H Holstein/Lauenburg. */
+/** A nation's figures for the council window (from the map for Denmark, the abstract model for the others). */
+struct FCampaign1851NationFigures
+{
+	double Population = 0.0;
+	double YearlyBudget = 0.0;
+	double ArmyMen = 0.0;
+	double RailKm = 0.0;
+	float Growth = 0.f;   // % a year
+};
+
 struct FCampaign1851City
 {
 	FString Name;
@@ -256,6 +267,35 @@ public:
 	const TArray<TObjectPtr<ACampaign1851ConstructionSite>>& GetProjects() const { return Projects; }
 	/** World position of a town's building plot (on the terrain). */
 	FVector PlotWorld(int32 CityIndex) const;
+
+	// ---- Nations, growth and the national AI (Campaign1851Nations.cpp).
+
+	const TArray<FCampaign1851Nation>& GetNations() const { return Nations; }
+	int32 GetPlayerNation() const { return PlayerNation; }
+	/** How the player runs a portfolio of his own nation (MANUEL, RÅDGIVER, AUTO). */
+	void SetDelegation(ECampaign1851Portfolio P, ECampaign1851Delegation Mode) { if (Nations.IsValidIndex(PlayerNation)) { Nations[PlayerNation].Modes[int32(P)] = Mode; } }
+	/** Guardrail: cash the ministries must leave in the treasury. */
+	void SetReserve(double Rd) { if (Nations.IsValidIndex(PlayerNation)) { Nations[PlayerNation].Reserve = FMath::Max(0.0, Rd); } }
+	const TArray<FCampaign1851Decision>& GetDecisions() const { return Decisions; }
+	/** Carries out a ministry's recommendation; false if it can no longer be done. */
+	bool ExecuteDecision(int32 Index);
+	int32 GetSeed() const { return Seed; }
+	float GetDeviation() const { return Deviation; }
+	/** The historical deviation for the next new game (0 .. 0.5). */
+	float NewGameDeviation = 0.2f;
+	/**
+	 * A new world from a seed: towns and amter as in 1851, each amt's growth, the nations' priorities and the
+	 * opening of the railways under construction varied by up to the deviation. Same seed, same world.
+	 */
+	void ResetWorld(int32 InSeed, float InDeviation);
+	/** Growth a year (%) of a town and of an amt's countryside, with stations, chausséer and civil buildings. */
+	float UrbanGrowthRate(int32 CityIndex) const;
+	float RuralGrowthRate(int32 AmtIndex) const;
+	/** Yearly income from finished civil buildings (trade tax, customs, postage). */
+	double CivilIncomePerYear() const;
+	FCampaign1851NationFigures NationFigures(int32 NationIndex) const;
+	void SaveWorld(UCampaign1851SaveGame* Save) const;
+	void RestoreWorld(const UCampaign1851SaveGame* Save);
 
 	// ---- Roads and railways (design manual 20.16.1; Campaign1851Network.cpp).
 
@@ -577,6 +617,26 @@ private:
 	TArray<FCampaign1851Railway> Railways;
 	int32 HistoricRailways = 0;   // Railways[0..HistoricRailways) come from the map data
 	TArray<FString> News;
+
+	// The world layer (Campaign1851Nations.cpp).
+	bool LoadNations();
+	void GrowMonth();
+	void PrivateInvestment();
+	void RunNationalAI();
+	void RunAbstractNation(int32 NationIndex);
+	TArray<FCampaign1851Decision> DecisionOptions(int32 NationIndex, ECampaign1851Portfolio P, double Budget, FRandomStream& Rng) const;
+	bool CarryOut(const FCampaign1851Decision& D);
+	void AddDecision(const FCampaign1851Decision& D);
+	TArray<FCampaign1851Nation> NationsAtStart;
+	TArray<FCampaign1851Nation> Nations;
+	int32 PlayerNation = 0;
+	int32 Seed = 1851;
+	float Deviation = 0.f;
+	TArray<FCampaign1851Decision> Decisions;
+	TArray<float> AmtGrowthMul;
+	TArray<int32> CityBasePopulation;
+	TArray<FIntPoint> AmtBase;   // urban, rural in 1851
+	TMap<FString, TPair<FDateTime, FDateTime>> RailwayBaseDates;
 	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> Chaussees;
 	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> RailBed;
 	UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> RailTrack;

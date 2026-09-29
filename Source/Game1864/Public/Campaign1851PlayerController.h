@@ -99,6 +99,8 @@ private:
 	/** Save slots in menu order. */
 	static const TArray<FString>& SaveSlots();
 	float AutosaveTimer = 0.f;
+	/** Test: a town building to put the camera on once it stands (-CampaignFocusBuilding=Town:Key). */
+	FString FocusBuildingOrder;
 	/** Speed to return to when un-pausing with the space bar. */
 	int32 SpeedBeforePause = 1;
 

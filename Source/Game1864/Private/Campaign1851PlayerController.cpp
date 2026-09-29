@@ -75,6 +75,10 @@ void ACampaign1851PlayerController::TryInit()
 	{
 		LoadFromSlot(TEXT("Autosave"));
 	}
+	else if (!bTestStart)
+	{
+		CampaignNewGame();   // a world of its own: new seed, the historical deviation, officers and experience varied
+	}
 	if (bTestStart)
 	{
 		CampaignBuild(BuildCity);
@@ -105,6 +109,8 @@ void ACampaign1851PlayerController::TryInit()
 			}
 		}
 	}
+	// -CampaignFocusBuilding=Odense:Textile_Mill (later, when the scene is up) puts the camera on a town building.
+	FParse::Value(FCommandLine::Get(), TEXT("CampaignFocusBuilding="), FocusBuildingOrder, false);
 	// -CampaignBuildLink=Aalborg:Randers:bane;Odense:Nyborg:chaussee starts link works (paid like any order).
 	FString LinkBuilds;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignBuildLink="), LinkBuilds, false))
@@ -203,7 +209,16 @@ void ACampaign1851PlayerController::TryInit()
 	{
 		Overlay->OpenWindow(WindowName == TEXT("army") ? SCampaign1851Overlay::EWindow::Army : WindowName == TEXT("officers") ? SCampaign1851Overlay::EWindow::Officers
 			: WindowName == TEXT("budget") ? SCampaign1851Overlay::EWindow::Budget : WindowName == TEXT("trains") ? SCampaign1851Overlay::EWindow::Trains
-			: WindowName == TEXT("chart") ? SCampaign1851Overlay::EWindow::Chart : SCampaign1851Overlay::EWindow::Towns);
+			: WindowName == TEXT("chart") ? SCampaign1851Overlay::EWindow::Chart : WindowName == TEXT("council") ? SCampaign1851Overlay::EWindow::Council : SCampaign1851Overlay::EWindow::Towns);
+	}
+	// -CampaignDelegate=auto|advisory hands every portfolio to the ministries (to watch the AI).
+	FString DelegateMode;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignDelegate="), DelegateMode))
+	{
+		for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count); ++p)
+		{
+			Map->SetDelegation(ECampaign1851Portfolio(p), DelegateMode == TEXT("auto") ? ECampaign1851Delegation::Auto : ECampaign1851Delegation::Advisory);
+		}
 	}
 	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignTestFieldArmy")))
 	{
@@ -354,6 +369,19 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	if (!bInitialised || !Camera)
 	{
 		return;
+	}
+	if (!FocusBuildingOrder.IsEmpty() && Map.IsValid())
+	{
+		FString Town, Key;
+		FocusBuildingOrder.Split(TEXT(":"), &Town, &Key);
+		if (const ACampaign1851ConstructionSite* Site = Map->FindBuilding(Map->FindCity(Town), Key))
+		{
+			if (Site->IsModuleDone(0))
+			{
+				FocusSite(Site);
+				FocusBuildingOrder.Reset();
+			}
+		}
 	}
 
 	FVector2D Pan = FVector2D::ZeroVector;
@@ -719,6 +747,27 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			const int32 Index = Map->FormationIndex(Module);
 			Overlay->OpenFormationPicker(Module, Index != INDEX_NONE && (Map->GetFormations()[Index].Echelon == ECampaign1851Echelon::Division || Map->GetFormations()[Index].Echelon == ECampaign1851Echelon::Army));
 		}
+		else if (Button == SCampaign1851Overlay::EButton::TownBuildingsTab)
+		{
+			Overlay->SetCivilTab(Module == 1);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::Delegate)
+		{
+			Map->SetDelegation(ECampaign1851Portfolio(Module / 3), ECampaign1851Delegation(Module % 3));
+			Overlay->ShowToast(FString::Printf(TEXT("%s: %s"), Campaign1851Nations::PortfolioName(ECampaign1851Portfolio(Module / 3)), Campaign1851Nations::DelegationName(ECampaign1851Delegation(Module % 3))));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::Reserve && Map->GetNations().IsValidIndex(Map->GetPlayerNation()))
+		{
+			Map->SetReserve(Map->GetNations()[Map->GetPlayerNation()].Reserve + (Module == 1 ? 50000.0 : -50000.0));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::DecisionExecute)
+		{
+			Overlay->ShowToast(Map->ExecuteDecision(Module) ? FString::Printf(TEXT("Udført: %s"), *Map->GetDecisions()[Module].Action) : FString(TEXT("Kan ikke udføres længere")));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::Deviation)
+		{
+			Map->NewGameDeviation = Module / 100.f;
+		}
 		else if (Button == SCampaign1851Overlay::EButton::FormationDeputy || Button == SCampaign1851Overlay::EButton::FormationStaff)
 		{
 			// Staff posts are filled by officers (a division's deputy is typically its senior colonel).
@@ -995,6 +1044,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 		P.Kind = Site->GetKind();
 		P.PlotKm = Site->PlotKm;
 		P.Yaw = float(Site->GetActorRotation().Yaw);
+		P.bPrivate = Site->IsPrivate();
 		TArray<FString> Built;
 		for (int32 m = 0; m < Site->NumModules(); ++m)
 		{
@@ -1015,6 +1065,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Trains = Map->SaveTrains();
 	Save->Formations = Map->SaveFormations();
 	Save->TrainOrders = Map->GetTrainOrders();
+	Map->SaveWorld(Save);
 	if (Save->Links.Num() > 0)
 	{
 		Parts.Add(FString::Printf(TEXT("%d vej-/baneanlæg"), Save->Links.Num()));
@@ -1056,6 +1107,8 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 		Map->ResetEconomy();
 	}
 	Map->ResetNetwork();
+	// The world from the save's seed (older saves: the 1851 world without deviation).
+	Map->ResetWorld(Save->SaveVersion >= 12 ? Save->Seed : 1851, Save->SaveVersion >= 12 ? Save->Deviation : 0.f);
 	const int32 LinksRestored = Save->SaveVersion >= 5 ? Map->RestoreNetwork(Save->Links) : 0;
 	Map->ResetArmy();
 	if (Save->SaveVersion >= 6)
@@ -1082,6 +1135,17 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	for (const FCampaign1851ProjectSave& P : Save->Projects)
 	{
 		Restored += Map->RestoreProject(P.City, P.ModuleDays, P.ActiveModule, P.Kind, P.PlotKm, P.Yaw) ? 1 : 0;
+		if (P.bPrivate)
+		{
+			if (ACampaign1851ConstructionSite* Site = Map->FindBuilding(Map->FindCity(P.City), P.Kind))
+			{
+				Site->SetPrivate(true);
+			}
+		}
+	}
+	if (Save->SaveVersion >= 12)
+	{
+		Map->RestoreWorld(Save);
 	}
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);
 	if (Overlay.IsValid())
@@ -1107,6 +1171,12 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	Map->SetSpeed(1);
 	Map->ResetEconomy();
 	Map->ResetNetwork();
+	// A new world: its own seed (or -CampaignSeed=N) and the chosen deviation from history (-CampaignDeviation=20).
+	int32 NewSeed = int32(FPlatformTime::Cycles() & 0x7fffffff);
+	FParse::Value(FCommandLine::Get(), TEXT("CampaignSeed="), NewSeed);
+	float DeviationPct = Map->NewGameDeviation * 100.f;
+	FParse::Value(FCommandLine::Get(), TEXT("CampaignDeviation="), DeviationPct);
+	Map->ResetWorld(NewSeed, DeviationPct / 100.f);
 	Map->ResetArmy();
 	if (Overlay.IsValid())
 	{
