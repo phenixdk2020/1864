@@ -243,6 +243,11 @@ struct FCampaign1851Regiment
 	TArray<int32> CompanyFort;
 	/** Raised during the campaign (not part of the army of 1851): saved with its definition, paid from the budget. */
 	bool bRaised = false;
+	/** Supply carried (Campaign1851Supply): days of rations for the men, of fodder for the horses, and the
+	 *  share of a full ammunition load (two days of battle). */
+	float Food = 4.f;
+	float Fodder = 2.f;
+	float Ammo = 1.f;
 	/** Officer indices: the regiment's chief, and a general whose headquarters marches with it. */
 	int32 Chief = INDEX_NONE;
 	int32 General = INDEX_NONE;
@@ -345,6 +350,7 @@ namespace Campaign1851Army
 	const TCHAR* EchelonMark(ECampaign1851Echelon Echelon);
 
 	// ---- Manpower (conscription law of 1849; estimates for play).
+	// (Supply: see namespace Campaign1851Supply below the regiment.)
 	/** Trained reserve per amt in 1851 (after the war), the yearly class and the fit men (ceiling), as shares of the population. */
 	constexpr float ManpowerStartShare = 0.02f;
 	constexpr float YearlyClassShare = 0.009f;
@@ -371,4 +377,30 @@ namespace Campaign1851Army
 	int32 CompaniesFor(ECampaign1851Arm Arm);
 	/** A general's effect on the pace of his column: Stab 5 = 1.0, each point ±1 %. */
 	inline float StaffPaceFactor(int32 Staff) { return 0.95f + 0.01f * Staff; }
+}
+
+/** Supply (Docs/Backlog-Forsyning.md; estimates for play). */
+namespace Campaign1851Supply
+{
+	/** Days of rations and fodder a unit carries (knapsacks, baggage). */
+	constexpr float FoodCarried = 4.f;
+	constexpr float FodderCarried = 2.f;
+	/** A full ammunition load: cartridges a man, rounds a gun (two days of battle). */
+	constexpr float CartridgesCarried = 60.f;
+	constexpr float RoundsPerGun = 120.f;
+	/** A depot feeds units within a day's march; a town sells to units at its edge. */
+	constexpr double DepotReachKm = 25.0;
+	constexpr double PurchaseReachKm = 3.0;
+	/** Prices (rd.): a ration bought for a depot, one bought on the spot, a horse's fodder, a battalion's load of ammunition. */
+	constexpr double DepotPricePerRation = 0.12;
+	constexpr double PurchasePricePerRation = 0.18;
+	constexpr double FodderPrice = 0.10;
+	constexpr double AmmoLoadPrice = 600.0;
+	/** Share of what a depot lacks that the intendance buys each month. */
+	constexpr float RefillShare = 0.5f;
+	/** Days of rations a fort keeps for its garrison. */
+	constexpr float FortFoodDays = 14.f;
+	bool NeedsFodder(ECampaign1851Arm Arm);
+	/** "proviant 3.5 d.  ·  foder 1.0 d.  ·  ammunition 100 %" */
+	FString Describe(const FCampaign1851Regiment& R);
 }

@@ -1599,6 +1599,7 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 	AdvanceNetwork(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
 	AdvanceForts(DeltaDays);
 	AdvanceDemolitions(DeltaDays);
+	AdvanceSupply(DeltaDays);
 	AdvanceArmy(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
 	if (GetDate().GetMonth() != MonthBefore)
 	{
@@ -1686,6 +1687,10 @@ TArray<FCampaign1851BudgetLine> ACampaign1851Map::MonthlyBudget() const
 	{
 		Lines.Add({ TEXT("Nye bataljoners underhold"), -RaisedUpkeepPerMonth() });
 	}
+	if (StockingCostPerMonth() > 0.5)
+	{
+		Lines.Add({ TEXT("Forråd til depoterne"), -StockingCostPerMonth() });
+	}
 	return Lines;
 }
 
@@ -1694,7 +1699,7 @@ double ACampaign1851Map::GetMonthlyUpkeep() const
 	double Total = 0.0;
 	for (const ACampaign1851ConstructionSite* Site : Projects)
 	{
-		Total += Site && !Site->IsPrivate() ? Site->GetYearlyUpkeep() / 12.0 : 0.0;
+		Total += Site && !Site->IsPrivate() && !Site->IsHistoric() ? Site->GetYearlyUpkeep() / 12.0 : 0.0;
 	}
 	return Total + (NetworkUpkeepPerYear() + FortUpkeepPerYear()) / 12.0;
 }
@@ -1778,6 +1783,7 @@ void ACampaign1851Map::CloseMonth()
 	GrowMonth();
 	MonthlyManpower();
 	MonthlySalvage();
+	MonthlySupply();
 	PrivateInvestment();
 	RunNationalAI();
 }

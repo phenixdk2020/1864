@@ -1279,6 +1279,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 		P.PlotKm = Site->PlotKm;
 		P.Yaw = float(Site->GetActorRotation().Yaw);
 		P.bPrivate = Site->IsPrivate();
+		P.bHistoric = Site->IsHistoric();
 		P.bDemolishing = Site->IsDemolishing();
 		if (P.bDemolishing)
 		{
@@ -1311,6 +1312,8 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Forts = Map->SaveForts();
 	Save->AmtManpower = Map->GetAmtManpower();
 	Save->GunStock = Map->GetGunStock();
+	Save->Supply = Map->SaveSupply();
+	Map->ExportUnits();
 	Save->MaterialLots = Map->GetMaterialLots();
 	if (Save->Links.Num() > 0)
 	{
@@ -1386,6 +1389,10 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 		{
 			RestoredSite->SetPrivate(true);
 		}
+		if (RestoredSite && P.bHistoric)
+		{
+			RestoredSite->SetHistoric(true);
+		}
 		if (RestoredSite && P.bDemolishing)
 		{
 			RestoredSite->RestoreDemolition(P.DemolishDays, P.DemolishWages, P.DemolishDone, P.DemolishFrom);
@@ -1401,6 +1408,11 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 		Map->SetAmtManpower(Save->AmtManpower);
 	}
 	Map->SetGunStock(Save->SaveVersion >= 16 ? Save->GunStock : 0);
+	Map->ResetSupply();
+	if (Save->SaveVersion >= 17)
+	{
+		Map->RestoreSupply(Save->Supply);
+	}
 	Map->SetMaterialLots(Save->SaveVersion >= 16 ? Save->MaterialLots : TArray<FVector>());
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);
 	if (Overlay.IsValid())
@@ -1432,10 +1444,12 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	float DeviationPct = Map->NewGameDeviation * 100.f;
 	FParse::Value(FCommandLine::Get(), TEXT("CampaignDeviation="), DeviationPct);
 	Map->ResetWorld(NewSeed, DeviationPct / 100.f);
+	Map->SeedHistoricBuildings();
 	Map->ResetArmy();
 	Map->ResetForts();
 	Map->SetGunStock(0);
 	Map->SetMaterialLots({});
+	Map->ResetSupply();
 	Map->ExportForts();
 	if (Overlay.IsValid())
 	{

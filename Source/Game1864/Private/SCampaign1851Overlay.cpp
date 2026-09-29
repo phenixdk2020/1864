@@ -551,6 +551,14 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	if (!C.bForeign)
 	{
 		const int32 AmtIndex = Map->AmtIndexOfTown(SelectedCity);
+		const FCampaign1851DepotCapacity DepotCap = Map->DepotCapacity(SelectedCity);
+		if (DepotCap.Food + DepotCap.Fodder + DepotCap.Ammo > 0.f)
+		{
+			const FCampaign1851DepotStock Stock = Map->DepotStock(SelectedCity);
+			PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Depot: %s/%s rationer  ·  foder %s  ·  ammunition %.0f/%.0f"),
+				*Thousands(int32(Stock.Food)), *Thousands(int32(DepotCap.Food)), *Thousands(int32(Stock.Fodder)), Stock.Ammo, DepotCap.Ammo),
+				Pos + FVector2D(22.f, 166.f), Serif(11, EFace::Italic), Ink, Size.X - 44.f);
+		}
 		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Skat %s rd./år  ·  reserve %s mand (+%s/år)"),
 			*Thousands(FMath::RoundToInt(C.Population * ACampaign1851Map::UrbanTaxPerHead)), *Thousands(FMath::FloorToInt(Map->GetManpower(AmtIndex))),
 			*Thousands(FMath::RoundToInt(Map->YearlyClass(AmtIndex)))),
@@ -1135,6 +1143,17 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 		TrainsNeeded += Campaign1851Army::TrainsNeeded(*R);
 	}
 	Line(TEXT("Med tog"), FString::Printf(TEXT("fylder %d tog  ·  ledige %d af %d"), TrainsNeeded, Map->FreeTroopTrains(), Map->GetTroopTrains()));
+	{
+		// Supply of the first unit (the least supplied, if several).
+		const FCampaign1851Regiment* Low = Sel[0];
+		for (const FCampaign1851Regiment* R : Sel)
+		{
+			Low = R->Food < Low->Food ? R : Low;
+		}
+		const int32 Depot = Map->DepotFor(Low->Km);
+		Line(TEXT("Forsyning"), Campaign1851Supply::Describe(*Low) + (Low->IsMarching() || Low->IsInField()
+			? (Depot != INDEX_NONE ? FString::Printf(TEXT("  ·  depot %s"), *Map->GetCities()[Depot].Name) : FString(TEXT("  ·  intet depot i nærheden"))) : FString(TEXT("  ·  garnison"))));
+	}
 	if (!Why.IsEmpty())
 	{
 		PaintTextFit(Geometry, Out, Layer + 2, Why, FVector2D(Pos.X + 22.f, Y), Serif(11, EFace::Italic), MutedInk, Inner);
@@ -1343,7 +1362,7 @@ void SCampaign1851Overlay::PaintFort(const FGeometry& Geometry, FSlateWindowElem
 	const TArray<int32> Candidates = bFortPickCompany ? Map->FortCandidates(F.Id) : TArray<int32>();
 	const int32 CompanyRows = F.Companies.Num();
 	const int32 PickRows = bFortPickCompany ? FMath::Max(1, FMath::Min(Candidates.Num(), 8)) : 0;
-	const FVector2D Size(560.f, 370.f + CompanyRows * 24.f + (bFortPickCompany ? 30.f + PickRows * 24.f : 0.f) + (DemolishArmed == 1000000 + F.Id ? 22.f : 0.f));
+	const FVector2D Size(560.f, 392.f + CompanyRows * 24.f + (bFortPickCompany ? 30.f + PickRows * 24.f : 0.f) + (DemolishArmed == 1000000 + F.Id ? 22.f : 0.f));
 	const FVector2D Pos(28.f, FMath::Max(130.f, Geometry.GetLocalSize().Y - 190.f - Size.Y));
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseFort);
@@ -1371,6 +1390,7 @@ void SCampaign1851Overlay::PaintFort(const FGeometry& Geometry, FSlateWindowElem
 	Line(TEXT("Reserve"), FString::Printf(TEXT("%d mand bag skansen  ·  dækning %d %%%s"), Reserve, Campaign1851Forts::ReserveCover(F.bTrenches),
 		Reserve > 0 ? TEXT("  ·  rykker ind, når der bliver plads") : TEXT("")));
 	Line(TEXT("Front mod"), Campaign1851Forts::Compass(F.Yaw));
+	Line(TEXT("Magasin"), FString::Printf(TEXT("%.0f skud pr. kanon  ·  %.0f patroner pr. mand  ·  proviant %.0f dage"), F.RoundsPerGun, F.CartridgesPerMan, F.FoodDays));
 	// The companies holding it, in the order they fill it.
 	Y += 4.f;
 	PaintText(Geometry, Out, Layer + 2, TEXT("K O M P A G N I E R"), FVector2D(Pos.X + 22.f, Y), Serif(10), Gold, 0.f, false);
@@ -3014,7 +3034,8 @@ void SCampaign1851Overlay::PaintTownBuildings(const FGeometry& Geometry, FSlateW
 			const bool bDone = Site->IsModuleDone(0);
 			const int32 Code = SelectedCity * 100 + i;
 			const FString State = Site->IsDemolishing() ? FString::Printf(TEXT("Rives ned  ·  %.0f %%"), 100.f * Site->GetDemolishDone() / FMath::Max(Site->GetDemolishDays(), 1.f))
-				: DemolishArmed == Code ? Map->DemolishText(Site) : (bDone ? FString(TEXT("Færdig")) : ProgressLine(Site, 0)) + (Site->IsPrivate() ? TEXT("  ·  privat") : TEXT(""));
+				: DemolishArmed == Code ? Map->DemolishText(Site) : Site->IsHistoric() ? FString(TEXT("Står fra før 1851"))
+				: (bDone ? FString(TEXT("Færdig")) : ProgressLine(Site, 0)) + (Site->IsPrivate() ? TEXT("  ·  privat") : TEXT(""));
 			PaintTextFit(Geometry, Out, Layer + 2, State, Row + FVector2D(70.f, 34.f), Serif(11, EFace::Italic), DemolishArmed == Code ? Gold : bDone ? Gold : Ink, Size.X - 70.f - 190.f);
 			PaintButton(Geometry, Out, Layer + 2, ButtonPos, ButtonSize, TEXT("VIS"), EButton::ShowSite, i);
 			PaintButton(Geometry, Out, Layer + 2, ButtonPos - FVector2D(94.f, 0.f), FVector2D(88.f, 26.f), DemolishArmed == Code ? TEXT("BEKRÆFT") : TEXT("NEDRIV"), EButton::Demolish, Code,

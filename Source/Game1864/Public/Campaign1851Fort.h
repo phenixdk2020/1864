@@ -42,6 +42,10 @@ struct FCampaign1851Fort
 	bool bTrenches = false;      // communication trenches: the reserve behind the fort in cover
 	double Invested = 0.0;       // money put into its works (what materials may come back from)
 	int32 GunsFromStock = 0;     // guns the work under way takes from the state's store
+	/** The fort's magazine: days of rations for its garrison, rounds a gun, cartridges a man. */
+	float FoodDays = 14.f;
+	float RoundsPerGun = 120.f;
+	float CartridgesPerMan = 100.f;
 	bool bBuilt = false;
 	ECampaign1851FortWork Work = ECampaign1851FortWork::None;
 	float DaysBuilt = 0.f;

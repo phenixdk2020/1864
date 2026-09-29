@@ -27,6 +27,20 @@ struct FCampaign1851BudgetLine
 };
 
 /** Region codes used by the 1851 data: K Kingdom, S Schleswig, H Holstein/Lauenburg. */
+/** A depot's room and what it holds: rations (a man a day), fodder (a horse a day), ammunition (battalion loads). */
+struct FCampaign1851DepotCapacity
+{
+	float Food = 0.f;
+	float Fodder = 0.f;
+	float Ammo = 0.f;
+};
+struct FCampaign1851DepotStock
+{
+	float Food = 0.f;
+	float Fodder = 0.f;
+	float Ammo = 0.f;
+};
+
 /** A nation's figures for the council window (from the map for Denmark, the abstract model for the others). */
 struct FCampaign1851NationFigures
 {
@@ -303,6 +317,21 @@ public:
 	const TArray<float>& GetAmtManpower() const { return AmtManpower; }
 	void SetAmtManpower(const TArray<float>& In) { if (In.Num() == AmtManpower.Num()) { AmtManpower = In; } }
 
+	// ---- Supply (Campaign1851Supply.cpp).
+
+	/** Room of a town's depot (garrison depot, grain store, arsenal); zero where there is none. */
+	FCampaign1851DepotCapacity DepotCapacity(int32 CityIndex) const;
+	FCampaign1851DepotStock DepotStock(int32 CityIndex) const;
+	/** The depot (town) that feeds a point (within a day's march, with something in it), or INDEX_NONE. */
+	int32 DepotFor(const FVector2D& Km) const;
+	/** What filling the depots costs a month at the current rate. */
+	double StockingCostPerMonth() const;
+	void ResetSupply();
+	TArray<FString> SaveSupply() const;
+	void RestoreSupply(const TArray<FString>& Lines);
+	/** Writes Saved/Battle/Units.json for the 3D battles. */
+	void ExportUnits() const;
+
 	// ---- Pulling down and salvage (Campaign1851Salvage.cpp).
 
 	/** Pulls a building or a whole garrison down (private ones against compensation). */
@@ -381,6 +410,8 @@ public:
 	double CivilIncomePerYear() const;
 	FCampaign1851NationFigures NationFigures(int32 NationIndex) const;
 	void SaveWorld(UCampaign1851SaveGame* Save) const;
+	/** The civil buildings the towns already have in 1851 (town halls, schools, merchants, breweries, the industry of the big towns). */
+	void SeedHistoricBuildings();
 	void RestoreWorld(const UCampaign1851SaveGame* Save);
 
 	// ---- Roads and railways (design manual 20.16.1; Campaign1851Network.cpp).
@@ -707,6 +738,14 @@ private:
 	TArray<FCampaign1851Railway> Railways;
 	int32 HistoricRailways = 0;   // Railways[0..HistoricRailways) come from the map data
 	TArray<FString> News;
+
+	// The supply layer (Campaign1851Supply.cpp).
+	void AdvanceSupply(float DeltaDays);
+	void MonthlySupply();
+	int32 TownForPurchase(const FVector2D& Km) const;
+	double AmmoLoadPrice() const;
+	TMap<int32, FCampaign1851DepotStock> Depots;
+	bool bHungerNews = false;
 
 	// The salvage layer (Campaign1851Salvage.cpp).
 	void AddMaterials(int32 CityIndex, double Rd, const FString& From);

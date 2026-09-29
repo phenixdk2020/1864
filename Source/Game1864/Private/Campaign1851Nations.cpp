@@ -225,7 +225,7 @@ float ACampaign1851Map::UrbanGrowthRate(int32 CityIndex) const
 	}
 	for (const ACampaign1851ConstructionSite* Site : Projects)
 	{
-		if (Site && !Site->IsGarrison() && Site->GetCityIndex() == CityIndex && Site->IsModuleDone(0))
+		if (Site && !Site->IsGarrison() && !Site->IsHistoric() && Site->GetCityIndex() == CityIndex && Site->IsModuleDone(0))
 		{
 			if (const FCampaign1851CivilEffect* E = Campaign1851Nations::CivilEffect(Site->GetKind()))
 			{
@@ -245,7 +245,7 @@ float ACampaign1851Map::RuralGrowthRate(int32 AmtIndex) const
 	float Rate = Campaign1851Nations::BaseRuralGrowth * (AmtGrowthMul.IsValidIndex(AmtIndex) ? AmtGrowthMul[AmtIndex] : 1.f);
 	for (const ACampaign1851ConstructionSite* Site : Projects)
 	{
-		if (Site && !Site->IsGarrison() && Site->IsModuleDone(0) && Cities.IsValidIndex(Site->GetCityIndex()) && Cities[Site->GetCityIndex()].AmtId == Amter[AmtIndex].Id)
+		if (Site && !Site->IsGarrison() && !Site->IsHistoric() && Site->IsModuleDone(0) && Cities.IsValidIndex(Site->GetCityIndex()) && Cities[Site->GetCityIndex()].AmtId == Amter[AmtIndex].Id)
 		{
 			if (const FCampaign1851CivilEffect* E = Campaign1851Nations::CivilEffect(Site->GetKind()))
 			{
@@ -295,7 +295,7 @@ double ACampaign1851Map::CivilIncomePerYear() const
 	double Total = 0.0;
 	for (const ACampaign1851ConstructionSite* Site : Projects)
 	{
-		if (Site && !Site->IsGarrison() && Site->IsModuleDone(0))
+		if (Site && !Site->IsGarrison() && !Site->IsHistoric() && Site->IsModuleDone(0))
 		{
 			if (const FCampaign1851CivilEffect* E = Campaign1851Nations::CivilEffect(Site->GetKind()))
 			{
@@ -889,4 +889,70 @@ void ACampaign1851Map::RestoreWorld(const UCampaign1851SaveGame* Save)
 		D.Key = S.Key;
 		Decisions.Add(D);
 	}
+}
+
+// ------------------------------------------------------------------ the towns of 1851
+
+void ACampaign1851Map::SeedHistoricBuildings()
+{
+	// Rules by the size and place of each town (estimates), and the known industry of the big towns; the
+	// campaign's deviation leaves one out here and there. They stand finished, as part of the 1851 town.
+	FRandomStream Rng(int32(HashCombine(uint32(Seed), 0x1851u)));
+	auto Keep = [&]() { return Rng.FRand() >= Deviation * 0.5f; };
+	struct FRule { const TCHAR* Key; int32 MinPop; bool bCoast; };
+	static const FRule Rules[] = {
+		{ TEXT("Schoolhouse"), 0, false },          // every town had its borgerskole
+		{ TEXT("Town_Hall"), 1000, false },         // every købstad its rådhus
+		{ TEXT("Merchant_House"), 1500, false },
+		{ TEXT("Post_Office"), 2000, false },
+		{ TEXT("Harbor_Building"), 2000, true },    // the customs house of a port town
+		{ TEXT("Brewery"), 4000, false },
+		{ TEXT("Brickworks"), 6000, false },
+		{ TEXT("Hospital"), 9000, false },
+	};
+	struct FNamed { const TCHAR* Town; const TCHAR* Key; };
+	static const FNamed Named[] = {
+		{ TEXT("København"), TEXT("Machine_Workshop") }, { TEXT("København"), TEXT("Textile_Mill") },
+		{ TEXT("Odense"), TEXT("Machine_Workshop") },     { TEXT("Flensborg"), TEXT("Machine_Workshop") },
+		{ TEXT("Neumünster"), TEXT("Textile_Mill") },     { TEXT("Flensborg"), TEXT("Textile_Mill") },
+		{ TEXT("Altona"), TEXT("Machine_Workshop") },     { TEXT("Skagen"), TEXT("Lighthouse") },
+		{ TEXT("Helsingør"), TEXT("Lighthouse") },
+	};
+	int32 Placed = 0;
+	auto Place = [&](int32 c, const TCHAR* Key)
+	{
+		if (!Cities.IsValidIndex(c) || FindBuilding(c, Key))
+		{
+			return;
+		}
+		if (ACampaign1851ConstructionSite* Site = StartBuilding(c, Key, false))
+		{
+			Site->RestoreState({ Site->ModuleDays(0) }, INDEX_NONE);
+			Site->SetHistoric(true);
+			++Placed;
+		}
+	};
+	for (int32 c = 0; c < Cities.Num(); ++c)
+	{
+		const FCampaign1851City& City = Cities[c];
+		if (City.bForeign || City.bBornholm)
+		{
+			continue;
+		}
+		for (const FRule& R : Rules)
+		{
+			if (City.Population >= R.MinPop && (!R.bCoast || IsCoastalTown(c)) && Keep())
+			{
+				Place(c, R.Key);
+			}
+		}
+	}
+	for (const FNamed& N : Named)
+	{
+		if (Keep())
+		{
+			Place(FindCity(N.Town), N.Key);
+		}
+	}
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|world|%d historic town buildings"), Placed);
 }

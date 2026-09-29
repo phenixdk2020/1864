@@ -162,6 +162,9 @@ public:
 	float GetDemolishWages() const { return DemolishWages; }
 	float GetDemolishDone() const { return DemolishDone; }
 	const TArray<float>& GetDemolishFrom() const { return DemolishFrom; }
+	/** Standing in 1851 already: part of the town's historical growth (no extra growth, income or upkeep). */
+	void SetHistoric(bool bIn) { bHistoric = bIn; }
+	bool IsHistoric() const { return bHistoric; }
 	/** Raised by private investors: the state pays neither wages nor upkeep. */
 	void SetPrivate(bool bIn) { bPrivate = bIn; }
 	bool IsPrivate() const { return bPrivate; }
@@ -200,6 +203,7 @@ private:
 	float Clock = 0.f;
 	bool bStalled = false;
 	bool bPrivate = false;
+	bool bHistoric = false;
 	bool bDemolishing = false;
 	float DemolishDays = 1.f, DemolishWages = 0.f, DemolishDone = 0.f;
 	TArray<float> DemolishFrom;

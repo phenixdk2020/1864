@@ -641,6 +641,10 @@ void ACampaign1851Map::ExportForts() const
 			Companies.Add(MakeShared<FJsonValueObject>(J));
 		}
 		O->SetArrayField(TEXT("companies"), Companies);
+		// The magazine: rounds a gun, cartridges a man, rations for the garrison.
+		O->SetNumberField(TEXT("roundsPerGun"), F.RoundsPerGun);
+		O->SetNumberField(TEXT("cartridgesPerMan"), F.CartridgesPerMan);
+		O->SetNumberField(TEXT("foodDays"), F.FoodDays);
 		// Gun platforms in the fort's frame, metres from its centre (x towards the front, y to the right);
 		// the map draws forts larger than life, so the battle gets the real scale (about 3 m a map unit).
 		constexpr float MetresPerUnit = 3.f;

@@ -31,6 +31,8 @@ struct FCampaign1851ProjectSave
 	UPROPERTY() float Yaw = 0.f;
 	/** v12: raised by private investors (no wages or upkeep from the state). */
 	UPROPERTY() bool bPrivate = false;
+	/** v18: standing in 1851 already. */
+	UPROPERTY() bool bHistoric = false;
 	/** v16: being pulled down. */
 	UPROPERTY() bool bDemolishing = false;
 	UPROPERTY() float DemolishDays = 0.f;
@@ -217,7 +219,7 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 
 public:
 	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands. 10: + troop trains on the map. 11: + field formations. */
-	static constexpr int32 CurrentVersion = 16;
+	static constexpr int32 CurrentVersion = 18;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;
@@ -263,6 +265,9 @@ public:
 	UPROPERTY() TArray<int32> AmtRural;
 	UPROPERTY() TArray<FCampaign1851NationSave> Nations;
 	UPROPERTY() TArray<FCampaign1851DecisionSave> Decisions;
+
+	/** Supply (v17): depots, units and forts, one line each. */
+	UPROPERTY() TArray<FString> Supply;
 
 	/** The state's store of fortress guns and the materials stores (town, rd., day) (v16). */
 	UPROPERTY() int32 GunStock = 0;
