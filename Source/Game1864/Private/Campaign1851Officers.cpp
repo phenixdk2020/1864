@@ -135,6 +135,7 @@ void ACampaign1851Map::ResetOfficers()
 	for (int32 i = 0; i < Regiments.Num(); ++i)
 	{
 		Regiments[i].Captains.Init(INDEX_NONE, Campaign1851Army::CompaniesFor(Regiments[i].Arm));
+		Regiments[i].CompanyFort.Init(0, Regiments[i].Captains.Num());
 		for (int32 k = 0; k < Regiments[i].Captains.Num(); ++k)
 		{
 			FCampaign1851Officer Captain = MakeOfficer(Rng, false, TEXT("Kaptajn"));
@@ -403,6 +404,7 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 	{
 		R.Chief = R.General = INDEX_NONE;
 		R.Captains.Init(INDEX_NONE, Campaign1851Army::CompaniesFor(R.Arm));
+		R.CompanyFort.Init(0, R.Captains.Num());
 	}
 	for (FCampaign1851Command& C : Commands)
 	{
@@ -473,9 +475,27 @@ int32 ACampaign1851Map::CompanyMen(int32 Regiment, int32 Company) const
 	{
 		return 0;
 	}
-	// The battalion's men spread over its companies (the first ones take the odd men).
-	const int32 N = Regiments[Regiment].Captains.Num(), Men = Regiments[Regiment].Men;
-	return Men / N + (Company < Men % N ? 1 : 0);
+	// A company in a fort has its own men there; the battalion's men spread over the companies with it.
+	const FCampaign1851Regiment& R = Regiments[Regiment];
+	const int32 FortId = R.CompanyFort.IsValidIndex(Company) ? R.CompanyFort[Company] : 0;
+	if (FortId != 0)
+	{
+		const int32 FortIdx = FortIndex(FortId);
+		const FCampaign1851FortCompany* C = FortIdx == INDEX_NONE ? nullptr
+			: Forts[FortIdx].Companies.FindByPredicate([&](const FCampaign1851FortCompany& X) { return X.Regiment == Regiment && X.Company == Company; });
+		return C ? C->Men : 0;
+	}
+	int32 With = 0, Index = 0;
+	for (int32 k = 0; k < R.Captains.Num(); ++k)
+	{
+		if (!R.CompanyFort.IsValidIndex(k) || R.CompanyFort[k] == 0)
+		{
+			Index += k < Company ? 1 : 0;
+			++With;
+		}
+	}
+	With = FMath::Max(With, 1);
+	return R.Men / With + (Index < R.Men % With ? 1 : 0);
 }
 
 FString ACampaign1851Map::OfficerRole(int32 Officer) const

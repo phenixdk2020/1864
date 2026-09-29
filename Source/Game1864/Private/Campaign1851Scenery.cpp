@@ -1169,6 +1169,15 @@ namespace Campaign1851Scenery
 			W.Quad(FVector3f(-3.f, -0.9f, 0.f), FVector3f(-3.f, 0.9f, 0.f), FVector3f(-3.f, 0.2f, 1.9f), FVector3f(-3.f, -0.2f, 1.9f), Turf, Below);
 			break;
 		}
+		case ESitePiece::TrenchSegment:
+		{
+			const FLinearColor TrenchFloor = Srgb(78, 64, 46), Lip = Srgb(112, 118, 66);
+			const FVector3f Below(0.f, 0.f, -3.f);
+			W.Quad(FVector3f(-5.f, -0.5f, 0.06f), FVector3f(5.f, -0.5f, 0.06f), FVector3f(5.f, 0.5f, 0.06f), FVector3f(-5.f, 0.5f, 0.06f), TrenchFloor, Below);
+			W.Quad(FVector3f(-5.f, -0.5f, 0.f), FVector3f(5.f, -0.5f, 0.f), FVector3f(5.f, -1.f, 0.7f), FVector3f(-5.f, -1.f, 0.7f), Lip, Below);
+			W.Quad(FVector3f(-5.f, -1.f, 0.7f), FVector3f(5.f, -1.f, 0.7f), FVector3f(5.f, -1.8f, 0.f), FVector3f(-5.f, -1.8f, 0.f), Lip, Below);
+			break;
+		}
 		// ---- Civil town buildings (each on its own plot; the long side along X, the front on +Y).
 		case ESitePiece::School:
 		{
@@ -1310,7 +1319,7 @@ namespace Campaign1851Scenery
 			TEXT("TrainEngine"), TEXT("TrainCarBrown"), TEXT("TrainCarGreen"),
 			TEXT("School"), TEXT("TownHall"), TEXT("PostOffice"), TEXT("Hospital"), TEXT("CustomsHouse"), TEXT("Lighthouse"), TEXT("MerchantYard"),
 			TEXT("Brewery"), TEXT("Brickworks"), TEXT("Sawmill"), TEXT("Workshop"), TEXT("Factory"), TEXT("Inn"),
-			TEXT("RedoubtSmall"), TEXT("RedoubtLarge"), TEXT("FortGun"), TEXT("PalisadeSmall"), TEXT("PalisadeLarge"), TEXT("Blockhouse"), TEXT("Traverse") };
+			TEXT("RedoubtSmall"), TEXT("RedoubtLarge"), TEXT("FortGun"), TEXT("PalisadeSmall"), TEXT("PalisadeLarge"), TEXT("Blockhouse"), TEXT("Traverse"), TEXT("TrenchSegment") };
 		return Finish(W, Material, FString::Printf(TEXT("SM_Campaign1851_Site_%s"), Names[int32(Piece)]));
 	}
 }

@@ -239,6 +239,8 @@ struct FCampaign1851Regiment
 	int32 Formation = 0;
 	/** The chiefs (officer index) of its companies; empty for units without companies (cavalry, batteries). */
 	TArray<int32> Captains;
+	/** Per company: the fort (id) it holds, 0 = with the battalion. Its men are then not in Men. */
+	TArray<int32> CompanyFort;
 	/** Officer indices: the regiment's chief, and a general whose headquarters marches with it. */
 	int32 Chief = INDEX_NONE;
 	int32 General = INDEX_NONE;

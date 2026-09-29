@@ -112,6 +112,26 @@ int32 ACampaign1851Map::NearestTown(const FVector2D& Km) const
 	return Best;
 }
 
+bool ACampaign1851Map::EnsureFortMeshes()
+{
+	using Campaign1851Scenery::ESitePiece;
+	if (FortMeshes.Num() == 0)
+	{
+		UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, FortArmyMaterial);
+		if (!Material)
+		{
+			return false;
+		}
+		// 0 small, 1 large, 2 gun, 3-4 palisades, 5 blockhouse, 6 traverse, 7 trench stretch.
+		for (ESitePiece Piece : { ESitePiece::RedoubtSmall, ESitePiece::RedoubtLarge, ESitePiece::FortGun, ESitePiece::PalisadeSmall, ESitePiece::PalisadeLarge,
+			ESitePiece::Blockhouse, ESitePiece::Traverse, ESitePiece::TrenchSegment })
+		{
+			FortMeshes.Add(Campaign1851Scenery::BuildSitePiece(Piece, Material));
+		}
+	}
+	return FortMeshes.Num() == 8;
+}
+
 int32 ACampaign1851Map::FortIndex(int32 Id) const
 {
 	return Forts.IndexOfByPredicate([Id](const FCampaign1851Fort& F) { return F.Id == Id; });
@@ -197,6 +217,15 @@ bool ACampaign1851Map::UpgradeFort(int32 Id, ECampaign1851FortWork Work, FString
 		Cost = Campaign1851Forts::GunsCost;
 		Days = Campaign1851Forts::GunsDays;
 	}
+	else if (Work == ECampaign1851FortWork::Trenches)
+	{
+		if (F.bTrenches)
+		{
+			return Fail(TEXT("Skansen har allerede løbegrave"));
+		}
+		Cost = Campaign1851Forts::TrenchesCost(F.bLarge);
+		Days = Campaign1851Forts::TrenchesDays;
+	}
 	else if (Work == ECampaign1851FortWork::Defence)
 	{
 		if (F.Defence >= Campaign1851Forts::MaxDefence)
@@ -219,7 +248,7 @@ bool ACampaign1851Map::UpgradeFort(int32 Id, ECampaign1851FortWork Work, FString
 	F.WorkDays = Days;
 	F.DaysBuilt = 0.f;
 	AddTransaction(-Cost * Campaign1851Buildings::DownPayment, FString::Printf(TEXT("%s: %s"), *F.Name,
-		Work == ECampaign1851FortWork::Guns ? TEXT("to kanoner mere") : Campaign1851Forts::DefenceName(F.Defence + 1)));
+		Work == ECampaign1851FortWork::Guns ? TEXT("to kanoner mere") : Work == ECampaign1851FortWork::Trenches ? TEXT("løbegrave") : Campaign1851Forts::DefenceName(F.Defence + 1)));
 	ExportForts();
 	return true;
 }
@@ -241,7 +270,7 @@ void ACampaign1851Map::AdvanceForts(float DeltaDays)
 	{
 		return;
 	}
-	bool bChanged = false;
+	bool bChanged = false, bTrenchesChanged = false;
 	for (int32 i = 0; i < Forts.Num(); ++i)
 	{
 		FCampaign1851Fort& F = Forts[i];
@@ -267,13 +296,18 @@ void ACampaign1851Map::AdvanceForts(float DeltaDays)
 			{
 				F.bBuilt = true;
 				F.Guns = Campaign1851Forts::StartGuns(F.bLarge);
-				F.Garrison = Campaign1851Forts::InfantryCapacity(F.bLarge);
-				News.Add(FString::Printf(TEXT("%s står færdig med %d kanoner"), *F.Name, F.Guns));
+				News.Add(FString::Printf(TEXT("%s står færdig med %d kanoner: send kompagnier derhen"), *F.Name, F.Guns));
 			}
 			else if (F.Work == ECampaign1851FortWork::Guns)
 			{
 				F.Guns = FMath::Min(F.Guns + Campaign1851Forts::GunStep, Campaign1851Forts::MaxGuns(F.bLarge));
 				News.Add(FString::Printf(TEXT("%s har nu %d kanoner"), *F.Name, F.Guns));
+			}
+			else if (F.Work == ECampaign1851FortWork::Trenches)
+			{
+				F.bTrenches = true;
+				News.Add(FString::Printf(TEXT("%s: løbegravene er færdige"), *F.Name));
+				bTrenchesChanged = true;
 			}
 			else
 			{
@@ -289,6 +323,10 @@ void ACampaign1851Map::AdvanceForts(float DeltaDays)
 		{
 			UpdateFortVisual(i);   // the earthwork rises in tenths
 		}
+	}
+	if (bTrenchesChanged)
+	{
+		UpdateTrenches();
 	}
 	if (bChanged)
 	{
@@ -329,19 +367,9 @@ void ACampaign1851Map::UpdateFortVisual(int32 Index)
 	{
 		return;
 	}
-	using Campaign1851Scenery::ESitePiece;
-	if (FortMeshes.Num() == 0)
+	if (!EnsureFortMeshes())
 	{
-		UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, FortArmyMaterial);
-		if (!Material)
-		{
-			return;
-		}
-		for (ESitePiece Piece : { ESitePiece::RedoubtSmall, ESitePiece::RedoubtLarge, ESitePiece::FortGun, ESitePiece::PalisadeSmall, ESitePiece::PalisadeLarge,
-			ESitePiece::Blockhouse, ESitePiece::Traverse })
-		{
-			FortMeshes.Add(Campaign1851Scenery::BuildSitePiece(Piece, Material));
-		}
+		return;
 	}
 	const FCampaign1851Fort& F = Forts[Index];
 	// Rebuilt from scratch: the parts are few.
@@ -410,6 +438,10 @@ void ACampaign1851Map::ResetForts()
 	FortPartOwner.Reset();
 	Forts.Reset();
 	NextFortId = 1;
+	for (FCampaign1851Regiment& R : Regiments)
+	{
+		R.CompanyFort.Init(0, R.Captains.Num());
+	}
 }
 
 FVector ACampaign1851Map::FortWorld(int32 Index) const
@@ -436,6 +468,14 @@ TArray<FCampaign1851FortSave> ACampaign1851Map::SaveForts() const
 		S.DaysBuilt = F.DaysBuilt;
 		S.WorkDays = F.WorkDays;
 		S.WorkCost = F.WorkCost;
+		S.bTrenches = F.bTrenches;
+		for (const FCampaign1851FortCompany& C : F.Companies)
+		{
+			if (Regiments.IsValidIndex(C.Regiment))
+			{
+				S.Companies.Add(FString::Printf(TEXT("%s:%d:%d"), *Regiments[C.Regiment].Id, C.Company, C.Men));
+			}
+		}
 	}
 	return Out;
 }
@@ -459,11 +499,25 @@ void ACampaign1851Map::RestoreForts(const TArray<FCampaign1851FortSave>& Saves)
 		F.DaysBuilt = S.DaysBuilt;
 		F.WorkDays = S.WorkDays;
 		F.WorkCost = S.WorkCost;
+		F.bTrenches = S.bTrenches;
+		for (const FString& Entry : S.Companies)
+		{
+			TArray<FString> P;
+			Entry.ParseIntoArray(P, TEXT(":"));
+			const int32 R = P.Num() == 3 ? FindRegiment(P[0]) : INDEX_NONE;
+			const int32 K = P.Num() == 3 ? FCString::Atoi(*P[1]) : 0;
+			if (R != INDEX_NONE && Regiments[R].CompanyFort.IsValidIndex(K))
+			{
+				Regiments[R].CompanyFort[K] = F.Id;
+				F.Companies.Add({ R, K, FCString::Atoi(*P[2]) });
+			}
+		}
 		NextFortId = FMath::Max(NextFortId, F.Id + 1);
 		ClearScenery(F.Km, (F.bLarge ? 20.f : 14.f) * PieceScale / float(KmToUnits));
 		Forts.Add(F);
 		UpdateFortVisual(Forts.Num() - 1);
 	}
+	UpdateTrenches();
 	ExportForts();
 }
 
@@ -506,7 +560,68 @@ void ACampaign1851Map::ExportForts() const
 		O->SetBoolField(TEXT("blockhouse"), F.Defence >= 3);
 		O->SetBoolField(TEXT("traverses"), F.Defence >= 4);
 		O->SetNumberField(TEXT("infantryCapacity"), Campaign1851Forts::InfantryCapacity(F.bLarge));
-		O->SetNumberField(TEXT("garrison"), F.Garrison);
+		int32 Inside = 0, Reserve = 0;
+		FortMen(F, Inside, Reserve);
+		O->SetNumberField(TEXT("garrison"), Inside + Reserve);
+		O->SetNumberField(TEXT("garrisonInside"), Inside);
+		O->SetNumberField(TEXT("garrisonReserve"), Reserve);
+		O->SetNumberField(TEXT("coverInsidePercent"), Campaign1851Forts::CoverPercent(F.Defence));
+		O->SetNumberField(TEXT("coverReservePercent"), Campaign1851Forts::ReserveCover(F.bTrenches));
+		O->SetBoolField(TEXT("trenches"), F.bTrenches);
+		TArray<TSharedPtr<FJsonValue>> TrenchIds;
+		for (int32 L : TrenchLinks(F.Id))
+		{
+			TrenchIds.Add(MakeShared<FJsonValueNumber>(L));
+		}
+		O->SetArrayField(TEXT("trenchLinks"), TrenchIds);
+		// The companies in the order they fill the fort: the first ones inside, the rest in the reserve.
+		TArray<TSharedPtr<FJsonValue>> Companies;
+		int32 Room = Campaign1851Forts::InfantryCapacity(F.bLarge);
+		for (const FCampaign1851FortCompany& C : F.Companies)
+		{
+			if (!Regiments.IsValidIndex(C.Regiment))
+			{
+				continue;
+			}
+			const FCampaign1851Regiment& R = Regiments[C.Regiment];
+			const int32 In = FMath::Min(C.Men, Room);
+			Room -= In;
+			TSharedRef<FJsonObject> J = MakeShared<FJsonObject>();
+			J->SetStringField(TEXT("regimentId"), R.Id);
+			J->SetStringField(TEXT("battalion"), R.Name);
+			J->SetNumberField(TEXT("company"), CompanyNumber(C.Regiment, C.Company));
+			J->SetNumberField(TEXT("men"), C.Men);
+			J->SetNumberField(TEXT("menInside"), In);
+			J->SetNumberField(TEXT("menReserve"), C.Men - In);
+			const int32 Captain = R.Captains.IsValidIndex(C.Company) ? R.Captains[C.Company] : INDEX_NONE;
+			if (Officers.IsValidIndex(Captain))
+			{
+				const FCampaign1851Officer& Off = Officers[Captain];
+				TSharedRef<FJsonObject> Cap = MakeShared<FJsonObject>();
+				Cap->SetStringField(TEXT("name"), Off.Name);
+				Cap->SetStringField(TEXT("rank"), Off.Rank);
+				Cap->SetNumberField(TEXT("experience"), Off.Experience);
+				for (int32 st = 0; st < int32(ECampaign1851OfficerStat::Count); ++st)
+				{
+					Cap->SetNumberField(Campaign1851Army::StatName(ECampaign1851OfficerStat(st)), Off.Stats[st]);
+				}
+				J->SetObjectField(TEXT("captain"), Cap);
+			}
+			const Campaign1851Army::FBattleFactors B = Campaign1851Army::BattleFactors(R);
+			TSharedRef<FJsonObject> Bf = MakeShared<FJsonObject>();
+			Bf->SetNumberField(TEXT("reloadTime"), B.ReloadTime);
+			Bf->SetNumberField(TEXT("accuracy"), B.Accuracy);
+			Bf->SetNumberField(TEXT("deploySpeed"), B.DeploySpeed);
+			Bf->SetNumberField(TEXT("skirmish"), B.Skirmish);
+			Bf->SetNumberField(TEXT("fatigueRate"), B.FatigueRate);
+			Bf->SetNumberField(TEXT("assault"), B.Assault);
+			Bf->SetNumberField(TEXT("morale"), B.Morale);
+			Bf->SetNumberField(TEXT("cohesion"), B.Cohesion);
+			Bf->SetNumberField(TEXT("experience"), B.Experience);
+			J->SetObjectField(TEXT("battleFactors"), Bf);
+			Companies.Add(MakeShared<FJsonValueObject>(J));
+		}
+		O->SetArrayField(TEXT("companies"), Companies);
 		// Gun platforms in the fort's frame, metres from its centre (x towards the front, y to the right);
 		// the map draws forts larger than life, so the battle gets the real scale (about 3 m a map unit).
 		constexpr float MetresPerUnit = 3.f;
@@ -545,8 +660,190 @@ void ACampaign1851Map::CompleteForts()
 		F.Work = ECampaign1851FortWork::None;
 		F.Guns = Campaign1851Forts::MaxGuns(F.bLarge);
 		F.Defence = Campaign1851Forts::MaxDefence;
-		F.Garrison = Campaign1851Forts::InfantryCapacity(F.bLarge);
+		F.bTrenches = true;
 		UpdateFortVisual(i);
 	}
+	UpdateTrenches();
 	ExportForts();
+}
+
+// ------------------------------------------------------------------ garrison and trenches
+
+void ACampaign1851Map::FortMen(const FCampaign1851Fort& F, int32& OutInside, int32& OutReserve) const
+{
+	int32 Total = 0;
+	for (const FCampaign1851FortCompany& C : F.Companies)
+	{
+		Total += C.Men;
+	}
+	OutInside = FMath::Min(Total, Campaign1851Forts::InfantryCapacity(F.bLarge));
+	OutReserve = Total - OutInside;
+}
+
+TArray<int32> ACampaign1851Map::FortCandidates(int32 FortId) const
+{
+	TArray<int32> Out;
+	const int32 Index = FortIndex(FortId);
+	if (Index == INDEX_NONE)
+	{
+		return Out;
+	}
+	for (int32 i = 0; i < Regiments.Num(); ++i)
+	{
+		const FCampaign1851Regiment& R = Regiments[i];
+		if (R.IsMarching() || R.Captains.Num() == 0 || FVector2D::Distance(R.Km, Forts[Index].Km) > Campaign1851Forts::CompanyReachKm)
+		{
+			continue;
+		}
+		for (int32 k = 0; k < R.Captains.Num(); ++k)
+		{
+			if (R.CompanyFort.IsValidIndex(k) && R.CompanyFort[k] == 0)
+			{
+				Out.Add(i * 10 + k);
+			}
+		}
+	}
+	return Out;
+}
+
+bool ACampaign1851Map::AddFortCompany(int32 FortId, int32 Regiment, int32 Company, FString* OutReason)
+{
+	auto Fail = [OutReason](const FString& Why) { if (OutReason) { *OutReason = Why; } return false; };
+	const int32 Index = FortIndex(FortId);
+	if (Index == INDEX_NONE || !Regiments.IsValidIndex(Regiment))
+	{
+		return Fail(TEXT("-"));
+	}
+	FCampaign1851Fort& F = Forts[Index];
+	FCampaign1851Regiment& R = Regiments[Regiment];
+	if (!F.bBuilt)
+	{
+		return Fail(TEXT("Skansen er ikke færdig endnu"));
+	}
+	if (!R.CompanyFort.IsValidIndex(Company) || R.CompanyFort[Company] != 0)
+	{
+		return Fail(TEXT("Kompagniet er ikke ved sin bataljon"));
+	}
+	if (R.IsMarching() || FVector2D::Distance(R.Km, F.Km) > Campaign1851Forts::CompanyReachKm)
+	{
+		return Fail(FString::Printf(TEXT("%s skal stå inden for %.0f km af skansen"), *R.Name, Campaign1851Forts::CompanyReachKm));
+	}
+	const int32 Men = CompanyMen(Regiment, Company);
+	R.Men -= Men;
+	R.CompanyFort[Company] = F.Id;
+	F.Companies.Add({ Regiment, Company, Men });
+	F.Garrison += Men;
+	ExportForts();
+	return true;
+}
+
+bool ACampaign1851Map::ReturnFortCompany(int32 FortId, int32 Entry, FString* OutReason)
+{
+	auto Fail = [OutReason](const FString& Why) { if (OutReason) { *OutReason = Why; } return false; };
+	const int32 Index = FortIndex(FortId);
+	if (Index == INDEX_NONE || !Forts[Index].Companies.IsValidIndex(Entry))
+	{
+		return Fail(TEXT("-"));
+	}
+	FCampaign1851Fort& F = Forts[Index];
+	const FCampaign1851FortCompany C = F.Companies[Entry];
+	if (!Regiments.IsValidIndex(C.Regiment))
+	{
+		return Fail(TEXT("-"));
+	}
+	FCampaign1851Regiment& R = Regiments[C.Regiment];
+	if (R.IsMarching() || FVector2D::Distance(R.Km, F.Km) > Campaign1851Forts::CompanyReachKm)
+	{
+		return Fail(FString::Printf(TEXT("%s er for langt væk: kompagniet bliver i skansen"), *R.Name));
+	}
+	R.Men = FMath::Min(R.Men + C.Men, FMath::Max(R.MaxMen, R.Men + C.Men));
+	if (R.CompanyFort.IsValidIndex(C.Company))
+	{
+		R.CompanyFort[C.Company] = 0;
+	}
+	F.Companies.RemoveAt(Entry);
+	F.Garrison -= C.Men;
+	ExportForts();
+	return true;
+}
+
+TArray<int32> ACampaign1851Map::TrenchLinks(int32 FortId) const
+{
+	TArray<int32> Out;
+	const int32 Index = FortIndex(FortId);
+	if (Index == INDEX_NONE || !Forts[Index].bTrenches)
+	{
+		return Out;
+	}
+	for (const FCampaign1851Fort& O : Forts)
+	{
+		if (O.Id != FortId && O.bTrenches && FVector2D::Distance(O.Km, Forts[Index].Km) <= Campaign1851Forts::TrenchReachKm)
+		{
+			Out.Add(O.Id);
+		}
+	}
+	return Out;
+}
+
+void ACampaign1851Map::UpdateTrenches()
+{
+	// Trenches are drawn anew: a zigzag of short dug stretches with an earth lip, over the ground between forts.
+	for (int32 p = FortParts.Num() - 1; p >= 0; --p)
+	{
+		if (FortPartOwner[p] == -1)
+		{
+			if (FortParts[p])
+			{
+				FortParts[p]->DestroyComponent();
+			}
+			FortParts.RemoveAt(p);
+			FortPartOwner.RemoveAt(p);
+		}
+	}
+	if (!EnsureFortMeshes())
+	{
+		return;
+	}
+	for (int32 a = 0; a < Forts.Num(); ++a)
+	{
+		for (int32 b = a + 1; b < Forts.Num(); ++b)
+		{
+			const FCampaign1851Fort& A = Forts[a];
+			const FCampaign1851Fort& B = Forts[b];
+			if (!A.bTrenches || !B.bTrenches || FVector2D::Distance(A.Km, B.Km) > Campaign1851Forts::TrenchReachKm)
+			{
+				continue;
+			}
+			// From the rear of one fort to the rear of the other, in zigzag stretches of about 60 m (map scale).
+			const FVector2D Dir = (B.Km - A.Km).GetSafeNormal();
+			const FVector2D Side(-Dir.Y, Dir.X);
+			const double Length = FVector2D::Distance(A.Km, B.Km);
+			const double Step = 0.06;
+			const int32 Count = FMath::Max(2, FMath::FloorToInt(Length / Step));
+			FVector2D Prev = A.Km;
+			for (int32 s = 1; s <= Count; ++s)
+			{
+				const double T = double(s) / Count;
+				const FVector2D Next = A.Km + (B.Km - A.Km) * T + Side * ((s % 2 == 0 || s == Count) ? 0.0 : 0.02);
+				const FVector P0 = GetActorTransform().TransformPosition(LocalAtKm(Prev));
+				const FVector P1 = GetActorTransform().TransformPosition(LocalAtKm(Next));
+				const FVector Mid = (P0 + P1) * 0.5;
+				const FVector D = P1 - P0;
+				const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(D.Y, D.X));
+				const float Len = float(D.Size2D());
+				UStaticMeshComponent* C = NewObject<UStaticMeshComponent>(this);
+				C->SetupAttachment(Root);
+				C->SetStaticMesh(FortMeshes[7]);
+				C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				// The segment piece is 10 units long along X; stretched to the stretch, following the ground's slope.
+				const float Pitch = FMath::RadiansToDegrees(FMath::Atan2(D.Z, double(Len)));
+				C->SetWorldTransform(FTransform(FRotator(Pitch, Yaw, 0.f), Mid + FVector(0.0, 0.0, 0.05), FVector(Len / 10.f, PieceScale * 2.f, PieceScale * 1.5f)));
+				C->SetVisibility(bSceneryVisible);
+				C->RegisterComponent();
+				FortParts.Add(C);
+				FortPartOwner.Add(-1);
+				Prev = Next;
+			}
+		}
+	}
 }

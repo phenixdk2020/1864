@@ -257,7 +257,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.38 SKANSER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.39 SKANSER MED BESÆTNING — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -1281,8 +1281,13 @@ void SCampaign1851Overlay::PaintFort(const FGeometry& Geometry, FSlateWindowElem
 		return;
 	}
 	const FCampaign1851Fort& F = Map->GetForts()[Index];
-	const FVector2D Size(440.f, 336.f);
-	const FVector2D Pos(28.f, Geometry.GetLocalSize().Y - 190.f - Size.Y);
+	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
+	const TArray<FCampaign1851Officer>& Officers = Map->GetOfficers();
+	const TArray<int32> Candidates = bFortPickCompany ? Map->FortCandidates(F.Id) : TArray<int32>();
+	const int32 CompanyRows = F.Companies.Num();
+	const int32 PickRows = bFortPickCompany ? FMath::Max(1, FMath::Min(Candidates.Num(), 8)) : 0;
+	const FVector2D Size(560.f, 370.f + CompanyRows * 24.f + (bFortPickCompany ? 30.f + PickRows * 24.f : 0.f));
+	const FVector2D Pos(28.f, FMath::Max(130.f, Geometry.GetLocalSize().Y - 190.f - Size.Y));
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseFort);
 	PaintTextFit(Geometry, Out, Layer + 2, F.Name, Pos + FVector2D(22.f, 34.f), Serif(22), Ink, Size.X - 80.f);
@@ -1296,32 +1301,88 @@ void SCampaign1851Overlay::PaintFort(const FGeometry& Geometry, FSlateWindowElem
 	};
 	if (F.Work != ECampaign1851FortWork::None)
 	{
-		const TCHAR* What = F.Work == ECampaign1851FortWork::Build ? TEXT("Anlægges") : F.Work == ECampaign1851FortWork::Guns ? TEXT("To kanoner mere") : Campaign1851Forts::DefenceName(F.Defence + 1);
+		const TCHAR* What = F.Work == ECampaign1851FortWork::Build ? TEXT("Anlægges") : F.Work == ECampaign1851FortWork::Guns ? TEXT("To kanoner mere")
+			: F.Work == ECampaign1851FortWork::Trenches ? TEXT("Løbegrave") : Campaign1851Forts::DefenceName(F.Defence + 1);
 		Line(TEXT("Arbejde"), FString::Printf(TEXT("%s  ·  %.0f %%  ·  %.0f dage tilbage%s"), What, F.Progress() * 100.f, FMath::Max(0.f, F.WorkDays - F.DaysBuilt), F.bStalled ? TEXT("  ·  ingen penge") : TEXT("")));
 	}
-	Line(TEXT("Kanoner"), FString::Printf(TEXT("%d af %d  ·  %s"), F.Guns, Campaign1851Forts::MaxGuns(F.bLarge), Campaign1851Forts::GunType()));
-	Line(TEXT("Forsvar"), FString::Printf(TEXT("%d  ·  %s"), F.Defence, Campaign1851Forts::DefenceName(F.Defence)));
-	Line(TEXT("Dækning"), FString::Printf(TEXT("%d %%  ·  brystværn %.1f m, grav %.1f m"), Campaign1851Forts::CoverPercent(F.Defence), Campaign1851Forts::ParapetHeightM(F.bLarge, F.Defence), Campaign1851Forts::DitchDepthM(F.bLarge)));
-	Line(TEXT("Besætning"), FString::Printf(TEXT("%d af %d infanterister  ·  %d kanonerer"), F.Garrison, Campaign1851Forts::InfantryCapacity(F.bLarge), F.Guns * Campaign1851Forts::GunnersPerGun));
+	int32 Inside = 0, Reserve = 0;
+	Map->FortMen(F, Inside, Reserve);
+	Line(TEXT("Kanoner"), FString::Printf(TEXT("%d af %d  ·  %s  ·  %d kanonerer"), F.Guns, Campaign1851Forts::MaxGuns(F.bLarge), Campaign1851Forts::GunType(), F.Guns * Campaign1851Forts::GunnersPerGun));
+	Line(TEXT("Forsvar"), FString::Printf(TEXT("%d  ·  %s%s"), F.Defence, Campaign1851Forts::DefenceName(F.Defence), F.bTrenches ? TEXT("  ·  løbegrave") : TEXT("")));
+	Line(TEXT("Inde"), FString::Printf(TEXT("%d af %d mand  ·  dækning %d %%  ·  brystværn %.1f m, grav %.1f m"), Inside, Campaign1851Forts::InfantryCapacity(F.bLarge),
+		Campaign1851Forts::CoverPercent(F.Defence), Campaign1851Forts::ParapetHeightM(F.bLarge, F.Defence), Campaign1851Forts::DitchDepthM(F.bLarge)));
+	Line(TEXT("Reserve"), FString::Printf(TEXT("%d mand bag skansen  ·  dækning %d %%%s"), Reserve, Campaign1851Forts::ReserveCover(F.bTrenches),
+		Reserve > 0 ? TEXT("  ·  rykker ind, når der bliver plads") : TEXT("")));
 	Line(TEXT("Front mod"), Campaign1851Forts::Compass(F.Yaw));
+	// The companies holding it, in the order they fill it.
+	Y += 4.f;
+	PaintText(Geometry, Out, Layer + 2, TEXT("K O M P A G N I E R"), FVector2D(Pos.X + 22.f, Y), Serif(10), Gold, 0.f, false);
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 170.f, Y - 11.f), FVector2D(148.f, 22.f), TEXT("+ KOMPAGNI"), EButton::FortPickCompany, F.Id, bFortPickCompany, !F.bBuilt);
+	Y += 24.f;
+	if (F.Companies.Num() == 0)
+	{
+		PaintText(Geometry, Out, Layer + 2, F.bBuilt ? TEXT("Ingen besætning: send et kompagni fra en bataljon i nærheden") : TEXT("Besættes, når skansen er færdig"),
+			FVector2D(Pos.X + 22.f, Y), Serif(11, EFace::Italic), MutedInk, 0.f, false);
+		Y += 24.f;
+	}
+	int32 Room = Campaign1851Forts::InfantryCapacity(F.bLarge);
+	for (int32 c = 0; c < F.Companies.Num(); ++c)
+	{
+		const FCampaign1851FortCompany& C = F.Companies[c];
+		if (!Regs.IsValidIndex(C.Regiment))
+		{
+			continue;
+		}
+		const FCampaign1851Regiment& R = Regs[C.Regiment];
+		const int32 In = FMath::Min(C.Men, Room);
+		Room -= In;
+		const int32 Captain = R.Captains.IsValidIndex(C.Company) ? R.Captains[C.Company] : INDEX_NONE;
+		const FString Where = In == C.Men ? FString(TEXT("inde")) : In == 0 ? FString(TEXT("reserve")) : FString::Printf(TEXT("%d inde, %d i reserve"), In, C.Men - In);
+		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("%d. Kompagni (%s)  ·  %s  ·  %d mand  ·  %s"), Map->CompanyNumber(C.Regiment, C.Company), *R.Name,
+			Officers.IsValidIndex(Captain) ? *FString::Printf(TEXT("Kaptajn %s"), *Officers[Captain].Name) : TEXT("ingen kaptajn"), C.Men, *Where),
+			FVector2D(Pos.X + 22.f, Y), Serif(11), Ink, Size.X - 150.f);
+		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 118.f, Y - 11.f), FVector2D(96.f, 22.f), TEXT("TRÆK UD"), EButton::FortReturn, c);
+		Y += 24.f;
+	}
+	if (bFortPickCompany)
+	{
+		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("Kompagnier fra bataljoner inden for %.0f km:"), Campaign1851Forts::CompanyReachKm), FVector2D(Pos.X + 22.f, Y + 4.f), Serif(11, EFace::Italic), Gold, 0.f, false);
+		Y += 28.f;
+		if (Candidates.Num() == 0)
+		{
+			PaintText(Geometry, Out, Layer + 2, TEXT("Ingen: før en bataljon hen til skansen først"), FVector2D(Pos.X + 22.f, Y), Serif(11, EFace::Italic), MutedInk, 0.f, false);
+			Y += 24.f;
+		}
+		for (int32 r = 0; r < Candidates.Num() && r < 8; ++r)
+		{
+			const int32 Reg = Candidates[r] / 10, K = Candidates[r] % 10;
+			const FCampaign1851Regiment& R = Regs[Reg];
+			const int32 Captain = R.Captains.IsValidIndex(K) ? R.Captains[K] : INDEX_NONE;
+			PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 18.f, Y - 11.f), FVector2D(Size.X - 36.f, 22.f), FString(), EButton::FortAddCompany, Candidates[r]);
+			PaintTextFit(Geometry, Out, Layer + 3, FString::Printf(TEXT("%d. Kompagni (%s)  ·  %s  ·  %d mand"), Map->CompanyNumber(Reg, K), *R.Name,
+				Officers.IsValidIndex(Captain) ? *FString::Printf(TEXT("Kaptajn %s"), *Officers[Captain].Name) : TEXT("ingen kaptajn"), Map->CompanyMen(Reg, K)),
+				FVector2D(Pos.X + 28.f, Y), Serif(11), Ink, Size.X - 60.f);
+			Y += 24.f;
+		}
+	}
+	// Works.
 	Y += 8.f;
 	const bool bIdle = F.bBuilt && F.Work == ECampaign1851FortWork::None;
 	const bool bMoreGuns = F.Guns < Campaign1851Forts::MaxGuns(F.bLarge);
 	const bool bStronger = F.Defence < Campaign1851Forts::MaxDefence;
-	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, Y), FVector2D(190.f, 28.f),
-		bMoreGuns ? FString::Printf(TEXT("+2 KANONER  %s rd."), *Thousands(Campaign1851Forts::GunsCost)) : FString(TEXT("ALLE KANONER")), EButton::FortGuns, F.Id, false, !bIdle || !bMoreGuns);
-	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 222.f, Y), FVector2D(196.f, 28.f),
-		bStronger ? FString::Printf(TEXT("FORSTÆRK  %s rd."), *Thousands(Campaign1851Forts::DefenceCost(F.Defence + 1, F.bLarge))) : FString(TEXT("FULDT UDBYGGET")), EButton::FortDefence, F.Id, false, !bIdle || !bStronger);
-	Y += 36.f;
-	if (bStronger)
-	{
-		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Næste: %s: %s"), Campaign1851Forts::DefenceName(F.Defence + 1), Campaign1851Forts::DefenceNote(F.Defence + 1)),
-			FVector2D(Pos.X + 22.f, Y + 4.f), Serif(10, EFace::Italic), MutedInk, Size.X - 44.f);
-	}
-	Y += 22.f;
-	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, Y), FVector2D(120.f, 26.f), TEXT("DREJ VENSTRE"), EButton::FortTurn, -1);
-	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 150.f, Y), FVector2D(120.f, 26.f), TEXT("DREJ HØJRE"), EButton::FortTurn, 1);
-	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 278.f, Y), FVector2D(140.f, 26.f), TEXT("VIS PÅ KORTET"), EButton::FortShow, F.Id);
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, Y), FVector2D(166.f, 28.f),
+		bMoreGuns ? FString::Printf(TEXT("+2 KANONER  %s"), *Thousands(Campaign1851Forts::GunsCost)) : FString(TEXT("ALLE KANONER")), EButton::FortGuns, F.Id, false, !bIdle || !bMoreGuns);
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 196.f, Y), FVector2D(170.f, 28.f),
+		bStronger ? FString::Printf(TEXT("FORSTÆRK  %s"), *Thousands(Campaign1851Forts::DefenceCost(F.Defence + 1, F.bLarge))) : FString(TEXT("FULDT UDBYGGET")), EButton::FortDefence, F.Id, false, !bIdle || !bStronger);
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 374.f, Y), FVector2D(164.f, 28.f),
+		F.bTrenches ? FString(TEXT("LØBEGRAVE BYGGET")) : FString::Printf(TEXT("LØBEGRAVE  %s"), *Thousands(Campaign1851Forts::TrenchesCost(F.bLarge))), EButton::FortTrenches, F.Id, false, !bIdle || F.bTrenches);
+	Y += 34.f;
+	PaintTextFit(Geometry, Out, Layer + 2, bStronger ? FString::Printf(TEXT("Næste forstærkning: %s: %s"), Campaign1851Forts::DefenceName(F.Defence + 1), Campaign1851Forts::DefenceNote(F.Defence + 1))
+		: FString(TEXT("Løbegrave: dækning for reserven og forbindelse til skanser inden for 3 km")), FVector2D(Pos.X + 22.f, Y + 4.f), Serif(10, EFace::Italic), MutedInk, Size.X - 44.f);
+	Y += 24.f;
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, Y), FVector2D(140.f, 26.f), TEXT("DREJ VENSTRE"), EButton::FortTurn, -1);
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 170.f, Y), FVector2D(140.f, 26.f), TEXT("DREJ HØJRE"), EButton::FortTurn, 1);
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 318.f, Y), FVector2D(160.f, 26.f), TEXT("VIS PÅ KORTET"), EButton::FortShow, F.Id);
 }
 
 void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
@@ -1815,8 +1876,9 @@ void SCampaign1851Overlay::BuildTreeRows(TArray<FTreeRow>& Rows) const
 				Company.Key = TreeKey(ETreeKind::Company, i * 10 + k);
 				Company.Depth = Depth + 1;
 				Company.Text = FString::Printf(TEXT("%d. Kompagni [I]"), Map->CompanyNumber(i, k));
-				Company.Info = FString::Printf(TEXT("%s  ·  %d/%d"), Officers.IsValidIndex(R.Captains[k]) ? *OfficerText(R.Captains[k]) : TEXT("ingen kaptajn"),
-					Map->CompanyMen(i, k), R.MaxMen / R.Captains.Num());
+				const int32 FortIdx = R.CompanyFort.IsValidIndex(k) ? Map->FortIndex(R.CompanyFort[k]) : INDEX_NONE;
+				Company.Info = FString::Printf(TEXT("%s  ·  %d/%d%s"), Officers.IsValidIndex(R.Captains[k]) ? *OfficerText(R.Captains[k]) : TEXT("ingen kaptajn"),
+					Map->CompanyMen(i, k), R.MaxMen / R.Captains.Num(), FortIdx != INDEX_NONE ? *FString::Printf(TEXT("  ·  i %s"), *Map->GetForts()[FortIdx].Name) : TEXT(""));
 				Rows.Add(Company);
 			}
 		}

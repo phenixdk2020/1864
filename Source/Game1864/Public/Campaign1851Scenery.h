@@ -99,7 +99,8 @@ namespace Campaign1851Scenery
 		PalisadeSmall,   // stakes in the lunette's ditch and across its gorge
 		PalisadeLarge,   // stakes in the redoubt's ditch
 		Blockhouse,      // bomb-proof timber blockhouse under earth
-		Traverse         // an earth traverse between two guns
+		Traverse,        // an earth traverse between two guns
+		TrenchSegment    // a stretch of communication trench, 10 units along X, earth lip on the -Y side
 	};
 
 	constexpr float BarracksLength = 16.f;

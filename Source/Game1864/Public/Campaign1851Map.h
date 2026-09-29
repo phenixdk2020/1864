@@ -298,6 +298,16 @@ public:
 	bool UpgradeFort(int32 Id, ECampaign1851FortWork Work, FString* OutReason = nullptr);
 	/** Turns a fort's front (degrees). */
 	void TurnFort(int32 Id, float DeltaYaw);
+	/** Sends a company of a battalion near the fort into it (its men leave the battalion). */
+	bool AddFortCompany(int32 FortId, int32 Regiment, int32 Company, FString* OutReason = nullptr);
+	/** Takes a company in a fort back to its battalion (which must be near). */
+	bool ReturnFortCompany(int32 FortId, int32 Entry, FString* OutReason = nullptr);
+	/** Companies of battalions standing near a fort that could hold it (regiment * 10 + company). */
+	TArray<int32> FortCandidates(int32 FortId) const;
+	/** Men in the fort (up to its room) and in the reserve behind it. */
+	void FortMen(const FCampaign1851Fort& F, int32& OutInside, int32& OutReserve) const;
+	/** Other forts joined to this one by trenches (ids). */
+	TArray<int32> TrenchLinks(int32 FortId) const;
 	/** For tests: every fort finished, fully armed and strengthened. */
 	void CompleteForts();
 	FVector FortWorld(int32 Index) const;
@@ -661,6 +671,8 @@ private:
 	// The fort layer (Campaign1851Forts.cpp).
 	void AdvanceForts(float DeltaDays);
 	void UpdateFortVisual(int32 Index);
+	void UpdateTrenches();
+	bool EnsureFortMeshes();
 	FTransform FortTransform(const FCampaign1851Fort& F) const;
 	TArray<FCampaign1851Fort> Forts;
 	int32 NextFortId = 1;

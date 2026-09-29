@@ -238,6 +238,28 @@ void ACampaign1851PlayerController::TryInit()
 		{
 			Map->CompleteForts();
 		}
+		// -CampaignFortGarrison=1:B12:0,B12:1;2:B12:2 puts companies (battalion id : company) in forts (id).
+		FString Garrisons;
+		if (FParse::Value(FCommandLine::Get(), TEXT("CampaignFortGarrison="), Garrisons, false))
+		{
+			TArray<FString> PerFort;
+			Garrisons.ParseIntoArray(PerFort, TEXT(";"));
+			for (const FString& G : PerFort)
+			{
+				FString FortId, List;
+				G.Split(TEXT(":"), &FortId, &List);
+				TArray<FString> Items;
+				List.ParseIntoArray(Items, TEXT(","));
+				for (const FString& Item : Items)
+				{
+					FString Reg, K;
+					Item.Split(TEXT(":"), &Reg, &K);
+					FString Why;
+					const bool bOk = Map->AddFortCompany(FCString::Atoi(*FortId), Map->FindRegiment(Reg), FCString::Atoi(*K), &Why);
+					UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|fort|garrison %s <- %s: %s"), *FortId, *Item, bOk ? TEXT("ok") : *Why);
+				}
+			}
+		}
 	}
 	// -CampaignDelegate=auto|advisory hands every portfolio to the ministries (to watch the AI).
 	FString DelegateMode;
@@ -800,10 +822,28 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Camera->SetView(Map->FortWorld(Index), 3.f, Camera->GetYaw());
 			}
 		}
-		else if (Button == SCampaign1851Overlay::EButton::FortGuns || Button == SCampaign1851Overlay::EButton::FortDefence)
+		else if (Button == SCampaign1851Overlay::EButton::FortPickCompany)
+		{
+			Overlay->ToggleFortPickCompany();
+		}
+		else if (Button == SCampaign1851Overlay::EButton::FortAddCompany || Button == SCampaign1851Overlay::EButton::FortReturn)
 		{
 			FString Why;
-			if (Map->UpgradeFort(Module, Button == SCampaign1851Overlay::EButton::FortGuns ? ECampaign1851FortWork::Guns : ECampaign1851FortWork::Defence, &Why))
+			const bool bAdd = Button == SCampaign1851Overlay::EButton::FortAddCompany;
+			if (bAdd ? Map->AddFortCompany(Overlay->GetSelectedFort(), Module / 10, Module % 10, &Why) : Map->ReturnFortCompany(Overlay->GetSelectedFort(), Module, &Why))
+			{
+				SaveToSlot(TEXT("Autosave"), true);
+			}
+			else
+			{
+				Overlay->ShowToast(Why);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::FortGuns || Button == SCampaign1851Overlay::EButton::FortDefence || Button == SCampaign1851Overlay::EButton::FortTrenches)
+		{
+			FString Why;
+			if (Map->UpgradeFort(Module, Button == SCampaign1851Overlay::EButton::FortGuns ? ECampaign1851FortWork::Guns
+				: Button == SCampaign1851Overlay::EButton::FortTrenches ? ECampaign1851FortWork::Trenches : ECampaign1851FortWork::Defence, &Why))
 			{
 				SaveToSlot(TEXT("Autosave"), true);
 			}

@@ -15,7 +15,16 @@ enum class ECampaign1851FortWork : uint8
 	None,
 	Build,     // raising the earthwork (with its first guns)
 	Guns,      // two more gun platforms and guns
-	Defence    // the next level of defence
+	Defence,   // the next level of defence
+	Trenches   // communication trenches to the forts nearby (cover for the reserve)
+};
+
+/** A company holding a fort: sent from its battalion, back to it when the battalion is near. */
+struct FCampaign1851FortCompany
+{
+	int32 Regiment = INDEX_NONE;   // the battalion (regiment index)
+	int32 Company = 0;             // its company (0-based)
+	int32 Men = 0;
 };
 
 struct FCampaign1851Fort
@@ -27,7 +36,9 @@ struct FCampaign1851Fort
 	bool bLarge = false;
 	int32 Guns = 0;              // guns in place
 	int32 Defence = 1;           // 1..4 (Campaign1851Forts::DefenceName)
-	int32 Garrison = 0;          // infantry in it now (the battles read it); up to InfantryCapacity
+	int32 Garrison = 0;          // infantry in and behind it (the companies' men)
+	TArray<FCampaign1851FortCompany> Companies;
+	bool bTrenches = false;      // communication trenches: the reserve behind the fort in cover
 	bool bBuilt = false;
 	ECampaign1851FortWork Work = ECampaign1851FortWork::None;
 	float DaysBuilt = 0.f;
@@ -64,6 +75,14 @@ namespace Campaign1851Forts
 	inline float DitchDepthM(bool bLarge) { return bLarge ? 2.8f : 2.0f; }
 	/** Infantry the fort holds (estimate: half a company, a company), and gunners per gun. */
 	inline int32 InfantryCapacity(bool bLarge) { return bLarge ? 250 : 120; }
+	/** Cover of the men who do not fit inside and wait behind the fort (0-100 %): shelters, or trenches. */
+	inline int32 ReserveCover(bool bTrenches) { return bTrenches ? 50 : 25; }
+	inline int32 TrenchesCost(bool bLarge) { return bLarge ? 6000 : 4000; }
+	constexpr float TrenchesDays = 25.f;
+	/** Forts with trenches this close (km) are joined by them. */
+	constexpr double TrenchReachKm = 3.0;
+	/** A battalion within this distance (km) of a fort can send or take back companies. */
+	constexpr double CompanyReachKm = 10.0;
 	constexpr int32 GunnersPerGun = 7;
 	/** Upkeep a year (repairs, guards, powder kept dry). */
 	inline int32 UpkeepPerYear(bool bLarge) { return bLarge ? 800 : 300; }

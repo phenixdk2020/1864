@@ -47,7 +47,7 @@ public:
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve, FormationDeputy, FormationStaff,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
-		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow };
+		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -68,6 +68,7 @@ public:
 	void SelectFort(int32 Id) { SelectedFort = Id; if (Id != 0) { SelectedCity = INDEX_NONE; SelectedRegiments.Reset(); } }
 	int32 GetSelectedFort() const { return SelectedFort; }
 	void SetFortPlacing(int32 Kind) { FortPlacing = Kind; }   // 0 none, 1 small, 2 large
+	void ToggleFortPickCompany() { bFortPickCompany = !bFortPickCompany; }
 	int32 GetFortPlacing() const { return FortPlacing; }
 	/** Drag and drop in the tree: what is dragged, the cursor (viewport pixels) and the row under it. */
 	void SetDrag(bool bOn, int32 Key, const FVector2D& ViewportPixel, int32 Hover) { bDragging = bOn; DragKey = Key; DragPos = ViewportPixel / FMath::Max(PaintScale, 0.01f); HoverKey = Hover; }
@@ -266,6 +267,7 @@ private:
 	bool bFortTool = false;
 	int32 SelectedFort = 0;
 	int32 FortPlacing = 0;
+	bool bFortPickCompany = false;
 	/** The town's building list: military (false) or civil (true). */
 	bool bCivilTab = false;
 	mutable float ChartScrollY = 0.f;

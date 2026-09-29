@@ -52,6 +52,9 @@ struct FCampaign1851FortSave
 	UPROPERTY() float DaysBuilt = 0.f;
 	UPROPERTY() float WorkDays = 1.f;
 	UPROPERTY() int32 WorkCost = 0;
+	/** v14: the companies in it ("B6:2:190") and its trenches. */
+	UPROPERTY() TArray<FString> Companies;
+	UPROPERTY() bool bTrenches = false;
 };
 
 /** A nation's control and (without a map) its abstract state (v12). */
@@ -201,7 +204,7 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 
 public:
 	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands. 10: + troop trains on the map. 11: + field formations. */
-	static constexpr int32 CurrentVersion = 13;
+	static constexpr int32 CurrentVersion = 14;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;
