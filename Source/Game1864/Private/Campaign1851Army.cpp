@@ -142,6 +142,19 @@ namespace Campaign1851Army
 		}
 	}
 
+	const TCHAR* StaffPostName(ECampaign1851Echelon Echelon, int32 Post)
+	{
+		if (Post == 1)
+		{
+			return TEXT("Næstkommanderende");
+		}
+		if (Post == 2)
+		{
+			return Echelon == ECampaign1851Echelon::Division || Echelon == ECampaign1851Echelon::Army ? TEXT("Stabschef") : TEXT("Adjudant");
+		}
+		return FormationRole(Echelon);
+	}
+
 	const TCHAR* UnitRole(ECampaign1851Arm Arm)
 	{
 		switch (Arm)
@@ -989,9 +1002,9 @@ FCampaign1851MarchPlan ACampaign1851Map::PlanColumn(const TArray<int32>& Column,
 		return Plan;
 	}
 	Plan.Pace = Campaign1851Army::ColumnPace(Members);
-	if (const FCampaign1851Officer* General = ColumnGeneral(Column))
+	if (const int32 Staff = ColumnStaff(Column))
 	{
-		Plan.Pace *= Campaign1851Army::StaffPaceFactor(General->Stat(ECampaign1851OfficerStat::Staff));
+		Plan.Pace *= Campaign1851Army::StaffPaceFactor(Staff);
 	}
 	// From where the lead regiment will be: its town or point, or the end of the stretch it is on.
 	const FCampaign1851Regiment& Lead = *Members[0];
@@ -1629,6 +1642,13 @@ void ACampaign1851Map::DissolveFormation(int32 Id)
 	{
 		Officers[Formations[Index].Commander].Formation = 0;
 	}
+	for (const int32 Staff : { Formations[Index].Deputy, Formations[Index].StaffChief })
+	{
+		if (Officers.IsValidIndex(Staff))
+		{
+			Officers[Staff].StaffOf = Officers[Staff].StaffPost = 0;
+		}
+	}
 	Formations.RemoveAt(Index);
 }
 
@@ -1708,6 +1728,7 @@ bool ACampaign1851Map::AssignFormationCommander(int32 Officer, int32 Formation)
 		Regiments[O.CaptainOf].Captains[O.Company] = INDEX_NONE;
 	}
 	O.CaptainOf = O.Company = INDEX_NONE;
+	LeaveStaffPost(Officer);
 	const int32 OldIndex = FormationIndex(O.Formation);
 	if (OldIndex != INDEX_NONE)
 	{
@@ -1787,7 +1808,156 @@ void ACampaign1851Map::BuildTestFieldArmy()
 	Formations[FormationIndex(GuardRegiment)].Name = TEXT("Garderegimentet");
 	Regiment(Guard, TEXT("B2"), TEXT("B3"));
 	Put(Reserve, { TEXT("GH"), TEXT("A1"), TEXT("A2"), TEXT("RA1") });
+	// Every headquarters with a deputy and a chief of staff (adjutant below the divisions).
+	for (int32 f = 0; f < Formations.Num(); ++f)
+	{
+		const bool bDivision = Formations[f].Echelon == ECampaign1851Echelon::Division;
+		const bool bBrigade = Formations[f].Echelon == ECampaign1851Echelon::Brigade;
+		const TCHAR* DeputyRank = bDivision ? TEXT("Oberst") : bBrigade ? TEXT("Oberstløjtnant") : TEXT("Major");
+		const TCHAR* StaffRank = bDivision ? TEXT("Major") : TEXT("Kaptajn");
+		for (int32 Post = 1; Post <= 2; ++Post)
+		{
+			FCampaign1851Officer New = MakeOfficer(Rng, false, Post == 1 ? DeputyRank : StaffRank);
+			New.Id = FString::Printf(TEXT("R%d"), NextOfficerNumber++);
+			AssignFormationStaff(Officers.Add(New), Formations[f].Id, Post);
+		}
+	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|army|test field army: %d formations"), Formations.Num());
+}
+
+void ACampaign1851Map::LeaveStaffPost(int32 Officer)
+{
+	if (!Officers.IsValidIndex(Officer))
+	{
+		return;
+	}
+	FCampaign1851Officer& O = Officers[Officer];
+	const int32 Index = FormationIndex(O.StaffOf);
+	if (Index != INDEX_NONE)
+	{
+		int32& Post = O.StaffPost == 1 ? Formations[Index].Deputy : Formations[Index].StaffChief;
+		Post = Post == Officer ? INDEX_NONE : Post;
+	}
+	O.StaffOf = O.StaffPost = 0;
+}
+
+bool ACampaign1851Map::AssignFormationStaff(int32 Officer, int32 Formation, int32 Post)
+{
+	if (Post == 0)
+	{
+		return AssignFormationCommander(Officer, Formation);
+	}
+	const int32 Index = FormationIndex(Formation);
+	if (!Officers.IsValidIndex(Officer) || Index == INDEX_NONE || Post < 1 || Post > 2)
+	{
+		return false;
+	}
+	FCampaign1851Officer& O = Officers[Officer];
+	// He leaves whatever post he had (as for a commander); whoever held this one goes to the pool.
+	if (Regiments.IsValidIndex(O.Regiment))
+	{
+		(O.bGeneral ? Regiments[O.Regiment].General : Regiments[O.Regiment].Chief) = INDEX_NONE;
+		O.Regiment = INDEX_NONE;
+	}
+	if (Commands.IsValidIndex(O.Command))
+	{
+		Commands[O.Command].General = INDEX_NONE;
+		O.Command = INDEX_NONE;
+	}
+	const int32 OldIndex = FormationIndex(O.Formation);
+	if (OldIndex != INDEX_NONE)
+	{
+		Formations[OldIndex].Commander = INDEX_NONE;
+	}
+	O.Formation = 0;
+	if (Regiments.IsValidIndex(O.CaptainOf) && Regiments[O.CaptainOf].Captains.IsValidIndex(O.Company))
+	{
+		Regiments[O.CaptainOf].Captains[O.Company] = INDEX_NONE;
+	}
+	O.CaptainOf = O.Company = INDEX_NONE;
+	LeaveStaffPost(Officer);
+	int32& Slot = Post == 1 ? Formations[Index].Deputy : Formations[Index].StaffChief;
+	if (Officers.IsValidIndex(Slot))
+	{
+		Officers[Slot].StaffOf = Officers[Slot].StaffPost = 0;
+	}
+	Slot = Officer;
+	O.StaffOf = Formation;
+	O.StaffPost = Post;
+	return true;
+}
+
+int32 ACampaign1851Map::ActingCommander(int32 Formation, bool* bOutActing) const
+{
+	const int32 Index = FormationIndex(Formation);
+	if (bOutActing)
+	{
+		*bOutActing = false;
+	}
+	if (Index == INDEX_NONE)
+	{
+		return INDEX_NONE;
+	}
+	if (Officers.IsValidIndex(Formations[Index].Commander))
+	{
+		return Formations[Index].Commander;
+	}
+	if (Officers.IsValidIndex(Formations[Index].Deputy))
+	{
+		if (bOutActing)
+		{
+			*bOutActing = true;
+		}
+		return Formations[Index].Deputy;
+	}
+	return INDEX_NONE;
+}
+
+int32 ACampaign1851Map::ColumnStaff(const TArray<int32>& Column) const
+{
+	// The best staff work over the column: its general's, or a chief of staff of a formation it belongs to.
+	int32 Best = 0;
+	if (const FCampaign1851Officer* General = ColumnGeneral(Column))
+	{
+		Best = General->Stat(ECampaign1851OfficerStat::Staff);
+	}
+	for (int32 i : Column)
+	{
+		if (!Regiments.IsValidIndex(i))
+		{
+			continue;
+		}
+		for (int32 At = Regiments[i].Formation, Guard = 0; At != 0 && Guard < 16; ++Guard)
+		{
+			const int32 Index = FormationIndex(At);
+			if (Index == INDEX_NONE)
+			{
+				break;
+			}
+			if (Officers.IsValidIndex(Formations[Index].StaffChief))
+			{
+				Best = FMath::Max(Best, int32(Officers[Formations[Index].StaffChief].Stat(ECampaign1851OfficerStat::Staff)));
+			}
+			At = Formations[Index].Parent;
+		}
+	}
+	return Best;
+}
+
+int32 ACampaign1851Map::SeniorCaptain(int32 Regiment) const
+{
+	int32 Best = INDEX_NONE;
+	if (Regiments.IsValidIndex(Regiment))
+	{
+		for (int32 O : Regiments[Regiment].Captains)
+		{
+			if (Officers.IsValidIndex(O) && (Best == INDEX_NONE || Officers[O].Experience > Officers[Best].Experience))
+			{
+				Best = O;
+			}
+		}
+	}
+	return Best;
 }
 
 TArray<FCampaign1851FormationSave> ACampaign1851Map::SaveFormations() const
@@ -1801,6 +1971,8 @@ TArray<FCampaign1851FormationSave> ACampaign1851Map::SaveFormations() const
 		S.Echelon = uint8(F.Echelon);
 		S.Parent = F.Parent;
 		S.Commander = Officers.IsValidIndex(F.Commander) ? Officers[F.Commander].Id : FString();
+		S.Deputy = Officers.IsValidIndex(F.Deputy) ? Officers[F.Deputy].Id : FString();
+		S.StaffChief = Officers.IsValidIndex(F.StaffChief) ? Officers[F.StaffChief].Id : FString();
 		for (const FCampaign1851Regiment& R : Regiments)
 		{
 			if (R.Formation == F.Id)
@@ -1841,6 +2013,15 @@ void ACampaign1851Map::RestoreFormations(const TArray<FCampaign1851FormationSave
 		if (O != INDEX_NONE)
 		{
 			AssignFormationCommander(O, F.Id);
+		}
+		const FString* Staff[] = { &S.Deputy, &S.StaffChief };
+		for (int32 Post = 1; Post <= 2; ++Post)
+		{
+			const int32 X = Staff[Post - 1]->IsEmpty() ? INDEX_NONE : Officers.IndexOfByPredicate([&](const FCampaign1851Officer& Y) { return Y.Id == *Staff[Post - 1]; });
+			if (X != INDEX_NONE)
+			{
+				AssignFormationStaff(X, F.Id, Post);
+			}
 		}
 	}
 }

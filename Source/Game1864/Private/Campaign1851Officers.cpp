@@ -273,6 +273,7 @@ bool ACampaign1851Map::AssignOfficer(int32 Officer, int32 Regiment)
 		(O.bGeneral ? Regiments[O.Regiment].General : Regiments[O.Regiment].Chief) = INDEX_NONE;
 	}
 	LeaveCompany(O, Regiments);
+	LeaveStaffPost(Officer);
 	Post = Officer;
 	O.Regiment = Regiment;
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|officers|%s %s -> %s"), *O.Rank, *O.Name, *R.Name);
@@ -330,6 +331,8 @@ bool ACampaign1851Map::DismissOfficer(int32 Officer)
 		{
 			--F.Commander;
 		}
+		F.Deputy -= F.Deputy > Officer ? 1 : 0;
+		F.StaffChief -= F.StaffChief > Officer ? 1 : 0;
 	}
 	return true;
 }
@@ -485,9 +488,16 @@ FString ACampaign1851Map::OfficerRole(int32 Officer) const
 		return O.bGeneral ? FString::Printf(TEXT("General ved %s"), *Regiments[O.Regiment].Name)
 			: FString::Printf(TEXT("%s, %s"), Campaign1851Army::UnitRole(Regiments[O.Regiment].Arm), *Regiments[O.Regiment].Name);
 	}
+	const int32 StaffIndex = FormationIndex(O.StaffOf);
+	if (StaffIndex != INDEX_NONE)
+	{
+		const bool bActing = O.StaffPost == 1 && !Officers.IsValidIndex(Formations[StaffIndex].Commander);
+		return FString::Printf(TEXT("%s%s, %s"), Campaign1851Army::StaffPostName(Formations[StaffIndex].Echelon, O.StaffPost), bActing ? TEXT(" (fungerende chef)") : TEXT(""), *Formations[StaffIndex].Name);
+	}
 	if (Regiments.IsValidIndex(O.CaptainOf))
 	{
-		return FString::Printf(TEXT("Kompagnichef, %d. Kompagni (%s)"), CompanyNumber(O.CaptainOf, O.Company), *Regiments[O.CaptainOf].Name);
+		return FString::Printf(TEXT("Kompagnichef, %d. Kompagni (%s)%s"), CompanyNumber(O.CaptainOf, O.Company), *Regiments[O.CaptainOf].Name,
+			SeniorCaptain(O.CaptainOf) == Officer ? TEXT(", næstkommanderende") : TEXT(""));
 	}
 	return TEXT("ledig");
 }

@@ -82,7 +82,10 @@ struct FCampaign1851Officer
 	/** A company chief (kaptajn): the regiment (battalion) index and the company in it, INDEX_NONE otherwise. */
 	int32 CaptainOf = INDEX_NONE;
 	int32 Company = INDEX_NONE;
-	bool IsFree() const { return Regiment == INDEX_NONE && Command == INDEX_NONE && Formation == 0 && CaptainOf == INDEX_NONE; }
+	/** A staff post at a formation's headquarters (FCampaign1851Formation::Id, 0 = none): 1 deputy, 2 chief of staff. */
+	int32 StaffOf = 0;
+	int32 StaffPost = 0;
+	bool IsFree() const { return Regiment == INDEX_NONE && Command == INDEX_NONE && Formation == 0 && CaptainOf == INDEX_NONE && StaffOf == 0; }
 
 	int32 Stat(ECampaign1851OfficerStat S) const { return Stats[int32(S)]; }
 };
@@ -145,6 +148,10 @@ struct FCampaign1851Formation
 	ECampaign1851Echelon Echelon = ECampaign1851Echelon::Brigade;
 	int32 Parent = 0;
 	int32 Commander = INDEX_NONE;   // officer index
+	/** The headquarters staff: the deputy takes over (acting) when the chief is missing; the chief of staff's
+	 *  staff work sets the pace of the formation's columns. Officer indices. */
+	int32 Deputy = INDEX_NONE;
+	int32 StaffChief = INDEX_NONE;
 };
 
 /**
@@ -334,6 +341,8 @@ namespace Campaign1851Army
 	const TCHAR* EchelonMark(ECampaign1851Echelon Echelon);
 	/** The chief's function of a formation: "Divisionschef", "Brigadechef", "Regimentschef". */
 	const TCHAR* FormationRole(ECampaign1851Echelon Echelon);
+	/** A headquarters staff post: 0 chief (FormationRole), 1 "Næstkommanderende", 2 "Stabschef" / "Adjudant". */
+	const TCHAR* StaffPostName(ECampaign1851Echelon Echelon, int32 Post);
 	/** The chief's function of a unit: "Bataljonschef", "Kavaleriofficer", "Batterichef". */
 	const TCHAR* UnitRole(ECampaign1851Arm Arm);
 	/** The map symbol of a unit: II (battalion), CAV, ART. */

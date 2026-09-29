@@ -88,6 +88,8 @@ struct FCampaign1851FormationSave
 	UPROPERTY() uint8 Echelon = 2;
 	UPROPERTY() int32 Parent = 0;
 	UPROPERTY() FString Commander;          // officer id
+	UPROPERTY() FString Deputy;             // officer id (headquarters staff)
+	UPROPERTY() FString StaffChief;         // officer id
 	UPROPERTY() TArray<FString> Regiments;  // regiment ids directly in it
 };
 

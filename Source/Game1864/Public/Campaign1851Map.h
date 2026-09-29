@@ -337,6 +337,16 @@ public:
 	TArray<int32> OfficerPool(bool bGenerals) const;
 	/** Makes an officer the chief of a regiment, or (a general) attaches him to it; whoever held the post goes to the pool. */
 	bool AssignOfficer(int32 Officer, int32 Regiment);
+	/** A headquarters staff post (1 deputy, 2 chief of staff; 0 = the chief himself). */
+	bool AssignFormationStaff(int32 Officer, int32 Formation, int32 Post);
+	/** The officer leaves the staff post he holds, if any. */
+	void LeaveStaffPost(int32 Officer);
+	/** Who leads the formation: its chief, or (acting) its deputy when the chief is missing. */
+	int32 ActingCommander(int32 Formation, bool* bOutActing = nullptr) const;
+	/** The best staff stat over a column: its general or a chief of staff above it (0 = none). */
+	int32 ColumnStaff(const TArray<int32>& Column) const;
+	/** The battalion's senior captain (most experienced): second in command after the major. */
+	int32 SeniorCaptain(int32 Regiment) const;
 	/** "Divisionschef, 1. Division", "Kompagnichef, 3. Kompagni (6. Bataillon)", "ledig". */
 	FString OfficerRole(int32 Officer) const;
 	/** A company's number, counted through its regiment (the 2nd battalion has companies 5-8). */

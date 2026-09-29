@@ -397,8 +397,9 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	const bool bFocus = CursorGround(Focus);
 	const bool bOverTree = Overlay.IsValid() && Overlay->IsOverTree(Mouse);
 	const bool bOverChart = Overlay.IsValid() && Overlay->IsOverChart(Mouse);
-	if (bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollUp))   { Overlay->ScrollChart(-2); }
-	if (bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollDown)) { Overlay->ScrollChart(2); }
+	const bool bShift = IsInputKeyDown(EKeys::LeftShift) || IsInputKeyDown(EKeys::RightShift);
+	if (bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollUp))   { Overlay->ScrollChart(-2, bShift); }
+	if (bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollDown)) { Overlay->ScrollChart(2, bShift); }
 	if (!bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollUp))   { if (bOverTree) { Overlay->ScrollTree(-3); } else { Camera->Zoom(1.f, bFocus ? &Focus : nullptr); } }
 	if (!bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollDown)) { if (bOverTree) { Overlay->ScrollTree(3); } else { Camera->Zoom(-1.f, bFocus ? &Focus : nullptr); } }
 	if (WasInputKeyJustPressed(EKeys::K) && Overlay.IsValid()) { Overlay->ToggleOOB(); }
@@ -588,10 +589,9 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			const int32 Regiment = Overlay->GetSelectedRegiments().Num() > 0 ? Overlay->GetSelectedRegiments()[0] : INDEX_NONE;
 			if (Overlay->GetPicker() == SCampaign1851Overlay::EPicker::FormationGeneral || Overlay->GetPicker() == SCampaign1851Overlay::EPicker::FormationOfficer)
 			{
-				if (Map->AssignFormationCommander(Module, Overlay->GetPickerFormation()))
+				if (Map->AssignFormationStaff(Module, Overlay->GetPickerFormation(), Overlay->GetPickerPost()))
 				{
-					const int32 Index = Map->FormationIndex(Overlay->GetPickerFormation());
-					Overlay->ShowToast(FString::Printf(TEXT("%s er chef for %s"), *Map->GetOfficers()[Module].Name, Index != INDEX_NONE ? *Map->GetFormations()[Index].Name : TEXT("")));
+					Overlay->ShowToast(FString::Printf(TEXT("%s: %s"), *Map->GetOfficers()[Module].Name, *Map->OfficerRole(Module)));
 					Overlay->OpenPicker(SCampaign1851Overlay::EPicker::None);
 					Overlay->InspectOfficer(INDEX_NONE);
 				}
@@ -695,6 +695,11 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			const int32 Index = Map->FormationIndex(Module);
 			Overlay->OpenFormationPicker(Module, Index != INDEX_NONE && (Map->GetFormations()[Index].Echelon == ECampaign1851Echelon::Division || Map->GetFormations()[Index].Echelon == ECampaign1851Echelon::Army));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::FormationDeputy || Button == SCampaign1851Overlay::EButton::FormationStaff)
+		{
+			// Staff posts are filled by officers (a division's deputy is typically its senior colonel).
+			Overlay->OpenFormationPicker(Module, false, Button == SCampaign1851Overlay::EButton::FormationDeputy ? 1 : 2);
 		}
 		else if (Button == SCampaign1851Overlay::EButton::FormationDissolve)
 		{

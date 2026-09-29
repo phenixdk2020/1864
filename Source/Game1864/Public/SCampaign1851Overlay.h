@@ -45,7 +45,7 @@ public:
 		MainMenu, WindowClose, TableSort, TableRow, TablePage, OfficerFilter, OfficerDismiss, ClosePanel, ExitGame,
 		OfficerPromote, OpenOOB, OOBCommand, CommandGeneralChange, TrainOrder,
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
-		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve };
+		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve, FormationDeputy, FormationStaff };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -56,13 +56,15 @@ public:
 	bool IsOverTree(const FVector2D& ViewportPixel) const;
 	/** Over the order-of-battle chart (the wheel scrolls it sideways). */
 	bool IsOverChart(const FVector2D& ViewportPixel) const;
-	void ScrollChart(int32 Steps) { ChartScroll = FMath::Max(0.f, ChartScroll + Steps * 60.f); }
+	void ScrollChart(int32 Steps, bool bVertical = false) { float& S = bVertical ? ChartScrollY : ChartScroll; S = FMath::Max(0.f, S + Steps * 60.f); }
 	bool IsOOBOpen() const { return bOOB; }
 	/** Drag and drop in the tree: what is dragged, the cursor (viewport pixels) and the row under it. */
 	void SetDrag(bool bOn, int32 Key, const FVector2D& ViewportPixel, int32 Hover) { bDragging = bOn; DragKey = Key; DragPos = ViewportPixel / FMath::Max(PaintScale, 0.01f); HoverKey = Hover; }
 	/** The officer picker for a formation's commander (generals for divisions, officers for brigades). */
-	void OpenFormationPicker(int32 Formation, bool bGenerals) { Picker = bGenerals ? EPicker::FormationGeneral : EPicker::FormationOfficer; PickerFormation = Formation; InspectedOfficer = INDEX_NONE; bTrainingMenu = false; }
+	void OpenFormationPicker(int32 Formation, bool bGenerals, int32 Post = 0) { Picker = bGenerals ? EPicker::FormationGeneral : EPicker::FormationOfficer; PickerFormation = Formation; PickerPost = Post; InspectedOfficer = INDEX_NONE; bTrainingMenu = false; }
 	int32 GetPickerFormation() const { return PickerFormation; }
+	/** The headquarters post being filled: 0 chief, 1 deputy, 2 chief of staff. */
+	int32 GetPickerPost() const { return PickerPost; }
 	/**
 	 * The march order dialog (right click): for every selected unit on foot / by train / straight across,
 	 * the times, and the columns it makes (each way its own column).
@@ -241,9 +243,11 @@ private:
 	int32 OOBExpanded = INDEX_NONE;   // the general command shown open (INDEX_NONE: the selected unit's; -2: none)
 	int32 PickerCommand = INDEX_NONE;
 	int32 PickerFormation = 0;
+	int32 PickerPost = 0;
 	TSet<int32> Collapsed;
 	mutable int32 TreeScroll = 0;
 	mutable float ChartScroll = 0.f;
+	mutable float ChartScrollY = 0.f;
 	mutable FVector2D ChartMin = FVector2D::ZeroVector, ChartMax = FVector2D::ZeroVector;
 	mutable FVector2D TreeMin = FVector2D::ZeroVector, TreeMax = FVector2D::ZeroVector;
 	bool bDragging = false;
