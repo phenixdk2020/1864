@@ -72,6 +72,34 @@ struct FCampaign1851EnemyCorps
 	int32 Leg = 0;
 	float LegElapsed = 0.f;
 	bool bEngaged = false;   // in contact with Danish troops: a battle is at hand
+	double RestUntil = 0.0;  // after a battle: waits (campaign day) before marching on
+};
+
+/** A battle at hand: the Danish units and forts within reach of an enemy corps. */
+struct FCampaign1851Battle
+{
+	int32 Id = 0;
+	double Day = 0.0;
+	FVector2D Km = FVector2D::ZeroVector;
+	int32 Town = INDEX_NONE;
+	int32 CorpsId = 0;
+	TArray<int32> Regiments;
+	TArray<int32> Forts;     // ids
+	bool bWaiting = false;   // sent to the 3D battle; waiting for its result file
+};
+
+/** What a battle cost and decided (from the 3D battle, the automatic resolution, or a retreat). */
+struct FCampaign1851BattleOutcome
+{
+	bool bDanishWin = false;
+	bool bDraw = false;
+	bool bRetreat = false;
+	bool bFromBattle3D = false;
+	TMap<int32, int32> UnitLosses;   // regiment index -> men lost
+	TMap<int32, float> UnitAmmo;     // regiment index -> share of the load used
+	TMap<int32, float> FortLossShare;
+	TArray<int32> CapturedForts;
+	int32 EnemyLosses = 0;
 };
 
 /** A historical event on the road to 1864, as this campaign has it (date and weight varied, or skipped). */
@@ -397,6 +425,18 @@ public:
 	void ForceWar() { SpawnCorps(TEXT("Forbundskorpset (Sachsen, Hannover)"), TEXT("DE"), 0.09f, TEXT("Altona"), { TEXT("Rendsborg") }, 0.f); Tension = 80.f; DeclareWar(); }
 	TArray<FString> SaveWar() const;
 	void RestoreWar(const TArray<FString>& Lines);
+	/** Battles at hand (the game pauses for the player's choice). */
+	const TArray<FCampaign1851Battle>& GetBattles() const { return Battles; }
+	/** Writes Saved/Battle/BattleRequest_N.json for the 3D battle game and waits for BattleResult_N.json. */
+	bool FightBattleIn3D(int32 BattleId);
+	void AutoResolveBattle(int32 BattleId);
+	void RetreatFromBattle(int32 BattleId);
+	/** The Danes' chance of winning (0-1) by strength, quality, cover and supply. */
+	float BattleOdds(const FCampaign1851Battle& B) const;
+	void BattleStrengths(const FCampaign1851Battle& B, float& OutDanish, float& OutEnemy) const;
+	int32 CorpsIndexOf(const FCampaign1851Battle& B) const;
+	/** Reads result files of battles sent to 3D. */
+	void PollBattleResults();
 	/** True if an amt's seat is held by the enemy (its taxes are lost). */
 	bool IsAmtOccupied(const FCampaign1851Amt& A) const;
 
@@ -855,6 +895,11 @@ private:
 	void AdvanceWar(float DeltaDays);
 	void DeclareWar();
 	void SpawnCorps(const FString& Name, const FString& NationId, float ShareOfArmy, const FString& From, const TArray<FString>& Objectives, float Delay);
+	void CreateBattle(int32 CorpsIndex);
+	void ApplyBattle(int32 BattleIndex, const FCampaign1851BattleOutcome& O);
+	TArray<FCampaign1851Battle> Battles;
+	int32 NextBattleId = 1;
+	double LastBattlePoll = 0.0;
 	float Tension = 25.f;
 	bool bAtWar = false;
 	TArray<FString> EventsFired;

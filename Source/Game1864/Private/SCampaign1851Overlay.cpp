@@ -246,6 +246,10 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	{
 		PaintOrderDialog(Geometry, Out, Layer + 8);
 	}
+	if (Window == EWindow::None)
+	{
+		PaintBattle(Geometry, Out, Layer + 30);
+	}
 	PaintToast(Geometry, Out, Layer + 40);   // above the windows
 	if (bMenuOpen)
 	{
@@ -257,7 +261,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.46 KRIG OG FRED — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.47 SLAG — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -1666,6 +1670,61 @@ void SCampaign1851Overlay::PaintSupply(const FGeometry& Geometry, FSlateWindowEl
 		PaintButton(Geometry, Out, Layer + 1, FVector2D(Pos.X + Size.X - 150.f, RY - 11.f), FVector2D(126.f, 22.f), TEXT("SEND"), EButton::SupplySend, Field[k], false, Map->FreeSupplyColumns() <= 0);
 		RY += 26.f;
 	}
+}
+
+void SCampaign1851Overlay::PaintBattle(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	const TArray<FCampaign1851Battle>& Battles = Map->GetBattles();
+	if (Battles.Num() == 0)
+	{
+		return;
+	}
+	const FCampaign1851Battle& B = Battles[0];
+	const int32 Ci = Map->CorpsIndexOf(B);
+	const FCampaign1851EnemyCorps* C = Ci != INDEX_NONE ? &Map->GetEnemyCorps()[Ci] : nullptr;
+	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
+	const FVector2D Screen = Geometry.GetLocalSize();
+	const FVector2D Size(760.f, 250.f);
+	const FVector2D Pos((Screen.X - Size.X) * 0.5f, Screen.Y - 190.f - Size.Y);
+	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	const FString Place = Map->GetCities().IsValidIndex(B.Town) ? Map->GetCities()[B.Town].Name : FString();
+	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("Slaget ved %s"), *Place), Pos + FVector2D(24.f, 34.f), Serif(24), FLinearColor(0.95f, 0.45f, 0.4f), 0.f);
+	int32 Men = 0, Guns = 0;
+	for (int32 i : B.Regiments)
+	{
+		Men += Regs.IsValidIndex(i) ? Regs[i].PresentMen() : 0;
+		Guns += Regs.IsValidIndex(i) ? Regs[i].Guns : 0;
+	}
+	int32 FortMen = 0, FortGuns = 0;
+	for (int32 Id : B.Forts)
+	{
+		const int32 Fi = Map->FortIndex(Id);
+		if (Fi != INDEX_NONE)
+		{
+			int32 In = 0, Res = 0;
+			Map->FortMen(Map->GetForts()[Fi], In, Res);
+			FortMen += In + Res;
+			FortGuns += Map->GetForts()[Fi].Guns;
+		}
+	}
+	PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Danske: %d enheder, %s mand, %d kanoner%s"), B.Regiments.Num(), *Thousands(Men), Guns,
+		B.Forts.Num() > 0 ? *FString::Printf(TEXT("  ·  %d skanser med %s mand og %d kanoner"), B.Forts.Num(), *Thousands(FortMen), FortGuns) : TEXT("")),
+		Pos + FVector2D(24.f, 76.f), Serif(13), Ink, Size.X - 48.f);
+	if (C)
+	{
+		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Fjenden: %s, %s mand, %d kanoner"), *C->Name, *Thousands(C->Men), C->Guns), Pos + FVector2D(24.f, 102.f), Serif(13), Ink, Size.X - 48.f);
+	}
+	const float Odds = Map->BattleOdds(B);
+	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("Chance for dansk sejr (skøn): %.0f %%"), Odds * 100.f), Pos + FVector2D(24.f, 130.f), Serif(13, EFace::Italic), Gold, 0.f, false);
+	if (B.bWaiting)
+	{
+		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Venter på 3D-slaget: resultatet læses fra Saved/Battle/BattleResult_%d.json"), B.Id), Pos + FVector2D(24.f, 160.f), Serif(12, EFace::Italic), Ink, Size.X - 48.f);
+		PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(24.f, Size.Y - 52.f), FVector2D(300.f, 32.f), TEXT("AFGØR AUTOMATISK I STEDET"), EButton::BattleAuto, B.Id);
+		return;
+	}
+	PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(24.f, Size.Y - 52.f), FVector2D(220.f, 32.f), TEXT("UDKÆMP I 3D"), EButton::BattleFight3D, B.Id);
+	PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(256.f, Size.Y - 52.f), FVector2D(250.f, 32.f), TEXT("AFGØR AUTOMATISK"), EButton::BattleAuto, B.Id);
+	PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(518.f, Size.Y - 52.f), FVector2D(218.f, 32.f), TEXT("TRÆK TILBAGE"), EButton::BattleRetreat, B.Id);
 }
 
 void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const

@@ -1,0 +1,384 @@
+// Battles of the 1851 campaign (Docs/Battle1851.md, backlog item 9): when an enemy corps meets Danish
+// troops or forts, the game pauses and offers the battle: to be fought in the 3D battle game (a request
+// file out, a result file back), resolved at once, or avoided by retreat. The outcome costs men,
+// ammunition, morale, forts and towns.
+
+#include "Campaign1851Map.h"
+
+#include "Dom/JsonObject.h"
+#include "HAL/FileManager.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
+#include "Serialization/JsonWriter.h"
+
+namespace
+{
+	FString BattleDir() { return FPaths::ProjectSavedDir() / TEXT("Battle"); }
+
+	/** The enemy's fighting quality: the Prussian needle gun loads lying down, three times as fast. */
+	float EnemyQuality(const FString& Nation) { return Nation == TEXT("PR") ? 1.3f : Nation == TEXT("AT") ? 1.05f : 0.9f; }
+	const TCHAR* EnemyRifle(const FString& Nation) { return Nation == TEXT("PR") ? TEXT("Dreyse tændnålsgevær (bagladeriffel)") : Nation == TEXT("AT") ? TEXT("Lorenz-riffel (forladeriffel)") : TEXT("forladeriffel"); }
+	constexpr float GunWorth = 60.f;   // a gun in the balance, in men
+}
+
+void ACampaign1851Map::CreateBattle(int32 CorpsIndex)
+{
+	FCampaign1851EnemyCorps& C = EnemyCorps[CorpsIndex];
+	FCampaign1851Battle B;
+	B.Id = NextBattleId++;
+	B.Day = CampaignDays;
+	B.Km = C.Km;
+	B.Town = NearestTown(C.Km);
+	B.CorpsId = C.Id;
+	for (int32 i = 0; i < Regiments.Num(); ++i)
+	{
+		if (Regiments[i].Men > 0 && FVector2D::Distance(Regiments[i].Km, C.Km) < 8.0)
+		{
+			B.Regiments.Add(i);
+		}
+	}
+	for (const FCampaign1851Fort& F : Forts)
+	{
+		if (F.bBuilt && FVector2D::Distance(F.Km, C.Km) < 8.0)
+		{
+			B.Forts.Add(F.Id);
+		}
+	}
+	Battles.Add(B);
+	SetSpeed(0);   // the player decides
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|battle|%d at %s: %d units, %d forts vs %s"), B.Id, Cities.IsValidIndex(B.Town) ? *Cities[B.Town].Name : TEXT("?"), B.Regiments.Num(), B.Forts.Num(), *C.Name);
+}
+
+int32 ACampaign1851Map::CorpsIndexOf(const FCampaign1851Battle& B) const
+{
+	return EnemyCorps.IndexOfByPredicate([&B](const FCampaign1851EnemyCorps& C) { return C.Id == B.CorpsId; });
+}
+
+void ACampaign1851Map::BattleStrengths(const FCampaign1851Battle& B, float& OutDanish, float& OutEnemy) const
+{
+	OutDanish = 0.f;
+	for (int32 i : B.Regiments)
+	{
+		if (!Regiments.IsValidIndex(i))
+		{
+			continue;
+		}
+		const FCampaign1851Regiment& R = Regiments[i];
+		const Campaign1851Army::FBattleFactors F = Campaign1851Army::BattleFactors(R);
+		const float Quality = (F.Accuracy + 1.f / FMath::Max(F.ReloadTime, 0.5f) + F.Assault) / 3.f * (0.6f + 0.4f * F.Morale) * (0.7f + 0.3f * F.Cohesion);
+		const float Supply = FMath::Clamp(0.4f + 0.6f * R.Ammo, 0.4f, 1.f) * (R.Food > 0.f ? 1.f : 0.8f);
+		OutDanish += R.PresentMen() * Quality * Supply + R.Guns * GunWorth;
+	}
+	for (int32 Id : B.Forts)
+	{
+		const int32 Fi = FortIndex(Id);
+		if (Fi == INDEX_NONE)
+		{
+			continue;
+		}
+		const FCampaign1851Fort& F = Forts[Fi];
+		int32 Inside = 0, Reserve = 0;
+		FortMen(F, Inside, Reserve);
+		// Behind a parapet a man counts for more; the guns need their powder.
+		OutDanish += Inside * (1.f + 2.f * Campaign1851Forts::CoverPercent(F.Defence) / 100.f) + Reserve * (1.f + Campaign1851Forts::ReserveCover(F.bTrenches) / 100.f)
+			+ F.Guns * GunWorth * FMath::Clamp(F.RoundsPerGun / 120.f, 0.2f, 1.f);
+	}
+	const int32 Ci = CorpsIndexOf(B);
+	OutEnemy = Ci != INDEX_NONE ? EnemyCorps[Ci].Men * EnemyQuality(EnemyCorps[Ci].Nation) + EnemyCorps[Ci].Guns * GunWorth : 0.f;
+}
+
+float ACampaign1851Map::BattleOdds(const FCampaign1851Battle& B) const
+{
+	float D = 0.f, E = 0.f;
+	BattleStrengths(B, D, E);
+	const float R = E > 0.f ? D / E : 10.f;
+	return R * R / (1.f + R * R);
+}
+
+bool ACampaign1851Map::FightBattleIn3D(int32 BattleId)
+{
+	// The request: where, when, who. The units and forts in full are in Units.json and Fortifications.json.
+	FCampaign1851Battle* B = Battles.FindByPredicate([BattleId](const FCampaign1851Battle& X) { return X.Id == BattleId; });
+	const int32 Ci = B ? CorpsIndexOf(*B) : INDEX_NONE;
+	if (!B || Ci == INDEX_NONE)
+	{
+		return false;
+	}
+	ExportUnits();
+	ExportForts();
+	const FCampaign1851EnemyCorps& C = EnemyCorps[Ci];
+	TSharedRef<FJsonObject> Doc = MakeShared<FJsonObject>();
+	const FVector2D LatLon = Extent.Projection.Inverse(B->Km);
+	const FDateTime Now = GetDate();
+	Doc->SetStringField(TEXT("format"), TEXT("PROJECT1864-BattleRequest-1"));
+	Doc->SetNumberField(TEXT("battleId"), B->Id);
+	Doc->SetStringField(TEXT("date"), Now.ToIso8601());
+	Doc->SetStringField(TEXT("season"), GetSeasonName());
+	Doc->SetBoolField(TEXT("snow"), Now.GetMonth() == 12 || Now.GetMonth() <= 2);
+	Doc->SetNumberField(TEXT("lat"), LatLon.X);
+	Doc->SetNumberField(TEXT("lon"), LatLon.Y);
+	Doc->SetStringField(TEXT("nearTown"), Cities.IsValidIndex(B->Town) ? Cities[B->Town].Name : FString());
+	TArray<TSharedPtr<FJsonValue>> Units, FortIds;
+	for (int32 i : B->Regiments)
+	{
+		Units.Add(MakeShared<FJsonValueString>(Regiments[i].Id));
+	}
+	for (int32 Id : B->Forts)
+	{
+		FortIds.Add(MakeShared<FJsonValueNumber>(Id));
+	}
+	Doc->SetArrayField(TEXT("danishUnitIds"), Units);
+	Doc->SetArrayField(TEXT("fortIds"), FortIds);
+	Doc->SetStringField(TEXT("unitsFile"), TEXT("Units.json"));
+	Doc->SetStringField(TEXT("fortsFile"), TEXT("Fortifications.json"));
+	TSharedRef<FJsonObject> Enemy = MakeShared<FJsonObject>();
+	Enemy->SetStringField(TEXT("name"), C.Name);
+	Enemy->SetStringField(TEXT("nation"), C.Nation);
+	Enemy->SetNumberField(TEXT("men"), C.Men);
+	Enemy->SetNumberField(TEXT("guns"), C.Guns);
+	Enemy->SetStringField(TEXT("rifle"), EnemyRifle(C.Nation));
+	Enemy->SetNumberField(TEXT("quality"), EnemyQuality(C.Nation));
+	Doc->SetObjectField(TEXT("enemy"), Enemy);
+	Doc->SetStringField(TEXT("resultFile"), FString::Printf(TEXT("BattleResult_%d.json"), B->Id));
+	FString Text;
+	FJsonSerializer::Serialize(Doc, TJsonWriterFactory<>::Create(&Text));
+	IFileManager::Get().MakeDirectory(*BattleDir(), true);
+	FFileHelper::SaveStringToFile(Text, *(BattleDir() / FString::Printf(TEXT("BattleRequest_%d.json"), B->Id)), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
+	B->bWaiting = true;
+	News.Add(FString::Printf(TEXT("Slaget sendt til 3D: BattleRequest_%d.json (venter på BattleResult_%d.json)"), B->Id, B->Id));
+	return true;
+}
+
+void ACampaign1851Map::PollBattleResults()
+{
+	for (int32 b = Battles.Num() - 1; b >= 0; --b)
+	{
+		if (!Battles[b].bWaiting)
+		{
+			continue;
+		}
+		const FString Path = BattleDir() / FString::Printf(TEXT("BattleResult_%d.json"), Battles[b].Id);
+		FString Text;
+		TSharedPtr<FJsonObject> Json;
+		if (!FFileHelper::LoadFileToString(Text, *Path) || !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Json) || !Json.IsValid())
+		{
+			continue;
+		}
+		// The 3D battle's own numbers: each unit's and fort's losses, the ammunition used, the outcome.
+		FCampaign1851BattleOutcome O;
+		const FString Outcome = Json->GetStringField(TEXT("outcome"));
+		O.bDanishWin = Outcome == TEXT("danish_victory");
+		O.bDraw = Outcome == TEXT("draw");
+		double EnemyLosses = 0.0;
+		Json->TryGetNumberField(TEXT("enemyLosses"), EnemyLosses);
+		O.EnemyLosses = int32(EnemyLosses);
+		const TArray<TSharedPtr<FJsonValue>>* Units = nullptr;
+		if (Json->TryGetArrayField(TEXT("units"), Units))
+		{
+			for (const TSharedPtr<FJsonValue>& V : *Units)
+			{
+				const TSharedPtr<FJsonObject> U = V->AsObject();
+				const int32 R = FindRegiment(U->GetStringField(TEXT("id")));
+				if (R != INDEX_NONE)
+				{
+					double Losses = 0.0, Ammo = 0.0;
+					U->TryGetNumberField(TEXT("losses"), Losses);
+					U->TryGetNumberField(TEXT("ammoUsed"), Ammo);
+					O.UnitLosses.Add(R, int32(Losses));
+					O.UnitAmmo.Add(R, float(Ammo));
+				}
+			}
+		}
+		const TArray<TSharedPtr<FJsonValue>>* FortResults = nullptr;
+		if (Json->TryGetArrayField(TEXT("forts"), FortResults))
+		{
+			for (const TSharedPtr<FJsonValue>& V : *FortResults)
+			{
+				const TSharedPtr<FJsonObject> F = V->AsObject();
+				bool bCaptured = false;
+				F->TryGetBoolField(TEXT("captured"), bCaptured);
+				if (bCaptured)
+				{
+					O.CapturedForts.Add(int32(F->GetNumberField(TEXT("id"))));
+				}
+			}
+		}
+		O.bFromBattle3D = true;
+		ApplyBattle(b, O);
+		IFileManager::Get().Move(*(Path + TEXT(".read")), *Path);
+	}
+}
+
+void ACampaign1851Map::AutoResolveBattle(int32 BattleId)
+{
+	const int32 b = Battles.IndexOfByPredicate([BattleId](const FCampaign1851Battle& X) { return X.Id == BattleId; });
+	if (b == INDEX_NONE)
+	{
+		return;
+	}
+	const FCampaign1851Battle& B = Battles[b];
+	FRandomStream Rng(int32(HashCombine(uint32(Seed), uint32(B.Id * 7919))));
+	float D = 0.f, E = 0.f;
+	BattleStrengths(B, D, E);
+	const float Odds = BattleOdds(B);
+	FCampaign1851BattleOutcome O;
+	const float Roll = Rng.FRand();
+	O.bDanishWin = Roll < Odds - 0.05f;
+	O.bDraw = !O.bDanishWin && Roll < Odds + 0.05f;
+	// Losses: the loser a fifth or so of those engaged, the winner a tenth; a draw both in between.
+	const float DanishShare = O.bDanishWin ? Rng.FRandRange(0.05f, 0.1f) : O.bDraw ? Rng.FRandRange(0.08f, 0.14f) : Rng.FRandRange(0.15f, 0.25f);
+	const float EnemyShare = O.bDanishWin ? Rng.FRandRange(0.15f, 0.25f) : O.bDraw ? Rng.FRandRange(0.08f, 0.14f) : Rng.FRandRange(0.04f, 0.09f);
+	for (int32 i : B.Regiments)
+	{
+		if (Regiments.IsValidIndex(i))
+		{
+			O.UnitLosses.Add(i, FMath::RoundToInt(Regiments[i].PresentMen() * DanishShare));
+			O.UnitAmmo.Add(i, Rng.FRandRange(0.3f, 0.7f));
+		}
+	}
+	for (int32 Id : B.Forts)
+	{
+		if (!O.bDanishWin && !O.bDraw)
+		{
+			O.CapturedForts.Add(Id);
+		}
+		O.FortLossShare.Add(Id, DanishShare * (O.bDanishWin ? 0.6f : 1.f));
+	}
+	const int32 Ci = CorpsIndexOf(B);
+	O.EnemyLosses = Ci != INDEX_NONE ? FMath::RoundToInt(EnemyCorps[Ci].Men * EnemyShare) : 0;
+	ApplyBattle(b, O);
+}
+
+void ACampaign1851Map::RetreatFromBattle(int32 BattleId)
+{
+	const int32 b = Battles.IndexOfByPredicate([BattleId](const FCampaign1851Battle& X) { return X.Id == BattleId; });
+	if (b == INDEX_NONE)
+	{
+		return;
+	}
+	// No battle: the Danes fall back north, the forts are given up with their guns.
+	FCampaign1851BattleOutcome O;
+	O.bRetreat = true;
+	for (int32 Id : Battles[b].Forts)
+	{
+		O.CapturedForts.Add(Id);
+	}
+	ApplyBattle(b, O);
+}
+
+void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleOutcome& O)
+{
+	FCampaign1851Battle B = Battles[BattleIndex];
+	Battles.RemoveAt(BattleIndex);
+	const int32 Ci = CorpsIndexOf(B);
+	const FString Place = Cities.IsValidIndex(B.Town) ? Cities[B.Town].Name : FString(TEXT("?"));
+	int32 DanishLosses = 0;
+	for (const TPair<int32, int32>& L : O.UnitLosses)
+	{
+		FCampaign1851Regiment& R = Regiments[L.Key];
+		const int32 Lost = FMath::Min(L.Value, R.Men);
+		R.Men -= Lost;
+		DanishLosses += Lost;
+		R.Morale = FMath::Clamp(R.Morale + (O.bDanishWin ? 0.05f : O.bDraw ? -0.05f : -0.15f), 0.05f, 1.f);
+		R.Cohesion = FMath::Max(10.f, R.Cohesion - (O.bDanishWin ? 5.f : 20.f));
+		R.Experience = FMath::Min(100.f, R.Experience + 5.f);
+	}
+	for (const TPair<int32, float>& A : O.UnitAmmo)
+	{
+		Regiments[A.Key].Ammo = FMath::Max(0.f, Regiments[A.Key].Ammo - A.Value);
+	}
+	// Forts: losses among their companies; the captured ones are lost with their guns.
+	for (int32 Id : B.Forts)
+	{
+		const int32 Fi = FortIndex(Id);
+		if (Fi == INDEX_NONE)
+		{
+			continue;
+		}
+		const float Share = O.FortLossShare.Contains(Id) ? O.FortLossShare[Id] : 0.f;
+		for (FCampaign1851FortCompany& C : Forts[Fi].Companies)
+		{
+			const int32 Lost = FMath::RoundToInt(C.Men * Share);
+			C.Men -= Lost;
+			DanishLosses += Lost;
+		}
+		Forts[Fi].RoundsPerGun = FMath::Max(0.f, Forts[Fi].RoundsPerGun - 60.f);
+		Forts[Fi].CartridgesPerMan = FMath::Max(0.f, Forts[Fi].CartridgesPerMan - 40.f);
+	}
+	for (int32 Id : O.CapturedForts)
+	{
+		const int32 Fi = FortIndex(Id);
+		if (Fi != INDEX_NONE)
+		{
+			// The companies that got away go back to their battalions; the guns are lost.
+			News.Add(FString::Printf(TEXT("%s er taget af fjenden"), *Forts[Fi].Name));
+			Forts[Fi].Guns = 0;
+			FinishFortDemolition(Fi);
+		}
+	}
+	if (Ci != INDEX_NONE)
+	{
+		FCampaign1851EnemyCorps& C = EnemyCorps[Ci];
+		C.Men = FMath::Max(0, C.Men - O.EnemyLosses);
+		C.bEngaged = false;
+		if (O.bDanishWin)
+		{
+			// Beaten: it falls back and waits for reinforcements (or breaks up if too weak).
+			C.RestUntil = CampaignDays + 20.0;
+			C.Route.Reset();
+			if (C.Men < 4000)
+			{
+				News.Add(FString::Printf(TEXT("%s er slået i opløsning"), *C.Name));
+				EnemyCorps.RemoveAt(Ci);
+			}
+		}
+		else
+		{
+			C.RestUntil = CampaignDays + 3.0;
+		}
+	}
+	// A defeat or a retreat: the Danes fall back north to the nearest town of their own.
+	if (!O.bDanishWin && !O.bDraw)
+	{
+		int32 Refuge = INDEX_NONE;
+		double BestKm = 1e9;
+		for (int32 c = 0; c < Cities.Num(); ++c)
+		{
+			const double Dist = FVector2D::Distance(TownKm(c), B.Km);
+			if (!Cities[c].bForeign && Cities[c].Occupier.IsEmpty() && TownKm(c).Y > B.Km.Y + 10.0 && Dist < BestKm)
+			{
+				BestKm = Dist;
+				Refuge = c;
+			}
+		}
+		if (Refuge != INDEX_NONE)
+		{
+			TArray<int32> Column;
+			for (int32 i : B.Regiments)
+			{
+				if (Regiments.IsValidIndex(i) && Regiments[i].Men > 0)
+				{
+					Column.Add(i);
+				}
+			}
+			if (Column.Num() > 0)
+			{
+				OrderMarchTo(Column, Refuge, TownKm(Refuge), ECampaign1851RouteMode::RoadsOnly);
+			}
+		}
+	}
+	const TCHAR* Result = O.bRetreat ? TEXT("tilbagetog uden kamp") : O.bDanishWin ? TEXT("dansk sejr") : O.bDraw ? TEXT("uafgjort") : TEXT("dansk nederlag");
+	News.Add(FString::Printf(TEXT("Slaget ved %s: %s  ·  danske tab %d, fjendens tab %d%s"), *Place, Result, DanishLosses, O.EnemyLosses, O.bFromBattle3D ? TEXT("  (fra 3D-slaget)") : TEXT("")));
+	FCampaign1851Decision D;
+	D.Day = CampaignDays;
+	D.Nation = PlayerNation;
+	D.Portfolio = ECampaign1851Portfolio::War;
+	D.Action = FString::Printf(TEXT("Slaget ved %s: %s"), *Place, Result);
+	D.Reasons = FString::Printf(TEXT("danske tab %d  ·  fjendens tab %d"), DanishLosses, O.EnemyLosses);
+	D.bDone = true;
+	AddDecision(D);
+	ExportUnits();
+	ExportForts();
+}

@@ -278,6 +278,8 @@ void ACampaign1851PlayerController::TryInit()
 	{
 		Map->ForceWar();
 	}
+	// -CampaignAutoBattles resolves each battle at once (test).
+	bAutoBattles = FParse::Param(FCommandLine::Get(), TEXT("CampaignAutoBattles"));
 	// -CampaignMobilise calls the army in at once (test).
 	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignMobilise")))
 	{
@@ -441,6 +443,11 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	if (!bInitialised || !Camera)
 	{
 		return;
+	}
+	if (bAutoBattles && Map.IsValid() && Map->GetBattles().Num() > 0)
+	{
+		Map->AutoResolveBattle(Map->GetBattles()[0].Id);
+		Map->SetSpeed(6);
 	}
 	if (!FocusBuildingOrder.IsEmpty() && Map.IsValid())
 	{
@@ -883,6 +890,20 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			{
 				Overlay->ShowToast(Why);
 			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::BattleFight3D)
+		{
+			Map->FightBattleIn3D(Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::BattleAuto)
+		{
+			Map->AutoResolveBattle(Module);
+			SaveToSlot(TEXT("Autosave"), true);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::BattleRetreat)
+		{
+			Map->RetreatFromBattle(Module);
+			SaveToSlot(TEXT("Autosave"), true);
 		}
 		else if (Button == SCampaign1851Overlay::EButton::Footing)
 		{

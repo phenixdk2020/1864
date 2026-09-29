@@ -147,9 +147,15 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		LastWarDay = FMath::FloorToInt(CampaignDays);
 		DailyWar();
 	}
-	for (FCampaign1851EnemyCorps& C : EnemyCorps)
+	if (Battles.ContainsByPredicate([](const FCampaign1851Battle& B) { return B.bWaiting; }) && FPlatformTime::Seconds() - LastBattlePoll > 1.0)
 	{
-		if (C.bEngaged)
+		LastBattlePoll = FPlatformTime::Seconds();
+		PollBattleResults();
+	}
+	for (int32 k = 0; k < EnemyCorps.Num(); ++k)
+	{
+		FCampaign1851EnemyCorps& C = EnemyCorps[k];
+		if (C.bEngaged || CampaignDays < C.RestUntil)
 		{
 			continue;
 		}
@@ -170,12 +176,17 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 				Contact = F.Name;
 			}
 		}
-		if (!Contact.IsEmpty())
+		if (!Contact.IsEmpty() && bAtWar)
 		{
 			C.bEngaged = true;
 			const int32 Near = NearestTown(C.Km);
 			News.Add(FString::Printf(TEXT("%s møder %s ved %s: slag forestår"), *C.Name, *Contact, Cities.IsValidIndex(Near) ? *Cities[Near].Name : TEXT("")));
+			CreateBattle(k);
 			continue;
+		}
+		if (!Contact.IsEmpty())
+		{
+			continue;   // not at war yet: the federal corps faces the Danes and waits
 		}
 		// Marching: along the roads to the next objective (only while at war; the federal corps waits at the Eider).
 		if (!bAtWar && C.Nation == TEXT("DE"))
@@ -327,7 +338,7 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 					C.Objectives.Add(FindCity(O));
 				}
 			}
-			C.bEngaged = P[9] == TEXT("1");
+			C.bEngaged = false;   // a battle still at hand is offered again on contact
 			EnemyCorps.Add(C);
 		}
 	}

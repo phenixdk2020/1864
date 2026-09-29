@@ -47,7 +47,7 @@ public:
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve, FormationDeputy, FormationStaff,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
-		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing };
+		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -214,6 +214,8 @@ private:
 	/** The SKANSER panel (new fort, list of forts) and a fort's own panel. */
 	void PaintFortTool(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintFort(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	/** A battle at hand: the forces, the odds, and the choice. */
+	void PaintBattle(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** The supply window: depots, columns, units in the field, the stores. */
 	void PaintSupply(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const;
 	/** The council window: the nations, the player's ministries (delegation) and their decisions. */
