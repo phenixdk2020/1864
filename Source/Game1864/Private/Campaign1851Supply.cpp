@@ -311,6 +311,7 @@ TArray<FString> ACampaign1851Map::SaveSupply() const
 	for (const FCampaign1851Regiment& R : Regiments)
 	{
 		Out.Add(FString::Printf(TEXT("unit|%s|%.2f|%.2f|%.3f"), *R.Id, R.Food, R.Fodder, R.Ammo));
+		Out.Add(FString::Printf(TEXT("present|%s|%.3f"), *R.Id, R.Present));
 	}
 	for (const FCampaign1851Fort& F : Forts)
 	{
@@ -336,6 +337,10 @@ void ACampaign1851Map::RestoreSupply(const TArray<FString>& Lines)
 			R.Food = FCString::Atof(*P[2]);
 			R.Fodder = FCString::Atof(*P[3]);
 			R.Ammo = FCString::Atof(*P[4]);
+		}
+		else if (P.Num() == 3 && P[0] == TEXT("present") && FindRegiment(P[1]) != INDEX_NONE)
+		{
+			Regiments[FindRegiment(P[1])].Present = FCString::Atof(*P[2]);
 		}
 		else if (P.Num() == 5 && P[0] == TEXT("fort") && FortIndex(FCString::Atoi(*P[1])) != INDEX_NONE)
 		{
@@ -366,6 +371,7 @@ void ACampaign1851Map::ExportUnits() const
 		O->SetNumberField(TEXT("lon"), LatLon.Y);
 		O->SetStringField(TEXT("place"), DescribePlace(R.Town, R.Km));
 		O->SetNumberField(TEXT("men"), R.Men);
+		O->SetNumberField(TEXT("presentMen"), R.PresentMen());
 		O->SetNumberField(TEXT("maxMen"), R.MaxMen);
 		O->SetNumberField(TEXT("horses"), R.Horses);
 		O->SetNumberField(TEXT("guns"), R.Guns);
@@ -423,7 +429,7 @@ bool ACampaign1851Map::PlanColumnRoute(FCampaign1851SupplyColumn& C, const FVect
 	C.Leg = 0;
 	C.LegElapsed = 0.f;
 	TArray<FCampaign1851Leg> Legs;
-	if (!PlanMarch(INDEX_NONE, C.Km, ToTown, To, Campaign1851Supply::ColumnKmPerDay, ECampaign1851RouteMode::RoadsOnly, Legs))
+	if (!PlanMarch(INDEX_NONE, C.Km, ToTown, To, Campaign1851Supply::ColumnKmPerDay, ECampaign1851RouteMode::RoadsAndRail, Legs))
 	{
 		if (!PlanMarch(INDEX_NONE, C.Km, ToTown, To, Campaign1851Supply::ColumnKmPerDay, ECampaign1851RouteMode::Direct, Legs))
 		{

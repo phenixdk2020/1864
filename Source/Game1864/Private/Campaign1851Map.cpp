@@ -1600,6 +1600,7 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 	AdvanceForts(DeltaDays);
 	AdvanceDemolitions(DeltaDays);
 	AdvanceSupply(DeltaDays);
+	AdvanceFooting(DeltaDays);
 	AdvanceSupplyColumns(DeltaDays);
 	AdvanceArmy(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
 	if (GetDate().GetMonth() != MonthBefore)
@@ -1692,6 +1693,10 @@ TArray<FCampaign1851BudgetLine> ACampaign1851Map::MonthlyBudget() const
 	{
 		Lines.Add({ TEXT("Forråd til depoterne"), -StockingCostPerMonth() });
 	}
+	if (MobilisedPayPerMonth() > 0.5)
+	{
+		Lines.Add({ TEXT("De indkaldtes løn og underhold"), -MobilisedPayPerMonth() });
+	}
 	return Lines;
 }
 
@@ -1783,6 +1788,7 @@ void ACampaign1851Map::CloseMonth()
 	// The world moves on: towns grow, investors build, the ministries (and the other nations) decide.
 	GrowMonth();
 	MonthlyMateriel();
+	MonthlyFooting();
 	MonthlyBuildingMaterials();
 	MonthlyManpower();
 	MonthlySalvage();
@@ -1842,7 +1848,7 @@ double ACampaign1851Map::YearlyTax(const FString& Region) const
 	{
 		Total += (Region.IsEmpty() || A.Region == Region) ? AmtYearlyTax(A) : 0.0;
 	}
-	return Total;
+	return Footing == ECampaign1851Footing::Peace ? Total : Total * Campaign1851Mobilisation::WarTaxFactor;
 }
 
 FString ACampaign1851Map::RegionName(const FString& Code)

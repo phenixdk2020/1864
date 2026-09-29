@@ -273,6 +273,11 @@ void ACampaign1851PlayerController::TryInit()
 			}
 		}
 	}
+	// -CampaignMobilise calls the army in at once (test).
+	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignMobilise")))
+	{
+		Map->Mobilise();
+	}
 	// -CampaignDelegate=auto|advisory hands every portfolio to the ministries (to watch the AI).
 	FString DelegateMode;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignDelegate="), DelegateMode))
@@ -874,6 +879,19 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Overlay->ShowToast(Why);
 			}
 		}
+		else if (Button == SCampaign1851Overlay::EButton::Footing)
+		{
+			FString Why;
+			if (Map->GetFooting() == ECampaign1851Footing::Peace)
+			{
+				Overlay->ShowToast(Map->Mobilise(&Why) ? FString(TEXT("Mobilisering beordret: de hjemsendte kaldes ind")) : Why);
+			}
+			else
+			{
+				Map->Demobilise();
+				Overlay->ShowToast(TEXT("Hjemsendelse beordret"));
+			}
+		}
 		else if (Button == SCampaign1851Overlay::EButton::SupplyMap)
 		{
 			Overlay->ToggleSupplyMap();
@@ -1351,6 +1369,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->SupplyColumns = Map->SaveSupplyColumns();
 	Save->Rifles = Map->GetRifles();
 	Save->HorseStock = Map->GetHorseStock();
+	Save->Footing = uint8(Map->GetFooting());
 	Map->ExportUnits();
 	Save->MaterialLots = Map->GetMaterialLots();
 	if (Save->Links.Num() > 0)
@@ -1465,6 +1484,7 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 		Map->ResetMateriel();
 		Map->SetGunStock(FMath::Max(Guns, Map->GetGunStock()));
 	}
+	Map->SetFooting(Save->SaveVersion >= 21 ? ECampaign1851Footing(FMath::Min<uint8>(Save->Footing, 2)) : ECampaign1851Footing::Peace);
 	Map->SetMaterialLots(Save->SaveVersion >= 16 ? Save->MaterialLots : TArray<FVector>());
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);
 	if (Overlay.IsValid())
@@ -1502,6 +1522,7 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	Map->SetMaterialLots({});
 	Map->ResetSupply();
 	Map->ResetMateriel();
+	Map->SetFooting(ECampaign1851Footing::Peace);
 	Map->ExportForts();
 	if (Overlay.IsValid())
 	{

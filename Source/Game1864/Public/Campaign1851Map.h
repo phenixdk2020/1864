@@ -357,6 +357,17 @@ public:
 	TArray<FString> SaveSupplyColumns() const;
 	void RestoreSupplyColumns(const TArray<FString>& Lines);
 
+	// ---- Peace footing and mobilisation (Campaign1851Mobilisation.cpp).
+
+	ECampaign1851Footing GetFooting() const { return Footing; }
+	void SetFooting(ECampaign1851Footing F) { Footing = F; }
+	/** Calls the men on leave in (pays the order); false with the reason. */
+	bool Mobilise(FString* OutReason = nullptr);
+	/** Back to peace footing: the men go home over a few days. */
+	void Demobilise();
+	/** Pay and keep a month of the men beyond the peace strength. */
+	double MobilisedPayPerMonth() const;
+
 	// ---- Materiel: rifles, guns and horses (Campaign1851Materiel.cpp).
 
 	int32 GetRifles() const { return Rifles; }
@@ -794,6 +805,11 @@ private:
 	int32 NextSupplyColumnId = 1;
 	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> SupplyColumnPieces;
 	UPROPERTY(Transient) TObjectPtr<UStaticMesh> ColumnMesh;
+
+	// The footing layer.
+	void AdvanceFooting(float DeltaDays);
+	void MonthlyFooting();
+	ECampaign1851Footing Footing = ECampaign1851Footing::Peace;
 
 	// The materiel layer.
 	void MonthlyMateriel();

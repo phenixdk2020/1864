@@ -1192,6 +1192,11 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 		Where = FString::Printf(TEXT("I %s"), *Map->DescribePlace(First.Town, First.Km));
 	}
 	Line(TEXT("Hvor"), Where);
+	{
+		int32 PresentSel = 0, MenSel = 0;
+		for (const FCampaign1851Regiment* R : Sel) { PresentSel += R->PresentMen(); MenSel += R->Men; }
+		Line(TEXT("Til stede"), FString::Printf(TEXT("%s af %s mand  ·  %s"), *Thousands(PresentSel), *Thousands(MenSel), Campaign1851Mobilisation::FootingName(Map->GetFooting())));
+	}
 	Line(TEXT("Marchfart"), FString::Printf(TEXT("%.0f km/dag på landevej, %.0f på chaussé"), Pace, Pace * Campaign1851Network::MarchKmPerDayChaussee / Campaign1851Network::MarchKmPerDayRoad));
 	int32 TrainsNeeded = 0;
 	for (const FCampaign1851Regiment* R : Sel)
@@ -2666,8 +2671,13 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 			Row.Keys = { Text, Text, Text, Text, double(R.Men), R.Experience, R.Skills[0], R.Skills[1], R.Skills[2], R.Skills[3], R.Skills[4], R.Skills[5], R.Morale, R.Cohesion, Text, Text };
 			Rows.Add(Row);
 		}
-		Title(TEXT("Hæren"), FString::Printf(TEXT("%d enheder  ·  %s mand  ·  %s heste  ·  %d kanoner  ·  lager: %s geværer, %d kanoner, %s heste"),
-			Regs.Num(), *Thousands(Men), *Thousands(Horses), Guns, *Thousands(Map->GetRifles()), Map->GetGunStock(), *Thousands(Map->GetHorseStock())));
+		int32 Present = 0;
+		for (const FCampaign1851Regiment& R : Regs) { Present += R.PresentMen(); }
+		Title(TEXT("Hæren"), FString::Printf(TEXT("%s  ·  %s af %s mand til stede  ·  %s heste  ·  %d kanoner  ·  lager: %s geværer, %d kanoner, %s heste"),
+			Campaign1851Mobilisation::FootingName(Map->GetFooting()), *Thousands(Present), *Thousands(Men), *Thousands(Horses), Guns, *Thousands(Map->GetRifles()), Map->GetGunStock(), *Thousands(Map->GetHorseStock())));
+		PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 300.f, 28.f), FVector2D(220.f, 28.f),
+			Map->GetFooting() == ECampaign1851Footing::Peace ? FString::Printf(TEXT("MOBILISÉR  %s rd."), *Thousands(int32(Campaign1851Mobilisation::OrderCost))) : FString(TEXT("HJEMSEND")),
+			EButton::Footing, 0, Map->GetFooting() != ECampaign1851Footing::Peace);
 		const TArray<FTableColumn> Cols = { {TEXT("Enhed"), 190.f}, {TEXT("Våben"), 130.f}, {TEXT("Garnison"), 105.f}, {TEXT("Hvor"), 200.f},
 			{TEXT("Mand"), 60.f, true}, {TEXT("Erf"), 48.f, true}, {TEXT("Lad"), 46.f, true}, {TEXT("Skyd"), 50.f, true}, {TEXT("Eks"), 46.f, true},
 			{TEXT("Felt"), 46.f, true}, {TEXT("Udh"), 46.f, true}, {TEXT("Baj"), 46.f, true}, {TEXT("Moral"), 64.f, true}, {TEXT("Samh"), 54.f, true},

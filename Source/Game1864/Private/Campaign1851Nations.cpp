@@ -20,6 +20,7 @@ namespace Campaign1851Nations
 		case ECampaign1851Portfolio::Interior: return TEXT("Indenrigs");
 		case ECampaign1851Portfolio::PublicWorks: return TEXT("Offentlige arbejder");
 		case ECampaign1851Portfolio::War: return TEXT("Krigsministeriet");
+		case ECampaign1851Portfolio::Intendance: return TEXT("Intendanturen");
 		default: return TEXT("Transport");
 		}
 	}
@@ -31,6 +32,7 @@ namespace Campaign1851Nations
 		case ECampaign1851Portfolio::Interior: return TEXT("skoler, rådhuse, handel og industri i byerne");
 		case ECampaign1851Portfolio::PublicWorks: return TEXT("chausséer og jernbaner");
 		case ECampaign1851Portfolio::War: return TEXT("øvelser, officerer og ledige poster");
+		case ECampaign1851Portfolio::Intendance: return TEXT("depoter og trænkolonner");
 		default: return TEXT("troppetog");
 		}
 	}
@@ -111,9 +113,9 @@ bool ACampaign1851Map::LoadNations()
 		const TArray<TSharedPtr<FJsonValue>>* Weights = nullptr;
 		if (O->TryGetArrayField(TEXT("weights"), Weights))
 		{
-			for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count) && p < Weights->Num(); ++p)
+			for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count); ++p)
 			{
-				N.BaseWeights[p] = float((*Weights)[p]->AsNumber());
+				N.BaseWeights[p] = p < Weights->Num() ? float((*Weights)[p]->AsNumber()) : 1.f;
 			}
 		}
 		double V = 0.0;
@@ -650,6 +652,57 @@ TArray<FCampaign1851Decision> ACampaign1851Map::DecisionOptions(int32 NationInde
 			Out.Add(D);
 		}
 	}
+	else if (P == ECampaign1851Portfolio::Intendance)
+	{
+		// More columns when units in the field outnumber the free ones.
+		int32 InField = 0;
+		for (const FCampaign1851Regiment& R : Regiments)
+		{
+			InField += (R.IsMarching() || R.IsInField()) && DepotFor(R.Km) == INDEX_NONE ? 1 : 0;
+		}
+		if (InField > FreeSupplyColumns() && Campaign1851Supply::ColumnCost <= Spendable && Campaign1851Supply::ColumnCost <= Budget)
+		{
+			FCampaign1851Decision D;
+			D.Kind = ECampaign1851DecisionKind::SupplyColumn;
+			D.Cost = Campaign1851Supply::ColumnCost;
+			D.Score = float(InField - FreeSupplyColumns()) * W * Noise();
+			D.Action = TEXT("Køb en trænkolonne");
+			D.Reasons = FString::Printf(TEXT("%d enheder i felten uden depot, %d ledige kolonner  ·  pris %s rd."), InField, FreeSupplyColumns(), *Rd(Campaign1851Supply::ColumnCost));
+			Out.Add(D);
+		}
+		// A grain store where many regiments stand without a depot near (their garrisons and the ground they cover).
+		for (int32 c = 0; c < Cities.Num(); ++c)
+		{
+			if (!BuildingBlockReason(c, TEXT("Grain_Warehouse")).IsEmpty() || FindBuilding(c, TEXT("Grain_Warehouse")))
+			{
+				continue;
+			}
+			const FCampaign1851DepotCapacity Cap = DepotCapacity(c);
+			if (Cap.Food > 0.f)
+			{
+				continue;
+			}
+			int32 Near = 0;
+			for (const FCampaign1851Regiment& R : Regiments)
+			{
+				Near += FVector2D::Distance(R.Km, TownKm(c)) < 40.0 && DepotFor(R.Km) == INDEX_NONE ? 1 : 0;
+			}
+			const FCampaign1851SiteModule* Def = ACampaign1851ConstructionSite::FindTownBuilding(TEXT("Grain_Warehouse"));
+			if (Near < 2 || !Def || Def->Cost() > Budget || Def->Cost() * Campaign1851Buildings::DownPayment > Spendable)
+			{
+				continue;
+			}
+			FCampaign1851Decision D;
+			D.Kind = ECampaign1851DecisionKind::CivilBuilding;
+			D.A = c;
+			D.Key = TEXT("Grain_Warehouse");
+			D.Cost = Def->Cost();
+			D.Score = float(Near) * 0.3f * W * Noise();
+			D.Action = FString::Printf(TEXT("Byg kornmagasin (depot) i %s"), *Cities[c].Name);
+			D.Reasons = FString::Printf(TEXT("%d enheder inden for 40 km uden depot  ·  60.000 rationer og foder  ·  pris %s rd."), Near, *Rd(D.Cost));
+			Out.Add(D);
+		}
+	}
 	else if (P == ECampaign1851Portfolio::Transport)
 	{
 		// Enough trains to move a quarter of the army at once (a train takes a battalion).
@@ -680,6 +733,8 @@ bool ACampaign1851Map::CarryOut(const FCampaign1851Decision& D)
 		return StartLinkWork(D.A, ECampaign1851LinkWork(D.B), true);
 	case ECampaign1851DecisionKind::TroopTrain:
 		return OrderTroopTrain();
+	case ECampaign1851DecisionKind::SupplyColumn:
+		return BuySupplyColumn();
 	case ECampaign1851DecisionKind::Training:
 		SetProgram(D.A, ECampaign1851Program(D.B));
 		return Regiments.IsValidIndex(D.A);

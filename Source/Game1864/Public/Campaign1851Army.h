@@ -249,6 +249,9 @@ struct FCampaign1851Regiment
 	float Food = 4.f;
 	float Fodder = 2.f;
 	float Ammo = 1.f;
+	/** Share of its men with the colours (peace footing: most are on leave; mobilisation calls them in). */
+	float Present = 0.35f;
+	int32 PresentMen() const { return FMath::RoundToInt(Men * Present); }
 	/** Officer indices: the regiment's chief, and a general whose headquarters marches with it. */
 	int32 Chief = INDEX_NONE;
 	int32 General = INDEX_NONE;
@@ -422,4 +425,26 @@ namespace Campaign1851Materiel
 	/** Prices when the store is short: a rifle bought abroad, a horse bought in the amter. */
 	constexpr int32 RifleImportPrice = 18;
 	constexpr int32 HorsePrice = 90;
+}
+
+/** Peace footing and mobilisation (estimates for play). */
+enum class ECampaign1851Footing : uint8
+{
+	Peace,        // a third with the colours, the rest on leave (permitteret)
+	Mobilising,   // the men on leave are called in
+	War           // all with the colours
+};
+namespace Campaign1851Mobilisation
+{
+	constexpr float PeacePresent = 0.35f;
+	/** Share of the establishment coming in a day (a mobilisation depot in the garrison town speeds it). */
+	constexpr float CallInPerDay = 0.06f;
+	constexpr float DepotBonus = 1.6f;
+	constexpr float SendHomePerDay = 0.1f;
+	/** Calling the men in (travel, kit), and each man beyond the peace strength a month. */
+	constexpr double OrderCost = 20000.0;
+	constexpr double PayPerManMonth = 3.0;
+	/** Taxes while the men are away from the farms and workshops. */
+	constexpr double WarTaxFactor = 0.9;
+	const TCHAR* FootingName(ECampaign1851Footing F);
 }

@@ -1424,7 +1424,7 @@ void ACampaign1851Map::AdvanceArmy(float DeltaDays, float DeltaSeconds)
 				const float Weight = Campaign1851Army::ProgramWeight(R.Program, Skill);
 				if (Weight > 0.f && V < Cap)
 				{
-					V = FMath::Min(Cap, V + DeltaDays * 0.12f * Weight * (0.5f + Lead / 10.f) * FMath::Max(0.1f, 1.f - V / 100.f));
+					V = FMath::Min(Cap, V + DeltaDays * 0.12f * Weight * (0.5f + Lead / 10.f) * FMath::Max(0.1f, 1.f - V / 100.f) * (0.4f + 0.6f * R.Present));
 				}
 				else if (Weight <= 0.f)
 				{

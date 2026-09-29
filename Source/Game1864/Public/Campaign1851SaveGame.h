@@ -219,7 +219,7 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 
 public:
 	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands. 10: + troop trains on the map. 11: + field formations. */
-	static constexpr int32 CurrentVersion = 20;
+	static constexpr int32 CurrentVersion = 21;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;
@@ -273,6 +273,8 @@ public:
 	/** Materiel stores (v20): rifles, horses (the guns are GunStock). */
 	UPROPERTY() int32 Rifles = 0;
 	UPROPERTY() int32 HorseStock = 0;
+	/** Footing (v21) and each unit's men present (in Supply lines as "present|id|share"). */
+	UPROPERTY() uint8 Footing = 0;
 
 	/** The state's store of fortress guns and the materials stores (town, rd., day) (v16). */
 	UPROPERTY() int32 GunStock = 0;

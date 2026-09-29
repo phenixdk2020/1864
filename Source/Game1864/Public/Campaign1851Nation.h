@@ -24,6 +24,7 @@ enum class ECampaign1851Portfolio : uint8
 	PublicWorks,   // Offentlige arbejder: chausséer and railways
 	War,           // Krigsministeriet: training, officers and their posts
 	Transport,     // Transport: troop trains
+	Intendance,    // Intendanturen: depots, supply columns (the quartermaster)
 	Count
 };
 
@@ -41,6 +42,7 @@ enum class ECampaign1851DecisionKind : uint8
 	CivilBuilding, // A = town, Key = building
 	LinkWork,      // A = link, B = ECampaign1851LinkWork
 	TroopTrain,
+	SupplyColumn,  // buy a supply column
 	Training,      // A = regiment, B = ECampaign1851Program
 	FillPost,      // A = officer, B = post code (see ACampaign1851Map::ExecuteDecision), Key = target
 	Recruit,
@@ -54,10 +56,10 @@ struct FCampaign1851Nation
 	/** True when the nation has its own map (towns, amter, links, army); else it grows on the abstract model. */
 	bool bOnMap = false;
 	ECampaign1851Controller Controller = ECampaign1851Controller::AI;
-	ECampaign1851Delegation Modes[int32(ECampaign1851Portfolio::Count)] = { ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto };
+	ECampaign1851Delegation Modes[int32(ECampaign1851Portfolio::Count)] = { ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto };
 	/** Priorities of the government per portfolio (historical tendency, then varied by the campaign seed). */
-	float BaseWeights[int32(ECampaign1851Portfolio::Count)] = { 1.f, 1.f, 1.f, 1.f };
-	float Weights[int32(ECampaign1851Portfolio::Count)] = { 1.f, 1.f, 1.f, 1.f };
+	float BaseWeights[int32(ECampaign1851Portfolio::Count)] = { 1.f, 1.f, 1.f, 1.f, 1.f };
+	float Weights[int32(ECampaign1851Portfolio::Count)] = { 1.f, 1.f, 1.f, 1.f, 1.f };
 	/** 0 bold .. 1 careful: how much of the money above the reserve it dares spend in a month. */
 	float Caution = 0.5f;
 	/** Guardrail: cash the ministries must leave in the treasury. */
