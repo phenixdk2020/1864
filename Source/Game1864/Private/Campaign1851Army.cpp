@@ -31,6 +31,7 @@ namespace Campaign1851Army
 		if (Text == TEXT("jager")) return ECampaign1851Arm::Jager;
 		if (Text == TEXT("cavalry")) return ECampaign1851Arm::Cavalry;
 		if (Text == TEXT("artillery")) return ECampaign1851Arm::Artillery;
+		if (Text == TEXT("horseartillery")) return ECampaign1851Arm::HorseArtillery;
 		return ECampaign1851Arm::Infantry;
 	}
 
@@ -42,14 +43,22 @@ namespace Campaign1851Army
 		case ECampaign1851Arm::Jager: return TEXT("Jægere");
 		case ECampaign1851Arm::Cavalry: return TEXT("Kavaleri");
 		case ECampaign1851Arm::Artillery: return TEXT("Artilleri");
+		case ECampaign1851Arm::HorseArtillery: return TEXT("Ridende artilleri");
 		default: return TEXT("Linjeinfanteri");
 		}
 	}
 
 	float MarchKmPerDay(ECampaign1851Arm Arm)
 	{
-		// Foot 20 km a day on a dirt road; horse 30; guns and limbers 18.
-		return Arm == ECampaign1851Arm::Cavalry ? 30.f : Arm == ECampaign1851Arm::Artillery ? 18.f : Campaign1851Network::MarchKmPerDayRoad;
+		// Foot 20 km a day on a dirt road; horse 30; foot artillery (guns and limbers, gunners walking) 18;
+		// horse artillery, all mounted with six-horse teams, 28.
+		switch (Arm)
+		{
+		case ECampaign1851Arm::Cavalry: return 30.f;
+		case ECampaign1851Arm::Artillery: return 18.f;
+		case ECampaign1851Arm::HorseArtillery: return 28.f;
+		default: return Campaign1851Network::MarchKmPerDayRoad;
+		}
 	}
 
 	float ColumnPace(const TArray<const FCampaign1851Regiment*>& Column, FString* OutWhy)
@@ -403,7 +412,7 @@ void ACampaign1851Map::UpdateRegimentPiece(int32 Regiment)
 			return;
 		}
 		using Campaign1851Scenery::ESitePiece;
-		for (ESitePiece Piece : { ESitePiece::FormationInfantry, ESitePiece::FormationGuard, ESitePiece::FormationJager, ESitePiece::FormationCavalry, ESitePiece::FormationArtillery })
+		for (ESitePiece Piece : { ESitePiece::FormationInfantry, ESitePiece::FormationGuard, ESitePiece::FormationJager, ESitePiece::FormationCavalry, ESitePiece::FormationArtillery, ESitePiece::FormationHorseArtillery })
 		{
 			ArmyMeshes.Add(Campaign1851Scenery::BuildSitePiece(Piece, Material));
 		}

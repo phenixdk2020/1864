@@ -67,7 +67,8 @@ namespace Campaign1851Scenery
 		FormationGuard,      // the Life Guard: red coats, bearskins
 		FormationJager,      // light infantry in green
 		FormationCavalry,    // dragoons on horseback
-		FormationArtillery   // guns with limbers and teams
+		FormationArtillery,      // guns with limbers and teams, gunners on foot
+		FormationHorseArtillery  // guns with six-horse teams and mounted gunners
 	};
 
 	constexpr float BarracksLength = 16.f;

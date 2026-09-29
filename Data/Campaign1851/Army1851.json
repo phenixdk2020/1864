@@ -1,5 +1,5 @@
 {
- "note": "Den danske hær i fred, efter treårskrigen (ca. 1851-52). Garnisonsbyerne er en omtrentlig rekonstruktion til prototypen og skal efterprøves mod kilder. Styrker: bataljon 4 kompagnier x 190 mand; dragonregiment 4 eskadroner; batteri 8 kanoner.",
+ "note": "Den danske hær i fred, efter treårskrigen (ca. 1851-52). Garnisonsbyerne er en omtrentlig rekonstruktion til prototypen og skal efterprøves mod kilder. Styrker: bataljon 4 kompagnier x 190 mand; dragonregiment 4 eskadroner; batteri 8 kanoner; ridende batteri 6 kanoner med beredne kanonerer (følger kavaleriet).",
  "nation": "DK",
  "regiments": [
   {"id": "LG",  "name": "Livgarden",               "arm": "guard",     "home": "København",  "men": 600, "horses": 12},
@@ -29,6 +29,8 @@
   {"id": "A2",  "name": "2. Batteri",              "arm": "artillery", "home": "København",  "men": 150, "horses": 110, "guns": 8},
   {"id": "A3",  "name": "3. Batteri",              "arm": "artillery", "home": "Fredericia", "men": 150, "horses": 110, "guns": 8},
   {"id": "A4",  "name": "4. Batteri",              "arm": "artillery", "home": "Rendsborg",  "men": 150, "horses": 110, "guns": 8},
-  {"id": "A5",  "name": "5. Batteri",              "arm": "artillery", "home": "Aarhus",     "men": 150, "horses": 110, "guns": 8}
+  {"id": "A5",  "name": "5. Batteri",              "arm": "artillery", "home": "Aarhus",     "men": 150, "horses": 110, "guns": 8},
+  {"id": "RA1", "name": "1. Ridende Batteri",      "arm": "horseartillery", "home": "København", "men": 180, "horses": 230, "guns": 6},
+  {"id": "RA2", "name": "2. Ridende Batteri",      "arm": "horseartillery", "home": "Randers",   "men": 180, "horses": 230, "guns": 6}
  ]
 }

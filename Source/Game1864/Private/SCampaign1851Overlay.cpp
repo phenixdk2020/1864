@@ -225,7 +225,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.29 HÆREN — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.30 HÆREN — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -704,8 +704,12 @@ namespace
 		{
 			DrawLines(Geometry, Out, Layer, { FVector2D(Min.X, Max.Y), FVector2D(Max.X, Min.Y) }, Line, 1.4f);
 		}
-		else if (Arm == ECampaign1851Arm::Artillery)
+		else if (Arm == ECampaign1851Arm::Artillery || Arm == ECampaign1851Arm::HorseArtillery)
 		{
+			if (Arm == ECampaign1851Arm::HorseArtillery)   // horse artillery: the gun dot with the cavalry slash
+			{
+				DrawLines(Geometry, Out, Layer, { FVector2D(Min.X, Max.Y), FVector2D(Max.X, Min.Y) }, Line, 1.4f);
+			}
 			TArray<FVector2D> Dot;
 			const FVector2D C = (Min + Max) * 0.5f;
 			for (int32 s = 0; s <= 12; ++s)
@@ -895,7 +899,7 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	if (First.IsMarching())
 	{
 		const FCampaign1851Leg& Leg = First.Route[First.Leg];
-		Where = FString::Printf(TEXT("%s %s → %s"), Leg.bRail ? TEXT("Med tog") : TEXT("På march"), *Cities[Leg.From].Name, *Cities[Leg.To].Name);
+		Where = FString::Printf(TEXT("%s fra %s til %s"), Leg.bRail ? TEXT("Med tog") : TEXT("På march"), *Cities[Leg.From].Name, *Cities[Leg.To].Name);
 	}
 	else
 	{

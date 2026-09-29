@@ -16,7 +16,8 @@ enum class ECampaign1851Arm : uint8
 	Guard,
 	Jager,
 	Cavalry,
-	Artillery
+	Artillery,        // foot artillery: horse-drawn guns, the gunners walk
+	HorseArtillery    // horse artillery: every gunner mounted, keeps up with the cavalry
 };
 
 /** One stretch of a march: a link walked (or ridden by train) from one town to the next. */
@@ -73,7 +74,7 @@ struct FCampaign1851Regiment
 namespace Campaign1851Army
 {
 	ECampaign1851Arm ParseArm(const FString& Text);
-	/** "Linjeinfanteri", "Garde", "Jægere", "Kavaleri", "Artilleri". */
+	/** "Linjeinfanteri", "Garde", "Jægere", "Kavaleri", "Artilleri", "Ridende artilleri". */
 	const TCHAR* ArmName(ECampaign1851Arm Arm);
 	/** Marching pace of the arm on a road (km/day); a chaussée adds a third. */
 	float MarchKmPerDay(ECampaign1851Arm Arm);

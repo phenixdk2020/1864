@@ -782,8 +782,11 @@ namespace Campaign1851Scenery
 			break;
 		}
 		case ESitePiece::FormationArtillery:
+		case ESitePiece::FormationHorseArtillery:
 		{
-			// Two guns in battery, each with its limber and a team of four horses behind, and the crew.
+			// Two guns in battery, each with its limber and a team behind (four horses; six for horse artillery),
+			// and the crew: on foot beside the gun, or mounted alongside the team.
+			const bool bRiding = Piece == ESitePiece::FormationHorseArtillery;
 			const FLinearColor Wood = Srgb(110, 118, 84), Barrel = Srgb(48, 52, 50), Horse = Srgb(96, 64, 40), Coat = Srgb(34, 44, 86);
 			for (float Y : { -1.f, 1.f })
 			{
@@ -794,7 +797,7 @@ namespace Campaign1851Scenery
 					W.Box(FVector3f(-0.05f, Y + S - 0.05f, 0.f), FVector3f(0.55f, Y + S + 0.05f, 0.6f), Wood);   // wheels
 				}
 				W.Box(FVector3f(-2.1f, Y - 0.35f, 0.3f), FVector3f(-1.4f, Y + 0.35f, 0.75f), Wood);             // limber
-				for (int32 H = 0; H < 2; ++H)
+				for (int32 H = 0; H < (bRiding ? 3 : 2); ++H)
 				{
 					for (float S : { -0.2f, 0.2f })
 					{
@@ -803,9 +806,24 @@ namespace Campaign1851Scenery
 						W.Box(FVector3f(X + 0.2f, Y + S - 0.07f, 0.7f), FVector3f(X + 0.45f, Y + S + 0.07f, 1.05f), Horse);
 					}
 				}
-				for (float CX : { -0.4f, -0.8f })
+				if (bRiding)
 				{
-					W.Box(FVector3f(CX - 0.1f, Y + 0.55f, 0.f), FVector3f(CX + 0.1f, Y + 0.75f, 1.1f), Coat);
+					// Mounted gunners riding beside the team.
+					for (float RX : { -2.4f, -3.4f })
+					{
+						const float RY = Y + (Y > 0.f ? 0.75f : -0.75f);
+						W.Box(FVector3f(RX - 0.4f, RY - 0.12f, 0.5f), FVector3f(RX + 0.35f, RY + 0.12f, 0.85f), Horse);
+						W.Box(FVector3f(RX + 0.25f, RY - 0.08f, 0.75f), FVector3f(RX + 0.5f, RY + 0.08f, 1.15f), Horse);
+						W.Box(FVector3f(RX - 0.14f, RY - 0.11f, 0.85f), FVector3f(RX + 0.08f, RY + 0.11f, 1.35f), Coat);
+						W.Box(FVector3f(RX - 0.08f, RY - 0.07f, 1.35f), FVector3f(RX + 0.03f, RY + 0.07f, 1.55f), Srgb(30, 30, 36));
+					}
+				}
+				else
+				{
+					for (float CX : { -0.4f, -0.8f })
+					{
+						W.Box(FVector3f(CX - 0.1f, Y + 0.55f, 0.f), FVector3f(CX + 0.1f, Y + 0.75f, 1.1f), Coat);
+					}
 				}
 			}
 			break;
@@ -814,7 +832,7 @@ namespace Campaign1851Scenery
 		static const TCHAR* Names[] = { TEXT("Ground"), TEXT("Barracks"), TEXT("Scaffold"), TEXT("CraneMast"), TEXT("CraneJib"), TEXT("Wagon"), TEXT("Flagpole"), TEXT("Flag"),
 			TEXT("Stables"), TEXT("Depot"), TEXT("Infirmary"), TEXT("Arsenal"), TEXT("Lazaret"), TEXT("Battery"), TEXT("PowderMagazine"), TEXT("StarFort"),
 			TEXT("Telegraph"), TEXT("Granary"), TEXT("Train"), TEXT("Station"),
-			TEXT("FormationInfantry"), TEXT("FormationGuard"), TEXT("FormationJager"), TEXT("FormationCavalry"), TEXT("FormationArtillery") };
+			TEXT("FormationInfantry"), TEXT("FormationGuard"), TEXT("FormationJager"), TEXT("FormationCavalry"), TEXT("FormationArtillery"), TEXT("FormationHorseArtillery") };
 		return Finish(W, Material, FString::Printf(TEXT("SM_Campaign1851_Site_%s"), Names[int32(Piece)]));
 	}
 }
