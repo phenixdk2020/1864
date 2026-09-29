@@ -204,13 +204,62 @@ void ACampaign1851PlayerController::TryInit()
 		Overlay->ToggleTrainingMenu();
 		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|ui|training menu open=%d selected=%d"), Overlay->IsTrainingMenuOpen() ? 1 : 0, Overlay->GetSelectedRegiments().Num());
 	}
+	// -CampaignDiplomacy=SE:0;SE:1;GB:3 takes foreign actions (0 envoy, 1 trade, 2 alliance, 3 guarantee) with test relations.
+	FString DiplomacyTest;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignDiplomacy="), DiplomacyTest, false))
+	{
+		TArray<FString> Items;
+		DiplomacyTest.ParseIntoArray(Items, TEXT(";"));
+		for (const FString& Item : Items)
+		{
+			FString Id, Action;
+			Item.Split(TEXT(":"), &Id, &Action);
+			const int32 n = Map->GetNations().IndexOfByPredicate([&Id](const FCampaign1851Nation& N) { return N.Id == Id; });
+			FString Why;
+			const bool bDone = Map->DoDiplomacy(n, ACampaign1851Map::EDiplomacyAction(FCString::Atoi(*Action)), &Why);
+			UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|diplomacy|%s|%s|%s|relation %.0f|income %.0f"), *Id, *Action, bDone ? TEXT("done") : *Why,
+				Map->GetNations().IsValidIndex(n) ? Map->GetNations()[n].Relation : 0.f, Map->ForeignIncomePerYear());
+		}
+	}
+	// -CampaignResearchDone=conserves,sanitation grants topics; -CampaignResearch=staff starts one; -CampaignDoctrine=0:1,2:2 sets doctrines.
+	FString ResearchTest;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignResearchDone="), ResearchTest, false))
+	{
+		TArray<FString> Ids;
+		ResearchTest.ParseIntoArray(Ids, TEXT(","));
+		for (const FString& Id : Ids)
+		{
+			Map->GrantResearch(Id);
+		}
+	}
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignResearch="), ResearchTest))
+	{
+		FString Why;
+		const bool bDone = Map->StartResearch(Campaign1851Research::FindTopic(ResearchTest), &Why);
+		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|research|%s|%s"), *ResearchTest, bDone ? TEXT("started") : *Why);
+	}
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignDoctrine="), ResearchTest, false))
+	{
+		TArray<FString> Items;
+		ResearchTest.ParseIntoArray(Items, TEXT(","));
+		for (const FString& Item : Items)
+		{
+			FString Level, Choice, Why;
+			Item.Split(TEXT(":"), &Level, &Choice);
+			const bool bDone = Map->SetDoctrine(FCString::Atoi(*Level), FCString::Atoi(*Choice), &Why);
+			UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|doctrine|%s|%s"), *Item, bDone ? TEXT("set") : *Why);
+		}
+	}
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|research-effects|loss %.2f|cover +%.0f|guns %.2f|infantry %.2f|food %.0f|call-in %.2f"),
+		Map->DanishLossFactor(), Map->FortCoverBonus(), Map->DanishGunFactor(), Map->InfantryFactor(), Map->FoodCap(), Map->CallInFactor());
 	FString WindowName;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignOpenWindow="), WindowName) && Overlay.IsValid())
 	{
 		Overlay->OpenWindow(WindowName == TEXT("army") ? SCampaign1851Overlay::EWindow::Army : WindowName == TEXT("officers") ? SCampaign1851Overlay::EWindow::Officers
 			: WindowName == TEXT("budget") ? SCampaign1851Overlay::EWindow::Budget : WindowName == TEXT("trains") ? SCampaign1851Overlay::EWindow::Trains
 			: WindowName == TEXT("chart") ? SCampaign1851Overlay::EWindow::Chart : WindowName == TEXT("council") ? SCampaign1851Overlay::EWindow::Council
-			: WindowName == TEXT("supply") ? SCampaign1851Overlay::EWindow::Supply : SCampaign1851Overlay::EWindow::Towns);
+			: WindowName == TEXT("supply") ? SCampaign1851Overlay::EWindow::Supply : WindowName == TEXT("foreign") ? SCampaign1851Overlay::EWindow::Foreign
+			: WindowName == TEXT("research") ? SCampaign1851Overlay::EWindow::Research : SCampaign1851Overlay::EWindow::Towns);
 	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignSupplyMap")) && Overlay.IsValid())
 	{
 		Overlay->ToggleSupplyMap();
@@ -905,6 +954,38 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Map->RetreatFromBattle(Module);
 			SaveToSlot(TEXT("Autosave"), true);
 		}
+		else if (Button == SCampaign1851Overlay::EButton::Diplomacy)
+		{
+			FString Why;
+			const bool bDone = Map->DoDiplomacy(Module / 10, ACampaign1851Map::EDiplomacyAction(Module % 10), &Why);
+			Overlay->ShowToast(bDone ? FString(TEXT("Udført")) : Why);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::ResearchStart)
+		{
+			FString Why;
+			Overlay->ShowToast(Map->StartResearch(Module, &Why) ? FString::Printf(TEXT("Forskning påbegyndt: %s"), Campaign1851Research::Topics()[Module].Name) : Why);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::DoctrineSet)
+		{
+			FString Why;
+			if (Map->SetDoctrine(Module / 10, Module % 10, &Why))
+			{
+				Overlay->ShowToast(FString::Printf(TEXT("Ny doktrin: %s"), Campaign1851Research::DoctrineName(Module / 10, Module % 10)));
+			}
+			else if (!Why.IsEmpty())
+			{
+				Overlay->ShowToast(Why);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::MakePeace)
+		{
+			const FString Terms = Map->PeaceTerms();
+			if (Map->MakePeace())
+			{
+				Overlay->ShowToast(FString::Printf(TEXT("Fred sluttet. %s"), *Terms));
+				SaveToSlot(TEXT("Autosave"), true);
+			}
+		}
 		else if (Button == SCampaign1851Overlay::EButton::Footing)
 		{
 			FString Why;
@@ -1397,6 +1478,8 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->HorseStock = Map->GetHorseStock();
 	Save->Footing = uint8(Map->GetFooting());
 	Save->War = Map->SaveWar();
+	Save->Diplomacy = Map->SaveDiplomacy();
+	Save->Research = Map->SaveResearch();
 	Map->ExportUnits();
 	Save->MaterialLots = Map->GetMaterialLots();
 	if (Save->Links.Num() > 0)
@@ -1515,6 +1598,16 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	if (Save->SaveVersion >= 22)
 	{
 		Map->RestoreWar(Save->War);
+	}
+	if (Save->SaveVersion >= 23)
+	{
+		Map->RestoreDiplomacy(Save->Diplomacy);
+		Map->RestoreResearch(Save->Research);
+	}
+	else
+	{
+		Map->ResetDiplomacy();
+		Map->ResetResearch();
 	}
 	Map->SetMaterialLots(Save->SaveVersion >= 16 ? Save->MaterialLots : TArray<FVector>());
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);

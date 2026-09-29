@@ -61,7 +61,7 @@ void ACampaign1851Map::DailyWar()
 			continue;
 		}
 		EventsFired.Add(P.Id);
-		Tension = FMath::Clamp(Tension + P.Tension, 0.f, 100.f);
+		Tension = FMath::Clamp(Tension + P.Tension * (P.Tension > 0.f ? GuaranteeDamping() : 1.f), 0.f, 100.f);
 		News.Add(FString::Printf(TEXT("%s (spænding %.0f)"), *P.Text, Tension));
 		FCampaign1851Decision D;
 		D.Day = CampaignDays;
@@ -87,7 +87,7 @@ void ACampaign1851Map::MonthlyWar()
 	// The tension drifts back towards an uneasy peace; a mobilised Danish army raises it.
 	if (!bAtWar)
 	{
-		Tension += Footing != ECampaign1851Footing::Peace ? 3.f : (25.f - Tension) * 0.03f;
+		Tension += Footing != ECampaign1851Footing::Peace ? 3.f * GuaranteeDamping() : (25.f - Tension) * 0.03f;
 		Tension = FMath::Clamp(Tension, 0.f, 100.f);
 	}
 }
@@ -95,6 +95,7 @@ void ACampaign1851Map::MonthlyWar()
 void ACampaign1851Map::DeclareWar()
 {
 	bAtWar = true;
+	WarStartDay = CampaignDays;
 	News.Add(TEXT("KRIG: Preussen og Østrig erklærer Danmark krig"));
 	FCampaign1851Decision D;
 	D.Day = CampaignDays;

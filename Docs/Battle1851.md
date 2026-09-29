@@ -13,6 +13,12 @@
   - hver kanon: 60 mand.
   - hver skanse: mand inde × (1 + 2 × dækning), plus reserven × (1 + reservens dækning), plus kanoner × 60 × ammunition.
 - **Fjendens styrke:** mand × kvalitet + kanoner × 60. Kvaliteten er Preussen 1,3 (tændnålsgeværet), Østrig 1,05 og Forbundet 0,9.
+- **Doktrin og forskning** (*Research1851.md*):
+  - Den danske kampkraft ganges med doktrinens faktor, ×1,05 med stabsskolen og ×0,9 under en omstilling.
+  - Infanteriet ganges med 1,25 med bagladegeværet.
+  - Kanonerne ganges med 1,4 med riflede kanoner.
+  - Skansernes dækning øges med fæstningsdoktrinen og fæstningsbyggeriet.
+  - Egne tab ganges med sanitetsvæsenets og doktrinens faktor.
 - **Chance for sejr:** r² / (1 + r²), hvor r = dansk styrke / fjendens styrke.
 - **Tab:**
   - Taberen mister 15–25 % og vinderen 5–10 %. Ved uafgjort mister begge 8–14 %.

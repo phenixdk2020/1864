@@ -10,6 +10,7 @@
 #include "Campaign1851Map.generated.h"
 
 class UStaticMeshComponent;
+class FJsonObject;
 class UInstancedStaticMeshComponent;
 class UHierarchicalInstancedStaticMeshComponent;
 class UMaterialInterface;
@@ -112,6 +113,29 @@ struct FPlannedEvent
 	bool bSkip = false;
 };
 
+/** A research project of the war ministry (Campaign1851Research.cpp). */
+struct FCampaign1851ResearchTopic
+{
+	const TCHAR* Id;
+	const TCHAR* Name;
+	const TCHAR* Effect;
+	int32 Year;            // open from this year
+	double CostPerMonth;
+	int32 Months;
+	const TCHAR* Needs;    // another topic first (or null)
+};
+
+namespace Campaign1851Research
+{
+	const TArray<FCampaign1851ResearchTopic>& Topics();
+	int32 FindTopic(const FString& Id);
+	/** Doctrine levels: 0 strategic, 1 operational, 2 tactical. */
+	int32 DoctrineChoices(int32 Level);
+	const TCHAR* LevelName(int32 Level);
+	const TCHAR* DoctrineName(int32 Level, int32 Choice);
+	const TCHAR* DoctrineEffect(int32 Level, int32 Choice);
+}
+
 /** A nation's figures for the council window (from the map for Denmark, the abstract model for the others). */
 struct FCampaign1851NationFigures
 {
@@ -137,6 +161,8 @@ struct FCampaign1851City
 	int32 AmtId = 0;
 	/** The nation holding the town in war ("PR", "AT"); empty when it is the kingdom's own. */
 	FString Occupier;
+	/** Ceded at a peace: it has left the monarchy (bForeign is then true). */
+	bool bCeded = false;
 
 	/** Military building plot beside a main road at the edge of town (towns of 2,500+). */
 	bool bHasPlot = false;
@@ -413,6 +439,61 @@ public:
 	bool BuySupplyColumn();
 	TArray<FString> SaveSupplyColumns() const;
 	void RestoreSupplyColumns(const TArray<FString>& Lines);
+
+	// ---- Foreign affairs (Campaign1851Diplomacy.cpp).
+
+	enum class EDiplomacyAction : uint8 { Envoy, Trade, Alliance, Guarantee };
+	void ResetDiplomacy();
+	/** Why an action cannot be taken now (empty: it can; "-": it does not apply to this nation). */
+	FString DiplomacyBlockReason(int32 NationIndex, EDiplomacyAction Action) const;
+	bool DoDiplomacy(int32 NationIndex, EDiplomacyAction Action, FString* OutReason = nullptr);
+	/** Factor on rises of the tension (each guarantor takes a fifth off). */
+	float GuaranteeDamping() const;
+	/** The Sound Dues (or their redemption) and the trade treaties, rd. a year. */
+	double ForeignIncomePerYear() const;
+	int32 TradeTreaties() const;
+	bool IsSoundDuesAbolished() const { return bSoundDuesAbolished; }
+	bool HasPeaceConference() const { return PeaceTalksDay >= 0.0; }
+	/** What a peace would cost now. */
+	FString PeaceTerms() const;
+	/** Sues for peace: the occupied towns are ceded and the war ends. */
+	bool MakePeace();
+	TArray<FString> SaveDiplomacy() const;
+	void RestoreDiplomacy(const TArray<FString>& Lines);
+	static constexpr double EnvoyCost = 5000.0;
+	static constexpr double TreatyCost = 10000.0;
+	static constexpr double AllianceCost = 20000.0;
+	static constexpr double GuaranteeCost = 15000.0;
+
+	// ---- Research and doctrine (Campaign1851Research.cpp).
+
+	void ResetResearch();
+	bool HasResearch(const TCHAR* Id) const;
+	/** Why a topic cannot be started (empty: it can). */
+	FString ResearchBlockReason(int32 Topic) const;
+	bool StartResearch(int32 Topic, FString* OutReason = nullptr);
+	int32 GetResearching() const { return Researching; }
+	int32 GetResearchMonths() const { return ResearchMonths; }
+	int32 GetDoctrine(int32 Level) const { return Level >= 0 && Level < 3 ? Doctrine[Level] : 0; }
+	bool SetDoctrine(int32 Level, int32 Choice, FString* OutReason = nullptr);
+	bool IsDoctrineChanging() const { return CampaignDays < DoctrineSettledDay; }
+	double GetDoctrineSettledDay() const { return DoctrineSettledDay; }
+	/** Effects in the battles, forts, supply and mobilisation. */
+	float DanishQualityFactor(const FCampaign1851Battle& B) const;
+	float DanishLossFactor() const;
+	float FortCoverBonus() const;
+	float DanishGunFactor() const;
+	float InfantryFactor() const;
+	float FoodCap() const;
+	float CallInFactor() const;
+	/** "doctrine" and "research" for Units.json and the battle request. */
+	void WriteDoctrineJson(const TSharedRef<FJsonObject>& Doc) const;
+	TArray<FString> SaveResearch() const;
+	void RestoreResearch(const TArray<FString>& Lines);
+	/** For tests: a topic done at once. */
+	void GrantResearch(const FString& Id) { if (Campaign1851Research::FindTopic(Id) != INDEX_NONE) { Researched.Add(Id); } }
+	static constexpr double DoctrineChangeDays = 60.0;
+	static constexpr double DoctrineChangeCost = 5000.0;
 
 	// ---- War and peace (Campaign1851War.cpp).
 
@@ -902,6 +983,20 @@ private:
 	double LastBattlePoll = 0.0;
 	float Tension = 25.f;
 	bool bAtWar = false;
+	double WarStartDay = 0.0;
+	// Foreign affairs.
+	void MonthlyDiplomacy();
+	bool bSoundDuesAbolished = false;
+	int32 RedemptionYearsLeft = 0;
+	double PeaceTalksDay = -1.0;
+	// Research and doctrine.
+	void MonthlyResearch();
+	TSet<FString> Researched;
+	int32 Researching = INDEX_NONE;
+	int32 ResearchMonths = 0;
+	bool bResearchStalled = false;
+	int32 Doctrine[3] = { 0, 0, 1 };
+	double DoctrineSettledDay = 0.0;
 	TArray<FString> EventsFired;
 	TArray<FPlannedEvent> EventPlan;
 	TArray<FCampaign1851EnemyCorps> EnemyCorps;

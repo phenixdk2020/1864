@@ -261,7 +261,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.47 SLAG — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.48 UDENRIGS — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -1826,6 +1826,164 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 	}
 }
 
+void SCampaign1851Overlay::PaintForeign(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
+{
+	const TArray<FCampaign1851Nation>& Nations = Map->GetNations();
+	PaintText(Geometry, Out, Layer + 1, TEXT("Udenrigsministeriet"), Pos + FVector2D(24.f, 34.f), Serif(22), Ink, 0.f);
+	PaintTextFit(Geometry, Out, Layer + 1, TEXT("Forholdet til udlandet: gesandter, handelstraktater, en alliance med Sverige-Norge og stormagternes garanti for helstaten"),
+		Pos + FVector2D(24.f, 64.f), Serif(12, EFace::Italic), Gold, Size.X - 170.f);
+	const float X = Pos.X + 24.f;
+	float Y = Pos.Y + 106.f;
+	PaintText(Geometry, Out, Layer + 1, TEXT("F O R H O L D E T   T I L   D A N M A R K"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
+	Y += 24.f;
+	const float Cols[] = { 0.f, 170.f, 400.f, 520.f, 660.f, 800.f, 940.f };
+	const TCHAR* Heads[] = { TEXT("Land"), TEXT("Forhold"), TEXT("Handel rd./år"), TEXT("Gesandt"), TEXT("Handelstraktat"), TEXT("Alliance"), TEXT("Garanti") };
+	for (int32 c = 0; c < 7; ++c)
+	{
+		PaintText(Geometry, Out, Layer + 1, Heads[c], FVector2D(X + Cols[c], Y), Serif(10, EFace::Italic), MutedInk, 0.f, false);
+	}
+	Y += 26.f;
+	const TCHAR* Labels[] = { TEXT("GESANDT"), TEXT("TRAKTAT"), TEXT("ALLIANCE"), TEXT("GARANTI") };
+	const double Costs[] = { ACampaign1851Map::EnvoyCost, ACampaign1851Map::TreatyCost, ACampaign1851Map::AllianceCost, ACampaign1851Map::GuaranteeCost };
+	for (int32 n = 0; n < Nations.Num(); ++n)
+	{
+		const FCampaign1851Nation& N = Nations[n];
+		if (N.IsPlayer())
+		{
+			continue;
+		}
+		PaintTextFit(Geometry, Out, Layer + 1, N.Name, FVector2D(X + Cols[0], Y), Serif(13), Ink, 160.f);
+		// The relation as a bar from -100 to 100.
+		const FLinearColor RelColour = N.Relation >= 40.f ? FLinearColor(0.45f, 0.75f, 0.4f) : N.Relation >= 0.f ? Ink : FLinearColor(0.95f, 0.4f, 0.35f);
+		PaintBar(Geometry, Out, Layer + 1, FVector2D(X + Cols[1], Y - 5.f), 150.f, (N.Relation + 100.f) / 200.f);
+		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("%+.0f"), N.Relation), FVector2D(X + Cols[1] + 160.f, Y), Serif(12), RelColour, 0.f, false);
+		PaintText(Geometry, Out, Layer + 1, N.bTrade ? Thousands(N.TradeValue) : FString::Printf(TEXT("(%s)"), *Thousands(N.TradeValue)), FVector2D(X + Cols[2], Y), Serif(12), N.bTrade ? Ink : MutedInk, 0.f, false);
+		for (int32 a = 0; a < 4; ++a)
+		{
+			const FString Why = Map->DiplomacyBlockReason(n, ACampaign1851Map::EDiplomacyAction(a));
+			if (Why == TEXT("-"))
+			{
+				continue;
+			}
+			const bool bHas = (a == 1 && N.bTrade) || (a == 2 && N.bAlliance) || (a == 3 && N.bGuarantee);
+			if (bHas)
+			{
+				PaintText(Geometry, Out, Layer + 1, a == 1 ? TEXT("indgået") : a == 2 ? TEXT("allieret") : TEXT("givet"), FVector2D(X + Cols[3 + a], Y), Serif(12, EFace::Italic), Gold, 0.f, false);
+				continue;
+			}
+			PaintButton(Geometry, Out, Layer + 1, FVector2D(X + Cols[3 + a], Y - 12.f), FVector2D(128.f, 24.f), FString::Printf(TEXT("%s %dk"), Labels[a], int32(Costs[a] / 1000.0)),
+				EButton::Diplomacy, n * 10 + a, false, !Why.IsEmpty());
+			if (!Why.IsEmpty())
+			{
+				PaintTextFit(Geometry, Out, Layer + 1, Why, FVector2D(X + Cols[3 + a], Y + 16.f), Serif(9, EFace::Italic), MutedInk, 130.f);
+			}
+		}
+		PaintTextFit(Geometry, Out, Layer + 1, N.Note, FVector2D(X, Y + 16.f), Serif(9, EFace::Italic), MutedInk, 380.f);
+		Y += 48.f;
+	}
+	Y += 10.f;
+	PaintText(Geometry, Out, Layer + 1, TEXT("I N D T Æ G T E R   F R A   U D L A N D E T"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
+	Y += 26.f;
+	PaintText(Geometry, Out, Layer + 1, Map->IsSoundDuesAbolished() ? TEXT("Øresundstolden er ophævet: kapitaliseringen betales i 20 år") : TEXT("Øresundstolden (ophæves ved Københavnstraktaten 1857)"),
+		FVector2D(X, Y), Serif(13), Ink, 0.f, false);
+	PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("I alt %s rd. om året  ·  %d handelstraktater (+%.2f %% vækst i handelsbyerne)"), *Thousands(int32(Map->ForeignIncomePerYear())),
+		Map->TradeTreaties(), 0.05f * Map->TradeTreaties()), FVector2D(X, Y + 22.f), Serif(12), Ink, 0.f, false);
+	Y += 60.f;
+	PaintText(Geometry, Out, Layer + 1, TEXT("K R I G   O G   F R E D"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
+	Y += 26.f;
+	PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("Spænding %.0f / 100  ·  garantierne dæmper stigninger til %.0f %%"), Map->GetTension(), Map->GuaranteeDamping() * 100.f),
+		FVector2D(X, Y), Serif(13), Ink, 0.f, false);
+	Y += 28.f;
+	if (Map->IsAtWar())
+	{
+		PaintText(Geometry, Out, Layer + 1, Map->HasPeaceConference() ? TEXT("Fredskonferencen i London er samlet") : TEXT("Ingen konference endnu (kræver en garantimagt med forhold 40 og 60 dages krig)"),
+			FVector2D(X, Y), Serif(12, EFace::Italic), Map->HasPeaceConference() ? Gold : MutedInk, 0.f, false);
+		Y += 24.f;
+		PaintTextFit(Geometry, Out, Layer + 1, Map->PeaceTerms(), FVector2D(X, Y), Serif(12), Ink, 700.f);
+		PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 720.f, Y - 12.f), FVector2D(200.f, 28.f), TEXT("SLUT FRED"), EButton::MakePeace, 0);
+	}
+	else
+	{
+		PaintText(Geometry, Out, Layer + 1, TEXT("Fred. En alliance hæver spændingen med Berlin og Wien lidt; stormagternes garanti dæmper den."), FVector2D(X, Y), Serif(12, EFace::Italic), MutedInk, 0.f, false);
+	}
+}
+
+void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
+{
+	PaintText(Geometry, Out, Layer + 1, TEXT("Forskning og doktriner"), Pos + FVector2D(24.f, 34.f), Serif(22), Ink, 0.f);
+	PaintTextFit(Geometry, Out, Layer + 1, TEXT("Krigsministeriet udvikler ét projekt ad gangen, betalt måned for måned; doktrinen bestemmer, hvordan hæren kæmper"),
+		Pos + FVector2D(24.f, 64.f), Serif(12, EFace::Italic), Gold, Size.X - 170.f);
+	const float X = Pos.X + 24.f;
+	float Y = Pos.Y + 106.f;
+	const float LeftW = 700.f;
+	PaintText(Geometry, Out, Layer + 1, TEXT("F O R S K N I N G"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
+	Y += 28.f;
+	const TArray<FCampaign1851ResearchTopic>& Topics = Campaign1851Research::Topics();
+	for (int32 t = 0; t < Topics.Num(); ++t)
+	{
+		const FCampaign1851ResearchTopic& T = Topics[t];
+		const FString Why = Map->ResearchBlockReason(t);
+		const bool bDone = Why == TEXT("færdig");
+		const bool bBusy = Map->GetResearching() == t;
+		PaintText(Geometry, Out, Layer + 1, T.Name, FVector2D(X, Y), Serif(14), bDone ? Gold : Ink, 0.f, false);
+		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("fra %d  ·  %d md.  ·  %s rd./md."), T.Year, T.Months, *Thousands(int32(T.CostPerMonth))),
+			FVector2D(X + 250.f, Y), Serif(11), MutedInk, 0.f, false);
+		PaintTextFit(Geometry, Out, Layer + 1, T.Effect, FVector2D(X, Y + 18.f), Serif(10, EFace::Italic), MutedInk, LeftW - 170.f);
+		if (bDone)
+		{
+			PaintText(Geometry, Out, Layer + 1, TEXT("færdig"), FVector2D(X + LeftW - 150.f, Y + 6.f), Serif(12, EFace::Italic), Gold, 0.f, false);
+		}
+		else if (bBusy)
+		{
+			PaintBar(Geometry, Out, Layer + 1, FVector2D(X + LeftW - 150.f, Y), 140.f, float(Map->GetResearchMonths()) / float(T.Months));
+			PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("%d / %d md."), Map->GetResearchMonths(), T.Months), FVector2D(X + LeftW - 150.f, Y + 18.f), Serif(10), Ink, 0.f, false);
+		}
+		else
+		{
+			PaintButton(Geometry, Out, Layer + 1, FVector2D(X + LeftW - 150.f, Y - 8.f), FVector2D(140.f, 24.f), TEXT("PÅBEGYND"), EButton::ResearchStart, t, false, !Why.IsEmpty());
+			if (!Why.IsEmpty())
+			{
+				PaintTextFit(Geometry, Out, Layer + 1, Why, FVector2D(X + LeftW - 150.f, Y + 22.f), Serif(9, EFace::Italic), MutedInk, 140.f);
+			}
+		}
+		Y += 50.f;
+	}
+	// The doctrines.
+	const float RX = X + LeftW + 30.f, RW = Size.X - LeftW - 90.f;
+	float RY = Pos.Y + 106.f;
+	DrawLines(Geometry, Out, Layer + 1, { FVector2D(RX - 14.f, RY - 10.f), FVector2D(RX - 14.f, Pos.Y + Size.Y - 24.f) }, Gold.CopyWithNewOpacity(0.3f), 1.f);
+	PaintText(Geometry, Out, Layer + 1, TEXT("D O K T R I N E R"), FVector2D(RX, RY), Serif(11), Gold, 0.f, false);
+	RY += 20.f;
+	PaintTextFit(Geometry, Out, Layer + 1, Map->IsDoctrineChanging()
+		? FString::Printf(TEXT("Hæren omstiller sig til %s (kampkraft −10 %%)"), *ACampaign1851Map::FormatDate(ACampaign1851Map::StartDate() + FTimespan::FromDays(Map->GetDoctrineSettledDay()), true))
+		: FString::Printf(TEXT("Et skift koster %s rd., lidt moral og %.0f dages omstilling"), *Thousands(int32(ACampaign1851Map::DoctrineChangeCost)), ACampaign1851Map::DoctrineChangeDays),
+		FVector2D(RX, RY + 6.f), Serif(10, EFace::Italic), Map->IsDoctrineChanging() ? Gold : MutedInk, RW);
+	RY += 36.f;
+	for (int32 l = 0; l < 3; ++l)
+	{
+		PaintText(Geometry, Out, Layer + 1, Campaign1851Research::LevelName(l), FVector2D(RX, RY), Serif(14), Ink, 0.f, false);
+		RY += 20.f;
+		const int32 Choices = Campaign1851Research::DoctrineChoices(l);
+		const float BW = (RW - 8.f * (Choices - 1)) / Choices;
+		for (int32 c = 0; c < Choices; ++c)
+		{
+			PaintButton(Geometry, Out, Layer + 1, FVector2D(RX + c * (BW + 8.f), RY), FVector2D(BW, 26.f), FString(Campaign1851Research::DoctrineName(l, c)).ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å")),
+				EButton::DoctrineSet, l * 10 + c, Map->GetDoctrine(l) == c, Map->IsDoctrineChanging() && Map->GetDoctrine(l) != c);
+		}
+		RY += 34.f;
+		PaintTextFit(Geometry, Out, Layer + 1, Campaign1851Research::DoctrineEffect(l, Map->GetDoctrine(l)), FVector2D(RX, RY + 4.f), Serif(10, EFace::Italic), MutedInk, RW);
+		RY += 34.f;
+	}
+	RY += 10.f;
+	PaintText(Geometry, Out, Layer + 1, TEXT("V I R K N I N G   I   S L A G"), FVector2D(RX, RY), Serif(11), Gold, 0.f, false);
+	RY += 26.f;
+	auto Line = [&](const FString& Text) { PaintTextFit(Geometry, Out, Layer + 1, Text, FVector2D(RX, RY), Serif(12), Ink, RW); RY += 20.f; };
+	Line(FString::Printf(TEXT("Egne tab × %.2f"), Map->DanishLossFactor()));
+	Line(FString::Printf(TEXT("Skansernes dækning +%.0f %%-point"), Map->FortCoverBonus()));
+	Line(FString::Printf(TEXT("Kanoner × %.2f  ·  infanteri × %.2f"), Map->DanishGunFactor(), Map->InfantryFactor()));
+	Line(FString::Printf(TEXT("Proviant båret: %.0f dage  ·  indkaldelse × %.2f"), Map->FoodCap(), Map->CallInFactor()));
+}
+
 void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
 {
 	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
@@ -2649,11 +2807,11 @@ void SCampaign1851Overlay::PaintCloseX(const FGeometry& Geometry, FSlateWindowEl
 void SCampaign1851Overlay::PaintMenuBar(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
 {
 	// Under the calendar: one window at a time, the open one lit.
-	const TCHAR* Labels[] = { TEXT("HÆREN"), TEXT("OFFICERER"), TEXT("STATSKASSEN"), TEXT("BYER"), TEXT("TOG"), TEXT("KAMPORDEN"), TEXT("STATSRÅD"), TEXT("FORSYNING") };
-	const float W = 94.f, Gap = 4.f;
-	const float Total = 8.f * W + 7.f * Gap;
-	const float X0 = FMath::Max((Geometry.GetLocalSize().X - 660.f) * 0.5f, 484.f) + (660.f - Total) * 0.5f;
-	for (int32 i = 0; i < 8; ++i)
+	const TCHAR* Labels[] = { TEXT("HÆREN"), TEXT("OFFICERER"), TEXT("STATSKASSEN"), TEXT("BYER"), TEXT("TOG"), TEXT("KAMPORDEN"), TEXT("STATSRÅD"), TEXT("FORSYNING"), TEXT("UDENRIGS"), TEXT("FORSKNING") };
+	const float W = 101.f, Gap = 3.f;
+	const float Total = 10.f * W + 9.f * Gap;
+	const float X0 = FMath::Max((Geometry.GetLocalSize().X - Total) * 0.5f, 484.f);
+	for (int32 i = 0; i < 10; ++i)
 	{
 		PaintButton(Geometry, Out, Layer, FVector2D(X0 + i * (W + Gap), 92.f), FVector2D(W, 28.f), Labels[i], EButton::MainMenu, i + 1, int32(Window) == i + 1);
 	}
@@ -2930,6 +3088,14 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 	else if (Window == EWindow::Council)
 	{
 		PaintCouncil(Geometry, Out, Layer + 2, Pos, Size);
+	}
+	else if (Window == EWindow::Foreign)
+	{
+		PaintForeign(Geometry, Out, Layer + 2, Pos, Size);
+	}
+	else if (Window == EWindow::Research)
+	{
+		PaintResearch(Geometry, Out, Layer + 2, Pos, Size);
 	}
 	else if (Window == EWindow::Chart)
 	{

@@ -127,6 +127,10 @@ bool ACampaign1851Map::LoadNations()
 		O->TryGetNumberField(TEXT("taxPerHead"), N.TaxPerHead);
 		if (O->TryGetNumberField(TEXT("growth"), V)) { N.BaseGrowth = float(V); }
 		O->TryGetStringField(TEXT("note"), N.Note);
+		if (O->TryGetNumberField(TEXT("relation"), V)) { N.BaseRelation = float(V); }
+		O->TryGetNumberField(TEXT("tradeValue"), N.TradeValue);
+		O->TryGetBoolField(TEXT("canAlly"), N.bCanAlly);
+		O->TryGetBoolField(TEXT("canGuarantee"), N.bCanGuarantee);
 		// The player's own nation starts with every portfolio in his hands.
 		for (ECampaign1851Delegation& M : N.Modes)
 		{
@@ -200,6 +204,8 @@ void ACampaign1851Map::ResetWorld(int32 InSeed, float InDeviation)
 	}
 	ResetManpower();
 	ResetWar();
+	ResetDiplomacy();
+	ResetResearch();
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|world|seed %d|deviation %.0f %%"), Seed, Deviation * 100.f);
 }
 
@@ -225,6 +231,11 @@ float ACampaign1851Map::UrbanGrowthRate(int32 CityIndex) const
 			Rate += Campaign1851Nations::ChausseeGrowth;
 			break;
 		}
+	}
+	// Trade treaties quicken the trading towns.
+	if (City.Population >= 4000)
+	{
+		Rate += 0.05f * TradeTreaties();
 	}
 	for (const ACampaign1851ConstructionSite* Site : Projects)
 	{

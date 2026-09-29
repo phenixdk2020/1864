@@ -102,7 +102,7 @@ void ACampaign1851Map::ResetSupply()
 	UpdateSupplyColumnPieces();
 	for (FCampaign1851Regiment& R : Regiments)
 	{
-		R.Food = Campaign1851Supply::FoodCarried;
+		R.Food = FoodCap();
 		R.Fodder = Campaign1851Supply::FodderCarried;
 		R.Ammo = 1.f;
 	}
@@ -124,7 +124,7 @@ void ACampaign1851Map::AdvanceSupply(float DeltaDays)
 		const bool bGarrison = !R.IsMarching() && Cities.IsValidIndex(R.Town) && !Cities[R.Town].bForeign;
 		if (bGarrison)
 		{
-			R.Food = FoodCarried;
+			R.Food = FoodCap();
 			R.Fodder = FodderCarried;
 			// Ammunition only where a depot or arsenal holds it (the garrison's own store).
 			FCampaign1851DepotStock* Own = Depots.Find(R.Town);
@@ -147,7 +147,7 @@ void ACampaign1851Map::AdvanceSupply(float DeltaDays)
 		if (const int32 Depot = DepotFor(Km); Depot != INDEX_NONE)
 		{
 			FCampaign1851DepotStock& S = Depots[Depot];
-			const float NeedFood = FMath::Max(0.f, FoodCarried - R.Food) * R.Men;
+			const float NeedFood = FMath::Max(0.f, FoodCap() - R.Food) * R.Men;
 			const float TakeFood = FMath::Min(NeedFood, S.Food);
 			S.Food -= TakeFood;
 			R.Food += R.Men > 0 ? TakeFood / R.Men : 0.f;
@@ -169,7 +169,7 @@ void ACampaign1851Map::AdvanceSupply(float DeltaDays)
 		{
 			// The town sells what it can spare in a day (about a ration for every tenth inhabitant).
 			const float Spare = Cities[Town].Population * 0.1f * DeltaDays;
-			const float TakeFood = FMath::Min(FMath::Max(0.f, FoodCarried - R.Food) * R.Men, Spare);
+			const float TakeFood = FMath::Min(FMath::Max(0.f, FoodCap() - R.Food) * R.Men, Spare);
 			R.Food += R.Men > 0 ? TakeFood / R.Men : 0.f;
 			Bought += TakeFood * PurchasePricePerRation;
 			if (bFodder)
@@ -358,6 +358,7 @@ void ACampaign1851Map::ExportUnits() const
 	TSharedRef<FJsonObject> Doc = MakeShared<FJsonObject>();
 	Doc->SetStringField(TEXT("format"), TEXT("PROJECT1864-Units-1"));
 	Doc->SetStringField(TEXT("date"), GetDate().ToIso8601());
+	WriteDoctrineJson(Doc);
 	TArray<TSharedPtr<FJsonValue>> List;
 	for (int32 i = 0; i < Regiments.Num(); ++i)
 	{
@@ -588,7 +589,7 @@ void ACampaign1851Map::AdvanceSupplyColumns(float DeltaDays)
 		else if (Regiments.IsValidIndex(C.Target))
 		{
 			FCampaign1851Regiment& R = Regiments[C.Target];
-			const float Food = FMath::Min(C.Food, FMath::Max(0.f, Campaign1851Supply::FoodCarried - R.Food) * R.Men);
+			const float Food = FMath::Min(C.Food, FMath::Max(0.f, FoodCap() - R.Food) * R.Men);
 			R.Food += R.Men > 0 ? Food / R.Men : 0.f;
 			C.Food -= Food;
 			const float Fodder = FMath::Min(C.Fodder, FMath::Max(0.f, Campaign1851Supply::FodderCarried - R.Fodder) * R.Horses);
@@ -621,7 +622,7 @@ void ACampaign1851Map::AdvanceSupplyColumns(float DeltaDays)
 			Nearest = D.Value.Food > 1000.f ? FMath::Min(Nearest, FVector2D::Distance(TownKm(D.Key), R.Km)) : Nearest;
 		}
 		const float Drive = Nearest < 1e8 ? float(Nearest * 1.4 / (Campaign1851Supply::ColumnKmPerDay * Weather)) : 0.f;
-		if (Nearest < 1e8 && R.Food < FMath::Min(Drive + 1.f, Campaign1851Supply::FoodCarried - 0.5f))
+		if (Nearest < 1e8 && R.Food < FMath::Min(Drive + 1.f, FoodCap() - 0.5f))
 		{
 			SendSupplyColumn(false, r);
 		}

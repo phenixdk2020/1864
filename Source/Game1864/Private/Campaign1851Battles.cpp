@@ -59,6 +59,7 @@ int32 ACampaign1851Map::CorpsIndexOf(const FCampaign1851Battle& B) const
 void ACampaign1851Map::BattleStrengths(const FCampaign1851Battle& B, float& OutDanish, float& OutEnemy) const
 {
 	OutDanish = 0.f;
+	const float DoctrineMul = DanishQualityFactor(B);
 	for (int32 i : B.Regiments)
 	{
 		if (!Regiments.IsValidIndex(i))
@@ -69,7 +70,7 @@ void ACampaign1851Map::BattleStrengths(const FCampaign1851Battle& B, float& OutD
 		const Campaign1851Army::FBattleFactors F = Campaign1851Army::BattleFactors(R);
 		const float Quality = (F.Accuracy + 1.f / FMath::Max(F.ReloadTime, 0.5f) + F.Assault) / 3.f * (0.6f + 0.4f * F.Morale) * (0.7f + 0.3f * F.Cohesion);
 		const float Supply = FMath::Clamp(0.4f + 0.6f * R.Ammo, 0.4f, 1.f) * (R.Food > 0.f ? 1.f : 0.8f);
-		OutDanish += R.PresentMen() * Quality * Supply + R.Guns * GunWorth;
+		OutDanish += R.PresentMen() * Quality * Supply * DoctrineMul * (R.Arm == ECampaign1851Arm::Infantry ? InfantryFactor() : 1.f) + R.Guns * GunWorth * DanishGunFactor();
 	}
 	for (int32 Id : B.Forts)
 	{
@@ -82,8 +83,8 @@ void ACampaign1851Map::BattleStrengths(const FCampaign1851Battle& B, float& OutD
 		int32 Inside = 0, Reserve = 0;
 		FortMen(F, Inside, Reserve);
 		// Behind a parapet a man counts for more; the guns need their powder.
-		OutDanish += Inside * (1.f + 2.f * Campaign1851Forts::CoverPercent(F.Defence) / 100.f) + Reserve * (1.f + Campaign1851Forts::ReserveCover(F.bTrenches) / 100.f)
-			+ F.Guns * GunWorth * FMath::Clamp(F.RoundsPerGun / 120.f, 0.2f, 1.f);
+		OutDanish += (Inside * (1.f + 2.f * (Campaign1851Forts::CoverPercent(F.Defence) + FortCoverBonus()) / 100.f) + Reserve * (1.f + Campaign1851Forts::ReserveCover(F.bTrenches) / 100.f)) * DoctrineMul
+			+ F.Guns * GunWorth * DanishGunFactor() * FMath::Clamp(F.RoundsPerGun / 120.f, 0.2f, 1.f);
 	}
 	const int32 Ci = CorpsIndexOf(B);
 	OutEnemy = Ci != INDEX_NONE ? EnemyCorps[Ci].Men * EnemyQuality(EnemyCorps[Ci].Nation) + EnemyCorps[Ci].Guns * GunWorth : 0.f;
@@ -116,6 +117,7 @@ bool ACampaign1851Map::FightBattleIn3D(int32 BattleId)
 	Doc->SetNumberField(TEXT("battleId"), B->Id);
 	Doc->SetStringField(TEXT("date"), Now.ToIso8601());
 	Doc->SetStringField(TEXT("season"), GetSeasonName());
+	WriteDoctrineJson(Doc);
 	Doc->SetBoolField(TEXT("snow"), Now.GetMonth() == 12 || Now.GetMonth() <= 2);
 	Doc->SetNumberField(TEXT("lat"), LatLon.X);
 	Doc->SetNumberField(TEXT("lon"), LatLon.Y);
@@ -228,7 +230,10 @@ void ACampaign1851Map::AutoResolveBattle(int32 BattleId)
 	O.bDanishWin = Roll < Odds - 0.05f;
 	O.bDraw = !O.bDanishWin && Roll < Odds + 0.05f;
 	// Losses: the loser a fifth or so of those engaged, the winner a tenth; a draw both in between.
-	const float DanishShare = O.bDanishWin ? Rng.FRandRange(0.05f, 0.1f) : O.bDraw ? Rng.FRandRange(0.08f, 0.14f) : Rng.FRandRange(0.15f, 0.25f);
+	// Overwhelmed (odds under 1 in 10): many are taken prisoner.
+	// Sanitation and the doctrine lessen them.
+	const float DanishShare = DanishLossFactor() * (O.bDanishWin ? Rng.FRandRange(0.05f, 0.1f) : O.bDraw ? Rng.FRandRange(0.08f, 0.14f)
+		: Odds < 0.1f ? Rng.FRandRange(0.35f, 0.55f) : Rng.FRandRange(0.15f, 0.25f));
 	const float EnemyShare = O.bDanishWin ? Rng.FRandRange(0.15f, 0.25f) : O.bDraw ? Rng.FRandRange(0.08f, 0.14f) : Rng.FRandRange(0.04f, 0.09f);
 	for (int32 i : B.Regiments)
 	{
@@ -247,7 +252,8 @@ void ACampaign1851Map::AutoResolveBattle(int32 BattleId)
 		O.FortLossShare.Add(Id, DanishShare * (O.bDanishWin ? 0.6f : 1.f));
 	}
 	const int32 Ci = CorpsIndexOf(B);
-	O.EnemyLosses = Ci != INDEX_NONE ? FMath::RoundToInt(EnemyCorps[Ci].Men * EnemyShare) : 0;
+	// The enemy loses what the Danes can inflict: never more than a share of their own fighting strength.
+	O.EnemyLosses = Ci != INDEX_NONE ? FMath::RoundToInt(FMath::Min(EnemyCorps[Ci].Men * EnemyShare, D * Rng.FRandRange(0.25f, 0.45f))) : 0;
 	ApplyBattle(b, O);
 }
 

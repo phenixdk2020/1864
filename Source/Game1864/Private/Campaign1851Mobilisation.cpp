@@ -56,7 +56,7 @@ void ACampaign1851Map::AdvanceFooting(float DeltaDays)
 		}
 		// The men come to their battalion's garrison; a mobilisation depot there hurries them along.
 		const ACampaign1851ConstructionSite* Depot = FindBuilding(R.Home, TEXT("Mobilization_Center"));
-		const float Rate = Campaign1851Mobilisation::CallInPerDay * (Depot && Depot->IsModuleDone(0) ? Campaign1851Mobilisation::DepotBonus : 1.f);
+		const float Rate = Campaign1851Mobilisation::CallInPerDay * CallInFactor() * (Depot && Depot->IsModuleDone(0) ? Campaign1851Mobilisation::DepotBonus : 1.f);
 		R.Present = FMath::Min(1.f, R.Present + DeltaDays * Rate);
 		bAllIn &= R.Present >= 0.999f;
 	}

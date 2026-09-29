@@ -100,7 +100,7 @@ double ACampaign1851Map::RaisedUpkeepPerMonth() const
 	double Total = 0.0;
 	for (const FCampaign1851Regiment& R : Regiments)
 	{
-		Total += R.bRaised ? Campaign1851Army::RaisedUpkeepPerMonth : 0.0;
+		Total += R.bRaised && !R.Id.StartsWith(TEXT("SE")) ? Campaign1851Army::RaisedUpkeepPerMonth : 0.0;   // Sweden-Norway pays its own
 	}
 	return Total;
 }

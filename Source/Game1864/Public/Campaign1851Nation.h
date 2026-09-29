@@ -76,6 +76,18 @@ struct FCampaign1851Nation
 	float BaseGrowth = 1.f;     // % a year, historical estimate
 	float GrowthMul = 1.f;      // the campaign's variation
 
+	// Foreign affairs (Campaign1851Diplomacy.cpp): towards the player's nation.
+	float BaseRelation = 0.f;   // -100 .. 100, the historical tendency
+	float Relation = 0.f;
+	int32 TradeValue = 0;       // rd. a year to the treasury with a trade treaty
+	bool bCanAlly = false;      // Sweden-Norway: a defence alliance is possible
+	bool bCanGuarantee = false; // the great powers of the London Protocol
+	bool bTrade = false;
+	bool bAlliance = false;
+	bool bGuarantee = false;
+	bool bAllyArrived = false;  // the allied brigade has come (once per war)
+	double LastEnvoyDay = -1000.0;
+
 	bool IsPlayer() const { return Controller == ECampaign1851Controller::Player; }
 	/** How a portfolio is run: an AI nation runs everything itself. */
 	ECampaign1851Delegation Mode(ECampaign1851Portfolio P) const { return IsPlayer() ? Modes[int32(P)] : ECampaign1851Delegation::Auto; }

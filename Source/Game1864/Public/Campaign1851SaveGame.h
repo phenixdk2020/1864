@@ -219,7 +219,7 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 
 public:
 	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands. 10: + troop trains on the map. 11: + field formations. */
-	static constexpr int32 CurrentVersion = 22;
+	static constexpr int32 CurrentVersion = 23;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;
@@ -277,6 +277,10 @@ public:
 	UPROPERTY() uint8 Footing = 0;
 	/** War and peace (v22): tension, events, occupied towns, enemy corps. */
 	UPROPERTY() TArray<FString> War;
+	/** Foreign affairs (v23): relations, treaties, the Sound Dues, ceded towns. */
+	UPROPERTY() TArray<FString> Diplomacy;
+	/** Research and doctrine (v23). */
+	UPROPERTY() TArray<FString> Research;
 
 	/** The state's store of fortress guns and the materials stores (town, rd., day) (v16). */
 	UPROPERTY() int32 GunStock = 0;

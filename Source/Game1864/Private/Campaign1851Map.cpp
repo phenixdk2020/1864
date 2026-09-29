@@ -1791,6 +1791,8 @@ void ACampaign1851Map::CloseMonth()
 	MonthlyMateriel();
 	MonthlyFooting();
 	MonthlyWar();
+	MonthlyDiplomacy();
+	MonthlyResearch();
 	MonthlyBuildingMaterials();
 	MonthlyManpower();
 	MonthlySalvage();

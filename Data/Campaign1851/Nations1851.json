@@ -1,29 +1,160 @@
 {
-  "note": "Nationerne 1851. Befolkning, jernbane-km og haerens fredsstyrke er skøn (status: estimated) til den abstrakte model, indtil landet faar sit eget kort. Vaegtene er regeringens tilboejeligheder pr. ressort (Indenrigs, Offentlige arbejder, Krigsministeriet, Transport); kampagnens seed og den historiske afvigelse varierer dem, saa hvert spil udvikler sig forskelligt. Danmarks tal kommer fra kortet (amter, byer, regimenter).",
+  "note": "Nationerne 1851. Befolkning, jernbane-km og haerens fredsstyrke er skøn (status: estimated) til den abstrakte model, indtil landet faar sit eget kort. Vaegtene er regeringens tilboejeligheder pr. ressort (Indenrigs, Offentlige arbejder, Krigsministeriet, Transport); kampagnens seed og den historiske afvigelse varierer dem, saa hvert spil udvikler sig forskelligt. Danmarks tal kommer fra kortet (amter, byer, regimenter). Forholdet til Danmark (-100..100), handelsværdi (rd./år med en handelstraktat), alliance (Sverige-Norge) og garanti (stormagterne) er spillets skøn.",
   "nations": [
     {
-      "id": "DK", "name": "Danmark", "onMap": true, "controller": "player",
-      "weights": [1.0, 1.1, 1.0, 0.6], "caution": 0.5, "reserve": 100000,
-      "growth": 1.2, "taxPerHead": 0.25,
-      "note": "Helstaten efter treårskrigen: gæld, men ønske om jernbaner og et forsvar mod syd."
+      "id": "DK",
+      "name": "Danmark",
+      "onMap": true,
+      "controller": "player",
+      "weights": [
+        1.0,
+        1.1,
+        1.0,
+        0.6
+      ],
+      "caution": 0.5,
+      "reserve": 100000,
+      "growth": 1.2,
+      "taxPerHead": 0.25,
+      "note": "Helstaten efter treårskrigen: gæld, men ønske om jernbaner og et forsvar mod syd.",
+      "relation": 100,
+      "tradeValue": 0
     },
     {
-      "id": "SE", "name": "Sverige-Norge", "onMap": false, "controller": "ai",
-      "weights": [1.2, 1.0, 0.8, 0.5], "caution": 0.7, "reserve": 150000,
-      "population": 4970000, "railKm": 0, "armyMen": 47000, "growth": 1.1, "taxPerHead": 0.2,
-      "note": "Forsigtig regering, skandinavisme i opinionen; de første jernbaner (Norge 1854, Sverige 1856) er endnu kun planer."
+      "id": "SE",
+      "name": "Sverige-Norge",
+      "onMap": false,
+      "controller": "ai",
+      "weights": [
+        1.2,
+        1.0,
+        0.8,
+        0.5
+      ],
+      "caution": 0.7,
+      "reserve": 150000,
+      "population": 4970000,
+      "railKm": 0,
+      "armyMen": 47000,
+      "growth": 1.1,
+      "taxPerHead": 0.2,
+      "note": "Forsigtig regering, skandinavisme i opinionen; de første jernbaner (Norge 1854, Sverige 1856) er endnu kun planer.",
+      "relation": 40,
+      "tradeValue": 3000,
+      "canAlly": true
     },
     {
-      "id": "PR", "name": "Preussen", "onMap": false, "controller": "ai",
-      "weights": [1.0, 1.2, 1.4, 1.0], "caution": 0.4, "reserve": 400000,
-      "population": 16330000, "railKm": 2900, "armyMen": 127000, "growth": 1.1, "taxPerHead": 0.25,
-      "note": "Industri og jernbaner i hastig vækst; hæren er landets rygrad."
+      "id": "PR",
+      "name": "Preussen",
+      "onMap": false,
+      "controller": "ai",
+      "weights": [
+        1.0,
+        1.2,
+        1.4,
+        1.0
+      ],
+      "caution": 0.4,
+      "reserve": 400000,
+      "population": 16330000,
+      "railKm": 2900,
+      "armyMen": 127000,
+      "growth": 1.1,
+      "taxPerHead": 0.25,
+      "note": "Industri og jernbaner i hastig vækst; hæren er landets rygrad.",
+      "relation": -20,
+      "tradeValue": 5000
     },
     {
-      "id": "AT", "name": "Østrig", "onMap": false, "controller": "ai",
-      "weights": [0.8, 0.9, 1.3, 0.7], "caution": 0.5, "reserve": 500000,
-      "population": 36500000, "railKm": 1400, "armyMen": 350000, "growth": 0.8, "taxPerHead": 0.15,
-      "note": "Et vidtstrakt kejserrige efter 1848-49: stor hær, stram økonomi."
+      "id": "AT",
+      "name": "Østrig",
+      "onMap": false,
+      "controller": "ai",
+      "weights": [
+        0.8,
+        0.9,
+        1.3,
+        0.7
+      ],
+      "caution": 0.5,
+      "reserve": 500000,
+      "population": 36500000,
+      "railKm": 1400,
+      "armyMen": 350000,
+      "growth": 0.8,
+      "taxPerHead": 0.15,
+      "note": "Et vidtstrakt kejserrige efter 1848-49: stor hær, stram økonomi.",
+      "relation": -5,
+      "tradeValue": 2000
+    },
+    {
+      "id": "GB",
+      "name": "Storbritannien",
+      "onMap": false,
+      "controller": "ai",
+      "weights": [
+        1.2,
+        1.3,
+        0.9,
+        1.0
+      ],
+      "caution": 0.6,
+      "reserve": 1000000,
+      "population": 27400000,
+      "railKm": 10600,
+      "armyMen": 140000,
+      "growth": 1.2,
+      "taxPerHead": 0.3,
+      "relation": 30,
+      "tradeValue": 12000,
+      "canGuarantee": true,
+      "note": "Verdens handelsmagt; en af London-protokollens garanter, men uvillig til at sende soldater."
+    },
+    {
+      "id": "FR",
+      "name": "Frankrig",
+      "onMap": false,
+      "controller": "ai",
+      "weights": [
+        1.0,
+        1.1,
+        1.2,
+        0.9
+      ],
+      "caution": 0.5,
+      "reserve": 1000000,
+      "population": 35800000,
+      "railKm": 3500,
+      "armyMen": 400000,
+      "growth": 0.4,
+      "taxPerHead": 0.25,
+      "relation": 10,
+      "tradeValue": 6000,
+      "canGuarantee": true,
+      "note": "Napoleon III's kejserrige fra 1852; garant, men med egne planer ved Rhinen."
+    },
+    {
+      "id": "RU",
+      "name": "Rusland",
+      "onMap": false,
+      "controller": "ai",
+      "weights": [
+        0.7,
+        0.8,
+        1.4,
+        0.6
+      ],
+      "caution": 0.5,
+      "reserve": 1000000,
+      "population": 69000000,
+      "railKm": 900,
+      "armyMen": 800000,
+      "growth": 1.0,
+      "taxPerHead": 0.08,
+      "relation": 35,
+      "tradeValue": 4000,
+      "canGuarantee": true,
+      "note": "Støttede helstaten i 1848-52; zaren ønsker ro i Østersøen."
     }
   ]
 }
