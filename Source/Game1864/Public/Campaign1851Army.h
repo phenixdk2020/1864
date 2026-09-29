@@ -216,6 +216,7 @@ struct FCampaign1851Regiment
 	int32 Men = 0;
 	int32 MaxMen = 0;
 	int32 Horses = 0;
+	int32 MaxHorses = 0;   // horses at full establishment (replaced from the store or bought)
 	int32 Guns = 0;
 	float Morale = 0.8f;
 	/** 0-100: field and battle experience (the army of 1851 are veterans of 1848-50). */
@@ -407,4 +408,18 @@ namespace Campaign1851Supply
 	bool NeedsFodder(ECampaign1851Arm Arm);
 	/** "proviant 3.5 d.  ·  foder 1.0 d.  ·  ammunition 100 %" */
 	FString Describe(const FCampaign1851Regiment& R);
+}
+
+/** Materiel: the state's stores and the works that fill them (estimates for play). */
+namespace Campaign1851Materiel
+{
+	struct FMateriel { int32 Rifles = 0; int32 Guns = 0; int32 Horses = 0; };
+	/** A month's output of a finished works (rifles, guns, horses). */
+	FMateriel Production(const FString& Key);
+	constexpr int32 RiflesAtStart = 6000;
+	constexpr int32 GunsAtStart = 24;
+	constexpr int32 HorsesAtStart = 800;
+	/** Prices when the store is short: a rifle bought abroad, a horse bought in the amter. */
+	constexpr int32 RifleImportPrice = 18;
+	constexpr int32 HorsePrice = 90;
 }

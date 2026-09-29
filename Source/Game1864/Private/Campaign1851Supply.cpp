@@ -506,6 +506,7 @@ bool ACampaign1851Map::BuySupplyColumn()
 		return false;
 	}
 	AddTransaction(-Campaign1851Supply::ColumnCost, TEXT("Trænkolonne købt (20 vogne, 80 heste)"));
+	TakeHorses(80, TEXT("trænkolonne"));
 	++SupplyColumnCount;
 	return true;
 }

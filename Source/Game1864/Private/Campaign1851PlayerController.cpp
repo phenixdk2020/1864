@@ -1331,6 +1331,8 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->GunStock = Map->GetGunStock();
 	Save->Supply = Map->SaveSupply();
 	Save->SupplyColumns = Map->SaveSupplyColumns();
+	Save->Rifles = Map->GetRifles();
+	Save->HorseStock = Map->GetHorseStock();
 	Map->ExportUnits();
 	Save->MaterialLots = Map->GetMaterialLots();
 	if (Save->Links.Num() > 0)
@@ -1435,6 +1437,16 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	{
 		Map->RestoreSupplyColumns(Save->SupplyColumns);
 	}
+	if (Save->SaveVersion >= 20)
+	{
+		Map->SetMateriel(Save->Rifles, Save->HorseStock);
+	}
+	else
+	{
+		const int32 Guns = Map->GetGunStock();
+		Map->ResetMateriel();
+		Map->SetGunStock(FMath::Max(Guns, Map->GetGunStock()));
+	}
 	Map->SetMaterialLots(Save->SaveVersion >= 16 ? Save->MaterialLots : TArray<FVector>());
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);
 	if (Overlay.IsValid())
@@ -1469,9 +1481,9 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	Map->SeedHistoricBuildings();
 	Map->ResetArmy();
 	Map->ResetForts();
-	Map->SetGunStock(0);
 	Map->SetMaterialLots({});
 	Map->ResetSupply();
+	Map->ResetMateriel();
 	Map->ExportForts();
 	if (Overlay.IsValid())
 	{

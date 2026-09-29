@@ -79,6 +79,7 @@ void ACampaign1851Map::MonthlyManpower()
 		}
 		R.Experience = (R.Experience * R.Men + Campaign1851Army::RecruitExperience * Take) / float(R.Men + Take);
 		R.Men += Take;
+		TakeRifles(Take, TEXT("rekrutter"));   // from the store; imports are booked there
 		AmtManpower[AmtIndex] -= Take;
 		Men += Take;
 		Cost += Take * Campaign1851Army::ReplacementCostPerMan;
@@ -149,6 +150,8 @@ int32 ACampaign1851Map::RaiseBattalion(int32 CityIndex, FString* OutReason)
 		S = Campaign1851Army::RecruitSkill;
 	}
 	AmtManpower[AmtIndexOfTown(CityIndex)] -= Campaign1851Army::RaiseMen;
+	TakeRifles(Campaign1851Army::RaiseMen, R.Name);
+	TakeHorses(R.Horses, R.Name);
 	AddTransaction(-Campaign1851Army::RaiseCost(), FString::Printf(TEXT("%s oprettet i %s (udrustning)"), *R.Name, *Cities[CityIndex].Name));
 	// Its officers: a major and four captains, hired.
 	FRandomStream Rng(int32(HashCombine(uint32(Seed), uint32(Number * 977))));
@@ -179,7 +182,7 @@ int32 ACampaign1851Map::AddRaisedRegiment(const FString& Id, const FString& Name
 	R.Home = Home;
 	R.Town = Home;
 	R.Men = R.MaxMen = MaxMen;
-	R.Horses = 14;
+	R.Horses = R.MaxHorses = 14;
 	R.bRaised = true;
 	R.Command = CommandsAtStart.IndexOfByPredicate([Home](const FCampaign1851Command& C) { return C.Towns.Contains(Home); });
 	R.Captains.Init(INDEX_NONE, Campaign1851Army::CompaniesFor(Arm));

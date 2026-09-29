@@ -357,6 +357,18 @@ public:
 	TArray<FString> SaveSupplyColumns() const;
 	void RestoreSupplyColumns(const TArray<FString>& Lines);
 
+	// ---- Materiel: rifles, guns and horses (Campaign1851Materiel.cpp).
+
+	int32 GetRifles() const { return Rifles; }
+	int32 GetHorseStock() const { return Horses; }
+	void SetMateriel(int32 InRifles, int32 InHorses) { Rifles = FMath::Max(0, InRifles); Horses = FMath::Max(0, InHorses); }
+	/** The stores as in 1851 (rifles, field guns, remounts). */
+	void ResetMateriel();
+	/** Rifles from the store, the rest bought abroad (booked); returns the import cost. */
+	double TakeRifles(int32 Wanted, const FString& For);
+	/** Horses from the store, the rest bought in the amter (booked). */
+	int32 TakeHorses(int32 Wanted, const FString& For);
+
 	// ---- Pulling down and salvage (Campaign1851Salvage.cpp).
 
 	/** Pulls a building or a whole garrison down (private ones against compensation). */
@@ -780,6 +792,11 @@ private:
 	int32 NextSupplyColumnId = 1;
 	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> SupplyColumnPieces;
 	UPROPERTY(Transient) TObjectPtr<UStaticMesh> ColumnMesh;
+
+	// The materiel layer.
+	void MonthlyMateriel();
+	int32 Rifles = 0;
+	int32 Horses = 0;
 
 	// The salvage layer (Campaign1851Salvage.cpp).
 	void AddMaterials(int32 CityIndex, double Rd, const FString& From);

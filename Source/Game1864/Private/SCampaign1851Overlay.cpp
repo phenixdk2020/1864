@@ -257,7 +257,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.42 FORSYNING OG TRÆNKOLONNER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.43 VÅBEN, HESTE OG LAGRE — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -2516,8 +2516,8 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 			Row.Keys = { Text, Text, Text, Text, double(R.Men), R.Experience, R.Skills[0], R.Skills[1], R.Skills[2], R.Skills[3], R.Skills[4], R.Skills[5], R.Morale, R.Cohesion, Text, Text };
 			Rows.Add(Row);
 		}
-		Title(TEXT("Hæren"), FString::Printf(TEXT("%d enheder  ·  %s mand  ·  %s heste  ·  %d kanoner  ·  klik på en række for at vælge enheden"),
-			Regs.Num(), *Thousands(Men), *Thousands(Horses), Guns));
+		Title(TEXT("Hæren"), FString::Printf(TEXT("%d enheder  ·  %s mand  ·  %s heste  ·  %d kanoner  ·  lager: %s geværer, %d kanoner, %s heste"),
+			Regs.Num(), *Thousands(Men), *Thousands(Horses), Guns, *Thousands(Map->GetRifles()), Map->GetGunStock(), *Thousands(Map->GetHorseStock())));
 		const TArray<FTableColumn> Cols = { {TEXT("Enhed"), 190.f}, {TEXT("Våben"), 130.f}, {TEXT("Garnison"), 105.f}, {TEXT("Hvor"), 200.f},
 			{TEXT("Mand"), 60.f, true}, {TEXT("Erf"), 48.f, true}, {TEXT("Lad"), 46.f, true}, {TEXT("Skyd"), 50.f, true}, {TEXT("Eks"), 46.f, true},
 			{TEXT("Felt"), 46.f, true}, {TEXT("Udh"), 46.f, true}, {TEXT("Baj"), 46.f, true}, {TEXT("Moral"), 64.f, true}, {TEXT("Samh"), 54.f, true},
@@ -2806,7 +2806,7 @@ void SCampaign1851Overlay::PaintCalendar(const FGeometry& Geometry, FSlateWindow
 	// Long months ("13. september 1851"): the date shrinks so the season stays clear of the buttons.
 	const FSlateFontInfo SeasonFont = Serif(13, EFace::Italic);
 	const float Room = X - 12.f - TextX - Measure(Map->GetSeasonName(), SeasonFont).X - 12.f;
-	const FSlateFontInfo Fitted = Measure(Date, DateFont).X <= Room ? DateFont : Serif(17);
+	const FSlateFontInfo Fitted = Measure(Date, DateFont).X <= Room - 24.f ? DateFont : Measure(Date, Serif(17)).X <= Room - 12.f ? Serif(17) : Serif(15);
 	PaintText(Geometry, Out, Layer + 2, Date, FVector2D(TextX, Pos.Y + Size.Y * 0.5f), Fitted, Ink, 0.f);
 	PaintText(Geometry, Out, Layer + 2, Map->GetSeasonName(), FVector2D(TextX + Measure(Date, Fitted).X + 12.f, Pos.Y + Size.Y * 0.5f + 2.f), SeasonFont, Gold, 0.f, false);
 	for (int32 s = 0; s < ACampaign1851Map::NumSpeeds(); ++s)

@@ -127,6 +127,12 @@ const TArray<FCampaign1851SiteModule>& ACampaign1851ConstructionSite::TownBuildi
 			ECampaign1851PlotRule::Shore, 0.15f, 0, true, 0);
 		Add(Module(TEXT("Grain_Warehouse"), TEXT("Kornmagasin"), ESitePiece::Granary, 13.f, 5.4f, 6.4f, 10.4f, TEXT("T_Bld_Grain_Warehouse")),
 			ECampaign1851PlotRule::Edge, 0.18f, 0, false, 0);
+		// Works that fill the state's stores (Campaign1851Materiel::Production).
+		Add(Module(TEXT("Rifle_Workshop"), TEXT("Geværværksted"), ESitePiece::Workshop, 20.f, 9.f, 5.f, 15.f, TEXT("")), ECampaign1851PlotRule::Edge, 0.2f, 4000, false, 0);
+		Add(Module(TEXT("Cannon_Foundry"), TEXT("Kanonstøberi"), ESitePiece::Factory, 27.f, 16.f, 11.f, 22.f, TEXT("")), ECampaign1851PlotRule::Outside, 0.25f, 8000, false, 0);
+		Add(Module(TEXT("Ammunition_Works"), TEXT("Ammunitionsfabrik"), ESitePiece::Workshop, 20.f, 9.f, 5.f, 15.f, TEXT("")), ECampaign1851PlotRule::Outside, 0.2f, 4000, false, 0);
+		Add(Module(TEXT("Stud_Farm"), TEXT("Stutteri"), ESitePiece::Stables, 12.f, 4.4f, 3.2f, 6.4f, TEXT("")), ECampaign1851PlotRule::Outside, 0.25f, 0, false, 0);
+		Add(Module(TEXT("Remount_Depot"), TEXT("Remontedepot"), ESitePiece::Stables, 12.f, 4.4f, 3.2f, 6.4f, TEXT("")), ECampaign1851PlotRule::Outside, 0.25f, 3000, false, 0);
 		// Civil buildings (growth and income: Campaign1851Nations::CivilEffect).
 		Add(Module(TEXT("Schoolhouse"), TEXT("Skole"), ESitePiece::School, 11.f, 7.f, 3.4f, 8.4f, TEXT("")), ECampaign1851PlotRule::InTown, 0.12f, 800, false, 0);
 		Add(Module(TEXT("Town_Hall"), TEXT("Rådhus"), ESitePiece::TownHall, 17.f, 9.f, 7.f, 17.f, TEXT("")), ECampaign1851PlotRule::InTown, 0.15f, 3000, false, 0);

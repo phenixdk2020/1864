@@ -1782,6 +1782,7 @@ void ACampaign1851Map::CloseMonth()
 	}
 	// The world moves on: towns grow, investors build, the ministries (and the other nations) decide.
 	GrowMonth();
+	MonthlyMateriel();
 	MonthlyManpower();
 	MonthlySalvage();
 	MonthlySupply();

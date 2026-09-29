@@ -916,6 +916,9 @@ void ACampaign1851Map::SeedHistoricBuildings()
 		{ TEXT("Odense"), TEXT("Machine_Workshop") },     { TEXT("Flensborg"), TEXT("Machine_Workshop") },
 		{ TEXT("Neumünster"), TEXT("Textile_Mill") },     { TEXT("Flensborg"), TEXT("Textile_Mill") },
 		{ TEXT("Altona"), TEXT("Machine_Workshop") },     { TEXT("Skagen"), TEXT("Lighthouse") },
+		{ TEXT("København"), TEXT("Arsenal") },           { TEXT("København"), TEXT("Cannon_Foundry") },
+		{ TEXT("Helsingør"), TEXT("Rifle_Workshop") },    { TEXT("Randers"), TEXT("Remount_Depot") },
+		{ TEXT("Rendsborg"), TEXT("Arsenal") },
 		{ TEXT("Helsingør"), TEXT("Lighthouse") },
 	};
 	int32 Placed = 0;

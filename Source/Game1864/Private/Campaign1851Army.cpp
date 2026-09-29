@@ -338,6 +338,7 @@ bool ACampaign1851Map::LoadArmy()
 		}
 		R.Men = R.MaxMen = int32(O->GetNumberField(TEXT("men")));
 		O->TryGetNumberField(TEXT("horses"), R.Horses);
+		R.MaxHorses = R.Horses;
 		O->TryGetNumberField(TEXT("guns"), R.Guns);
 		R.Town = R.Home;
 		// The army of 1851 has just come out of a war: seasoned, drilled; arms have their strengths.
