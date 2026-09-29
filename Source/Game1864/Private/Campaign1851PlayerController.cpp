@@ -238,6 +238,13 @@ void ACampaign1851PlayerController::TryInit()
 		{
 			Map->CompleteForts();
 		}
+		// -CampaignDemolishFort=1 slights a fort (test of salvage).
+		int32 SlightId = 0;
+		if (FParse::Value(FCommandLine::Get(), TEXT("CampaignDemolishFort="), SlightId))
+		{
+			FString Why;
+			UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|fort|demolish %d: %s"), SlightId, Map->DemolishFort(SlightId, &Why) ? TEXT("ok") : *Why);
+		}
 		// -CampaignFortGarrison=1:B12:0,B12:1;2:B12:2 puts companies (battalion id : company) in forts (id).
 		FString Garrisons;
 		if (FParse::Value(FCommandLine::Get(), TEXT("CampaignFortGarrison="), Garrisons, false))
@@ -818,6 +825,36 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			const int32 Index = Map->FormationIndex(Module);
 			Overlay->OpenFormationPicker(Module, Index != INDEX_NONE && (Map->GetFormations()[Index].Echelon == ECampaign1851Echelon::Division || Map->GetFormations()[Index].Echelon == ECampaign1851Echelon::Army));
 		}
+		else if (Button == SCampaign1851Overlay::EButton::Demolish)
+		{
+			// First click arms it (the button asks to confirm), the second pulls down.
+			if (Overlay->GetDemolishArmed() != Module)
+			{
+				Overlay->ArmDemolish(Module);
+			}
+			else
+			{
+				Overlay->ArmDemolish(0);
+				FString Why;
+				bool bOk = false;
+				if (Module >= 1000000)
+				{
+					bOk = Map->DemolishFort(Module - 1000000, &Why);
+				}
+				else
+				{
+					const int32 City = Module / 100, Kind = Module % 100;
+					ACampaign1851ConstructionSite* Site = Kind == 99 ? Map->FindProject(City)
+						: ACampaign1851ConstructionSite::TownBuildings().IsValidIndex(Kind) ? Map->FindBuilding(City, ACampaign1851ConstructionSite::TownBuildings()[Kind].Key) : nullptr;
+					bOk = Map->DemolishSite(Site, &Why);
+				}
+				Overlay->ShowToast(bOk ? FString(TEXT("Nedrivningen er begyndt")) : Why);
+				if (bOk)
+				{
+					SaveToSlot(TEXT("Autosave"), true);
+				}
+			}
+		}
 		else if (Button == SCampaign1851Overlay::EButton::RaiseBattalion)
 		{
 			FString Why;
@@ -1242,6 +1279,14 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 		P.PlotKm = Site->PlotKm;
 		P.Yaw = float(Site->GetActorRotation().Yaw);
 		P.bPrivate = Site->IsPrivate();
+		P.bDemolishing = Site->IsDemolishing();
+		if (P.bDemolishing)
+		{
+			P.DemolishDays = Site->GetDemolishDays();
+			P.DemolishWages = Site->GetDemolishWages();
+			P.DemolishDone = Site->GetDemolishDone();
+			P.DemolishFrom = Site->GetDemolishFrom();
+		}
 		TArray<FString> Built;
 		for (int32 m = 0; m < Site->NumModules(); ++m)
 		{
@@ -1265,6 +1310,8 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Map->SaveWorld(Save);
 	Save->Forts = Map->SaveForts();
 	Save->AmtManpower = Map->GetAmtManpower();
+	Save->GunStock = Map->GetGunStock();
+	Save->MaterialLots = Map->GetMaterialLots();
 	if (Save->Links.Num() > 0)
 	{
 		Parts.Add(FString::Printf(TEXT("%d vej-/baneanlæg"), Save->Links.Num()));
@@ -1334,12 +1381,14 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	for (const FCampaign1851ProjectSave& P : Save->Projects)
 	{
 		Restored += Map->RestoreProject(P.City, P.ModuleDays, P.ActiveModule, P.Kind, P.PlotKm, P.Yaw) ? 1 : 0;
-		if (P.bPrivate)
+		ACampaign1851ConstructionSite* RestoredSite = P.Kind == TEXT("Garrison") || P.Kind.IsEmpty() ? Map->FindProject(Map->FindCity(P.City)) : Map->FindBuilding(Map->FindCity(P.City), P.Kind);
+		if (RestoredSite && P.bPrivate)
 		{
-			if (ACampaign1851ConstructionSite* Site = Map->FindBuilding(Map->FindCity(P.City), P.Kind))
-			{
-				Site->SetPrivate(true);
-			}
+			RestoredSite->SetPrivate(true);
+		}
+		if (RestoredSite && P.bDemolishing)
+		{
+			RestoredSite->RestoreDemolition(P.DemolishDays, P.DemolishWages, P.DemolishDone, P.DemolishFrom);
 		}
 	}
 	if (Save->SaveVersion >= 12)
@@ -1351,6 +1400,8 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	{
 		Map->SetAmtManpower(Save->AmtManpower);
 	}
+	Map->SetGunStock(Save->SaveVersion >= 16 ? Save->GunStock : 0);
+	Map->SetMaterialLots(Save->SaveVersion >= 16 ? Save->MaterialLots : TArray<FVector>());
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);
 	if (Overlay.IsValid())
 	{
@@ -1383,6 +1434,8 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	Map->ResetWorld(NewSeed, DeviationPct / 100.f);
 	Map->ResetArmy();
 	Map->ResetForts();
+	Map->SetGunStock(0);
+	Map->SetMaterialLots({});
 	Map->ExportForts();
 	if (Overlay.IsValid())
 	{

@@ -401,6 +401,7 @@ bool ACampaign1851Map::StartLinkWork(int32 Link, ECampaign1851LinkWork Work, boo
 	if (bCharge)
 	{
 		AddTransaction(-Cost * Campaign1851Buildings::DownPayment, FString::Printf(TEXT("Udbetaling: %s"), *Name));
+		UseMaterials((TownKm(L.A) + TownKm(L.B)) * 0.5, Cost, Name);
 	}
 	if (Work == ECampaign1851LinkWork::Railway)
 	{

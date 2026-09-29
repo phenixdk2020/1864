@@ -303,6 +303,23 @@ public:
 	const TArray<float>& GetAmtManpower() const { return AmtManpower; }
 	void SetAmtManpower(const TArray<float>& In) { if (In.Num() == AmtManpower.Num()) { AmtManpower = In; } }
 
+	// ---- Pulling down and salvage (Campaign1851Salvage.cpp).
+
+	/** Pulls a building or a whole garrison down (private ones against compensation). */
+	bool DemolishSite(ACampaign1851ConstructionSite* Site, FString* OutReason = nullptr);
+	/** "materialer ca. 6.000 rd." (and the owner's compensation for private buildings). */
+	FString DemolishText(const ACampaign1851ConstructionSite* Site) const;
+	/** Slights a fort: its companies go home, its guns to the store, materials to the nearest town. */
+	bool DemolishFort(int32 Id, FString* OutReason = nullptr);
+	/** Fortress guns in the state's store (for any fort). */
+	int32 GetGunStock() const { return GunStock; }
+	void SetGunStock(int32 N) { GunStock = FMath::Max(0, N); }
+	/** Materials stored within reach (km) of a point, in rigsdaler. */
+	double MaterialsNear(const FVector2D& Km) const;
+	const TArray<FVector>& GetMaterialLots() const { return MaterialLots; }
+	void SetMaterialLots(const TArray<FVector>& In) { MaterialLots = In; }
+	static constexpr double MaterialReachKm = 30.0;
+
 	// ---- Field fortifications, skanser (Campaign1851Forts.cpp).
 
 	const TArray<FCampaign1851Fort>& GetForts() const { return Forts; }
@@ -690,6 +707,16 @@ private:
 	TArray<FCampaign1851Railway> Railways;
 	int32 HistoricRailways = 0;   // Railways[0..HistoricRailways) come from the map data
 	TArray<FString> News;
+
+	// The salvage layer (Campaign1851Salvage.cpp).
+	void AddMaterials(int32 CityIndex, double Rd, const FString& From);
+	void UseMaterials(const FVector2D& Km, double Cost, const FString& For);
+	void MonthlySalvage();
+	void AdvanceDemolitions(float DeltaDays);
+	void FinishFortDemolition(int32 Index);
+	int32 TakeGunsFromStock(int32 Wanted);
+	int32 GunStock = 0;
+	TArray<FVector> MaterialLots;   // town index, rd., campaign day stored
 
 	// The manpower layer (Campaign1851Manpower.cpp).
 	void ResetManpower();

@@ -184,9 +184,14 @@ int32 ACampaign1851Map::StartFort(const FVector2D& Km, bool bLarge, float Yaw, F
 	F.Work = ECampaign1851FortWork::Build;
 	// Trees and farms on the ground give way to the works.
 	ClearScenery(Km, (bLarge ? 20.f : 14.f) * PieceScale / float(KmToUnits));
-	F.WorkCost = Campaign1851Forts::BuildCost(bLarge);
+	// Guns from the state's store go in first (the fort then costs that much less).
+	F.GunsFromStock = TakeGunsFromStock(Campaign1851Forts::StartGuns(bLarge));
+	F.WorkCost = Campaign1851Forts::BuildCost(bLarge) - F.GunsFromStock * Campaign1851Forts::GunPrice;
+	F.Invested = F.WorkCost;
 	F.WorkDays = Campaign1851Forts::BuildDays(bLarge);
-	AddTransaction(-F.WorkCost * Campaign1851Buildings::DownPayment, FString::Printf(TEXT("%s: %s skanse påbegyndt"), *F.Name, bLarge ? TEXT("stor") : TEXT("lille")));
+	AddTransaction(-F.WorkCost * Campaign1851Buildings::DownPayment, FString::Printf(TEXT("%s: %s skanse påbegyndt%s"), *F.Name, bLarge ? TEXT("stor") : TEXT("lille"),
+		F.GunsFromStock > 0 ? *FString::Printf(TEXT(" (%d kanoner fra lageret)"), F.GunsFromStock) : TEXT("")));
+	UseMaterials(Km, F.WorkCost, F.Name);
 	Forts.Add(F);
 	UpdateFortVisual(Forts.Num() - 1);
 	ExportForts();
@@ -214,7 +219,9 @@ bool ACampaign1851Map::UpgradeFort(int32 Id, ECampaign1851FortWork Work, FString
 		{
 			return Fail(TEXT("Skansen har alle sine kanoner"));
 		}
-		Cost = Campaign1851Forts::GunsCost;
+		// Guns on the state's store: only the platforms are paid for.
+		F.GunsFromStock = TakeGunsFromStock(Campaign1851Forts::GunStep);
+		Cost = Campaign1851Forts::GunsCost - F.GunsFromStock * Campaign1851Forts::GunPrice;
 		Days = Campaign1851Forts::GunsDays;
 	}
 	else if (Work == ECampaign1851FortWork::Trenches)
@@ -241,12 +248,16 @@ bool ACampaign1851Map::UpgradeFort(int32 Id, ECampaign1851FortWork Work, FString
 	}
 	if (!CanAfford(Cost))
 	{
+		GunStock += F.GunsFromStock;   // back on the store
+		F.GunsFromStock = 0;
 		return Fail(TEXT("Ikke råd til udbetalingen"));
 	}
 	F.Work = Work;
 	F.WorkCost = Cost;
 	F.WorkDays = Days;
 	F.DaysBuilt = 0.f;
+	F.Invested += Cost;
+	UseMaterials(F.Km, Cost, F.Name);
 	AddTransaction(-Cost * Campaign1851Buildings::DownPayment, FString::Printf(TEXT("%s: %s"), *F.Name,
 		Work == ECampaign1851FortWork::Guns ? TEXT("to kanoner mere") : Work == ECampaign1851FortWork::Trenches ? TEXT("løbegrave") : Campaign1851Forts::DefenceName(F.Defence + 1)));
 	ExportForts();
@@ -290,6 +301,12 @@ void ACampaign1851Map::AdvanceForts(float DeltaDays)
 		MonthSpend.FindOrAdd(FString::Printf(TEXT("Skanser: %s"), *F.Name)) += Work * PerDay;
 		const float Before = F.Progress();
 		F.DaysBuilt += Work;
+		if (F.DaysBuilt >= F.WorkDays && F.Work == ECampaign1851FortWork::Demolish)
+		{
+			FinishFortDemolition(i);   // writes the battle data itself
+			--i;
+			continue;
+		}
 		if (F.DaysBuilt >= F.WorkDays)
 		{
 			if (F.Work == ECampaign1851FortWork::Build)
@@ -469,6 +486,7 @@ TArray<FCampaign1851FortSave> ACampaign1851Map::SaveForts() const
 		S.WorkDays = F.WorkDays;
 		S.WorkCost = F.WorkCost;
 		S.bTrenches = F.bTrenches;
+		S.Invested = F.Invested;
 		for (const FCampaign1851FortCompany& C : F.Companies)
 		{
 			if (Regiments.IsValidIndex(C.Regiment))
@@ -495,11 +513,12 @@ void ACampaign1851Map::RestoreForts(const TArray<FCampaign1851FortSave>& Saves)
 		F.Defence = FMath::Clamp(S.Defence, 1, Campaign1851Forts::MaxDefence);
 		F.Garrison = S.Garrison;
 		F.bBuilt = S.bBuilt;
-		F.Work = ECampaign1851FortWork(FMath::Min<uint8>(S.Work, uint8(ECampaign1851FortWork::Defence)));
+		F.Work = ECampaign1851FortWork(FMath::Min<uint8>(S.Work, uint8(ECampaign1851FortWork::Demolish)));
 		F.DaysBuilt = S.DaysBuilt;
 		F.WorkDays = S.WorkDays;
 		F.WorkCost = S.WorkCost;
 		F.bTrenches = S.bTrenches;
+		F.Invested = S.Invested;
 		for (const FString& Entry : S.Companies)
 		{
 			TArray<FString> P;
@@ -719,6 +738,10 @@ bool ACampaign1851Map::AddFortCompany(int32 FortId, int32 Regiment, int32 Compan
 	if (!F.bBuilt)
 	{
 		return Fail(TEXT("Skansen er ikke færdig endnu"));
+	}
+	if (F.Work == ECampaign1851FortWork::Demolish)
+	{
+		return Fail(TEXT("Skansen sløjfes"));
 	}
 	if (!R.CompanyFort.IsValidIndex(Company) || R.CompanyFort[Company] != 0)
 	{

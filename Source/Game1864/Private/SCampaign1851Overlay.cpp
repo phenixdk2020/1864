@@ -602,6 +602,15 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 		PaintBar(Geometry, Out, Layer + 2, Text + FVector2D(0.f, 92.f), 220.f, Site->GetModuleProgress(0));
 	}
 	PaintButton(Geometry, Out, Layer + 2, Text + FVector2D(0.f, 106.f), FVector2D(150.f, 26.f), TEXT("VIS PÅ KORTET"), EButton::ShowOnMap);
+	{
+		const int32 Code = SelectedCity * 100 + 99;
+		PaintButton(Geometry, Out, Layer + 2, Text + FVector2D(158.f, 106.f), FVector2D(118.f, 26.f), Site->IsDemolishing() ? TEXT("RIVES NED") : DemolishArmed == Code ? TEXT("BEKRÆFT") : TEXT("NEDRIV"),
+			EButton::Demolish, Code, DemolishArmed == Code, Site->IsDemolishing());
+		if (DemolishArmed == Code)
+		{
+			PaintTextFit(Geometry, Out, Layer + 2, Map->DemolishText(Site), Text + FVector2D(0.f, 94.f), Serif(10, EFace::Italic), Gold, Size.X - 150.f);
+		}
+	}
 	if (bBarracksDone)
 	{
 		// A new battalion of recruits from the amt's reserve (design: manpower, conscription of 1849).
@@ -1289,7 +1298,8 @@ void SCampaign1851Overlay::PaintFortTool(const FGeometry& Geometry, FSlateWindow
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseFortPanel);
 	PaintText(Geometry, Out, Layer + 2, TEXT("S K A N S E R"), Pos + FVector2D(22.f, 26.f), Serif(11), Gold, 0.f, false);
-	PaintTextFit(Geometry, Out, Layer + 2, TEXT("Feltbefæstninger hvor som helst i monarkiet: vælg type, klik på kortet"), Pos + FVector2D(22.f, 50.f), Serif(10, EFace::Italic), MutedInk, Size.X - 44.f);
+	PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Vælg type og klik på kortet  ·  kanoner på lager: %d (sparer %s rd. pr. kanon)"), Map->GetGunStock(), *Thousands(Campaign1851Forts::GunPrice)),
+		Pos + FVector2D(22.f, 50.f), Serif(10, EFace::Italic), MutedInk, Size.X - 44.f);
 	for (int32 k = 0; k < 2; ++k)
 	{
 		const bool bLarge = k == 1;
@@ -1333,7 +1343,7 @@ void SCampaign1851Overlay::PaintFort(const FGeometry& Geometry, FSlateWindowElem
 	const TArray<int32> Candidates = bFortPickCompany ? Map->FortCandidates(F.Id) : TArray<int32>();
 	const int32 CompanyRows = F.Companies.Num();
 	const int32 PickRows = bFortPickCompany ? FMath::Max(1, FMath::Min(Candidates.Num(), 8)) : 0;
-	const FVector2D Size(560.f, 370.f + CompanyRows * 24.f + (bFortPickCompany ? 30.f + PickRows * 24.f : 0.f));
+	const FVector2D Size(560.f, 370.f + CompanyRows * 24.f + (bFortPickCompany ? 30.f + PickRows * 24.f : 0.f) + (DemolishArmed == 1000000 + F.Id ? 22.f : 0.f));
 	const FVector2D Pos(28.f, FMath::Max(130.f, Geometry.GetLocalSize().Y - 190.f - Size.Y));
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseFort);
@@ -1349,7 +1359,7 @@ void SCampaign1851Overlay::PaintFort(const FGeometry& Geometry, FSlateWindowElem
 	if (F.Work != ECampaign1851FortWork::None)
 	{
 		const TCHAR* What = F.Work == ECampaign1851FortWork::Build ? TEXT("Anlægges") : F.Work == ECampaign1851FortWork::Guns ? TEXT("To kanoner mere")
-			: F.Work == ECampaign1851FortWork::Trenches ? TEXT("Løbegrave") : Campaign1851Forts::DefenceName(F.Defence + 1);
+			: F.Work == ECampaign1851FortWork::Trenches ? TEXT("Løbegrave") : F.Work == ECampaign1851FortWork::Demolish ? TEXT("Sløjfes") : Campaign1851Forts::DefenceName(F.Defence + 1);
 		Line(TEXT("Arbejde"), FString::Printf(TEXT("%s  ·  %.0f %%  ·  %.0f dage tilbage%s"), What, F.Progress() * 100.f, FMath::Max(0.f, F.WorkDays - F.DaysBuilt), F.bStalled ? TEXT("  ·  ingen penge") : TEXT("")));
 	}
 	int32 Inside = 0, Reserve = 0;
@@ -1427,9 +1437,17 @@ void SCampaign1851Overlay::PaintFort(const FGeometry& Geometry, FSlateWindowElem
 	PaintTextFit(Geometry, Out, Layer + 2, bStronger ? FString::Printf(TEXT("Næste forstærkning: %s: %s"), Campaign1851Forts::DefenceName(F.Defence + 1), Campaign1851Forts::DefenceNote(F.Defence + 1))
 		: FString(TEXT("Løbegrave: dækning for reserven og forbindelse til skanser inden for 3 km")), FVector2D(Pos.X + 22.f, Y + 4.f), Serif(10, EFace::Italic), MutedInk, Size.X - 44.f);
 	Y += 24.f;
-	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, Y), FVector2D(140.f, 26.f), TEXT("DREJ VENSTRE"), EButton::FortTurn, -1);
-	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 170.f, Y), FVector2D(140.f, 26.f), TEXT("DREJ HØJRE"), EButton::FortTurn, 1);
-	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 318.f, Y), FVector2D(160.f, 26.f), TEXT("VIS PÅ KORTET"), EButton::FortShow, F.Id);
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, Y), FVector2D(124.f, 26.f), TEXT("DREJ VENSTRE"), EButton::FortTurn, -1);
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 152.f, Y), FVector2D(124.f, 26.f), TEXT("DREJ HØJRE"), EButton::FortTurn, 1);
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 282.f, Y), FVector2D(130.f, 26.f), TEXT("VIS PÅ KORTET"), EButton::FortShow, F.Id);
+	const int32 Code = 1000000 + F.Id;
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 418.f, Y), FVector2D(120.f, 26.f), DemolishArmed == Code ? TEXT("BEKRÆFT") : TEXT("SLØJF"), EButton::Demolish, Code,
+		DemolishArmed == Code, F.Work == ECampaign1851FortWork::Demolish);
+	if (DemolishArmed == Code)
+	{
+		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Sløjfes: %d kanoner til lageret, materialer ca. %d rd., kompagnierne går hjem"), F.Guns, FMath::RoundToInt(F.Invested * 0.1)),
+			FVector2D(Pos.X + 22.f, Y + 38.f), Serif(10, EFace::Italic), Gold, Size.X - 44.f);
+	}
 }
 
 void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
@@ -2994,9 +3012,13 @@ void SCampaign1851Overlay::PaintTownBuildings(const FGeometry& Geometry, FSlateW
 		if (Site)
 		{
 			const bool bDone = Site->IsModuleDone(0);
-			PaintText(Geometry, Out, Layer + 2, (bDone ? FString(TEXT("Færdig")) : ProgressLine(Site, 0)) + (Site->IsPrivate() ? TEXT("  ·  privat") : TEXT("")),
-				Row + FVector2D(70.f, 34.f), Serif(11, EFace::Italic), bDone ? Gold : Ink, 0.f, false);
+			const int32 Code = SelectedCity * 100 + i;
+			const FString State = Site->IsDemolishing() ? FString::Printf(TEXT("Rives ned  ·  %.0f %%"), 100.f * Site->GetDemolishDone() / FMath::Max(Site->GetDemolishDays(), 1.f))
+				: DemolishArmed == Code ? Map->DemolishText(Site) : (bDone ? FString(TEXT("Færdig")) : ProgressLine(Site, 0)) + (Site->IsPrivate() ? TEXT("  ·  privat") : TEXT(""));
+			PaintTextFit(Geometry, Out, Layer + 2, State, Row + FVector2D(70.f, 34.f), Serif(11, EFace::Italic), DemolishArmed == Code ? Gold : bDone ? Gold : Ink, Size.X - 70.f - 190.f);
 			PaintButton(Geometry, Out, Layer + 2, ButtonPos, ButtonSize, TEXT("VIS"), EButton::ShowSite, i);
+			PaintButton(Geometry, Out, Layer + 2, ButtonPos - FVector2D(94.f, 0.f), FVector2D(88.f, 26.f), DemolishArmed == Code ? TEXT("BEKRÆFT") : TEXT("NEDRIV"), EButton::Demolish, Code,
+				DemolishArmed == Code, Site->IsDemolishing());
 			continue;
 		}
 		const FString Why = Map->BuildingBlockReason(SelectedCity, Def.Key);

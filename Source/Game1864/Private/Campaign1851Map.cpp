@@ -1190,6 +1190,7 @@ ACampaign1851ConstructionSite* ACampaign1851Map::StartProject(int32 CityIndex, b
 	if (Site && bCharge)
 	{
 		AddTransaction(-Garrison[0].Cost() * Campaign1851Buildings::DownPayment, FString::Printf(TEXT("Materialer bestilt: %s, infanterikaserne"), *City.Name));
+		UseMaterials(TownKm(CityIndex), Garrison[0].Cost(), FString::Printf(TEXT("%s, infanterikaserne"), *City.Name));
 	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|barracks started"), *City.Name);
 	return Site;
@@ -1205,6 +1206,7 @@ bool ACampaign1851Map::StartModule(int32 CityIndex, int32 Module)
 	Site->StartModule(Module);
 	AddTransaction(-Site->ModuleCost(Module) * Campaign1851Buildings::DownPayment,
 		FString::Printf(TEXT("Materialer bestilt: %s, %s"), *Cities[CityIndex].Name, *Site->ModuleName(Module).ToLower()));
+	UseMaterials(TownKm(CityIndex), Site->ModuleCost(Module), FString::Printf(TEXT("%s, %s"), *Cities[CityIndex].Name, *Site->ModuleName(Module).ToLower()));
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|%s started"), *Cities[CityIndex].Name, *Site->ModuleName(Module));
 	return true;
 }
@@ -1459,6 +1461,7 @@ ACampaign1851ConstructionSite* ACampaign1851Map::StartBuilding(int32 CityIndex, 
 	if (bCharge)
 	{
 		AddTransaction(-Def->Cost() * Campaign1851Buildings::DownPayment, FString::Printf(TEXT("Materialer bestilt: %s, %s"), *Cities[CityIndex].Name, *Def->Name.ToLower()));
+		UseMaterials(Km, Def->Cost(), FString::Printf(TEXT("%s, %s"), *Cities[CityIndex].Name, *Def->Name.ToLower()));
 	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|%s started at %.1f,%.1f km"), *Cities[CityIndex].Name, *Def->Name, Km.X, Km.Y);
 	return Site;
@@ -1595,6 +1598,7 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 	}
 	AdvanceNetwork(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
 	AdvanceForts(DeltaDays);
+	AdvanceDemolitions(DeltaDays);
 	AdvanceArmy(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
 	if (GetDate().GetMonth() != MonthBefore)
 	{
@@ -1773,6 +1777,7 @@ void ACampaign1851Map::CloseMonth()
 	// The world moves on: towns grow, investors build, the ministries (and the other nations) decide.
 	GrowMonth();
 	MonthlyManpower();
+	MonthlySalvage();
 	PrivateInvestment();
 	RunNationalAI();
 }

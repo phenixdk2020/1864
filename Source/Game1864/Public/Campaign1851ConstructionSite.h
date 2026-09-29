@@ -125,6 +125,43 @@ public:
 	bool IsStalled() const { return bStalled; }
 	/** Upkeep per year of the finished modules. */
 	int32 GetYearlyUpkeep() const;
+	/** Pulling it down: the modules come down over the days, the labourers paid by the map. */
+	void StartDemolition(float Days, float Wages)
+	{
+		bDemolishing = true;
+		DemolishDays = FMath::Max(Days, 1.f);
+		DemolishWages = Wages;
+		DemolishDone = 0.f;
+		DemolishFrom = Elapsed;
+		Active = INDEX_NONE;
+	}
+	/** Restores a demolition under way from a save. */
+	void RestoreDemolition(float Days, float Wages, float Done, const TArray<float>& From)
+	{
+		bDemolishing = true;
+		DemolishDays = FMath::Max(Days, 1.f);
+		DemolishWages = Wages;
+		DemolishDone = 0.f;
+		DemolishFrom = From;
+		AdvanceDemolition(Done);
+	}
+	/** Work on the demolition; true when it is down. */
+	bool AdvanceDemolition(float Work)
+	{
+		DemolishDone += Work;
+		const float Left = FMath::Clamp(1.f - DemolishDone / DemolishDays, 0.f, 1.f);
+		for (int32 m = 0; m < Elapsed.Num(); ++m)
+		{
+			Elapsed[m] = DemolishFrom.IsValidIndex(m) && DemolishFrom[m] >= 0.f ? DemolishFrom[m] * Left : -1.f;
+		}
+		Apply(0.f);
+		return DemolishDone >= DemolishDays;
+	}
+	bool IsDemolishing() const { return bDemolishing; }
+	float GetDemolishDays() const { return DemolishDays; }
+	float GetDemolishWages() const { return DemolishWages; }
+	float GetDemolishDone() const { return DemolishDone; }
+	const TArray<float>& GetDemolishFrom() const { return DemolishFrom; }
 	/** Raised by private investors: the state pays neither wages nor upkeep. */
 	void SetPrivate(bool bIn) { bPrivate = bIn; }
 	bool IsPrivate() const { return bPrivate; }
@@ -163,6 +200,9 @@ private:
 	float Clock = 0.f;
 	bool bStalled = false;
 	bool bPrivate = false;
+	bool bDemolishing = false;
+	float DemolishDays = 1.f, DemolishWages = 0.f, DemolishDone = 0.f;
+	TArray<float> DemolishFrom;
 
 	TArray<FVector> WagonPath;
 	TArray<float> WagonDistance;   // cumulative, world units

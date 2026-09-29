@@ -16,7 +16,8 @@ enum class ECampaign1851FortWork : uint8
 	Build,     // raising the earthwork (with its first guns)
 	Guns,      // two more gun platforms and guns
 	Defence,   // the next level of defence
-	Trenches   // communication trenches to the forts nearby (cover for the reserve)
+	Trenches,  // communication trenches to the forts nearby (cover for the reserve)
+	Demolish   // slighting the fort: guns to the store, materials to the nearest town
 };
 
 /** A company holding a fort: sent from its battalion, back to it when the battalion is near. */
@@ -39,6 +40,8 @@ struct FCampaign1851Fort
 	int32 Garrison = 0;          // infantry in and behind it (the companies' men)
 	TArray<FCampaign1851FortCompany> Companies;
 	bool bTrenches = false;      // communication trenches: the reserve behind the fort in cover
+	double Invested = 0.0;       // money put into its works (what materials may come back from)
+	int32 GunsFromStock = 0;     // guns the work under way takes from the state's store
 	bool bBuilt = false;
 	ECampaign1851FortWork Work = ECampaign1851FortWork::None;
 	float DaysBuilt = 0.f;
@@ -60,6 +63,8 @@ namespace Campaign1851Forts
 	inline float BuildDays(bool bLarge) { return bLarge ? 90.f : 45.f; }
 	/** Two more gun platforms with their fortress guns. */
 	constexpr int32 GunsCost = 3600;
+	/** The price of a fortress gun within that (a gun from the state's store saves it). */
+	constexpr int32 GunPrice = 1200;
 	constexpr float GunsDays = 15.f;
 	constexpr int32 MaxDefence = 4;
 	/** "Brystværn og grav", "Palisader og ulvegrave", "Bombesikkert blokhus", "Traverser og bombesikre magasiner". */

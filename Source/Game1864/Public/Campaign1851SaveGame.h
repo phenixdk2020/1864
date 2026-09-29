@@ -31,6 +31,12 @@ struct FCampaign1851ProjectSave
 	UPROPERTY() float Yaw = 0.f;
 	/** v12: raised by private investors (no wages or upkeep from the state). */
 	UPROPERTY() bool bPrivate = false;
+	/** v16: being pulled down. */
+	UPROPERTY() bool bDemolishing = false;
+	UPROPERTY() float DemolishDays = 0.f;
+	UPROPERTY() float DemolishWages = 0.f;
+	UPROPERTY() float DemolishDone = 0.f;
+	UPROPERTY() TArray<float> DemolishFrom;
 };
 
 /** A field fortification (v13). */
@@ -55,6 +61,7 @@ struct FCampaign1851FortSave
 	/** v14: the companies in it ("B6:2:190") and its trenches. */
 	UPROPERTY() TArray<FString> Companies;
 	UPROPERTY() bool bTrenches = false;
+	UPROPERTY() double Invested = 0.0;
 };
 
 /** A nation's control and (without a map) its abstract state (v12). */
@@ -210,7 +217,7 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 
 public:
 	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands. 10: + troop trains on the map. 11: + field formations. */
-	static constexpr int32 CurrentVersion = 15;
+	static constexpr int32 CurrentVersion = 16;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;
@@ -256,6 +263,10 @@ public:
 	UPROPERTY() TArray<int32> AmtRural;
 	UPROPERTY() TArray<FCampaign1851NationSave> Nations;
 	UPROPERTY() TArray<FCampaign1851DecisionSave> Decisions;
+
+	/** The state's store of fortress guns and the materials stores (town, rd., day) (v16). */
+	UPROPERTY() int32 GunStock = 0;
+	UPROPERTY() TArray<FVector> MaterialLots;
 
 	/** Each amt's reserve of trained men (v15). */
 	UPROPERTY() TArray<float> AmtManpower;

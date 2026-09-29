@@ -47,7 +47,7 @@ public:
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve, FormationDeputy, FormationStaff,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
-		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion };
+		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -69,6 +69,9 @@ public:
 	int32 GetSelectedFort() const { return SelectedFort; }
 	void SetFortPlacing(int32 Kind) { FortPlacing = Kind; }   // 0 none, 1 small, 2 large
 	void ToggleFortPickCompany() { bFortPickCompany = !bFortPickCompany; }
+	/** Pulling down asks once: the armed target (fort 1000000 + id; town building city * 100 + kind; garrison city * 100 + 99). */
+	void ArmDemolish(int32 Code) { DemolishArmed = Code; }
+	int32 GetDemolishArmed() const { return DemolishArmed; }
 	int32 GetFortPlacing() const { return FortPlacing; }
 	/** Drag and drop in the tree: what is dragged, the cursor (viewport pixels) and the row under it. */
 	void SetDrag(bool bOn, int32 Key, const FVector2D& ViewportPixel, int32 Hover) { bDragging = bOn; DragKey = Key; DragPos = ViewportPixel / FMath::Max(PaintScale, 0.01f); HoverKey = Hover; }
@@ -268,6 +271,7 @@ private:
 	int32 SelectedFort = 0;
 	int32 FortPlacing = 0;
 	bool bFortPickCompany = false;
+	int32 DemolishArmed = 0;
 	/** The town's building list: military (false) or civil (true). */
 	bool bCivilTab = false;
 	mutable float ChartScrollY = 0.f;
