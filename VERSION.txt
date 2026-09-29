@@ -1,3 +1,3 @@
 PROJECT 1864 - Unreal kanal: CAMPAIGN (kampagnekort)
-Prototype version: UE-CAMPAIGN v00.00.31 OFFICERER, TRAENING, MARCH HVORHEN SOM HELST
+Prototype version: UE-CAMPAIGN v00.00.32 MENUER, BYGRAFIK, STOP/SLET ORDRE
 Branch: channel-campaign

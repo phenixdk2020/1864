@@ -106,6 +106,8 @@ struct FCampaign1851Leg
 	FVector2D ToKm = FVector2D::ZeroVector;
 	bool bRail = false;
 	bool bOffRoad = false;
+	/** Part of a link only (km along it from its From end); a negative LineTo means the whole link. */
+	float LineTo = -1.f;
 	float Days = 0.f;
 };
 
@@ -151,6 +153,9 @@ struct FCampaign1851Regiment
 	float PaceKmPerDay = 20.f;
 	/** Regiments ordered together share a group and march as one column (0 = alone). */
 	int32 Group = 0;
+	/** Where the current order found it (to go back to when the order is cancelled). */
+	int32 OriginTown = INDEX_NONE;
+	FVector2D OriginKm = FVector2D::ZeroVector;
 	/** How the current march was ordered (for re-planning after a load). */
 	ECampaign1851RouteMode Mode = ECampaign1851RouteMode::RoadsAndRail;
 	FVector2D Km = FVector2D::ZeroVector;   // position on the map now (projected km)

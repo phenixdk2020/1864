@@ -41,13 +41,28 @@ public:
 	int32 GetSelectedAmt() const { return SelectedAmt; }
 
 	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury, BuildTown, ShowSite, BuildLink, ShowLink,
-		Regiment, RegimentRow, ArmyHome, ArmyHalt, OfficerChange, GeneralChange, OfficerPick, OfficerRecruit, PickerClose, TrainingProgram, OfficerInfo, OfficerCardClose, ProgramPick, RouteMode };
+		Regiment, RegimentRow, ArmyHome, ArmyHalt, OfficerChange, GeneralChange, OfficerPick, OfficerRecruit, PickerClose, TrainingProgram, OfficerInfo, OfficerCardClose, ProgramPick, RouteMode, ArmyCancel, TownTab,
+		MainMenu, WindowClose, TableSort, TableRow, TablePage, OfficerFilter, OfficerDismiss, ClosePanel };
+	/** What an X in a panel's corner closes (the Module of EButton::ClosePanel). */
+	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger };
+	/** The big windows opened from the menu bar under the calendar (one at a time). */
+	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns };
+	void OpenWindow(EWindow In) { Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
+	EWindow GetWindow() const { return Window; }
+	/** Sort a table by a column (again: the other way round). */
+	void SetSort(int32 Column) { bSortDesc = Column == SortColumn ? !bSortDesc : Column > 3; SortColumn = Column; Page = 0; }
+	void TurnPage(int32 Delta) { Page = FMath::Max(0, Page + Delta); }
+	void SetOfficerFilter(int32 Filter) { OfficerFilter = Filter; Page = 0; }
+	/** The town card's side panel: 0 none, 1 garrison, 2 buildings, 3 roads and railways. */
+	void SetTownTab(int32 Tab) { TownTab = Tab; }
+	int32 GetTownTab() const { return TownTab; }
 	/** How the next march order goes (the three buttons in the army panel). */
 	void SetRouteMode(ECampaign1851RouteMode In) { RouteMode = In; }
 	ECampaign1851RouteMode GetRouteMode() const { return RouteMode; }
 	/** The training menu beside the army panel. */
 	void ToggleTrainingMenu() { bTrainingMenu = !bTrainingMenu; if (bTrainingMenu) { Picker = EPicker::None; InspectedOfficer = INDEX_NONE; } }
 	void CloseTrainingMenu() { bTrainingMenu = false; }
+	bool IsTrainingMenuOpen() const { return bTrainingMenu; }
 	/** The officer list beside the army panel: chiefs or generals to appoint. */
 	enum class EPicker : uint8 { None, Chief, General };
 	void OpenPicker(EPicker In) { Picker = In; InspectedOfficer = INDEX_NONE; bTrainingMenu = false; }
@@ -109,6 +124,17 @@ private:
 	void PaintArmyInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** Unassigned officers or generals with their qualities; click to appoint, or recruit a new one. */
 	void PaintOfficerPicker(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft) const;
+	/** A small X button in a panel's top right corner. */
+	void PaintCloseX(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& TopRight, int32 What) const;
+	/** Army / Officers / Treasury / Towns buttons under the calendar. */
+	void PaintMenuBar(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	/** The open big window: a sortable table (or the budget), rows clickable. */
+	void PaintWindow(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	struct FTableColumn { FString Title; float Width = 80.f; bool bRight = false; };
+	struct FTableRow { TArray<FString> Cells; TArray<double> Keys; int32 Id = INDEX_NONE; };
+	/** Headings (click to sort), striped rows (click: RowAction with the row's Id), pages. */
+	void PaintTable(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, int32 VisibleRows,
+		const TArray<FTableColumn>& Columns, TArray<FTableRow> Rows, EButton RowAction, int32 Highlight) const;
 	/** Every training programme: what it trains, days for +10 under the chief, cost a month; click to choose. */
 	void PaintTrainingMenu(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft) const;
 	/** One officer's card: rank, age, post, experience and every quality with what it means. */
@@ -144,6 +170,12 @@ private:
 	EPicker Picker = EPicker::None;
 	int32 InspectedOfficer = INDEX_NONE;
 	bool bTrainingMenu = false;
+	int32 TownTab = 0;
+	EWindow Window = EWindow::None;
+	int32 SortColumn = 0;
+	bool bSortDesc = false;
+	int32 Page = 0;
+	int32 OfficerFilter = 0;
 	ECampaign1851RouteMode RouteMode = ECampaign1851RouteMode::RoadsAndRail;
 	TSharedPtr<FSlateBrush> BornholmBrush;
 	TSharedPtr<FSlateBrush> DotBrush;

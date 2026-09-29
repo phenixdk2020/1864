@@ -183,6 +183,28 @@ int32 ACampaign1851Map::RecruitOfficer(bool bGeneral)
 	return Officers.Add(O);
 }
 
+bool ACampaign1851Map::DismissOfficer(int32 Officer)
+{
+	if (!Officers.IsValidIndex(Officer) || Officers[Officer].Regiment != INDEX_NONE)
+	{
+		return false;
+	}
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|officers|dismissed %s %s"), *Officers[Officer].Rank, *Officers[Officer].Name);
+	Officers.RemoveAt(Officer);
+	// Posts point at officer indices: those after the removed one move down.
+	for (FCampaign1851Regiment& R : Regiments)
+	{
+		for (int32* Post : { &R.Chief, &R.General })
+		{
+			if (*Post > Officer)
+			{
+				--*Post;
+			}
+		}
+	}
+	return true;
+}
+
 const FCampaign1851Officer* ACampaign1851Map::ColumnGeneral(const TArray<int32>& Column) const
 {
 	for (int32 i : Column)

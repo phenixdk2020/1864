@@ -30,6 +30,9 @@ namespace
 		FStaticMeshAttributes Attributes{ Mesh };
 		FPolygonGroupID Group;
 
+		/** Darken faces near the ground (pieces standing on the map; not the road ribbons). */
+		bool bGroundShade = false;
+
 		FWriter()
 		{
 			Attributes.Register();
@@ -49,6 +52,7 @@ namespace
 			}
 			const float Light = bLit ? 0.62f + 0.5f * FMath::Max(0.f, FVector3f::DotProduct(N, ToLight)) : 1.f;
 			const FLinearColor Lit = Base * Light;
+			const bool bShade = bLit && bGroundShade;
 
 			TVertexAttributesRef<FVector3f> Positions = Attributes.GetVertexPositions();
 			TVertexInstanceAttributesRef<FVector3f> Normals = Attributes.GetVertexInstanceNormals();
@@ -65,7 +69,9 @@ namespace
 				Normals[Corners[i]] = N;
 				Tangents[Corners[i]] = FVector3f::ForwardVector;
 				Signs[Corners[i]] = 1.f;
-				Colours[Corners[i]] = FVector4f(Lit.R, Lit.G, Lit.B, 1.f);
+				// Baked contact shading: walls and trunks darken over the last couple of units above the ground.
+				const float Shade = bShade ? 0.7f + 0.3f * FMath::Clamp(P[i].Z / 2.4f, 0.f, 1.f) : 1.f;
+				Colours[Corners[i]] = FVector4f(Lit.R * Shade, Lit.G * Shade, Lit.B * Shade, 1.f);
 			}
 			Mesh.CreateTriangle(Group, Corners);
 		}
@@ -112,6 +118,56 @@ namespace
 			Quad(At(-HL - O, HW + O, Eave - Drop), At(HL + O, HW + O, Eave - Drop), At(HL + O, 0.f, Ridge), At(-HL - O, 0.f, Ridge), Roof, RoofIn);
 		}
 
+		/**
+		 * Windows in rows (one per storey) on both long walls of a House, and a door in the middle of the +Y wall.
+		 * Quads sit a hair outside the wall so they draw over it.
+		 */
+		void Facade(const FVector2f& Centre, float Length, float Width, float Eave, int32 Storeys, const FLinearColor& Window, const FLinearColor& DoorColour)
+		{
+			const float HL = Length * 0.5f, HW = Width * 0.5f + 0.03f;
+			const float Storey = Eave / Storeys;
+			const int32 Bays = FMath::Max(2, FMath::FloorToInt((Length - 1.f) / 1.4f));
+			const FVector3f In(Centre.X, Centre.Y, Eave * 0.5f);
+			for (int32 Row = 0; Row < Storeys; ++Row)
+			{
+				const float Z0 = Row * Storey + Storey * 0.35f, Z1 = Z0 + Storey * 0.42f;
+				for (int32 b = 0; b < Bays; ++b)
+				{
+					const float X = Centre.X - HL + (b + 0.5f) * Length / Bays;
+					if (Row == 0 && b == Bays / 2)
+					{
+						continue;   // the door's place
+					}
+					for (float Side : { -1.f, 1.f })
+					{
+						const float Y = Centre.Y + Side * HW;
+						Quad(FVector3f(X - 0.28f, Y, Z0), FVector3f(X + 0.28f, Y, Z0), FVector3f(X + 0.28f, Y, Z1), FVector3f(X - 0.28f, Y, Z1), Window, In);
+					}
+				}
+			}
+			const float DX = Centre.X - HL + (Bays / 2 + 0.5f) * Length / Bays, Y = Centre.Y + HW;
+			Quad(FVector3f(DX - 0.38f, Y, 0.f), FVector3f(DX + 0.38f, Y, 0.f), FVector3f(DX + 0.38f, Y, FMath::Min(1.7f, Storey * 0.8f)), FVector3f(DX - 0.38f, Y, FMath::Min(1.7f, Storey * 0.8f)), DoorColour, In);
+		}
+
+		/** Half-timbering on the long walls: posts, a rail at mid-height and the wall plate, dark over the plaster. */
+		void TimberFrame(const FVector2f& Centre, float Length, float Width, float Eave, const FLinearColor& Wood)
+		{
+			const float HL = Length * 0.5f, HW = Width * 0.5f;
+			for (float Side : { -1.f, 1.f })
+			{
+				const float Y0 = Centre.Y + Side * HW, Y1 = Y0 + Side * 0.05f;
+				const float YMin = FMath::Min(Y0, Y1), YMax = FMath::Max(Y0, Y1);
+				for (float X = -HL; X <= HL + 0.01f; X += Length / FMath::Max(3, FMath::RoundToInt(Length / 1.1f)))
+				{
+					Box(FVector3f(Centre.X + X - 0.07f, YMin, 0.3f), FVector3f(Centre.X + X + 0.07f, YMax, Eave), Wood);
+				}
+				for (float Z : { 0.3f, Eave * 0.5f, Eave - 0.12f })
+				{
+					Box(FVector3f(Centre.X - HL, YMin, Z), FVector3f(Centre.X + HL, YMax, Z + 0.12f), Wood);
+				}
+			}
+		}
+
 		/** Square pyramid (tower spire). */
 		void Spire(const FVector2f& Centre, float Half, float Z0, float Z1, const FLinearColor& Base)
 		{
@@ -127,13 +183,13 @@ namespace
 		}
 
 		/** A faceted solid of revolution through the given (radius, height) rings; radius 0 = a point. */
-		void Lathe(const TArray<FVector2f>& Profile, int32 Sides, const FLinearColor& Base, float Twist = 0.f)
+		void Lathe(const TArray<FVector2f>& Profile, int32 Sides, const FLinearColor& Base, float Twist = 0.f, const FVector3f& Offset = FVector3f::ZeroVector)
 		{
-			const FVector3f In(0.f, 0.f, (Profile[0].Y + Profile.Last().Y) * 0.5f);
+			const FVector3f In = Offset + FVector3f(0.f, 0.f, (Profile[0].Y + Profile.Last().Y) * 0.5f);
 			auto P = [&](int32 Ring, int32 Side)
 			{
 				const float A = (Side + Twist * Ring) * UE_TWO_PI / Sides;
-				return FVector3f(Profile[Ring].X * FMath::Cos(A), Profile[Ring].X * FMath::Sin(A), Profile[Ring].Y);
+				return Offset + FVector3f(Profile[Ring].X * FMath::Cos(A), Profile[Ring].X * FMath::Sin(A), Profile[Ring].Y);
 			};
 			for (int32 r = 0; r + 1 < Profile.Num(); ++r)
 			{
@@ -166,42 +222,131 @@ namespace
 		}
 	};
 
-	void BuildPiece(FWriter& W, Campaign1851Scenery::EPiece Piece)
+void BuildPiece(FWriter& W, Campaign1851Scenery::EPiece Piece)
 	{
 		using Campaign1851Scenery::EPiece;
+		const FLinearColor Timber = Srgb(64, 46, 34), Brick = Srgb(164, 76, 54), Glass = Srgb(44, 52, 62), Door = Srgb(86, 56, 36);
+		const FLinearColor Tar = Srgb(40, 38, 36), Stone = Srgb(122, 116, 106), Hay = Srgb(200, 168, 96);
+		W.bGroundShade = true;
 		switch (Piece)
 		{
 		case EPiece::TownHouse:
 		case EPiece::TownHouseOchre:
 			W.DropShadow(4.6f, 3.4f, 1.6f);
+			W.Box(FVector3f(-3.6f, -2.3f, 0.f), FVector3f(3.6f, 2.3f, 0.35f), Stone);
 			W.House(FVector2f(0.f, 0.f), 7.f, 4.4f, 3.4f, 6.2f, Piece == EPiece::TownHouse ? Plaster : Ochre, Tile);
+			W.Facade(FVector2f(0.f, 0.f), 7.f, 4.4f, 3.4f, 2, Glass, Door);
+			W.Box(FVector3f(1.6f, -0.3f, 5.2f), FVector3f(2.2f, 0.3f, 7.f), Brick);
+			break;
+		case EPiece::TownHouseTimber:
+			W.DropShadow(4.4f, 3.2f, 1.5f);
+			W.Box(FVector3f(-3.35f, -2.15f, 0.f), FVector3f(3.35f, 2.15f, 0.35f), Stone);
+			W.House(FVector2f(0.f, 0.f), 6.5f, 4.f, 3.2f, 5.8f, Plaster, Tile);
+			W.TimberFrame(FVector2f(0.f, 0.f), 6.5f, 4.f, 3.2f, Timber);
+			W.Facade(FVector2f(0.f, 0.f), 6.5f, 4.f, 3.2f, 2, Glass, Door);
+			W.Box(FVector3f(-2.f, -0.28f, 4.8f), FVector3f(-1.45f, 0.28f, 6.5f), Brick);
+			break;
+		case EPiece::MerchantHouse:
+			W.DropShadow(5.4f, 4.f, 2.f);
+			W.Box(FVector3f(-4.3f, -2.7f, 0.f), FVector3f(4.3f, 2.7f, 0.4f), Stone);
+			W.House(FVector2f(0.f, 0.f), 8.4f, 5.2f, 5.2f, 8.6f, Brick, Tile);
+			W.Facade(FVector2f(0.f, 0.f), 8.4f, 5.2f, 5.2f, 3, Srgb(236, 230, 214), Door);   // white window frames on brick
+			W.Box(FVector3f(-0.9f, -3.1f, 5.f), FVector3f(0.9f, -2.3f, 7.4f), Brick);            // dormer (kvist) towards the street
+			W.Box(FVector3f(-1.1f, -3.2f, 7.4f), FVector3f(1.1f, -2.2f, 7.65f), Tile);
+			W.Box(FVector3f(2.4f, -0.3f, 7.6f), FVector3f(3.f, 0.3f, 9.4f), Brick);
+			W.Box(FVector3f(-3.f, -0.3f, 7.6f), FVector3f(-2.4f, 0.3f, 9.4f), Brick);
 			break;
 		case EPiece::Cottage:
 			W.DropShadow(3.6f, 2.6f, 1.2f);
+			W.Box(FVector3f(-2.8f, -1.75f, 0.f), FVector3f(2.8f, 1.75f, 0.4f), Tar);   // tarred plinth (sokkel)
 			W.House(FVector2f(0.f, 0.f), 5.5f, 3.4f, 2.2f, 4.8f, Plaster, Thatch);
+			W.Facade(FVector2f(0.f, 0.f), 5.5f, 3.4f, 2.2f, 1, Glass, Door);
+			W.Box(FVector3f(0.6f, -0.25f, 3.9f), FVector3f(1.1f, 0.25f, 5.3f), Plaster);
 			break;
 		case EPiece::Farm:
 			W.DropShadow(7.f, 7.f, 1.8f);
+			// Four wings round the yard: the dwelling (stuehus) whitewashed with windows, barns and stables with doors.
+			W.Box(FVector3f(-5.05f, -5.95f, 0.f), FVector3f(5.05f, -2.45f, 0.4f), Tar);
 			W.House(FVector2f(0.f, -4.2f), 10.f, 3.4f, 2.4f, 5.f, Plaster, Thatch);
+			W.Facade(FVector2f(0.f, -4.2f), 10.f, 3.4f, 2.4f, 1, Glass, Door);
 			W.House(FVector2f(0.f, 4.2f), 10.f, 3.4f, 2.4f, 5.f, Srgb(150, 120, 92), Thatch);
+			W.Box(FVector3f(-0.9f, 2.45f, 0.f), FVector3f(0.9f, 2.5f, 2.1f), Door);               // barn gate to the yard
 			W.House(FVector2f(-4.8f, 0.f), 5.f, 3.2f, 2.4f, 4.8f, Plaster, Thatch, true);
 			W.House(FVector2f(4.8f, 0.f), 5.f, 3.2f, 2.4f, 4.8f, Srgb(150, 120, 92), Thatch, true);
+			W.Box(FVector3f(1.2f, -4.45f, 4.1f), FVector3f(1.7f, -3.95f, 5.5f), Plaster);
 			break;
 		case EPiece::Church:
 			W.DropShadow(10.f, 5.f, 3.f);
 			W.House(FVector2f(1.5f, 0.f), 12.f, 5.4f, 4.8f, 8.6f, Plaster, Tile);
 			W.Box(FVector3f(-7.9f, -2.2f, 0.f), FVector3f(-3.5f, 2.2f, 12.5f), Plaster);
-			W.Spire(FVector2f(-5.7f, 0.f), 2.5f, 12.5f, 20.f, Slate);
+			// Stepped gables (kamtakker) on the tower, and tall narrow windows along the nave.
+			for (float Y : { -2.25f, 2.25f })
+			{
+				for (int32 Step = 0; Step < 3; ++Step)
+				{
+					const float Half = 2.2f - Step * 0.7f;
+					W.Box(FVector3f(-5.7f - Half, Y - 0.12f, 12.5f + Step * 0.8f), FVector3f(-5.7f + Half, Y + 0.12f, 13.3f + Step * 0.8f), Plaster);
+				}
+			}
+			for (int32 w = 0; w < 4; ++w)
+			{
+				const float X = -2.f + w * 2.6f;
+				for (float Side : { -1.f, 1.f })
+				{
+					const float Y = Side * 2.74f;
+					W.Quad(FVector3f(X - 0.35f, Y, 1.4f), FVector3f(X + 0.35f, Y, 1.4f), FVector3f(X + 0.35f, Y, 3.6f), FVector3f(X - 0.35f, Y, 3.6f), Glass, FVector3f(X, 0.f, 2.5f));
+				}
+			}
+			W.Box(FVector3f(-6.4f, -2.25f, 0.f), FVector3f(-5.f, -2.2f, 2.6f), Door);
+			W.Spire(FVector2f(-5.7f, 0.f), 2.5f, 14.9f, 21.f, Slate);
 			break;
+		case EPiece::Windmill:
+		{
+			W.DropShadow(4.f, 3.f, 2.f);
+			W.Lathe({ { 3.f, 0.f }, { 2.8f, 2.4f }, { 1.9f, 8.6f }, { 0.f, 8.6f } }, 8, Srgb(206, 196, 176));    // plastered octagon
+			W.Lathe({ { 3.6f, 2.4f }, { 3.6f, 2.7f }, { 0.f, 2.7f } }, 8, Srgb(110, 84, 58));                     // the gallery (omgang)
+			W.Lathe({ { 2.1f, 8.6f }, { 1.6f, 9.8f }, { 0.f, 10.6f } }, 8, Srgb(70, 60, 54));                     // the cap
+			const FLinearColor Stock = Srgb(88, 66, 46), Sail = Srgb(226, 214, 186);
+			const float HubX = 2.3f, HubZ = 9.2f, Arm = 6.4f;
+			W.Box(FVector3f(HubX - 0.2f, -0.25f, HubZ - 0.25f), FVector3f(HubX + 0.3f, 0.25f, HubZ + 0.25f), Stock);
+			W.Box(FVector3f(HubX, -0.1f, HubZ - Arm), FVector3f(HubX + 0.15f, 0.1f, HubZ + Arm), Stock);    // the + of the stocks
+			W.Box(FVector3f(HubX, -Arm, HubZ - 0.1f), FVector3f(HubX + 0.15f, Arm, HubZ + 0.1f), Stock);
+			// Sails on the trailing side of each stock.
+			W.Box(FVector3f(HubX + 0.05f, 0.1f, HubZ + 1.2f), FVector3f(HubX + 0.1f, 1.2f, HubZ + Arm), Sail);
+			W.Box(FVector3f(HubX + 0.05f, -1.2f, HubZ - Arm), FVector3f(HubX + 0.1f, -0.1f, HubZ - 1.2f), Sail);
+			W.Box(FVector3f(HubX + 0.05f, 1.2f, HubZ - 1.2f), FVector3f(HubX + 0.1f, Arm, HubZ - 0.1f), Sail);
+			W.Box(FVector3f(HubX + 0.05f, -Arm, HubZ + 0.1f), FVector3f(HubX + 0.1f, -1.2f, HubZ + 1.2f), Sail);
+			W.Box(FVector3f(2.95f, -0.5f, 0.f), FVector3f(3.05f, 0.5f, 1.6f), Door);
+			break;
+		}
 		case EPiece::Broadleaf:
+			// Beech: a trunk, and a crown of three lobes in slightly different greens.
 			W.DropShadow(4.8f, 3.8f, 2.4f);
 			W.Box(FVector3f(-0.45f, -0.45f, 0.f), FVector3f(0.45f, 0.45f, 3.5f), Bark);
-			W.Lathe({ { 0.f, 2.4f }, { 3.4f, 3.6f }, { 4.4f, 6.4f }, { 3.2f, 9.6f }, { 0.f, 11.f } }, 7, Beech, 0.5f);
+			W.Lathe({ { 0.f, 2.4f }, { 3.4f, 3.6f }, { 4.1f, 6.2f }, { 2.9f, 9.2f }, { 0.f, 10.4f } }, 8, Beech, 0.5f);
+			W.Lathe({ { 0.f, 4.8f }, { 2.2f, 5.6f }, { 2.4f, 7.4f }, { 0.f, 9.2f } }, 7, Beech * 1.12f, 0.3f, FVector3f(1.9f, 1.2f, 1.4f));
+			W.Lathe({ { 0.f, 3.6f }, { 2.f, 4.4f }, { 2.2f, 6.f }, { 0.f, 7.6f } }, 7, Beech * 0.86f, 0.3f, FVector3f(-1.7f, -1.3f, 0.4f));
+			break;
+		case EPiece::Oak:
+			// Oak: thick trunk, broad and flat, dark and knotty.
+			W.DropShadow(5.8f, 4.6f, 2.4f);
+			W.Box(FVector3f(-0.65f, -0.65f, 0.f), FVector3f(0.65f, 0.65f, 3.f), Bark);
+			W.Lathe({ { 0.f, 2.6f }, { 4.2f, 3.6f }, { 4.8f, 5.6f }, { 3.2f, 7.6f }, { 0.f, 8.4f } }, 8, Srgb(56, 80, 34), 0.5f);
+			W.Lathe({ { 0.f, 3.4f }, { 2.6f, 4.2f }, { 2.8f, 6.f }, { 0.f, 7.4f } }, 7, Srgb(64, 92, 38), 0.2f, FVector3f(2.8f, 0.8f, 0.6f));
+			W.Lathe({ { 0.f, 3.f }, { 2.4f, 3.8f }, { 2.5f, 5.4f }, { 0.f, 6.8f } }, 7, Srgb(48, 70, 30), 0.2f, FVector3f(-2.4f, -1.6f, 0.2f));
+			W.Lathe({ { 0.f, 4.f }, { 2.2f, 4.8f }, { 2.3f, 6.2f }, { 0.f, 7.6f } }, 7, Srgb(60, 86, 36), 0.2f, FVector3f(-0.8f, 2.6f, 0.8f));
 			break;
 		case EPiece::Conifer:
+			// Spruce in three tiers.
 			W.DropShadow(3.2f, 2.6f, 2.6f);
 			W.Box(FVector3f(-0.35f, -0.35f, 0.f), FVector3f(0.35f, 0.35f, 2.f), Bark);
-			W.Lathe({ { 3.2f, 1.6f }, { 1.4f, 7.f }, { 2.4f, 6.2f }, { 0.f, 14.f } }, 6, Spruce);
+			W.Lathe({ { 3.2f, 1.6f }, { 0.f, 7.f } }, 7, Spruce);
+			W.Lathe({ { 2.5f, 5.f }, { 0.f, 10.f } }, 7, Spruce * 1.1f, 0.5f);
+			W.Lathe({ { 1.7f, 8.6f }, { 0.f, 14.f } }, 7, Spruce * 1.2f);
+			break;
+		case EPiece::Haystack:
+			W.DropShadow(1.8f, 1.6f, 0.8f);
+			W.Lathe({ { 1.3f, 0.f }, { 1.45f, 1.f }, { 1.1f, 2.f }, { 0.f, 2.7f } }, 8, Hay, 0.5f);
 			break;
 		default:
 			break;
@@ -213,7 +358,8 @@ namespace Campaign1851Scenery
 {
 	const TCHAR* Name(EPiece Piece)
 	{
-		static const TCHAR* Names[] = { TEXT("TownHouse"), TEXT("TownHouseOchre"), TEXT("Cottage"), TEXT("Farm"), TEXT("Church"), TEXT("Broadleaf"), TEXT("Conifer") };
+		static const TCHAR* Names[] = { TEXT("TownHouse"), TEXT("TownHouseOchre"), TEXT("Cottage"), TEXT("Farm"), TEXT("Church"), TEXT("Broadleaf"), TEXT("Conifer"),
+			TEXT("TownHouseTimber"), TEXT("MerchantHouse"), TEXT("Windmill"), TEXT("Oak"), TEXT("Haystack") };
 		return Names[FMath::Clamp(int32(Piece), 0, int32(EPiece::Count) - 1)];
 	}
 
@@ -223,6 +369,7 @@ namespace Campaign1851Scenery
 		// that is already on screen (the renderer's ray tracing geometry asserts on that).
 		UStaticMesh* Mesh = NewObject<UStaticMesh>(GetTransientPackage(), MakeUniqueObjectName(GetTransientPackage(), UStaticMesh::StaticClass(), FName(*MeshName)), RF_Transient);
 		Mesh->GetStaticMaterials().Add(FStaticMaterial(Material, TEXT("Scenery")));
+		Mesh->bSupportRayTracing = false;   // the map is unlit: ray tracing geometry would only cost memory
 		UStaticMesh::FBuildMeshDescriptionsParams Params;
 		Params.bFastBuild = true;
 		Params.bMarkPackageDirty = false;

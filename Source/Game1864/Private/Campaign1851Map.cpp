@@ -363,6 +363,7 @@ void ACampaign1851Map::BuildTerrain()
 
 	UStaticMesh* Static = NewObject<UStaticMesh>(this, TEXT("SM_Campaign1851_Terrain"), RF_Transient);
 	Static->GetStaticMaterials().Add(FStaticMaterial(MapMaterial, TEXT("Map")));
+	Static->bSupportRayTracing = false;
 	UStaticMesh::FBuildMeshDescriptionsParams Params;
 	Params.bFastBuild = true;
 	Params.bMarkPackageDirty = false;
@@ -739,11 +740,28 @@ void ACampaign1851Map::BuildScenery()
 				continue;
 			}
 			const float Core = 1.f - D / Radius;  // taller houses in the centre
-			const EPiece Piece = Rng.FRand() < 0.3f ? EPiece::TownHouseOchre : EPiece::TownHouse;
+			// Merchants' brick houses crowd the core; plastered and half-timbered houses everywhere else.
+			const float Kind = Rng.FRand();
+			const EPiece Piece = Core > 0.55f && Kind < 0.35f ? EPiece::MerchantHouse
+				: Kind < 0.55f ? EPiece::TownHouse : Kind < 0.75f ? EPiece::TownHouseOchre : EPiece::TownHouseTimber;
+			// Plain houses grow a little taller towards the core; the brick merchants' houses are tall already.
 			Place(Piece, Km, Street + (Rng.FRand() < 0.5f ? 0.f : 90.f) + Rng.FRandRange(-5.f, 5.f),
-				Rng.FRandRange(0.8f, 1.1f), Rng.FRandRange(0.85f, 1.05f) + 0.35f * Core);
+				Rng.FRandRange(0.8f, 1.1f), Piece == EPiece::MerchantHouse ? Rng.FRandRange(0.9f, 1.05f) : Rng.FRandRange(0.85f, 1.05f) + 0.25f * Core);
 			Take(Km, 0.04f);
 			++h;
+		}
+		// Windmills on the town's edge, where the wind comes off the fields.
+		const int32 Mills = FMath::Clamp(1 + int32(Pop / 6000.f), 1, 4);
+		for (int32 m = 0, Tries = 0; m < Mills && Tries < 60; ++Tries)
+		{
+			const float A = Rng.FRandRange(0.f, UE_TWO_PI);
+			const FVector2D Km = Centre + FVector2D(FMath::Cos(A), FMath::Sin(A)) * (Radius + Rng.FRandRange(0.3f, 1.2f));
+			if (IsMonarchyLand(Km) && IsFree(Km, 0.06f))
+			{
+				Place(EPiece::Windmill, Km, Rng.FRandRange(-30.f, 30.f), Rng.FRandRange(0.9f, 1.1f));   // sails to the west wind
+				Take(Km, 0.06f);
+				++m;
+			}
 		}
 	}
 	auto InTown = [&Towns](const FVector2D& Km, float Margin)
@@ -868,6 +886,17 @@ void ACampaign1851Map::BuildScenery()
 				Place(EPiece::Church, Km, Rng.FRandRange(0.f, 360.f), 0.85f);
 				Take(Km, 0.12f);
 			}
+			// Many villages had their mill.
+			if (Rng.FRand() < 0.35f)
+			{
+				const float A = Rng.FRandRange(0.f, UE_TWO_PI);
+				const FVector2D P = Km + FVector2D(FMath::Cos(A), FMath::Sin(A)) * Rng.FRandRange(0.5f, 1.1f);
+				if (IsMonarchyLand(P) && IsFree(P, 0.06f))
+				{
+					Place(EPiece::Windmill, P, Rng.FRandRange(-30.f, 30.f), Rng.FRandRange(0.8f, 1.f));
+					Take(P, 0.06f);
+				}
+			}
 			const int32 Count = Rng.RandRange(5, 11);
 			for (int32 i = 0, Tries = 0; i < Count && Tries < 60; ++Tries)
 			{
@@ -887,6 +916,17 @@ void ACampaign1851Map::BuildScenery()
 		{
 			Place(EPiece::Farm, Km, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.8f, 1.05f));
 			Take(Km, 0.1f);
+			// Haystacks in the fields round the farm.
+			for (int32 k = Rng.RandRange(0, 3); k > 0; --k)
+			{
+				const float A = Rng.FRandRange(0.f, UE_TWO_PI);
+				const FVector2D P = Km + FVector2D(FMath::Cos(A), FMath::Sin(A)) * Rng.FRandRange(0.14f, 0.3f);
+				if (IsMonarchyLand(P) && IsFree(P, 0.015f))
+				{
+					Place(EPiece::Haystack, P, 0.f, Rng.FRandRange(0.8f, 1.2f));
+					Take(P, 0.015f);
+				}
+			}
 		}
 		else if (Site.Kind == ESite::Cottage && IsFree(Km, 0.035f))
 		{
@@ -926,7 +966,9 @@ void ACampaign1851Map::BuildScenery()
 					continue;
 				}
 				const bool bConifer = Rng.FRand() < 0.12f + 0.5f * Westness;
-				Place(bConifer ? EPiece::Conifer : EPiece::Broadleaf, Km, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.75f, 1.3f), Rng.FRandRange(0.85f, 1.15f));
+				// Beech the common broadleaf; oak a third of the rest (more of it out in the fields and hedges than deep in the woods).
+				const EPiece Tree = bConifer ? EPiece::Conifer : Rng.FRand() < (Wood > 0.08f ? 0.2f : 0.45f) ? EPiece::Oak : EPiece::Broadleaf;
+				Place(Tree, Km, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.75f, 1.3f), Rng.FRandRange(0.85f, 1.15f));
 			}
 		}
 	}
@@ -1432,8 +1474,8 @@ bool ACampaign1851Map::RestoreProject(const FString& CityName, const TArray<floa
 namespace
 {
 	/** Speed 1: a quarter of an hour a second (a day in 96 s); speed 3: a day in 8 s; speed 5: a day a second. */
-	const float SpeedHours[] = { 0.f, 0.25f, 1.f, 3.f, 8.f, 24.f };
-	const TCHAR* SpeedLabels[] = { TEXT("PAUSE"), TEXT("1"), TEXT("2"), TEXT("3"), TEXT("4"), TEXT("5") };
+	const float SpeedHours[] = { 0.f, 0.25f, 1.f, 3.f, 8.f, 24.f, 96.f };
+	const TCHAR* SpeedLabels[] = { TEXT("PAUSE"), TEXT("1"), TEXT("2"), TEXT("3"), TEXT("4"), TEXT("5"), TEXT("6") };
 	const TCHAR* MonthNames[] = { TEXT("januar"), TEXT("februar"), TEXT("marts"), TEXT("april"), TEXT("maj"), TEXT("juni"),
 		TEXT("juli"), TEXT("august"), TEXT("september"), TEXT("oktober"), TEXT("november"), TEXT("december") };
 	const TCHAR* MonthShort[] = { TEXT("jan."), TEXT("feb."), TEXT("mar."), TEXT("apr."), TEXT("maj"), TEXT("jun."),
@@ -1473,7 +1515,9 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 	const int32 MonthBefore = GetDate().GetMonth();
 	// The clock ticks in whole minutes; the work of those minutes is done at once.
 	MinuteCarry += double(DeltaSeconds) * HoursPerSecondAt(Speed) * 60.0;
-	const double Minutes = FMath::FloorToDouble(MinuteCarry);
+	// Speed 6 jumps a whole day at a time (for waiting on something); the others tick minute by minute.
+	const double Step = Speed >= 6 ? 1440.0 : 1.0;
+	const double Minutes = FMath::FloorToDouble(MinuteCarry / Step) * Step;
 	MinuteCarry -= Minutes;
 	const float DeltaDays = float(Minutes / 1440.0);
 	CampaignDays = FMath::RoundToDouble((CampaignDays + Minutes / 1440.0) * 1440.0) / 1440.0;
@@ -1545,6 +1589,46 @@ void ACampaign1851Map::UpdateSeason()
 }
 
 // ------------------------------------------------------------------ treasury
+
+TArray<FCampaign1851BudgetLine> ACampaign1851Map::MonthlyBudget() const
+{
+	TArray<FCampaign1851BudgetLine> Lines;
+	for (const TCHAR* Region : { TEXT("K"), TEXT("S"), TEXT("H") })
+	{
+		Lines.Add({ FString::Printf(TEXT("Skatter: %s"), *RegionName(Region)), YearlyTax(Region) / 12.0 });
+	}
+	// Construction at today's pace (wages for 30 working days, slower in frost).
+	const FDateTime Now = GetDate();
+	double Building = 0.0, Works = 0.0;
+	for (const ACampaign1851ConstructionSite* Site : Projects)
+	{
+		const int32 Module = Site ? Site->GetActiveModule() : INDEX_NONE;
+		if (Module != INDEX_NONE)
+		{
+			Building += Site->ModuleCostPerDay(Module) * 30.0 * Campaign1851Buildings::WorkRate(Site->ModuleType(Module), Now);
+		}
+	}
+	for (const FCampaign1851Link& L : Links)
+	{
+		if (L.Work != ECampaign1851LinkWork::None)
+		{
+			Works += L.WorkCost * (1.0 - Campaign1851Buildings::DownPayment) / FMath::Max(L.WorkDays, 1.f) * 30.0 * Campaign1851Buildings::WorkRate(Campaign1851Network::WorkType(), Now);
+		}
+	}
+	double Training = 0.0;
+	for (const FCampaign1851Regiment& R : Regiments)
+	{
+		Training += R.IsMarching() ? 0.0 : Campaign1851Army::ProgramCostPerMonth(R.Program) * R.Men / 760.0;
+	}
+	const double RoadUpkeep = NetworkUpkeepPerYear() / 12.0;
+	Lines.Add({ TEXT("Byggeri (dagløn)"), -Building });
+	Lines.Add({ TEXT("Veje og jernbaner under anlæg"), -Works });
+	Lines.Add({ TEXT("Drift af garnisoner og bygninger"), -(GetMonthlyUpkeep() - RoadUpkeep) });
+	Lines.Add({ TEXT("Vedligehold af chausséer og jernbaner"), -RoadUpkeep });
+	Lines.Add({ TEXT("Officerslønninger"), -OfficerPayPerMonth() });
+	Lines.Add({ TEXT("Hærens øvelser"), -Training });
+	return Lines;
+}
 
 double ACampaign1851Map::GetMonthlyUpkeep() const
 {

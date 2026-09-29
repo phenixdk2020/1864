@@ -195,6 +195,13 @@ void ACampaign1851PlayerController::TryInit()
 	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignOpenTraining")) && Overlay.IsValid())
 	{
 		Overlay->ToggleTrainingMenu();
+		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|ui|training menu open=%d selected=%d"), Overlay->IsTrainingMenuOpen() ? 1 : 0, Overlay->GetSelectedRegiments().Num());
+	}
+	FString WindowName;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignOpenWindow="), WindowName) && Overlay.IsValid())
+	{
+		Overlay->OpenWindow(WindowName == TEXT("army") ? SCampaign1851Overlay::EWindow::Army : WindowName == TEXT("officers") ? SCampaign1851Overlay::EWindow::Officers
+			: WindowName == TEXT("budget") ? SCampaign1851Overlay::EWindow::Budget : SCampaign1851Overlay::EWindow::Towns);
 	}
 	FString InspectId;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignInspectOfficer="), InspectId) && Overlay.IsValid())
@@ -231,6 +238,14 @@ void ACampaign1851PlayerController::TryInit()
 		{
 			CampaignView(FCString::Atof(*Parts[0]), FCString::Atof(*Parts[1]), FCString::Atof(*Parts[2]), Parts.Num() > 3 ? FCString::Atof(*Parts[3]) : 0.f);
 		}
+	}
+}
+
+void ACampaign1851PlayerController::CampaignMoney(float Amount)
+{
+	if (Map.IsValid())
+	{
+		Map->AddTransaction(Amount - Map->GetTreasury(), TEXT("Testpenge"));
 	}
 }
 
@@ -335,7 +350,8 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		bRightDragged = false;
 	}
 	bRightDragged |= IsInputKeyDown(EKeys::RightMouseButton) && FVector2D::Distance(Mouse, RightDownAt) > 6.f;
-	if (WasInputKeyJustReleased(EKeys::RightMouseButton) && !bRightDragged && Overlay.IsValid() && Overlay->GetSelectedRegiments().Num() > 0)
+	if (WasInputKeyJustReleased(EKeys::RightMouseButton) && !bRightDragged && Overlay.IsValid() && Overlay->GetSelectedRegiments().Num() > 0
+		&& Overlay->GetWindow() == SCampaign1851Overlay::EWindow::None)
 	{
 		// A town, or any point on the ground; Ctrl sends it straight across country whatever the setting.
 		const int32 Town = CityUnderCursor();
@@ -351,7 +367,14 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	}
 	if (WasInputKeyJustPressed(EKeys::Escape) && Overlay.IsValid())
 	{
-		Overlay->SetSelectedRegiments({});
+		if (Overlay->GetWindow() != SCampaign1851Overlay::EWindow::None)
+		{
+			Overlay->OpenWindow(SCampaign1851Overlay::EWindow::None);
+		}
+		else
+		{
+			Overlay->SetSelectedRegiments({});
+		}
 	}
 
 	FVector Focus;
@@ -372,7 +395,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	{
 		if (Map->GetSpeed() > 0) { SpeedBeforePause = Map->GetSpeed(); Map->SetSpeed(0); } else { Map->SetSpeed(SpeedBeforePause); }
 	}
-	const FKey SpeedKeys[] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five };
+	const FKey SpeedKeys[] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six };
 	for (int32 s = 0; s < UE_ARRAY_COUNT(SpeedKeys); ++s)
 	{
 		if (WasInputKeyJustPressed(SpeedKeys[s])) { Map->SetSpeed(s + 1); }
@@ -551,8 +574,91 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			for (int32 i : Overlay->GetSelectedRegiments())
 			{
-				Map->HaltRegiment(i);
+				Map->StopRegiment(i);
 			}
+			Overlay->ShowToast(TEXT("Holdt!"));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::ArmyCancel)
+		{
+			for (int32 i : Overlay->GetSelectedRegiments())
+			{
+				Map->CancelOrder(i);
+			}
+			Overlay->ShowToast(TEXT("Ordren er slettet: tilbage til udgangspunktet"));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::ClosePanel)
+		{
+			switch (Module)
+			{
+			case SCampaign1851Overlay::CloseTownTab: Overlay->SetTownTab(0); break;
+			case SCampaign1851Overlay::CloseTraining: Overlay->CloseTrainingMenu(); break;
+			case SCampaign1851Overlay::ClosePicker: Overlay->OpenPicker(SCampaign1851Overlay::EPicker::None); break;
+			case SCampaign1851Overlay::CloseOfficerCard: Overlay->InspectOfficer(INDEX_NONE); break;
+			case SCampaign1851Overlay::CloseWindow: Overlay->OpenWindow(SCampaign1851Overlay::EWindow::None); break;
+			case SCampaign1851Overlay::CloseLedger: Overlay->ToggleLedger(); break;
+			default:
+				Overlay->SetSelectedRegiments({});
+				Overlay->SetSelectedCity(INDEX_NONE);
+				Overlay->SetSelectedAmt(0);
+				Map->SetHighlightedAmt(0);
+				break;
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::MainMenu)
+		{
+			const SCampaign1851Overlay::EWindow Want = SCampaign1851Overlay::EWindow(Module);
+			Overlay->OpenWindow(Overlay->GetWindow() == Want ? SCampaign1851Overlay::EWindow::None : Want);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::WindowClose)
+		{
+			Overlay->OpenWindow(SCampaign1851Overlay::EWindow::None);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::TableSort)
+		{
+			Overlay->SetSort(Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::TablePage)
+		{
+			Overlay->TurnPage(Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OfficerFilter)
+		{
+			Overlay->SetOfficerFilter(Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OfficerDismiss)
+		{
+			if (Map->DismissOfficer(Module))
+			{
+				Overlay->InspectOfficer(INDEX_NONE);
+				Overlay->ShowToast(TEXT("Officeren er afskediget"));
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::TableRow)
+		{
+			// A row: the unit or town is picked and the camera goes there; an officer shows his card.
+			const SCampaign1851Overlay::EWindow Open = Overlay->GetWindow();
+			if (Open == SCampaign1851Overlay::EWindow::Officers)
+			{
+				Overlay->InspectOfficer(Overlay->GetInspectedOfficer() == Module ? INDEX_NONE : Module);
+			}
+			else if (Open == SCampaign1851Overlay::EWindow::Army && Map->GetRegiments().IsValidIndex(Module))
+			{
+				SelectRegiments({ Module });
+				Camera->SetView(Map->RegimentWorld(Module), 30.f, Camera->GetYaw());
+				Overlay->OpenWindow(SCampaign1851Overlay::EWindow::None);
+			}
+			else if (Open == SCampaign1851Overlay::EWindow::Towns && Map->GetCities().IsValidIndex(Module))
+			{
+				Overlay->SetSelectedRegiments({});
+				Overlay->SetSelectedCity(Module);
+				Map->SetHighlightedAmt(Map->GetCities()[Module].AmtId);
+				Camera->SetView(Map->GetCities()[Module].World, 40.f, Camera->GetYaw());
+				Overlay->OpenWindow(SCampaign1851Overlay::EWindow::None);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::TownTab)
+		{
+			Overlay->SetTownTab(Overlay->GetTownTab() == Module ? 0 : Module);
 		}
 		else if (Button == SCampaign1851Overlay::EButton::BuildLink)
 		{
@@ -590,7 +696,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			FocusPlot(Overlay->GetSelectedCity());
 		}
-		else
+		else if (Overlay.IsValid() && Overlay->GetWindow() == SCampaign1851Overlay::EWindow::None)
 		{
 			PickCity();
 		}

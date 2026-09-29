@@ -22,8 +22,13 @@ namespace Campaign1851Scenery
 		Cottage,         // small thatched house
 		Farm,            // four-winged farm ("firlænget gård") around a yard, thatched
 		Church,          // white church, red roof, west tower with spire
-		Broadleaf,       // beech/oak crown
-		Conifer,         // spruce
+		Broadleaf,       // beech: a crown of several lobes
+		Conifer,         // spruce in three tiers
+		TownHouseTimber, // half-timbered (bindingsværk): white panels in dark timber, red tile roof
+		MerchantHouse,   // three-storey red-brick merchant's house in the town core
+		Windmill,        // Dutch windmill: octagonal body, cap and four sails
+		Oak,             // broad, dark, lobed crown on a thick trunk
+		Haystack,        // a stack of hay in the fields by a farm
 		Count
 	};
 

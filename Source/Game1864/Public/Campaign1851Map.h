@@ -17,6 +17,13 @@ class UMaterialParameterCollection;
 class UStaticMesh;
 class FJsonObject;
 
+/** A line of the state's monthly budget (the treasury window). */
+struct FCampaign1851BudgetLine
+{
+	FString Text;
+	double PerMonth = 0.0;   // rigsdaler; income positive, spending negative
+};
+
 /** Region codes used by the 1851 data: K Kingdom, S Schleswig, H Holstein/Lauenburg. */
 struct FCampaign1851City
 {
@@ -180,8 +187,8 @@ public:
 	void AdvanceTime(float DeltaSeconds);
 	void SetSpeed(int32 InSpeed) { Speed = FMath::Clamp(InSpeed, 0, NumSpeeds() - 1); }
 	int32 GetSpeed() const { return Speed; }
-	static int32 NumSpeeds() { return 6; }
-	/** Campaign hours per real second at a speed step (0, 0.25, 1, 3, 8, 24). */
+	static int32 NumSpeeds() { return 7; }
+	/** Campaign hours per real second at a speed step (0, 0.25, 1, 3, 8, 24, 96); speed 6 jumps a whole day at a time. */
 	static float HoursPerSecondAt(int32 InSpeed);
 	static const TCHAR* SpeedLabel(int32 InSpeed);
 	/** "14:37" */
@@ -198,9 +205,12 @@ public:
 	// ---- Treasury (design manual 20.2: money / state credit; backlog B-346 budget with a transaction log).
 
 	/** Cash at the start of a campaign; income comes from the amter's taxes (YearlyTax). */
-	static constexpr double StartingTreasury = 150000.0;
+	// TEST (2026-09-29): 5,000,000 while the army and buildings are being tried out; the campaign value is 150,000.
+	static constexpr double StartingTreasury = 5000000.0;
 	double GetTreasury() const { return Treasury; }
 	const TArray<FCampaign1851Transaction>& GetLedger() const { return Ledger; }
+	/** This month's budget as it stands: taxes by region, then every kind of spending (construction at today's pace). */
+	TArray<FCampaign1851BudgetLine> MonthlyBudget() const;
 	/** Upkeep of finished buildings per month. */
 	double GetMonthlyUpkeep() const;
 	/** Books money in or out (negative = spent) with a reason. */
@@ -286,6 +296,8 @@ public:
 	int32 FindRegiment(const FString& Id) const { return Regiments.IndexOfByPredicate([&Id](const FCampaign1851Regiment& R) { return R.Id == Id; }); }
 	/** Regiments standing in a town. */
 	TArray<int32> RegimentsIn(int32 CityIndex) const;
+	/** Fastest times (days) from a town to every town, and the leg that reaches each (Dijkstra over the links). */
+	void TravelTimes(int32 From, float Pace, bool bRail, TArray<float>& OutDays, TArray<FCampaign1851Leg>& OutVia) const;
 	/** Fastest way between two towns now for a column of this road pace (km/day), by road, chaussée, ferry and (bRail) railway. */
 	bool FindRoute(int32 From, int32 To, float Pace, TArray<FCampaign1851Leg>& OutLegs, bool bRail = true) const;
 	/**
@@ -330,6 +342,12 @@ public:
 	/** The general of a stack or column: the first general attached to one of its regiments. */
 	const FCampaign1851Officer* ColumnGeneral(const TArray<int32>& Column) const;
 	int32 OfficerCost(bool bGeneral) const { return bGeneral ? GeneralRecruitCost : OfficerRecruitCost; }
+	/** Stops a regiment where it is now (in the field if it was between towns). */
+	void StopRegiment(int32 Regiment);
+	/** Cancels a march: the regiment goes back to where the order found it. */
+	void CancelOrder(int32 Regiment);
+	/** Sends an officer in the pool home (no more pay); false if he holds a post. */
+	bool DismissOfficer(int32 Officer);
 	/** Officers' pay per month (all officers, assigned or in the pool). */
 	double OfficerPayPerMonth() const;
 	TArray<FCampaign1851OfficerSave> SaveOfficers() const;

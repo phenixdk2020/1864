@@ -291,6 +291,24 @@ TArray<FVector2D> ACampaign1851Map::LegLine(const FCampaign1851Leg& Leg) const
 	{
 		Algo::Reverse(Line);
 	}
+	if (Leg.LineTo >= 0.f)
+	{
+		// Only the first part of the road: up to where the column turns off into the fields.
+		TArray<FVector2D> Part = { Line[0] };
+		double At = 0.0;
+		for (int32 i = 0; i + 1 < Line.Num(); ++i)
+		{
+			const double Len = FVector2D::Distance(Line[i], Line[i + 1]);
+			if (At + Len >= Leg.LineTo)
+			{
+				Part.Add(FMath::Lerp(Line[i], Line[i + 1], Len > 0.0 ? (Leg.LineTo - At) / Len : 0.0));
+				break;
+			}
+			Part.Add(Line[i + 1]);
+			At += Len;
+		}
+		return Part;
+	}
 	return Line;
 }
 
@@ -359,13 +377,8 @@ FString ACampaign1851Map::DescribePlace(int32 CityIndex, const FVector2D& Km) co
 	return Best == INDEX_NONE ? FString(TEXT("i terrænet")) : FString::Printf(TEXT("terrænet %.0f km fra %s"), BestKm, *Cities[Best].Name);
 }
 
-bool ACampaign1851Map::FindRoute(int32 From, int32 To, float Pace, TArray<FCampaign1851Leg>& OutLegs, bool bRail) const
+void ACampaign1851Map::TravelTimes(int32 From, float Pace, bool bRail, TArray<float>& OutDays, TArray<FCampaign1851Leg>& OutVia) const
 {
-	OutLegs.Reset();
-	if (!Cities.IsValidIndex(From) || !Cities.IsValidIndex(To) || From == To)
-	{
-		return false;
-	}
 	// Dijkstra over the towns; a leg's cost is its time. Boarding a train costs a day of loading.
 	auto LegFor = [&](int32 Link, int32 At, bool bArrivedByRail)
 	{
@@ -383,29 +396,32 @@ bool ACampaign1851Map::FindRoute(int32 From, int32 To, float Pace, TArray<FCampa
 				+ (L.HasFerry() ? Campaign1851Network::FerryDays : 0.f);
 		return Leg;
 	};
-	TArray<float> Best;
-	Best.Init(TNumericLimits<float>::Max(), Cities.Num());
-	TArray<FCampaign1851Leg> Via;
-	Via.SetNum(Cities.Num());
+	OutDays.Init(TNumericLimits<float>::Max(), Cities.Num());
+	OutVia.Reset();
+	OutVia.SetNum(Cities.Num());
 	TArray<bool> Done;
 	Done.Init(false, Cities.Num());
-	Best[From] = 0.f;
+	if (!Cities.IsValidIndex(From))
+	{
+		return;
+	}
+	OutDays[From] = 0.f;
 	for (;;)
 	{
 		int32 At = INDEX_NONE;
 		for (int32 c = 0; c < Cities.Num(); ++c)
 		{
-			if (!Done[c] && Best[c] < TNumericLimits<float>::Max() && (At == INDEX_NONE || Best[c] < Best[At]))
+			if (!Done[c] && OutDays[c] < TNumericLimits<float>::Max() && (At == INDEX_NONE || OutDays[c] < OutDays[At]))
 			{
 				At = c;
 			}
 		}
-		if (At == INDEX_NONE || At == To)
+		if (At == INDEX_NONE)
 		{
 			break;
 		}
 		Done[At] = true;
-		const bool bByRail = At != From && Via[At].bRail;
+		const bool bByRail = At != From && OutVia[At].bRail;
 		for (int32 Link = 0; Link < Links.Num(); ++Link)
 		{
 			if (Links[Link].A != At && Links[Link].B != At)
@@ -413,14 +429,26 @@ bool ACampaign1851Map::FindRoute(int32 From, int32 To, float Pace, TArray<FCampa
 				continue;
 			}
 			const FCampaign1851Leg Leg = LegFor(Link, At, bByRail);
-			if (Best[At] + Leg.Days < Best[Leg.To])
+			if (OutDays[At] + Leg.Days < OutDays[Leg.To])
 			{
-				Best[Leg.To] = Best[At] + Leg.Days;
-				Via[Leg.To] = Leg;
+				OutDays[Leg.To] = OutDays[At] + Leg.Days;
+				OutVia[Leg.To] = Leg;
 			}
 		}
 	}
-	if (Best[To] == TNumericLimits<float>::Max())
+}
+
+bool ACampaign1851Map::FindRoute(int32 From, int32 To, float Pace, TArray<FCampaign1851Leg>& OutLegs, bool bRail) const
+{
+	OutLegs.Reset();
+	if (!Cities.IsValidIndex(From) || !Cities.IsValidIndex(To) || From == To)
+	{
+		return false;
+	}
+	TArray<float> Days;
+	TArray<FCampaign1851Leg> Via;
+	TravelTimes(From, Pace, bRail, Days, Via);
+	if (Days[To] == TNumericLimits<float>::Max())
 	{
 		return false;
 	}
@@ -437,6 +465,7 @@ bool ACampaign1851Map::PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 
 	OutLegs.Reset();
 	const FVector2D StartKm = Cities.IsValidIndex(FromTown) ? TownKm(FromTown) : FromKm;
 	const FVector2D EndKm = Cities.IsValidIndex(ToTown) ? TownKm(ToTown) : ToKm;
+	const float FieldPace = Pace * Campaign1851Army::OffRoadPaceFactor;
 	auto Across = [&](int32 A, const FVector2D& AKm, int32 B, const FVector2D& BKm)
 	{
 		FCampaign1851Leg Leg;
@@ -445,7 +474,7 @@ bool ACampaign1851Map::PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 
 		Leg.To = B;
 		Leg.FromKm = AKm;
 		Leg.ToKm = BKm;
-		Leg.Days = float(FVector2D::Distance(AKm, BKm)) / (Pace * Campaign1851Army::OffRoadPaceFactor);
+		Leg.Days = float(FVector2D::Distance(AKm, BKm)) / FieldPace;
 		return Leg;
 	};
 	if ((FromTown != INDEX_NONE && FromTown == ToTown) || FVector2D::Distance(StartKm, EndKm) < 0.05)
@@ -453,9 +482,10 @@ bool ACampaign1851Map::PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 
 		if (OutReason) { *OutReason = TEXT("Den er der allerede"); }
 		return false;
 	}
+	const bool bDirectDry = IsDryLine(StartKm, EndKm);
 	if (Mode == ECampaign1851RouteMode::Direct)
 	{
-		if (!IsDryLine(StartKm, EndKm))
+		if (!bDirectDry)
 		{
 			if (OutReason) { *OutReason = TEXT("Der er vand i vejen: vælg veje"); }
 			return false;
@@ -463,34 +493,179 @@ bool ACampaign1851Map::PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 
 		OutLegs.Add(Across(FromTown, StartKm, ToTown, EndKm));
 		return true;
 	}
-	// By road: across the fields to the nearest town if it starts or ends out there, the roads between.
-	const int32 EnterTown = Cities.IsValidIndex(FromTown) ? FromTown : NearestTownFrom(StartKm);
-	const int32 LeaveTown = Cities.IsValidIndex(ToTown) ? ToTown : NearestTownFrom(EndKm);
-	if (EnterTown == INDEX_NONE || LeaveTown == INDEX_NONE)
+
+	// By road: every way of joining the roads (a town near the start) and of leaving them (a town, or
+	// any point along a road) is weighed, and the fastest whole march wins, the fields included.
+	const bool bRail = Mode == ECampaign1851RouteMode::RoadsAndRail;
+	struct FEntry { int32 Town; float Days; };
+	TArray<FEntry> Entries;
+	if (Cities.IsValidIndex(FromTown))
+	{
+		Entries.Add({ FromTown, 0.f });
+	}
+	else
+	{
+		TArray<TPair<double, int32>> Near;
+		for (int32 c = 0; c < Cities.Num(); ++c)
+		{
+			if (!Cities[c].bForeign && !Cities[c].bBornholm && FVector2D::Distance(StartKm, TownKm(c)) < 40.0)
+			{
+				Near.Add({ FVector2D::Distance(StartKm, TownKm(c)), c });
+			}
+		}
+		Near.Sort([](const TPair<double, int32>& A, const TPair<double, int32>& B) { return A.Key < B.Key; });
+		for (int32 n = 0; n < Near.Num() && Entries.Num() < 4; ++n)
+		{
+			if (IsDryLine(StartKm, TownKm(Near[n].Value)))
+			{
+				Entries.Add({ Near[n].Value, float(Near[n].Key) / FieldPace });
+			}
+		}
+	}
+
+	struct FPlan
+	{
+		float Days = TNumericLimits<float>::Max();
+		int32 Entry = INDEX_NONE;     // town the roads start from
+		int32 Exit = INDEX_NONE;      // town the roads reach (the partial link starts there)
+		int32 Link = INDEX_NONE;      // leaving part-way along this link, at Along km from Exit
+		float Along = 0.f;
+		FVector2D LeaveKm = FVector2D::ZeroVector;
+		bool bDirect = false;
+	};
+	FPlan Best;
+	if (bDirectDry)
+	{
+		Best.Days = float(FVector2D::Distance(StartKm, EndKm)) / FieldPace;
+		Best.bDirect = true;
+	}
+	TArray<float> BestDays;
+	TArray<FCampaign1851Leg> BestVia;
+	for (const FEntry& E : Entries)
+	{
+		TArray<float> Days;
+		TArray<FCampaign1851Leg> Via;
+		TravelTimes(E.Town, Pace, bRail, Days, Via);
+		// Candidates, cheapest first; the (slower) dry-land test only for those that could win.
+		TArray<FPlan> Candidates;
+		if (Cities.IsValidIndex(ToTown))
+		{
+			if (Days[ToTown] < TNumericLimits<float>::Max())
+			{
+				FPlan P;
+				P.Days = E.Days + Days[ToTown];
+				P.Entry = E.Town;
+				P.Exit = ToTown;
+				Candidates.Add(P);
+			}
+		}
+		else
+		{
+			for (int32 c = 0; c < Cities.Num(); ++c)
+			{
+				const double Off = FVector2D::Distance(TownKm(c), EndKm);
+				if (Days[c] < TNumericLimits<float>::Max() && Off < 40.0)
+				{
+					FPlan P;
+					P.Days = E.Days + Days[c] + float(Off) / FieldPace;
+					P.Entry = E.Town;
+					P.Exit = c;
+					P.LeaveKm = TownKm(c);
+					Candidates.Add(P);
+				}
+			}
+			// Leaving a road part-way: sample every road link each kilometre from both ends.
+			for (int32 k = 0; k < Links.Num(); ++k)
+			{
+				const FCampaign1851Link& L = Links[k];
+				if (L.HasFerry())
+				{
+					continue;
+				}
+				const float RoadPace = Pace * (L.bChaussee ? Campaign1851Network::MarchKmPerDayChaussee / Campaign1851Network::MarchKmPerDayRoad : 1.f);
+				const double Length = LineLength(L.Km);
+				for (double d = 1.0; d < Length; d += 1.0)
+				{
+					const FVector2D Point = AlongLine(L.Km, d);
+					const double Off = FVector2D::Distance(Point, EndKm);
+					if (Off > 40.0)
+					{
+						continue;
+					}
+					for (int32 Side = 0; Side < 2; ++Side)
+					{
+						const int32 Town = Side == 0 ? L.A : L.B;
+						const double Along = Side == 0 ? d : Length - d;
+						if (Days[Town] == TNumericLimits<float>::Max())
+						{
+							continue;
+						}
+						FPlan P;
+						P.Days = E.Days + Days[Town] + float(Along) / RoadPace + float(Off) / FieldPace;
+						P.Entry = E.Town;
+						P.Exit = Town;
+						P.Link = k;
+						P.Along = float(Along);
+						P.LeaveKm = Point;
+						Candidates.Add(P);
+					}
+				}
+			}
+		}
+		Candidates.Sort([](const FPlan& A, const FPlan& B) { return A.Days < B.Days; });
+		for (const FPlan& P : Candidates)
+		{
+			if (P.Days >= Best.Days)
+			{
+				break;
+			}
+			if (Cities.IsValidIndex(ToTown) || IsDryLine(P.LeaveKm, EndKm))
+			{
+				Best = P;
+				BestDays = Days;
+				BestVia = Via;
+				break;
+			}
+		}
+	}
+	if (Best.Days == TNumericLimits<float>::Max())
 	{
 		if (OutReason) { *OutReason = TEXT("Ingen vej derhen"); }
 		return false;
 	}
-	if (EnterTown == LeaveTown && !Cities.IsValidIndex(FromTown) && !Cities.IsValidIndex(ToTown) && IsDryLine(StartKm, EndKm))
+	if (Best.bDirect)
 	{
-		OutLegs.Add(Across(INDEX_NONE, StartKm, INDEX_NONE, EndKm));   // both near the same town: straight there
+		OutLegs.Add(Across(FromTown, StartKm, ToTown, EndKm));
 		return true;
 	}
+	// Build it: fields to the entry town, roads to the exit town, part of a road, fields to the goal.
 	if (!Cities.IsValidIndex(FromTown))
 	{
-		OutLegs.Add(Across(INDEX_NONE, StartKm, EnterTown, TownKm(EnterTown)));
+		OutLegs.Add(Across(INDEX_NONE, StartKm, Best.Entry, TownKm(Best.Entry)));
 	}
 	TArray<FCampaign1851Leg> RoadLegs;
-	if (EnterTown != LeaveTown && !FindRoute(EnterTown, LeaveTown, Pace, RoadLegs, Mode == ECampaign1851RouteMode::RoadsAndRail))
+	for (int32 At = Best.Exit; At != Best.Entry; At = BestVia[At].From)
 	{
-		if (OutReason) { *OutReason = FString::Printf(TEXT("Ingen vej til %s"), *Cities[LeaveTown].Name); }
-		OutLegs.Reset();
-		return false;
+		RoadLegs.Insert(BestVia[At], 0);
 	}
 	OutLegs.Append(RoadLegs);
-	if (!Cities.IsValidIndex(ToTown))
+	if (Links.IsValidIndex(Best.Link))
 	{
-		OutLegs.Add(Across(LeaveTown, TownKm(LeaveTown), INDEX_NONE, EndKm));
+		const FCampaign1851Link& L = Links[Best.Link];
+		FCampaign1851Leg Part;
+		Part.Link = Best.Link;
+		Part.From = Best.Exit;
+		Part.To = INDEX_NONE;
+		Part.FromKm = TownKm(Best.Exit);
+		Part.ToKm = Best.LeaveKm;
+		Part.LineTo = Best.Along;
+		Part.Days = Best.Along / (Pace * (L.bChaussee ? Campaign1851Network::MarchKmPerDayChaussee / Campaign1851Network::MarchKmPerDayRoad : 1.f));
+		OutLegs.Add(Part);
+		OutLegs.Add(Across(INDEX_NONE, Best.LeaveKm, INDEX_NONE, EndKm));
+	}
+	else if (!Cities.IsValidIndex(ToTown))
+	{
+		OutLegs.Add(Across(Best.Exit, TownKm(Best.Exit), INDEX_NONE, EndKm));
 	}
 	return OutLegs.Num() > 0;
 }
@@ -568,6 +743,8 @@ bool ACampaign1851Map::OrderMarchTo(const TArray<int32>& Column, int32 CityIndex
 		}
 		else
 		{
+			R.OriginTown = R.Town;
+			R.OriginKm = Cities.IsValidIndex(R.Town) ? TownKm(R.Town) : R.Km;
 			R.Route = MoveTemp(Legs);
 			R.Leg = 0;
 			R.LegElapsed = 0.f;
@@ -581,6 +758,45 @@ bool ACampaign1851Map::OrderMarchTo(const TArray<int32>& Column, int32 CityIndex
 		UpdateRegimentPiece(i);
 	}
 	return Ordered > 0;
+}
+
+void ACampaign1851Map::StopRegiment(int32 Regiment)
+{
+	if (!Regiments.IsValidIndex(Regiment) || !Regiments[Regiment].IsMarching())
+	{
+		return;
+	}
+	// Halt on the spot: the column stands in the field where it was (Km is kept up to date by the march).
+	FCampaign1851Regiment& R = Regiments[Regiment];
+	R.Route.Reset();
+	R.Leg = 0;
+	R.LegElapsed = 0.f;
+	R.Group = 0;
+	R.Town = INDEX_NONE;
+	UpdateRegimentPiece(Regiment);
+}
+
+void ACampaign1851Map::CancelOrder(int32 Regiment)
+{
+	if (!Regiments.IsValidIndex(Regiment) || !Regiments[Regiment].IsMarching())
+	{
+		return;
+	}
+	FCampaign1851Regiment& R = Regiments[Regiment];
+	const int32 OriginTown = R.OriginTown;
+	const FVector2D OriginKm = R.OriginKm;
+	const ECampaign1851RouteMode Mode = R.Mode;
+	StopRegiment(Regiment);
+	if (!OriginKm.IsZero() && FVector2D::Distance(OriginKm, R.Km) > 0.05)
+	{
+		OrderMarchTo({ Regiment }, OriginTown, OriginKm, Mode);
+	}
+	else if (Cities.IsValidIndex(OriginTown))
+	{
+		R.Town = OriginTown;
+		PlaceInTown(Regiment);
+		UpdateRegimentPiece(Regiment);
+	}
 }
 
 void ACampaign1851Map::HaltRegiment(int32 Regiment)
@@ -757,6 +973,21 @@ void ACampaign1851Map::UpdateRegimentPiece(int32 Regiment)
 		Piece->SetWorldScale3D(FVector(PieceScale * FormationScale));
 		Piece->RegisterComponent();
 		RegimentPieces[Regiment] = Piece;
+	}
+	// By rail it is a train on the track; otherwise its formation.
+	const bool bOnTrain = R.IsMarching() && R.Route[R.Leg].bRail;
+	if (bOnTrain && !TrainMesh)
+	{
+		if (UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, ArmyMaterialPath))
+		{
+			TrainMesh = Campaign1851Scenery::BuildSitePiece(Campaign1851Scenery::ESitePiece::Train, Material);
+		}
+	}
+	UStaticMesh* Wanted = bOnTrain && TrainMesh ? TrainMesh.Get() : ArmyMeshes[FMath::Min(int32(R.Arm), ArmyMeshes.Num() - 1)].Get();
+	if (Piece->GetStaticMesh() != Wanted)
+	{
+		Piece->SetStaticMesh(Wanted);
+		Piece->SetWorldScale3D(FVector(PieceScale * (bOnTrain ? 1.6f : FormationScale)));
 	}
 	// The formation faces +X: turn it to the heading (world Y is south).
 	Piece->SetWorldLocationAndRotation(WorldAtKm(R.Km) + FVector(0.0, 0.0, 0.5),

@@ -40,6 +40,10 @@ public:
 	UFUNCTION(Exec)
 	void CampaignNewGame();
 
+	/** Test money: sets the treasury, e.g. "CampaignMoney 5000000". */
+	UFUNCTION(Exec)
+	void CampaignMoney(float Amount);
+
 	/** Starts the barracks in a town and flies to its building site, e.g. "CampaignBuild Aalborg". */
 	UFUNCTION(Exec)
 	void CampaignBuild(const FString& CityName);
