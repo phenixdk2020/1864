@@ -196,6 +196,7 @@ void ACampaign1851Map::ResetWorld(int32 InSeed, float InDeviation)
 			R.Opened = FMath::Max(StartDate() + FTimespan::FromDays(30.0), Base.Value + FTimespan::FromDays(Shift));
 		}
 	}
+	ResetManpower();
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|world|seed %d|deviation %.0f %%"), Seed, Deviation * 100.f);
 }
 
@@ -576,6 +577,30 @@ TArray<FCampaign1851Decision> ACampaign1851Map::DecisionOptions(int32 NationInde
 			D.Reasons = FString::Printf(TEXT("%d ubesatte poster og ingen ledige officerer  ·  pris %s rd."), Vacancies, *Rd(OfficerRecruitCost));
 			Out.Add(D);
 		}
+		// A new battalion where a barracks stands and the amt has the men, while the army is small for the kingdom.
+		int32 ArmyMen = 0;
+		for (const FCampaign1851Regiment& R : Regiments) { ArmyMen += R.Men; }
+		double People = 0.0;
+		for (const FCampaign1851Amt& A : Amter) { People += A.Population; }
+		if (ArmyMen < People * 0.009 && Campaign1851Army::RaiseCost() <= Budget)
+		{
+			for (int32 c = 0; c < Cities.Num(); ++c)
+			{
+				if (RaiseBlockReason(c).IsEmpty())
+				{
+					FCampaign1851Decision D;
+					D.Kind = ECampaign1851DecisionKind::Raise;
+					D.A = c;
+					D.Cost = Campaign1851Army::RaiseCost();
+					D.Score = 1.2f * W * float(1.0 - ArmyMen / (People * 0.009)) * 4.f;
+					D.Action = FString::Printf(TEXT("Opret en ny bataljon i %s"), *Cities[c].Name);
+					D.Reasons = FString::Printf(TEXT("hæren %s mand er lille for %s indbyggere  ·  amtet har %d mand i reserve  ·  pris %s rd. + %s rd./md."),
+						*Rd(ArmyMen), *Rd(People), FMath::FloorToInt(GetManpower(AmtIndexOfTown(c))), *Rd(Campaign1851Army::RaiseCost()), *Rd(Campaign1851Army::RaisedUpkeepPerMonth));
+					Out.Add(D);
+					break;
+				}
+			}
+		}
 		// Training: units drilling by habit are set to train their weakest skill, as far as the budget allows;
 		// all training together may take at most a share of the monthly taxes (by the ministry's weight).
 		double Monthly = 0.0;
@@ -660,6 +685,8 @@ bool ACampaign1851Map::CarryOut(const FCampaign1851Decision& D)
 		return Regiments.IsValidIndex(D.A);
 	case ECampaign1851DecisionKind::Recruit:
 		return RecruitOfficer(false) != INDEX_NONE;
+	case ECampaign1851DecisionKind::Raise:
+		return RaiseBattalion(D.A) != INDEX_NONE;
 	case ECampaign1851DecisionKind::FillPost:
 	{
 		if (!Officers.IsValidIndex(D.A) || !Officers[D.A].IsFree())

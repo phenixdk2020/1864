@@ -638,6 +638,20 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			}
 			SelectRegiments(Stack);
 		}
+		else if (Button == SCampaign1851Overlay::EButton::RegimentPiece)
+		{
+			// Close in: the miniature is the regiment itself; shift-click adds or removes it.
+			TArray<int32> Sel = Overlay->GetSelectedRegiments();
+			if (IsInputKeyDown(EKeys::LeftShift) || IsInputKeyDown(EKeys::RightShift))
+			{
+				if (Sel.Contains(Module)) { Sel.Remove(Module); } else { Sel.Add(Module); }
+			}
+			else
+			{
+				Sel = { Module };
+			}
+			SelectRegiments(Sel);
+		}
 		else if (Button == SCampaign1851Overlay::EButton::RegimentRow)
 		{
 			TArray<int32> Sel = Overlay->GetSelectedRegiments();
@@ -803,6 +817,20 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			const int32 Index = Map->FormationIndex(Module);
 			Overlay->OpenFormationPicker(Module, Index != INDEX_NONE && (Map->GetFormations()[Index].Echelon == ECampaign1851Echelon::Division || Map->GetFormations()[Index].Echelon == ECampaign1851Echelon::Army));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::RaiseBattalion)
+		{
+			FString Why;
+			const int32 New = Map->RaiseBattalion(Overlay->GetSelectedCity(), &Why);
+			if (New != INDEX_NONE)
+			{
+				Overlay->ShowToast(FString::Printf(TEXT("%s oprettet: 760 rekrutter, en major og fire kaptajner"), *Map->GetRegiments()[New].Name));
+				SaveToSlot(TEXT("Autosave"), true);
+			}
+			else
+			{
+				Overlay->ShowToast(Why);
+			}
 		}
 		else if (Button == SCampaign1851Overlay::EButton::FortTool)
 		{
@@ -1236,6 +1264,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->TrainOrders = Map->GetTrainOrders();
 	Map->SaveWorld(Save);
 	Save->Forts = Map->SaveForts();
+	Save->AmtManpower = Map->GetAmtManpower();
 	if (Save->Links.Num() > 0)
 	{
 		Parts.Add(FString::Printf(TEXT("%d vej-/baneanlæg"), Save->Links.Num()));
@@ -1318,6 +1347,10 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 		Map->RestoreWorld(Save);
 	}
 	Map->RestoreForts(Save->SaveVersion >= 13 ? Save->Forts : TArray<FCampaign1851FortSave>());
+	if (Save->SaveVersion >= 15)
+	{
+		Map->SetAmtManpower(Save->AmtManpower);
+	}
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);
 	if (Overlay.IsValid())
 	{

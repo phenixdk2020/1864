@@ -284,6 +284,25 @@ public:
 	/** World position of a town's building plot (on the terrain). */
 	FVector PlotWorld(int32 CityIndex) const;
 
+	// ---- Manpower: each amt's reserve, replacements and new battalions (Campaign1851Manpower.cpp).
+
+	/** The amt (index) a town lies in. */
+	int32 AmtIndexOfTown(int32 CityIndex) const;
+	/** Trained men in an amt's reserve, the fit men (ceiling) and the yearly class. */
+	float GetManpower(int32 AmtIndex) const { return AmtManpower.IsValidIndex(AmtIndex) ? AmtManpower[AmtIndex] : 0.f; }
+	float ManpowerCap(int32 AmtIndex) const;
+	float YearlyClass(int32 AmtIndex) const;
+	/** Why no battalion can be raised in a town (empty if it can). */
+	FString RaiseBlockReason(int32 CityIndex) const;
+	/** Raises a battalion of recruits at the town's barracks from its amt's reserve; its index or INDEX_NONE. */
+	int32 RaiseBattalion(int32 CityIndex, FString* OutReason = nullptr);
+	/** Upkeep a month of the battalions raised since 1851. */
+	double RaisedUpkeepPerMonth() const;
+	/** A battalion's strength to fill up to (less its companies in forts). */
+	int32 BattalionTarget(int32 Regiment) const;
+	const TArray<float>& GetAmtManpower() const { return AmtManpower; }
+	void SetAmtManpower(const TArray<float>& In) { if (In.Num() == AmtManpower.Num()) { AmtManpower = In; } }
+
 	// ---- Field fortifications, skanser (Campaign1851Forts.cpp).
 
 	const TArray<FCampaign1851Fort>& GetForts() const { return Forts; }
@@ -521,6 +540,10 @@ public:
 
 	/** Screen-size scaling for the city markers; called by the player controller each frame. */
 	void UpdateMarkers(float CameraDistanceKm);
+	/** The camera's distance (km) at the last marker update. */
+	float GetCameraDistanceKm() const { return LastCameraDistanceKm; }
+	/** Closer than this (km) the regiments are picked by their miniatures, not by NATO counters. */
+	static constexpr float MiniatureViewKm = 15.f;
 
 	/** Population size class used by markers and the legend. */
 	static float SizeClass(int32 Population);
@@ -667,6 +690,12 @@ private:
 	TArray<FCampaign1851Railway> Railways;
 	int32 HistoricRailways = 0;   // Railways[0..HistoricRailways) come from the map data
 	TArray<FString> News;
+
+	// The manpower layer (Campaign1851Manpower.cpp).
+	void ResetManpower();
+	void MonthlyManpower();
+	int32 AddRaisedRegiment(const FString& Id, const FString& Name, ECampaign1851Arm Arm, int32 Home, int32 MaxMen);
+	TArray<float> AmtManpower;
 
 	// The fort layer (Campaign1851Forts.cpp).
 	void AdvanceForts(float DeltaDays);

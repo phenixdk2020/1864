@@ -138,6 +138,12 @@ struct FCampaign1851RegimentSave
 	UPROPERTY() TArray<float> Skills;
 	UPROPERTY() uint8 Program = 1;
 	UPROPERTY() float Cohesion = 0.f;
+	/** v15: raised during the campaign, with its definition. */
+	UPROPERTY() bool bRaised = false;
+	UPROPERTY() FString Name;
+	UPROPERTY() uint8 Arm = 0;
+	UPROPERTY() FString Home;
+	UPROPERTY() int32 MaxMen = 0;
 };
 
 /** A formation of the field army (v11): its place in the tree, its commander and its regiments. */
@@ -204,7 +210,7 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 
 public:
 	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands. 10: + troop trains on the map. 11: + field formations. */
-	static constexpr int32 CurrentVersion = 14;
+	static constexpr int32 CurrentVersion = 15;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;
@@ -250,6 +256,9 @@ public:
 	UPROPERTY() TArray<int32> AmtRural;
 	UPROPERTY() TArray<FCampaign1851NationSave> Nations;
 	UPROPERTY() TArray<FCampaign1851DecisionSave> Decisions;
+
+	/** Each amt's reserve of trained men (v15). */
+	UPROPERTY() TArray<float> AmtManpower;
 
 	/** Field fortifications (v13). */
 	UPROPERTY() TArray<FCampaign1851FortSave> Forts;

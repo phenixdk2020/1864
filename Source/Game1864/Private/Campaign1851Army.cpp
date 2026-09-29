@@ -397,6 +397,23 @@ bool ACampaign1851Map::LoadArmy()
 
 void ACampaign1851Map::ResetArmy()
 {
+	// Pieces of battalions raised in the last campaign go with them.
+	for (int32 i = ArmyAtStart.Num(); i < RegimentPieces.Num(); ++i)
+	{
+		if (RegimentPieces[i])
+		{
+			RegimentPieces[i]->DestroyComponent();
+		}
+	}
+	for (int32 c = ArmyAtStart.Num() * 3; c < RegimentCars.Num(); ++c)
+	{
+		if (RegimentCars[c])
+		{
+			RegimentCars[c]->DestroyComponent();
+		}
+	}
+	RegimentPieces.SetNum(FMath::Min(RegimentPieces.Num(), ArmyAtStart.Num()));
+	RegimentCars.SetNum(FMath::Min(RegimentCars.Num(), ArmyAtStart.Num() * 3));
 	Regiments = ArmyAtStart;
 	Commands = CommandsAtStart;
 	// The regiments' experience in this campaign: the 1851 figures, varied by the historical deviation.
@@ -2081,6 +2098,14 @@ TArray<FCampaign1851RegimentSave> ACampaign1851Map::SaveArmy() const
 		FCampaign1851RegimentSave& S = Out.AddDefaulted_GetRef();
 		S.Id = R.Id;
 		S.Men = R.Men;
+		S.bRaised = R.bRaised;
+		if (R.bRaised)
+		{
+			S.Name = R.Name;
+			S.Arm = uint8(R.Arm);
+			S.Home = Cities.IsValidIndex(R.Home) ? Cities[R.Home].Name : FString();
+			S.MaxMen = R.MaxMen;
+		}
 		S.Morale = R.Morale;
 		S.Pace = R.PaceKmPerDay;
 		S.Group = R.Group;
@@ -2109,7 +2134,11 @@ int32 ACampaign1851Map::RestoreArmy(const TArray<FCampaign1851RegimentSave>& Sav
 	for (int32 k = 0; k < Saves.Num(); ++k)
 	{
 		const FCampaign1851RegimentSave& S = Saves[k];
-		const int32 i = FindRegiment(S.Id);
+		int32 i = FindRegiment(S.Id);
+		if (i == INDEX_NONE && S.bRaised && FindCity(S.Home) != INDEX_NONE)
+		{
+			i = AddRaisedRegiment(S.Id, S.Name, ECampaign1851Arm(S.Arm), FindCity(S.Home), S.MaxMen);
+		}
 		if (i == INDEX_NONE)
 		{
 			continue;

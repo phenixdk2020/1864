@@ -1665,6 +1665,10 @@ TArray<FCampaign1851BudgetLine> ACampaign1851Map::MonthlyBudget() const
 	{
 		Lines.Insert({ TEXT("Erhverv, told og post"), CivilIncomePerYear() / 12.0 }, 3);
 	}
+	if (RaisedUpkeepPerMonth() > 0.5)
+	{
+		Lines.Add({ TEXT("Nye bataljoners underhold"), -RaisedUpkeepPerMonth() });
+	}
 	return Lines;
 }
 
@@ -1755,6 +1759,7 @@ void ACampaign1851Map::CloseMonth()
 	}
 	// The world moves on: towns grow, investors build, the ministries (and the other nations) decide.
 	GrowMonth();
+	MonthlyManpower();
 	PrivateInvestment();
 	RunNationalAI();
 }

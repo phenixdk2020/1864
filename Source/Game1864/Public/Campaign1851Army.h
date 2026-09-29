@@ -241,6 +241,8 @@ struct FCampaign1851Regiment
 	TArray<int32> Captains;
 	/** Per company: the fort (id) it holds, 0 = with the battalion. Its men are then not in Men. */
 	TArray<int32> CompanyFort;
+	/** Raised during the campaign (not part of the army of 1851): saved with its definition, paid from the budget. */
+	bool bRaised = false;
 	/** Officer indices: the regiment's chief, and a general whose headquarters marches with it. */
 	int32 Chief = INDEX_NONE;
 	int32 General = INDEX_NONE;
@@ -341,6 +343,22 @@ namespace Campaign1851Army
 	/** "Hær", "Division", "Brigade", "Afdeling"; and the map symbol's size mark (XXXX, XX, X, II). */
 	const TCHAR* EchelonName(ECampaign1851Echelon Echelon);
 	const TCHAR* EchelonMark(ECampaign1851Echelon Echelon);
+
+	// ---- Manpower (conscription law of 1849; estimates for play).
+	/** Trained reserve per amt in 1851 (after the war), the yearly class and the fit men (ceiling), as shares of the population. */
+	constexpr float ManpowerStartShare = 0.02f;
+	constexpr float YearlyClassShare = 0.009f;
+	constexpr float ManpowerCapShare = 0.09f;
+	/** Replacements a month (share of full strength) and their kit (rd. a man). */
+	constexpr float ReplacementShare = 0.08f;
+	constexpr int32 ReplacementCostPerMan = 10;
+	/** A new battalion: its men, kit a man, and its upkeep a month beyond the army of 1851. */
+	constexpr int32 RaiseMen = 760;
+	constexpr int32 RaiseCostPerMan = 15;
+	inline int32 RaiseCost() { return RaiseMen * RaiseCostPerMan; }
+	constexpr double RaisedUpkeepPerMonth = 1200.0;
+	constexpr float RecruitExperience = 20.f;
+	constexpr float RecruitSkill = 35.f;
 	/** The chief's function of a formation: "Divisionschef", "Brigadechef", "Regimentschef". */
 	const TCHAR* FormationRole(ECampaign1851Echelon Echelon);
 	/** A headquarters staff post: 0 chief (FormationRole), 1 "Næstkommanderende", 2 "Stabschef" / "Adjudant". */

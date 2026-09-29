@@ -43,7 +43,8 @@ enum class ECampaign1851DecisionKind : uint8
 	TroopTrain,
 	Training,      // A = regiment, B = ECampaign1851Program
 	FillPost,      // A = officer, B = post code (see ACampaign1851Map::ExecuteDecision), Key = target
-	Recruit
+	Recruit,
+	Raise          // A = town: a new battalion at its barracks
 };
 
 struct FCampaign1851Nation

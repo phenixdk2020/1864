@@ -257,7 +257,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.39 SKANSER MED BESÆTNING — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.40 MANDSKAB OG MINIATURER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -532,13 +532,13 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	}
 	else if (TownTab == 3)
 	{
-		PaintTownLinks(Geometry, Out, Layer, 28.f + 380.f + 10.f);
+		PaintTownLinks(Geometry, Out, Layer, 28.f + 440.f + 10.f);
 	}
-	const FVector2D Size(380.f, C.bForeign ? 150.f : 222.f);
+	const FVector2D Size(440.f, C.bForeign ? 150.f : 226.f);
 	const ACampaign1851ConstructionSite* Site = C.bHasPlot ? Map->FindProject(SelectedCity) : nullptr;
 	const int32 ModuleRows = Site && Site->IsBarracksDone() ? Site->NumModules() - 1 : 0;
 	const float RowHeight = 54.f;
-	const float CardHeight = 150.f + (ModuleRows > 0 ? ModuleRows * RowHeight + 10.f : 0.f);
+	const float CardHeight = 150.f + (ModuleRows > 0 ? 34.f + ModuleRows * RowHeight + 10.f : 0.f);
 	const FVector2D Pos(28.f, Geometry.GetLocalSize().Y - 190.f - Size.Y);
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseSelection);
@@ -550,9 +550,11 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("ca. %s indbyggere (%d)  ·  vækst %.1f %%/år"), *Thousands(C.Population), Map->GetDate().GetYear(), Map->UrbanGrowthRate(SelectedCity)), Pos + FVector2D(22.f, 120.f), Serif(13), Ink, 0.f, false);
 	if (!C.bForeign)
 	{
-		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("Skat %s rd./år  ·  våbenføre ca. %s mænd"),
-			*Thousands(FMath::RoundToInt(C.Population * ACampaign1851Map::UrbanTaxPerHead)), *Thousands(FMath::RoundToInt(C.Population * 0.09))),
-			Pos + FVector2D(22.f, 146.f), Serif(12, EFace::Italic), Gold, 0.f, false);
+		const int32 AmtIndex = Map->AmtIndexOfTown(SelectedCity);
+		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Skat %s rd./år  ·  reserve %s mand (+%s/år)"),
+			*Thousands(FMath::RoundToInt(C.Population * ACampaign1851Map::UrbanTaxPerHead)), *Thousands(FMath::FloorToInt(Map->GetManpower(AmtIndex))),
+			*Thousands(FMath::RoundToInt(Map->YearlyClass(AmtIndex)))),
+			Pos + FVector2D(22.f, 146.f), Serif(12, EFace::Italic), Gold, Size.X - 44.f);
 		const TCHAR* Tabs[] = { TEXT("GARNISON"), TEXT("BYGNINGER"), TEXT("VEJE OG BANER") };
 		const float TabW = (Size.X - 44.f - 16.f) / 3.f;
 		for (int32 t = 0; t < 3; ++t)
@@ -567,7 +569,7 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	}
 
 	// Garrison (design manual 20.16.5-7): the barracks card, then the modules around the parade ground.
-	const FVector2D Card(28.f + 380.f + 10.f, Geometry.GetLocalSize().Y - 190.f - CardHeight);
+	const FVector2D Card(28.f + 440.f + 10.f, Geometry.GetLocalSize().Y - 190.f - CardHeight);
 	PaintPanel(Geometry, Out, Layer, Card, FVector2D(Size.X, CardHeight));
 	PaintCloseX(Geometry, Out, Layer + 3, Card + FVector2D(Size.X, 0.f), CloseTownTab);
 	PaintText(Geometry, Out, Layer + 2, TEXT("G A R N I S O N"), Card + FVector2D(22.f, 22.f), Serif(11), Gold, 0.f, false);
@@ -600,10 +602,19 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 		PaintBar(Geometry, Out, Layer + 2, Text + FVector2D(0.f, 92.f), 220.f, Site->GetModuleProgress(0));
 	}
 	PaintButton(Geometry, Out, Layer + 2, Text + FVector2D(0.f, 106.f), FVector2D(150.f, 26.f), TEXT("VIS PÅ KORTET"), EButton::ShowOnMap);
+	if (bBarracksDone)
+	{
+		// A new battalion of recruits from the amt's reserve (design: manpower, conscription of 1849).
+		const FString Why = Map->RaiseBlockReason(SelectedCity);
+		PaintButton(Geometry, Out, Layer + 2, Text + FVector2D(0.f, 136.f), FVector2D(220.f, 26.f), FString::Printf(TEXT("OPRET BATAILLON  %s rd."), *Thousands(Campaign1851Army::RaiseCost())),
+			EButton::RaiseBattalion, 0, false, !Why.IsEmpty());
+		PaintTextFit(Geometry, Out, Layer + 2, Why.IsEmpty() ? FString::Printf(TEXT("760 mand fra amtet  ·  +%s rd./md."), *Thousands(int32(Campaign1851Army::RaisedUpkeepPerMonth))) : Why,
+			Text + FVector2D(228.f, 149.f), Serif(10, EFace::Italic), MutedInk, 140.f);
+	}
 
 	for (int32 m = 1; m <= ModuleRows; ++m)
 	{
-		const FVector2D Row = Card + FVector2D(0.f, 150.f + (m - 1) * RowHeight);
+		const FVector2D Row = Card + FVector2D(0.f, 184.f + (m - 1) * RowHeight);
 		TArray<FVector2D> Rule = { Row + FVector2D(18.f, -2.f), Row + FVector2D(Size.X - 18.f, -2.f) };
 		FSlateDrawElement::MakeLines(Out, Layer + 2, Geometry.ToPaintGeometry(), Rule, ESlateDrawEffect::None, Gold.CopyWithNewOpacity(0.3f), true, 1.f);
 		if (ModuleBrushes.IsValidIndex(m) && ModuleBrushes[m]->GetResourceObject())
@@ -860,6 +871,40 @@ void SCampaign1851Overlay::PaintArmy(const FGeometry& Geometry, FSlateWindowElem
 			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("ankomst %s %s"), *ACampaign1851Map::FormatClock(Now + FTimespan::FromDays(R.DaysLeft())),
 				*ACampaign1851Map::FormatDate(Now + FTimespan::FromDays(R.DaysLeft()), true)), End + FVector2D(12.f, 16.f), Serif(11, EFace::Italic), RouteBlue, 0.f);
 		}
+	}
+
+	// Close in, the miniatures themselves are the regiments: each can be clicked; the counters give way.
+	if (Map->GetCameraDistanceKm() < ACampaign1851Map::MiniatureViewKm)
+	{
+		const FSlateBrush* Ring = FCoreStyle::Get().GetBrush("WhiteBrush");
+		for (int32 i = 0; i < Regs.Num(); ++i)
+		{
+			const FCampaign1851Regiment& R = Regs[i];
+			if (R.IsMarching() && R.Route[R.Leg].bRail)
+			{
+				continue;   // riding a train: the train stands for it
+			}
+			const FVector World = Map->RegimentWorld(i);
+			FVector2D P, Edge;
+			if (!ToLocal(Geometry, World, P) || !ToLocal(Geometry, World + FVector(25.0, 0.0, 0.0), Edge))
+			{
+				continue;
+			}
+			const float Radius = FMath::Clamp(float(FVector2D::Distance(P, Edge)), 16.f, 90.f);
+			const FVector2D Min = P - FVector2D(Radius, Radius * 1.2f), Max = P + FVector2D(Radius, Radius * 0.5f);
+			Buttons.Add({ Min, Max, EButton::RegimentPiece, i });
+			if (SelectedRegiments.Contains(i))
+			{
+				// A gold frame round the chosen miniature, with its name and strength beneath.
+				DrawLines(Geometry, Out, Layer + 2, { Min, FVector2D(Max.X, Min.Y), Max, FVector2D(Min.X, Max.Y), Min }, Gold, 2.f);
+				const FString Label = FString::Printf(TEXT("%s  ·  %d"), *R.Name, R.Men);
+				const FVector2D LabelSize = Measure(Label, Serif(11)) + FVector2D(12.f, 6.f);
+				const FVector2D At(P.X - LabelSize.X * 0.5f, Max.Y + 4.f);
+				FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(LabelSize, FSlateLayoutTransform(At)), Ring, ESlateDrawEffect::None, Panel);
+				PaintText(Geometry, Out, Layer + 3, Label, At + FVector2D(6.f, LabelSize.Y * 0.5f), Serif(11), Ink, 0.f, false);
+			}
+		}
+		return;
 	}
 
 	// Stacks: every regiment in a town together, every column on the march together.
@@ -2706,10 +2751,14 @@ void SCampaign1851Overlay::PaintCalendar(const FGeometry& Geometry, FSlateWindow
 	float TextX = Pos.X + 22.f;
 	PaintText(Geometry, Out, Layer + 2, Hour, FVector2D(TextX, Pos.Y + Size.Y * 0.5f), DateFont, Gold, 0.f);
 	TextX += Measure(TEXT("00:00"), DateFont).X + 14.f;
-	PaintText(Geometry, Out, Layer + 2, Date, FVector2D(TextX, Pos.Y + Size.Y * 0.5f), DateFont, Ink, 0.f);
-	PaintText(Geometry, Out, Layer + 2, Map->GetSeasonName(), FVector2D(TextX + Measure(Date, DateFont).X + 12.f, Pos.Y + Size.Y * 0.5f + 2.f), Serif(13, EFace::Italic), Gold, 0.f, false);
 	const float PauseWidth = 62.f, ButtonWidth = 34.f, Gap = 5.f;
 	float X = Pos.X + Size.X - 16.f - PauseWidth - (ACampaign1851Map::NumSpeeds() - 1) * (ButtonWidth + Gap);
+	// Long months ("13. september 1851"): the date shrinks so the season stays clear of the buttons.
+	const FSlateFontInfo SeasonFont = Serif(13, EFace::Italic);
+	const float Room = X - 12.f - TextX - Measure(Map->GetSeasonName(), SeasonFont).X - 12.f;
+	const FSlateFontInfo Fitted = Measure(Date, DateFont).X <= Room ? DateFont : Serif(17);
+	PaintText(Geometry, Out, Layer + 2, Date, FVector2D(TextX, Pos.Y + Size.Y * 0.5f), Fitted, Ink, 0.f);
+	PaintText(Geometry, Out, Layer + 2, Map->GetSeasonName(), FVector2D(TextX + Measure(Date, Fitted).X + 12.f, Pos.Y + Size.Y * 0.5f + 2.f), SeasonFont, Gold, 0.f, false);
 	for (int32 s = 0; s < ACampaign1851Map::NumSpeeds(); ++s)
 	{
 		const float W = s == 0 ? PauseWidth : ButtonWidth;
@@ -2911,7 +2960,7 @@ void SCampaign1851Overlay::PaintTownBuildings(const FGeometry& Geometry, FSlateW
 	}
 	const float RowHeight = 50.f;
 	const FVector2D Size(470.f, 48.f + FMath::Max(Rows.Num(), 1) * RowHeight + 8.f);
-	const FVector2D Pos(28.f + 380.f + 10.f, FMath::Max(130.f, Geometry.GetLocalSize().Y - 190.f - Size.Y));
+	const FVector2D Pos(28.f + 440.f + 10.f, FMath::Max(130.f, Geometry.GetLocalSize().Y - 190.f - Size.Y));
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseTownTab);
 	PaintText(Geometry, Out, Layer + 2, TEXT("B Y G N I N G E R"), Pos + FVector2D(22.f, 24.f), Serif(11), Gold, 0.f, false);
