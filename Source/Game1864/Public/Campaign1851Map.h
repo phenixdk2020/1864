@@ -57,6 +57,33 @@ struct FCampaign1851SupplyColumn
 	float LegElapsed = 0.f;
 };
 
+/** An enemy corps on the map (war): its strength and the towns it marches on in turn. */
+struct FCampaign1851EnemyCorps
+{
+	int32 Id = 0;
+	FString Name;
+	FString Nation;          // "PR", "AT", "DE" (the Confederation)
+	int32 Men = 0;
+	int32 Guns = 0;
+	FVector2D Km = FVector2D::ZeroVector;
+	int32 Town = INDEX_NONE; // where it stands (INDEX_NONE on the march)
+	TArray<int32> Objectives;
+	TArray<FCampaign1851Leg> Route;
+	int32 Leg = 0;
+	float LegElapsed = 0.f;
+	bool bEngaged = false;   // in contact with Danish troops: a battle is at hand
+};
+
+/** A historical event on the road to 1864, as this campaign has it (date and weight varied, or skipped). */
+struct FPlannedEvent
+{
+	FString Id;
+	FString Text;
+	double Day = 0.0;
+	float Tension = 0.f;
+	bool bSkip = false;
+};
+
 /** A nation's figures for the council window (from the map for Denmark, the abstract model for the others). */
 struct FCampaign1851NationFigures
 {
@@ -80,6 +107,8 @@ struct FCampaign1851City
 	FVector World = FVector::ZeroVector;
 	/** Amt id (FCampaign1851Amt::Id); 0 for foreign towns. */
 	int32 AmtId = 0;
+	/** The nation holding the town in war ("PR", "AT"); empty when it is the kingdom's own. */
+	FString Occupier;
 
 	/** Military building plot beside a main road at the edge of town (towns of 2,500+). */
 	bool bHasPlot = false;
@@ -356,6 +385,20 @@ public:
 	bool BuySupplyColumn();
 	TArray<FString> SaveSupplyColumns() const;
 	void RestoreSupplyColumns(const TArray<FString>& Lines);
+
+	// ---- War and peace (Campaign1851War.cpp).
+
+	float GetTension() const { return Tension; }
+	bool IsAtWar() const { return bAtWar; }
+	const TArray<FCampaign1851EnemyCorps>& GetEnemyCorps() const { return EnemyCorps; }
+	const TArray<FPlannedEvent>& GetEventPlan() const { return EventPlan; }
+	void ResetWar();
+	/** For tests: the federal execution and the declaration of war now. */
+	void ForceWar() { SpawnCorps(TEXT("Forbundskorpset (Sachsen, Hannover)"), TEXT("DE"), 0.09f, TEXT("Altona"), { TEXT("Rendsborg") }, 0.f); Tension = 80.f; DeclareWar(); }
+	TArray<FString> SaveWar() const;
+	void RestoreWar(const TArray<FString>& Lines);
+	/** True if an amt's seat is held by the enemy (its taxes are lost). */
+	bool IsAmtOccupied(const FCampaign1851Amt& A) const;
 
 	// ---- Peace footing and mobilisation (Campaign1851Mobilisation.cpp).
 
@@ -805,6 +848,20 @@ private:
 	int32 NextSupplyColumnId = 1;
 	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> SupplyColumnPieces;
 	UPROPERTY(Transient) TObjectPtr<UStaticMesh> ColumnMesh;
+
+	// The war layer.
+	void DailyWar();
+	void MonthlyWar();
+	void AdvanceWar(float DeltaDays);
+	void DeclareWar();
+	void SpawnCorps(const FString& Name, const FString& NationId, float ShareOfArmy, const FString& From, const TArray<FString>& Objectives, float Delay);
+	float Tension = 25.f;
+	bool bAtWar = false;
+	TArray<FString> EventsFired;
+	TArray<FPlannedEvent> EventPlan;
+	TArray<FCampaign1851EnemyCorps> EnemyCorps;
+	int32 NextCorpsId = 1;
+	int32 LastWarDay = -1;
 
 	// The footing layer.
 	void AdvanceFooting(float DeltaDays);

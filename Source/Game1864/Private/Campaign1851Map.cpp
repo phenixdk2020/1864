@@ -1601,6 +1601,7 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 	AdvanceDemolitions(DeltaDays);
 	AdvanceSupply(DeltaDays);
 	AdvanceFooting(DeltaDays);
+	AdvanceWar(DeltaDays);
 	AdvanceSupplyColumns(DeltaDays);
 	AdvanceArmy(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
 	if (GetDate().GetMonth() != MonthBefore)
@@ -1789,6 +1790,7 @@ void ACampaign1851Map::CloseMonth()
 	GrowMonth();
 	MonthlyMateriel();
 	MonthlyFooting();
+	MonthlyWar();
 	MonthlyBuildingMaterials();
 	MonthlyManpower();
 	MonthlySalvage();
@@ -1846,7 +1848,7 @@ double ACampaign1851Map::YearlyTax(const FString& Region) const
 	double Total = 0.0;
 	for (const FCampaign1851Amt& A : Amter)
 	{
-		Total += (Region.IsEmpty() || A.Region == Region) ? AmtYearlyTax(A) : 0.0;
+		Total += (Region.IsEmpty() || A.Region == Region) && !IsAmtOccupied(A) ? AmtYearlyTax(A) : 0.0;
 	}
 	return Footing == ECampaign1851Footing::Peace ? Total : Total * Campaign1851Mobilisation::WarTaxFactor;
 }

@@ -199,6 +199,7 @@ void ACampaign1851Map::ResetWorld(int32 InSeed, float InDeviation)
 		}
 	}
 	ResetManpower();
+	ResetWar();
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|world|seed %d|deviation %.0f %%"), Seed, Deviation * 100.f);
 }
 

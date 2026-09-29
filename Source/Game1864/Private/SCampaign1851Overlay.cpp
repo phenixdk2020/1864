@@ -257,7 +257,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.43 VÅBEN, HESTE OG LAGRE — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.46 KRIG OG FRED — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -551,6 +551,10 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	const FCampaign1851Amt* Amt = Map->FindAmt(C.AmtId);
 	PaintText(Geometry, Out, Layer + 2, C.bForeign ? TEXT("Uden for monarkiet") : Amt ? FString::Printf(TEXT("%s  ·  %s"), *Amt->Name, *ACampaign1851Map::RegionName(Amt->Region)) : RegionName(C.Region),
 		Pos + FVector2D(22.f, 92.f), Serif(13), Ink, 0.f, false);
+	if (!C.Occupier.IsEmpty())
+	{
+		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("BESAT af %s"), C.Occupier == TEXT("AT") ? TEXT("Østrig") : TEXT("Preussen")), Pos + FVector2D(Size.X - 30.f, 62.f), Serif(13), FLinearColor(0.95f, 0.4f, 0.35f), 1.f, false);
+	}
 	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("ca. %s indbyggere (%d)  ·  vækst %.1f %%/år"), *Thousands(C.Population), Map->GetDate().GetYear(), Map->UrbanGrowthRate(SelectedCity)), Pos + FVector2D(22.f, 120.f), Serif(13), Ink, 0.f, false);
 	if (!C.bForeign)
 	{
@@ -897,6 +901,35 @@ void SCampaign1851Overlay::PaintArmy(const FGeometry& Geometry, FSlateWindowElem
 			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("ankomst %s %s"), *ACampaign1851Map::FormatClock(Now + FTimespan::FromDays(R.DaysLeft())),
 				*ACampaign1851Map::FormatDate(Now + FTimespan::FromDays(R.DaysLeft()), true)), End + FVector2D(12.f, 16.f), Serif(11, EFace::Italic), RouteBlue, 0.f);
 		}
+	}
+
+	// The enemy: red counters with the corps' strength (at every zoom).
+	const TArray<FCampaign1851EnemyCorps>& Corps = Map->GetEnemyCorps();
+	for (int32 k = 0; k < Corps.Num(); ++k)
+	{
+		const FCampaign1851EnemyCorps& C = Corps[k];
+		FVector2D P;
+		if (!ToLocal(Geometry, Map->WorldAtKm(C.Km), P))
+		{
+			continue;
+		}
+		// Beside the Danish counters, and beside each other where several stand together.
+		int32 Before = 0;
+		for (int32 j = 0; j < k; ++j)
+		{
+			Before += FVector2D::Distance(Corps[j].Km, C.Km) < 3.0 ? 1 : 0;
+		}
+		P += FVector2D(60.f + Before * 60.f, 0.f);
+		const FVector2D EBox(50.f, 32.f);
+		const FVector2D Min = P - FVector2D(EBox.X * 0.5f, EBox.Y + 10.f);
+		const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+		FSlateDrawElement::MakeBox(Out, Layer + 7, Geometry.ToPaintGeometry(EBox, FSlateLayoutTransform(Min)), White, ESlateDrawEffect::None, FLinearColor(0.55f, 0.08f, 0.08f, 0.92f));
+		const FVector2D Max = Min + EBox;
+		DrawLines(Geometry, Out, Layer + 8, { Min, FVector2D(Max.X, Min.Y), Max, FVector2D(Min.X, Max.Y), Min }, C.bEngaged ? Gold : Ink, C.bEngaged ? 2.5f : 1.2f);
+		DrawLines(Geometry, Out, Layer + 9, { Min + FVector2D(8.f, 6.f), Max - FVector2D(8.f, 6.f) }, Ink, 1.5f);
+		DrawLines(Geometry, Out, Layer + 9, { FVector2D(Min.X + 8.f, Max.Y - 6.f), FVector2D(Max.X - 8.f, Min.Y + 6.f) }, Ink, 1.5f);
+		PaintText(Geometry, Out, Layer + 9, FString::Printf(TEXT("%s"), *Thousands(C.Men)), FVector2D(P.X, Min.Y - 9.f), Serif(10), FLinearColor(1.f, 0.75f, 0.7f), 0.5f);
+		PaintText(Geometry, Out, Layer + 9, C.Nation == TEXT("AT") ? TEXT("ØSTRIG") : C.Nation == TEXT("DE") ? TEXT("FORBUNDET") : TEXT("PREUSSEN"), FVector2D(P.X, Max.Y + 8.f), Serif(9), FLinearColor(1.f, 0.75f, 0.7f), 0.5f);
 	}
 
 	// The supply map: each depot's reach (a day's march) and every unit's supply in colour.
@@ -1669,7 +1702,12 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 		Y += 24.f;
 	}
 	PaintText(Geometry, Out, Layer + 1, TEXT("* uden eget kort endnu: vokser på en abstrakt model (skøn)"), FVector2D(X, Y), Serif(10, EFace::Italic), MutedInk, 0.f, false);
-	Y += 40.f;
+	Y += 28.f;
+		// The tension with the German Confederation, and war.
+		PaintText(Geometry, Out, Layer + 1, Map->IsAtWar() ? TEXT("KRIG med Preussen og Østrig") : TEXT("Spænding med Det tyske forbund"), FVector2D(X, Y), Serif(13), Map->IsAtWar() ? FLinearColor(0.95f, 0.4f, 0.35f) : Ink, 0.f, false);
+		PaintBar(Geometry, Out, Layer + 1, FVector2D(X + 260.f, Y - 5.f), 260.f, Map->GetTension() / 100.f);
+		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("%.0f / 100  (krig ved 80)"), Map->GetTension()), FVector2D(X + 530.f, Y), Serif(11), Ink, 0.f, false);
+		Y += 30.f;
 	// The player's ministries.
 	if (Nations.IsValidIndex(Map->GetPlayerNation()))
 	{

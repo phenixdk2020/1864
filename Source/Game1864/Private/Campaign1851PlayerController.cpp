@@ -273,6 +273,11 @@ void ACampaign1851PlayerController::TryInit()
 			}
 		}
 	}
+	// -CampaignWarTest brings the ultimatum forward (test of the war).
+	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignWarTest")))
+	{
+		Map->ForceWar();
+	}
 	// -CampaignMobilise calls the army in at once (test).
 	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignMobilise")))
 	{
@@ -1370,6 +1375,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Rifles = Map->GetRifles();
 	Save->HorseStock = Map->GetHorseStock();
 	Save->Footing = uint8(Map->GetFooting());
+	Save->War = Map->SaveWar();
 	Map->ExportUnits();
 	Save->MaterialLots = Map->GetMaterialLots();
 	if (Save->Links.Num() > 0)
@@ -1485,6 +1491,10 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 		Map->SetGunStock(FMath::Max(Guns, Map->GetGunStock()));
 	}
 	Map->SetFooting(Save->SaveVersion >= 21 ? ECampaign1851Footing(FMath::Min<uint8>(Save->Footing, 2)) : ECampaign1851Footing::Peace);
+	if (Save->SaveVersion >= 22)
+	{
+		Map->RestoreWar(Save->War);
+	}
 	Map->SetMaterialLots(Save->SaveVersion >= 16 ? Save->MaterialLots : TArray<FVector>());
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);
 	if (Overlay.IsValid())
