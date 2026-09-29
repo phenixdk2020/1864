@@ -43,11 +43,47 @@ public:
 	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury, BuildTown, ShowSite, BuildLink, ShowLink,
 		Regiment, RegimentRow, ArmyHome, ArmyHalt, OfficerChange, GeneralChange, OfficerPick, OfficerRecruit, PickerClose, TrainingProgram, OfficerInfo, OfficerCardClose, ProgramPick, RouteMode, ArmyCancel, TownTab,
 		MainMenu, WindowClose, TableSort, TableRow, TablePage, OfficerFilter, OfficerDismiss, ClosePanel, ExitGame,
-		OfficerPromote, OpenOOB, OOBCommand, CommandGeneralChange, TrainOrder };
+		OfficerPromote, OpenOOB, OOBCommand, CommandGeneralChange, TrainOrder,
+		OrderAll, OrderUnit, OrderExecute, OrderCancel,
+		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve };
+	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
+	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
+	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
+	static ETreeKind TreeKind(int32 Key) { return ETreeKind(Key / 100000); }
+	static int32 TreeId(int32 Key) { return Key % 100000; }
+	void ToggleCollapsed(int32 Key) { if (Collapsed.Contains(Key)) { Collapsed.Remove(Key); } else { Collapsed.Add(Key); } }
+	void ScrollTree(int32 Rows) { TreeScroll = FMath::Max(0, TreeScroll + Rows); }
+	bool IsOverTree(const FVector2D& ViewportPixel) const;
+	/** Over the order-of-battle chart (the wheel scrolls it sideways). */
+	bool IsOverChart(const FVector2D& ViewportPixel) const;
+	void ScrollChart(int32 Steps) { ChartScroll = FMath::Max(0.f, ChartScroll + Steps * 60.f); }
+	bool IsOOBOpen() const { return bOOB; }
+	/** Drag and drop in the tree: what is dragged, the cursor (viewport pixels) and the row under it. */
+	void SetDrag(bool bOn, int32 Key, const FVector2D& ViewportPixel, int32 Hover) { bDragging = bOn; DragKey = Key; DragPos = ViewportPixel / FMath::Max(PaintScale, 0.01f); HoverKey = Hover; }
+	/** The officer picker for a formation's commander (generals for divisions, officers for brigades). */
+	void OpenFormationPicker(int32 Formation, bool bGenerals) { Picker = bGenerals ? EPicker::FormationGeneral : EPicker::FormationOfficer; PickerFormation = Formation; InspectedOfficer = INDEX_NONE; bTrainingMenu = false; }
+	int32 GetPickerFormation() const { return PickerFormation; }
+	/**
+	 * The march order dialog (right click): for every selected unit on foot / by train / straight across,
+	 * the times, and the columns it makes (each way its own column).
+	 */
+	struct FOrderDialog
+	{
+		bool bOpen = false;
+		int32 Town = INDEX_NONE;
+		FVector2D Km = FVector2D::ZeroVector;
+		FString Goal;
+		TArray<int32> Units;
+		TArray<uint8> Ways;            // per unit: 0 on foot, 1 by train, 2 straight across
+		FString AllTimes[3];           // the whole selection each way
+		TArray<FString> Columns;       // one line per column the order makes
+	};
+	FOrderDialog& EditOrder() { return OrderDialog; }
+	const FOrderDialog& GetOrder() const { return OrderDialog; }
 	/** What an X in a panel's corner closes (the Module of EButton::ClosePanel). */
-	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB };
+	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB, CloseOrder };
 	/** The big windows opened from the menu bar under the calendar (one at a time). */
-	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains };
+	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart };
 	void OpenWindow(EWindow In) { Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
 	EWindow GetWindow() const { return Window; }
 	/** Sort a table by a column (again: the other way round). */
@@ -65,13 +101,13 @@ public:
 	void CloseTrainingMenu() { bTrainingMenu = false; }
 	bool IsTrainingMenuOpen() const { return bTrainingMenu; }
 	/** The officer list beside the army panel: chiefs or generals to appoint. */
-	enum class EPicker : uint8 { None, Chief, General, CommandGeneral };
-	void OpenPicker(EPicker In) { Picker = In; InspectedOfficer = INDEX_NONE; bTrainingMenu = false; bOOB = false; }
+	enum class EPicker : uint8 { None, Chief, General, CommandGeneral, FormationGeneral, FormationOfficer };
+	void OpenPicker(EPicker In) { Picker = In; InspectedOfficer = INDEX_NONE; bTrainingMenu = false; }
 	/** The general picker for a general command's commanding general. */
 	void OpenCommandPicker(int32 Command) { OpenPicker(EPicker::CommandGeneral); PickerCommand = Command; }
 	int32 GetPickerCommand() const { return PickerCommand; }
 	/** The order of battle beside the army panel. */
-	void ToggleOOB() { bOOB = !bOOB; if (bOOB) { bTrainingMenu = false; Picker = EPicker::None; InspectedOfficer = INDEX_NONE; OOBExpanded = INDEX_NONE; } }
+	void ToggleOOB() { bOOB = !bOOB; }
 	void ExpandOOB(int32 Command) { OOBExpanded = OOBExpanded == Command ? -2 : Command; }
 	/** The officer card (all qualities) beside the army panel; INDEX_NONE closes it. */
 	void InspectOfficer(int32 Officer) { InspectedOfficer = Officer; }
@@ -142,6 +178,28 @@ private:
 	/** Headings (click to sort), striped rows (click: RowAction with the row's Id), pages. */
 	void PaintTable(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, int32 VisibleRows,
 		const TArray<FTableColumn>& Columns, TArray<FTableRow> Rows, EButton RowAction, int32 Highlight) const;
+	/** The march order dialog. */
+	void PaintOrderDialog(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	struct FTreeRow
+	{
+		int32 Key = 0;
+		int32 Depth = 0;
+		FString Text;
+		FString Info;
+		bool bSelected = false;
+		bool bFormation = false;
+		bool bHasChildren = false;
+		bool bOpen = true;
+	};
+	/** The field army as an organisation chart: HQ boxes, units stacked under them, connecting lines. */
+	void PaintOOBChart(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const;
+	/** The tree's rows as they are open now: the field army's formations, then the garrisons by command and arm. */
+	void BuildTreeRows(TArray<FTreeRow>& Rows) const;
+public:
+	FString TreeKeyText(int32 Key) const;
+private:
+	/** Training menu, officer picker or card: beside the army panel (or beside the tree when that is open). */
+	void PaintSidePanels(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** The order of battle: the army, its general commands and their regiments by arm; the selected lit. */
 	void PaintOOB(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft) const;
 	/** Every training programme: what it trains, days for +10 under the chief, cost a month; click to choose. */
@@ -182,6 +240,17 @@ private:
 	bool bOOB = false;
 	int32 OOBExpanded = INDEX_NONE;   // the general command shown open (INDEX_NONE: the selected unit's; -2: none)
 	int32 PickerCommand = INDEX_NONE;
+	int32 PickerFormation = 0;
+	TSet<int32> Collapsed;
+	mutable int32 TreeScroll = 0;
+	mutable float ChartScroll = 0.f;
+	mutable FVector2D ChartMin = FVector2D::ZeroVector, ChartMax = FVector2D::ZeroVector;
+	mutable FVector2D TreeMin = FVector2D::ZeroVector, TreeMax = FVector2D::ZeroVector;
+	bool bDragging = false;
+	int32 DragKey = 0;
+	int32 HoverKey = 0;
+	FVector2D DragPos = FVector2D::ZeroVector;
+	FOrderDialog OrderDialog;
 	int32 TownTab = 0;
 	EWindow Window = EWindow::None;
 	int32 SortColumn = 0;

@@ -77,6 +77,34 @@ struct FCampaign1851RegimentSave
 	UPROPERTY() float Cohesion = 0.f;
 };
 
+/** A formation of the field army (v11): its place in the tree, its commander and its regiments. */
+USTRUCT()
+struct FCampaign1851FormationSave
+{
+	GENERATED_BODY()
+
+	UPROPERTY() int32 Id = 0;
+	UPROPERTY() FString Name;
+	UPROPERTY() uint8 Echelon = 2;
+	UPROPERTY() int32 Parent = 0;
+	UPROPERTY() FString Commander;          // officer id
+	UPROPERTY() TArray<FString> Regiments;  // regiment ids directly in it
+};
+
+/** A troop train (v10): where it stands, and the column it serves. */
+USTRUCT()
+struct FCampaign1851TrainSave
+{
+	GENERATED_BODY()
+
+	UPROPERTY() int32 Id = 0;
+	UPROPERTY() FString Station;
+	UPROPERTY() FString Lead;       // regiment id
+	UPROPERTY() FString Board;
+	UPROPERTY() FString Release;
+	UPROPERTY() bool bBoarded = false;
+};
+
 /** An officer (v7): who he is, his qualities and experience, and the regiment he serves with (empty = pool). */
 USTRUCT()
 struct FCampaign1851OfficerSave
@@ -94,6 +122,9 @@ struct FCampaign1851OfficerSave
 	UPROPERTY() FString Regiment;
 	/** v9: the general command he leads (id), if any. */
 	UPROPERTY() FString Command;
+	/** v11: the battalion (id) and company he leads as captain, if any. */
+	UPROPERTY() FString CaptainOf;
+	UPROPERTY() int32 Company = INDEX_NONE;
 };
 
 /**
@@ -107,8 +138,8 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
-	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands, troop trains. */
-	static constexpr int32 CurrentVersion = 9;
+	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands. 10: + troop trains on the map. 11: + field formations. */
+	static constexpr int32 CurrentVersion = 11;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;
@@ -139,8 +170,10 @@ public:
 	/** The officer corps (v7). */
 	UPROPERTY() TArray<FCampaign1851OfficerSave> Officers;
 
-	/** Troop trains (v9): owned, busy (count, day free) and on order (count, day of delivery). */
-	UPROPERTY() int32 TroopTrains = -1;
-	UPROPERTY() TArray<FVector2D> TrainBookings;
+	/** Troop trains (v10) and trains on order (count, day of delivery). */
+	UPROPERTY() TArray<FCampaign1851TrainSave> Trains;
+
+	/** The field army's formations (v11). */
+	UPROPERTY() TArray<FCampaign1851FormationSave> Formations;
 	UPROPERTY() TArray<FVector2D> TrainOrders;
 };

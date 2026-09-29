@@ -20,6 +20,27 @@ enum class ECampaign1851Arm : uint8
 	HorseArtillery    // horse artillery: every gunner mounted, keeps up with the cavalry
 };
 
+/**
+ * A troop train (locomotive and some twenty carriages: a battalion, 250 horses or a battery). It stands at
+ * a station, runs empty to a column's boarding station, carries the column and stays where it set it down.
+ */
+struct FCampaign1851TroopTrain
+{
+	int32 Id = 0;
+	int32 Station = INDEX_NONE;     // where it stands (INDEX_NONE while running)
+	int32 Lead = INDEX_NONE;        // lead regiment of the column it serves (INDEX_NONE = free)
+	int32 Board = INDEX_NONE;       // where the column boards
+	int32 Release = INDEX_NONE;     // where the column leaves the train (the train stays there)
+	bool bBoarded = false;
+	TArray<struct FCampaign1851Leg> Path;   // the empty run to Board
+	int32 PathLeg = 0;
+	float PathElapsed = 0.f;
+	FVector2D Km = FVector2D::ZeroVector;
+
+	bool IsFree() const { return Lead == INDEX_NONE; }
+	bool IsRunningEmpty() const { return PathLeg < Path.Num(); }
+};
+
 /** An officer's qualities (design manual 8), each 1-10. Aggression runs from cautious (1) to bold (10). */
 enum class ECampaign1851OfficerStat : uint8
 {
@@ -32,6 +53,7 @@ enum class ECampaign1851OfficerStat : uint8
 	Aggression,    // Aggressivitet: attack and pursuit versus caution
 	Composure,     // Nerve: keeping the overview under pressure
 	Political,     // Politisk vægt: appointments, dismissals, prestige
+	Caution,       // Forsigtighed: scouting, covering the flanks, not walking into a trap
 	Count
 };
 
@@ -46,7 +68,7 @@ struct FCampaign1851Officer
 	FString Rank;
 	int32 Born = 1800;
 	bool bGeneral = false;
-	uint8 Stats[int32(ECampaign1851OfficerStat::Count)] = { 5, 5, 5, 5, 5, 5, 5, 5, 5 };
+	uint8 Stats[int32(ECampaign1851OfficerStat::Count)] = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 };
 	/** 0-100; grows with days in the field (and later with battles). */
 	float Experience = 0.f;
 	/** The regiment commanded (chief) or accompanied (general); INDEX_NONE = unassigned, in the pool. */
@@ -55,7 +77,12 @@ struct FCampaign1851Officer
 	bool bRecruited = false;
 	/** A general commanding a general command (FCampaign1851Command index), INDEX_NONE otherwise. */
 	int32 Command = INDEX_NONE;
-	bool IsFree() const { return Regiment == INDEX_NONE && Command == INDEX_NONE; }
+	/** The field formation he commands (FCampaign1851Formation::Id), 0 = none. */
+	int32 Formation = 0;
+	/** A company chief (kaptajn): the regiment (battalion) index and the company in it, INDEX_NONE otherwise. */
+	int32 CaptainOf = INDEX_NONE;
+	int32 Company = INDEX_NONE;
+	bool IsFree() const { return Regiment == INDEX_NONE && Command == INDEX_NONE && Formation == 0 && CaptainOf == INDEX_NONE; }
 
 	int32 Stat(ECampaign1851OfficerStat S) const { return Stats[int32(S)]; }
 };
@@ -96,6 +123,30 @@ enum class ECampaign1851RouteMode : uint8
 	Direct          // a straight line across the fields, slower than the road
 };
 
+/** Levels of the field army (design manual: Army -> Division -> Brigade -> Regiment; levels optional). */
+enum class ECampaign1851Echelon : uint8
+{
+	Army,
+	Division,
+	Brigade,
+	Regiment,     // two battalions under an oberstløjtnant
+	Detachment
+};
+
+/**
+ * A formation of the field army that the player puts together (the operational order of battle):
+ * a name, a level, a parent formation (0 = directly under the field army) and a commander.
+ * Regiments belong to at most one formation; those in none stay in garrison under their general command.
+ */
+struct FCampaign1851Formation
+{
+	int32 Id = 0;
+	FString Name;
+	ECampaign1851Echelon Echelon = ECampaign1851Echelon::Brigade;
+	int32 Parent = 0;
+	int32 Commander = INDEX_NONE;   // officer index
+};
+
 /**
  * A general command (generalkommando) of the peacetime army: a region's towns, its headquarters and its
  * commanding general. Regiments belong to the command of their garrison (the order of battle, OOB).
@@ -123,9 +174,29 @@ struct FCampaign1851Leg
 	FVector2D ToKm = FVector2D::ZeroVector;
 	bool bRail = false;
 	bool bOffRoad = false;
+	/** Waiting at a station for the trains (From = To, no distance). */
+	bool bWait = false;
 	/** Part of a link only (km along it from its From end); a negative LineTo means the whole link. */
 	float LineTo = -1.f;
 	float Days = 0.f;
+};
+
+/** A column's march worked out before it is ordered (for the order dialog and for the order itself). */
+struct FCampaign1851MarchPlan
+{
+	bool bOk = false;
+	ECampaign1851RouteMode Mode = ECampaign1851RouteMode::RoadsAndRail;   // may fall back to roads (no trains)
+	float Pace = 20.f;
+	TArray<FCampaign1851Leg> Route;
+	float Days = 0.f;          // to the goal, from now
+	float WaitDays = 0.f;      // waiting for trains at the station
+	int32 TrainsNeeded = 0;
+	TArray<int32> Trains;      // the troop trains it takes (indices)
+	TArray<TArray<FCampaign1851Leg>> TrainPaths;   // their empty runs to the boarding station
+	int32 Board = INDEX_NONE;
+	int32 Release = INDEX_NONE;
+	FString TrainSource;       // "2 tog fra Roskilde, 1 tog holder i København"
+	FString Note;              // why it cannot, or why it marches instead
 };
 
 struct FCampaign1851Regiment
@@ -157,6 +228,10 @@ struct FCampaign1851Regiment
 	float Cohesion = 70.f;
 	/** The general command it belongs to (order of battle). */
 	int32 Command = INDEX_NONE;
+	/** Its formation in the field army (FCampaign1851Formation::Id), 0 = in garrison. */
+	int32 Formation = 0;
+	/** The chiefs (officer index) of its companies; empty for units without companies (cavalry, batteries). */
+	TArray<int32> Captains;
 	/** Officer indices: the regiment's chief, and a general whose headquarters marches with it. */
 	int32 Chief = INDEX_NONE;
 	int32 General = INDEX_NONE;
@@ -254,6 +329,17 @@ namespace Campaign1851Army
 	/** Across country a column goes at this share of its road pace (hedges, ditches, ploughed fields). */
 	constexpr float OffRoadPaceFactor = 0.6f;
 	const TCHAR* RouteModeName(ECampaign1851RouteMode Mode);
+	/** "Hær", "Division", "Brigade", "Afdeling"; and the map symbol's size mark (XXXX, XX, X, II). */
+	const TCHAR* EchelonName(ECampaign1851Echelon Echelon);
+	const TCHAR* EchelonMark(ECampaign1851Echelon Echelon);
+	/** The chief's function of a formation: "Divisionschef", "Brigadechef", "Regimentschef". */
+	const TCHAR* FormationRole(ECampaign1851Echelon Echelon);
+	/** The chief's function of a unit: "Bataljonschef", "Kavaleriofficer", "Batterichef". */
+	const TCHAR* UnitRole(ECampaign1851Arm Arm);
+	/** The map symbol of a unit: II (battalion), CAV, ART. */
+	const TCHAR* ArmMark(ECampaign1851Arm Arm);
+	/** Companies of a unit: four for a battalion (infantry, jægere, the Guard), none for the others. */
+	int32 CompaniesFor(ECampaign1851Arm Arm);
 	/** A general's effect on the pace of his column: Stab 5 = 1.0, each point ±1 %. */
 	inline float StaffPaceFactor(int32 Staff) { return 0.95f + 0.01f * Staff; }
 }

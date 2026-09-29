@@ -60,6 +60,23 @@ private:
 	void SelectRegiments(const TArray<int32>& Regiments);
 	/** Sends the selected regiments as one column to a town, or to a point in the field (CityIndex = INDEX_NONE). */
 	void MarchSelected(int32 CityIndex, const FVector2D& TargetKm);
+	/** Opens the march order dialog for the selection towards a town or a point. */
+	void OpenOrderDialog(int32 CityIndex, const FVector2D& TargetKm);
+	/** Works out the dialog's times and columns again (after a change of ways). */
+	void RefreshOrderDialog();
+	/** Orders the dialog's columns: every way its own column. */
+	void ExecuteOrderDialog();
+	/** Order-of-battle tree: a row pressed (click or the start of a drag). */
+	int32 TreePressKey = INDEX_NONE;
+	FVector2D TreePressAt = FVector2D::ZeroVector;
+	bool bTreeDragging = false;
+	void TreeClick(int32 Key);
+	void TreeDrop(int32 Source, int32 Target);
+
+	/** For testing: puts the garrisons into a field army of two divisions and a reserve. */
+	UFUNCTION(Exec)
+	void CampaignTestFieldArmy();
+
 	/** Right mouse: a click (not a drag) gives the march order. */
 	FVector2D RightDownAt = FVector2D::ZeroVector;
 	bool bRightDragged = false;

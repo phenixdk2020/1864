@@ -460,6 +460,14 @@ void ACampaign1851Map::UpdateMarkers(float CameraDistanceKm)
 			RegimentPieces[i]->SetVisibility(CameraDistanceKm < 60.f && !bPassenger);
 		}
 	}
+	for (int32 t = 0; t < TroopTrainPieces.Num(); ++t)
+	{
+		if (TroopTrainPieces[t])
+		{
+			const int32 Train = t / TrainVehicles;
+			TroopTrainPieces[t]->SetVisibility(bSceneryVisible && TroopTrainList.IsValidIndex(Train) && !TroopTrainList[Train].bBoarded);
+		}
+	}
 	for (int32 c = 0; c < RegimentCars.Num(); ++c)
 	{
 		// A regiment's carriages show only while it rides the train.

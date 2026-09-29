@@ -202,7 +202,12 @@ void ACampaign1851PlayerController::TryInit()
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignOpenWindow="), WindowName) && Overlay.IsValid())
 	{
 		Overlay->OpenWindow(WindowName == TEXT("army") ? SCampaign1851Overlay::EWindow::Army : WindowName == TEXT("officers") ? SCampaign1851Overlay::EWindow::Officers
-			: WindowName == TEXT("budget") ? SCampaign1851Overlay::EWindow::Budget : WindowName == TEXT("trains") ? SCampaign1851Overlay::EWindow::Trains : SCampaign1851Overlay::EWindow::Towns);
+			: WindowName == TEXT("budget") ? SCampaign1851Overlay::EWindow::Budget : WindowName == TEXT("trains") ? SCampaign1851Overlay::EWindow::Trains
+			: WindowName == TEXT("chart") ? SCampaign1851Overlay::EWindow::Chart : SCampaign1851Overlay::EWindow::Towns);
+	}
+	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignTestFieldArmy")))
+	{
+		Map->BuildTestFieldArmy();
 	}
 	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignOpenOOB")) && Overlay.IsValid())
 	{
@@ -359,15 +364,21 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		&& Overlay->GetWindow() == SCampaign1851Overlay::EWindow::None)
 	{
 		// A town, or any point on the ground; Ctrl sends it straight across country whatever the setting.
+		// Shift: straight away the panel's way; otherwise the order dialog with the times each way.
 		const int32 Town = CityUnderCursor();
 		FVector Ground;
-		if (Town != INDEX_NONE)
+		const bool bNow = IsInputKeyDown(EKeys::LeftShift) || IsInputKeyDown(EKeys::RightShift);
+		if (Town != INDEX_NONE || CursorGround(Ground))
 		{
-			MarchSelected(Town, Map->TownKm(Town));
-		}
-		else if (CursorGround(Ground))
-		{
-			MarchSelected(INDEX_NONE, Map->KmAtWorld(Ground));
+			const FVector2D Km = Town != INDEX_NONE ? Map->TownKm(Town) : Map->KmAtWorld(Ground);
+			if (bNow)
+			{
+				MarchSelected(Town, Km);
+			}
+			else
+			{
+				OpenOrderDialog(Town, Km);
+			}
 		}
 	}
 	if (WasInputKeyJustPressed(EKeys::Escape) && Overlay.IsValid())
@@ -384,8 +395,35 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 
 	FVector Focus;
 	const bool bFocus = CursorGround(Focus);
-	if (WasInputKeyJustPressed(EKeys::MouseScrollUp))   { Camera->Zoom(1.f, bFocus ? &Focus : nullptr); }
-	if (WasInputKeyJustPressed(EKeys::MouseScrollDown)) { Camera->Zoom(-1.f, bFocus ? &Focus : nullptr); }
+	const bool bOverTree = Overlay.IsValid() && Overlay->IsOverTree(Mouse);
+	const bool bOverChart = Overlay.IsValid() && Overlay->IsOverChart(Mouse);
+	if (bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollUp))   { Overlay->ScrollChart(-2); }
+	if (bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollDown)) { Overlay->ScrollChart(2); }
+	if (!bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollUp))   { if (bOverTree) { Overlay->ScrollTree(-3); } else { Camera->Zoom(1.f, bFocus ? &Focus : nullptr); } }
+	if (!bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollDown)) { if (bOverTree) { Overlay->ScrollTree(3); } else { Camera->Zoom(-1.f, bFocus ? &Focus : nullptr); } }
+	if (WasInputKeyJustPressed(EKeys::K) && Overlay.IsValid()) { Overlay->ToggleOOB(); }
+	// Tree drag and drop: pressed on a row, moved a little -> dragging; released -> drop (or a click).
+	if (TreePressKey != INDEX_NONE && Overlay.IsValid())
+	{
+		int32 Hover = INDEX_NONE;
+		const SCampaign1851Overlay::EButton Under = Overlay->HitButton(Mouse, &Hover);
+		bTreeDragging |= FVector2D::Distance(Mouse, TreePressAt) > 6.f;
+		Overlay->SetDrag(bTreeDragging, TreePressKey, Mouse, Under == SCampaign1851Overlay::EButton::TreeRow ? Hover : INDEX_NONE);
+		if (WasInputKeyJustReleased(EKeys::LeftMouseButton))
+		{
+			if (bTreeDragging)
+			{
+				TreeDrop(TreePressKey, Under == SCampaign1851Overlay::EButton::TreeRow ? Hover : INDEX_NONE);
+			}
+			else
+			{
+				TreeClick(TreePressKey);
+			}
+			TreePressKey = INDEX_NONE;
+			bTreeDragging = false;
+			Overlay->SetDrag(false, 0, Mouse, INDEX_NONE);
+		}
+	}
 	if (IsInputKeyDown(EKeys::Q)) { Camera->Rotate(-1.f, DeltaTime); }
 	if (IsInputKeyDown(EKeys::E)) { Camera->Rotate(1.f, DeltaTime); }
 	if (WasInputKeyJustPressed(EKeys::Home)) { Camera->ResetView(); }
@@ -543,12 +581,22 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Overlay->CloseTrainingMenu();
 			Overlay->OpenPicker(SCampaign1851Overlay::EPicker::None);
 		}
-		else if (Button == SCampaign1851Overlay::EButton::OfficerPick && Overlay->GetSelectedRegiments().Num() > 0)
+		else if (Button == SCampaign1851Overlay::EButton::OfficerPick)
 		{
 			// A chief takes the (single) selected regiment; a general goes with the first regiment of the stack,
-			// or takes over a general command when that is the post being filled.
-			const int32 Regiment = Overlay->GetSelectedRegiments()[0];
-			if (Overlay->GetPicker() == SCampaign1851Overlay::EPicker::CommandGeneral)
+			// or takes over a general command or a formation when that is the post being filled.
+			const int32 Regiment = Overlay->GetSelectedRegiments().Num() > 0 ? Overlay->GetSelectedRegiments()[0] : INDEX_NONE;
+			if (Overlay->GetPicker() == SCampaign1851Overlay::EPicker::FormationGeneral || Overlay->GetPicker() == SCampaign1851Overlay::EPicker::FormationOfficer)
+			{
+				if (Map->AssignFormationCommander(Module, Overlay->GetPickerFormation()))
+				{
+					const int32 Index = Map->FormationIndex(Overlay->GetPickerFormation());
+					Overlay->ShowToast(FString::Printf(TEXT("%s er chef for %s"), *Map->GetOfficers()[Module].Name, Index != INDEX_NONE ? *Map->GetFormations()[Index].Name : TEXT("")));
+					Overlay->OpenPicker(SCampaign1851Overlay::EPicker::None);
+					Overlay->InspectOfficer(INDEX_NONE);
+				}
+			}
+			else if (Overlay->GetPicker() == SCampaign1851Overlay::EPicker::CommandGeneral)
 			{
 				if (Map->AssignCommandGeneral(Module, Overlay->GetPickerCommand()))
 				{
@@ -618,6 +666,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			case SCampaign1851Overlay::CloseWindow: Overlay->OpenWindow(SCampaign1851Overlay::EWindow::None); break;
 			case SCampaign1851Overlay::CloseLedger: Overlay->ToggleLedger(); break;
 			case SCampaign1851Overlay::CloseOOB: Overlay->ToggleOOB(); break;
+			case SCampaign1851Overlay::CloseOrder: Overlay->EditOrder().bOpen = false; break;
 			default:
 				Overlay->SetSelectedRegiments({});
 				Overlay->SetSelectedCity(INDEX_NONE);
@@ -625,6 +674,53 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Map->SetHighlightedAmt(0);
 				break;
 			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::TreeRow)
+		{
+			TreePressKey = Module;   // click or drag: decided on release
+			TreePressAt = Mouse;
+			bTreeDragging = false;
+		}
+		else if (Button == SCampaign1851Overlay::EButton::TreeToggle)
+		{
+			Overlay->ToggleCollapsed(Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::TreeNew)
+		{
+			const int32 Id = Map->CreateFormation(ECampaign1851Echelon(Module), 0);
+			const int32 Index = Map->FormationIndex(Id);
+			Overlay->ShowToast(FString::Printf(TEXT("%s oprettet: træk enheder hen på den"), Index != INDEX_NONE ? *Map->GetFormations()[Index].Name : TEXT("")));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::FormationChief)
+		{
+			const int32 Index = Map->FormationIndex(Module);
+			Overlay->OpenFormationPicker(Module, Index != INDEX_NONE && (Map->GetFormations()[Index].Echelon == ECampaign1851Echelon::Division || Map->GetFormations()[Index].Echelon == ECampaign1851Echelon::Army));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::FormationDissolve)
+		{
+			Map->DissolveFormation(Module);
+			Overlay->ShowToast(TEXT("Formationen er opløst"));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OrderAll || Button == SCampaign1851Overlay::EButton::OrderUnit)
+		{
+			SCampaign1851Overlay::FOrderDialog& D = Overlay->EditOrder();
+			if (Button == SCampaign1851Overlay::EButton::OrderAll)
+			{
+				for (uint8& W : D.Ways) { W = uint8(Module); }
+			}
+			else if (D.Ways.IsValidIndex(Module / 3))
+			{
+				D.Ways[Module / 3] = uint8(Module % 3);
+			}
+			RefreshOrderDialog();
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OrderExecute)
+		{
+			ExecuteOrderDialog();
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OrderCancel)
+		{
+			Overlay->EditOrder().bOpen = false;
 		}
 		else if (Button == SCampaign1851Overlay::EButton::OfficerPromote)
 		{
@@ -888,8 +984,8 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Links = Map->SaveNetwork();
 	Save->Regiments = Map->SaveArmy();
 	Save->Officers = Map->SaveOfficers();
-	Save->TroopTrains = Map->GetTroopTrains();
-	Save->TrainBookings = Map->GetTrainBookings();
+	Save->Trains = Map->SaveTrains();
+	Save->Formations = Map->SaveFormations();
 	Save->TrainOrders = Map->GetTrainOrders();
 	if (Save->Links.Num() > 0)
 	{
@@ -942,9 +1038,13 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	{
 		Map->RestoreOfficers(Save->Officers);
 	}
-	if (Save->SaveVersion >= 9 && Save->TroopTrains >= 0)
+	if (Save->SaveVersion >= 10)
 	{
-		Map->RestoreTrains(Save->TroopTrains, Save->TrainBookings, Save->TrainOrders);
+		Map->RestoreTrains(Save->Trains, Save->TrainOrders);
+	}
+	if (Save->SaveVersion >= 11)
+	{
+		Map->RestoreFormations(Save->Formations);
 	}
 	if (Overlay.IsValid())
 	{
@@ -1104,6 +1204,210 @@ void ACampaign1851PlayerController::MarchSelected(int32 CityIndex, const FVector
 	else if (!Why.IsEmpty())
 	{
 		Overlay->ShowToast(Why);
+	}
+}
+
+namespace
+{
+	/** The dialog's ways (0 on foot, 1 by train, 2 straight across) as route modes. */
+	ECampaign1851RouteMode WayMode(int32 Way)
+	{
+		return Way == 1 ? ECampaign1851RouteMode::RoadsAndRail : Way == 2 ? ECampaign1851RouteMode::Direct : ECampaign1851RouteMode::RoadsOnly;
+	}
+}
+
+void ACampaign1851PlayerController::OpenOrderDialog(int32 CityIndex, const FVector2D& TargetKm)
+{
+	SCampaign1851Overlay::FOrderDialog& D = Overlay->EditOrder();
+	D = SCampaign1851Overlay::FOrderDialog();
+	D.bOpen = true;
+	D.Town = CityIndex;
+	D.Km = TargetKm;
+	D.Goal = Map->DescribePlace(CityIndex, TargetKm);
+	D.Units = Overlay->GetSelectedRegiments();
+	const ECampaign1851RouteMode Default = Overlay->GetRouteMode();
+	const uint8 Way = Default == ECampaign1851RouteMode::RoadsAndRail ? 1 : Default == ECampaign1851RouteMode::Direct ? 2 : 0;
+	D.Ways.Init(Way, D.Units.Num());
+	RefreshOrderDialog();
+}
+
+void ACampaign1851PlayerController::RefreshOrderDialog()
+{
+	SCampaign1851Overlay::FOrderDialog& D = Overlay->EditOrder();
+	const FDateTime Now = Map->GetDate();
+	for (int32 w = 0; w < 3; ++w)
+	{
+		const FCampaign1851MarchPlan P = Map->PlanColumn(D.Units, D.Town, D.Km, WayMode(w));
+		D.AllTimes[w] = !P.bOk ? FString(TEXT("umuligt")) : (w == 1 && P.Trains.Num() == 0) ? FString(TEXT("ingen tog")) : ACampaign1851Map::FormatDuration(P.Days);
+	}
+	// One column per way chosen.
+	D.Columns.Reset();
+	const TCHAR* Names[] = { TEXT("Til fods"), TEXT("Med tog"), TEXT("Lige linje") };
+	for (int32 w = 0; w < 3; ++w)
+	{
+		TArray<int32> Column;
+		for (int32 u = 0; u < D.Units.Num(); ++u)
+		{
+			if (D.Ways[u] == w)
+			{
+				Column.Add(D.Units[u]);
+			}
+		}
+		if (Column.Num() == 0)
+		{
+			continue;
+		}
+		const FCampaign1851MarchPlan P = Map->PlanColumn(Column, D.Town, D.Km, WayMode(w));
+		if (!P.bOk)
+		{
+			D.Columns.Add(FString::Printf(TEXT("%s (%d): %s"), Names[w], Column.Num(), *P.Note));
+			continue;
+		}
+		const FDateTime Arrive = Now + FTimespan::FromDays(P.Days);
+		FString Line = FString::Printf(TEXT("%s (%d): %s  ·  ankomst %s %s"), Names[w], Column.Num(), *ACampaign1851Map::FormatDuration(P.Days),
+			*ACampaign1851Map::FormatClock(Arrive), *ACampaign1851Map::FormatDate(Arrive, true));
+		if (P.Trains.Num() > 0)
+		{
+			Line += FString::Printf(TEXT("  ·  %s%s"), *P.TrainSource, P.WaitDays > 0.01f ? *FString::Printf(TEXT(", venter %s"), *ACampaign1851Map::FormatDuration(P.WaitDays)) : TEXT(""));
+		}
+		else if (!P.Note.IsEmpty())
+		{
+			Line += FString::Printf(TEXT("  ·  %s"), *P.Note);
+		}
+		D.Columns.Add(Line);
+	}
+}
+
+void ACampaign1851PlayerController::ExecuteOrderDialog()
+{
+	SCampaign1851Overlay::FOrderDialog D = Overlay->EditOrder();
+	Overlay->EditOrder().bOpen = false;
+	TArray<FString> Notes;
+	for (int32 w = 0; w < 3; ++w)
+	{
+		TArray<int32> Column;
+		for (int32 u = 0; u < D.Units.Num(); ++u)
+		{
+			if (D.Ways[u] == w)
+			{
+				Column.Add(D.Units[u]);
+			}
+		}
+		FString Why;
+		if (Column.Num() > 0 && !Map->OrderMarchTo(Column, D.Town, D.Km, WayMode(w), &Why))
+		{
+			Notes.Add(Why);
+		}
+		const FString Note = Map->TakeOrderNote();
+		if (!Note.IsEmpty())
+		{
+			Notes.Add(Note);
+		}
+	}
+	Overlay->ShowToast(Notes.Num() > 0 ? FString::Join(Notes, TEXT("  ·  ")) : FString::Printf(TEXT("Marcherer mod %s"), *D.Goal));
+	SaveToSlot(TEXT("Autosave"), true);
+}
+
+void ACampaign1851PlayerController::TreeClick(int32 Key)
+{
+	using K = SCampaign1851Overlay::ETreeKind;
+	const int32 Id = SCampaign1851Overlay::TreeId(Key);
+	switch (SCampaign1851Overlay::TreeKind(Key))
+	{
+	case K::Regiment:
+		if (IsInputKeyDown(EKeys::LeftShift) || IsInputKeyDown(EKeys::RightShift))
+		{
+			TArray<int32> Sel = Overlay->GetSelectedRegiments();
+			if (Sel.Contains(Id)) { Sel.Remove(Id); } else { Sel.Add(Id); }
+			SelectRegiments(Sel);
+		}
+		else
+		{
+			SelectRegiments({ Id });
+		}
+		break;
+	case K::Formation:
+		SelectRegiments(Map->FormationRegiments(Id));   // the whole formation, to order it as one
+		break;
+	case K::Company:
+		SelectRegiments({ Id / 10 });   // a company moves with its battalion
+		break;
+	case K::NewFormation:
+		break;
+	default:
+		Overlay->ToggleCollapsed(Key);
+		break;
+	}
+}
+
+void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
+{
+	using K = SCampaign1851Overlay::ETreeKind;
+	if (Target == INDEX_NONE || Target == Source)
+	{
+		return;
+	}
+	const int32 SourceId = SCampaign1851Overlay::TreeId(Source), TargetId = SCampaign1851Overlay::TreeId(Target);
+	const K TargetKind = SCampaign1851Overlay::TreeKind(Target);
+	if (TargetKind == K::NewFormation)
+	{
+		// "Drag here for a new unit": a new formation one level below the one it stands by, with the unit in it.
+		if (SCampaign1851Overlay::TreeKind(Source) != K::Regiment)
+		{
+			Overlay->ShowToast(TEXT("Træk en bataljon, eskadron eller et batteri herover"));
+			return;
+		}
+		const int32 ParentIndex = Map->FormationIndex(TargetId);
+		const ECampaign1851Echelon Above = ParentIndex == INDEX_NONE ? ECampaign1851Echelon::Army : Map->GetFormations()[ParentIndex].Echelon;
+		const ECampaign1851Echelon Echelon = Above == ECampaign1851Echelon::Army ? ECampaign1851Echelon::Division : Above == ECampaign1851Echelon::Division ? ECampaign1851Echelon::Brigade : ECampaign1851Echelon::Regiment;
+		const int32 Id = Map->CreateFormation(Echelon, ParentIndex == INDEX_NONE ? 0 : TargetId);
+		Map->MoveRegimentToFormation(SourceId, Id);
+		Overlay->ShowToast(FString::Printf(TEXT("%s oprettet med %s"), *Map->GetFormations()[Map->FormationIndex(Id)].Name, *Overlay->TreeKeyText(Source)));
+		return;
+	}
+	// Where the drop puts things: a formation, the formation of a regiment dropped on, or the garrisons (0).
+	int32 Into = INDEX_NONE;
+	if (TargetKind == K::Formation)
+	{
+		Into = TargetId;
+	}
+	else if (TargetKind == K::Regiment && Map->GetRegiments().IsValidIndex(TargetId))
+	{
+		Into = Map->GetRegiments()[TargetId].Formation;
+	}
+	else if (TargetKind == K::Garrisons || TargetKind == K::Command || TargetKind == K::ArmGroup)
+	{
+		Into = 0;
+	}
+	else if (TargetKind == K::FieldArmy)
+	{
+		Into = -1;   // the top of the field army: only formations can stand there
+	}
+	bool bDone = false;
+	FString What;
+	if (SCampaign1851Overlay::TreeKind(Source) == K::Regiment && Into >= 0)
+	{
+		bDone = Map->MoveRegimentToFormation(SourceId, Into);
+		What = Into == 0 ? TEXT("tilbage i garnison") : FString::Printf(TEXT("ind i %s"), *Map->GetFormations()[Map->FormationIndex(Into)].Name);
+	}
+	else if (SCampaign1851Overlay::TreeKind(Source) == K::Formation && Into != 0)
+	{
+		const int32 Parent = Into < 0 ? 0 : Into;
+		bDone = Map->MoveFormation(SourceId, Parent);
+		What = Parent == 0 ? FString(TEXT("direkte under felthæren")) : FString::Printf(TEXT("under %s"), *Map->GetFormations()[Map->FormationIndex(Parent)].Name);
+	}
+	Overlay->ShowToast(bDone ? FString::Printf(TEXT("%s flyttet %s"), *Overlay->TreeKeyText(Source), *What) : FString(TEXT("Kan ikke flyttes dertil")));
+}
+
+void ACampaign1851PlayerController::CampaignTestFieldArmy()
+{
+	if (Map.IsValid())
+	{
+		Map->BuildTestFieldArmy();
+		if (Overlay.IsValid() && !Overlay->IsOOBOpen())
+		{
+			Overlay->ToggleOOB();
+		}
 	}
 }
 

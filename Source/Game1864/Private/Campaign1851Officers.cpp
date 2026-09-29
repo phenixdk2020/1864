@@ -10,22 +10,32 @@
 
 namespace
 {
-	const TCHAR* StatKeys[] = { TEXT("leadership"), TEXT("inspiration"), TEXT("initiative"), TEXT("tactical"), TEXT("staff"), TEXT("discipline"), TEXT("aggression"), TEXT("composure"), TEXT("political") };
+	const TCHAR* StatKeys[] = { TEXT("leadership"), TEXT("inspiration"), TEXT("initiative"), TEXT("tactical"), TEXT("staff"), TEXT("discipline"), TEXT("aggression"), TEXT("composure"), TEXT("political"), TEXT("caution") };
 	constexpr int32 NumStats = int32(ECampaign1851OfficerStat::Count);
 	/** Officers in reserve at the start, beside one chief per regiment. */
 	constexpr int32 ReserveOfficers = 4;
 
-	/** A regiment's chief by its arm: colonels for the Guard and cavalry regiments, lieutenant-colonels for battalions, captains for batteries. */
+	/** A unit's chief by its arm: colonels for the cavalry regiments, majors for battalions, captains for batteries. */
 	const TCHAR* ChiefRank(ECampaign1851Arm Arm)
 	{
 		switch (Arm)
 		{
-		case ECampaign1851Arm::Guard:
+		case ECampaign1851Arm::Guard: return TEXT("Major");
 		case ECampaign1851Arm::Cavalry: return TEXT("Oberst");
 		case ECampaign1851Arm::Artillery:
 		case ECampaign1851Arm::HorseArtillery: return TEXT("Kaptajn");
-		default: return TEXT("Oberstløjtnant");
+		default: return TEXT("Major");
 		}
+	}
+
+	/** An officer leaves the company he leads (if any). */
+	void LeaveCompany(FCampaign1851Officer& O, TArray<FCampaign1851Regiment>& Regiments)
+	{
+		if (Regiments.IsValidIndex(O.CaptainOf) && Regiments[O.CaptainOf].Captains.IsValidIndex(O.Company))
+		{
+			Regiments[O.CaptainOf].Captains[O.Company] = INDEX_NONE;
+		}
+		O.CaptainOf = O.Company = INDEX_NONE;
 	}
 }
 
@@ -110,6 +120,19 @@ void ACampaign1851Map::ResetOfficers()
 		Regiments[i].Chief = Officers.Add(Chief);
 		Regiments[i].General = INDEX_NONE;
 	}
+	// A captain for every company of the battalions (drawn after the chiefs, so they keep their names).
+	for (int32 i = 0; i < Regiments.Num(); ++i)
+	{
+		Regiments[i].Captains.Init(INDEX_NONE, Campaign1851Army::CompaniesFor(Regiments[i].Arm));
+		for (int32 k = 0; k < Regiments[i].Captains.Num(); ++k)
+		{
+			FCampaign1851Officer Captain = MakeOfficer(Rng, false, TEXT("Kaptajn"));
+			++NextOfficerNumber;
+			Captain.CaptainOf = i;
+			Captain.Company = k;
+			Regiments[i].Captains[k] = Officers.Add(Captain);
+		}
+	}
 	const TCHAR* ReserveRanks[] = { TEXT("Major"), TEXT("Major"), TEXT("Kaptajn"), TEXT("Oberstløjtnant") };
 	for (int32 r = 0; r < ReserveOfficers; ++r)
 	{
@@ -127,10 +150,6 @@ void ACampaign1851Map::ResetOfficers()
 			AssignCommandGeneral(G, c);
 		}
 	}
-	// Rolling stock of 1851: a few troop trains on the Copenhagen and Holstein lines.
-	TroopTrains = 4;
-	TrainBookings.Reset();
-	TrainOrders.Reset();
 }
 
 bool ACampaign1851Map::AssignCommandGeneral(int32 Officer, int32 Command)
@@ -198,17 +217,6 @@ bool ACampaign1851Map::PromoteOfficer(int32 Officer)
 	return true;
 }
 
-int32 ACampaign1851Map::FreeTroopTrains() const
-{
-	const double Now = CampaignDays;
-	int32 Busy = 0;
-	for (const FVector2D& B : TrainBookings)
-	{
-		Busy += B.Y > Now ? int32(B.X) : 0;
-	}
-	return FMath::Max(0, TroopTrains - Busy);
-}
-
 bool ACampaign1851Map::OrderTroopTrain()
 {
 	if (Treasury < TroopTrainCost)
@@ -264,6 +272,7 @@ bool ACampaign1851Map::AssignOfficer(int32 Officer, int32 Regiment)
 	{
 		(O.bGeneral ? Regiments[O.Regiment].General : Regiments[O.Regiment].Chief) = INDEX_NONE;
 	}
+	LeaveCompany(O, Regiments);
 	Post = Officer;
 	O.Regiment = Regiment;
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|officers|%s %s -> %s"), *O.Rank, *O.Name, *R.Name);
@@ -303,12 +312,23 @@ bool ACampaign1851Map::DismissOfficer(int32 Officer)
 				--*Post;
 			}
 		}
+		for (int32& Post : R.Captains)
+		{
+			Post -= Post > Officer ? 1 : 0;
+		}
 	}
 	for (FCampaign1851Command& C : Commands)
 	{
 		if (C.General > Officer)
 		{
 			--C.General;
+		}
+	}
+	for (FCampaign1851Formation& F : Formations)
+	{
+		if (F.Commander > Officer)
+		{
+			--F.Commander;
 		}
 	}
 	return true;
@@ -352,6 +372,8 @@ TArray<FCampaign1851OfficerSave> ACampaign1851Map::SaveOfficers() const
 		S.Experience = O.Experience;
 		S.Regiment = Regiments.IsValidIndex(O.Regiment) ? Regiments[O.Regiment].Id : FString();
 		S.Command = Commands.IsValidIndex(O.Command) ? Commands[O.Command].Id : FString();
+		S.CaptainOf = Regiments.IsValidIndex(O.CaptainOf) ? Regiments[O.CaptainOf].Id : FString();
+		S.Company = O.Company;
 	}
 	return Out;
 }
@@ -366,6 +388,7 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 	for (FCampaign1851Regiment& R : Regiments)
 	{
 		R.Chief = R.General = INDEX_NONE;
+		R.Captains.Init(INDEX_NONE, Campaign1851Army::CompaniesFor(R.Arm));
 	}
 	for (FCampaign1851Command& C : Commands)
 	{
@@ -396,9 +419,75 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 		{
 			AssignCommandGeneral(Index, Command);
 		}
+		const int32 CaptainOf = FindRegiment(S.CaptainOf);
+		if (CaptainOf != INDEX_NONE && Regiments[CaptainOf].Captains.IsValidIndex(S.Company))
+		{
+			Regiments[CaptainOf].Captains[S.Company] = Index;
+			Officers[Index].CaptainOf = CaptainOf;
+			Officers[Index].Company = S.Company;
+		}
 		if (S.Id.StartsWith(TEXT("R")))
 		{
 			NextOfficerNumber = FMath::Max(NextOfficerNumber, FCString::Atoi(*S.Id.RightChop(1)) + 1);
 		}
 	}
+}
+
+int32 ACampaign1851Map::CompanyNumber(int32 Regiment, int32 Company) const
+{
+	// Numbered through the regiment: the second battalion of a regiment has companies 5-8.
+	if (!Regiments.IsValidIndex(Regiment))
+	{
+		return Company + 1;
+	}
+	const FCampaign1851Regiment& R = Regiments[Regiment];
+	const int32 Index = FormationIndex(R.Formation);
+	int32 Before = 0;
+	if (Index != INDEX_NONE && Formations[Index].Echelon == ECampaign1851Echelon::Regiment)
+	{
+		for (int32 i = 0; i < Regiment; ++i)
+		{
+			Before += Regiments[i].Formation == R.Formation ? Regiments[i].Captains.Num() : 0;
+		}
+	}
+	return Before + Company + 1;
+}
+
+int32 ACampaign1851Map::CompanyMen(int32 Regiment, int32 Company) const
+{
+	if (!Regiments.IsValidIndex(Regiment) || Regiments[Regiment].Captains.Num() == 0)
+	{
+		return 0;
+	}
+	// The battalion's men spread over its companies (the first ones take the odd men).
+	const int32 N = Regiments[Regiment].Captains.Num(), Men = Regiments[Regiment].Men;
+	return Men / N + (Company < Men % N ? 1 : 0);
+}
+
+FString ACampaign1851Map::OfficerRole(int32 Officer) const
+{
+	if (!Officers.IsValidIndex(Officer))
+	{
+		return FString();
+	}
+	const FCampaign1851Officer& O = Officers[Officer];
+	const int32 Index = FormationIndex(O.Formation);
+	if (Index != INDEX_NONE)
+	{
+		return FString::Printf(TEXT("%s, %s"), Campaign1851Army::FormationRole(Formations[Index].Echelon), *Formations[Index].Name);
+	}
+	if (Commands.IsValidIndex(O.Command))
+	{
+		return FString::Printf(TEXT("Kommanderende general, %s"), *Commands[O.Command].Name);
+	}
+	if (Regiments.IsValidIndex(O.Regiment))
+	{
+		return O.bGeneral ? FString::Printf(TEXT("General ved %s"), *Regiments[O.Regiment].Name)
+			: FString::Printf(TEXT("%s, %s"), Campaign1851Army::UnitRole(Regiments[O.Regiment].Arm), *Regiments[O.Regiment].Name);
+	}
+	if (Regiments.IsValidIndex(O.CaptainOf))
+	{
+		return FString::Printf(TEXT("Kompagnichef, %d. Kompagni (%s)"), CompanyNumber(O.CaptainOf, O.Company), *Regiments[O.CaptainOf].Name);
+	}
+	return TEXT("ledig");
 }

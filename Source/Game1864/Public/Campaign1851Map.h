@@ -337,6 +337,12 @@ public:
 	TArray<int32> OfficerPool(bool bGenerals) const;
 	/** Makes an officer the chief of a regiment, or (a general) attaches him to it; whoever held the post goes to the pool. */
 	bool AssignOfficer(int32 Officer, int32 Regiment);
+	/** "Divisionschef, 1. Division", "Kompagnichef, 3. Kompagni (6. Bataillon)", "ledig". */
+	FString OfficerRole(int32 Officer) const;
+	/** A company's number, counted through its regiment (the 2nd battalion has companies 5-8). */
+	int32 CompanyNumber(int32 Regiment, int32 Company) const;
+	/** A company's men (the battalion's strength spread over its companies). */
+	int32 CompanyMen(int32 Regiment, int32 Company) const;
 	/** Hires a new officer or general into the pool (pays the cost); INDEX_NONE if the treasury cannot. */
 	int32 RecruitOfficer(bool bGeneral);
 	/** The general of a stack or column: the first general attached to one of its regiments. */
@@ -347,6 +353,28 @@ public:
 	/** Cancels a march: the regiment goes back to where the order found it. */
 	void CancelOrder(int32 Regiment);
 	const TArray<FCampaign1851Command>& GetCommands() const { return Commands; }
+
+	// ---- The field army: formations the player puts together (the tree in KAMPORDEN, drag and drop).
+	const TArray<FCampaign1851Formation>& GetFormations() const { return Formations; }
+	int32 FormationIndex(int32 Id) const;
+	/** A new, numbered formation under Parent (0 = the field army itself); returns its id. */
+	int32 CreateFormation(ECampaign1851Echelon Echelon, int32 Parent);
+	/** Dissolves a formation: its units and sub-formations go up a level. */
+	void DissolveFormation(int32 Id);
+	/** True if formation Id is Ancestor or lies under it. */
+	bool IsInside(int32 Id, int32 Ancestor) const;
+	/** Puts a formation under another (0 = the field army); refused if it would go under itself. */
+	bool MoveFormation(int32 Id, int32 NewParent);
+	/** Puts a regiment in a formation (0 = back to its garrison). */
+	bool MoveRegimentToFormation(int32 Regiment, int32 Formation);
+	/** Every regiment in a formation and its sub-formations. */
+	TArray<int32> FormationRegiments(int32 Id) const;
+	/** Makes an officer the commander of a formation (he leaves any other post). */
+	bool AssignFormationCommander(int32 Officer, int32 Formation);
+	/** For testing: a field army of two divisions and a reserve (brigades, commanders) from the garrisons. */
+	void BuildTestFieldArmy();
+	TArray<FCampaign1851FormationSave> SaveFormations() const;
+	void RestoreFormations(const TArray<FCampaign1851FormationSave>& Saves);
 	/** Makes a general the commanding general of a general command (the previous one goes to the pool). */
 	bool AssignCommandGeneral(int32 Officer, int32 Command);
 	/** Why an officer cannot be promoted now (empty if he can): top rank, too little experience. */
@@ -357,15 +385,23 @@ public:
 	// ---- Troop trains (rolling stock, backlog B-380): the state's trains, those under way, those on order.
 	static constexpr int32 TroopTrainCost = 30000;
 	static constexpr float TroopTrainDeliveryDays = 120.f;
-	int32 GetTroopTrains() const { return TroopTrains; }
-	/** Trains not carrying (or returning from) a column now. */
+	int32 GetTroopTrains() const { return TroopTrainList.Num(); }
+	const TArray<FCampaign1851TroopTrain>& GetTroopTrainList() const { return TroopTrainList; }
+	/** Trains not serving a column now. */
 	int32 FreeTroopTrains() const;
-	/** Busy trains: how many, and the day each group is back (campaign days). */
-	const TArray<FVector2D>& GetTrainBookings() const { return TrainBookings; }
+	/** "holder ledigt i Roskilde", "kører tomt til ...", "kører 9. Bataillon til ...". */
+	FString DescribeTrain(int32 Train) const;
+	/** Works out a column's march (route, trains, waiting, time) without ordering it. */
+	FCampaign1851MarchPlan PlanColumn(const TArray<int32>& Column, int32 CityIndex, const FVector2D& TargetKm, ECampaign1851RouteMode Mode) const;
+	/** "4 d. 6 t.", "9 t." */
+	static FString FormatDuration(float Days);
 	/** Ordered trains: how many, and the day they arrive (campaign days). */
 	const TArray<FVector2D>& GetTrainOrders() const { return TrainOrders; }
-	/** Loaded troop trains (a save). */
-	void RestoreTrains(int32 Count, const TArray<FVector2D>& Bookings, const TArray<FVector2D>& Orders) { TroopTrains = Count; TrainBookings = Bookings; TrainOrders = Orders; }
+	/** Saved troop trains; restored after the regiments. */
+	TArray<FCampaign1851TrainSave> SaveTrains() const;
+	void RestoreTrains(const TArray<FCampaign1851TrainSave>& Saves, const TArray<FVector2D>& Orders);
+	/** The trains of 1851 (new game, or before loading). */
+	void ResetTroopTrains();
 	/** Orders a troop train (locomotive and carriages) from abroad; false if the treasury cannot pay. */
 	bool OrderTroopTrain();
 	/** A note from the last march order for the player (e.g. not enough trains, so the column marches). */
@@ -480,10 +516,17 @@ private:
 	// ---- Officers (Campaign1851Officers.cpp)
 	TArray<FCampaign1851Command> Commands;
 	TArray<FCampaign1851Command> CommandsAtStart;
+	TArray<FCampaign1851Formation> Formations;
+	int32 NextFormationId = 1;
 	TArray<FString> CommandGeneralIds;
-	int32 TroopTrains = 4;
-	TArray<FVector2D> TrainBookings;   // X count, Y campaign day free again
+	TArray<FCampaign1851TroopTrain> TroopTrainList;
+	int32 NextTrainId = 1;
 	TArray<FVector2D> TrainOrders;     // X count, Y campaign day of delivery
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> TroopTrainPieces;   // four per train
+	/** Days by rail alone from a town to every town (and the leg reaching each). */
+	void RailTimes(int32 From, TArray<float>& OutDays, TArray<FCampaign1851Leg>& OutVia) const;
+	void AdvanceTroopTrains(float DeltaDays);
+	void UpdateTroopTrainPieces();
 	FString OrderNote;
 	bool LoadOfficers();
 	/** The officer corps of 1851: the generals, and a chief for every regiment plus a few in reserve (fixed seed). */
