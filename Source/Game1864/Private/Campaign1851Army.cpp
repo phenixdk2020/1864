@@ -858,11 +858,12 @@ bool ACampaign1851Map::OrderMarchTo(const TArray<int32>& Column, int32 CityIndex
 		// Regiments starting where the lead does share its route (and its trains); any others march on their own.
 		TArray<FCampaign1851Leg> Legs;
 		const bool bWithLead = bMarching == bLeadMarching && (StartTown == (bLeadMarching ? Lead.Route[Lead.Leg].To : Lead.Town)) && (StartTown != INDEX_NONE || FVector2D::Distance(StartKm, LeadStart) < 0.3);
+		const bool bThere = bMarching && ((CityIndex != INDEX_NONE && StartTown == CityIndex) || (CityIndex == INDEX_NONE && FVector2D::Distance(StartKm, TargetKm) < 0.05));
 		if (bWithLead)
 		{
 			Legs = Plan.Route;
 		}
-		else if (!PlanMarch(StartTown, StartKm, CityIndex, TargetKm, Plan.Pace, ECampaign1851RouteMode::RoadsOnly, Legs, OutReason))
+		else if (!bThere && !PlanMarch(StartTown, StartKm, CityIndex, TargetKm, Plan.Pace, ECampaign1851RouteMode::RoadsOnly, Legs, OutReason))
 		{
 			continue;
 		}
@@ -1012,8 +1013,10 @@ FCampaign1851MarchPlan ACampaign1851Map::PlanColumn(const TArray<int32>& Column,
 	const int32 StartTown = bMarching ? Lead.Route[Lead.Leg].To : Lead.Town;
 	const FVector2D StartKm = bMarching ? Lead.Route[Lead.Leg].ToKm : Lead.Km;
 	const float Offset = bMarching ? FMath::Max(0.f, Lead.Route[Lead.Leg].Days - Lead.LegElapsed) : 0.f;
+	// A column already on its way to the goal (its current stretch ends there) just finishes that stretch.
+	const bool bAtGoal = bMarching && ((CityIndex != INDEX_NONE && StartTown == CityIndex) || (CityIndex == INDEX_NONE && FVector2D::Distance(StartKm, TargetKm) < 0.05));
 	FString Why;
-	if (!PlanMarch(StartTown, StartKm, CityIndex, TargetKm, Plan.Pace, Mode, Plan.Route, &Why))
+	if (!bAtGoal && !PlanMarch(StartTown, StartKm, CityIndex, TargetKm, Plan.Pace, Mode, Plan.Route, &Why))
 	{
 		Plan.Note = Why;
 		return Plan;
@@ -1113,7 +1116,7 @@ FCampaign1851MarchPlan ACampaign1851Map::PlanColumn(const TArray<int32>& Column,
 	{
 		Plan.Days += L.Days;
 	}
-	Plan.bOk = Plan.Route.Num() > 0;
+	Plan.bOk = Plan.Route.Num() > 0 || bAtGoal;
 	return Plan;
 }
 

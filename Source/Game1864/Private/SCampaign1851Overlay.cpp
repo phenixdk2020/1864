@@ -256,7 +256,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.35 KAMPORDEN MED HQ-STABE — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.36 DEL STYRKEN, HQ-STABE — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -1174,14 +1174,14 @@ void SCampaign1851Overlay::PaintOrderDialog(const FGeometry& Geometry, FSlateWin
 	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
 	const int32 Rows = FMath::Min(D.Units.Num(), 12);
 	const float RowH = 28.f;
-	const FVector2D Size(720.f, 150.f + Rows * RowH + D.Columns.Num() * 24.f + 70.f);
+	const FVector2D Size(880.f, 150.f + Rows * RowH + D.Columns.Num() * 24.f + 70.f);
 	const FVector2D Screen = Geometry.GetLocalSize();
 	const FVector2D Pos(Screen.X - Size.X - 28.f, FMath::Max(130.f, Screen.Y - 190.f - Size.Y));
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseOrder);
 	PaintText(Geometry, Out, Layer + 2, TEXT("M A R C H O R D R E"), Pos + FVector2D(22.f, 26.f), Serif(11), Gold, 0.f, false);
 	PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("til %s"), *D.Goal), Pos + FVector2D(22.f, 52.f), Serif(18), Ink, Size.X - 80.f);
-	const TCHAR* Ways[] = { TEXT("TIL FODS"), TEXT("MED TOG"), TEXT("LIGE LINJE") };
+	const TCHAR* Ways[] = { TEXT("TIL FODS"), TEXT("MED TOG"), TEXT("LIGE LINJE"), TEXT("BLIVER") };
 	// All at once, with the time each way would take the whole selection.
 	float Y = Pos.Y + 92.f;
 	PaintText(Geometry, Out, Layer + 2, TEXT("Alle"), FVector2D(Pos.X + 22.f, Y), Serif(12, EFace::Italic), Gold, 0.f, false);
@@ -1197,9 +1197,11 @@ void SCampaign1851Overlay::PaintOrderDialog(const FGeometry& Geometry, FSlateWin
 	{
 		const int32 u = D.Units[r];
 		PaintTextFit(Geometry, Out, Layer + 2, Regs.IsValidIndex(u) ? Regs[u].Name : FString(), FVector2D(Pos.X + 22.f, Y), Serif(12), Ink, 124.f);
-		for (int32 w = 0; w < 3; ++w)
+		for (int32 w = 0; w < 4; ++w)
 		{
-			PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 150.f + w * (WW + 8.f), Y - 12.f), FVector2D(WW, 24.f), Ways[w], EButton::OrderUnit, r * 3 + w, D.Ways.IsValidIndex(r) && D.Ways[r] == w);
+			// The fourth: split off and stay here (halting if on the march).
+			const float Width = w == 3 ? 150.f : WW;
+			PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 150.f + w * (WW + 8.f), Y - 12.f), FVector2D(Width, 24.f), Ways[w], EButton::OrderUnit, r * 4 + w, D.Ways.IsValidIndex(r) && D.Ways[r] == w);
 		}
 		Y += RowH;
 	}
@@ -1212,7 +1214,7 @@ void SCampaign1851Overlay::PaintOrderDialog(const FGeometry& Geometry, FSlateWin
 	}
 	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, Pos.Y + Size.Y - 48.f), FVector2D(160.f, 30.f), TEXT("UDFØR"), EButton::OrderExecute);
 	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 192.f, Pos.Y + Size.Y - 48.f), FVector2D(160.f, 30.f), TEXT("ANNULLÉR"), EButton::OrderCancel);
-	PaintText(Geometry, Out, Layer + 2, TEXT("Hver vej bliver sin egen kolonne  ·  Shift+højreklik: straks"), FVector2D(Pos.X + Size.X - 22.f, Pos.Y + Size.Y - 33.f), Serif(10, EFace::Italic), MutedInk, 1.f, false);
+	PaintText(Geometry, Out, Layer + 2, TEXT("Hver vej bliver sin egen kolonne  ·  BLIVER: deler styrken her  ·  Shift+højreklik: straks"), FVector2D(Pos.X + Size.X - 22.f, Pos.Y + Size.Y - 33.f), Serif(10, EFace::Italic), MutedInk, 1.f, false);
 }
 
 bool SCampaign1851Overlay::IsOverChart(const FVector2D& ViewportPixel) const
