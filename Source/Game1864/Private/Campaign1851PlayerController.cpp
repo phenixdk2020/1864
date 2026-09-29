@@ -135,10 +135,17 @@ void ACampaign1851PlayerController::TryInit()
 		Marches.ParseIntoArray(Orders, TEXT(";"));
 		for (const FString& Order : Orders)
 		{
-			FString Ids, Town;
-			if (!Order.Split(TEXT(":"), &Ids, &Town))
+			// Ids:Town, Ids:@lat,lon (a point in the field), optionally :road|roadonly|direct.
+			TArray<FString> Parts;
+			Order.ParseIntoArray(Parts, TEXT(":"));
+			if (Parts.Num() < 2)
 			{
 				continue;
+			}
+			const FString Ids = Parts[0], Town = Parts[1];
+			if (Parts.Num() > 2 && Overlay.IsValid())
+			{
+				Overlay->SetRouteMode(Parts[2] == TEXT("direct") ? ECampaign1851RouteMode::Direct : Parts[2] == TEXT("roadonly") ? ECampaign1851RouteMode::RoadsOnly : ECampaign1851RouteMode::RoadsAndRail);
 			}
 			TArray<FString> IdList;
 			Ids.ParseIntoArray(IdList, TEXT(","));
@@ -152,8 +159,47 @@ void ACampaign1851PlayerController::TryInit()
 				}
 			}
 			SelectRegiments(Column);
-			MarchSelected(Map->FindCity(Town));
+			if (Town.StartsWith(TEXT("@")))
+			{
+				FString Lat, Lon;
+				Town.RightChop(1).Split(TEXT(","), &Lat, &Lon);
+				MarchSelected(INDEX_NONE, Map->KmAtWorld(Map->Project(FCString::Atod(*Lat), FCString::Atod(*Lon))));
+			}
+			else
+			{
+				MarchSelected(Map->FindCity(Town), Map->TownKm(Map->FindCity(Town)));
+			}
 		}
+	}
+	// -CampaignSelectRegiments=B9,D2 selects regiments; -CampaignOpenPicker=chief|general opens the officer list.
+	FString SelectIds;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignSelectRegiments="), SelectIds, false))
+	{
+		TArray<FString> IdList;
+		SelectIds.ParseIntoArray(IdList, TEXT(","));
+		TArray<int32> Sel;
+		for (const FString& Id : IdList)
+		{
+			if (Map->FindRegiment(Id) != INDEX_NONE)
+			{
+				Sel.Add(Map->FindRegiment(Id));
+			}
+		}
+		SelectRegiments(Sel);
+	}
+	FString PickerRole;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignOpenPicker="), PickerRole) && Overlay.IsValid())
+	{
+		Overlay->OpenPicker(PickerRole == TEXT("general") ? SCampaign1851Overlay::EPicker::General : SCampaign1851Overlay::EPicker::Chief);
+	}
+	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignOpenTraining")) && Overlay.IsValid())
+	{
+		Overlay->ToggleTrainingMenu();
+	}
+	FString InspectId;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignInspectOfficer="), InspectId) && Overlay.IsValid())
+	{
+		Overlay->InspectOfficer(Map->GetOfficers().IndexOfByPredicate([&InspectId](const FCampaign1851Officer& O) { return O.Id == InspectId; }));
 	}
 	FString StartCity;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignSelectCity="), StartCity) && Overlay.IsValid())
@@ -291,7 +337,17 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	bRightDragged |= IsInputKeyDown(EKeys::RightMouseButton) && FVector2D::Distance(Mouse, RightDownAt) > 6.f;
 	if (WasInputKeyJustReleased(EKeys::RightMouseButton) && !bRightDragged && Overlay.IsValid() && Overlay->GetSelectedRegiments().Num() > 0)
 	{
-		MarchSelected(CityUnderCursor());
+		// A town, or any point on the ground; Ctrl sends it straight across country whatever the setting.
+		const int32 Town = CityUnderCursor();
+		FVector Ground;
+		if (Town != INDEX_NONE)
+		{
+			MarchSelected(Town, Map->TownKm(Town));
+		}
+		else if (CursorGround(Ground))
+		{
+			MarchSelected(INDEX_NONE, Map->KmAtWorld(Ground));
+		}
 	}
 	if (WasInputKeyJustPressed(EKeys::Escape) && Overlay.IsValid())
 	{
@@ -416,6 +472,70 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			}
 			SelectRegiments(Sel);
 		}
+		else if (Button == SCampaign1851Overlay::EButton::RouteMode)
+		{
+			const ECampaign1851RouteMode Modes[] = { ECampaign1851RouteMode::RoadsAndRail, ECampaign1851RouteMode::RoadsOnly, ECampaign1851RouteMode::Direct };
+			Overlay->SetRouteMode(Modes[FMath::Clamp(Module, 0, 2)]);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::TrainingProgram)
+		{
+			Overlay->ToggleTrainingMenu();
+		}
+		else if (Button == SCampaign1851Overlay::EButton::ProgramPick)
+		{
+			// The chosen programme for everything selected.
+			for (int32 i : Overlay->GetSelectedRegiments())
+			{
+				Map->SetProgram(i, ECampaign1851Program(Module));
+			}
+			Overlay->CloseTrainingMenu();
+			Overlay->ShowToast(FString::Printf(TEXT("Øvelser: %s"), Campaign1851Army::ProgramName(ECampaign1851Program(Module))));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OfficerChange || Button == SCampaign1851Overlay::EButton::GeneralChange)
+		{
+			const SCampaign1851Overlay::EPicker Want = Button == SCampaign1851Overlay::EButton::GeneralChange ? SCampaign1851Overlay::EPicker::General : SCampaign1851Overlay::EPicker::Chief;
+			Overlay->OpenPicker(Overlay->GetPicker() == Want ? SCampaign1851Overlay::EPicker::None : Want);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OfficerInfo)
+		{
+			Overlay->InspectOfficer(Overlay->GetInspectedOfficer() == Module ? INDEX_NONE : Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OfficerCardClose)
+		{
+			Overlay->InspectOfficer(INDEX_NONE);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::PickerClose)
+		{
+			Overlay->CloseTrainingMenu();
+			Overlay->OpenPicker(SCampaign1851Overlay::EPicker::None);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OfficerPick && Overlay->GetSelectedRegiments().Num() > 0)
+		{
+			// A chief takes the (single) selected regiment; a general goes with the first regiment of the stack.
+			const int32 Regiment = Overlay->GetSelectedRegiments()[0];
+			if (Map->AssignOfficer(Module, Regiment) && Map->GetOfficers().IsValidIndex(Module))
+			{
+				const FCampaign1851Officer& O = Map->GetOfficers()[Module];
+				Overlay->ShowToast(FString::Printf(TEXT("%s %s %s"), *O.Rank, *O.Name,
+					O.bGeneral ? TEXT("har overtaget kommandoen") : *FString::Printf(TEXT("er ny chef for %s"), *Map->GetRegiments()[Regiment].Name)));
+				Overlay->OpenPicker(SCampaign1851Overlay::EPicker::None);
+				Overlay->InspectOfficer(INDEX_NONE);
+				SaveToSlot(TEXT("Autosave"), true);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OfficerRecruit)
+		{
+			const int32 New = Map->RecruitOfficer(Module == 1);
+			if (New != INDEX_NONE)
+			{
+				const FCampaign1851Officer& O = Map->GetOfficers()[New];
+				Overlay->ShowToast(FString::Printf(TEXT("%s %s er ansat og venter på en post"), *O.Rank, *O.Name));
+			}
+			else
+			{
+				Overlay->ShowToast(TEXT("Ikke råd i statskassen"));
+			}
+		}
 		else if (Button == SCampaign1851Overlay::EButton::ArmyHome)
 		{
 			// Each regiment home to its own garrison.
@@ -497,21 +617,27 @@ int32 ACampaign1851PlayerController::CityUnderCursor() const
 	{
 		return INDEX_NONE;
 	}
-	// Nearest visible marker within ~16 px of the cursor.
+	// The whole town is the target: its built-up area on screen, and at least ~16 px round the dot.
 	int32 Best = INDEX_NONE;
-	float BestDist = 16.f;
+	float BestScore = 1.f;
 	const TArray<FCampaign1851City>& Cities = Map->GetCities();
 	for (int32 i = 0; i < Cities.Num(); ++i)
 	{
-		FVector2D Screen;
+		FVector2D Screen, Edge;
 		if (Cities[i].bBornholm || !ProjectWorldLocationToScreen(Cities[i].World, Screen, false))
 		{
 			continue;
 		}
-		const float Dist = FVector2D::Distance(Screen, FVector2D(MX, MY));
-		if (Dist < BestDist)
+		float Radius = 16.f;
+		const float RadiusUnits = ACampaign1851Map::TownRadiusKm(Cities[i].Population) * float(ACampaign1851Map::KmToUnits);
+		if (ProjectWorldLocationToScreen(Cities[i].World + FVector(RadiusUnits, 0.0, 0.0), Edge, false))
 		{
-			BestDist = Dist;
+			Radius = FMath::Max(Radius, float(FVector2D::Distance(Screen, Edge)));
+		}
+		const float Score = FVector2D::Distance(Screen, FVector2D(MX, MY)) / Radius;
+		if (Score < BestScore)
+		{
+			BestScore = Score;
 			Best = i;
 		}
 	}
@@ -608,6 +734,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Ledger = Map->GetLedger();
 	Save->Links = Map->SaveNetwork();
 	Save->Regiments = Map->SaveArmy();
+	Save->Officers = Map->SaveOfficers();
 	if (Save->Links.Num() > 0)
 	{
 		Parts.Add(FString::Printf(TEXT("%d vej-/baneanlæg"), Save->Links.Num()));
@@ -654,6 +781,10 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	if (Save->SaveVersion >= 6)
 	{
 		Map->RestoreArmy(Save->Regiments);
+	}
+	if (Save->SaveVersion >= 7)
+	{
+		Map->RestoreOfficers(Save->Officers);
 	}
 	if (Overlay.IsValid())
 	{
@@ -745,6 +876,19 @@ TArray<int32> ACampaign1851PlayerController::StackOf(int32 Regiment) const
 		return {};
 	}
 	const FCampaign1851Regiment& R = Regs[Regiment];
+	if (R.IsInField())
+	{
+		// Halted together in the field: everything within ~200 m.
+		TArray<int32> Here;
+		for (int32 i = 0; i < Regs.Num(); ++i)
+		{
+			if (Regs[i].IsInField() && FVector2D::Distance(Regs[i].Km, R.Km) < 0.2)
+			{
+				Here.Add(i);
+			}
+		}
+		return Here;
+	}
 	if (!R.IsMarching())
 	{
 		return Map->RegimentsIn(R.Town);
@@ -774,20 +918,22 @@ void ACampaign1851PlayerController::SelectRegiments(const TArray<int32>& Regimen
 	}
 }
 
-void ACampaign1851PlayerController::MarchSelected(int32 CityIndex)
+void ACampaign1851PlayerController::MarchSelected(int32 CityIndex, const FVector2D& TargetKm)
 {
-	if (!Map.IsValid() || !Overlay.IsValid() || CityIndex == INDEX_NONE)
+	if (!Map.IsValid() || !Overlay.IsValid())
 	{
 		return;
 	}
 	const TArray<int32> Column = Overlay->GetSelectedRegiments();
+	const bool bCtrl = IsInputKeyDown(EKeys::LeftControl) || IsInputKeyDown(EKeys::RightControl);
+	const ECampaign1851RouteMode Mode = bCtrl ? ECampaign1851RouteMode::Direct : Overlay->GetRouteMode();
 	FString Why;
-	if (Map->OrderMarch(Column, CityIndex, &Why))
+	if (Map->OrderMarchTo(Column, CityIndex, TargetKm, Mode, &Why))
 	{
 		const FCampaign1851Regiment& R = Map->GetRegiments()[Column[0]];
 		const FDateTime Arrive = Map->GetDate() + FTimespan::FromDays(R.DaysLeft());
-		Overlay->ShowToast(FString::Printf(TEXT("%s mod %s  ·  ankomst %s %s"), Column.Num() > 1 ? *FString::Printf(TEXT("%d enheder marcherer"), Column.Num()) : *FString::Printf(TEXT("%s marcherer"), *R.Name),
-			*Map->GetCities()[CityIndex].Name, *ACampaign1851Map::FormatClock(Arrive), *ACampaign1851Map::FormatDate(Arrive, true)));
+		Overlay->ShowToast(FString::Printf(TEXT("%s mod %s (%s)  ·  ankomst %s %s"), Column.Num() > 1 ? *FString::Printf(TEXT("%d enheder marcherer"), Column.Num()) : *FString::Printf(TEXT("%s marcherer"), *R.Name),
+			*Map->DescribePlace(CityIndex, TargetKm), Campaign1851Army::RouteModeName(Mode), *ACampaign1851Map::FormatClock(Arrive), *ACampaign1851Map::FormatDate(Arrive, true)));
 	}
 	else if (!Why.IsEmpty())
 	{

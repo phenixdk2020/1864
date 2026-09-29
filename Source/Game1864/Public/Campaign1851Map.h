@@ -181,7 +181,7 @@ public:
 	void SetSpeed(int32 InSpeed) { Speed = FMath::Clamp(InSpeed, 0, NumSpeeds() - 1); }
 	int32 GetSpeed() const { return Speed; }
 	static int32 NumSpeeds() { return 6; }
-	/** Campaign hours per real second at a speed step (0, 2, 6, 12, 24, 96). */
+	/** Campaign hours per real second at a speed step (0, 0.25, 1, 3, 8, 24). */
 	static float HoursPerSecondAt(int32 InSpeed);
 	static const TCHAR* SpeedLabel(int32 InSpeed);
 	/** "14:37" */
@@ -286,19 +286,55 @@ public:
 	int32 FindRegiment(const FString& Id) const { return Regiments.IndexOfByPredicate([&Id](const FCampaign1851Regiment& R) { return R.Id == Id; }); }
 	/** Regiments standing in a town. */
 	TArray<int32> RegimentsIn(int32 CityIndex) const;
-	/** Fastest way between two towns now for a column of this road pace (km/day), by road, chaussée, railway and ferry. */
-	bool FindRoute(int32 From, int32 To, float Pace, TArray<FCampaign1851Leg>& OutLegs) const;
+	/** Fastest way between two towns now for a column of this road pace (km/day), by road, chaussée, ferry and (bRail) railway. */
+	bool FindRoute(int32 From, int32 To, float Pace, TArray<FCampaign1851Leg>& OutLegs, bool bRail = true) const;
+	/**
+	 * A march from a town or a point to a town or a point: straight across country (Direct), or across the
+	 * fields to the nearest town and then by road (and rail) to the town nearest the goal.
+	 */
+	bool PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 ToTown, const FVector2D& ToKm, float Pace, ECampaign1851RouteMode Mode,
+		TArray<FCampaign1851Leg>& OutLegs, FString* OutReason = nullptr) const;
+	/** Sends regiments as one column to a town (CityIndex) or a point in the field (TargetKm, CityIndex = INDEX_NONE). */
+	bool OrderMarchTo(const TArray<int32>& Column, int32 CityIndex, const FVector2D& TargetKm, ECampaign1851RouteMode Mode, FString* OutReason = nullptr);
+	FVector2D TownKm(int32 CityIndex) const;
+	/** Projected km of a world position (the inverse of WorldAtKm, ignoring height). */
+	FVector2D KmAtWorld(const FVector& World) const;
+	/** True if a straight march between two points stays on the monarchy's land. */
+	bool IsDryLine(const FVector2D& A, const FVector2D& B) const;
+	/** The nearest monarchy town reachable across the fields from a point (INDEX_NONE if none within 60 km). */
+	int32 NearestTownFrom(const FVector2D& Km) const;
+	/** "Aalborg", or "terrænet 4 km fra Aalborg". */
+	FString DescribePlace(int32 CityIndex, const FVector2D& Km) const;
 	/**
 	 * Sends regiments to a town as one column, at the pace of its slowest arm (Campaign1851Army::ColumnPace);
 	 * any on the march finish their current stretch first.
 	 */
 	bool OrderMarch(const TArray<int32>& Column, int32 CityIndex, FString* OutReason = nullptr);
+	/** Sets a regiment's training programme in garrison. */
+	void SetProgram(int32 Regiment, ECampaign1851Program Program) { if (Regiments.IsValidIndex(Regiment)) { Regiments[Regiment].Program = Program; } }
 	/** Halts a regiment at the end of the stretch it is on. */
 	void HaltRegiment(int32 Regiment);
 	/** The ground a leg covers, from its From town to its To town (projected km). */
 	TArray<FVector2D> LegLine(const FCampaign1851Leg& Leg) const;
 	/** Where a regiment is on the map now. */
 	FVector RegimentWorld(int32 Regiment) const;
+	// ---- Officers (design manual 8; Campaign1851Officers.cpp).
+
+	const TArray<FCampaign1851Officer>& GetOfficers() const { return Officers; }
+	/** Unassigned officers (bGenerals: generals, else regimental officers). */
+	TArray<int32> OfficerPool(bool bGenerals) const;
+	/** Makes an officer the chief of a regiment, or (a general) attaches him to it; whoever held the post goes to the pool. */
+	bool AssignOfficer(int32 Officer, int32 Regiment);
+	/** Hires a new officer or general into the pool (pays the cost); INDEX_NONE if the treasury cannot. */
+	int32 RecruitOfficer(bool bGeneral);
+	/** The general of a stack or column: the first general attached to one of its regiments. */
+	const FCampaign1851Officer* ColumnGeneral(const TArray<int32>& Column) const;
+	int32 OfficerCost(bool bGeneral) const { return bGeneral ? GeneralRecruitCost : OfficerRecruitCost; }
+	/** Officers' pay per month (all officers, assigned or in the pool). */
+	double OfficerPayPerMonth() const;
+	TArray<FCampaign1851OfficerSave> SaveOfficers() const;
+	void RestoreOfficers(const TArray<FCampaign1851OfficerSave>& Saves);
+
 	/** The army of 1851 in its garrisons (new game, or before loading). */
 	void ResetArmy();
 	TArray<FCampaign1851RegimentSave> SaveArmy() const;
@@ -397,6 +433,17 @@ private:
 	int32 FeaturesW = 0, FeaturesH = 0;
 	bool bSceneryVisible = false;
 	bool bRoadsVisible = false;
+
+	// ---- Officers (Campaign1851Officers.cpp)
+	bool LoadOfficers();
+	/** The officer corps of 1851: the generals, and a chief for every regiment plus a few in reserve (fixed seed). */
+	void ResetOfficers();
+	FCampaign1851Officer MakeOfficer(FRandomStream& Rng, bool bGeneral, const FString& Rank) const;
+	TArray<FCampaign1851Officer> Officers;
+	TArray<FCampaign1851Officer> GeneralsAtStart;
+	TArray<FString> FirstNames, Surnames;
+	int32 OfficerPay = 600, GeneralPay = 3000, OfficerRecruitCost = 1500, GeneralRecruitCost = 6000;
+	int32 NextOfficerNumber = 1;
 
 	// ---- Army (Campaign1851Army.cpp)
 	bool LoadArmy();

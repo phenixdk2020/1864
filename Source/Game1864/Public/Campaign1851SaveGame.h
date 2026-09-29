@@ -60,11 +60,38 @@ struct FCampaign1851RegimentSave
 	UPROPERTY() FString LegTo;
 	UPROPERTY() float LegElapsed = 0.f;
 	UPROPERTY() FString Destination;
+	/** v8: its position, and a march's goal in the field and kind of route. */
+	UPROPERTY() FVector2D Km = FVector2D::ZeroVector;
+	UPROPERTY() FVector2D DestinationKm = FVector2D::ZeroVector;
+	UPROPERTY() bool bMarching = false;
+	UPROPERTY() uint8 Mode = 0;
 	UPROPERTY() int32 Men = 0;
 	UPROPERTY() float Morale = 0.8f;
 	/** Pace (km/day) and column of the march under way. */
 	UPROPERTY() float Pace = 0.f;
 	UPROPERTY() int32 Group = 0;
+	/** Unit qualities (v7). */
+	UPROPERTY() float Experience = 0.f;
+	UPROPERTY() TArray<float> Skills;
+	UPROPERTY() uint8 Program = 1;
+	UPROPERTY() float Cohesion = 0.f;
+};
+
+/** An officer (v7): who he is, his qualities and experience, and the regiment he serves with (empty = pool). */
+USTRUCT()
+struct FCampaign1851OfficerSave
+{
+	GENERATED_BODY()
+
+	UPROPERTY() FString Id;
+	UPROPERTY() FString Name;
+	UPROPERTY() FString Rank;
+	UPROPERTY() int32 Born = 1800;
+	UPROPERTY() bool bGeneral = false;
+	UPROPERTY() bool bRecruited = false;
+	UPROPERTY() TArray<uint8> Stats;
+	UPROPERTY() float Experience = 0.f;
+	UPROPERTY() FString Regiment;
 };
 
 /**
@@ -78,8 +105,8 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
-	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. */
-	static constexpr int32 CurrentVersion = 6;
+	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. */
+	static constexpr int32 CurrentVersion = 8;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;
@@ -106,4 +133,7 @@ public:
 
 	/** The regiments (missing ones stay in their garrisons). */
 	UPROPERTY() TArray<FCampaign1851RegimentSave> Regiments;
+
+	/** The officer corps (v7). */
+	UPROPERTY() TArray<FCampaign1851OfficerSave> Officers;
 };

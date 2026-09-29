@@ -54,8 +54,8 @@ private:
 	/** The regiments that stand or march together with this one (its town's stack, or its column). */
 	TArray<int32> StackOf(int32 Regiment) const;
 	void SelectRegiments(const TArray<int32>& Regiments);
-	/** Sends the selected regiments to a town as one column. */
-	void MarchSelected(int32 CityIndex);
+	/** Sends the selected regiments as one column to a town, or to a point in the field (CityIndex = INDEX_NONE). */
+	void MarchSelected(int32 CityIndex, const FVector2D& TargetKm);
 	/** Right mouse: a click (not a drag) gives the march order. */
 	FVector2D RightDownAt = FVector2D::ZeroVector;
 	bool bRightDragged = false;

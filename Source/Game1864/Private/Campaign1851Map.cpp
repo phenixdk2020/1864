@@ -118,6 +118,7 @@ void ACampaign1851Map::BeginPlay()
 	ResetNetwork();
 	if (LoadArmy())
 	{
+		LoadOfficers();
 		ResetArmy();
 	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|ready|cities=%d|labels=%d|size=%.0fx%.0f km"), Cities.Num(), Labels.Num(), SizeKm.X, SizeKm.Y);
@@ -1430,8 +1431,8 @@ bool ACampaign1851Map::RestoreProject(const FString& CityName, const TArray<floa
 
 namespace
 {
-	/** Speed 1 shows a day in 12 s, speed 3 in 2 s, speed 5 races through four days a second. */
-	const float SpeedHours[] = { 0.f, 2.f, 6.f, 12.f, 24.f, 96.f };
+	/** Speed 1: a quarter of an hour a second (a day in 96 s); speed 3: a day in 8 s; speed 5: a day a second. */
+	const float SpeedHours[] = { 0.f, 0.25f, 1.f, 3.f, 8.f, 24.f };
 	const TCHAR* SpeedLabels[] = { TEXT("PAUSE"), TEXT("1"), TEXT("2"), TEXT("3"), TEXT("4"), TEXT("5") };
 	const TCHAR* MonthNames[] = { TEXT("januar"), TEXT("februar"), TEXT("marts"), TEXT("april"), TEXT("maj"), TEXT("juni"),
 		TEXT("juli"), TEXT("august"), TEXT("september"), TEXT("oktober"), TEXT("november"), TEXT("december") };
@@ -1603,6 +1604,20 @@ void ACampaign1851Map::CloseMonth()
 	if (Upkeep >= 1.0)
 	{
 		AddTransaction(-Upkeep, TEXT("Drift af garnisoner og bygninger"));
+	}
+	double TrainingCost = 0.0;
+	for (const FCampaign1851Regiment& R : Regiments)
+	{
+		TrainingCost += R.IsMarching() ? 0.0 : Campaign1851Army::ProgramCostPerMonth(R.Program) * R.Men / 760.0;
+	}
+	if (TrainingCost >= 1.0)
+	{
+		AddTransaction(-TrainingCost, TEXT("Hærens øvelser"));
+	}
+	const double OfficerSalaries = OfficerPayPerMonth();
+	if (OfficerSalaries >= 1.0)
+	{
+		AddTransaction(-OfficerSalaries, TEXT("Officerslønninger"));
 	}
 	if (RoadUpkeep >= 1.0)
 	{

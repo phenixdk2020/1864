@@ -1,0 +1,14 @@
+{
+ "note": "Officerer 1851. Generalerne er historiske personer; deres værdier (1-10, erfaring 0-100) er spillets skøn, ikke kildebelagte. Regimentscheferne ved spillets start og nye rekrutter får navne fra listerne nedenfor og tilfældige værdier (fast frø, så et nyt spil altid starter ens).",
+ "stats": ["leadership", "inspiration", "initiative", "tactical", "staff", "discipline", "aggression", "composure", "political"],
+ "generals": [
+  {"id": "G_KROGH",  "name": "Gerhard Christoph von Krogh",     "rank": "Generalløjtnant", "born": 1785, "leadership": 7, "inspiration": 7, "initiative": 6, "tactical": 7, "staff": 7, "discipline": 8, "aggression": 5, "composure": 7, "political": 7, "experience": 80},
+  {"id": "G_BULOW",  "name": "Frederik Rubeck Henrik Bülow",    "rank": "Generalløjtnant", "born": 1791, "leadership": 8, "inspiration": 8, "initiative": 7, "tactical": 8, "staff": 6, "discipline": 6, "aggression": 7, "composure": 8, "political": 6, "experience": 80},
+  {"id": "G_MEZA",   "name": "Christian Julius de Meza",        "rank": "Generalmajor",    "born": 1792, "leadership": 7, "inspiration": 5, "initiative": 5, "tactical": 8, "staff": 6, "discipline": 7, "aggression": 3, "composure": 7, "political": 5, "experience": 75},
+  {"id": "G_HEGERMANN", "name": "Cai Ditlev Hegermann-Lindencrone", "rank": "Generalmajor", "born": 1807, "leadership": 6, "inspiration": 5, "initiative": 5, "tactical": 6, "staff": 7, "discipline": 7, "aggression": 4, "composure": 6, "political": 5, "experience": 70}
+ ],
+ "firstNames": ["Christian", "Frederik", "Hans", "Peter", "Carl", "Johan", "Niels", "Jens", "Anders", "Søren", "Ludvig", "Otto", "Wilhelm", "Georg", "Henrik", "Emil", "Adolph", "Julius", "Theodor", "Ernst", "Axel", "Ferdinand", "August", "Gustav"],
+ "surnames": ["Schau", "Bauditz", "Rosen", "Lasson", "Beck", "Wilster", "Juel", "Scharffenberg", "Schøller", "Harbou", "Wegener", "Wichmann", "Neergaard", "Lundbye", "Tvermoes", "Rosenørn", "Holck", "Bruun", "Faber", "Krabbe", "Scheel", "Castenschiold", "Kauffmann", "Stiernholm", "Hveding", "Thestrup", "Myhlenfeldt", "Caroc", "Brock", "Wørishøffer", "Fibiger", "Leth", "Lemvigh", "Rist", "Wolle", "Bernstorff", "Løvenskiold", "Flensborg", "Dreyer", "Hammer"],
+ "pay": {"officer": 600, "general": 3000},
+ "recruitCost": {"officer": 1500, "general": 6000}
+}

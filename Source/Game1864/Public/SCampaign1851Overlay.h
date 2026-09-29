@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/SLeafWidget.h"
+#include "Campaign1851Army.h"
 #include "UObject/StrongObjectPtr.h"
 #include "Engine/Texture2D.h"
 
@@ -33,14 +34,27 @@ public:
 	void SetSelectedCity(int32 Index) { SelectedCity = Index; }
 	int32 GetSelectedCity() const { return SelectedCity; }
 	/** Regiments selected (a stack, a column or single ones); they take the info panel. */
-	void SetSelectedRegiments(const TArray<int32>& In) { SelectedRegiments = In; }
+	void SetSelectedRegiments(const TArray<int32>& In) { SelectedRegiments = In; if (In.Num() == 0) { Picker = EPicker::None; InspectedOfficer = INDEX_NONE; } }
 	const TArray<int32>& GetSelectedRegiments() const { return SelectedRegiments; }
 	/** Amt to show when no town is selected (0 = none). */
 	void SetSelectedAmt(int32 Id) { SelectedAmt = Id; }
 	int32 GetSelectedAmt() const { return SelectedAmt; }
 
 	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury, BuildTown, ShowSite, BuildLink, ShowLink,
-		Regiment, RegimentRow, ArmyHome, ArmyHalt };
+		Regiment, RegimentRow, ArmyHome, ArmyHalt, OfficerChange, GeneralChange, OfficerPick, OfficerRecruit, PickerClose, TrainingProgram, OfficerInfo, OfficerCardClose, ProgramPick, RouteMode };
+	/** How the next march order goes (the three buttons in the army panel). */
+	void SetRouteMode(ECampaign1851RouteMode In) { RouteMode = In; }
+	ECampaign1851RouteMode GetRouteMode() const { return RouteMode; }
+	/** The training menu beside the army panel. */
+	void ToggleTrainingMenu() { bTrainingMenu = !bTrainingMenu; if (bTrainingMenu) { Picker = EPicker::None; InspectedOfficer = INDEX_NONE; } }
+	void CloseTrainingMenu() { bTrainingMenu = false; }
+	/** The officer list beside the army panel: chiefs or generals to appoint. */
+	enum class EPicker : uint8 { None, Chief, General };
+	void OpenPicker(EPicker In) { Picker = In; InspectedOfficer = INDEX_NONE; bTrainingMenu = false; }
+	/** The officer card (all qualities) beside the army panel; INDEX_NONE closes it. */
+	void InspectOfficer(int32 Officer) { InspectedOfficer = Officer; }
+	int32 GetInspectedOfficer() const { return InspectedOfficer; }
+	EPicker GetPicker() const { return Picker; }
 	/** Module of a BuildLink button: link * 2 + 0 for a chaussée, + 1 for a railway. */
 	static int32 LinkButton(int32 Link, bool bRailway) { return Link * 2 + (bRailway ? 1 : 0); }
 	void ToggleLedger() { bLedgerOpen = !bLedgerOpen; }
@@ -91,8 +105,19 @@ private:
 	void PaintAmtInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** Unit counters (NATO style, Danish blue) on every town with regiments and on every column on the march; routes of the selected. */
 	void PaintArmy(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
-	/** The selected regiments: strength, place, march pace and arrival, orders. */
+	/** The selected regiments: strength, qualities, place, march pace and arrival, chief and general, orders. */
 	void PaintArmyInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	/** Unassigned officers or generals with their qualities; click to appoint, or recruit a new one. */
+	void PaintOfficerPicker(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft) const;
+	/** Every training programme: what it trains, days for +10 under the chief, cost a month; click to choose. */
+	void PaintTrainingMenu(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft) const;
+	/** One officer's card: rank, age, post, experience and every quality with what it means. */
+	void PaintOfficerCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft) const;
+	/** Left-aligned (or AlignX) text cut with "..." to fit MaxWidth. */
+	void PaintTextFit(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FString& Text, const FVector2D& Pos,
+		const FSlateFontInfo& Font, const FLinearColor& Colour, float MaxWidth, float AlignX = 0.f) const;
+	/** "Før 7  Insp 6  ...  ·  erf. 45" */
+	FString OfficerStatLine(const struct FCampaign1851Officer& O) const;
 	/** Progress rings at the middle of roads and railways under construction. */
 	void PaintLinkWorks(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** Progress rings over towns with a building project. */
@@ -116,6 +141,10 @@ private:
 	int32 SelectedCity = INDEX_NONE;
 	int32 SelectedAmt = 0;
 	TArray<int32> SelectedRegiments;
+	EPicker Picker = EPicker::None;
+	int32 InspectedOfficer = INDEX_NONE;
+	bool bTrainingMenu = false;
+	ECampaign1851RouteMode RouteMode = ECampaign1851RouteMode::RoadsAndRail;
 	TSharedPtr<FSlateBrush> BornholmBrush;
 	TSharedPtr<FSlateBrush> DotBrush;
 	TArray<TSharedPtr<FSlateBrush>> ModuleBrushes;   // card images per garrison module
