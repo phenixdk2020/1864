@@ -214,7 +214,7 @@ void ACampaign1851PlayerController::TryInit()
 		Overlay->ToggleOOB();
 	}
 	// -CampaignSplitTo=Vejle:B7 opens the march order for the selection to a town with the listed units staying
-	// behind (BLIVER) and carries it out; with -CampaignSplitShow it only opens the dialog.
+	// behind (OPDEL) and carries it out; with -CampaignSplitShow it only opens the dialog.
 	FString SplitTo;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignSplitTo="), SplitTo, false) && Overlay.IsValid())
 	{
@@ -1270,7 +1270,7 @@ void ACampaign1851PlayerController::RefreshOrderDialog()
 	}
 	// One column per way chosen.
 	D.Columns.Reset();
-	const TCHAR* Names[] = { TEXT("Til fods"), TEXT("Med tog"), TEXT("Lige linje"), TEXT("Bliver") };
+	const TCHAR* Names[] = { TEXT("Til fods"), TEXT("Med tog"), TEXT("Lige linje"), TEXT("Opdel") };
 	for (int32 w = 0; w < 4; ++w)
 	{
 		TArray<int32> Column;
@@ -1289,7 +1289,7 @@ void ACampaign1851PlayerController::RefreshOrderDialog()
 		{
 			// Split off: they halt (or stay) where they are, as a column of their own.
 			const FCampaign1851Regiment& R = Map->GetRegiments()[Column[0]];
-			D.Columns.Add(FString::Printf(TEXT("Bliver (%d): holder stand %s"), Column.Num(),
+			D.Columns.Add(FString::Printf(TEXT("Opdel (%d): udskilles og holder stand %s"), Column.Num(),
 				R.IsMarching() ? TEXT("hvor de er nu (standser marchen)") : *FString::Printf(TEXT("ved %s"), *Map->DescribePlace(R.Town, R.Km))));
 			continue;
 		}
@@ -1331,7 +1331,7 @@ void ACampaign1851PlayerController::ExecuteOrderDialog()
 	}
 	if (Staying > 0)
 	{
-		Notes.Add(FString::Printf(TEXT("%d %s tilbage"), Staying, Staying == 1 ? TEXT("enhed bliver") : TEXT("enheder bliver")));
+		Notes.Add(FString::Printf(TEXT("Styrken er opdelt: %d %s udskilt og holder stand"), Staying, Staying == 1 ? TEXT("enhed") : TEXT("enheder")));
 		// The force is split: keep only those that march selected (the rest are a column of their own now).
 		TArray<int32> Going;
 		for (int32 u = 0; u < D.Units.Num(); ++u)

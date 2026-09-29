@@ -1181,7 +1181,7 @@ void SCampaign1851Overlay::PaintOrderDialog(const FGeometry& Geometry, FSlateWin
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseOrder);
 	PaintText(Geometry, Out, Layer + 2, TEXT("M A R C H O R D R E"), Pos + FVector2D(22.f, 26.f), Serif(11), Gold, 0.f, false);
 	PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("til %s"), *D.Goal), Pos + FVector2D(22.f, 52.f), Serif(18), Ink, Size.X - 80.f);
-	const TCHAR* Ways[] = { TEXT("TIL FODS"), TEXT("MED TOG"), TEXT("LIGE LINJE"), TEXT("BLIVER") };
+	const TCHAR* Ways[] = { TEXT("TIL FODS"), TEXT("MED TOG"), TEXT("LIGE LINJE"), TEXT("OPDEL") };
 	// All at once, with the time each way would take the whole selection.
 	float Y = Pos.Y + 92.f;
 	PaintText(Geometry, Out, Layer + 2, TEXT("Alle"), FVector2D(Pos.X + 22.f, Y), Serif(12, EFace::Italic), Gold, 0.f, false);
@@ -1214,7 +1214,7 @@ void SCampaign1851Overlay::PaintOrderDialog(const FGeometry& Geometry, FSlateWin
 	}
 	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, Pos.Y + Size.Y - 48.f), FVector2D(160.f, 30.f), TEXT("UDFØR"), EButton::OrderExecute);
 	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 192.f, Pos.Y + Size.Y - 48.f), FVector2D(160.f, 30.f), TEXT("ANNULLÉR"), EButton::OrderCancel);
-	PaintText(Geometry, Out, Layer + 2, TEXT("Hver vej bliver sin egen kolonne  ·  BLIVER: deler styrken her  ·  Shift+højreklik: straks"), FVector2D(Pos.X + Size.X - 22.f, Pos.Y + Size.Y - 33.f), Serif(10, EFace::Italic), MutedInk, 1.f, false);
+	PaintText(Geometry, Out, Layer + 2, TEXT("Hver vej bliver sin egen kolonne  ·  OPDEL: udskiller enheden, den holder stand  ·  Shift+højreklik: straks"), FVector2D(Pos.X + Size.X - 22.f, Pos.Y + Size.Y - 33.f), Serif(10, EFace::Italic), MutedInk, 1.f, false);
 }
 
 bool SCampaign1851Overlay::IsOverChart(const FVector2D& ViewportPixel) const
