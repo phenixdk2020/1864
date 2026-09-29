@@ -855,6 +855,23 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				}
 			}
 		}
+		else if (Button == SCampaign1851Overlay::EButton::SupplySend)
+		{
+			FString Why;
+			const bool bFort = Module >= 1000000;
+			if (Map->SendSupplyColumn(bFort, bFort ? Module - 1000000 : Module, &Why))
+			{
+				Overlay->ShowToast(TEXT("Trænkolonnen kører fra depotet"));
+			}
+			else
+			{
+				Overlay->ShowToast(Why);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::SupplyBuy)
+		{
+			Overlay->ShowToast(Map->BuySupplyColumn() ? FString::Printf(TEXT("Trænkolonne købt: %d i alt"), Map->GetSupplyColumnCount()) : FString(TEXT("Ikke råd")));
+		}
 		else if (Button == SCampaign1851Overlay::EButton::RaiseBattalion)
 		{
 			FString Why;
@@ -1313,6 +1330,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->AmtManpower = Map->GetAmtManpower();
 	Save->GunStock = Map->GetGunStock();
 	Save->Supply = Map->SaveSupply();
+	Save->SupplyColumns = Map->SaveSupplyColumns();
 	Map->ExportUnits();
 	Save->MaterialLots = Map->GetMaterialLots();
 	if (Save->Links.Num() > 0)
@@ -1412,6 +1430,10 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	if (Save->SaveVersion >= 17)
 	{
 		Map->RestoreSupply(Save->Supply);
+	}
+	if (Save->SaveVersion >= 19)
+	{
+		Map->RestoreSupplyColumns(Save->SupplyColumns);
 	}
 	Map->SetMaterialLots(Save->SaveVersion >= 16 ? Save->MaterialLots : TArray<FVector>());
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);

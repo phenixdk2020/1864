@@ -1600,6 +1600,7 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 	AdvanceForts(DeltaDays);
 	AdvanceDemolitions(DeltaDays);
 	AdvanceSupply(DeltaDays);
+	AdvanceSupplyColumns(DeltaDays);
 	AdvanceArmy(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
 	if (GetDate().GetMonth() != MonthBefore)
 	{

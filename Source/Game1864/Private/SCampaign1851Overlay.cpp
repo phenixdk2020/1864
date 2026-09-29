@@ -257,7 +257,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.40 MANDSKAB OG MINIATURER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.42 FORSYNING OG TRÆNKOLONNER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -1151,7 +1151,9 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 			Low = R->Food < Low->Food ? R : Low;
 		}
 		const int32 Depot = Map->DepotFor(Low->Km);
-		Line(TEXT("Forsyning"), Campaign1851Supply::Describe(*Low) + (Low->IsMarching() || Low->IsInField()
+		const int32 LowIndex = int32(Low - Map->GetRegiments().GetData());
+		const bool bColumn = Map->GetSupplyColumns().ContainsByPredicate([LowIndex](const FCampaign1851SupplyColumn& C) { return !C.bFort && C.Target == LowIndex && C.State == ESupplyColumnState::Outbound; });
+		Line(TEXT("Forsyning"), Campaign1851Supply::Describe(*Low) + (bColumn ? FString(TEXT("  ·  trænkolonne på vej")) : FString()) + (Low->IsMarching() || Low->IsInField()
 			? (Depot != INDEX_NONE ? FString::Printf(TEXT("  ·  depot %s"), *Map->GetCities()[Depot].Name) : FString(TEXT("  ·  intet depot i nærheden"))) : FString(TEXT("  ·  garnison"))));
 	}
 	if (!Why.IsEmpty())
@@ -1241,6 +1243,11 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	{
 		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 22.f - ButtonSize.X, ButtonY), ButtonSize, TEXT("KAMPORDEN"), EButton::OpenOOB, 0, bOOB);
 	}
+	if (First.IsInField())
+	{
+		const int32 FirstIndex = SelectedRegiments.IsValidIndex(0) ? SelectedRegiments[0] : INDEX_NONE;
+		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 32.f + ButtonSize.X, ButtonY), ButtonSize, TEXT("SEND FORSYNING"), EButton::SupplySend, FirstIndex, false, Map->FreeSupplyColumns() <= 0);
+	}
 	if (First.IsMarching())
 	{
 		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 32.f + ButtonSize.X, ButtonY), ButtonSize, TEXT("STOP"), EButton::ArmyHalt);
@@ -1317,8 +1324,10 @@ void SCampaign1851Overlay::PaintFortTool(const FGeometry& Geometry, FSlateWindow
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseFortPanel);
 	PaintText(Geometry, Out, Layer + 2, TEXT("S K A N S E R"), Pos + FVector2D(22.f, 26.f), Serif(11), Gold, 0.f, false);
-	PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Vælg type og klik på kortet  ·  kanoner på lager: %d (sparer %s rd. pr. kanon)"), Map->GetGunStock(), *Thousands(Campaign1851Forts::GunPrice)),
-		Pos + FVector2D(22.f, 50.f), Serif(10, EFace::Italic), MutedInk, Size.X - 44.f);
+	PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Vælg type og klik på kortet  ·  kanoner på lager: %d (sparer %s rd. pr. kanon)  ·  trænkolonner %d/%d ledige"),
+		Map->GetGunStock(), *Thousands(Campaign1851Forts::GunPrice), Map->FreeSupplyColumns(), Map->GetSupplyColumnCount()),
+		Pos + FVector2D(22.f, 50.f), Serif(10, EFace::Italic), MutedInk, Size.X - 44.f - 150.f);
+	PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(Size.X - 172.f, 38.f), FVector2D(150.f, 24.f), FString::Printf(TEXT("KØB KOLONNE %s"), *Thousands(Campaign1851Supply::ColumnCost)), EButton::SupplyBuy);
 	for (int32 k = 0; k < 2; ++k)
 	{
 		const bool bLarge = k == 1;
@@ -1391,6 +1400,7 @@ void SCampaign1851Overlay::PaintFort(const FGeometry& Geometry, FSlateWindowElem
 		Reserve > 0 ? TEXT("  ·  rykker ind, når der bliver plads") : TEXT("")));
 	Line(TEXT("Front mod"), Campaign1851Forts::Compass(F.Yaw));
 	Line(TEXT("Magasin"), FString::Printf(TEXT("%.0f skud pr. kanon  ·  %.0f patroner pr. mand  ·  proviant %.0f dage"), F.RoundsPerGun, F.CartridgesPerMan, F.FoodDays));
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 190.f, Y - 33.f), FVector2D(168.f, 22.f), TEXT("SEND FORSYNING"), EButton::SupplySend, 1000000 + F.Id, false, !F.bBuilt || Map->FreeSupplyColumns() <= 0);
 	// The companies holding it, in the order they fill it.
 	Y += 4.f;
 	PaintText(Geometry, Out, Layer + 2, TEXT("K O M P A G N I E R"), FVector2D(Pos.X + 22.f, Y), Serif(10), Gold, 0.f, false);

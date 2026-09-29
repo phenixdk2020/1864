@@ -38,3 +38,10 @@ Filen skrives hver måned og ved hver gemning. Hver enhed har:
   "foodDays": 4, "fodderDays": 2, "ammoFraction": 1, "cartridgesPerMan": 60, "roundsPerGun": 0,
   "battleFactors": { "reloadTime": 1.0, "accuracy": 0.98, "...": 0 } }
 ```
+
+## Trænkolonner (F-5, v00.00.42)
+- **Antal:** Hæren har 6 trænkolonner i 1851. Hver er 20 vogne og 80 heste, og en ny koster 2.500 rd. (knappen **KØB KOLONNE** i SKANSER-panelet).
+- **Last:** En kolonne laster op til 12.000 rationer, 4.000 foderrationer og 6 ammunitionsladninger på det nærmeste depot med forråd. Den kører ad vejene med 25 km om dagen, i vinterføre kun 60 %.
+- **Aflevering:** Kolonnen afleverer det, enheden eller skansen mangler, og kører hjem med resten. Er enheden marcheret videre, følger kolonnen efter.
+- **Automatisk:** Enheder uden depot i nærheden bestiller selv en kolonne i tide, altså når proviant er under køreturen + 1 dag. **SEND FORSYNING** i hær- og skansepanelet sender en med det samme.
+- **På kortet:** Kolonnerne ses som hestevogne, når man er zoomet ind.

@@ -41,6 +41,22 @@ struct FCampaign1851DepotStock
 	float Ammo = 0.f;
 };
 
+/** A supply column on the roads: from a depot to a unit or a fort, and home again. */
+enum class ESupplyColumnState : uint8 { Outbound, Returning };
+struct FCampaign1851SupplyColumn
+{
+	int32 Id = 0;
+	int32 Depot = INDEX_NONE;     // town it loads at and returns to
+	bool bFort = false;
+	int32 Target = INDEX_NONE;    // regiment index, or fort id
+	float Food = 0.f, Fodder = 0.f, Ammo = 0.f;
+	ESupplyColumnState State = ESupplyColumnState::Outbound;
+	FVector2D Km = FVector2D::ZeroVector;
+	TArray<FCampaign1851Leg> Route;
+	int32 Leg = 0;
+	float LegElapsed = 0.f;
+};
+
 /** A nation's figures for the council window (from the map for Denmark, the abstract model for the others). */
 struct FCampaign1851NationFigures
 {
@@ -331,6 +347,15 @@ public:
 	void RestoreSupply(const TArray<FString>& Lines);
 	/** Writes Saved/Battle/Units.json for the 3D battles. */
 	void ExportUnits() const;
+	/** Sends a supply column from the nearest depot with stock to a unit (regiment index) or a fort (id). */
+	bool SendSupplyColumn(bool bFort, int32 Target, FString* OutReason = nullptr);
+	const TArray<FCampaign1851SupplyColumn>& GetSupplyColumns() const { return SupplyColumns; }
+	int32 GetSupplyColumnCount() const { return SupplyColumnCount; }
+	int32 FreeSupplyColumns() const;
+	/** Buys a new column (wagons and horses); false if the treasury cannot. */
+	bool BuySupplyColumn();
+	TArray<FString> SaveSupplyColumns() const;
+	void RestoreSupplyColumns(const TArray<FString>& Lines);
 
 	// ---- Pulling down and salvage (Campaign1851Salvage.cpp).
 
@@ -746,6 +771,15 @@ private:
 	double AmmoLoadPrice() const;
 	TMap<int32, FCampaign1851DepotStock> Depots;
 	bool bHungerNews = false;
+	void AdvanceSupplyColumns(float DeltaDays);
+	void UpdateSupplyColumnPieces();
+	bool PlanColumnRoute(FCampaign1851SupplyColumn& C, const FVector2D& To, int32 ToTown);
+	FVector2D SupplyTargetKm(const FCampaign1851SupplyColumn& C) const;
+	TArray<FCampaign1851SupplyColumn> SupplyColumns;
+	int32 SupplyColumnCount = Campaign1851Supply::ColumnsAtStart;
+	int32 NextSupplyColumnId = 1;
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> SupplyColumnPieces;
+	UPROPERTY(Transient) TObjectPtr<UStaticMesh> ColumnMesh;
 
 	// The salvage layer (Campaign1851Salvage.cpp).
 	void AddMaterials(int32 CityIndex, double Rd, const FString& From);

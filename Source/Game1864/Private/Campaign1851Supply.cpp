@@ -5,6 +5,8 @@
 #include "Campaign1851Map.h"
 
 #include "Campaign1851ConstructionSite.h"
+#include "Campaign1851Scenery.h"
+#include "Components/StaticMeshComponent.h"
 #include "Dom/JsonObject.h"
 #include "HAL/FileManager.h"
 #include "Misc/FileHelper.h"
@@ -95,6 +97,9 @@ int32 ACampaign1851Map::TownForPurchase(const FVector2D& Km) const
 void ACampaign1851Map::ResetSupply()
 {
 	Depots.Reset();
+	SupplyColumns.Reset();
+	SupplyColumnCount = Campaign1851Supply::ColumnsAtStart;
+	UpdateSupplyColumnPieces();
 	for (FCampaign1851Regiment& R : Regiments)
 	{
 		R.Food = Campaign1851Supply::FoodCarried;
@@ -390,4 +395,313 @@ void ACampaign1851Map::ExportUnits() const
 	const FString Path = FPaths::ProjectSavedDir() / TEXT("Battle/Units.json");
 	IFileManager::Get().MakeDirectory(*FPaths::GetPath(Path), true);
 	FFileHelper::SaveStringToFile(Text, *Path, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
+}
+
+// ------------------------------------------------------------------ supply columns (F-5)
+
+namespace
+{
+	/** A column's load in rations, fodder and ammunition loads (20 wagons of 800 kg). */
+	constexpr float ColumnFood = 12000.f;
+	constexpr float ColumnFodder = 4000.f;
+	constexpr float ColumnAmmo = 6.f;
+}
+
+FVector2D ACampaign1851Map::SupplyTargetKm(const FCampaign1851SupplyColumn& C) const
+{
+	if (C.bFort)
+	{
+		const int32 F = FortIndex(C.Target);
+		return F != INDEX_NONE ? Forts[F].Km : C.Km;
+	}
+	return Regiments.IsValidIndex(C.Target) ? Regiments[C.Target].Km : C.Km;
+}
+
+bool ACampaign1851Map::PlanColumnRoute(FCampaign1851SupplyColumn& C, const FVector2D& To, int32 ToTown)
+{
+	C.Route.Reset();
+	C.Leg = 0;
+	C.LegElapsed = 0.f;
+	TArray<FCampaign1851Leg> Legs;
+	if (!PlanMarch(INDEX_NONE, C.Km, ToTown, To, Campaign1851Supply::ColumnKmPerDay, ECampaign1851RouteMode::RoadsOnly, Legs))
+	{
+		if (!PlanMarch(INDEX_NONE, C.Km, ToTown, To, Campaign1851Supply::ColumnKmPerDay, ECampaign1851RouteMode::Direct, Legs))
+		{
+			return FVector2D::Distance(C.Km, To) < 0.5;   // already there
+		}
+	}
+	C.Route = MoveTemp(Legs);
+	return true;
+}
+
+bool ACampaign1851Map::SendSupplyColumn(bool bFort, int32 Target, FString* OutReason)
+{
+	auto Fail = [OutReason](const FString& Why) { if (OutReason) { *OutReason = Why; } return false; };
+	const FVector2D To = bFort ? (FortIndex(Target) != INDEX_NONE ? Forts[FortIndex(Target)].Km : FVector2D::ZeroVector)
+		: (Regiments.IsValidIndex(Target) ? Regiments[Target].Km : FVector2D::ZeroVector);
+	if (To.IsZero())
+	{
+		return Fail(TEXT("-"));
+	}
+	if (SupplyColumns.ContainsByPredicate([&](const FCampaign1851SupplyColumn& C) { return C.bFort == bFort && C.Target == Target && C.State != ESupplyColumnState::Returning; }))
+	{
+		return Fail(TEXT("En trænkolonne er allerede på vej"));
+	}
+	if (FreeSupplyColumns() <= 0)
+	{
+		return Fail(TEXT("Ingen ledige trænkolonner: køb flere"));
+	}
+	// The nearest depot with stock (as the crow flies; the road decides the time).
+	int32 Best = INDEX_NONE;
+	double BestKm = 1e9;
+	for (const TPair<int32, FCampaign1851DepotStock>& D : Depots)
+	{
+		const double Dist = FVector2D::Distance(TownKm(D.Key), To);
+		if (D.Value.Food > 1000.f && Dist < BestKm)
+		{
+			BestKm = Dist;
+			Best = D.Key;
+		}
+	}
+	if (Best == INDEX_NONE)
+	{
+		return Fail(TEXT("Intet depot med forråd: byg Depot og magasin eller Kornmagasin"));
+	}
+	FCampaign1851DepotStock& S = Depots[Best];
+	FCampaign1851SupplyColumn C;
+	C.Id = NextSupplyColumnId++;
+	C.Depot = Best;
+	C.bFort = bFort;
+	C.Target = Target;
+	C.Km = TownKm(Best);
+	C.Food = FMath::Min(ColumnFood, S.Food);
+	C.Fodder = FMath::Min(ColumnFodder, S.Fodder);
+	C.Ammo = FMath::Min(ColumnAmmo, S.Ammo);
+	S.Food -= C.Food;
+	S.Fodder -= C.Fodder;
+	S.Ammo -= C.Ammo;
+	C.State = ESupplyColumnState::Outbound;
+	if (!PlanColumnRoute(C, To, INDEX_NONE))
+	{
+		S.Food += C.Food;
+		S.Fodder += C.Fodder;
+		S.Ammo += C.Ammo;
+		return Fail(TEXT("Ingen vej derhen"));
+	}
+	SupplyColumns.Add(C);
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|supply|column %d from %s to %s"), C.Id, *Cities[Best].Name,
+		bFort ? *Forts[FortIndex(Target)].Name : *Regiments[Target].Name);
+	return true;
+}
+
+int32 ACampaign1851Map::FreeSupplyColumns() const
+{
+	return SupplyColumnCount - SupplyColumns.Num();
+}
+
+bool ACampaign1851Map::BuySupplyColumn()
+{
+	if (Treasury < Campaign1851Supply::ColumnCost)
+	{
+		return false;
+	}
+	AddTransaction(-Campaign1851Supply::ColumnCost, TEXT("Trænkolonne købt (20 vogne, 80 heste)"));
+	++SupplyColumnCount;
+	return true;
+}
+
+void ACampaign1851Map::AdvanceSupplyColumns(float DeltaDays)
+{
+	if (DeltaDays <= 0.f)
+	{
+		return;
+	}
+	// Frost and thaw: the wagons crawl in winter.
+	const int32 Month = GetDate().GetMonth();
+	const float Weather = (Month == 12 || Month <= 2) ? 0.6f : Month == 3 ? 0.8f : 1.f;
+	for (int32 i = SupplyColumns.Num() - 1; i >= 0; --i)
+	{
+		FCampaign1851SupplyColumn& C = SupplyColumns[i];
+		C.LegElapsed += DeltaDays * Weather;
+		while (C.Route.IsValidIndex(C.Leg) && C.LegElapsed >= C.Route[C.Leg].Days)
+		{
+			C.LegElapsed -= C.Route[C.Leg].Days;
+			C.Km = C.Route[C.Leg].ToKm;
+			++C.Leg;
+		}
+		if (C.Route.IsValidIndex(C.Leg))
+		{
+			const FCampaign1851Leg& L = C.Route[C.Leg];
+			const TArray<FVector2D> Line = LegLine(L);
+			C.Km = AlongLine(Line, LineLength(Line) * FMath::Clamp(C.LegElapsed / FMath::Max(L.Days, 0.001f), 0.f, 1.f));
+			continue;
+		}
+		// Arrived.
+		if (C.State == ESupplyColumnState::Returning)
+		{
+			FCampaign1851DepotStock& S = Depots.FindOrAdd(C.Depot);
+			S.Food += C.Food;
+			S.Fodder += C.Fodder;
+			S.Ammo += C.Ammo;
+			SupplyColumns.RemoveAt(i);
+			continue;
+		}
+		const FVector2D To = SupplyTargetKm(C);
+		if (FVector2D::Distance(C.Km, To) > 3.0)
+		{
+			// The unit has marched on: follow it.
+			if (!PlanColumnRoute(C, To, INDEX_NONE))
+			{
+				C.State = ESupplyColumnState::Returning;
+				PlanColumnRoute(C, TownKm(C.Depot), C.Depot);
+			}
+			continue;
+		}
+		// Hand over what they need, then drive home with the rest.
+		if (C.bFort)
+		{
+			const int32 F = FortIndex(C.Target);
+			if (F != INDEX_NONE)
+			{
+				FCampaign1851Fort& Fort = Forts[F];
+				const float Men = float(FMath::Max(Fort.Garrison, 1));
+				const float Food = FMath::Min(C.Food, FMath::Max(0.f, Campaign1851Supply::FortFoodDays - Fort.FoodDays) * Men);
+				Fort.FoodDays += Food / Men;
+				C.Food -= Food;
+				const float Ammo = FMath::Min(C.Ammo, 1.f);
+				if (Ammo > 0.f)
+				{
+					Fort.RoundsPerGun = FMath::Min(120.f, Fort.RoundsPerGun + 60.f * Ammo);
+					Fort.CartridgesPerMan = FMath::Min(100.f, Fort.CartridgesPerMan + 50.f * Ammo);
+					C.Ammo -= Ammo;
+				}
+				News.Add(FString::Printf(TEXT("Trænkolonnen har forsynet %s"), *Fort.Name));
+			}
+		}
+		else if (Regiments.IsValidIndex(C.Target))
+		{
+			FCampaign1851Regiment& R = Regiments[C.Target];
+			const float Food = FMath::Min(C.Food, FMath::Max(0.f, Campaign1851Supply::FoodCarried - R.Food) * R.Men);
+			R.Food += R.Men > 0 ? Food / R.Men : 0.f;
+			C.Food -= Food;
+			const float Fodder = FMath::Min(C.Fodder, FMath::Max(0.f, Campaign1851Supply::FodderCarried - R.Fodder) * R.Horses);
+			R.Fodder += R.Horses > 0 ? Fodder / R.Horses : 0.f;
+			C.Fodder -= Fodder;
+			const float Ammo = FMath::Min(C.Ammo, 1.f - R.Ammo);
+			R.Ammo += Ammo;
+			C.Ammo -= Ammo;
+			News.Add(FString::Printf(TEXT("Trænkolonnen har forsynet %s"), *R.Name));
+		}
+		C.State = ESupplyColumnState::Returning;
+		if (!PlanColumnRoute(C, TownKm(C.Depot), C.Depot))
+		{
+			SupplyColumns.RemoveAt(i);
+		}
+	}
+	// Units far from any depot and running short call for a column (the intendance's standing order).
+	for (int32 r = 0; r < Regiments.Num(); ++r)
+	{
+		const FCampaign1851Regiment& R = Regiments[r];
+		if (!(R.IsMarching() || R.IsInField()) || DepotFor(R.Km) != INDEX_NONE || FreeSupplyColumns() <= 0
+			|| SupplyColumns.ContainsByPredicate([r](const FCampaign1851SupplyColumn& C) { return !C.bFort && C.Target == r && C.State == ESupplyColumnState::Outbound; }))
+		{
+			continue;
+		}
+		// Order in time: the drive from the nearest stocked depot (roads wind, winter slows) and a day to spare.
+		double Nearest = 1e9;
+		for (const TPair<int32, FCampaign1851DepotStock>& D : Depots)
+		{
+			Nearest = D.Value.Food > 1000.f ? FMath::Min(Nearest, FVector2D::Distance(TownKm(D.Key), R.Km)) : Nearest;
+		}
+		const float Drive = Nearest < 1e8 ? float(Nearest * 1.4 / (Campaign1851Supply::ColumnKmPerDay * Weather)) : 0.f;
+		if (Nearest < 1e8 && R.Food < FMath::Min(Drive + 1.f, Campaign1851Supply::FoodCarried - 0.5f))
+		{
+			SendSupplyColumn(false, r);
+		}
+	}
+	UpdateSupplyColumnPieces();
+}
+
+void ACampaign1851Map::UpdateSupplyColumnPieces()
+{
+	if (!ColumnMesh)
+	{
+		UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Campaign1851/M_Campaign1851Scenery.M_Campaign1851Scenery"));
+		if (!Material)
+		{
+			return;
+		}
+		ColumnMesh = Campaign1851Scenery::BuildSitePiece(Campaign1851Scenery::ESitePiece::Wagon, Material);
+	}
+	while (SupplyColumnPieces.Num() < SupplyColumns.Num())
+	{
+		UStaticMeshComponent* P = NewObject<UStaticMeshComponent>(this);
+		P->SetupAttachment(Root);
+		P->SetStaticMesh(ColumnMesh);
+		P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		P->RegisterComponent();
+		SupplyColumnPieces.Add(P);
+	}
+	for (int32 i = 0; i < SupplyColumnPieces.Num(); ++i)
+	{
+		UStaticMeshComponent* P = SupplyColumnPieces[i];
+		if (!P)
+		{
+			continue;
+		}
+		if (!SupplyColumns.IsValidIndex(i))
+		{
+			P->SetVisibility(false);
+			continue;
+		}
+		const FCampaign1851SupplyColumn& C = SupplyColumns[i];
+		FVector2D Dir(1.0, 0.0);
+		if (C.Route.IsValidIndex(C.Leg))
+		{
+			const TArray<FVector2D> Line = LegLine(C.Route[C.Leg]);
+			AlongLine(Line, LineLength(Line) * FMath::Clamp(C.LegElapsed / FMath::Max(C.Route[C.Leg].Days, 0.001f), 0.f, 1.f), &Dir);
+		}
+		// Km north is -Y in the world.
+		const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(-Dir.Y, Dir.X));
+		P->SetWorldTransform(FTransform(FRotator(0.f, Yaw, 0.f), WorldAtKm(C.Km), FVector(PieceScale * 3.f)));
+		P->SetVisibility(LastCameraDistanceKm < 60.f);
+	}
+}
+
+TArray<FString> ACampaign1851Map::SaveSupplyColumns() const
+{
+	TArray<FString> Out;
+	Out.Add(FString::Printf(TEXT("count|%d"), SupplyColumnCount));
+	for (const FCampaign1851SupplyColumn& C : SupplyColumns)
+	{
+		// Columns under way are saved as their loads going home to their depot (a simple, safe restore).
+		if (Cities.IsValidIndex(C.Depot))
+		{
+			Out.Add(FString::Printf(TEXT("home|%s|%.0f|%.0f|%.2f"), *Cities[C.Depot].Name, C.Food, C.Fodder, C.Ammo));
+		}
+	}
+	return Out;
+}
+
+void ACampaign1851Map::RestoreSupplyColumns(const TArray<FString>& Lines)
+{
+	SupplyColumns.Reset();
+	SupplyColumnCount = Campaign1851Supply::ColumnsAtStart;
+	for (const FString& Line : Lines)
+	{
+		TArray<FString> P;
+		Line.ParseIntoArray(P, TEXT("|"), false);
+		if (P.Num() == 2 && P[0] == TEXT("count"))
+		{
+			SupplyColumnCount = FCString::Atoi(*P[1]);
+		}
+		else if (P.Num() == 5 && P[0] == TEXT("home") && FindCity(P[1]) != INDEX_NONE)
+		{
+			FCampaign1851DepotStock& S = Depots.FindOrAdd(FindCity(P[1]));
+			S.Food += FCString::Atof(*P[2]);
+			S.Fodder += FCString::Atof(*P[3]);
+			S.Ammo += FCString::Atof(*P[4]);
+		}
+	}
+	UpdateSupplyColumnPieces();
 }

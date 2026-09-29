@@ -400,6 +400,10 @@ namespace Campaign1851Supply
 	constexpr float RefillShare = 0.5f;
 	/** Days of rations a fort keeps for its garrison. */
 	constexpr float FortFoodDays = 14.f;
+	/** Supply columns (trænkolonner): pace on the roads, price of a new one, how many the army has in 1851. */
+	constexpr float ColumnKmPerDay = 25.f;
+	constexpr int32 ColumnCost = 2500;
+	constexpr int32 ColumnsAtStart = 6;
 	bool NeedsFodder(ECampaign1851Arm Arm);
 	/** "proviant 3.5 d.  ·  foder 1.0 d.  ·  ammunition 100 %" */
 	FString Describe(const FCampaign1851Regiment& R);
