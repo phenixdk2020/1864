@@ -92,6 +92,8 @@ struct FCampaign1851OfficerSave
 	UPROPERTY() TArray<uint8> Stats;
 	UPROPERTY() float Experience = 0.f;
 	UPROPERTY() FString Regiment;
+	/** v9: the general command he leads (id), if any. */
+	UPROPERTY() FString Command;
 };
 
 /**
@@ -105,8 +107,8 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
-	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. */
-	static constexpr int32 CurrentVersion = 8;
+	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands, troop trains. */
+	static constexpr int32 CurrentVersion = 9;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;
@@ -136,4 +138,9 @@ public:
 
 	/** The officer corps (v7). */
 	UPROPERTY() TArray<FCampaign1851OfficerSave> Officers;
+
+	/** Troop trains (v9): owned, busy (count, day free) and on order (count, day of delivery). */
+	UPROPERTY() int32 TroopTrains = -1;
+	UPROPERTY() TArray<FVector2D> TrainBookings;
+	UPROPERTY() TArray<FVector2D> TrainOrders;
 };

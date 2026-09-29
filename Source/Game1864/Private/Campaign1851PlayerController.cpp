@@ -9,6 +9,7 @@
 #include "Campaign1851ConstructionSite.h"
 #include "Campaign1851SaveGame.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 ACampaign1851PlayerController::ACampaign1851PlayerController()
 {
@@ -201,7 +202,11 @@ void ACampaign1851PlayerController::TryInit()
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignOpenWindow="), WindowName) && Overlay.IsValid())
 	{
 		Overlay->OpenWindow(WindowName == TEXT("army") ? SCampaign1851Overlay::EWindow::Army : WindowName == TEXT("officers") ? SCampaign1851Overlay::EWindow::Officers
-			: WindowName == TEXT("budget") ? SCampaign1851Overlay::EWindow::Budget : SCampaign1851Overlay::EWindow::Towns);
+			: WindowName == TEXT("budget") ? SCampaign1851Overlay::EWindow::Budget : WindowName == TEXT("trains") ? SCampaign1851Overlay::EWindow::Trains : SCampaign1851Overlay::EWindow::Towns);
+	}
+	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignOpenOOB")) && Overlay.IsValid())
+	{
+		Overlay->ToggleOOB();
 	}
 	FString InspectId;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignInspectOfficer="), InspectId) && Overlay.IsValid())
@@ -441,6 +446,12 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			Overlay->CloseMenu();
 		}
+		else if (Button == SCampaign1851Overlay::EButton::ExitGame)
+		{
+			// Save first, then quit (in the editor this only ends the play session).
+			SaveToSlot(TEXT("Autosave"), true);
+			UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+		}
 	}
 	else if (WasInputKeyJustPressed(EKeys::LeftMouseButton))
 	{
@@ -534,9 +545,19 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 		else if (Button == SCampaign1851Overlay::EButton::OfficerPick && Overlay->GetSelectedRegiments().Num() > 0)
 		{
-			// A chief takes the (single) selected regiment; a general goes with the first regiment of the stack.
+			// A chief takes the (single) selected regiment; a general goes with the first regiment of the stack,
+			// or takes over a general command when that is the post being filled.
 			const int32 Regiment = Overlay->GetSelectedRegiments()[0];
-			if (Map->AssignOfficer(Module, Regiment) && Map->GetOfficers().IsValidIndex(Module))
+			if (Overlay->GetPicker() == SCampaign1851Overlay::EPicker::CommandGeneral)
+			{
+				if (Map->AssignCommandGeneral(Module, Overlay->GetPickerCommand()))
+				{
+					Overlay->ShowToast(FString::Printf(TEXT("%s har overtaget %s"), *Map->GetOfficers()[Module].Name, *Map->GetCommands()[Overlay->GetPickerCommand()].Name));
+					Overlay->OpenPicker(SCampaign1851Overlay::EPicker::None);
+					Overlay->InspectOfficer(INDEX_NONE);
+				}
+			}
+			else if (Map->AssignOfficer(Module, Regiment) && Map->GetOfficers().IsValidIndex(Module))
 			{
 				const FCampaign1851Officer& O = Map->GetOfficers()[Module];
 				Overlay->ShowToast(FString::Printf(TEXT("%s %s %s"), *O.Rank, *O.Name,
@@ -596,6 +617,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			case SCampaign1851Overlay::CloseOfficerCard: Overlay->InspectOfficer(INDEX_NONE); break;
 			case SCampaign1851Overlay::CloseWindow: Overlay->OpenWindow(SCampaign1851Overlay::EWindow::None); break;
 			case SCampaign1851Overlay::CloseLedger: Overlay->ToggleLedger(); break;
+			case SCampaign1851Overlay::CloseOOB: Overlay->ToggleOOB(); break;
 			default:
 				Overlay->SetSelectedRegiments({});
 				Overlay->SetSelectedCity(INDEX_NONE);
@@ -603,6 +625,31 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Map->SetHighlightedAmt(0);
 				break;
 			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OfficerPromote)
+		{
+			if (Map->PromoteOfficer(Module))
+			{
+				const FCampaign1851Officer& O = Map->GetOfficers()[Module];
+				Overlay->ShowToast(FString::Printf(TEXT("%s er forfremmet til %s%s"), *O.Name, *O.Rank, O.bGeneral && O.IsFree() ? TEXT(": ledig general, regimentet mangler en chef") : TEXT("")));
+				SaveToSlot(TEXT("Autosave"), true);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OpenOOB)
+		{
+			Overlay->ToggleOOB();
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OOBCommand)
+		{
+			Overlay->ExpandOOB(Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::CommandGeneralChange)
+		{
+			Overlay->OpenCommandPicker(Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::TrainOrder)
+		{
+			Overlay->ShowToast(Map->OrderTroopTrain() ? TEXT("Togsæt bestilt i England") : TEXT("Ikke råd i statskassen"));
 		}
 		else if (Button == SCampaign1851Overlay::EButton::MainMenu)
 		{
@@ -841,6 +888,9 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Links = Map->SaveNetwork();
 	Save->Regiments = Map->SaveArmy();
 	Save->Officers = Map->SaveOfficers();
+	Save->TroopTrains = Map->GetTroopTrains();
+	Save->TrainBookings = Map->GetTrainBookings();
+	Save->TrainOrders = Map->GetTrainOrders();
 	if (Save->Links.Num() > 0)
 	{
 		Parts.Add(FString::Printf(TEXT("%d vej-/baneanlæg"), Save->Links.Num()));
@@ -891,6 +941,10 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	if (Save->SaveVersion >= 7)
 	{
 		Map->RestoreOfficers(Save->Officers);
+	}
+	if (Save->SaveVersion >= 9 && Save->TroopTrains >= 0)
+	{
+		Map->RestoreTrains(Save->TroopTrains, Save->TrainBookings, Save->TrainOrders);
 	}
 	if (Overlay.IsValid())
 	{
@@ -1036,6 +1090,12 @@ void ACampaign1851PlayerController::MarchSelected(int32 CityIndex, const FVector
 	FString Why;
 	if (Map->OrderMarchTo(Column, CityIndex, TargetKm, Mode, &Why))
 	{
+		const FString Note = Map->TakeOrderNote();
+		if (!Note.IsEmpty())
+		{
+			Overlay->ShowToast(Note);
+			return;
+		}
 		const FCampaign1851Regiment& R = Map->GetRegiments()[Column[0]];
 		const FDateTime Arrive = Map->GetDate() + FTimespan::FromDays(R.DaysLeft());
 		Overlay->ShowToast(FString::Printf(TEXT("%s mod %s (%s)  ·  ankomst %s %s"), Column.Num() > 1 ? *FString::Printf(TEXT("%d enheder marcherer"), Column.Num()) : *FString::Printf(TEXT("%s marcherer"), *R.Name),

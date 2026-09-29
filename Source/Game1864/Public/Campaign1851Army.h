@@ -53,6 +53,9 @@ struct FCampaign1851Officer
 	int32 Regiment = INDEX_NONE;
 	/** Hired during the campaign (not part of the 1851 officer corps). */
 	bool bRecruited = false;
+	/** A general commanding a general command (FCampaign1851Command index), INDEX_NONE otherwise. */
+	int32 Command = INDEX_NONE;
+	bool IsFree() const { return Regiment == INDEX_NONE && Command == INDEX_NONE; }
 
 	int32 Stat(ECampaign1851OfficerStat S) const { return Stats[int32(S)]; }
 };
@@ -91,6 +94,20 @@ enum class ECampaign1851RouteMode : uint8
 	RoadsAndRail,   // fastest: roads, chausséer, ferries and open railways
 	RoadsOnly,      // on foot along the roads as far as they go (no trains)
 	Direct          // a straight line across the fields, slower than the road
+};
+
+/**
+ * A general command (generalkommando) of the peacetime army: a region's towns, its headquarters and its
+ * commanding general. Regiments belong to the command of their garrison (the order of battle, OOB).
+ */
+struct FCampaign1851Command
+{
+	FString Id;
+	FString Name;
+	FString Area;
+	int32 HQ = INDEX_NONE;
+	TArray<int32> Towns;
+	int32 General = INDEX_NONE;   // officer index
 };
 
 /**
@@ -138,6 +155,8 @@ struct FCampaign1851Regiment
 	}
 	/** 0-100: how well the unit holds together (falls with long marches, rises at rest). */
 	float Cohesion = 70.f;
+	/** The general command it belongs to (order of battle). */
+	int32 Command = INDEX_NONE;
 	/** Officer indices: the regiment's chief, and a general whose headquarters marches with it. */
 	int32 Chief = INDEX_NONE;
 	int32 General = INDEX_NONE;
@@ -222,6 +241,16 @@ namespace Campaign1851Army
 		float Experience = 0.55f;   // 0-1
 	};
 	FBattleFactors BattleFactors(const FCampaign1851Regiment& Regiment);
+	/** Officer ranks, lowest first: Kaptajn ... General; generals from Generalmajor (index 4). */
+	const TArray<FString>& Ranks();
+	int32 RankIndex(const FString& Rank);
+	constexpr int32 FirstGeneralRank = 4;
+	/** Pay per year of a rank (rigsdaler). */
+	int32 RankPay(int32 Rank);
+	/** Experience needed to be promoted to a rank. */
+	float RankExperience(int32 Rank);
+	/** Troop trains a regiment fills: a battalion per 800 men, cavalry per 250 horses, a battery each. */
+	int32 TrainsNeeded(const FCampaign1851Regiment& Regiment);
 	/** Across country a column goes at this share of its road pace (hedges, ditches, ploughed fields). */
 	constexpr float OffRoadPaceFactor = 0.6f;
 	const TCHAR* RouteModeName(ECampaign1851RouteMode Mode);

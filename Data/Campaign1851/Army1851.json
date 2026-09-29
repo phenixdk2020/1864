@@ -1,6 +1,13 @@
 {
- "note": "Den danske hær i fred, efter treårskrigen (ca. 1851-52). Garnisonsbyerne er en omtrentlig rekonstruktion til prototypen og skal efterprøves mod kilder. Styrker: bataljon 4 kompagnier x 190 mand; dragonregiment 4 eskadroner; batteri 8 kanoner; ridende batteri 6 kanoner med beredne kanonerer (følger kavaleriet). Erfaring og træning (0-100) er spillets skøn efter våbenart: garden og de ridende batterier drillet højest, jægerne bedst til skydning og feltøvelse.",
+ "note": "Generalkommandoerne er fredshærens inddeling efter 1850 (omtrentlig); deres chefer er spillets valg. Den danske hær i fred, efter treårskrigen (ca. 1851-52). Garnisonsbyerne er en omtrentlig rekonstruktion til prototypen og skal efterprøves mod kilder. Styrker: bataljon 4 kompagnier x 190 mand; dragonregiment 4 eskadroner; batteri 8 kanoner; ridende batteri 6 kanoner med beredne kanonerer (følger kavaleriet). Erfaring og træning (0-100) er spillets skøn efter våbenart: garden og de ridende batterier drillet højest, jægerne bedst til skydning og feltøvelse.",
  "nation": "DK",
+ "commands": [
+  {"id": "GK1", "name": "1. Generalkommando", "area": "Sjælland, Møn, Lolland-Falster og Bornholm", "hq": "København", "general": "G_BULOW", "towns": ["København", "Helsingør", "Roskilde", "Køge", "Holbæk", "Kalundborg", "Slagelse", "Næstved", "Vordingborg", "Stege", "Nykøbing F", "Nakskov", "Rønne"]},
+  {"id": "GK2", "name": "2. Generalkommando", "area": "Fyn og Langeland", "hq": "Odense", "general": "G_HEGERMANN", "towns": ["Odense", "Nyborg", "Svendborg", "Faaborg", "Assens", "Middelfart", "Bogense", "Rudkøbing"]},
+  {"id": "GK3", "name": "3. Generalkommando", "area": "Nørrejylland", "hq": "Aarhus", "general": "G_MEZA", "towns": ["Aalborg", "Aarhus", "Randers", "Horsens", "Fredericia", "Vejle", "Kolding", "Viborg", "Skanderborg", "Grenaa", "Hjørring", "Frederikshavn", "Skagen", "Thisted", "Nykøbing M", "Holstebro", "Ringkøbing", "Ribe", "Varde"]},
+  {"id": "GK4", "name": "4. Generalkommando", "area": "Hertugdømmet Slesvig", "hq": "Flensborg", "general": "G_KROGH", "towns": ["Haderslev", "Aabenraa", "Sønderborg", "Tønder", "Flensborg", "Slesvig", "Husum", "Egernførde"]},
+  {"id": "GK5", "name": "5. Generalkommando", "area": "Holsten og Lauenborg", "hq": "Rendsborg", "general": "", "towns": ["Kiel", "Rendsborg", "Itzehoe", "Glückstadt", "Altona", "Neumünster", "Ratzeburg"]}
+ ],
  "regiments": [
   {"id": "LG", "name": "Livgarden", "arm": "guard", "home": "København", "men": 600, "horses": 12, "experience": 70, "skills": {"loading": 65, "marksmanship": 50, "drill": 75, "fieldcraft": 55, "endurance": 55, "assault": 60}},
   {"id": "GH", "name": "Gardehusarregimentet", "arm": "cavalry", "home": "København", "men": 480, "horses": 500, "experience": 55, "skills": {"loading": 45, "marksmanship": 40, "drill": 60, "fieldcraft": 55, "endurance": 60, "assault": 60}},

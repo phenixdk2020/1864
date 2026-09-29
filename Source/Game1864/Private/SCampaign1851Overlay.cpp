@@ -238,7 +238,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.32 MENUER OG BYGRAFIK — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.33 KAMPORDEN OG TOG — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -945,7 +945,7 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	const FVector2D Size0(580.f, 0.f);
 	const float Inner = Size0.X - 44.f;
 	float Height = 32.f + 30.f + 30.f;                         // title, subtitle
-	Height += 22.f * 4.f;                                       // strength, experience, place, pace
+	Height += 22.f * 5.f;                                       // strength, experience, place, pace, trains
 	Height += Why.IsEmpty() ? 0.f : 20.f;
 	Height += First.IsMarching() ? 22.f : 0.f;
 	Height += bSingle ? 3 * 21.f + 8.f : 0.f;                   // training bars (the table shows them for a stack)
@@ -1046,6 +1046,12 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	}
 	Line(TEXT("Hvor"), Where);
 	Line(TEXT("Marchfart"), FString::Printf(TEXT("%.0f km/dag på landevej, %.0f på chaussé"), Pace, Pace * Campaign1851Network::MarchKmPerDayChaussee / Campaign1851Network::MarchKmPerDayRoad));
+	int32 TrainsNeeded = 0;
+	for (const FCampaign1851Regiment* R : Sel)
+	{
+		TrainsNeeded += Campaign1851Army::TrainsNeeded(*R);
+	}
+	Line(TEXT("Med tog"), FString::Printf(TEXT("fylder %d tog  ·  ledige %d af %d"), TrainsNeeded, Map->FreeTroopTrains(), Map->GetTroopTrains()));
 	if (!Why.IsEmpty())
 	{
 		PaintTextFit(Geometry, Out, Layer + 2, Why, FVector2D(Pos.X + 22.f, Y), Serif(11, EFace::Italic), MutedInk, Inner);
@@ -1129,6 +1135,10 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	const FVector2D ButtonSize(150.f, 28.f);
 	const float ButtonY = Pos.Y + Size.Y - 70.f;
 	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, ButtonY), ButtonSize, TEXT("TIL GARNISON"), EButton::ArmyHome);
+	if (!First.IsMarching())
+	{
+		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 22.f - ButtonSize.X, ButtonY), ButtonSize, TEXT("KAMPORDEN"), EButton::OpenOOB, 0, bOOB);
+	}
 	if (First.IsMarching())
 	{
 		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 32.f + ButtonSize.X, ButtonY), ButtonSize, TEXT("STOP"), EButton::ArmyHalt);
@@ -1141,6 +1151,10 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	{
 		PaintTrainingMenu(Geometry, Out, Layer + 4, Beside);
 	}
+	else if (bOOB)
+	{
+		PaintOOB(Geometry, Out, Layer + 4, Beside);
+	}
 	else if (Officers.IsValidIndex(InspectedOfficer))
 	{
 		PaintOfficerCard(Geometry, Out, Layer + 4, Beside);
@@ -1148,6 +1162,99 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	else if (Picker != EPicker::None)
 	{
 		PaintOfficerPicker(Geometry, Out, Layer + 4, Beside);
+	}
+}
+
+void SCampaign1851Overlay::PaintOOB(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft) const
+{
+	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
+	const TArray<FCampaign1851Command>& Commands = Map->GetCommands();
+	const TArray<FCampaign1851Officer>& Officers = Map->GetOfficers();
+	const TArray<FCampaign1851City>& Cities = Map->GetCities();
+	// The command shown open: the one chosen, else the selected unit's.
+	int32 Open = OOBExpanded;
+	if (Open == INDEX_NONE && SelectedRegiments.Num() > 0 && Regs.IsValidIndex(SelectedRegiments[0]))
+	{
+		Open = Regs[SelectedRegiments[0]].Command;
+	}
+	const float LineH = 21.f;
+	TArray<int32> OpenUnits;
+	for (int32 i = 0; i < Regs.Num(); ++i)
+	{
+		if (Regs[i].Command == Open)
+		{
+			OpenUnits.Add(i);
+		}
+	}
+	const FVector2D Size(560.f, 70.f + Commands.Num() * 50.f + (Commands.IsValidIndex(Open) ? OpenUnits.Num() * LineH + 3 * 24.f : 0.f) + 24.f);
+	const FVector2D Pos(BottomLeft.X, FMath::Max(130.f, BottomLeft.Y - Size.Y));
+	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseOOB);
+	int32 AllMen = 0;
+	for (const FCampaign1851Regiment& R : Regs)
+	{
+		AllMen += R.Men;
+	}
+	PaintText(Geometry, Out, Layer + 2, TEXT("K A M P O R D E N"), Pos + FVector2D(22.f, 26.f), Serif(11), Gold, 0.f, false);
+	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("Hæren  ·  %d enheder  ·  %s mand"), Regs.Num(), *Thousands(AllMen)), Pos + FVector2D(Size.X - 56.f, 26.f), Serif(11, EFace::Italic), MutedInk, 1.f, false);
+	float Y = Pos.Y + 56.f;
+	for (int32 c = 0; c < Commands.Num(); ++c)
+	{
+		const FCampaign1851Command& C = Commands[c];
+		int32 Units = 0, Men = 0;
+		for (const FCampaign1851Regiment& R : Regs)
+		{
+			if (R.Command == c)
+			{
+				++Units;
+				Men += R.Men;
+			}
+		}
+		// The command: a row to open it, its area and headquarters, its general (change him).
+		const FVector2D Row(Pos.X + 14.f, Y - 12.f);
+		PaintButton(Geometry, Out, Layer + 2, Row, FVector2D(Size.X - 28.f - 110.f, 44.f), FString(), EButton::OOBCommand, c, c == Open);
+		PaintTextFit(Geometry, Out, Layer + 4, FString::Printf(TEXT("%s %s  ·  %d enheder, %s mand"), c == Open ? TEXT("-") : TEXT("+"), *C.Name, Units, *Thousands(Men)),
+			FVector2D(Row.X + 10.f, Y), Serif(13), c == Open ? FLinearColor::FromSRGBColor(FColor(30, 22, 12)) : Ink, Size.X - 170.f);
+		const FCampaign1851Officer* G = Officers.IsValidIndex(C.General) ? &Officers[C.General] : nullptr;
+		PaintTextFit(Geometry, Out, Layer + 4, FString::Printf(TEXT("%s  ·  %s"), *C.Area, G ? *FString::Printf(TEXT("%s %s %s"), *G->Rank, *G->Name, *FString::ChrN(Campaign1851Army::Stars(G->Experience), TEXT('*'))) : TEXT("ingen kommanderende general")),
+			FVector2D(Row.X + 22.f, Y + 18.f), Serif(10, EFace::Italic), c == Open ? FLinearColor::FromSRGBColor(FColor(50, 38, 22)) : MutedInk, Size.X - 180.f);
+		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 118.f, Y - 12.f), FVector2D(100.f, 44.f), G ? TEXT("SKIFT") : TEXT("UDNÆVN"), EButton::CommandGeneralChange, c);
+		Y += 50.f;
+		if (c != Open)
+		{
+			continue;
+		}
+		// Its regiments, by arm; click one to pick it.
+		const TCHAR* Groups[] = { TEXT("Fodfolk"), TEXT("Rytteri"), TEXT("Artilleri") };
+		for (int32 g = 0; g < 3; ++g)
+		{
+			TArray<int32> In;
+			for (int32 i : OpenUnits)
+			{
+				const ECampaign1851Arm A = Regs[i].Arm;
+				const int32 Group = A == ECampaign1851Arm::Cavalry ? 1 : (A == ECampaign1851Arm::Artillery || A == ECampaign1851Arm::HorseArtillery) ? 2 : 0;
+				if (Group == g)
+				{
+					In.Add(i);
+				}
+			}
+			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s (%d)"), Groups[g], In.Num()), FVector2D(Pos.X + 34.f, Y), Serif(11, EFace::Italic), Gold, 0.f, false);
+			Y += 24.f;
+			for (int32 i : In)
+			{
+				const FCampaign1851Regiment& R = Regs[i];
+				const bool bSel = SelectedRegiments.Contains(i);
+				const FVector2D Line(Pos.X + 44.f, Y - 10.f);
+				PaintButton(Geometry, Out, Layer + 2, Line, FVector2D(Size.X - 62.f, LineH - 2.f), FString(), EButton::RegimentRow, i, bSel);
+				const FLinearColor Col = bSel ? FLinearColor::FromSRGBColor(FColor(30, 22, 12)) : Ink;
+				const FCampaign1851Officer* Chief = Officers.IsValidIndex(R.Chief) ? &Officers[R.Chief] : nullptr;
+				PaintTextFit(Geometry, Out, Layer + 4, R.Name, FVector2D(Line.X + 8.f, Y), Serif(11), Col, 170.f);
+				PaintText(Geometry, Out, Layer + 4, FString::FromInt(R.Men), FVector2D(Line.X + 230.f, Y), Serif(11), Col, 1.f, false);
+				PaintTextFit(Geometry, Out, Layer + 4, Chief ? Chief->Name : FString(TEXT("ingen chef")), FVector2D(Line.X + 244.f, Y), Serif(11, EFace::Italic), Col, 150.f);
+				PaintTextFit(Geometry, Out, Layer + 4, R.IsMarching() ? FString(TEXT("på march")) : Map->DescribePlace(R.Town, R.Km), FVector2D(Line.X + 400.f, Y), Serif(10), Col, 96.f);
+				Y += LineH;
+			}
+		}
 	}
 }
 
@@ -1298,7 +1405,9 @@ void SCampaign1851Overlay::PaintOfficerCard(const FGeometry& Geometry, FSlateWin
 	PaintTextFit(Geometry, Out, Layer + 2, O.Name, FVector2D(Pos.X + 22.f, Y), Serif(20), Ink, Size.X - 80.f);
 	Y += 28.f;
 	const int32 Age = Map->GetDate().GetYear() - O.Born;
-	const FString Post = Regs.IsValidIndex(O.Regiment) ? FString::Printf(TEXT("%s %s"), O.bGeneral ? TEXT("med") : TEXT("chef for"), *Regs[O.Regiment].Name) : FString(TEXT("ledig"));
+	const TArray<FCampaign1851Command>& Commands = Map->GetCommands();
+	const FString Post = Commands.IsValidIndex(O.Command) ? FString::Printf(TEXT("chef for %s"), *Commands[O.Command].Name)
+		: Regs.IsValidIndex(O.Regiment) ? FString::Printf(TEXT("%s %s"), O.bGeneral ? TEXT("med") : TEXT("chef for"), *Regs[O.Regiment].Name) : FString(TEXT("ledig"));
 	PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s  ·  %d år  ·  %s%s"), *O.Rank, Age, *Post, O.bRecruited ? TEXT("  ·  ansat under felttoget") : TEXT("")),
 		FVector2D(Pos.X + 22.f, Y), Serif(12, EFace::Italic), Gold, Size.X - 44.f);
 	Y += 26.f;
@@ -1315,13 +1424,26 @@ void SCampaign1851Overlay::PaintOfficerCard(const FGeometry& Geometry, FSlateWin
 		Y += RowHeight;
 	}
 	// Appoint from the list (the officer is free and fits the post being filled), or back / close.
-	const bool bCanAppoint = O.Regiment == INDEX_NONE && Picker != EPicker::None && (Picker == EPicker::General) == O.bGeneral;
+	const bool bCanAppoint = O.IsFree() && Picker != EPicker::None && (Picker == EPicker::General || Picker == EPicker::CommandGeneral) == O.bGeneral;
 	const float ButtonY = Pos.Y + Size.Y - 46.f;
+	// Promotion: one rank at a time, when his experience allows it.
+	const FString Block = Map->PromotionBlock(InspectedOfficer);
+	const int32 Next = Campaign1851Army::RankIndex(O.Rank) + 1;
+	if (Block.IsEmpty())
+	{
+		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 182.f, ButtonY), FVector2D(150.f, 28.f), TEXT("FORFREM"), EButton::OfficerPromote, InspectedOfficer);
+		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("til %s (løn %s rd./år)"), *Campaign1851Army::Ranks()[Next], *Thousands(Campaign1851Army::RankPay(Next))),
+			FVector2D(Pos.X + 22.f, ButtonY - 12.f), Serif(10, EFace::Italic), MutedInk, Size.X - 44.f);
+	}
+	else
+	{
+		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Forfremmelse: %s"), *Block), FVector2D(Pos.X + 22.f, ButtonY - 12.f), Serif(10, EFace::Italic), MutedInk, Size.X - 44.f);
+	}
 	if (bCanAppoint)
 	{
 		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, ButtonY), FVector2D(150.f, 28.f), TEXT("UDNÆVN"), EButton::OfficerPick, InspectedOfficer);
 	}
-	if (!bCanAppoint && O.Regiment == INDEX_NONE)
+	if (!bCanAppoint && O.IsFree())
 	{
 		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, ButtonY), FVector2D(150.f, 28.f), TEXT("AFSKED"), EButton::OfficerDismiss, InspectedOfficer);
 	}
@@ -1338,11 +1460,11 @@ void SCampaign1851Overlay::PaintCloseX(const FGeometry& Geometry, FSlateWindowEl
 void SCampaign1851Overlay::PaintMenuBar(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
 {
 	// Under the calendar: one window at a time, the open one lit.
-	const TCHAR* Labels[] = { TEXT("HÆREN"), TEXT("OFFICERER"), TEXT("STATSKASSEN"), TEXT("BYER") };
-	const float W = 150.f, Gap = 8.f;
-	const float Total = 4.f * W + 3.f * Gap;
+	const TCHAR* Labels[] = { TEXT("HÆREN"), TEXT("OFFICERER"), TEXT("STATSKASSEN"), TEXT("BYER"), TEXT("TOG") };
+	const float W = 124.f, Gap = 8.f;
+	const float Total = 5.f * W + 4.f * Gap;
 	const float X0 = FMath::Max((Geometry.GetLocalSize().X - 660.f) * 0.5f, 484.f) + (660.f - Total) * 0.5f;
-	for (int32 i = 0; i < 4; ++i)
+	for (int32 i = 0; i < 5; ++i)
 	{
 		PaintButton(Geometry, Out, Layer, FVector2D(X0 + i * (W + Gap), 92.f), FVector2D(W, 28.f), Labels[i], EButton::MainMenu, i + 1, int32(Window) == i + 1);
 	}
@@ -1471,17 +1593,17 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 		for (int32 i = 0; i < Officers.Num(); ++i)
 		{
 			const FCampaign1851Officer& O = Officers[i];
-			const bool bFree = O.Regiment == INDEX_NONE;
+			const bool bFree = O.IsFree();
 			if ((OfficerFilter == 1 && !O.bGeneral) || (OfficerFilter == 2 && (O.bGeneral || bFree)) || (OfficerFilter == 3 && !bFree))
 			{
 				continue;
 			}
-			const int32 Salary = O.bGeneral ? 3000 : 600;
+			const int32 Salary = Campaign1851Army::RankPay(Campaign1851Army::RankIndex(O.Rank));
 			Pay += Salary;
 			FTableRow Row;
 			Row.Id = i;
 			Row.Cells = { O.Name, O.Rank, FString::FromInt(Map->GetDate().GetYear() - O.Born),
-				Regs.IsValidIndex(O.Regiment) ? Regs[O.Regiment].Name : FString(TEXT("ledig")) };
+				Map->GetCommands().IsValidIndex(O.Command) ? Map->GetCommands()[O.Command].Name : Regs.IsValidIndex(O.Regiment) ? Regs[O.Regiment].Name : FString(TEXT("ledig")) };
 			Row.Keys = { Text, Text, double(Map->GetDate().GetYear() - O.Born), Text };
 			for (int32 s = 0; s < int32(ECampaign1851OfficerStat::Count); ++s)
 			{
@@ -1567,6 +1689,47 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 			PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("%s%s"), T.Amount < 0 ? TEXT("-") : TEXT("+"), *Thousands(FMath::Abs(FMath::RoundToInt(T.Amount)))), FVector2D(RX + RW, TY), Serif(12), T.Amount < 0 ? Ink : Gold, 1.f, false);
 		}
 	}
+	else if (Window == EWindow::Trains)
+	{
+		const int32 Free = Map->FreeTroopTrains(), All = Map->GetTroopTrains();
+		Title(TEXT("Troppetog"), FString::Printf(TEXT("%d tog  ·  %d ledige  ·  et tog tager en bataljon (800 mand), 250 heste eller et batteri"), All, Free));
+		float Y = Pos.Y + 112.f;
+		auto Line = [&](const FString& A, const FString& B)
+		{
+			PaintText(Geometry, Out, Layer + 3, A, FVector2D(Pos.X + 40.f, Y), Serif(13), Ink, 0.f, false);
+			PaintText(Geometry, Out, Layer + 3, B, FVector2D(Pos.X + 520.f, Y), Serif(13), Ink, 0.f, false);
+			Y += 26.f;
+		};
+		PaintText(Geometry, Out, Layer + 3, TEXT("O P T A G E T"), FVector2D(Pos.X + 24.f, Y), Serif(11), Gold, 0.f, false);
+		Y += 30.f;
+		if (Map->GetTrainBookings().Num() == 0)
+		{
+			Line(TEXT("Ingen tog kører lige nu"), FString());
+		}
+		for (const FVector2D& B : Map->GetTrainBookings())
+		{
+			const FDateTime Back = ACampaign1851Map::StartDate() + FTimespan::FromDays(B.Y);
+			Line(FString::Printf(TEXT("%d tog kører en kolonne"), int32(B.X)), FString::Printf(TEXT("ledige igen %s %s"), *ACampaign1851Map::FormatClock(Back), *ACampaign1851Map::FormatDate(Back, true)));
+		}
+		Y += 16.f;
+		PaintText(Geometry, Out, Layer + 3, TEXT("B E S T I L T"), FVector2D(Pos.X + 24.f, Y), Serif(11), Gold, 0.f, false);
+		Y += 30.f;
+		if (Map->GetTrainOrders().Num() == 0)
+		{
+			Line(TEXT("Ingen tog i bestilling"), FString());
+		}
+		for (const FVector2D& O : Map->GetTrainOrders())
+		{
+			const FDateTime Arrive = ACampaign1851Map::StartDate() + FTimespan::FromDays(O.Y);
+			Line(FString::Printf(TEXT("%d togsæt fra England"), int32(O.X)), FString::Printf(TEXT("leveres ca. %s"), *ACampaign1851Map::FormatDate(Arrive, true)));
+		}
+		Y += 24.f;
+		PaintButton(Geometry, Out, Layer + 3, FVector2D(Pos.X + 24.f, Y), FVector2D(420.f, 32.f),
+			FString::Printf(TEXT("BESTIL TOGSÆT  (%s rd.  ·  levering %.0f dage)"), *Thousands(ACampaign1851Map::TroopTrainCost), ACampaign1851Map::TroopTrainDeliveryDays),
+			EButton::TrainOrder, 0, false, Map->GetTreasury() < ACampaign1851Map::TroopTrainCost);
+		PaintText(Geometry, Out, Layer + 3, TEXT("Lokomotiv og vogne bygges i England og skibes til Danmark. Uden ledige tog marcherer kolonnen i stedet."),
+			FVector2D(Pos.X + 24.f, Y + 56.f), Serif(11, EFace::Italic), MutedInk, 0.f, false);
+	}
 	else if (Window == EWindow::Towns)
 	{
 		TArray<FTableRow> Rows;
@@ -1649,6 +1812,7 @@ void SCampaign1851Overlay::PaintMenu(const FGeometry& Geometry, FSlateWindowElem
 		PaintText(Geometry, Out, Layer + 3, TEXT("Alle byggerier slettes"), Pos + FVector2D(248.f, Size.Y - 35.f), Serif(11, EFace::Italic), Gold, 0.f, false);
 	}
 	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 144.f, Size.Y - 50.f), FVector2D(120.f, 30.f), TEXT("LUK"), EButton::CloseMenu);
+	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 314.f, Size.Y - 50.f), FVector2D(160.f, 30.f), TEXT("AFSLUT SPIL"), EButton::ExitGame);
 }
 
 void SCampaign1851Overlay::PaintToast(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const

@@ -346,6 +346,31 @@ public:
 	void StopRegiment(int32 Regiment);
 	/** Cancels a march: the regiment goes back to where the order found it. */
 	void CancelOrder(int32 Regiment);
+	const TArray<FCampaign1851Command>& GetCommands() const { return Commands; }
+	/** Makes a general the commanding general of a general command (the previous one goes to the pool). */
+	bool AssignCommandGeneral(int32 Officer, int32 Command);
+	/** Why an officer cannot be promoted now (empty if he can): top rank, too little experience. */
+	FString PromotionBlock(int32 Officer) const;
+	/** Promotes an officer one rank; a colonel made generalmajor leaves his regiment for the pool of generals. */
+	bool PromoteOfficer(int32 Officer);
+
+	// ---- Troop trains (rolling stock, backlog B-380): the state's trains, those under way, those on order.
+	static constexpr int32 TroopTrainCost = 30000;
+	static constexpr float TroopTrainDeliveryDays = 120.f;
+	int32 GetTroopTrains() const { return TroopTrains; }
+	/** Trains not carrying (or returning from) a column now. */
+	int32 FreeTroopTrains() const;
+	/** Busy trains: how many, and the day each group is back (campaign days). */
+	const TArray<FVector2D>& GetTrainBookings() const { return TrainBookings; }
+	/** Ordered trains: how many, and the day they arrive (campaign days). */
+	const TArray<FVector2D>& GetTrainOrders() const { return TrainOrders; }
+	/** Loaded troop trains (a save). */
+	void RestoreTrains(int32 Count, const TArray<FVector2D>& Bookings, const TArray<FVector2D>& Orders) { TroopTrains = Count; TrainBookings = Bookings; TrainOrders = Orders; }
+	/** Orders a troop train (locomotive and carriages) from abroad; false if the treasury cannot pay. */
+	bool OrderTroopTrain();
+	/** A note from the last march order for the player (e.g. not enough trains, so the column marches). */
+	FString TakeOrderNote() { FString Note = OrderNote; OrderNote.Reset(); return Note; }
+
 	/** Sends an officer in the pool home (no more pay); false if he holds a post. */
 	bool DismissOfficer(int32 Officer);
 	/** Officers' pay per month (all officers, assigned or in the pool). */
@@ -453,6 +478,13 @@ private:
 	bool bRoadsVisible = false;
 
 	// ---- Officers (Campaign1851Officers.cpp)
+	TArray<FCampaign1851Command> Commands;
+	TArray<FCampaign1851Command> CommandsAtStart;
+	TArray<FString> CommandGeneralIds;
+	int32 TroopTrains = 4;
+	TArray<FVector2D> TrainBookings;   // X count, Y campaign day free again
+	TArray<FVector2D> TrainOrders;     // X count, Y campaign day of delivery
+	FString OrderNote;
 	bool LoadOfficers();
 	/** The officer corps of 1851: the generals, and a chief for every regiment plus a few in reserve (fixed seed). */
 	void ResetOfficers();
@@ -505,6 +537,18 @@ private:
 	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> Stations;
 	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> Gangs;     // one per link (null when idle)
 	UPROPERTY(Transient) TObjectPtr<UStaticMesh> TrainMesh;
+	/** Engine, brown and green carriage: a train is laid on the track vehicle by vehicle. */
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMesh>> TrainParts;
+	/** Carriages behind a regiment's engine when it goes by rail (three per regiment). */
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> RegimentCars;
+	/** Vehicles per train: the engine and three carriages. */
+	static constexpr int32 TrainVehicles = 4;
+	void EnsureTrainParts();
+	/**
+	 * Lays a train on a line: Parts[0] the engine with its front FrontKm along the line, running towards
+	 * Direction (+1: along the line, -1: back), the carriages behind it; each vehicle follows the curve.
+	 */
+	void PlaceTrain(const TArray<UStaticMeshComponent*>& Parts, const TArray<FVector2D>& Line, double FrontKm, float Direction, float Scale) const;
 	UPROPERTY(Transient) TObjectPtr<UStaticMesh> GangMesh;
 	UPROPERTY(Transient) TObjectPtr<UStaticMesh> StationMesh;
 	TArray<float> TrainAt;       // km along the line

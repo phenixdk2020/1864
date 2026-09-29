@@ -975,11 +975,56 @@ namespace Campaign1851Scenery
 			}
 			break;
 		}
+		case ESitePiece::TrainEngine:
+		{
+			// The locomotive and tender of the Train piece, moved so their middle is the origin.
+			const FLinearColor Iron = Srgb(34, 34, 38), Wheel = Srgb(120, 38, 30), Brass = Srgb(206, 170, 90), Roof = Srgb(70, 70, 74);
+			const float O = 2.55f;
+			auto B = [&](float X0, float Y0, float Z0, float X1, float Y1, float Z1, const FLinearColor& C) { W.Box(FVector3f(X0 + O, Y0, Z0), FVector3f(X1 + O, Y1, Z1), C); };
+			B(-3.4f, -0.62f, 0.35f, 0.f, 0.62f, 0.6f, Iron);
+			B(-2.4f, -0.52f, 0.6f, -0.15f, 0.52f, 1.55f, Iron);
+			B(-0.9f, -0.2f, 1.55f, -0.5f, 0.2f, 2.5f, Iron);
+			B(-1.6f, -0.24f, 1.55f, -1.2f, 0.24f, 1.9f, Brass);
+			B(-3.4f, -0.62f, 0.6f, -2.4f, 0.62f, 2.1f, Iron);
+			B(-3.5f, -0.7f, 2.1f, -2.3f, 0.7f, 2.25f, Roof);
+			B(0.f, -0.6f, 0.3f, 0.12f, 0.6f, 0.6f, Wheel);
+			for (float X : { -2.9f, -1.8f, -0.7f })
+			{
+				B(X - 0.4f, -0.68f, 0.f, X + 0.4f, 0.68f, 0.8f, Wheel);
+			}
+			B(-5.1f, -0.6f, 0.2f, -3.6f, 0.6f, 1.3f, Iron);
+			B(-5.f, -0.5f, 1.3f, -3.7f, 0.5f, 1.5f, Srgb(40, 36, 32));
+			break;
+		}
+		case ESitePiece::TrainCarBrown:
+		case ESitePiece::TrainCarGreen:
+		{
+			const FLinearColor Iron = Srgb(34, 34, 38), Roof = Srgb(70, 70, 74);
+			const FLinearColor Body = Piece == ESitePiece::TrainCarBrown ? Srgb(112, 70, 44) : Srgb(52, 88, 60);
+			const float X0 = -1.45f, X1 = 1.45f;
+			W.Box(FVector3f(X0, -0.62f, 0.3f), FVector3f(X1, 0.62f, 1.6f), Body);
+			W.Box(FVector3f(X0 - 0.08f, -0.7f, 1.6f), FVector3f(X1 + 0.08f, 0.7f, 1.8f), Roof);
+			for (int32 k = 0; k < 4; ++k)
+			{
+				const float X = X0 + 0.45f + k * 0.67f;
+				for (float Side : { -1.f, 1.f })
+				{
+					W.Quad(FVector3f(X, Side * 0.63f, 0.9f), FVector3f(X + 0.4f, Side * 0.63f, 0.9f), FVector3f(X + 0.4f, Side * 0.63f, 1.4f), FVector3f(X, Side * 0.63f, 1.4f),
+						Srgb(222, 206, 150), FVector3f(0.f, 0.f, 1.f));
+				}
+			}
+			for (float X : { X0 + 0.5f, X1 - 0.5f })
+			{
+				W.Box(FVector3f(X - 0.3f, -0.66f, 0.f), FVector3f(X + 0.3f, 0.66f, 0.45f), Iron);
+			}
+			break;
+		}
 		}
 		static const TCHAR* Names[] = { TEXT("Ground"), TEXT("Barracks"), TEXT("Scaffold"), TEXT("CraneMast"), TEXT("CraneJib"), TEXT("Wagon"), TEXT("Flagpole"), TEXT("Flag"),
 			TEXT("Stables"), TEXT("Depot"), TEXT("Infirmary"), TEXT("Arsenal"), TEXT("Lazaret"), TEXT("Battery"), TEXT("PowderMagazine"), TEXT("StarFort"),
 			TEXT("Telegraph"), TEXT("Granary"), TEXT("Train"), TEXT("Station"),
-			TEXT("FormationInfantry"), TEXT("FormationGuard"), TEXT("FormationJager"), TEXT("FormationCavalry"), TEXT("FormationArtillery"), TEXT("FormationHorseArtillery") };
+			TEXT("FormationInfantry"), TEXT("FormationGuard"), TEXT("FormationJager"), TEXT("FormationCavalry"), TEXT("FormationArtillery"), TEXT("FormationHorseArtillery"),
+			TEXT("TrainEngine"), TEXT("TrainCarBrown"), TEXT("TrainCarGreen") };
 		return Finish(W, Material, FString::Printf(TEXT("SM_Campaign1851_Site_%s"), Names[int32(Piece)]));
 	}
 }

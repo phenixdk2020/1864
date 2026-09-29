@@ -83,6 +83,41 @@ namespace Campaign1851Army
 		return FMath::Clamp(FMath::FloorToInt(Experience / 20.f), 0, 5);
 	}
 
+	const TArray<FString>& Ranks()
+	{
+		static const TArray<FString> Names = { TEXT("Kaptajn"), TEXT("Major"), TEXT("Oberstløjtnant"), TEXT("Oberst"), TEXT("Generalmajor"), TEXT("Generalløjtnant"), TEXT("General") };
+		return Names;
+	}
+
+	int32 RankIndex(const FString& Rank)
+	{
+		const int32 Index = Ranks().IndexOfByKey(Rank);
+		return Index == INDEX_NONE ? 1 : Index;
+	}
+
+	int32 RankPay(int32 Rank)
+	{
+		static const int32 Pay[] = { 500, 600, 800, 1000, 3000, 4000, 5000 };
+		return Pay[FMath::Clamp(Rank, 0, 6)];
+	}
+
+	float RankExperience(int32 Rank)
+	{
+		static const float Xp[] = { 0.f, 30.f, 40.f, 50.f, 60.f, 70.f, 80.f };
+		return Xp[FMath::Clamp(Rank, 0, 6)];
+	}
+
+	int32 TrainsNeeded(const FCampaign1851Regiment& R)
+	{
+		switch (R.Arm)
+		{
+		case ECampaign1851Arm::Cavalry: return FMath::Max(1, FMath::DivideAndRoundUp(R.Horses, 250));
+		case ECampaign1851Arm::Artillery:
+		case ECampaign1851Arm::HorseArtillery: return 1;
+		default: return FMath::Max(1, FMath::DivideAndRoundUp(R.Men, 800));
+		}
+	}
+
 	const TCHAR* RouteModeName(ECampaign1851RouteMode Mode)
 	{
 		return Mode == ECampaign1851RouteMode::RoadsOnly ? TEXT("kun veje") : Mode == ECampaign1851RouteMode::Direct ? TEXT("lige linje") : TEXT("veje og tog");
@@ -246,13 +281,48 @@ bool ACampaign1851Map::LoadArmy()
 		}
 		ArmyAtStart.Add(MoveTemp(R));
 	}
-	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|army|%d regiments"), ArmyAtStart.Num());
+	// General commands: the towns of each; a regiment belongs to the command of its garrison.
+	CommandsAtStart.Reset();
+	CommandGeneralIds.Reset();
+	const TArray<TSharedPtr<FJsonValue>>* CommandArray = nullptr;
+	if (Json->TryGetArrayField(TEXT("commands"), CommandArray))
+	{
+		for (const TSharedPtr<FJsonValue>& Value : *CommandArray)
+		{
+			const TSharedPtr<FJsonObject> O = Value->AsObject();
+			FCampaign1851Command C;
+			C.Id = O->GetStringField(TEXT("id"));
+			C.Name = O->GetStringField(TEXT("name"));
+			O->TryGetStringField(TEXT("area"), C.Area);
+			C.HQ = FindCity(O->GetStringField(TEXT("hq")));
+			TArray<FString> Towns;
+			O->TryGetStringArrayField(TEXT("towns"), Towns);
+			for (const FString& T : Towns)
+			{
+				const int32 Index = FindCity(T);
+				if (Index != INDEX_NONE)
+				{
+					C.Towns.Add(Index);
+				}
+			}
+			FString GeneralId;
+			O->TryGetStringField(TEXT("general"), GeneralId);
+			CommandGeneralIds.Add(GeneralId);
+			CommandsAtStart.Add(C);
+		}
+	}
+	for (FCampaign1851Regiment& R : ArmyAtStart)
+	{
+		R.Command = CommandsAtStart.IndexOfByPredicate([&R](const FCampaign1851Command& C) { return C.Towns.Contains(R.Home); });
+	}
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|army|%d regiments, %d general commands"), ArmyAtStart.Num(), CommandsAtStart.Num());
 	return ArmyAtStart.Num() > 0;
 }
 
 void ACampaign1851Map::ResetArmy()
 {
 	Regiments = ArmyAtStart;
+	Commands = CommandsAtStart;
 	ResetOfficers();
 	for (int32 i = 0; i < Regiments.Num(); ++i)
 	{
@@ -713,9 +783,28 @@ bool ACampaign1851Map::OrderMarchTo(const TArray<int32>& Column, int32 CityIndex
 	{
 		Pace *= Campaign1851Army::StaffPaceFactor(General->Stat(ECampaign1851OfficerStat::Staff));
 	}
+	// By rail only if there are trains for the whole column; otherwise it marches.
+	int32 TrainsNeeded = 0;
+	for (const FCampaign1851Regiment* R : Members)
+	{
+		TrainsNeeded += Campaign1851Army::TrainsNeeded(*R);
+	}
+	if (Mode == ECampaign1851RouteMode::RoadsAndRail)
+	{
+		const FCampaign1851Regiment& Lead = *Members[0];
+		TArray<FCampaign1851Leg> Trial;
+		const bool bLeadMarching = Lead.IsMarching();
+		if (PlanMarch(bLeadMarching ? Lead.Route[Lead.Leg].To : Lead.Town, bLeadMarching ? Lead.Route[Lead.Leg].ToKm : Lead.Km, CityIndex, TargetKm, Pace, Mode, Trial)
+			&& Trial.ContainsByPredicate([](const FCampaign1851Leg& L) { return L.bRail; }) && FreeTroopTrains() < TrainsNeeded)
+		{
+			OrderNote = FString::Printf(TEXT("Kun %d ledige tog, kolonnen skal bruge %d: den marcherer"), FreeTroopTrains(), TrainsNeeded);
+			Mode = ECampaign1851RouteMode::RoadsOnly;
+		}
+	}
 	static int32 NextGroup = 1;
 	const int32 Group = Column.Num() > 1 ? NextGroup++ : 0;
 	int32 Ordered = 0;
+	float RailDays = 0.f, TripDays = 0.f;
 	for (int32 i : Column)
 	{
 		if (!Regiments.IsValidIndex(i))
@@ -753,9 +842,23 @@ bool ACampaign1851Map::OrderMarchTo(const TArray<int32>& Column, int32 CityIndex
 			R.Km = R.Route[0].FromKm;
 		}
 		++Ordered;
+		if (Ordered == 1)
+		{
+			TripDays = R.DaysLeft();
+			for (const FCampaign1851Leg& L : R.Route)
+			{
+				RailDays += L.bRail ? L.Days : 0.f;
+			}
+		}
 		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|army|%s marches to %s (%s)|%d legs|%.1f days|pace %.1f km/day"), *R.Name, *DescribePlace(CityIndex, TargetKm),
 			Campaign1851Army::RouteModeName(Mode), R.Route.Num(), R.DaysLeft(), Pace);
 		UpdateRegimentPiece(i);
+	}
+	if (RailDays > 0.f)
+	{
+		// The trains carry the column there and come back empty.
+		TrainBookings.Add(FVector2D(TrainsNeeded, CampaignDays + TripDays + RailDays));
+		OrderNote = FString::Printf(TEXT("%d tog kører kolonnen; ledige nu: %d"), TrainsNeeded, FreeTroopTrains());
 	}
 	return Ordered > 0;
 }
@@ -812,6 +915,16 @@ void ACampaign1851Map::HaltRegiment(int32 Regiment)
 
 void ACampaign1851Map::AdvanceArmy(float DeltaDays, float DeltaSeconds)
 {
+	for (int32 o = TrainOrders.Num() - 1; o >= 0; --o)
+	{
+		if (CampaignDays >= TrainOrders[o].Y)
+		{
+			TroopTrains += int32(TrainOrders[o].X);
+			News.Add(FString::Printf(TEXT("Et nyt troppetog er leveret (i alt %d)"), TroopTrains));
+			TrainOrders.RemoveAt(o);
+		}
+	}
+	TrainBookings.RemoveAll([this](const FVector2D& B) { return B.Y <= CampaignDays; });
 	for (int32 i = 0; i < Regiments.Num() && DeltaDays > 0.f; ++i)
 	{
 		// The chief's hand: drill in garrison, morale towards what he can inspire, cohesion at rest.
@@ -974,20 +1087,64 @@ void ACampaign1851Map::UpdateRegimentPiece(int32 Regiment)
 		Piece->RegisterComponent();
 		RegimentPieces[Regiment] = Piece;
 	}
-	// By rail it is a train on the track; otherwise its formation.
+	// By rail it is a train (engine and three carriages on the track); otherwise its formation.
 	const bool bOnTrain = R.IsMarching() && R.Route[R.Leg].bRail;
-	if (bOnTrain && !TrainMesh)
+	if (bOnTrain)
 	{
-		if (UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, ArmyMaterialPath))
+		EnsureTrainParts();
+	}
+	bool bTrain = bOnTrain && TrainParts.Num() == 3;
+	bool bPassenger = false;   // rides in the train of an earlier regiment of the same column
+	if (bTrain && R.Group != 0)
+	{
+		for (int32 j = 0; j < Regiment; ++j)
 		{
-			TrainMesh = Campaign1851Scenery::BuildSitePiece(Campaign1851Scenery::ESitePiece::Train, Material);
+			if (Regiments[j].Group == R.Group && Regiments[j].IsMarching() && Regiments[j].Route[Regiments[j].Leg].bRail)
+			{
+				bPassenger = true;
+				break;
+			}
 		}
 	}
-	UStaticMesh* Wanted = bOnTrain && TrainMesh ? TrainMesh.Get() : ArmyMeshes[FMath::Min(int32(R.Arm), ArmyMeshes.Num() - 1)].Get();
+	UStaticMesh* Wanted = bTrain ? TrainParts[0].Get() : ArmyMeshes[FMath::Min(int32(R.Arm), ArmyMeshes.Num() - 1)].Get();
+	const float TrainScale = PieceScale * 1.6f;
 	if (Piece->GetStaticMesh() != Wanted)
 	{
 		Piece->SetStaticMesh(Wanted);
-		Piece->SetWorldScale3D(FVector(PieceScale * (bOnTrain ? 1.6f : FormationScale)));
+		Piece->SetWorldScale3D(FVector(bTrain ? TrainScale : PieceScale * FormationScale));
+	}
+	RegimentCars.SetNum(Regiments.Num() * 3);
+	for (int32 c = 0; c < 3; ++c)
+	{
+		TObjectPtr<UStaticMeshComponent>& Car = RegimentCars[Regiment * 3 + c];
+		if (bTrain && !Car)
+		{
+			Car = NewObject<UStaticMeshComponent>(this, MakeUniqueObjectName(this, UStaticMeshComponent::StaticClass(), *FString::Printf(TEXT("RegimentCar_%s"), *R.Id)));
+			Car->SetupAttachment(Root);
+			Car->SetStaticMesh(TrainParts[c == 0 ? 1 : 2]);
+			Car->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			Car->SetCastShadow(false);
+			Car->SetWorldScale3D(FVector(TrainScale));
+			Car->RegisterComponent();
+		}
+		if (Car)
+		{
+			Car->SetVisibility(bTrain && !bPassenger && LastCameraDistanceKm < FormationMaxDistanceKm);
+		}
+	}
+	if (bPassenger)
+	{
+		Piece->SetVisibility(false);
+		return;
+	}
+	if (bTrain)
+	{
+		const FCampaign1851Leg& Leg = R.Route[R.Leg];
+		const TArray<FVector2D> Line = LegLine(Leg);
+		const double Front = LineLength(Line) * FMath::Clamp(R.LegElapsed / FMath::Max(Leg.Days, 0.001f), 0.f, 1.f);
+		PlaceTrain({ Piece, RegimentCars[Regiment * 3].Get(), RegimentCars[Regiment * 3 + 1].Get(), RegimentCars[Regiment * 3 + 2].Get() }, Line, Front, 1.f, TrainScale);
+		Piece->SetVisibility(LastCameraDistanceKm < FormationMaxDistanceKm);
+		return;
 	}
 	// The formation faces +X: turn it to the heading (world Y is south).
 	Piece->SetWorldLocationAndRotation(WorldAtKm(R.Km) + FVector(0.0, 0.0, 0.5),

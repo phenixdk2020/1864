@@ -116,6 +116,108 @@ void ACampaign1851Map::ResetOfficers()
 		Officers.Add(MakeOfficer(Rng, false, ReserveRanks[r % UE_ARRAY_COUNT(ReserveRanks)]));
 		++NextOfficerNumber;
 	}
+	// The general commands and their commanding generals (from the data file).
+	Commands = CommandsAtStart;
+	for (int32 c = 0; c < Commands.Num(); ++c)
+	{
+		Commands[c].General = INDEX_NONE;
+		const int32 G = Officers.IndexOfByPredicate([&](const FCampaign1851Officer& O) { return O.bGeneral && CommandGeneralIds.IsValidIndex(c) && O.Id == CommandGeneralIds[c]; });
+		if (G != INDEX_NONE)
+		{
+			AssignCommandGeneral(G, c);
+		}
+	}
+	// Rolling stock of 1851: a few troop trains on the Copenhagen and Holstein lines.
+	TroopTrains = 4;
+	TrainBookings.Reset();
+	TrainOrders.Reset();
+}
+
+bool ACampaign1851Map::AssignCommandGeneral(int32 Officer, int32 Command)
+{
+	if (!Officers.IsValidIndex(Officer) || !Commands.IsValidIndex(Command) || !Officers[Officer].bGeneral)
+	{
+		return false;
+	}
+	FCampaign1851Officer& O = Officers[Officer];
+	if (Officers.IsValidIndex(Commands[Command].General) && Commands[Command].General != Officer)
+	{
+		Officers[Commands[Command].General].Command = INDEX_NONE;   // the old commander goes to the pool
+	}
+	if (Commands.IsValidIndex(O.Command) && O.Command != Command)
+	{
+		Commands[O.Command].General = INDEX_NONE;
+	}
+	if (Regiments.IsValidIndex(O.Regiment))
+	{
+		Regiments[O.Regiment].General = INDEX_NONE;
+		O.Regiment = INDEX_NONE;
+	}
+	O.Command = Command;
+	Commands[Command].General = Officer;
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|officers|%s %s commands %s"), *O.Rank, *O.Name, *Commands[Command].Name);
+	return true;
+}
+
+FString ACampaign1851Map::PromotionBlock(int32 Officer) const
+{
+	if (!Officers.IsValidIndex(Officer))
+	{
+		return TEXT("-");
+	}
+	const FCampaign1851Officer& O = Officers[Officer];
+	const int32 Next = Campaign1851Army::RankIndex(O.Rank) + 1;
+	if (Next >= Campaign1851Army::Ranks().Num())
+	{
+		return TEXT("højeste rang");
+	}
+	const float Need = Campaign1851Army::RankExperience(Next);
+	return O.Experience < Need ? FString::Printf(TEXT("%s kræver erfaring %.0f"), *Campaign1851Army::Ranks()[Next], Need) : FString();
+}
+
+bool ACampaign1851Map::PromoteOfficer(int32 Officer)
+{
+	if (!PromotionBlock(Officer).IsEmpty())
+	{
+		return false;
+	}
+	FCampaign1851Officer& O = Officers[Officer];
+	const int32 Next = Campaign1851Army::RankIndex(O.Rank) + 1;
+	O.Rank = Campaign1851Army::Ranks()[Next];
+	if (!O.bGeneral && Next >= Campaign1851Army::FirstGeneralRank)
+	{
+		// A new general leaves his regiment: it needs a new chief, he a general's post.
+		if (Regiments.IsValidIndex(O.Regiment))
+		{
+			Regiments[O.Regiment].Chief = INDEX_NONE;
+		}
+		O.Regiment = INDEX_NONE;
+		O.bGeneral = true;
+	}
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|officers|%s promoted to %s"), *O.Name, *O.Rank);
+	return true;
+}
+
+int32 ACampaign1851Map::FreeTroopTrains() const
+{
+	const double Now = CampaignDays;
+	int32 Busy = 0;
+	for (const FVector2D& B : TrainBookings)
+	{
+		Busy += B.Y > Now ? int32(B.X) : 0;
+	}
+	return FMath::Max(0, TroopTrains - Busy);
+}
+
+bool ACampaign1851Map::OrderTroopTrain()
+{
+	if (Treasury < TroopTrainCost)
+	{
+		return false;
+	}
+	AddTransaction(-TroopTrainCost, TEXT("Troppetog bestilt (lokomotiv og vogne)"));
+	TrainOrders.Add(FVector2D(1.0, CampaignDays + TroopTrainDeliveryDays));
+	return true;
 }
 
 TArray<int32> ACampaign1851Map::OfficerPool(bool bGenerals) const
@@ -123,7 +225,7 @@ TArray<int32> ACampaign1851Map::OfficerPool(bool bGenerals) const
 	TArray<int32> Out;
 	for (int32 i = 0; i < Officers.Num(); ++i)
 	{
-		if (Officers[i].bGeneral == bGenerals && Officers[i].Regiment == INDEX_NONE)
+		if (Officers[i].bGeneral == bGenerals && Officers[i].IsFree())
 		{
 			Out.Add(i);
 		}
@@ -185,7 +287,7 @@ int32 ACampaign1851Map::RecruitOfficer(bool bGeneral)
 
 bool ACampaign1851Map::DismissOfficer(int32 Officer)
 {
-	if (!Officers.IsValidIndex(Officer) || Officers[Officer].Regiment != INDEX_NONE)
+	if (!Officers.IsValidIndex(Officer) || !Officers[Officer].IsFree())
 	{
 		return false;
 	}
@@ -200,6 +302,13 @@ bool ACampaign1851Map::DismissOfficer(int32 Officer)
 			{
 				--*Post;
 			}
+		}
+	}
+	for (FCampaign1851Command& C : Commands)
+	{
+		if (C.General > Officer)
+		{
+			--C.General;
 		}
 	}
 	return true;
@@ -222,7 +331,7 @@ double ACampaign1851Map::OfficerPayPerMonth() const
 	double Year = 0.0;
 	for (const FCampaign1851Officer& O : Officers)
 	{
-		Year += O.bGeneral ? GeneralPay : OfficerPay;
+		Year += Campaign1851Army::RankPay(Campaign1851Army::RankIndex(O.Rank));
 	}
 	return Year / 12.0;
 }
@@ -242,6 +351,7 @@ TArray<FCampaign1851OfficerSave> ACampaign1851Map::SaveOfficers() const
 		S.Stats = TArray<uint8>(O.Stats, NumStats);
 		S.Experience = O.Experience;
 		S.Regiment = Regiments.IsValidIndex(O.Regiment) ? Regiments[O.Regiment].Id : FString();
+		S.Command = Commands.IsValidIndex(O.Command) ? Commands[O.Command].Id : FString();
 	}
 	return Out;
 }
@@ -256,6 +366,10 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 	for (FCampaign1851Regiment& R : Regiments)
 	{
 		R.Chief = R.General = INDEX_NONE;
+	}
+	for (FCampaign1851Command& C : Commands)
+	{
+		C.General = INDEX_NONE;
 	}
 	for (const FCampaign1851OfficerSave& S : Saves)
 	{
@@ -276,6 +390,11 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 		if (Regiment != INDEX_NONE)
 		{
 			AssignOfficer(Index, Regiment);
+		}
+		const int32 Command = Commands.IndexOfByPredicate([&S](const FCampaign1851Command& C) { return C.Id == S.Command; });
+		if (Command != INDEX_NONE)
+		{
+			AssignCommandGeneral(Index, Command);
 		}
 		if (S.Id.StartsWith(TEXT("R")))
 		{

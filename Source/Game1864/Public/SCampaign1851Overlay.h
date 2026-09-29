@@ -42,11 +42,12 @@ public:
 
 	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury, BuildTown, ShowSite, BuildLink, ShowLink,
 		Regiment, RegimentRow, ArmyHome, ArmyHalt, OfficerChange, GeneralChange, OfficerPick, OfficerRecruit, PickerClose, TrainingProgram, OfficerInfo, OfficerCardClose, ProgramPick, RouteMode, ArmyCancel, TownTab,
-		MainMenu, WindowClose, TableSort, TableRow, TablePage, OfficerFilter, OfficerDismiss, ClosePanel };
+		MainMenu, WindowClose, TableSort, TableRow, TablePage, OfficerFilter, OfficerDismiss, ClosePanel, ExitGame,
+		OfficerPromote, OpenOOB, OOBCommand, CommandGeneralChange, TrainOrder };
 	/** What an X in a panel's corner closes (the Module of EButton::ClosePanel). */
-	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger };
+	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB };
 	/** The big windows opened from the menu bar under the calendar (one at a time). */
-	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns };
+	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains };
 	void OpenWindow(EWindow In) { Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
 	EWindow GetWindow() const { return Window; }
 	/** Sort a table by a column (again: the other way round). */
@@ -64,8 +65,14 @@ public:
 	void CloseTrainingMenu() { bTrainingMenu = false; }
 	bool IsTrainingMenuOpen() const { return bTrainingMenu; }
 	/** The officer list beside the army panel: chiefs or generals to appoint. */
-	enum class EPicker : uint8 { None, Chief, General };
-	void OpenPicker(EPicker In) { Picker = In; InspectedOfficer = INDEX_NONE; bTrainingMenu = false; }
+	enum class EPicker : uint8 { None, Chief, General, CommandGeneral };
+	void OpenPicker(EPicker In) { Picker = In; InspectedOfficer = INDEX_NONE; bTrainingMenu = false; bOOB = false; }
+	/** The general picker for a general command's commanding general. */
+	void OpenCommandPicker(int32 Command) { OpenPicker(EPicker::CommandGeneral); PickerCommand = Command; }
+	int32 GetPickerCommand() const { return PickerCommand; }
+	/** The order of battle beside the army panel. */
+	void ToggleOOB() { bOOB = !bOOB; if (bOOB) { bTrainingMenu = false; Picker = EPicker::None; InspectedOfficer = INDEX_NONE; OOBExpanded = INDEX_NONE; } }
+	void ExpandOOB(int32 Command) { OOBExpanded = OOBExpanded == Command ? -2 : Command; }
 	/** The officer card (all qualities) beside the army panel; INDEX_NONE closes it. */
 	void InspectOfficer(int32 Officer) { InspectedOfficer = Officer; }
 	int32 GetInspectedOfficer() const { return InspectedOfficer; }
@@ -135,6 +142,8 @@ private:
 	/** Headings (click to sort), striped rows (click: RowAction with the row's Id), pages. */
 	void PaintTable(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, int32 VisibleRows,
 		const TArray<FTableColumn>& Columns, TArray<FTableRow> Rows, EButton RowAction, int32 Highlight) const;
+	/** The order of battle: the army, its general commands and their regiments by arm; the selected lit. */
+	void PaintOOB(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft) const;
 	/** Every training programme: what it trains, days for +10 under the chief, cost a month; click to choose. */
 	void PaintTrainingMenu(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft) const;
 	/** One officer's card: rank, age, post, experience and every quality with what it means. */
@@ -170,6 +179,9 @@ private:
 	EPicker Picker = EPicker::None;
 	int32 InspectedOfficer = INDEX_NONE;
 	bool bTrainingMenu = false;
+	bool bOOB = false;
+	int32 OOBExpanded = INDEX_NONE;   // the general command shown open (INDEX_NONE: the selected unit's; -2: none)
+	int32 PickerCommand = INDEX_NONE;
 	int32 TownTab = 0;
 	EWindow Window = EWindow::None;
 	int32 SortColumn = 0;

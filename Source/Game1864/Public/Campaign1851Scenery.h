@@ -73,7 +73,11 @@ namespace Campaign1851Scenery
 		FormationJager,      // light infantry in green
 		FormationCavalry,    // dragoons on horseback
 		FormationArtillery,      // guns with limbers and teams, gunners on foot
-		FormationHorseArtillery  // guns with six-horse teams and mounted gunners
+		FormationHorseArtillery, // guns with six-horse teams and mounted gunners
+		// A train in parts, each centred on its origin and facing +X, so every vehicle follows the curve:
+		TrainEngine,     // locomotive and tender (5.2 long)
+		TrainCarBrown,   // first-class carriage (2.9 long)
+		TrainCarGreen    // second-class carriage (2.9 long)
 	};
 
 	constexpr float BarracksLength = 16.f;

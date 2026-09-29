@@ -616,10 +616,9 @@ void ACampaign1851Map::AdvanceNetwork(float DeltaDays, float DeltaSeconds)
 		return;
 	}
 	// Trains shuttle along the open lines; they face the way they run.
-	for (int32 r = 0; r < Trains.Num() && r < Railways.Num(); ++r)
+	for (int32 r = 0; r < Railways.Num() && (r + 1) * TrainVehicles <= Trains.Num(); ++r)
 	{
-		UStaticMeshComponent* Train = Trains[r];
-		if (!Train)
+		if (!Trains[r * TrainVehicles])
 		{
 			continue;
 		}
@@ -638,10 +637,12 @@ void ACampaign1851Map::AdvanceNetwork(float DeltaDays, float DeltaSeconds)
 				TrainPause[r] = TrainPauseSeconds;
 			}
 		}
-		FVector2D Dir;
-		const FVector2D At = AlongLine(R.Km, TrainAt[r], &Dir);
-		Dir *= TrainDirection[r];
-		Train->SetWorldLocationAndRotation(WorldAtKm(At) + FVector(0.0, 0.0, 1.0), FRotator(0.f, FMath::RadiansToDegrees(FMath::Atan2(-Dir.Y, Dir.X)) + float(GetActorRotation().Yaw), 0.f));
+		TArray<UStaticMeshComponent*> Parts;
+		for (int32 v = 0; v < TrainVehicles; ++v)
+		{
+			Parts.Add(Trains[r * TrainVehicles + v]);
+		}
+		PlaceTrain(Parts, R.Km, TrainAt[r], TrainDirection[r], PieceScale);
 	}
 	// Work gangs: a cart shuttles just behind the head of the works.
 	GangClock += DeltaSeconds;
@@ -679,6 +680,51 @@ void ACampaign1851Map::AdvanceNetwork(float DeltaDays, float DeltaSeconds)
 			Dir = -Dir;   // driving back for the next load
 		}
 		Gang->SetWorldLocationAndRotation(WorldAtKm(At), FRotator(0.f, FMath::RadiansToDegrees(FMath::Atan2(-Dir.Y, Dir.X)) + float(GetActorRotation().Yaw), 0.f));
+	}
+}
+
+// ------------------------------------------------------------------ trains
+
+void ACampaign1851Map::EnsureTrainParts()
+{
+	if (TrainParts.Num() > 0)
+	{
+		return;
+	}
+	if (UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, NetworkMaterialPath))
+	{
+		using Campaign1851Scenery::ESitePiece;
+		for (ESitePiece Piece : { ESitePiece::TrainEngine, ESitePiece::TrainCarBrown, ESitePiece::TrainCarGreen })
+		{
+			TrainParts.Add(Campaign1851Scenery::BuildSitePiece(Piece, Material));
+		}
+	}
+}
+
+void ACampaign1851Map::PlaceTrain(const TArray<UStaticMeshComponent*>& Parts, const TArray<FVector2D>& Line, double FrontKm, float Direction, float Scale) const
+{
+	// Vehicle fronts and lengths behind the engine's front, in piece units (as Campaign1851Scenery builds them).
+	static const float Front[] = { 0.f, 5.35f, 8.5f, 11.65f };
+	static const float Length[] = { 5.22f, 2.9f, 2.9f, 2.9f };
+	const double Length0 = LineLength(Line);
+	const double UnitKm = Scale / KmToUnits;
+	for (int32 v = 0; v < Parts.Num() && v < TrainVehicles; ++v)
+	{
+		if (!Parts[v])
+		{
+			continue;
+		}
+		const double A = FMath::Clamp(FrontKm - Direction * Front[v] * UnitKm, 0.0, Length0);
+		const double B = FMath::Clamp(FrontKm - Direction * (Front[v] + Length[v]) * UnitKm, 0.0, Length0);
+		FVector2D Tangent;
+		const FVector2D PA = AlongLine(Line, A, &Tangent), PB = AlongLine(Line, B);
+		FVector2D Dir = (PA - PB).GetSafeNormal();
+		if (Dir.IsNearlyZero())
+		{
+			Dir = Tangent * Direction;
+		}
+		Parts[v]->SetWorldLocationAndRotation(WorldAtKm((PA + PB) * 0.5) + FVector(0.0, 0.0, 1.0),
+			FRotator(0.f, FMath::RadiansToDegrees(FMath::Atan2(-Dir.Y, Dir.X)) + float(GetActorRotation().Yaw), 0.f));
 	}
 }
 
@@ -791,6 +837,7 @@ void ACampaign1851Map::RebuildNetworkMeshes()
 
 	// Trains on the open lines, stations in their towns, and a work gang at every head of works.
 	UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, NetworkMaterialPath);
+	EnsureTrainParts();
 	if (Material && !TrainMesh)
 	{
 		TrainMesh = Campaign1851Scenery::BuildSitePiece(Campaign1851Scenery::ESitePiece::Train, Material);
@@ -808,34 +855,44 @@ void ACampaign1851Map::RebuildNetworkMeshes()
 		C->RegisterComponent();
 		return C;
 	};
-	for (int32 r = Railways.Num(); r < Trains.Num(); ++r)   // lines gone with a new game or a load
+	for (int32 t = Railways.Num() * TrainVehicles; t < Trains.Num(); ++t)   // lines gone with a new game or a load
 	{
-		if (Trains[r])
+		if (Trains[t])
 		{
-			Trains[r]->DestroyComponent();
+			Trains[t]->DestroyComponent();
 		}
 	}
-	Trains.SetNum(Railways.Num());
+	Trains.SetNum(Railways.Num() * TrainVehicles);
 	TrainAt.SetNum(Railways.Num());
 	TrainDirection.SetNum(Railways.Num());
 	TrainPause.SetNum(Railways.Num());
 	for (int32 r = 0; r < Railways.Num(); ++r)
 	{
 		const bool bOpen = Railways[r].IsOpen(Now);
-		if (bOpen && !Trains[r] && TrainMesh)
+		const int32 First = r * TrainVehicles;
+		if (bOpen && !Trains[First] && TrainParts.Num() == 3)
 		{
-			Trains[r] = MakePiece(TrainMesh, TEXT("Train"));
+			TArray<UStaticMeshComponent*> Parts;
+			for (int32 v = 0; v < TrainVehicles; ++v)
+			{
+				Trains[First + v] = MakePiece(TrainParts[v == 0 ? 0 : v == 1 ? 1 : 2], TEXT("Train"));
+				Parts.Add(Trains[First + v]);
+			}
 			TrainAt[r] = Railways[r].LengthKm * (0.2f + 0.6f * FMath::Frac(r * 0.37f));
 			TrainDirection[r] = r % 2 ? -1.f : 1.f;
 			TrainPause[r] = 0.f;
-			FVector2D Dir;
-			const FVector2D At = AlongLine(Railways[r].Km, TrainAt[r], &Dir);
-			Trains[r]->SetWorldLocation(WorldAtKm(At));
+			PlaceTrain(Parts, Railways[r].Km, TrainAt[r], TrainDirection[r], PieceScale);
 		}
-		else if (!bOpen && Trains[r])
+		else if (!bOpen && Trains[First])
 		{
-			Trains[r]->DestroyComponent();
-			Trains[r] = nullptr;
+			for (int32 v = 0; v < TrainVehicles; ++v)
+			{
+				if (Trains[First + v])
+				{
+					Trains[First + v]->DestroyComponent();
+					Trains[First + v] = nullptr;
+				}
+			}
 		}
 	}
 	for (UStaticMeshComponent* Station : Stations)

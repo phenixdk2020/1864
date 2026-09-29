@@ -450,11 +450,23 @@ void ACampaign1851Map::UpdateMarkers(float CameraDistanceKm)
 		}
 	}
 	LastCameraDistanceKm = CameraDistanceKm;
-	for (UStaticMeshComponent* Piece : RegimentPieces)
+	for (int32 i = 0; i < RegimentPieces.Num(); ++i)
 	{
-		if (Piece)
+		if (RegimentPieces[i])
 		{
-			Piece->SetVisibility(CameraDistanceKm < 60.f);
+			// A regiment riding in another's train keeps its piece hidden (UpdateRegimentPiece decides).
+			const bool bPassenger = Regiments.IsValidIndex(i) && Regiments[i].Group != 0 && Regiments[i].IsMarching() && Regiments[i].Route[Regiments[i].Leg].bRail
+				&& Regiments.ContainsByPredicate([&](const FCampaign1851Regiment& O) { return &O < &Regiments[i] && O.Group == Regiments[i].Group && O.IsMarching() && O.Route[O.Leg].bRail; });
+			RegimentPieces[i]->SetVisibility(CameraDistanceKm < 60.f && !bPassenger);
+		}
+	}
+	for (int32 c = 0; c < RegimentCars.Num(); ++c)
+	{
+		// A regiment's carriages show only while it rides the train.
+		const int32 i = c / 3;
+		if (RegimentCars[c])
+		{
+			RegimentCars[c]->SetVisibility(CameraDistanceKm < 60.f && Regiments.IsValidIndex(i) && Regiments[i].IsMarching() && Regiments[i].Route[Regiments[i].Leg].bRail);
 		}
 	}
 	if (SeasonCollection)
