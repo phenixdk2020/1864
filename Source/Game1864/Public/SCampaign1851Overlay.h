@@ -32,11 +32,15 @@ public:
 	/** City to show in the info panel; -1 hides it. */
 	void SetSelectedCity(int32 Index) { SelectedCity = Index; }
 	int32 GetSelectedCity() const { return SelectedCity; }
+	/** Regiments selected (a stack, a column or single ones); they take the info panel. */
+	void SetSelectedRegiments(const TArray<int32>& In) { SelectedRegiments = In; }
+	const TArray<int32>& GetSelectedRegiments() const { return SelectedRegiments; }
 	/** Amt to show when no town is selected (0 = none). */
 	void SetSelectedAmt(int32 Id) { SelectedAmt = Id; }
 	int32 GetSelectedAmt() const { return SelectedAmt; }
 
-	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury, BuildTown, ShowSite, BuildLink, ShowLink };
+	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury, BuildTown, ShowSite, BuildLink, ShowLink,
+		Regiment, RegimentRow, ArmyHome, ArmyHalt };
 	/** Module of a BuildLink button: link * 2 + 0 for a chaussée, + 1 for a railway. */
 	static int32 LinkButton(int32 Link, bool bRailway) { return Link * 2 + (bRailway ? 1 : 0); }
 	void ToggleLedger() { bLedgerOpen = !bLedgerOpen; }
@@ -85,6 +89,10 @@ private:
 	FString LinkProgressLine(int32 Link) const;
 	/** The selected amt: region, seat, population, area, towns, taxes, men of military age, garrisons. */
 	void PaintAmtInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	/** Unit counters (NATO style, Danish blue) on every town with regiments and on every column on the march; routes of the selected. */
+	void PaintArmy(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	/** The selected regiments: strength, place, march pace and arrival, orders. */
+	void PaintArmyInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** Progress rings at the middle of roads and railways under construction. */
 	void PaintLinkWorks(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	/** Progress rings over towns with a building project. */
@@ -107,6 +115,7 @@ private:
 	TWeakObjectPtr<APlayerController> Controller;
 	int32 SelectedCity = INDEX_NONE;
 	int32 SelectedAmt = 0;
+	TArray<int32> SelectedRegiments;
 	TSharedPtr<FSlateBrush> BornholmBrush;
 	TSharedPtr<FSlateBrush> DotBrush;
 	TArray<TSharedPtr<FSlateBrush>> ModuleBrushes;   // card images per garrison module

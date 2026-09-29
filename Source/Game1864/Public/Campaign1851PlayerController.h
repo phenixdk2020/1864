@@ -49,6 +49,16 @@ private:
 	bool ScreenGround(const FVector2D& Screen, FVector& Out) const;
 	void TryInit();
 	void PickCity();
+	/** Town marker under the cursor (within ~16 px), or INDEX_NONE. */
+	int32 CityUnderCursor() const;
+	/** The regiments that stand or march together with this one (its town's stack, or its column). */
+	TArray<int32> StackOf(int32 Regiment) const;
+	void SelectRegiments(const TArray<int32>& Regiments);
+	/** Sends the selected regiments to a town as one column. */
+	void MarchSelected(int32 CityIndex);
+	/** Right mouse: a click (not a drag) gives the march order. */
+	FVector2D RightDownAt = FVector2D::ZeroVector;
+	bool bRightDragged = false;
 	void FocusPlot(int32 CityIndex);
 	/** Flies the camera to a building site, looking at its front. */
 	void FocusSite(const class ACampaign1851ConstructionSite* Site);

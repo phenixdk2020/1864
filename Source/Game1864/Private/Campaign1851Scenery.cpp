@@ -716,10 +716,105 @@ namespace Campaign1851Scenery
 			}
 			break;
 		}
+		case ESitePiece::FormationInfantry:
+		case ESitePiece::FormationGuard:
+		case ESitePiece::FormationJager:
+		{
+			// Four ranks of eight files behind a colour party; one soldier = body, legs, head and headgear.
+			const bool bGuard = Piece == ESitePiece::FormationGuard, bJager = Piece == ESitePiece::FormationJager;
+			const FLinearColor Coat = bGuard ? Srgb(176, 30, 34) : bJager ? Srgb(46, 70, 44) : Srgb(34, 44, 86);
+			const FLinearColor Trousers = bJager ? Srgb(60, 76, 58) : Srgb(122, 150, 190);
+			const FLinearColor Hat = bGuard ? Srgb(24, 22, 22) : Srgb(30, 30, 36);
+			const FLinearColor Skin = Srgb(214, 170, 140), Steel = Srgb(200, 200, 206);
+			auto Soldier = [&](float X, float Y)
+			{
+				W.Box(FVector3f(X - 0.12f, Y - 0.1f, 0.f), FVector3f(X + 0.12f, Y + 0.1f, 0.5f), Trousers);
+				W.Box(FVector3f(X - 0.14f, Y - 0.13f, 0.5f), FVector3f(X + 0.14f, Y + 0.13f, 1.05f), Coat);
+				W.Box(FVector3f(X - 0.08f, Y - 0.08f, 1.05f), FVector3f(X + 0.08f, Y + 0.08f, 1.22f), Skin);
+				W.Box(FVector3f(X - 0.09f, Y - 0.09f, 1.22f), FVector3f(X + 0.09f, Y + 0.09f, bGuard ? 1.6f : 1.4f), Hat);
+				W.Box(FVector3f(X - 0.02f, Y + 0.12f, 0.6f), FVector3f(X + 0.02f, Y + 0.16f, 1.65f), Steel);   // musket on the shoulder
+			};
+			for (int32 Rank = 0; Rank < 4; ++Rank)
+			{
+				for (int32 File = 0; File < 8; ++File)
+				{
+					Soldier(-Rank * 0.55f - 0.6f, (File - 3.5f) * 0.36f);
+				}
+			}
+			// Officer ahead, and the colour: pole with Dannebrog.
+			Soldier(0.9f, 0.f);
+			W.Box(FVector3f(0.3f, -0.03f, 0.f), FVector3f(0.36f, 0.03f, 2.6f), Srgb(120, 90, 60));
+			const FLinearColor Red = Srgb(200, 16, 46), White = Srgb(245, 245, 240);
+			const float Xs[] = { -0.64f, -0.34f, -0.24f, 0.33f };
+			const float Zs[] = { 1.8f, 2.08f, 2.18f, 2.58f };
+			for (int32 i = 0; i < 3; ++i)
+			{
+				for (int32 j = 0; j < 3; ++j)
+				{
+					const FLinearColor& C = (i == 1 || j == 1) ? White : Red;
+					W.Quad(FVector3f(Xs[i], 0.f, Zs[j]), FVector3f(Xs[i + 1], 0.f, Zs[j]), FVector3f(Xs[i + 1], 0.f, Zs[j + 1]), FVector3f(Xs[i], 0.f, Zs[j + 1]), C, FVector3f(0.f, -1.f, 2.f));
+					W.Quad(FVector3f(Xs[i], 0.01f, Zs[j]), FVector3f(Xs[i + 1], 0.01f, Zs[j]), FVector3f(Xs[i + 1], 0.01f, Zs[j + 1]), FVector3f(Xs[i], 0.01f, Zs[j + 1]), C, FVector3f(0.f, 1.f, 2.f));
+				}
+			}
+			break;
+		}
+		case ESitePiece::FormationCavalry:
+		{
+			// Two ranks of six riders: horse body, legs, neck; rider in light blue with a helmet.
+			const FLinearColor Horse = Srgb(96, 64, 40), Dark = Srgb(52, 36, 24), Coat = Srgb(118, 146, 188), Helmet = Srgb(210, 206, 196);
+			for (int32 Rank = 0; Rank < 2; ++Rank)
+			{
+				for (int32 File = 0; File < 6; ++File)
+				{
+					const float X = -Rank * 1.4f, Y = (File - 2.5f) * 0.55f;
+					W.Box(FVector3f(X - 0.5f, Y - 0.14f, 0.55f), FVector3f(X + 0.4f, Y + 0.14f, 0.95f), File % 3 == 1 ? Dark : Horse);
+					W.Box(FVector3f(X + 0.3f, Y - 0.09f, 0.85f), FVector3f(X + 0.62f, Y + 0.09f, 1.3f), Horse);
+					for (float LX : { -0.4f, 0.3f })
+					{
+						W.Box(FVector3f(X + LX - 0.05f, Y - 0.12f, 0.f), FVector3f(X + LX + 0.05f, Y + 0.12f, 0.55f), Dark);
+					}
+					W.Box(FVector3f(X - 0.16f, Y - 0.12f, 0.95f), FVector3f(X + 0.08f, Y + 0.12f, 1.5f), Coat);
+					W.Box(FVector3f(X - 0.09f, Y - 0.08f, 1.5f), FVector3f(X + 0.03f, Y + 0.08f, 1.75f), Helmet);
+				}
+			}
+			W.Box(FVector3f(0.9f, -0.03f, 0.f), FVector3f(0.95f, 0.03f, 2.6f), Srgb(120, 90, 60));   // guidon
+			W.Quad(FVector3f(0.95f, 0.f, 2.1f), FVector3f(1.5f, 0.f, 2.3f), FVector3f(0.95f, 0.f, 2.55f), FVector3f(0.95f, 0.f, 2.1f), Srgb(200, 16, 46), FVector3f(1.f, -1.f, 2.f));
+			break;
+		}
+		case ESitePiece::FormationArtillery:
+		{
+			// Two guns in battery, each with its limber and a team of four horses behind, and the crew.
+			const FLinearColor Wood = Srgb(110, 118, 84), Barrel = Srgb(48, 52, 50), Horse = Srgb(96, 64, 40), Coat = Srgb(34, 44, 86);
+			for (float Y : { -1.f, 1.f })
+			{
+				W.Box(FVector3f(0.1f, Y - 0.1f, 0.35f), FVector3f(1.1f, Y + 0.1f, 0.55f), Barrel);                // barrel
+				W.Box(FVector3f(-0.9f, Y - 0.08f, 0.2f), FVector3f(0.3f, Y + 0.08f, 0.4f), Wood);                // trail
+				for (float S : { -0.35f, 0.35f })
+				{
+					W.Box(FVector3f(-0.05f, Y + S - 0.05f, 0.f), FVector3f(0.55f, Y + S + 0.05f, 0.6f), Wood);   // wheels
+				}
+				W.Box(FVector3f(-2.1f, Y - 0.35f, 0.3f), FVector3f(-1.4f, Y + 0.35f, 0.75f), Wood);             // limber
+				for (int32 H = 0; H < 2; ++H)
+				{
+					for (float S : { -0.2f, 0.2f })
+					{
+						const float X = -2.6f - H * 0.9f;
+						W.Box(FVector3f(X - 0.4f, Y + S - 0.1f, 0.45f), FVector3f(X + 0.3f, Y + S + 0.1f, 0.8f), Horse);
+						W.Box(FVector3f(X + 0.2f, Y + S - 0.07f, 0.7f), FVector3f(X + 0.45f, Y + S + 0.07f, 1.05f), Horse);
+					}
+				}
+				for (float CX : { -0.4f, -0.8f })
+				{
+					W.Box(FVector3f(CX - 0.1f, Y + 0.55f, 0.f), FVector3f(CX + 0.1f, Y + 0.75f, 1.1f), Coat);
+				}
+			}
+			break;
+		}
 		}
 		static const TCHAR* Names[] = { TEXT("Ground"), TEXT("Barracks"), TEXT("Scaffold"), TEXT("CraneMast"), TEXT("CraneJib"), TEXT("Wagon"), TEXT("Flagpole"), TEXT("Flag"),
 			TEXT("Stables"), TEXT("Depot"), TEXT("Infirmary"), TEXT("Arsenal"), TEXT("Lazaret"), TEXT("Battery"), TEXT("PowderMagazine"), TEXT("StarFort"),
-			TEXT("Telegraph"), TEXT("Granary"), TEXT("Train"), TEXT("Station") };
+			TEXT("Telegraph"), TEXT("Granary"), TEXT("Train"), TEXT("Station"),
+			TEXT("FormationInfantry"), TEXT("FormationGuard"), TEXT("FormationJager"), TEXT("FormationCavalry"), TEXT("FormationArtillery") };
 		return Finish(W, Material, FString::Printf(TEXT("SM_Campaign1851_Site_%s"), Names[int32(Piece)]));
 	}
 }

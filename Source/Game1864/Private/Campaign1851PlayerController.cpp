@@ -127,6 +127,34 @@ void ACampaign1851PlayerController::TryInit()
 			}
 		}
 	}
+	// -CampaignMarch=B9,D2:Randers;A1:Roskilde sends columns off (and selects the last one).
+	FString Marches;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignMarch="), Marches, false))
+	{
+		TArray<FString> Orders;
+		Marches.ParseIntoArray(Orders, TEXT(";"));
+		for (const FString& Order : Orders)
+		{
+			FString Ids, Town;
+			if (!Order.Split(TEXT(":"), &Ids, &Town))
+			{
+				continue;
+			}
+			TArray<FString> IdList;
+			Ids.ParseIntoArray(IdList, TEXT(","));
+			TArray<int32> Column;
+			for (const FString& Id : IdList)
+			{
+				const int32 i = Map->FindRegiment(Id);
+				if (i != INDEX_NONE)
+				{
+					Column.Add(i);
+				}
+			}
+			SelectRegiments(Column);
+			MarchSelected(Map->FindCity(Town));
+		}
+	}
 	FString StartCity;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignSelectCity="), StartCity) && Overlay.IsValid())
 	{
@@ -255,6 +283,20 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 	}
 	LastMouse = Mouse;
+	if (WasInputKeyJustPressed(EKeys::RightMouseButton))
+	{
+		RightDownAt = Mouse;
+		bRightDragged = false;
+	}
+	bRightDragged |= IsInputKeyDown(EKeys::RightMouseButton) && FVector2D::Distance(Mouse, RightDownAt) > 6.f;
+	if (WasInputKeyJustReleased(EKeys::RightMouseButton) && !bRightDragged && Overlay.IsValid() && Overlay->GetSelectedRegiments().Num() > 0)
+	{
+		MarchSelected(CityUnderCursor());
+	}
+	if (WasInputKeyJustPressed(EKeys::Escape) && Overlay.IsValid())
+	{
+		Overlay->SetSelectedRegiments({});
+	}
 
 	FVector Focus;
 	const bool bFocus = CursorGround(Focus);
@@ -345,6 +387,53 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			FocusSite(Map->FindBuilding(Overlay->GetSelectedCity(), ACampaign1851ConstructionSite::TownBuildings()[Module].Key));
 		}
+		else if (Button == SCampaign1851Overlay::EButton::Regiment)
+		{
+			// Click a counter: its whole stack; shift-click adds or removes it.
+			TArray<int32> Stack = StackOf(Module);
+			if (IsInputKeyDown(EKeys::LeftShift) || IsInputKeyDown(EKeys::RightShift))
+			{
+				TArray<int32> Sel = Overlay->GetSelectedRegiments();
+				const bool bAll = !Stack.ContainsByPredicate([&Sel](int32 i) { return !Sel.Contains(i); });
+				for (int32 i : Stack)
+				{
+					if (bAll) { Sel.Remove(i); } else { Sel.AddUnique(i); }
+				}
+				Stack = Sel;
+			}
+			SelectRegiments(Stack);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::RegimentRow)
+		{
+			TArray<int32> Sel = Overlay->GetSelectedRegiments();
+			if (IsInputKeyDown(EKeys::LeftShift) || IsInputKeyDown(EKeys::RightShift))
+			{
+				Sel.Remove(Module);
+			}
+			else
+			{
+				Sel = { Module };
+			}
+			SelectRegiments(Sel);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::ArmyHome)
+		{
+			// Each regiment home to its own garrison.
+			for (int32 i : Overlay->GetSelectedRegiments())
+			{
+				if (Map->GetRegiments().IsValidIndex(i))
+				{
+					Map->OrderMarch({ i }, Map->GetRegiments()[i].Home);
+				}
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::ArmyHalt)
+		{
+			for (int32 i : Overlay->GetSelectedRegiments())
+			{
+				Map->HaltRegiment(i);
+			}
+		}
 		else if (Button == SCampaign1851Overlay::EButton::BuildLink)
 		{
 			BuildLink(Module / 2, Module % 2 ? ECampaign1851LinkWork::Railway : ECampaign1851LinkWork::Chaussee);
@@ -401,12 +490,12 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	LastCameraYaw = Camera->GetYaw();
 }
 
-void ACampaign1851PlayerController::PickCity()
+int32 ACampaign1851PlayerController::CityUnderCursor() const
 {
 	float MX, MY;
-	if (!Overlay.IsValid() || !GetMousePosition(MX, MY))
+	if (!Map.IsValid() || !GetMousePosition(MX, MY))
 	{
-		return;
+		return INDEX_NONE;
 	}
 	// Nearest visible marker within ~16 px of the cursor.
 	int32 Best = INDEX_NONE;
@@ -426,6 +515,17 @@ void ACampaign1851PlayerController::PickCity()
 			Best = i;
 		}
 	}
+	return Best;
+}
+
+void ACampaign1851PlayerController::PickCity()
+{
+	if (!Overlay.IsValid())
+	{
+		return;
+	}
+	const int32 Best = CityUnderCursor();
+	Overlay->SetSelectedRegiments({});
 	Overlay->SetSelectedCity(Best);
 	// No town under the cursor: select the amt there instead (and light it up).
 	FVector Ground;
@@ -507,6 +607,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Treasury = Map->GetTreasury();
 	Save->Ledger = Map->GetLedger();
 	Save->Links = Map->SaveNetwork();
+	Save->Regiments = Map->SaveArmy();
 	if (Save->Links.Num() > 0)
 	{
 		Parts.Add(FString::Printf(TEXT("%d vej-/baneanlæg"), Save->Links.Num()));
@@ -549,6 +650,15 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	}
 	Map->ResetNetwork();
 	const int32 LinksRestored = Save->SaveVersion >= 5 ? Map->RestoreNetwork(Save->Links) : 0;
+	Map->ResetArmy();
+	if (Save->SaveVersion >= 6)
+	{
+		Map->RestoreArmy(Save->Regiments);
+	}
+	if (Overlay.IsValid())
+	{
+		Overlay->SetSelectedRegiments({});
+	}
 	int32 Restored = 0;
 	for (const FCampaign1851ProjectSave& P : Save->Projects)
 	{
@@ -578,6 +688,11 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	Map->SetSpeed(1);
 	Map->ResetEconomy();
 	Map->ResetNetwork();
+	Map->ResetArmy();
+	if (Overlay.IsValid())
+	{
+		Overlay->SetSelectedRegiments({});
+	}
 	Camera->ResetView();
 	if (Overlay.IsValid())
 	{
@@ -620,6 +735,64 @@ void ACampaign1851PlayerController::FocusSite(const ACampaign1851ConstructionSit
 	}
 	Camera->SetView(Site->GetActorLocation(), 6.5f, float(Site->GetActorRotation().Yaw) + 25.f);
 	Map->UpdateMarkers(Camera->GetDistanceKm());
+}
+
+TArray<int32> ACampaign1851PlayerController::StackOf(int32 Regiment) const
+{
+	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
+	if (!Regs.IsValidIndex(Regiment))
+	{
+		return {};
+	}
+	const FCampaign1851Regiment& R = Regs[Regiment];
+	if (!R.IsMarching())
+	{
+		return Map->RegimentsIn(R.Town);
+	}
+	TArray<int32> Out;
+	for (int32 i = 0; i < Regs.Num(); ++i)
+	{
+		if (i == Regiment || (R.Group && Regs[i].Group == R.Group && Regs[i].IsMarching()))
+		{
+			Out.Add(i);
+		}
+	}
+	return Out;
+}
+
+void ACampaign1851PlayerController::SelectRegiments(const TArray<int32>& Regiments)
+{
+	if (Overlay.IsValid())
+	{
+		Overlay->SetSelectedRegiments(Regiments);
+		if (Regiments.Num() > 0)
+		{
+			Overlay->SetSelectedCity(INDEX_NONE);
+			Overlay->SetSelectedAmt(0);
+			Map->SetHighlightedAmt(0);
+		}
+	}
+}
+
+void ACampaign1851PlayerController::MarchSelected(int32 CityIndex)
+{
+	if (!Map.IsValid() || !Overlay.IsValid() || CityIndex == INDEX_NONE)
+	{
+		return;
+	}
+	const TArray<int32> Column = Overlay->GetSelectedRegiments();
+	FString Why;
+	if (Map->OrderMarch(Column, CityIndex, &Why))
+	{
+		const FCampaign1851Regiment& R = Map->GetRegiments()[Column[0]];
+		const FDateTime Arrive = Map->GetDate() + FTimespan::FromDays(R.DaysLeft());
+		Overlay->ShowToast(FString::Printf(TEXT("%s mod %s  ·  ankomst %s %s"), Column.Num() > 1 ? *FString::Printf(TEXT("%d enheder marcherer"), Column.Num()) : *FString::Printf(TEXT("%s marcherer"), *R.Name),
+			*Map->GetCities()[CityIndex].Name, *ACampaign1851Map::FormatClock(Arrive), *ACampaign1851Map::FormatDate(Arrive, true)));
+	}
+	else if (!Why.IsEmpty())
+	{
+		Overlay->ShowToast(Why);
+	}
 }
 
 void ACampaign1851PlayerController::BuildLink(int32 Link, ECampaign1851LinkWork Work)

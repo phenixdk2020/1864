@@ -116,6 +116,10 @@ void ACampaign1851Map::BeginPlay()
 	Campaign1851Buildings::Load();
 	ResetEconomy();
 	ResetNetwork();
+	if (LoadArmy())
+	{
+		ResetArmy();
+	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|ready|cities=%d|labels=%d|size=%.0fx%.0f km"), Cities.Num(), Labels.Num(), SizeKm.X, SizeKm.Y);
 }
 
@@ -444,6 +448,13 @@ void ACampaign1851Map::UpdateMarkers(float CameraDistanceKm)
 		}
 	}
 	LastCameraDistanceKm = CameraDistanceKm;
+	for (UStaticMeshComponent* Piece : RegimentPieces)
+	{
+		if (Piece)
+		{
+			Piece->SetVisibility(CameraDistanceKm < 60.f);
+		}
+	}
 	if (SeasonCollection)
 	{
 		UKismetMaterialLibrary::SetScalarParameterValue(this, SeasonCollection, TEXT("ViewKm"), CameraDistanceKm);
@@ -1492,6 +1503,7 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 		Site->Advance(Work, Speed > 0 ? DeltaSeconds : 0.f);
 	}
 	AdvanceNetwork(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
+	AdvanceArmy(DeltaDays, Speed > 0 ? DeltaSeconds : 0.f);
 	if (GetDate().GetMonth() != MonthBefore)
 	{
 		CloseMonth();

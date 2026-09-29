@@ -199,6 +199,8 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	Layer = PaintLabels(Geometry, Out, Layer, DistanceKm) + 2;
 	PaintProjects(Geometry, Out, Layer);
 	PaintLinkWorks(Geometry, Out, Layer);
+	PaintArmy(Geometry, Out, Layer);
+	Layer += 6;
 	PaintTitle(Geometry, Out, Layer);
 	PaintLegend(Geometry, Out, Layer);
 	PaintCompass(Geometry, Out, Layer, Camera ? Camera->GetYaw() : 0.f);
@@ -221,9 +223,9 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	}
 
 	const FVector2D Size = Geometry.GetLocalSize();
-	PaintText(Geometry, Out, Layer, TEXT("Klik på en by  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5, +/−: fart  ·  M: menu  ·  F5/F9: gem/indlæs"),
+	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.28 TIMER OG MINUTTER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.29 HÆREN — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -471,6 +473,11 @@ void SCampaign1851Overlay::PaintBornholm(const FGeometry& Geometry, FSlateWindow
 void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
 {
 	const TArray<FCampaign1851City>& Cities = Map->GetCities();
+	if (SelectedRegiments.Num() > 0)
+	{
+		PaintArmyInfo(Geometry, Out, Layer);
+		return;
+	}
 	if (!Cities.IsValidIndex(SelectedCity))
 	{
 		PaintAmtInfo(Geometry, Out, Layer);
@@ -596,8 +603,9 @@ void SCampaign1851Overlay::PaintButton(const FGeometry& Geometry, FSlateWindowEl
 SCampaign1851Overlay::EButton SCampaign1851Overlay::HitButton(const FVector2D& ViewportPixel, int32* OutModule) const
 {
 	const FVector2D Local = ViewportPixel / FMath::Max(PaintScale, 0.01f);
-	for (const FButtonRect& B : Buttons)
+	for (int32 b = Buttons.Num() - 1; b >= 0; --b)
 	{
+		const FButtonRect& B = Buttons[b];
 		if (Local.X >= B.Min.X && Local.Y >= B.Min.Y && Local.X <= B.Max.X && Local.Y <= B.Max.Y)
 		{
 			if (OutModule)
@@ -678,6 +686,255 @@ void SCampaign1851Overlay::PaintLinkWorks(const FGeometry& Geometry, FSlateWindo
 		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("%s %s–%s%s"), L.Work == ECampaign1851LinkWork::Railway ? TEXT("Jernbane") : TEXT("Chaussé"),
 			*Cities[L.A].Name, *Cities[L.B].Name, L.bStalled ? TEXT(" · standset") : TEXT("")), P + FVector2D(Radius + 8.f, 0.f), Serif(11, EFace::Italic), Ink, 0.f);
 	}
+}
+
+// ------------------------------------------------------------------ army
+
+namespace
+{
+	const FLinearColor DanishBlue = FLinearColor::FromSRGBColor(FColor(36, 70, 150, 235));
+	const FLinearColor RouteBlue = FLinearColor::FromSRGBColor(FColor(110, 180, 255));
+
+	/** NATO-style symbol inside a counter's frame. */
+	void PaintArmSymbol(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Min, const FVector2D& Max, ECampaign1851Arm Arm)
+	{
+		const FLinearColor Line = FLinearColor::White;
+		DrawLines(Geometry, Out, Layer, { Min, FVector2D(Max.X, Min.Y), Max, FVector2D(Min.X, Max.Y), Min }, Line, 1.4f);
+		if (Arm == ECampaign1851Arm::Cavalry)
+		{
+			DrawLines(Geometry, Out, Layer, { FVector2D(Min.X, Max.Y), FVector2D(Max.X, Min.Y) }, Line, 1.4f);
+		}
+		else if (Arm == ECampaign1851Arm::Artillery)
+		{
+			TArray<FVector2D> Dot;
+			const FVector2D C = (Min + Max) * 0.5f;
+			for (int32 s = 0; s <= 12; ++s)
+			{
+				Dot.Add(C + FVector2D(FMath::Cos(s * UE_TWO_PI / 12.f), FMath::Sin(s * UE_TWO_PI / 12.f)) * 3.2f);
+			}
+			DrawLines(Geometry, Out, Layer, Dot, Line, 3.f);
+		}
+		else
+		{
+			DrawLines(Geometry, Out, Layer, { Min, Max }, Line, 1.4f);
+			DrawLines(Geometry, Out, Layer, { FVector2D(Min.X, Max.Y), FVector2D(Max.X, Min.Y) }, Line, 1.4f);
+			if (Arm == ECampaign1851Arm::Guard)   // a bar over the frame for the guard
+			{
+				DrawLines(Geometry, Out, Layer, { Min + FVector2D(4.f, -3.f), FVector2D(Max.X - 4.f, Min.Y - 3.f) }, Line, 1.4f);
+			}
+			else if (Arm == ECampaign1851Arm::Jager)   // light infantry: a small horn under the frame
+			{
+				DrawLines(Geometry, Out, Layer, { FVector2D(Min.X + 6.f, Max.Y + 3.f), FVector2D(Max.X - 6.f, Max.Y + 3.f) }, Line, 1.4f);
+			}
+		}
+	}
+}
+
+void SCampaign1851Overlay::PaintArmy(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
+	const TArray<FCampaign1851City>& Cities = Map->GetCities();
+	const FDateTime Now = Map->GetDate();
+
+	// Routes of the selected regiments: what is left of the march, and the arrival time.
+	TSet<int32> DrawnGroups;
+	for (int32 i : SelectedRegiments)
+	{
+		if (!Regs.IsValidIndex(i) || !Regs[i].IsMarching() || (Regs[i].Group && DrawnGroups.Contains(Regs[i].Group)))
+		{
+			continue;
+		}
+		DrawnGroups.Add(Regs[i].Group);
+		const FCampaign1851Regiment& R = Regs[i];
+		for (int32 l = R.Leg; l < R.Route.Num(); ++l)
+		{
+			TArray<FVector2D> Line = Map->LegLine(R.Route[l]);
+			if (l == R.Leg)
+			{
+				// From where the column is now.
+				const double Length = ACampaign1851Map::LineLength(Line);
+				const double Done = Length * FMath::Clamp(R.LegElapsed / FMath::Max(R.Route[l].Days, 0.001f), 0.f, 1.f);
+				TArray<FVector2D> Rest = { R.Km };
+				double At = 0.0;
+				for (int32 p = 0; p + 1 < Line.Num(); ++p)
+				{
+					At += FVector2D::Distance(Line[p], Line[p + 1]);
+					if (At > Done)
+					{
+						Rest.Add(Line[p + 1]);
+					}
+				}
+				Line = MoveTemp(Rest);
+			}
+			TArray<FVector2D> Screen;
+			const int32 Step = FMath::Max(1, Line.Num() / 40);
+			for (int32 p = 0; p < Line.Num(); p += Step)
+			{
+				FVector2D S;
+				if (ToLocal(Geometry, Map->WorldAtKm(Line[p]), S))
+				{
+					Screen.Add(S);
+				}
+			}
+			FVector2D Last;
+			if (Line.Num() > 0 && ToLocal(Geometry, Map->WorldAtKm(Line.Last()), Last))
+			{
+				Screen.Add(Last);
+			}
+			if (Screen.Num() >= 2)
+			{
+				DrawLines(Geometry, Out, Layer, Screen, Shadow, 5.f);
+				DrawLines(Geometry, Out, Layer + 1, Screen, R.Route[l].bRail ? Ink : RouteBlue, 2.5f);
+			}
+		}
+		FVector2D End;
+		if (ToLocal(Geometry, Cities[R.Destination()].World, End))
+		{
+			PaintDot(Geometry, Out, Layer + 1, End, 14.f, RouteBlue);
+			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("ankomst %s %s"), *ACampaign1851Map::FormatClock(Now + FTimespan::FromDays(R.DaysLeft())),
+				*ACampaign1851Map::FormatDate(Now + FTimespan::FromDays(R.DaysLeft()), true)), End + FVector2D(12.f, 16.f), Serif(11, EFace::Italic), RouteBlue, 0.f);
+		}
+	}
+
+	// Stacks: every regiment in a town together, every column on the march together.
+	TMap<int64, TArray<int32>> Stacks;
+	for (int32 i = 0; i < Regs.Num(); ++i)
+	{
+		const FCampaign1851Regiment& R = Regs[i];
+		const int64 Key = !R.IsMarching() ? int64(R.Town) : R.Group ? (int64(1) << 32) + R.Group : (int64(2) << 32) + i;
+		Stacks.FindOrAdd(Key).Add(i);
+	}
+	const FVector2D Box(46.f, 30.f);
+	for (const TPair<int64, TArray<int32>>& Stack : Stacks)
+	{
+		const FCampaign1851Regiment& Top = Regs[Stack.Value[0]];
+		FVector2D P;
+		const FVector World = Top.IsMarching() ? Map->RegimentWorld(Stack.Value[0]) : Cities[Top.Town].World;
+		if (!ToLocal(Geometry, World, P))
+		{
+			continue;
+		}
+		// In a town the counter stands above the dot; on the march on the column.
+		const FVector2D Min = P + (Top.IsMarching() ? FVector2D(-Box.X * 0.5f, -Box.Y * 0.5f) : FVector2D(-Box.X * 0.5f, -Box.Y - 14.f));
+		bool bSelected = false;
+		int32 Men = 0;
+		ECampaign1851Arm Arm = Top.Arm;
+		int32 Biggest = 0;
+		for (int32 i : Stack.Value)
+		{
+			bSelected |= SelectedRegiments.Contains(i);
+			Men += Regs[i].Men;
+			if (Regs[i].Men > Biggest)
+			{
+				Biggest = Regs[i].Men;
+				Arm = Regs[i].Arm;
+			}
+		}
+		const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+		if (Stack.Value.Num() > 1)   // cards behind: it is a stack
+		{
+			FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(Box, FSlateLayoutTransform(Min + FVector2D(4.f, -4.f))), White, ESlateDrawEffect::None, DanishBlue * 0.7f);
+		}
+		FSlateDrawElement::MakeBox(Out, Layer + 3, Geometry.ToPaintGeometry(Box, FSlateLayoutTransform(Min)), White, ESlateDrawEffect::None, bSelected ? DanishBlue * 1.35f : DanishBlue);
+		const FVector2D Max = Min + Box;
+		DrawLines(Geometry, Out, Layer + 4, { Min, FVector2D(Max.X, Min.Y), Max, FVector2D(Min.X, Max.Y), Min }, bSelected ? Gold : Gold.CopyWithNewOpacity(0.6f), bSelected ? 2.5f : 1.f);
+		PaintArmSymbol(Geometry, Out, Layer + 5, Min + FVector2D(9.f, 7.f), Max - FVector2D(Stack.Value.Num() > 1 ? 15.f : 9.f, 7.f), Arm);
+		if (Stack.Value.Num() > 1)
+		{
+			PaintText(Geometry, Out, Layer + 5, FString::FromInt(Stack.Value.Num()), FVector2D(Max.X - 7.f, Min.Y + Box.Y * 0.5f), Serif(10, EFace::Bold), Ink, 0.5f, false);
+		}
+		PaintText(Geometry, Out, Layer + 5, FString::Printf(TEXT("%d"), Men), FVector2D(Min.X + Box.X * 0.5f, Min.Y - (Stack.Value.Num() > 1 ? 13.f : 9.f)), Serif(9), Ink, 0.5f);
+		Buttons.Add({ Min, Max, EButton::Regiment, Stack.Value[0] });
+	}
+}
+
+void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
+	const TArray<FCampaign1851City>& Cities = Map->GetCities();
+	TArray<const FCampaign1851Regiment*> Sel;
+	for (int32 i : SelectedRegiments)
+	{
+		if (Regs.IsValidIndex(i))
+		{
+			Sel.Add(&Regs[i]);
+		}
+	}
+	if (Sel.Num() == 0)
+	{
+		return;
+	}
+	const FCampaign1851Regiment& First = *Sel[0];
+	const int32 Rows = FMath::Min(Sel.Num(), 8);
+	const FVector2D Size(460.f, 262.f + (Sel.Num() > 1 ? Rows * 24.f + 8.f : 0.f));
+	const FVector2D Pos(28.f, Geometry.GetLocalSize().Y - 190.f - Size.Y);
+	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	float Y = Pos.Y + 32.f;
+	int32 Men = 0, MaxMen = 0, Horses = 0, Guns = 0;
+	for (const FCampaign1851Regiment* R : Sel)
+	{
+		Men += R->Men;
+		MaxMen += R->MaxMen;
+		Horses += R->Horses;
+		Guns += R->Guns;
+	}
+	PaintText(Geometry, Out, Layer + 2, Sel.Num() == 1 ? First.Name : FString::Printf(TEXT("Kolonne: %d enheder"), Sel.Num()), FVector2D(Pos.X + 22.f, Y), Serif(22), Ink, 0.f);
+	Y += 30.f;
+	PaintText(Geometry, Out, Layer + 2, Sel.Num() == 1 ? FString::Printf(TEXT("%s  ·  garnison %s"), Campaign1851Army::ArmName(First.Arm), *Cities[First.Home].Name) : FString(TEXT("Marcherer samlet i den langsomstes tempo")),
+		FVector2D(Pos.X + 22.f, Y), Serif(13, EFace::Italic), Gold, 0.f, false);
+	Y += 30.f;
+	auto Line = [&](const FString& Label, const FString& Value)
+	{
+		PaintText(Geometry, Out, Layer + 2, Label, FVector2D(Pos.X + 22.f, Y), Serif(12, EFace::Italic), Gold, 0.f, false);
+		PaintText(Geometry, Out, Layer + 2, Value, FVector2D(Pos.X + 140.f, Y), Serif(13), Ink, 0.f, false);
+		Y += 22.f;
+	};
+	Line(TEXT("Styrke"), FString::Printf(TEXT("%d / %d mand%s%s"), Men, MaxMen, Horses > 50 ? *FString::Printf(TEXT("  ·  %d heste"), Horses) : TEXT(""),
+		Guns > 0 ? *FString::Printf(TEXT("  ·  %d kanoner"), Guns) : TEXT("")));
+	FString Where;
+	if (First.IsMarching())
+	{
+		const FCampaign1851Leg& Leg = First.Route[First.Leg];
+		Where = FString::Printf(TEXT("%s %s → %s"), Leg.bRail ? TEXT("Med tog") : TEXT("På march"), *Cities[Leg.From].Name, *Cities[Leg.To].Name);
+	}
+	else
+	{
+		Where = FString::Printf(TEXT("I %s"), Cities.IsValidIndex(First.Town) ? *Cities[First.Town].Name : TEXT("?"));
+	}
+	Line(TEXT("Hvor"), Where);
+	FString Why;
+	const float Pace = Campaign1851Army::ColumnPace(Sel, &Why);
+	Line(TEXT("Marchfart"), FString::Printf(TEXT("%.0f km/dag på landevej, %.0f på chaussé"), Pace, Pace * Campaign1851Network::MarchKmPerDayChaussee / Campaign1851Network::MarchKmPerDayRoad));
+	if (!Why.IsEmpty())
+	{
+		PaintText(Geometry, Out, Layer + 2, Why, FVector2D(Pos.X + 22.f, Y), Serif(11, EFace::Italic), MutedInk, 0.f, false);
+		Y += 20.f;
+	}
+	if (First.IsMarching())
+	{
+		const FDateTime Arrive = Map->GetDate() + FTimespan::FromDays(First.DaysLeft());
+		Line(TEXT("Mål"), FString::Printf(TEXT("%s  ·  ankomst %s %s"), *Cities[First.Destination()].Name, *ACampaign1851Map::FormatClock(Arrive), *ACampaign1851Map::FormatDate(Arrive, true)));
+	}
+	if (Sel.Num() > 1)
+	{
+		Y += 6.f;
+		for (int32 r = 0; r < Rows; ++r)
+		{
+			const FVector2D Row(Pos.X + 18.f, Y - 11.f);
+			PaintButton(Geometry, Out, Layer + 2, Row, FVector2D(Size.X - 36.f, 21.f),
+				FString::Printf(TEXT("%s  ·  %s  ·  %d mand"), *Sel[r]->Name, Campaign1851Army::ArmName(Sel[r]->Arm), Sel[r]->Men), EButton::RegimentRow, SelectedRegiments[r]);
+			Y += 24.f;
+		}
+	}
+	const FVector2D ButtonSize(150.f, 28.f);
+	const float ButtonY = Pos.Y + Size.Y - 70.f;
+	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 22.f, ButtonY), ButtonSize, TEXT("TIL GARNISON"), EButton::ArmyHome);
+	if (First.IsMarching())
+	{
+		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 32.f + ButtonSize.X, ButtonY), ButtonSize, TEXT("HOLDT"), EButton::ArmyHalt);
+	}
+	PaintText(Geometry, Out, Layer + 2, TEXT("Højreklik på en by: march dertil  ·  Shift-klik: vælg flere  ·  Esc: fravælg"), FVector2D(Pos.X + Size.X * 0.5f, Pos.Y + Size.Y - 20.f),
+		Serif(10, EFace::Italic), MutedInk, 0.5f, false);
 }
 
 void SCampaign1851Overlay::PaintMenu(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const

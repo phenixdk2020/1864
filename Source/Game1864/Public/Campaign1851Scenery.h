@@ -61,7 +61,13 @@ namespace Campaign1851Scenery
 		Granary,         // tall yellow-brick grain store with hoist gables (13 x 5.4)
 		// Railways:
 		Train,           // locomotive, tender and three carriages; the front at the origin, running to +X (14.4 long)
-		Station          // small brick station with platform and canopy on the -Y side (8 x 4)
+		Station,         // small brick station with platform and canopy on the -Y side (8 x 4)
+		// Regiments on the campaign map (board-game miniatures), facing +X:
+		FormationInfantry,   // a battalion in column: dark blue coats, light blue trousers, Dannebrog
+		FormationGuard,      // the Life Guard: red coats, bearskins
+		FormationJager,      // light infantry in green
+		FormationCavalry,    // dragoons on horseback
+		FormationArtillery   // guns with limbers and teams
 	};
 
 	constexpr float BarracksLength = 16.f;

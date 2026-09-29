@@ -47,6 +47,26 @@ struct FCampaign1851LinkSave
 	UPROPERTY() float DaysBuilt = 0.f;
 };
 
+/** A regiment's state: where it stands or which stretch it is on, where it is going, its strength. */
+USTRUCT()
+struct FCampaign1851RegimentSave
+{
+	GENERATED_BODY()
+
+	UPROPERTY() FString Id;
+	/** The town it stands in, or the town the current stretch started from. */
+	UPROPERTY() FString Town;
+	/** Marching: the end of the current stretch, the days spent on it and the final destination. */
+	UPROPERTY() FString LegTo;
+	UPROPERTY() float LegElapsed = 0.f;
+	UPROPERTY() FString Destination;
+	UPROPERTY() int32 Men = 0;
+	UPROPERTY() float Morale = 0.8f;
+	/** Pace (km/day) and column of the march under way. */
+	UPROPERTY() float Pace = 0.f;
+	UPROPERTY() int32 Group = 0;
+};
+
 /**
  * A saved 1851 campaign (Saved/SaveGames/<slot>.sav). Holds the construction projects, the
  * camera view and the selected town. Bump SaveVersion when the layout changes and migrate in
@@ -58,8 +78,8 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
-	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. */
-	static constexpr int32 CurrentVersion = 5;
+	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. */
+	static constexpr int32 CurrentVersion = 6;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	UPROPERTY() FDateTime SavedAt;
@@ -83,4 +103,7 @@ public:
 
 	/** Chausséer and railways built by the player, and link projects under way. */
 	UPROPERTY() TArray<FCampaign1851LinkSave> Links;
+
+	/** The regiments (missing ones stay in their garrisons). */
+	UPROPERTY() TArray<FCampaign1851RegimentSave> Regiments;
 };

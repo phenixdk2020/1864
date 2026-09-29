@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Campaign1851SaveGame.h"
 #include "Campaign1851Network.h"
+#include "Campaign1851Army.h"
 #include "Campaign1851Map.generated.h"
 
 class UStaticMeshComponent;
@@ -279,6 +280,30 @@ public:
 	static FVector2D AlongLine(const TArray<FVector2D>& Line, double Distance, FVector2D* OutDirection = nullptr);
 	static double LineLength(const TArray<FVector2D>& Line);
 
+	// ---- Regiments (design manual 7; Campaign1851Army.cpp).
+
+	const TArray<FCampaign1851Regiment>& GetRegiments() const { return Regiments; }
+	int32 FindRegiment(const FString& Id) const { return Regiments.IndexOfByPredicate([&Id](const FCampaign1851Regiment& R) { return R.Id == Id; }); }
+	/** Regiments standing in a town. */
+	TArray<int32> RegimentsIn(int32 CityIndex) const;
+	/** Fastest way between two towns now for a column of this road pace (km/day), by road, chaussée, railway and ferry. */
+	bool FindRoute(int32 From, int32 To, float Pace, TArray<FCampaign1851Leg>& OutLegs) const;
+	/**
+	 * Sends regiments to a town as one column, at the pace of its slowest arm (Campaign1851Army::ColumnPace);
+	 * any on the march finish their current stretch first.
+	 */
+	bool OrderMarch(const TArray<int32>& Column, int32 CityIndex, FString* OutReason = nullptr);
+	/** Halts a regiment at the end of the stretch it is on. */
+	void HaltRegiment(int32 Regiment);
+	/** The ground a leg covers, from its From town to its To town (projected km). */
+	TArray<FVector2D> LegLine(const FCampaign1851Leg& Leg) const;
+	/** Where a regiment is on the map now. */
+	FVector RegimentWorld(int32 Regiment) const;
+	/** The army of 1851 in its garrisons (new game, or before loading). */
+	void ResetArmy();
+	TArray<FCampaign1851RegimentSave> SaveArmy() const;
+	int32 RestoreArmy(const TArray<FCampaign1851RegimentSave>& Saves);
+
 	/** Screen-size scaling for the city markers; called by the player controller each frame. */
 	void UpdateMarkers(float CameraDistanceKm);
 
@@ -372,6 +397,17 @@ private:
 	int32 FeaturesW = 0, FeaturesH = 0;
 	bool bSceneryVisible = false;
 	bool bRoadsVisible = false;
+
+	// ---- Army (Campaign1851Army.cpp)
+	bool LoadArmy();
+	void AdvanceArmy(float DeltaDays, float DeltaSeconds);
+	/** Position of a regiment standing in a town: around the edge of it, each in its own place. */
+	void PlaceInTown(int32 Regiment);
+	void UpdateRegimentPiece(int32 Regiment);
+	TArray<FCampaign1851Regiment> Regiments;
+	TArray<FCampaign1851Regiment> ArmyAtStart;
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> RegimentPieces;
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMesh>> ArmyMeshes;   // per ECampaign1851Arm
 
 	// ---- Network (Campaign1851Network.cpp)
 	bool LoadNetwork(const FJsonObject& Json);
