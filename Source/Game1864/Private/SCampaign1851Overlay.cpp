@@ -1282,8 +1282,10 @@ void SCampaign1851Overlay::PaintFortTool(const FGeometry& Geometry, FSlateWindow
 {
 	const TArray<FCampaign1851Fort>& Forts = Map->GetForts();
 	const int32 Rows = FMath::Min(Forts.Num(), 8);
-	const FVector2D Size(470.f, 200.f + Rows * 28.f);
-	const FVector2D Pos(28.f, 350.f);
+	const FVector2D Size(540.f, 200.f + Rows * 28.f);
+	// Beside the fort's own panel when one is chosen, else in its place at the bottom left.
+	const bool bBeside = Map->FortIndex(SelectedFort) != INDEX_NONE || SelectedRegiments.Num() > 0 || Map->GetCities().IsValidIndex(SelectedCity) || SelectedAmt != 0;
+	const FVector2D Pos(bBeside ? 28.f + 560.f + 10.f : 28.f, FMath::Max(130.f, Geometry.GetLocalSize().Y - 190.f - Size.Y));
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseFortPanel);
 	PaintText(Geometry, Out, Layer + 2, TEXT("S K A N S E R"), Pos + FVector2D(22.f, 26.f), Serif(11), Gold, 0.f, false);

@@ -212,7 +212,7 @@ public:
 
 	/** Moves the clock on by the real time passed, in whole minutes; drives the projects and the season. */
 	void AdvanceTime(float DeltaSeconds);
-	void SetSpeed(int32 InSpeed) { Speed = FMath::Clamp(InSpeed, 0, NumSpeeds() - 1); }
+	void SetSpeed(int32 InSpeed) { const int32 New = FMath::Clamp(InSpeed, 0, NumSpeeds() - 1); if (New != Speed) { MinuteCarry = 0.0; } Speed = New; }
 	int32 GetSpeed() const { return Speed; }
 	static int32 NumSpeeds() { return 7; }
 	/** Campaign hours per real second at a speed step (0, 0.25, 1, 3, 8, 24, 96); speed 6 jumps a whole day at a time. */
@@ -765,7 +765,9 @@ private:
 	/** Season weights for the map materials (MPC_Campaign1851Season): Snow, Bare, Autumn, Spring. */
 	void UpdateSeason();
 	double CampaignDays = 0.0;
-	double MinuteCarry = 0.0;   // part of a minute of real time not yet ticked
+	double MinuteCarry = 0.0;   // part of a minute of real time not yet ticked (speed 6: seconds towards the next day)
+	/** Speed 6: real seconds per campaign day. */
+	static constexpr float DaySeconds = 0.4f;
 	int32 Speed = 1;
 
 	/** Closes a month: grant in, upkeep and the month's construction wages out. */

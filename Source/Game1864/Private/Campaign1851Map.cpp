@@ -1543,11 +1543,24 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 	}
 	const int32 MonthBefore = GetDate().GetMonth();
 	// The clock ticks in whole minutes; the work of those minutes is done at once.
-	MinuteCarry += double(DeltaSeconds) * HoursPerSecondAt(Speed) * 60.0;
-	// Speed 6 jumps a whole day at a time (for waiting on something); the others tick minute by minute.
-	const double Step = Speed >= 6 ? 1440.0 : 1.0;
-	const double Minutes = FMath::FloorToDouble(MinuteCarry / Step) * Step;
-	MinuteCarry -= Minutes;
+	double Minutes = 0.0;
+	if (Speed >= 6)
+	{
+		// Speed 6: exactly one day per beat, in an even rhythm (1, 2, 3 ...). A slow frame never jumps two
+		// days at once: time that piled up is dropped rather than caught up.
+		MinuteCarry += DeltaSeconds;
+		if (MinuteCarry >= DaySeconds)
+		{
+			Minutes = 1440.0;
+			MinuteCarry = FMath::Min(MinuteCarry - DaySeconds, double(DaySeconds) * 0.5);
+		}
+	}
+	else
+	{
+		MinuteCarry += double(DeltaSeconds) * HoursPerSecondAt(Speed) * 60.0;
+		Minutes = FMath::FloorToDouble(MinuteCarry);
+		MinuteCarry -= Minutes;
+	}
 	const float DeltaDays = float(Minutes / 1440.0);
 	CampaignDays = FMath::RoundToDouble((CampaignDays + Minutes / 1440.0) * 1440.0) / 1440.0;
 	for (ACampaign1851ConstructionSite* Site : Projects)
