@@ -534,7 +534,11 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	{
 		PaintTownLinks(Geometry, Out, Layer, 28.f + 440.f + 10.f);
 	}
-	const FVector2D Size(440.f, C.bForeign ? 150.f : 226.f);
+	// Room for the depot and the materials store, when the town has them.
+	const FCampaign1851DepotCapacity DepotRoom = Map->DepotCapacity(SelectedCity);
+	const bool bDepotLine = !C.bForeign && DepotRoom.Food + DepotRoom.Fodder + DepotRoom.Ammo > 0.f;
+	const bool bMaterialsLine = !C.bForeign && Map->GetMaterialsIn(SelectedCity) >= 1.0;
+	const FVector2D Size(440.f, C.bForeign ? 150.f : 226.f + (bDepotLine ? 20.f : 0.f) + (bMaterialsLine ? 20.f : 0.f));
 	const ACampaign1851ConstructionSite* Site = C.bHasPlot ? Map->FindProject(SelectedCity) : nullptr;
 	const int32 ModuleRows = Site && Site->IsBarracksDone() ? Site->NumModules() - 1 : 0;
 	const float RowHeight = 54.f;
@@ -551,6 +555,11 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	if (!C.bForeign)
 	{
 		const int32 AmtIndex = Map->AmtIndexOfTown(SelectedCity);
+		if (bMaterialsLine)
+		{
+			PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Byggematerialer: %s rd. på lager (op til halvdelen af byggeri inden for 30 km)"), *Thousands(int32(Map->GetMaterialsIn(SelectedCity)))),
+				Pos + FVector2D(22.f, 166.f + (bDepotLine ? 20.f : 0.f)), Serif(11, EFace::Italic), Ink, Size.X - 44.f);
+		}
 		const FCampaign1851DepotCapacity DepotCap = Map->DepotCapacity(SelectedCity);
 		if (DepotCap.Food + DepotCap.Fodder + DepotCap.Ammo > 0.f)
 		{
@@ -887,6 +896,53 @@ void SCampaign1851Overlay::PaintArmy(const FGeometry& Geometry, FSlateWindowElem
 			PaintDot(Geometry, Out, Layer + 1, End, 14.f, RouteBlue);
 			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("ankomst %s %s"), *ACampaign1851Map::FormatClock(Now + FTimespan::FromDays(R.DaysLeft())),
 				*ACampaign1851Map::FormatDate(Now + FTimespan::FromDays(R.DaysLeft()), true)), End + FVector2D(12.f, 16.f), Serif(11, EFace::Italic), RouteBlue, 0.f);
+		}
+	}
+
+	// The supply map: each depot's reach (a day's march) and every unit's supply in colour.
+	if (bSupplyMap)
+	{
+		for (int32 c = 0; c < Cities.Num(); ++c)
+		{
+			const FCampaign1851DepotStock S = Map->DepotStock(c);
+			if (S.Food + S.Fodder + S.Ammo <= 1.f)
+			{
+				continue;
+			}
+			TArray<FVector2D> Ring;
+			for (int32 a = 0; a <= 36; ++a)
+			{
+				const double A = a * UE_TWO_PI / 36.0;
+				FVector2D P;
+				if (ToLocal(Geometry, Map->WorldAtKm(Map->TownKm(c) + FVector2D(FMath::Cos(A), FMath::Sin(A)) * Campaign1851Supply::DepotReachKm), P))
+				{
+					Ring.Add(P);
+				}
+			}
+			if (Ring.Num() > 2)
+			{
+				DrawLines(Geometry, Out, Layer, Ring, FLinearColor(0.35f, 0.8f, 0.35f, 0.8f), 2.5f);
+			}
+		}
+		for (int32 i = 0; i < Regs.Num(); ++i)
+		{
+			const FCampaign1851Regiment& R = Regs[i];
+			FVector2D P;
+			if (!ToLocal(Geometry, Map->RegimentWorld(i), P))
+			{
+				continue;
+			}
+			const bool bGarrison = !R.IsMarching() && !R.IsInField();
+			const FLinearColor Status = bGarrison ? FLinearColor(0.35f, 0.75f, 0.35f) : R.Food < 1.f ? FLinearColor(0.85f, 0.25f, 0.2f) : R.Food < 2.f ? FLinearColor(0.9f, 0.75f, 0.25f) : FLinearColor(0.35f, 0.75f, 0.35f);
+			PaintDot(Geometry, Out, Layer + 6, P + FVector2D(0.f, 8.f), 12.f, Status);
+		}
+		for (const FCampaign1851SupplyColumn& C : Map->GetSupplyColumns())
+		{
+			FVector2D P;
+			if (ToLocal(Geometry, Map->WorldAtKm(C.Km), P))
+			{
+				PaintDot(Geometry, Out, Layer + 6, P, 9.f, FLinearColor(0.75f, 0.55f, 0.3f));
+			}
 		}
 	}
 
@@ -1477,6 +1533,100 @@ void SCampaign1851Overlay::PaintFort(const FGeometry& Geometry, FSlateWindowElem
 	{
 		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Sløjfes: %d kanoner til lageret, materialer ca. %d rd., kompagnierne går hjem"), F.Guns, FMath::RoundToInt(F.Invested * 0.1)),
 			FVector2D(Pos.X + 22.f, Y + 38.f), Serif(10, EFace::Italic), Gold, Size.X - 44.f);
+	}
+}
+
+void SCampaign1851Overlay::PaintSupply(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
+{
+	const TArray<FCampaign1851City>& Cities = Map->GetCities();
+	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
+	PaintText(Geometry, Out, Layer + 1, TEXT("Forsyning"), Pos + FVector2D(24.f, 34.f), Serif(22), Ink, 0.f);
+	PaintTextFit(Geometry, Out, Layer + 1, FString::Printf(TEXT("Lager: %s geværer  ·  %d kanoner  ·  %s heste  ·  trænkolonner %d af %d ledige  ·  forråd %s rd./md."),
+		*Thousands(Map->GetRifles()), Map->GetGunStock(), *Thousands(Map->GetHorseStock()), Map->FreeSupplyColumns(), Map->GetSupplyColumnCount(), *Thousands(int32(Map->StockingCostPerMonth()))),
+		Pos + FVector2D(24.f, 64.f), Serif(12, EFace::Italic), Gold, Size.X - 520.f);
+	PaintButton(Geometry, Out, Layer + 1, Pos + FVector2D(Size.X - 470.f, 50.f), FVector2D(190.f, 28.f), bSupplyMap ? TEXT("SKJUL KORTET (F)") : TEXT("FORSYNINGSKORT (F)"), EButton::SupplyMap, 0, bSupplyMap);
+	PaintButton(Geometry, Out, Layer + 1, Pos + FVector2D(Size.X - 272.f, 50.f), FVector2D(200.f, 28.f), FString::Printf(TEXT("KØB KOLONNE  %s"), *Thousands(Campaign1851Supply::ColumnCost)), EButton::SupplyBuy);
+	// Depots.
+	float Y = Pos.Y + 112.f;
+	const float X = Pos.X + 24.f;
+	PaintText(Geometry, Out, Layer + 1, TEXT("D E P O T E R"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
+	Y += 24.f;
+	const float DCols[] = { 0.f, 150.f, 300.f, 430.f, 540.f };
+	const TCHAR* DHeads[] = { TEXT("By"), TEXT("Proviant"), TEXT("Foder"), TEXT("Ammunition"), TEXT("Materialer") };
+	for (int32 c = 0; c < 5; ++c)
+	{
+		PaintText(Geometry, Out, Layer + 1, DHeads[c], FVector2D(X + DCols[c], Y), Serif(10, EFace::Italic), MutedInk, 0.f, false);
+	}
+	Y += 20.f;
+	int32 Shown = 0;
+	for (int32 c = 0; c < Cities.Num() && Shown < 14; ++c)
+	{
+		const FCampaign1851DepotCapacity Cap = Map->DepotCapacity(c);
+		const double Materials = Map->GetMaterialsIn(c);
+		if (Cap.Food + Cap.Fodder + Cap.Ammo <= 0.f && Materials < 1.0)
+		{
+			continue;
+		}
+		const FCampaign1851DepotStock S = Map->DepotStock(c);
+		PaintTextFit(Geometry, Out, Layer + 1, Cities[c].Name, FVector2D(X + DCols[0], Y), Serif(12), Ink, 140.f);
+		PaintText(Geometry, Out, Layer + 1, Cap.Food > 0.f ? FString::Printf(TEXT("%s / %s"), *Thousands(int32(S.Food)), *Thousands(int32(Cap.Food))) : FString(TEXT("-")), FVector2D(X + DCols[1], Y), Serif(12), Ink, 0.f, false);
+		PaintText(Geometry, Out, Layer + 1, Cap.Fodder > 0.f ? FString::Printf(TEXT("%s / %s"), *Thousands(int32(S.Fodder)), *Thousands(int32(Cap.Fodder))) : FString(TEXT("-")), FVector2D(X + DCols[2], Y), Serif(12), Ink, 0.f, false);
+		PaintText(Geometry, Out, Layer + 1, Cap.Ammo > 0.f ? FString::Printf(TEXT("%.0f / %.0f"), S.Ammo, Cap.Ammo) : FString(TEXT("-")), FVector2D(X + DCols[3], Y), Serif(12), Ink, 0.f, false);
+		PaintText(Geometry, Out, Layer + 1, Materials >= 1.0 ? FString::Printf(TEXT("%s rd."), *Thousands(int32(Materials))) : FString(TEXT("-")), FVector2D(X + DCols[4], Y), Serif(12), Ink, 0.f, false);
+		Y += 22.f;
+		++Shown;
+	}
+	if (Shown == 0)
+	{
+		PaintTextFit(Geometry, Out, Layer + 1, TEXT("Ingen depoter: byg Depot og magasin (garnison), Kornmagasin eller Arsenal"), FVector2D(X, Y), Serif(12, EFace::Italic), MutedInk, 640.f);
+		Y += 22.f;
+	}
+	// Columns under way.
+	Y += 18.f;
+	PaintText(Geometry, Out, Layer + 1, TEXT("T R Æ N K O L O N N E R   U N D E R V E J S"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
+	Y += 24.f;
+	const TArray<FCampaign1851SupplyColumn>& Columns = Map->GetSupplyColumns();
+	if (Columns.Num() == 0)
+	{
+		PaintText(Geometry, Out, Layer + 1, TEXT("Ingen"), FVector2D(X, Y), Serif(12, EFace::Italic), MutedInk, 0.f, false);
+		Y += 22.f;
+	}
+	for (int32 i = 0; i < Columns.Num() && i < 8; ++i)
+	{
+		const FCampaign1851SupplyColumn& C = Columns[i];
+		const FString To = C.bFort ? (Map->FortIndex(C.Target) != INDEX_NONE ? Map->GetForts()[Map->FortIndex(C.Target)].Name : FString())
+			: (Regs.IsValidIndex(C.Target) ? Regs[C.Target].Name : FString());
+		PaintTextFit(Geometry, Out, Layer + 1, FString::Printf(TEXT("Kolonne %d  ·  %s  ·  %s %s  ·  %s rationer"), C.Id, Cities.IsValidIndex(C.Depot) ? *Cities[C.Depot].Name : TEXT(""),
+			C.State == ESupplyColumnState::Outbound ? TEXT("på vej til") : TEXT("kører hjem fra"), *To, *Thousands(int32(C.Food))), FVector2D(X, Y), Serif(12), Ink, 640.f);
+		Y += 22.f;
+	}
+	// Units in the field, the worst supplied first.
+	const float RX = Pos.X + 720.f;
+	float RY = Pos.Y + 112.f;
+	PaintText(Geometry, Out, Layer + 1, TEXT("E N H E D E R   I   F E L T E N"), FVector2D(RX, RY), Serif(11), Gold, 0.f, false);
+	RY += 24.f;
+	TArray<int32> Field;
+	for (int32 i = 0; i < Regs.Num(); ++i)
+	{
+		if (Regs[i].IsMarching() || Regs[i].IsInField())
+		{
+			Field.Add(i);
+		}
+	}
+	Field.Sort([&Regs](int32 A, int32 B) { return Regs[A].Food < Regs[B].Food; });
+	if (Field.Num() == 0)
+	{
+		PaintText(Geometry, Out, Layer + 1, TEXT("Hele hæren står i garnison"), FVector2D(RX, RY), Serif(12, EFace::Italic), MutedInk, 0.f, false);
+	}
+	for (int32 k = 0; k < Field.Num() && RY < Pos.Y + Size.Y - 40.f; ++k)
+	{
+		const FCampaign1851Regiment& R = Regs[Field[k]];
+		const FLinearColor Status = R.Food < 1.f ? FLinearColor(0.85f, 0.25f, 0.2f) : R.Food < 2.f ? FLinearColor(0.9f, 0.75f, 0.25f) : FLinearColor(0.35f, 0.75f, 0.35f);
+		PaintDot(Geometry, Out, Layer + 1, FVector2D(RX + 6.f, RY), 10.f, Status);
+		PaintTextFit(Geometry, Out, Layer + 1, FString::Printf(TEXT("%s  ·  %s  ·  %s"), *R.Name, *Map->DescribePlace(R.Town, R.Km), *Campaign1851Supply::Describe(R)),
+			FVector2D(RX + 18.f, RY), Serif(12), Ink, Size.X - 720.f - 170.f);
+		PaintButton(Geometry, Out, Layer + 1, FVector2D(Pos.X + Size.X - 150.f, RY - 11.f), FVector2D(126.f, 22.f), TEXT("SEND"), EButton::SupplySend, Field[k], false, Map->FreeSupplyColumns() <= 0);
+		RY += 26.f;
 	}
 }
 
@@ -2397,11 +2547,11 @@ void SCampaign1851Overlay::PaintCloseX(const FGeometry& Geometry, FSlateWindowEl
 void SCampaign1851Overlay::PaintMenuBar(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
 {
 	// Under the calendar: one window at a time, the open one lit.
-	const TCHAR* Labels[] = { TEXT("HÆREN"), TEXT("OFFICERER"), TEXT("STATSKASSEN"), TEXT("BYER"), TEXT("TOG"), TEXT("KAMPORDEN"), TEXT("STATSRÅD") };
-	const float W = 98.f, Gap = 5.f;
-	const float Total = 7.f * W + 6.f * Gap;
+	const TCHAR* Labels[] = { TEXT("HÆREN"), TEXT("OFFICERER"), TEXT("STATSKASSEN"), TEXT("BYER"), TEXT("TOG"), TEXT("KAMPORDEN"), TEXT("STATSRÅD"), TEXT("FORSYNING") };
+	const float W = 94.f, Gap = 4.f;
+	const float Total = 8.f * W + 7.f * Gap;
 	const float X0 = FMath::Max((Geometry.GetLocalSize().X - 660.f) * 0.5f, 484.f) + (660.f - Total) * 0.5f;
-	for (int32 i = 0; i < 7; ++i)
+	for (int32 i = 0; i < 8; ++i)
 	{
 		PaintButton(Geometry, Out, Layer, FVector2D(X0 + i * (W + Gap), 92.f), FVector2D(W, 28.f), Labels[i], EButton::MainMenu, i + 1, int32(Window) == i + 1);
 	}
@@ -2665,6 +2815,10 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 			EButton::TrainOrder, 0, false, Map->GetTreasury() < ACampaign1851Map::TroopTrainCost);
 		PaintText(Geometry, Out, Layer + 3, TEXT("Lokomotiv og vogne bygges i England og skibes til Danmark. Uden ledige tog marcherer kolonnen i stedet."),
 			FVector2D(Pos.X + 24.f, Y + 56.f), Serif(11, EFace::Italic), MutedInk, 0.f, false);
+	}
+	else if (Window == EWindow::Supply)
+	{
+		PaintSupply(Geometry, Out, Layer + 2, Pos, Size);
 	}
 	else if (Window == EWindow::Council)
 	{

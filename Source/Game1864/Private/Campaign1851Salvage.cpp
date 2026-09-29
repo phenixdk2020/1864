@@ -24,13 +24,17 @@ namespace
 	}
 }
 
-void ACampaign1851Map::AddMaterials(int32 CityIndex, double Rd, const FString& From)
+void ACampaign1851Map::AddMaterials(int32 CityIndex, double Rd, const FString& From, bool bNews)
 {
 	if (Rd < 1.0 || !Cities.IsValidIndex(CityIndex))
 	{
 		return;
 	}
 	MaterialLots.Add(FVector(double(CityIndex), Rd, CampaignDays));
+	if (!bNews)
+	{
+		return;
+	}
 	News.Add(FString::Printf(TEXT("Materialer for %s rd. fra %s ligger nu på lager i %s"), *FString::FromInt(FMath::RoundToInt(Rd)), *From, *Cities[CityIndex].Name));
 }
 
@@ -85,6 +89,35 @@ void ACampaign1851Map::MonthlySalvage()
 	if (Sold >= 1.0)
 	{
 		AddTransaction(Sold, TEXT("Overskydende byggematerialer solgt"));
+	}
+}
+
+double ACampaign1851Map::MaterialsIn(int32 CityIndex) const
+{
+	double Total = 0.0;
+	for (const FVector& Lot : MaterialLots)
+	{
+		Total += int32(Lot.X) == CityIndex ? Lot.Y : 0.0;
+	}
+	return Total;
+}
+
+void ACampaign1851Map::MonthlyBuildingMaterials()
+{
+	// Brickworks and sawmills (the state's or private) deliver bricks and timber to their town's store, which
+	// pays part of the works within 30 km; the store of a town holds up to a few thousand rigsdaler.
+	for (const ACampaign1851ConstructionSite* Site : Projects)
+	{
+		if (!Site || Site->IsGarrison() || Site->IsDemolishing() || !Site->IsModuleDone(0))
+		{
+			continue;
+		}
+		const double Made = Site->GetKind() == TEXT("Brickworks") ? 600.0 : Site->GetKind() == TEXT("Sawmill") ? 300.0 : 0.0;
+		const int32 City = Site->GetCityIndex();
+		if (Made > 0.0 && MaterialsIn(City) < MaterialStoreCap)
+		{
+			AddMaterials(City, FMath::Min(Made, MaterialStoreCap - MaterialsIn(City)), Site->ModuleName(0).ToLower(), false);
+		}
 	}
 }
 

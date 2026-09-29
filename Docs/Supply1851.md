@@ -45,3 +45,12 @@ Filen skrives hver måned og ved hver gemning. Hver enhed har:
 - **Aflevering:** Kolonnen afleverer det, enheden eller skansen mangler, og kører hjem med resten. Er enheden marcheret videre, følger kolonnen efter.
 - **Automatisk:** Enheder uden depot i nærheden bestiller selv en kolonne i tide, altså når proviant er under køreturen + 1 dag. **SEND FORSYNING** i hær- og skansepanelet sender en med det samme.
 - **På kortet:** Kolonnerne ses som hestevogne, når man er zoomet ind.
+## Byggematerialer (backlog 4, v00.00.44)
+- Teglværker leverer mursten for 600 rd. om måneden og savværker tømmer for 300 rd. til materialelageret i deres by. Det gælder også private værker, som staten køber af.
+- En by kan højst have 5.000 rd. på lager.
+- Lageret betaler op til halvdelen af nyt byggeri inden for 30 km, sammen med materialer fra nedrivning.
+- Lageret står i bypanelet og i FORSYNING-vinduet.
+
+## Forsyningsvinduet og forsyningskortet (backlog 5, v00.00.44)
+- **Menuknappen FORSYNING:** viser statens lager (geværer, kanoner, heste, trænkolonner, forråd pr. måned), depoter (proviant, foder, ammunition, materialer), kolonner undervejs og enheder i felten. Enhederne står efter forsyning, de dårligst forsynede først, med farve og SEND-knap.
+- **Forsyningskort (tasten F):** viser en grøn ring om hvert depot med forråd (rækkevidde 25 km) og en farvet prik pr. enhed: grøn = forsynet, gul = under 2 dage, rød = under 1 dag. Trænkolonnerne vises som brune prikker.

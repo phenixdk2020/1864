@@ -209,7 +209,12 @@ void ACampaign1851PlayerController::TryInit()
 	{
 		Overlay->OpenWindow(WindowName == TEXT("army") ? SCampaign1851Overlay::EWindow::Army : WindowName == TEXT("officers") ? SCampaign1851Overlay::EWindow::Officers
 			: WindowName == TEXT("budget") ? SCampaign1851Overlay::EWindow::Budget : WindowName == TEXT("trains") ? SCampaign1851Overlay::EWindow::Trains
-			: WindowName == TEXT("chart") ? SCampaign1851Overlay::EWindow::Chart : WindowName == TEXT("council") ? SCampaign1851Overlay::EWindow::Council : SCampaign1851Overlay::EWindow::Towns);
+			: WindowName == TEXT("chart") ? SCampaign1851Overlay::EWindow::Chart : WindowName == TEXT("council") ? SCampaign1851Overlay::EWindow::Council
+			: WindowName == TEXT("supply") ? SCampaign1851Overlay::EWindow::Supply : SCampaign1851Overlay::EWindow::Towns);
+	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignSupplyMap")) && Overlay.IsValid())
+	{
+		Overlay->ToggleSupplyMap();
+	}
 	}
 	// -CampaignBuildFort=54.91,9.75,stor,135;54.90,9.72,lille,160 starts forts (lat, lon, size, front bearing);
 	// -CampaignFortsComplete finishes them fully armed and strengthened (to see them).
@@ -516,6 +521,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	if (!bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollUp))   { if (bOverTree) { Overlay->ScrollTree(-3); } else { Camera->Zoom(1.f, bFocus ? &Focus : nullptr); } }
 	if (!bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollDown)) { if (bOverTree) { Overlay->ScrollTree(3); } else { Camera->Zoom(-1.f, bFocus ? &Focus : nullptr); } }
 	if (WasInputKeyJustPressed(EKeys::K) && Overlay.IsValid()) { Overlay->ToggleOOB(); }
+	if (WasInputKeyJustPressed(EKeys::F) && Overlay.IsValid()) { Overlay->ToggleSupplyMap(); }
 	// Tree drag and drop: pressed on a row, moved a little -> dragging; released -> drop (or a click).
 	if (TreePressKey != INDEX_NONE && Overlay.IsValid())
 	{
@@ -866,6 +872,14 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			else
 			{
 				Overlay->ShowToast(Why);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::SupplyMap)
+		{
+			Overlay->ToggleSupplyMap();
+			if (Overlay->IsSupplyMap())
+			{
+				Overlay->OpenWindow(SCampaign1851Overlay::EWindow::None);
 			}
 		}
 		else if (Button == SCampaign1851Overlay::EButton::SupplyBuy)
@@ -1304,6 +1318,10 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 			P.DemolishWages = Site->GetDemolishWages();
 			P.DemolishDone = Site->GetDemolishDone();
 			P.DemolishFrom = Site->GetDemolishFrom();
+		}
+		if (Site->IsHistoric())
+		{
+			continue;   // the towns' own buildings of 1851 are not news in the summary
 		}
 		TArray<FString> Built;
 		for (int32 m = 0; m < Site->NumModules(); ++m)

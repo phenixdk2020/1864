@@ -47,7 +47,7 @@ public:
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve, FormationDeputy, FormationStaff,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
-		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy };
+		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -61,6 +61,9 @@ public:
 	void ScrollChart(int32 Steps, bool bVertical = false) { float& S = bVertical ? ChartScrollY : ChartScroll; S = FMath::Max(0.f, S + Steps * 60.f); }
 	bool IsOOBOpen() const { return bOOB; }
 	void SetCivilTab(bool bIn) { bCivilTab = bIn; }
+	/** The supply map: depot ranges and each unit's supply in colour (key F). */
+	void ToggleSupplyMap() { bSupplyMap = !bSupplyMap; }
+	bool IsSupplyMap() const { return bSupplyMap; }
 	/** The fort list and the choice of a new fort (the SKANSER button). */
 	void ToggleFortTool() { bFortTool = !bFortTool; }
 	void HideFortTool() { bFortTool = false; }
@@ -100,7 +103,7 @@ public:
 	/** What an X in a panel's corner closes (the Module of EButton::ClosePanel). */
 	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB, CloseOrder, CloseFortPanel, CloseFort };
 	/** The big windows opened from the menu bar under the calendar (one at a time). */
-	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council };
+	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council, Supply };
 	void OpenWindow(EWindow In) { Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
 	EWindow GetWindow() const { return Window; }
 	/** Sort a table by a column (again: the other way round). */
@@ -211,6 +214,8 @@ private:
 	/** The SKANSER panel (new fort, list of forts) and a fort's own panel. */
 	void PaintFortTool(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintFort(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	/** The supply window: depots, columns, units in the field, the stores. */
+	void PaintSupply(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const;
 	/** The council window: the nations, the player's ministries (delegation) and their decisions. */
 	void PaintCouncil(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const;
 	/** The field army as an organisation chart: HQ boxes, units stacked under them, connecting lines. */
@@ -268,6 +273,7 @@ private:
 	mutable int32 TreeScroll = 0;
 	mutable float ChartScroll = 0.f;
 	bool bFortTool = false;
+	bool bSupplyMap = false;
 	int32 SelectedFort = 0;
 	int32 FortPlacing = 0;
 	bool bFortPickCompany = false;

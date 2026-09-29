@@ -380,6 +380,8 @@ public:
 	/** Fortress guns in the state's store (for any fort). */
 	int32 GetGunStock() const { return GunStock; }
 	void SetGunStock(int32 N) { GunStock = FMath::Max(0, N); }
+	/** Materials stored in a town (rigsdaler). */
+	double GetMaterialsIn(int32 CityIndex) const { return MaterialsIn(CityIndex); }
 	/** Materials stored within reach (km) of a point, in rigsdaler. */
 	double MaterialsNear(const FVector2D& Km) const;
 	const TArray<FVector>& GetMaterialLots() const { return MaterialLots; }
@@ -799,7 +801,10 @@ private:
 	int32 Horses = 0;
 
 	// The salvage layer (Campaign1851Salvage.cpp).
-	void AddMaterials(int32 CityIndex, double Rd, const FString& From);
+	void AddMaterials(int32 CityIndex, double Rd, const FString& From, bool bNews = true);
+	double MaterialsIn(int32 CityIndex) const;
+	void MonthlyBuildingMaterials();
+	static constexpr double MaterialStoreCap = 5000.0;
 	void UseMaterials(const FVector2D& Km, double Cost, const FString& For);
 	void MonthlySalvage();
 	void AdvanceDemolitions(float DeltaDays);
