@@ -845,9 +845,37 @@ bool ACampaign1851Map::PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 
 	return OutLegs.Num() > 0;
 }
 
+FVector2D ACampaign1851Map::ShownKm(int32 Regiment) const
+{
+	// Units standing together are drawn side by side across their heading (first in the middle), so the
+	// miniatures and their labels do not sit on top of each other.
+	const FCampaign1851Regiment& R = Regiments[Regiment];
+	if (R.IsMarching() && R.Route[R.Leg].bRail)
+	{
+		return R.Km;
+	}
+	int32 Slot = 0;
+	for (int32 j = 0; j < Regiment; ++j)
+	{
+		const FCampaign1851Regiment& O = Regiments[j];
+		if (O.Men > 0 && !(O.IsMarching() && O.Route[O.Leg].bRail) && FVector2D::Distance(O.Km, R.Km) < 0.35)
+		{
+			++Slot;
+		}
+	}
+	if (Slot == 0)
+	{
+		return R.Km;
+	}
+	const FVector2D Heading = R.Heading.IsNearlyZero() ? FVector2D(1.0, 0.0) : R.Heading.GetSafeNormal();
+	const FVector2D Side(-Heading.Y, Heading.X);
+	const double Step = 0.62 * ((Slot + 1) / 2) * (Slot % 2 == 1 ? 1.0 : -1.0);
+	return R.Km + Side * Step;
+}
+
 FVector ACampaign1851Map::RegimentWorld(int32 Regiment) const
 {
-	return Regiments.IsValidIndex(Regiment) ? WorldAtKm(Regiments[Regiment].Km) : FVector::ZeroVector;
+	return Regiments.IsValidIndex(Regiment) ? WorldAtKm(ShownKm(Regiment)) : FVector::ZeroVector;
 }
 
 // ------------------------------------------------------------------ orders
@@ -1446,6 +1474,7 @@ void ACampaign1851Map::AdvanceArmy(float DeltaDays, float DeltaSeconds)
 			}
 		}
 	}
+	bool bAnyMoved = false;
 	for (int32 i = 0; i < Regiments.Num(); ++i)
 	{
 		FCampaign1851Regiment& R = Regiments[i];
@@ -1490,6 +1519,18 @@ void ACampaign1851Map::AdvanceArmy(float DeltaDays, float DeltaSeconds)
 			R.Heading = Dir;
 		}
 		UpdateRegimentPiece(i);
+		bAnyMoved = true;
+	}
+	// Those standing still move aside when others come to (or leave) their place.
+	if (bAnyMoved)
+	{
+		for (int32 i = 0; i < Regiments.Num(); ++i)
+		{
+			if (!Regiments[i].IsMarching())
+			{
+				UpdateRegimentPiece(i);
+			}
+		}
 	}
 	AdvanceTroopTrains(DeltaDays);
 }
@@ -1619,7 +1660,7 @@ void ACampaign1851Map::UpdateRegimentPiece(int32 Regiment)
 		return;
 	}
 	// The formation faces +X: turn it to the heading (world Y is south).
-	Piece->SetWorldLocationAndRotation(WorldAtKm(R.Km) + FVector(0.0, 0.0, 0.5),
+	Piece->SetWorldLocationAndRotation(WorldAtKm(ShownKm(Regiment)) + FVector(0.0, 0.0, 0.5),
 		FRotator(0.f, FMath::RadiansToDegrees(FMath::Atan2(-R.Heading.Y, R.Heading.X)) + float(GetActorRotation().Yaw), 0.f));
 	Piece->SetVisibility(LastCameraDistanceKm < FormationMaxDistanceKm);
 }

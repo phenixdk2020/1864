@@ -1058,6 +1058,8 @@ public:
 	TArray<FVector2D> LegLine(const FCampaign1851Leg& Leg) const;
 	/** Where a regiment is on the map now. */
 	FVector RegimentWorld(int32 Regiment) const;
+	/** Where a unit is drawn: its place, moved aside when others stand there too. */
+	FVector2D ShownKm(int32 Regiment) const;
 	// ---- Officers (design manual 8; Campaign1851Officers.cpp).
 
 	const TArray<FCampaign1851Officer>& GetOfficers() const { return Officers; }

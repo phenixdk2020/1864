@@ -99,6 +99,144 @@ namespace
 			Quad(P(1, 0, 0), P(1, 1, 0), P(1, 1, 1), P(1, 0, 1), Base, In);
 		}
 
+		/** A tapered round rod from P0 to P1 (radius R0 to R1), N sides, closed at the ends: legs, arms, barrels. */
+		void Frustum(const FVector3f& P0, const FVector3f& P1, float R0, float R1, const FLinearColor& Base, int32 N = 8)
+		{
+			FVector3f Axis = P1 - P0;
+			const float Len = Axis.Size();
+			if (Len < 1e-4f)
+			{
+				return;
+			}
+			Axis /= Len;
+			const FVector3f U = (FMath::Abs(Axis.Z) < 0.9f ? FVector3f::CrossProduct(Axis, FVector3f(0.f, 0.f, 1.f)) : FVector3f::CrossProduct(Axis, FVector3f(1.f, 0.f, 0.f))).GetSafeNormal();
+			const FVector3f V = FVector3f::CrossProduct(Axis, U);
+			const FVector3f In = (P0 + P1) * 0.5f;
+			for (int32 k = 0; k < N; ++k)
+			{
+				const float A0 = k * UE_TWO_PI / N, A1 = (k + 1) * UE_TWO_PI / N;
+				const FVector3f D0 = U * FMath::Cos(A0) + V * FMath::Sin(A0), D1 = U * FMath::Cos(A1) + V * FMath::Sin(A1);
+				Quad(P0 + D0 * R0, P0 + D1 * R0, P1 + D1 * R1, P1 + D0 * R1, Base, In);
+				if (R0 > 1e-4f) { Tri(P0, P0 + D0 * R0, P0 + D1 * R0, Base, In); }
+				if (R1 > 1e-4f) { Tri(P1, P1 + D0 * R1, P1 + D1 * R1, Base, In); }
+			}
+		}
+
+		/** A low-poly ellipsoid: heads, horse bodies, crowns. */
+		void Ball(const FVector3f& C, const FVector3f& Radii, const FLinearColor& Base, int32 N = 8, int32 M = 5)
+		{
+			auto At = [&](int32 i, int32 j)
+			{
+				const float Lat = -UE_HALF_PI + UE_PI * j / M, Lon = UE_TWO_PI * i / N;
+				return C + FVector3f(FMath::Cos(Lat) * FMath::Cos(Lon) * Radii.X, FMath::Cos(Lat) * FMath::Sin(Lon) * Radii.Y, FMath::Sin(Lat) * Radii.Z);
+			};
+			for (int32 j = 0; j < M; ++j)
+			{
+				for (int32 i = 0; i < N; ++i)
+				{
+					if (j == 0) { Tri(At(i, 0), At(i, 1), At(i + 1, 1), Base, C); }
+					else if (j == M - 1) { Tri(At(i, j), At(i + 1, j), At(i, M), Base, C); }
+					else { Quad(At(i, j), At(i + 1, j), At(i + 1, j + 1), At(i, j + 1), Base, C); }
+				}
+			}
+		}
+
+		/** A soldier of 1851 on foot, facing +X, about 1.7 units tall. */
+		void Soldier(float X, float Y, const FLinearColor& Coat, const FLinearColor& Trousers, const FLinearColor& Hat, float HatHeight, float HatTop, const FLinearColor& Belts, bool bRifle = true)
+		{
+			const FLinearColor Skin(0.66f, 0.42f, 0.32f), Leather(0.05f, 0.04f, 0.035f), Steel(0.62f, 0.62f, 0.66f), Stock(0.3f, 0.18f, 0.09f);
+			// Legs, a little apart; boots.
+			for (float S : { -0.065f, 0.065f })
+			{
+				Frustum(FVector3f(X, Y + S, 0.52f), FVector3f(X, Y + S * 1.2f, 0.1f), 0.055f, 0.045f, Trousers, 6);
+				Frustum(FVector3f(X + 0.02f, Y + S * 1.2f, 0.12f), FVector3f(X + 0.05f, Y + S * 1.2f, 0.f), 0.05f, 0.05f, Leather, 6);
+			}
+			// Coat: skirts, waist, shoulders.
+			Frustum(FVector3f(X, Y, 0.42f), FVector3f(X, Y, 0.62f), 0.15f, 0.13f, Coat);
+			Frustum(FVector3f(X, Y, 0.62f), FVector3f(X, Y, 1.02f), 0.13f, 0.16f, Coat);
+			Ball(FVector3f(X, Y, 1.02f), FVector3f(0.15f, 0.17f, 0.06f), Coat, 8, 3);
+			// Cross belts over the chest and the waist belt.
+			Frustum(FVector3f(X + 0.14f, Y - 0.12f, 0.98f), FVector3f(X + 0.15f, Y + 0.1f, 0.6f), 0.018f, 0.018f, Belts, 4);
+			Frustum(FVector3f(X + 0.14f, Y + 0.12f, 0.98f), FVector3f(X + 0.15f, Y - 0.1f, 0.6f), 0.018f, 0.018f, Belts, 4);
+			Frustum(FVector3f(X, Y, 0.63f), FVector3f(X, Y, 0.67f), 0.14f, 0.14f, Belts);
+			// Arms: the right hand at the musket, the left hanging.
+			Frustum(FVector3f(X, Y - 0.17f, 0.98f), FVector3f(X + 0.03f, Y - 0.19f, 0.62f), 0.045f, 0.04f, Coat, 6);
+			Frustum(FVector3f(X, Y + 0.17f, 0.98f), FVector3f(X + 0.1f, Y + 0.2f, 0.72f), 0.045f, 0.04f, Coat, 6);
+			Ball(FVector3f(X + 0.11f, Y + 0.2f, 0.7f), FVector3f(0.035f, 0.035f, 0.035f), Skin, 6, 3);
+			// Collar, head and headgear with its peak.
+			Frustum(FVector3f(X, Y, 1.04f), FVector3f(X, Y, 1.1f), 0.06f, 0.055f, Coat, 6);
+			Ball(FVector3f(X + 0.01f, Y, 1.18f), FVector3f(0.085f, 0.08f, 0.1f), Skin);
+			Frustum(FVector3f(X, Y, 1.22f), FVector3f(X - 0.01f, Y, 1.22f + HatHeight), 0.088f, HatTop, Hat);
+			Frustum(FVector3f(X + 0.06f, Y, 1.24f), FVector3f(X + 0.14f, Y, 1.23f), 0.05f, 0.03f, Leather, 4);
+			if (bRifle)
+			{
+				// The musket shouldered: butt at the hip, barrel up past the head, bayonet fixed.
+				Frustum(FVector3f(X + 0.12f, Y + 0.22f, 0.6f), FVector3f(X + 0.1f, Y + 0.23f, 0.9f), 0.03f, 0.02f, Stock, 4);
+				Frustum(FVector3f(X + 0.1f, Y + 0.23f, 0.9f), FVector3f(X + 0.07f, Y + 0.24f, 1.62f), 0.014f, 0.012f, Steel, 4);
+				Frustum(FVector3f(X + 0.07f, Y + 0.24f, 1.62f), FVector3f(X + 0.065f, Y + 0.24f, 1.9f), 0.008f, 0.002f, Steel, 4);
+			}
+		}
+
+		/** A horse facing +X, about 1.4 units at the head; a darker mane, tail and hind legs. */
+		void Horse(float X, float Y, const FLinearColor& Coat, const FLinearColor& Dark, float Walk = 0.f)
+		{
+			Ball(FVector3f(X - 0.05f, Y, 0.82f), FVector3f(0.5f, 0.17f, 0.2f), Coat, 10, 5);
+			Frustum(FVector3f(X + 0.35f, Y, 0.9f), FVector3f(X + 0.6f, Y, 1.28f), 0.11f, 0.07f, Coat, 6);
+			Frustum(FVector3f(X + 0.58f, Y, 1.3f), FVector3f(X + 0.8f, Y, 1.12f), 0.075f, 0.045f, Coat, 6);
+			Frustum(FVector3f(X + 0.36f, Y, 1.08f), FVector3f(X + 0.58f, Y, 1.36f), 0.03f, 0.03f, Dark, 4);
+			Frustum(FVector3f(X - 0.52f, Y, 0.9f), FVector3f(X - 0.68f, Y, 0.5f), 0.05f, 0.02f, Dark, 4);
+			const float Legs[4][2] = { { 0.3f, -0.1f }, { 0.3f, 0.1f }, { -0.38f, -0.1f }, { -0.38f, 0.1f } };
+			for (int32 l = 0; l < 4; ++l)
+			{
+				const float Step = (l % 2 == 0 ? 1.f : -1.f) * Walk;
+				Frustum(FVector3f(X + Legs[l][0], Y + Legs[l][1], 0.72f), FVector3f(X + Legs[l][0] + Step, Y + Legs[l][1], 0.05f), 0.045f, 0.03f, l < 2 ? Coat : Dark, 5);
+			}
+		}
+
+		/** A rider seated on a Horse at X, Y. */
+		void Rider(float X, float Y, const FLinearColor& Coat, const FLinearColor& Trousers, const FLinearColor& Hat, float HatHeight, bool bSabre = true)
+		{
+			const FLinearColor Skin(0.66f, 0.42f, 0.32f), Steel(0.66f, 0.66f, 0.7f), Leather(0.05f, 0.04f, 0.035f);
+			for (float S : { -1.f, 1.f })
+			{
+				Frustum(FVector3f(X - 0.02f, Y + S * 0.1f, 1.0f), FVector3f(X + 0.06f, Y + S * 0.19f, 0.62f), 0.05f, 0.045f, Trousers, 5);
+				Frustum(FVector3f(X + 0.06f, Y + S * 0.19f, 0.66f), FVector3f(X + 0.09f, Y + S * 0.19f, 0.5f), 0.05f, 0.05f, Leather, 5);
+			}
+			Frustum(FVector3f(X - 0.04f, Y, 1.0f), FVector3f(X - 0.02f, Y, 1.42f), 0.13f, 0.15f, Coat);
+			Ball(FVector3f(X - 0.02f, Y, 1.42f), FVector3f(0.13f, 0.15f, 0.05f), Coat, 8, 3);
+			Frustum(FVector3f(X - 0.02f, Y - 0.15f, 1.38f), FVector3f(X + 0.12f, Y - 0.14f, 1.12f), 0.04f, 0.035f, Coat, 5);
+			Frustum(FVector3f(X - 0.02f, Y + 0.15f, 1.38f), FVector3f(X + 0.14f, Y + 0.16f, 1.14f), 0.04f, 0.035f, Coat, 5);
+			Ball(FVector3f(X, Y, 1.56f), FVector3f(0.08f, 0.075f, 0.095f), Skin);
+			Frustum(FVector3f(X - 0.01f, Y, 1.6f), FVector3f(X - 0.02f, Y, 1.6f + HatHeight), 0.085f, 0.06f, Hat);
+			if (bSabre)
+			{
+				Frustum(FVector3f(X + 0.14f, Y + 0.18f, 1.14f), FVector3f(X + 0.02f, Y + 0.2f, 1.9f), 0.012f, 0.006f, Steel, 4);
+			}
+		}
+
+		/** A field gun on its carriage, muzzle to +X: round barrel, spoked wheels, trail. */
+		void FieldGun(float X, float Y, const FLinearColor& Wood, const FLinearColor& Barrel)
+		{
+			Frustum(FVector3f(X - 0.2f, Y, 0.55f), FVector3f(X + 1.0f, Y, 0.58f), 0.12f, 0.085f, Barrel, 10);
+			Ball(FVector3f(X - 0.22f, Y, 0.55f), FVector3f(0.07f, 0.07f, 0.07f), Barrel, 6, 3);
+			Frustum(FVector3f(X - 0.05f, Y, 0.45f), FVector3f(X - 1.05f, Y, 0.08f), 0.09f, 0.07f, Wood, 6);
+			Frustum(FVector3f(X + 0.1f, Y - 0.36f, 0.35f), FVector3f(X + 0.1f, Y + 0.36f, 0.35f), 0.035f, 0.035f, Wood, 6);
+			for (float S : { -0.36f, 0.36f })
+			{
+				const FVector3f Hub(X + 0.1f, Y + S, 0.35f);
+				const int32 Spokes = 10;
+				for (int32 k = 0; k < Spokes; ++k)
+				{
+					const float A0 = k * UE_TWO_PI / Spokes, A1 = (k + 1) * UE_TWO_PI / Spokes;
+					const FVector3f R0 = Hub + FVector3f(FMath::Cos(A0) * 0.35f, 0.f, FMath::Sin(A0) * 0.35f);
+					const FVector3f R1 = Hub + FVector3f(FMath::Cos(A1) * 0.35f, 0.f, FMath::Sin(A1) * 0.35f);
+					Frustum(R0, R1, 0.04f, 0.04f, Wood, 4);
+					Frustum(Hub, R0, 0.02f, 0.02f, Wood, 4);
+				}
+				Frustum(Hub - FVector3f(0.f, 0.05f, 0.f), Hub + FVector3f(0.f, 0.05f, 0.f), 0.06f, 0.06f, Barrel, 6);
+			}
+		}
+
 		/**
 		 * A house: walls plus a gabled roof with the ridge along its length.
 		 * bAlongY turns the house 90 degrees around its centre.
@@ -872,110 +1010,105 @@ namespace Campaign1851Scenery
 		case ESitePiece::FormationGuard:
 		case ESitePiece::FormationJager:
 		{
-			// Four ranks of eight files behind a colour party; one soldier = body, legs, head and headgear.
+			// Four ranks of eight files behind the colour party; the officer ahead with drawn sabre.
 			const bool bGuard = Piece == ESitePiece::FormationGuard, bJager = Piece == ESitePiece::FormationJager;
 			const FLinearColor Coat = bGuard ? Srgb(176, 30, 34) : bJager ? Srgb(46, 70, 44) : Srgb(34, 44, 86);
 			const FLinearColor Trousers = bJager ? Srgb(60, 76, 58) : Srgb(122, 150, 190);
 			const FLinearColor Hat = bGuard ? Srgb(24, 22, 22) : Srgb(30, 30, 36);
-			const FLinearColor Skin = Srgb(214, 170, 140), Steel = Srgb(200, 200, 206);
-			auto Soldier = [&](float X, float Y)
-			{
-				W.Box(FVector3f(X - 0.12f, Y - 0.1f, 0.f), FVector3f(X + 0.12f, Y + 0.1f, 0.5f), Trousers);
-				W.Box(FVector3f(X - 0.14f, Y - 0.13f, 0.5f), FVector3f(X + 0.14f, Y + 0.13f, 1.05f), Coat);
-				W.Box(FVector3f(X - 0.08f, Y - 0.08f, 1.05f), FVector3f(X + 0.08f, Y + 0.08f, 1.22f), Skin);
-				W.Box(FVector3f(X - 0.09f, Y - 0.09f, 1.22f), FVector3f(X + 0.09f, Y + 0.09f, bGuard ? 1.6f : 1.4f), Hat);
-				W.Box(FVector3f(X - 0.02f, Y + 0.12f, 0.6f), FVector3f(X + 0.02f, Y + 0.16f, 1.65f), Steel);   // musket on the shoulder
-			};
+			const FLinearColor Belts = bJager ? Srgb(40, 32, 24) : Srgb(236, 232, 220);
+			// Guard: tall bearskin; line: shako; jaegere: low cap.
+			const float HatHeight = bGuard ? 0.34f : bJager ? 0.1f : 0.18f, HatTop = bGuard ? 0.1f : bJager ? 0.08f : 0.095f;
 			for (int32 Rank = 0; Rank < 4; ++Rank)
 			{
 				for (int32 File = 0; File < 8; ++File)
 				{
-					Soldier(-Rank * 0.55f - 0.6f, (File - 3.5f) * 0.36f);
+					W.Soldier(-Rank * 0.55f - 0.6f, (File - 3.5f) * 0.36f + (Rank % 2) * 0.03f, Coat, Trousers, Hat, HatHeight, HatTop, Belts);
 				}
 			}
-			// Officer ahead, and the colour: pole with Dannebrog.
-			Soldier(0.9f, 0.f);
-			W.Box(FVector3f(0.3f, -0.03f, 0.f), FVector3f(0.36f, 0.03f, 2.6f), Srgb(120, 90, 60));
+			W.Soldier(0.9f, 0.f, Coat, Trousers, Hat, HatHeight, HatTop, Srgb(214, 176, 102), false);
+			W.Frustum(FVector3f(1.02f, 0.2f, 0.72f), FVector3f(1.25f, 0.24f, 1.55f), 0.012f, 0.006f, Srgb(200, 200, 206), 4);
+			// The colour: pole with Dannebrog, and its bearer.
+			W.Frustum(FVector3f(0.33f, 0.f, 0.f), FVector3f(0.33f, 0.f, 2.65f), 0.03f, 0.025f, Srgb(120, 90, 60), 6);
+			W.Ball(FVector3f(0.33f, 0.f, 2.68f), FVector3f(0.05f, 0.05f, 0.05f), Srgb(214, 176, 102), 6, 3);
+			W.Soldier(0.2f, 0.12f, Coat, Trousers, Hat, HatHeight, HatTop, Belts, false);
 			const FLinearColor Red = Srgb(200, 16, 46), White = Srgb(245, 245, 240);
-			const float Xs[] = { -0.64f, -0.34f, -0.24f, 0.33f };
+			const float Xs[] = { -0.64f, -0.34f, -0.24f, 0.31f };
 			const float Zs[] = { 1.8f, 2.08f, 2.18f, 2.58f };
 			for (int32 i = 0; i < 3; ++i)
 			{
 				for (int32 j = 0; j < 3; ++j)
 				{
 					const FLinearColor& C = (i == 1 || j == 1) ? White : Red;
-					W.Quad(FVector3f(Xs[i], 0.f, Zs[j]), FVector3f(Xs[i + 1], 0.f, Zs[j]), FVector3f(Xs[i + 1], 0.f, Zs[j + 1]), FVector3f(Xs[i], 0.f, Zs[j + 1]), C, FVector3f(0.f, -1.f, 2.f));
-					W.Quad(FVector3f(Xs[i], 0.01f, Zs[j]), FVector3f(Xs[i + 1], 0.01f, Zs[j]), FVector3f(Xs[i + 1], 0.01f, Zs[j + 1]), FVector3f(Xs[i], 0.01f, Zs[j + 1]), C, FVector3f(0.f, 1.f, 2.f));
+					const float W0 = 0.05f * FMath::Sin(Xs[i] * 6.f), W1 = 0.05f * FMath::Sin(Xs[i + 1] * 6.f);
+					W.Quad(FVector3f(Xs[i], W0, Zs[j]), FVector3f(Xs[i + 1], W1, Zs[j]), FVector3f(Xs[i + 1], W1, Zs[j + 1]), FVector3f(Xs[i], W0, Zs[j + 1]), C, FVector3f(0.f, -1.f, 2.f));
+					W.Quad(FVector3f(Xs[i], W0 + 0.01f, Zs[j]), FVector3f(Xs[i + 1], W1 + 0.01f, Zs[j]), FVector3f(Xs[i + 1], W1 + 0.01f, Zs[j + 1]), FVector3f(Xs[i], W0 + 0.01f, Zs[j + 1]), C, FVector3f(0.f, 1.f, 2.f));
 				}
 			}
 			break;
 		}
 		case ESitePiece::FormationCavalry:
 		{
-			// Two ranks of six riders: horse body, legs, neck; rider in light blue with a helmet.
-			const FLinearColor Horse = Srgb(96, 64, 40), Dark = Srgb(52, 36, 24), Coat = Srgb(118, 146, 188), Helmet = Srgb(210, 206, 196);
+			// Two ranks of six riders in light blue with helmets; bays, blacks and chestnuts; the guidon ahead.
+			const FLinearColor Bay = Srgb(110, 70, 42), Black = Srgb(40, 32, 28), Chestnut = Srgb(140, 84, 46), Dark = Srgb(46, 32, 22);
+			const FLinearColor Coat = Srgb(118, 146, 188), Trousers = Srgb(40, 44, 70), Helmet = Srgb(210, 206, 196);
 			for (int32 Rank = 0; Rank < 2; ++Rank)
 			{
 				for (int32 File = 0; File < 6; ++File)
 				{
-					const float X = -Rank * 1.4f, Y = (File - 2.5f) * 0.55f;
-					W.Box(FVector3f(X - 0.5f, Y - 0.14f, 0.55f), FVector3f(X + 0.4f, Y + 0.14f, 0.95f), File % 3 == 1 ? Dark : Horse);
-					W.Box(FVector3f(X + 0.3f, Y - 0.09f, 0.85f), FVector3f(X + 0.62f, Y + 0.09f, 1.3f), Horse);
-					for (float LX : { -0.4f, 0.3f })
-					{
-						W.Box(FVector3f(X + LX - 0.05f, Y - 0.12f, 0.f), FVector3f(X + LX + 0.05f, Y + 0.12f, 0.55f), Dark);
-					}
-					W.Box(FVector3f(X - 0.16f, Y - 0.12f, 0.95f), FVector3f(X + 0.08f, Y + 0.12f, 1.5f), Coat);
-					W.Box(FVector3f(X - 0.09f, Y - 0.08f, 1.5f), FVector3f(X + 0.03f, Y + 0.08f, 1.75f), Helmet);
+					const float X = -Rank * 1.5f, Y = (File - 2.5f) * 0.55f;
+					W.Horse(X, Y, File % 3 == 1 ? Black : File % 3 == 2 ? Chestnut : Bay, Dark, (File + Rank) % 2 ? 0.06f : -0.06f);
+					W.Rider(X - 0.05f, Y, Coat, Trousers, Helmet, 0.16f);
 				}
 			}
-			W.Box(FVector3f(0.9f, -0.03f, 0.f), FVector3f(0.95f, 0.03f, 2.6f), Srgb(120, 90, 60));   // guidon
-			W.Quad(FVector3f(0.95f, 0.f, 2.1f), FVector3f(1.5f, 0.f, 2.3f), FVector3f(0.95f, 0.f, 2.55f), FVector3f(0.95f, 0.f, 2.1f), Srgb(200, 16, 46), FVector3f(1.f, -1.f, 2.f));
+			W.Frustum(FVector3f(1.0f, 0.f, 0.f), FVector3f(1.0f, 0.f, 2.6f), 0.025f, 0.02f, Srgb(120, 90, 60), 6);
+			W.Quad(FVector3f(1.0f, 0.f, 2.1f), FVector3f(1.55f, 0.03f, 2.3f), FVector3f(1.0f, 0.f, 2.55f), FVector3f(1.0f, 0.f, 2.1f), Srgb(200, 16, 46), FVector3f(1.f, -1.f, 2.f));
 			break;
 		}
 		case ESitePiece::FormationArtillery:
 		case ESitePiece::FormationHorseArtillery:
 		{
-			// Two guns in battery, each with its limber and a team behind (four horses; six for horse artillery),
-			// and the crew: on foot beside the gun, or mounted alongside the team.
+			// Two guns in battery, each with its limber and team behind (four horses; six for horse artillery),
+			// the crew about the gun, or mounted alongside the team.
 			const bool bRiding = Piece == ESitePiece::FormationHorseArtillery;
-			const FLinearColor Wood = Srgb(110, 118, 84), Barrel = Srgb(48, 52, 50), Horse = Srgb(96, 64, 40), Coat = Srgb(34, 44, 86);
-			for (float Y : { -1.f, 1.f })
+			const FLinearColor Wood = Srgb(70, 78, 52), Barrel = Srgb(62, 58, 52), Bay = Srgb(110, 70, 42), Dark = Srgb(46, 32, 22);
+			const FLinearColor Coat = Srgb(34, 44, 86), Trousers = Srgb(122, 150, 190), Hat = Srgb(30, 30, 36), Belts = Srgb(236, 232, 220);
+			for (float Y : { -1.1f, 1.1f })
 			{
-				W.Box(FVector3f(0.1f, Y - 0.1f, 0.35f), FVector3f(1.1f, Y + 0.1f, 0.55f), Barrel);                // barrel
-				W.Box(FVector3f(-0.9f, Y - 0.08f, 0.2f), FVector3f(0.3f, Y + 0.08f, 0.4f), Wood);                // trail
-				for (float S : { -0.35f, 0.35f })
+				W.FieldGun(0.3f, Y, Wood, Barrel);
+				// Limber: its chest on two wheels, the pole to the team.
+				W.Box(FVector3f(-2.2f, Y - 0.32f, 0.45f), FVector3f(-1.6f, Y + 0.32f, 0.8f), Wood);
+				for (float S : { -0.36f, 0.36f })
 				{
-					W.Box(FVector3f(-0.05f, Y + S - 0.05f, 0.f), FVector3f(0.55f, Y + S + 0.05f, 0.6f), Wood);   // wheels
+					W.Frustum(FVector3f(-1.9f, Y + S - 0.04f, 0.33f), FVector3f(-1.9f, Y + S + 0.04f, 0.33f), 0.33f, 0.33f, Wood, 10);
 				}
-				W.Box(FVector3f(-2.1f, Y - 0.35f, 0.3f), FVector3f(-1.4f, Y + 0.35f, 0.75f), Wood);             // limber
+				W.Frustum(FVector3f(-2.2f, Y, 0.55f), FVector3f(-4.6f, Y, 0.6f), 0.025f, 0.025f, Wood, 4);
 				for (int32 H = 0; H < (bRiding ? 3 : 2); ++H)
 				{
-					for (float S : { -0.2f, 0.2f })
+					for (float S : { -0.22f, 0.22f })
 					{
-						const float X = -2.6f - H * 0.9f;
-						W.Box(FVector3f(X - 0.4f, Y + S - 0.1f, 0.45f), FVector3f(X + 0.3f, Y + S + 0.1f, 0.8f), Horse);
-						W.Box(FVector3f(X + 0.2f, Y + S - 0.07f, 0.7f), FVector3f(X + 0.45f, Y + S + 0.07f, 1.05f), Horse);
+						W.Horse(-2.5f - H * 1.05f, Y + S, H % 2 ? Dark : Bay, Dark);
+					}
+					if (!bRiding || H == 0)
+					{
+						W.Rider(-2.55f - H * 1.05f, Y - 0.22f, Coat, Trousers, Hat, 0.14f, false);
 					}
 				}
 				if (bRiding)
 				{
-					// Mounted gunners riding beside the team.
-					for (float RX : { -2.4f, -3.4f })
+					for (float RX : { -2.6f, -3.6f })
 					{
-						const float RY = Y + (Y > 0.f ? 0.75f : -0.75f);
-						W.Box(FVector3f(RX - 0.4f, RY - 0.12f, 0.5f), FVector3f(RX + 0.35f, RY + 0.12f, 0.85f), Horse);
-						W.Box(FVector3f(RX + 0.25f, RY - 0.08f, 0.75f), FVector3f(RX + 0.5f, RY + 0.08f, 1.15f), Horse);
-						W.Box(FVector3f(RX - 0.14f, RY - 0.11f, 0.85f), FVector3f(RX + 0.08f, RY + 0.11f, 1.35f), Coat);
-						W.Box(FVector3f(RX - 0.08f, RY - 0.07f, 1.35f), FVector3f(RX + 0.03f, RY + 0.07f, 1.55f), Srgb(30, 30, 36));
+						const float RY = Y + (Y > 0.f ? 0.8f : -0.8f);
+						W.Horse(RX, RY, Bay, Dark);
+						W.Rider(RX - 0.05f, RY, Coat, Trousers, Hat, 0.14f, false);
 					}
 				}
 				else
 				{
-					for (float CX : { -0.4f, -0.8f })
-					{
-						W.Box(FVector3f(CX - 0.1f, Y + 0.55f, 0.f), FVector3f(CX + 0.1f, Y + 0.75f, 1.1f), Coat);
-					}
+					// The crew: loader at the muzzle with the rammer, gunner at the trail, a third man.
+					W.Soldier(1.1f, Y + 0.45f, Coat, Trousers, Hat, 0.16f, 0.09f, Belts, false);
+					W.Soldier(-0.8f, Y + 0.4f, Coat, Trousers, Hat, 0.16f, 0.09f, Belts, false);
+					W.Soldier(0.2f, Y - 0.55f, Coat, Trousers, Hat, 0.16f, 0.09f, Belts, false);
+					W.Frustum(FVector3f(1.2f, Y + 0.6f, 0.7f), FVector3f(1.9f, Y + 0.35f, 1.2f), 0.015f, 0.015f, Wood, 4);
 				}
 			}
 			break;

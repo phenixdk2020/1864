@@ -1068,7 +1068,14 @@ void SCampaign1851Overlay::PaintArmy(const FGeometry& Geometry, FSlateWindowElem
 				DrawLines(Geometry, Out, Layer + 2, { Min, FVector2D(Max.X, Min.Y), Max, FVector2D(Min.X, Max.Y), Min }, Gold, 2.f);
 				const FString Label = FString::Printf(TEXT("%s  ·  %d"), *R.Name, R.Men);
 				const FVector2D LabelSize = Measure(Label, Serif(11)) + FVector2D(12.f, 6.f);
-				const FVector2D At(P.X - LabelSize.X * 0.5f, Max.Y + 4.f);
+				// Labels of chosen units close together stack downwards instead of overlapping.
+				int32 Below = 0;
+				for (int32 j : SelectedRegiments)
+				{
+					FVector2D Q;
+					Below += j < i && ToLocal(Geometry, Map->RegimentWorld(j), Q) && FVector2D::Distance(Q, P) < 220.f ? 1 : 0;
+				}
+				const FVector2D At(P.X - LabelSize.X * 0.5f, Max.Y + 4.f + Below * (LabelSize.Y + 2.f));
 				FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(LabelSize, FSlateLayoutTransform(At)), Ring, ESlateDrawEffect::None, Panel);
 				PaintText(Geometry, Out, Layer + 3, Label, At + FVector2D(6.f, LabelSize.Y * 0.5f), Serif(11), Ink, 0.f, false);
 			}
@@ -1196,7 +1203,7 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	Height += 76.f;                                             // buttons and hint
 	const float RowHeight = 21.f;
 	const float Room = Geometry.GetLocalSize().Y - 190.f - 360.f - Height - 34.f;
-	const int32 Fit = FMath::Max(0, FMath::FloorToInt(Room / RowHeight));
+	const int32 Fit = FMath::Max(3, FMath::FloorToInt(Room / RowHeight));
 	const int32 Rows = bSingle ? 0 : FMath::Min(Sel.Num(), Sel.Num() > Fit ? FMath::Max(0, Fit - 1) : Fit);
 	const bool bMore = !bSingle && Rows < Sel.Num();
 	Height += bSingle ? 0.f : 30.f + (Rows + (bMore ? 1 : 0)) * RowHeight;
@@ -3610,9 +3617,9 @@ void SCampaign1851Overlay::PaintOfficerCard(const FGeometry& Geometry, FSlateWin
 		TEXT("bevarer overblikket under pres"),
 		TEXT("udnævnelser, afskedigelser og prestige"),
 		TEXT("opklaring, dækker flankerne, går ikke i en fælde") };
-	const int32 NumStats = int32(ECampaign1851OfficerStat::Count);
+	const int32 CardStats = int32(ECampaign1851OfficerStat::Count);
 	const float RowHeight = 34.f;
-	const FVector2D Size(460.f, 110.f + (NumStats - (O.bGeneral ? 0 : 1)) * RowHeight + 70.f);
+	const FVector2D Size(460.f, 110.f + (CardStats - (O.bGeneral ? 0 : 1)) * RowHeight + 70.f);
 	const FVector2D Pos(BottomLeft.X, BottomLeft.Y - Size.Y);
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseOfficerCard);
@@ -3628,7 +3635,7 @@ void SCampaign1851Overlay::PaintOfficerCard(const FGeometry& Geometry, FSlateWin
 	PaintBar(Geometry, Out, Layer + 2, FVector2D(Pos.X + 150.f, Y - 3.f), 200.f, O.Experience / 100.f);
 	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%.0f  %s"), O.Experience, *FString::ChrN(Campaign1851Army::Stars(O.Experience), TEXT('*'))), FVector2D(Pos.X + 362.f, Y), Serif(12), Ink, 0.f, false);
 	Y += 24.f;
-	for (int32 s = 0; s < NumStats; ++s)
+	for (int32 s = 0; s < CardStats; ++s)
 	{
 		if (s == int32(ECampaign1851OfficerStat::Political) && !O.bGeneral)
 		{
