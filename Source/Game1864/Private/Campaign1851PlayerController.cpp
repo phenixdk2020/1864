@@ -280,8 +280,20 @@ void ACampaign1851PlayerController::TryInit()
 			: WindowName == TEXT("chart") ? SCampaign1851Overlay::EWindow::Chart : WindowName == TEXT("council") ? SCampaign1851Overlay::EWindow::Council
 			: WindowName == TEXT("supply") ? SCampaign1851Overlay::EWindow::Supply : WindowName == TEXT("foreign") ? SCampaign1851Overlay::EWindow::Foreign
 			: WindowName == TEXT("research") ? SCampaign1851Overlay::EWindow::Research : WindowName == TEXT("navy") ? SCampaign1851Overlay::EWindow::Navy
+			: WindowName == TEXT("battlefield") ? SCampaign1851Overlay::EWindow::Battlefield
 			: WindowName == TEXT("gazette") ? SCampaign1851Overlay::EWindow::Gazette : WindowName == TEXT("end") ? SCampaign1851Overlay::EWindow::End
 			: SCampaign1851Overlay::EWindow::Towns);
+	// -CampaignBattlefield=lat,lon,km builds the ground there (test of the generator).
+	FString FieldAt;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignBattlefield="), FieldAt, false))
+	{
+		TArray<FString> P;
+		FieldAt.ParseIntoArray(P, TEXT(","));
+		if (P.Num() >= 2)
+		{
+			Map->GenerateBattlefield(Map->KmAtWorld(Map->Project(FCString::Atod(*P[0]), FCString::Atod(*P[1]))), P.Num() > 2 ? FCString::Atof(*P[2]) : 8.f, TEXT("Test"));
+		}
+	}
 	int32 GazetteTab = 0;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignGazetteTab="), GazetteTab) && Overlay.IsValid())
 	{
@@ -1161,6 +1173,46 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		else if (Button == SCampaign1851Overlay::EButton::NewGameNation)
 		{
 			Map->NewGameNation = Module == 1 ? TEXT("SE") : TEXT("DK");
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OpenBattlefield)
+		{
+			const bool bOpen = Overlay->GetWindow() == SCampaign1851Overlay::EWindow::Battlefield;
+			if (!bOpen && !Map->GetBattlefield().IsValid())
+			{
+				Map->GenerateBattlefield(Map->KmAtWorld(Camera->GetTarget()), Map->BattlefieldSizeKm, TEXT("Kort"));
+			}
+			Overlay->OpenWindow(bOpen ? SCampaign1851Overlay::EWindow::None : SCampaign1851Overlay::EWindow::Battlefield);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::BattlefieldSize)
+		{
+			Map->BattlefieldSizeKm = float(Module);
+			if (Map->GetBattlefield().IsValid())
+			{
+				Map->GenerateBattlefield(Map->GetBattlefield().CentreKm, Map->BattlefieldSizeKm, Map->GetBattlefield().Name);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::BattlefieldHere)
+		{
+			Map->GenerateBattlefield(Map->KmAtWorld(Camera->GetTarget()), Map->BattlefieldSizeKm, TEXT("Kort"));
+			Overlay->ShowToast(FString::Printf(TEXT("Slagmarken ved %s er bygget: Saved/Battle/%s"), *Map->GetBattlefield().Place, *Map->BattlefieldFile()));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::BattlefieldAtBattle)
+		{
+			const FCampaign1851Battle* Bt = Map->GetBattles().FindByPredicate([Module](const FCampaign1851Battle& X) { return X.Id == Module; });
+			if (Bt)
+			{
+				Map->GenerateBattlefield(Bt->Km, Map->BattlefieldSizeKm, FString::Printf(TEXT("Battle_%d"), Bt->Id));
+				Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Battlefield);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::DelegateAll)
+		{
+			Map->SetAllDelegation(ECampaign1851Delegation(Module));
+			Overlay->ShowToast(FString::Printf(TEXT("Alle ressorter: %s"), Campaign1851Nations::DelegationName(ECampaign1851Delegation(Module))));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::MinisterDismiss)
+		{
+			Map->DismissMinister(Module);
 		}
 		else if (Button == SCampaign1851Overlay::EButton::NationWeight)
 		{

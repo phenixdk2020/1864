@@ -213,6 +213,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	PaintButton(Geometry, Out, Layer, FVector2D(28.f, 206.f), FVector2D(150.f, 28.f), TEXT("SPILMENU  (M)"), EButton::Menu);
 	PaintButton(Geometry, Out, Layer, FVector2D(186.f, 206.f), FVector2D(120.f, 28.f), TEXT("SKANSER"), EButton::FortTool, 0, bFortTool);
 	PaintButton(Geometry, Out, Layer, FVector2D(314.f, 206.f), FVector2D(120.f, 28.f), TEXT("AVISEN"), EButton::OpenGazette, 0, Window == EWindow::Gazette);
+	PaintButton(Geometry, Out, Layer, FVector2D(442.f, 206.f), FVector2D(130.f, 28.f), TEXT("SLAGMARK"), EButton::OpenBattlefield, 0, Window == EWindow::Battlefield);
 	PaintCalendar(Geometry, Out, Layer);
 	PaintTreasury(Geometry, Out, Layer);
 	if (Window != EWindow::None)
@@ -262,7 +263,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.50 AVIS OG SLUTNING — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.51 MINISTRE OG SLAGMARK — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -1740,6 +1741,7 @@ void SCampaign1851Overlay::PaintBattle(const FGeometry& Geometry, FSlateWindowEl
 		return;
 	}
 	PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(24.f, Size.Y - 52.f), FVector2D(220.f, 32.f), TEXT("UDKÆMP I 3D"), EButton::BattleFight3D, B.Id);
+	PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(Size.X - 170.f, 14.f), FVector2D(146.f, 24.f), TEXT("SE SLAGMARKEN"), EButton::BattlefieldAtBattle, B.Id);
 	PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(256.f, Size.Y - 52.f), FVector2D(250.f, 32.f), TEXT("AFGØR AUTOMATISK"), EButton::BattleAuto, B.Id);
 	PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(518.f, Size.Y - 52.f), FVector2D(218.f, 32.f), TEXT("TRÆK TILBAGE"), EButton::BattleRetreat, B.Id);
 }
@@ -1825,20 +1827,28 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 	{
 		const FCampaign1851Nation& Me = Nations[Map->GetPlayerNation()];
 		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("R E S S O R T E R   ·   %s"), *Me.Name.ToUpper()), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
-		Y += 16.f;
-		PaintText(Geometry, Out, Layer + 1, TEXT("MANUEL: du bestemmer  ·  RÅDGIVER: ministeriet anbefaler  ·  AUTO: ministeriet handler selv"), FVector2D(X, Y + 8.f), Serif(10, EFace::Italic), MutedInk, 0.f, false);
-		Y += 34.f;
+		// All at once.
+		PaintText(Geometry, Out, Layer + 1, TEXT("alle:"), FVector2D(X + 330.f, Y), Serif(10, EFace::Italic), MutedInk, 0.f, false);
+		for (int32 m = 0; m < 3; ++m)
+		{
+			PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 368.f + m * 84.f, Y - 11.f), FVector2D(80.f, 22.f), Campaign1851Nations::DelegationName(ECampaign1851Delegation(m)), EButton::DelegateAll, m);
+		}
+		Y += 30.f;
 		for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count); ++p)
 		{
 			const ECampaign1851Portfolio P = ECampaign1851Portfolio(p);
-			PaintText(Geometry, Out, Layer + 1, Campaign1851Nations::PortfolioName(P), FVector2D(X, Y), Serif(14), Ink, 0.f, false);
-			PaintTextFit(Geometry, Out, Layer + 1, Campaign1851Nations::PortfolioScope(P), FVector2D(X, Y + 17.f), Serif(10, EFace::Italic), MutedInk, 250.f);
+			const FCampaign1851Minister& Min = Map->GetMinister(P);
+			PaintText(Geometry, Out, Layer + 1, Campaign1851Nations::PortfolioName(P), FVector2D(X, Y), Serif(13), Ink, 0.f, false);
+			PaintTextFit(Geometry, Out, Layer + 1, Campaign1851Nations::PortfolioScope(P), FVector2D(X, Y + 15.f), Serif(9, EFace::Italic), MutedInk, 150.f);
+			PaintTextFit(Geometry, Out, Layer + 1, Min.Name, FVector2D(X + 158.f, Y), Serif(12), Gold, 150.f);
+			PaintTextFit(Geometry, Out, Layer + 1, FString::Printf(TEXT("dygtig %d · sparsom %d · forsigtig %d"), Min.Skill, Min.Thrift, Min.Caution), FVector2D(X + 158.f, Y + 15.f), Serif(9, EFace::Italic), MutedInk, 205.f);
 			for (int32 m = 0; m < 3; ++m)
 			{
-				PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 270.f + m * 128.f, Y - 8.f), FVector2D(120.f, 26.f), Campaign1851Nations::DelegationName(ECampaign1851Delegation(m)),
+				PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 368.f + m * 84.f, Y - 6.f), FVector2D(80.f, 24.f), Campaign1851Nations::DelegationName(ECampaign1851Delegation(m)),
 					EButton::Delegate, p * 3 + m, int32(Me.Modes[p]) == m);
 			}
-			Y += 46.f;
+			PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 622.f, Y - 6.f), FVector2D(38.f, 24.f), TEXT("NY"), EButton::MinisterDismiss, p);
+			Y += 36.f;
 		}
 		Y += 6.f;
 		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("Mindste kassebeholdning: %s rd."), *Thousands(int32(Me.Reserve))), FVector2D(X, Y), Serif(13), Ink, 0.f, false);
@@ -2327,6 +2337,114 @@ void SCampaign1851Overlay::PaintEnd(const FGeometry& Geometry, FSlateWindowEleme
 	Y += 60.f;
 	PaintText(Geometry, Out, Layer + 1, ACampaign1851Map::FinalGrade(Total), FVector2D(Pos.X + Size.X * 0.5f, Y), Serif(22, EFace::Italic), Gold, 0.5f);
 	PaintText(Geometry, Out, Layer + 1, TEXT("Luk vinduet for at spille videre, eller start et nyt spil i spilmenuen (M)."), FVector2D(Pos.X + Size.X * 0.5f, Y + 50.f), Serif(12, EFace::Italic), MutedInk, 0.5f);
+}
+
+void SCampaign1851Overlay::PaintBattlefield(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
+{
+	const FCampaign1851Battlefield& B = Map->GetBattlefield();
+	PaintText(Geometry, Out, Layer + 1, TEXT("Slagmarken"), Pos + FVector2D(24.f, 34.f), Serif(22), Ink, 0.f);
+	PaintTextFit(Geometry, Out, Layer + 1, TEXT("Terrænet til et 3D-slag, bygget ud fra stedet på kortet: højder, skov, vand, byer, gårde, veje, jernbaner og skanser. Enhederne kommer senere."),
+		Pos + FVector2D(24.f, 64.f), Serif(12, EFace::Italic), Gold, Size.X - 170.f);
+	const float ImageSide = FMath::Min(Size.Y - 130.f, Size.X - 520.f);
+	const FVector2D ImagePos = Pos + FVector2D(24.f, 100.f);
+	if (!B.IsValid() || !Map->GetBattlefieldTexture())
+	{
+		PaintText(Geometry, Out, Layer + 1, TEXT("Tryk GENERÉR HER for at bygge slagmarken, hvor kortet står centreret."), ImagePos + FVector2D(0.f, 20.f), Serif(14, EFace::Italic), MutedInk, 0.f, false);
+	}
+	else
+	{
+		if (!BattlefieldBrush.IsValid())
+		{
+			BattlefieldBrush = MakeShared<FSlateBrush>();
+		}
+		if (BattlefieldBrush->GetResourceObject() != Map->GetBattlefieldTexture())
+		{
+			BattlefieldBrush->SetResourceObject(Map->GetBattlefieldTexture());
+			BattlefieldBrush->ImageSize = FVector2D(512.f, 512.f);
+		}
+		FSlateDrawElement::MakeBox(Out, Layer + 1, Geometry.ToPaintGeometry(FVector2D(ImageSide, ImageSide), FSlateLayoutTransform(ImagePos)), BattlefieldBrush.Get());
+		const float SizeM = B.SizeKm * 1000.f;
+		auto ToImage = [&](const FVector2D& M) { return ImagePos + FVector2D(M.X / SizeM, 1.f - M.Y / SizeM) * ImageSide; };
+		// Town names and the forts.
+		for (const FCampaign1851BattleTown& T : B.Towns)
+		{
+			if (T.M.X > 0.f && T.M.Y > 0.f && T.M.X < SizeM && T.M.Y < SizeM)
+			{
+				PaintText(Geometry, Out, Layer + 3, T.Name, ToImage(T.M), Serif(15, EFace::Bold), Ink, 0.5f);
+			}
+		}
+		for (int32 f = 0; f < B.Forts.Num(); ++f)
+		{
+			PaintText(Geometry, Out, Layer + 3, B.Forts[f].Name, ToImage(B.FortM[f]) + FVector2D(0.f, -16.f), Serif(10), Gold, 0.5f);
+		}
+		// Scale bar (1 km) and north.
+		const float Km = ImageSide / B.SizeKm;
+		const FVector2D S0 = ImagePos + FVector2D(16.f, ImageSide - 20.f);
+		DrawLines(Geometry, Out, Layer + 3, { S0, S0 + FVector2D(Km, 0.f) }, Ink, 3.f);
+		PaintText(Geometry, Out, Layer + 3, TEXT("1 km"), S0 + FVector2D(Km * 0.5f, -12.f), Serif(11), Ink, 0.5f);
+		PaintText(Geometry, Out, Layer + 3, TEXT("N"), ImagePos + FVector2D(ImageSide - 24.f, 18.f), Serif(14), Ink, 0.5f);
+		DrawLines(Geometry, Out, Layer + 2, { ImagePos, ImagePos + FVector2D(ImageSide, 0.f), ImagePos + FVector2D(ImageSide, ImageSide), ImagePos + FVector2D(0.f, ImageSide), ImagePos }, Gold, 1.5f);
+	}
+	// Right: facts, size and the buttons.
+	const float RX = ImagePos.X + ImageSide + 30.f;
+	float Y = Pos.Y + 110.f;
+	auto Line = [&](const FString& Label, const FString& Value)
+	{
+		PaintText(Geometry, Out, Layer + 1, Label, FVector2D(RX, Y), Serif(12, EFace::Italic), Gold, 0.f, false);
+		PaintTextFit(Geometry, Out, Layer + 1, Value, FVector2D(RX + 150.f, Y), Serif(13), Ink, Pos.X + Size.X - RX - 180.f);
+		Y += 24.f;
+	};
+	if (B.IsValid())
+	{
+		int32 Wood = 0, Sea = 0, Town = 0;
+		float Lo = 1e9f, Hi = -1e9f;
+		for (int32 k = 0; k < B.Kind.Num(); ++k)
+		{
+			Wood += B.Kind[k] == uint8(EBattlefieldCell::Wood) ? 1 : 0;
+			Sea += B.Kind[k] == uint8(EBattlefieldCell::Sea) ? 1 : 0;
+			Town += B.Kind[k] == uint8(EBattlefieldCell::Town) ? 1 : 0;
+			if (B.Kind[k] != uint8(EBattlefieldCell::Sea)) { Lo = FMath::Min(Lo, B.HeightM[k]); Hi = FMath::Max(Hi, B.HeightM[k]); }
+		}
+		const float Cells = FMath::Max(1, B.Kind.Num()) / 100.f;
+		Line(TEXT("Ved"), B.Place);
+		Line(TEXT("Midtpunkt"), FString::Printf(TEXT("%.4f° N, %.4f° Ø"), B.Lat, B.Lon));
+		Line(TEXT("Størrelse"), FString::Printf(TEXT("%.0f × %.0f km  ·  256 × 256 felter à %.0f m"), B.SizeKm, B.SizeKm, B.SizeKm * 1000.f / 256.f));
+		Line(TEXT("Dato"), FString::Printf(TEXT("%s  ·  %s"), *ACampaign1851Map::FormatDate(ACampaign1851Map::StartDate() + FTimespan::FromDays(B.Day)), *Map->GetSeasonAndWeather()));
+		Line(TEXT("Højde"), Hi > Lo ? FString::Printf(TEXT("%.0f – %.0f m"), Lo, Hi) : FString(TEXT("-")));
+		Line(TEXT("Skov / vand / by"), FString::Printf(TEXT("%.0f %% / %.0f %% / %.0f %%"), Wood / Cells, Sea / Cells, Town / Cells));
+		Line(TEXT("Bygninger"), FString::Printf(TEXT("%d  ·  %d gårde"), B.Buildings.Num(), B.Farms));
+		Line(TEXT("Veje"), FString::Printf(TEXT("%d landeveje, %d markveje, %d chausséer, %d jernbaner"), B.Roads.Num(), B.Lanes.Num(), B.Chaussees.Num(), B.Rails.Num()));
+		Line(TEXT("Skanser"), FString::FromInt(B.Forts.Num()));
+		Line(TEXT("Fil"), Map->BattlefieldFile());
+		Y += 16.f;
+	}
+	PaintText(Geometry, Out, Layer + 1, TEXT("S T Ø R R E L S E"), FVector2D(RX, Y), Serif(11), Gold, 0.f, false);
+	Y += 18.f;
+	const int32 Sizes[] = { 4, 8, 12 };
+	for (int32 s = 0; s < 3; ++s)
+	{
+		PaintButton(Geometry, Out, Layer + 1, FVector2D(RX + s * 96.f, Y), FVector2D(90.f, 26.f), FString::Printf(TEXT("%d KM"), Sizes[s]), EButton::BattlefieldSize, Sizes[s],
+			FMath::RoundToInt(Map->BattlefieldSizeKm) == Sizes[s]);
+	}
+	Y += 44.f;
+	PaintButton(Geometry, Out, Layer + 1, FVector2D(RX, Y), FVector2D(280.f, 32.f), TEXT("GENERÉR HER"), EButton::BattlefieldHere, 0);
+	PaintTextFit(Geometry, Out, Layer + 1, TEXT("Midt på kortets udsnit. Et slag bygger sin egen slagmark (SE SLAGMARKEN i slagpanelet)."), FVector2D(RX, Y + 46.f), Serif(10, EFace::Italic), MutedInk, Pos.X + Size.X - RX - 30.f);
+	// Legend.
+	Y += 80.f;
+	const TPair<const TCHAR*, FLinearColor> Legend[] = {
+		{ TEXT("Mark"), FLinearColor::FromSRGBColor(FColor(172, 160, 104)) }, { TEXT("Eng og strand"), FLinearColor::FromSRGBColor(FColor(118, 146, 104)) },
+		{ TEXT("Skov"), FLinearColor::FromSRGBColor(FColor(52, 84, 46)) }, { TEXT("By"), FLinearColor::FromSRGBColor(FColor(158, 130, 104)) },
+		{ TEXT("Hav"), FLinearColor::FromSRGBColor(FColor(62, 96, 124)) }, { TEXT("Chaussé / landevej"), FLinearColor::FromSRGBColor(FColor(224, 206, 160)) },
+		{ TEXT("Jernbane"), FLinearColor::FromSRGBColor(FColor(52, 46, 42)) }, { TEXT("Huse og gårde"), FLinearColor::FromSRGBColor(FColor(170, 64, 48)) },
+		{ TEXT("Skanse og løbegrav"), FLinearColor::FromSRGBColor(FColor(150, 128, 84)) } };
+	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+	for (const TPair<const TCHAR*, FLinearColor>& L : Legend)
+	{
+		FSlateDrawElement::MakeBox(Out, Layer + 1, Geometry.ToPaintGeometry(FVector2D(18.f, 12.f), FSlateLayoutTransform(FVector2D(RX, Y - 6.f))), White, ESlateDrawEffect::None, L.Value);
+		PaintText(Geometry, Out, Layer + 1, L.Key, FVector2D(RX + 28.f, Y), Serif(12), Ink, 0.f, false);
+		Y += 20.f;
+	}
+	PaintText(Geometry, Out, Layer + 1, TEXT("Højdekurver for hver 5 m; skyggen falder fra nordvest."), FVector2D(RX, Y + 6.f), Serif(10, EFace::Italic), MutedInk, 0.f, false);
 }
 
 void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
@@ -3463,6 +3581,10 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 	else if (Window == EWindow::End)
 	{
 		PaintEnd(Geometry, Out, Layer + 2, Pos, Size);
+	}
+	else if (Window == EWindow::Battlefield)
+	{
+		PaintBattlefield(Geometry, Out, Layer + 2, Pos, Size);
 	}
 	else if (Window == EWindow::Chart)
 	{

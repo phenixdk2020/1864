@@ -60,17 +60,20 @@ TArray<FCampaign1851ScoreLine> ACampaign1851Map::FinalScore() const
 	double Now = 0.0, Then = 0.0;
 	for (int32 c = 0; c < Cities.Num() && c < CityBasePopulation.Num(); ++c)
 	{
-		if (Cities[c].bForeign && !Cities[c].bCeded)
+		if (Cities[c].bForeign)
 		{
-			continue;   // never the monarchy's
+			continue;   // foreign, or ceded (counted under the monarchy kept)
 		}
-		Now += Cities[c].bCeded ? 0.0 : Cities[c].Population;
+		Now += Cities[c].Population;
 		Then += CityBasePopulation[c];
 	}
 	for (int32 a = 0; a < Amter.Num() && a < AmtBase.Num(); ++a)
 	{
-		Now += IsAmtOccupied(Amter[a]) ? 0.0 : Amter[a].Rural;
-		Then += AmtBase[a].Y;
+		if (!IsAmtOccupied(Amter[a]))
+		{
+			Now += Amter[a].Rural;
+			Then += AmtBase[a].Y;
+		}
 	}
 	const float Growth = FMath::Clamp(float((Now / FMath::Max(Then, 1.0) - 1.0) * 100.0), -10.f, 20.f);
 	Lines.Add({ FString::Printf(TEXT("Befolkningens vækst: %+.1f %%"), float((Now / FMath::Max(Then, 1.0) - 1.0) * 100.0)), Growth });
@@ -79,8 +82,9 @@ TArray<FCampaign1851ScoreLine> ACampaign1851Map::FinalScore() const
 	Lines.Add({ FString::Printf(TEXT("Finanserne: kasse %s, gæld %s rd."), *FString::FromInt(int32(Treasury)), *FString::FromInt(int32(Debt))), Money });
 	// The war, or the peace kept.
 	const bool bHadWar = EventsFired.Contains(TEXT("ultimatum")) || DanishWarLosses + EnemyWarLosses > 0;
-	const float War = bHadWar ? WarScore() * 15.f : 10.f;
-	Lines.Add({ bHadWar ? FString::Printf(TEXT("Krigen: krigsstilling %+.2f"), WarScore()) : FString(TEXT("Freden bevaret")), War });
+	const float Score = bAtWar ? WarScore() : LastWarScore;
+	const float War = bHadWar ? Score * 15.f : 10.f;
+	Lines.Add({ bHadWar ? FString::Printf(TEXT("Krigen: krigsstilling %+.2f"), Score) : FString(TEXT("Freden bevaret")), War });
 	Lines.Add({ FString::Printf(TEXT("Stemningen i landet: %.0f"), Mood), Mood / 10.f });
 	return Lines;
 }

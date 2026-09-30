@@ -11,7 +11,7 @@ namespace
 	const float MeanTemp[12] = { 0.f, 0.f, 2.f, 6.f, 11.f, 15.f, 17.f, 16.f, 13.f, 9.f, 5.f, 2.f };
 	const float WetChance[12] = { 0.45f, 0.4f, 0.4f, 0.38f, 0.38f, 0.4f, 0.45f, 0.48f, 0.5f, 0.55f, 0.58f, 0.52f };
 
-	float Hash01(uint32 A, uint32 B)
+	float WeatherHash01(uint32 A, uint32 B)
 	{
 		return FRandomStream(int32(HashCombine(A * 2654435761u, B))).FRand();
 	}
@@ -40,10 +40,10 @@ float ACampaign1851Map::TemperatureOn(int32 Day) const
 	// A hard or mild winter by the year (the winter of 1864 was hard); spells of some days; the day itself.
 	const int32 WinterYear = Date.GetMonth() >= 7 ? Date.GetYear() : Date.GetYear() - 1;
 	const bool bWinter = Date.GetMonth() >= 11 || Date.GetMonth() <= 3;
-	const float Winter = bWinter ? (Hash01(uint32(Seed), uint32(WinterYear)) * 5.f - 3.f) : 0.f;
-	const float P1 = Hash01(uint32(Seed) + 11u, 1u) * UE_TWO_PI, P2 = Hash01(uint32(Seed) + 13u, 2u) * UE_TWO_PI;
+	const float Winter = bWinter ? (WeatherHash01(uint32(Seed), uint32(WinterYear)) * 5.f - 3.f) : 0.f;
+	const float P1 = WeatherHash01(uint32(Seed) + 11u, 1u) * UE_TWO_PI, P2 = WeatherHash01(uint32(Seed) + 13u, 2u) * UE_TWO_PI;
 	const float Spell = 3.f * FMath::Sin(Day * UE_TWO_PI / 9.f + P1) + 2.f * FMath::Sin(Day * UE_TWO_PI / 23.f + P2);
-	const float Daily = (Hash01(uint32(Seed) + 17u, uint32(Day)) - 0.5f) * 3.f;
+	const float Daily = (WeatherHash01(uint32(Seed) + 17u, uint32(Day)) - 0.5f) * 3.f;
 	return Mean + Winter + Spell + Daily;
 }
 
@@ -52,7 +52,7 @@ ECampaign1851Weather ACampaign1851Map::WeatherOn(int32 Day) const
 	const float T = TemperatureOn(Day);
 	const int32 M = (StartDate() + FTimespan::FromDays(Day)).GetMonth() - 1;
 	const bool bStormSeason = M >= 9 || M <= 2;
-	if (Hash01(uint32(Seed) + 23u, uint32(Day)) < (bStormSeason ? 0.05f : 0.02f))
+	if (WeatherHash01(uint32(Seed) + 23u, uint32(Day)) < (bStormSeason ? 0.05f : 0.02f))
 	{
 		return ECampaign1851Weather::Storm;
 	}
@@ -69,7 +69,7 @@ ECampaign1851Weather ACampaign1851Map::WeatherOn(int32 Day) const
 			return ECampaign1851Weather::Thaw;
 		}
 	}
-	if (Hash01(uint32(Seed) + 29u, uint32(Day)) < WetChance[M])
+	if (WeatherHash01(uint32(Seed) + 29u, uint32(Day)) < WetChance[M])
 	{
 		return T < 0.5f ? ECampaign1851Weather::Snow : ECampaign1851Weather::Rain;
 	}

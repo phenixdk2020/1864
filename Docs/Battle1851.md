@@ -41,6 +41,7 @@
   "resultFile": "BattleResult_3.json"
 }
 ```
+- `battlefieldFile`: slagmarkens terræn (se Battlefield1851.md), bygget 8 km omkring slaget.
 - Enhedernes og skansernes fulde data står i `Units.json` og `Fortifications.json`, som skrives i samme øjeblik.
 - `Units.json` indeholder mand til stede, forsyning og kampværdier.
 - `Fortifications.json` indeholder kanoner, dækning, kompagnier og magasin.

@@ -291,6 +291,7 @@ bool ACampaign1851Map::MakePeace(int32 Offer, FString* OutReason)
 		if (OutReason) { *OutReason = FString::Printf(TEXT("Fjenden afviser: %s"), *O.Why); }
 		return false;
 	}
+	LastWarScore = WarScore();
 	// The ceded towns leave the monarchy (their amter no longer pay).
 	TArray<FString> Ceded;
 	for (int32 c : O.Ceded)

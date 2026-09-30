@@ -155,6 +155,48 @@ struct FPlannedEvent
 	bool bSkip = false;
 };
 
+/** The battlefield generator (Campaign1851Battlefield.cpp). */
+enum class EBattlefieldCell : uint8 { Field, Sea, Meadow, Wood, Town };
+
+struct FCampaign1851BattleBuilding
+{
+	FVector2D M = FVector2D::ZeroVector;   // metres from the south-west corner (x east, y north)
+	FVector2D Size = FVector2D(10.0, 10.0);
+	float Yaw = 0.f;
+	FString Kind;                          // house, farm, garrison, or a civil building's key
+};
+
+struct FCampaign1851BattleTown
+{
+	FString Name;
+	FVector2D M = FVector2D::ZeroVector;
+	float RadiusM = 0.f;
+};
+
+struct FCampaign1851Battlefield
+{
+	FString Name;
+	FString Place;
+	FVector2D CentreKm = FVector2D::ZeroVector;
+	double Lat = 0.0, Lon = 0.0;
+	float SizeKm = 8.f;
+	double Day = 0.0;
+	bool bSnow = false;
+	TArray<float> HeightM;      // grid 256 x 256, row 0 at the south
+	TArray<uint8> Kind;         // EBattlefieldCell
+	TArray<uint8> Wood;         // 0-100
+	TArray<TArray<FVector2D>> Roads, Lanes, Tracks, Chaussees, Rails;
+	TArray<FCampaign1851BattleBuilding> Buildings;
+	TArray<FCampaign1851BattleTown> Towns;
+	TArray<struct FCampaign1851Fort> Forts;
+	TArray<FVector2D> FortM;
+	TArray<FVector2D> Villages;
+	TArray<FVector2D> FarmM;
+	int32 Farms = 0;
+	TArray<FColor> Pixels;      // the picture, 512 x 512, row 0 at the north
+	bool IsValid() const { return HeightM.Num() > 0; }
+};
+
 /** A line of the final score (Campaign1851Endgame.cpp). */
 struct FCampaign1851ScoreLine
 {
@@ -192,6 +234,17 @@ namespace Campaign1851Politics
 	const TCHAR* CurrentName(ECampaign1851Current C);
 	const TCHAR* CurrentEffect(ECampaign1851Current C);
 }
+
+/** A minister (Campaign1851Ministers.cpp): qualities 1-10. */
+struct FCampaign1851Minister
+{
+	FString Name;
+	ECampaign1851Current Line = ECampaign1851Current::Helstat;
+	uint8 Skill = 5;     // how well the ministry chooses and how far its money goes
+	uint8 Thrift = 5;    // how much it holds back
+	uint8 Caution = 5;   // how bold its foreign, naval and financial steps are
+	double Since = 0.0;
+};
 
 /** A peace the Danes may offer (Campaign1851Diplomacy.cpp). */
 struct FCampaign1851PeaceOffer
@@ -558,6 +611,23 @@ public:
 	/** Offers a peace; false (with the reason) if the enemy refuses. */
 	bool MakePeace(int32 Offer, FString* OutReason = nullptr);
 	double AllianceCostNow() const { return AllianceCost * (Government == ECampaign1851Current::Scandinavian ? 0.5 : 1.0); }
+
+	// ---- The battlefield generator (Campaign1851Battlefield.cpp).
+
+	/** Builds the ground of a square of SizeKm around a point and writes Saved/Battle/Battlefield_<Name>.json and .png. */
+	bool GenerateBattlefield(const FVector2D& CentreKm, float SizeKm, const FString& Name);
+	const FCampaign1851Battlefield& GetBattlefield() const { return Battlefield; }
+	UTexture2D* GetBattlefieldTexture() const { return BattlefieldTexture; }
+	int32 GetBattlefieldVersion() const { return BattlefieldVersion; }
+	FString BattlefieldFile() const;
+	float BattlefieldSizeKm = 8.f;
+
+	// ---- The ministers (Campaign1851Ministers.cpp).
+
+	const FCampaign1851Minister& GetMinister(ECampaign1851Portfolio P) const { return Ministers[int32(P)]; }
+	bool DismissMinister(int32 Portfolio);
+	void SetAllDelegation(ECampaign1851Delegation Mode);
+	float MinisterBudgetFactor(ECampaign1851Portfolio P) const;
 
 	// ---- The choice of nation and the end (Campaign1851Endgame.cpp).
 
@@ -1188,6 +1258,23 @@ private:
 	bool bSoundDuesAbolished = false;
 	int32 RedemptionYearsLeft = 0;
 	double PeaceTalksDay = -1.0;
+	// The battlefield.
+	void RenderBattlefield();
+	void WriteBattlefield() const;
+	FCampaign1851Battlefield Battlefield;
+	TArray<TArray<FVector2D>> LaneLinesKm;   // the country lanes (projected km)
+	TArray<FVector> CountrySites;            // villages (0), farms (1), cottages (2) of the map's countryside
+	float LastWarScore = 0.f;                // at the last peace
+	UPROPERTY(Transient) TObjectPtr<UTexture2D> BattlefieldTexture;
+	int32 BattlefieldVersion = 0;
+	// Ministers.
+	FCampaign1851Minister MakeMinister(ECampaign1851Portfolio P, ECampaign1851Current Line, const FString& Avoid) const;
+	void AppointCabinet(ECampaign1851Current Line);
+	TArray<FCampaign1851Decision> MinisterOptions(ECampaign1851Portfolio P, double Budget) const;
+	bool CarryOutMinister(const FCampaign1851Decision& D);
+	TArray<FString> SaveMinisters() const;
+	void RestoreMinister(const TArray<FString>& P);
+	FCampaign1851Minister Ministers[int32(ECampaign1851Portfolio::Count)];
 	// The end.
 	void CheckCampaignEnd();
 	int32 PlayedNation = 0;

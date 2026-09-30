@@ -21,6 +21,9 @@ namespace Campaign1851Nations
 		case ECampaign1851Portfolio::PublicWorks: return TEXT("Offentlige arbejder");
 		case ECampaign1851Portfolio::War: return TEXT("Krigsministeriet");
 		case ECampaign1851Portfolio::Intendance: return TEXT("Intendanturen");
+		case ECampaign1851Portfolio::Foreign: return TEXT("Udenrigs");
+		case ECampaign1851Portfolio::Navy: return TEXT("Marinen");
+		case ECampaign1851Portfolio::Finance: return TEXT("Finanserne");
 		default: return TEXT("Transport");
 		}
 	}
@@ -33,6 +36,9 @@ namespace Campaign1851Nations
 		case ECampaign1851Portfolio::PublicWorks: return TEXT("chausséer og jernbaner");
 		case ECampaign1851Portfolio::War: return TEXT("øvelser, officerer og ledige poster");
 		case ECampaign1851Portfolio::Intendance: return TEXT("depoter og trænkolonner");
+		case ECampaign1851Portfolio::Foreign: return TEXT("gesandter, traktater, alliance, garantier, fred");
+		case ECampaign1851Portfolio::Navy: return TEXT("skibe og blokade");
+		case ECampaign1851Portfolio::Finance: return TEXT("statslån og afdrag");
 		default: return TEXT("troppetog");
 		}
 	}
@@ -410,7 +416,8 @@ void ACampaign1851Map::RunNationalAI()
 			{
 				continue;
 			}
-			const double Budget = Surplus * 0.35 * (1.0 - 0.6 * N.Caution) * N.Weights[p] / FMath::Max(WeightSum, 0.1f) * 4.0;
+			// Eight portfolios share it (the minister's skill and thrift move his share).
+			const double Budget = Surplus * 0.35 * (1.0 - 0.6 * N.Caution) * N.Weights[p] / FMath::Max(WeightSum, 0.1f) * 6.4 * (n == PlayerNation ? MinisterBudgetFactor(P) : 1.f);
 			TArray<FCampaign1851Decision> Options = DecisionOptions(n, P, Budget, Rng);
 			Options.Sort([](const FCampaign1851Decision& A, const FCampaign1851Decision& B) { return A.Score > B.Score; });
 			// A ministry acts on its best few options a month (the War ministry fills several posts at once).
@@ -738,6 +745,10 @@ TArray<FCampaign1851Decision> ACampaign1851Map::DecisionOptions(int32 NationInde
 			Out.Add(D);
 		}
 	}
+	if (NationIndex == PlayerNation)
+	{
+		Out.Append(MinisterOptions(P, Budget));
+	}
 	return Out;
 }
 
@@ -762,6 +773,13 @@ bool ACampaign1851Map::CarryOut(const FCampaign1851Decision& D)
 		return RaiseBattalion(D.A) != INDEX_NONE;
 	case ECampaign1851DecisionKind::FortProgramme:
 		return BuildProgramme(D.A);
+	case ECampaign1851DecisionKind::Diplomacy:
+	case ECampaign1851DecisionKind::Peace:
+	case ECampaign1851DecisionKind::Ship:
+	case ECampaign1851DecisionKind::Blockade:
+	case ECampaign1851DecisionKind::Loan:
+	case ECampaign1851DecisionKind::Doctrine:
+		return CarryOutMinister(D);
 	case ECampaign1851DecisionKind::FillPost:
 	{
 		if (!Officers.IsValidIndex(D.A) || !Officers[D.A].IsFree())
@@ -811,8 +829,9 @@ void ACampaign1851Map::RunAbstractNation(int32 NationIndex)
 	FCampaign1851Nation& N = Nations[NationIndex];
 	N.Treasury += N.Population * N.TaxPerHead * (0.9 + 0.1 * N.Industry) / 12.0;
 	const double Spend = FMath::Max(0.0, N.Treasury - N.Reserve) * 0.5 * (1.0 - 0.5 * N.Caution);
+	// The abstract model spends on the first five portfolios (the others have nothing to buy there).
 	float WeightSum = 0.f;
-	for (float W : N.Weights) { WeightSum += W; }
+	for (int32 p = 0; p <= int32(ECampaign1851Portfolio::Intendance); ++p) { WeightSum += N.Weights[p]; }
 	auto Share = [&](ECampaign1851Portfolio P) { return Spend * N.Weights[int32(P)] / FMath::Max(WeightSum, 0.1f); };
 	const double RailBefore = N.RailKm, ArmyBefore = N.ArmyMen;
 	N.RailKm += Share(ECampaign1851Portfolio::PublicWorks) / 14000.0 + Share(ECampaign1851Portfolio::Transport) / 40000.0;

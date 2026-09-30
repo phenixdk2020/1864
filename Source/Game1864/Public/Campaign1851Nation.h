@@ -25,6 +25,9 @@ enum class ECampaign1851Portfolio : uint8
 	War,           // Krigsministeriet: training, officers and their posts
 	Transport,     // Transport: troop trains
 	Intendance,    // Intendanturen: depots, supply columns (the quartermaster)
+	Foreign,       // Udenrigs: envoys, treaties, alliance, guarantees, peace
+	Navy,          // Marinen: ships and the blockade
+	Finance,       // Finanser: state loans and repayments
 	Count
 };
 
@@ -47,7 +50,13 @@ enum class ECampaign1851DecisionKind : uint8
 	FillPost,      // A = officer, B = post code (see ACampaign1851Map::ExecuteDecision), Key = target
 	Recruit,
 	Raise,         // A = town: a new battalion at its barracks
-	FortProgramme  // A = the historical work (Campaign1851Siege.cpp)
+	FortProgramme, // A = the historical work (Campaign1851Siege.cpp)
+	Diplomacy,     // A = nation, B = EDiplomacyAction
+	Peace,         // A = peace offer
+	Ship,          // A = ship class
+	Blockade,      // B = 1 on, 0 off
+	Loan,          // B = 0 borrow 100.000, 1 borrow 250.000, 2 repay 100.000
+	Doctrine       // A = level, B = choice
 };
 
 struct FCampaign1851Nation
@@ -57,10 +66,10 @@ struct FCampaign1851Nation
 	/** True when the nation has its own map (towns, amter, links, army); else it grows on the abstract model. */
 	bool bOnMap = false;
 	ECampaign1851Controller Controller = ECampaign1851Controller::AI;
-	ECampaign1851Delegation Modes[int32(ECampaign1851Portfolio::Count)] = { ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto };
+	ECampaign1851Delegation Modes[int32(ECampaign1851Portfolio::Count)] = { ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto, ECampaign1851Delegation::Auto };
 	/** Priorities of the government per portfolio (historical tendency, then varied by the campaign seed). */
-	float BaseWeights[int32(ECampaign1851Portfolio::Count)] = { 1.f, 1.f, 1.f, 1.f, 1.f };
-	float Weights[int32(ECampaign1851Portfolio::Count)] = { 1.f, 1.f, 1.f, 1.f, 1.f };
+	float BaseWeights[int32(ECampaign1851Portfolio::Count)] = { 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f };
+	float Weights[int32(ECampaign1851Portfolio::Count)] = { 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f };
 	/** 0 bold .. 1 careful: how much of the money above the reserve it dares spend in a month. */
 	float Caution = 0.5f;
 	/** Guardrail: cash the ministries must leave in the treasury. */

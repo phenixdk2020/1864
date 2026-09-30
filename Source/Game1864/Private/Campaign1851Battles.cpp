@@ -147,6 +147,9 @@ bool ACampaign1851Map::FightBattleIn3D(int32 BattleId)
 	Enemy->SetNumberField(TEXT("quality"), EnemyQuality(C.Nation));
 	Doc->SetObjectField(TEXT("enemy"), Enemy);
 	Doc->SetStringField(TEXT("resultFile"), FString::Printf(TEXT("BattleResult_%d.json"), B->Id));
+	// The ground of the battle (the generator, 8 km around it).
+	GenerateBattlefield(B->Km, 8.f, FString::Printf(TEXT("Battle_%d"), B->Id));
+	Doc->SetStringField(TEXT("battlefieldFile"), BattlefieldFile());
 	FString Text;
 	FJsonSerializer::Serialize(Doc, TJsonWriterFactory<>::Create(&Text));
 	IFileManager::Get().MakeDirectory(*BattleDir(), true);

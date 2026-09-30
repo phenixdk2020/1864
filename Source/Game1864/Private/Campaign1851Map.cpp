@@ -830,6 +830,11 @@ void ACampaign1851Map::BuildScenery()
 		}
 	}
 
+	CountrySites.Reset();   // kept for the battlefield generator (x, y km, kind)
+	for (const FSite& S : Sites)
+	{
+		CountrySites.Add(FVector(S.Km.X, S.Km.Y, float(S.Kind)));
+	}
 	// Village lanes: each village to the nearest main road and to its nearest neighbour village,
 	// gently winding, and only over land.
 	TArray<TArray<FVector2D>> LaneLines;
@@ -1069,6 +1074,7 @@ void ACampaign1851Map::BuildScenery()
 	Ferries = BuildRibbons(Dense, 0.07f, Srgb(236, 226, 196), TEXT("Ferries"), Material);
 	bRoadsVisible = false;
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|roads|main=%d|ferries=%d|lanes=%d"), RoadLines.Num(), FerryLines.Num(), LaneLines.Num());
+	LaneLinesKm = LaneLines;   // kept for the battlefield generator
 }
 
 UStaticMeshComponent* ACampaign1851Map::BuildRibbons(const TArray<TArray<FVector2D>>& Lines, float WidthKm, const FLinearColor& Colour, const TCHAR* Name, UMaterialInterface* Material)

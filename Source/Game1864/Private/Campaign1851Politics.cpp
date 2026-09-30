@@ -57,6 +57,11 @@ void ACampaign1851Map::ResetPolitics()
 	Government = ECampaign1851Current::Helstat;
 	GovernmentSince = 0.0;
 	NextCabinet = 0;
+	for (FCampaign1851Minister& M : Ministers)
+	{
+		M = FCampaign1851Minister();
+	}
+	AppointCabinet(Government);
 }
 
 float ACampaign1851Map::TaxMoodFactor() const
@@ -89,6 +94,7 @@ void ACampaign1851Map::FormGovernment(const FString& Name, ECampaign1851Current 
 	PrimeMinister = Name;
 	Government = Line;
 	GovernmentSince = CampaignDays;
+	AppointCabinet(Line);
 	News.Add(FString::Printf(TEXT("Ny regering: %s (%s)"), *Name, Campaign1851Politics::CurrentName(Line)));
 	FCampaign1851Decision D;
 	D.Day = CampaignDays;
@@ -210,6 +216,7 @@ TArray<FString> ACampaign1851Map::SavePolitics() const
 	TArray<FString> Out;
 	Out.Add(FString::Printf(TEXT("state|%.2f|%.2f|%.2f|%.2f|%s|%d|%.2f|%d|%d|%d"), Support[0], Support[1], Support[2], Mood, *PrimeMinister, int32(Government), GovernmentSince, NextCabinet,
 		DanishWarLosses, EnemyWarLosses));
+	Out.Append(SaveMinisters());
 	return Out;
 }
 
@@ -220,7 +227,11 @@ void ACampaign1851Map::RestorePolitics(const TArray<FString>& Lines)
 	{
 		TArray<FString> P;
 		Line.ParseIntoArray(P, TEXT("|"), false);
-		if (P.Num() == 11 && P[0] == TEXT("state"))
+		if (P.Num() == 8 && P[0] == TEXT("min"))
+		{
+			RestoreMinister(P);
+		}
+		else if (P.Num() == 11 && P[0] == TEXT("state"))
 		{
 			for (int32 s = 0; s < 3; ++s)
 			{

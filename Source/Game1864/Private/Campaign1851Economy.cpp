@@ -12,7 +12,7 @@ namespace
 	const float GoodPerHead[int32(ECampaign1851Good::Count)] = { 0.6f, 0.3f, 0.15f };
 	constexpr double ExportDuty = 0.02;
 
-	float Hash01(uint32 A, uint32 B)
+	float EcoHash01(uint32 A, uint32 B)
 	{
 		return FRandomStream(int32(HashCombine(A * 40503u, B))).FRand();
 	}
@@ -28,9 +28,9 @@ float ACampaign1851Map::PriceIndex(ECampaign1851Good G) const
 	const FDateTime Now = GetDate();
 	const int32 Month = (Now.GetYear() - 1851) * 12 + Now.GetMonth();
 	// A slow walk of the market, and the year's harvest for the grain.
-	const float Walk = 1.f + 0.12f * FMath::Sin(Month * UE_TWO_PI / 29.f + Hash01(uint32(Seed), uint32(G)) * 6.f) + 0.06f * (Hash01(uint32(Seed) + uint32(G), uint32(Month)) - 0.5f);
+	const float Walk = 1.f + 0.12f * FMath::Sin(Month * UE_TWO_PI / 29.f + EcoHash01(uint32(Seed), uint32(G)) * 6.f) + 0.06f * (EcoHash01(uint32(Seed) + uint32(G), uint32(Month)) - 0.5f);
 	const int32 HarvestYear = Now.GetMonth() >= 8 ? Now.GetYear() : Now.GetYear() - 1;
-	const float Harvest = G == ECampaign1851Good::Grain ? 0.85f + 0.3f * Hash01(uint32(Seed) + 99u, uint32(HarvestYear)) : 1.f;
+	const float Harvest = G == ECampaign1851Good::Grain ? 0.85f + 0.3f * EcoHash01(uint32(Seed) + 99u, uint32(HarvestYear)) : 1.f;
 	float Times = 1.f;
 	// The Crimean War: Russian grain gone from the market (October 1853 - March 1856).
 	if (Now >= FDateTime(1853, 10, 1) && Now < FDateTime(1856, 4, 1))
@@ -54,7 +54,7 @@ double ACampaign1851Map::ExportValuePerYear(ECampaign1851Good G) const
 		Rural += IsAmtOccupied(A) ? 0.0 : A.Rural;
 	}
 	const int32 HarvestYear = GetDate().GetMonth() >= 8 ? GetDate().GetYear() : GetDate().GetYear() - 1;
-	const float Harvest = G == ECampaign1851Good::Grain ? 0.85f + 0.3f * Hash01(uint32(Seed) + 99u, uint32(HarvestYear)) : 1.f;
+	const float Harvest = G == ECampaign1851Good::Grain ? 0.85f + 0.3f * EcoHash01(uint32(Seed) + 99u, uint32(HarvestYear)) : 1.f;
 	// War: Hamburg and the Elbe closed to cattle; without the sea every export suffers.
 	float War = 1.f;
 	if (bAtWar)
@@ -170,7 +170,7 @@ TArray<FString> ACampaign1851Map::SaveEconomy() const
 		Out.Add(FString::Printf(TEXT("h|%.1f|%.0f|%.0f|%.0f|%.1f|%.2f|%.2f|%.3f|%.0f"), R.Day, R.Population, R.Treasury, R.ArmyMen, R.RailKm, R.Tension, R.Mood, R.Grain, R.Debt));
 	}
 	Out.Append(SaveFortProgrammes());
-	Out.Add(FString::Printf(TEXT("end|%d"), bEndShown ? 1 : 0));
+	Out.Add(FString::Printf(TEXT("end|%d|%.3f"), bEndShown ? 1 : 0, LastWarScore));
 	const int32 From = FMath::Max(0, NewsLog.Num() - 120);
 	for (int32 n = From; n < NewsLog.Num(); ++n)
 	{
@@ -208,9 +208,10 @@ void ACampaign1851Map::RestoreEconomy(const TArray<FString>& Lines)
 			R.Debt = FCString::Atod(*P[9]);
 			History.Add(R);
 		}
-		else if (P.Num() == 2 && P[0] == TEXT("end"))
+		else if (P.Num() >= 2 && P[0] == TEXT("end"))
 		{
 			bEndShown = P[1] == TEXT("1");
+			LastWarScore = P.Num() > 2 ? FCString::Atof(*P[2]) : 0.f;
 		}
 		else if (P.Num() == 4 && P[0] == TEXT("prog"))
 		{
