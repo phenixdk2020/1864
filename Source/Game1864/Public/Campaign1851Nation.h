@@ -56,7 +56,8 @@ enum class ECampaign1851DecisionKind : uint8
 	Ship,          // A = ship class
 	Blockade,      // B = 1 on, 0 off
 	Loan,          // B = 0 borrow 100.000, 1 borrow 250.000, 2 repay 100.000
-	Doctrine       // A = level, B = choice
+	Doctrine,      // A = level, B = choice
+	BuyRaw         // A = raw material, B = amount
 };
 
 struct FCampaign1851Nation

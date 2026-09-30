@@ -47,7 +47,7 @@ public:
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve, FormationDeputy, FormationStaff,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
-		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle };
+		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -68,7 +68,7 @@ public:
 	void ToggleFortTool() { bFortTool = !bFortTool; }
 	void HideFortTool() { bFortTool = false; }
 	/** The fort shown in its panel (id, 0 = none); placing mode shows the hint. */
-	void SelectFort(int32 Id) { SelectedFort = Id; if (Id != 0) { SelectedCity = INDEX_NONE; SelectedRegiments.Reset(); } }
+	void SelectFort(int32 Id) { SelectedFort = Id; if (Id != 0) { SelectedCity = INDEX_NONE; SelectedRegiments.Reset(); SelectedBridge = 0; } }
 	int32 GetSelectedFort() const { return SelectedFort; }
 	void SetFortPlacing(int32 Kind) { FortPlacing = Kind; }   // 0 none, 1 small, 2 large
 	void ToggleFortPickCompany() { bFortPickCompany = !bFortPickCompany; }
@@ -103,7 +103,7 @@ public:
 	/** What an X in a panel's corner closes (the Module of EButton::ClosePanel). */
 	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB, CloseOrder, CloseFortPanel, CloseFort };
 	/** The big windows opened from the menu bar under the calendar (one at a time). */
-	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council, Supply, Foreign, Research, Navy, Gazette, End, Battlefield };
+	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council, Supply, Foreign, Research, Navy, Gazette, End, Battlefield, Materiel };
 	void OpenWindow(EWindow In) { Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
 	EWindow GetWindow() const { return Window; }
 	/** Sort a table by a column (again: the other way round). */
@@ -227,6 +227,22 @@ private:
 	void PaintEnd(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const;
 	void PaintBattlefield(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const;
 	mutable TSharedPtr<FSlateBrush> BattlefieldBrush;
+public:
+	/** The candidates for a minister's post shown in the council (-1 none). */
+	void SetMinisterPick(int32 Portfolio) { MinisterPick = Portfolio; }
+	/** The bridge shown in its panel (id, 0 = none). */
+	void SelectBridge(int32 Id) { SelectedBridge = Id; if (Id != 0) { SelectedCity = INDEX_NONE; SelectedRegiments.Reset(); SelectedFort = 0; } }
+	int32 GetSelectedBridge() const { return SelectedBridge; }
+	int32 GetMinisterPick() const { return MinisterPick; }
+private:
+	int32 MinisterPick = -1;
+	int32 SelectedBridge = 0;
+	void PaintMateriel(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const;
+public:
+	/** The new unit being prepared in the MATERIEL window. */
+	int32 RaiseType = 0, RaiseTownPick = 0, RaiseCommand = 0, RaiseProgram = 1;
+private:
+	void PaintBridge(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 public:
 	/** The newspaper's tabs: 0 the paper, 1 the market, 2 statistics, 3 the reference book (4 + n: an entry). */
 	void SetGazetteTab(int32 Tab) { if (Tab >= 100) { LexiconEntry = Tab - 100; GazetteTab = 3; } else { GazetteTab = Tab; } }

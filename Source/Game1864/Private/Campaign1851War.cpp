@@ -155,6 +155,7 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		DailyWeather();
 		DailyHealth();
 		DailySieges();
+		DailyBridges();
 		EnemyReinforcements();
 	}
 	UpdateIntel();

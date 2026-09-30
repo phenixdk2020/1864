@@ -155,6 +155,51 @@ struct FPlannedEvent
 	bool bSkip = false;
 };
 
+/** A bridge on a road link, or a sound where a pontoon bridge can be laid (Campaign1851Bridges.cpp). */
+enum class EBridgeState : uint8 { Intact, Blown, Building, Site };
+enum class EBridgeAction : uint8 { Blow, Rebuild, Build };
+
+struct FCampaign1851Bridge
+{
+	int32 Id = 0;
+	FString Name;
+	int32 Link = INDEX_NONE;
+	FVector2D Km = FVector2D::ZeroVector;
+	float LengthM = 0.f;
+	EBridgeState State = EBridgeState::Intact;
+	float DaysLeft = 0.f;
+	float FerryKm = 0.f;     // > 0: a pontoon bridge over this ferry's sound
+};
+
+/** Raw materials in the state's stores (Campaign1851Resources.cpp). */
+enum class ECampaign1851Raw : uint8 { Iron, Coal, Timber, Powder, Cloth, Leather, Count };
+
+namespace Campaign1851Resources
+{
+	struct FRawInfo
+	{
+		const TCHAR* Name;
+		const TCHAR* Unit;
+		double Price;      // bought abroad (rd. a unit)
+		float Start;       // in store in 1851
+		float Country;     // what the country gives a month of itself
+		bool bImported;    // mostly from abroad
+	};
+	const FRawInfo& Info(ECampaign1851Raw R);
+	/** A type of unit that can be raised. */
+	struct FUnitType
+	{
+		const TCHAR* Name;
+		const TCHAR* NameSuffix;
+		const TCHAR* IdPrefix;
+		ECampaign1851Arm Arm;
+		int32 Men, Rifles, Guns, Horses, Uniforms, Leather;
+		double CostFactor;
+	};
+	constexpr int32 UnitTypes = 5;
+	const FUnitType& Type(int32 T);
+}
+
 /** The battlefield generator (Campaign1851Battlefield.cpp). */
 enum class EBattlefieldCell : uint8 { Field, Sea, Meadow, Wood, Town };
 
@@ -192,6 +237,8 @@ struct FCampaign1851Battlefield
 	TArray<FVector2D> FortM;
 	TArray<FVector2D> Villages;
 	TArray<FVector2D> FarmM;
+	TArray<struct FCampaign1851Bridge> Bridges;
+	TArray<FVector2D> BridgeM;
 	int32 Farms = 0;
 	TArray<FColor> Pixels;      // the picture, 512 x 512, row 0 at the north
 	bool IsValid() const { return HeightM.Num() > 0; }
@@ -273,12 +320,18 @@ struct FCampaign1851ResearchTopic
 	double CostPerMonth;
 	int32 Months;
 	const TCHAR* Needs;    // another topic first (or null)
+	int32 Branch;          // the column of the research tree (Campaign1851Research::BranchName)
 };
 
 namespace Campaign1851Research
 {
 	const TArray<FCampaign1851ResearchTopic>& Topics();
 	int32 FindTopic(const FString& Id);
+	constexpr int32 Branches = 5;
+	/** The level in the research tree (0 = I). */
+	int32 Tier(int32 Topic);
+	const TCHAR* Roman(int32 Tier);
+	const TCHAR* BranchName(int32 Branch);
 	/** Doctrine levels: 0 strategic, 1 operational, 2 tactical. */
 	int32 DoctrineChoices(int32 Level);
 	const TCHAR* LevelName(int32 Level);
@@ -612,10 +665,37 @@ public:
 	bool MakePeace(int32 Offer, FString* OutReason = nullptr);
 	double AllianceCostNow() const { return AllianceCost * (Government == ECampaign1851Current::Scandinavian ? 0.5 : 1.0); }
 
+	// ---- Raw materials, equipment and new units (Campaign1851Resources.cpp).
+
+	void ResetResources();
+	float GetRaw(ECampaign1851Raw R) const { return RawStock[int32(R)]; }
+	double RawPrice(ECampaign1851Raw R) const;
+	bool CanImport(FString* OutReason = nullptr) const;
+	bool BuyRaw(ECampaign1851Raw R, float Amount, FString* OutReason = nullptr);
+	/** A month's making and use of each raw material (the use at the arms works' full output). */
+	void RawFlow(float OutMade[int32(ECampaign1851Raw::Count)], float OutUsed[int32(ECampaign1851Raw::Count)]) const;
+	bool RaiseTownOk(int32 Town) const;
+	TArray<int32> RaiseTowns() const;
+	FString UnitBlockReason(int32 Type, int32 Town) const;
+	double UnitCost(int32 Type) const;
+	/** Raises a unit of a type at a garrison town, under a general command, with a training programme. */
+	int32 RaiseUnit(int32 Type, int32 Town, int32 Command, ECampaign1851Program Program, FString* OutReason = nullptr);
+	TArray<FString> SaveResources() const;
+	void RestoreResources(const TArray<FString>& Lines);
+
+	// ---- Bridges (Campaign1851Bridges.cpp).
+
+	const TArray<FCampaign1851Bridge>& GetBridges() const { return Bridges; }
+	int32 BridgeIndex(int32 Id) const;
+	FString BridgeBlockReason(int32 Id, EBridgeAction Action) const;
+	bool BridgeAction(int32 Id, EBridgeAction Action, FString* OutReason = nullptr);
+	TArray<FString> SaveBridges() const;
+	void RestoreBridges(const TArray<FString>& Lines);
+
 	// ---- The battlefield generator (Campaign1851Battlefield.cpp).
 
 	/** Builds the ground of a square of SizeKm around a point and writes Saved/Battle/Battlefield_<Name>.json and .png. */
-	bool GenerateBattlefield(const FVector2D& CentreKm, float SizeKm, const FString& Name);
+	bool GenerateBattlefield(FVector2D CentreKm, float SizeKm, FString Name);
 	const FCampaign1851Battlefield& GetBattlefield() const { return Battlefield; }
 	UTexture2D* GetBattlefieldTexture() const { return BattlefieldTexture; }
 	int32 GetBattlefieldVersion() const { return BattlefieldVersion; }
@@ -626,6 +706,9 @@ public:
 
 	const FCampaign1851Minister& GetMinister(ECampaign1851Portfolio P) const { return Ministers[int32(P)]; }
 	bool DismissMinister(int32 Portfolio);
+	/** The others who could take the post (the pool of the portfolio, the present minister left out). */
+	TArray<FCampaign1851Minister> MinisterCandidates(ECampaign1851Portfolio P) const;
+	bool AppointMinister(int32 Portfolio, int32 Candidate);
 	void SetAllDelegation(ECampaign1851Delegation Mode);
 	float MinisterBudgetFactor(ECampaign1851Portfolio P) const;
 
@@ -1012,6 +1095,12 @@ public:
 	bool MoveFormation(int32 Id, int32 NewParent);
 	/** Puts a regiment in a formation (0 = back to its garrison). */
 	bool MoveRegimentToFormation(int32 Regiment, int32 Formation);
+	/**
+	 * A general command's garrison units into the field army at once: under the army a division (the foot in
+	 * brigades of four, cavalry and batteries under the division, the command's general at its head), under a
+	 * division a brigade, deeper all into the formation itself. Returns the new formation's id (0 if nothing).
+	 */
+	int32 FormFromCommand(int32 Command, int32 Parent);
 	/** Every regiment in a formation and its sub-formations. */
 	TArray<int32> FormationRegiments(int32 Id) const;
 	/** Makes an officer the commander of a formation (he leaves any other post). */
@@ -1258,6 +1347,16 @@ private:
 	bool bSoundDuesAbolished = false;
 	int32 RedemptionYearsLeft = 0;
 	double PeaceTalksDay = -1.0;
+	// Raw materials.
+	float MonthlyRawMaterials();
+	float RawStock[int32(ECampaign1851Raw::Count)] = {};
+	bool bRawShortNoted = false;
+	// Bridges.
+	void DetectBridges();
+	void ApplyBridge(const FCampaign1851Bridge& B);
+	void DailyBridges();
+	TArray<FCampaign1851Bridge> Bridges;
+	TArray<float> LinkFerryKm0;
 	// The battlefield.
 	void RenderBattlefield();
 	void WriteBattlefield() const;

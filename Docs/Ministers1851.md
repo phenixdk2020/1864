@@ -12,7 +12,10 @@
 | **Marinen** (ny) | Skibsbygning og blokade |
 | **Finanserne** (ny) | Statslån og afdrag |
 
-- Hver ressort kan stå på **MANUEL**, **RÅDGIVER** eller **AUTO**.
+- Hver ressort kan stå på **MANUEL**, **RÅDGIVER** eller **AUTO**. Der er én knap pr. ressort, og et klik skifter til næste tilstand.
+  - **MANUEL:** du bestemmer selv, og ministeriet gør intet.
+  - **RÅDGIVER:** ministeriet foreslår i listen til højre, og du trykker UDFØR, hvis du er enig.
+  - **AUTO:** ministeriet handler selv inden for reserven.
 - Knapperne *alle: MANUEL / RÅDGIVER / AUTO* i Statsrådet sætter alle ressorter på én gang.
 - Beslutningerne og rådene står i listen til højre med begrundelse og ministerens navn.
 
@@ -28,7 +31,7 @@
 | Forsigtig | Udenrigs: alliance kun ved forsigtighed ≤ 6. Marinen: kræver større overlegenhed før blokade. Finanserne: låner kun billigt |
 
 - **Regeringsskifte:** en ny regering beholder ministre fra sin egen strømning og udskifter resten.
-- **NY:** knappen udskifter ministeren med en anden fra regeringens strømning.
+- **UDSKIFT:** knappen viser kandidaterne til posten med strømning og evner. Klik UDNÆVN for at vælge en.
 
 ## Hvad AUTO gør
 - **Udenrigs:**

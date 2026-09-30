@@ -46,7 +46,7 @@ FString ACampaign1851Map::DiplomacyBlockReason(int32 NationIndex, EDiplomacyActi
 	switch (Action)
 	{
 	case EDiplomacyAction::Envoy:
-		if (CampaignDays - N.LastEnvoyDay < EnvoyCooldownDays) return FString::Printf(TEXT("gesandten er lige rejst (%.0f dage)"), EnvoyCooldownDays - (CampaignDays - N.LastEnvoyDay));
+		if (CampaignDays - N.LastEnvoyDay < EnvoyCooldownDays) return FString::Printf(TEXT("igen om %.0f dage"), EnvoyCooldownDays - (CampaignDays - N.LastEnvoyDay));
 		if (Treasury < EnvoyCost) return TEXT("ikke råd");
 		return FString();
 	case EDiplomacyAction::Trade:
@@ -58,7 +58,7 @@ FString ACampaign1851Map::DiplomacyBlockReason(int32 NationIndex, EDiplomacyActi
 	case EDiplomacyAction::Alliance:
 		if (!N.bCanAlly) return TEXT("-");
 		if (N.bAlliance) return TEXT("allieret");
-		if (!N.bTrade) return TEXT("kræver handelstraktat");
+		if (!N.bTrade) return TEXT("kræver traktat");
 		if (N.Relation < 60.f) return TEXT("kræver forhold 60");
 		if (Treasury < AllianceCostNow()) return TEXT("ikke råd");
 		return FString();

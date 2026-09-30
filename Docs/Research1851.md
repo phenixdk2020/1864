@@ -2,22 +2,22 @@
 
 Vinduet **FORSKNING** er menu 10.
 
-## Forskning
-- Der kører ét projekt ad gangen, og det betales hver måned.
-- Skifter man projekt, tabes det arbejde, der allerede er gjort på det gamle.
-- Er der ikke penge i kassen, står projektet stille.
-- Står Krigsministeriet på **AUTO** i Statsrådet, vælger det selv det første åbne projekt, som kassen kan bære over reserven.
+## Forskning som træ
+Vinduet FORSKNING viser et træ i stil med Hearts of Iron.
+- **Grene:** fem søjler.
+- **Niveauer:** rækkerne er niveau I, II, III osv.
+- **Streger** går fra et projekt til det, det åbner for.
+- **Rækkefølge:** et projekt kræver kun det ovenover i sin gren. Der er ingen årstal.
+- **Start:** klik på en boks for at påbegynde projektet.
+- **Ét ad gangen:** der kører ét projekt ad gangen, og det betales hver måned. Står Krigsministeriet på AUTO, vælger det selv.
 
-| Id | Projekt | Fra | Måneder | Rd./md. | Kræver | Virkning |
-|---|---|---|---|---|---|---|
-| sanitation | Sanitetsvæsenet | 1852 | 12 | 800 | | Tab i slag −20 % |
-| fortress | Fæstningsbyggeri | 1852 | 12 | 1.200 | | Skansernes dækning +10 %-point |
-| conserves | Konserves og feltbagerier | 1853 | 10 | 1.000 | | 6 dages proviant båret (før 4) |
-| telegraph | Felttelegrafen | 1854 | 12 | 1.500 | | Indkaldelse ×1,25 |
-| staff | Stabsskolen | 1855 | 18 | 1.000 | | Kampværdi ×1,05 |
-| railmob | Jernbanemobilisering | 1856 | 12 | 1.500 | telegraph | Indkaldelse yderligere ×1,25 |
-| riflegun | Riflede kanoner | 1858 | 18 | 3.000 | | Kanoner (felt og skanse) ×1,4 |
-| breech | Bagladegeværet | 1860 | 24 | 4.000 | staff | Infanteri ×1,25 |
+| Gren | I | II | III |
+|---|---|---|---|
+| Sanitet og forsyning | Sanitetsvæsenet (tab −20 %) | Konserves og feltbagerier (6 dages proviant) | Militærhospitaler (syge 40 % hurtigere tilbage) |
+| Befæstning | Fæstningsbyggeri (dækning +10) | Kasematter og blendinger (dækning +10) | |
+| Samfærdsel | Felttelegrafen (indkaldelse × 1,25) | Jernbanemobilisering (× 1,25) | |
+| Hæren | Stabsskolen (kampværdi + 5 %) | Bagladegeværet (infanteri × 1,25) | |
+| Artilleriet | Riflede kanoner (× 1,4) | | |
 
 ## Doktriner
 - Et skift koster 5.000 rd. og −0,05 i moral for alle enheder.

@@ -507,6 +507,7 @@ void ACampaign1851Map::ResetNetwork()
 	}
 	UpdateOpenRailways(false);
 	RebuildNetworkMeshes();
+	DetectBridges();
 }
 
 TArray<FCampaign1851LinkSave> ACampaign1851Map::SaveNetwork() const

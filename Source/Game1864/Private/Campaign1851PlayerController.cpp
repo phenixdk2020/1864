@@ -85,6 +85,7 @@ void ACampaign1851PlayerController::TryInit()
 	}
 	// Test starts: -CampaignSpeed=0..3, -CampaignDate=1852-01-20 (e.g. to see the winter).
 	int32 StartSpeed = 0;
+	Map->SetSpeed(0);   // the game starts paused
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignSpeed="), StartSpeed))
 	{
 		Map->SetSpeed(StartSpeed);
@@ -266,6 +267,13 @@ void ACampaign1851PlayerController::TryInit()
 			Map->CompleteForts();
 		}
 	}
+	// -CampaignFormCommand=0 drags a whole general command into the field army (test).
+	int32 FormCommand = -1;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignFormCommand="), FormCommand))
+	{
+		const int32 Id = Map->FormFromCommand(FormCommand, 0);
+		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|oob|command %d -> formation %d with %d units"), FormCommand, Id, Map->FormationRegiments(Id).Num());
+	}
 	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignYearlyOfficers")))
 	{
 		Map->YearlyOfficers();
@@ -281,6 +289,7 @@ void ACampaign1851PlayerController::TryInit()
 			: WindowName == TEXT("supply") ? SCampaign1851Overlay::EWindow::Supply : WindowName == TEXT("foreign") ? SCampaign1851Overlay::EWindow::Foreign
 			: WindowName == TEXT("research") ? SCampaign1851Overlay::EWindow::Research : WindowName == TEXT("navy") ? SCampaign1851Overlay::EWindow::Navy
 			: WindowName == TEXT("battlefield") ? SCampaign1851Overlay::EWindow::Battlefield
+			: WindowName == TEXT("materiel") ? SCampaign1851Overlay::EWindow::Materiel
 			: WindowName == TEXT("gazette") ? SCampaign1851Overlay::EWindow::Gazette : WindowName == TEXT("end") ? SCampaign1851Overlay::EWindow::End
 			: SCampaign1851Overlay::EWindow::Towns);
 	// -CampaignBattlefield=lat,lon,km builds the ground there (test of the generator).
@@ -908,6 +917,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			case SCampaign1851Overlay::CloseFortPanel: Overlay->HideFortTool(); Overlay->SetFortPlacing(0); break;
 			case SCampaign1851Overlay::CloseFort: Overlay->SelectFort(0); break;
 			default:
+				Overlay->SelectBridge(0);
 				Overlay->SetSelectedRegiments({});
 				Overlay->SetSelectedCity(INDEX_NONE);
 				Overlay->SetSelectedAmt(0);
@@ -1174,6 +1184,60 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			Map->NewGameNation = Module == 1 ? TEXT("SE") : TEXT("DK");
 		}
+		else if (Button == SCampaign1851Overlay::EButton::BridgeSelect)
+		{
+			Overlay->SelectBridge(Overlay->GetSelectedBridge() == Module ? 0 : Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::BridgeDo)
+		{
+			FString Why;
+			const bool bDone = Map->BridgeAction(Module / 10, EBridgeAction(Module % 10), &Why);
+			if (!bDone)
+			{
+				Overlay->ShowToast(Why);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OpenMateriel)
+		{
+			Overlay->OpenWindow(Overlay->GetWindow() == SCampaign1851Overlay::EWindow::Materiel ? SCampaign1851Overlay::EWindow::None : SCampaign1851Overlay::EWindow::Materiel);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::RawBuy)
+		{
+			const ECampaign1851Raw R = ECampaign1851Raw(Module / 10);
+			const float Step = R == ECampaign1851Raw::Cloth || R == ECampaign1851Raw::Leather ? 100.f : 10.f;
+			FString Why;
+			if (!Map->BuyRaw(R, Step * (Module % 10 == 0 ? 1.f : 10.f), &Why))
+			{
+				Overlay->ShowToast(Why);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::UnitType)
+		{
+			Overlay->RaiseType = Module;
+		}
+		else if (Button == SCampaign1851Overlay::EButton::UnitTown)
+		{
+			Overlay->RaiseTownPick += Module;
+		}
+		else if (Button == SCampaign1851Overlay::EButton::UnitCommand)
+		{
+			Overlay->RaiseCommand += Module;
+		}
+		else if (Button == SCampaign1851Overlay::EButton::UnitProgram)
+		{
+			const int32 N = int32(ECampaign1851Program::Count);
+			Overlay->RaiseProgram = ((Overlay->RaiseProgram + Module) % N + N) % N;
+		}
+		else if (Button == SCampaign1851Overlay::EButton::UnitRaise)
+		{
+			const TArray<int32> Towns = Map->RaiseTowns();
+			const int32 Town = Towns.Num() > 0 ? Towns[((Overlay->RaiseTownPick % Towns.Num()) + Towns.Num()) % Towns.Num()] : INDEX_NONE;
+			const int32 NC = Map->GetCommands().Num();
+			const int32 Command = NC > 0 ? ((Overlay->RaiseCommand % NC) + NC) % NC : INDEX_NONE;
+			FString Why;
+			const int32 New = Map->RaiseUnit(Overlay->RaiseType, Town, Command, ECampaign1851Program(Overlay->RaiseProgram), &Why);
+			Overlay->ShowToast(New != INDEX_NONE ? FString::Printf(TEXT("%s er oprettet"), *Map->GetRegiments()[New].Name) : Why);
+		}
 		else if (Button == SCampaign1851Overlay::EButton::OpenBattlefield)
 		{
 			const bool bOpen = Overlay->GetWindow() == SCampaign1851Overlay::EWindow::Battlefield;
@@ -1212,7 +1276,19 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 		else if (Button == SCampaign1851Overlay::EButton::MinisterDismiss)
 		{
-			Map->DismissMinister(Module);
+			Overlay->SetMinisterPick(Overlay->GetMinisterPick() == Module ? -1 : Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::MinisterAppoint)
+		{
+			if (Map->AppointMinister(Module / 10, Module % 10))
+			{
+				Overlay->ShowToast(FString::Printf(TEXT("Ny minister: %s"), *Map->GetMinister(ECampaign1851Portfolio(Module / 10)).Name));
+			}
+			Overlay->SetMinisterPick(-1);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::MinisterPickClose)
+		{
+			Overlay->SetMinisterPick(-1);
 		}
 		else if (Button == SCampaign1851Overlay::EButton::NationWeight)
 		{
@@ -1608,6 +1684,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Navy = Map->SaveNavy();
 	Save->Politics = Map->SavePolitics();
 	Save->Economy = Map->SaveEconomy();
+	Save->Bridges = Map->SaveBridges();
 	Map->ExportUnits();
 	Save->MaterialLots = Map->GetMaterialLots();
 	if (Save->Links.Num() > 0)
@@ -1740,6 +1817,7 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	Map->RestoreNavy(Save->SaveVersion >= 24 ? Save->Navy : TArray<FString>());
 	Map->RestorePolitics(Save->SaveVersion >= 25 ? Save->Politics : TArray<FString>());
 	Map->RestoreEconomy(Save->SaveVersion >= 26 ? Save->Economy : TArray<FString>());
+	Map->RestoreBridges(Save->SaveVersion >= 27 ? Save->Bridges : TArray<FString>());
 	Map->SetMaterialLots(Save->SaveVersion >= 16 ? Save->MaterialLots : TArray<FVector>());
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);
 	if (Overlay.IsValid())
@@ -1762,7 +1840,7 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	}
 	Map->ClearProjects();
 	Map->SetCampaignDays(0.0);
-	Map->SetSpeed(1);
+	Map->SetSpeed(0);
 	Map->ResetEconomy();
 	Map->ResetNetwork();
 	// A new world: its own seed (or -CampaignSeed=N) and the chosen deviation from history (-CampaignDeviation=20).
@@ -2085,6 +2163,16 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 	}
 	const int32 SourceId = SCampaign1851Overlay::TreeId(Source), TargetId = SCampaign1851Overlay::TreeId(Target);
 	const K TargetKind = SCampaign1851Overlay::TreeKind(Target);
+	// A whole general command dragged into the chart.
+	if (SCampaign1851Overlay::TreeKind(Source) == K::Command && (TargetKind == K::NewFormation || TargetKind == K::Formation || TargetKind == K::FieldArmy))
+	{
+		const int32 Parent = TargetKind == K::FieldArmy ? 0 : TargetId;
+		const int32 Id = Map->FormFromCommand(SourceId, Parent);
+		const int32 Index = Map->FormationIndex(Id);
+		Overlay->ShowToast(Index != INDEX_NONE ? FString::Printf(TEXT("%s oprettet af %s (%d enheder)"), *Map->GetFormations()[Index].Name, *Map->GetCommands()[SourceId].Name, Map->FormationRegiments(Id).Num())
+			: FString(TEXT("Kommandoen har ingen enheder i garnison")));
+		return;
+	}
 	if (TargetKind == K::NewFormation)
 	{
 		// "Drag here for a new unit": a new formation one level below the one it stands by, with the unit in it.

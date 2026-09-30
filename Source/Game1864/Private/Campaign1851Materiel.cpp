@@ -30,14 +30,16 @@ void ACampaign1851Map::ResetMateriel()
 
 void ACampaign1851Map::MonthlyMateriel()
 {
+	// The arms works make as much as the iron, coal and timber in store allow.
+	const float Share = MonthlyRawMaterials();
 	Campaign1851Materiel::FMateriel Made;
 	for (const ACampaign1851ConstructionSite* Site : Projects)
 	{
 		if (Site && !Site->IsGarrison() && !Site->IsDemolishing() && Site->IsModuleDone(0))
 		{
 			const Campaign1851Materiel::FMateriel P = Campaign1851Materiel::Production(Site->GetKind());
-			Made.Rifles += P.Rifles;
-			Made.Guns += P.Guns;
+			Made.Rifles += FMath::RoundToInt(P.Rifles * Share);
+			Made.Guns += FMath::FloorToInt(P.Guns * Share + 0.5f);
 			Made.Horses += P.Horses;
 		}
 	}

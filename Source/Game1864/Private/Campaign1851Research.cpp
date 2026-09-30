@@ -12,14 +12,16 @@ namespace Campaign1851Research
 	const TArray<FCampaign1851ResearchTopic>& Topics()
 	{
 		static const TArray<FCampaign1851ResearchTopic> List = {
-			{ TEXT("sanitation"), TEXT("Sanitetsvæsenet"),          TEXT("Ambulancer og feltlazaretter: tab i slag −20 %"),                          1852, 800.0,  12, nullptr },
-			{ TEXT("fortress"),   TEXT("Fæstningsbyggeri"),         TEXT("Ingeniørkorpsets skole: skansernes dækning +10 %-point"),                  1852, 1200.0, 12, nullptr },
-			{ TEXT("conserves"),  TEXT("Konserves og feltbagerier"), TEXT("Enhederne bærer 2 dages proviant mere (6 i stedet for 4)"),              1853, 1000.0, 10, nullptr },
-			{ TEXT("telegraph"),  TEXT("Felttelegrafen"),           TEXT("Indkaldelsen går 25 % hurtigere"),                                        1854, 1500.0, 12, nullptr },
-			{ TEXT("staff"),      TEXT("Stabsskolen"),              TEXT("Uddannede stabsofficerer: kampværdi +5 %"),                               1855, 1000.0, 18, nullptr },
-			{ TEXT("railmob"),    TEXT("Jernbanemobilisering"),     TEXT("Køreplaner for indkaldelsen: yderligere 25 % hurtigere"),                  1856, 1500.0, 12, TEXT("telegraph") },
-			{ TEXT("riflegun"),   TEXT("Riflede kanoner"),          TEXT("Længere rækkevidde og træfsikkerhed: kanonerne tæller 40 % mere"),         1858, 3000.0, 18, nullptr },
-			{ TEXT("breech"),     TEXT("Bagladegeværet"),           TEXT("Infanteriet lader liggende og tre gange så hurtigt: kampværdi +25 %"),    1860, 4000.0, 24, TEXT("staff") },
+			{ TEXT("sanitation"), TEXT("Sanitetsvæsenet"),          TEXT("Ambulancer og feltlazaretter: tab i slag −20 %"),                          1852, 800.0,  12, nullptr, 0 },
+			{ TEXT("fortress"),   TEXT("Fæstningsbyggeri"),         TEXT("Ingeniørkorpsets skole: skansernes dækning +10 %-point"),                  1852, 1200.0, 12, nullptr, 1 },
+			{ TEXT("conserves"),  TEXT("Konserves og feltbagerier"), TEXT("Enhederne bærer 2 dages proviant mere (6 i stedet for 4)"),              1853, 1000.0, 10, TEXT("sanitation"), 0 },
+			{ TEXT("telegraph"),  TEXT("Felttelegrafen"),           TEXT("Indkaldelsen går 25 % hurtigere; meldinger på timer"),                     1854, 1500.0, 12, nullptr, 2 },
+			{ TEXT("staff"),      TEXT("Stabsskolen"),              TEXT("Uddannede stabsofficerer: kampværdi +5 %"),                               1855, 1000.0, 18, nullptr, 3 },
+			{ TEXT("railmob"),    TEXT("Jernbanemobilisering"),     TEXT("Køreplaner for indkaldelsen: yderligere 25 % hurtigere"),                  1856, 1500.0, 12, TEXT("telegraph"), 2 },
+			{ TEXT("hospitals"),  TEXT("Militærhospitaler"),        TEXT("Syge og sårede kommer 40 % hurtigere tilbage"),                           1857, 1200.0, 12, TEXT("conserves"), 0 },
+			{ TEXT("riflegun"),   TEXT("Riflede kanoner"),          TEXT("Længere rækkevidde og træfsikkerhed: kanonerne tæller 40 % mere"),         1858, 3000.0, 18, nullptr, 4 },
+			{ TEXT("casemates"),  TEXT("Kasematter og blendinger"), TEXT("Skansernes dækning yderligere +10 %-point"),                              1859, 2000.0, 15, TEXT("fortress"), 1 },
+			{ TEXT("breech"),     TEXT("Bagladegeværet"),           TEXT("Infanteriet lader liggende og tre gange så hurtigt: kampværdi +25 %"),    1860, 4000.0, 24, TEXT("staff"), 3 },
 		};
 		return List;
 	}
@@ -30,6 +32,29 @@ namespace Campaign1851Research
 	}
 
 	int32 DoctrineChoices(int32 Level) { return Level == 2 ? 3 : 2; }
+
+	int32 Tier(int32 Topic)
+	{
+		// The depth in its branch: I for a root, II for what it opens, and so on.
+		int32 Depth = 0;
+		for (int32 t = Topic; Topics().IsValidIndex(t) && Topics()[t].Needs && Depth < 10; t = FindTopic(Topics()[t].Needs))
+		{
+			++Depth;
+		}
+		return Depth;
+	}
+
+	const TCHAR* Roman(int32 Tier)
+	{
+		static const TCHAR* Numerals[] = { TEXT("I"), TEXT("II"), TEXT("III"), TEXT("IV"), TEXT("V"), TEXT("VI"), TEXT("VII"), TEXT("VIII") };
+		return Numerals[FMath::Clamp(Tier, 0, 7)];
+	}
+
+	const TCHAR* BranchName(int32 Branch)
+	{
+		static const TCHAR* Names[Branches] = { TEXT("Sanitet og forsyning"), TEXT("Befæstning"), TEXT("Samfærdsel"), TEXT("Hæren"), TEXT("Artilleriet") };
+		return Branch >= 0 && Branch < Branches ? Names[Branch] : TEXT("");
+	}
 
 	const TCHAR* LevelName(int32 Level)
 	{
@@ -87,7 +112,6 @@ FString ACampaign1851Map::ResearchBlockReason(int32 Topic) const
 	const FCampaign1851ResearchTopic& T = List[Topic];
 	if (Researched.Contains(T.Id)) return TEXT("færdig");
 	if (Researching == Topic) return TEXT("i gang");
-	if (GetDate().GetYear() < T.Year) return FString::Printf(TEXT("fra %d"), T.Year);
 	if (T.Needs && !Researched.Contains(T.Needs))
 	{
 		const int32 Need = Campaign1851Research::FindTopic(T.Needs);
@@ -231,7 +255,7 @@ float ACampaign1851Map::DanishLossFactor() const
 
 float ACampaign1851Map::FortCoverBonus() const
 {
-	return (HasResearch(TEXT("fortress")) ? 10.f : 0.f) + (Doctrine[0] == 0 ? 10.f : 0.f);
+	return (HasResearch(TEXT("fortress")) ? 10.f : 0.f) + (HasResearch(TEXT("casemates")) ? 10.f : 0.f) + (Doctrine[0] == 0 ? 10.f : 0.f);
 }
 
 float ACampaign1851Map::DanishGunFactor() const

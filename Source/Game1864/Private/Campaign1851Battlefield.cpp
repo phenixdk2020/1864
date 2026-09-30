@@ -91,7 +91,7 @@ namespace
 	}
 }
 
-bool ACampaign1851Map::GenerateBattlefield(const FVector2D& CentreKm, float InSizeKm, const FString& Name)
+bool ACampaign1851Map::GenerateBattlefield(FVector2D CentreKm, float InSizeKm, FString Name)
 {
 	FCampaign1851Battlefield& B = Battlefield;
 	B = FCampaign1851Battlefield();
@@ -410,6 +410,15 @@ bool ACampaign1851Map::GenerateBattlefield(const FVector2D& CentreKm, float InSi
 			B.FortM.Add(M);
 		}
 	}
+	for (const FCampaign1851Bridge& Bd : Bridges)
+	{
+		const FVector2D M = (Bd.Km - Origin) * 1000.0;
+		if (Bd.State != EBridgeState::Site && M.X >= 0.f && M.Y >= 0.f && M.X <= SizeM && M.Y <= SizeM)
+		{
+			B.Bridges.Add(Bd);
+			B.BridgeM.Add(M);
+		}
+	}
 
 	RenderBattlefield();
 	WriteBattlefield();
@@ -513,6 +522,23 @@ void ACampaign1851Map::RenderBattlefield()
 	for (const TArray<FVector2D>& L : B.Roads) { Line(L, W(10.f, 3.5f), FColor(96, 78, 58)); Line(L, W(10.f, 2.2f), FColor(236, 220, 176)); }
 	for (const TArray<FVector2D>& L : B.Chaussees) { Line(L, W(18.f, 4.5f), FColor(80, 70, 60)); Line(L, W(12.f, 3.f), FColor(246, 238, 210)); }
 	for (const TArray<FVector2D>& L : B.Rails) { Line(L, W(12.f, 2.5f), FColor(40, 34, 30)); }
+	// Bridges: a dark deck over the water; a blown one leaves the water showing.
+	for (int32 b = 0; b < B.Bridges.Num(); ++b)
+	{
+		const FVector2D M = B.BridgeM[b];
+		const float R = FMath::Max(B.Bridges[b].LengthM * 0.5f, 3.f * Px);
+		for (float y = -R; y <= R; y += Px * 0.5f)
+		{
+			for (float x = -2.f * Px; x <= 2.f * Px; x += Px * 0.5f)
+			{
+				const int32 px = FMath::FloorToInt((M.X + x) / Px), py = FMath::FloorToInt((SizeM - M.Y - y) / Px);
+				if (px >= 0 && py >= 0 && px < BfImage && py < BfImage && B.Bridges[b].State == EBridgeState::Blown)
+				{
+					Img[py * BfImage + px] = FColor(62, 96, 124);
+				}
+			}
+		}
+	}
 	auto Rect = [&](const FCampaign1851BattleBuilding& Bd, const FColor& C)
 	{
 		const float BYaw = FMath::DegreesToRadians(Bd.Yaw);
@@ -683,6 +709,18 @@ void ACampaign1851Map::WriteBattlefield() const
 		FortList.Add(MakeShared<FJsonValueObject>(O));
 	}
 	Doc->SetArrayField(TEXT("forts"), FortList);
+	TArray<TSharedPtr<FJsonValue>> BridgeList;
+	for (int32 b = 0; b < B.Bridges.Num(); ++b)
+	{
+		TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+		O->SetStringField(TEXT("name"), B.Bridges[b].Name);
+		O->SetNumberField(TEXT("x"), FMath::RoundToInt(B.BridgeM[b].X));
+		O->SetNumberField(TEXT("y"), FMath::RoundToInt(B.BridgeM[b].Y));
+		O->SetNumberField(TEXT("lengthM"), FMath::RoundToInt(B.Bridges[b].LengthM));
+		O->SetStringField(TEXT("state"), B.Bridges[b].State == EBridgeState::Blown ? TEXT("blown") : B.Bridges[b].State == EBridgeState::Building ? TEXT("building") : TEXT("intact"));
+		BridgeList.Add(MakeShared<FJsonValueObject>(O));
+	}
+	Doc->SetArrayField(TEXT("bridges"), BridgeList);
 	FString Text;
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Text);
 	FJsonSerializer::Serialize(Doc, Writer);

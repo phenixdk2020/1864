@@ -170,6 +170,7 @@ TArray<FString> ACampaign1851Map::SaveEconomy() const
 		Out.Add(FString::Printf(TEXT("h|%.1f|%.0f|%.0f|%.0f|%.1f|%.2f|%.2f|%.3f|%.0f"), R.Day, R.Population, R.Treasury, R.ArmyMen, R.RailKm, R.Tension, R.Mood, R.Grain, R.Debt));
 	}
 	Out.Append(SaveFortProgrammes());
+	Out.Append(SaveResources());
 	Out.Add(FString::Printf(TEXT("end|%d|%.3f"), bEndShown ? 1 : 0, LastWarScore));
 	const int32 From = FMath::Max(0, NewsLog.Num() - 120);
 	for (int32 n = From; n < NewsLog.Num(); ++n)
@@ -207,6 +208,10 @@ void ACampaign1851Map::RestoreEconomy(const TArray<FString>& Lines)
 			R.Grain = FCString::Atof(*P[8]);
 			R.Debt = FCString::Atod(*P[9]);
 			History.Add(R);
+		}
+		else if (P.Num() > 0 && P[0] == TEXT("raw"))
+		{
+			RestoreResources({ Line });
 		}
 		else if (P.Num() >= 2 && P[0] == TEXT("end"))
 		{

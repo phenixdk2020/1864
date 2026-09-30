@@ -31,6 +31,7 @@ struct FCampaign1851Link
 
 	bool bChaussee = false;        // paved now
 	bool bRailway = false;         // an open railway joins A and B
+	bool bBlocked = false;         // a bridge on it is blown (or a pontoon bridge taken up): no way through
 	bool bHistoricChaussee = false;
 
 	/** The project under way on this link (one at a time). */

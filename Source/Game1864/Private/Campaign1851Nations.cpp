@@ -216,6 +216,7 @@ void ACampaign1851Map::ResetWorld(int32 InSeed, float InDeviation)
 	ResetPolitics();
 	RestoreEconomy(TArray<FString>());
 	ResetFortProgrammes();
+	ResetResources();
 	bEndPending = bEndShown = false;
 	ApplyNewGameNation();
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|world|seed %d|deviation %.0f %%"), Seed, Deviation * 100.f);
@@ -779,6 +780,7 @@ bool ACampaign1851Map::CarryOut(const FCampaign1851Decision& D)
 	case ECampaign1851DecisionKind::Blockade:
 	case ECampaign1851DecisionKind::Loan:
 	case ECampaign1851DecisionKind::Doctrine:
+	case ECampaign1851DecisionKind::BuyRaw:
 		return CarryOutMinister(D);
 	case ECampaign1851DecisionKind::FillPost:
 	{

@@ -597,7 +597,7 @@ void ACampaign1851Map::TravelTimes(int32 From, float Pace, bool bRail, TArray<fl
 		const bool bByRail = At != From && OutVia[At].bRail;
 		for (int32 Link = 0; Link < Links.Num(); ++Link)
 		{
-			if (Links[Link].A != At && Links[Link].B != At)
+			if ((Links[Link].A != At && Links[Link].B != At) || Links[Link].bBlocked)
 			{
 				continue;
 			}
@@ -751,7 +751,7 @@ bool ACampaign1851Map::PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 
 			for (int32 k = 0; k < Links.Num(); ++k)
 			{
 				const FCampaign1851Link& L = Links[k];
-				if (L.HasFerry())
+				if (L.HasFerry() || L.bBlocked)
 				{
 					continue;
 				}
@@ -972,7 +972,7 @@ void ACampaign1851Map::RailTimes(int32 From, TArray<float>& OutDays, TArray<FCam
 		for (int32 k = 0; k < Links.Num(); ++k)
 		{
 			const FCampaign1851Link& L = Links[k];
-			if (!L.bRailway || (L.A != At && L.B != At))
+			if (!L.bRailway || L.bBlocked || (L.A != At && L.B != At))
 			{
 				continue;
 			}
@@ -1646,6 +1646,60 @@ int32 ACampaign1851Map::CreateFormation(ECampaign1851Echelon Echelon, int32 Pare
 	F.Parent = FormationIndex(Parent) != INDEX_NONE ? Parent : 0;
 	Formations.Add(F);
 	return F.Id;
+}
+
+int32 ACampaign1851Map::FormFromCommand(int32 Command, int32 Parent)
+{
+	if (!Commands.IsValidIndex(Command))
+	{
+		return 0;
+	}
+	TArray<int32> Foot, Other;
+	for (int32 i = 0; i < Regiments.Num(); ++i)
+	{
+		const FCampaign1851Regiment& R = Regiments[i];
+		if (R.Command == Command && R.Formation == 0 && R.Men > 0)
+		{
+			(R.Arm == ECampaign1851Arm::Infantry || R.Arm == ECampaign1851Arm::Jager || R.Arm == ECampaign1851Arm::Guard ? Foot : Other).Add(i);
+		}
+	}
+	if (Foot.Num() + Other.Num() == 0)
+	{
+		return 0;
+	}
+	const int32 ParentIndex = FormationIndex(Parent);
+	const ECampaign1851Echelon Above = ParentIndex == INDEX_NONE ? ECampaign1851Echelon::Army : Formations[ParentIndex].Echelon;
+	const ECampaign1851Echelon Echelon = Above == ECampaign1851Echelon::Army ? ECampaign1851Echelon::Division : Above == ECampaign1851Echelon::Division ? ECampaign1851Echelon::Brigade : ECampaign1851Echelon::Regiment;
+	const int32 Id = CreateFormation(Echelon, ParentIndex == INDEX_NONE ? 0 : Parent);
+	if (Echelon == ECampaign1851Echelon::Division && Foot.Num() > 4)
+	{
+		// The foot in brigades of up to four battalions.
+		for (int32 b = 0; b < Foot.Num(); b += 4)
+		{
+			const int32 Brigade = CreateFormation(ECampaign1851Echelon::Brigade, Id);
+			for (int32 k = b; k < FMath::Min(b + 4, Foot.Num()); ++k)
+			{
+				MoveRegimentToFormation(Foot[k], Brigade);
+			}
+		}
+	}
+	else
+	{
+		for (int32 i : Foot)
+		{
+			MoveRegimentToFormation(i, Id);
+		}
+	}
+	for (int32 i : Other)
+	{
+		MoveRegimentToFormation(i, Id);
+	}
+	// The command's general leads it when he is free to.
+	if (Officers.IsValidIndex(Commands[Command].General))
+	{
+		AssignFormationCommander(Commands[Command].General, Id);
+	}
+	return Id;
 }
 
 void ACampaign1851Map::DissolveFormation(int32 Id)

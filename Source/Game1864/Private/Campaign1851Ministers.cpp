@@ -79,6 +79,44 @@ void ACampaign1851Map::AppointCabinet(ECampaign1851Current Line)
 	}
 }
 
+TArray<FCampaign1851Minister> ACampaign1851Map::MinisterCandidates(ECampaign1851Portfolio P) const
+{
+	TArray<FCampaign1851Minister> Out;
+	for (const FMinisterName& N : Pool(P))
+	{
+		if (Ministers[int32(P)].Name == N.Name)
+		{
+			continue;
+		}
+		FCampaign1851Minister M;
+		M.Name = N.Name;
+		M.Line = N.Line;
+		M.Skill = Quality(uint32(Seed), N.Name, 1);
+		M.Thrift = Quality(uint32(Seed), N.Name, 2);
+		M.Caution = Quality(uint32(Seed), N.Name, 3);
+		M.Since = CampaignDays;
+		Out.Add(M);
+	}
+	return Out;
+}
+
+bool ACampaign1851Map::AppointMinister(int32 Portfolio, int32 Candidate)
+{
+	if (Portfolio < 0 || Portfolio >= int32(ECampaign1851Portfolio::Count))
+	{
+		return false;
+	}
+	const TArray<FCampaign1851Minister> Candidates = MinisterCandidates(ECampaign1851Portfolio(Portfolio));
+	if (!Candidates.IsValidIndex(Candidate))
+	{
+		return false;
+	}
+	const FString Old = Ministers[Portfolio].Name;
+	Ministers[Portfolio] = Candidates[Candidate];
+	News.Add(FString::Printf(TEXT("%s afløses af %s som minister for %s"), *Old, *Ministers[Portfolio].Name, Campaign1851Nations::PortfolioName(ECampaign1851Portfolio(Portfolio))));
+	return true;
+}
+
 bool ACampaign1851Map::DismissMinister(int32 Portfolio)
 {
 	if (Portfolio < 0 || Portfolio >= int32(ECampaign1851Portfolio::Count))
@@ -223,6 +261,24 @@ TArray<FCampaign1851Decision> ACampaign1851Map::MinisterOptions(ECampaign1851Por
 			Add(ECampaign1851DecisionKind::Loan, 0, 2, 100000.0, 20.f, TEXT("Afdrag 100.000 rd. på statsgælden"), FString::Printf(TEXT("gæld %s rd. til %.1f %%"), *FString::FromInt(int32(Debt)), DebtRate * 100.f));
 		}
 	}
+	else if (P == ECampaign1851Portfolio::Intendance && CanImport())
+	{
+		// Three months of iron and coal for the works; cloth and leather for a new battalion or two.
+		float Made[int32(ECampaign1851Raw::Count)], Used[int32(ECampaign1851Raw::Count)];
+		RawFlow(Made, Used);
+		for (int32 r = 0; r < int32(ECampaign1851Raw::Count); ++r)
+		{
+			const ECampaign1851Raw R = ECampaign1851Raw(r);
+			const float Need = R == ECampaign1851Raw::Cloth || R == ECampaign1851Raw::Leather ? 1600.f : R == ECampaign1851Raw::Powder ? 200.f : 3.f * FMath::Max(0.f, Used[r] - Made[r]);
+			const float Short = Need - RawStock[r];
+			if (Short > 0.5f && RawPrice(R) * Short <= Budget)
+			{
+				const Campaign1851Resources::FRawInfo& I = Campaign1851Resources::Info(R);
+				Add(ECampaign1851DecisionKind::BuyRaw, r, FMath::CeilToInt(Short), RawPrice(R) * Short, 8.f + Short / FMath::Max(Need, 1.f) * 10.f,
+					FString::Printf(TEXT("Køb %d %s %s"), FMath::CeilToInt(Short), I.Unit, I.Name), FString::Printf(TEXT("lager %.0f, ønsket %.0f"), RawStock[r], Need));
+			}
+		}
+	}
 	else if (P == ECampaign1851Portfolio::War && !IsDoctrineChanging())
 	{
 		// The doctrine to the situation: no bayonet against the needle gun; the fortress with great works.
@@ -261,6 +317,8 @@ bool ACampaign1851Map::CarryOutMinister(const FCampaign1851Decision& D)
 		return D.B == 2 ? RepayLoan(100000.0) : TakeLoan(D.B == 1 ? 250000.0 : 100000.0);
 	case ECampaign1851DecisionKind::Doctrine:
 		return SetDoctrine(D.A, D.B);
+	case ECampaign1851DecisionKind::BuyRaw:
+		return BuyRaw(ECampaign1851Raw(D.A), float(D.B));
 	default:
 		return false;
 	}
