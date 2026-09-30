@@ -56,3 +56,12 @@ Hver type kræver:
 
 ## Gemning
 `raw|jern|kul|tømmer|krudt|klæde|læder` i Economy-linjerne.
+
+## Morterer og vogne
+- **Morterbatteri:** 120 mand, 6 morterer, 12 vogne, 72 heste og 120 uniformer.
+- **Fart:** et batteri med morterer marcherer med 80 % fart, når der er to vogne pr. morter. Er der for få vogne, går det med 50 %.
+- **I slag** tæller en morter 80 % af en kanon.
+- **Lager:** 12 morterer og 150 vogne i 1851.
+- **Produktion:** arsenalet støber én morter om måneden, og vognfabrikken bygger 20 vogne (1 t jern og 10 læs tømmer).
+- **Indkøb:** en morter koster 900 rd. i udlandet, en vogn 60 rd. i landet. Begge dele er dyrere i krig.
+- **Units.json** har felterne `mortars` og `wagons`.

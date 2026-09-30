@@ -137,6 +137,14 @@ bool ACampaign1851Map::LoadNations()
 		O->TryGetNumberField(TEXT("tradeValue"), N.TradeValue);
 		O->TryGetBoolField(TEXT("canAlly"), N.bCanAlly);
 		O->TryGetBoolField(TEXT("canGuarantee"), N.bCanGuarantee);
+		O->TryGetStringField(TEXT("role"), N.Role);
+		O->TryGetStringField(TEXT("period"), N.Period);
+		O->TryGetStringField(TEXT("group"), N.Group);
+		O->TryGetStringField(TEXT("priority"), N.Priority);
+		O->TryGetStringField(TEXT("infantry"), N.Infantry);
+		O->TryGetStringField(TEXT("cavalry"), N.Cavalry);
+		O->TryGetStringField(TEXT("artillery"), N.Artillery);
+		O->TryGetBoolField(TEXT("active"), N.bActive);
 		// The player's own nation starts with every portfolio in his hands.
 		for (ECampaign1851Delegation& M : N.Modes)
 		{
@@ -400,6 +408,10 @@ void ACampaign1851Map::RunNationalAI()
 	for (int32 n = 0; n < Nations.Num(); ++n)
 	{
 		FCampaign1851Nation& N = Nations[n];
+		if (!N.bActive)
+		{
+			continue;
+		}
 		if (!N.bOnMap)
 		{
 			RunAbstractNation(n);

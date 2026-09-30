@@ -41,6 +41,7 @@ namespace Campaign1851Resources
 	/** What an arms works needs a month for its full output (iron, coal, timber). */
 	FVector3f ArmsInput(const FString& Key)
 	{
+		if (Key == TEXT("Wagon_Works")) return FVector3f(1.f, 0.f, 10.f);
 		if (Key == TEXT("Rifle_Workshop")) return FVector3f(3.f, 1.f, 5.f);
 		if (Key == TEXT("Arsenal")) return FVector3f(4.f, 2.f, 3.f);
 		if (Key == TEXT("Cannon_Foundry")) return FVector3f(8.f, 6.f, 0.f);
@@ -56,6 +57,7 @@ namespace Campaign1851Resources
 			{ TEXT("Dragonregiment"),    TEXT("Dragonregiment"),  TEXT("D"),  ECampaign1851Arm::Cavalry,        560, 560, 0, 600, 560,  1120, 1.6 },
 			{ TEXT("Batteri"),           TEXT("Batteri"),         TEXT("A"),  ECampaign1851Arm::Artillery,      150, 0,   8, 110, 150,  300,  1.3 },
 			{ TEXT("Ridende batteri"),   TEXT("Ridende Batteri"), TEXT("RA"), ECampaign1851Arm::HorseArtillery, 180, 0,   6, 230, 180,  460,  1.5 },
+			{ TEXT("Morterbatteri"),     TEXT("Morterbatteri"),   TEXT("M"),  ECampaign1851Arm::Artillery,      120, 0,   0, 72,  120,  240,  1.2, 6, 12 },
 		};
 		return List[FMath::Clamp(T, 0, UnitTypes - 1)];
 	}
@@ -67,6 +69,25 @@ void ACampaign1851Map::ResetResources()
 	{
 		RawStock[r] = Campaign1851Resources::Info(ECampaign1851Raw(r)).Start;
 	}
+	MortarStock = 12;   // the arsenal's mortars after 1848-50 (estimate)
+	WagonStock = 150;
+}
+
+bool ACampaign1851Map::BuyKit(bool bMortars, int32 Count, FString* OutReason)
+{
+	if (bMortars && !CanImport(OutReason))
+	{
+		return false;
+	}
+	const double Cost = Count * (bMortars ? Campaign1851Resources::MortarPrice : Campaign1851Resources::WagonPrice) * (bAtWar ? 1.5 : 1.0);
+	if (Treasury < Cost)
+	{
+		if (OutReason) { *OutReason = TEXT("ikke råd"); }
+		return false;
+	}
+	AddTransaction(-Cost, FString::Printf(TEXT("Indkøb: %d %s"), Count, bMortars ? TEXT("morterer") : TEXT("vogne")));
+	(bMortars ? MortarStock : WagonStock) += Count;
+	return true;
 }
 
 bool ACampaign1851Map::RaiseTownOk(int32 Town) const
@@ -193,6 +214,10 @@ FString ACampaign1851Map::UnitBlockReason(int32 Type, int32 Town) const
 	{
 		return FString::Printf(TEXT("mangler %d kanoner på lager"), T.Guns - GunStock);
 	}
+	if (T.Mortars > MortarStock)
+	{
+		return FString::Printf(TEXT("mangler %d morterer på lager"), T.Mortars - MortarStock);
+	}
 	if (RawStock[int32(ECampaign1851Raw::Cloth)] < T.Uniforms)
 	{
 		return TEXT("mangler klæde til uniformerne");
@@ -213,7 +238,8 @@ double ACampaign1851Map::UnitCost(int32 Type) const
 	// Pay, kit and quarters in the first months; rifles missing from the store are bought abroad on top.
 	const Campaign1851Resources::FUnitType& T = Campaign1851Resources::Type(Type);
 	const int32 MissingRifles = FMath::Max(0, T.Rifles - Rifles);
-	return Campaign1851Army::RaiseCost() * T.CostFactor * T.Men / 760.0 + MissingRifles * double(Campaign1851Materiel::RifleImportPrice);
+	const int32 MissingWagons = FMath::Max(0, T.Wagons - WagonStock);
+	return Campaign1851Army::RaiseCost() * T.CostFactor * T.Men / 760.0 + MissingRifles * double(Campaign1851Materiel::RifleImportPrice) + MissingWagons * Campaign1851Resources::WagonPrice;
 }
 
 int32 ACampaign1851Map::RaiseUnit(int32 Type, int32 Town, int32 Command, ECampaign1851Program Program, FString* OutReason)
@@ -240,6 +266,19 @@ int32 ACampaign1851Map::RaiseUnit(int32 Type, int32 Town, int32 Command, ECampai
 	}
 	R.Horses = R.MaxHorses = T.Horses;
 	R.Guns = TakeGunsFromStock(T.Guns);
+	R.Mortars = FMath::Min(T.Mortars, MortarStock);
+	MortarStock -= R.Mortars;
+	R.Wagons = T.Wagons;
+	const int32 WagonsBought = FMath::Max(0, T.Wagons - WagonStock);
+	WagonStock = FMath::Max(0, WagonStock - T.Wagons);
+	if (WagonsBought > 0)
+	{
+		AddTransaction(-WagonsBought * Campaign1851Resources::WagonPrice, FString::Printf(TEXT("%d vogne købt: %s"), WagonsBought, *R.Name));
+	}
+	if (R.Mortars > 0)
+	{
+		R.PaceKmPerDay *= 0.8f;
+	}
 	R.Program = Program;
 	if (Commands.IsValidIndex(Command))
 	{
@@ -281,7 +320,15 @@ TArray<FString> ACampaign1851Map::SaveResources() const
 	{
 		Line += FString::Printf(TEXT("|%.1f"), V);
 	}
-	return { Line };
+	TArray<FString> Out = { Line, FString::Printf(TEXT("kit|%d|%d"), MortarStock, WagonStock) };
+	for (const FCampaign1851Regiment& R : Regiments)
+	{
+		if (R.Mortars > 0 || R.Wagons > 0)
+		{
+			Out.Add(FString::Printf(TEXT("mortars|%s|%d|%d"), *R.Id, R.Mortars, R.Wagons));
+		}
+	}
+	return Out;
 }
 
 void ACampaign1851Map::RestoreResources(const TArray<FString>& Lines)
@@ -291,7 +338,17 @@ void ACampaign1851Map::RestoreResources(const TArray<FString>& Lines)
 	{
 		TArray<FString> P;
 		L.ParseIntoArray(P, TEXT("|"), false);
-		if (P.Num() == int32(ECampaign1851Raw::Count) + 1 && P[0] == TEXT("raw"))
+		if (P.Num() == 3 && P[0] == TEXT("kit"))
+		{
+			MortarStock = FCString::Atoi(*P[1]);
+			WagonStock = FCString::Atoi(*P[2]);
+		}
+		else if (P.Num() == 4 && P[0] == TEXT("mortars") && FindRegiment(P[1]) != INDEX_NONE)
+		{
+			Regiments[FindRegiment(P[1])].Mortars = FCString::Atoi(*P[2]);
+			Regiments[FindRegiment(P[1])].Wagons = FCString::Atoi(*P[3]);
+		}
+		else if (P.Num() == int32(ECampaign1851Raw::Count) + 1 && P[0] == TEXT("raw"))
 		{
 			for (int32 r = 0; r < int32(ECampaign1851Raw::Count); ++r)
 			{

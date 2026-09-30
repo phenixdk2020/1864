@@ -276,7 +276,9 @@ namespace Campaign1851Army
 		for (const FCampaign1851Regiment* R : Column)
 		{
 			Men += R->Men;
-			const float Own = MarchKmPerDay(R->Arm) * EndurancePaceFactor(R->Skill(ECampaign1851Skill::Endurance));
+			// Mortars are heavy: slow on their wagons, very slow without enough of them.
+			const float Mortar = R->Mortars > 0 ? (R->Wagons >= R->Mortars * 2 ? 0.8f : 0.5f) : 1.f;
+			const float Own = MarchKmPerDay(R->Arm) * EndurancePaceFactor(R->Skill(ECampaign1851Skill::Endurance)) * Mortar;
 			if (Own < Pace)
 			{
 				Pace = Own;

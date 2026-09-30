@@ -70,7 +70,7 @@ void ACampaign1851Map::BattleStrengths(const FCampaign1851Battle& B, float& OutD
 		const Campaign1851Army::FBattleFactors F = Campaign1851Army::BattleFactors(R);
 		const float Quality = (F.Accuracy + 1.f / FMath::Max(F.ReloadTime, 0.5f) + F.Assault) / 3.f * (0.6f + 0.4f * F.Morale) * (0.7f + 0.3f * F.Cohesion);
 		const float Supply = FMath::Clamp(0.4f + 0.6f * R.Ammo, 0.4f, 1.f) * (R.Food > 0.f ? 1.f : 0.8f);
-		OutDanish += R.PresentMen() * Quality * Supply * DoctrineMul * (R.Arm == ECampaign1851Arm::Infantry ? InfantryFactor() : 1.f) + R.Guns * GunWorth * DanishGunFactor();
+		OutDanish += R.PresentMen() * Quality * Supply * DoctrineMul * (R.Arm == ECampaign1851Arm::Infantry ? InfantryFactor() : 1.f) + R.Guns * GunWorth * DanishGunFactor() + R.Mortars * GunWorth * 0.8f;
 	}
 	for (int32 Id : B.Forts)
 	{

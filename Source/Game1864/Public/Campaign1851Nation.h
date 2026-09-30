@@ -76,6 +76,11 @@ struct FCampaign1851Nation
 	/** Guardrail: cash the ministries must leave in the treasury. */
 	double Reserve = 100000.0;
 	FString Note;
+	/** From the list of countries and uniforms 1851-1866: role, period, group and the arms' uniform types. */
+	FString Role, Period, Group, Priority;
+	FString Infantry, Cavalry, Artillery;
+	/** False for a faction not in being when the campaign starts (the Schleswig-Holstein army, dissolved 1851). */
+	bool bActive = true;
 
 	// The abstract model (nations without a map). Money in rigsdaler-equivalents.
 	double Population = 0.0;

@@ -37,7 +37,7 @@ void ACampaign1851Map::ResetDiplomacy()
 FString ACampaign1851Map::DiplomacyBlockReason(int32 NationIndex, EDiplomacyAction Action) const
 {
 	using namespace Campaign1851Diplomacy;
-	if (!Nations.IsValidIndex(NationIndex) || NationIndex == PlayerNation)
+	if (!Nations.IsValidIndex(NationIndex) || NationIndex == PlayerNation || !Nations[NationIndex].bActive)
 	{
 		return TEXT("-");
 	}

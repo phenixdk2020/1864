@@ -4,6 +4,8 @@
 // rebuilt. A bridge over a sound lets the enemy cross without boats, whatever the fleet does, unless blown.
 
 #include "Campaign1851Map.h"
+#include "Campaign1851Scenery.h"
+#include "Components/StaticMeshComponent.h"
 
 namespace Campaign1851Bridge
 {
@@ -29,6 +31,18 @@ void ACampaign1851Map::DetectBridges()
 	{
 		Links[l].FerryKm = LinkFerryKm0[l];
 	}
+	// One bridge for all the roads over the same water: a new find near an old one joins it.
+	auto AddBridge = [&](FCampaign1851Bridge B)
+	{
+		if (FCampaign1851Bridge* Same = Bridges.FindByPredicate([&B](const FCampaign1851Bridge& X) { return FVector2D::Distance(X.Km, B.Km) < 0.5 && (X.FerryKm > 0.f) == (B.FerryKm > 0.f); }))
+		{
+			if (B.Link != INDEX_NONE) { Same->Links.AddUnique(B.Link); }
+			return;
+		}
+		B.Id = Next++;
+		if (B.Link != INDEX_NONE) { B.Links.Add(B.Link); }
+		Bridges.Add(B);
+	};
 	for (int32 l = 0; l < Links.Num(); ++l)
 	{
 		FCampaign1851Link& L = Links[l];
@@ -36,19 +50,45 @@ void ACampaign1851Map::DetectBridges()
 		const FString Near = Cities.IsValidIndex(L.A) && Cities.IsValidIndex(L.B) ? FString::Printf(TEXT("%s–%s"), *Cities[L.A].Name, *Cities[L.B].Name) : FString();
 		if (L.HasFerry())
 		{
-			// A short ferry: a site for a pontoon bridge (the sound's middle, where the road meets the water).
-			if (L.FerryKm <= Campaign1851Bridge::MaxFerryKm && L.Km.Num() > 1)
+			// A short ferry: a site for a pontoon bridge, where the map's ferry crosses (the ferry line nearest the road).
+			if (L.FerryKm > Campaign1851Bridge::MaxFerryKm || L.Km.Num() < 2)
 			{
-				FCampaign1851Bridge B;
-				B.Id = Next++;
-				B.Link = l;
-				B.Name = L.Ferry.IsEmpty() ? Near : L.Ferry;
-				B.Km = AlongLine(L.Km, LineLength(L.Km) * 0.5);
-				B.LengthM = L.FerryKm * 1000.f;
-				B.State = EBridgeState::Site;
-				B.FerryKm = L.FerryKm;
-				Bridges.Add(B);
+				continue;
 			}
+			const TArray<FVector2D>* Best = nullptr;
+			double BestD = 3.0;
+			for (const TArray<FVector2D>& F : FerryLines)
+			{
+				if (F.Num() < 2)
+				{
+					continue;
+				}
+				const FVector2D Mid = (F[0] + F.Last()) * 0.5;
+				for (const FVector2D& P : L.Km)
+				{
+					const double D = FVector2D::Distance(P, Mid);
+					if (D < BestD) { BestD = D; Best = &F; }
+				}
+			}
+			FCampaign1851Bridge B;
+			B.Link = l;
+			B.Name = L.Ferry.IsEmpty() ? Near : L.Ferry;
+			B.State = EBridgeState::Site;
+			B.FerryKm = L.FerryKm;
+			if (Best)
+			{
+				B.EndA = (*Best)[0];
+				B.EndB = Best->Last();
+			}
+			else
+			{
+				const double Total = LineLength(L.Km);
+				B.EndA = AlongLine(L.Km, Total * 0.5 - L.FerryKm * 0.5);
+				B.EndB = AlongLine(L.Km, Total * 0.5 + L.FerryKm * 0.5);
+			}
+			B.Km = (B.EndA + B.EndB) * 0.5;
+			B.LengthM = float(FVector2D::Distance(B.EndA, B.EndB) * 1000.0);
+			AddBridge(B);
 			continue;
 		}
 		// Over land with water on the way: every stretch of 20 - 900 m of water is a bridge.
@@ -67,20 +107,63 @@ void ACampaign1851Map::DetectBridges()
 				if (Span >= 0.02f && Span <= 0.9f)
 				{
 					FCampaign1851Bridge B;
-					B.Id = Next++;
 					B.Link = l;
 					const int32 Town = NearestTown(AlongLine(L.Km, (WetFrom + d) * 0.5f));
 					B.Name = FString::Printf(TEXT("Broen ved %s"), Cities.IsValidIndex(Town) ? *Cities[Town].Name : *Near);
 					B.Km = AlongLine(L.Km, (WetFrom + d) * 0.5f);
+					B.EndA = AlongLine(L.Km, FMath::Max(0.f, WetFrom - 0.03f));
+					B.EndB = AlongLine(L.Km, FMath::Min(Len, d + 0.03f));
 					B.LengthM = Span * 1000.f;
 					B.State = EBridgeState::Intact;
-					Bridges.Add(B);
+					AddBridge(B);
 				}
 				WetFrom = -1.f;
 			}
 		}
 	}
+	// The town bridges the map's roads do not cross (positions approximate).
+	struct FTownBridge { const TCHAR* Name; double LatA, LonA, LatB, LonB; };
+	const FTownBridge TownBridges[] = {
+		{ TEXT("Knippelsbro"), 55.6753, 12.5846, 55.6735, 12.5893 },
+		{ TEXT("Langebro"),    55.6701, 12.5784, 55.6680, 12.5824 },
+	};
+	for (const FTownBridge& T : TownBridges)
+	{
+		FCampaign1851Bridge B;
+		B.Name = T.Name;
+		// The map's coast is simplified: along the bridge's line, the stretch of water nearest its middle.
+		const FVector2D A = Extent.Projection.Forward(T.LatA, T.LonA), C = Extent.Projection.Forward(T.LatB, T.LonB);
+		const FVector2D Mid = (A + C) * 0.5, Dir = (C - A).GetSafeNormal();
+		double BestFrom = 0.0, BestTo = 0.0, BestGap = 1e9, From = -1e9;
+		for (double t = -1.5; t <= 1.5; t += 0.02)
+		{
+			const bool bWet = IsSea(Mid + Dir * t);
+			if (bWet && From < -1e8) { From = t; }
+			if (!bWet && From > -1e8)
+			{
+				const double Gap = FMath::Abs((From + t) * 0.5);
+				if (Gap < BestGap && t - From < 1.2) { BestGap = Gap; BestFrom = From; BestTo = t; }
+				From = -1e9;
+			}
+		}
+		if (BestGap > 1e8)
+		{
+			continue;   // no water there on the map
+		}
+		B.EndA = Mid + Dir * (BestFrom - 0.03);
+		B.EndB = Mid + Dir * (BestTo + 0.03);
+		B.Km = (B.EndA + B.EndB) * 0.5;
+		B.LengthM = float(FVector2D::Distance(B.EndA, B.EndB) * 1000.0);
+		B.State = EBridgeState::Intact;
+		AddBridge(B);
+	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|bridges|%d (%d pontoon sites)"), Bridges.Num(), Bridges.FilterByPredicate([](const FCampaign1851Bridge& B) { return B.State == EBridgeState::Site; }).Num());
+	for (const FCampaign1851Bridge& B : Bridges)
+	{
+		const FVector2D LatLon = Extent.Projection.Inverse(B.Km);
+		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|bridge|%d|%s|%.0f m|%s|%.4f,%.4f"), B.Id, *B.Name, B.LengthM, B.State == EBridgeState::Site ? TEXT("pontonsted") : TEXT("bro"), LatLon.X, LatLon.Y);
+	}
+	RebuildBridgeMeshes();
 }
 
 int32 ACampaign1851Map::BridgeIndex(int32 Id) const
@@ -90,18 +173,20 @@ int32 ACampaign1851Map::BridgeIndex(int32 Id) const
 
 void ACampaign1851Map::ApplyBridge(const FCampaign1851Bridge& B)
 {
-	if (!Links.IsValidIndex(B.Link))
+	// Blown or being rebuilt: the roads over it are cut. A pontoon bridge standing: no ferry any more.
+	for (int32 l : B.Links)
 	{
-		return;
-	}
-	FCampaign1851Link& L = Links[B.Link];
-	// Blown or being rebuilt: the road is cut. A pontoon bridge standing: no ferry any more.
-	const bool bCut = B.State == EBridgeState::Blown || (B.State == EBridgeState::Building && B.FerryKm <= 0.f);
-	L.bBlocked = bCut;
-	if (B.FerryKm > 0.f)
-	{
-		L.FerryKm = B.State == EBridgeState::Intact ? 0.f : B.FerryKm;
-		L.bBlocked = B.State == EBridgeState::Blown;
+		if (!Links.IsValidIndex(l))
+		{
+			continue;
+		}
+		FCampaign1851Link& L = Links[l];
+		L.bBlocked = B.State == EBridgeState::Blown || (B.State == EBridgeState::Building && B.FerryKm <= 0.f);
+		if (B.FerryKm > 0.f)
+		{
+			L.FerryKm = B.State == EBridgeState::Intact ? 0.f : LinkFerryKm0.IsValidIndex(l) ? LinkFerryKm0[l] : B.FerryKm;
+			L.bBlocked = B.State == EBridgeState::Blown;
+		}
 	}
 }
 
@@ -159,7 +244,79 @@ bool ACampaign1851Map::BridgeAction(int32 Id, EBridgeAction Action, FString* Out
 		break;
 	}
 	ApplyBridge(B);
+	RebuildBridgeMeshes();
 	return true;
+}
+
+void ACampaign1851Map::RebuildBridgeMeshes()
+{
+	for (TObjectPtr<UStaticMeshComponent>& M : BridgeMeshes)
+	{
+		if (M) { M->DestroyComponent(); }
+	}
+	BridgeMeshes.Reset();
+	if (GridZ.Num() == 0)
+	{
+		return;
+	}
+	UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Campaign1851/M_Campaign1851Scenery.M_Campaign1851Scenery"));
+	if (!Material)
+	{
+		return;
+	}
+	TArray<TArray<FVector>> Decks, Rails, Pontoons;
+	for (const FCampaign1851Bridge& B : Bridges)
+	{
+		if (B.State == EBridgeState::Site)
+		{
+			continue;
+		}
+		// A flat deck a little above the higher bank; railings along both sides.
+		const FVector A = LocalAtKm(B.EndA), C = LocalAtKm(B.EndB);
+		const double Z = FMath::Max(A.Z, C.Z) + 2.5;
+		const FVector2D Dir = (B.EndB - B.EndA).GetSafeNormal();
+		const FVector2D Side(-Dir.Y, Dir.X);
+		auto Span = [&](float T0, float T1, const FVector2D& Offset, double Lift)
+		{
+			TArray<FVector> Pts;
+			for (int32 s = 0; s <= 8; ++s)
+			{
+				const float T = FMath::Lerp(T0, T1, s / 8.f);
+				FVector P = LocalAtKm(FMath::Lerp(B.EndA, B.EndB, double(T)) + Offset);
+				P.Z = Z + Lift;
+				Pts.Add(P);
+			}
+			return Pts;
+		};
+		const bool bPontoon = B.FerryKm > 0.f;
+		// Blown: the two ends stand, the middle is gone; being built: the ends grow towards each other.
+		TArray<FVector2f> Parts;
+		if (B.State == EBridgeState::Blown) { Parts = { FVector2f(0.f, 0.35f), FVector2f(0.65f, 1.f) }; }
+		else if (B.State == EBridgeState::Building) { Parts = { FVector2f(0.f, 0.25f), FVector2f(0.75f, 1.f) }; }
+		else { Parts = { FVector2f(0.f, 1.f) }; }
+		for (const FVector2f& P : Parts)
+		{
+			(bPontoon ? Pontoons : Decks).Add(Span(P.X, P.Y, FVector2D::ZeroVector, 0.0));
+			Rails.Add(Span(P.X, P.Y, Side * 0.095, 0.8));
+			Rails.Add(Span(P.X, P.Y, -Side * 0.095, 0.8));
+		}
+	}
+	auto Make = [&](const TArray<TArray<FVector>>& Lines, float WidthKm, const FLinearColor& Colour, const TCHAR* Name)
+	{
+		if (Lines.Num() == 0)
+		{
+			return;
+		}
+		UStaticMeshComponent* Mesh = NewObject<UStaticMeshComponent>(this, MakeUniqueObjectName(this, UStaticMeshComponent::StaticClass(), Name));
+		Mesh->SetupAttachment(Root);
+		Mesh->SetStaticMesh(Campaign1851Scenery::BuildRibbons(Lines, WidthKm * 0.5f * float(KmToUnits), Colour, Material, *FString::Printf(TEXT("SM_Campaign1851_%s"), Name)));
+		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Mesh->RegisterComponent();
+		BridgeMeshes.Add(Mesh);
+	};
+	Make(Decks, 0.2f, FLinearColor::FromSRGBColor(FColor(132, 116, 96)), TEXT("BridgeDecks"));
+	Make(Pontoons, 0.16f, FLinearColor::FromSRGBColor(FColor(96, 70, 48)), TEXT("BridgePontoons"));
+	Make(Rails, 0.025f, FLinearColor::FromSRGBColor(FColor(52, 42, 34)), TEXT("BridgeRails"));
 }
 
 void ACampaign1851Map::DailyBridges()
@@ -171,6 +328,7 @@ void ACampaign1851Map::DailyBridges()
 			B.State = EBridgeState::Intact;
 			News.Add(FString::Printf(TEXT("%s står færdig"), *B.Name));
 			ApplyBridge(B);
+			RebuildBridgeMeshes();
 		}
 	}
 }
@@ -205,4 +363,5 @@ void ACampaign1851Map::RestoreBridges(const TArray<FString>& Lines)
 			ApplyBridge(Bridges[i]);
 		}
 	}
+	RebuildBridgeMeshes();
 }

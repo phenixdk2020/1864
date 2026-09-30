@@ -83,3 +83,23 @@ Indtægterne bogføres hver måned som *Erhverv, told og post*.
 - AI'en bruger de samme handlinger som spilleren og får ingen gratis ressourcer.
 
 **Test:** `-CampaignDelegate=auto|advisory`, `-CampaignOpenWindow=council`, `-CampaignSpeed=6`.
+
+## Landene 1851–1866 og uniformerne
+Listen over lande følger `Reference/Units/MultiView/PROJECT_1864_Lande_og_Uniformer_1851-1866.xlsx`. Den står også i designmanualens afsnit 5.1 og i designsupplementet "Lande og uniformer 1851–1866".
+
+| Id | Land | Gruppe | Rolle |
+|---|---|---|---|
+| DK | Danmark | Norden | Kernefraktion (spilleren) |
+| SE | Sverige | Norden | Kernefraktion; alliance mulig |
+| NO | Norge | Norden | I union med Sverige |
+| PR | Preussen | Stormagter | Kernefraktion |
+| AT | Østrig | Stormagter | Historisk 1864-fraktion |
+| GB, FR, RU | Storbritannien, Frankrig, Rusland | Stormagter | Garantimagter |
+| HAN, MEC, OLD, BRA | Hannover, Mecklenburg-Schwerin, Oldenburg, Braunschweig | Tyske stater | Nordtyske fraktioner |
+| NL, BE | Nederlandene, Belgien | Vesten | Vestlige fraktioner |
+| SH | Slesvig-Holstens oprørshær | Tyske stater | Særfraktion, inaktiv (opløst 1851) |
+
+- **Felter pr. land:** `role`, `period`, `group`, `priority`, `infantry`, `cavalry` og `artillery` (uniformstyperne). En inaktiv fraktion har `active: false`.
+- **Skøn:** befolkning, hær, jernbane-km, forhold og handelsværdi for de nye lande er spillets skøn.
+- **Statsrådet** viser landene med en hær på mindst 30.000 mand og nævner de mindre stater på én linje.
+- **UDENRIGS** har faneblade: STORMAGTER, NORDEN, TYSKE STATER og VESTEN.

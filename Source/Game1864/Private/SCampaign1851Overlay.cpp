@@ -264,7 +264,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.52 MATERIEL OG BROER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.53 LANDE OG MORTERER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -289,8 +289,8 @@ int32 SCampaign1851Overlay::PaintLabels(const FGeometry& Geometry, FSlateWindowE
 		if (L.Kind == TEXT("sea")) { I.Text = Spaced(L.Text); I.Font = Serif(18, EFace::Italic); I.Colour = SeaInk; I.Priority = 900000; }
 		else if (L.Kind == TEXT("strait")) { if (D >= 400.f) continue; I.Text = L.Text; I.Font = Serif(11, EFace::Italic); I.Colour = SeaInk; I.Priority = 500; }
 		else if (L.Kind == TEXT("land")) { if (D <= 45.f) continue; I.Text = Spaced(L.Text); I.Font = Serif(20, EFace::Italic); I.Colour = FLinearColor::FromSRGBColor(FColor(245, 237, 204, 200)); I.Priority = 700000; }
-		else if (L.Kind == TEXT("duchy")) { I.Text = Spaced(L.Text.ToUpper()); I.Font = Serif(13); I.Colour = Gold; I.Priority = 800000; }
-		else if (L.Kind == TEXT("amt")) { if (D <= 30.f || D >= 330.f) continue; I.Text = Spaced(L.Text.ToUpper()); I.Font = Serif(10); I.Colour = FLinearColor::FromSRGBColor(FColor(232, 214, 160, 190)); I.Priority = 600; }
+		else if (L.Kind == TEXT("duchy")) { I.Text = Spaced(L.Text.ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"))); I.Font = Serif(13); I.Colour = Gold; I.Priority = 800000; }
+		else if (L.Kind == TEXT("amt")) { if (D <= 30.f || D >= 330.f) continue; I.Text = Spaced(L.Text.ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"))); I.Font = Serif(10); I.Colour = FLinearColor::FromSRGBColor(FColor(232, 214, 160, 190)); I.Priority = 600; }
 		else { I.Text = L.Text; I.Font = Serif(13, EFace::Italic); I.Colour = MutedInk; I.Priority = 400; }
 		Items.Add(I);
 	}
@@ -1245,7 +1245,9 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 		Y += 22.f;
 	};
 	Line(TEXT("Styrke"), FString::Printf(TEXT("%d / %d mand%s%s"), Men, MaxMen, Horses > 50 ? *FString::Printf(TEXT("  ·  %d heste"), Horses) : TEXT(""),
-		Guns > 0 ? *FString::Printf(TEXT("  ·  %d kanoner"), Guns) : TEXT("")));
+		Guns > 0 ? *FString::Printf(TEXT("  ·  %d kanoner"), Guns) : Sel.ContainsByPredicate([](const FCampaign1851Regiment* R) { return R->Mortars > 0; })
+			? *FString::Printf(TEXT("  ·  morterer på vogne"))
+			: TEXT("")));
 	Line(TEXT("Erfaring"), FString::Printf(TEXT("%s (%.0f)  ·  moral %.0f %%  ·  samhørighed %.0f"), Campaign1851Army::ExperienceName(Xp), Xp, Morale * 100.f, Cohesion));
 	if (bSingle)
 	{
@@ -1848,10 +1850,20 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 		PaintText(Geometry, Out, Layer + 1, Heads[c], FVector2D(X + Cols[c], Y), Serif(10, EFace::Italic), MutedInk, 0.f, false);
 	}
 	Y += 20.f;
+	TArray<FString> Small;
 	for (int32 n = 0; n < Nations.Num(); ++n)
 	{
 		const FCampaign1851Nation& N = Nations[n];
 		const FCampaign1851NationFigures F = Map->NationFigures(n);
+		if (!N.bActive)
+		{
+			continue;
+		}
+		if (!N.IsPlayer() && n != Map->GetPlayerNation() && N.Group != TEXT("stormagt") && N.Id != TEXT("SE"))
+		{
+			Small.Add(N.Name);
+			continue;
+		}
 		const FLinearColor C = N.IsPlayer() ? Gold : Ink;
 		PaintTextFit(Geometry, Out, Layer + 1, N.Name + (N.bOnMap ? TEXT("") : TEXT(" *")), FVector2D(X + Cols[0], Y), Serif(13), C, 160.f);
 		PaintText(Geometry, Out, Layer + 1, N.IsPlayer() ? TEXT("Spilleren") : TEXT("AI"), FVector2D(X + Cols[1], Y), Serif(12), C, 0.f, false);
@@ -1862,7 +1874,7 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("%.1f %%"), F.Growth), FVector2D(X + Cols[6], Y), Serif(12), Ink, 0.f, false);
 		Y += 21.f;
 	}
-	PaintText(Geometry, Out, Layer + 1, TEXT("* uden eget kort endnu: vokser på en abstrakt model (skøn)"), FVector2D(X, Y), Serif(10, EFace::Italic), MutedInk, 0.f, false);
+	PaintTextFit(Geometry, Out, Layer + 1, FString::Printf(TEXT("* abstrakt model (skøn)  ·  mindre stater: %s (se UDENRIGS)"), *FString::Join(Small, TEXT(", "))), FVector2D(X, Y), Serif(10, EFace::Italic), MutedInk, LeftW - 10.f);
 	Y += 28.f;
 		// The tension with the German Confederation, and war.
 		PaintText(Geometry, Out, Layer + 1, Map->IsAtWar() ? TEXT("KRIG med Preussen og Østrig") : TEXT("Spænding med Det tyske forbund"), FVector2D(X, Y), Serif(13), Map->IsAtWar() ? FLinearColor(0.95f, 0.4f, 0.35f) : Ink, 0.f, false);
@@ -1892,7 +1904,7 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 	if (Map->GetPlayedNation() != Map->GetPlayerNation() && Nations.IsValidIndex(Map->GetPlayedNation()))
 	{
 		const FCampaign1851Nation& Me = Nations[Map->GetPlayedNation()];
-		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("D U   S P I L L E R   %s"), *Me.Name.ToUpper()), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
+		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("D U   S P I L L E R   %s"), *Me.Name.ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"))), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
 		PaintText(Geometry, Out, Layer + 1, TEXT("Abstrakt model: sæt regeringens prioriteter; Danmark styres af AI på kortet"), FVector2D(X, Y + 22.f), Serif(10, EFace::Italic), MutedInk, 0.f, false);
 		Y += 50.f;
 		for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count); ++p)
@@ -1909,7 +1921,7 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 	else if (Nations.IsValidIndex(Map->GetPlayerNation()))
 	{
 		const FCampaign1851Nation& Me = Nations[Map->GetPlayerNation()];
-		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("R E S S O R T E R   ·   %s"), *Me.Name.ToUpper()), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
+		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("R E S S O R T E R   ·   %s"), *Me.Name.ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"))), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
 		// All at once.
 		PaintText(Geometry, Out, Layer + 1, TEXT("alle:"), FVector2D(X + 330.f, Y), Serif(10, EFace::Italic), MutedInk, 0.f, false);
 		for (int32 m = 0; m < 3; ++m)
@@ -1947,7 +1959,7 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 	{
 		const ECampaign1851Portfolio P = ECampaign1851Portfolio(MinisterPick);
 		DrawLines(Geometry, Out, Layer + 1, { FVector2D(RX - 12.f, RY - 10.f), FVector2D(RX - 12.f, Pos.Y + Size.Y - 24.f) }, Gold.CopyWithNewOpacity(0.3f), 1.f);
-		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("K A N D I D A T E R   ·   %s"), *FString(Campaign1851Nations::PortfolioName(P)).ToUpper()), FVector2D(RX, RY), Serif(11), Gold, 0.f, false);
+		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("K A N D I D A T E R   ·   %s"), *FString(Campaign1851Nations::PortfolioName(P)).ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"))), FVector2D(RX, RY), Serif(11), Gold, 0.f, false);
 		PaintButton(Geometry, Out, Layer + 1, FVector2D(RX + RW - 90.f, RY - 12.f), FVector2D(90.f, 24.f), TEXT("LUK"), EButton::MinisterPickClose, 0);
 		RY += 30.f;
 		const FCampaign1851Minister& Now = Map->GetMinister(P);
@@ -2015,6 +2027,17 @@ void SCampaign1851Overlay::PaintForeign(const FGeometry& Geometry, FSlateWindowE
 	float Y = Pos.Y + 106.f;
 	PaintText(Geometry, Out, Layer + 1, TEXT("F O R H O L D E T   T I L   D A N M A R K"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
 	Y += 24.f;
+	// The countries by group, one tab at a time.
+	{
+		const TCHAR* Tabs[] = { TEXT("STORMAGTER"), TEXT("NORDEN"), TEXT("TYSKE STATER"), TEXT("VESTEN") };
+		for (int32 t = 0; t < 4; ++t)
+		{
+			PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 360.f + t * 150.f, Y - 14.f), FVector2D(142.f, 24.f), Tabs[t], EButton::ForeignTab, t, ForeignTab == t);
+		}
+		Y += 20.f;
+	}
+	const TCHAR* Groups[] = { TEXT("stormagt"), TEXT("norden"), TEXT("tysk"), TEXT("vest") };
+	const FString Group = Groups[FMath::Clamp(ForeignTab, 0, 3)];
 	const float Cols[] = { 0.f, 170.f, 400.f, 520.f, 660.f, 800.f, 940.f };
 	const TCHAR* Heads[] = { TEXT("Land"), TEXT("Forhold"), TEXT("Handel rd./år"), TEXT("Gesandt"), TEXT("Handelstraktat"), TEXT("Alliance"), TEXT("Garanti") };
 	for (int32 c = 0; c < 7; ++c)
@@ -2027,7 +2050,7 @@ void SCampaign1851Overlay::PaintForeign(const FGeometry& Geometry, FSlateWindowE
 	for (int32 n = 0; n < Nations.Num(); ++n)
 	{
 		const FCampaign1851Nation& N = Nations[n];
-		if (n == Map->GetPlayerNation())
+		if (n == Map->GetPlayerNation() || !N.bActive || N.Group != Group)
 		{
 			continue;
 		}
@@ -2094,6 +2117,67 @@ void SCampaign1851Overlay::PaintForeign(const FGeometry& Geometry, FSlateWindowE
 	}
 }
 
+void SCampaign1851Overlay::PaintBranchSymbol(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, int32 Branch, const FVector2D& C, float R) const
+{
+	// A plain emblem in a round frame: red cross, star fort, telegraph, crossed rifles, cannon.
+	TArray<FVector2D> Ring;
+	for (int32 a = 0; a <= 32; ++a)
+	{
+		Ring.Add(C + FVector2D(FMath::Cos(a * UE_TWO_PI / 32.f), FMath::Sin(a * UE_TWO_PI / 32.f)) * R);
+	}
+	DrawLines(Geometry, Out, Layer, Ring, Gold.CopyWithNewOpacity(0.7f), 1.5f);
+	const float S = R * 0.62f;
+	const FLinearColor Mark = Ink;
+	auto L = [&](std::initializer_list<FVector2D> Pts, const FLinearColor& Colour, float Thick)
+	{
+		TArray<FVector2D> P;
+		for (const FVector2D& Q : Pts) { P.Add(C + Q * S); }
+		DrawLines(Geometry, Out, Layer + 1, P, Colour, Thick);
+	};
+	switch (Branch)
+	{
+	case 0:   // the red cross of the ambulances
+		L({ FVector2D(0.f, -0.8f), FVector2D(0.f, 0.8f) }, FLinearColor(0.85f, 0.15f, 0.12f), 5.f);
+		L({ FVector2D(-0.8f, 0.f), FVector2D(0.8f, 0.f) }, FLinearColor(0.85f, 0.15f, 0.12f), 5.f);
+		break;
+	case 1:   // a star fort seen from above
+	{
+		TArray<FVector2D> Star;
+		for (int32 k = 0; k <= 10; ++k)
+		{
+			const float A = -UE_HALF_PI + k * UE_PI / 5.f;
+			Star.Add(C + FVector2D(FMath::Cos(A), FMath::Sin(A)) * S * (k % 2 == 0 ? 1.f : 0.5f));
+		}
+		DrawLines(Geometry, Out, Layer + 1, Star, Mark, 2.f);
+		break;
+	}
+	case 2:   // a telegraph pole and its wire
+		L({ FVector2D(0.f, 0.9f), FVector2D(0.f, -0.9f) }, Mark, 2.f);
+		L({ FVector2D(-0.5f, -0.6f), FVector2D(0.5f, -0.6f) }, Mark, 2.f);
+		L({ FVector2D(-0.35f, -0.3f), FVector2D(0.35f, -0.3f) }, Mark, 2.f);
+		L({ FVector2D(-0.95f, -0.45f), FVector2D(-0.5f, -0.6f), FVector2D(0.5f, -0.6f), FVector2D(0.95f, -0.45f) }, Gold, 1.f);
+		break;
+	case 3:   // two rifles crossed
+		L({ FVector2D(-0.8f, 0.8f), FVector2D(0.8f, -0.8f) }, Mark, 2.5f);
+		L({ FVector2D(0.8f, 0.8f), FVector2D(-0.8f, -0.8f) }, Mark, 2.5f);
+		L({ FVector2D(-0.8f, 0.8f), FVector2D(-0.55f, 0.55f) }, Gold, 4.f);
+		L({ FVector2D(0.8f, 0.8f), FVector2D(0.55f, 0.55f) }, Gold, 4.f);
+		break;
+	default:  // a field gun: barrel and wheel
+	{
+		L({ FVector2D(-0.9f, -0.35f), FVector2D(0.5f, 0.15f) }, Mark, 4.f);
+		TArray<FVector2D> Wheel;
+		for (int32 a = 0; a <= 16; ++a)
+		{
+			Wheel.Add(C + (FVector2D(0.2f, 0.35f) + FVector2D(FMath::Cos(a * UE_TWO_PI / 16.f), FMath::Sin(a * UE_TWO_PI / 16.f)) * 0.42f) * S);
+		}
+		DrawLines(Geometry, Out, Layer + 1, Wheel, Gold, 2.f);
+		L({ FVector2D(0.2f, 0.35f), FVector2D(0.95f, 0.75f) }, Mark, 2.f);
+		break;
+	}
+	}
+}
+
 void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
 {
 	PaintText(Geometry, Out, Layer + 1, TEXT("Forskning og doktriner"), Pos + FVector2D(24.f, 34.f), Serif(22), Ink, 0.f);
@@ -2108,7 +2192,7 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 	const TArray<FCampaign1851ResearchTopic>& Topics = Campaign1851Research::Topics();
 	const float YearW = 46.f;
 	const float ColW = (LeftW - YearW) / Campaign1851Research::Branches;
-	const float Top = Y + 26.f;
+	const float Top = Y + 84.f;   // the headings, then the branch symbols
 	int32 Years = 1;   // the number of levels
 	for (int32 t = 0; t < Topics.Num(); ++t)
 	{
@@ -2118,7 +2202,8 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 	const FVector2D Box(ColW - 22.f, RowH - 14.f);
 	for (int32 c = 0; c < Campaign1851Research::Branches; ++c)
 	{
-		PaintTextFit(Geometry, Out, Layer + 1, FString(Campaign1851Research::BranchName(c)).ToUpper(), FVector2D(X + YearW + c * ColW + ColW * 0.5f - Box.X * 0.5f, Y), Serif(10), Gold, Box.X);
+		PaintBranchSymbol(Geometry, Out, Layer + 1, c, FVector2D(X + YearW + c * ColW + ColW * 0.5f, Y + 44.f), 22.f);
+		PaintTextFit(Geometry, Out, Layer + 1, FString(Campaign1851Research::BranchName(c)).ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å")), FVector2D(X + YearW + c * ColW + ColW * 0.5f - Box.X * 0.5f, Y), Serif(10), Gold, Box.X);
 	}
 	for (int32 r = 0; r < Years; ++r)
 	{
@@ -2151,7 +2236,7 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		const bool bDone = Why == TEXT("færdig");
 		const bool bBusy = Map->GetResearching() == t;
 		const FVector2D P = BoxPos(T);
-		PaintButton(Geometry, Out, Layer + 2, P, Box, FString(), EButton::ResearchStart, t, bDone, !Why.IsEmpty());
+		PaintButton(Geometry, Out, Layer + 2, P, Box, FString(), EButton::ResearchPick, t, bDone || ResearchPick == t);
 		const FLinearColor Main = bDone ? Dark : Why.IsEmpty() || bBusy ? Ink : MutedInk;
 		PaintTextFit(Geometry, Out, Layer + 4, T.Name, P + FVector2D(8.f, 13.f), Serif(12), Main, Box.X - 16.f);
 		const FString State = bDone ? FString(TEXT("færdig"))
@@ -2167,6 +2252,53 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		{
 			PaintBar(Geometry, Out, Layer + 4, P + FVector2D(8.f, Box.Y - 9.f), Box.X - 16.f, float(Map->GetResearchMonths()) / float(T.Months));
 		}
+	}
+	// The topic clicked: what it does, what it costs, and START.
+	if (Topics.IsValidIndex(ResearchPick))
+	{
+		const FCampaign1851ResearchTopic& T = Topics[ResearchPick];
+		const FString Why = Map->ResearchBlockReason(ResearchPick);
+		const FVector2D BoxSize(560.f, 280.f);
+		const FVector2D BP(X + (LeftW - BoxSize.X) * 0.5f, Pos.Y + Size.Y - BoxSize.Y - 40.f);
+		PaintPanel(Geometry, Out, Layer + 6, BP, BoxSize);
+		DrawLines(Geometry, Out, Layer + 7, { BP, BP + FVector2D(BoxSize.X, 0.f), BP + BoxSize, BP + FVector2D(0.f, BoxSize.Y), BP }, Gold, 1.5f);
+		PaintBranchSymbol(Geometry, Out, Layer + 8, T.Branch, BP + FVector2D(46.f, 50.f), 26.f);
+		PaintText(Geometry, Out, Layer + 8, T.Name, BP + FVector2D(90.f, 40.f), Serif(20), Ink, 0.f, false);
+		PaintText(Geometry, Out, Layer + 8, FString::Printf(TEXT("%s  ·  niveau %s"), Campaign1851Research::BranchName(T.Branch), Campaign1851Research::Roman(Campaign1851Research::Tier(ResearchPick))),
+			BP + FVector2D(90.f, 66.f), Serif(12, EFace::Italic), Gold, 0.f, false);
+		float TY = BP.Y + 104.f;
+		// The effect, wrapped.
+		TArray<FString> Words;
+		FString(T.Effect).ParseIntoArray(Words, TEXT(" "));
+		FString LineText;
+		for (const FString& Word : Words)
+		{
+			const FString Try = LineText.IsEmpty() ? Word : LineText + TEXT(" ") + Word;
+			if (Measure(Try, Serif(14)).X > BoxSize.X - 48.f && !LineText.IsEmpty())
+			{
+				PaintText(Geometry, Out, Layer + 8, LineText, FVector2D(BP.X + 24.f, TY), Serif(14), Ink, 0.f, false);
+				TY += 22.f;
+				LineText = Word;
+			}
+			else
+			{
+				LineText = Try;
+			}
+		}
+		PaintText(Geometry, Out, Layer + 8, LineText, FVector2D(BP.X + 24.f, TY), Serif(14), Ink, 0.f, false);
+		TY += 34.f;
+		const int32 Need = T.Needs ? Campaign1851Research::FindTopic(T.Needs) : INDEX_NONE;
+		PaintTextFit(Geometry, Out, Layer + 8, FString::Printf(TEXT("%d måneder  ·  %s rd. om måneden  ·  i alt %s rd."), T.Months, *Thousands(int32(T.CostPerMonth)), *Thousands(int32(T.CostPerMonth * T.Months))),
+			FVector2D(BP.X + 24.f, TY), Serif(12), MutedInk, BoxSize.X - 48.f);
+		if (Topics.IsValidIndex(Need))
+		{
+			PaintTextFit(Geometry, Out, Layer + 8, FString::Printf(TEXT("Kræver først: %s"), Topics[Need].Name), FVector2D(BP.X + 24.f, TY + 20.f), Serif(12, EFace::Italic), Gold, BoxSize.X - 48.f);
+		}
+		const bool bBusy = Map->GetResearching() == ResearchPick;
+		const FString Label = Why == TEXT("færdig") ? FString(TEXT("FÆRDIG")) : bBusy ? FString::Printf(TEXT("I GANG  ·  %d AF %d MD."), Map->GetResearchMonths(), T.Months)
+			: Why.IsEmpty() ? (Map->GetResearching() != INDEX_NONE ? FString(TEXT("START (AFBRYDER DET NUVÆRENDE)")) : FString(TEXT("START"))) : Why;
+		PaintButton(Geometry, Out, Layer + 8, FVector2D(BP.X + 24.f, BP.Y + BoxSize.Y - 54.f), FVector2D(330.f, 32.f), Label, EButton::ResearchStart, ResearchPick, false, !Why.IsEmpty());
+		PaintButton(Geometry, Out, Layer + 8, FVector2D(BP.X + BoxSize.X - 144.f, BP.Y + BoxSize.Y - 54.f), FVector2D(120.f, 32.f), TEXT("LUK"), EButton::ResearchPick, -1);
 	}
 	// The doctrines.
 	const float RX = X + LeftW + 30.f, RW = Size.X - LeftW - 90.f;
@@ -2541,16 +2673,24 @@ void SCampaign1851Overlay::PaintMateriel(const FGeometry& Geometry, FSlateWindow
 	{
 		PaintText(Geometry, Out, Layer + 1, Kit[k], FVector2D(X + (k % 3) * 250.f, Y + (k / 3) * 24.f), Serif(13), Ink, 0.f, false);
 	}
+	Y += 58.f;
+	PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("Morterer %d  ·  vogne %d"), Map->GetMortarStock(), Map->GetWagonStock()), FVector2D(X, Y), Serif(13), Ink, 0.f, false);
+	PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 250.f, Y - 12.f), FVector2D(220.f, 24.f), FString::Printf(TEXT("KØB 2 MORTERER (%s rd.)"), *Thousands(int32(2 * Campaign1851Resources::MortarPrice))),
+		EButton::KitBuy, 1, false, !bImport);
+	PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 480.f, Y - 12.f), FVector2D(200.f, 24.f), FString::Printf(TEXT("KØB 10 VOGNE (%s rd.)"), *Thousands(int32(10 * Campaign1851Resources::WagonPrice))),
+		EButton::KitBuy, 0);
+	PaintTextFit(Geometry, Out, Layer + 1, TEXT("Morterer til belejring og skanser; hver morter kører på to vogne. Arsenalet støber én om måneden, vognfabrikken bygger 20 vogne."),
+		FVector2D(X, Y + 22.f), Serif(10, EFace::Italic), MutedInk, LeftW - 20.f);
 	// ---- New unit.
 	const float RX = X + LeftW + 30.f, RW = Size.X - LeftW - 90.f;
 	float RY = Pos.Y + 110.f;
 	DrawLines(Geometry, Out, Layer + 1, { FVector2D(RX - 14.f, RY - 10.f), FVector2D(RX - 14.f, Pos.Y + Size.Y - 24.f) }, Gold.CopyWithNewOpacity(0.3f), 1.f);
 	PaintText(Geometry, Out, Layer + 1, TEXT("I N D K A L D   E N   N Y   E N H E D"), FVector2D(RX, RY), Serif(11), Gold, 0.f, false);
 	RY += 22.f;
-	const float TW = (RW - 4.f * 6.f) / 5.f;
+	const float TW = (RW - 5.f * 6.f) / 6.f;
 	for (int32 t = 0; t < Campaign1851Resources::UnitTypes; ++t)
 	{
-		const TCHAR* Short[] = { TEXT("BATAILLON"), TEXT("JÆGERE"), TEXT("DRAGONER"), TEXT("BATTERI"), TEXT("RID. BATTERI") };
+		const TCHAR* Short[] = { TEXT("BATAILLON"), TEXT("JÆGERE"), TEXT("DRAGONER"), TEXT("BATTERI"), TEXT("RID. BATTERI"), TEXT("MORTERER") };
 		PaintButton(Geometry, Out, Layer + 1, FVector2D(RX + t * (TW + 6.f), RY), FVector2D(TW, 28.f), Short[t], EButton::UnitType, t, RaiseType == t);
 	}
 	RY += 48.f;
@@ -2588,13 +2728,15 @@ void SCampaign1851Overlay::PaintMateriel(const FGeometry& Geometry, FSlateWindow
 	Need(TEXT("Rekrutter fra amtet"), T.Men, Reserve, TEXT(""));
 	if (T.Rifles > 0) Need(TEXT("Geværer"), T.Rifles, Map->GetRifles(), TEXT("det manglende købes i udlandet"));
 	if (T.Guns > 0) Need(TEXT("Kanoner"), T.Guns, Map->GetGunStock(), TEXT(""));
+	if (T.Mortars > 0) Need(TEXT("Morterer"), T.Mortars, Map->GetMortarStock(), TEXT(""));
+	if (T.Wagons > 0) Need(TEXT("Vogne"), T.Wagons, Map->GetWagonStock(), TEXT("de manglende købes i landet"));
 	Need(TEXT("Uniformer (klæde)"), T.Uniforms, Map->GetRaw(ECampaign1851Raw::Cloth), TEXT(""));
 	Need(TEXT("Remtøj og sadler (læder)"), T.Leather, Map->GetRaw(ECampaign1851Raw::Leather), TEXT(""));
 	Need(TEXT("Heste"), T.Horses, Map->GetHorseStock(), TEXT("det manglende købes i amterne"));
 	Need(TEXT("Penge (rd.)"), float(Map->UnitCost(RaiseType)), float(Map->GetTreasury()), TEXT("udrustning og sold"));
 	RY += 14.f;
 	const FString Why = Map->UnitBlockReason(RaiseType, Town);
-	PaintButton(Geometry, Out, Layer + 1, FVector2D(RX, RY), FVector2D(RW, 34.f), Why.IsEmpty() ? FString::Printf(TEXT("OPRET %s"), *FString(T.Name).ToUpper().Replace(TEXT("æ"), TEXT("Æ"))) : Why,
+	PaintButton(Geometry, Out, Layer + 1, FVector2D(RX, RY), FVector2D(RW, 34.f), Why.IsEmpty() ? FString::Printf(TEXT("OPRET %s"), *FString(T.Name).ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"))) : Why,
 		EButton::UnitRaise, 0, false, !Why.IsEmpty());
 }
 
@@ -2942,7 +3084,7 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 			}
 			bool bActing = false;
 			const int32 Leader = Map->ActingCommander(F.Id, &bActing);
-			Box(Min, FVector2D(BoxW, HQH), HQKey, 0, { FString::Printf(TEXT("%s [%s]"), *F.Name.ToUpper(), Campaign1851Army::EchelonMark(F.Echelon)),
+			Box(Min, FVector2D(BoxW, HQH), HQKey, 0, { FString::Printf(TEXT("%s [%s]"), *F.Name.ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å")), Campaign1851Army::EchelonMark(F.Echelon)),
 				Campaign1851Army::FormationRole(F.Echelon),
 				bActing ? FString::Printf(TEXT("fungerende: %s"), *OfficerText(Leader)) : OfficerText(F.Commander),
 				FString::Printf(TEXT("NK: %s"), *OfficerText(F.Deputy)),
@@ -3536,12 +3678,89 @@ void SCampaign1851Overlay::PaintMenuBar(const FGeometry& Geometry, FSlateWindowE
 {
 	// Under the calendar: one window at a time, the open one lit.
 	const TCHAR* Labels[] = { TEXT("HÆREN"), TEXT("OFFICERER"), TEXT("KASSEN"), TEXT("BYER"), TEXT("TOG"), TEXT("KAMPORDEN"), TEXT("STATSRÅD"), TEXT("FORSYNING"), TEXT("UDENRIGS"), TEXT("FORSKNING"), TEXT("FLÅDEN") };
-	const float W = 94.f, Gap = 2.f;
+	// Small square buttons: a drawn symbol above, the name small below.
+	const float W = 74.f, H = 46.f, Gap = 3.f;
 	const float Total = 11.f * W + 10.f * Gap;
 	const float X0 = FMath::Max((Geometry.GetLocalSize().X - Total) * 0.5f, 484.f);
+	const FLinearColor Dark = FLinearColor::FromSRGBColor(FColor(30, 22, 12));
 	for (int32 i = 0; i < 11; ++i)
 	{
-		PaintButton(Geometry, Out, Layer, FVector2D(X0 + i * (W + Gap), 92.f), FVector2D(W, 28.f), Labels[i], EButton::MainMenu, i + 1, int32(Window) == i + 1);
+		const bool bOn = int32(Window) == i + 1;
+		const FVector2D P(X0 + i * (W + Gap), 90.f);
+		PaintButton(Geometry, Out, Layer, P, FVector2D(W, H), FString(), EButton::MainMenu, i + 1, bOn);
+		PaintMenuIcon(Geometry, Out, Layer + 2, i, P + FVector2D(W * 0.5f, 17.f), 11.f, bOn ? Dark : Ink);
+		PaintTextFit(Geometry, Out, Layer + 2, Labels[i], FVector2D(P.X + W * 0.5f - FMath::Min(Measure(Labels[i], Serif(8)).X, W - 6.f) * 0.5f, P.Y + H - 9.f), Serif(8), bOn ? Dark : Gold, W - 6.f);
+	}
+}
+
+void SCampaign1851Overlay::PaintMenuIcon(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, int32 Index, const FVector2D& C, float S, const FLinearColor& Colour) const
+{
+	auto L = [&](std::initializer_list<FVector2D> Pts, float Thick = 1.6f)
+	{
+		TArray<FVector2D> P;
+		for (const FVector2D& Q : Pts) { P.Add(C + Q * S); }
+		DrawLines(Geometry, Out, Layer, P, Colour, Thick);
+	};
+	auto Circle = [&](const FVector2D& At, float R, int32 N = 14)
+	{
+		TArray<FVector2D> P;
+		for (int32 a = 0; a <= N; ++a) { P.Add(C + (At + FVector2D(FMath::Cos(a * UE_TWO_PI / N), FMath::Sin(a * UE_TWO_PI / N)) * R) * S); }
+		DrawLines(Geometry, Out, Layer, P, Colour, 1.6f);
+	};
+	switch (Index)
+	{
+	case 0:   // the army: two crossed sabres
+		L({ FVector2D(-0.9f, 0.9f), FVector2D(0.8f, -0.8f) }, 2.f); L({ FVector2D(0.9f, 0.9f), FVector2D(-0.8f, -0.8f) }, 2.f);
+		L({ FVector2D(-0.9f, 0.5f), FVector2D(-0.5f, 0.9f) }); L({ FVector2D(0.9f, 0.5f), FVector2D(0.5f, 0.9f) });
+		break;
+	case 1:   // officers: an epaulette with a star
+		L({ FVector2D(-0.9f, 0.3f), FVector2D(-0.6f, -0.3f), FVector2D(0.6f, -0.3f), FVector2D(0.9f, 0.3f), FVector2D(-0.9f, 0.3f) });
+		for (float x = -0.7f; x <= 0.71f; x += 0.35f) { L({ FVector2D(x, 0.3f), FVector2D(x, 0.8f) }, 1.f); }
+		L({ FVector2D(0.f, -0.95f), FVector2D(0.f, -0.45f) }); L({ FVector2D(-0.25f, -0.7f), FVector2D(0.25f, -0.7f) });
+		break;
+	case 2:   // the treasury: a stack of coins
+		for (int32 k = 0; k < 3; ++k) { const float y = 0.6f - k * 0.45f; L({ FVector2D(-0.8f, y), FVector2D(0.8f, y), FVector2D(0.8f, y - 0.3f), FVector2D(-0.8f, y - 0.3f), FVector2D(-0.8f, y) }); }
+		break;
+	case 3:   // towns: a house with a gable
+		L({ FVector2D(-0.8f, 0.9f), FVector2D(-0.8f, -0.1f), FVector2D(0.f, -0.9f), FVector2D(0.8f, -0.1f), FVector2D(0.8f, 0.9f), FVector2D(-0.8f, 0.9f) });
+		L({ FVector2D(-0.2f, 0.9f), FVector2D(-0.2f, 0.3f), FVector2D(0.2f, 0.3f), FVector2D(0.2f, 0.9f) });
+		break;
+	case 4:   // trains: a locomotive
+		L({ FVector2D(-0.9f, 0.4f), FVector2D(-0.9f, -0.2f), FVector2D(0.3f, -0.2f), FVector2D(0.3f, -0.7f), FVector2D(0.9f, -0.7f), FVector2D(0.9f, 0.4f), FVector2D(-0.9f, 0.4f) });
+		L({ FVector2D(-0.6f, -0.2f), FVector2D(-0.6f, -0.8f) }, 2.f);
+		Circle(FVector2D(-0.45f, 0.65f), 0.25f, 10); Circle(FVector2D(0.5f, 0.65f), 0.25f, 10);
+		break;
+	case 5:   // order of battle: a small organisation chart
+		L({ FVector2D(-0.3f, -0.95f), FVector2D(0.3f, -0.95f), FVector2D(0.3f, -0.55f), FVector2D(-0.3f, -0.55f), FVector2D(-0.3f, -0.95f) });
+		L({ FVector2D(0.f, -0.55f), FVector2D(0.f, -0.2f) }); L({ FVector2D(-0.7f, -0.2f), FVector2D(0.7f, -0.2f) });
+		for (float x : { -0.7f, 0.7f })
+		{
+			L({ FVector2D(x, -0.2f), FVector2D(x, 0.2f) });
+			L({ FVector2D(x - 0.25f, 0.2f), FVector2D(x + 0.25f, 0.2f), FVector2D(x + 0.25f, 0.6f), FVector2D(x - 0.25f, 0.6f), FVector2D(x - 0.25f, 0.2f) });
+		}
+		break;
+	case 6:   // council of state: a crown
+		L({ FVector2D(-0.8f, 0.6f), FVector2D(-0.9f, -0.5f), FVector2D(-0.4f, 0.f), FVector2D(0.f, -0.8f), FVector2D(0.4f, 0.f), FVector2D(0.9f, -0.5f), FVector2D(0.8f, 0.6f), FVector2D(-0.8f, 0.6f) });
+		break;
+	case 7:   // supply: a covered wagon
+		L({ FVector2D(-0.9f, 0.4f), FVector2D(0.9f, 0.4f) }, 2.f);
+		L({ FVector2D(-0.8f, 0.4f), FVector2D(-0.8f, -0.3f), FVector2D(-0.4f, -0.7f), FVector2D(0.4f, -0.7f), FVector2D(0.8f, -0.3f), FVector2D(0.8f, 0.4f) });
+		Circle(FVector2D(-0.5f, 0.65f), 0.25f, 10); Circle(FVector2D(0.5f, 0.65f), 0.25f, 10);
+		break;
+	case 8:   // foreign affairs: a globe
+		Circle(FVector2D::ZeroVector, 0.85f, 18);
+		L({ FVector2D(-0.85f, 0.f), FVector2D(0.85f, 0.f) }, 1.f); L({ FVector2D(0.f, -0.85f), FVector2D(0.f, 0.85f) }, 1.f);
+		L({ FVector2D(-0.4f, -0.75f), FVector2D(-0.5f, 0.f), FVector2D(-0.4f, 0.75f) }, 1.f); L({ FVector2D(0.4f, -0.75f), FVector2D(0.5f, 0.f), FVector2D(0.4f, 0.75f) }, 1.f);
+		break;
+	case 9:   // research: a flask
+		L({ FVector2D(-0.2f, -0.9f), FVector2D(-0.2f, -0.3f), FVector2D(-0.8f, 0.8f), FVector2D(0.8f, 0.8f), FVector2D(0.2f, -0.3f), FVector2D(0.2f, -0.9f) });
+		L({ FVector2D(-0.35f, -0.9f), FVector2D(0.35f, -0.9f) }); L({ FVector2D(-0.55f, 0.35f), FVector2D(0.55f, 0.35f) }, 1.f);
+		break;
+	default:  // the navy: an anchor
+		L({ FVector2D(0.f, -0.7f), FVector2D(0.f, 0.85f) }, 2.f); L({ FVector2D(-0.4f, -0.45f), FVector2D(0.4f, -0.45f) });
+		Circle(FVector2D(0.f, -0.85f), 0.15f, 8);
+		L({ FVector2D(-0.8f, 0.3f), FVector2D(-0.6f, 0.7f), FVector2D(0.f, 0.85f), FVector2D(0.6f, 0.7f), FVector2D(0.8f, 0.3f) });
+		break;
 	}
 }
 

@@ -43,6 +43,14 @@ void ACampaign1851Map::MonthlyMateriel()
 			Made.Horses += P.Horses;
 		}
 	}
+	for (const ACampaign1851ConstructionSite* Site : Projects)
+	{
+		if (Site && !Site->IsGarrison() && !Site->IsDemolishing() && Site->IsModuleDone(0))
+		{
+			MortarStock += Site->GetKind() == TEXT("Arsenal") && Share > 0.5f ? 1 : 0;
+			WagonStock += Site->GetKind() == TEXT("Wagon_Works") ? FMath::RoundToInt(20.f * Share) : 0;
+		}
+	}
 	Rifles += Made.Rifles;
 	GunStock += Made.Guns;
 	Horses += Made.Horses;

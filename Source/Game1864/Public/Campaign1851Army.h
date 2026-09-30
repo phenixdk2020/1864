@@ -218,6 +218,9 @@ struct FCampaign1851Regiment
 	int32 Horses = 0;
 	int32 MaxHorses = 0;   // horses at full establishment (replaced from the store or bought)
 	int32 Guns = 0;
+	/** Siege mortars, and the wagons that carry them (two a mortar; without them the battery crawls). */
+	int32 Mortars = 0;
+	int32 Wagons = 0;
 	float Morale = 0.8f;
 	/** 0-100: field and battle experience (the army of 1851 are veterans of 1848-50). */
 	float Experience = 55.f;

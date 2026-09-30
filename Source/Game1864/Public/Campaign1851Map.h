@@ -169,6 +169,8 @@ struct FCampaign1851Bridge
 	EBridgeState State = EBridgeState::Intact;
 	float DaysLeft = 0.f;
 	float FerryKm = 0.f;     // > 0: a pontoon bridge over this ferry's sound
+	FVector2D EndA = FVector2D::ZeroVector, EndB = FVector2D::ZeroVector;   // the banks it joins (km)
+	TArray<int32> Links;     // every road link over it (several roads may share one bridge)
 };
 
 /** Raw materials in the state's stores (Campaign1851Resources.cpp). */
@@ -195,8 +197,12 @@ namespace Campaign1851Resources
 		ECampaign1851Arm Arm;
 		int32 Men, Rifles, Guns, Horses, Uniforms, Leather;
 		double CostFactor;
+		int32 Mortars = 0;
+		int32 Wagons = 0;
 	};
-	constexpr int32 UnitTypes = 5;
+	constexpr int32 UnitTypes = 6;
+	constexpr double MortarPrice = 900.0;   // bought abroad
+	constexpr double WagonPrice = 60.0;     // bought in the country
 	const FUnitType& Type(int32 T);
 }
 
@@ -669,6 +675,10 @@ public:
 
 	void ResetResources();
 	float GetRaw(ECampaign1851Raw R) const { return RawStock[int32(R)]; }
+	int32 GetMortarStock() const { return MortarStock; }
+	int32 GetWagonStock() const { return WagonStock; }
+	/** Buys mortars (abroad) or wagons (in the country) for the store. */
+	bool BuyKit(bool bMortars, int32 Count, FString* OutReason = nullptr);
 	double RawPrice(ECampaign1851Raw R) const;
 	bool CanImport(FString* OutReason = nullptr) const;
 	bool BuyRaw(ECampaign1851Raw R, float Amount, FString* OutReason = nullptr);
@@ -1351,12 +1361,17 @@ private:
 	float MonthlyRawMaterials();
 	float RawStock[int32(ECampaign1851Raw::Count)] = {};
 	bool bRawShortNoted = false;
+	int32 MortarStock = 12;
+	int32 WagonStock = 150;
 	// Bridges.
 	void DetectBridges();
 	void ApplyBridge(const FCampaign1851Bridge& B);
 	void DailyBridges();
 	TArray<FCampaign1851Bridge> Bridges;
 	TArray<float> LinkFerryKm0;
+	/** The bridges as meshes on the map: a deck over the water with its railings (a blown one in two stumps). */
+	void RebuildBridgeMeshes();
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> BridgeMeshes;
 	// The battlefield.
 	void RenderBattlefield();
 	void WriteBattlefield() const;

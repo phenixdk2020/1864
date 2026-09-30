@@ -303,6 +303,11 @@ void ACampaign1851PlayerController::TryInit()
 			Map->GenerateBattlefield(Map->KmAtWorld(Map->Project(FCString::Atod(*P[0]), FCString::Atod(*P[1]))), P.Num() > 2 ? FCString::Atof(*P[2]) : 8.f, TEXT("Test"));
 		}
 	}
+	if (Overlay.IsValid())
+	{
+		FParse::Value(FCommandLine::Get(), TEXT("CampaignResearchPick="), Overlay->ResearchPick);
+		FParse::Value(FCommandLine::Get(), TEXT("CampaignForeignTab="), Overlay->ForeignTab);
+	}
 	int32 GazetteTab = 0;
 	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignGazetteTab="), GazetteTab) && Overlay.IsValid())
 	{
@@ -1207,6 +1212,22 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			const float Step = R == ECampaign1851Raw::Cloth || R == ECampaign1851Raw::Leather ? 100.f : 10.f;
 			FString Why;
 			if (!Map->BuyRaw(R, Step * (Module % 10 == 0 ? 1.f : 10.f), &Why))
+			{
+				Overlay->ShowToast(Why);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::ForeignTab)
+		{
+			Overlay->ForeignTab = Module;
+		}
+		else if (Button == SCampaign1851Overlay::EButton::ResearchPick)
+		{
+			Overlay->ResearchPick = Overlay->ResearchPick == Module ? -1 : Module;
+		}
+		else if (Button == SCampaign1851Overlay::EButton::KitBuy)
+		{
+			FString Why;
+			if (!Map->BuyKit(Module == 1, Module == 1 ? 2 : 10, &Why))
 			{
 				Overlay->ShowToast(Why);
 			}

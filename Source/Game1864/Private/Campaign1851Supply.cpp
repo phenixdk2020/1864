@@ -391,6 +391,8 @@ void ACampaign1851Map::ExportUnits() const
 		O->SetNumberField(TEXT("maxMen"), R.MaxMen);
 		O->SetNumberField(TEXT("horses"), R.Horses);
 		O->SetNumberField(TEXT("guns"), R.Guns);
+		O->SetNumberField(TEXT("mortars"), R.Mortars);
+		O->SetNumberField(TEXT("wagons"), R.Wagons);
 		O->SetNumberField(TEXT("foodDays"), R.Food);
 		O->SetNumberField(TEXT("fodderDays"), R.Fodder);
 		O->SetNumberField(TEXT("ammoFraction"), R.Ammo);

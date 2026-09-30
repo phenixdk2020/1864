@@ -8,7 +8,8 @@ Vinduet FORSKNING viser et træ i stil med Hearts of Iron.
 - **Niveauer:** rækkerne er niveau I, II, III osv.
 - **Streger** går fra et projekt til det, det åbner for.
 - **Rækkefølge:** et projekt kræver kun det ovenover i sin gren. Der er ingen årstal.
-- **Start:** klik på en boks for at påbegynde projektet.
+- **Start:** klik på en boks. Der åbnes en boks med symbolet, hvad projektet gør, pris og tid, hvad det kræver først, og knappen START (eller hvorfor det ikke kan startes endnu).
+- **Symboler:** hver gren har sit symbol: rødt kors, stjerneskanse, telegraf, krydsede geværer og kanon.
 - **Ét ad gangen:** der kører ét projekt ad gangen, og det betales hver måned. Står Krigsministeriet på AUTO, vælger det selv.
 
 | Gren | I | II | III |

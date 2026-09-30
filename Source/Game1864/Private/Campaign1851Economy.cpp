@@ -184,6 +184,7 @@ void ACampaign1851Map::RestoreEconomy(const TArray<FString>& Lines)
 {
 	Debt = 0.0;
 	DebtRate = 0.04f;
+	TArray<FString> ResourceLines;
 	History.Reset();
 	NewsLog.Reset();
 	for (const FString& Line : Lines)
@@ -209,9 +210,9 @@ void ACampaign1851Map::RestoreEconomy(const TArray<FString>& Lines)
 			R.Debt = FCString::Atod(*P[9]);
 			History.Add(R);
 		}
-		else if (P.Num() > 0 && P[0] == TEXT("raw"))
+		else if (P.Num() > 0 && (P[0] == TEXT("raw") || P[0] == TEXT("kit") || P[0] == TEXT("mortars")))
 		{
-			RestoreResources({ Line });
+			ResourceLines.Add(Line);
 		}
 		else if (P.Num() >= 2 && P[0] == TEXT("end"))
 		{
@@ -227,4 +228,5 @@ void ACampaign1851Map::RestoreEconomy(const TArray<FString>& Lines)
 			NewsLog.Add(TPair<double, FString>(FCString::Atod(*P[1]), P[2]));
 		}
 	}
+	RestoreResources(ResourceLines);
 }
