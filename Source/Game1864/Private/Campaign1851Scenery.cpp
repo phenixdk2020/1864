@@ -10,7 +10,10 @@
 
 namespace
 {
+#ifndef CAMPAIGN1851_SRGB   // one definition per unity blob
+#define CAMPAIGN1851_SRGB
 	FLinearColor Srgb(uint8 R, uint8 G, uint8 B) { return FLinearColor::FromSRGBColor(FColor(R, G, B)); }
+#endif
 
 	const FLinearColor Plaster = Srgb(226, 216, 192);
 	const FLinearColor Ochre = Srgb(214, 172, 98);

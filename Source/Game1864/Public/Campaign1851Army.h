@@ -251,6 +251,8 @@ struct FCampaign1851Regiment
 	float Ammo = 1.f;
 	/** Share of its men with the colours (peace footing: most are on leave; mobilisation calls them in). */
 	float Present = 0.35f;
+	/** Sick and wounded in the lazaret (not in Men; most come back within weeks). */
+	int32 Sick = 0;
 	int32 PresentMen() const { return FMath::RoundToInt(Men * Present); }
 	/** Officer indices: the regiment's chief, and a general whose headquarters marches with it. */
 	int32 Chief = INDEX_NONE;

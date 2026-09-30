@@ -118,6 +118,9 @@ bool ACampaign1851Map::FightBattleIn3D(int32 BattleId)
 	Doc->SetStringField(TEXT("date"), Now.ToIso8601());
 	Doc->SetStringField(TEXT("season"), GetSeasonName());
 	WriteDoctrineJson(Doc);
+	Doc->SetStringField(TEXT("weather"), Campaign1851Weather::Name(GetWeather()));
+	Doc->SetNumberField(TEXT("temperatureC"), FMath::RoundToInt(GetTemperature()));
+	Doc->SetBoolField(TEXT("ice"), IsIceWinter());
 	Doc->SetBoolField(TEXT("snow"), Now.GetMonth() == 12 || Now.GetMonth() <= 2);
 	Doc->SetNumberField(TEXT("lat"), LatLon.X);
 	Doc->SetNumberField(TEXT("lon"), LatLon.Y);
@@ -280,17 +283,27 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 	Battles.RemoveAt(BattleIndex);
 	const int32 Ci = CorpsIndexOf(B);
 	const FString Place = Cities.IsValidIndex(B.Town) ? Cities[B.Town].Name : FString(TEXT("?"));
-	int32 DanishLosses = 0;
+	int32 DanishLosses = 0, Prisoners = 0;
 	for (const TPair<int32, int32>& L : O.UnitLosses)
 	{
 		FCampaign1851Regiment& R = Regiments[L.Key];
 		const int32 Lost = FMath::Min(L.Value, R.Men);
 		R.Men -= Lost;
+		SplitLosses(L.Key, Lost, !O.bDanishWin && !O.bDraw, Prisoners);
 		DanishLosses += Lost;
 		R.Morale = FMath::Clamp(R.Morale + (O.bDanishWin ? 0.05f : O.bDraw ? -0.05f : -0.15f), 0.05f, 1.f);
 		R.Cohesion = FMath::Max(10.f, R.Cohesion - (O.bDanishWin ? 5.f : 20.f));
 		R.Experience = FMath::Min(100.f, R.Experience + 5.f);
+		for (const int32 o : { R.Chief, R.General })
+		{
+			if (Officers.IsValidIndex(o))
+			{
+				Officers[o].Experience = FMath::Min(100.f, Officers[o].Experience + (O.bDanishWin ? 6.f : 3.f));
+			}
+		}
 	}
+	// The country follows the war: victories cheer, defeats are blamed on the Eider policy.
+	PoliticalShock(O.bDanishWin ? 4.f : O.bDraw ? -1.f : -5.f, O.bDanishWin ? 2.f : O.bDraw ? 0.f : -3.f);
 	for (const TPair<int32, float>& A : O.UnitAmmo)
 	{
 		Regiments[A.Key].Ammo = FMath::Max(0.f, Regiments[A.Key].Ammo - A.Value);
@@ -313,6 +326,7 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 		Forts[Fi].RoundsPerGun = FMath::Max(0.f, Forts[Fi].RoundsPerGun - 60.f);
 		Forts[Fi].CartridgesPerMan = FMath::Max(0.f, Forts[Fi].CartridgesPerMan - 40.f);
 	}
+	DanishWarLosses += DanishLosses;
 	for (int32 Id : O.CapturedForts)
 	{
 		const int32 Fi = FortIndex(Id);
@@ -328,6 +342,8 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 	{
 		FCampaign1851EnemyCorps& C = EnemyCorps[Ci];
 		C.Men = FMath::Max(0, C.Men - O.EnemyLosses);
+		EnemyWarLosses += O.EnemyLosses;
+		EnemyCaptured += FMath::RoundToInt(O.EnemyLosses * (O.bDanishWin ? 0.2f : 0.05f));
 		C.bEngaged = false;
 		if (O.bDanishWin)
 		{

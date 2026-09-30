@@ -251,7 +251,7 @@ float ACampaign1851Map::FoodCap() const
 
 float ACampaign1851Map::CallInFactor() const
 {
-	return (HasResearch(TEXT("telegraph")) ? 1.25f : 1.f) * (HasResearch(TEXT("railmob")) ? 1.25f : 1.f);
+	return (HasResearch(TEXT("telegraph")) ? 1.25f : 1.f) * (HasResearch(TEXT("railmob")) ? 1.25f : 1.f) * CallInMoodFactor();
 }
 
 void ACampaign1851Map::WriteDoctrineJson(const TSharedRef<FJsonObject>& Doc) const

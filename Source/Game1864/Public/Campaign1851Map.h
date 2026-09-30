@@ -74,7 +74,46 @@ struct FCampaign1851EnemyCorps
 	float LegElapsed = 0.f;
 	bool bEngaged = false;   // in contact with Danish troops: a battle is at hand
 	double RestUntil = 0.0;  // after a battle: waits (campaign day) before marching on
+	int32 StartMen = 0;      // strength when it took the field (reinforcements up to half again)
+	// What the Danes know of it (the fog of war): seen now, or last seen or reported.
+	bool bSeen = true;
+	FVector2D SeenKm = FVector2D::ZeroVector;
+	double SeenDay = -1.0;
+	int32 SeenMen = 0;       // the estimate (cavalry counts well, towns by rumour)
+	FVector2D ReportKm = FVector2D::ZeroVector;
+	double ReportDay = -1.0;
+	double ReportArrive = -1.0;   // a report on its way (courier or telegraph)
+	int32 ReportMen = 0;
+	// The enemy's own thinking.
+	double NextThink = 0.0;
+	bool bWaitingNoted = false;
+	double CrossingReadyDay = -1.0;   // boats gathered for a narrow sound (the Danish fleet holds the sea)
+	TArray<int32> Barred;             // towns it cannot reach while the Danish fleet holds the sea
 };
+
+/** A class of warship (Campaign1851Navy.cpp). */
+struct FCampaign1851ShipClass
+{
+	const TCHAR* Name;
+	float Strength;         // in the balance at sea (a ship of the line 10)
+	int32 Year;             // can be ordered from (0: not built any more)
+	double Cost;
+	int32 Months;
+	double UpkeepPerYear;
+};
+
+struct FCampaign1851Ship
+{
+	FString Name;
+	int32 Class = 0;
+	int32 Built = 1851;
+	double ReadyDay = 0.0;  // on the stocks until then
+};
+
+namespace Campaign1851Navy
+{
+	const TArray<FCampaign1851ShipClass>& Classes();
+}
 
 /** A battle at hand: the Danish units and forts within reach of an enemy corps. */
 struct FCampaign1851Battle
@@ -112,6 +151,32 @@ struct FPlannedEvent
 	float Tension = 0.f;
 	bool bSkip = false;
 };
+
+/** The currents of opinion (Campaign1851Politics.cpp). */
+enum class ECampaign1851Current : uint8 { Helstat, Ejder, Scandinavian };
+
+namespace Campaign1851Politics
+{
+	const TCHAR* CurrentName(ECampaign1851Current C);
+	const TCHAR* CurrentEffect(ECampaign1851Current C);
+}
+
+/** A peace the Danes may offer (Campaign1851Diplomacy.cpp). */
+struct FCampaign1851PeaceOffer
+{
+	FString Name;
+	TArray<int32> Ceded;   // town indices
+	bool bAccepted = false;
+	FString Why;
+};
+
+/** The day's weather (Campaign1851Weather.cpp). */
+enum class ECampaign1851Weather : uint8 { Clear, Rain, Snow, Frost, Thaw, Storm };
+
+namespace Campaign1851Weather
+{
+	const TCHAR* Name(ECampaign1851Weather W);
+}
 
 /** A research project of the war ministry (Campaign1851Research.cpp). */
 struct FCampaign1851ResearchTopic
@@ -454,16 +519,75 @@ public:
 	int32 TradeTreaties() const;
 	bool IsSoundDuesAbolished() const { return bSoundDuesAbolished; }
 	bool HasPeaceConference() const { return PeaceTalksDay >= 0.0; }
-	/** What a peace would cost now. */
-	FString PeaceTerms() const;
-	/** Sues for peace: the occupied towns are ceded and the war ends. */
-	bool MakePeace();
+	/** -1 .. 1: how the war stands (losses traded, towns held, the blockade). */
+	float WarScore() const;
+	/** The peaces on offer and whether the enemy would take them. */
+	TArray<FCampaign1851PeaceOffer> PeaceOffers() const;
+	/** Offers a peace; false (with the reason) if the enemy refuses. */
+	bool MakePeace(int32 Offer, FString* OutReason = nullptr);
+	double AllianceCostNow() const { return AllianceCost * (Government == ECampaign1851Current::Scandinavian ? 0.5 : 1.0); }
+
+	// ---- Government and opinion (Campaign1851Politics.cpp).
+
+	void ResetPolitics();
+	float GetSupport(ECampaign1851Current C) const { return Support[int32(C)]; }
+	float GetMood() const { return Mood; }
+	int32 GetDanishWarLosses() const { return DanishWarLosses; }
+	int32 GetEnemyWarLosses() const { return EnemyWarLosses; }
+	const FString& GetPrimeMinister() const { return PrimeMinister; }
+	ECampaign1851Current GetGovernment() const { return Government; }
+	double GetGovernmentSince() const { return GovernmentSince; }
+	float TaxMoodFactor() const;
+	float CallInMoodFactor() const;
+	float GovernmentTensionFactor() const;
+	ECampaign1851Current LeadingCurrent() const;
+	TArray<FString> SavePolitics() const;
+	void RestorePolitics(const TArray<FString>& Lines);
 	TArray<FString> SaveDiplomacy() const;
 	void RestoreDiplomacy(const TArray<FString>& Lines);
 	static constexpr double EnvoyCost = 5000.0;
 	static constexpr double TreatyCost = 10000.0;
 	static constexpr double AllianceCost = 20000.0;
 	static constexpr double GuaranteeCost = 15000.0;
+
+	/** New Year: the officers age, retire or die; the officer school's class joins (Campaign1851Career.cpp). */
+	void YearlyOfficers();
+
+	// ---- Sickness, the wounded and prisoners (Campaign1851Health.cpp).
+
+	int32 SickTotal() const;
+	int32 GetDanesCaptured() const { return DanesCaptured; }
+	int32 GetEnemyCaptured() const { return EnemyCaptured; }
+	void ExchangePrisoners();
+
+	// ---- Weather (Campaign1851Weather.cpp): follows from the seed, day by day.
+
+	float TemperatureOn(int32 Day) const;
+	ECampaign1851Weather WeatherOn(int32 Day) const;
+	ECampaign1851Weather GetWeather() const;
+	float GetTemperature() const;
+	/** A hard frost: the narrow waters (Slien, Alssund) bear. */
+	bool IsIceWinter() const;
+	FString GetSeasonAndWeather() const;
+	/** How fast a leg is covered today (1 normal; mud, snow and thaw slow the roads, a storm the ferries). */
+	float LegPace(const FCampaign1851Leg& Leg) const;
+
+	// ---- The navy (Campaign1851Navy.cpp).
+
+	void ResetNavy();
+	const TArray<FCampaign1851Ship>& GetShips() const { return Ships; }
+	float DanishSeaStrength() const;
+	float EnemySeaStrength() const;
+	bool HasSeaControl() const;
+	double NavyUpkeepPerYear() const;
+	FString ShipBlockReason(int32 Class) const;
+	bool OrderShip(int32 Class, FString* OutReason = nullptr);
+	bool IsBlockade() const { return bBlockade; }
+	void SetBlockade(bool bOn);
+	/** 0: the corps may cross, 1: it must gather boats first (a narrow sound), 2: the fleet bars the way. */
+	int32 WaterCrossing(const FCampaign1851EnemyCorps& C, const TArray<FCampaign1851Leg>& Legs, FString& OutFerry) const;
+	TArray<FString> SaveNavy() const;
+	void RestoreNavy(const TArray<FString>& Lines);
 
 	// ---- Research and doctrine (Campaign1851Research.cpp).
 
@@ -975,6 +1099,11 @@ private:
 	void MonthlyWar();
 	void AdvanceWar(float DeltaDays);
 	void DeclareWar();
+	// Reconnaissance and the enemy's decisions (Campaign1851Intel.cpp).
+	void UpdateIntel();
+	float EnemyEstimateOfDefence(int32 Town) const;
+	bool ChooseCorpsObjective(int32 CorpsIndex);
+	void EnemyReinforcements();
 	void SpawnCorps(const FString& Name, const FString& NationId, float ShareOfArmy, const FString& From, const TArray<FString>& Objectives, float Delay);
 	void CreateBattle(int32 CorpsIndex);
 	void ApplyBattle(int32 BattleIndex, const FCampaign1851BattleOutcome& O);
@@ -989,6 +1118,38 @@ private:
 	bool bSoundDuesAbolished = false;
 	int32 RedemptionYearsLeft = 0;
 	double PeaceTalksDay = -1.0;
+	// Politics.
+	void MonthlyPolitics();
+	void FormGovernment(const FString& Name, ECampaign1851Current Line, const FString& Why);
+	void PoliticalShock(float MoodChange, float EjderChange);
+	float Support[3] = { 45.f, 40.f, 15.f };
+	float Mood = 60.f;
+	FString PrimeMinister;
+	ECampaign1851Current Government = ECampaign1851Current::Helstat;
+	double GovernmentSince = 0.0;
+	int32 NextCabinet = 0;
+	int32 DanishWarLosses = 0;
+	int32 EnemyWarLosses = 0;
+	// Officers' careers (Campaign1851Career.cpp).
+	void VacateOfficer(int32 Officer);
+	// Health.
+	void DailyHealth();
+	/** A battle's losses of a unit: the wounded to its lazaret, the prisoners counted. */
+	void SplitLosses(int32 RegimentIndex, int32 Lost, bool bDefeat, int32& OutPrisoners);
+	int32 DanesCaptured = 0;
+	int32 EnemyCaptured = 0;
+	// Weather.
+	void DailyWeather();
+	mutable int32 WeatherCacheDay = INT32_MIN;
+	mutable ECampaign1851Weather WeatherCache = ECampaign1851Weather::Clear;
+	mutable float TemperatureCache = 0.f;
+	mutable bool bIceCache = false;
+	bool bIceNoted = false;
+	// The navy.
+	void MonthlyNavy();
+	TArray<FCampaign1851Ship> Ships;
+	bool bBlockade = false;
+	double AustrianSquadronDay = -1.0;
 	// Research and doctrine.
 	void MonthlyResearch();
 	TSet<FString> Researched;

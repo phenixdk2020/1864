@@ -61,7 +61,7 @@ void ACampaign1851Map::DailyWar()
 			continue;
 		}
 		EventsFired.Add(P.Id);
-		Tension = FMath::Clamp(Tension + P.Tension * (P.Tension > 0.f ? GuaranteeDamping() : 1.f), 0.f, 100.f);
+		Tension = FMath::Clamp(Tension + P.Tension * (P.Tension > 0.f ? GuaranteeDamping() * GovernmentTensionFactor() : 1.f), 0.f, 100.f);
 		News.Add(FString::Printf(TEXT("%s (spænding %.0f)"), *P.Text, Tension));
 		FCampaign1851Decision D;
 		D.Day = CampaignDays;
@@ -96,6 +96,7 @@ void ACampaign1851Map::DeclareWar()
 {
 	bAtWar = true;
 	WarStartDay = CampaignDays;
+	DanishWarLosses = EnemyWarLosses = 0;
 	News.Add(TEXT("KRIG: Preussen og Østrig erklærer Danmark krig"));
 	FCampaign1851Decision D;
 	D.Day = CampaignDays;
@@ -123,6 +124,10 @@ void ACampaign1851Map::SpawnCorps(const FString& Name, const FString& NationId, 
 	C.Name = Name;
 	C.Nation = NationId;
 	C.Men = N ? FMath::RoundToInt(N->ArmyMen * ShareOfArmy) : 12000;
+	C.StartMen = C.Men;
+	C.SeenKm = TownKm(Town);
+	C.SeenDay = CampaignDays;
+	C.SeenMen = C.Men;
 	C.Guns = FMath::Max(12, C.Men / 250);
 	C.Km = TownKm(Town);
 	C.Town = Town;
@@ -147,7 +152,11 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 	{
 		LastWarDay = FMath::FloorToInt(CampaignDays);
 		DailyWar();
+		DailyWeather();
+		DailyHealth();
+		EnemyReinforcements();
 	}
+	UpdateIntel();
 	if (Battles.ContainsByPredicate([](const FCampaign1851Battle& B) { return B.bWaiting; }) && FPlatformTime::Seconds() - LastBattlePoll > 1.0)
 	{
 		LastBattlePoll = FPlatformTime::Seconds();
@@ -203,6 +212,11 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		}
 		if (C.Route.Num() == 0)
 		{
+			// The enemy chooses its next objective by what it believes of the Danish defence.
+			if (bAtWar && C.Nation != TEXT("DE") && !ChooseCorpsObjective(k))
+			{
+				continue;
+			}
 			if (C.Objectives.Num() == 0)
 			{
 				continue;
@@ -214,12 +228,33 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 				C.Objectives.RemoveAt(0);
 				continue;
 			}
+			// Over water: the Danish fleet bars the Belts; a narrow sound takes a week of gathering boats.
+			FString Ferry;
+			const int32 Water = WaterCrossing(C, Legs, Ferry);
+			if (Water == 2)
+			{
+				News.Add(FString::Printf(TEXT("%s kan ikke gå over %s: den danske flåde behersker farvandet"), *C.Name, *Ferry));
+				C.Barred.AddUnique(Goal);
+				C.Objectives.RemoveAt(0);
+				C.RestUntil = CampaignDays + 2.0;
+				continue;
+			}
+			if (Water == 1)
+			{
+				if (C.CrossingReadyDay < 0.0)
+				{
+					C.CrossingReadyDay = CampaignDays + 7.0;
+					News.Add(FString::Printf(TEXT("Efterretning: %s samler både ved %s"), *C.Name, *Ferry));
+				}
+				continue;
+			}
+			C.CrossingReadyDay = -1.0;
 			C.Route = MoveTemp(Legs);
 			C.Leg = 0;
 			C.LegElapsed = 0.f;
 			C.Town = INDEX_NONE;
 		}
-		C.LegElapsed += DeltaDays;
+		C.LegElapsed += DeltaDays * (C.Route.IsValidIndex(C.Leg) ? LegPace(C.Route[C.Leg]) : 1.f);
 		while (C.Route.IsValidIndex(C.Leg) && C.LegElapsed >= C.Route[C.Leg].Days)
 		{
 			C.LegElapsed -= C.Route[C.Leg].Days;
@@ -292,6 +327,11 @@ TArray<FString> ACampaign1851Map::SaveWar() const
 		Out.Add(FString::Printf(TEXT("corps|%s|%s|%d|%d|%.3f|%.3f|%s|%s|%d"), *C.Name, *C.Nation, C.Men, C.Guns, C.Km.X, C.Km.Y,
 			Cities.IsValidIndex(At) ? *Cities[At].Name : TEXT(""), *Objectives, C.bEngaged ? 1 : 0));
 	}
+	for (int32 k = 0; k < EnemyCorps.Num(); ++k)
+	{
+		const FCampaign1851EnemyCorps& C = EnemyCorps[k];
+		Out.Add(FString::Printf(TEXT("intel|%d|%.3f|%.3f|%.2f|%d|%d"), k, C.SeenKm.X, C.SeenKm.Y, C.SeenDay, C.SeenMen, C.StartMen));
+	}
 	return Out;
 }
 
@@ -307,6 +347,14 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 		{
 			Tension = FCString::Atof(*P[1]);
 			bAtWar = P[2] == TEXT("1");
+		}
+		else if (P.Num() == 7 && P[0] == TEXT("intel") && EnemyCorps.IsValidIndex(FCString::Atoi(*P[1])))
+		{
+			FCampaign1851EnemyCorps& C = EnemyCorps[FCString::Atoi(*P[1])];
+			C.SeenKm = FVector2D(FCString::Atod(*P[2]), FCString::Atod(*P[3]));
+			C.SeenDay = FCString::Atod(*P[4]);
+			C.SeenMen = FCString::Atoi(*P[5]);
+			C.StartMen = FMath::Max(C.Men, FCString::Atoi(*P[6]));
 		}
 		else if (P.Num() == 2 && P[0] == TEXT("fired"))
 		{
@@ -340,6 +388,9 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 				}
 			}
 			C.bEngaged = false;   // a battle still at hand is offered again on contact
+			C.StartMen = C.Men;
+			C.SeenKm = C.Km;
+			C.SeenMen = C.Men;
 			EnemyCorps.Add(C);
 		}
 	}

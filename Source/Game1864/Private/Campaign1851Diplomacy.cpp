@@ -60,7 +60,7 @@ FString ACampaign1851Map::DiplomacyBlockReason(int32 NationIndex, EDiplomacyActi
 		if (N.bAlliance) return TEXT("allieret");
 		if (!N.bTrade) return TEXT("kræver handelstraktat");
 		if (N.Relation < 60.f) return TEXT("kræver forhold 60");
-		if (Treasury < AllianceCost) return TEXT("ikke råd");
+		if (Treasury < AllianceCostNow()) return TEXT("ikke råd");
 		return FString();
 	case EDiplomacyAction::Guarantee:
 		if (!N.bCanGuarantee) return TEXT("-");
@@ -97,7 +97,7 @@ bool ACampaign1851Map::DoDiplomacy(int32 NationIndex, EDiplomacyAction Action, F
 		News.Add(FString::Printf(TEXT("Handelstraktat med %s: +%s rd. om året i told og handel"), *N.Name, *FString::FromInt(N.TradeValue)));
 		break;
 	case EDiplomacyAction::Alliance:
-		AddTransaction(-AllianceCost, FString::Printf(TEXT("Forsvarsalliance med %s"), *N.Name));
+		AddTransaction(-AllianceCostNow(), FString::Printf(TEXT("Forsvarsalliance med %s"), *N.Name));
 		N.bAlliance = true;
 		News.Add(FString::Printf(TEXT("Forsvarsalliance med %s: ved krig sendes en hjælpebrigade"), *N.Name));
 		// Berlin and Vienna do not like it.
@@ -205,7 +205,8 @@ void ACampaign1851Map::MonthlyDiplomacy()
 			}
 		}
 		const bool bGuaranteed = Nations.ContainsByPredicate([](const FCampaign1851Nation& N) { return N.bGuarantee && N.Relation >= 40.f; });
-		if (bGuaranteed && PeaceTalksDay < 0.0 && CampaignDays - WarStartDay > 60.0)
+		const double TalksAfter = bBlockade && HasSeaControl() ? 45.0 : 60.0;   // the blockade hurts Hamburg and Stettin
+		if (bGuaranteed && PeaceTalksDay < 0.0 && CampaignDays - WarStartDay > TalksAfter)
 		{
 			PeaceTalksDay = CampaignDays;
 			News.Add(TEXT("Stormagterne kræver en fredskonference i London: fredsforhandling er mulig på bedre vilkår"));
@@ -213,52 +214,117 @@ void ACampaign1851Map::MonthlyDiplomacy()
 	}
 }
 
-FString ACampaign1851Map::PeaceTerms() const
+float ACampaign1851Map::WarScore() const
 {
-	TArray<FString> Lost;
+	// -1 .. 1: the losses traded, the towns held, the sea.
+	int32 Occupied = 0;
 	for (const FCampaign1851City& C : Cities)
 	{
-		if (!C.Occupier.IsEmpty() && !C.bForeign)
-		{
-			Lost.Add(C.Name);
-		}
+		Occupied += !C.Occupier.IsEmpty() && !C.bForeign ? 1 : 0;
 	}
-	// A conference in London lets the kingdom keep what the enemy holds only in Holstein's south.
-	if (PeaceTalksDay >= 0.0 && Lost.Num() > 0)
-	{
-		return FString::Printf(TEXT("Konferencen: de besatte byer (%s) afstås, men resten af Slesvig bevares"), *FString::Join(Lost, TEXT(", ")));
-	}
-	return Lost.Num() == 0 ? FString(TEXT("Status quo: intet afstås")) : FString::Printf(TEXT("De besatte byer afstås: %s"), *FString::Join(Lost, TEXT(", ")));
+	const float Losses = float(EnemyWarLosses - DanishWarLosses) / float(FMath::Max(10000, EnemyWarLosses + DanishWarLosses));
+	return FMath::Clamp(Losses - 0.04f * Occupied + (bBlockade && HasSeaControl() ? 0.1f : 0.f), -1.f, 1.f);
 }
 
-bool ACampaign1851Map::MakePeace()
+TArray<FCampaign1851PeaceOffer> ACampaign1851Map::PeaceOffers() const
 {
-	if (!bAtWar)
+	TArray<FCampaign1851PeaceOffer> Offers;
+	const float Score = WarScore();
+	const bool bConference = PeaceTalksDay >= 0.0;
+	auto Towns = [this](TFunctionRef<bool(const FCampaign1851City&)> Pred)
+	{
+		TArray<int32> Out;
+		for (int32 c = 0; c < Cities.Num(); ++c)
+		{
+			if (!Cities[c].bForeign && Pred(Cities[c]))
+			{
+				Out.Add(c);
+			}
+		}
+		return Out;
+	};
+	{
+		FCampaign1851PeaceOffer O;
+		O.Name = TEXT("Status quo");
+		O.bAccepted = Score >= 0.25f;
+		O.Why = O.bAccepted ? TEXT("fjenden er slået nok til at opgive") : FString::Printf(TEXT("kræver krigsstilling 0,25 (nu %.2f)"), Score);
+		Offers.Add(O);
+	}
+	{
+		// The line of language (roughly the Flensborg fjord): Holstein, Lauenburg and southern Schleswig go.
+		FCampaign1851PeaceOffer O;
+		O.Name = TEXT("Deling efter sprog");
+		O.Ceded = Towns([](const FCampaign1851City& C) { return C.Region == TEXT("H") || (C.Region == TEXT("S") && C.Lat < 54.75); });
+		O.bAccepted = bConference || Score >= -0.2f;
+		O.Why = O.bAccepted ? (bConference ? TEXT("stormagterne på konferencen støtter delingen") : TEXT("fjenden kan godtage det")) : FString::Printf(TEXT("kræver konference eller krigsstilling −0,2 (nu %.2f)"), Score);
+		Offers.Add(O);
+	}
+	{
+		FCampaign1851PeaceOffer O;
+		O.Name = TEXT("De besatte byer");
+		O.Ceded = Towns([](const FCampaign1851City& C) { return !C.Occupier.IsEmpty(); });
+		O.bAccepted = Score >= -0.6f;
+		O.Why = O.bAccepted ? TEXT("fjenden beholder, hvad han har taget") : FString::Printf(TEXT("fjenden vil have mere (krigsstilling %.2f)"), Score);
+		Offers.Add(O);
+	}
+	{
+		FCampaign1851PeaceOffer O;
+		O.Name = TEXT("Hertugdømmerne");
+		O.Ceded = Towns([](const FCampaign1851City& C) { return C.Region == TEXT("H") || C.Region == TEXT("S"); });
+		O.bAccepted = true;
+		O.Why = TEXT("som i Wienfreden 1864: Slesvig, Holsten og Lauenborg afstås");
+		Offers.Add(O);
+	}
+	return Offers;
+}
+
+bool ACampaign1851Map::MakePeace(int32 Offer, FString* OutReason)
+{
+	const TArray<FCampaign1851PeaceOffer> Offers = PeaceOffers();
+	if (!bAtWar || !Offers.IsValidIndex(Offer))
 	{
 		return false;
 	}
-	// The occupied towns are ceded: they leave the monarchy (their amter no longer pay).
+	const FCampaign1851PeaceOffer& O = Offers[Offer];
+	if (!O.bAccepted)
+	{
+		if (OutReason) { *OutReason = FString::Printf(TEXT("Fjenden afviser: %s"), *O.Why); }
+		return false;
+	}
+	// The ceded towns leave the monarchy (their amter no longer pay).
 	TArray<FString> Ceded;
+	for (int32 c : O.Ceded)
+	{
+		FCampaign1851City& C = Cities[c];
+		C.bForeign = true;
+		C.bCeded = true;
+		if (C.Occupier.IsEmpty())
+		{
+			C.Occupier = TEXT("PR");
+		}
+		Ceded.Add(C.Name);
+	}
+	// Occupied towns not ceded come back.
 	for (FCampaign1851City& C : Cities)
 	{
-		if (!C.Occupier.IsEmpty() && !C.bForeign)
+		if (!C.bCeded && !C.Occupier.IsEmpty())
 		{
-			C.bForeign = true;
-			C.bCeded = true;
-			Ceded.Add(C.Name);
+			C.Occupier.Reset();
 		}
 	}
 	bAtWar = false;
+	ExchangePrisoners();
 	EnemyCorps.Reset();
 	Battles.Reset();
 	Tension = 30.f;
 	PeaceTalksDay = -1.0;
-	News.Add(Ceded.Num() > 0 ? FString::Printf(TEXT("Fred: %s afstås"), *FString::Join(Ceded, TEXT(", "))) : FString(TEXT("Fred på status quo")));
+	PoliticalShock(Ceded.Num() == 0 ? 10.f : -FMath::Min(25.f, Ceded.Num() * 1.5f), Ceded.Num() == 0 ? 3.f : -6.f);
+	News.Add(Ceded.Num() > 0 ? FString::Printf(TEXT("Fred (%s): %d byer afstås"), *O.Name, Ceded.Num()) : FString(TEXT("Fred på status quo")));
 	FCampaign1851Decision D;
 	D.Day = CampaignDays;
 	D.Nation = PlayerNation;
 	D.Portfolio = ECampaign1851Portfolio::War;
-	D.Action = TEXT("Fredsslutning");
+	D.Action = FString::Printf(TEXT("Fredsslutning: %s"), *O.Name);
 	D.Reasons = Ceded.Num() > 0 ? FString::Printf(TEXT("afstået: %s"), *FString::Join(Ceded, TEXT(", "))) : FString(TEXT("intet afstået"));
 	D.bDone = true;
 	AddDecision(D);

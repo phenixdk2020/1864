@@ -15,7 +15,10 @@
 namespace
 {
 	const TCHAR* NetworkMaterialPath = TEXT("/Game/Campaign1851/M_Campaign1851Scenery.M_Campaign1851Scenery");
+#ifndef CAMPAIGN1851_SRGB   // one definition per unity blob
+#define CAMPAIGN1851_SRGB
 	FLinearColor Srgb(uint8 R, uint8 G, uint8 B) { return FLinearColor::FromSRGBColor(FColor(R, G, B)); }
+#endif
 
 	/** The line from distance From to To (km along it). */
 	TArray<FVector2D> SubLine(const TArray<FVector2D>& Line, double From, double To)

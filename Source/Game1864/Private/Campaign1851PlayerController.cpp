@@ -250,6 +250,11 @@ void ACampaign1851PlayerController::TryInit()
 			UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|doctrine|%s|%s"), *Item, bDone ? TEXT("set") : *Why);
 		}
 	}
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|weather|%s"), *Map->GetSeasonAndWeather());
+	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignYearlyOfficers")))
+	{
+		Map->YearlyOfficers();
+	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|research-effects|loss %.2f|cover +%.0f|guns %.2f|infantry %.2f|food %.0f|call-in %.2f"),
 		Map->DanishLossFactor(), Map->FortCoverBonus(), Map->DanishGunFactor(), Map->InfantryFactor(), Map->FoodCap(), Map->CallInFactor());
 	FString WindowName;
@@ -259,7 +264,8 @@ void ACampaign1851PlayerController::TryInit()
 			: WindowName == TEXT("budget") ? SCampaign1851Overlay::EWindow::Budget : WindowName == TEXT("trains") ? SCampaign1851Overlay::EWindow::Trains
 			: WindowName == TEXT("chart") ? SCampaign1851Overlay::EWindow::Chart : WindowName == TEXT("council") ? SCampaign1851Overlay::EWindow::Council
 			: WindowName == TEXT("supply") ? SCampaign1851Overlay::EWindow::Supply : WindowName == TEXT("foreign") ? SCampaign1851Overlay::EWindow::Foreign
-			: WindowName == TEXT("research") ? SCampaign1851Overlay::EWindow::Research : SCampaign1851Overlay::EWindow::Towns);
+			: WindowName == TEXT("research") ? SCampaign1851Overlay::EWindow::Research : WindowName == TEXT("navy") ? SCampaign1851Overlay::EWindow::Navy
+			: SCampaign1851Overlay::EWindow::Towns);
 	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignSupplyMap")) && Overlay.IsValid())
 	{
 		Overlay->ToggleSupplyMap();
@@ -960,6 +966,15 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			const bool bDone = Map->DoDiplomacy(Module / 10, ACampaign1851Map::EDiplomacyAction(Module % 10), &Why);
 			Overlay->ShowToast(bDone ? FString(TEXT("Udført")) : Why);
 		}
+		else if (Button == SCampaign1851Overlay::EButton::ShipOrder)
+		{
+			FString Why;
+			Overlay->ShowToast(Map->OrderShip(Module, &Why) ? FString::Printf(TEXT("%s bestilt"), Campaign1851Navy::Classes()[Module].Name) : Why);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::Blockade)
+		{
+			Map->SetBlockade(Module == 1);
+		}
 		else if (Button == SCampaign1851Overlay::EButton::ResearchStart)
 		{
 			FString Why;
@@ -979,11 +994,15 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 		else if (Button == SCampaign1851Overlay::EButton::MakePeace)
 		{
-			const FString Terms = Map->PeaceTerms();
-			if (Map->MakePeace())
+			FString Why;
+			if (Map->MakePeace(Module, &Why))
 			{
-				Overlay->ShowToast(FString::Printf(TEXT("Fred sluttet. %s"), *Terms));
+				Overlay->ShowToast(TEXT("Fred sluttet"));
 				SaveToSlot(TEXT("Autosave"), true);
+			}
+			else
+			{
+				Overlay->ShowToast(Why);
 			}
 		}
 		else if (Button == SCampaign1851Overlay::EButton::Footing)
@@ -1480,6 +1499,8 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->War = Map->SaveWar();
 	Save->Diplomacy = Map->SaveDiplomacy();
 	Save->Research = Map->SaveResearch();
+	Save->Navy = Map->SaveNavy();
+	Save->Politics = Map->SavePolitics();
 	Map->ExportUnits();
 	Save->MaterialLots = Map->GetMaterialLots();
 	if (Save->Links.Num() > 0)
@@ -1609,6 +1630,8 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 		Map->ResetDiplomacy();
 		Map->ResetResearch();
 	}
+	Map->RestoreNavy(Save->SaveVersion >= 24 ? Save->Navy : TArray<FString>());
+	Map->RestorePolitics(Save->SaveVersion >= 25 ? Save->Politics : TArray<FString>());
 	Map->SetMaterialLots(Save->SaveVersion >= 16 ? Save->MaterialLots : TArray<FVector>());
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);
 	if (Overlay.IsValid())

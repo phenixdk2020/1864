@@ -1451,7 +1451,7 @@ void ACampaign1851Map::AdvanceArmy(float DeltaDays, float DeltaSeconds)
 		{
 			continue;
 		}
-		R.LegElapsed += DeltaDays;
+		R.LegElapsed += DeltaDays * LegPace(R.Route[R.Leg]);
 		while (R.IsMarching() && R.LegElapsed >= R.Route[R.Leg].Days)
 		{
 			R.LegElapsed -= R.Route[R.Leg].Days;

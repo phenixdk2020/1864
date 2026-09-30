@@ -312,11 +312,16 @@ TArray<FString> ACampaign1851Map::SaveSupply() const
 	{
 		Out.Add(FString::Printf(TEXT("unit|%s|%.2f|%.2f|%.3f"), *R.Id, R.Food, R.Fodder, R.Ammo));
 		Out.Add(FString::Printf(TEXT("present|%s|%.3f"), *R.Id, R.Present));
+		if (R.Sick > 0)
+		{
+			Out.Add(FString::Printf(TEXT("sick|%s|%d"), *R.Id, R.Sick));
+		}
 	}
 	for (const FCampaign1851Fort& F : Forts)
 	{
 		Out.Add(FString::Printf(TEXT("fort|%d|%.2f|%.0f|%.0f"), F.Id, F.FoodDays, F.RoundsPerGun, F.CartridgesPerMan));
 	}
+	Out.Add(FString::Printf(TEXT("prisoners|%d|%d"), DanesCaptured, EnemyCaptured));
 	return Out;
 }
 
@@ -341,6 +346,15 @@ void ACampaign1851Map::RestoreSupply(const TArray<FString>& Lines)
 		else if (P.Num() == 3 && P[0] == TEXT("present") && FindRegiment(P[1]) != INDEX_NONE)
 		{
 			Regiments[FindRegiment(P[1])].Present = FCString::Atof(*P[2]);
+		}
+		else if (P.Num() == 3 && P[0] == TEXT("sick") && FindRegiment(P[1]) != INDEX_NONE)
+		{
+			Regiments[FindRegiment(P[1])].Sick = FCString::Atoi(*P[2]);
+		}
+		else if (P.Num() == 3 && P[0] == TEXT("prisoners"))
+		{
+			DanesCaptured = FCString::Atoi(*P[1]);
+			EnemyCaptured = FCString::Atoi(*P[2]);
 		}
 		else if (P.Num() == 5 && P[0] == TEXT("fort") && FortIndex(FCString::Atoi(*P[1])) != INDEX_NONE)
 		{
@@ -373,6 +387,7 @@ void ACampaign1851Map::ExportUnits() const
 		O->SetStringField(TEXT("place"), DescribePlace(R.Town, R.Km));
 		O->SetNumberField(TEXT("men"), R.Men);
 		O->SetNumberField(TEXT("presentMen"), R.PresentMen());
+		O->SetNumberField(TEXT("sick"), R.Sick);
 		O->SetNumberField(TEXT("maxMen"), R.MaxMen);
 		O->SetNumberField(TEXT("horses"), R.Horses);
 		O->SetNumberField(TEXT("guns"), R.Guns);
@@ -524,13 +539,11 @@ void ACampaign1851Map::AdvanceSupplyColumns(float DeltaDays)
 	{
 		return;
 	}
-	// Frost and thaw: the wagons crawl in winter.
-	const int32 Month = GetDate().GetMonth();
-	const float Weather = (Month == 12 || Month <= 2) ? 0.6f : Month == 3 ? 0.8f : 1.f;
 	for (int32 i = SupplyColumns.Num() - 1; i >= 0; --i)
 	{
 		FCampaign1851SupplyColumn& C = SupplyColumns[i];
-		C.LegElapsed += DeltaDays * Weather;
+		// Mud, snow and thaw: the wagons crawl (a little worse than marching men).
+		C.LegElapsed += DeltaDays * (C.Route.IsValidIndex(C.Leg) ? FMath::Pow(LegPace(C.Route[C.Leg]), 1.2f) : 1.f);
 		while (C.Route.IsValidIndex(C.Leg) && C.LegElapsed >= C.Route[C.Leg].Days)
 		{
 			C.LegElapsed -= C.Route[C.Leg].Days;
@@ -621,7 +634,7 @@ void ACampaign1851Map::AdvanceSupplyColumns(float DeltaDays)
 		{
 			Nearest = D.Value.Food > 1000.f ? FMath::Min(Nearest, FVector2D::Distance(TownKm(D.Key), R.Km)) : Nearest;
 		}
-		const float Drive = Nearest < 1e8 ? float(Nearest * 1.4 / (Campaign1851Supply::ColumnKmPerDay * Weather)) : 0.f;
+		const float Drive = Nearest < 1e8 ? float(Nearest * 1.4 / (Campaign1851Supply::ColumnKmPerDay * LegPace(FCampaign1851Leg()))) : 0.f;
 		if (Nearest < 1e8 && R.Food < FMath::Min(Drive + 1.f, FoodCap() - 0.5f))
 		{
 			SendSupplyColumn(false, r);

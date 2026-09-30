@@ -38,7 +38,10 @@ namespace
 	}
 
 	const TCHAR* FlatColourPath = TEXT("/Game/Materials/M_FlatColor.M_FlatColor");
+#ifndef CAMPAIGN1851_SRGB   // one definition per unity blob
+#define CAMPAIGN1851_SRGB
 	FLinearColor Srgb(uint8 R, uint8 G, uint8 B) { return FLinearColor::FromSRGBColor(FColor(R, G, B)); }
+#endif
 
 	const TCHAR* ConstructionMaterialPath = TEXT("/Game/Campaign1851/M_Campaign1851Construction.M_Campaign1851Construction");
 	const TCHAR* SceneryMaterialPath = TEXT("/Game/Campaign1851/M_Campaign1851Scenery.M_Campaign1851Scenery");
@@ -1793,6 +1796,12 @@ void ACampaign1851Map::CloseMonth()
 	MonthlyWar();
 	MonthlyDiplomacy();
 	MonthlyResearch();
+	MonthlyNavy();
+	MonthlyPolitics();
+	if (GetDate().GetMonth() == 1)
+	{
+		YearlyOfficers();
+	}
 	MonthlyBuildingMaterials();
 	MonthlyManpower();
 	MonthlySalvage();
@@ -1852,6 +1861,7 @@ double ACampaign1851Map::YearlyTax(const FString& Region) const
 	{
 		Total += (Region.IsEmpty() || A.Region == Region) && !IsAmtOccupied(A) ? AmtYearlyTax(A) : 0.0;
 	}
+	Total *= TaxMoodFactor();   // a discontented country pays reluctantly
 	return Footing == ECampaign1851Footing::Peace ? Total : Total * Campaign1851Mobilisation::WarTaxFactor;
 }
 
