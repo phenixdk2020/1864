@@ -125,7 +125,7 @@ void ACampaign1851Map::MonthlyPolitics()
 	{
 		Occupied += !C.Occupier.IsEmpty() && !C.bForeign ? 1 : 0;
 	}
-	Mood += (60.f - Mood) * 0.05f - (Footing != ECampaign1851Footing::Peace ? 1.5f : 0.f) - (bAtWar ? 0.5f : 0.f) - Occupied * 1.f;
+	Mood += (60.f - Mood) * 0.05f - (Footing != ECampaign1851Footing::Peace ? 1.5f : 0.f) - (bAtWar ? 0.5f : 0.f) - FMath::Min(Occupied, 10) * 0.5f;
 	Mood = FMath::Clamp(Mood, 0.f, 100.f);
 	// The currents: tension feeds the Eider policy, a friendly Sweden the Scandinavianists.
 	const FCampaign1851Nation* SE = Nations.FindByPredicate([](const FCampaign1851Nation& N) { return N.Id == TEXT("SE"); });

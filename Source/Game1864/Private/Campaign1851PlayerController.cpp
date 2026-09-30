@@ -251,6 +251,21 @@ void ACampaign1851PlayerController::TryInit()
 		}
 	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|weather|%s"), *Map->GetSeasonAndWeather());
+	// -CampaignWorks=0,1 carries out the historical works now (0 Dannevirke, 1 Dybbøl, 2 Fredericia).
+	FString WorksTest;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignWorks="), WorksTest, false))
+	{
+		TArray<FString> Items;
+		WorksTest.ParseIntoArray(Items, TEXT(","));
+		for (const FString& Item : Items)
+		{
+			Map->BuildProgramme(FCString::Atoi(*Item));
+		}
+		if (FParse::Param(FCommandLine::Get(), TEXT("CampaignFortsComplete")))
+		{
+			Map->CompleteForts();
+		}
+	}
 	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignYearlyOfficers")))
 	{
 		Map->YearlyOfficers();
@@ -265,7 +280,13 @@ void ACampaign1851PlayerController::TryInit()
 			: WindowName == TEXT("chart") ? SCampaign1851Overlay::EWindow::Chart : WindowName == TEXT("council") ? SCampaign1851Overlay::EWindow::Council
 			: WindowName == TEXT("supply") ? SCampaign1851Overlay::EWindow::Supply : WindowName == TEXT("foreign") ? SCampaign1851Overlay::EWindow::Foreign
 			: WindowName == TEXT("research") ? SCampaign1851Overlay::EWindow::Research : WindowName == TEXT("navy") ? SCampaign1851Overlay::EWindow::Navy
+			: WindowName == TEXT("gazette") ? SCampaign1851Overlay::EWindow::Gazette : WindowName == TEXT("end") ? SCampaign1851Overlay::EWindow::End
 			: SCampaign1851Overlay::EWindow::Towns);
+	int32 GazetteTab = 0;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignGazetteTab="), GazetteTab) && Overlay.IsValid())
+	{
+		Overlay->SetGazetteTab(GazetteTab);
+	}
 	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignSupplyMap")) && Overlay.IsValid())
 	{
 		Overlay->ToggleSupplyMap();
@@ -966,6 +987,26 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			const bool bDone = Map->DoDiplomacy(Module / 10, ACampaign1851Map::EDiplomacyAction(Module % 10), &Why);
 			Overlay->ShowToast(bDone ? FString(TEXT("Udført")) : Why);
 		}
+		else if (Button == SCampaign1851Overlay::EButton::Loan)
+		{
+			FString Why;
+			if (Module == 2)
+			{
+				Overlay->ShowToast(Map->RepayLoan(100000.0) ? FString(TEXT("Afdrag betalt")) : FString(TEXT("Ingen gæld eller ikke råd")));
+			}
+			else
+			{
+				Overlay->ShowToast(Map->TakeLoan(Module == 0 ? 100000.0 : 250000.0, &Why) ? FString(TEXT("Lånet er optaget")) : Why);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OpenGazette)
+		{
+			Overlay->OpenWindow(Overlay->GetWindow() == SCampaign1851Overlay::EWindow::Gazette ? SCampaign1851Overlay::EWindow::None : SCampaign1851Overlay::EWindow::Gazette);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::GazetteTab)
+		{
+			Overlay->SetGazetteTab(Module);
+		}
 		else if (Button == SCampaign1851Overlay::EButton::ShipOrder)
 		{
 			FString Why;
@@ -1116,6 +1157,14 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		else if (Button == SCampaign1851Overlay::EButton::Deviation)
 		{
 			Map->NewGameDeviation = Module / 100.f;
+		}
+		else if (Button == SCampaign1851Overlay::EButton::NewGameNation)
+		{
+			Map->NewGameNation = Module == 1 ? TEXT("SE") : TEXT("DK");
+		}
+		else if (Button == SCampaign1851Overlay::EButton::NationWeight)
+		{
+			Map->AdjustNationWeight(Module / 2, Module % 2 == 1 ? 0.1f : -0.1f);
 		}
 		else if (Button == SCampaign1851Overlay::EButton::FormationDeputy || Button == SCampaign1851Overlay::EButton::FormationStaff)
 		{
@@ -1297,6 +1346,11 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 	}
 
+	if (Map->TakeEndPending() && Overlay.IsValid())
+	{
+		Map->SetSpeed(0);
+		Overlay->OpenWindow(SCampaign1851Overlay::EWindow::End);
+	}
 	for (const FString& News : Map->TakeNews())
 	{
 		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|news|%s"), *News);
@@ -1501,6 +1555,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Research = Map->SaveResearch();
 	Save->Navy = Map->SaveNavy();
 	Save->Politics = Map->SavePolitics();
+	Save->Economy = Map->SaveEconomy();
 	Map->ExportUnits();
 	Save->MaterialLots = Map->GetMaterialLots();
 	if (Save->Links.Num() > 0)
@@ -1632,6 +1687,7 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	}
 	Map->RestoreNavy(Save->SaveVersion >= 24 ? Save->Navy : TArray<FString>());
 	Map->RestorePolitics(Save->SaveVersion >= 25 ? Save->Politics : TArray<FString>());
+	Map->RestoreEconomy(Save->SaveVersion >= 26 ? Save->Economy : TArray<FString>());
 	Map->SetMaterialLots(Save->SaveVersion >= 16 ? Save->MaterialLots : TArray<FVector>());
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);
 	if (Overlay.IsValid())
@@ -1662,6 +1718,11 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	FParse::Value(FCommandLine::Get(), TEXT("CampaignSeed="), NewSeed);
 	float DeviationPct = Map->NewGameDeviation * 100.f;
 	FParse::Value(FCommandLine::Get(), TEXT("CampaignDeviation="), DeviationPct);
+	FString NationFlag;
+	if (FParse::Value(FCommandLine::Get(), TEXT("CampaignNation="), NationFlag))
+	{
+		Map->NewGameNation = NationFlag;
+	}
 	Map->ResetWorld(NewSeed, DeviationPct / 100.f);
 	Map->SeedHistoricBuildings();
 	Map->ResetArmy();

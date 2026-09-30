@@ -89,6 +89,9 @@ struct FCampaign1851EnemyCorps
 	bool bWaitingNoted = false;
 	double CrossingReadyDay = -1.0;   // boats gathered for a narrow sound (the Danish fleet holds the sea)
 	TArray<int32> Barred;             // towns it cannot reach while the Danish fleet holds the sea
+	int32 SiegeTown = INDEX_NONE;     // the position it besieges (or marches to besiege)
+	bool bSieging = false;            // dug in before it: no battle until it storms
+	double SiegeStart = 0.0;
 };
 
 /** A class of warship (Campaign1851Navy.cpp). */
@@ -150,6 +153,35 @@ struct FPlannedEvent
 	double Day = 0.0;
 	float Tension = 0.f;
 	bool bSkip = false;
+};
+
+/** A line of the final score (Campaign1851Endgame.cpp). */
+struct FCampaign1851ScoreLine
+{
+	FString Text;
+	float Points = 0.f;
+};
+
+/** Export goods (Campaign1851Economy.cpp). */
+enum class ECampaign1851Good : uint8 { Grain, Cattle, Butter, Count };
+
+namespace Campaign1851Economy
+{
+	const TCHAR* GoodName(ECampaign1851Good G);
+}
+
+/** The country's state at a month's end (the statistics). */
+struct FCampaign1851Record
+{
+	double Day = 0.0;
+	double Population = 0.0;
+	double Treasury = 0.0;
+	double ArmyMen = 0.0;
+	double RailKm = 0.0;
+	float Tension = 0.f;
+	float Mood = 0.f;
+	float Grain = 1.f;
+	double Debt = 0.0;
 };
 
 /** The currents of opinion (Campaign1851Politics.cpp). */
@@ -527,6 +559,42 @@ public:
 	bool MakePeace(int32 Offer, FString* OutReason = nullptr);
 	double AllianceCostNow() const { return AllianceCost * (Government == ECampaign1851Current::Scandinavian ? 0.5 : 1.0); }
 
+	// ---- The choice of nation and the end (Campaign1851Endgame.cpp).
+
+	/** The nation of the next new game ("DK" on the map, "SE" on the abstract model). */
+	FString NewGameNation = TEXT("DK");
+	void ApplyNewGameNation();
+	/** The nation the player governs (Denmark unless another was chosen). */
+	int32 GetPlayedNation() const;
+	void AdjustNationWeight(int32 Portfolio, float Delta);
+	TArray<FCampaign1851ScoreLine> FinalScore() const;
+	static FString FinalGrade(float Total);
+	/** True once when the campaign has ended (1 January 1867, or the peace after a war). */
+	bool TakeEndPending();
+
+	// ---- The historical works and sieges (Campaign1851Siege.cpp).
+
+	void ResetFortProgrammes();
+	double ProgrammeCost(int32 Index) const;
+	bool BuildProgramme(int32 Index);
+	bool HasFortsNear(int32 Town) const;
+
+	// ---- Trade goods, loans and the record (Campaign1851Economy.cpp).
+
+	float PriceIndex(ECampaign1851Good G) const;
+	double ExportValuePerYear(ECampaign1851Good G) const;
+	double ExportDutyPerYear() const;
+	double GetDebt() const { return Debt; }
+	float GetDebtRate() const { return DebtRate; }
+	/** The rate a new loan would cost now. */
+	float CreditRate() const;
+	FString LoanBlockReason(double Amount) const;
+	bool TakeLoan(double Amount, FString* OutReason = nullptr);
+	bool RepayLoan(double Amount);
+	const TArray<FCampaign1851Record>& GetHistory() const { return History; }
+	TArray<FString> SaveEconomy() const;
+	void RestoreEconomy(const TArray<FString>& Lines);
+
 	// ---- Government and opinion (Campaign1851Politics.cpp).
 
 	void ResetPolitics();
@@ -778,7 +846,9 @@ public:
 	TArray<FCampaign1851LinkSave> SaveNetwork() const;
 	int32 RestoreNetwork(const TArray<FCampaign1851LinkSave>& Saves);
 	/** Messages for the player ("Jernbanen ... er åbnet"); the controller shows them. */
-	TArray<FString> TakeNews() { TArray<FString> Out = MoveTemp(News); News.Reset(); return Out; }
+	/** The news since the last call (also kept in the newspaper's log). */
+	TArray<FString> TakeNews();
+	const TArray<TPair<double, FString>>& GetNewsLog() const { return NewsLog; }
 	/** World position of a projected-km point on the terrain. */
 	FVector WorldAtKm(const FVector2D& Km) const;
 	/** Point at a distance along a polyline (km), with the heading there. */
@@ -1118,6 +1188,24 @@ private:
 	bool bSoundDuesAbolished = false;
 	int32 RedemptionYearsLeft = 0;
 	double PeaceTalksDay = -1.0;
+	// The end.
+	void CheckCampaignEnd();
+	int32 PlayedNation = 0;
+	bool bEndPending = false;
+	bool bEndShown = false;
+	// Works and sieges.
+	void MonthlyFortProgrammes();
+	void DailySieges();
+	TArray<FString> SaveFortProgrammes() const;
+	void RestoreFortProgramme(int32 Index, int32 State, double Day);
+	TArray<double> ProgrammeDay;
+	TArray<int32> ProgrammeState;
+	// Economy.
+	void MonthlyEconomy();
+	double Debt = 0.0;
+	float DebtRate = 0.04f;
+	TArray<FCampaign1851Record> History;
+	TArray<TPair<double, FString>> NewsLog;
 	// Politics.
 	void MonthlyPolitics();
 	void FormGovernment(const FString& Name, ECampaign1851Current Line, const FString& Why);

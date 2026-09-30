@@ -208,6 +208,10 @@ void ACampaign1851Map::ResetWorld(int32 InSeed, float InDeviation)
 	ResetResearch();
 	ResetNavy();
 	ResetPolitics();
+	RestoreEconomy(TArray<FString>());
+	ResetFortProgrammes();
+	bEndPending = bEndShown = false;
+	ApplyNewGameNation();
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|world|seed %d|deviation %.0f %%"), Seed, Deviation * 100.f);
 }
 
@@ -756,6 +760,8 @@ bool ACampaign1851Map::CarryOut(const FCampaign1851Decision& D)
 		return RecruitOfficer(false) != INDEX_NONE;
 	case ECampaign1851DecisionKind::Raise:
 		return RaiseBattalion(D.A) != INDEX_NONE;
+	case ECampaign1851DecisionKind::FortProgramme:
+		return BuildProgramme(D.A);
 	case ECampaign1851DecisionKind::FillPost:
 	{
 		if (!Officers.IsValidIndex(D.A) || !Officers[D.A].IsFree())

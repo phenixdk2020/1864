@@ -28,7 +28,7 @@ void ACampaign1851Map::ResetDiplomacy()
 	FRandomStream Rng(int32(HashCombine(uint32(Seed), 0xD1Au)));
 	for (FCampaign1851Nation& N : Nations)
 	{
-		N.Relation = N.IsPlayer() ? 100.f : FMath::Clamp(N.BaseRelation + 20.f * Deviation * Rng.FRandRange(-1.f, 1.f), -100.f, 100.f);
+		N.Relation = &N == &Nations[PlayerNation] ? 100.f : FMath::Clamp(N.BaseRelation + 20.f * Deviation * Rng.FRandRange(-1.f, 1.f), -100.f, 100.f);
 		N.bTrade = N.bAlliance = N.bGuarantee = false;
 		N.LastEnvoyDay = -1000.0;
 	}
@@ -37,7 +37,7 @@ void ACampaign1851Map::ResetDiplomacy()
 FString ACampaign1851Map::DiplomacyBlockReason(int32 NationIndex, EDiplomacyAction Action) const
 {
 	using namespace Campaign1851Diplomacy;
-	if (!Nations.IsValidIndex(NationIndex) || Nations[NationIndex].IsPlayer())
+	if (!Nations.IsValidIndex(NationIndex) || NationIndex == PlayerNation)
 	{
 		return TEXT("-");
 	}
@@ -173,7 +173,7 @@ void ACampaign1851Map::MonthlyDiplomacy()
 	// Relations drift back to their tendency; tension sours Berlin and Vienna; war ends alliances' patience.
 	for (FCampaign1851Nation& N : Nations)
 	{
-		if (N.IsPlayer())
+		if (&N == &Nations[PlayerNation])
 		{
 			continue;
 		}
@@ -325,6 +325,7 @@ bool ACampaign1851Map::MakePeace(int32 Offer, FString* OutReason)
 	D.Nation = PlayerNation;
 	D.Portfolio = ECampaign1851Portfolio::War;
 	D.Action = FString::Printf(TEXT("Fredsslutning: %s"), *O.Name);
+	bEndPending = true;   // the war decided: the campaign's result
 	D.Reasons = Ceded.Num() > 0 ? FString::Printf(TEXT("afstået: %s"), *FString::Join(Ceded, TEXT(", "))) : FString(TEXT("intet afstået"));
 	D.bDone = true;
 	AddDecision(D);

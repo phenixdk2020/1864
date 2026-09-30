@@ -1,17 +1,17 @@
-# Backlog: de næste 20 opgaver (campaign-kortet)
+# Backlog: de 20 opgaver (campaign-kortet)
 
-Status pr. v00.00.48. Afsluttet senest:
-- trænkolonner
-- våbenproduktion
-- heste
-- materialer
-- forsyningskort
-- intendanturen
-- mobilisering
-- fjenden og krigsudbrud
-- slag til og fra 3D
-- **udenrigs** (diplomati, handel, Øresundstolden, fred): se *Diplomacy1851.md*
-- **forskning og doktriner**: se *Research1851.md*
+Status pr. v00.00.50: **alle 20 er lavet**. Dokumentationen findes i:
+- *Intel1851.md*
+- *Navy1851.md*
+- *Weather1851.md*
+- *Health1851.md*
+- *Politics1851.md*
+- *Economy1851.md*
+- *Siege1851.md*
+- *Endgame1851.md*
+- *Army1851.md* (officerernes karriere)
+
+Det, der mangler eller er forenklet, står under *Næste skridt* nederst.
 
 | # | Opgave | Indhold | Hvorfor nu |
 |---|---|---|---|
@@ -40,3 +40,10 @@ Status pr. v00.00.48. Afsluttet senest:
 - Andre landes egne kort (Preussen, Østrig).
 - Jernbanemobilisering koblet til køreplaner på kortet.
 - Handelsvarer (korn, kvæg, smør) og markedspriser.
+
+## Næste skridt (efter de 20)
+- **Sverige-Norge:** eget kort og egne vinduer. I dag er landet kun abstrakt.
+- **Balance:** testbeløbet på 5.000.000 rd. skal ned på 150.000, og priser og vægte skal justeres efter prøvespil.
+- **Flåden:** skibe på kortet og søtransport af tropper.
+- **Belejring:** fæstningernes egen forsyning og undsætning, og en belejring i 3D.
+- **Afprøvning:** en belejring er endnu ikke set i en testkørsel. Det er det sjældne tilfælde, hvor fjenden vurderer en befæstet stilling som for stærk til storm.

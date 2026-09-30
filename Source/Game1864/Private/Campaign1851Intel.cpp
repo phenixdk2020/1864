@@ -139,7 +139,7 @@ bool ACampaign1851Map::ChooseCorpsObjective(int32 CorpsIndex)
 		C.Barred.Reset();
 	}
 	// Candidates: the plan's objectives and every town of the monarchy within 120 km.
-	int32 Best = INDEX_NONE;
+	int32 Best = INDEX_NONE, Siege = INDEX_NONE;
 	float BestScore = 0.f, BestDefence = 0.f;
 	float FirstDefence = -1.f;
 	for (int32 t = 0; t < Cities.Num(); ++t)
@@ -159,7 +159,12 @@ bool ACampaign1851Map::ChooseCorpsObjective(int32 CorpsIndex)
 		const float Odds = Strength / Defence;
 		if (Odds < 1.3f)
 		{
-			continue;   // too strong for this corps alone
+			// Too strong to storm; a fortified objective of the plan can be besieged.
+			if (Planned == 0 && Odds >= 0.6f && HasFortsNear(t))
+			{
+				Siege = t;
+			}
+			continue;
 		}
 		const float Value = 1.f + Town.Population / 5000.f + (Planned == 0 ? 4.f : Planned != INDEX_NONE ? 1.5f : 0.f);
 		const float Score = Value * FMath::Min(Odds, 3.f) / (1.f + float(Dist) / 40.f);
@@ -183,6 +188,16 @@ bool ACampaign1851Map::ChooseCorpsObjective(int32 CorpsIndex)
 		AddDecision(D);
 		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|enemy-ai|%s|%s|%s"), *C.Name, *Action, *Reasons);
 	};
+	if (Best == INDEX_NONE && Siege != INDEX_NONE)
+	{
+		if (C.SiegeTown != Siege)
+		{
+			C.SiegeTown = Siege;
+			Decide(FString::Printf(TEXT("%s går mod %s for at belejre stillingen"), *C.Name, *Cities[Siege].Name),
+				FString::Printf(TEXT("for stærk til storm (ca. %s mand bag skanser)"), *FString::FromInt(int32(EnemyEstimateOfDefence(Siege)))));
+		}
+		return true;
+	}
 	if (Best == INDEX_NONE)
 	{
 		// Nothing it dares: it waits for reinforcements where it stands.

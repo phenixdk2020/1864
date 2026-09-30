@@ -154,6 +154,7 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		DailyWar();
 		DailyWeather();
 		DailyHealth();
+		DailySieges();
 		EnemyReinforcements();
 	}
 	UpdateIntel();
@@ -169,11 +170,22 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		{
 			continue;
 		}
-		// Contact: Danish troops or a fort within 5 km stop the corps; a battle is at hand.
+		// Come before the position it means to besiege: it digs in there.
+		if (bAtWar && Cities.IsValidIndex(C.SiegeTown) && !C.bSieging && FVector2D::Distance(C.Km, TownKm(C.SiegeTown)) < 9.0)
+		{
+			C.bSieging = true;
+			C.SiegeStart = CampaignDays;
+			C.Route.Reset();
+			C.Town = INDEX_NONE;
+			News.Add(FString::Printf(TEXT("%s belejrer stillingen ved %s"), *C.Name, *Cities[C.SiegeTown].Name));
+		}
+		// Contact: Danish troops or a fort within 5 km stop the corps; a battle is at hand. A besieging corps
+		// fights only a relief from outside the position.
 		FString Contact;
+		const FVector2D SiegeAt = C.bSieging && Cities.IsValidIndex(C.SiegeTown) ? TownKm(C.SiegeTown) : FVector2D(1e9, 1e9);
 		for (const FCampaign1851Regiment& R : Regiments)
 		{
-			if (FVector2D::Distance(R.Km, C.Km) < 5.0 && R.Men > 0)
+			if (FVector2D::Distance(R.Km, C.Km) < 5.0 && R.Men > 0 && FVector2D::Distance(R.Km, SiegeAt) > 10.0)
 			{
 				Contact = R.Name;
 				break;
@@ -181,10 +193,14 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		}
 		for (const FCampaign1851Fort& F : Forts)
 		{
-			if (Contact.IsEmpty() && FVector2D::Distance(F.Km, C.Km) < 5.0 && F.bBuilt)
+			if (Contact.IsEmpty() && FVector2D::Distance(F.Km, C.Km) < 5.0 && F.bBuilt && !C.bSieging)
 			{
 				Contact = F.Name;
 			}
+		}
+		if (C.bSieging && Contact.IsEmpty())
+		{
+			continue;   // the siege goes on (DailySieges)
 		}
 		if (!Contact.IsEmpty() && bAtWar)
 		{
@@ -331,6 +347,10 @@ TArray<FString> ACampaign1851Map::SaveWar() const
 	{
 		const FCampaign1851EnemyCorps& C = EnemyCorps[k];
 		Out.Add(FString::Printf(TEXT("intel|%d|%.3f|%.3f|%.2f|%d|%d"), k, C.SeenKm.X, C.SeenKm.Y, C.SeenDay, C.SeenMen, C.StartMen));
+		if (Cities.IsValidIndex(C.SiegeTown))
+		{
+			Out.Add(FString::Printf(TEXT("siege|%d|%s|%d|%.2f"), k, *Cities[C.SiegeTown].Name, C.bSieging ? 1 : 0, C.SiegeStart));
+		}
 	}
 	return Out;
 }
@@ -355,6 +375,13 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 			C.SeenDay = FCString::Atod(*P[4]);
 			C.SeenMen = FCString::Atoi(*P[5]);
 			C.StartMen = FMath::Max(C.Men, FCString::Atoi(*P[6]));
+		}
+		else if (P.Num() == 5 && P[0] == TEXT("siege") && EnemyCorps.IsValidIndex(FCString::Atoi(*P[1])))
+		{
+			FCampaign1851EnemyCorps& C = EnemyCorps[FCString::Atoi(*P[1])];
+			C.SiegeTown = FindCity(P[2]);
+			C.bSieging = P[3] == TEXT("1");
+			C.SiegeStart = FCString::Atod(*P[4]);
 		}
 		else if (P.Num() == 2 && P[0] == TEXT("fired"))
 		{

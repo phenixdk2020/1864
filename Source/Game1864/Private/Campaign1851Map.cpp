@@ -1701,6 +1701,13 @@ TArray<FCampaign1851BudgetLine> ACampaign1851Map::MonthlyBudget() const
 	{
 		Lines.Add({ TEXT("De indkaldtes løn og underhold"), -MobilisedPayPerMonth() });
 	}
+	Lines.Add({ TEXT("Told på udførsel (korn, kvæg, smør)"), ExportDutyPerYear() / 12.0 });
+	Lines.Add({ TEXT("Øresundstold og handelstraktater"), ForeignIncomePerYear() / 12.0 });
+	Lines.Add({ TEXT("Flåden"), -NavyUpkeepPerYear() / 12.0 });
+	if (Debt > 0.5)
+	{
+		Lines.Add({ TEXT("Renter af statsgælden"), -Debt * DebtRate / 12.0 });
+	}
 	return Lines;
 }
 
@@ -1798,6 +1805,9 @@ void ACampaign1851Map::CloseMonth()
 	MonthlyResearch();
 	MonthlyNavy();
 	MonthlyPolitics();
+	MonthlyEconomy();
+	MonthlyFortProgrammes();
+	CheckCampaignEnd();
 	if (GetDate().GetMonth() == 1)
 	{
 		YearlyOfficers();

@@ -303,7 +303,7 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 		}
 	}
 	// The country follows the war: victories cheer, defeats are blamed on the Eider policy.
-	PoliticalShock(O.bDanishWin ? 4.f : O.bDraw ? -1.f : -5.f, O.bDanishWin ? 2.f : O.bDraw ? 0.f : -3.f);
+	PoliticalShock(O.bDanishWin ? 3.f : O.bDraw ? -1.f : -3.f, O.bDanishWin ? 2.f : O.bDraw ? 0.f : -2.f);
 	for (const TPair<int32, float>& A : O.UnitAmmo)
 	{
 		Regiments[A.Key].Ammo = FMath::Max(0.f, Regiments[A.Key].Ammo - A.Value);
@@ -342,6 +342,8 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 	{
 		FCampaign1851EnemyCorps& C = EnemyCorps[Ci];
 		C.Men = FMath::Max(0, C.Men - O.EnemyLosses);
+		C.bSieging = false;
+		C.SiegeTown = INDEX_NONE;
 		EnemyWarLosses += O.EnemyLosses;
 		EnemyCaptured += FMath::RoundToInt(O.EnemyLosses * (O.bDanishWin ? 0.2f : 0.05f));
 		C.bEngaged = false;
