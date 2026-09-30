@@ -23,7 +23,7 @@ namespace
 	const FLinearColor Beech = Srgb(62, 90, 38);
 	const FLinearColor Spruce = Srgb(36, 58, 36);
 	const FLinearColor Bark = Srgb(72, 54, 38);
-	const FLinearColor Shadow = Srgb(30, 38, 20);
+	const FLinearColor ShadeGreen = Srgb(30, 38, 20);
 
 	/** Towards the light: the painted map's hillshade is lit from the north-west (north = -Y). */
 	const FVector3f ToLight = FVector3f(-0.55f, -0.55f, 0.63f).GetSafeNormal();
@@ -222,7 +222,7 @@ namespace
 			{
 				const float A0 = s * UE_TWO_PI / Sides, A1 = (s + 1) * UE_TWO_PI / Sides;
 				Tri(Centre, Centre + FVector3f(RadiusX * FMath::Cos(A0), RadiusY * FMath::Sin(A0), 0.f),
-					Centre + FVector3f(RadiusX * FMath::Cos(A1), RadiusY * FMath::Sin(A1), 0.f), Shadow, Below, false);
+					Centre + FVector3f(RadiusX * FMath::Cos(A1), RadiusY * FMath::Sin(A1), 0.f), ShadeGreen, Below, false);
 			}
 		}
 	};

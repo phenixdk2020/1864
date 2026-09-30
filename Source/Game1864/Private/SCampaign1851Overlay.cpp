@@ -2171,6 +2171,7 @@ void SCampaign1851Overlay::PaintGazette(const FGeometry& Geometry, FSlateWindowE
 			{
 				++Column;
 				Y = Pos.Y + 144.f;
+				LastDay = -1.0;   // the date again at the top of the next column
 			}
 		}
 	}
