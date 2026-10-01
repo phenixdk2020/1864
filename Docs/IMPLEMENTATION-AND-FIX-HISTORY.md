@@ -1,5 +1,12 @@
 # PROJECT 1864 — Implementation & Fix History
 
+> **Dokumentet vedligeholdes nu her i Game1864-projektet** (`1864-Campaign/Docs`). Slaget og kampagnen er samlet i ét projekt siden 1. oktober 2026.
+> - Afsnit 1–8 er Unity-prototypens historik. Den er uændret fra `Strategy/docs/IMPLEMENTATION-AND-FIX-HISTORY.md`.
+> - Afsnit 9 er Unreal-porten af slaget (Strategy1864).
+> - Afsnit 10 er samlingen i Game1864 og koblingen til kampagnen.
+>
+> Nyt arbejde på slaget eller kampagnen noteres i afsnit 10 og frem.
+
 **Konsolideret ved v00.00.09f30x TEST**  
 **Gameplay-baseline: v00.00.09f30x**  
 **Unity-baseline: 6000.6.0f1**
@@ -666,3 +673,129 @@ Ikke færdigt endnu:
 - Echelon Left/Right.
 - Full autonomous Brigade/Division Officer AI.
 - Full campaign/OOB expansion til flere regimenter/brigader.
+
+## 9. Unreal-porten af slaget (Strategy1864, 27.–30. september 2026)
+
+Slaget blev porteret fra Unity til Unreal Engine 5.8 som modulet `Strategy1864`.
+- **Projekt:** `Strategy/Unreal`, grenen `unreal-port`.
+- **Omfang:** 634 commits og omkring 28.500 linjer C++.
+- **Version:** HUD-markør v00.02.xx-dev, sidst v00.02.79.
+- **Kilde:** opsummeringen bygger på commit-beskederne.
+
+### 27. september — fundamentet (196 commits)
+- Projektets grundskelet. RTS-kamera og valg af enheder (U01). Kommandohierarki (U02).
+- Ordrernes livsforløb og fysisk bevægelse (U03).
+- Formationsgeometri og kompagniernes pladser (U04).
+- Officers-AI med HQ-følge og kommandozoner (U07).
+- Sigtelinje, rækkevidde og ildkegler. Hukommelse om sidst sete fjende. Karré og kavaleriformationer.
+- Dragoner sidder af og op igen, med hesteparken.
+- Moral, samhold, chok og genopretning under ild. Træthed og erfaring.
+- Ilddisciplin, ammunition, opbrugt ammunition og genforsyning.
+- Ordrekø med forsinkelse. Officersprofiler og kommandoforsinkelse. Doktrin, aggressivitet og selvstændighed.
+- Selvstændig fjende-AI med flugt og samling. AI-sværhedsgrad og telemetri.
+- Broer: hvem der står på broen, og bevægelse der tager hensyn til broen. Forhindringer, omveje og hældning.
+- Sortkrudtsrøg. Hændelser for salver og tab.
+- Kamporden: valg, kamerafokus og tilknytninger. Kontrol af kommandotræet. Faste seeds.
+- En test-tjekliste for tidligere fejl.
+
+### 28. september — artilleri, logistik og visuel kerne (346 commits)
+**Artilleri:**
+- artilleribatteri som taktisk enhed med NATO-symbol;
+- ammunition efter type;
+- forstille, opstille og flytte med håndkraft; kusk krævet for at køre;
+- sideretning; skader på besætning, heste og kanoner;
+- erobring og genbrug af kanoner;
+- skudopgaver i tilstandene manuel, auto og hold.
+
+**Fælles visuel kerne:**
+- skeletter og animationssæt med kontrol af, at de passer sammen;
+- fæster til gevær, bajonet, sabel og værktøj;
+- hestens gangarter (skridt, trav, galop) ud fra bevægelsen;
+- rytter og hest i takt;
+- besætningens kanonøvelser som animation;
+- uniforms- og udstyrsforvalg samt farvepaletter for Danmark og Preussen.
+
+**Slagets testverden:**
+- kavaleri, artilleri og fjender kan slås til og fra hver for sig;
+- en fælles kontrakt for testvisningen.
+
+### 29. september — testverden og specialisttropper (68 commits)
+**Testverden:**
+- et testsystem, der selv starter testscenariet og kameraet;
+- synlige pladsholdere for enhederne;
+- en flad testslagmark på 600 m (`Strategy1864_QA`);
+- etiketter på enhederne.
+
+**Batch 1–10:**
+- løsrevne afdelinger og underofficerer (kadre, lokal reaktion, samling og omformering);
+- skydeøvelse med knælende stilling;
+- befæstninger og markskanser (forsvarsstillinger efter type, besættelse og dækning for artilleri);
+- arbejdshold, der graver og bryder igennem;
+- storm på befæstninger med sprængt gennembrud;
+- morterer og forsvarets logistik;
+- gemning af specialistenhedernes tilstand og test af den.
+
+### 30. september — rigtige soldater og skydeøvelse (23 commits)
+- Livgarden 1864: rig, automatisk import og det fælles skelet `SK_Human_1864`.
+- En komponent, der viser kompagniets soldater i 3D. Livgarden vises på det første danske testkompagni.
+- Skydeøvelse som forskning, med ild geled for geled i takt og regler for, hvilke pladser i formationen der må skyde.
+- HUD-markør v00.02.79.
+
+## 10. Samlet i Game1864 (1. oktober 2026 og frem)
+
+### Slaget flyttet ind i Game1864
+**Ændring i Strategy1864 (commit `66c231c`):**
+- `StrategyQARuntimeSubsystem` starter kun på kort, der hedder `Strategy1864…`.
+- Ellers ville kampagnekortet få testslaget og slagets kamera.
+
+**Spejling ind i 1864-Campaign** (commits `6e5ffe6` og `1471346`, den sidste med arbejdsversionen oven på `66c231c`):
+- modulet ligger i `Source/Strategy1864`;
+- indholdet i `Content/Units`;
+- slagkortet i `Content/Maps/Strategy1864_QA.umap`;
+- tastaturbindingerne i `Config/DefaultInput.ini`.
+
+**Engangsændringer i projektet:**
+- Modulet er med i `Game1864.uproject` og begge `Target.cs`-filer.
+- Kort med præfikset `Strategy1864_` kører `StrategyGameMode` via `GameModeMapPrefixes`. Kampagnen beholder `Campaign1851GameMode`.
+
+**Beslutning (commit `8e96a8c`):** slaget udvikles fremover kun i Game1864. Strategy1864 bruges ikke længere, og `Tools/Battle/Sync-Battle.ps1` køres ikke mere.
+
+**Verificeret:**
+- Hele projektet bygger.
+- Kampagnen starter uden testslag.
+- `Strategy1864_QA` starter med `StrategyGameMode`, 20 enheder og et kommandotræ, der består kontrollen.
+
+**Kendt fejl i slagets test** (`StrategyOOBTestScenario.cpp`):
+- Tjeklisten tæller morterbatteriet (`AStrategyMortarBatteryUnit` arver fra artilleribatteriet) som artilleri og melder derfor "Expected 1 Danish artillery battery, found 2".
+- Den melder også "Artillery QA battery did not start deployed", fordi morteren ikke er opstillet fra start.
+- Fejlen fandtes allerede før flytningen.
+
+### Kampagnen klar til slaget (kampagne v00.00.53–v00.00.55)
+**Til 3D-slaget sendes** `Units.json` og `BattleRequest_N.json` (Docs/BattleLink1851.md):
+- `battleRules`: forskning omsat til slagets egne tal, fx ladetid, karré, dækning i afgrøder, karabinens rækkevidde, kommandozoner og pionerbro;
+- `aiDefaults`: doktrin omsat til DEF/BAL/OFF og ildpolitik;
+- `subunits`: kompagnier à 190 med kaptajner, eskadroner à 120/140 og batterier;
+- `formations`: kommandotræet XX/X/III med chef, stedfortræder og stabschef.
+
+**Forskningstræet** har 7 grene, og infanteri-, kavaleri- og kommandoemnerne er bygget på slagets systemer:
+- karré;
+- kædelinjer;
+- dragonernes ildkamp;
+- rytterchok;
+- rytterspejdning;
+- stabsskole og generalstab;
+- pontonnerer.
+
+**Slagmarksgeneratoren** (`Battlefield_*.json`) giver:
+- højde, vand og floder med våde enge;
+- broer og vadesteder;
+- markskel (knicks, diger og grøfter);
+- veje, jernbaner, byer, gårde og skanser.
+
+**Slagmarken i 3D:** knappen GÅ IND PÅ SLAGMARKEN viser den genererede slagmark som 3D-model ved siden af kampagnekortet, endnu uden enheder.
+
+### Næste skridt
+- Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
+- Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
+- Rette morterfejlen i testens tjekliste.
+

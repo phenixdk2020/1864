@@ -1,6 +1,6 @@
 # Kampagnen og 3D-slaget
 
-Slag-prototypen (Unity, v00.00.09f30x) og kampagnen (Unreal) skal tale samme sprog. Den samlede historik for slaget står i `IMPLEMENTATION-AND-FIX-HISTORY.md` i slag-repoet.
+Slag-prototypen (Unity, v00.00.09f30x) og kampagnen (Unreal) skal tale samme sprog. Den samlede historik for slaget og kampagnen står i `Docs/IMPLEMENTATION-AND-FIX-HISTORY.md`.
 
 Dette dokument beskriver tre ting:
 - hvad kampagnen sender til slaget;
