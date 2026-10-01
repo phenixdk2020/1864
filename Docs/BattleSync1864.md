@@ -1,6 +1,13 @@
-# Slaget i kampagneprojektet (spejling fra Strategy1864)
+# Slaget i kampagneprojektet
 
-Slaget udvikles fortsat i **Strategy1864** (`R:\Onedrive\Dokumenter\Unreal Projects\Strategy1864`, GitHub `phenixdk2020/Strategy`, grenen `unreal-port`). Kampagneprojektet får en kopi af det, så begge dele kører i samme spil.
+**Siden 1. oktober 2026 udvikles slaget kun her i Game1864-projektet:**
+- koden ligger i `Source/Strategy1864`;
+- indholdet ligger i `Content/Units`;
+- slagkortene ligger i `Content/Maps/Strategy1864_*`.
+
+Strategy1864-projektet bruges ikke længere. Spejlingen nedenfor er historik. Kør ikke `Sync-Battle.ps1` igen, for det ville overskrive ændringer, der er lavet her.
+
+Før skiftet blev slaget udviklet i **Strategy1864** (`R:\Onedrive\Dokumenter\Unreal Projects\Strategy1864`, GitHub `phenixdk2020/Strategy`, grenen `unreal-port`). Kampagneprojektet får en kopi af det, så begge dele kører i samme spil.
 
 ## Hvad kopieres
 | Fra Strategy1864 | Til 1864-Campaign | Hvordan |
