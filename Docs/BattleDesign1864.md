@@ -264,3 +264,12 @@ Hele Unreal-porten må ikke kaldes testet endnu.
 - **Mangler:**
   - stående, knælende og liggende testet;
   - FireByRank vist geled for geled på den enkelte soldats plads, så geled 1, 2 og 3 skyder og lader hver for sig i stedet for hele kompagniet på én gang.
+
+## 46. Afklaringer (1. oktober 2026)
+- **Geledder:** infanteriet står i 3 geledder. Det giver et kompagni på 190 mand ca. 48 m front. I 2 geledder ville fronten være ca. 70 m og linjen meget lang.
+- **Modstander:** de første fjender er svenske, med den svenske 3D-model. Preussiske og østrigske tropper kommer senere.
+- **Fra forskning til slag:** en ny evne (fx en skydeøvelse eller karré) skal først forskes i kampagnen og dernæst trænes af den enkelte enhed, før den kan bruges i slaget. `battleRules` angiver, hvad der er forsket. Enhedens træning afgør, om den kan det.
+- **Vand:**
+  - Små vandløb og bække må krydses, men langsomt og i uorden.
+  - Større vandløb og floder kan kun krydses ad en rigtig bro eller en pontonbro, som pionererne skal bygge.
+  - En sprængt bro skal bygges op igen eller erstattes af en pontonbro.
