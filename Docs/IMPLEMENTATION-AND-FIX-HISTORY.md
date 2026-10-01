@@ -804,6 +804,47 @@ Slaget blev porteret fra Unity til Unreal Engine 5.8 som modulet `Strategy1864`.
 - **Rettet:** spejlingen bevarede kildefilernes gamle tidsstempler. Derfor genbrugte byggeværktøjet gamle objektfiler, og arbejdsversionens byg var delvis den gamle kode (link-fejl på `GetFormationLocalBounds`). Alle filer i `Source/Strategy1864` blev markeret som ændrede og bygget forfra, og `Sync-Battle.ps1` sætter nu tidsstemplet ved kopiering.
 - **Verificeret:** `Strategy1864_Duel` starter med "PROJECT1864-DUEL: Livgarden and Swedish infantry, 2 units", og begge kompagnier vises som 3D-soldater.
 
+### Duellen: fremrykning, ild, død og røg (1. oktober 2026)
+Ændret i `Tests/StrategyOOBTestScenario` og `Visual/StrategyInfantryVisualComponent`. Ny klasse: `Visual/StrategyMuzzleSmokePuff`.
+
+**Duellen:**
+- Livgarden og svensk infanteri starter 300 m fra hinanden.
+- Duellen er nu den eneste bevægelsesautoritet (`TickDuel`). Den selvstændige AI er slået fra, fordi den venter på en kontakt, som duellen ikke har.
+- Hvert kompagni rykker frem i kolonne, til fjenden er inden for kompagniets egen aktive skudafstand (`GetActiveRangeCm`, MEDIUM 70 m). Så holder det med front mod fjenden og skyder gennem den almindelige `CombatComponent`.
+
+**Ildkegler:**
+- Begge kompagnier viser kegle (±35°) med CLOSE, MEDIUM og LONG.
+- Den aktive afstand er kraftig, de andre svage.
+- Det er kun QA-grafik.
+
+**Den enkelte soldat:**
+- Hver salve fordeles på soldaterne med op til 0,6 s forskydning.
+- Den, der skyder, hæver geværet (`A_Rifle_Down_To_Aim`), skyder (`A_Firing_Rifle`), får røg fra mundingen og vender tilbage til kompagniets animation.
+- Loopende animationer starter forskudt med ±10 % fart, så soldaterne ikke går i takt.
+
+**Tab:**
+- Den, der rammes, falder med en af 3 dødsanimationer. Under march bruges også `A_Walking_To_Dying`.
+- Han løsnes fra kompagniet og bliver liggende med sit gevær.
+- Før forsvandt figurerne bare.
+
+**Røg (`AStrategyMuzzleSmokePuff`):**
+- Gennemsigtige kugler med motorens `M_SimpleTranslucent`.
+- De vokser fra ca. 0,5 til 3 m, driver frem med skuddet, stiger og tynder ud over 7–11 s.
+- Røgfeltets effekt på sigt er fortsat `AStrategySmokeField`.
+
+**Geværer:** de peges hver opdatering fra højre hånd mod venstre hånd (`bAlignRifleBetweenHands`, `RifleGripFraction` 0,22). Før lå de på tværs af brystet, fordi håndknoglens akser er forskellige fra animation til animation.
+
+**Testkamera:**
+- `-Strategy1864DuelCamera=<cm>`: afstand.
+- `-Strategy1864DuelFocus=0/1`: følg et af kompagnierne.
+- `-Strategy1864DuelPitch=<grader>` og `-Strategy1864DuelYaw=<grader>`: vinkel.
+
+**Verificeret visuelt:** kolonnen marcherer frem, de holder på 63 m og danner linje i 3 geledder med geværerne i anslag. Røgen kommer fra rækken, og en falden soldat bliver liggende.
+
+**Ikke verificeret:** om hver af de 3 dødsanimationer faktisk bliver valgt.
+
+**Senere: FireByRank pr. geled.** Geled 1 skyder og lader, så geled 2 og så geled 3, i stedet for at tilfældige soldater skyder (`FireDrillComponent` kender allerede det geled, der skyder).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -184,4 +184,15 @@ private:
 
     void DrawRuntimeQAVisuals() const;
     void ConfigureRuntimeQALabel(AStrategyUnit* Unit) const;
+
+    /** The duel: each company advances until the enemy is inside its own active fire range, then holds and
+     *  fires; the fire cones of both are drawn. */
+    void TickDuel(float DeltaSeconds);
+    void DrawDuelCones() const;
+
+    UPROPERTY(Transient)
+    TArray<TObjectPtr<AStrategyCompanyUnit>> DuelCompanies;
+
+    float DuelAccumulator = 0.0f;
+    bool bDuelCameraPlaced = false;
 };

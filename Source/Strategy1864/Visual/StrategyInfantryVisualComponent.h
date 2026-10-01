@@ -47,14 +47,46 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
     FName RightHandBoneName = TEXT("RightHand");
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
+    FName LeftHandBoneName = TEXT("LeftHand");
+
+    // Point each rifle from the right hand towards the left hand every refresh, so it lies along the
+    // soldier's grip in every animation (the hand bone's own axes differ between animations).
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
+    bool bAlignRifleBetweenHands = true;
+
+    // Where the right hand holds the rifle, as a share of its length from the butt.
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry", meta=(ClampMin="0.0", ClampMax="1.0"))
+    float RifleGripFraction = 0.22f;
+
+    // The rifle mesh's barrel points along -X instead of +X.
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
+    bool bRifleBarrelAlongNegativeX = false;
+
+    // Each soldier hit falls with a death animation and stays lying where he fell.
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
+    bool bLeaveCorpses = true;
+
+    // Black-powder smoke from the muzzles at every shot.
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
+    bool bMuzzleSmoke = true;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
+    TSoftObjectPtr<UAnimSequence> RaiseToAimAsset;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
+    TSoftObjectPtr<UAnimSequence> DeathWalkingAsset;
+
     // The imported Livgarden faces +Y; strategy formations face +X.
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
     float SoldierMeshYawOffset = -90.0f;
 
-    // Rifle asset points along local X; rotate it into the imported hand grip.
+    // Rifle asset points along local X; rotate it into the imported hand grip, then turned 180 degrees about
+    // its own X and 180 degrees about its own Y (it sat the wrong way round in the hand).
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
     FTransform WeaponRelativeTransform = FTransform(
-        FRotator(-8.0f, 90.0f, 0.0f), FVector(-4.0f, 0.0f, 10.0f));
+        FQuat(FRotator(-8.0f, 90.0f, 0.0f)) * FQuat(FVector::XAxisVector, UE_PI) * FQuat(FVector::YAxisVector, UE_PI),
+        FVector(-4.0f, 0.0f, 10.0f));
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Assets")
     TSoftObjectPtr<USkeletalMesh> SoldierMeshAsset;
@@ -139,6 +171,12 @@ public:
         return SoldierComponents.Num();
     }
 
+    UFUNCTION(BlueprintPure, Category="Strategy|Visual|Infantry")
+    int32 GetCorpseCount() const
+    {
+        return CorpseComponents.Num();
+    }
+
 private:
     UFUNCTION()
     void HandleVolleyVisualEvent(
@@ -156,6 +194,14 @@ private:
     void RefreshWeaponMeshes();
     UAnimSequence* ResolveAnimation(bool& bOutLooping) const;
     void DestroyVisualComponents();
+    /** Soldiers hit: out of the ranks, a death animation, and left lying (Docs: the duel test). */
+    void KillSoldiers(int32 Count);
+    /** Rifles along the grip, from the right hand towards the left. */
+    void AlignWeapons();
+    /** Each soldier's own shot: raise, fire, smoke; then back to the company's animation. */
+    void UpdatePersonalActions();
+    void PlayOnSoldier(USkeletalMeshComponent* Soldier, UAnimSequence* Sequence, bool bLooping, bool bRandomStart);
+    void SpawnMuzzleSmoke(const USkeletalMeshComponent* Soldier, int32 Index);
 
     UPROPERTY(Transient)
     TObjectPtr<AStrategyCompanyUnit> OwnerCompany;
@@ -177,6 +223,15 @@ private:
 
     UPROPERTY(Transient)
     TArray<TObjectPtr<UStaticMeshComponent>> WeaponComponents;
+
+    /** The fallen: they stay where they fell (detached from the company), their rifles with them. */
+    UPROPERTY(Transient)
+    TArray<TObjectPtr<USkeletalMeshComponent>> CorpseComponents;
+
+    /** Per soldier (parallel to SoldierComponents): when his own shot starts, and until when it plays. */
+    TArray<float> SoldierFireAt;
+    TArray<float> SoldierBusyUntil;
+    TArray<uint8> SoldierFirePhase;   // 0 none, 1 raising, 2 firing
 
     int32 CachedStrength = INDEX_NONE;
     uint8 CachedFormationValue = 255;

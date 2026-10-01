@@ -2,6 +2,12 @@
 
 #include "Misc/CommandLine.h"
 #include "Misc/PackageName.h"
+#include "DrawDebugHelpers.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "../Orders/StrategyOrderComponent.h"
+#include "../Player/StrategyCameraPawn.h"
+#include "../Visual/StrategyInfantryVisualComponent.h"
 
 #include "../Command/StrategyCommandComponent.h"
 #include "../Units/StrategyCompanyUnit.h"
@@ -162,6 +168,144 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
     {
         DrawRuntimeQAVisuals();
     }
+
+    if (bLivgardenVsSwedishTest && DuelCompanies.Num() == 2)
+    {
+        TickDuel(DeltaSeconds);
+        DrawDuelCones();
+    }
+}
+
+void AStrategyOOBTestScenario::TickDuel(float DeltaSeconds)
+{
+    // Close in on the two companies once, so the soldiers can be seen (the QA bootstrap starts far out).
+    if (!bDuelCameraPlaced)
+    {
+        if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+        {
+            if (AStrategyCameraPawn* Camera = Cast<AStrategyCameraPawn>(PC->GetPawn()))
+            {
+                // -Strategy1864DuelCamera=<cm>: how far out (and -Strategy1864DuelFocus=0/1: on one of the companies).
+                float Arm = 9000.0f;
+                int32 FocusOn = -1;
+                FParse::Value(FCommandLine::Get(), TEXT("Strategy1864DuelCamera="), Arm);
+                FParse::Value(FCommandLine::Get(), TEXT("Strategy1864DuelFocus="), FocusOn);
+                const FVector Mid = DuelCompanies.IsValidIndex(FocusOn) ? DuelCompanies[FocusOn]->GetActorLocation()
+                    : (DuelCompanies[0]->GetActorLocation() + DuelCompanies[1]->GetActorLocation()) * 0.5f;
+                Camera->FocusOnWorldLocation(Mid);
+                float Pitch = -55.0f;
+                float CameraYaw = 0.0f;
+                FParse::Value(FCommandLine::Get(), TEXT("Strategy1864DuelPitch="), Pitch);
+                FParse::Value(FCommandLine::Get(), TEXT("Strategy1864DuelYaw="), CameraYaw);
+                if (Camera->SpringArm)
+                {
+                    Camera->SpringArm->TargetArmLength = Arm;
+                    Camera->SpringArm->SetRelativeRotation(FRotator(FMath::Clamp(Pitch, -85.0f, -5.0f), CameraYaw, 0.0f));
+                }
+                bDuelCameraPlaced = true;
+            }
+        }
+    }
+
+    // A company in focus: the camera follows it.
+    int32 Follow = -1;
+    if (FParse::Value(FCommandLine::Get(), TEXT("Strategy1864DuelFocus="), Follow) && DuelCompanies.IsValidIndex(Follow) && IsValid(DuelCompanies[Follow]))
+    {
+        if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+        {
+            if (AStrategyCameraPawn* Camera = Cast<AStrategyCameraPawn>(PC->GetPawn()))
+            {
+                Camera->FocusOnWorldLocation(DuelCompanies[Follow]->GetActorLocation());
+            }
+        }
+    }
+
+    DuelAccumulator += DeltaSeconds;
+    if (DuelAccumulator < 0.5f)
+    {
+        return;
+    }
+    DuelAccumulator = 0.0f;
+
+    for (int32 Me = 0; Me < 2; ++Me)
+    {
+        AStrategyCompanyUnit* Company = DuelCompanies[Me];
+        AStrategyCompanyUnit* Enemy = DuelCompanies[1 - Me];
+        if (!IsValid(Company) || !IsValid(Enemy) || !Company->IsCombatEffective() || !Enemy->IsCombatEffective() ||
+            !Company->OrderComponent || !Company->FireControlComponent)
+        {
+            continue;
+        }
+        const FVector Here = Company->GetActorLocation();
+        const FVector There = Enemy->GetActorLocation();
+        const float Distance = FVector::Dist2D(Here, There);
+        // The company's own agreed fire distance: the range of its active fire policy.
+        const float Range = Company->FireControlComponent->GetActiveRangeCm();
+        const FVector Away = (Here - There).GetSafeNormal2D();
+        const float FacingYaw = (There - Here).Rotation().Yaw;
+        const FStrategyOrder Current = Company->OrderComponent->GetCurrentOrder();
+        if (Distance > Range * 0.95f)
+        {
+            const FVector Goal = There + Away * Range * 0.85f;
+            const bool bAlreadyGoing = Current.Type == EStrategyOrderType::Advance && FVector::Dist2D(Current.TargetLocation, Goal) < 1500.0f;
+            if (!bAlreadyGoing)
+            {
+                FStrategyOrder Order;
+                Order.Type = EStrategyOrderType::Advance;
+                Order.TargetLocation = Goal;
+                Order.FacingYaw = FacingYaw;
+                Order.bHasFacing = true;
+                Order.Authority = EStrategyOrderAuthority::OfficerAI;
+                Company->OrderComponent->SetOrder(Order);
+                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DUEL: %s advances (%.0f m away, fires at %.0f m)"), *Company->DisplayName.ToString(), Distance / 100.0f, Range / 100.0f);
+            }
+        }
+        else if (Current.Type != EStrategyOrderType::Hold)
+        {
+            FStrategyOrder Hold;
+            Hold.Type = EStrategyOrderType::Hold;
+            Hold.TargetLocation = Here;
+            Hold.FacingYaw = FacingYaw;
+            Hold.bHasFacing = true;
+            Hold.Authority = EStrategyOrderAuthority::OfficerAI;
+            Company->OrderComponent->SetOrder(Hold);
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DUEL: %s halts and fires (%.0f m)"), *Company->DisplayName.ToString(), Distance / 100.0f);
+        }
+    }
+}
+
+void AStrategyOOBTestScenario::DrawDuelCones() const
+{
+    // Close, medium and long range as arcs inside the fire cone; the active one strong.
+    for (const AStrategyCompanyUnit* Company : DuelCompanies)
+    {
+        if (!IsValid(Company) || !Company->FireControlComponent || !Company->IsCombatEffective())
+        {
+            continue;
+        }
+        const UStrategyFireControlComponent* Fire = Company->FireControlComponent;
+        const FColor Colour = Company->Side == EStrategySide::Denmark ? FColor(40, 110, 255) : FColor(255, 70, 50);
+        const FVector ConeOrigin = Company->GetActorLocation() + FVector(0.0f, 0.0f, 25.0f);
+        const float Yaw = Company->GetActorRotation().Yaw;
+        const float Half = Fire->FireConeHalfAngleDegrees;
+        const float Active = Fire->GetActiveRangeCm();
+        for (const float Range : { Fire->CloseRangeCm, Fire->MediumRangeCm, Fire->LongRangeCm })
+        {
+            const bool bActive = FMath::IsNearlyEqual(Range, Active, 1.0f);
+            const FColor C = bActive ? Colour : FColor(Colour.R, Colour.G, Colour.B, 90);
+            FVector Last = ConeOrigin + FRotator(0.0f, Yaw - Half, 0.0f).Vector() * Range;
+            for (int32 s = 1; s <= 16; ++s)
+            {
+                const FVector P = ConeOrigin + FRotator(0.0f, Yaw - Half + 2.0f * Half * s / 16.0f, 0.0f).Vector() * Range;
+                DrawDebugLine(GetWorld(), Last, P, C, false, -1.0f, 0, bActive ? 12.0f : 3.0f);
+                Last = P;
+            }
+        }
+        for (const float Side : { -Half, Half })
+        {
+            DrawDebugLine(GetWorld(), ConeOrigin, ConeOrigin + FRotator(0.0f, Yaw + Side, 0.0f).Vector() * Fire->LongRangeCm, Colour, false, -1.0f, 0, 4.0f);
+        }
+    }
 }
 
 void AStrategyOOBTestScenario::BuildTestOOB()
@@ -170,14 +314,17 @@ void AStrategyOOBTestScenario::BuildTestOOB()
 
     if (bLivgardenVsSwedishTest)
     {
+        // 300 m apart: both have to march before they are in range.
         AStrategyCompanyUnit* Guard = SpawnCompany(
             TEXT("DK-LIVGARDEN-C1"), TEXT("Livgarden"), 1,
-            Origin + FVector(8500.0f, -7000.0f, 0.0f), nullptr,
+            Origin + FVector(1000.0f, -7000.0f, 0.0f), nullptr,
             static_cast<uint8>(EStrategySide::Denmark));
         AStrategyCompanyUnit* Swedish = SpawnCompany(
             TEXT("SE-INFANTRY-C1"), TEXT("Svensk infanteri"), 1,
-            Origin + FVector(22500.0f, -7000.0f, 0.0f), nullptr,
+            Origin + FVector(31000.0f, -7000.0f, 0.0f), nullptr,
             static_cast<uint8>(EStrategySide::Enemy));
+        DuelCompanies.Reset();
+        bDuelCameraPlaced = false;
         if (Swedish)
         {
             Swedish->SetActorRotation(FRotator(0.0f, 180.0f, 0.0f));
@@ -192,10 +339,12 @@ void AStrategyOOBTestScenario::BuildTestOOB()
             if (!Company) continue;
             Company->bPlayerControllable = false;
             Company->bOfficerAIEnabled = true;
+            // The duel drives them itself (TickDuel); the autonomous AI waits for a contact the duel lacks.
             if (Company->AutonomousBattleAIComponent)
             {
-                Company->AutonomousBattleAIComponent->bEnableForNonPlayerSides = true;
+                Company->AutonomousBattleAIComponent->bEnableForNonPlayerSides = false;
             }
+            DuelCompanies.Add(Company);
             if (Company->InfantryVisualComponent)
             {
                 Company->InfantryVisualComponent->SetEnabled(true);

@@ -11,6 +11,8 @@
 #include "../Units/StrategyCompanyUnit.h"
 #include "StrategyEquipmentVisualComponent.h"
 #include "StrategyHumanAnimationStateComponent.h"
+#include "StrategyMuzzleSmokePuff.h"
+#include "Engine/World.h"
 
 UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
 {
@@ -77,6 +79,10 @@ UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Death_From_Front_Headshot.A_Death_From_Front_Headshot")));
     DeathAsset3 = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Falling_Back_Death.A_Falling_Back_Death")));
+    RaiseToAimAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Rifle_Down_To_Aim.A_Rifle_Down_To_Aim")));
+    DeathWalkingAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Walking_To_Dying.A_Walking_To_Dying")));
 }
 
 void UStrategyInfantryVisualComponent::BeginPlay()
@@ -146,7 +152,12 @@ void UStrategyInfantryVisualComponent::TickComponent(
 
     if (CachedStrength != CurrentStrength)
     {
-        EnsureVisualCount(GetDesiredVisualCount());
+        const int32 Desired = GetDesiredVisualCount();
+        if (bLeaveCorpses && CachedStrength != INDEX_NONE && Desired < SoldierComponents.Num())
+        {
+            KillSoldiers(SoldierComponents.Num() - Desired);
+        }
+        EnsureVisualCount(Desired);
         RebuildFormation();
         CachedStrength = CurrentStrength;
     }
@@ -168,6 +179,8 @@ void UStrategyInfantryVisualComponent::TickComponent(
     }
 
     RefreshAnimation(false);
+    UpdatePersonalActions();
+    AlignWeapons();
     UpdateFormationBounds();
 }
 
@@ -288,11 +301,179 @@ void UStrategyInfantryVisualComponent::HandleVolleyVisualEvent(
         return;
     }
 
-    OwnerCompany->HumanAnimationStateComponent->RequestAction(
-        EStrategyHumanAnimationAction::Fire,
-        0.65f);
+    // Every soldier of the volley fires his own shot, a little apart from the next: raise, fire, smoke.
+    const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+    const int32 Count = SoldierComponents.Num();
+    SoldierFireAt.SetNumZeroed(Count);
+    SoldierBusyUntil.SetNumZeroed(Count);
+    SoldierFirePhase.SetNumZeroed(Count);
+    const int32 Firing = FMath::Clamp(Shots / FMath::Max(1, VisualScaleDivisor), 1, Count);
+    TArray<int32> Order;
+    for (int32 i = 0; i < Count; ++i) { Order.Add(i); }
+    for (int32 i = Order.Num() - 1; i > 0; --i) { Order.Swap(i, FMath::RandRange(0, i)); }
+    for (int32 k = 0; k < Firing; ++k)
+    {
+        const int32 i = Order[k];
+        if (SoldierFirePhase[i] == 0)
+        {
+            SoldierFireAt[i] = Now + FMath::FRandRange(0.0f, 0.6f);
+        }
+    }
+}
 
-    RefreshAnimation(true);
+void UStrategyInfantryVisualComponent::PlayOnSoldier(USkeletalMeshComponent* Soldier, UAnimSequence* Sequence, bool bLooping, bool bRandomStart)
+{
+    if (!Soldier || !Sequence)
+    {
+        return;
+    }
+    Soldier->bPauseAnims = false;
+    Soldier->PlayAnimation(Sequence, bLooping);
+    // Not all in step: each soldier starts somewhere in a looping animation and at his own pace.
+    Soldier->SetPosition(bRandomStart ? FMath::FRandRange(0.0f, Sequence->GetPlayLength()) : 0.0f, false);
+    Soldier->SetPlayRate(bRandomStart ? FMath::FRandRange(0.9f, 1.1f) : 1.0f);
+}
+
+void UStrategyInfantryVisualComponent::UpdatePersonalActions()
+{
+    UWorld* World = GetWorld();
+    if (!World || SoldierFireAt.Num() != SoldierComponents.Num())
+    {
+        return;
+    }
+    const float Now = World->GetTimeSeconds();
+    const EStrategyStance Stance = OwnerCompany && OwnerCompany->StanceComponent ? OwnerCompany->StanceComponent->Stance : EStrategyStance::Standing;
+    for (int32 i = 0; i < SoldierComponents.Num(); ++i)
+    {
+        USkeletalMeshComponent* Soldier = SoldierComponents[i];
+        if (!Soldier)
+        {
+            continue;
+        }
+        if (SoldierFirePhase[i] == 0 && SoldierFireAt[i] > 0.0f && Now >= SoldierFireAt[i])
+        {
+            // Raise the rifle (standing), then the shot.
+            UAnimSequence* Raise = Stance == EStrategyStance::Standing ? RaiseToAimAsset.LoadSynchronous() : nullptr;
+            if (Raise)
+            {
+                PlayOnSoldier(Soldier, Raise, false, false);
+                SoldierFirePhase[i] = 1;
+                SoldierBusyUntil[i] = Now + Raise->GetPlayLength() * 0.85f;
+            }
+            else
+            {
+                SoldierFirePhase[i] = 1;
+                SoldierBusyUntil[i] = Now;
+            }
+            SoldierFireAt[i] = 0.0f;
+        }
+        else if (SoldierFirePhase[i] == 1 && Now >= SoldierBusyUntil[i])
+        {
+            UAnimSequence* Fire = (Stance == EStrategyStance::Prone ? FireProneAsset : Stance == EStrategyStance::Kneeling ? FireKneelingAsset : FireStandingAsset).LoadSynchronous();
+            PlayOnSoldier(Soldier, Fire, false, false);
+            SoldierFirePhase[i] = 2;
+            SoldierBusyUntil[i] = Now + (Fire ? Fire->GetPlayLength() : 0.6f);
+            SpawnMuzzleSmoke(Soldier, i);
+        }
+        else if (SoldierFirePhase[i] == 2 && Now >= SoldierBusyUntil[i])
+        {
+            // Back to what the company does (reloading, aiming, marching).
+            SoldierFirePhase[i] = 0;
+            bool bLooping = true;
+            PlayOnSoldier(Soldier, ResolveAnimation(bLooping), bLooping, true);
+        }
+    }
+}
+
+void UStrategyInfantryVisualComponent::SpawnMuzzleSmoke(const USkeletalMeshComponent* Soldier, int32 Index)
+{
+    UWorld* World = GetWorld();
+    if (!bMuzzleSmoke || !World || !Soldier)
+    {
+        return;
+    }
+    // At the muzzle: the far end of the rifle, else ahead of the soldier at shoulder height.
+    FVector Muzzle = Soldier->GetComponentLocation() + Soldier->GetRightVector() * -70.0f + FVector(0.0f, 0.0f, 150.0f);
+    FVector Forward = OwnerCompany ? OwnerCompany->GetActorForwardVector() : FVector::ForwardVector;
+    if (WeaponComponents.IsValidIndex(Index) && WeaponComponents[Index] && WeaponComponents[Index]->GetStaticMesh())
+    {
+        const UStaticMeshComponent* Weapon = WeaponComponents[Index];
+        const FBox Box = Weapon->GetStaticMesh()->GetBoundingBox();
+        const float Tip = bRifleBarrelAlongNegativeX ? Box.Min.X : Box.Max.X;
+        Muzzle = Weapon->GetComponentTransform().TransformPosition(FVector(Tip, 0.0f, 0.0f));
+        Forward = Weapon->GetForwardVector() * (bRifleBarrelAlongNegativeX ? -1.0f : 1.0f);
+    }
+    FActorSpawnParameters Params;
+    Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    if (AStrategyMuzzleSmokePuff* Puff = World->SpawnActor<AStrategyMuzzleSmokePuff>(AStrategyMuzzleSmokePuff::StaticClass(), Muzzle + Forward * 40.0f, FRotator::ZeroRotator, Params))
+    {
+        Puff->Drift = Forward * 60.0f + FVector(FMath::FRandRange(-15.0f, 15.0f), FMath::FRandRange(-15.0f, 15.0f), 18.0f);
+    }
+}
+
+void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count)
+{
+    // The hit: random men of the company fall where they stand and stay there (not with the company).
+    const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+    const bool bMoving = OwnerCompany && OwnerCompany->HumanAnimationStateComponent &&
+        (OwnerCompany->HumanAnimationStateComponent->CurrentAction == EStrategyHumanAnimationAction::Walk ||
+         OwnerCompany->HumanAnimationStateComponent->CurrentAction == EStrategyHumanAnimationAction::Run);
+    for (int32 k = 0; k < Count && SoldierComponents.Num() > 0; ++k)
+    {
+        const int32 i = FMath::RandRange(0, SoldierComponents.Num() - 1);
+        USkeletalMeshComponent* Soldier = SoldierComponents[i];
+        if (Soldier)
+        {
+            Soldier->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+            const int32 Variant = FMath::RandRange(0, 2);
+            const TSoftObjectPtr<UAnimSequence>& Death = bMoving && !DeathWalkingAsset.IsNull() && FMath::FRand() < 0.5f ? DeathWalkingAsset
+                : Variant == 0 ? DeathAsset : Variant == 1 ? DeathAsset2 : DeathAsset3;
+            Soldier->SetPlayRate(FMath::FRandRange(0.9f, 1.1f));
+            Soldier->bPauseAnims = false;
+            Soldier->PlayAnimation(Death.LoadSynchronous(), false);
+            CorpseComponents.Add(Soldier);
+        }
+        SoldierComponents.RemoveAt(i);
+        if (WeaponComponents.IsValidIndex(i))
+        {
+            WeaponComponents.RemoveAt(i);   // the rifle stays in the fallen man's hand
+        }
+        if (SoldierFireAt.IsValidIndex(i)) { SoldierFireAt.RemoveAt(i); }
+        if (SoldierBusyUntil.IsValidIndex(i)) { SoldierBusyUntil.RemoveAt(i); }
+        if (SoldierFirePhase.IsValidIndex(i)) { SoldierFirePhase.RemoveAt(i); }
+    }
+}
+
+void UStrategyInfantryVisualComponent::AlignWeapons()
+{
+    if (!bAlignRifleBetweenHands)
+    {
+        return;
+    }
+    for (int32 i = 0; i < SoldierComponents.Num() && i < WeaponComponents.Num(); ++i)
+    {
+        USkeletalMeshComponent* Soldier = SoldierComponents[i];
+        UStaticMeshComponent* Weapon = WeaponComponents[i];
+        if (!Soldier || !Weapon || !Weapon->GetStaticMesh())
+        {
+            continue;
+        }
+        const FVector Right = Soldier->GetSocketLocation(RightHandBoneName);
+        const FVector Left = Soldier->GetSocketLocation(LeftHandBoneName);
+        FVector Dir = Left - Right;
+        if (Dir.Size() < 12.0f)
+        {
+            Weapon->SetRelativeTransform(WeaponRelativeTransform);   // hands together: the hand's own grip
+            continue;
+        }
+        Dir.Normalize();
+        const FVector Barrel = bRifleBarrelAlongNegativeX ? -Dir : Dir;
+        const FRotator Rotation = FRotationMatrix::MakeFromXZ(Barrel, Soldier->GetUpVector()).Rotator();
+        const FBox Box = Weapon->GetStaticMesh()->GetBoundingBox();
+        const float ButtX = bRifleBarrelAlongNegativeX ? Box.Max.X : Box.Min.X;
+        const float GripX = ButtX + (Box.Max.X - Box.Min.X) * RifleGripFraction * (bRifleBarrelAlongNegativeX ? -1.0f : 1.0f);
+        Weapon->SetWorldLocationAndRotation(Right - Rotation.RotateVector(FVector(GripX, 0.0f, 0.0f)), Rotation);
+    }
 }
 
 bool UStrategyInfantryVisualComponent::EnsureAssetsLoaded()
@@ -399,6 +580,9 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
         }
 
         SoldierComponents.RemoveAt(LastIndex);
+        if (SoldierFireAt.IsValidIndex(LastIndex)) { SoldierFireAt.RemoveAt(LastIndex); }
+        if (SoldierBusyUntil.IsValidIndex(LastIndex)) { SoldierBusyUntil.RemoveAt(LastIndex); }
+        if (SoldierFirePhase.IsValidIndex(LastIndex)) { SoldierFirePhase.RemoveAt(LastIndex); }
     }
 
     while (SoldierComponents.Num() < DesiredCount)
@@ -442,6 +626,9 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
 
         SoldierComponents.Add(Soldier);
         WeaponComponents.Add(Weapon);
+        SoldierFireAt.Add(0.0f);
+        SoldierBusyUntil.Add(0.0f);
+        SoldierFirePhase.Add(0);
     }
 
     LastAnimationAsset = nullptr;
@@ -572,10 +759,10 @@ void UStrategyInfantryVisualComponent::RefreshAnimation(
         return;
     }
 
-    for (USkeletalMeshComponent* Soldier :
-         SoldierComponents)
+    for (int32 Index = 0; Index < SoldierComponents.Num(); ++Index)
     {
-        if (!Soldier)
+        USkeletalMeshComponent* Soldier = SoldierComponents[Index];
+        if (!Soldier || (SoldierFirePhase.IsValidIndex(Index) && SoldierFirePhase[Index] != 0))
         {
             continue;
         }
@@ -584,7 +771,8 @@ void UStrategyInfantryVisualComponent::RefreshAnimation(
         Soldier->PlayAnimation(
             Sequence,
             bLooping);
-        Soldier->SetPosition(0.0f, false);
+        Soldier->SetPosition(bLooping && !bHoldPose ? FMath::FRandRange(0.0f, Sequence->GetPlayLength()) : 0.0f, false);
+        Soldier->SetPlayRate(bLooping && !bHoldPose ? FMath::FRandRange(0.9f, 1.1f) : 1.0f);
         if (bHoldPose)
         {
             Soldier->TickAnimation(0.0f, false);
@@ -793,6 +981,9 @@ void UStrategyInfantryVisualComponent::DestroyVisualComponents()
 
     WeaponComponents.Reset();
     SoldierComponents.Reset();
+    SoldierFireAt.Reset();
+    SoldierBusyUntil.Reset();
+    SoldierFirePhase.Reset();
 
     LoadedSoldierMesh = nullptr;
     LoadedRifleMesh = nullptr;
