@@ -1,0 +1,134 @@
+#include "StrategyAnimationManifestLibrary.h"
+
+TArray<FName>
+UStrategyAnimationManifestLibrary::GetCoreHumanAnimationNames()
+{
+    return {
+        TEXT("Idle_Stand"),
+        TEXT("Idle_Alert"),
+        TEXT("Walk_Forward"),
+        TEXT("Walk_Backward"),
+        TEXT("Walk_Left"),
+        TEXT("Walk_Right"),
+        TEXT("Run_Forward"),
+        TEXT("Turn_Left_90"),
+        TEXT("Turn_Right_90"),
+        TEXT("Turn_180"),
+        TEXT("Kneel_Down"),
+        TEXT("Kneel_Idle"),
+        TEXT("Stand_From_Kneel"),
+        TEXT("Prone_Down"),
+        TEXT("Prone_Idle"),
+        TEXT("Prone_Up"),
+        TEXT("Rifle_Idle_LowReady"),
+        TEXT("Rifle_Shoulder"),
+        TEXT("Rifle_Aim"),
+        TEXT("Rifle_Fire"),
+        TEXT("Rifle_Recoil"),
+        TEXT("Rifle_Reload_Standing"),
+        TEXT("Rifle_Reload_Kneeling"),
+        TEXT("Rifle_Lower"),
+        TEXT("Rifle_Fix_Bayonet"),
+        TEXT("Rifle_Remove_Bayonet"),
+        TEXT("Bayonet_Ready"),
+        TEXT("Bayonet_Charge_Run"),
+        TEXT("Bayonet_Thrust_1"),
+        TEXT("Rifle_Melee_Butt"),
+        TEXT("Die_Front"),
+        TEXT("Die_Back"),
+        TEXT("Hit_Front"),
+        TEXT("Routed_Run"),
+        TEXT("Mount_Left"),
+        TEXT("Dismount_Left")
+    };
+}
+
+TArray<FName>
+UStrategyAnimationManifestLibrary::GetMountedAnimationNames()
+{
+    return {
+        TEXT("Rider_Idle"),
+        TEXT("Rider_Walk"),
+        TEXT("Rider_Trot"),
+        TEXT("Rider_Canter"),
+        TEXT("Rider_Gallop"),
+        TEXT("Rider_Turn_Left"),
+        TEXT("Rider_Turn_Right"),
+        TEXT("Rider_Sabre_Draw"),
+        TEXT("Rider_Sabre_Ready"),
+        TEXT("Rider_Sabre_Attack_Left"),
+        TEXT("Rider_Carbine_Aim"),
+        TEXT("Rider_Carbine_Fire"),
+        TEXT("Rider_Hit"),
+        TEXT("Rider_Fall_Left")
+    };
+}
+
+TArray<FName>
+UStrategyAnimationManifestLibrary::GetHorseAnimationNames()
+{
+    return {
+        TEXT("Horse_Idle"),
+        TEXT("Horse_Walk"),
+        TEXT("Horse_Trot"),
+        TEXT("Horse_Canter"),
+        TEXT("Horse_Gallop"),
+        TEXT("Horse_Turn_Left"),
+        TEXT("Horse_Turn_Right"),
+        TEXT("Horse_Stop"),
+        TEXT("Horse_Rear"),
+        TEXT("Horse_Hit"),
+        TEXT("Horse_Die_Left"),
+        TEXT("Harness_Idle"),
+        TEXT("Harness_Walk"),
+        TEXT("Harness_Trot"),
+        TEXT("Harness_StartPull"),
+        TEXT("Harness_StopPull"),
+        TEXT("Harness_Turn_Left"),
+        TEXT("Harness_Turn_Right"),
+        TEXT("Harness_Hit"),
+        TEXT("Harness_Fall")
+    };
+}
+
+TArray<FName>
+UStrategyAnimationManifestLibrary::GetArtilleryCrewAnimationNames()
+{
+    return {
+        TEXT("GunCrew_Push_Start"),
+        TEXT("GunCrew_Push_Loop"),
+        TEXT("GunCrew_Push_Stop"),
+        TEXT("GunCrew_Pull_Start"),
+        TEXT("GunCrew_Pull_Loop"),
+        TEXT("GunCrew_Pull_Stop"),
+        TEXT("GunCrew_Traverse_Left_Start"),
+        TEXT("GunCrew_Traverse_Left_Loop"),
+        TEXT("GunCrew_Traverse_Left_Stop"),
+        TEXT("GunCrew_Traverse_Right_Start"),
+        TEXT("GunCrew_Traverse_Right_Loop"),
+        TEXT("GunCrew_Traverse_Right_Stop"),
+        TEXT("Gun_Sponge"),
+        TEXT("Gun_Load_Charge"),
+        TEXT("Gun_Load_Projectile"),
+        TEXT("Gun_Ram"),
+        TEXT("Gun_Prime"),
+        TEXT("GunCrew_Clear"),
+        TEXT("Gun_Fire_Pull"),
+        TEXT("Gun_RecoilReact"),
+        TEXT("Gun_Return_To_Battery"),
+        TEXT("Unlimber_Crew_Dismount"),
+        TEXT("Unlimber_DisconnectGun"),
+        TEXT("Unlimber_MoveHorsesAway"),
+        TEXT("Unlimber_MoveGunIntoPosition"),
+        TEXT("Unlimber_Ready"),
+        TEXT("Limber_CeaseFire"),
+        TEXT("Limber_MoveGunToLimber"),
+        TEXT("Limber_ConnectGun"),
+        TEXT("Limber_Horses_ToGun"),
+        TEXT("Limber_Crew_Mount"),
+        TEXT("Limber_ReadyToMove"),
+        TEXT("Gun_Repair_Work"),
+        TEXT("Abandon_Gun"),
+        TEXT("Ammo_Carry_Projectile")
+    };
+}
