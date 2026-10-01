@@ -99,8 +99,8 @@ void ACampaign1851Camera::Tick(float DeltaSeconds)
 
 void ACampaign1851Camera::Apply()
 {
-	Target.X = FMath::Clamp(Target.X, -HalfExtent.X, HalfExtent.X);
-	Target.Y = FMath::Clamp(Target.Y, -HalfExtent.Y, HalfExtent.Y);
+	Target.X = FMath::Clamp(Target.X, BoundsCentre.X - HalfExtent.X, BoundsCentre.X + HalfExtent.X);
+	Target.Y = FMath::Clamp(Target.Y, BoundsCentre.Y - HalfExtent.Y, BoundsCentre.Y + HalfExtent.Y);
 	const FRotator Rot(-GetPitch(), -90.f + Yaw, 0.f);
 	SetActorLocationAndRotation(Target - Rot.Vector() * Distance * ACampaign1851Map::KmToUnits, Rot);
 	// Close in, a shallow depth of field focused on the target: the tilt-shift look of a model

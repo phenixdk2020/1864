@@ -12,8 +12,6 @@ namespace Campaign1851Bridge
 	constexpr double BlowCost = 500.0;
 	constexpr double RebuildCost = 4000.0;
 	constexpr float RebuildDays = 20.f;
-	constexpr double PontoonCost = 25000.0;
-	constexpr float PontoonDays = 45.f;
 	constexpr float MaxFerryKm = 1.2f;   // a sound narrow enough for a pontoon bridge
 }
 
@@ -32,9 +30,11 @@ void ACampaign1851Map::DetectBridges()
 		Links[l].FerryKm = LinkFerryKm0[l];
 	}
 	// One bridge for all the roads over the same water: a new find near an old one joins it.
-	auto AddBridge = [&](FCampaign1851Bridge B)
+	auto AddBridge = [&](FCampaign1851Bridge B, bool bOwnName = false)
 	{
-		if (FCampaign1851Bridge* Same = Bridges.FindByPredicate([&B](const FCampaign1851Bridge& X) { return FVector2D::Distance(X.Km, B.Km) < 0.5 && (X.FerryKm > 0.f) == (B.FerryKm > 0.f); }))
+		// A named town bridge (Knippelsbro, Langebro) stays a bridge of its own even close to another.
+		FCampaign1851Bridge* Same = bOwnName ? nullptr : Bridges.FindByPredicate([&B](const FCampaign1851Bridge& X) { return FVector2D::Distance(X.Km, B.Km) < 0.5 && (X.FerryKm > 0.f) == (B.FerryKm > 0.f); });
+		if (Same)
 		{
 			if (B.Link != INDEX_NONE) { Same->Links.AddUnique(B.Link); }
 			return;
@@ -155,7 +155,7 @@ void ACampaign1851Map::DetectBridges()
 		B.Km = (B.EndA + B.EndB) * 0.5;
 		B.LengthM = float(FVector2D::Distance(B.EndA, B.EndB) * 1000.0);
 		B.State = EBridgeState::Intact;
-		AddBridge(B);
+		AddBridge(B, true);
 	}
 	// Over the rivers and the canal (Campaign1851Hydro.cpp): where a road between two towns crosses one.
 	// After the others, so the bridges of older saves keep their numbers. The Elbe had no bridge in 1851.
@@ -278,7 +278,7 @@ FString ACampaign1851Map::BridgeBlockReason(int32 Id, EBridgeAction Action) cons
 		return FString();
 	case EBridgeAction::Build:
 		if (B.State != EBridgeState::Site) return TEXT("-");
-		if (Treasury < Campaign1851Bridge::PontoonCost) return TEXT("ikke råd");
+		if (Treasury < PontoonCost()) return TEXT("ikke råd");
 		return FString();
 	}
 	return TEXT("-");
@@ -306,9 +306,9 @@ bool ACampaign1851Map::BridgeAction(int32 Id, EBridgeAction Action, FString* Out
 		B.DaysLeft = Campaign1851Bridge::RebuildDays;
 		break;
 	case EBridgeAction::Build:
-		AddTransaction(-Campaign1851Bridge::PontoonCost, FString::Printf(TEXT("Pontonbro: %s"), *B.Name));
+		AddTransaction(-PontoonCost(), FString::Printf(TEXT("Pontonbro: %s"), *B.Name));
 		B.State = EBridgeState::Building;
-		B.DaysLeft = Campaign1851Bridge::PontoonDays;
+		B.DaysLeft = PontoonDays();
 		break;
 	}
 	ApplyBridge(B);

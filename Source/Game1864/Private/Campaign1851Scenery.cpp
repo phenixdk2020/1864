@@ -547,6 +547,17 @@ namespace Campaign1851Scenery
 		return Finish(Writer, Material, FString::Printf(TEXT("SM_Campaign1851_%s"), Name(Piece)));
 	}
 
+	UStaticMesh* BuildColoured(const TArray<FVector>& Triangles, const TArray<FLinearColor>& Colours, UMaterialInterface* Material, const TCHAR* MeshName)
+	{
+		FWriter Writer;
+		for (int32 i = 0; i + 2 < Triangles.Num(); i += 3)
+		{
+			const FVector3f A(Triangles[i]), B(Triangles[i + 1]), C(Triangles[i + 2]);
+			Writer.Tri(A, B, C, Colours.IsValidIndex(i / 3) ? Colours[i / 3] : FLinearColor::Gray, (A + B + C) / 3.f - FVector3f(0.f, 0.f, 50.f), false);
+		}
+		return Finish(Writer, Material, FString(MeshName));
+	}
+
 	UStaticMesh* BuildFlat(const TArray<FVector>& Triangles, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* MeshName)
 	{
 		FWriter Writer;

@@ -400,7 +400,154 @@ void ACampaign1851Map::UpdateHydroVisibility(float CameraDistanceKm)
 		{
 			const FString N = Mesh->GetName();
 			const bool bSmall = N == TEXT("Rivers0") || N == TEXT("Rivers1");
+			// The border: narrow close in, broad from afar.
+			if (N == TEXT("BorderNear")) { Mesh->SetVisibility(CameraDistanceKm < 150.f); continue; }
+			if (N == TEXT("BorderFar")) { Mesh->SetVisibility(CameraDistanceKm >= 150.f); continue; }
 			Mesh->SetVisibility(!bSmall || CameraDistanceKm < RoadsMaxDistanceKm);
 		}
+	}
+}
+
+void ACampaign1851Map::BuildBorderMeshes()
+{
+	// The monarchy's land border (Docs/Hydro1851.md): every pixel edge of the features map between the
+	// monarchy's land and foreign land (not the sea), joined into lines, smoothed and drawn as a red band
+	// over the painted map; a narrow band close in, a broad one from afar.
+	UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, HydroMaterialPath);
+	if (!Material || FeaturesW == 0 || FeaturesH == 0)
+	{
+		return;
+	}
+	const double PkX = SizeKm.X / FeaturesW, PkY = SizeKm.Y / FeaturesH;
+	auto Mine = [&](int32 X, int32 Y) { return X >= 0 && Y >= 0 && X < FeaturesW && Y < FeaturesH && Features[Y * FeaturesW + X].R > 127; };
+	auto CentreKm = [&](int32 X, int32 Y) { return FVector2D(Extent.XMin + (X + 0.5) * PkX, Extent.YMax - (Y + 0.5) * PkY); };
+	// Foreign land: not the monarchy's, not sea, and no sea within two pixels (the two maps' coastlines differ
+	// by a pixel or so; without this the whole coast would get bits of border).
+	auto Foreign = [&](int32 X, int32 Y)
+	{
+		if (X < 0 || Y < 0 || X >= FeaturesW || Y >= FeaturesH || Mine(X, Y) || IsSea(CentreKm(X, Y)))
+		{
+			return false;
+		}
+		for (int32 dy = -2; dy <= 2; ++dy)
+		{
+			for (int32 dx = -2; dx <= 2; ++dx)
+			{
+				const int32 x = FMath::Clamp(X + dx, 0, FeaturesW - 1), y = FMath::Clamp(Y + dy, 0, FeaturesH - 1);
+				if (!Mine(x, y) && IsSea(CentreKm(x, y)))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	};
+	// Corners of the pixel grid: (X, Y) with X 0..W, Y 0..H.
+	const int32 CW = FeaturesW + 1;
+	TMultiMap<int32, int32> Adjacent;
+	TArray<FIntPoint> Edges;
+	auto AddEdge = [&](int32 A, int32 B)
+	{
+		const int32 E = Edges.Add(FIntPoint(A, B));
+		Adjacent.Add(A, E);
+		Adjacent.Add(B, E);
+	};
+	for (int32 Y = 0; Y < FeaturesH; ++Y)
+	{
+		for (int32 X = 0; X < FeaturesW; ++X)
+		{
+			if (!Mine(X, Y))
+			{
+				continue;
+			}
+			if (Foreign(X + 1, Y)) { AddEdge(Y * CW + X + 1, (Y + 1) * CW + X + 1); }
+			if (Foreign(X - 1, Y)) { AddEdge(Y * CW + X, (Y + 1) * CW + X); }
+			if (Foreign(X, Y + 1)) { AddEdge((Y + 1) * CW + X, (Y + 1) * CW + X + 1); }
+			if (Foreign(X, Y - 1)) { AddEdge(Y * CW + X, Y * CW + X + 1); }
+		}
+	}
+	auto CornerKm = [&](int32 C) { return FVector2D(Extent.XMin + (C % CW) * PkX, Extent.YMax - (C / CW) * PkY); };
+	TArray<bool> Used;
+	Used.Init(false, Edges.Num());
+	TArray<TArray<FVector2D>> Lines;
+	for (int32 e = 0; e < Edges.Num(); ++e)
+	{
+		if (Used[e])
+		{
+			continue;
+		}
+		Used[e] = true;
+		// Walk on from both ends while the line goes on unbranched.
+		TArray<int32> Chain = { Edges[e].X, Edges[e].Y };
+		for (int32 Side = 0; Side < 2; ++Side)
+		{
+			for (;;)
+			{
+				const int32 End = Side == 0 ? Chain.Last() : Chain[0];
+				TArray<int32> Next;
+				Adjacent.MultiFind(End, Next);
+				int32 Pick = INDEX_NONE;
+				for (int32 n : Next)
+				{
+					if (!Used[n]) { Pick = n; break; }
+				}
+				if (Pick == INDEX_NONE)
+				{
+					break;
+				}
+				Used[Pick] = true;
+				const int32 Other = Edges[Pick].X == End ? Edges[Pick].Y : Edges[Pick].X;
+				if (Side == 0) { Chain.Add(Other); } else { Chain.Insert(Other, 0); }
+			}
+		}
+		if (Chain.Num() < 8)
+		{
+			continue;   // a stray pixel or two
+		}
+		TArray<FVector2D> Km;
+		for (int32 C : Chain) { Km.Add(CornerKm(C)); }
+		// Smooth the pixel steps (Chaikin, three rounds), keeping the ends.
+		for (int32 Round = 0; Round < 3; ++Round)
+		{
+			TArray<FVector2D> S = { Km[0] };
+			for (int32 i = 0; i + 1 < Km.Num(); ++i)
+			{
+				S.Add(Km[i] * 0.75 + Km[i + 1] * 0.25);
+				S.Add(Km[i] * 0.25 + Km[i + 1] * 0.75);
+			}
+			S.Add(Km.Last());
+			Km = MoveTemp(S);
+		}
+		// Thin out to about 150 m.
+		TArray<FVector2D> Thin = { Km[0] };
+		for (int32 i = 1; i < Km.Num(); ++i)
+		{
+			if (FVector2D::Distance(Thin.Last(), Km[i]) > 0.15 || i == Km.Num() - 1)
+			{
+				Thin.Add(Km[i]);
+			}
+		}
+		Lines.Add(MoveTemp(Thin));
+	}
+	double Total = 0.0;
+	for (const TArray<FVector2D>& L : Lines) { Total += LineLength(L); }
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|border|%d lines|%.0f km"), Lines.Num(), Total);
+	const FLinearColor Red = FLinearColor::FromSRGBColor(FColor(168, 26, 30));
+	for (int32 Far = 0; Far < 2; ++Far)
+	{
+		TArray<TArray<FVector>> Local;
+		for (const TArray<FVector2D>& L : Lines)
+		{
+			TArray<FVector>& Out = Local.AddDefaulted_GetRef();
+			for (const FVector2D& P : L) { Out.Add(LocalAtKm(P) + FVector(0.0, 0.0, 1.6)); }
+		}
+		UStaticMeshComponent* Mesh = NewObject<UStaticMeshComponent>(this, Far ? TEXT("BorderFar") : TEXT("BorderNear"));
+		Mesh->SetupAttachment(Root);
+		Mesh->SetStaticMesh(Campaign1851Scenery::BuildRibbons(Local, (Far ? 1.5f : 0.4f) * 0.5f * float(KmToUnits), Red, Material, Far ? TEXT("SM_Campaign1851_BorderFar") : TEXT("SM_Campaign1851_BorderNear")));
+		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Mesh->SetCastShadow(false);
+		Mesh->SetVisibility(Far == 1);
+		Mesh->RegisterComponent();
+		RiverMeshes.Add(Mesh);
 	}
 }

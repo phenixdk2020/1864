@@ -47,6 +47,8 @@ namespace Campaign1851Scenery
 
 	/** Unlit flat triangles (map-local units, three points each) in one colour: lakes. */
 	UStaticMesh* BuildFlat(const TArray<FVector>& Triangles, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* Name);
+	/** Unlit flat triangles with a colour each (Colours: one per triangle): the battlefield's ground. */
+	UStaticMesh* BuildColoured(const TArray<FVector>& Triangles, const TArray<FLinearColor>& Colours, UMaterialInterface* Material, const TCHAR* Name);
 
 	/** Building-site pieces (ACampaign1851ConstructionSite), in piece units; the barracks faces +Y. */
 	enum class ESitePiece : uint8

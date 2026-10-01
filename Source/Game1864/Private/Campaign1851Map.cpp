@@ -109,6 +109,7 @@ void ACampaign1851Map::BeginPlay()
 	const bool bFeatures = LoadFeatures();
 	LoadHydro();
 	BuildHydroMeshes();
+	BuildBorderMeshes();
 	if (bFeatures)
 	{
 		BuildScenery();
@@ -1613,13 +1614,13 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 	double Minutes = 0.0;
 	if (Speed >= 6)
 	{
-		// Speed 6: exactly one day per beat, in an even rhythm (1, 2, 3 ...). A slow frame never jumps two
-		// days at once: time that piled up is dropped rather than caught up.
-		MinuteCarry += DeltaSeconds;
-		if (MinuteCarry >= DaySeconds)
+		// Speed 6: exactly one day per beat, in an even rhythm (1, 2, 3 ...). The beat is kept on the wall
+		// clock from the end of the last day's work, so a day that takes long to compute (marches, supply,
+		// the war) delays the next one instead of letting it follow at once.
+		if (FPlatformTime::Seconds() >= NextDayAt)
 		{
 			Minutes = 1440.0;
-			MinuteCarry = FMath::Min(MinuteCarry - DaySeconds, double(DaySeconds) * 0.5);
+			bDayBeat = true;
 		}
 	}
 	else
@@ -1685,6 +1686,11 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 		}
 	}
 	UpdateSeason();
+	if (bDayBeat)
+	{
+		NextDayAt = FPlatformTime::Seconds() + DaySeconds;
+		bDayBeat = false;
+	}
 }
 
 void ACampaign1851Map::UpdateSeason()
@@ -1815,6 +1821,7 @@ bool ACampaign1851Map::CanAfford(int32 CostRd) const
 
 void ACampaign1851Map::CloseMonth()
 {
+	RefillMinistryBudgets();
 	// Wages leave the treasury day by day; the account book gets one line per project and month.
 	for (const TPair<FString, double>& Spend : MonthSpend)
 	{

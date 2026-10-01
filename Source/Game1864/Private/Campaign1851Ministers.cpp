@@ -324,9 +324,34 @@ bool ACampaign1851Map::CarryOutMinister(const FCampaign1851Decision& D)
 	}
 }
 
+void ACampaign1851Map::StepMinistryBudget(ECampaign1851Portfolio P, int32 Dir)
+{
+	static const double Steps[] = { 0.0, 1000.0, 2000.0, 5000.0, 10000.0, 15000.0, 20000.0, 30000.0, 50000.0, 75000.0, 100000.0 };
+	double& B = MinistryBudget[int32(P)];
+	int32 At = 0;
+	for (int32 i = 0; i < UE_ARRAY_COUNT(Steps); ++i)
+	{
+		if (Steps[i] <= B + 0.5) { At = i; }
+	}
+	B = Steps[FMath::Clamp(At + Dir, 0, int32(UE_ARRAY_COUNT(Steps)) - 1)];
+	MinistryPot[int32(P)] = FMath::Min(MinistryPot[int32(P)], B * 3.0);
+}
+
+void ACampaign1851Map::RefillMinistryBudgets()
+{
+	for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count); ++p)
+	{
+		MinistryPot[p] = FMath::Min(MinistryPot[p] + MinistryBudget[p], MinistryBudget[p] * 3.0);
+	}
+}
+
 TArray<FString> ACampaign1851Map::SaveMinisters() const
 {
 	TArray<FString> Out;
+	for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count); ++p)
+	{
+		Out.Add(FString::Printf(TEXT("budget|%d|%.0f|%.0f"), p, MinistryBudget[p], MinistryPot[p]));
+	}
 	for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count); ++p)
 	{
 		const FCampaign1851Minister& M = Ministers[p];

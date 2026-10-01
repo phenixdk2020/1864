@@ -183,6 +183,8 @@ struct FCampaign1851TrainSave
 	UPROPERTY() FString Board;
 	UPROPERTY() FString Release;
 	UPROPERTY() bool bBoarded = false;
+	UPROPERTY() FString TransferTo;   // moved to another railway (empty: not)
+	UPROPERTY() float TransferDays = 0.f;
 };
 
 /** An officer (v7): who he is, his qualities and experience, and the regiment he serves with (empty = pool). */

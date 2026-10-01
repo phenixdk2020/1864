@@ -47,6 +47,12 @@ const TCHAR* Campaign1851Politics::CurrentEffect(ECampaign1851Current C)
 
 void ACampaign1851Map::ResetPolitics()
 {
+	// The ministries' AUTO budgets as at the start (rd. a month; the pot begins with one month).
+	const double Budgets[] = { 5000.0, 15000.0, 10000.0, 10000.0, 5000.0, 2000.0, 10000.0, 10000.0 };
+	for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count); ++p)
+	{
+		MinistryBudget[p] = MinistryPot[p] = Budgets[p];
+	}
 	// Summer 1851: the whole state restored after the war, the National Liberals strong in Copenhagen.
 	FRandomStream Rng(int32(HashCombine(uint32(Seed), 0x9011u)));
 	Support[0] = 45.f + 10.f * Deviation * Rng.FRandRange(-1.f, 1.f);
@@ -230,6 +236,15 @@ void ACampaign1851Map::RestorePolitics(const TArray<FString>& Lines)
 		if (P.Num() == 8 && P[0] == TEXT("min"))
 		{
 			RestoreMinister(P);
+		}
+		else if (P.Num() == 4 && P[0] == TEXT("budget"))
+		{
+			const int32 p = FCString::Atoi(*P[1]);
+			if (p >= 0 && p < int32(ECampaign1851Portfolio::Count))
+			{
+				MinistryBudget[p] = FCString::Atod(*P[2]);
+				MinistryPot[p] = FCString::Atod(*P[3]);
+			}
 		}
 		else if (P.Num() == 11 && P[0] == TEXT("state"))
 		{

@@ -294,6 +294,7 @@ struct FCampaign1851Battlefield
 	TArray<FCampaign1851BattleCrossing> Crossings;
 	int32 Farms = 0;
 	TArray<FColor> Pixels;      // the picture, 512 x 512, row 0 at the north
+	TArray<FColor> GroundPixels;   // the same before the ways, buildings and boundaries are drawn (the 3D ground)
 	bool IsValid() const { return HeightM.Num() > 0; }
 };
 
@@ -380,7 +381,7 @@ namespace Campaign1851Research
 {
 	const TArray<FCampaign1851ResearchTopic>& Topics();
 	int32 FindTopic(const FString& Id);
-	constexpr int32 Branches = 5;
+	constexpr int32 Branches = 7;
 	/** The level in the research tree (0 = I). */
 	int32 Tier(int32 Topic);
 	const TCHAR* Roman(int32 Tier);
@@ -581,7 +582,7 @@ public:
 
 	/** Moves the clock on by the real time passed, in whole minutes; drives the projects and the season. */
 	void AdvanceTime(float DeltaSeconds);
-	void SetSpeed(int32 InSpeed) { const int32 New = FMath::Clamp(InSpeed, 0, NumSpeeds() - 1); if (New != Speed) { MinuteCarry = 0.0; } Speed = New; }
+	void SetSpeed(int32 InSpeed) { const int32 New = FMath::Clamp(InSpeed, 0, NumSpeeds() - 1); if (New != Speed) { MinuteCarry = 0.0; NextDayAt = 0.0; } Speed = New; }
 	int32 GetSpeed() const { return Speed; }
 	static int32 NumSpeeds() { return 7; }
 	/** Campaign hours per real second at a speed step (0, 0.25, 1, 3, 8, 24, 96); speed 6 jumps a whole day at a time. */
@@ -755,6 +756,14 @@ public:
 	/** On a lake or a river as drawn, give or take the margin. */
 	bool IsFreshWater(const FVector2D& Km, float MarginKm = 0.f) const;
 	EHedgeKind HedgeKindAt(const FVector2D& Km) const;
+
+	// ---- the battlefield in 3D (Campaign1851BattleView.cpp)
+	bool EnterBattleView();
+	void LeaveBattleView();
+	bool IsBattleView() const { return bBattleView; }
+	FVector BattleViewOrigin() const;
+	FVector2D BattleViewHalfExtent() const;
+	float BattleViewGroundZ() const;
 	int32 BridgeIndex(int32 Id) const;
 	FString BridgeBlockReason(int32 Id, EBridgeAction Action) const;
 	bool BridgeAction(int32 Id, EBridgeAction Action, FString* OutReason = nullptr);
@@ -883,6 +892,17 @@ public:
 
 	void ResetResearch();
 	bool HasResearch(const TCHAR* Id) const;
+	/** A pontoon bridge's cost and days (the Pontonnerkorps cheapens and hastens them). */
+	double PontoonCost() const;
+	float PontoonDays() const;
+	/** The battle's command zones (Stabsskolen, Generalstaben). */
+	float CommandReachFactor() const;
+	/** battleRules and aiDefaults for the 3D battle (Docs/BattleLink1851.md). */
+	void WriteBattleRulesJson(const TSharedRef<FJsonObject>& Doc) const;
+	/** An officer for the battle files (name, rank, experience, the ten stats); vacant when none. */
+	TSharedRef<FJsonObject> OfficerJson(int32 Officer) const;
+	/** A unit as the 3D battle builds it: companies, squadrons or the battery, with their officers. */
+	TSharedRef<FJsonObject> BattleOrganisationJson(int32 Regiment) const;
 	/** Why a topic cannot be started (empty: it can). */
 	FString ResearchBlockReason(int32 Topic) const;
 	bool StartResearch(int32 Topic, FString* OutReason = nullptr);
@@ -1160,6 +1180,8 @@ public:
 	int32 CreateFormation(ECampaign1851Echelon Echelon, int32 Parent);
 	/** Dissolves a formation: its units and sub-formations go up a level. */
 	void DissolveFormation(int32 Id);
+	/** A formation and all under it dissolved, its units back in garrison; returns the number of units. */
+	int32 ReturnFormationToGarrison(int32 Id);
 	/** True if formation Id is Ancestor or lies under it. */
 	bool IsInside(int32 Id, int32 Ancestor) const;
 	/** Puts a formation under another (0 = the field army); refused if it would go under itself. */
@@ -1208,7 +1230,15 @@ public:
 	/** The trains of 1851 (new game, or before loading). */
 	void ResetTroopTrains();
 	/** Orders a troop train (locomotive and carriages) from abroad; false if the treasury cannot pay. */
-	bool OrderTroopTrain();
+	/** A train set from England, delivered to the station given (a rail network's depot; none: Copenhagen). */
+	bool OrderTroopTrain(int32 Station = INDEX_NONE);
+	/** The railways that hang together, each with its stations and the depot where new trains are landed. */
+	struct FRailNet { FString Name; TArray<int32> Stations; int32 Depot = INDEX_NONE; };
+	TArray<FRailNet> RailNets() const;
+	/** Move a free train to another network's depot (by ship or cart): cost and days. */
+	static constexpr double TrainTransferCost = 6000.0;
+	float TrainTransferDays(int32 Train, int32 Station) const;
+	bool TransferTrain(int32 Train, int32 Station, FString* OutReason = nullptr);
 	/** A note from the last march order for the player (e.g. not enough trains, so the column marches). */
 	FString TakeOrderNote() { FString Note = OrderNote; OrderNote.Reset(); return Note; }
 
@@ -1282,7 +1312,14 @@ private:
 	bool LoadFeatures();
 	bool LoadHydro();
 	void BuildHydroMeshes();
+	/** The monarchy's land border as a red band (Campaign1851Hydro.cpp). */
+	void BuildBorderMeshes();
 	void UpdateHydroVisibility(float CameraDistanceKm);
+	void BuildBattleView();
+	bool bBattleView = false;
+	int32 BattleViewVersion = -1;
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UActorComponent>> BattleViewParts;
 	TArray<FCampaign1851River> Rivers;
 	TArray<FCampaign1851Lake> Lakes;
 	TMap<FIntPoint, TArray<FIntPoint>> RiverCells;   // 1 km cell -> (river, segment)
@@ -1458,8 +1495,22 @@ private:
 	TArray<FCampaign1851Decision> MinisterOptions(ECampaign1851Portfolio P, double Budget) const;
 	bool CarryOutMinister(const FCampaign1851Decision& D);
 	TArray<FString> SaveMinisters() const;
+public:
+	double GetMinistryBudget(ECampaign1851Portfolio P) const { return MinistryBudget[int32(P)]; }
+	double GetMinistryPot(ECampaign1851Portfolio P) const { return MinistryPot[int32(P)]; }
+	/** One step up or down the ladder 0, 1.000, 2.000, 5.000 ... 100.000 rd. a month. */
+	void StepMinistryBudget(ECampaign1851Portfolio P, int32 Dir);
+	/** The month's allowance into each pot (at the month's close). */
+	void RefillMinistryBudgets();
+	/** An AUTO ministry of the player spends from its pot; false when the pot is short. */
+	bool MinistryCanSpend(ECampaign1851Portfolio P, double Cost) const { return Cost <= MinistryPot[int32(P)] + 0.5; }
+	void MinistrySpend(ECampaign1851Portfolio P, double Cost) { MinistryPot[int32(P)] = FMath::Max(0.0, MinistryPot[int32(P)] - Cost); }
+private:
 	void RestoreMinister(const TArray<FString>& P);
 	FCampaign1851Minister Ministers[int32(ECampaign1851Portfolio::Count)];
+	/** What each ministry may spend on AUTO: a monthly allowance (rd.) and the pot it fills (at most three months). */
+	double MinistryBudget[int32(ECampaign1851Portfolio::Count)] = { 5000.0, 15000.0, 10000.0, 10000.0, 5000.0, 2000.0, 10000.0, 10000.0 };
+	double MinistryPot[int32(ECampaign1851Portfolio::Count)] = { 5000.0, 15000.0, 10000.0, 10000.0, 5000.0, 2000.0, 10000.0, 10000.0 };
 	// The end.
 	void CheckCampaignEnd();
 	int32 PlayedNation = 0;
@@ -1621,7 +1672,9 @@ private:
 	/** Season weights for the map materials (MPC_Campaign1851Season): Snow, Bare, Autumn, Spring. */
 	void UpdateSeason();
 	double CampaignDays = 0.0;
-	double MinuteCarry = 0.0;   // part of a minute of real time not yet ticked (speed 6: seconds towards the next day)
+	double MinuteCarry = 0.0;   // part of a minute of real time not yet ticked
+	double NextDayAt = 0.0;     // speed 6: wall-clock time (FPlatformTime) of the next day
+	bool bDayBeat = false;
 	/** Speed 6: real seconds per campaign day. */
 	static constexpr float DaySeconds = 0.4f;
 	int32 Speed = 1;

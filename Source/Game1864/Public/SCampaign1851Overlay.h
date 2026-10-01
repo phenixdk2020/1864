@@ -43,7 +43,7 @@ public:
 	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury, BuildTown, ShowSite, BuildLink, ShowLink,
 		Regiment, RegimentPiece, RegimentRow, ArmyHome, ArmyHalt, OfficerChange, GeneralChange, OfficerPick, OfficerRecruit, PickerClose, TrainingProgram, OfficerInfo, OfficerCardClose, ProgramPick, RouteMode, ArmyCancel, TownTab,
 		MainMenu, WindowClose, TableSort, TableRow, TablePage, OfficerFilter, OfficerDismiss, ClosePanel, ExitGame,
-		OfficerPromote, OpenOOB, OOBCommand, CommandGeneralChange, TrainOrder,
+		OfficerPromote, OpenOOB, OOBCommand, CommandGeneralChange, TrainOrder, TrainMove, MinistryBudget, BattleViewEnter, BattleViewLeave,
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve, FormationDeputy, FormationStaff,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
@@ -103,7 +103,7 @@ public:
 	/** What an X in a panel's corner closes (the Module of EButton::ClosePanel). */
 	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB, CloseOrder, CloseFortPanel, CloseFort };
 	/** The big windows opened from the menu bar under the calendar (one at a time). */
-	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council, Supply, Foreign, Research, Navy, Gazette, End, Battlefield, Materiel };
+	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council, Supply, Foreign, Research, Navy, Gazette, End, Battlefield, Materiel, Nations };
 	void OpenWindow(EWindow In) { Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
 	EWindow GetWindow() const { return Window; }
 	/** Sort a table by a column (again: the other way round). */
@@ -245,6 +245,7 @@ public:
 	int32 ForeignTab = 0;
 private:
 	void PaintMateriel(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const;
+	void PaintNations(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const;
 public:
 	/** The new unit being prepared in the MATERIEL window. */
 	int32 RaiseType = 0, RaiseTownPick = 0, RaiseCommand = 0, RaiseProgram = 1;

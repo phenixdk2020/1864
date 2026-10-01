@@ -29,6 +29,10 @@ public:
 
 	void Init(const FVector& InTarget, float InDistanceKm, const FVector2D& InHalfExtentUnits);
 	void SetView(const FVector& InTarget, float InDistanceKm, float InYaw);
+	/** Where the target may go: a rectangle round Centre (the map; or the battlefield model beside it). */
+	void SetBounds(const FVector2D& InCentre, const FVector2D& InHalfExtentUnits) { BoundsCentre = InCentre; HalfExtent = InHalfExtentUnits; }
+	FVector2D GetBoundsCentre() const { return BoundsCentre; }
+	FVector2D GetHalfExtent() const { return HalfExtent; }
 
 	/** Pan in screen-aligned directions; Input -1..1 per axis. */
 	void Pan(const FVector2D& Input, float DeltaSeconds);
@@ -52,6 +56,7 @@ private:
 	FVector Target = FVector::ZeroVector;
 	FVector HomeTarget = FVector::ZeroVector;
 	FVector2D HalfExtent = FVector2D(1.0, 1.0);
+	FVector2D BoundsCentre = FVector2D::ZeroVector;
 	float Distance = 960.f;
 	float TargetDistance = 960.f;
 	float HomeDistance = 960.f;

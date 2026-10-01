@@ -106,8 +106,9 @@ void ACampaign1851Map::MonthlyFortProgrammes()
 		const double Cost = ProgrammeCost(i);
 		if (bAuto)
 		{
-			if (Treasury - Cost > Reserve && BuildProgramme(i))
+			if (Treasury - Cost > Reserve && MinistryCanSpend(ECampaign1851Portfolio::War, Cost) && BuildProgramme(i))
 			{
+				MinistrySpend(ECampaign1851Portfolio::War, Cost);
 				FCampaign1851Decision D;
 				D.Day = CampaignDays;
 				D.Nation = PlayerNation;

@@ -431,7 +431,9 @@ void ACampaign1851Map::RunNationalAI()
 			}
 			// Eight portfolios share it (the minister's skill and thrift move his share).
 			const double Budget = Surplus * 0.35 * (1.0 - 0.6 * N.Caution) * N.Weights[p] / FMath::Max(WeightSum, 0.1f) * 6.4 * (n == PlayerNation ? MinisterBudgetFactor(P) : 1.f);
-			TArray<FCampaign1851Decision> Options = DecisionOptions(n, P, Budget, Rng);
+			// The player's AUTO ministries keep within their budget (the pot of their monthly allowance).
+			const bool bCapped = n == PlayerNation && Mode == ECampaign1851Delegation::Auto;
+			TArray<FCampaign1851Decision> Options = DecisionOptions(n, P, bCapped ? FMath::Min(Budget, MinistryPot[p]) : Budget, Rng);
 			Options.Sort([](const FCampaign1851Decision& A, const FCampaign1851Decision& B) { return A.Score > B.Score; });
 			// A ministry acts on its best few options a month (the War ministry fills several posts at once).
 			const int32 Take = P == ECampaign1851Portfolio::War ? 6 : 1;
@@ -443,9 +445,14 @@ void ACampaign1851Map::RunNationalAI()
 				D.Portfolio = P;
 				if (Mode == ECampaign1851Delegation::Auto)
 				{
+					if (bCapped && !MinistryCanSpend(P, D.Cost))
+					{
+						continue;
+					}
 					D.bDone = CarryOut(D);
 					if (D.bDone)
 					{
+						if (bCapped) { MinistrySpend(P, D.Cost); }
 						AddDecision(D);
 					}
 				}
@@ -745,7 +752,7 @@ TArray<FCampaign1851Decision> ACampaign1851Map::DecisionOptions(int32 NationInde
 	{
 		// Enough trains to move a quarter of the army at once (a train takes a battalion).
 		int32 Ordered = 0;
-		for (const FVector2D& O : TrainOrders) { Ordered += int32(O.X); }
+		Ordered += TrainOrders.Num();
 		const int32 Need = FMath::CeilToInt(Regiments.Num() / 4.f);
 		if (GetTroopTrains() + Ordered < Need && TroopTrainCost <= Budget && TroopTrainCost <= Spendable)
 		{

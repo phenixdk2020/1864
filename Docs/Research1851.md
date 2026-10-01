@@ -4,21 +4,24 @@ Vinduet **FORSKNING** er menu 10.
 
 ## Forskning som træ
 Vinduet FORSKNING viser et træ i stil med Hearts of Iron.
-- **Grene:** fem søjler.
+- **Grene:** syv søjler.
 - **Niveauer:** rækkerne er niveau I, II, III osv.
 - **Streger** går fra et projekt til det, det åbner for.
 - **Rækkefølge:** et projekt kræver kun det ovenover i sin gren. Der er ingen årstal.
 - **Start:** klik på en boks. Der åbnes en boks med symbolet, hvad projektet gør, pris og tid, hvad det kræver først, og knappen START (eller hvorfor det ikke kan startes endnu).
-- **Symboler:** hver gren har sit symbol: rødt kors, stjerneskanse, telegraf, krydsede geværer og kanon.
+- **Symboler:** hver gren har sit symbol: rødt kors, stjerneskanse, telegraf, krydsede geværer, kanon, hestesko med sabel og stabsflag.
 - **Ét ad gangen:** der kører ét projekt ad gangen, og det betales hver måned. Står Krigsministeriet på AUTO, vælger det selv.
+- **Til slaget:** emnerne for infanteriet, kavaleriet, kommandoen og pontonnererne ændrer 3D-slagets egne tal (se BattleLink1851.md).
 
 | Gren | I | II | III |
 |---|---|---|---|
 | Sanitet og forsyning | Sanitetsvæsenet (tab −20 %) | Konserves og feltbagerier (6 dages proviant) | Militærhospitaler (syge 40 % hurtigere tilbage) |
 | Befæstning | Fæstningsbyggeri (dækning +10) | Kasematter og blendinger (dækning +10) | |
-| Samfærdsel | Felttelegrafen (indkaldelse × 1,25) | Jernbanemobilisering (× 1,25) | |
-| Hæren | Stabsskolen (kampværdi + 5 %) | Bagladegeværet (infanteri × 1,25) | |
+| Samfærdsel | Felttelegrafen (indkaldelse × 1,25) | Jernbanemobilisering (× 1,25) | Pontonnerkorpset (pontonbro −40 % pris, halv tid; pionerbro i slaget) |
+| Infanteriet | Karré-eksercitsen (karré 30 % hurtigere; hver side skyder 30 %) | Kædelinjer og jægertaktik (dækning × 1,25, tab −10 %) | Bagladegeværet (infanteri × 1,25; ladetid × 0,35 i slaget) |
 | Artilleriet | Riflede kanoner (× 1,4) | | |
+| Kavaleriet | Rytterspejdning (rytteriet ser 50 % længere; SPEJD HER i slaget) | Dragonernes ildkamp (karabin 45/90/130 m, 5 s) | Rytterchokket (omformering × 1,25, chok i flanke × 1,2) |
+| Kommando | Stabsskolen (kampværdi +5 %; kommandozoner +15 %) | Generalstaben (ordrer 25 % hurtigere, zoner +15 %, +5 % med 3 eller flere enheder) | |
 
 ## Doktriner
 - Et skift koster 5.000 rd. og −0,05 i moral for alle enheder.
@@ -38,6 +41,7 @@ Vinduet FORSKNING viser et træ i stil med Hearts of Iron.
 `Units.json` og `BattleRequest_N.json` får to nye felter:
 - `"doctrine": { strategic, operational, tactical, changing, lossFactor, fortCoverBonusPercent, gunFactor, infantryFactor }`
 - `"research": [id, …]`
+- `"battleRules"` og `"aiDefaults"` (se BattleLink1851.md)
 
 ## Gemning (v23)
 Gemmes som `Research`-linjer:

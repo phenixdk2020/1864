@@ -290,6 +290,7 @@ void ACampaign1851PlayerController::TryInit()
 			: WindowName == TEXT("research") ? SCampaign1851Overlay::EWindow::Research : WindowName == TEXT("navy") ? SCampaign1851Overlay::EWindow::Navy
 			: WindowName == TEXT("battlefield") ? SCampaign1851Overlay::EWindow::Battlefield
 			: WindowName == TEXT("materiel") ? SCampaign1851Overlay::EWindow::Materiel
+			: WindowName == TEXT("nations") ? SCampaign1851Overlay::EWindow::Nations
 			: WindowName == TEXT("gazette") ? SCampaign1851Overlay::EWindow::Gazette : WindowName == TEXT("end") ? SCampaign1851Overlay::EWindow::End
 			: SCampaign1851Overlay::EWindow::Towns);
 	// -CampaignBattlefield=lat,lon,km builds the ground there (test of the generator).
@@ -301,6 +302,11 @@ void ACampaign1851PlayerController::TryInit()
 		if (P.Num() >= 2)
 		{
 			Map->GenerateBattlefield(Map->KmAtWorld(Map->Project(FCString::Atod(*P[0]), FCString::Atod(*P[1]))), P.Num() > 2 ? FCString::Atof(*P[2]) : 8.f, TEXT("Test"));
+		}
+		// -CampaignBattleView: and go onto it (test of the 3D model).
+		if (FParse::Param(FCommandLine::Get(), TEXT("CampaignBattleView")))
+		{
+			SetBattleView(true);
 		}
 	}
 	if (Overlay.IsValid())
@@ -533,6 +539,10 @@ bool ACampaign1851PlayerController::ScreenGround(const FVector2D& Screen, FVecto
 
 bool ACampaign1851PlayerController::CursorGround(FVector& Out) const
 {
+	if (Map.IsValid() && Map->IsBattleView())
+	{
+		return false;   // the battlefield model: no map under the cursor
+	}
 	float X, Y;
 	return GetMousePosition(X, Y) && ScreenGround(FVector2D(X, Y), Out);
 }
@@ -1369,7 +1379,26 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 		else if (Button == SCampaign1851Overlay::EButton::TrainOrder)
 		{
-			Overlay->ShowToast(Map->OrderTroopTrain() ? TEXT("Togsæt bestilt i England") : TEXT("Ikke råd i statskassen"));
+			Overlay->ShowToast(Map->OrderTroopTrain(Module) ? FString::Printf(TEXT("Togsæt bestilt i England til %s"), Map->GetCities().IsValidIndex(Module) ? *Map->GetCities()[Module].Name : TEXT("København"))
+				: FString(TEXT("Ikke råd i statskassen")));
+		}
+		else if (Button == SCampaign1851Overlay::EButton::BattleViewEnter)
+		{
+			SetBattleView(true);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::BattleViewLeave)
+		{
+			SetBattleView(false);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::MinistryBudget)
+		{
+			Map->StepMinistryBudget(ECampaign1851Portfolio(Module / 2), Module % 2 == 1 ? 1 : -1);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::TrainMove)
+		{
+			FString Why;
+			const int32 Train = Module / 1000, To = Module % 1000;
+			Overlay->ShowToast(Map->TransferTrain(Train, To, &Why) ? FString::Printf(TEXT("Toget skibes til %s"), *Map->GetCities()[To].Name) : FString::Printf(TEXT("Kan ikke flyttes: %s"), *Why));
 		}
 		else if (Button == SCampaign1851Overlay::EButton::MainMenu)
 		{
@@ -2235,6 +2264,14 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		bDone = Map->MoveRegimentToFormation(SourceId, Into);
 		What = Into == 0 ? TEXT("tilbage i garnison") : FString::Printf(TEXT("ind i %s"), *Map->GetFormations()[Map->FormationIndex(Into)].Name);
 	}
+	else if (SCampaign1851Overlay::TreeKind(Source) == K::Formation && Into == 0)
+	{
+		// A whole formation back to the garrisons: its units go home to their commands, it is dissolved.
+		const FString Name = Overlay->TreeKeyText(Source);
+		const int32 Units = Map->ReturnFormationToGarrison(SourceId);
+		Overlay->ShowToast(FString::Printf(TEXT("%s opløst: %d enheder tilbage i garnison"), *Name, Units));
+		return;
+	}
 	else if (SCampaign1851Overlay::TreeKind(Source) == K::Formation && Into != 0)
 	{
 		const int32 Parent = Into < 0 ? 0 : Into;
@@ -2242,6 +2279,35 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		What = Parent == 0 ? FString(TEXT("direkte under felthæren")) : FString::Printf(TEXT("under %s"), *Map->GetFormations()[Map->FormationIndex(Parent)].Name);
 	}
 	Overlay->ShowToast(bDone ? FString::Printf(TEXT("%s flyttet %s"), *Overlay->TreeKeyText(Source), *What) : FString(TEXT("Kan ikke flyttes dertil")));
+}
+
+void ACampaign1851PlayerController::SetBattleView(bool bEnter)
+{
+	ACampaign1851Camera* Cam = Cast<ACampaign1851Camera>(GetPawn());
+	if (!Map.IsValid() || !Cam)
+	{
+		return;
+	}
+	if (bEnter && !Map->IsBattleView() && Map->EnterBattleView())
+	{
+		// Remember the map view, then look at the model from above, its whole width in sight.
+		SavedMapTarget = Cam->GetTarget();
+		SavedMapDistance = Cam->GetDistanceKm();
+		SavedMapYaw = Cam->GetYaw();
+		SavedMapCentre = Cam->GetBoundsCentre();
+		SavedMapHalf = Cam->GetHalfExtent();
+		const FVector O = Map->GetActorTransform().TransformPosition(Map->BattleViewOrigin());
+		Cam->SetBounds(FVector2D(O.X, O.Y), Map->BattleViewHalfExtent());
+		Cam->SetView(FVector(O.X, O.Y, O.Z + Map->BattleViewGroundZ()), float(Map->BattleViewHalfExtent().X / ACampaign1851Map::KmToUnits) * 1.6f, 0.f);
+		if (Overlay.IsValid()) { Overlay->OpenWindow(SCampaign1851Overlay::EWindow::None); }
+		Map->SetSpeed(0);
+	}
+	else if (!bEnter && Map->IsBattleView())
+	{
+		Map->LeaveBattleView();
+		Cam->SetBounds(SavedMapCentre, SavedMapHalf);
+		Cam->SetView(SavedMapTarget, SavedMapDistance, SavedMapYaw);
+	}
 }
 
 void ACampaign1851PlayerController::CampaignTestFieldArmy()

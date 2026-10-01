@@ -36,8 +36,11 @@ struct FCampaign1851TroopTrain
 	int32 PathLeg = 0;
 	float PathElapsed = 0.f;
 	FVector2D Km = FVector2D::ZeroVector;
+	/** Being moved to another railway (shipped or carted): the station it goes to and the days left. */
+	int32 TransferTo = INDEX_NONE;
+	float TransferDays = 0.f;
 
-	bool IsFree() const { return Lead == INDEX_NONE; }
+	bool IsFree() const { return Lead == INDEX_NONE && TransferTo == INDEX_NONE; }
 	bool IsRunningEmpty() const { return PathLeg < Path.Num(); }
 };
 

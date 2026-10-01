@@ -43,3 +43,21 @@ Billedet på 512 × 512: højdeskygge fra nordvest, højdekurver for hver 5 m, m
 `BattleRequest_N.json` har feltet `battlefieldFile`. Det er slagmarken på 8 km omkring slaget, og den bygges i samme øjeblik.
 
 Test: `-CampaignBattlefield=lat,lon,km -CampaignOpenWindow=battlefield`.
+
+## Gå ind på slagmarken
+Knappen **GÅ IND PÅ SLAGMARKEN** i vinduet SLAGMARK bygger den genererede slagmark i 3D. Modellen står langt ude ved siden af kampagnekortet.
+
+**Modellen:**
+- **Skala:** 5 enheder pr. meter. Højden er overdrevet 1,5 gange.
+- **Jorden:** billedets farver i 512 × 512 felter, uden veje.
+- **Oven på jorden:** veje, chausséer, markveje, jernbaner og åer som bånd; huse, gårde og kirker; skov som træer; markskel som knicks, diger eller grøfter.
+- **Rydning:** der står ingen træer på veje og vand eller tæt ved huse.
+
+**Kameraet** styres som på kortet. TILBAGE TIL KORTET fører tilbage til det sted, hvor man var på kortet.
+
+**Imens:**
+- Spillet står på pause.
+- Kortets skilte er skjult.
+- Der er ingen enheder endnu.
+
+**Test:** `-CampaignOpenWindow=battlefield -CampaignBattlefield=lat,lon,km -CampaignBattleView`

@@ -42,9 +42,11 @@ void ACampaign1851Map::UpdateIntel()
 		float Error = -1.f;
 		for (const FCampaign1851Regiment& R : Regiments)
 		{
-			if (R.Men > 0 && FVector2D::Distance(R.Km, C.Km) < SightKm(R.Arm))
+			// Rytterspejdning: the cavalry sees half as far again.
+			const float Sight = SightKm(R.Arm) * (R.Arm == ECampaign1851Arm::Cavalry && HasResearch(TEXT("recon")) ? 1.5f : 1.f);
+			if (R.Men > 0 && FVector2D::Distance(R.Km, C.Km) < Sight)
 			{
-				const float E = SightKm(R.Arm) > 10.f ? 0.05f : 0.25f;
+				const float E = Sight > 10.f ? 0.05f : 0.25f;
 				Error = Error < 0.f ? E : FMath::Min(Error, E);
 			}
 		}

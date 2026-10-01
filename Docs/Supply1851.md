@@ -54,3 +54,18 @@ Filen skrives hver måned og ved hver gemning. Hver enhed har:
 ## Forsyningsvinduet og forsyningskortet (backlog 5, v00.00.44)
 - **Menuknappen FORSYNING:** viser statens lager (geværer, kanoner, heste, trænkolonner, forråd pr. måned), depoter (proviant, foder, ammunition, materialer), kolonner undervejs og enheder i felten. Enhederne står efter forsyning, de dårligst forsynede først, med farve og SEND-knap.
 - **Forsyningskort (tasten F):** viser en grøn ring om hvert depot med forråd (rækkevidde 25 km) og en farvet prik pr. enhed: grøn = forsynet, gul = under 2 dage, rød = under 1 dag. Trænkolonnerne vises som brune prikker.
+## Magasinerne i 1851
+Hæren havde magasiner i fæstnings- og garnisonsbyerne. De står fulde fra start og fyldes op hver måned som andre depoter. Tallene er spillets skøn.
+
+| By | Proviant | Foder | Ammunition (læs) |
+|---|---|---|---|
+| København (Proviantgården, Tøjhuset) | 120.000 | 60.000 | 150 |
+| Fredericia, Rendsborg (fæstninger) | 60.000 | 30.000 | 60 |
+| Nyborg | 30.000 | 15.000 | 30 |
+| Helsingør (Kronborg) | 20.000 | 10.000 | 20 |
+| Flensborg | 20.000 | 10.000 | 15 |
+| Aalborg, Aarhus, Viborg, Odense, Slesvig, Kiel, Altona | 15.000 | 8.000 | 10 |
+| Frederikshavn (Fladstrand) | 10.000 | 5.000 | 10 |
+
+- Garnisonens depot, kornmagasiner og arsenaler, som spilleren bygger, kommer oveni.
+- Ældre gemte spil får magasinerne fyldt gradvist af de månedlige opkøb.

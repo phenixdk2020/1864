@@ -1116,7 +1116,7 @@ FCampaign1851MarchPlan ACampaign1851Map::PlanColumn(const TArray<int32>& Column,
 		}
 		else if (Candidates.Num() < Plan.TrainsNeeded)
 		{
-			Replan(FString::Printf(TEXT("Kun %d ledige tog på banen ved %s (skal bruge %d): kolonnen marcherer"), Candidates.Num(), *Cities[Board].Name, Plan.TrainsNeeded));
+			Replan(FString::Printf(TEXT("Kun %d ledige tog på hele jernbanenettet, der når %s (skal bruge %d): kolonnen marcherer"), Candidates.Num(), *Cities[Board].Name, Plan.TrainsNeeded));
 		}
 		else
 		{
@@ -1179,6 +1179,19 @@ void ACampaign1851Map::AdvanceTroopTrains(float DeltaDays)
 	for (int32 t = 0; t < TroopTrainList.Num(); ++t)
 	{
 		FCampaign1851TroopTrain& T = TroopTrainList[t];
+		// Being moved to another railway: there when the days are up.
+		if (T.TransferTo != INDEX_NONE)
+		{
+			T.TransferDays -= DeltaDays;
+			if (T.TransferDays <= 0.f)
+			{
+				T.Station = T.TransferTo;
+				T.TransferTo = INDEX_NONE;
+				T.TransferDays = 0.f;
+				News.Add(FString::Printf(TEXT("Tog %d er fremme i %s"), T.Id, Cities.IsValidIndex(T.Station) ? *Cities[T.Station].Name : TEXT("?")));
+			}
+			continue;
+		}
 		if (T.IsRunningEmpty())
 		{
 			T.PathElapsed += DeltaDays;
@@ -1225,12 +1238,13 @@ void ACampaign1851Map::AdvanceTroopTrains(float DeltaDays)
 	{
 		if (CampaignDays >= TrainOrders[o].Y)
 		{
-			// Delivered by ship to Copenhagen.
+			// Delivered by ship to the station it was ordered for.
 			FCampaign1851TroopTrain T;
 			T.Id = NextTrainId++;
-			T.Station = FindCity(TEXT("København"));
+			const int32 To = int32(TrainOrders[o].X) - 1;
+			T.Station = Cities.IsValidIndex(To) ? To : FindCity(TEXT("København"));
 			TroopTrainList.Add(T);
-			News.Add(FString::Printf(TEXT("Et nyt troppetog er leveret i København (i alt %d)"), TroopTrainList.Num()));
+			News.Add(FString::Printf(TEXT("Et nyt troppetog er leveret i %s (i alt %d)"), Cities.IsValidIndex(T.Station) ? *Cities[T.Station].Name : TEXT("?"), TroopTrainList.Num()));
 			TrainOrders.RemoveAt(o);
 		}
 	}
@@ -1270,6 +1284,11 @@ FString ACampaign1851Map::DescribeTrain(int32 Train) const
 		return FString();
 	}
 	const FCampaign1851TroopTrain& T = TroopTrainList[Train];
+	if (T.TransferTo != INDEX_NONE)
+	{
+		return FString::Printf(TEXT("skibes til %s  ·  fremme ca. %s"), Cities.IsValidIndex(T.TransferTo) ? *Cities[T.TransferTo].Name : TEXT("?"),
+			*FormatDate(GetDate() + FTimespan::FromDays(T.TransferDays), true));
+	}
 	const FString Column = Regiments.IsValidIndex(T.Lead) ? Regiments[T.Lead].Name + (Regiments[T.Lead].Group ? TEXT(" m.fl.") : TEXT("")) : FString();
 	if (T.IsRunningEmpty())
 	{
@@ -1329,7 +1348,7 @@ void ACampaign1851Map::UpdateTroopTrainPieces()
 			Parts.Add(P);
 		}
 		// With its column it is drawn as the column's train; otherwise on its own.
-		const bool bShow = !T.bBoarded && bSceneryVisible;
+		const bool bShow = !T.bBoarded && T.TransferTo == INDEX_NONE && bSceneryVisible;
 		for (UStaticMeshComponent* P : Parts)
 		{
 			P->SetVisibility(bShow);
@@ -1801,6 +1820,33 @@ bool ACampaign1851Map::MoveFormation(int32 Id, int32 NewParent)
 	return true;
 }
 
+int32 ACampaign1851Map::ReturnFormationToGarrison(int32 Id)
+{
+	if (FormationIndex(Id) == INDEX_NONE)
+	{
+		return 0;
+	}
+	const TArray<int32> Units = FormationRegiments(Id);
+	for (int32 i : Units)
+	{
+		Regiments[i].Formation = 0;
+	}
+	// It and everything under it.
+	TArray<int32> Ids;
+	for (const FCampaign1851Formation& F : Formations)
+	{
+		if (IsInside(F.Id, Id))
+		{
+			Ids.Add(F.Id);
+		}
+	}
+	for (int32 F : Ids)
+	{
+		DissolveFormation(F);
+	}
+	return Units.Num();
+}
+
 bool ACampaign1851Map::MoveRegimentToFormation(int32 Regiment, int32 Formation)
 {
 	if (!Regiments.IsValidIndex(Regiment) || (Formation != 0 && FormationIndex(Formation) == INDEX_NONE))
@@ -2163,6 +2209,8 @@ TArray<FCampaign1851TrainSave> ACampaign1851Map::SaveTrains() const
 		S.Lead = Regiments.IsValidIndex(T.Lead) ? Regiments[T.Lead].Id : FString();
 		S.Board = Cities.IsValidIndex(T.Board) ? Cities[T.Board].Name : FString();
 		S.Release = Cities.IsValidIndex(T.Release) ? Cities[T.Release].Name : FString();
+		S.TransferTo = Cities.IsValidIndex(T.TransferTo) ? Cities[T.TransferTo].Name : FString();
+		S.TransferDays = T.TransferDays;
 		S.bBoarded = T.bBoarded;
 	}
 	return Out;
@@ -2181,6 +2229,8 @@ void ACampaign1851Map::RestoreTrains(const TArray<FCampaign1851TrainSave>& Saves
 		T.Board = FindCity(S.Board);
 		T.Release = FindCity(S.Release);
 		T.bBoarded = S.bBoarded;
+		T.TransferTo = S.TransferTo.IsEmpty() ? INDEX_NONE : FindCity(S.TransferTo);
+		T.TransferDays = T.TransferTo != INDEX_NONE ? S.TransferDays : 0.f;
 		NextTrainId = FMath::Max(NextTrainId, S.Id + 1);
 		TroopTrainList.Add(T);
 	}

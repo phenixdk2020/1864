@@ -680,6 +680,7 @@ void ACampaign1851Map::RenderBattlefield()
 			Img[py * BfImage + px] = C;
 		}
 	}
+	B.GroundPixels = Img;
 	// Lines and shapes in metres.
 	auto Plot = [&](const FVector2D& M, const FColor& C)
 	{

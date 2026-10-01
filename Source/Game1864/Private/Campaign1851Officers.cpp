@@ -229,14 +229,95 @@ bool ACampaign1851Map::PromoteOfficer(int32 Officer)
 	return true;
 }
 
-bool ACampaign1851Map::OrderTroopTrain()
+bool ACampaign1851Map::OrderTroopTrain(int32 Station)
 {
 	if (Treasury < TroopTrainCost)
 	{
 		return false;
 	}
-	AddTransaction(-TroopTrainCost, TEXT("Troppetog bestilt (lokomotiv og vogne)"));
-	TrainOrders.Add(FVector2D(1.0, CampaignDays + TroopTrainDeliveryDays));
+	if (!Cities.IsValidIndex(Station))
+	{
+		Station = FindCity(TEXT("København"));
+	}
+	AddTransaction(-TroopTrainCost, FString::Printf(TEXT("Troppetog bestilt til %s (lokomotiv og vogne)"), Cities.IsValidIndex(Station) ? *Cities[Station].Name : TEXT("?")));
+	// X: the station it is landed at, plus one (older saves have 1: the first town, Copenhagen).
+	TrainOrders.Add(FVector2D(double(FMath::Max(Station, 0) + 1), CampaignDays + TroopTrainDeliveryDays));
+	return true;
+}
+
+TArray<ACampaign1851Map::FRailNet> ACampaign1851Map::RailNets() const
+{
+	// The open railways as networks of towns that hang together (Altona-Kiel with Rendsburg and Glückstadt,
+	// Copenhagen-Roskilde, ...). A train can only run on the network it stands on.
+	TArray<FRailNet> Nets;
+	TArray<int32> NetOf;
+	NetOf.Init(INDEX_NONE, Cities.Num());
+	for (int32 c = 0; c < Cities.Num(); ++c)
+	{
+		const bool bStation = Links.ContainsByPredicate([c](const FCampaign1851Link& L) { return L.bRailway && (L.A == c || L.B == c); });
+		if (!bStation || NetOf[c] != INDEX_NONE)
+		{
+			continue;
+		}
+		FRailNet& Net = Nets.AddDefaulted_GetRef();
+		const int32 Me = Nets.Num() - 1;
+		TArray<int32> Open = { c };
+		NetOf[c] = Me;
+		while (Open.Num() > 0)
+		{
+			const int32 At = Open.Pop();
+			Net.Stations.Add(At);
+			for (const FCampaign1851Link& L : Links)
+			{
+				if (L.bRailway && (L.A == At || L.B == At))
+				{
+					const int32 Other = L.A == At ? L.B : L.A;
+					if (Cities.IsValidIndex(Other) && NetOf[Other] == INDEX_NONE)
+					{
+						NetOf[Other] = Me;
+						Open.Add(Other);
+					}
+				}
+			}
+		}
+		// Named after its two largest towns; new trains are landed at its largest port.
+		TArray<int32> ByPop = Net.Stations;
+		ByPop.Sort([this](int32 A, int32 B) { return Cities[A].Population > Cities[B].Population; });
+		Net.Name = ByPop.Num() > 1 ? FString::Printf(TEXT("%s–%s"), *Cities[ByPop[0]].Name, *Cities[ByPop[1]].Name) : Cities[ByPop[0]].Name;
+		for (int32 s : ByPop)
+		{
+			if (IsCoastalTown(s)) { Net.Depot = s; break; }
+		}
+		Net.Depot = Net.Depot == INDEX_NONE ? ByPop[0] : Net.Depot;
+	}
+	return Nets;
+}
+
+float ACampaign1851Map::TrainTransferDays(int32 Train, int32 Station) const
+{
+	// Loaded on a ship or on carts: ten days for the work, a day for every 40 km between the stations.
+	if (!TroopTrainList.IsValidIndex(Train) || !Cities.IsValidIndex(Station) || !Cities.IsValidIndex(TroopTrainList[Train].Station))
+	{
+		return 0.f;
+	}
+	return 10.f + float(FVector2D::Distance(TownKm(TroopTrainList[Train].Station), TownKm(Station))) / 40.f;
+}
+
+bool ACampaign1851Map::TransferTrain(int32 Train, int32 Station, FString* OutReason)
+{
+	auto Fail = [OutReason](const TCHAR* Why) { if (OutReason) { *OutReason = Why; } return false; };
+	if (!TroopTrainList.IsValidIndex(Train) || !Cities.IsValidIndex(Station)) return Fail(TEXT("-"));
+	FCampaign1851TroopTrain& T = TroopTrainList[Train];
+	if (!T.IsFree() || !Cities.IsValidIndex(T.Station)) return Fail(TEXT("toget er i brug"));
+	if (T.Station == Station) return Fail(TEXT("toget står der allerede"));
+	if (Treasury < TrainTransferCost) return Fail(TEXT("ikke råd"));
+	const float Days = TrainTransferDays(Train, Station);
+	AddTransaction(-TrainTransferCost, FString::Printf(TEXT("Tog %d flyttes til %s"), T.Id, *Cities[Station].Name));
+	T.TransferTo = Station;
+	T.TransferDays = Days;
+	T.Station = INDEX_NONE;
+	News.Add(FString::Printf(TEXT("Tog %d skibes til %s (%s)"), T.Id, *Cities[Station].Name, *FormatDuration(Days)));
+	UpdateTroopTrainPieces();
 	return true;
 }
 

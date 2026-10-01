@@ -28,10 +28,46 @@ namespace Campaign1851Supply
 	}
 }
 
+namespace
+{
+	/** The army's magazines of 1851 (estimates): the fortresses' proviant and powder stores and the garrison
+	 *  towns' magazines. Rations, fodder rations and ammunition loads (one load: a battalion's two days). */
+	struct FMagazine1851 { const TCHAR* Town; float Food, Fodder, Ammo; };
+	const FMagazine1851 Magazines1851[] = {
+		{ TEXT("København"),  120000.f, 60000.f, 150.f },   // Proviantgården, Tøjhuset
+		{ TEXT("Fredericia"),  60000.f, 30000.f,  60.f },   // the fortress
+		{ TEXT("Rendsborg"),   60000.f, 30000.f,  60.f },   // the fortress on the Eider
+		{ TEXT("Nyborg"),      30000.f, 15000.f,  30.f },   // the fortress on the Great Belt
+		{ TEXT("Helsingør"),   20000.f, 10000.f,  20.f },   // Kronborg
+		{ TEXT("Frederikshavn"), 10000.f, 5000.f, 10.f },   // Fladstrand battery
+		{ TEXT("Aalborg"),     15000.f,  8000.f,  10.f },
+		{ TEXT("Aarhus"),      15000.f,  8000.f,  10.f },
+		{ TEXT("Viborg"),      15000.f,  8000.f,  10.f },
+		{ TEXT("Odense"),      15000.f,  8000.f,  10.f },
+		{ TEXT("Flensborg"),   20000.f, 10000.f,  15.f },
+		{ TEXT("Slesvig"),     15000.f,  8000.f,  10.f },
+		{ TEXT("Kiel"),        15000.f,  8000.f,  10.f },
+		{ TEXT("Altona"),      15000.f,  8000.f,  10.f },
+	};
+}
+
 FCampaign1851DepotCapacity ACampaign1851Map::DepotCapacity(int32 CityIndex) const
 {
-	// A garrison's depot and magazine, a grain store, an arsenal: each adds room.
+	// A garrison's depot and magazine, a grain store, an arsenal: each adds room. The magazines of 1851 to
+	// begin with.
 	FCampaign1851DepotCapacity C;
+	if (Cities.IsValidIndex(CityIndex))
+	{
+		for (const FMagazine1851& M : Magazines1851)
+		{
+			if (Cities[CityIndex].Name == M.Town)
+			{
+				C.Food += M.Food;
+				C.Fodder += M.Fodder;
+				C.Ammo += M.Ammo;
+			}
+		}
+	}
 	if (const ACampaign1851ConstructionSite* Garrison = FindProject(CityIndex))
 	{
 		if (!Garrison->IsDemolishing() && Garrison->NumModules() > 2 && Garrison->IsModuleDone(2))
@@ -97,6 +133,15 @@ int32 ACampaign1851Map::TownForPurchase(const FVector2D& Km) const
 void ACampaign1851Map::ResetSupply()
 {
 	Depots.Reset();
+	// The magazines of 1851 stand full.
+	for (int32 c = 0; c < Cities.Num(); ++c)
+	{
+		const FCampaign1851DepotCapacity Cap = DepotCapacity(c);
+		if (Cap.Food + Cap.Fodder + Cap.Ammo > 0.f)
+		{
+			Depots.Add(c, { Cap.Food, Cap.Fodder, Cap.Ammo });
+		}
+	}
 	SupplyColumns.Reset();
 	SupplyColumnCount = Campaign1851Supply::ColumnsAtStart;
 	UpdateSupplyColumnPieces();
@@ -366,6 +411,102 @@ void ACampaign1851Map::RestoreSupply(const TArray<FString>& Lines)
 	}
 }
 
+TSharedRef<FJsonObject> ACampaign1851Map::OfficerJson(int32 Officer) const
+{
+	TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+	if (!Officers.IsValidIndex(Officer))
+	{
+		O->SetBoolField(TEXT("vacant"), true);
+		return O;
+	}
+	const FCampaign1851Officer& Off = Officers[Officer];
+	O->SetStringField(TEXT("id"), Off.Id);
+	O->SetStringField(TEXT("name"), Off.Name);
+	O->SetStringField(TEXT("rank"), Off.Rank);
+	O->SetNumberField(TEXT("experience"), FMath::RoundToInt(Off.Experience));
+	// The battle's officer AI: leadership, initiative and the rest, 1-10.
+	TSharedRef<FJsonObject> Stats = MakeShared<FJsonObject>();
+	static const TCHAR* Keys[] = { TEXT("leadership"), TEXT("inspiration"), TEXT("initiative"), TEXT("tactical"), TEXT("staff"), TEXT("discipline"), TEXT("aggression"), TEXT("composure"), TEXT("political"), TEXT("caution") };
+	for (int32 s = 0; s < int32(ECampaign1851OfficerStat::Count) && s < UE_ARRAY_COUNT(Keys); ++s)
+	{
+		Stats->SetNumberField(Keys[s], Off.Stats[s]);
+	}
+	O->SetObjectField(TEXT("stats"), Stats);
+	return O;
+}
+
+TSharedRef<FJsonObject> ACampaign1851Map::BattleOrganisationJson(int32 Regiment) const
+{
+	// How the battle builds the unit (the Unity prototype F30): an infantry battalion as companies of about
+	// 190 under their captains and a major or lieutenant colonel; a cavalry regiment as squadrons (hussars
+	// 120, dragoons 140 riders); a battery with its guns. Only the men with the colours (presentMen) fight.
+	const FCampaign1851Regiment& R = Regiments[Regiment];
+	TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+	const bool bHussars = R.Arm == ECampaign1851Arm::Cavalry && R.Name.Contains(TEXT("husar"));
+	const TCHAR* Type = R.Arm == ECampaign1851Arm::Guard ? TEXT("guard_battalion") : R.Arm == ECampaign1851Arm::Jager ? TEXT("jager_battalion")
+		: R.Arm == ECampaign1851Arm::Cavalry ? (bHussars ? TEXT("hussar_regiment") : TEXT("dragoon_regiment"))
+		: R.Arm == ECampaign1851Arm::Artillery ? TEXT("foot_battery") : R.Arm == ECampaign1851Arm::HorseArtillery ? TEXT("horse_battery") : TEXT("infantry_battalion");
+	O->SetStringField(TEXT("type"), Type);
+	O->SetStringField(TEXT("symbol"), R.Arm == ECampaign1851Arm::Cavalry ? TEXT("II/CAV") : R.Guns > 0 ? TEXT("I/ART") : TEXT("II"));
+	O->SetObjectField(TEXT("commander"), OfficerJson(R.Chief));
+	O->SetObjectField(TEXT("general"), OfficerJson(R.General));
+	O->SetNumberField(TEXT("formation"), R.Formation);
+	O->SetStringField(TEXT("command"), Commands.IsValidIndex(R.Command) ? Commands[R.Command].Id : FString());
+	O->SetStringField(TEXT("attachment"), TEXT("organic"));
+	const int32 Present = R.PresentMen();
+	TArray<TSharedPtr<FJsonValue>> Subs;
+	if (R.Arm == ECampaign1851Arm::Cavalry)
+	{
+		const int32 Size = bHussars ? 120 : 140;
+		const int32 Squadrons = FMath::Max(1, FMath::RoundToInt(float(FMath::Max(R.MaxMen, R.Men)) / Size));
+		for (int32 s = 0; s < Squadrons; ++s)
+		{
+			TSharedRef<FJsonObject> S = MakeShared<FJsonObject>();
+			S->SetStringField(TEXT("kind"), TEXT("squadron"));
+			S->SetStringField(TEXT("name"), FString::Printf(TEXT("%d. ESKADRON"), s + 1));
+			S->SetNumberField(TEXT("men"), Present / Squadrons + (s < Present % Squadrons ? 1 : 0));
+			S->SetNumberField(TEXT("establishment"), Size);
+			Subs.Add(MakeShared<FJsonValueObject>(S));
+		}
+	}
+	else if (R.Guns > 0)
+	{
+		TSharedRef<FJsonObject> S = MakeShared<FJsonObject>();
+		S->SetStringField(TEXT("kind"), TEXT("battery"));
+		S->SetStringField(TEXT("name"), R.Name);
+		S->SetNumberField(TEXT("men"), Present);
+		S->SetNumberField(TEXT("guns"), R.Guns);
+		S->SetNumberField(TEXT("mortars"), R.Mortars);
+		Subs.Add(MakeShared<FJsonValueObject>(S));
+	}
+	else
+	{
+		const int32 Companies = FMath::Max(4, R.Captains.Num());
+		int32 InField = 0;
+		for (int32 c = 0; c < Companies; ++c)
+		{
+			InField += R.CompanyFort.IsValidIndex(c) && R.CompanyFort[c] != 0 ? 0 : 1;
+		}
+		InField = FMath::Max(1, InField);
+		int32 k = 0;
+		for (int32 c = 0; c < Companies; ++c)
+		{
+			TSharedRef<FJsonObject> S = MakeShared<FJsonObject>();
+			const int32 Fort = R.CompanyFort.IsValidIndex(c) ? R.CompanyFort[c] : 0;
+			S->SetStringField(TEXT("kind"), TEXT("company"));
+			S->SetStringField(TEXT("name"), FString::Printf(TEXT("%d. KOMPAGNI"), c + 1));
+			S->SetNumberField(TEXT("men"), Fort != 0 ? 0 : Present / InField + (k < Present % InField ? 1 : 0));
+			S->SetNumberField(TEXT("establishment"), 190);
+			S->SetNumberField(TEXT("fortId"), Fort);
+			S->SetObjectField(TEXT("captain"), OfficerJson(R.Captains.IsValidIndex(c) ? R.Captains[c] : INDEX_NONE));
+			k += Fort != 0 ? 0 : 1;
+			Subs.Add(MakeShared<FJsonValueObject>(S));
+		}
+	}
+	O->SetArrayField(TEXT("subunits"), Subs);
+	return O;
+}
+
 void ACampaign1851Map::ExportUnits() const
 {
 	// Every regiment with its place, strength, supply and battle factors, for the 3D battles (Docs/Supply1851.md).
@@ -410,9 +551,27 @@ void ACampaign1851Map::ExportUnits() const
 		Bf->SetNumberField(TEXT("cohesion"), B.Cohesion);
 		Bf->SetNumberField(TEXT("experience"), B.Experience);
 		O->SetObjectField(TEXT("battleFactors"), Bf);
+		O->SetObjectField(TEXT("battle"), BattleOrganisationJson(i));
 		List.Add(MakeShared<FJsonValueObject>(O));
 	}
 	Doc->SetArrayField(TEXT("units"), List);
+	// The field army's formations (division XX, brigade X, regiment III of two battalions) for the battle's
+	// command tree: OrganicParent from here, attachments are the battle's own.
+	TArray<TSharedPtr<FJsonValue>> FormList;
+	for (const FCampaign1851Formation& F : Formations)
+	{
+		TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+		O->SetNumberField(TEXT("id"), F.Id);
+		O->SetStringField(TEXT("name"), F.Name);
+		O->SetStringField(TEXT("echelon"), F.Echelon == ECampaign1851Echelon::Army ? TEXT("ARMY") : F.Echelon == ECampaign1851Echelon::Division ? TEXT("XX")
+			: F.Echelon == ECampaign1851Echelon::Brigade ? TEXT("X") : F.Echelon == ECampaign1851Echelon::Regiment ? TEXT("III") : TEXT("DET"));
+		O->SetNumberField(TEXT("parent"), F.Parent);
+		O->SetObjectField(TEXT("commander"), OfficerJson(F.Commander));
+		O->SetObjectField(TEXT("deputy"), OfficerJson(F.Deputy));
+		O->SetObjectField(TEXT("chiefOfStaff"), OfficerJson(F.StaffChief));
+		FormList.Add(MakeShared<FJsonValueObject>(O));
+	}
+	Doc->SetArrayField(TEXT("formations"), FormList);
 	FString Text;
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Text);
 	FJsonSerializer::Serialize(Doc, Writer);

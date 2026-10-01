@@ -117,4 +117,13 @@ private:
 	TSharedPtr<SCampaign1851Overlay> Overlay;
 	FVector2D LastMouse = FVector2D::ZeroVector;
 	bool bInitialised = false;
+
+	/** Onto the battlefield model (and back to the map view it came from). */
+	void SetBattleView(bool bEnter);
+	/** The map view to come back to from the battlefield model. */
+	FVector SavedMapTarget = FVector::ZeroVector;
+	float SavedMapDistance = 600.f;
+	float SavedMapYaw = 0.f;
+	FVector2D SavedMapCentre = FVector2D::ZeroVector;
+	FVector2D SavedMapHalf = FVector2D(1.0, 1.0);
 };
