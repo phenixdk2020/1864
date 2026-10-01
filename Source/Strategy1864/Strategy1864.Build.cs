@@ -21,6 +21,8 @@ public class Strategy1864 : ModuleRules
                 "Json",
                 "ImageWrapper",
                 "RenderCore",
+                "MeshDescription",          // the crowd model (far soldiers built as a static mesh)
+                "StaticMeshDescription",
                 "Game1864"   // the campaign: the scenery pieces for the battlefield from the campaign
             });
     }

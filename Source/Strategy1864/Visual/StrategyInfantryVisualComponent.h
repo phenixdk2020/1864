@@ -6,6 +6,8 @@
 
 class AStrategyCompanyUnit;
 class UAnimSequence;
+class UInstancedStaticMeshComponent;
+class UStrategyCrowdModel;
 class USkeletalMesh;
 class USkeletalMeshComponent;
 class UStaticMesh;
@@ -167,6 +169,18 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
     TSoftObjectPtr<UAnimSequence> DeathAsset3;
 
+    /** The hybrid: beyond CrowdFarCm from the camera the company's men (and its fallen) are drawn baked (one
+     *  instanced mesh, M_CrowdVAT, each man his own clip and time) instead of as animated skeletal meshes; back to
+     *  full animation inside CrowdNearCm. 0 turns it off (also -Strategy1864Crowd=0; -Strategy1864CrowdFar=<cm>). */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
+    float CrowdFarCm = 7000.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
+    float CrowdNearCm = 5500.0f;
+
+    UFUNCTION(BlueprintPure, Category="Strategy|Visual|Infantry")
+    bool IsCrowdMode() const { return bCrowdMode; }
+
     UFUNCTION(BlueprintCallable, Category="Strategy|Visual|Infantry")
     void SetEnabled(bool bNewEnabled);
 
@@ -258,4 +272,40 @@ private:
     bool bLastHoldingPose = false;
     bool bLoadAttempted = false;
     FBox FormationLocalBounds = FBox(ForceInit);
+
+    // ---- the hybrid (baked far men)
+    /** What a man plays (so either form can take over where the other was): the clip, when it started (its
+     *  position = (now - start) * rate), the rate (0: a held pose), looping or once. */
+    struct FPlayedClip
+    {
+        TWeakObjectPtr<UAnimSequence> Clip;
+        float Start = 0.0f;
+        float Rate = 1.0f;
+        bool bLoop = true;
+    };
+    TArray<FPlayedClip> SoldierClips;   // parallel to SoldierComponents
+    TArray<FPlayedClip> CorpseClips;    // parallel to CorpseComponents
+
+    UPROPERTY(Transient)
+    TObjectPtr<UInstancedStaticMeshComponent> CrowdLiving;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UInstancedStaticMeshComponent> CrowdFallen;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UStrategyCrowdModel> CrowdModel;
+
+    bool bCrowdMode = false;
+    bool bCrowdDirty = false;       // the instances to rebuild (men added, fallen, moved in the formation)
+    bool bCrowdDataDirty = false;   // a man's clip changed
+    bool bCrowdFailed = false;
+
+    void RecordClip(USkeletalMeshComponent* Soldier, UAnimSequence* Clip, bool bLoop, float Position, float Rate);
+    void UpdateCrowdMode();
+    bool EnsureCrowdModel();
+    void EnterCrowdMode();
+    void LeaveCrowdMode();
+    void RebuildCrowdInstances();
+    void RestoreClip(USkeletalMeshComponent* Soldier, const FPlayedClip& Played, float Now) const;
+    UStaticMesh* CurrentRifleMesh() const;
 };

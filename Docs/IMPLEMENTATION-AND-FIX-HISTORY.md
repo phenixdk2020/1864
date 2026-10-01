@@ -1016,6 +1016,23 @@ Kun ladte soldater kan blive valgt til næste salve.
   - Testflag: `-Strategy1864Sun=`, `-Strategy1864SunYaw=`, `-Strategy1864Haze=`, `-Strategy1864Exposure=`.
 - Fjendens ildkegle tegnes kun med streger. Dens fyld lå hen over vores egen linje.
 
+### Blandingen: bagte soldater på afstand, fuld animation tæt på (1. oktober 2026, nat)
+- Kompagnier længere end 70 m fra kameraet tegnes "bagt", og de skifter tilbage under 55 m (`CrowdFarCm`/`CrowdNearCm`):
+  - Ét instansieret mesh pr. kompagni og et for de faldne, i stedet for 190 skeletmodeller med hvert sit gevær.
+  - De skjulte skeletmodeller tikker ikke.
+  - Testflag: `-Strategy1864Crowd=0` og `-Strategy1864CrowdFar=<cm>`.
+- `UStrategyCrowdModel` (`Visual/StrategyCrowdModel.h/.cpp`) bager første gang en verden bruger en model (26–60 ms pr. model). AnimToTexture-pluginet findes ikke i motoren, så bagningen er vores egen:
+  - Soldatens LOD3 (ca. 2.500 vertices; LOD'erne laves af `make_crowd_material.py`) og geværet bliver én statisk model.
+  - Knogleindeks ligger i UV1-2 og vægte i UV3-4. Geværet sidder på en virtuel knogle.
+  - Alle komponentens klip bages med 15 billeder i sekundet af en skjult skeletmodel til en float-tekstur med skinningsmatricer (tre texels pr. knogle, én række pr. billede).
+  - Geværets virtuelle knogle følger samme regel som `AlignWeapons`: fra højre hånd mod venstre.
+- `M_CrowdVAT` laver skinningen i vertex-shaderen og blander to billeder. Instansens custom data er første række, antal billeder, starttid og billedrate (negativ betyder: spil én gang og bliv liggende).
+- `UStrategyInfantryVisualComponent` husker hver mands klip (`FPlayedClip`: klip, start, rate, loop) i `PlayOnSoldier`, `RefreshAnimation` og `KillSoldiers`:
+  - Bagt tilstand fortsætter, hvor den fulde animation var, og omvendt (`RestoreClip`).
+  - Ladecyklus, sigte, skud og død kører uændret pr. mand. De faldne falder og bliver liggende også i bagt tilstand.
+- Målt på OOB-kortet med to kompagnier i 3D: spil-tid pr. billede 11,3 → 7,8 ms, polygoner 3,4 → 1,3 mio., draw calls 1548 → 958.
+- Fejl rettet undervejs: Transform-noden i materialet tager sit input med tomt navn (`''`). Med "Input" fik den intet, og spillet brugte standardmaterialet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
