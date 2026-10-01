@@ -990,6 +990,32 @@ Kun ladte soldater kan blive valgt til næste salve.
 - `r.RayTracing=False`. Puljen gik over budgettet ved tæt kamera, og spillet var næsten frosset.
 - Byggefejl C4459: `Gold` skyggede for en global variabel i unity-buildet og er omdøbt.
 
+### Slagmarkens grafik som referencebilledet (1. oktober 2026, nat)
+- Årsagen til det flade look: hele slagmarken brugte kampagnekortets *unlit* materiale (`M_Campaign1851Scenery`) med påmalet skygge.
+- Nye belyste materialer laves med `Content/Python/import_battle_graphics.py` i `/Game/Battle/Materials`:
+  - **`M_BattleGround`:** billedets vertexfarver (sRGB → lineær med pow 2,2) gange en flisebelagt græsdetalje i to skalaer (3 m og 11,3 m). Jordteksturen bruges, hvor farven er brun (R > G). Hertil makrovariation over 400 m (frodige, tørre og mørke pletter) og normal maps.
+  - **`M_Foliage`:** maskerede tosidede løvkort med vind (SimpleGrassWind, vægt i vertexfarve R), AO (G), farvevariation pr. instans og udtynding med afstanden til græsset (`FadeStart`/`FadeLength`). Instanserne er `MI_Spruce`, `MI_Pine`, `MI_Leaves` og `MI_Grass`.
+  - Desuden `M_Bark`, `M_FenceWood`, `M_BattleScenery` (belyste bygninger og diger) og `M_BattleWater`.
+  - Alle har brugsflaget for instansierede meshes. Uden det tegner spillet standardmaterialet (brune firkanter).
+- Teksturer laves med `Tools/Battle/make_battle_textures.py` (numpy/PIL), modeller med `Tools/Battle/make_battle_meshes.py` (Blender):
+  - Gran, fyr, løvtræ og eg som kort med normaler ud fra kronen, så de virker fyldige.
+  - Busk, tre græstotter og stakit (stolper og rafter).
+- `AStrategyCampaignBattlefield`:
+  - Ny jord og nye træer i skovene.
+  - Knikkene er vokset til med buske hver 3,2 m og et træ hver ca. 40 m; buskene tegnes kun inden for 1,8 km, mens volden bliver.
+  - Stakit langs veje og spor, med huller.
+  - Hver å i sin egen bredde (Ejderen 50 m).
+  - Græs i 25 m-fliser inden for 115 m af kameraet, kun når kameraet er under 130 m. Det holdes væk fra veje, vand, huse og knik via en 2 m-maske. Komponenterne genbruges, og der bygges højst 6 fliser pr. tick.
+  - Engen har fået en dæmpet sensommerpalet uden påmalet skygge.
+  - `-Strategy1864Grass=0` slår græsset fra.
+- `AStrategyBattleAtmosphere` (ny) bruges på alle slagkort:
+  - Lav sol (24°) fra sydvest, 5400 K, bløde skygger.
+  - Himmellyset optager himlen i realtid.
+  - Tynd varm dis.
+  - Farvekorrektion: mætning 0,92, let varm gain, bloom, vignet og eksponering −0,4.
+  - Testflag: `-Strategy1864Sun=`, `-Strategy1864SunYaw=`, `-Strategy1864Haze=`, `-Strategy1864Exposure=`.
+- Fjendens ildkegle tegnes kun med streger. Dens fyld lå hen over vores egen linje.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

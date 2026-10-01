@@ -17,6 +17,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "../Orders/StrategyOrderComponent.h"
 #include "../Player/StrategyCameraPawn.h"
+#include "../Visual/StrategyBattleAtmosphere.h"
 #include "../Visual/StrategyInfantryVisualComponent.h"
 
 #include "../Command/StrategyCommandComponent.h"
@@ -153,6 +154,12 @@ void AStrategyOOBTestScenario::BeginPlay()
             bUseFlatQAMap
             ? ECollisionEnabled::QueryAndPhysics
             : ECollisionEnabled::NoCollision);
+    }
+
+    // The battle's light and air (a low warm sun, haze, grading) on every battle map.
+    if (AStrategyBattleAtmosphere* Atmosphere = GetWorld()->SpawnActor<AStrategyBattleAtmosphere>(AStrategyBattleAtmosphere::StaticClass(), Origin, FRotator::ZeroRotator))
+    {
+        Atmosphere->Apply();
     }
 
     // The test fields get a meadow instead of the grey box (-Strategy1864FlatQA keeps the box).

@@ -382,8 +382,9 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
     const float ActiveRange = Fire->GetActiveRangeCm();
     const bool bHold = Fire->FirePolicy == EStrategyFirePolicy::Hold;
 
-    // The chosen band filled (front to the chosen range), translucent.
-    if (!bHold)
+    // The chosen band filled (front to the chosen range), translucent; the enemy's cone only in outline (its fill
+    // would lie over our own line).
+    if (!bHold && bDanish)
     {
         const TArray<FVector> Edge = Outline(ActiveRange, 10);
         TArray<FVector2D> Screen;

@@ -4,7 +4,10 @@
 #include "GameFramework/Actor.h"
 #include "StrategyCampaignBattlefield.generated.h"
 
+class UInstancedStaticMeshComponent;
+class UMaterialInterface;
 class UProceduralMeshComponent;
+class UStaticMesh;
 
 /**
  * The battlefield from the campaign (PROJECT 1864 Game1864): built from the generator's file
@@ -13,6 +16,12 @@ class UProceduralMeshComponent;
  * stand on it; the roads, chausséer, lanes, tracks, railways and rivers as ribbons, the houses, farms and
  * churches, the woods, and the field boundaries (knicks, dikes, ditches). Battlefield x east, y north,
  * origin south-west; world +X north (the QA's "towards the enemy"), +Y east, centred on the actor.
+ *
+ * The look (the lit battle materials in /Game/Battle, from Content/Python/import_battle_graphics.py): the ground
+ * with a tiled grass and dirt detail, spruces, pines and broadleaf trees of alpha cards, bushes and trees on the
+ * knicks, post-and-rail fences along the lanes, and grass clumps in tiles round the camera (only near the
+ * ground, kept off the ways, the water and the buildings). Without those assets it falls back to the campaign
+ * map's unlit pieces.
  */
 UCLASS()
 class STRATEGY1864_API AStrategyCampaignBattlefield : public AActor
@@ -21,12 +30,13 @@ class STRATEGY1864_API AStrategyCampaignBattlefield : public AActor
 
 public:
     AStrategyCampaignBattlefield();
+    virtual void Tick(float DeltaSeconds) override;
 
     /** Read the file (a full path, or a name under Saved/Battle) and build everything; false when it fails. */
     bool BuildFromFile(const FString& FileName);
 
     /** The test fields' ground instead of the flat QA box: a gently rolling meadow (grass in patches, a dirt
-     *  track, a wood and copses round the edges, hedges), SizeM square, with collision. */
+     *  track, a wood and copses round the edges, hedges, fences), SizeM square, with collision. */
     void BuildMeadow(float InSizeM, int32 Seed);
 
     /** The field's size in cm (a square), and the ground height at a world point (cm). */
@@ -38,6 +48,10 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Battlefield")
     FString Place;
+
+    /** Grass clumps round the camera (-Strategy1864Grass=0 turns them off). */
+    UPROPERTY(EditAnywhere, Category="Strategy|Battlefield")
+    bool bStreamGrass = true;
 
 private:
     UPROPERTY()
@@ -55,4 +69,43 @@ private:
     TArray<float> HeightM;   // Grid x Grid, row 0 at the south
 
     float HeightAtM(double XM, double YM) const;
+
+    // ---- the look
+    /** The ground's colours ((ColourN+1)^2, row 0 south) and where no grass grows (the ways, water, buildings). */
+    TArray<FColor> GroundColours;
+    int32 ColourN = 0;
+    TBitArray<> NoGrass;
+    int32 NoGrassN = 0;
+    void ResetNoGrass();
+    void MarkNoGrass(const TArray<FVector2D>& Line, double HalfWidthM);
+    void MarkNoGrassDisc(const FVector2D& Centre, double RadiusM);
+    /** 0..1: how much grass grows at a field point (from the ground colour, 0 on the marked ways). */
+    float GrassAt(double XM, double YM) const;
+
+    /** The battle's materials and foliage meshes (null when not imported). */
+    UMaterialInterface* GroundMaterial() const;
+    UMaterialInterface* SceneryMaterial(UMaterialInterface* Fallback) const;
+    UMaterialInterface* WaterMaterial(UMaterialInterface* Fallback) const;
+
+    /** Add instances of a mesh (one hierarchical instanced component), culled beyond CullCm (0: never). */
+    UInstancedStaticMeshComponent* AddInstanced(UStaticMesh* Mesh, const TArray<FTransform>& Instances, bool bShadows, float CullCm, const TCHAR* Name);
+
+    /** Trees, bushes and fences from the battle's meshes: woods (by kind), knick lines, fence lines. */
+    void PlaceTree(TMap<UStaticMesh*, TArray<FTransform>>& Out, int32 Kind, const FVector& Local, float Scale, uint32 Hash) const;
+    void PlaceKnick(TMap<UStaticMesh*, TArray<FTransform>>& Bushes, TMap<UStaticMesh*, TArray<FTransform>>& Trees, const TArray<FVector2D>& Line, uint32 Seed) const;
+    void PlaceFence(TArray<FTransform>& Out, const TArray<FVector2D>& Line, double SideM, float GapChance, uint32 Seed) const;
+
+    // ---- grass tiles round the camera
+    UPROPERTY(Transient)
+    TArray<TObjectPtr<UStaticMesh>> GrassMeshes;
+
+    UPROPERTY(Transient)
+    TArray<TObjectPtr<UInstancedStaticMeshComponent>> GrassPool;
+
+    TArray<TArray<int32>> FreeGrass;             // per grass mesh: free components in the pool
+    TMap<FIntPoint, TArray<int32>> GrassTiles;   // tile -> components in the pool
+    float GrassTimer = 0.0f;
+    void SetupGrass();
+    void UpdateGrass();
+    void BuildGrassTile(const FIntPoint& Tile, TArray<int32>& Components);
 };
