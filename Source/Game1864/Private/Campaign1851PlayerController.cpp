@@ -10,6 +10,8 @@
 #include "Campaign1851SaveGame.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "HAL/FileManager.h"
+#include "Misc/Paths.h"
 
 ACampaign1851PlayerController::ACampaign1851PlayerController()
 {
@@ -71,7 +73,17 @@ void ACampaign1851PlayerController::TryInit()
 
 	FString BuildCity;
 	const bool bTestStart = FParse::Value(FCommandLine::Get(), TEXT("CampaignBuild="), BuildCity, false);
-	if (!bTestStart && !FParse::Param(FCommandLine::Get(), TEXT("CampaignNew")) && UGameplayStatics::DoesSaveGameExist(TEXT("Autosave"), 0))
+	// Back from a 3D battle: the campaign as it was left (whatever the command line says); the result is read in.
+	const FString ReturnFlag = FPaths::ProjectSavedDir() / TEXT("Battle/ReturnToCampaign.flag");
+	const bool bBackFromBattle = IFileManager::Get().FileExists(*ReturnFlag) && UGameplayStatics::DoesSaveGameExist(TEXT("Autosave"), 0);
+	if (bBackFromBattle)
+	{
+		IFileManager::Get().Delete(*ReturnFlag);
+		bResumedFromBattle = true;
+		LoadFromSlot(TEXT("Autosave"));
+		Map->PollBattleResults();
+	}
+	else if (!bTestStart && !FParse::Param(FCommandLine::Get(), TEXT("CampaignNew")) && UGameplayStatics::DoesSaveGameExist(TEXT("Autosave"), 0))
 	{
 		LoadFromSlot(TEXT("Autosave"));
 	}
@@ -382,14 +394,14 @@ void ACampaign1851PlayerController::TryInit()
 		}
 	}
 	// -CampaignWarTest brings the ultimatum forward (test of the war).
-	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignWarTest")))
+	if (!bResumedFromBattle && FParse::Param(FCommandLine::Get(), TEXT("CampaignWarTest")))
 	{
 		Map->ForceWar();
 	}
 	// -CampaignAutoBattles resolves each battle at once (test).
 	bAutoBattles = FParse::Param(FCommandLine::Get(), TEXT("CampaignAutoBattles"));
 	// -CampaignMobilise calls the army in at once (test).
-	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignMobilise")))
+	if (!bResumedFromBattle && FParse::Param(FCommandLine::Get(), TEXT("CampaignMobilise")))
 	{
 		Map->Mobilise();
 	}
@@ -555,6 +567,21 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	if (!bInitialised || !Camera)
 	{
 		return;
+	}
+	// -CampaignFight3D: the first battle goes to 3D at once (test of the way to the battle and back).
+	static bool bFight3DDone = false;
+	if (!bFight3DDone && FParse::Param(FCommandLine::Get(), TEXT("CampaignFight3D")) && Map.IsValid() && Map->GetBattles().Num() > 0 &&
+		!Map->GetBattles()[0].bWaiting && Overlay.IsValid())
+	{
+		bFight3DDone = true;
+		const int32 BattleId = Map->GetBattles()[0].Id;
+		if (Map->FightBattleIn3D(BattleId))
+		{
+			SaveToSlot(TEXT("Autosave"), true);
+			GEngine->GameViewport->RemoveViewportWidgetContent(Overlay.ToSharedRef());
+			UGameplayStatics::OpenLevel(this, FName(TEXT("Strategy1864_Field")), true, FString::Printf(TEXT("Battle=%d"), BattleId));
+			return;
+		}
 	}
 	if (bAutoBattles && Map.IsValid() && Map->GetBattles().Num() > 0)
 	{
@@ -1006,7 +1033,18 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 		else if (Button == SCampaign1851Overlay::EButton::BattleFight3D)
 		{
-			Map->FightBattleIn3D(Module);
+			// The battle in 3D (the Strategy1864 battle in this project): the request, the units and the field are
+			// written, the campaign saved; the battle map opens and comes back here with BattleResult_N.json.
+			if (Map->FightBattleIn3D(Module))
+			{
+				SaveToSlot(TEXT("Autosave"), true);
+				if (GEngine && GEngine->GameViewport && Overlay.IsValid())
+				{
+					GEngine->GameViewport->RemoveViewportWidgetContent(Overlay.ToSharedRef());
+				}
+				UGameplayStatics::OpenLevel(this, FName(TEXT("Strategy1864_Field")), true, FString::Printf(TEXT("Battle=%d"), Module));
+				return;
+			}
 		}
 		else if (Button == SCampaign1851Overlay::EButton::BattleAuto)
 		{

@@ -45,10 +45,13 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|UI")
     bool bOOBOpen = true;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|UI")
+    bool bSettingsOpen = false;
+
 private:
     enum class EAction : uint8
     {
-        None, Minimap, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop
+        None, Minimap, FinishBattle, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop
     };
 
     struct FButton
@@ -63,6 +66,7 @@ private:
     void DrawOOBRow(AStrategyUnit* Unit, int32 Depth, float& Y, int32 Guard);
     void DrawCommandPanel(AStrategyUnit* Unit);
     void DrawMinimap();
+    void DrawSettings();
     void DrawButton(float X, float Y, float W, float H, const FString& Label, EAction Action, int32 Value, bool bActive,
         AStrategyUnit* Unit = nullptr, const FLinearColor* Colour = nullptr);
     void DrawPanel(float X, float Y, float W, float H);

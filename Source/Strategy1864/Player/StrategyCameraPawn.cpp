@@ -1,4 +1,5 @@
 #include "StrategyCameraPawn.h"
+#include "Misc/ConfigCacheIni.h"
 #include "StrategyPlayerController.h"
 #include "../Units/StrategyUnit.h"
 #include "GameFramework/PlayerController.h"
@@ -34,6 +35,36 @@ AStrategyCameraPawn::AStrategyCameraPawn()
     MovementComponent->Deceleration = 10000.0f;
 }
 
+namespace
+{
+    const TCHAR* SettingsSection = TEXT("PROJECT1864.Settings");
+    float CachedKeySpeed = -1.0f;
+}
+
+float AStrategyCameraPawn::GetKeySpeedFactor()
+{
+    if (CachedKeySpeed < 0.0f)
+    {
+        CachedKeySpeed = 5.0f;   // the default: five times the prototype's speed
+        if (GConfig)
+        {
+            GConfig->GetFloat(SettingsSection, TEXT("CameraKeySpeed"), CachedKeySpeed, GGameUserSettingsIni);
+        }
+        CachedKeySpeed = FMath::Clamp(CachedKeySpeed, 0.5f, 30.0f);
+    }
+    return CachedKeySpeed;
+}
+
+void AStrategyCameraPawn::SetKeySpeedFactor(float Factor)
+{
+    CachedKeySpeed = FMath::Clamp(Factor, 0.5f, 30.0f);
+    if (GConfig)
+    {
+        GConfig->SetFloat(SettingsSection, TEXT("CameraKeySpeed"), CachedKeySpeed, GGameUserSettingsIni);
+        GConfig->Flush(false, GGameUserSettingsIni);
+    }
+}
+
 void AStrategyCameraPawn::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
@@ -41,7 +72,10 @@ void AStrategyCameraPawn::Tick(float DeltaTime)
     if (MovementComponent)
     {
         const APlayerController* PC = Cast<APlayerController>(GetController());
-        MovementComponent->MaxSpeed = PC && (PC->IsInputKeyDown(EKeys::LeftShift) || PC->IsInputKeyDown(EKeys::RightShift)) ? 9000.0f : 3000.0f;
+        const float Factor = GetKeySpeedFactor();
+        MovementComponent->MaxSpeed = (PC && (PC->IsInputKeyDown(EKeys::LeftShift) || PC->IsInputKeyDown(EKeys::RightShift)) ? 9000.0f : 3000.0f) * Factor;
+        MovementComponent->Acceleration = 8000.0f * Factor;
+        MovementComponent->Deceleration = 10000.0f * Factor;
     }
     if (bPresetTransition && SpringArm)
     {

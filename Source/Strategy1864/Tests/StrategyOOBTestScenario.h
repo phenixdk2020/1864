@@ -185,6 +185,31 @@ private:
     void DrawRuntimeQAVisuals() const;
     void ConfigureRuntimeQALabel(AStrategyUnit* Unit) const;
 
+public:
+    /** The battle from the campaign: true when it was set up (the field and the units). */
+    bool IsCampaignBattle() const { return bCampaignBattle; }
+
+    /** Writes Saved/Battle/BattleResult_<N>.json (losses per campaign unit, enemy losses, outcome) and,
+     *  when the battle came from the campaign, goes back to the campaign map. */
+    UFUNCTION(BlueprintCallable, Category="Strategy|Campaign")
+    void FinishCampaignBattle();
+
+private:
+    /** Builds the campaign's battlefield and its units (BattleRequest, Units.json, Battlefield_*.json). */
+    bool BuildCampaignBattle(const FString& BattlefieldFile, int32 BattleId);
+
+    UPROPERTY(Transient)
+    TObjectPtr<class AStrategyCampaignBattlefield> CampaignField;
+
+    bool bCampaignBattle = false;
+    bool bReturnToCampaign = false;
+    bool bFieldCameraPlaced = true;
+    bool bCampaignFinished = false;
+    FVector FieldCameraTarget = FVector::ZeroVector;
+    int32 CampaignBattleId = 0;
+    /** The units of the battle and the campaign unit each belongs to ("" for the enemy). */
+    TMap<TWeakObjectPtr<AStrategyUnit>, FString> CampaignUnitOf;
+
     /** The duel: each company advances until the enemy is inside its own active fire range, then holds and
      *  fires; the fire cones of both are drawn. */
     void TickDuel(float DeltaSeconds);

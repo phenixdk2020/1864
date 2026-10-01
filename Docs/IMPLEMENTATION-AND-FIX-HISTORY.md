@@ -888,6 +888,53 @@ Slaget blev porteret fra Unity til Unreal Engine 5.8 som modulet `Strategy1864`.
 
 **Ikke prøvet endnu:** ordrer fra panelet med klik og træk for front, dobbeltklik og klik på minikortet.
 
+### Kampagnens slagmark i 3D-slaget, frem og tilbage (1. oktober 2026)
+**Kampagnen → slaget:**
+- UDKÆMP I 3D skriver `BattleRequest_N.json`, `Units.json` og `Battlefield_Battle_N.json` (med `_ground.png`, dvs. jorden uden tegnede veje og huse).
+- Kampagnen gemmes i Autosave.
+- Kortet `Strategy1864_Field` åbnes med `?Battle=N`.
+
+**Slaget (`AStrategyOOBTestScenario::BuildCampaignBattle`):**
+- `AStrategyCampaignBattlefield` (`Source/Strategy1864/Campaign`) bygger slagmarken i fuld skala (1 enhed = 1 cm):
+  - jorden er en `UProceduralMeshComponent` med farver fra billedet og kollision på højdegitteret, så enhedernes terrænspørgsmål står på den;
+  - veje, chausséer, markveje, spor, jernbaner og åer er bånd;
+  - huse, gårde, kirker, skov og markskel bruger kampagnens scenerimodeller (`Campaign1851Scenery` er nu eksporteret med `GAME1864_API`).
+- Kampagnens enheder:
+  - bataljoner bliver en major-HQ med kompagnierne fra `battle.subunits`, med deres mænd og 72 m mellem kompagnierne;
+  - rytteri står på fløjene og batterier bag midten;
+  - alle under HQ'et Felthæren.
+- Fjenden: `enemy.men`/190 kompagnier (højst 16) i to linjer, 800 m fra de danske, med AI ON. Det svenske mesh står i for preussisk og østrigsk.
+- Figurerne vises 1:5 (`-Strategy1864FieldLOD=`). Simulationen har alle mænd.
+
+**Slaget → kampagnen:**
+- AFSLUT SLAGET → KAMPAGNEN skriver `BattleResult_N.json`: tab pr. kampagneenhed, fjendens tab og udfald ud fra den andel, hver side har tilbage.
+- Slaget skriver `ReturnToCampaign.flag` og åbner `Campaign1851`.
+- Kampagnen indlæser Autosave (også med `-CampaignNew`), springer testflagene over og læser resultatet ind.
+
+**Rettet:** kampagnens slag blev ikke gemt. Et slag, der ventede på 3D, gik tabt ved indlæsning. Nu gemmes de som `battle|…`-linjer i krigens del af gemningen.
+
+**Testflag:**
+- `-CampaignFight3D`: første slag sendes til 3D.
+- `-Strategy1864AutoFinish=<s>`: slaget afsluttes af sig selv.
+- `-Strategy1864Field=<fil>` og `-Strategy1864Battle=N`: start slagkortet direkte.
+
+**Verificeret hele vejen:**
+1. Krig, og slaget ved Rendsborg sendes til 3D.
+2. Slagmarken bygges med 14. bataljon og 4. batteri mod 16 østrigske kompagnier.
+3. Slaget afsluttes, og der skrives et resultat.
+4. Kampagnen indlæses, og nyheden lyder "Slaget ved Rendsborg: uafgjort … (fra 3D-slaget)". Resultatfilen er læst (`.read`).
+
+**Mangler:**
+- Floderne er kun grafik og spærrer endnu ikke ruterne (`AStrategyRiverBarrier` kan kun lige floder).
+- Skanser og broer fra kampagnen sættes ikke ind som stillinger.
+- Fjenden har ingen HQ'er.
+- `battleRules` og `aiDefaults` læses ikke endnu.
+- Opstillingen ignorerer terrænet: de danske kan stå midt i en by.
+
+**Indstillinger:**
+- Kameraets fart på tasterne sættes under INDSTILLINGER i slagets skærmbillede, i trin fra x1 til x20.
+- Standard er x5 (`AStrategyCameraPawn::GetKeySpeedFactor`, gemt i `GameUserSettings.ini` [PROJECT1864.Settings]).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

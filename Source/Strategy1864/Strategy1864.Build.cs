@@ -16,7 +16,11 @@ public class Strategy1864 : ModuleRules
                 "EnhancedInput",
                 "AIModule",
                 "NavigationSystem",
-                "UMG"
+                "UMG",
+                "ProceduralMeshComponent",
+                "Json",
+                "ImageWrapper",
+                "Game1864"   // the campaign: the scenery pieces for the battlefield from the campaign
             });
     }
 }

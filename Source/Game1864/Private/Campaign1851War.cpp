@@ -32,6 +32,7 @@ void ACampaign1851Map::ResetWar()
 	bAtWar = false;
 	EventsFired.Reset();
 	EnemyCorps.Reset();
+	Battles.Reset();
 	for (FCampaign1851City& C : Cities)
 	{
 		C.Occupier.Reset();
@@ -353,6 +354,14 @@ TArray<FString> ACampaign1851Map::SaveWar() const
 			Out.Add(FString::Printf(TEXT("siege|%d|%s|%d|%.2f"), k, *Cities[C.SiegeTown].Name, C.bSieging ? 1 : 0, C.SiegeStart));
 		}
 	}
+	// Battles at hand (one sent to 3D waits for its result across the trip to the battle map and back).
+	for (const FCampaign1851Battle& B : Battles)
+	{
+		FString Units, FortIds;
+		for (int32 r : B.Regiments) { if (Regiments.IsValidIndex(r)) { Units += (Units.IsEmpty() ? TEXT("") : TEXT(",")) + Regiments[r].Id; } }
+		for (int32 f : B.Forts) { FortIds += (FortIds.IsEmpty() ? TEXT("") : TEXT(",")) + FString::FromInt(f); }
+		Out.Add(FString::Printf(TEXT("battle|%d|%.4f|%.3f|%.3f|%d|%d|%s|%s|%d"), B.Id, B.Day, B.Km.X, B.Km.Y, B.Town, CorpsIndexOf(B), *Units, *FortIds, B.bWaiting ? 1 : 0));
+	}
 	return Out;
 }
 
@@ -391,6 +400,30 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 		else if (P.Num() == 3 && P[0] == TEXT("occupied") && FindCity(P[1]) != INDEX_NONE)
 		{
 			Cities[FindCity(P[1])].Occupier = P[2];
+		}
+		else if (P.Num() == 10 && P[0] == TEXT("battle"))
+		{
+			FCampaign1851Battle B;
+			B.Id = FCString::Atoi(*P[1]);
+			B.Day = FCString::Atod(*P[2]);
+			B.Km = FVector2D(FCString::Atod(*P[3]), FCString::Atod(*P[4]));
+			B.Town = FCString::Atoi(*P[5]);
+			const int32 k = FCString::Atoi(*P[6]);
+			if (!EnemyCorps.IsValidIndex(k))
+			{
+				continue;
+			}
+			B.CorpsId = EnemyCorps[k].Id;
+			EnemyCorps[k].bEngaged = true;
+			TArray<FString> Ids;
+			P[7].ParseIntoArray(Ids, TEXT(","));
+			for (const FString& Id : Ids) { if (FindRegiment(Id) != INDEX_NONE) { B.Regiments.Add(FindRegiment(Id)); } }
+			Ids.Reset();
+			P[8].ParseIntoArray(Ids, TEXT(","));
+			for (const FString& Id : Ids) { B.Forts.Add(FCString::Atoi(*Id)); }
+			B.bWaiting = P[9] == TEXT("1");
+			NextBattleId = FMath::Max(NextBattleId, B.Id + 1);
+			Battles.Add(B);
 		}
 		else if (P.Num() == 10 && P[0] == TEXT("corps"))
 		{

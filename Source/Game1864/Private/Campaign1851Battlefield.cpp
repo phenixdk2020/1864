@@ -851,6 +851,13 @@ void ACampaign1851Map::WriteBattlefield() const
 	{
 		FFileHelper::SaveArrayToFile(Png->GetCompressed(), *(Dir / Base + TEXT(".png")));
 	}
+	// The ground alone (no ways, buildings or boundaries): the 3D battle draws those itself.
+	TSharedPtr<IImageWrapper> GroundPng = Module.CreateImageWrapper(EImageFormat::PNG);
+	if (GroundPng.IsValid() && B.GroundPixels.Num() == BfImage * BfImage &&
+		GroundPng->SetRaw(B.GroundPixels.GetData(), B.GroundPixels.Num() * sizeof(FColor), BfImage, BfImage, ERGBFormat::BGRA, 8))
+	{
+		FFileHelper::SaveArrayToFile(GroundPng->GetCompressed(), *(Dir / Base + TEXT("_ground.png")));
+	}
 	// The data: origin at the south-west corner, x east, y north, metres; the grid row 0 at the south.
 	TSharedRef<FJsonObject> Doc = MakeShared<FJsonObject>();
 	Doc->SetStringField(TEXT("format"), TEXT("PROJECT1864-Battlefield-1"));

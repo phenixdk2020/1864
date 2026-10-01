@@ -44,6 +44,10 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Camera")
     float RotationSpeedDegrees = 70.0f;
 
+    /** The speed of the camera on the keys (WASD), set under INDSTILLINGER and kept in GameUserSettings.ini. */
+    static float GetKeySpeedFactor();
+    static void SetKeySpeedFactor(float Factor);
+
     UFUNCTION(BlueprintCallable, Category="Strategy|Camera")
     void FocusOnWorldLocation(const FVector& WorldLocation);
     /** Arm length and pitch, eased in, centred on the selection (also the order of battle's double click). */

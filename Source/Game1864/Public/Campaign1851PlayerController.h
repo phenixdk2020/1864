@@ -103,6 +103,8 @@ private:
 	FString FocusBuildingOrder;
 	/** Test: resolve battles automatically as they come. */
 	bool bAutoBattles = false;
+	/** Back from a 3D battle: the test flags of the command line are not applied again. */
+	bool bResumedFromBattle = false;
 	/** The fort under the mouse (id, 0 = none). */
 	int32 FortUnderCursor() const;
 	/** Speed to return to when un-pausing with the space bar. */

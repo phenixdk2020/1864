@@ -2,6 +2,15 @@
 
 #include "Misc/CommandLine.h"
 #include "Misc/PackageName.h"
+#include "../Campaign/StrategyCampaignBattlefield.h"
+#include "Dom/JsonObject.h"
+#include "HAL/FileManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
+#include "Serialization/JsonWriter.h"
 #include "DrawDebugHelpers.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -159,9 +168,303 @@ void AStrategyOOBTestScenario::BeginPlay()
     }
     UE_LOG(LogTemp, Display, TEXT("PROJECT1864-QA: map %s, test %s"), *MapName, bLivgardenVsSwedishTest ? TEXT("Livgarden vs Swedish duel") : TEXT("full OOB"));
 
+    // The battle from the campaign: ?Battle=N (from the campaign map), -Strategy1864Battle=N, -Strategy1864Field=<file>,
+    // or a map named *Field* (the newest battlefield file).
+    {
+        int32 BattleId = 0;
+        FString FieldFile;
+        const FString Option = GetWorld()->URL.GetOption(TEXT("Battle="), TEXT(""));
+        if (!Option.IsEmpty())
+        {
+            BattleId = FCString::Atoi(*Option);
+            bReturnToCampaign = true;
+        }
+        FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Battle="), BattleId);
+        FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Field="), FieldFile);
+        if (BattleId > 0 && FieldFile.IsEmpty())
+        {
+            FieldFile = FString::Printf(TEXT("Battlefield_Battle_%d.json"), BattleId);
+        }
+        if (FieldFile.IsEmpty() && MapName.Contains(TEXT("Field")))
+        {
+            TArray<FString> Files;
+            const FString Dir = FPaths::ProjectSavedDir() / TEXT("Battle");
+            IFileManager::Get().FindFiles(Files, *(Dir / TEXT("Battlefield_*.json")), true, false);
+            FDateTime Newest = FDateTime::MinValue();
+            for (const FString& F : Files)
+            {
+                const FDateTime Stamp = IFileManager::Get().GetTimeStamp(*(Dir / F));
+                if (Stamp > Newest) { Newest = Stamp; FieldFile = F; }
+            }
+        }
+        if (!FieldFile.IsEmpty())
+        {
+            bLivgardenVsSwedishTest = false;
+            if (BuildCampaignBattle(FieldFile, BattleId))
+            {
+                return;
+            }
+        }
+    }
+
     if (bBuildOnBeginPlay)
     {
         BuildTestOOB();
+    }
+}
+
+bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFile, int32 BattleId)
+{
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        return false;
+    }
+    ClearSpawnedUnits();
+    // The flat QA ground away; the campaign's field in its place.
+    if (QAFlatGround)
+    {
+        QAFlatGround->SetVisibility(false, true);
+        QAFlatGround->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
+    FActorSpawnParameters Params;
+    Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    CampaignField = World->SpawnActor<AStrategyCampaignBattlefield>(AStrategyCampaignBattlefield::StaticClass(), Origin, FRotator::ZeroRotator, Params);
+    if (!CampaignField || !CampaignField->BuildFromFile(BattlefieldFile))
+    {
+        if (QAFlatGround)
+        {
+            QAFlatGround->SetVisibility(true, true);
+            QAFlatGround->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        }
+        return false;
+    }
+    bCampaignBattle = true;
+    CampaignBattleId = BattleId;
+    CampaignUnitOf.Reset();
+    const FString Dir = FPaths::ProjectSavedDir() / TEXT("Battle");
+
+    // The request: which Danish units fight, and the enemy.
+    TArray<FString> DanishIds;
+    double EnemyMen = 1520.0;
+    FString EnemyNation = TEXT("PR");
+    {
+        FString Text;
+        TSharedPtr<FJsonObject> Json;
+        if (BattleId > 0 && FFileHelper::LoadFileToString(Text, *(Dir / FString::Printf(TEXT("BattleRequest_%d.json"), BattleId))) &&
+            FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Json) && Json.IsValid())
+        {
+            for (const TSharedPtr<FJsonValue>& V : Json->GetArrayField(TEXT("danishUnitIds"))) { DanishIds.Add(V->AsString()); }
+            const TSharedPtr<FJsonObject> Enemy = Json->GetObjectField(TEXT("enemy"));
+            EnemyMen = Enemy->GetNumberField(TEXT("men"));
+            EnemyNation = Enemy->GetStringField(TEXT("nation"));
+        }
+    }
+    // The units as the campaign has them.
+    TArray<TSharedPtr<FJsonObject>> Units;
+    {
+        FString Text;
+        TSharedPtr<FJsonObject> Json;
+        if (FFileHelper::LoadFileToString(Text, *(Dir / TEXT("Units.json"))) && FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Json) && Json.IsValid())
+        {
+            int32 Infantry = 0, Cavalry = 0, Batteries = 0;
+            for (const TSharedPtr<FJsonValue>& V : Json->GetArrayField(TEXT("units")))
+            {
+                const TSharedPtr<FJsonObject> U = V->AsObject();
+                const TSharedPtr<FJsonObject>* Battle = nullptr;
+                if (!U->TryGetObjectField(TEXT("battle"), Battle))
+                {
+                    continue;
+                }
+                const FString Type = (*Battle)->GetStringField(TEXT("type"));
+                if (DanishIds.Num() > 0)
+                {
+                    if (DanishIds.Contains(U->GetStringField(TEXT("id")))) { Units.Add(U); }
+                    continue;
+                }
+                // A test without a request: two battalions, a cavalry regiment and a battery.
+                const bool bInf = Type.Contains(TEXT("battalion")), bCav = Type.Contains(TEXT("regiment")), bArt = Type.Contains(TEXT("battery"));
+                if ((bInf && Infantry < 2) || (bCav && Cavalry < 1) || (bArt && Batteries < 1))
+                {
+                    Units.Add(U);
+                    Infantry += bInf ? 1 : 0;
+                    Cavalry += bCav ? 1 : 0;
+                    Batteries += bArt ? 1 : 0;
+                }
+            }
+        }
+    }
+
+    // -Strategy1864FieldLOD=<1|2|5|10>: how many men a figure stands for (the simulation keeps every man).
+    int32 Lod = 5;
+    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864FieldLOD="), Lod);
+
+    // The Danes south of the middle facing north, the enemy north facing south, 800 m apart.
+    const float DanishX = Origin.X - 40000.0f, EnemyX = Origin.X + 40000.0f;
+    AStrategyHQUnit* Army = SpawnHQ(TEXT("DK-FIELD-HQ"), TEXT("Felthæren"), static_cast<uint8>(EStrategyHQLevel::Division), FVector(DanishX - 30000.0f, Origin.Y, 0.0f), nullptr);
+    TArray<TSharedPtr<FJsonObject>> Battalions, Horse, Guns;
+    for (const TSharedPtr<FJsonObject>& U : Units)
+    {
+        const FString Type = U->GetObjectField(TEXT("battle"))->GetStringField(TEXT("type"));
+        (Type.Contains(TEXT("battalion")) ? Battalions : Type.Contains(TEXT("battery")) ? Guns : Horse).Add(U);
+    }
+    const float FieldSpacing = 7200.0f;   // 72 m centre to centre (design 8)
+    const float BattalionWidth = 4.0f * FieldSpacing + 3000.0f;
+    float Y = Origin.Y - (Battalions.Num() - 1) * BattalionWidth * 0.5f;
+    for (const TSharedPtr<FJsonObject>& U : Battalions)
+    {
+        const FString Id = U->GetStringField(TEXT("id"));
+        const TSharedPtr<FJsonObject> Battle = U->GetObjectField(TEXT("battle"));
+        AStrategyHQUnit* Major = SpawnHQ(FName(*FString::Printf(TEXT("DK-%s-HQ"), *Id)), U->GetStringField(TEXT("name")), static_cast<uint8>(EStrategyHQLevel::Battalion), FVector(DanishX - 9000.0f, Y, 0.0f), Army);
+        CampaignUnitOf.Add(Major, Id);
+        const TArray<TSharedPtr<FJsonValue>>& Subs = Battle->GetArrayField(TEXT("subunits"));
+        int32 Number = 0;
+        for (int32 c = 0; c < Subs.Num(); ++c)
+        {
+            const TSharedPtr<FJsonObject> Sub = Subs[c]->AsObject();
+            const int32 Men = int32(Sub->GetNumberField(TEXT("men")));
+            if (Men <= 0)
+            {
+                continue;   // in a fort, or no men with the colours
+            }
+            ++Number;
+            AStrategyCompanyUnit* Company = SpawnCompany(FName(*FString::Printf(TEXT("DK-%s-C%d"), *Id, c + 1)),
+                FString::Printf(TEXT("%s %s"), *Id, *Sub->GetStringField(TEXT("name")).Left(3)), c + 1,
+                FVector(DanishX, Y + (c - 1.5f) * FieldSpacing, 0.0f), Major, static_cast<uint8>(EStrategySide::Denmark));
+            if (Company)
+            {
+                Company->InitialStrength = Company->CurrentStrength = Men;
+                if (Company->InfantryVisualComponent)
+                {
+                    Company->InfantryVisualComponent->SetVisualScaleDivisor(Lod);
+                    Company->InfantryVisualComponent->SetEnabled(true);
+                }
+                ConfigureRuntimeQALabel(Company);
+                CampaignUnitOf.Add(Company, Id);
+            }
+        }
+        Y += BattalionWidth;
+    }
+    // Cavalry on the flanks, the batteries behind the middle.
+    for (int32 h = 0; h < Horse.Num(); ++h)
+    {
+        const TSharedPtr<FJsonObject>& U = Horse[h];
+        const FString Id = U->GetStringField(TEXT("id"));
+        const float Side = (h % 2 == 0 ? -1.0f : 1.0f) * (Battalions.Num() * BattalionWidth * 0.5f + 12000.0f + (h / 2) * 15000.0f);
+        if (ACavalryUnit* Cav = SpawnCavalry(FName(*FString::Printf(TEXT("DK-%s"), *Id)), U->GetStringField(TEXT("name")), FVector(DanishX - 6000.0f, Origin.Y + Side, 0.0f), Army))
+        {
+            const int32 Men = FMath::Max(1, int32(U->GetNumberField(TEXT("presentMen"))));
+            Cav->InitialStrength = Cav->CurrentStrength = Men;
+            ConfigureRuntimeQALabel(Cav);
+            CampaignUnitOf.Add(Cav, Id);
+        }
+    }
+    for (int32 g = 0; g < Guns.Num(); ++g)
+    {
+        const TSharedPtr<FJsonObject>& U = Guns[g];
+        const FString Id = U->GetStringField(TEXT("id"));
+        if (AStrategyArtilleryBatteryUnit* Battery = SpawnArtilleryBattery(FName(*FString::Printf(TEXT("DK-%s"), *Id)), U->GetStringField(TEXT("name")),
+            FVector(DanishX - 14000.0f, Origin.Y + (g - (Guns.Num() - 1) * 0.5f) * 14000.0f, 0.0f), Army))
+        {
+            ConfigureRuntimeQALabel(Battery);
+            CampaignUnitOf.Add(Battery, Id);
+        }
+    }
+    // The enemy: companies of 190 (at most sixteen) in two lines, the AI on.
+    const int32 EnemyCompanies = FMath::Clamp(FMath::RoundToInt(EnemyMen / 190.0), 1, 16);
+    const int32 PerLine = FMath::Min(EnemyCompanies, 8);
+    for (int32 e = 0; e < EnemyCompanies; ++e)
+    {
+        const int32 Line = e / PerLine, InLine = e % PerLine;
+        AStrategyCompanyUnit* Company = SpawnCompany(FName(*FString::Printf(TEXT("EN-%s-C%d"), *EnemyNation, e + 1)),
+            FString::Printf(TEXT("%s %d. Kp."), EnemyNation == TEXT("AT") ? TEXT("Østr.") : TEXT("Pr."), e + 1), e + 1,
+            FVector(EnemyX + Line * 15000.0f, Origin.Y + (InLine - (PerLine - 1) * 0.5f) * 7200.0f, 0.0f), nullptr,
+            static_cast<uint8>(EnemyNation == TEXT("AT") ? EStrategySide::Austria : EStrategySide::Prussia));
+        if (Company)
+        {
+            Company->SetActorRotation(FRotator(0.0f, 180.0f, 0.0f));
+            Company->bOfficerAIEnabled = true;
+            if (Company->AutonomousBattleAIComponent)
+            {
+                Company->AutonomousBattleAIComponent->bEnableForNonPlayerSides = true;
+            }
+            if (Company->InfantryVisualComponent)
+            {
+                // No Prussian model yet: the Swedish stands in.
+                Company->InfantryVisualComponent->SoldierMeshAsset = TSoftObjectPtr<USkeletalMesh>(
+                    FSoftObjectPath(TEXT("/Game/Units/Swedish/Infantry1864/Mesh/SK_SE_Infantry_1864.SK_SE_Infantry_1864")));
+                Company->InfantryVisualComponent->SetVisualScaleDivisor(Lod);
+                Company->InfantryVisualComponent->SetEnabled(true);
+            }
+            ConfigureRuntimeQALabel(Company);
+            CampaignUnitOf.Add(Company, FString());
+        }
+    }
+    // The camera over the Danish line (placed on the first tick, after the QA bootstrap has placed its own).
+    FieldCameraTarget = FVector(DanishX - 6000.0f, Origin.Y, CampaignField->GroundZ(FVector(DanishX, Origin.Y, 0.0f)));
+    bFieldCameraPlaced = false;
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FIELD: battle %d at %s: %d Danish units (%d battalions, %d cavalry, %d batteries), %d enemy companies (%s, %.0f men), figures 1:%d"),
+        BattleId, *CampaignField->Place, Units.Num(), Battalions.Num(), Horse.Num(), Guns.Num(), EnemyCompanies, *EnemyNation, EnemyMen, Lod);
+    return true;
+}
+
+void AStrategyOOBTestScenario::FinishCampaignBattle()
+{
+    if (!bCampaignBattle)
+    {
+        return;
+    }
+    // Losses per campaign unit, the enemy's, and the outcome by the share each side has left.
+    TMap<FString, int32> Losses;
+    int32 DanesStart = 0, DanesNow = 0, EnemyStart = 0, EnemyNow = 0;
+    for (const TPair<TWeakObjectPtr<AStrategyUnit>, FString>& It : CampaignUnitOf)
+    {
+        const AStrategyUnit* Unit = It.Key.Get();
+        if (!Unit || Unit->Echelon == EStrategyEchelon::Battalion || Unit->Echelon == EStrategyEchelon::Division)
+        {
+            continue;
+        }
+        const int32 Lost = FMath::Max(0, Unit->InitialStrength - FMath::Max(0, Unit->CurrentStrength));
+        if (It.Value.IsEmpty())
+        {
+            EnemyStart += Unit->InitialStrength;
+            EnemyNow += FMath::Max(0, Unit->CurrentStrength);
+        }
+        else
+        {
+            Losses.FindOrAdd(It.Value) += Lost;
+            DanesStart += Unit->InitialStrength;
+            DanesNow += FMath::Max(0, Unit->CurrentStrength);
+        }
+    }
+    const float DanesLeft = DanesStart > 0 ? float(DanesNow) / DanesStart : 0.0f;
+    const float EnemyLeft = EnemyStart > 0 ? float(EnemyNow) / EnemyStart : 0.0f;
+    const FString Outcome = DanesLeft > EnemyLeft + 0.05f ? TEXT("danish_victory") : EnemyLeft > DanesLeft + 0.05f ? TEXT("enemy_victory") : TEXT("draw");
+    TSharedRef<FJsonObject> Doc = MakeShared<FJsonObject>();
+    Doc->SetStringField(TEXT("format"), TEXT("PROJECT1864-BattleResult-1"));
+    Doc->SetNumberField(TEXT("battleId"), CampaignBattleId);
+    Doc->SetStringField(TEXT("outcome"), Outcome);
+    Doc->SetNumberField(TEXT("enemyLosses"), EnemyStart - EnemyNow);
+    TArray<TSharedPtr<FJsonValue>> UnitList;
+    for (const TPair<FString, int32>& L : Losses)
+    {
+        TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+        O->SetStringField(TEXT("id"), L.Key);
+        O->SetNumberField(TEXT("losses"), L.Value);
+        UnitList.Add(MakeShared<FJsonValueObject>(O));
+    }
+    Doc->SetArrayField(TEXT("units"), UnitList);
+    FString Text;
+    FJsonSerializer::Serialize(Doc, TJsonWriterFactory<>::Create(&Text));
+    const FString Dir = FPaths::ProjectSavedDir() / TEXT("Battle");
+    const int32 Id = FMath::Max(1, CampaignBattleId);
+    FFileHelper::SaveStringToFile(Text, *(Dir / FString::Printf(TEXT("BattleResult_%d.json"), Id)), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FIELD: result %s (Danes %d of %d left, enemy %d of %d) -> BattleResult_%d.json"), *Outcome, DanesNow, DanesStart, EnemyNow, EnemyStart, Id);
+    if (bReturnToCampaign)
+    {
+        // The campaign loads its autosave when it finds this (whatever its command line says).
+        FFileHelper::SaveStringToFile(FString::FromInt(Id), *(Dir / TEXT("ReturnToCampaign.flag")));
+        UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851")));
     }
 }
 
@@ -172,6 +475,37 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
     if (bDrawRuntimeQAVisuals)
     {
         DrawRuntimeQAVisuals();
+    }
+
+    // -Strategy1864AutoFinish=<seconds>: the battle ends by itself (test of the way back).
+    if (bCampaignBattle)
+    {
+        float AutoFinish = 0.0f;
+        if (FParse::Value(FCommandLine::Get(), TEXT("Strategy1864AutoFinish="), AutoFinish) && AutoFinish > 0.0f &&
+            GetWorld()->GetTimeSeconds() > AutoFinish && !bCampaignFinished)
+        {
+            bCampaignFinished = true;
+            FinishCampaignBattle();
+            return;
+        }
+    }
+
+    if (bCampaignBattle && !bFieldCameraPlaced)
+    {
+        if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+        {
+            if (AStrategyCameraPawn* Camera = Cast<AStrategyCameraPawn>(PC->GetPawn()))
+            {
+                Camera->SetActorRotation(FRotator::ZeroRotator);
+                Camera->FocusOnWorldLocation(FieldCameraTarget);
+                if (Camera->SpringArm)
+                {
+                    Camera->SpringArm->TargetArmLength = 22000.0f;
+                    Camera->SpringArm->SetRelativeRotation(FRotator(-40.0f, 0.0f, 0.0f));
+                }
+                bFieldCameraPlaced = true;
+            }
+        }
     }
 
     if (bLivgardenVsSwedishTest && DuelCompanies.Num() == 2)

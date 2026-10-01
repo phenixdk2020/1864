@@ -9,6 +9,7 @@
 #include "../Orders/StrategyOrderTypes.h"
 #include "../Units/StrategyUnit.h"
 #include "Engine/Canvas.h"
+#include "../Tests/StrategyOOBTestScenario.h"
 #include "StrategyCameraPawn.h"
 #include "EngineUtils.h"
 
@@ -153,9 +154,22 @@ void AStrategyHUD::DrawHUD()
         DrawRect(PanelColour, 6.0f, 6.0f, 330.0f, 22.0f);
         Text(BuildMarker, 12.0f, 9.0f, Ink);
     }
+    DrawButton(342.0f, 6.0f, 130.0f, 22.0f, TEXT("INDSTILLINGER"), EAction::SettingsToggle, 0, bSettingsOpen, nullptr, bSettingsOpen ? nullptr : &ButtonDark);
 
     DrawOOB();
     DrawMinimap();
+    DrawSettings();
+    // The battle from the campaign: its end and the way back.
+    for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+    {
+        if (It->IsCampaignBattle())
+        {
+            const float BW = 300.0f, BX = Canvas->ClipX - BW - 8.0f;
+            DrawPanel(BX - 6.0f, 40.0f, BW + 12.0f, 44.0f);
+            DrawButton(BX, 46.0f, BW, 32.0f, TEXT("AFSLUT SLAGET  →  KAMPAGNEN"), EAction::FinishBattle, 0, false, nullptr, &ExecutingBlue);
+            break;
+        }
+    }
 
     if (const AStrategyPlayerController* PC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
     {
@@ -248,7 +262,8 @@ void AStrategyHUD::DrawOOBRow(AStrategyUnit* Unit, int32 Depth, float& Y, int32 
     }
     const bool bAttached = Unit->CommandComponent && Unit->CommandComponent->CurrentCommandParent != Unit->CommandComponent->OrganicParent;
     Text(EchelonMark(Unit), Indent + 18.0f, Y + 4.0f, SymbolBlue);
-    Text(FString::Printf(TEXT("%s%s"), bAttached ? TEXT("↳ ") : TEXT(""), *Unit->DisplayName.ToString().ToUpper()), Indent + 46.0f, Y + 4.0f, bSel ? Gold : Ink);
+    const FString Upper = Unit->DisplayName.ToString().ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"));
+    Text(FString::Printf(TEXT("%s%s"), bAttached ? TEXT("↳ ") : TEXT(""), *Upper), Indent + 46.0f, Y + 4.0f, bSel ? Gold : Ink);
     Text(FString::FromInt(MenUnder(Unit)), X + 350.0f, Y + 4.0f, Ink, 0.9f);
     Text(OrderLabel(Unit), X + 405.0f, Y + 4.0f, Muted, 0.9f);
     Text(Unit->bOfficerAIEnabled ? TEXT("ON") : TEXT("OFF"), X + 478.0f, Y + 4.0f, Unit->bOfficerAIEnabled ? ActiveGreen : Muted, 0.9f);
@@ -264,6 +279,29 @@ void AStrategyHUD::DrawOOBRow(AStrategyUnit* Unit, int32 Depth, float& Y, int32 
             DrawOOBRow(Sub, Depth + 1, Y, Guard + 1);
         }
     }
+}
+
+// ------------------------------------------------------------------ settings
+
+void AStrategyHUD::DrawSettings()
+{
+    if (!bSettingsOpen)
+    {
+        return;
+    }
+    // A small window under the button: the camera's speed on the keys.
+    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 96.0f;
+    DrawPanel(X, Y, W, H);
+    Text(TEXT("INDSTILLINGER"), X + 12.0f, Y + 8.0f, Gold);
+    const float Factor = AStrategyCameraPawn::GetKeySpeedFactor();
+    Text(TEXT("Kamerafart på tasterne (WASD)"), X + 12.0f, Y + 38.0f, Ink);
+    static const float Steps[] = { 1.0f, 2.0f, 3.0f, 5.0f, 8.0f, 10.0f, 15.0f, 20.0f };
+    int32 At = 0;
+    for (int32 i = 0; i < UE_ARRAY_COUNT(Steps); ++i) { if (Steps[i] <= Factor + 0.01f) { At = i; } }
+    DrawButton(X + 240.0f, Y + 34.0f, 30.0f, 24.0f, TEXT("-"), EAction::CameraSpeed, FMath::Max(0, At - 1), false, nullptr, &ButtonDark);
+    Text(FString::Printf(TEXT("x %g"), Factor), X + 282.0f, Y + 38.0f, Gold);
+    DrawButton(X + 330.0f, Y + 34.0f, 30.0f, 24.0f, TEXT("+"), EAction::CameraSpeed, FMath::Min(int32(UE_ARRAY_COUNT(Steps)) - 1, At + 1), false, nullptr, &ButtonDark);
+    Text(TEXT("Shift giver tre gange så hurtigt. Gemmes til næste gang."), X + 12.0f, Y + 68.0f, Muted, 0.85f);
 }
 
 // ------------------------------------------------------------------ minimap
@@ -473,6 +511,22 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                     {
                         Camera->FocusOnWorldLocation(World);
                     }
+                }
+                break;
+            case EAction::SettingsToggle:
+                bSettingsOpen = !bSettingsOpen;
+                break;
+            case EAction::CameraSpeed:
+            {
+                static const float Steps[] = { 1.0f, 2.0f, 3.0f, 5.0f, 8.0f, 10.0f, 15.0f, 20.0f };
+                AStrategyCameraPawn::SetKeySpeedFactor(Steps[FMath::Clamp(B.Value, 0, int32(UE_ARRAY_COUNT(Steps)) - 1)]);
+                break;
+            }
+            case EAction::FinishBattle:
+                for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+                {
+                    It->FinishCampaignBattle();
+                    break;
                 }
                 break;
             case EAction::OOBToggle:

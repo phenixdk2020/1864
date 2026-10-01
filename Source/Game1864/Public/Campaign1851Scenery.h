@@ -35,20 +35,20 @@ namespace Campaign1851Scenery
 		Count
 	};
 
-	UStaticMesh* Build(EPiece Piece, UMaterialInterface* Material);
+	GAME1864_API UStaticMesh* Build(EPiece Piece, UMaterialInterface* Material);
 
 	/**
 	 * A flat ribbon along each polyline (points in map-local units, already on the terrain):
 	 * darker edges, lighter crown, like a dirt road.
 	 */
-	UStaticMesh* BuildRibbons(const TArray<TArray<FVector>>& Lines, float HalfWidth, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* Name);
+	GAME1864_API UStaticMesh* BuildRibbons(const TArray<TArray<FVector>>& Lines, float HalfWidth, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* Name);
 
 	const TCHAR* Name(EPiece Piece);
 
 	/** Unlit flat triangles (map-local units, three points each) in one colour: lakes. */
-	UStaticMesh* BuildFlat(const TArray<FVector>& Triangles, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* Name);
+	GAME1864_API UStaticMesh* BuildFlat(const TArray<FVector>& Triangles, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* Name);
 	/** Unlit flat triangles with a colour each (Colours: one per triangle): the battlefield's ground. */
-	UStaticMesh* BuildColoured(const TArray<FVector>& Triangles, const TArray<FLinearColor>& Colours, UMaterialInterface* Material, const TCHAR* Name);
+	GAME1864_API UStaticMesh* BuildColoured(const TArray<FVector>& Triangles, const TArray<FLinearColor>& Colours, UMaterialInterface* Material, const TCHAR* Name);
 
 	/** Building-site pieces (ACampaign1851ConstructionSite), in piece units; the barracks faces +Y. */
 	enum class ESitePiece : uint8
