@@ -358,6 +358,12 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
                 Company->InitialStrength = Company->CurrentStrength = Men;
                 if (Company->InfantryVisualComponent)
                 {
+                    // The model by arm: the jægerkorps in the jæger uniform, the guard as Livgarden, the line in the standard.
+                    const FString Kind = Battle->GetStringField(TEXT("type"));
+                    const TCHAR* Mesh = Kind.Contains(TEXT("jager")) ? TEXT("/Game/Units/Danish/Jager1864/Mesh/SK_DK_Jager_1864.SK_DK_Jager_1864")
+                        : Kind.Contains(TEXT("guard")) ? TEXT("/Game/Units/Danish/Livgarden1864/Mesh/SK_DK_Livgarden_1864.SK_DK_Livgarden_1864")
+                        : TEXT("/Game/Units/Danish/Infantry1864/Mesh/SK_DK_Infantry_1864.SK_DK_Infantry_1864");
+                    Company->InfantryVisualComponent->SoldierMeshAsset = TSoftObjectPtr<USkeletalMesh>(FSoftObjectPath(Mesh));
                     Company->InfantryVisualComponent->SetVisualScaleDivisor(Lod);
                     Company->InfantryVisualComponent->SetEnabled(true);
                 }
@@ -717,6 +723,16 @@ void AStrategyOOBTestScenario::BuildTestOOB()
             TEXT("SE-INFANTRY-C1"), TEXT("Svensk infanteri"), 1,
             Origin + FVector(31000.0f, -7000.0f + SideOffset, 0.0f), nullptr,
             static_cast<uint8>(EStrategySide::Enemy));
+        // -Strategy1864DuelDanish=Infantry|Jager: the Danes in the line infantry's or the jæger's uniform instead.
+        FString DanishModel;
+        if (Guard && Guard->InfantryVisualComponent && FParse::Value(FCommandLine::Get(), TEXT("Strategy1864DuelDanish="), DanishModel))
+        {
+            const bool bJager = DanishModel.Equals(TEXT("Jager"), ESearchCase::IgnoreCase);
+            Guard->DisplayName = FText::FromString(bJager ? TEXT("Jægere") : TEXT("Linjeinfanteri"));
+            Guard->InfantryVisualComponent->SoldierMeshAsset = TSoftObjectPtr<USkeletalMesh>(FSoftObjectPath(bJager
+                ? TEXT("/Game/Units/Danish/Jager1864/Mesh/SK_DK_Jager_1864.SK_DK_Jager_1864")
+                : TEXT("/Game/Units/Danish/Infantry1864/Mesh/SK_DK_Infantry_1864.SK_DK_Infantry_1864")));
+        }
         DuelCompanies.Reset();
         bDuelCameraPlaced = false;
         if (Swedish)

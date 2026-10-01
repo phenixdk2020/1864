@@ -1,5 +1,9 @@
 #include "StrategyColourFlag.h"
 
+#include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/Texture.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
 #include "ProceduralMeshComponent.h"
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
@@ -17,6 +21,26 @@ void AStrategyColourFlag::Setup(AActor* InFollow, const FString& Nation, const F
 {
     Follow = InFollow;
     LocalOffset = Offset;
+    // The model: 2 m as imported, 2.8 m on the field; the cloth streams to +X from the pole, turned to -X here.
+    if (UStaticMesh* Standard = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Units/Items/SM_Flag_Standard.SM_Flag_Standard")))
+    {
+        Model = NewObject<UStaticMeshComponent>(this, TEXT("Model"));
+        Model->SetStaticMesh(Standard);
+        Model->SetupAttachment(Mesh);
+        Model->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Model->bVisibleInRayTracing = false;
+        Model->SetCastShadow(true);
+        Model->SetRelativeScale3D(FVector(1.4f));
+        Model->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 140.0f), FRotator(0.0f, 180.0f, 0.0f));
+        Model->RegisterComponent();
+        UTexture* Flag = LoadObject<UTexture>(nullptr, *FString::Printf(TEXT("/Game/Units/Flags/T_Flag_%s.T_Flag_%s"), *Nation, *Nation));
+        if (Flag && SetFlagTexture(Flag))
+        {
+            return;
+        }
+        Model->DestroyComponent();
+        Model = nullptr;
+    }
     TArray<FVector> V;
     TArray<int32> T;
     TArray<FColor> C;
@@ -35,9 +59,9 @@ void AStrategyColourFlag::Setup(AActor* InFollow, const FString& Nation, const F
         Quad(FVector(Min.X, Min.Y, Min.Z), FVector(Min.X, Max.Y, Min.Z), FVector(Min.X, Max.Y, Max.Z), FVector(Min.X, Min.Y, Max.Z), Colour);
         Quad(FVector(Max.X, Min.Y, Min.Z), FVector(Max.X, Max.Y, Min.Z), FVector(Max.X, Max.Y, Max.Z), FVector(Max.X, Min.Y, Max.Z), Colour);
     };
-    const FColor Pole(70, 52, 34), Gold(214, 180, 70);
-    Box(FVector(-3.0f, -3.0f, 0.0f), FVector(3.0f, 3.0f, 300.0f), Pole);
-    Box(FVector(-5.0f, -5.0f, 300.0f), FVector(5.0f, 5.0f, 312.0f), Gold);
+    const FColor PoleColour(70, 52, 34), FinialColour(214, 180, 70);
+    Box(FVector(-3.0f, -3.0f, 0.0f), FVector(3.0f, 3.0f, 300.0f), PoleColour);
+    Box(FVector(-5.0f, -5.0f, 300.0f), FVector(5.0f, 5.0f, 312.0f), FinialColour);
     // The cloth: 120 x 90 cm from 200 to 290 cm, the cross off-centre towards the pole (a Nordic cross).
     const bool bDanish = Nation == TEXT("DK");
     const bool bSwedish = Nation == TEXT("SE");
@@ -56,6 +80,22 @@ void AStrategyColourFlag::Setup(AActor* InFollow, const FString& Nation, const F
     {
         Mesh->SetMaterial(0, Material);
     }
+}
+
+bool AStrategyColourFlag::SetFlagTexture(UTexture* Flag)
+{
+    const int32 Slot = Model ? Model->GetMaterialIndex(TEXT("Cloth")) : INDEX_NONE;
+    if (!Flag || Slot == INDEX_NONE)
+    {
+        return false;
+    }
+    UMaterialInstanceDynamic* Cloth = Model->CreateDynamicMaterialInstance(Slot);
+    if (!Cloth)
+    {
+        return false;
+    }
+    Cloth->SetTextureParameterValue(TEXT("Flag"), Flag);
+    return true;
 }
 
 void AStrategyColourFlag::Tick(float DeltaSeconds)

@@ -974,6 +974,22 @@ Kun ladte soldater kan blive valgt til næste salve.
 - en fanebærer;
 - FireByRank pr. geled.
 
+### Danske modeller, faneflag med vilkårligt flag, ray tracing fra (1. oktober 2026, sen aften)
+- Nye modeller importeret med `Content/Python/import_units_1864.py` fra `SourceAssets/Units1864` (FBX plus teksturen fra den tilhørende GLB):
+  - `SK_DK_Infantry_1864` (linjeinfanteri) og `SK_DK_Jager_1864` (jæger, 6. regiment) på det fælles skelet `SK_Human_1864`, med materialet `M_*`.
+  - Statiske genstande i `/Game/Units/Items`: `SM_Flag_Standard`, `SM_Cannon_1864`, `SM_Mortar_1864`, `SM_Saddle`, `SM_Scabbard`, `SM_Saber` og `SM_Horse_Static`. De er normaliseret til ca. 2 m største mål og skal skaleres, når de bruges.
+- I kampagneslaget vælges model efter bataljonstypen:
+  - `jager_battalion` får jægermodellen;
+  - `guard_battalion` får Livgarden;
+  - resten får linjeinfanteriet.
+- Duellen har fået flaget `-Strategy1864DuelDanish=Infantry|Jager`.
+- Faneflaget kan bære et vilkårligt flag:
+  - `Flag_Standard_Split.fbx` er delt i Blender i stang (slot `Pole`) og dug (slot `Cloth`, flade UV'er med stangsiden ved u=0 og toppen ved v=0).
+  - `Content/Python/import_flag_1864.py` importerer hver PNG i `SourceAssets/Units1864/Flags` som `/Game/Units/Flags/T_<navn>` og laver `M_FlagCloth` (tosidet, med teksturparameteren `Flag`).
+  - `AStrategyColourFlag` bruger modellen (2,8 m) med `T_Flag_<nation>` og har fået `SetFlagTexture` til andre flag. Det procedurale flag er kun reserve.
+- `r.RayTracing=False`. Puljen gik over budgettet ved tæt kamera, og spillet var næsten frosset.
+- Byggefejl C4459: `Gold` skyggede for en global variabel i unity-buildet og er omdøbt.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
