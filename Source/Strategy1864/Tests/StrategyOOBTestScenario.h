@@ -186,6 +186,9 @@ private:
     void ConfigureRuntimeQALabel(AStrategyUnit* Unit) const;
 
 public:
+    /** The duel's two companies (their fire cones are drawn by the HUD). */
+    const TArray<TObjectPtr<AStrategyCompanyUnit>>& GetDuelCompanies() const { return DuelCompanies; }
+
     /** The battle from the campaign: true when it was set up (the field and the units). */
     bool IsCampaignBattle() const { return bCampaignBattle; }
 

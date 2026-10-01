@@ -14,6 +14,9 @@
 #include "StrategyHumanAnimationStateComponent.h"
 #include "StrategyMuzzleSmokePuff.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
+#include "Animation/AnimSingleNodeInstance.h"
+#include "../Formations/StrategyFormationComponent.h"
 
 UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
 {
@@ -82,6 +85,14 @@ UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Falling_Back_Death.A_Falling_Back_Death")));
     RaiseToAimAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Rifle_Down_To_Aim.A_Rifle_Down_To_Aim")));
+    LoadAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Reload_sitting.A_Reload_sitting")));
+    RiseFromLoadAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Rifle_Kneel_To_Stand.A_Rifle_Kneel_To_Stand")));
+    ReadyAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Rifle_Idle.A_Rifle_Idle")));
+    AimHoldAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Rifle_Aiming_Idle.A_Rifle_Aiming_Idle")));
     DeathWalkingAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Walking_To_Dying.A_Walking_To_Dying")));
 }
@@ -323,7 +334,8 @@ void UStrategyInfantryVisualComponent::HandleVolleyVisualEvent(
     for (int32 k = 0; k < Firing && k < Order.Num(); ++k)
     {
         const int32 i = Order[k];
-        if (SoldierFirePhase[i] == 0)
+        // Those standing loaded (company animation, ready or aiming) fire; the loading do not.
+        if (SoldierFirePhase[i] == 0 || SoldierFirePhase[i] == 5 || SoldierFirePhase[i] == 6)
         {
             SoldierFireAt[i] = Now + FMath::FRandRange(0.0f, 0.6f);
         }
@@ -343,6 +355,57 @@ void UStrategyInfantryVisualComponent::PlayOnSoldier(USkeletalMeshComponent* Sol
     Soldier->SetPlayRate(bRandomStart ? FMath::FRandRange(0.9f, 1.1f) : 1.0f);
 }
 
+namespace
+{
+    // Each soldier's firing cycle (only in the firing line; marching, the company's animation rules).
+    enum EFirePhase : uint8 { PhaseNone = 0, PhaseRaise = 1, PhaseFire = 2, PhaseLoad = 3, PhaseRise = 4, PhaseReady = 5, PhaseAim = 6 };
+}
+
+bool UStrategyInfantryVisualComponent::IsEnemyInRange() const
+{
+    const UStrategyFireControlComponent* Fire = OwnerCompany ? OwnerCompany->FireControlComponent.Get() : nullptr;
+    if (!Fire || !GetWorld())
+    {
+        return false;
+    }
+    for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+    {
+        if (IsValid(*It) && It->Side != OwnerCompany->Side && It->Side != EStrategySide::Neutral && It->IsCombatEffective() &&
+            Fire->IsLocationInsideFireField(It->GetActorLocation(), Fire->GetActiveRangeCm()))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool UStrategyInfantryVisualComponent::IsInFiringLine() const
+{
+    if (!OwnerCompany || !OwnerCompany->FireControlComponent || !GetWorld())
+    {
+        return false;
+    }
+    const bool bMoving = OwnerCompany->HumanAnimationStateComponent &&
+        (OwnerCompany->HumanAnimationStateComponent->CurrentAction == EStrategyHumanAnimationAction::Walk ||
+         OwnerCompany->HumanAnimationStateComponent->CurrentAction == EStrategyHumanAnimationAction::Run);
+    const bool bLine = !OwnerCompany->FormationComponent || OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Line;
+    if (bMoving || !bLine)
+    {
+        return false;
+    }
+    // An enemy within the long range ahead: stand ready.
+    const UStrategyFireControlComponent* Fire = OwnerCompany->FireControlComponent;
+    for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+    {
+        if (IsValid(*It) && It->Side != OwnerCompany->Side && It->Side != EStrategySide::Neutral && It->IsCombatEffective() &&
+            Fire->IsLocationInsideFireField(It->GetActorLocation(), Fire->LongRangeCm * 1.3f))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void UStrategyInfantryVisualComponent::UpdatePersonalActions()
 {
     UWorld* World = GetWorld();
@@ -352,6 +415,16 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
     }
     const float Now = World->GetTimeSeconds();
     const EStrategyStance Stance = OwnerCompany && OwnerCompany->StanceComponent ? OwnerCompany->StanceComponent->Stance : EStrategyStance::Standing;
+    const bool bLine = IsInFiringLine();
+    const bool bInRange = bLine && IsEnemyInRange();
+    // The company's loading time (the combat core's reload: every man reloads together after a volley).
+    const float ReloadLeft = OwnerCompany && OwnerCompany->CombatComponent ? OwnerCompany->CombatComponent->ReloadRemainingSeconds : 0.0f;
+    UAnimSequence* Load = LoadAsset.LoadSynchronous();
+    UAnimSequence* Rise = RiseFromLoadAsset.LoadSynchronous();
+    UAnimSequence* Ready = ReadyAsset.LoadSynchronous();
+    UAnimSequence* AimHold = AimHoldAsset.LoadSynchronous();
+    UAnimSequence* Raise = RaiseToAimAsset.LoadSynchronous();
+    const float RiseLength = Rise ? Rise->GetPlayLength() : 0.0f;
     for (int32 i = 0; i < SoldierComponents.Num(); ++i)
     {
         USkeletalMeshComponent* Soldier = SoldierComponents[i];
@@ -359,37 +432,114 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
         {
             continue;
         }
-        if (SoldierFirePhase[i] == 0 && SoldierFireAt[i] > 0.0f && Now >= SoldierFireAt[i])
+        uint8& Phase = SoldierFirePhase[i];
+        // Out of the firing line (marching, in column): the company's animation; a pending shot is dropped.
+        if (!bLine && Phase >= PhaseLoad)
         {
-            // Raise the rifle (standing), then the shot.
-            UAnimSequence* Raise = Stance == EStrategyStance::Standing ? RaiseToAimAsset.LoadSynchronous() : nullptr;
-            if (Raise)
+            Phase = PhaseNone;
+            bool bLooping = true;
+            PlayOnSoldier(Soldier, ResolveAnimation(bLooping), bLooping, true);
+            continue;
+        }
+        // Into the firing line: loaded (the muskets came loaded), so ready.
+        if (bLine && Phase == PhaseNone && SoldierFireAt[i] <= 0.0f)
+        {
+            Phase = PhaseReady;
+            PlayOnSoldier(Soldier, Ready, true, true);
+            continue;
+        }
+        // The shot: from aim straight, otherwise raise first.
+        if (SoldierFireAt[i] > 0.0f && Now >= SoldierFireAt[i] && (Phase == PhaseNone || Phase == PhaseReady || Phase == PhaseAim))
+        {
+            SoldierFireAt[i] = 0.0f;
+            if (Phase == PhaseAim || !Raise || Stance != EStrategyStance::Standing)
             {
-                PlayOnSoldier(Soldier, Raise, false, false);
-                SoldierFirePhase[i] = 1;
-                SoldierBusyUntil[i] = Now + Raise->GetPlayLength() * 0.85f;
+                Phase = PhaseRaise;
+                SoldierBusyUntil[i] = Now;
             }
             else
             {
-                SoldierFirePhase[i] = 1;
-                SoldierBusyUntil[i] = Now;
+                PlayOnSoldier(Soldier, Raise, false, false);
+                Phase = PhaseRaise;
+                SoldierBusyUntil[i] = Now + Raise->GetPlayLength() * 0.85f;
             }
-            SoldierFireAt[i] = 0.0f;
+            continue;
         }
-        else if (SoldierFirePhase[i] == 1 && Now >= SoldierBusyUntil[i])
+        switch (Phase)
         {
-            UAnimSequence* Fire = (Stance == EStrategyStance::Prone ? FireProneAsset : Stance == EStrategyStance::Kneeling ? FireKneelingAsset : FireStandingAsset).LoadSynchronous();
-            PlayOnSoldier(Soldier, Fire, false, false);
-            SoldierFirePhase[i] = 2;
-            SoldierBusyUntil[i] = Now + (Fire ? Fire->GetPlayLength() : 0.6f);
-            SpawnMuzzleSmoke(Soldier, i);
-        }
-        else if (SoldierFirePhase[i] == 2 && Now >= SoldierBusyUntil[i])
-        {
-            // Back to what the company does (reloading, aiming, marching).
-            SoldierFirePhase[i] = 0;
-            bool bLooping = true;
-            PlayOnSoldier(Soldier, ResolveAnimation(bLooping), bLooping, true);
+            case PhaseRaise:
+                if (Now >= SoldierBusyUntil[i])
+                {
+                    UAnimSequence* Fire = (Stance == EStrategyStance::Prone ? FireProneAsset : Stance == EStrategyStance::Kneeling ? FireKneelingAsset : FireStandingAsset).LoadSynchronous();
+                    PlayOnSoldier(Soldier, Fire, false, false);
+                    Phase = PhaseFire;
+                    SoldierBusyUntil[i] = Now + (Fire ? Fire->GetPlayLength() : 0.6f);
+                    SpawnMuzzleSmoke(Soldier, i);
+                }
+                break;
+            case PhaseFire:
+                if (Now >= SoldierBusyUntil[i])
+                {
+                    if (bLine && Load)
+                    {
+                        // Load: down on one knee with powder, ball and ramrod (looped while the company reloads).
+                        PlayOnSoldier(Soldier, Load, true, false);
+                        Phase = PhaseLoad;
+                    }
+                    else
+                    {
+                        Phase = PhaseNone;
+                        bool bLooping = true;
+                        PlayOnSoldier(Soldier, ResolveAnimation(bLooping), bLooping, true);
+                    }
+                }
+                break;
+            case PhaseLoad:
+                // Up again when the loading is almost done.
+                if (ReloadLeft <= RiseLength + 0.2f)
+                {
+                    if (Rise)
+                    {
+                        PlayOnSoldier(Soldier, Rise, false, false);
+                        SoldierBusyUntil[i] = Now + RiseLength;
+                    }
+                    else
+                    {
+                        SoldierBusyUntil[i] = Now;
+                    }
+                    Phase = PhaseRise;
+                }
+                break;
+            case PhaseRise:
+                if (Now >= SoldierBusyUntil[i])
+                {
+                    PlayOnSoldier(Soldier, Ready, true, true);
+                    Phase = PhaseReady;
+                }
+                break;
+            case PhaseReady:
+                // Present arms when the enemy is inside the chosen range.
+                if (bInRange && Raise)
+                {
+                    PlayOnSoldier(Soldier, Raise, false, false);
+                    SoldierBusyUntil[i] = Now + Raise->GetPlayLength();
+                    Phase = PhaseAim;
+                }
+                break;
+            case PhaseAim:
+                if (Now >= SoldierBusyUntil[i] && AimHold && Soldier->GetAnimationMode() == EAnimationMode::AnimationSingleNode &&
+                    Soldier->GetSingleNodeInstance() && Soldier->GetSingleNodeInstance()->GetAnimationAsset() != AimHold)
+                {
+                    PlayOnSoldier(Soldier, AimHold, true, true);
+                }
+                if (!bInRange)
+                {
+                    PlayOnSoldier(Soldier, Ready, true, true);   // the enemy went out of range: order arms
+                    Phase = PhaseReady;
+                }
+                break;
+            default:
+                break;
         }
     }
 }
@@ -611,6 +761,8 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
         Soldier->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Soldier->SetGenerateOverlapEvents(false);
         Soldier->SetCastShadow(true);
+        // Hundreds of animated soldiers would overrun the ray tracing memory (the campaign's renderer has it on).
+        Soldier->bVisibleInRayTracing = false;
         Soldier->SetupAttachment(OwnerCompany->SceneRoot);
         Soldier->RegisterComponent();
 
@@ -625,6 +777,7 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
             Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             Weapon->SetGenerateOverlapEvents(false);
             Weapon->SetCastShadow(true);
+            Weapon->bVisibleInRayTracing = false;
             Weapon->RegisterComponent();
             Weapon->AttachToComponent(
                 Soldier,

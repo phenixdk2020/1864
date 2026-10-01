@@ -25,6 +25,10 @@ public:
     /** Read the file (a full path, or a name under Saved/Battle) and build everything; false when it fails. */
     bool BuildFromFile(const FString& FileName);
 
+    /** The test fields' ground instead of the flat QA box: a gently rolling meadow (grass in patches, a dirt
+     *  track, a wood and copses round the edges, hedges), SizeM square, with collision. */
+    void BuildMeadow(float InSizeM, int32 Seed);
+
     /** The field's size in cm (a square), and the ground height at a world point (cm). */
     float GetSizeCm() const { return SizeCm; }
     float GroundZ(const FVector& World) const;

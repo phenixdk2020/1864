@@ -3,6 +3,7 @@
 #include "Misc/CommandLine.h"
 #include "Misc/PackageName.h"
 #include "../Campaign/StrategyCampaignBattlefield.h"
+#include "../Visual/StrategyColourFlag.h"
 #include "Dom/JsonObject.h"
 #include "HAL/FileManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -152,6 +153,27 @@ void AStrategyOOBTestScenario::BeginPlay()
             bUseFlatQAMap
             ? ECollisionEnabled::QueryAndPhysics
             : ECollisionEnabled::NoCollision);
+    }
+
+    // The test fields get a meadow instead of the grey box (-Strategy1864FlatQA keeps the box).
+    const FString MeadowMap = FPackageName::GetShortName(GetWorld()->GetOutermost()->GetName());
+    FString FieldArgument;
+    if (bUseFlatQAMap && !MeadowMap.Contains(TEXT("Field")) && !FParse::Param(FCommandLine::Get(), TEXT("Strategy1864FlatQA")) &&
+        !FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Field="), FieldArgument) &&
+        GetWorld()->URL.GetOption(TEXT("Battle="), nullptr) == nullptr)
+    {
+        FActorSpawnParameters MeadowParams;
+        MeadowParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        if (AStrategyCampaignBattlefield* Meadow = GetWorld()->SpawnActor<AStrategyCampaignBattlefield>(AStrategyCampaignBattlefield::StaticClass(),
+            Origin + FVector(15000.0f, -7000.0f, 0.0f), FRotator::ZeroRotator, MeadowParams))
+        {
+            Meadow->BuildMeadow(FMath::Max(1200.0f, FlatMapSizeCm / 100.0f * 2.0f), QARandomSeed);
+            if (QAFlatGround)
+            {
+                QAFlatGround->SetVisibility(false, true);
+                QAFlatGround->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            }
+        }
     }
 
     // The infantry duel (Livgarden against Swedish infantry, both in 3D): on a map named *Duel* or with
@@ -511,7 +533,7 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
     if (bLivgardenVsSwedishTest && DuelCompanies.Num() == 2)
     {
         TickDuel(DeltaSeconds);
-        DrawDuelCones();
+        // The cones are the HUD's (AStrategyHUD::DrawFireCone).
     }
 }
 
@@ -585,6 +607,18 @@ void AStrategyOOBTestScenario::TickDuel(float DeltaSeconds)
         const FVector Away = (Here - There).GetSafeNormal2D();
         const float FacingYaw = FMath::IsNearlyZero(SideOffsetCm) ? (There - Here).Rotation().Yaw : Company->GetActorRotation().Yaw;
         const FStrategyOrder Current = Company->OrderComponent->GetCurrentOrder();
+        // March in column until the enemy's longest range + 35 m (design 7), then form line.
+        const float DeployCm = (Enemy->FireControlComponent ? Enemy->FireControlComponent->LongRangeCm : 10000.0f) + 3500.0f;
+        if (Company->FormationComponent)
+        {
+            const EStrategyFormationType Want = Distance > DeployCm ? EStrategyFormationType::MarchColumn : EStrategyFormationType::Line;
+            if (Company->FormationComponent->CurrentFormation != Want)
+            {
+                Company->FormationComponent->SetFormation(Want);
+                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DUEL: %s forms %s (%.0f m from the enemy)"), *Company->DisplayName.ToString(),
+                    Want == EStrategyFormationType::Line ? TEXT("line") : TEXT("column"), Distance / 100.0f);
+            }
+        }
         if (Distance > Range * 0.95f)
         {
             // Straight ahead to the range (the company does not wheel towards an enemy off to the side).
@@ -721,6 +755,14 @@ void AStrategyOOBTestScenario::BuildTestOOB()
             if (Company->FireControlComponent)
             {
                 Company->FireControlComponent->bRequireCurrentContact = false;
+            }
+        }
+        // The colours: Dannebrog and the Swedish flag a little behind the middle of each company.
+        for (AStrategyCompanyUnit* Company : DuelCompanies)
+        {
+            if (AStrategyColourFlag* Flag = GetWorld()->SpawnActor<AStrategyColourFlag>(AStrategyColourFlag::StaticClass(), Company->GetActorLocation(), FRotator::ZeroRotator))
+            {
+                Flag->Setup(Company, Company->Side == EStrategySide::Denmark ? TEXT("DK") : TEXT("SE"), FVector(-250.0f, 60.0f, 0.0f));
             }
         }
         UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DUEL: Livgarden and Swedish infantry, %d units; full OOB disabled"), SpawnedUnitObjects.Num());

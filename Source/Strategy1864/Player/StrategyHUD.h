@@ -67,6 +67,11 @@ private:
     void DrawCommandPanel(AStrategyUnit* Unit);
     void DrawMinimap();
     void DrawSettings();
+    /** The fire cone of a unit on the ground (as the QA design): from the formation's front corners, the
+     *  sides dashed at the half angle, the close, medium and long ranges as dashed arcs following the front,
+     *  the chosen range strong and orange with the band up to it filled; the labels in metres and degrees. */
+    void DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend);
+    void DashedPolyline(const TArray<FVector>& WorldPoints, const FLinearColor& Colour, float Thickness, float Dash, float Gap);
     void DrawButton(float X, float Y, float W, float H, const FString& Label, EAction Action, int32 Value, bool bActive,
         AStrategyUnit* Unit = nullptr, const FLinearColor* Colour = nullptr);
     void DrawPanel(float X, float Y, float W, float H);

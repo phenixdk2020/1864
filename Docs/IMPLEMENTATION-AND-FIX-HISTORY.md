@@ -935,6 +935,45 @@ Slaget blev porteret fra Unity til Unreal Engine 5.8 som modulet `Strategy1864`.
 - Kameraets fart på tasterne sættes under INDSTILLINGER i slagets skærmbillede, i trin fra x1 til x20.
 - Standard er x5 (`AStrategyCameraPawn::GetKeySpeedFactor`, gemt i `GameUserSettings.ini` [PROJECT1864.Settings]).
 
+### Ildkegle, ildcyklus og grafik (1. oktober 2026, aften)
+**Ildkeglen** tegnes nu af HUD'en (`AStrategyHUD::DrawFireCone`) for valgte enheder og duellens kompagnier. Udseendet følger brugerens QA-billede:
+- keglen går fra formationens forreste hjørner, fra venstre til højre mand;
+- siderne er hvide og stiplede, med ±35° ved enderne;
+- CLOSE, MEDIUM og LONG er stiplede buer med meter på;
+- den valgte afstand er kraftig orange, og båndet op til den er fyldt halvgennemsigtigt;
+- der er en forklaring "FIRE POLICY (AKTIV: …)";
+- under enheden står et mærke: NATO-symbol, navn og "190 mand | Linie | Ild: MEDIUM".
+
+Duellens gamle debug-kegler er fjernet.
+
+**Rettet:** et nedbrud i Canvas-trekanten (`CanvasItem.cpp:1721`, tekstur mangler). Nu bruges `GWhiteTexture`, og `RenderCore` er tilføjet som afhængighed.
+
+**Ildcyklussen pr. soldat** (`UStrategyInfantryVisualComponent::UpdatePersonalActions`):
+1. **March og formation:** duellen marcherer i kolonne, indtil fjendens længste rækkevidde + 35 m (135 m), og danner så linje.
+2. **Ladet, klar:** i linje med fjenden inden for lang rækkevidde står soldaterne ladte og klar (`A_Rifle_Idle`).
+3. **Sigt:** fjenden inden for den valgte afstand: anslag (`A_Rifle_Down_To_Aim` og derefter `A_Rifle_Aiming_Idle`).
+4. **Skyd:** salven giver skud (`A_Firing_Rifle`) og røg.
+5. **Lad:** knæ med ladestok (`A_Reload_sitting`, den eneste ladeanimation i sættet), så længe kompagniets ladetid løber.
+6. **Rejs, klar:** rejse sig (`A_Rifle_Kneel_To_Stand`) og stå klar.
+7. **Forfra.**
+
+Kun ladte soldater kan blive valgt til næste salve.
+
+**Rettet:** soldater i anslag blev aldrig valgt til skud, så cyklussen gik i stå.
+
+**Grafik:**
+- **Engen:** testbanerne får en bølget eng (`AStrategyCampaignBattlefield::BuildMeadow`, 1200 m) i stedet for den grå boks. Græs i pletter (frisk, frodigt, tørt, mørkt og blomster), lys fra nordvest, en markvej, skov bag begge sider, krat, enkelte træer og to knick-hegn med åbninger. `-Strategy1864FlatQA` beholder boksen.
+- **Faner:** Dannebrog og den svenske korsfane (`AStrategyColourFlag`) følger kompagnierne.
+- **Ray tracing:** soldater, geværer, røg og faner er taget ud af ray tracing. Med 380 animerede soldater tæt på løb ray tracing-hukommelsen over (`!Geometry->IsEvicted`), og spillet frøs næsten.
+
+**Verificeret visuelt i `Strategy1864_Duel`:** kolonne til 133 m, linje, holdt på 65 m, salve med røg, knæ og ladning, rejse sig, sigte, faldne der ligger, faner og eng med skov.
+
+**Mangler for at ligne billedet:**
+- dansk linjeinfanteri i blåt med oppakning (kræver en model);
+- en rigtig græstekstur og belysning med skygger på jorden (materialet er i dag ubelyst med farver i hjørnerne);
+- en fanebærer;
+- FireByRank pr. geled.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

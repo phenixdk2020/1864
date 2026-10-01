@@ -77,6 +77,19 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
     TSoftObjectPtr<UAnimSequence> DeathWalkingAsset;
 
+    /** The firing cycle: loading (kneeling with the ramrod: the only loading the set has), rising, ready, aiming. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
+    TSoftObjectPtr<UAnimSequence> LoadAsset;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
+    TSoftObjectPtr<UAnimSequence> RiseFromLoadAsset;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
+    TSoftObjectPtr<UAnimSequence> ReadyAsset;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
+    TSoftObjectPtr<UAnimSequence> AimHoldAsset;
+
     // The imported Livgarden faces +Y; strategy formations face +X.
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
     float SoldierMeshYawOffset = -90.0f;
@@ -231,7 +244,12 @@ private:
     /** Per soldier (parallel to SoldierComponents): when his own shot starts, and until when it plays. */
     TArray<float> SoldierFireAt;
     TArray<float> SoldierBusyUntil;
-    TArray<uint8> SoldierFirePhase;   // 0 none, 1 raising, 2 firing
+    TArray<uint8> SoldierFirePhase;   // a EFirePhase for each soldier
+
+    /** Is an enemy inside the company's chosen range and cone (it may fire). */
+    bool IsEnemyInRange() const;
+    /** In battle (halted in line facing an enemy within its long range): the soldiers run the firing cycle. */
+    bool IsInFiringLine() const;
 
     int32 CachedStrength = INDEX_NONE;
     uint8 CachedFormationValue = 255;

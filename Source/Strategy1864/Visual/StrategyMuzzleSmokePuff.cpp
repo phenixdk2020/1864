@@ -36,6 +36,7 @@ void AStrategyMuzzleSmokePuff::BeginPlay()
         Ball->SetStaticMesh(Sphere);
         Ball->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Ball->SetCastShadow(false);
+        Ball->bVisibleInRayTracing = false;
         Ball->RegisterComponent();
         UMaterialInstanceDynamic* Mid = Translucent ? UMaterialInstanceDynamic::Create(Translucent, this) : nullptr;
         if (Mid)

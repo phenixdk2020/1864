@@ -20,6 +20,7 @@ public class Strategy1864 : ModuleRules
                 "ProceduralMeshComponent",
                 "Json",
                 "ImageWrapper",
+                "RenderCore",
                 "Game1864"   // the campaign: the scenery pieces for the battlefield from the campaign
             });
     }
