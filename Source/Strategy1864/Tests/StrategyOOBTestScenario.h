@@ -35,6 +35,10 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Test")
     bool bBuildOnBeginPlay = true;
 
+    // A focused model/combat test; the full OOB remains available when disabled.
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Test")
+    bool bLivgardenVsSwedishTest = false;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Test")
     FVector Origin = FVector::ZeroVector;
 

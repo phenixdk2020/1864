@@ -39,7 +39,7 @@ UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Rifle_Aiming_Idle.A_Rifle_Aiming_Idle")));
 
     FireStandingAsset = TSoftObjectPtr<UAnimSequence>(
-        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Fire_Rifle.A_Fire_Rifle")));
+        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Firing_Rifle.A_Firing_Rifle")));
 
     IdleKneelingAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Rifle_Kneel_Idle.A_Rifle_Kneel_Idle")));
@@ -48,7 +48,7 @@ UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Idle_Crouching_Aiming.A_Idle_Crouching_Aiming")));
 
     FireKneelingAsset = TSoftObjectPtr<UAnimSequence>(
-        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Firing_Rifle.A_Firing_Rifle")));
+        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Fire_Rifle.A_Fire_Rifle")));
 
     ReloadKneelingAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Reload_sitting.A_Reload_sitting")));
@@ -73,6 +73,10 @@ UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
 
     DeathAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Death_From_The_Front.A_Death_From_The_Front")));
+    DeathAsset2 = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Death_From_Front_Headshot.A_Death_From_Front_Headshot")));
+    DeathAsset3 = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Falling_Back_Death.A_Falling_Back_Death")));
 }
 
 void UStrategyInfantryVisualComponent::BeginPlay()
@@ -164,6 +168,7 @@ void UStrategyInfantryVisualComponent::TickComponent(
     }
 
     RefreshAnimation(false);
+    UpdateFormationBounds();
 }
 
 void UStrategyInfantryVisualComponent::SetEnabled(
@@ -218,6 +223,7 @@ void UStrategyInfantryVisualComponent::SetVisualScaleDivisor(
         EnsureVisualCount(GetDesiredVisualCount());
         RebuildFormation();
         RefreshAnimation(true);
+        UpdateFormationBounds();
     }
 }
 
@@ -248,6 +254,7 @@ void UStrategyInfantryVisualComponent::RefreshVisuals()
     RebuildFormation();
     RefreshWeaponMeshes();
     RefreshAnimation(true);
+    UpdateFormationBounds();
 
     CachedStrength =
         FMath::Max(0, OwnerCompany->CurrentStrength);
@@ -501,7 +508,37 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
             Slot.WorldLocation);
 
         Soldier->SetRelativeRotation(
-            FRotator(0.0f, Slot.FacingYaw, 0.0f));
+            FRotator(0.0f, Slot.FacingYaw + SoldierMeshYawOffset, 0.0f));
+    }
+}
+
+bool UStrategyInfantryVisualComponent::GetFormationLocalBounds(FBox& OutBounds) const
+{
+    OutBounds = FormationLocalBounds;
+    return bEnabled && OutBounds.IsValid != 0;
+}
+
+void UStrategyInfantryVisualComponent::UpdateFormationBounds()
+{
+    FBox& OutBounds = FormationLocalBounds;
+    OutBounds = FBox(ForceInit);
+    if (!bEnabled || !LoadedSoldierMesh) return;
+    for (const USkeletalMeshComponent* Soldier : SoldierComponents)
+    {
+        if (IsValid(Soldier))
+        {
+            // Imported reference-pose bounds stay below ground when an animation
+            // moves the hips. Use the evaluated pose so kneeling/prone also fit.
+            FBox PoseBounds(ForceInit);
+            for (const FTransform& Bone : Soldier->GetComponentSpaceTransforms())
+            {
+                PoseBounds += Bone.GetLocation();
+            }
+            if (PoseBounds.IsValid)
+            {
+                OutBounds += PoseBounds.ExpandBy(20.0f).TransformBy(Soldier->GetRelativeTransform());
+            }
+        }
     }
 }
 
@@ -522,9 +559,15 @@ void UStrategyInfantryVisualComponent::RefreshAnimation(
         return;
     }
 
+    const bool bHoldPose = !bAnimateIdle &&
+        (Sequence == IdleStandingAsset.Get() || Sequence == IdleKneelingAsset.Get() ||
+         Sequence == IdleProneAsset.Get() || Sequence == AimStandingAsset.Get() ||
+         Sequence == AimKneelingAsset.Get());
+
     if (!bForce &&
         LastAnimationAsset == Sequence &&
-        bLastAnimationLooping == bLooping)
+        bLastAnimationLooping == bLooping &&
+        bLastHoldingPose == bHoldPose)
     {
         return;
     }
@@ -537,13 +580,22 @@ void UStrategyInfantryVisualComponent::RefreshAnimation(
             continue;
         }
 
+        Soldier->bPauseAnims = false;
         Soldier->PlayAnimation(
             Sequence,
             bLooping);
+        Soldier->SetPosition(0.0f, false);
+        if (bHoldPose)
+        {
+            Soldier->TickAnimation(0.0f, false);
+            Soldier->RefreshBoneTransforms();
+        }
+        Soldier->bPauseAnims = bHoldPose;
     }
 
     LastAnimationAsset = Sequence;
     bLastAnimationLooping = bLooping;
+    bLastHoldingPose = bHoldPose;
 }
 
 void UStrategyInfantryVisualComponent::RefreshWeaponMeshes()
@@ -599,7 +651,10 @@ UAnimSequence* UStrategyInfantryVisualComponent::ResolveAnimation(
         EStrategyUnitState::Destroyed)
     {
         bOutLooping = false;
-        return DeathAsset.LoadSynchronous();
+        const uint32 Variant = GetTypeHash(OwnerCompany->StableUnitId) % 3u;
+        const TSoftObjectPtr<UAnimSequence>& Chosen =
+            Variant == 0 ? DeathAsset : (Variant == 1 ? DeathAsset2 : DeathAsset3);
+        return Chosen.LoadSynchronous();
     }
 
     if (Action ==
@@ -748,5 +803,7 @@ void UStrategyInfantryVisualComponent::DestroyVisualComponents()
     CachedFormationValue = 255;
     bCachedBayonetFixed = false;
     bLastAnimationLooping = false;
+    bLastHoldingPose = false;
     bLoadAttempted = false;
+    FormationLocalBounds = FBox(ForceInit);
 }

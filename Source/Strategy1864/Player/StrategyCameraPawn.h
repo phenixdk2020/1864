@@ -33,7 +33,7 @@ public:
     TObjectPtr<UFloatingPawnMovement> MovementComponent;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Camera")
-    float MinZoom = 800.0f;
+    float MinZoom = 150.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Camera")
     float MaxZoom = 60000.0f;
@@ -76,6 +76,21 @@ private:
     void MoveRight(float Value);
     void ZoomCamera(float Value);
     void RotateCamera(float Value);
+    void TiltCamera(float Value);
+    void MouseOrbitX(float Value);
+    void MouseOrbitY(float Value);
+    void BeginCameraPan();
+    void EndCameraPan();
+    void FocusSelected();
+    void PresetOverview();
+    void PresetTactical();
+    void PresetSoldiers();
+    void PresetTopDown();
+    void ApplyPreset(float ArmLength, float Pitch);
+    bool bPresetTransition = false;
+    bool bRightMousePan = false;
+    float PresetArmLength = 18000.0f;
+    float PresetPitch = -55.0f;
 
     TWeakObjectPtr<AActor> ProjectileFollowTarget;
     FVector PreFollowLocation = FVector::ZeroVector;

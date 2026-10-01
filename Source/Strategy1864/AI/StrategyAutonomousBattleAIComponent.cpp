@@ -143,6 +143,17 @@ void UStrategyAutonomousBattleAIComponent::TickComponent(
 
     if (CurrentDistance <= DesiredDistance)
     {
+        // Replace the previous advance order with an explicit hold order.
+        // This keeps the formation stationary while CombatComponent fires;
+        // otherwise the old movement order can carry it through the firing line.
+        FStrategyOrder HoldOrder;
+        HoldOrder.Type = EStrategyOrderType::Hold;
+        HoldOrder.TargetLocation = OwnerUnit->GetActorLocation();
+        HoldOrder.FacingYaw =
+            (Enemy->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
+        HoldOrder.bHasFacing = true;
+        HoldOrder.Authority = EStrategyOrderAuthority::OfficerAI;
+        OwnerUnit->OrderComponent->SetOrder(HoldOrder);
         if (OwnerUnit->AITelemetryComponent)
         {
             OwnerUnit->AITelemetryComponent->SetDecision(
@@ -241,6 +252,10 @@ bool UStrategyAutonomousBattleAIComponent::IsAutonomousEnemy() const
         OwnerUnit->Side == EStrategySide::Austria ||
         OwnerUnit->Side == EStrategySide::Enemy;
 
-    return bEnemySide &&
+    const bool bUncontrolledDanishUnit =
+        OwnerUnit->Side == EStrategySide::Denmark &&
+        !OwnerUnit->bPlayerControllable;
+
+    return (bEnemySide || bUncontrolledDanishUnit) &&
         OwnerUnit->Echelon == EStrategyEchelon::Company;
 }

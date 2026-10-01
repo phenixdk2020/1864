@@ -4,6 +4,7 @@
 #include "../Units/StrategyUnit.h"
 #include "../Orders/StrategyOrderComponent.h"
 #include "../Orders/StrategyOrderTypes.h"
+#include "../Combat/StrategyFireControlComponent.h"
 
 void AStrategyHUD::BeginSelectionBox(const FVector2D& ScreenPoint)
 {
@@ -88,6 +89,25 @@ void AStrategyHUD::DrawHUD()
                     nullptr,
                     0.9f,
                     false);
+
+                if (const UStrategyFireControlComponent* Fire = Unit->FireControlComponent)
+                {
+                    const FLinearColor ShortColor = FLinearColor::FromSRGBColor(FColor(100, 230, 130));
+                    const FLinearColor MediumColor = FLinearColor::FromSRGBColor(FColor(255, 200, 60));
+                    const FLinearColor LongColor = FLinearColor::FromSRGBColor(FColor(255, 110, 90));
+                    const FLinearColor ActiveColor = Fire->FirePolicy == EStrategyFirePolicy::Close ? ShortColor :
+                        Fire->FirePolicy == EStrategyFirePolicy::Medium ? MediumColor :
+                        Fire->FirePolicy == EStrategyFirePolicy::Long ? LongColor : FLinearColor::White;
+                    DrawRect(FLinearColor(0.015f, 0.02f, 0.03f, 0.85f), 12.0f, 126.0f, 330.0f, 94.0f);
+                    DrawText(FString::Printf(TEXT("Skydeafstand: %s"), *Fire->GetActiveRangeLabel()),
+                        ActiveColor, 20.0f, 134.0f, nullptr, 1.1f, false);
+                    DrawText(FString::Printf(TEXT("Kort: 0-%.0f m"), Fire->CloseRangeCm / 100.0f),
+                        ShortColor, 20.0f, 160.0f, nullptr, 1.0f, false);
+                    DrawText(FString::Printf(TEXT("Mellem: %.0f-%.0f m"), Fire->CloseRangeCm / 100.0f, Fire->MediumRangeCm / 100.0f),
+                        MediumColor, 20.0f, 178.0f, nullptr, 1.0f, false);
+                    DrawText(FString::Printf(TEXT("Lang: %.0f-%.0f m"), Fire->MediumRangeCm / 100.0f, Fire->LongRangeCm / 100.0f),
+                        LongColor, 20.0f, 196.0f, nullptr, 1.0f, false);
+                }
 
                 if (Unit->OrderComponent)
                 {

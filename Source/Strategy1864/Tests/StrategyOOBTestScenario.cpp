@@ -72,6 +72,7 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/SkeletalMesh.h"
 #include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
 #include "DrawDebugHelpers.h"
@@ -154,6 +155,56 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
 void AStrategyOOBTestScenario::BuildTestOOB()
 {
     ClearSpawnedUnits();
+
+    if (bLivgardenVsSwedishTest)
+    {
+        AStrategyCompanyUnit* Guard = SpawnCompany(
+            TEXT("DK-LIVGARDEN-C1"), TEXT("Livgarden"), 1,
+            Origin + FVector(8500.0f, -7000.0f, 0.0f), nullptr,
+            static_cast<uint8>(EStrategySide::Denmark));
+        AStrategyCompanyUnit* Swedish = SpawnCompany(
+            TEXT("SE-INFANTRY-C1"), TEXT("Svensk infanteri"), 1,
+            Origin + FVector(22500.0f, -7000.0f, 0.0f), nullptr,
+            static_cast<uint8>(EStrategySide::Enemy));
+        if (Swedish)
+        {
+            Swedish->SetActorRotation(FRotator(0.0f, 180.0f, 0.0f));
+            if (Swedish->InfantryVisualComponent)
+            {
+                Swedish->InfantryVisualComponent->SoldierMeshAsset = TSoftObjectPtr<USkeletalMesh>(
+                    FSoftObjectPath(TEXT("/Game/Units/Swedish/Infantry1864/Mesh/SK_SE_Infantry_1864.SK_SE_Infantry_1864")));
+            }
+        }
+        for (AStrategyCompanyUnit* Company : {Guard, Swedish})
+        {
+            if (!Company) continue;
+            Company->bPlayerControllable = false;
+            Company->bOfficerAIEnabled = true;
+            if (Company->AutonomousBattleAIComponent)
+            {
+                Company->AutonomousBattleAIComponent->bEnableForNonPlayerSides = true;
+            }
+            if (Company->InfantryVisualComponent)
+            {
+                Company->InfantryVisualComponent->SetEnabled(true);
+            }
+            ConfigureRuntimeQALabel(Company);
+            if (Company->CombatComponent)
+            {
+                Company->CombatComponent->SetDeterministicRandomSeed(
+                    QARandomSeed ^ static_cast<int32>(GetTypeHash(Company->StableUnitId)));
+            }
+            // The focused duel has no full OOB/contact simulation around it;
+            // direct line-of-sight is sufficient for the two test companies
+            // to acquire one another and exchange fire.
+            if (Company->FireControlComponent)
+            {
+                Company->FireControlComponent->bRequireCurrentContact = false;
+            }
+        }
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DUEL: Livgarden and Swedish infantry, %d units; full OOB disabled"), SpawnedUnitObjects.Num());
+        return;
+    }
 
     if (bSpawnTerrainQA)
     {
@@ -1229,34 +1280,40 @@ void AStrategyOOBTestScenario::DrawRuntimeQAVisuals() const
                 break;
         }
 
-        const FVector Center =
+        FVector Center =
             Unit->GetActorLocation() +
             FVector(0.0f, 0.0f, Extent.Z + 18.0f);
 
-        DrawDebugBox(
-            World,
-            Center,
-            Extent,
-            Unit->GetActorQuat(),
-            Color,
-            false,
-            0.0f,
-            0,
-            QAVisualThickness);
+        if (const UStrategyInfantryVisualComponent* InfantryVisual =
+            Unit->FindComponentByClass<UStrategyInfantryVisualComponent>())
+        {
+            FBox FormationBounds;
+            if (InfantryVisual->GetFormationLocalBounds(FormationBounds))
+            {
+                FormationBounds = FormationBounds.ExpandBy(15.0f);
+                Extent = FormationBounds.GetExtent();
+                Center = Unit->GetActorTransform().TransformPosition(FormationBounds.GetCenter());
+            }
+        }
 
-        const FVector Forward =
-            Unit->GetActorForwardVector().GetSafeNormal2D();
-
-        DrawDebugDirectionalArrow(
-            World,
-            Center,
-            Center + Forward * (Extent.X + 260.0f),
-            90.0f,
-            Color,
-            false,
-            0.0f,
-            0,
-            QAVisualThickness);
+        if (Unit->bSelected)
+        {
+            // Selection is a footprint on the ground, never a box around the soldiers.
+            Center.Z = Unit->GetActorLocation().Z + 5.0f;
+            const FVector Right = Unit->GetActorRightVector().GetSafeNormal2D();
+            const FVector Forward = Unit->GetActorForwardVector().GetSafeNormal2D();
+            const FVector Corners[] = {
+                Center - Forward * Extent.X - Right * Extent.Y,
+                Center + Forward * Extent.X - Right * Extent.Y,
+                Center + Forward * Extent.X + Right * Extent.Y,
+                Center - Forward * Extent.X + Right * Extent.Y
+            };
+            for (int32 Edge = 0; Edge < 4; ++Edge)
+            {
+                DrawDebugLine(World, Corners[Edge], Corners[(Edge + 1) % 4],
+                    Color, false, 0.0f, 0, QAVisualThickness);
+            }
+        }
 
         FString UnitLabel;
 

@@ -228,6 +228,44 @@ void AStrategyPlayerController::SelectSingleUnderCursor()
         HitUnit = Cast<AStrategyUnit>(Hit.GetActor());
     }
 
+    // Formation models are made from many instanced soldiers and do not carry
+    // a collision shape.  Use a generous screen-space fallback so clicking
+    // anywhere on the visible formation still selects its owning unit.
+    if (!HitUnit)
+    {
+        FVector2D Cursor;
+        if (GetMousePosition(Cursor.X, Cursor.Y))
+        {
+            float BestDistance = 140.0f;
+            UWorld* World = GetWorld();
+            if (World)
+            {
+                for (TActorIterator<AStrategyUnit> It(World); It; ++It)
+                {
+                    AStrategyUnit* Candidate = *It;
+                    if (!IsValid(Candidate) || !Candidate->bPlayerControllable)
+                    {
+                        continue;
+                    }
+
+                    FVector2D ScreenPoint;
+                    if (!ProjectWorldLocationToScreen(
+                        Candidate->GetActorLocation(), ScreenPoint, false))
+                    {
+                        continue;
+                    }
+
+                    const float Distance = FVector2D::Distance(Cursor, ScreenPoint);
+                    if (Distance < BestDistance)
+                    {
+                        BestDistance = Distance;
+                        HitUnit = Candidate;
+                    }
+                }
+            }
+        }
+    }
+
     if (!bAdd && !bRemove)
     {
         ClearSelection();

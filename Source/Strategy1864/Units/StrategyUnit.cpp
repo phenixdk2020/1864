@@ -56,6 +56,7 @@
 #include "../Engineering/StrategyWorkingPartyComponent.h"
 #include "../Tests/StrategySpecialistStateComponent.h"
 #include "Components/MeshComponent.h"
+#include "../Visual/StrategyInfantryVisualComponent.h"
 
 AStrategyUnit::AStrategyUnit()
 {
@@ -392,6 +393,13 @@ void AStrategyUnit::SetSemanticZoomState(EStrategySemanticZoomState NewState)
         }
     }
 
+    const UStrategyInfantryVisualComponent* InfantryVisual =
+        FindComponentByClass<UStrategyInfantryVisualComponent>();
+    if (QAPlaceholderMesh && InfantryVisual && InfantryVisual->GetRenderedSoldierCount() > 0)
+    {
+        QAPlaceholderMesh->SetVisibility(false, true);
+    }
+
     if (DebugLabel)
     {
         const bool bHQ =
@@ -406,7 +414,8 @@ void AStrategyUnit::SetSemanticZoomState(EStrategySemanticZoomState NewState)
             SemanticZoomState == EStrategySemanticZoomState::Operational ||
             bStrategic;
 
-        DebugLabel->SetVisibility(bShowLabel);
+        const bool bHasSoldiers = InfantryVisual && InfantryVisual->GetRenderedSoldierCount() > 0;
+        DebugLabel->SetVisibility(bShowLabel && !bHasSoldiers);
     }
 
     if (bChanged)

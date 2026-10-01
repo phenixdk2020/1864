@@ -32,6 +32,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
     bool bEnabled = false;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
+    bool bAnimateIdle = false;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry", meta=(ClampMin="1"))
     int32 VisualScaleDivisor = 1;
 
@@ -42,10 +45,16 @@ public:
     float RefreshIntervalSeconds = 0.08f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
-    FName RightHandBoneName = TEXT("mixamorig:RightHand");
+    FName RightHandBoneName = TEXT("RightHand");
 
+    // The imported Livgarden faces +Y; strategy formations face +X.
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
-    FTransform WeaponRelativeTransform = FTransform::Identity;
+    float SoldierMeshYawOffset = -90.0f;
+
+    // Rifle asset points along local X; rotate it into the imported hand grip.
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
+    FTransform WeaponRelativeTransform = FTransform(
+        FRotator(-8.0f, 90.0f, 0.0f), FVector(-4.0f, 0.0f, 10.0f));
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Assets")
     TSoftObjectPtr<USkeletalMesh> SoldierMeshAsset;
@@ -107,6 +116,12 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
     TSoftObjectPtr<UAnimSequence> DeathAsset;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
+    TSoftObjectPtr<UAnimSequence> DeathAsset2;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
+    TSoftObjectPtr<UAnimSequence> DeathAsset3;
+
     UFUNCTION(BlueprintCallable, Category="Strategy|Visual|Infantry")
     void SetEnabled(bool bNewEnabled);
 
@@ -115,6 +130,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Strategy|Visual|Infantry")
     void RefreshVisuals();
+
+    bool GetFormationLocalBounds(FBox& OutBounds) const;
 
     UFUNCTION(BlueprintPure, Category="Strategy|Visual|Infantry")
     int32 GetRenderedSoldierCount() const
@@ -134,6 +151,7 @@ private:
     int32 GetDesiredVisualCount() const;
     void EnsureVisualCount(int32 DesiredCount);
     void RebuildFormation();
+    void UpdateFormationBounds();
     void RefreshAnimation(bool bForce = false);
     void RefreshWeaponMeshes();
     UAnimSequence* ResolveAnimation(bool& bOutLooping) const;
@@ -164,5 +182,7 @@ private:
     uint8 CachedFormationValue = 255;
     bool bCachedBayonetFixed = false;
     bool bLastAnimationLooping = false;
+    bool bLastHoldingPose = false;
     bool bLoadAttempted = false;
+    FBox FormationLocalBounds = FBox(ForceInit);
 };

@@ -96,6 +96,40 @@ void UStrategyCombatComponent::TickComponent(
         return;
     }
 
+    // Autonomous companies must turn their frontage toward the closest enemy
+    // before evaluating the fire cone. Movement orders can leave the actor
+    // rotation unchanged, which otherwise makes a valid target permanently
+    // fail CanEngageTarget().
+    if (!OwnerUnit->bPlayerControllable && OwnerUnit->FireControlComponent)
+    {
+        AStrategyUnit* NearestEnemy = nullptr;
+        float NearestDistanceCm = TNumericLimits<float>::Max();
+        for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+        {
+            AStrategyUnit* Candidate = *It;
+            if (!IsValid(Candidate) || Candidate == OwnerUnit ||
+                Candidate->Side == OwnerUnit->Side ||
+                Candidate->Side == EStrategySide::Neutral ||
+                !Candidate->IsCombatEffective())
+            {
+                continue;
+            }
+            const float DistanceCm = FVector::Dist2D(
+                OwnerUnit->GetActorLocation(), Candidate->GetActorLocation());
+            if (DistanceCm < NearestDistanceCm)
+            {
+                NearestDistanceCm = DistanceCm;
+                NearestEnemy = Candidate;
+            }
+        }
+        if (NearestEnemy)
+        {
+            const FVector ToEnemy =
+                NearestEnemy->GetActorLocation() - OwnerUnit->GetActorLocation();
+            OwnerUnit->SetActorRotation(FRotator(0.0f, ToEnemy.Rotation().Yaw, 0.0f));
+        }
+    }
+
     AStrategyUnit* Target = FindBestTarget();
     if (Target)
     {

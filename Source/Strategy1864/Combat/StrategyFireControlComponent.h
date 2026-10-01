@@ -56,14 +56,23 @@ public:
     float GetActiveRangeCm() const;
 
     UFUNCTION(BlueprintPure, Category="Strategy|Fire")
+    FString GetActiveRangeLabel() const;
+
+    UFUNCTION(BlueprintPure, Category="Strategy|Fire")
     bool IsInsideFireCone(const AStrategyUnit* Target) const;
 
     UFUNCTION(BlueprintPure, Category="Strategy|Fire")
     bool CanEngageTarget(const AStrategyUnit* Target) const;
 
+    UFUNCTION(BlueprintPure, Category="Strategy|Fire")
+    void GetFireFront(FVector& Left, FVector& Right, int32 FaceIndex = 0) const;
+
+    UFUNCTION(BlueprintPure, Category="Strategy|Fire")
+    bool IsLocationInsideFireField(FVector Location, float RangeCm) const;
+
 private:
     void DrawQARangeCones() const;
-    void DrawRangeArc(float RangeCm, bool bActive, const FColor& Color) const;
+    void DrawRangeArc(float InnerRangeCm, float RangeCm, bool bActive, const FColor& Color, const TCHAR* Label) const;
 
     UPROPERTY()
     TObjectPtr<AStrategyUnit> OwnerUnit;

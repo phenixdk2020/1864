@@ -92,7 +92,9 @@ void UStrategyHumanAnimationStateComponent::RefreshBaseLocomotion()
         return;
     }
 
-    if (OwnerUnit->UnitState == EStrategyUnitState::Routed)
+    const bool bMoving = LastMeasuredSpeedCmPerSecond > 5.0f;
+
+    if (bMoving && OwnerUnit->UnitState == EStrategyUnitState::Routed)
     {
         BaseLocomotionAction =
             bMounted
@@ -100,10 +102,6 @@ void UStrategyHumanAnimationStateComponent::RefreshBaseLocomotion()
             : EStrategyHumanAnimationAction::RoutedRun;
         return;
     }
-
-    const bool bMoving =
-        LastMeasuredSpeedCmPerSecond > 5.0f ||
-        OwnerUnit->UnitState == EStrategyUnitState::Moving;
 
     if (!bMoving)
     {

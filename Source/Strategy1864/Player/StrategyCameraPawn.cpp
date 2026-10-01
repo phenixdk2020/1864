@@ -1,4 +1,7 @@
 #include "StrategyCameraPawn.h"
+#include "StrategyPlayerController.h"
+#include "../Units/StrategyUnit.h"
+#include "GameFramework/PlayerController.h"
 
 #include "Camera/CameraComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
@@ -35,6 +38,19 @@ void AStrategyCameraPawn::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    if (MovementComponent)
+    {
+        const APlayerController* PC = Cast<APlayerController>(GetController());
+        MovementComponent->MaxSpeed = PC && (PC->IsInputKeyDown(EKeys::LeftShift) || PC->IsInputKeyDown(EKeys::RightShift)) ? 9000.0f : 3000.0f;
+    }
+    if (bPresetTransition && SpringArm)
+    {
+        SpringArm->TargetArmLength = FMath::FInterpTo(SpringArm->TargetArmLength, PresetArmLength, DeltaTime, 7.0f);
+        FRotator Rotation = SpringArm->GetRelativeRotation();
+        Rotation.Pitch = FMath::FInterpTo(Rotation.Pitch, PresetPitch, DeltaTime, 7.0f);
+        SpringArm->SetRelativeRotation(Rotation);
+        if (FMath::IsNearlyEqual(SpringArm->TargetArmLength, PresetArmLength, 1.0f) && FMath::IsNearlyEqual(Rotation.Pitch, PresetPitch, 0.1f)) bPresetTransition = false;
+    }
     if (!bFollowingProjectile)
     {
         return;
@@ -107,6 +123,16 @@ void AStrategyCameraPawn::SetupPlayerInputComponent(UInputComponent* PlayerInput
     PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AStrategyCameraPawn::MoveRight);
     PlayerInputComponent->BindAxis(TEXT("CameraZoom"), this, &AStrategyCameraPawn::ZoomCamera);
     PlayerInputComponent->BindAxis(TEXT("CameraYaw"), this, &AStrategyCameraPawn::RotateCamera);
+    PlayerInputComponent->BindAxis(TEXT("CameraTilt"), this, &AStrategyCameraPawn::TiltCamera);
+    PlayerInputComponent->BindAxis(TEXT("CameraOrbitX"), this, &AStrategyCameraPawn::MouseOrbitX);
+    PlayerInputComponent->BindAxis(TEXT("CameraOrbitY"), this, &AStrategyCameraPawn::MouseOrbitY);
+    PlayerInputComponent->BindAction(TEXT("CameraPan"), IE_Pressed, this, &AStrategyCameraPawn::BeginCameraPan);
+    PlayerInputComponent->BindAction(TEXT("CameraPan"), IE_Released, this, &AStrategyCameraPawn::EndCameraPan);
+    PlayerInputComponent->BindAction(TEXT("CameraFocus"), IE_Pressed, this, &AStrategyCameraPawn::FocusSelected);
+    PlayerInputComponent->BindAction(TEXT("CameraOverview"), IE_Pressed, this, &AStrategyCameraPawn::PresetOverview);
+    PlayerInputComponent->BindAction(TEXT("CameraTactical"), IE_Pressed, this, &AStrategyCameraPawn::PresetTactical);
+    PlayerInputComponent->BindAction(TEXT("CameraSoldiers"), IE_Pressed, this, &AStrategyCameraPawn::PresetSoldiers);
+    PlayerInputComponent->BindAction(TEXT("CameraTopDown"), IE_Pressed, this, &AStrategyCameraPawn::PresetTopDown);
 }
 
 void AStrategyCameraPawn::MoveForward(float Value)
@@ -157,8 +183,10 @@ void AStrategyCameraPawn::ZoomCamera(float Value)
         return;
     }
 
+    bPresetTransition = false;
+    const float Step = FMath::Clamp(SpringArm->TargetArmLength * 0.15f, 25.0f, ZoomStep);
     SpringArm->TargetArmLength = FMath::Clamp(
-        SpringArm->TargetArmLength - (Value * ZoomStep),
+        SpringArm->TargetArmLength - (Value * Step),
         MinZoom,
         MaxZoom);
 }
@@ -184,6 +212,7 @@ void AStrategyCameraPawn::FocusOnWorldLocation(const FVector& WorldLocation)
     FVector NewLocation = GetActorLocation();
     NewLocation.X = WorldLocation.X;
     NewLocation.Y = WorldLocation.Y;
+    NewLocation.Z = WorldLocation.Z + 100.0f;
     SetActorLocation(NewLocation);
 }
 
@@ -226,3 +255,76 @@ void AStrategyCameraPawn::StopProjectileFollow(
 
     bFollowingProjectile = false;
 }
+
+void AStrategyCameraPawn::TiltCamera(float Value)
+{
+    if (!SpringArm || FMath::IsNearlyZero(Value)) return;
+    if (bFollowingProjectile) StopProjectileFollow(true);
+    bPresetTransition = false;
+    FRotator Rotation = SpringArm->GetRelativeRotation();
+    Rotation.Pitch = FMath::Clamp(Rotation.Pitch - Value * 45.0f * GetWorld()->GetDeltaSeconds(), -85.0f, -10.0f);
+    SpringArm->SetRelativeRotation(Rotation);
+}
+void AStrategyCameraPawn::MouseOrbitX(float Value)
+{
+    APlayerController* PC = Cast<APlayerController>(GetController());
+    if (!PC || FMath::IsNearlyZero(Value)) return;
+    if (bFollowingProjectile) StopProjectileFollow(true);
+    if (bRightMousePan || PC->IsInputKeyDown(EKeys::RightMouseButton))
+    {
+        AddActorWorldOffset(-GetActorRightVector() * Value * 35.0f);
+    }
+    else if (PC->IsInputKeyDown(EKeys::MiddleMouseButton))
+    {
+        AddActorLocalRotation(FRotator(0.0f, Value * 1.5f, 0.0f));
+    }
+}
+void AStrategyCameraPawn::MouseOrbitY(float Value)
+{
+    APlayerController* PC = Cast<APlayerController>(GetController());
+    if (!PC || !SpringArm || FMath::IsNearlyZero(Value)) return;
+    if (bFollowingProjectile) StopProjectileFollow(true);
+    if (bRightMousePan || PC->IsInputKeyDown(EKeys::RightMouseButton))
+    {
+        FVector Forward = GetActorForwardVector();
+        Forward.Z = 0.0f;
+        AddActorWorldOffset(-Forward.GetSafeNormal() * Value * 35.0f);
+    }
+    else if (PC->IsInputKeyDown(EKeys::MiddleMouseButton))
+    {
+        bPresetTransition = false;
+        FRotator Rotation = SpringArm->GetRelativeRotation();
+        Rotation.Pitch = FMath::Clamp(Rotation.Pitch + Value * 1.5f, -85.0f, -10.0f);
+        SpringArm->SetRelativeRotation(Rotation);
+    }
+}
+void AStrategyCameraPawn::BeginCameraPan() { bRightMousePan = true; }
+void AStrategyCameraPawn::EndCameraPan() { bRightMousePan = false; }
+void AStrategyCameraPawn::FocusSelected()
+{
+    if (AStrategyPlayerController* PC = Cast<AStrategyPlayerController>(GetController()))
+    {
+        const TArray<AStrategyUnit*> Units = PC->GetSelectedUnits();
+        FVector Center = FVector::ZeroVector;
+        int32 Count = 0;
+        for (AStrategyUnit* Unit : Units) if (IsValid(Unit)) { Center += Unit->GetActorLocation(); ++Count; }
+        if (Count > 0) { if (bFollowingProjectile) StopProjectileFollow(true); FocusOnWorldLocation(Center / Count); }
+    }
+}
+void AStrategyCameraPawn::ApplyPreset(float ArmLength, float Pitch)
+{
+    if (bFollowingProjectile) StopProjectileFollow(true);
+    FocusSelected();
+    FVector Position = GetActorLocation();
+    Position.Z = 100.0f;
+    // Preserve the selected unit's terrain elevation when available.
+    SetActorLocation(Position);
+    FocusSelected();
+    PresetArmLength = FMath::Clamp(ArmLength, MinZoom, MaxZoom);
+    PresetPitch = Pitch;
+    bPresetTransition = true;
+}
+void AStrategyCameraPawn::PresetOverview() { ApplyPreset(18000.0f, -60.0f); }
+void AStrategyCameraPawn::PresetTactical() { ApplyPreset(6000.0f, -55.0f); }
+void AStrategyCameraPawn::PresetSoldiers() { ApplyPreset(650.0f, -20.0f); }
+void AStrategyCameraPawn::PresetTopDown() { ApplyPreset(12000.0f, -85.0f); }
