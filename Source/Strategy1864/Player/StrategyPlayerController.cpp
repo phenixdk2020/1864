@@ -118,6 +118,17 @@ void AStrategyPlayerController::PlayerTick(float DeltaTime)
 
 void AStrategyPlayerController::SelectionPressed()
 {
+    // A click on the screen's panels (order of battle, command panel) stays there.
+    {
+        float UIX = 0.0f, UIY = 0.0f;
+        AStrategyHUD* HUD = GetStrategyHUD();
+        if (HUD && GetMousePosition(UIX, UIY) && HUD->HandleClick(FVector2D(UIX, UIY)))
+        {
+            bUIClickConsumed = true;
+            return;
+        }
+    }
+
     if (bOrderPlacementPending)
     {
         FVector GroundPoint;
@@ -148,6 +159,12 @@ void AStrategyPlayerController::SelectionPressed()
 
 void AStrategyPlayerController::SelectionReleased()
 {
+    if (bUIClickConsumed)
+    {
+        bUIClickConsumed = false;
+        return;
+    }
+
     if (bOrderPlacementPending && bOrderFacingDragActive)
     {
         FVector FacingPoint;
@@ -510,7 +527,9 @@ void AStrategyPlayerController::SelectUnitFromOOB(
         if (AStrategyCameraPawn* CameraPawn =
             Cast<AStrategyCameraPawn>(GetPawn()))
         {
-            CameraPawn->FocusOnWorldLocation(Unit->GetActorLocation());
+            // A double click in the order of battle: the camera behind the unit, looking the way it faces.
+            CameraPawn->SetActorRotation(FRotator(0.0f, Unit->GetActorRotation().Yaw, 0.0f));
+            CameraPawn->ApplyPreset(4500.0f, -28.0f);
         }
     }
 }

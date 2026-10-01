@@ -46,6 +46,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Strategy|Camera")
     void FocusOnWorldLocation(const FVector& WorldLocation);
+    /** Arm length and pitch, eased in, centred on the selection (also the order of battle's double click). */
+    void ApplyPreset(float ArmLength, float Pitch);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Camera|Projectile")
     float ProjectileFollowArmLength = 850.0f;
@@ -86,7 +88,6 @@ private:
     void PresetTactical();
     void PresetSoldiers();
     void PresetTopDown();
-    void ApplyPreset(float ArmLength, float Pitch);
     bool bPresetTransition = false;
     bool bRightMousePan = false;
     float PresetArmLength = 18000.0f;

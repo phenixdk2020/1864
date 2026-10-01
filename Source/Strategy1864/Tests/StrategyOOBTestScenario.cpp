@@ -152,6 +152,11 @@ void AStrategyOOBTestScenario::BeginPlay()
     {
         bLivgardenVsSwedishTest = true;
     }
+    // The full order of battle (division, brigade, regiments, cavalry, artillery): a map named *OOB* or -Strategy1864FullOOB.
+    if (MapName.Contains(TEXT("OOB")) || FParse::Param(FCommandLine::Get(), TEXT("Strategy1864FullOOB")))
+    {
+        bLivgardenVsSwedishTest = false;
+    }
     UE_LOG(LogTemp, Display, TEXT("PROJECT1864-QA: map %s, test %s"), *MapName, bLivgardenVsSwedishTest ? TEXT("Livgarden vs Swedish duel") : TEXT("full OOB"));
 
     if (bBuildOnBeginPlay)

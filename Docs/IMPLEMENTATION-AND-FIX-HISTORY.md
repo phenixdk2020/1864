@@ -862,6 +862,32 @@ Slaget blev porteret fra Unity til Unreal Engine 5.8 som modulet `Strategy1864`.
 
 **Senere: FireByRank pr. geled.** Geled 1 skyder og lader, så geled 2 og så geled 3, i stedet for at tilfældige soldater skyder (`FireDrillComponent` kender allerede det geled, der skyder).
 
+### Slagets skærmbillede: kamporden, kommandopanel og minikort (1. oktober 2026)
+`Player/StrategyHUD` er skrevet om efter Unity F30X (brugerens video og skærmbillede).
+
+**Kampordenen** (øverst til venstre, [O]):
+- Kolonnerne er træet med NATO-mærker (XX/X/III/II/I), MÆND, STATUS, AI og TILK. ATT og ↳ markerer midlertidigt tilknyttede enheder.
+- HQ'er viser summen af mænd under sig.
+- Grene foldes med −/+, og hele panelet kan foldes.
+- Et klik vælger enheden uden at flytte kameraet. Et dobbeltklik stiller kameraet bag enheden, så det ser i enhedens retning.
+
+**Kommandopanelet** (bunden, for den valgte enhed):
+- HQ'er: AI ON/OFF, DEF/BAL/OFF og de seks ordrer (ANGRIB HER, FORSVAR HER, RYK FREM, TILBAGETRÆK, SAML, STOP/HOLD). Knappen er blå, mens ordren udføres. De underlagte vises med status, AI og tilknytning.
+- Kompagnier: HOLD/CLOSE/MED/LONG, RYK FREM, TILBAGE, CHARGE og STOP samt LINIE/KOLONNE/KARRÉ.
+
+**Minikortet** ("Taktisk kort / kamera", nederst til højre):
+- Alle enheder vises: danske i turkis, fjender i rødt, den valgte i guld.
+- Kameraets plads er markeret.
+- Et klik flytter kameraet dertil.
+
+**Klik på panelerne** bliver i panelerne (`AStrategyPlayerController::SelectionPressed`).
+
+**Ny testbane:** `Strategy1864_OOB` starter hele kampordenen. Kommandolinjen `-Strategy1864FullOOB` gør det samme.
+
+**Verificeret:** kampordenen med 20 enheder, valg af 2. kompagni fra træet og kommandopanelet for et kompagni.
+
+**Ikke prøvet endnu:** ordrer fra panelet med klik og træk for front, dobbeltklik og klik på minikortet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

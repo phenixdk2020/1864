@@ -90,6 +90,7 @@ private:
     bool ResolveGroundPointUnderCursor(FVector& OutWorldPoint) const;
 
     bool bOrderPlacementPending = false;
+    bool bUIClickConsumed = false;
     bool bOrderFacingDragActive = false;
     EStrategyOrderType PendingOrderType = EStrategyOrderType::None;
     FVector PendingOrderTarget = FVector::ZeroVector;
