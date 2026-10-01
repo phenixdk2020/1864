@@ -843,6 +843,23 @@ Slaget blev porteret fra Unity til Unreal Engine 5.8 som modulet `Strategy1864`.
 
 **Ikke verificeret:** om hver af de 3 dødsanimationer faktisk bliver valgt.
 
+**Ildkeglen fra formationens front (brugerens tegning):**
+- Keglens sider går fra formationens forreste hjørner (`GetFireFront`) ud i ±35°.
+- CLOSE, MEDIUM og LONG følger fronten: lige ud for fronten og runde i siderne.
+- Den valgte afstand er tyk og i fuld farve, de andre to tynde og mørke.
+
+**Skytter efter vinkel og afstand (i slagets kampkerne):**
+- `UStrategyFireControlComponent::GetBearingFraction` tjekker hver mands plads i formationen mod 22 punkter på tværs af målformationen. Et punkt tæller, hvis det ligger foran ham, inden for den aktive afstand og inden for ±35° fra hans egen plads.
+- Salven (`CombatComponent::TryFireAt`) ganges med andelen af mænd, der kan skyde. Det sker efter skydeøvelsens regler for geledder og før skyttekædens tæthed.
+- `LastVolleyTarget`, `LastBearingCount` og `LastBearingTotal` gemmes.
+- I visningen skyder de mænd, der kan ramme (`CanPointBearOn`), først.
+- Karré er undtaget, fordi siderne har deres egen andel.
+
+**Verificeret:**
+- Front mod front: "190 of 190 men can bear".
+- Med `-Strategy1864DuelOffset=6000` drejer kompagnierne sig stadig mod hinanden, fordi `CombatComponent` vender selvstændige kompagniers front mod nærmeste fjende. Derfor kan alle stadig skyde.
+- Et mindre antal skytter er ikke set endnu. Det viser sig først, når fronten er låst, fx ved forsvar af en stilling.
+
 **Senere: FireByRank pr. geled.** Geled 1 skyder og lader, så geled 2 og så geled 3, i stedet for at tilfældige soldater skyder (`FireDrillComponent` kender allerede det geled, der skyder).
 
 ### Næste skridt

@@ -130,6 +130,106 @@ void UStrategyFireControlComponent::GetFireFront(FVector& Left, FVector& Right, 
     Right = Unit->GetActorTransform().TransformPosition(Forward * Front + Lateral * MaxLateral);
 }
 
+TArray<FVector> UStrategyFireControlComponent::GetTargetSamplePoints(const AStrategyUnit* Target) const
+{
+    TArray<FVector> Points;
+    if (!IsValid(Target))
+    {
+        return Points;
+    }
+    Points.Add(Target->GetActorLocation());
+    FBox Bounds(ForceInit);
+    if (const UStrategyInfantryVisualComponent* Visual = Target->FindComponentByClass<UStrategyInfantryVisualComponent>())
+    {
+        Visual->GetFormationLocalBounds(Bounds);
+    }
+    if (!Bounds.IsValid && Target->FormationComponent && Target->CurrentStrength > 0)
+    {
+        for (const FStrategyFormationSlot& Slot : Target->FormationComponent->GenerateSoldierSlots(FVector::ZeroVector, 0.0f, Target->CurrentStrength))
+        {
+            Bounds += Slot.WorldLocation;
+        }
+    }
+    if (!Bounds.IsValid)
+    {
+        return Points;
+    }
+    // Seven points across the front and the rear, the centre line between.
+    const FTransform& T = Target->GetActorTransform();
+    for (int32 i = 0; i <= 6; ++i)
+    {
+        const float Y = FMath::Lerp(Bounds.Min.Y, Bounds.Max.Y, i / 6.0f);
+        Points.Add(T.TransformPosition(FVector(Bounds.Max.X, Y, 0.0f)));
+        Points.Add(T.TransformPosition(FVector(Bounds.Min.X, Y, 0.0f)));
+        Points.Add(T.TransformPosition(FVector((Bounds.Min.X + Bounds.Max.X) * 0.5f, Y, 0.0f)));
+    }
+    return Points;
+}
+
+bool UStrategyFireControlComponent::CanPointBearOn(const FVector& From, const FVector& Forward, const AStrategyUnit* Target, float RangeCm) const
+{
+    const float TanHalf = FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(FireConeHalfAngleDegrees, 0.0f, 89.9f)));
+    const FVector F = Forward.GetSafeNormal2D();
+    const FVector Lateral(-F.Y, F.X, 0.0f);
+    for (const FVector& P : GetTargetSamplePoints(Target))
+    {
+        FVector Offset = P - From;
+        Offset.Z = 0.0f;
+        const float Ahead = FVector::DotProduct(Offset, F);
+        if (Ahead > 0.0f && Offset.Size2D() <= RangeCm && FMath::Abs(FVector::DotProduct(Offset, Lateral)) <= Ahead * TanHalf)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+float UStrategyFireControlComponent::GetBearingFraction(const AStrategyUnit* Target, int32* OutBearing, int32* OutTotal) const
+{
+    const AStrategyUnit* Unit = OwnerUnit ? OwnerUnit.Get() : Cast<AStrategyUnit>(GetOwner());
+    if (OutBearing) { *OutBearing = 0; }
+    if (OutTotal) { *OutTotal = 0; }
+    if (!Unit || !IsValid(Target) || !Unit->FormationComponent || Unit->CurrentStrength <= 0)
+    {
+        return 1.0f;
+    }
+    if (Unit->FormationComponent->CurrentFormation == EStrategyFormationType::Square)
+    {
+        return 1.0f;
+    }
+    const TArray<FStrategyFormationSlot> Slots = Unit->FormationComponent->GenerateSoldierSlots(FVector::ZeroVector, 0.0f, Unit->CurrentStrength);
+    if (Slots.Num() == 0)
+    {
+        return 1.0f;
+    }
+    // The target's points once, then each man's place against them.
+    const TArray<FVector> Points = GetTargetSamplePoints(Target);
+    const float RangeCm = GetActiveRangeCm();
+    const float TanHalf = FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(FireConeHalfAngleDegrees, 0.0f, 89.9f)));
+    const FTransform& T = Unit->GetActorTransform();
+    const FVector F = Unit->GetActorForwardVector().GetSafeNormal2D();
+    const FVector Lateral(-F.Y, F.X, 0.0f);
+    int32 Bearing = 0;
+    for (const FStrategyFormationSlot& Slot : Slots)
+    {
+        const FVector From = T.TransformPosition(Slot.WorldLocation);
+        for (const FVector& P : Points)
+        {
+            FVector Offset = P - From;
+            Offset.Z = 0.0f;
+            const float Ahead = FVector::DotProduct(Offset, F);
+            if (Ahead > 0.0f && Offset.Size2D() <= RangeCm && FMath::Abs(FVector::DotProduct(Offset, Lateral)) <= Ahead * TanHalf)
+            {
+                ++Bearing;
+                break;
+            }
+        }
+    }
+    if (OutBearing) { *OutBearing = Bearing; }
+    if (OutTotal) { *OutTotal = Slots.Num(); }
+    return static_cast<float>(Bearing) / static_cast<float>(Slots.Num());
+}
+
 bool UStrategyFireControlComponent::IsLocationInsideFireField(FVector Location, float RangeCm) const
 {
     const AStrategyUnit* Unit = OwnerUnit ? OwnerUnit.Get() : Cast<AStrategyUnit>(GetOwner());

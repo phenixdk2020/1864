@@ -193,6 +193,17 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
                 AmmunitionRounds);
     }
 
+    // Only the men who can bring their muskets to bear: from each man's place in the formation the target
+    // must lie ahead, inside the range and within the fire cone's half angle.
+    {
+        int32 Bearing = 0, Total = 0;
+        const float BearingFraction = OwnerUnit->FireControlComponent->GetBearingFraction(Target, &Bearing, &Total);
+        LastVolleyTarget = Target;
+        LastBearingCount = Bearing;
+        LastBearingTotal = Total;
+        ShotCount = FMath::Clamp(FMath::RoundToInt(static_cast<float>(ShotCount) * BearingFraction), 0, AmmunitionRounds);
+    }
+
     if (OwnerUnit->SkirmisherComponent)
     {
         ShotCount =

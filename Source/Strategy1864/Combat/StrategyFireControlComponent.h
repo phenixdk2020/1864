@@ -70,6 +70,17 @@ public:
     UFUNCTION(BlueprintPure, Category="Strategy|Fire")
     bool IsLocationInsideFireField(FVector Location, float RangeCm) const;
 
+    /** Can a man standing at From (facing Forward) bring his musket to bear on any part of the target
+     *  formation: ahead of him, inside the range, within the half angle of the fire cone from his place. */
+    bool CanPointBearOn(const FVector& From, const FVector& Forward, const AStrategyUnit* Target, float RangeCm) const;
+
+    /** The share of the company's men who can bear on the target (by angle and range from each man's slot);
+     *  1 for a square (its faces have their own share). */
+    float GetBearingFraction(const AStrategyUnit* Target, int32* OutBearing = nullptr, int32* OutTotal = nullptr) const;
+
+    /** Points across the target's formation (its front, centre and rear corners), for the checks above. */
+    TArray<FVector> GetTargetSamplePoints(const AStrategyUnit* Target) const;
+
 private:
     void DrawQARangeCones() const;
     void DrawRangeArc(float InnerRangeCm, float RangeCm, bool bActive, const FColor& Color, const TCHAR* Label) const;

@@ -227,6 +227,8 @@ void AStrategyOOBTestScenario::TickDuel(float DeltaSeconds)
     }
     DuelAccumulator = 0.0f;
 
+    float SideOffsetCm = 0.0f;
+    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864DuelOffset="), SideOffsetCm);
     for (int32 Me = 0; Me < 2; ++Me)
     {
         AStrategyCompanyUnit* Company = DuelCompanies[Me];
@@ -242,11 +244,15 @@ void AStrategyOOBTestScenario::TickDuel(float DeltaSeconds)
         // The company's own agreed fire distance: the range of its active fire policy.
         const float Range = Company->FireControlComponent->GetActiveRangeCm();
         const FVector Away = (Here - There).GetSafeNormal2D();
-        const float FacingYaw = (There - Here).Rotation().Yaw;
+        const float FacingYaw = FMath::IsNearlyZero(SideOffsetCm) ? (There - Here).Rotation().Yaw : Company->GetActorRotation().Yaw;
         const FStrategyOrder Current = Company->OrderComponent->GetCurrentOrder();
         if (Distance > Range * 0.95f)
         {
-            const FVector Goal = There + Away * Range * 0.85f;
+            // Straight ahead to the range (the company does not wheel towards an enemy off to the side).
+            const FVector Ahead = FVector(Company->GetActorForwardVector().X, Company->GetActorForwardVector().Y, 0.0f).GetSafeNormal();
+            const float Along = FVector::DotProduct(There - Here, Ahead);
+            const FVector Goal = FMath::IsNearlyZero(SideOffsetCm) ? There + Away * Range * 0.85f
+                : Here + Ahead * FMath::Max(0.0f, Along - Range * 0.85f);
             const bool bAlreadyGoing = Current.Type == EStrategyOrderType::Advance && FVector::Dist2D(Current.TargetLocation, Goal) < 1500.0f;
             if (!bAlreadyGoing)
             {
@@ -269,14 +275,18 @@ void AStrategyOOBTestScenario::TickDuel(float DeltaSeconds)
             Hold.bHasFacing = true;
             Hold.Authority = EStrategyOrderAuthority::OfficerAI;
             Company->OrderComponent->SetOrder(Hold);
-            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DUEL: %s halts and fires (%.0f m)"), *Company->DisplayName.ToString(), Distance / 100.0f);
+            int32 Bearing = 0, Total = 0;
+            Company->FireControlComponent->GetBearingFraction(Enemy, &Bearing, &Total);
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DUEL: %s halts and fires (%.0f m): %d of %d men can bear"), *Company->DisplayName.ToString(), Distance / 100.0f, Bearing, Total);
         }
     }
 }
 
 void AStrategyOOBTestScenario::DrawDuelCones() const
 {
-    // Close, medium and long range as arcs inside the fire cone; the active one strong.
+    // The fire cone from the two front corners of the formation: its sides go out at the half angle from
+    // each corner, and the close, medium and long ranges follow the front (straight across the front,
+    // rounded at the sides). The chosen range strong, the other two faint.
     for (const AStrategyCompanyUnit* Company : DuelCompanies)
     {
         if (!IsValid(Company) || !Company->FireControlComponent || !Company->IsCombatEffective())
@@ -284,27 +294,35 @@ void AStrategyOOBTestScenario::DrawDuelCones() const
             continue;
         }
         const UStrategyFireControlComponent* Fire = Company->FireControlComponent;
-        const FColor Colour = Company->Side == EStrategySide::Denmark ? FColor(40, 110, 255) : FColor(255, 70, 50);
-        const FVector ConeOrigin = Company->GetActorLocation() + FVector(0.0f, 0.0f, 25.0f);
-        const float Yaw = Company->GetActorRotation().Yaw;
-        const float Half = Fire->FireConeHalfAngleDegrees;
+        FVector Left, Right;
+        Fire->GetFireFront(Left, Right, 0);
+        const FVector Lateral = (Right - Left).GetSafeNormal2D();
+        const FVector Forward(Lateral.Y, -Lateral.X, 0.0f);
+        const FVector Lift(0.0f, 0.0f, 25.0f);
+        Left += Lift;
+        Right += Lift;
+        const bool bDanish = Company->Side == EStrategySide::Denmark;
+        const FColor Strong = bDanish ? FColor(40, 110, 255) : FColor(255, 60, 40);
+        const FColor Faint = bDanish ? FColor(30, 55, 110) : FColor(110, 40, 30);
+        const float Half = FMath::DegreesToRadians(Fire->FireConeHalfAngleDegrees);
         const float Active = Fire->GetActiveRangeCm();
+        auto Dir = [&](float Angle) { return Forward * FMath::Cos(Angle) + Lateral * FMath::Sin(Angle); };   // Angle < 0: to the left
         for (const float Range : { Fire->CloseRangeCm, Fire->MediumRangeCm, Fire->LongRangeCm })
         {
             const bool bActive = FMath::IsNearlyEqual(Range, Active, 1.0f);
-            const FColor C = bActive ? Colour : FColor(Colour.R, Colour.G, Colour.B, 90);
-            FVector Last = ConeOrigin + FRotator(0.0f, Yaw - Half, 0.0f).Vector() * Range;
-            for (int32 s = 1; s <= 16; ++s)
+            const FColor C = bActive ? Strong : Faint;
+            const float Thick = bActive ? 14.0f : 3.0f;
+            TArray<FVector> Line;
+            for (int32 s = 0; s <= 8; ++s) { Line.Add(Left + Dir(-Half + Half * s / 8.0f) * Range); }   // left corner: out to straight ahead
+            for (int32 s = 0; s <= 8; ++s) { Line.Add(Right + Dir(Half * s / 8.0f) * Range); }          // right corner: straight ahead to out
+            for (int32 i = 0; i + 1 < Line.Num(); ++i)
             {
-                const FVector P = ConeOrigin + FRotator(0.0f, Yaw - Half + 2.0f * Half * s / 16.0f, 0.0f).Vector() * Range;
-                DrawDebugLine(GetWorld(), Last, P, C, false, -1.0f, 0, bActive ? 12.0f : 3.0f);
-                Last = P;
+                DrawDebugLine(GetWorld(), Line[i], Line[i + 1], C, false, -1.0f, 0, Thick);
             }
         }
-        for (const float Side : { -Half, Half })
-        {
-            DrawDebugLine(GetWorld(), ConeOrigin, ConeOrigin + FRotator(0.0f, Yaw + Side, 0.0f).Vector() * Fire->LongRangeCm, Colour, false, -1.0f, 0, 4.0f);
-        }
+        DrawDebugLine(GetWorld(), Left, Left + Dir(-Half) * Fire->LongRangeCm, Strong, false, -1.0f, 0, 4.0f);
+        DrawDebugLine(GetWorld(), Right, Right + Dir(Half) * Fire->LongRangeCm, Strong, false, -1.0f, 0, 4.0f);
+        DrawDebugLine(GetWorld(), Left, Right, Strong, false, -1.0f, 0, 4.0f);
     }
 }
 
@@ -319,9 +337,12 @@ void AStrategyOOBTestScenario::BuildTestOOB()
             TEXT("DK-LIVGARDEN-C1"), TEXT("Livgarden"), 1,
             Origin + FVector(1000.0f, -7000.0f, 0.0f), nullptr,
             static_cast<uint8>(EStrategySide::Denmark));
+        // -Strategy1864DuelOffset=<cm>: the Swedes that far to the side (an oblique fight: fewer men can bear).
+        float SideOffset = 0.0f;
+        FParse::Value(FCommandLine::Get(), TEXT("Strategy1864DuelOffset="), SideOffset);
         AStrategyCompanyUnit* Swedish = SpawnCompany(
             TEXT("SE-INFANTRY-C1"), TEXT("Svensk infanteri"), 1,
-            Origin + FVector(31000.0f, -7000.0f, 0.0f), nullptr,
+            Origin + FVector(31000.0f, -7000.0f + SideOffset, 0.0f), nullptr,
             static_cast<uint8>(EStrategySide::Enemy));
         DuelCompanies.Reset();
         bDuelCameraPlaced = false;

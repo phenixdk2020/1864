@@ -67,6 +67,16 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Combat")
     int32 MaxShotsPerVolley = 190;
 
+    /** The target of the last volley and how many of the company could bear on it (angle and range). */
+    UPROPERTY(Transient, BlueprintReadOnly, Category="Strategy|Combat")
+    TObjectPtr<AStrategyUnit> LastVolleyTarget;
+
+    UPROPERTY(Transient, BlueprintReadOnly, Category="Strategy|Combat")
+    int32 LastBearingCount = 0;
+
+    UPROPERTY(Transient, BlueprintReadOnly, Category="Strategy|Combat")
+    int32 LastBearingTotal = 0;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Combat")
     float ReloadRemainingSeconds = 0.0f;
 

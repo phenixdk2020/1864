@@ -6,6 +6,7 @@
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
 #include "../Combat/StrategyCombatComponent.h"
+#include "../Combat/StrategyFireControlComponent.h"
 #include "../Combat/StrategyStanceComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "../Units/StrategyCompanyUnit.h"
@@ -308,10 +309,18 @@ void UStrategyInfantryVisualComponent::HandleVolleyVisualEvent(
     SoldierBusyUntil.SetNumZeroed(Count);
     SoldierFirePhase.SetNumZeroed(Count);
     const int32 Firing = FMath::Clamp(Shots / FMath::Max(1, VisualScaleDivisor), 1, Count);
-    TArray<int32> Order;
-    for (int32 i = 0; i < Count; ++i) { Order.Add(i); }
+    // Those who can bear on the target first (their own place, angle and range); the rest only to make up the number.
+    TArray<int32> Order, Others;
+    const AStrategyUnit* Target = OwnerCompany->CombatComponent ? OwnerCompany->CombatComponent->LastVolleyTarget.Get() : nullptr;
+    const UStrategyFireControlComponent* Fire = OwnerCompany->FireControlComponent;
+    for (int32 i = 0; i < Count; ++i)
+    {
+        const bool bBears = !Target || !Fire || !SoldierComponents[i] ||
+            Fire->CanPointBearOn(SoldierComponents[i]->GetComponentLocation(), OwnerCompany->GetActorForwardVector(), Target, Fire->GetActiveRangeCm());
+        (bBears ? Order : Others).Add(i);
+    }
     for (int32 i = Order.Num() - 1; i > 0; --i) { Order.Swap(i, FMath::RandRange(0, i)); }
-    for (int32 k = 0; k < Firing; ++k)
+    for (int32 k = 0; k < Firing && k < Order.Num(); ++k)
     {
         const int32 i = Order[k];
         if (SoldierFirePhase[i] == 0)
