@@ -491,6 +491,25 @@ void BuildPiece(FWriter& W, Campaign1851Scenery::EPiece Piece)
 			W.DropShadow(1.8f, 1.6f, 0.8f);
 			W.Lathe({ { 1.3f, 0.f }, { 1.45f, 1.f }, { 1.1f, 2.f }, { 0.f, 2.7f } }, 8, Hay, 0.5f);
 			break;
+		case EPiece::Knick:
+			// The bank of earth and the bushes on it (hazel, hawthorn, blackthorn), uneven.
+			W.Box(FVector3f(-2.f, -0.55f, 0.f), FVector3f(2.f, 0.55f, 0.4f), Srgb(112, 92, 62));
+			W.Box(FVector3f(-2.f, -0.4f, 0.35f), FVector3f(-0.6f, 0.4f, 1.4f), Srgb(58, 88, 40));
+			W.Box(FVector3f(-0.7f, -0.45f, 0.35f), FVector3f(0.8f, 0.45f, 1.7f), Srgb(66, 98, 44));
+			W.Box(FVector3f(0.7f, -0.38f, 0.35f), FVector3f(2.f, 0.38f, 1.3f), Srgb(50, 78, 36));
+			break;
+		case EPiece::StoneDike:
+			W.Box(FVector3f(-2.f, -0.42f, 0.f), FVector3f(2.f, 0.42f, 0.5f), Srgb(150, 146, 136));
+			W.Box(FVector3f(-1.7f, -0.3f, 0.45f), FVector3f(-0.5f, 0.3f, 0.72f), Srgb(128, 124, 116));
+			W.Box(FVector3f(0.2f, -0.32f, 0.45f), FVector3f(1.5f, 0.32f, 0.78f), Srgb(168, 162, 150));
+			break;
+		case EPiece::Ditch:
+		{
+			const FVector3f Below(0.f, 0.f, -5.f);
+			W.Quad(FVector3f(-2.f, -0.75f, 0.14f), FVector3f(2.f, -0.75f, 0.14f), FVector3f(2.f, 0.75f, 0.14f), FVector3f(-2.f, 0.75f, 0.14f), Srgb(104, 118, 66), Below);
+			W.Quad(FVector3f(-2.f, -0.35f, 0.18f), FVector3f(2.f, -0.35f, 0.18f), FVector3f(2.f, 0.35f, 0.18f), FVector3f(-2.f, 0.35f, 0.18f), Srgb(70, 104, 128), Below);
+			break;
+		}
 		default:
 			break;
 		}
@@ -502,7 +521,7 @@ namespace Campaign1851Scenery
 	const TCHAR* Name(EPiece Piece)
 	{
 		static const TCHAR* Names[] = { TEXT("TownHouse"), TEXT("TownHouseOchre"), TEXT("Cottage"), TEXT("Farm"), TEXT("Church"), TEXT("Broadleaf"), TEXT("Conifer"),
-			TEXT("TownHouseTimber"), TEXT("MerchantHouse"), TEXT("Windmill"), TEXT("Oak"), TEXT("Haystack") };
+			TEXT("TownHouseTimber"), TEXT("MerchantHouse"), TEXT("Windmill"), TEXT("Oak"), TEXT("Haystack"), TEXT("Knick"), TEXT("StoneDike"), TEXT("Ditch") };
 		return Names[FMath::Clamp(int32(Piece), 0, int32(EPiece::Count) - 1)];
 	}
 
@@ -526,6 +545,17 @@ namespace Campaign1851Scenery
 		FWriter Writer;
 		BuildPiece(Writer, Piece);
 		return Finish(Writer, Material, FString::Printf(TEXT("SM_Campaign1851_%s"), Name(Piece)));
+	}
+
+	UStaticMesh* BuildFlat(const TArray<FVector>& Triangles, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* MeshName)
+	{
+		FWriter Writer;
+		for (int32 i = 0; i + 2 < Triangles.Num(); i += 3)
+		{
+			const FVector3f A(Triangles[i]), B(Triangles[i + 1]), C(Triangles[i + 2]);
+			Writer.Tri(A, B, C, Colour, (A + B + C) / 3.f - FVector3f(0.f, 0.f, 50.f), false);
+		}
+		return Finish(Writer, Material, FString(MeshName));
 	}
 
 	UStaticMesh* BuildRibbons(const TArray<TArray<FVector>>& Lines, float HalfWidth, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* MeshName)

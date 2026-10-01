@@ -207,7 +207,50 @@ namespace Campaign1851Resources
 }
 
 /** The battlefield generator (Campaign1851Battlefield.cpp). */
-enum class EBattlefieldCell : uint8 { Field, Sea, Meadow, Wood, Town };
+enum class EBattlefieldCell : uint8 { Field, Sea, Meadow, Wood, Town, Water };
+
+/** Field boundaries (Campaign1851Hydro.cpp): knicks (hedges on banks), stone or earth dikes, marsh ditches. */
+enum class EHedgeKind : uint8 { Knick, Dike, Ditch };
+
+/** A river or canal (Data/Campaign1851/Hydro1851.json), projected km from the source to the sea. */
+struct FCampaign1851River
+{
+	FString Name;
+	int32 Class = 1;           // 0 brook, 1 river, 2 large river, 3 the Elbe
+	bool bCanal = false;
+	float WidthM = 20.f;
+	TArray<FVector2D> Km;
+};
+
+/** A lake: a wobbled ellipse. */
+struct FCampaign1851Lake
+{
+	FString Name;
+	FVector2D CentreKm = FVector2D::ZeroVector;
+	float A = 1.f, B = 1.f, RotDeg = 0.f;   // semi-axes km; the long axis from east towards north
+	uint32 Seed = 0;
+	TArray<FVector2D> Km;                   // the shore
+};
+
+struct FCampaign1851BattleRiver
+{
+	FString Name;
+	float WidthM = 10.f;
+	TArray<FVector2D> M;
+};
+
+struct FCampaign1851BattleHedge
+{
+	EHedgeKind Kind = EHedgeKind::Knick;
+	TArray<FVector2D> M;
+};
+
+struct FCampaign1851BattleCrossing
+{
+	FString Kind;     // bridge (a lane over a river) or ford (a track through a brook)
+	FString River;
+	FVector2D M = FVector2D::ZeroVector;
+};
 
 struct FCampaign1851BattleBuilding
 {
@@ -245,6 +288,10 @@ struct FCampaign1851Battlefield
 	TArray<FVector2D> FarmM;
 	TArray<struct FCampaign1851Bridge> Bridges;
 	TArray<FVector2D> BridgeM;
+	TArray<FCampaign1851BattleRiver> Rivers;
+	TArray<TArray<FVector2D>> Lakes;
+	TArray<FCampaign1851BattleHedge> Hedges;
+	TArray<FCampaign1851BattleCrossing> Crossings;
 	int32 Farms = 0;
 	TArray<FColor> Pixels;      // the picture, 512 x 512, row 0 at the north
 	bool IsValid() const { return HeightM.Num() > 0; }
@@ -696,6 +743,18 @@ public:
 	// ---- Bridges (Campaign1851Bridges.cpp).
 
 	const TArray<FCampaign1851Bridge>& GetBridges() const { return Bridges; }
+
+	// ---- rivers, lakes, field boundaries (Campaign1851Hydro.cpp)
+	const TArray<FCampaign1851River>& GetRivers() const { return Rivers; }
+	const TArray<FCampaign1851Lake>& GetLakes() const { return Lakes; }
+	static float RiverWidthM(int32 Class);
+	static float RiverDrawnKm(int32 Class);
+	bool IsLake(const FVector2D& Km, float MarginKm = 0.f, int32* OutLake = nullptr) const;
+	/** Distance to the nearest river's middle within about a km (1e9 when none). */
+	double RiverDistanceKm(const FVector2D& Km, int32* OutRiver = nullptr) const;
+	/** On a lake or a river as drawn, give or take the margin. */
+	bool IsFreshWater(const FVector2D& Km, float MarginKm = 0.f) const;
+	EHedgeKind HedgeKindAt(const FVector2D& Km) const;
 	int32 BridgeIndex(int32 Id) const;
 	FString BridgeBlockReason(int32 Id, EBridgeAction Action) const;
 	bool BridgeAction(int32 Id, EBridgeAction Action, FString* OutReason = nullptr);
@@ -1203,6 +1262,10 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<UStaticMeshComponent> Lanes;
 
+	/** Rivers by class and the lakes (Campaign1851Hydro.cpp). */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UStaticMeshComponent>> RiverMeshes;
+
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<ACampaign1851ConstructionSite>> Projects;
 
@@ -1217,6 +1280,12 @@ private:
 	void BuildTerrain();
 	void BuildMarkers();
 	bool LoadFeatures();
+	bool LoadHydro();
+	void BuildHydroMeshes();
+	void UpdateHydroVisibility(float CameraDistanceKm);
+	TArray<FCampaign1851River> Rivers;
+	TArray<FCampaign1851Lake> Lakes;
+	TMap<FIntPoint, TArray<FIntPoint>> RiverCells;   // 1 km cell -> (river, segment)
 	void BuildScenery();
 	/** Drapes polylines (projected km) on the terrain as a ribbon mesh. */
 	UStaticMeshComponent* BuildRibbons(const TArray<TArray<FVector2D>>& Lines, float WidthKm, const FLinearColor& Colour, const TCHAR* Name, UMaterialInterface* Material);

@@ -106,7 +106,10 @@ void ACampaign1851Map::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|no Denmark1851_Amter.png; amter cannot be picked on the map"));
 	}
-	if (LoadFeatures())
+	const bool bFeatures = LoadFeatures();
+	LoadHydro();
+	BuildHydroMeshes();
+	if (bFeatures)
 	{
 		BuildScenery();
 	}
@@ -451,6 +454,7 @@ void ACampaign1851Map::UpdateMarkers(float CameraDistanceKm)
 	{
 		Lanes->SetVisibility(bShowScenery);
 	}
+	UpdateHydroVisibility(CameraDistanceKm);
 	const bool bShowRoads = CameraDistanceKm < RoadsMaxDistanceKm;
 	if (Roads && bShowRoads != bRoadsVisible)
 	{
@@ -818,7 +822,7 @@ void ACampaign1851Map::BuildScenery()
 		for (double X = Extent.XMin; X < Extent.XMax; X += FarmCellKm)
 		{
 			const FVector2D Km(X + Rng.FRand() * FarmCellKm, Y + Rng.FRand() * FarmCellKm);
-			if (!IsMonarchyLand(Km) || Woodland(Km) > 0.3f || InTown(Km, 0.5f))
+			if (!IsMonarchyLand(Km) || Woodland(Km) > 0.3f || InTown(Km, 0.5f) || IsFreshWater(Km, 0.3f))
 			{
 				continue;
 			}
@@ -972,6 +976,57 @@ void ACampaign1851Map::BuildScenery()
 		}
 	}
 
+	// ---- Field boundaries round the farms and villages (Campaign1851Hydro.cpp): a grid of fields about each,
+	// its sides in segments with gaps for the gates; knicks in the duchies and east Jutland, stone and earth
+	// dikes on the islands and the heath, ditches in the marsh. Their own random stream, so the rest of the
+	// scenery stays as it was.
+	{
+		FRandomStream HedgeRng(1864);
+		int32 Segments = 0;
+		for (const FSite& S : Sites)
+		{
+			if (S.Kind == ESite::Cottage)
+			{
+				continue;
+			}
+			const float FieldYaw = HedgeRng.FRandRange(0.f, 90.f);
+			const FVector2D Ax(FMath::Cos(FMath::DegreesToRadians(FieldYaw)), FMath::Sin(FMath::DegreesToRadians(FieldYaw)));
+			const FVector2D Ay(-Ax.Y, Ax.X);
+			const float FieldKm = HedgeRng.FRandRange(0.26f, 0.4f);
+			const int32 N = S.Kind == ESite::Village ? 3 : 2;
+			const FVector2D Corner = S.Km - (Ax + Ay) * (FieldKm * N * 0.5f) + Ax * HedgeRng.FRandRange(-0.08f, 0.08f) + Ay * HedgeRng.FRandRange(-0.08f, 0.08f);
+			const EHedgeKind HedgeKind = HedgeKindAt(S.Km);
+			const EPiece Piece = HedgeKind == EHedgeKind::Knick ? EPiece::Knick : HedgeKind == EHedgeKind::Dike ? EPiece::StoneDike : EPiece::Ditch;
+			for (int32 Dir = 0; Dir < 2; ++Dir)
+			{
+				const FVector2D U = Dir == 0 ? Ax : Ay, V = Dir == 0 ? Ay : Ax;
+				for (int32 Line = 0; Line <= N; ++Line)
+				{
+					for (int32 Half = 0; Half < N * 2; ++Half)
+					{
+						if (HedgeRng.FRand() < 0.22f)
+						{
+							continue;   // a gap or a gate
+						}
+						const FVector2D A = Corner + V * (Line * FieldKm) + U * (Half * FieldKm * 0.5f);
+						const FVector2D Mid = A + U * (FieldKm * 0.25f);
+						if (!IsMonarchyLand(A) || !IsMonarchyLand(A + U * (FieldKm * 0.5f)) || InTown(Mid, 0.1f) || Woodland(Mid) > 0.5f
+							|| !IsFree(Mid, 0.012f) || IsFreshWater(Mid, 0.04f))
+						{
+							continue;
+						}
+						// Map-local Y runs south, so the heading's Y flips.
+						const float LocalYaw = FMath::RadiansToDegrees(FMath::Atan2(-U.Y, U.X));
+						Items[int32(Piece)].Emplace(FRotator(0.f, LocalYaw, 0.f), LocalAtKm(Mid) - FVector(0.0, 0.0, 0.2),
+							FVector(FieldKm * 0.5f * float(KmToUnits) / 4.f, PieceScale, PieceScale));
+						++Segments;
+					}
+				}
+			}
+		}
+		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|scenery|field boundaries=%d"), Segments);
+	}
+
 	// ---- Trees: woods where the painted map has woodland, plus scattered field trees. Mostly beech;
 	// spruce becomes common towards the west Jutland heath plantations.
 	const double PixelKmX = SizeKm.X / FeaturesW, PixelKmY = SizeKm.Y / FeaturesH;
@@ -998,7 +1053,7 @@ void ACampaign1851Map::BuildScenery()
 				}
 				Expected -= 1.f;
 				const FVector2D Km = Corner + FVector2D(Rng.FRand() * PixelKmX, Rng.FRand() * PixelKmY);
-				if (InTown(Km, 0.1f) || !IsFree(Km, 0.015f))
+				if (InTown(Km, 0.1f) || !IsFree(Km, 0.015f) || IsFreshWater(Km, 0.04f))
 				{
 					continue;
 				}

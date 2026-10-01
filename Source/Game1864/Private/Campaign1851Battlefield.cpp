@@ -129,6 +129,12 @@ bool ACampaign1851Map::GenerateBattlefield(FVector2D CentreKm, float InSizeKm, F
 				B.HeightM[k] = -2.f;
 				continue;
 			}
+			if (IsLake(Km))
+			{
+				B.Kind[k] = uint8(EBattlefieldCell::Water);
+				B.HeightM[k] = FMath::Max(0.3f, SampleHeight01(UvFromKm(Km)) * BfMaxHeightM - 1.5f);
+				continue;
+			}
 			// The map's height (about 126 m a pixel) and a fine relief: small knolls and hollows.
 			const float Base = SampleHeight01(UvFromKm(Km)) * BfMaxHeightM;
 			const float Relief = (BfFractal(PlaceSeed, M.X, M.Y, 420.0) - 0.5f) * FMath::Min(6.f, 1.f + Base * 0.15f);
@@ -159,6 +165,79 @@ bool ACampaign1851Map::GenerateBattlefield(FVector2D CentreKm, float InSizeKm, F
 			if (bShore)
 			{
 				B.Kind[k] = uint8(EBattlefieldCell::Meadow);
+			}
+		}
+	}
+
+	// ---- rivers and lakes (Campaign1851Hydro.cpp): the course in metres, water in the cells it fills (wide
+	// rivers), wet meadows along the banks; the lakes' shores as polygons.
+	for (const FCampaign1851River& Rv : Rivers)
+	{
+		TArray<TArray<FVector2D>> Pieces;
+		AddClipped(Rv.Km, Origin, SizeM, Pieces);
+		for (TArray<FVector2D>& P : Pieces)
+		{
+			// A finer course: small bends every 40 m on top of the map's.
+			TArray<FVector2D> Fine;
+			for (int32 i = 0; i + 1 < P.Num(); ++i)
+			{
+				const FVector2D D = P[i + 1] - P[i];
+				const float Len = D.Size();
+				const FVector2D N = Len > 0.f ? FVector2D(-D.Y, D.X) / Len : FVector2D::ZeroVector;
+				for (float t = 0.f; t < Len; t += 40.f)
+				{
+					const FVector2D Q = P[i] + D * (t / FMath::Max(Len, 1.f));
+					const float Wig = (BfNoise(PlaceSeed + 31u, Q.X, Q.Y, 180.0) - 0.5f) * FMath::Min(60.f, 6.f * Rv.WidthM);
+					Fine.Add(Q + N * Wig);
+				}
+			}
+			Fine.Add(P.Last());
+			B.Rivers.Add({ Rv.Name, Rv.WidthM, Fine });
+		}
+	}
+	for (const FCampaign1851Lake& Lk : Lakes)
+	{
+		TArray<TArray<FVector2D>> Shore;
+		TArray<FVector2D> Closed = Lk.Km;
+		Closed.Add(Lk.Km[0]);
+		AddClipped(Closed, Origin, SizeM, Shore);
+		if (Shore.Num() > 0)
+		{
+			TArray<FVector2D> Poly;
+			for (const FVector2D& P : Closed) { Poly.Add((P - Origin) * 1000.0); }
+			B.Lakes.Add(Poly);
+		}
+	}
+	for (int32 j = 0; j < BfGrid; ++j)
+	{
+		for (int32 i = 0; i < BfGrid; ++i)
+		{
+			const int32 k = j * BfGrid + i;
+			if (B.Kind[k] == uint8(EBattlefieldCell::Sea) || B.Kind[k] == uint8(EBattlefieldCell::Water))
+			{
+				continue;
+			}
+			const FVector2D M((i + 0.5f) * Cell, (j + 0.5f) * Cell);
+			for (const FCampaign1851BattleRiver& Rv : B.Rivers)
+			{
+				float Best = 1e9f;
+				for (int32 s = 0; s + 1 < Rv.M.Num(); ++s)
+				{
+					const FVector2D D = Rv.M[s + 1] - Rv.M[s];
+					const float T = FMath::Clamp(float(FVector2D::DotProduct(M - Rv.M[s], D) / FMath::Max(D.SizeSquared(), 1.0)), 0.f, 1.f);
+					Best = FMath::Min(Best, float(FVector2D::Distance(M, Rv.M[s] + D * T)));
+				}
+				if (Best < Rv.WidthM * 0.5f && Rv.WidthM > Cell * 0.6f)
+				{
+					B.Kind[k] = uint8(EBattlefieldCell::Water);
+					B.HeightM[k] = FMath::Max(0.2f, B.HeightM[k] - 1.5f);
+					break;
+				}
+				if (Best < 60.f + Rv.WidthM * 2.f && B.Kind[k] == uint8(EBattlefieldCell::Field))
+				{
+					B.Kind[k] = uint8(EBattlefieldCell::Meadow);   // wet meadow (eng) by the water
+					B.HeightM[k] = FMath::Max(0.3f, B.HeightM[k] - 0.6f * (1.f - Best / (60.f + Rv.WidthM * 2.f)));
+				}
 			}
 		}
 	}
@@ -420,6 +499,112 @@ bool ACampaign1851Map::GenerateBattlefield(FVector2D CentreKm, float InSizeKm, F
 		}
 	}
 
+	// ---- field boundaries: the sides of the field parcels (the same as the picture's), most with a knick,
+	// dike or ditch after the region; gaps for gates, none across water, woods, towns or the ways.
+	{
+		auto KindAtM = [&](const FVector2D& M)
+		{
+			const int32 k = FMath::Clamp(int32(M.Y / Cell), 0, BfGrid - 1) * BfGrid + FMath::Clamp(int32(M.X / Cell), 0, BfGrid - 1);
+			return EBattlefieldCell(B.Kind[k]);
+		};
+		auto Open = [&](const FVector2D& M)
+		{
+			const EBattlefieldCell K = KindAtM(M);
+			return K == EBattlefieldCell::Field || K == EBattlefieldCell::Meadow;
+		};
+		auto NearWay = [&](const FVector2D& M)
+		{
+			for (const TArray<TArray<FVector2D>>* Set : { &B.Roads, &B.Lanes, &B.Chaussees, &B.Rails })
+			{
+				for (const TArray<FVector2D>& L : *Set)
+				{
+					for (int32 s = 0; s + 1 < L.Num(); ++s)
+					{
+						const FVector2D D = L[s + 1] - L[s];
+						if (FMath::Abs(D.X) + FMath::Abs(D.Y) < 1.f) { continue; }
+						const float T = FMath::Clamp(float(FVector2D::DotProduct(M - L[s], D) / D.SizeSquared()), 0.f, 1.f);
+						if (FVector2D::DistSquared(M, L[s] + D * T) < 14.f * 14.f) { return true; }
+					}
+				}
+			}
+			return false;
+		};
+		const EHedgeKind Region = HedgeKindAt(CentreKm);
+		const float Share = Region == EHedgeKind::Knick ? 0.7f : Region == EHedgeKind::Ditch ? 0.6f : 0.45f;
+		constexpr float PW = 140.f, PH = 110.f;   // the parcels of RenderBattlefield
+		auto RowY = [](float X, int32 Row) { return Row * 110.f - 37.f * FMath::Sin(X / 400.f); };
+		// Vertical sides at x = 140 i, horizontal ones along the gently bent rows; segments of half a parcel.
+		for (int32 i = 1; i * PW < SizeM && B.Hedges.Num() < 20000; ++i)
+		{
+			const float X = i * PW;
+			TArray<FVector2D> Run;
+			for (float Y = 0.f; Y <= SizeM; Y += PH * 0.5f)
+			{
+				const FVector2D M(X, Y + PH * 0.25f);
+				const bool bKeep = Open(M + FVector2D(-20.f, 0.f)) && Open(M + FVector2D(20.f, 0.f)) && !NearWay(M) && BfHash(PlaceSeed + 41u, uint32(i * 7919 + int32(Y))) < Share;
+				if (bKeep) { if (Run.Num() == 0) { Run.Add(FVector2D(X, Y)); } Run.Add(FVector2D(X, Y + PH * 0.5f)); }
+				else if (Run.Num() > 1) { B.Hedges.Add({ Region, Run }); Run.Reset(); }
+				else { Run.Reset(); }
+			}
+			if (Run.Num() > 1) { B.Hedges.Add({ Region, Run }); }
+		}
+		for (int32 Row = 0; RowY(0.f, Row) < SizeM + 60.f && B.Hedges.Num() < 20000; ++Row)
+		{
+			TArray<FVector2D> Run;
+			for (float X = 0.f; X <= SizeM; X += PW * 0.5f)
+			{
+				const FVector2D M(X + PW * 0.25f, RowY(X + PW * 0.25f, Row));
+				const bool bKeep = M.Y > 0.f && M.Y < SizeM && Open(M + FVector2D(0.f, -20.f)) && Open(M + FVector2D(0.f, 20.f)) && !NearWay(M)
+					&& BfHash(PlaceSeed + 43u, uint32(Row * 7919 + int32(X))) < Share;
+				if (bKeep)
+				{
+					if (Run.Num() == 0) { Run.Add(FVector2D(X, RowY(X, Row))); }
+					Run.Add(FVector2D(X + PW * 0.25f, M.Y));
+					Run.Add(FVector2D(X + PW * 0.5f, RowY(X + PW * 0.5f, Row)));
+				}
+				else if (Run.Num() > 1) { B.Hedges.Add({ Region, Run }); Run.Reset(); }
+				else { Run.Reset(); }
+			}
+			if (Run.Num() > 1) { B.Hedges.Add({ Region, Run }); }
+		}
+	}
+	// ---- crossings: a lane or road over a river gets a small bridge (unless the campaign map has one there),
+	// a farm track goes through a brook at a ford.
+	{
+		auto Cross = [&](const TArray<TArray<FVector2D>>& Ways, bool bTrack)
+		{
+			for (const TArray<FVector2D>& W : Ways)
+			{
+				for (int32 a = 0; a + 1 < W.Num(); ++a)
+				{
+					for (const FCampaign1851BattleRiver& Rv : B.Rivers)
+					{
+						for (int32 s = 0; s + 1 < Rv.M.Num(); ++s)
+						{
+							const FVector2D P = W[a], R = W[a + 1] - W[a], Q = Rv.M[s], S = Rv.M[s + 1] - Rv.M[s];
+							const double Den = R.X * S.Y - R.Y * S.X;
+							if (FMath::Abs(Den) < 1e-9) { continue; }
+							const double T = ((Q.X - P.X) * S.Y - (Q.Y - P.Y) * S.X) / Den, U = ((Q.X - P.X) * R.Y - (Q.Y - P.Y) * R.X) / Den;
+							if (T < 0.0 || T > 1.0 || U < 0.0 || U > 1.0) { continue; }
+							const FVector2D X = P + R * T;
+							if (bTrack && Rv.WidthM > 10.f) { continue; }   // no ford through a river
+							const bool bTaken = B.BridgeM.ContainsByPredicate([&X](const FVector2D& M) { return FVector2D::Distance(M, X) < 150.f; })
+								|| B.Crossings.ContainsByPredicate([&X](const FCampaign1851BattleCrossing& C) { return FVector2D::Distance(C.M, X) < 60.f; });
+							if (!bTaken)
+							{
+								B.Crossings.Add({ bTrack ? TEXT("ford") : TEXT("bridge"), Rv.Name, X });
+							}
+						}
+					}
+				}
+			}
+		};
+		Cross(B.Roads, false);
+		Cross(B.Chaussees, false);
+		Cross(B.Lanes, false);
+		Cross(B.Tracks, true);
+	}
+
 	RenderBattlefield();
 	WriteBattlefield();
 	double NearestRoad = 1e9;
@@ -432,6 +617,7 @@ bool ACampaign1851Map::GenerateBattlefield(FVector2D CentreKm, float InSizeKm, F
 	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|battlefield|%s|%.4f,%.4f|%.0f km|%d buildings|%d farms|%d roads|%d lanes|%d rail|%d forts|of %d main, %d lanes; nearest road point %.1f km"), *B.Place, B.Lat, B.Lon, B.SizeKm,
 		B.Buildings.Num(), B.Farms, B.Roads.Num() + B.Chaussees.Num(), B.Lanes.Num(), B.Rails.Num(), B.Forts.Num(), RoadLines.Num(), LaneLinesKm.Num(), NearestRoad);
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|battlefield|water|%d rivers|%d lakes|%d hedges|%d crossings"), B.Rivers.Num(), B.Lakes.Num(), B.Hedges.Num(), B.Crossings.Num());
 	return true;
 }
 
@@ -467,6 +653,10 @@ void ACampaign1851Map::RenderBattlefield()
 			if (K == EBattlefieldCell::Sea)
 			{
 				C = FColor(62, 96, 124);
+			}
+			else if (K == EBattlefieldCell::Water)
+			{
+				C = FColor(74, 112, 140);
 			}
 			else
 			{
@@ -517,6 +707,44 @@ void ACampaign1851Map::RenderBattlefield()
 	};
 	// Widths at least a pixel or two, so the ways read at every size; a dark edge under each.
 	const auto W = [Px](float Metres, float MinPx) { return FMath::Max(Metres, MinPx * Px); };
+	// Field boundaries under the ways, a thin line blended into the fields (each pixel once): knicks dark
+	// green, dikes grey, ditches blue-grey.
+	{
+		TArray<uint8> Mask;
+		Mask.SetNumZeroed(BfImage * BfImage);
+		for (const FCampaign1851BattleHedge& H : B.Hedges)
+		{
+			for (int32 i = 0; i + 1 < H.M.Num(); ++i)
+			{
+				const FVector2D D = H.M[i + 1] - H.M[i];
+				const float Len = D.Size();
+				for (float t = 0.f; t <= Len; t += Px * 0.5f)
+				{
+					const FVector2D P = H.M[i] + D * (t / FMath::Max(Len, 1.f));
+					const int32 px = FMath::FloorToInt(P.X / Px), py = FMath::FloorToInt((SizeM - P.Y) / Px);
+					if (px >= 0 && py >= 0 && px < BfImage && py < BfImage)
+					{
+						Mask[py * BfImage + px] = uint8(H.Kind) + 1;
+					}
+				}
+			}
+		}
+		const FColor HedgeInk[] = { FColor(40, 66, 30), FColor(160, 156, 146), FColor(70, 104, 128) };
+		const float HedgeAlpha[] = { 0.5f, 0.55f, 0.6f };
+		for (int32 p = 0; p < Mask.Num(); ++p)
+		{
+			if (Mask[p])
+			{
+				Img[p] = BfMix(Img[p], HedgeInk[Mask[p] - 1], HedgeAlpha[Mask[p] - 1]);
+			}
+		}
+	}
+	// Rivers: a dark bank and the water, at least a pixel or two wide.
+	for (const FCampaign1851BattleRiver& Rv : B.Rivers)
+	{
+		Line(Rv.M, W(Rv.WidthM + 6.f, 2.4f), FColor(84, 96, 70));
+		Line(Rv.M, W(Rv.WidthM, 1.5f), FColor(74, 112, 140));
+	}
 	for (const TArray<FVector2D>& L : B.Tracks) { Line(L, W(3.f, 1.f), FColor(150, 128, 92)); }
 	for (const TArray<FVector2D>& L : B.Lanes) { Line(L, W(6.f, 2.5f), FColor(110, 90, 66)); Line(L, W(6.f, 1.5f), FColor(222, 202, 156)); }
 	for (const TArray<FVector2D>& L : B.Roads) { Line(L, W(10.f, 3.5f), FColor(96, 78, 58)); Line(L, W(10.f, 2.2f), FColor(236, 220, 176)); }
@@ -536,6 +764,18 @@ void ACampaign1851Map::RenderBattlefield()
 				{
 					Img[py * BfImage + px] = FColor(62, 96, 124);
 				}
+			}
+		}
+	}
+	// Crossings: a light deck over the river, a ford as a pale gravel patch.
+	for (const FCampaign1851BattleCrossing& Cx : B.Crossings)
+	{
+		const bool bFord = Cx.Kind == TEXT("ford");
+		for (float y = -2.f * Px; y <= 2.f * Px; y += Px * 0.5f)
+		{
+			for (float x = -2.f * Px; x <= 2.f * Px; x += Px * 0.5f)
+			{
+				Plot(Cx.M + FVector2D(x, y), bFord ? FColor(196, 186, 150) : FColor(120, 96, 70));
 			}
 		}
 	}
@@ -636,8 +876,8 @@ void ACampaign1851Map::WriteBattlefield() const
 	FString Kinds, Woods;
 	for (int32 k = 0; k < B.Kind.Num(); ++k)
 	{
-		static const TCHAR Chars[] = TEXT(".~mwt");
-		Kinds.AppendChar(Chars[FMath::Clamp(int32(B.Kind[k]), 0, 4)]);
+		static const TCHAR Chars[] = TEXT(".~mwto");
+		Kinds.AppendChar(Chars[FMath::Clamp(int32(B.Kind[k]), 0, 5)]);
 		Woods.AppendChar(TCHAR('0' + FMath::Min(9, B.Wood[k] / 10)));
 	}
 	Doc->SetStringField(TEXT("kinds"), Kinds);
@@ -721,6 +961,37 @@ void ACampaign1851Map::WriteBattlefield() const
 		BridgeList.Add(MakeShared<FJsonValueObject>(O));
 	}
 	Doc->SetArrayField(TEXT("bridges"), BridgeList);
+	TArray<TSharedPtr<FJsonValue>> RiverList;
+	for (const FCampaign1851BattleRiver& Rv : B.Rivers)
+	{
+		TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+		O->SetStringField(TEXT("name"), Rv.Name);
+		O->SetNumberField(TEXT("widthM"), FMath::RoundToInt(Rv.WidthM));
+		O->SetArrayField(TEXT("points"), Lines({ Rv.M })[0]->AsArray());
+		RiverList.Add(MakeShared<FJsonValueObject>(O));
+	}
+	Doc->SetArrayField(TEXT("rivers"), RiverList);
+	Doc->SetArrayField(TEXT("lakes"), Lines(B.Lakes));
+	TArray<TSharedPtr<FJsonValue>> HedgeList;
+	for (const FCampaign1851BattleHedge& H : B.Hedges)
+	{
+		TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+		O->SetStringField(TEXT("kind"), H.Kind == EHedgeKind::Knick ? TEXT("knick") : H.Kind == EHedgeKind::Dike ? TEXT("dike") : TEXT("ditch"));
+		O->SetArrayField(TEXT("points"), Lines({ H.M })[0]->AsArray());
+		HedgeList.Add(MakeShared<FJsonValueObject>(O));
+	}
+	Doc->SetArrayField(TEXT("hedges"), HedgeList);
+	TArray<TSharedPtr<FJsonValue>> CrossList;
+	for (const FCampaign1851BattleCrossing& Cx : B.Crossings)
+	{
+		TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+		O->SetStringField(TEXT("kind"), Cx.Kind);
+		O->SetStringField(TEXT("river"), Cx.River);
+		O->SetNumberField(TEXT("x"), FMath::RoundToInt(Cx.M.X));
+		O->SetNumberField(TEXT("y"), FMath::RoundToInt(Cx.M.Y));
+		CrossList.Add(MakeShared<FJsonValueObject>(O));
+	}
+	Doc->SetArrayField(TEXT("crossings"), CrossList);
 	FString Text;
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Text);
 	FJsonSerializer::Serialize(Doc, Writer);

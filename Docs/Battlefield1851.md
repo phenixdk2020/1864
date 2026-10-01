@@ -27,7 +27,8 @@ Knappen **SLAGMARK** (ved siden af AVISEN), eller **SE SLAGMARKEN** i slagpanele
 - **Koordinater:** origo i det sydvestlige hjørne, x mod øst og y mod nord, i meter.
 - **Gitterdata:**
   - `heightDm`: 256 × 256 højder i decimeter, række 0 mod syd.
-  - `kinds`: ét tegn pr. felt: `.` mark, `~` hav, `m` eng, `w` skov, `t` by.
+  - `kinds`: ét tegn pr. felt: `.` mark, `~` hav, `m` eng, `w` skov, `t` by, `o` ferskvand (sø eller bred flod).
+  - `rivers`, `lakes`, `hedges` (knicks, diger, grøfter) og `crossings` (broer og vadesteder): se Hydro1851.md.
   - `woodDensity`: `0`–`9` pr. felt.
 - **Linjer:** `roads`, `lanes`, `tracks`, `chaussees` og `railways` som punktlister `[x, y, x, y, …]`.
 - **Objekter:**

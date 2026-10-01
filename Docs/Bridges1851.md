@@ -19,7 +19,7 @@
 - **Samme bro på flere veje:** hvis flere vejforbindelser går over den samme bro, er det én bro. Sprænges den, afskæres dem alle.
 - **Kortets kystlinje er forenklet:** byens historiske broer lægges derfor over det vand, kortet har tættest på deres rigtige plads.
 - **Langebro** falder sammen med Knippelsbro på kortet.
-- **Floder** findes ikke i kortdataene endnu, så broer over åer mangler.
+- **Broer over floderne:** hvor en vej mellem to byer krydser en flod eller kanal, er der også en bro, fx Broen over Gudenå ved Randers (se Hydro1851.md).
 
 ## På kortet
 - **Faste broer:** et stendæk med rækværk i begge sider.

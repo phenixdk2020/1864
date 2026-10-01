@@ -29,6 +29,9 @@ namespace Campaign1851Scenery
 		Windmill,        // Dutch windmill: octagonal body, cap and four sails
 		Oak,             // broad, dark, lobed crown on a thick trunk
 		Haystack,        // a stack of hay in the fields by a farm
+		Knick,           // a hedge on an earth bank, 4 units long along X (stretched to the segment)
+		StoneDike,       // a low wall of field stones, 4 units long
+		Ditch,           // a water-filled ditch between grass banks, 4 units long
 		Count
 	};
 
@@ -41,6 +44,9 @@ namespace Campaign1851Scenery
 	UStaticMesh* BuildRibbons(const TArray<TArray<FVector>>& Lines, float HalfWidth, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* Name);
 
 	const TCHAR* Name(EPiece Piece);
+
+	/** Unlit flat triangles (map-local units, three points each) in one colour: lakes. */
+	UStaticMesh* BuildFlat(const TArray<FVector>& Triangles, const FLinearColor& Colour, UMaterialInterface* Material, const TCHAR* Name);
 
 	/** Building-site pieces (ACampaign1851ConstructionSite), in piece units; the barracks faces +Y. */
 	enum class ESitePiece : uint8

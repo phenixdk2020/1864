@@ -264,7 +264,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
-	PaintText(Geometry, Out, Layer, TEXT("v00.00.53 LANDE OG MORTERER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
+	PaintText(Geometry, Out, Layer, TEXT("v00.00.54 FLODER, SØER OG MARKSKEL — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
 	return Layer + 16;
 }
 
@@ -290,6 +290,7 @@ int32 SCampaign1851Overlay::PaintLabels(const FGeometry& Geometry, FSlateWindowE
 		else if (L.Kind == TEXT("strait")) { if (D >= 400.f) continue; I.Text = L.Text; I.Font = Serif(11, EFace::Italic); I.Colour = SeaInk; I.Priority = 500; }
 		else if (L.Kind == TEXT("land")) { if (D <= 45.f) continue; I.Text = Spaced(L.Text); I.Font = Serif(20, EFace::Italic); I.Colour = FLinearColor::FromSRGBColor(FColor(245, 237, 204, 200)); I.Priority = 700000; }
 		else if (L.Kind == TEXT("duchy")) { I.Text = Spaced(L.Text.ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"))); I.Font = Serif(13); I.Colour = Gold; I.Priority = 800000; }
+		else if (L.Kind == TEXT("river")) { if (D >= 160.f) continue; I.Text = L.Text; I.Font = Serif(10, EFace::Italic); I.Colour = SeaInk; I.Priority = 450; }
 		else if (L.Kind == TEXT("amt")) { if (D <= 30.f || D >= 330.f) continue; I.Text = Spaced(L.Text.ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"))); I.Font = Serif(10); I.Colour = FLinearColor::FromSRGBColor(FColor(232, 214, 160, 190)); I.Priority = 600; }
 		else { I.Text = L.Text; I.Font = Serif(13, EFace::Italic); I.Colour = MutedInk; I.Priority = 400; }
 		Items.Add(I);
@@ -2823,6 +2824,16 @@ void SCampaign1851Overlay::PaintBattlefield(const FGeometry& Geometry, FSlateWin
 		Line(TEXT("Bygninger"), FString::Printf(TEXT("%d  ·  %d gårde"), B.Buildings.Num(), B.Farms));
 		Line(TEXT("Veje"), FString::Printf(TEXT("%d landeveje, %d markveje, %d chausséer, %d jernbaner"), B.Roads.Num(), B.Lanes.Num(), B.Chaussees.Num(), B.Rails.Num()));
 		Line(TEXT("Skanser"), FString::FromInt(B.Forts.Num()));
+		{
+			TArray<FString> Names;
+			for (const FCampaign1851BattleRiver& Rv : B.Rivers) { Names.AddUnique(Rv.Name); }
+			const int32 Fords = B.Crossings.FilterByPredicate([](const FCampaign1851BattleCrossing& C) { return C.Kind == TEXT("ford"); }).Num();
+			Line(TEXT("Vand"), Names.Num() + B.Lakes.Num() == 0 ? FString(TEXT("-"))
+				: FString::Printf(TEXT("%s%s  ·  %d broer, %d vadesteder"), *FString::Join(Names, TEXT(", ")), B.Lakes.Num() > 0 ? *FString::Printf(TEXT(", %d sø(er)"), B.Lakes.Num()) : TEXT(""),
+					B.Crossings.Num() - Fords + B.Bridges.Num(), Fords));
+			const TCHAR* HedgeName = B.Hedges.Num() == 0 ? TEXT("-") : B.Hedges[0].Kind == EHedgeKind::Knick ? TEXT("knicks (levende hegn på vold)") : B.Hedges[0].Kind == EHedgeKind::Dike ? TEXT("sten- og jorddiger") : TEXT("grøfter");
+			Line(TEXT("Markskel"), B.Hedges.Num() == 0 ? FString(TEXT("-")) : FString::Printf(TEXT("%d stræk %s"), B.Hedges.Num(), HedgeName));
+		}
 		Line(TEXT("Fil"), Map->BattlefieldFile());
 		Y += 16.f;
 	}
@@ -2844,14 +2855,19 @@ void SCampaign1851Overlay::PaintBattlefield(const FGeometry& Geometry, FSlateWin
 		{ TEXT("Skov"), FLinearColor::FromSRGBColor(FColor(52, 84, 46)) }, { TEXT("By"), FLinearColor::FromSRGBColor(FColor(158, 130, 104)) },
 		{ TEXT("Hav"), FLinearColor::FromSRGBColor(FColor(62, 96, 124)) }, { TEXT("Chaussé / landevej"), FLinearColor::FromSRGBColor(FColor(224, 206, 160)) },
 		{ TEXT("Jernbane"), FLinearColor::FromSRGBColor(FColor(52, 46, 42)) }, { TEXT("Huse og gårde"), FLinearColor::FromSRGBColor(FColor(170, 64, 48)) },
-		{ TEXT("Skanse og løbegrav"), FLinearColor::FromSRGBColor(FColor(150, 128, 84)) } };
+		{ TEXT("Skanse og løbegrav"), FLinearColor::FromSRGBColor(FColor(150, 128, 84)) }, { TEXT("Å, sø og vadested"), FLinearColor::FromSRGBColor(FColor(74, 112, 140)) },
+		{ TEXT("Knick (hegn på vold)"), FLinearColor::FromSRGBColor(FColor(40, 66, 30)) }, { TEXT("Sten- og jorddige"), FLinearColor::FromSRGBColor(FColor(160, 156, 146)) },
+		{ TEXT("Grøft i marsken"), FLinearColor::FromSRGBColor(FColor(70, 104, 128)) } };
 	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
-	for (const TPair<const TCHAR*, FLinearColor>& L : Legend)
+	// Two columns.
+	const int32 Half = (UE_ARRAY_COUNT(Legend) + 1) / 2;
+	for (int32 i = 0; i < UE_ARRAY_COUNT(Legend); ++i)
 	{
-		FSlateDrawElement::MakeBox(Out, Layer + 1, Geometry.ToPaintGeometry(FVector2D(18.f, 12.f), FSlateLayoutTransform(FVector2D(RX, Y - 6.f))), White, ESlateDrawEffect::None, L.Value);
-		PaintText(Geometry, Out, Layer + 1, L.Key, FVector2D(RX + 28.f, Y), Serif(12), Ink, 0.f, false);
-		Y += 20.f;
+		const float LX = RX + (i < Half ? 0.f : 250.f), LY = Y + (i % Half) * 20.f;
+		FSlateDrawElement::MakeBox(Out, Layer + 1, Geometry.ToPaintGeometry(FVector2D(18.f, 12.f), FSlateLayoutTransform(FVector2D(LX, LY - 6.f))), White, ESlateDrawEffect::None, Legend[i].Value);
+		PaintText(Geometry, Out, Layer + 1, Legend[i].Key, FVector2D(LX + 28.f, LY), Serif(12), Ink, 0.f, false);
 	}
+	Y += Half * 20.f;
 	PaintText(Geometry, Out, Layer + 1, TEXT("Højdekurver for hver 5 m; skyggen falder fra nordvest."), FVector2D(RX, Y + 6.f), Serif(10, EFace::Italic), MutedInk, 0.f, false);
 }
 

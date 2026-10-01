@@ -157,6 +157,74 @@ void ACampaign1851Map::DetectBridges()
 		B.State = EBridgeState::Intact;
 		AddBridge(B);
 	}
+	// Over the rivers and the canal (Campaign1851Hydro.cpp): where a road between two towns crosses one.
+	// After the others, so the bridges of older saves keep their numbers. The Elbe had no bridge in 1851.
+	auto Hit = [](const FVector2D& A, const FVector2D& B, const FVector2D& C, const FVector2D& D, FVector2D& Out)
+	{
+		const FVector2D R = B - A, S = D - C;
+		const double Den = R.X * S.Y - R.Y * S.X;
+		if (FMath::Abs(Den) < 1e-12)
+		{
+			return false;
+		}
+		const double T = ((C.X - A.X) * S.Y - (C.Y - A.Y) * S.X) / Den, U = ((C.X - A.X) * R.Y - (C.Y - A.Y) * R.X) / Den;
+		if (T < 0.0 || T > 1.0 || U < 0.0 || U > 1.0)
+		{
+			return false;
+		}
+		Out = A + R * T;
+		return true;
+	};
+	int32 RiverBridges = 0;
+	for (int32 r = 0; r < Rivers.Num(); ++r)
+	{
+		const FCampaign1851River& Rv = Rivers[r];
+		if (Rv.Class >= 3)
+		{
+			continue;
+		}
+		FBox2D RBox(ForceInit);
+		for (const FVector2D& P : Rv.Km) { RBox += P; }
+		for (int32 l = 0; l < Links.Num(); ++l)
+		{
+			const FCampaign1851Link& L = Links[l];
+			if (L.HasFerry() || L.Km.Num() < 2)
+			{
+				continue;
+			}
+			for (int32 i = 0; i + 1 < L.Km.Num(); ++i)
+			{
+				const FVector2D A = L.Km[i], C = L.Km[i + 1];
+				if (FMath::Max(A.X, C.X) < RBox.Min.X || FMath::Min(A.X, C.X) > RBox.Max.X || FMath::Max(A.Y, C.Y) < RBox.Min.Y || FMath::Min(A.Y, C.Y) > RBox.Max.Y)
+				{
+					continue;
+				}
+				for (int32 s = 0; s + 1 < Rv.Km.Num(); ++s)
+				{
+					FVector2D X;
+					if (!Hit(A, C, Rv.Km[s], Rv.Km[s + 1], X))
+					{
+						continue;
+					}
+					const FVector2D Dir = (C - A).GetSafeNormal();
+					const double Half = FMath::Max(double(RiverDrawnKm(Rv.Class)) * 0.5 + 0.04, 0.06);
+					FCampaign1851Bridge B;
+					B.Link = l;
+					const int32 Town = NearestTown(X);
+					B.Name = FString::Printf(TEXT("Broen over %s ved %s"), *Rv.Name, Cities.IsValidIndex(Town) ? *Cities[Town].Name : TEXT("?"));
+					B.Km = X;
+					B.EndA = X - Dir * Half;
+					B.EndB = X + Dir * Half;
+					B.LengthM = Rv.WidthM + 10.f;
+					B.State = EBridgeState::Intact;
+					const int32 Before = Bridges.Num();
+					AddBridge(B);
+					RiverBridges += Bridges.Num() - Before;
+				}
+			}
+		}
+	}
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|bridges|over rivers=%d"), RiverBridges);
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|bridges|%d (%d pontoon sites)"), Bridges.Num(), Bridges.FilterByPredicate([](const FCampaign1851Bridge& B) { return B.State == EBridgeState::Site; }).Num());
 	for (const FCampaign1851Bridge& B : Bridges)
 	{
