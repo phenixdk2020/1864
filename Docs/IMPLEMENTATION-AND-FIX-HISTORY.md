@@ -1033,6 +1033,32 @@ Kun ladte soldater kan blive valgt til næste salve.
 - Målt på OOB-kortet med to kompagnier i 3D: spil-tid pr. billede 11,3 → 7,8 ms, polygoner 3,4 → 1,3 mio., draw calls 1548 → 958.
 - Fejl rettet undervejs: Transform-noden i materialet tager sit input med tomt navn (`''`). Med "Input" fik den intet, og spillet brugte standardmaterialet.
 
+### Kampagneslagene: opstilling på åbent land, fjendens HQ'er, kampagnens regler, ildmetoder med forskning og træning (2. oktober 2026)
+- **Opstilling** (`BuildCampaignBattle`):
+  - Fjenden kommer fra sit korps' retning (`enemy.bearingDeg` i slagforespørgslen: grader nord for øst, fra korpset til slaget). Står korpset på selve slagets grund, kommer han fra syd.
+  - Danskerne forsvarer foran byen: mellem den og fjenden, på første afstand fra midten (mindst 350 m), hvor hele fronten står på mindst 80 % åbent land. Fjenden står 700 m længere ude eller mere, også på åbent land.
+  - Alle enheder vender mod hinanden, og kameraet starter bag den danske linje og ser mod fjenden.
+  - `AStrategyCampaignBattlefield::IsOpenGround` afviser by, skov, vand, hav, veje, knik og huse. `IsWater` giver også åens bredde.
+- **Fjenden** har fået en brigadestab og en bataljonsstab for hver fire kompagnier:
+  - Med preussisk tændnålsgevær (Dreyse, eller Preussen uden angivelse) lades der tre gange så hurtigt. Han bruger bagladeren og fri ild; østrigerne bruger salve.
+  - Hans træfsandsynlighed ganges med hans kvalitet og de danske tabsfaktorer (`battleRules.lossFactor` × `doctrine.lossFactor`).
+- **Danske kompagnier** får regimentets egne kampfaktorer fra Units.json:
+  - ladetid × `reloadTime` × `battleRules.infantry.reloadFactor`;
+  - træfsandsynlighed × `accuracy` × `doctrine.infantryFactor`;
+  - moral og samhørighed;
+  - ildpolitik fra `aiDefaults.firePolicy`.
+- **Ildmetoderne** følger designet: først forsk, derefter træn, så brug.
+  - Fire nye forskningsemner: To-geleds ild (1852), Geledild (1853), Kommanderet salve (1855) og Fri ild (1857).
+  - Regimenterne indøver de udforskede metoder i garnison (eksercits, skydeøvelser 0,8, blandet 0,4): ca. 40 dage til 60 under en jævn chef.
+  - Værdierne gemmes (`FireDrills`) og vises i regimentsvinduet ("Ildmetoder ... ✓" fra 60). De går ud i Units.json som `fireDrills`.
+  - Slaget giver kompagniet den højeste metode, der er indøvet til 60. Geledild er standard, når den er åben.
+- **HUD:** ILDMETODE-rækken (1.GLD, 2.GLD, GELED, SALVE, FRI); låste metoder er dæmpede og afvises.
+- **Animation:**
+  - Kun det geled, hvis tur det er, løfter og skyder. Pladsens geled er slot % geledder, samme regel som simuleringen.
+  - Salven går af samlet (0,2 s), geledild som en bølge (0,6 s) og fri ild mand for mand (2,5 s).
+  - Hver mand lader sin egen fulde ladetid, så geledderne skifter rytmisk.
+- Jordmaterialet bruger kun jordtekstur, hvor farven er grålig-brun (vej, bygrund, tråd). Gule kornmarker beholder græsdetaljen.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

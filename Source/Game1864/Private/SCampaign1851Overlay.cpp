@@ -1291,7 +1291,7 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	Height += 22.f * 7.f + 10.f;                                // strength, experience, place, present, pace, trains, supply
 	Height += Why.IsEmpty() ? 0.f : 20.f;
 	Height += First.IsMarching() ? 22.f : 0.f;
-	Height += bSingle ? 3 * 21.f + 8.f : 0.f;                   // training bars (the table shows them for a stack)
+	Height += bSingle ? 3 * 21.f + 8.f + 22.f : 0.f;            // training bars (the table shows them for a stack), fire methods
 	Height += 30.f + 30.f;                                      // programme, route
 	Height += 12.f + (bSingle ? 44.f : 0.f) + 44.f;             // chief, general
 	Height += 76.f;                                             // buttons and hint
@@ -1360,6 +1360,20 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%.0f"), Skills[s]), Cell + FVector2D(228.f, 0.f), Serif(11), Ink, 0.f, false);
 		}
 		Y += 3 * 21.f + 8.f;
+		// The fire methods: researched ones with their training (ready from 60).
+		{
+			static const TCHAR* DrillTopics[4] = { TEXT("tworank"), TEXT("firebyrank"), TEXT("volley"), TEXT("independent") };
+			static const TCHAR* DrillNames[4] = { TEXT("To geledder"), TEXT("Geledild"), TEXT("Salve"), TEXT("Fri ild") };
+			FString Drills;
+			for (int32 d = 0; d < 4; ++d)
+			{
+				if (Map->HasResearch(DrillTopics[d]))
+				{
+					Drills += FString::Printf(TEXT("%s%s %.0f%s"), Drills.IsEmpty() ? TEXT("") : TEXT("  ·  "), DrillNames[d], First.FireDrills[d], First.FireDrills[d] >= 60.f ? TEXT(" ✓") : TEXT(""));
+				}
+			}
+			Line(TEXT("Ildmetoder"), Drills.IsEmpty() ? FString(TEXT("Forreste geled (forsk i nye ildmetoder)")) : Drills);
+		}
 	}
 	const bool bSameProgram = !Sel.ContainsByPredicate([&First](const FCampaign1851Regiment* R) { return R->Program != First.Program; });
 	PaintText(Geometry, Out, Layer + 2, TEXT("Øvelser"), FVector2D(Pos.X + 22.f, Y), Serif(12, EFace::Italic), Gold, 0.f, false);

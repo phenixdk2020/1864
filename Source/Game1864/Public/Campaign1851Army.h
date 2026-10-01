@@ -230,6 +230,9 @@ struct FCampaign1851Regiment
 	/** Trained skills (ECampaign1851Skill), 0-100, kept up in garrison by the training programme. */
 	float Skills[int32(ECampaign1851Skill::Count)] = { 60.f, 50.f, 60.f, 55.f, 55.f, 50.f };
 	ECampaign1851Program Program = ECampaign1851Program::Drill;
+	/** The fire methods it has trained (research first, then garrison drill): to-geleds ild, geledild,
+	 *  kommanderet salve, fri ild; 0-100, usable in battle from 60 (Campaign1851Army::FireDrillNames). */
+	float FireDrills[4] = { 0.f, 0.f, 0.f, 0.f };
 	float Skill(ECampaign1851Skill S) const { return Skills[int32(S)]; }
 	/** Mean of the trained skills. */
 	float MeanSkill() const

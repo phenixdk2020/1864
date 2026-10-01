@@ -30,6 +30,12 @@ namespace Campaign1851Research
 			{ TEXT("shock"),      TEXT("Rytterchokket"),            TEXT("Rytteriet reformerer 25 % hurtigere, og et angreb i flanke eller ryg ryster 20 % mere. Kampværdi +3 % med rytteri"), 1857, 1500.0, 14, TEXT("carbine"), 5 },
 			{ TEXT("genstaff"),   TEXT("Generalstaben"),            TEXT("Brigade- og divisionsstabe: ordrer udføres 25 % hurtigere, kommandozonerne yderligere 15 % større, +5 % i slag med 3 enheder eller flere"), 1858, 2000.0, 18, TEXT("staff"), 6 },
 			{ TEXT("pontoon"),    TEXT("Pontonnerkorpset"),         TEXT("Pontonbroer koster 40 % mindre og lægges på halv tid. I slaget: pionererne kan slå en bro over en å"), 1856, 1500.0, 12, TEXT("railmob"), 2 },
+			// The fire methods (the battle's fire drill): researched here, then trained by each regiment in garrison
+			// (eksercits, skydeøvelser or blandet) to 60 before the companies may use them in battle.
+			{ TEXT("tworank"),    TEXT("To-geleds ild"),            TEXT("De to forreste geledder skyder sammen. Skal derefter indøves i regimenterne (eksercits/skydeøvelser)"), 1852, 500.0, 6, nullptr, 3 },
+			{ TEXT("firebyrank"), TEXT("Geledild"),                 TEXT("Geledderne skyder på skift, så ilden aldrig hører op. Skal indøves i regimenterne"), 1853, 800.0, 8, TEXT("tworank"), 3 },
+			{ TEXT("volley"),     TEXT("Kommanderet salve"),        TEXT("Hele kompagniet på kommando: den tunge salve, der ryster fjenden. Skal indøves i regimenterne"), 1855, 900.0, 8, TEXT("firebyrank"), 3 },
+			{ TEXT("independent"), TEXT("Fri ild"),                 TEXT("Hver mand skyder, når han har ladt og sigtet: hurtigere ild, svagere salver. Skal indøves i regimenterne"), 1857, 1000.0, 10, TEXT("volley"), 3 },
 		};
 		return List;
 	}

@@ -145,6 +145,10 @@ bool ACampaign1851Map::FightBattleIn3D(int32 BattleId)
 	Enemy->SetNumberField(TEXT("guns"), C.Guns);
 	Enemy->SetStringField(TEXT("rifle"), EnemyRifle(C.Nation));
 	Enemy->SetNumberField(TEXT("quality"), EnemyQuality(C.Nation));
+	// Where the enemy comes from (degrees north of east, the battlefield's axes): from his corps; from the south
+	// (the border) when he stands on the battle's own ground.
+	const FVector2D Away = C.Km - B->Km;
+	Enemy->SetNumberField(TEXT("bearingDeg"), Away.Size() > 0.3 ? FMath::RadiansToDegrees(FMath::Atan2(Away.Y, Away.X)) : -90.0);
 	Doc->SetObjectField(TEXT("enemy"), Enemy);
 	Doc->SetStringField(TEXT("resultFile"), FString::Printf(TEXT("BattleResult_%d.json"), B->Id));
 	// The ground of the battle (the generator, 8 km around it).

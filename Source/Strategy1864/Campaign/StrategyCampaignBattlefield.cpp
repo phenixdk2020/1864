@@ -95,6 +95,56 @@ FVector AStrategyCampaignBattlefield::FieldToWorld(double XM, double YM, double 
     return GetActorLocation() + FVector(YM * 100.0 - Half, XM * 100.0 - Half, HeightAtM(XM, YM) * 100.0 + LiftCm);
 }
 
+bool AStrategyCampaignBattlefield::IsOpenGround(const FVector& World) const
+{
+    const FVector L = World - GetActorLocation();
+    const double Half = SizeCm * 0.5;
+    const double SizeM = SizeCm / 100.0;
+    const double XM = (L.Y + Half) / 100.0, YM = (L.X + Half) / 100.0;
+    if (XM < 0.0 || YM < 0.0 || XM >= SizeM || YM >= SizeM)
+    {
+        return false;
+    }
+    if (KindsGrid.Len() == Grid * Grid)
+    {
+        const int32 I = FMath::Clamp(int32(XM / SizeM * Grid), 0, Grid - 1), J = FMath::Clamp(int32(YM / SizeM * Grid), 0, Grid - 1);
+        const TCHAR K = KindsGrid[J * Grid + I];
+        if (K == TCHAR('~') || K == TCHAR('w') || K == TCHAR('t') || K == TCHAR('o'))
+        {
+            return false;
+        }
+    }
+    return GrassAt(XM, YM) > 0.2f;
+}
+
+bool AStrategyCampaignBattlefield::IsWater(const FVector& World, float* OutWidthM) const
+{
+    const FVector L = World - GetActorLocation();
+    const double Half = SizeCm * 0.5;
+    const FVector2D P((L.Y + Half) / 100.0, (L.X + Half) / 100.0);
+    for (const FRiver& R : Rivers)
+    {
+        for (int32 s = 0; s + 1 < R.Points.Num(); ++s)
+        {
+            const FVector2D A = R.Points[s], D = R.Points[s + 1] - A;
+            const double T = FMath::Clamp(FVector2D::DotProduct(P - A, D) / FMath::Max(D.SizeSquared(), 1e-6), 0.0, 1.0);
+            if (FVector2D::Distance(P, A + D * T) <= R.WidthM * 0.5)
+            {
+                if (OutWidthM) { *OutWidthM = R.WidthM; }
+                return true;
+            }
+        }
+    }
+    if (OutWidthM) { *OutWidthM = 0.0f; }
+    const double SizeM = SizeCm / 100.0;
+    if (KindsGrid.Len() == Grid * Grid && P.X >= 0.0 && P.Y >= 0.0 && P.X < SizeM && P.Y < SizeM)
+    {
+        const TCHAR K = KindsGrid[FMath::Clamp(int32(P.Y / SizeM * Grid), 0, Grid - 1) * Grid + FMath::Clamp(int32(P.X / SizeM * Grid), 0, Grid - 1)];
+        return K == TCHAR('~') || K == TCHAR('o');
+    }
+    return false;
+}
+
 float AStrategyCampaignBattlefield::GroundZ(const FVector& World) const
 {
     const FVector L = World - GetActorLocation();
@@ -718,6 +768,8 @@ bool AStrategyCampaignBattlefield::BuildFromFile(const FString& FileName)
     MinHeightM = TNumericLimits<float>::Max();
     for (float H : HeightM) { MinHeightM = FMath::Min(MinHeightM, H); }
     ResetNoGrass();
+    KindsGrid = Json->GetStringField(TEXT("kinds"));
+    Rivers.Reset();
 
     // The picture (row 0 north): the ground's colours.
     TArray<FColor> Pixels;
@@ -886,13 +938,16 @@ bool AStrategyCampaignBattlefield::BuildFromFile(const FString& FileName)
     UMaterialInterface* WayMaterial = GroundMat ? GroundMat : Material;
     {
         // Each river at its own width (the Ejder is fifty metres across, a brook a few).
-        const TArray<TSharedPtr<FJsonValue>>* Rivers = nullptr;
-        if (Json->TryGetArrayField(TEXT("rivers"), Rivers))
+        const TArray<TSharedPtr<FJsonValue>>* RiverArray = nullptr;
+        if (Json->TryGetArrayField(TEXT("rivers"), RiverArray))
         {
-            for (const TSharedPtr<FJsonValue>& V : *Rivers)
+            for (const TSharedPtr<FJsonValue>& V : *RiverArray)
             {
                 double WidthM = 12.0;
                 V->AsObject()->TryGetNumberField(TEXT("widthM"), WidthM);
+                FRiver& River = Rivers.AddDefaulted_GetRef();
+                River.Points = ReadPoints(V->AsObject()->GetArrayField(TEXT("points")));
+                River.WidthM = float(FMath::Clamp(WidthM, 3.0, 120.0));
                 Ribbons({ ReadPoints(V->AsObject()->GetArrayField(TEXT("points"))) }, FMath::Clamp(WidthM, 3.0, 120.0),
                     FLinearColor::FromSRGBColor(FColor(60, 86, 100)), 30.0, TEXT("Rivers"), WaterMaterial(Material));
             }

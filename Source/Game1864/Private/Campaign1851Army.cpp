@@ -1481,6 +1481,18 @@ void ACampaign1851Map::AdvanceArmy(float DeltaDays, float DeltaSeconds)
 				}
 			}
 			R.Cohesion = FMath::Min(90.f, R.Cohesion + DeltaDays * 0.3f);
+			// The fire methods the army has researched: drilled in (about forty days to the battle-ready 60
+			// under a fair chief with eksercits, longer with skydeøvelser or blandet).
+			static const TCHAR* DrillTopics[4] = { TEXT("tworank"), TEXT("firebyrank"), TEXT("volley"), TEXT("independent") };
+			const float DrillWeight = R.Program == ECampaign1851Program::Drill ? 1.f : R.Program == ECampaign1851Program::LiveFire ? 0.8f
+				: R.Program == ECampaign1851Program::Mixed ? 0.4f : 0.f;
+			for (int32 d = 0; d < 4; ++d)
+			{
+				if (DrillWeight > 0.f && HasResearch(DrillTopics[d]) && R.FireDrills[d] < 100.f)
+				{
+					R.FireDrills[d] = FMath::Min(100.f, R.FireDrills[d] + DeltaDays * 1.5f * DrillWeight * (0.5f + Lead / 10.f) * (0.4f + 0.6f * R.Present));
+				}
+			}
 		}
 		// Well-trained soldiers trust themselves: up to +10 % on what the chief can inspire.
 		const float MoraleTarget = 0.7f + 0.025f * Insp + 0.1f * (R.MeanSkill() - 50.f) / 50.f;
@@ -2260,6 +2272,7 @@ TArray<FCampaign1851RegimentSave> ACampaign1851Map::SaveArmy() const
 		S.Experience = R.Experience;
 		S.Skills = TArray<float>(R.Skills, int32(ECampaign1851Skill::Count));
 		S.Program = uint8(R.Program);
+		S.FireDrills = TArray<float>(R.FireDrills, 4);
 		S.Cohesion = R.Cohesion;
 		// Where it is (town, or a point), and where it is going: a march is planned again from here on loading.
 		S.Town = !R.IsMarching() && Cities.IsValidIndex(R.Town) ? Cities[R.Town].Name : FString();
@@ -2308,6 +2321,10 @@ int32 ACampaign1851Map::RestoreArmy(const TArray<FCampaign1851RegimentSave>& Sav
 				R.Skills[s] = S.Skills[s];
 			}
 			R.Program = ECampaign1851Program(FMath::Min<uint8>(S.Program, uint8(ECampaign1851Program::Count) - 1));
+		}
+		for (int32 d = 0; d < 4 && d < S.FireDrills.Num(); ++d)
+		{
+			R.FireDrills[d] = S.FireDrills[d];
 		}
 		// In a town, or out in the field (v8 saves keep the point; older ones knew only towns).
 		R.Town = FindCity(S.Town);

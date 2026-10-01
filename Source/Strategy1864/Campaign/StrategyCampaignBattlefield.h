@@ -46,6 +46,12 @@ public:
     /** Battlefield metres (x east, y north) to world. */
     FVector FieldToWorld(double XM, double YM, double LiftCm = 0.0) const;
 
+    /** Open ground at a world point: not a town, a wood, water or the sea, not on a way, a knick or a house. */
+    bool IsOpenGround(const FVector& World) const;
+
+    /** Water at a world point (a river, a lake, the sea), and how wide the river there is (m; 0 when none). */
+    bool IsWater(const FVector& World, float* OutWidthM = nullptr) const;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Battlefield")
     FString Place;
 
@@ -67,6 +73,11 @@ private:
     float SizeCm = 800000.0f;
     float MinHeightM = 0.0f;
     TArray<float> HeightM;   // Grid x Grid, row 0 at the south
+    FString KindsGrid;       // Grid x Grid, the generator's cell kinds (. field ~ sea m meadow w wood t town o water)
+
+    /** The rivers (field metres) with their widths, for the crossings. */
+    struct FRiver { TArray<FVector2D> Points; float WidthM = 12.0f; };
+    TArray<FRiver> Rivers;
 
     float HeightAtM(double XM, double YM) const;
 

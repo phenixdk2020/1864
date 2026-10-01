@@ -209,6 +209,7 @@ private:
     bool bFieldCameraPlaced = true;
     bool bCampaignFinished = false;
     FVector FieldCameraTarget = FVector::ZeroVector;
+    float FieldCameraYaw = 0.0f;
     int32 CampaignBattleId = 0;
     /** The units of the battle and the campaign unit each belongs to ("" for the enemy). */
     TMap<TWeakObjectPtr<AStrategyUnit>, FString> CampaignUnitOf;

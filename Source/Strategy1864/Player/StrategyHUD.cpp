@@ -3,6 +3,7 @@
 #include "StrategyPlayerController.h"
 #include "../AI/StrategyDoctrineComponent.h"
 #include "../Combat/StrategyFireControlComponent.h"
+#include "../Combat/StrategyFireDrillComponent.h"
 #include "../Command/StrategyCommandComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "../Orders/StrategyOrderComponent.h"
@@ -638,6 +639,19 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
             Text(FString::Printf(TEXT("%.0f m / %.0f m / %.0f m  ·  kegle ±%.0f°"), Fire->CloseRangeCm / 100.0f, Fire->MediumRangeCm / 100.0f, Fire->LongRangeCm / 100.0f,
                 Fire->FireConeHalfAngleDegrees), MX, MY + 48.0f, Muted, 0.85f);
         }
+        // The fire method: what the regiment has researched and drilled (the locked ones dimmed).
+        if (UStrategyFireDrillComponent* Drill = Unit->FireDrillComponent)
+        {
+            const TCHAR* Labels[] = { TEXT("1.GLD"), TEXT("2.GLD"), TEXT("GELED"), TEXT("SALVE"), TEXT("FRI") };
+            const EStrategyFireDrillMode Modes[] = { EStrategyFireDrillMode::FrontRank, EStrategyFireDrillMode::TwoRankFire, EStrategyFireDrillMode::FireByRank,
+                EStrategyFireDrillMode::Volley, EStrategyFireDrillMode::Independent };
+            for (int32 i = 0; i < 5; ++i)
+            {
+                const bool bOpen = Drill->IsDrillModeUnlocked(Modes[i]);
+                DrawButton(MX + i * 56.0f, MY + 66.0f, 52.0f, 24.0f, Labels[i], EAction::FireDrill, int32(Modes[i]), Drill->DrillMode == Modes[i], Unit,
+                    bOpen ? nullptr : &ButtonDark);
+            }
+        }
         const float OX = MX + 280.0f;
         Text(TEXT("ORDRER / BEVÆGELSE"), OX, MY, Gold, 0.85f);
         DrawButton(OX, MY + 18.0f, 110.0f, 24.0f, TEXT("RYK FREM"), EAction::Order, int32(EStrategyOrderType::Advance), Current == EStrategyOrderType::Advance, Unit);
@@ -743,6 +757,12 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 break;
             case EAction::OOBToggle:
                 bOOBOpen = !bOOBOpen;
+                break;
+            case EAction::FireDrill:
+                if (Unit && Unit->FireDrillComponent)
+                {
+                    Unit->FireDrillComponent->SetDrillMode(EStrategyFireDrillMode(B.Value));   // refused while not drilled
+                }
                 break;
             case EAction::OOBFold:
                 if (Unit)

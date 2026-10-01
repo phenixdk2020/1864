@@ -165,7 +165,12 @@ dirt_lum = g.node(unreal.MaterialExpressionDesaturation)
 g.link(dirt, 'RGB', dirt_lum, '')
 dirt_col = g.mul(vc, g.div(g.mask(dirt_lum, r=True), g.const(0.2)))
 # Dirt where the picture is brown (red above green), grass where it is green.
-dirt_mask = g.sat(g.add(g.mul(g.sub(g.mask(vc, r=True), g.mask(vc, g=True)), g.const(30.0)), g.const(0.15)))
+# Dirt where the picture is a greyish brown (ways, trampled ground, the town): red over green, and blue enough
+# against red (a ripe grain field is yellow, little blue, and keeps the grass detail).
+vr, vg, vb = g.mask(vc, r=True), g.mask(vc, g=True), g.mask(vc, b=True)
+browner = g.sat(g.mul(g.sub(vr, vg), g.const(25.0)))
+greyer = g.sat(g.mul(g.sub(g.div(vb, g.add(vr, g.const(0.01))), g.const(0.28)), g.const(8.0)))
+dirt_mask = g.mul(browner, greyer)
 base = g.lerp(grass_col, dirt_col, dirt_mask)
 # Macro: lush (darker, greener) and dry (yellower) patches, and a brightness swing.
 dry_tint = g.const3(0.30, 0.26, 0.10)

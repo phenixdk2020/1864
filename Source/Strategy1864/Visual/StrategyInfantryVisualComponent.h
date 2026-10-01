@@ -259,6 +259,7 @@ private:
     TArray<float> SoldierFireAt;
     TArray<float> SoldierBusyUntil;
     TArray<uint8> SoldierFirePhase;   // a EFirePhase for each soldier
+    TArray<int32> SoldierSlots;       // each soldier's formation slot (its rank: slot % ranks, for the fire drill)
 
     /** Is an enemy inside the company's chosen range and cone (it may fire). */
     bool IsEnemyInRange() const;

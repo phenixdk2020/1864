@@ -273,20 +273,62 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     CampaignUnitOf.Reset();
     const FString Dir = FPaths::ProjectSavedDir() / TEXT("Battle");
 
-    // The request: which Danish units fight, and the enemy.
+    // The request: which Danish units fight, the enemy, the rules (research, doctrine, AI defaults).
     TArray<FString> DanishIds;
     double EnemyMen = 1520.0;
     FString EnemyNation = TEXT("PR");
+    FString EnemyRifle;
+    double EnemyQuality = 1.0;
+    double BearingDeg = -90.0;   // the enemy from the south when the request does not say
+    TSharedPtr<FJsonObject> Request;
     {
         FString Text;
-        TSharedPtr<FJsonObject> Json;
         if (BattleId > 0 && FFileHelper::LoadFileToString(Text, *(Dir / FString::Printf(TEXT("BattleRequest_%d.json"), BattleId))) &&
-            FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Json) && Json.IsValid())
+            FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Request) && Request.IsValid())
         {
-            for (const TSharedPtr<FJsonValue>& V : Json->GetArrayField(TEXT("danishUnitIds"))) { DanishIds.Add(V->AsString()); }
-            const TSharedPtr<FJsonObject> Enemy = Json->GetObjectField(TEXT("enemy"));
+            for (const TSharedPtr<FJsonValue>& V : Request->GetArrayField(TEXT("danishUnitIds"))) { DanishIds.Add(V->AsString()); }
+            const TSharedPtr<FJsonObject> Enemy = Request->GetObjectField(TEXT("enemy"));
             EnemyMen = Enemy->GetNumberField(TEXT("men"));
             EnemyNation = Enemy->GetStringField(TEXT("nation"));
+            Enemy->TryGetStringField(TEXT("rifle"), EnemyRifle);
+            Enemy->TryGetNumberField(TEXT("quality"), EnemyQuality);
+            Enemy->TryGetNumberField(TEXT("bearingDeg"), BearingDeg);
+        }
+        else
+        {
+            Request.Reset();
+        }
+    }
+    // A number from the request (Group.Key, or Key at the top), with a default.
+    auto RuleNumber = [&](const TCHAR* Group, const TCHAR* Sub, const TCHAR* Key, double Default)
+    {
+        double Value = Default;
+        const TSharedPtr<FJsonObject>* G = nullptr;
+        if (Request && Request->TryGetObjectField(Group, G))
+        {
+            const TSharedPtr<FJsonObject>* S = nullptr;
+            if (Sub && (*G)->TryGetObjectField(Sub, S))
+            {
+                (*S)->TryGetNumberField(Key, Value);
+            }
+            else if (!Sub)
+            {
+                (*G)->TryGetNumberField(Key, Value);
+            }
+        }
+        return Value;
+    };
+    const double ReloadRule = RuleNumber(TEXT("battleRules"), TEXT("infantry"), TEXT("reloadFactor"), 1.0);
+    const double LossRule = RuleNumber(TEXT("battleRules"), nullptr, TEXT("lossFactor"), 1.0) * RuleNumber(TEXT("doctrine"), nullptr, TEXT("lossFactor"), 1.0);
+    const double InfantryRule = RuleNumber(TEXT("doctrine"), nullptr, TEXT("infantryFactor"), 1.0);
+    EStrategyFirePolicy DanishPolicy = EStrategyFirePolicy::Medium;
+    {
+        FString Policy;
+        const TSharedPtr<FJsonObject>* Ai = nullptr;
+        if (Request && Request->TryGetObjectField(TEXT("aiDefaults"), Ai) && (*Ai)->TryGetStringField(TEXT("firePolicy"), Policy))
+        {
+            DanishPolicy = Policy == TEXT("HOLD") ? EStrategyFirePolicy::Hold : Policy == TEXT("CLOSE") ? EStrategyFirePolicy::Close
+                : Policy == TEXT("LONG") ? EStrategyFirePolicy::Long : EStrategyFirePolicy::Medium;
         }
     }
     // The units as the campaign has them.
@@ -328,9 +370,6 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     int32 Lod = 5;
     FParse::Value(FCommandLine::Get(), TEXT("Strategy1864FieldLOD="), Lod);
 
-    // The Danes south of the middle facing north, the enemy north facing south, 800 m apart.
-    const float DanishX = Origin.X - 40000.0f, EnemyX = Origin.X + 40000.0f;
-    AStrategyHQUnit* Army = SpawnHQ(TEXT("DK-FIELD-HQ"), TEXT("Felthæren"), static_cast<uint8>(EStrategyHQLevel::Division), FVector(DanishX - 30000.0f, Origin.Y, 0.0f), nullptr);
     TArray<TSharedPtr<FJsonObject>> Battalions, Horse, Guns;
     for (const TSharedPtr<FJsonObject>& U : Units)
     {
@@ -339,12 +378,119 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     }
     const float FieldSpacing = 7200.0f;   // 72 m centre to centre (design 8)
     const float BattalionWidth = 4.0f * FieldSpacing + 3000.0f;
-    float Y = Origin.Y - (Battalions.Num() - 1) * BattalionWidth * 0.5f;
+    const int32 EnemyCompanies = FMath::Clamp(FMath::RoundToInt(EnemyMen / 190.0), 1, 16);
+    const int32 PerLine = FMath::Min(EnemyCompanies, 8);
+
+    // The two lines on open ground along the enemy's approach: the Danes in front of the place they hold (between
+    // it and the enemy), at the first distance from the middle where the whole front is on open ground (no town,
+    // wood, water, ways or knicks), at least 350 m out; the enemy 700 m beyond them or more, on open ground too.
+    const double Bearing = FMath::DegreesToRadians(BearingDeg);
+    const FVector ToEnemy(FMath::Sin(Bearing), FMath::Cos(Bearing), 0.0);   // world +X north, +Y east
+    const FVector Lateral(-ToEnemy.Y, ToEnemy.X, 0.0);                      // the Danes' right
+    const float DanishYaw = ToEnemy.Rotation().Yaw;
+    auto OpenShare = [&](const FVector& Centre, const FVector& Forward, float HalfWidthCm)
+    {
+        int32 Open = 0, All = 0;
+        const FVector Side(-Forward.Y, Forward.X, 0.0);
+        for (float Depth = -6000.0f; Depth <= 6000.0f; Depth += 3000.0f)
+        {
+            for (float S = -HalfWidthCm; S <= HalfWidthCm; S += 3000.0f)
+            {
+                ++All;
+                Open += CampaignField->IsOpenGround(Centre - Forward * Depth + Side * S) ? 1 : 0;
+            }
+        }
+        return All > 0 ? float(Open) / float(All) : 0.0f;
+    };
+    auto FindLine = [&](const FVector& Outward, float MinCm, float HalfWidthCm)
+    {
+        float Best = MinCm, BestShare = -1.0f;
+        for (float D = MinCm; D <= 280000.0f; D += 5000.0f)
+        {
+            const float Share = OpenShare(Origin + Outward * D, -Outward, HalfWidthCm);
+            if (Share >= 0.8f)
+            {
+                return D;
+            }
+            if (Share > BestShare + 0.02f)
+            {
+                BestShare = Share;
+                Best = D;
+            }
+        }
+        return Best;
+    };
+    const float DanishHalf = FMath::Max(1, Battalions.Num()) * BattalionWidth * 0.5f + (Horse.Num() > 0 ? 15000.0f : 3000.0f);
+    const float EnemyHalf = PerLine * FieldSpacing * 0.5f;
+    const float DanishOut = FindLine(ToEnemy, 35000.0f, DanishHalf);
+    const float EnemyOut = FindLine(ToEnemy, DanishOut + 70000.0f, EnemyHalf);
+    const FVector DanishLine = Origin + ToEnemy * DanishOut;
+    const FVector EnemyLine = Origin + ToEnemy * EnemyOut;
+    auto Danish = [&](float Forward, float Right) { return DanishLine + ToEnemy * Forward + Lateral * Right; };
+    auto Hostile = [&](float Forward, float Right) { return EnemyLine - ToEnemy * Forward - Lateral * Right; };
+    auto Face = [&](AStrategyUnit* Unit, bool bEnemy)
+    {
+        if (Unit)
+        {
+            Unit->SetActorRotation(FRotator(0.0f, bEnemy ? DanishYaw + 180.0f : DanishYaw, 0.0f));
+        }
+    };
+
+    // The rules on a Danish company: the regiment's own training (reload, accuracy, morale, cohesion), the
+    // research (reload factor, the fire methods it has drilled to 60), the doctrine and the AI defaults.
+    auto ApplyDanish = [&](AStrategyCompanyUnit* Company, const TSharedPtr<FJsonObject>& U)
+    {
+        double Reload = 1.0, Accuracy = 1.0, Morale = -1.0, Cohesion = -1.0;
+        const TSharedPtr<FJsonObject>* Factors = nullptr;
+        if (U->TryGetObjectField(TEXT("battleFactors"), Factors))
+        {
+            (*Factors)->TryGetNumberField(TEXT("reloadTime"), Reload);
+            (*Factors)->TryGetNumberField(TEXT("accuracy"), Accuracy);
+            (*Factors)->TryGetNumberField(TEXT("morale"), Morale);
+            (*Factors)->TryGetNumberField(TEXT("cohesion"), Cohesion);
+        }
+        if (Company->CombatComponent)
+        {
+            Company->CombatComponent->ReloadSeconds *= float(Reload * ReloadRule);
+            Company->CombatComponent->BaseHitChance *= float(Accuracy * InfantryRule);
+        }
+        if (Morale >= 0.0) { Company->Morale = float(FMath::Clamp(Morale * 100.0, 10.0, 100.0)); }
+        if (Cohesion >= 0.0) { Company->Cohesion = float(FMath::Clamp(Cohesion * 100.0, 10.0, 100.0)); }
+        if (Company->FireControlComponent)
+        {
+            Company->FireControlComponent->SetFirePolicy(DanishPolicy);
+        }
+        if (UStrategyFireDrillComponent* Drill = Company->FireDrillComponent)
+        {
+            // The highest fire method the regiment has drilled to 60 (front rank fire is always there).
+            double Two = 0.0, ByRank = 0.0, Volley = 0.0, Free = 0.0;
+            const TSharedPtr<FJsonObject>* Drills = nullptr;
+            if (U->TryGetObjectField(TEXT("fireDrills"), Drills))
+            {
+                (*Drills)->TryGetNumberField(TEXT("twoRank"), Two);
+                (*Drills)->TryGetNumberField(TEXT("byRank"), ByRank);
+                (*Drills)->TryGetNumberField(TEXT("volley"), Volley);
+                (*Drills)->TryGetNumberField(TEXT("independent"), Free);
+            }
+            const EStrategyFireDrillResearchLevel Level = Free >= 60.0 ? EStrategyFireDrillResearchLevel::IndependentFire
+                : Volley >= 60.0 ? EStrategyFireDrillResearchLevel::ControlledVolley : ByRank >= 60.0 ? EStrategyFireDrillResearchLevel::FireByRank
+                : Two >= 60.0 ? EStrategyFireDrillResearchLevel::TwoRankFire : EStrategyFireDrillResearchLevel::FrontRankFire;
+            Drill->SetResearchLevel(Level);
+            Drill->DrillTraining = float(FMath::Clamp(FMath::Max(FMath::Max(Two, ByRank), FMath::Max(Volley, Free)), 40.0, 100.0));
+            // Fire by rank when drilled (the steady fire of the line), else the best there is.
+            Drill->SetDrillMode(Drill->IsDrillModeUnlocked(EStrategyFireDrillMode::FireByRank) ? EStrategyFireDrillMode::FireByRank : Drill->GetHighestUnlockedDrillMode());
+        }
+    };
+
+    AStrategyHQUnit* Army = SpawnHQ(TEXT("DK-FIELD-HQ"), TEXT("Felthæren"), static_cast<uint8>(EStrategyHQLevel::Division), Danish(-30000.0f, 0.0f), nullptr);
+    Face(Army, false);
+    float Y = -(Battalions.Num() - 1) * BattalionWidth * 0.5f;
     for (const TSharedPtr<FJsonObject>& U : Battalions)
     {
         const FString Id = U->GetStringField(TEXT("id"));
         const TSharedPtr<FJsonObject> Battle = U->GetObjectField(TEXT("battle"));
-        AStrategyHQUnit* Major = SpawnHQ(FName(*FString::Printf(TEXT("DK-%s-HQ"), *Id)), U->GetStringField(TEXT("name")), static_cast<uint8>(EStrategyHQLevel::Battalion), FVector(DanishX - 9000.0f, Y, 0.0f), Army);
+        AStrategyHQUnit* Major = SpawnHQ(FName(*FString::Printf(TEXT("DK-%s-HQ"), *Id)), U->GetStringField(TEXT("name")), static_cast<uint8>(EStrategyHQLevel::Battalion), Danish(-9000.0f, Y), Army);
+        Face(Major, false);
         CampaignUnitOf.Add(Major, Id);
         const TArray<TSharedPtr<FJsonValue>>& Subs = Battle->GetArrayField(TEXT("subunits"));
         int32 Number = 0;
@@ -359,10 +505,12 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             ++Number;
             AStrategyCompanyUnit* Company = SpawnCompany(FName(*FString::Printf(TEXT("DK-%s-C%d"), *Id, c + 1)),
                 FString::Printf(TEXT("%s %s"), *Id, *Sub->GetStringField(TEXT("name")).Left(3)), c + 1,
-                FVector(DanishX, Y + (c - 1.5f) * FieldSpacing, 0.0f), Major, static_cast<uint8>(EStrategySide::Denmark));
+                Danish(0.0f, Y + (c - 1.5f) * FieldSpacing), Major, static_cast<uint8>(EStrategySide::Denmark));
             if (Company)
             {
+                Face(Company, false);
                 Company->InitialStrength = Company->CurrentStrength = Men;
+                ApplyDanish(Company, U);
                 if (Company->InfantryVisualComponent)
                 {
                     // The model by arm: the jægerkorps in the jæger uniform, the guard as Livgarden, the line in the standard.
@@ -386,8 +534,9 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         const TSharedPtr<FJsonObject>& U = Horse[h];
         const FString Id = U->GetStringField(TEXT("id"));
         const float Side = (h % 2 == 0 ? -1.0f : 1.0f) * (Battalions.Num() * BattalionWidth * 0.5f + 12000.0f + (h / 2) * 15000.0f);
-        if (ACavalryUnit* Cav = SpawnCavalry(FName(*FString::Printf(TEXT("DK-%s"), *Id)), U->GetStringField(TEXT("name")), FVector(DanishX - 6000.0f, Origin.Y + Side, 0.0f), Army))
+        if (ACavalryUnit* Cav = SpawnCavalry(FName(*FString::Printf(TEXT("DK-%s"), *Id)), U->GetStringField(TEXT("name")), Danish(-6000.0f, Side), Army))
         {
+            Face(Cav, false);
             const int32 Men = FMath::Max(1, int32(U->GetNumberField(TEXT("presentMen"))));
             Cav->InitialStrength = Cav->CurrentStrength = Men;
             ConfigureRuntimeQALabel(Cav);
@@ -399,29 +548,77 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         const TSharedPtr<FJsonObject>& U = Guns[g];
         const FString Id = U->GetStringField(TEXT("id"));
         if (AStrategyArtilleryBatteryUnit* Battery = SpawnArtilleryBattery(FName(*FString::Printf(TEXT("DK-%s"), *Id)), U->GetStringField(TEXT("name")),
-            FVector(DanishX - 14000.0f, Origin.Y + (g - (Guns.Num() - 1) * 0.5f) * 14000.0f, 0.0f), Army))
+            Danish(-14000.0f, (g - (Guns.Num() - 1) * 0.5f) * 14000.0f), Army))
         {
+            Face(Battery, false);
             ConfigureRuntimeQALabel(Battery);
             CampaignUnitOf.Add(Battery, Id);
         }
     }
-    // The enemy: companies of 190 (at most sixteen) in two lines, the AI on.
-    const int32 EnemyCompanies = FMath::Clamp(FMath::RoundToInt(EnemyMen / 190.0), 1, 16);
-    const int32 PerLine = FMath::Min(EnemyCompanies, 8);
+
+    // The enemy: a brigade staff, a battalion staff for every four companies, companies of 190 (at most sixteen)
+    // in two lines, the AI on. His rifle and quality from the request (the Prussian needle gun loads lying and
+    // three times as fast; the Danish loss factors make his fire count for more or less).
+    const EStrategySide EnemySide = EnemyNation == TEXT("AT") ? EStrategySide::Austria : EStrategySide::Prussia;
+    const bool bNeedleGun = EnemyRifle.Contains(TEXT("Dreyse")) || EnemyRifle.Contains(TEXT("ndnål")) || (EnemyRifle.IsEmpty() && EnemySide == EStrategySide::Prussia);
+    const FString EnemyLabel = EnemySide == EStrategySide::Austria ? TEXT("Østr.") : TEXT("Pr.");
+    AStrategyHQUnit* EnemyBrigade = SpawnHQ(FName(*FString::Printf(TEXT("EN-%s-BDE"), *EnemyNation)), FString::Printf(TEXT("%s brigade"), *EnemyLabel),
+        static_cast<uint8>(EStrategyHQLevel::Brigade), Hostile(-30000.0f, 0.0f), nullptr);
+    if (EnemyBrigade)
+    {
+        EnemyBrigade->Side = EnemySide;
+        EnemyBrigade->bPlayerControllable = false;
+        EnemyBrigade->bOfficerAIEnabled = true;
+        EnemyBrigade->RefreshDebugLabel();
+        Face(EnemyBrigade, true);
+    }
+    TArray<AStrategyHQUnit*> EnemyBattalions;
+    for (int32 b = 0; b < (EnemyCompanies + 3) / 4; ++b)
+    {
+        const int32 First = b * 4, Line = First / PerLine;
+        const float Right = ((First % PerLine) + 1.5f - (PerLine - 1) * 0.5f) * FieldSpacing;
+        AStrategyHQUnit* HQ = SpawnHQ(FName(*FString::Printf(TEXT("EN-%s-BN%d"), *EnemyNation, b + 1)), FString::Printf(TEXT("%s %d. bataillon"), *EnemyLabel, b + 1),
+            static_cast<uint8>(EStrategyHQLevel::Battalion), Hostile(-9000.0f - Line * 15000.0f, Right), EnemyBrigade);
+        if (HQ)
+        {
+            HQ->Side = EnemySide;
+            HQ->bPlayerControllable = false;
+            HQ->bOfficerAIEnabled = true;
+            HQ->RefreshDebugLabel();
+            Face(HQ, true);
+        }
+        EnemyBattalions.Add(HQ);
+    }
     for (int32 e = 0; e < EnemyCompanies; ++e)
     {
         const int32 Line = e / PerLine, InLine = e % PerLine;
         AStrategyCompanyUnit* Company = SpawnCompany(FName(*FString::Printf(TEXT("EN-%s-C%d"), *EnemyNation, e + 1)),
-            FString::Printf(TEXT("%s %d. Kp."), EnemyNation == TEXT("AT") ? TEXT("Østr.") : TEXT("Pr."), e + 1), e + 1,
-            FVector(EnemyX + Line * 15000.0f, Origin.Y + (InLine - (PerLine - 1) * 0.5f) * 7200.0f, 0.0f), nullptr,
-            static_cast<uint8>(EnemyNation == TEXT("AT") ? EStrategySide::Austria : EStrategySide::Prussia));
+            FString::Printf(TEXT("%s %d. Kp."), *EnemyLabel, e + 1), e + 1,
+            Hostile(-Line * 15000.0f, (InLine - (PerLine - 1) * 0.5f) * FieldSpacing), EnemyBattalions.IsValidIndex(e / 4) ? EnemyBattalions[e / 4] : nullptr,
+            static_cast<uint8>(EnemySide));
         if (Company)
         {
-            Company->SetActorRotation(FRotator(0.0f, 180.0f, 0.0f));
+            Face(Company, true);
             Company->bOfficerAIEnabled = true;
             if (Company->AutonomousBattleAIComponent)
             {
                 Company->AutonomousBattleAIComponent->bEnableForNonPlayerSides = true;
+            }
+            if (Company->CombatComponent)
+            {
+                Company->CombatComponent->BaseHitChance *= float(EnemyQuality * LossRule);
+                if (bNeedleGun)
+                {
+                    Company->CombatComponent->ReloadSeconds *= 0.35f;
+                }
+            }
+            if (UStrategyFireDrillComponent* Drill = Company->FireDrillComponent)
+            {
+                // The Prussians fought in open order with the needle gun (independent fire); the Austrians by volley.
+                Drill->SetLoadingMethod(bNeedleGun ? EStrategyLoadingMethod::BreechLoader : EStrategyLoadingMethod::MuzzleLoader);
+                Drill->SetResearchLevel(EStrategyFireDrillResearchLevel::AdvancedFireDrill);
+                Drill->DrillTraining = 70.0f;
+                Drill->SetDrillMode(bNeedleGun ? EStrategyFireDrillMode::Independent : EStrategyFireDrillMode::Volley);
             }
             if (Company->InfantryVisualComponent)
             {
@@ -435,11 +632,17 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             CampaignUnitOf.Add(Company, FString());
         }
     }
-    // The camera over the Danish line (placed on the first tick, after the QA bootstrap has placed its own).
-    FieldCameraTarget = FVector(DanishX - 6000.0f, Origin.Y, CampaignField->GroundZ(FVector(DanishX, Origin.Y, 0.0f)));
+    // The camera behind the Danish line, looking towards the enemy (placed on the first tick, after the QA
+    // bootstrap has placed its own).
+    FieldCameraTarget = Danish(-6000.0f, 0.0f);
+    FieldCameraTarget.Z = CampaignField->GroundZ(FieldCameraTarget);
+    FieldCameraYaw = DanishYaw;
     bFieldCameraPlaced = false;
-    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FIELD: battle %d at %s: %d Danish units (%d battalions, %d cavalry, %d batteries), %d enemy companies (%s, %.0f men), figures 1:%d"),
-        BattleId, *CampaignField->Place, Units.Num(), Battalions.Num(), Horse.Num(), Guns.Num(), EnemyCompanies, *EnemyNation, EnemyMen, Lod);
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FIELD: battle %d at %s: %d Danish units (%d battalions, %d cavalry, %d batteries), %d enemy companies (%s, %.0f men%s), figures 1:%d"),
+        BattleId, *CampaignField->Place, Units.Num(), Battalions.Num(), Horse.Num(), Guns.Num(), EnemyCompanies, *EnemyNation, EnemyMen, bNeedleGun ? TEXT(", needle gun") : TEXT(""), Lod);
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FIELD: the enemy from %.0f deg; the Danish line %.0f m out, the enemy %.0f m out (open %.0f%% / %.0f%%); rules reload x%.2f, losses x%.2f, policy %d"),
+        BearingDeg, DanishOut / 100.0f, EnemyOut / 100.0f, OpenShare(DanishLine, ToEnemy, DanishHalf) * 100.0f, OpenShare(EnemyLine, -ToEnemy, EnemyHalf) * 100.0f,
+        ReloadRule, LossRule, int32(DanishPolicy));
     return true;
 }
 
@@ -531,7 +734,7 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
         {
             if (AStrategyCameraPawn* Camera = Cast<AStrategyCameraPawn>(PC->GetPawn()))
             {
-                Camera->SetActorRotation(FRotator::ZeroRotator);
+                Camera->SetActorRotation(FRotator(0.0f, FieldCameraYaw, 0.0f));
                 Camera->FocusOnWorldLocation(FieldCameraTarget);
                 if (Camera->SpringArm)
                 {

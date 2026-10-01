@@ -145,6 +145,7 @@ struct FCampaign1851RegimentSave
 	/** Unit qualities (v7). */
 	UPROPERTY() float Experience = 0.f;
 	UPROPERTY() TArray<float> Skills;
+	UPROPERTY() TArray<float> FireDrills;
 	UPROPERTY() uint8 Program = 1;
 	UPROPERTY() float Cohesion = 0.f;
 	/** v15: raised during the campaign, with its definition. */

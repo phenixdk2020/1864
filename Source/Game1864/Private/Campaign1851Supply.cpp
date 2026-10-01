@@ -551,6 +551,13 @@ void ACampaign1851Map::ExportUnits() const
 		Bf->SetNumberField(TEXT("cohesion"), B.Cohesion);
 		Bf->SetNumberField(TEXT("experience"), B.Experience);
 		O->SetObjectField(TEXT("battleFactors"), Bf);
+		// The fire methods trained (0-100; the battle allows a method from 60).
+		TSharedRef<FJsonObject> Drills = MakeShared<FJsonObject>();
+		Drills->SetNumberField(TEXT("twoRank"), FMath::RoundToInt(R.FireDrills[0]));
+		Drills->SetNumberField(TEXT("byRank"), FMath::RoundToInt(R.FireDrills[1]));
+		Drills->SetNumberField(TEXT("volley"), FMath::RoundToInt(R.FireDrills[2]));
+		Drills->SetNumberField(TEXT("independent"), FMath::RoundToInt(R.FireDrills[3]));
+		O->SetObjectField(TEXT("fireDrills"), Drills);
 		O->SetObjectField(TEXT("battle"), BattleOrganisationJson(i));
 		List.Add(MakeShared<FJsonValueObject>(O));
 	}

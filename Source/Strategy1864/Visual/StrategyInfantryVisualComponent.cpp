@@ -23,6 +23,7 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "StrategyCrowdModel.h"
+#include "../Combat/StrategyFireDrillComponent.h"
 
 UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
 {
@@ -334,12 +335,22 @@ void UStrategyInfantryVisualComponent::HandleVolleyVisualEvent(
     TArray<int32> Order, Others;
     const AStrategyUnit* Target = OwnerCompany->CombatComponent ? OwnerCompany->CombatComponent->LastVolleyTarget.Get() : nullptr;
     const UStrategyFireControlComponent* Fire = OwnerCompany->FireControlComponent;
+    // The fire drill: only the rank(s) whose turn it is (fire by rank: the one rank; front rank: the first;
+    // two-rank: the first two; volley and independent fire: everyone).
+    const UStrategyFireDrillComponent* Drill = OwnerCompany->FireDrillComponent;
     for (int32 i = 0; i < Count; ++i)
     {
+        if (Drill && SoldierSlots.IsValidIndex(i) && !Drill->IsFormationSlotEligibleToFire(SoldierSlots[i]))
+        {
+            continue;
+        }
         const bool bBears = !Target || !Fire || !SoldierComponents[i] ||
             Fire->CanPointBearOn(SoldierComponents[i]->GetComponentLocation(), OwnerCompany->GetActorForwardVector(), Target, Fire->GetActiveRangeCm());
         (bBears ? Order : Others).Add(i);
     }
+    // How the shots spread: a volley goes off together, fire by rank in a ripple, independent fire man by man.
+    const EStrategyFireDrillMode Mode = Drill ? Drill->DrillMode : EStrategyFireDrillMode::FrontRank;
+    const float Spread = Mode == EStrategyFireDrillMode::Volley ? 0.2f : Mode == EStrategyFireDrillMode::Independent ? 2.5f : 0.6f;
     for (int32 i = Order.Num() - 1; i > 0; --i) { Order.Swap(i, FMath::RandRange(0, i)); }
     for (int32 k = 0; k < Firing && k < Order.Num(); ++k)
     {
@@ -347,7 +358,7 @@ void UStrategyInfantryVisualComponent::HandleVolleyVisualEvent(
         // Those standing loaded (company animation, ready or aiming) fire; the loading do not.
         if (SoldierFirePhase[i] == 0 || SoldierFirePhase[i] == 5 || SoldierFirePhase[i] == 6)
         {
-            SoldierFireAt[i] = Now + FMath::FRandRange(0.0f, 0.6f);
+            SoldierFireAt[i] = Now + FMath::FRandRange(0.0f, Spread);
         }
     }
 }
@@ -495,9 +506,12 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
                 {
                     if (bLine && Load)
                     {
-                        // Load: down on one knee with powder, ball and ramrod (looped while the company reloads).
+                        // Load: down on one knee with powder, ball and ramrod, for the musket's own reload (by rank,
+                        // the next rank fires meanwhile).
                         PlayOnSoldier(Soldier, Load, true, false);
                         Phase = PhaseLoad;
+                        const float MusketReload = OwnerCompany && OwnerCompany->CombatComponent ? OwnerCompany->CombatComponent->ReloadSeconds : 18.0f;
+                        SoldierBusyUntil[i] = Now + MusketReload * FMath::FRandRange(0.9f, 1.1f);
                     }
                     else
                     {
@@ -508,8 +522,8 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
                 }
                 break;
             case PhaseLoad:
-                // Up again when the loading is almost done.
-                if (ReloadLeft <= RiseLength + 0.2f)
+                // Up again when his loading is almost done (and the company is not still reloading as one).
+                if (Now >= SoldierBusyUntil[i] - RiseLength - 0.2f && ReloadLeft <= RiseLength + 0.2f)
                 {
                     if (Rise)
                     {
@@ -615,6 +629,7 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count)
         }
         SoldierComponents.RemoveAt(i);
         if (SoldierClips.IsValidIndex(i)) { SoldierClips.RemoveAt(i); }
+        if (SoldierSlots.IsValidIndex(i)) { SoldierSlots.RemoveAt(i); }
         if (WeaponComponents.IsValidIndex(i))
         {
             WeaponComponents.RemoveAt(i);   // the rifle stays in the fallen man's hand
@@ -894,6 +909,11 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
 
         Soldier->SetRelativeRotation(
             FRotator(0.0f, Slot.FacingYaw + SoldierMeshYawOffset, 0.0f));
+        if (SoldierSlots.Num() != RenderedCount)
+        {
+            SoldierSlots.SetNum(RenderedCount);
+        }
+        SoldierSlots[VisualIndex] = Slot.SlotIndex >= 0 ? Slot.SlotIndex : FullIndex;
     }
     bCrowdDirty = true;
 }
