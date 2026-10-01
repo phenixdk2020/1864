@@ -1,5 +1,8 @@
 #include "StrategyOOBTestScenario.h"
 
+#include "Misc/CommandLine.h"
+#include "Misc/PackageName.h"
+
 #include "../Command/StrategyCommandComponent.h"
 #include "../Units/StrategyCompanyUnit.h"
 #include "../Units/StrategyHQUnit.h"
@@ -135,6 +138,15 @@ void AStrategyOOBTestScenario::BeginPlay()
             ? ECollisionEnabled::QueryAndPhysics
             : ECollisionEnabled::NoCollision);
     }
+
+    // The infantry duel (Livgarden against Swedish infantry, both in 3D): on a map named *Duel* or with
+    // -Strategy1864Duel on the command line, whatever the map's saved setting.
+    const FString MapName = FPackageName::GetShortName(GetWorld()->GetOutermost()->GetName());
+    if (MapName.Contains(TEXT("Duel")) || FParse::Param(FCommandLine::Get(), TEXT("Strategy1864Duel")))
+    {
+        bLivgardenVsSwedishTest = true;
+    }
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-QA: map %s, test %s"), *MapName, bLivgardenVsSwedishTest ? TEXT("Livgarden vs Swedish duel") : TEXT("full OOB"));
 
     if (bBuildOnBeginPlay)
     {

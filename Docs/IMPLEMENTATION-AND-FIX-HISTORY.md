@@ -794,6 +794,16 @@ Slaget blev porteret fra Unity til Unreal Engine 5.8 som modulet `Strategy1864`.
 
 **Slagmarken i 3D:** knappen GÅ IND PÅ SLAGMARKEN viser den genererede slagmark som 3D-model ved siden af kampagnekortet, endnu uden enheder.
 
+### Testbanen med duellen Livgarden mod svensk infanteri (1. oktober 2026)
+- **Ny testbane:** `Content/Maps/Strategy1864_Duel.umap`, en kopi af QA-kortet.
+  - Alle kort med "Duel" i navnet starter duellen. Det gør kommandolinjen `-Strategy1864Duel` også.
+  - Duellen er to kompagnier i 3D: Livgarden (`SK_DK_Livgarden_1864`) og svensk infanteri (`SK_SE_Infantry_1864`). Den fulde kamporden er slået fra.
+  - Rettelsen ligger i `AStrategyOOBTestScenario::BeginPlay` og bruger `bLivgardenVsSwedishTest`.
+  - Grunden til rettelsen: QA-kortets gemte indstilling slog ikke igennem, og den fulde kamporden startede i stedet.
+- **Loggen** viser nu kort og valgt test: `PROJECT1864-QA: map …, test …`.
+- **Rettet:** spejlingen bevarede kildefilernes gamle tidsstempler. Derfor genbrugte byggeværktøjet gamle objektfiler, og arbejdsversionens byg var delvis den gamle kode (link-fejl på `GetFormationLocalBounds`). Alle filer i `Source/Strategy1864` blev markeret som ændrede og bygget forfra, og `Sync-Battle.ps1` sætter nu tidsstemplet ved kopiering.
+- **Verificeret:** `Strategy1864_Duel` starter med "PROJECT1864-DUEL: Livgarden and Swedish infantry, 2 units", og begge kompagnier vises som 3D-soldater.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

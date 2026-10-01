@@ -37,6 +37,9 @@ if ($WorkingTree) {
 robocopy $ModuleSource $ModuleTarget /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "robocopy fejlede for kildekoden ($LASTEXITCODE)" }
 if (-not $WorkingTree) { Remove-Item -Recurse -Force $Temp }
+# The copies get the time of copying: robocopy keeps the source times, and an older time makes the build
+# reuse stale object files.
+Get-ChildItem $ModuleTarget -Recurse -File | ForEach-Object { $_.LastWriteTime = Get-Date }
 
 # ---- indholdet: /Game/Units (spejlet) og slagkortene Strategy1864_* (kun kopieret, kampagnens kort røres ikke)
 robocopy (Join-Path $SrcUnreal "Content\Units") (Join-Path $Target "Content\Units") /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
