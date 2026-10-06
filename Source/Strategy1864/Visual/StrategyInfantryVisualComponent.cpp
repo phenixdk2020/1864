@@ -208,6 +208,7 @@ void UStrategyInfantryVisualComponent::TickComponent(
         OwnerCompany->QAPlaceholderMesh->SetVisibility(false);
     }
     ProcessPendingKills();
+    MarchDust(GetWorld()->GetTimeSeconds());
     RefreshAnimation(false);
     UpdatePersonalActions();
     UpdateCrowdMode();
@@ -627,6 +628,32 @@ void UStrategyInfantryVisualComponent::SpawnMuzzleSmoke(const USkeletalMeshCompo
     {
         Puff->Drift = Forward * 60.0f + FVector(FMath::FRandRange(-15.0f, 15.0f), FMath::FRandRange(-15.0f, 15.0f), 18.0f);
     }
+}
+
+void UStrategyInfantryVisualComponent::MarchDust(float Now)
+{
+    if (Now < NextMarchDust || !OwnerCompany || !OwnerCompany->HumanAnimationStateComponent)
+    {
+        return;
+    }
+    const EStrategyHumanAnimationAction Action = OwnerCompany->HumanAnimationStateComponent->CurrentAction;
+    if (Action != EStrategyHumanAnimationAction::Walk && Action != EStrategyHumanAnimationAction::Run)
+    {
+        return;
+    }
+    NextMarchDust = Now + FMath::FRandRange(0.6f, 1.2f);
+    // Only near the camera (a sight for the commander, nothing for the far field).
+    if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+    {
+        if (PC->PlayerCameraManager && FVector::Dist(PC->PlayerCameraManager->GetCameraLocation(), OwnerCompany->GetActorLocation()) > 40000.0f)
+        {
+            return;
+        }
+    }
+    const FVector Fwd = OwnerCompany->GetActorForwardVector().GetSafeNormal2D();
+    const FVector Right(-Fwd.Y, Fwd.X, 0.0f);
+    const FVector At = OwnerCompany->GetActorLocation() - Fwd * 500.0f + Right * FMath::FRandRange(-1200.0f, 1200.0f);
+    AStrategyBattleBlast::Spawn(GetWorld(), EStrategyBlastKind::HoofDust, At + FVector(0.0f, 0.0f, 20.0f), Fwd, 3.2f);
 }
 
 void UStrategyInfantryVisualComponent::QueueKills(int32 Count)

@@ -119,6 +119,8 @@ private:
     void MarkNoGrassDisc(const FVector2D& Centre, double RadiusM);
     /** 0..1: how much grass grows at a field point (from the ground colour, 0 on the marked ways). */
     float GrassAt(double XM, double YM) const;
+    /** 0..1: ripe grain (the ochre of the ground picture: red over green, not the brown of ploughed land). */
+    float CropAt(double XM, double YM) const;
 
     /** The battle's materials and foliage meshes (null when not imported). */
     UMaterialInterface* GroundMaterial() const;

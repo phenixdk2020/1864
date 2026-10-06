@@ -1185,6 +1185,15 @@ Kun ladte soldater kan blive valgt til næste salve.
 - **Billeder:** `Docs/BILLEDER-TIL-SPILLET.md` har lister med filnavne, størrelser og regler for alle billeder (forfra, ens stil). `Tools/Campaign/Import-Billeder.bat` importerer dem. Portrætterne vælger det næste billede, der findes, hvis puljen er under tolv.
 - **Test:** `-CampaignUiShots=sek:cmd;cmd,...` åbner vinduer og kort og gemmer skærmbilleder (`-CampaignUiShotsQuit` lukker bagefter).
 
+
+### 2026-10-06 — Slagmarken: hvede og marchstøv
+- **Moden hvede** på de okkergule marker (`CropAt` i `StrategyCampaignBattlefield`): gule marker (rød en smule over grøn, lidt blå) får stående hvede i stedet for grønne græstotter.
+  - Hvedetotterne er krydskort på 0,7–0,8 m, to pr. punkt, og de svajer i vinden.
+  - Kortet `T_Card_Wheat` laves af `Tools/Battle/make_wheat_card.py`, meshene (`SM_Wheat_A/B`) af `make_battle_meshes.py`, og `Content/Python/import_wheat.py` importerer kun hvedens egne aktiver.
+  - Græstotterne er væk fra markerne (`GrassAt` tæller okker som jord).
+- **Marchstøv:** en marcherende kompagnikolonne rejser støv bag sig, kun nær kameraet.
+- **Advarsel:** `import_battle_graphics.py` genopbygger hele udseendet og gav en anden jordtekstur end den, der ligger i Content. Kør den ikke igen uden at sammenligne. Hvede-importen er skilt ud for netop det.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

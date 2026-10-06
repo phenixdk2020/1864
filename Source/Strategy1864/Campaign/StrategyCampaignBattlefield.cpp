@@ -434,10 +434,34 @@ float AStrategyCampaignBattlefield::GrassAt(double XM, double YM) const
     }
     const int32 I = FMath::Clamp(FMath::RoundToInt(XM / SizeM * ColourN), 0, ColourN), J = FMath::Clamp(FMath::RoundToInt(YM / SizeM * ColourN), 0, ColourN);
     const FColor C = GroundColours[J * (ColourN + 1) + I];
-    // Green over blue (not water), and not brown (not dirt, not the town's ground).
+    // Green over blue (not water), and not brown (not dirt, not the town's ground), and not the ochre of a grain field.
     const float Green = FMath::Clamp((float(C.G) - float(C.B)) / 60.0f, 0.0f, 1.0f);
-    const float Dirt = FMath::Clamp((float(C.R) - float(C.G)) / 25.0f, 0.0f, 1.0f);
+    const float Dirt = FMath::Clamp((float(C.R) - float(C.G) + 4.0f) / 16.0f, 0.0f, 1.0f);
     return Green * (1.0f - Dirt);
+}
+
+float AStrategyCampaignBattlefield::CropAt(double XM, double YM) const
+{
+    const double SizeM = SizeCm / 100.0;
+    if (XM < 0.0 || YM < 0.0 || XM >= SizeM || YM >= SizeM || ColourN == 0 || GroundColours.Num() != (ColourN + 1) * (ColourN + 1))
+    {
+        return 0.0f;
+    }
+    if (NoGrassN > 0)
+    {
+        const int32 I = FMath::Clamp(int32(XM / SizeM * NoGrassN), 0, NoGrassN - 1), J = FMath::Clamp(int32(YM / SizeM * NoGrassN), 0, NoGrassN - 1);
+        if (NoGrass[J * NoGrassN + I])
+        {
+            return 0.0f;
+        }
+    }
+    const int32 I = FMath::Clamp(FMath::RoundToInt(XM / SizeM * ColourN), 0, ColourN), J = FMath::Clamp(FMath::RoundToInt(YM / SizeM * ColourN), 0, ColourN);
+    const FColor C = GroundColours[J * (ColourN + 1) + I];
+    // A ripe grain field is yellow: red a little over green and little blue (the greyer browns are ploughed land).
+    const float RG = float(C.R) - float(C.G);
+    const float BlueToRed = float(C.B) / FMath::Max(float(C.R), 1.0f);
+    return FMath::Clamp((RG - 4.0f) / 6.0f, 0.0f, 1.0f) * (1.0f - FMath::Clamp((RG - 26.0f) / 6.0f, 0.0f, 1.0f))
+        * FMath::Clamp((0.60f - BlueToRed) / 0.06f, 0.0f, 1.0f) * FMath::Clamp((float(C.R) - 120.0f) / 30.0f, 0.0f, 1.0f);
 }
 
 UInstancedStaticMeshComponent* AStrategyCampaignBattlefield::AddInstanced(UStaticMesh* Mesh, const TArray<FTransform>& Instances, bool bShadows, float CullCm, const TCHAR* Name)
@@ -552,7 +576,8 @@ void AStrategyCampaignBattlefield::PlaceFence(TArray<FTransform>& Out, const TAr
 void AStrategyCampaignBattlefield::SetupGrass()
 {
     GrassMeshes.Reset();
-    for (const TCHAR* Name : { TEXT("SM_Grass_Clump_A"), TEXT("SM_Grass_Clump_C"), TEXT("SM_Grass_Clump_B") })
+    // Kinds 0-2: grass; 3-4: ripe wheat (the ochre fields; only if both are there).
+    for (const TCHAR* Name : { TEXT("SM_Grass_Clump_A"), TEXT("SM_Grass_Clump_C"), TEXT("SM_Grass_Clump_B"), TEXT("SM_Wheat_A"), TEXT("SM_Wheat_B") })
     {
         if (UStaticMesh* Mesh = BattleMesh(Name))
         {
@@ -585,13 +610,27 @@ void AStrategyCampaignBattlefield::BuildGrassTile(const FIntPoint& Tile, TArray<
         {
             continue;
         }
-        const float Weight = GrassAt(X, Y);
         const float Roll = FieldHash01(Seed, k * 4u + 2u);
+        const float Pick = FieldHash01(Seed, k * 4u + 3u);
+        // Ripe grain: a standing field of wheat.
+        const float Crop = Kinds >= 5 ? CropAt(X, Y) : 0.0f;
+        if (Crop > 0.0f)
+        {
+            if (Roll < Crop)
+            {
+                const float H = 0.85f + 0.3f * FieldHash01(Seed + 29u, k);
+                Instances[Pick < 0.55f ? 3 : 4].Emplace(FRotator(0.0f, 360.0f * FieldHash01(Seed + 31u, k), 0.0f), FieldToWorld(X, Y, -2.0) - Actor, FVector(H, H, H * (0.9f + 0.2f * Pick)));
+                // A second clump close by: the field is thick.
+                const double X2 = X + (FieldHash01(Seed + 37u, k) - 0.5) * 0.8, Y2 = Y + (FieldHash01(Seed + 41u, k) - 0.5) * 0.8;
+                Instances[Pick < 0.5f ? 4 : 3].Emplace(FRotator(0.0f, 360.0f * FieldHash01(Seed + 43u, k), 0.0f), FieldToWorld(X2, Y2, -2.0) - Actor, FVector(H * 0.95f, H * 0.95f, H * (0.85f + 0.25f * (1.0f - Pick))));
+            }
+            continue;
+        }
+        const float Weight = GrassAt(X, Y);
         if (Roll >= Weight)
         {
             continue;
         }
-        const float Pick = FieldHash01(Seed, k * 4u + 3u);
         const int32 Kind = FMath::Min(Kinds - 1, Pick < 0.55f ? 0 : Pick < 0.88f ? 1 : 2);
         const float S = 0.5f + 0.45f * FieldHash01(Seed + 17u, k);
         Instances[Kind].Emplace(FRotator(0.0f, 360.0f * Roll / FMath::Max(Weight, 0.01f), 0.0f), FieldToWorld(X, Y, -2.0) - Actor, FVector(S, S, S * (0.8f + 0.4f * Pick)));

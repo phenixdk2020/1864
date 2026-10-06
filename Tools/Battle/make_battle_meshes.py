@@ -234,6 +234,27 @@ def fence(name, seed, length=3.0):
     b.export(name)
 
 
+def wheat(name, seed, cards=4, height=1.0, width=1.0):
+    """A clump of standing wheat: crossed cards a metre high, the tops leaning over a little (wind weight 1 at the ears)."""
+    random.seed(seed)
+    b = Builder(['Wheat'])
+    for k in range(cards):
+        a = math.pi * k / cards + random.uniform(-0.15, 0.15)
+        d = Vector((math.cos(a), math.sin(a), 0))
+        off = Vector((random.uniform(-0.1, 0.1), random.uniform(-0.1, 0.1), 0))
+        lean = Vector((random.uniform(-0.1, 0.1), random.uniform(-0.1, 0.1), 0))
+        h = height * random.uniform(0.9, 1.08)
+        p0, p1, p2 = off, off + Vector((0, 0, h * 0.5)) + lean * 0.2, off + Vector((0, 0, h)) + lean
+        w = width * 0.5
+        n = d.cross(Vector((0, 0, 1)))
+        for (q0, q1, v0, v1) in ((p0, p1, 0.0, 0.5), (p1, p2, 0.5, 1.0)):
+            c = [q0 - d * w, q0 + d * w, q1 + d * w, q1 - d * w]
+            b.quad(c, [(0, v0), (1, v0), (1, v1), (0, v1)], 'Wheat',
+                   [(v0, 0.5 + 0.5 * v0, 0, 1)] * 2 + [(v1, 0.5 + 0.5 * v1, 0, 1)] * 2,
+                   [(n + Vector((0, 0, 1.4))).normalized()] * 4)
+    b.export(name)
+
+
 grass('SM_Grass_Clump_A', 0.45, 0.55, 3, 1)
 grass('SM_Grass_Clump_B', 0.75, 0.6, 3, 2)
 grass('SM_Grass_Clump_C', 0.28, 0.5, 2, 3)
@@ -245,3 +266,5 @@ broadleaf('SM_Broadleaf_A', 31, 13.0)
 broadleaf('SM_Oak_A', 32, 11.0, 140)
 bush('SM_Bush_A', 41)
 fence('SM_Fence_Rail', 51)
+wheat('SM_Wheat_A', 61, 4, 1.0, 0.8)
+wheat('SM_Wheat_B', 62, 5, 0.92, 0.7)

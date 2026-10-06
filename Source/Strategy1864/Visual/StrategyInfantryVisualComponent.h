@@ -225,6 +225,9 @@ private:
     void KillSoldiers(int32 Count, const FVector* Near = nullptr, const FVector* ConeOrigin = nullptr);
     /** Men lost to a shot still in the air fall when it strikes, next to the strike (the artillery's registry). */
     void QueueKills(int32 Count);
+    /** A marching company raises dust behind it (a few puffs along its rear rank). */
+    void MarchDust(float Now);
+    float NextMarchDust = 0.0f;
     void ProcessPendingKills();
     struct FPendingKill { int32 Count = 0; FVector Location = FVector::ZeroVector; float Time = 0.0f; bool bCone = false; FVector Origin = FVector::ZeroVector; };
     TArray<FPendingKill> PendingKills;
