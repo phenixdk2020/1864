@@ -1,0 +1,41 @@
+PROJECT 1864 - Unity Battle Prototype
+Prototype version: v00.00.09f30f
+Build status: TEST
+Build name: IMPLEMENTATION + FIX HISTORY CONSOLIDATION
+Visible build marker: PROJECT 1864 | v00.00.09f30f TEST
+Unity editor baseline: 6000.6.0f1 (Unity 6.6)
+Repository layout: Unity project root = repository root
+Gameplay baseline: v00.00.09f30e
+Canonical behaviour reference: docs/UNIT-AND-OFFICER-BEHAVIOUR-RULES.md
+Full implementation/fix history: docs/IMPLEMENTATION-AND-FIX-HISTORY.md
+Historical snapshot through F29R: docs/archive/VERSION-through-v00.00.09f29r.txt
+
+v00.00.09f30f - Implementation + Fix History Consolidation
+- Backup before F30F: backup/channel-test-v00.00.09f30e-pre-09f30f-history-consolidation at F30E HEAD 83409c58a761b01854f36c5acbcfe41a453491cb.
+- Adds docs/IMPLEMENTATION-AND-FIX-HISTORY.md as the consolidated chronological record from the project foundation through F30E.
+- The history separately identifies implemented features, hardening and known bug/hotfix corrections.
+- Explicitly records the complete F30E implementation: 120/120 Gardehusar, 140/140 Dragon, Dragon 1:1 dismount, historical visual differentiation, HQ mounted polish and 1:1 footprint hardening.
+- Consolidates fixes including compile errors, route/authority conflicts, HUD regressions, Square renderer mismatch, charge input/formation/fire, contact/pathfinding, selection persistence, Square smoke/footprint/cones, defense facing, friendly fire lanes, F30 runtime NullReferences, command-tree direction, OOB overlap/scroll/drag-drop and F30E ghost-rider/collider hardening.
+- No tactical gameplay rules are changed from F30E.
+- Designmanual is updated in the follow-up F30F documentation commit.
+
+Primary v00.00.09f30f QA
+1. Unity must compile with no red errors.
+2. Visible marker reads PROJECT 1864 | v00.00.09f30f TEST.
+3. Runtime cavalry/AI/OOB behavior must remain identical to F30E.
+4. docs/IMPLEMENTATION-AND-FIX-HISTORY.md must cover the documented lineage from foundation through F30E.
+5. Designmanual baseline must reference F30F history after the follow-up documentation commit.
+
+CURRENT IMPLEMENTED BASELINE — inherited from F30E
+- 1:1 cavalry tactical scale: Gardehusar 120/120; Dragon 140/140.
+- Dragon 1:1 SID AF/STIG OP with horse-holder position.
+- Distinct Gardehusar/Dragon visual identity and improved cavalry/HQ mounts.
+- OOB fixed columns, scrollbar and drag/drop attachments.
+- Dynamic CurrentCommandParent: Division / Brigade / Regiment / Major A / Major B.
+- Cavalry Officer AI seeks flank/rear and respects direct manual override.
+- Physical Division + Brigade + Regiment + Battalion + Company hierarchy.
+- Infantry Line/Column/Square, fire policies, charge/melee, under-fire and mission authority.
+- Semantic zoom/NATO, tactical map, crop concealment and navigation hardening.
+
+FULL CHANGE/FIX LINEAGE
+See docs/IMPLEMENTATION-AND-FIX-HISTORY.md. The full document is intentionally separated from this active VERSION header to keep the build status readable while preserving the complete history.

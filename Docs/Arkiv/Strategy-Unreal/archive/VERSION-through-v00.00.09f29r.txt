@@ -1,0 +1,378 @@
+PROJECT 1864 - Unity Battle Prototype
+Prototype version: v00.00.09f29r
+Build status: TEST
+Build name: CROP FIELD CONCEALMENT + MAP POLISH
+Visible build marker: PROJECT 1864 | v00.00.09f29r TEST
+TEST versioning rule: every delivered TEST revision receives a visible suffix bump so screenshots and test feedback can always be tied to the exact revision
+Design manual baseline: v00.02.15 + tactical design supplements through 09f29r
+Canonical behaviour reference: docs/UNIT-AND-OFFICER-BEHAVIOUR-RULES.md
+Current tactical roadmap: docs/backlog/B-280-CHARGE-REGIMENT-HQ-HIERARCHY.md
+09f29r design supplement: docs/design-supplements/v00.00.09f29r-crop-field-concealment.md
+09f29q design supplement: docs/design-supplements/v00.00.09f29q-oob-hq-semantic-zoom.md
+09f29p design supplement: docs/design-supplements/v00.00.09f29p-navigation-sidestep-visual-polish.md
+09f29o design supplement: docs/design-supplements/v00.00.09f29o-contact-threat-visibility.md
+09f29n design supplement: docs/design-supplements/v00.00.09f29n-charge-melee-hq-spacing.md
+09f29m design supplement: docs/design-supplements/v00.00.09f29m-square-active-renderer-fix.md
+09f29l design supplement: docs/design-supplements/v00.00.09f29l-battlefield-hardening.md
+09f29k design supplement: docs/design-supplements/v00.00.09f29k-charge-targeting.md
+09f29j design supplement: docs/design-supplements/v00.00.09f29j-precontact-line-deployment.md
+09f29i design supplement: docs/design-supplements/v00.00.09f29i-tactical-visibility-layer.md
+09f29g design supplement: docs/design-supplements/v00.00.09f29g-contact-facing-unified-hud.md
+09f29f HUD fix: Assets/Scripts/PrototypeRegimentalHud09F29F.cs
+09f29e design supplement: docs/design-supplements/v00.00.09f29e-regimental-defense-attack-coordination.md
+09f29d design supplement: docs/design-supplements/v00.00.09f29d-semantic-zoom-nato-symbols.md
+09f29c design supplement: docs/design-supplements/v00.00.09f29c-unified-command-hud.md
+09f29b design supplement: docs/design-supplements/v00.00.09f29b-battlefield-attack-ai-hardening.md
+Unity editor baseline: 6000.6.0f1 (Unity 6.6)
+Repository layout: Unity project root = repository root
+
+v00.00.09f29r - Crop field concealment + map polish
+- Updates the canonical Markdown design manual first to designbaseline v00.02.15 and makes F29R the current terrain/readability baseline.
+- Converts the six F29P field-boundary areas into shared crop-field gameplay geometry with center/width/depth/yaw/density data.
+- Adds yellow/golden field base surfaces plus low crop rows that partially hide infantry legs/lower silhouettes at close zoom.
+- Crop visuals have no colliders and do not become navigation blockers.
+- Dense crop scales movement to about x0.92 after the existing F7 movement-mode speed writer; F29R does not own route or destination.
+- Targets inside crop receive concealment rather than ballistic cover: roughly -2% hit chance at CLOSE, -5% around MEDIUM and -10% toward LONG, density-scaled.
+- Long-range target acquisition is shortened by the crop visibility factor; a ready volley is briefly delayed while the target remains beyond the concealed acquisition threshold.
+- A unit firing from crop is temporarily revealed for about 4.5 seconds by activity/black-powder smoke, reducing the concealment effect.
+- F14 close-range lethality supplement now uses the same F29R terrain multiplier and logs Terrain=x..., so the legacy 16-hit cap cannot erase concealment tuning.
+- Adds yellow crop-field overlays to the existing F29P tactical map using the same gameplay field data; M still governs map visibility.
+- F29Q OOB/HQ navigation, NATO semantic zoom, F29P Side Step/camera, F29O contact/cones, F29N Charge and F29M Square remain unchanged.
+- Full crop trampling/deformation, cavalry-specific crop handling and officer-stat-driven use of concealment remain future work.
+- Backup: backup/channel-test-v00.00.09f29q-pre-09f29r-crop-fields.
+
+Primary v00.00.09f29r QA
+1. Unity compiles without red errors and marker reads PROJECT 1864 | v00.00.09f29r TEST.
+2. Verify six yellow/golden crop fields are visible inside the prior field boundaries.
+3. Walk infantry through a dense field and verify movement is modestly slower without pathfinding detours.
+4. At close zoom verify crop rows hide only lower parts of soldiers rather than entire formations.
+5. Open the tactical map and verify the crop fields appear as yellow map areas; M must hide both map and field overlay.
+6. Compare fire against the same target on open ground versus inside crop at CLOSE/MED/LONG; concealment effect should grow with range.
+7. Check VOLLEY-CAL-09F14 logs for Terrain=x... when the target stands in a crop field.
+8. Fire from inside crop and verify CROP-FIELD-09F29R|Reveal=True appears and concealment is reduced for about 4.5 seconds.
+9. Verify crop never provides direct ballistic damage reduction once a hit has been resolved.
+10. Regression: OOB click/double-click camera navigation and semantic NATO zoom remain functional.
+11. Regression: Side Step does not rotate formation; Charge remains Line/HOLD FIRE and deep-contact melee; Square remains stable.
+
+v00.00.09f29q - OOB + HQ discoverability + semantic zoom polish
+- Updates the canonical Markdown design manual first to designbaseline v00.02.14 and makes F29Q the current tactical command/navigation baseline.
+- Adds a collapsible ORDER OF BATTLE panel with the real Danish command hierarchy: III Regiment/Oberstløjtnant -> II Major A/B -> I Companies 1-8.
+- O toggles the OOB; Major A/B groups can independently expand/collapse.
+- Single-clicking an OOB row selects that company/HQ and focuses the camera on it without issuing or altering tactical orders.
+- Double-clicking a company/HQ moves the camera to a close tactical position behind the selected entity; companies therefore open directly behind their current facing.
+- Selected OOB row is highlighted gold. Company rows show CurrentStrength plus compact state: HOLD, movement arrow, ILD, KAMP, SQUARE, CHARGE, MELEE or ROUT.
+- OOB selection uses the existing PlayerCommander/F27/F28 selection authority and does not change AI, doctrine, mission or command ownership.
+- Adds F29Q semantic-zoom polish on top of F29D: HQ discoverability begins around 55 m; MEDIUM around 95 m; full company NATO operational counters around 175 m; strategic 3D suppression around 315 m.
+- F29Q fills only the earlier transition gaps; the proven F29D NATO renderer remains authoritative in its existing ranges.
+- At 315 m and above F29Q suppresses company/HQ mesh presentation and the active F7 3D soldier renderer while leaving simulation, colliders, AI, orders and command links active. Returning below 315 m restores physical 3D.
+- Selected Major receives an extra gold HQ selection halo at semantic zoom so Major A/B remain easy to locate.
+- Early F29Q NATO counters are clickable navigation shortcuts and route through the same OOB selection/focus path.
+- Keeps F29P tactical map, camera navigation, formation-preserving Side Step and visual polish unchanged.
+- Backup: backup/channel-test-v00.00.09f29p-pre-09f29q-oob-semantic-zoom.
+
+Primary v00.00.09f29q QA
+1. Unity compiles without red errors and marker reads PROJECT 1864 | v00.00.09f29q TEST.
+2. Verify OOB appears upper-left below the build marker; O and the header +/- button collapse/restore it.
+3. Verify hierarchy reads III 1. Regiment/Oberstløjtnant -> II Major A/B -> I eight companies.
+4. Click every company row: correct company must become selected and camera must jump to it.
+5. Double-click a company row: camera must move behind the company and align with its facing.
+6. Click Major A, Major B and Oberstløjtnant rows: correct HQ selection and camera focus must follow.
+7. Selected row must be gold and company rows must update strength/state during movement/combat/Square/Charge/melee/rout.
+8. Zoom to roughly 55-95 m and verify HQ NATO identification appears earlier than the old F29D threshold.
+9. Zoom above roughly 175 m and verify all company NATO counters are available earlier than the old 235 m operational threshold.
+10. Zoom above roughly 315 m and verify physical companies/HQs give way to NATO symbols while the battle simulation continues.
+11. Zoom back below 315 m and verify physical F7 soldiers/HQ meshes return.
+12. Regression: F29P minimap/camera/Side Step, F29O contact/cones, F29N Charge and F29M Square remain functional.
+
+v00.00.09f29p - Tactical map + camera navigation + lateral manoeuvre + visual polish
+- Adds a compact tactical overview map above the command HUD with dynamic bounds around the active battle.
+- Map markers: Danish blue, Prussian red, selected unit yellow, Major HQ cyan, Oberstløjtnant HQ gold, camera direction white.
+- Tactical map also sketches the road and river so unit positions are easier to recognise spatially.
+- M toggles the tactical map.
+- F focuses the camera on the selected company/HQ while preserving tactical camera orientation/height.
+- Shift+F moves the camera behind the selected formation at close tactical height and aligns the camera with unit facing.
+- F1/F2 focus Major A/B; F3 focuses Oberstløjtnant; N reorients the camera north.
+- Map panel adds < / N / > rotation buttons plus FOCUS and BAG quick-navigation buttons.
+- Adds a short formation-preserving Side Step for friendly frontage overlap: about 12 m lateral displacement at 1.45 m/s while original facing is preserved.
+- Side Step does not rotate the line toward travel, does not convert to Column and pauses while higher-priority Charge/melee, Square, bridge, under-fire or local-contact states own the company.
+- Only one company in an overlapping pair moves; the clearest left/right side is selected and a move into the river corridor is rejected.
+- Adds presentation-only company captain figures, distinct Major/Oberstløjtnant staff groups and subtle field-boundary dressing with no colliders/navigation impact.
+- Existing F7 rank-and-file renderer and F4 national/regimental standards remain authoritative.
+- Expands B-280 officer-personality backlog with future TacticalOpportunity logic: a good captain should exploit an already engaged enemy only after evaluating flank/rear exposure, while a weak or over-aggressive captain may misjudge the same risk according to stats and decision noise.
+- Full stat-driven opportunistic mission override is documented but intentionally not activated in F29P; F29P first stabilises the physical Side Step/visibility foundation.
+- Backup: backup/channel-test-v00.00.09f29o-pre-09f29p-navigation-visuals.
+
+Primary v00.00.09f29p QA
+1. Unity compiles without red errors and marker reads PROJECT 1864 | v00.00.09f29p TEST.
+2. Press M and verify the tactical map toggles on/off.
+3. Verify Danish/Prussian/selected/Major/Oberstløjtnant markers plus road/river are readable on the map.
+4. Select a company and test F; camera focuses the company. Test Shift+F; camera moves behind the unit and aligns with facing.
+5. Test map < / N / > plus F1/F2/F3 quick camera navigation.
+6. Put two friendly companies closer than about 13 m. Only one should step roughly 12 m laterally and preserve its original facing.
+7. During Side Step the company must remain in its current formation and must not rotate 90 degrees toward travel.
+8. Verify Side Step does not interrupt Charge/melee, Square, bridge route, under-fire reaction or active local AttackContact.
+9. Verify captain/HQ staff graphics and field boundaries are visible but create no collision/pathfinding effects.
+10. Regression: F29O nearby enemy threat cones and flank contact turn-and-engage remain active.
+11. Regression: F29N Charge remains Line/HOLD FIRE with deep contact and hidden cones during charge/melee.
+12. Regression: F29M Square remains visually authoritative and strength-scaled.
+
+v00.00.09f29o - Enemy threat cones + flank-contact engagement
+- Adds nearby Prussian threat-cone preview whenever a Danish company is selected and the enemy is within 180 m.
+- Enemy threat cones use a distinct red palette and are visual-only; simulation and AI are unchanged by the preview.
+- Enemy cones are shown only while the hostile formation is actually fire-ready; Column, Line-reform, active Charge and charge-created melee remain cone-suppressed.
+- Hardens F29G attack-contact authority: an enemy entering the selected CLOSE/MED/LONG range is detected by distance even when it is outside the company’s current facing arc.
+- On local contact during AttackHere the company drops the parent march leg, stays/deploys Line, receives AttackTarget, stops at its selected firing range and turns toward the enemy instead of marching past it.
+- Local contact is sticky through an 18 m release buffer to prevent rapid combat/march oscillation.
+- Wide-map navigation now yields while local attack contact owns the company and may not keep writing an obsolete detour/Column state.
+- Trees and FencePosts are removed from the F29E hard-detour list in accordance with the canonical pass-through scenery rule; Farmhouse/Barn remain hard local blockers.
+- The supplied QA log showed repeated FencePost replanning for 2. Regiment, which is the navigation conflict this change removes.
+- Bridge-only river authority remains higher priority; local contact capture is skipped while an active bridge route owns the company.
+- Backup: backup/channel-test-v00.00.09f29n-pre-09f29o-contact-threat.
+
+Primary v00.00.09f29o QA
+1. Unity compiles without red errors and marker reads PROJECT 1864 | v00.00.09f29o TEST.
+2. Select a Danish company near the Prussian line; nearby enemy Close/Medium/Long cones must become visible without selecting the enemy.
+3. Move the selected company more than 180 m away and verify unrelated enemy cones disappear.
+4. An enemy in Column/reforming/Charge/melee must not display a normal musket cone.
+5. Give ANGRIB HER with MED selected and approach an enemy from a crossing/flank angle. As soon as the enemy is within MED, the company must stop the parent march, stay/deploy Line, turn and engage.
+6. Repeat with LONG and CLOSE to verify fire policy remains the contact threshold.
+7. Verify the console no longer repeatedly reports NAV-WIDE detours with Blocker=FencePost.
+8. Regression: bridge-only routing still owns active river crossings.
+9. Regression: F29N Charge remains Line/HOLD FIRE, closes to deep melee contact and hides cones during charge/melee.
+10. Regression: F29M Square, F29L defensive-arrival guard and F29N HQ spacing remain active.
+
+v00.00.09f29n - Charge melee + HQ spacing hardening
+- CHARGE is locked to Line for the complete assault; automatic march-column and bridge steering may alter route but may not reform the charging company into Column.
+- CHARGE is locked to HOLD FIRE throughout approach and physical melee; the previous fire policy is restored only when the charge ends.
+- Charge contact distance is reduced from about 7.2 m to about 2.2 m root-to-root so the two company footprints overlap deeply enough to read as bayonet combat.
+- Normal musket cones are hidden for the charging company and, after physical charge contact, for both melee participants.
+- Major HQ follow distance is reduced from 105 m to 80 m and refresh threshold from 55 m to 42 m.
+- Oberstløjtnant follow distance is reduced from 210 m to 160 m and refresh threshold from 90 m to 68 m.
+- Manual HQ positioning, safe-relocation checks and mission authority remain unchanged.
+- Backup: backup/channel-test-v00.00.09f29m-pre-09f29n-charge-melee-contact.
+
+Primary v00.00.09f29n QA
+1. Marker reads PROJECT 1864 | v00.00.09f29n TEST.
+2. Charge must not fire during approach or melee.
+3. Charging company must remain Line and never switch to Column.
+4. Fire cones disappear throughout charge/melee.
+5. Charge closes to near-overlap/deep footprint contact instead of stopping several metres apart.
+6. Previous fire policy returns after charge termination.
+7. Major/Oberstløjtnant command lines are visibly shorter at about 80/160 m target spacing.
+
+v00.00.09f29m - Square active-renderer hotfix
+- Fixes the F29L Square visual failure where tactical Square state activated but the visible soldiers remained in Line/Column.
+- Root cause: F29/F29L wrote Square positions into PrototypeBattleVisuals09F5, while the active visible renderer is PrototypeBattleVisuals09F7 and F7 explicitly disables F5 at runtime.
+- Adds PrototypeSquareRuntimeHotfix09F29M as the final Square visual writer against the active F7 states/LocalPositions collection.
+- Visible soldiers now interpolate from their current Line/Column positions into a hollow two-rank Square over the existing Square formation timer.
+- Square remains strength-scaled from CurrentStrength, so casualties reduce the visible Square footprint.
+- Hides SelectionFootprint09F5 while Square is active so the normal long yellow Line/Column rectangle disappears.
+- Reapplies the Square collider after PrototypeUnitFootprint09F5 has performed its normal LateUpdate footprint write.
+- Disables the obsolete F29L Square visual writer at runtime; the original F29 tactical Square state remains authoritative for formation time, HOLD FIRE while forming, fire effectiveness and anti-cavalry state.
+- Backup: backup/channel-test-v00.00.09f29l-pre-09f29m-square-fix.
+
+Primary v00.00.09f29m QA
+1. Unity compiles without red errors and marker reads PROJECT 1864 | v00.00.09f29m TEST.
+2. Select one Danish company in Line and press SQUARE.
+3. The normal long yellow Line/Column selection rectangle must disappear immediately.
+4. Visible soldiers must physically leave Line/Column and move toward all four sides of a hollow Square over several seconds.
+5. DANNER KARRÉ must change to KARRÉ KLAR when the existing Square timer completes.
+6. The visible soldiers must remain in Square after READY; the active F7 Line/Column renderer must not pull them back.
+7. Repeat after casualties and verify the Square is visibly smaller.
+8. Press LINJE and verify Square ends and the normal line selection footprint returns.
+9. Regression: F29L HQ follow, river continuity and defensive arrival hysteresis remain active.
+10. Regression: F29K right-click CHARGE and F29J pre-contact Column -> Line deployment remain active.
+
+v00.00.09f29l - Battlefield hardening
+- Major HQ follows active missions independently of Major AI ON/OFF and targets roughly 105 m behind its battalion centre.
+- Major follow point is refreshed after roughly 55 m of tactical movement so HQs do not lag far behind the fighting line.
+- Oberstløjtnant follows active player/higher-command missions independently of Regimental AI ON/OFF and targets roughly 210 m behind the midpoint of both Majors.
+- Regimental follow point is refreshed after roughly 90 m of tactical movement.
+- Explicit manual HQ moves are preserved instead of being immediately overwritten; a new mission returns the HQ to normal follow behaviour.
+- Withdrawal follow is placed on the safe rear side in the direction of withdrawal.
+- Replaces the visually unreliable F29G water presentation with a denser continuous F29L river ribbon sampled against the actual rendered Battlefield Ground mesh.
+- River width is 7.5 m, longitudinal sampling 1.25 m and water surface lift 0.24 m; older Stream renderers/F29G ribbon are hidden while navigation/colliders remain unchanged.
+- Adds authoritative final visual Square positioning: displayed men physically interpolate from Line/Column into a hollow two-rank square over the existing Square formation timer.
+- Square side length and collider scale with CurrentStrength, so casualties visibly produce a smaller square.
+- Adds defensive arrival hysteresis: latch at 1.35 m, release at 3.20 m; F29E micro-correction is suppressed while latched so defending companies stop shuttling around the blue destination footprint.
+- Under-fire reaction remains authoritative while a defensive slot is latched.
+- Backup: backup/channel-test-v00.00.09f29k-pre-09f29l-battlefield-hardening.
+
+Primary v00.00.09f29l QA
+1. Unity compiles without red errors and marker reads PROJECT 1864 | v00.00.09f29l TEST.
+2. Give Oberstløjtnant ANGRIB HER with AI OFF and verify both Majors and Oberstløjtnant continue to follow the advancing formation.
+3. Verify Major HQs remain approximately 105 m behind their battalions and Oberstløjtnant approximately 210 m behind the Major midpoint, subject to terrain safety.
+4. Manually move a HQ; the manual move must remain authoritative until a new mission is issued.
+5. Inspect the full river and bridge: no dry water gaps and water continues under the bridge.
+6. Order SQUARE and visually confirm displayed men move out of their current formation into a hollow two-rank square rather than merely changing state/outline.
+7. Repeat SQUARE after casualties and verify the square footprint is smaller.
+8. Give FORSVAR HER and verify a company settles in its blue slot without repeatedly walking out and back into the destination.
+9. Regression: F29K CHARGE remains green while armed, uses right-click target confirmation and holds fire during the charge.
+10. Regression: F29J Column -> Line deployment still occurs before hostile LONG range.
+
+v00.00.09f29k - Charge right-click targeting
+- Keeps the F25 charge/melee engine as the authoritative physical charge implementation.
+- Clicking CHARGE or pressing V now enters an explicit armed target-pick state.
+- The CHARGE button is visibly green while armed and a valid hovered enemy is labelled CHARGE MÅL.
+- Charge confirmation is RIGHT CLICK on a hostile company; LEFT CLICK no longer confirms charge.
+- The confirming right-click is consumed before PlayerCommander can reinterpret it as a normal move/attack order.
+- Right-clicking empty terrain while armed does not issue a move order and leaves charge armed.
+- ESC or clicking CHARGE/V again cancels the armed state.
+- The F25 engine still switches fire policy to HOLD FIRE for the entire charge approach and restores the previous fire policy when charge ends.
+- Backup: backup/channel-test-v00.00.09f29j-pre-09f29k-charge-targeting.
+
+Primary v00.00.09f29k QA
+1. Unity compiles without red errors and marker reads PROJECT 1864 | v00.00.09f29k TEST.
+2. Select one or more companies and click CHARGE; button must immediately appear green before a target is selected.
+3. Hover a valid Prussian company; CHARGE MÅL should appear.
+4. LEFT CLICK on an enemy must not start charge.
+5. RIGHT CLICK a valid enemy; all armed companies must charge that enemy and no normal move order may be created by the same click.
+6. During approach the charging companies must not fire; their previous HOLD/CLOSE/MED/LONG setting is restored after charge termination.
+7. RIGHT CLICK empty terrain while armed must not move the company.
+8. ESC and a second CHARGE/V activation must cancel target-pick.
+9. At contact F25 hands melee to PrototypeMeleeCombatManager as before.
+10. Regression: F29J pre-contact Line deployment, F29I tactical visibility and F29G unified HUD/contact behaviour remain operational.
+
+v00.00.09f29j - Pre-contact line deployment
+- AI/marching companies may use Column while safely outside hostile engagement range.
+- Before entering an enemy formation's LONG/max range they deploy to Line with a 10 m safety buffer.
+- Uses the ENEMY MaximumRange rather than the moving company's own range.
+- Higher-command movement authority remains intact: when F27 owns movement the approach policy is allowed to perform only the safety-critical Column -> Line formation change.
+- Adds 14 m hysteresis to prevent Line/Column oscillation around the deployment threshold.
+- Active SQUARE has higher tactical priority and is never collapsed by the approach policy.
+- Backup: backup/channel-test-v00.00.09f29i-pre-09f29j-deploy-before-long.
+
+Primary v00.00.09f29j QA
+1. An attacking company may march in Column while clearly outside hostile LONG range.
+2. It must begin Line deployment before crossing enemy MaximumRange.
+3. The same rule must work while a Major owns the march route and local OfficerAIController is disabled.
+4. It must not repeatedly oscillate between Line and Column near the threshold.
+5. SQUARE must remain untouched by this policy.
+
+v00.00.09f29i - Tactical visibility layer
+- Adds close-zoom fixed-size HQ labels and beacons for both Majors and the Oberstløjtnant.
+- Complements F29D semantic zoom instead of duplicating its NATO counters at >=72 m.
+- Adds current-order tags at HQs and matching objective tags for Major and Regimental orders.
+- Selected company receives a persistent high-contrast facing arrow.
+- Active fire contact is marked KAMP; formations reacting to hostile fire/recent hits are marked UNDER ILD.
+- TAB toggles the extended tactical overlay without changing selection, simulation, movement or AI authority.
+- Essential close-zoom HQ discoverability and selected-company facing remain available with the extended overlay OFF.
+- Backup: backup/channel-test-v00.00.09f29h-pre-09f29i-tactical-visibility.
+
+Primary v00.00.09f29i QA
+1. Unity compiles without red errors and marker reads PROJECT 1864 | v00.00.09f29i TEST.
+2. At close zoom, Major A, Major B and Oberstløjtnant are easy to locate through fixed-size HQ labels/beacons.
+3. At >=72 m, F29D remains the primary NATO HQ presentation without a duplicated F29I full HQ counter.
+4. Give FORSVAR/ANGRIB/RYK FREM/TILBAGETRÆK/SAML and verify current order plus objective text remains visible.
+5. Select a company and verify a clear facing arrow is shown.
+6. Exchange fire and verify KAMP / UNDER ILD appears near the affected formations.
+7. Press TAB and verify extended order/objective/combat information toggles without changing orders or selection.
+8. Verify the bottom command HUD remains unobstructed.
+
+v00.00.09f29h - Unified HUD compile hotfix
+- Fixes CS0104 in PrototypeUnifiedCommandHud09F29G.cs where `Object` was ambiguous between `System.Object` and `UnityEngine.Object`.
+- Adds explicit `using Object = UnityEngine.Object;` alias; all FindAnyObjectByType calls now resolve to UnityEngine.Object.
+- No tactical behaviour changes relative to F29G.
+- Visible build marker bumped to v00.00.09f29h TEST.
+- Backup: backup/channel-test-v00.00.09f29g-pre-09f29h-compile-fix.
+
+Primary v00.00.09f29h QA
+1. Unity must compile without CS0104 errors from PrototypeUnifiedCommandHud09F29G.cs.
+2. Visible marker must read PROJECT 1864 | v00.00.09f29h TEST.
+3. Regression: select Oberstløjtnant, Major and Company and verify the unified F29G HUD still appears for all three levels.
+4. Regression: test click/drag facing and company MED-range contact engagement from F29G.
+
+v00.00.09f29g - Contact combat + facing orders + unified HUD + river continuity
+- Adds full selection command-chain visibility: selected company -> owning Major -> Oberstløjtnant; selected Major -> own companies + Oberstløjtnant; selected Oberstløjtnant -> both Majors -> all companies.
+- Adds company contact override during parent AttackHere missions: a company drops the march leg and engages when an enemy enters its currently selected fire-policy range.
+- CLOSE/MED/LONG therefore become the actual contact trigger. HOLD does not auto-open fire.
+- Preserves the company fire-policy preference across higher AttackHere orders instead of silently forcing LONG.
+- Disables the F29E coordinated attack-slot writer so it cannot compete with F27 parent movement and local Captain contact authority.
+- Adds unified click/drag officer point orders: click sets objective; drag from the objective sets explicit facing; click without drag keeps automatic facing.
+- A new higher officer order cancels any active company-level fighting withdrawal under the affected battalion before applying the new order.
+- Adds one authoritative F29G HUD for Regiment, Battalion/Major and Company/Kaptajn using the approved F29F visual language.
+- F29C and F29F overlay components are disabled at runtime by F29G; old F27/F28 command components remain state engines behind the opaque input-consuming panel.
+- Company HUD retains fire policy, withdrawal bands, forced march, charge, stop and Line/Column/Square controls.
+- Adds a continuous river-water ribbon from map edge to map edge, including underneath the bridge; navigation rules are unchanged.
+- Backup: backup/channel-test-v00.00.09f29f-pre-09f29g-contact-ai-hud-chain.
+
+Primary v00.00.09f29g QA
+1. Unity compiles without red errors and marker reads PROJECT 1864 | v00.00.09f29g TEST.
+2. Select one company: its line to the Major and the Major line back to the Oberstløjtnant must both be visible.
+3. Select a Major: Major -> four companies and Major -> Oberstløjtnant must be visible.
+4. Select the Oberstløjtnant: the complete Regiment -> Majors -> Companies tree must be visible.
+5. Set a company to MED, give a higher AttackHere order and verify MED remains selected.
+6. When an enemy enters MED range during that march, the company must stop marching and engage immediately instead of continuing to its slot.
+7. Repeat with companies passing north/south of the enemy; each must recognise contact independently.
+8. On Major/Oberstløjtnant FORSVAR HER: click objective and drag toward the expected enemy direction; final company facing must follow the arrow.
+9. Issue TILBAGETRÆK then immediately FORSVAR HER; old company-level withdrawal state must not continue after the new order.
+10. Verify Regiment, Major and Company HUDs all use the same dark/olive F29G style and green-active/red-inactive state language.
+11. Verify river water is continuous with no visible gaps and remains present under the bridge.
+
+v00.00.09f29f - Regimental HUD visibility fix
+- Corrects the F29E regression where runtime QA still showed the legacy F28 Oberstløjtnant HUD instead of the promised unified HUD.
+- Moves the authoritative replacement Oberstløjtnant HUD into its own matching C# script/class file: PrototypeRegimentalHud09F29F.cs.
+- Builds IMGUI styles only inside OnGUI instead of from Awake.
+- Removes the hierarchy-installed gate from the core panel: if the Regimental HQ is selected, the HUD always draws; subordinate stats fill in when hierarchy data is available.
+- Draws at explicit high front priority (GUI.depth -100000) and uses an opaque full-width 90 px panel to cover the legacy F28 presentation.
+- Disables the experimental F29E HUD component if it instantiated, while retaining the F28 Regimental HQ component for command/input/state logic.
+- HUD sections remain ENHEDSINFO / AI, REGIMENTSORDRER and BATALJONER UNDER OBERSTLØJTNANT.
+- AI ON is green / AI OFF red; active DEF/BAL/OFF is green and inactive states are red.
+- Header deliberately includes F29F during QA so screenshots prove the replacement HUD is the one being rendered.
+- Backup: backup/channel-test-v00.00.09f29e-pre-09f29f-hud-fix.
+
+Primary v00.00.09f29f QA
+1. Unity compiles without red errors and marker reads PROJECT 1864 | v00.00.09f29f TEST.
+2. Select the Oberstløjtnant. Bottom header must explicitly read `1. REGIMENT | OBERSTLØJTNANT | REGIMENTSKOMMANDO | F29F`.
+3. Verify the old F28 single-row HUD is visually covered by the new 90 px panel.
+4. Verify ENHEDSINFO / AI, REGIMENTSORDRER and BATALJONER UNDER OBERSTLØJTNANT are visible.
+5. AI ON/OFF and DEF/BAL/OFF must use green active / red inactive state colours.
+6. Verify ANGRIB HER, FORSVAR HER, RYK FREM, TILBAGETRÆK, SAML and STOP/HOLD remain functional.
+7. Regression: F29E objective circle, full command-chain lines, company destination footprints, defensive frontage and coordinated attacks remain active.
+
+v00.00.09f29e - Regimental defense + objective visuals + coordinated attack
+- Adds regimental objective persistence, full command-chain visibility and company mission footprints at Oberstløjtnant selection.
+- Tightens final company mission arrival to approximately 0.85 m.
+- FORSVAR HER anchors battalions around the clicked centre instead of leaving the old wide central corridor.
+- FRONT/RESERVE and FRONT/FLANK keep the tactically forward battalion in the FRONT role.
+- Adds coordinated explicit AttackTarget deployment for multiple companies attacking the same enemy.
+- Adds wide-map navigation protection for the 5760 x 3840 m battlefield while retaining bridge-only river authority.
+- F29E attempted a new Oberstløjtnant HUD, but runtime QA showed that this overlay was not reliably visible; F29F supersedes that HUD implementation.
+- Backup before F29E: backup/channel-test-v00.00.09f29d-pre-09f29e-regimental-visual-defense.
+
+v00.00.09f29d - Semantic zoom + NATO tactical overlay
+- Runtime semantic zoom levels: CLOSE, MEDIUM, OPERATIONAL and STRATEGIC.
+- HQ-prioritized screen-space counters, NATO echelons I/II/III and strategic mesh suppression while simulation remains active.
+- Backup: backup/channel-test-v00.00.09f29c-pre-09f29d-semantic-zoom.
+
+v00.00.09f29c - Unified command HUD + company naming
+- Compact 90 px tactical HUD for Major/Battalion and Company/Kaptajn.
+- Major HUD: ENHEDSINFO / AI, BATALJONSORDRER and KOMPAGNIER UNDER MAJOR.
+- Company HUD: ENHEDSINFO, AI/DOKTRIN, SKYDNING, ORDRER/BEVÆGELSE and FORMATION.
+- Green active / red inactive state language.
+- Company controls include HOLD/CLOSE/MED/LONG, withdrawal, TVANG, CHARGE, STOP and LINJE/KOLONNE/SQUARE.
+- Danish visible company naming normalized to 1. KOMPAGNI through 8. KOMPAGNI.
+
+v00.00.09f29b - Battlefield scale + attack AI hardening
+- Tactical battlefield enlarged to 5760 x 3840 m.
+- Two Prussian company-scale QA formations.
+- Single physical movement owner principle, sticky explicit attack targets and attack-role hardening.
+- Retains F29A terrain-following hierarchy links and river-safe formation endpoints.
+
+v00.00.09f29 - Infantry square / cavalry-threat foundation
+- Manual/AI SQUARE state layered over Line/Column.
+- Formation time, reduced square fire effectiveness and mounted-threat API.
+
+Retained from v00.00.09f28
+- Physical Oberstløjtnant Regimental HQ with two Majors and eight company-scale infantry units.
+- Oberstløjtnant -> Major -> Kaptajn authority chain and Regimental mission allocation.
+
+Retained from v00.00.09f26-v00.00.09f25
+- Under-fire reaction preserves parent mission while local AI responds to hostile fire.
+- Infantry CHARGE/melee baseline and local Captain authority.
+
+Next milestone
+- Validate F29R crop visuals, movement friction, concealment, temporary reveal and tactical-map field overlay together with F29Q OOB/NATO navigation.
+- After terrain/readability stability, activate officer-stat-driven tactical opportunity selection so captains can exploit engaged enemies according to skill, initiative, experience and risk judgement, including whether crop concealment makes a lateral approach worthwhile.
+- If stable, finish remaining F29 cleanup and then proceed to F30 cavalry.
+- F30: first real Danish mounted cavalry prototype on shared cavalry core.
