@@ -195,6 +195,11 @@ public:
     /** The pioneers (research Pontonnerkorpset): may they lay a pontoon bridge, and order one by a staff (it is
      *  laid over the broad river nearest the staff, within 600 m, after five minutes). */
     bool CanLayPontoonBridges() const { return bCampaignBattle && bPioneerBridges; }
+    /** Testing: the enemy attacks (his staff orders the attack on the Danish line, his officers close) or defends
+     *  (holds where he stands, front to the Danes, fires only at those who come within his reach). */
+    void SetEnemyAttacking(bool bAttack);
+    bool IsEnemyAttacking() const { return bEnemyAttacking; }
+    bool bEnemyAttacking = true;
 
     /** The battle's standing (every battle): the men each side began with and has left (fighting units only:
      *  companies, squadrons, batteries; no staffs or wagons), and how many of its units have broken. */

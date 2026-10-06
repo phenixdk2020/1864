@@ -11,6 +11,7 @@
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "../Formations/StrategyFormationPolicyComponent.h"
+#include "../AI/StrategyFieldOfficerComponent.h"
 #include "../Formations/StrategyFormationTransitionComponent.h"
 #include "../Orders/StrategyParentExecutionComponent.h"
 #include "../Navigation/StrategyRoutePlannerComponent.h"
@@ -110,6 +111,7 @@ AStrategyUnit::AStrategyUnit()
     FireControlComponent = CreateDefaultSubobject<UStrategyFireControlComponent>(TEXT("FireControlComponent"));
     CombatComponent = CreateDefaultSubobject<UStrategyCombatComponent>(TEXT("CombatComponent"));
     OfficerAIComponent = CreateDefaultSubobject<UStrategyOfficerAIComponent>(TEXT("OfficerAIComponent"));
+    FieldOfficerComponent = CreateDefaultSubobject<UStrategyFieldOfficerComponent>(TEXT("FieldOfficerComponent"));
     ThreatReactionComponent = CreateDefaultSubobject<UStrategyThreatReactionComponent>(TEXT("ThreatReactionComponent"));
     OOBStatusComponent = CreateDefaultSubobject<UStrategyOOBStatusComponent>(TEXT("OOBStatusComponent"));
     SemanticZoomComponent = CreateDefaultSubobject<UStrategySemanticZoomComponent>(TEXT("SemanticZoomComponent"));

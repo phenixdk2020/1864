@@ -400,6 +400,21 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
             }
         }
     }
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864EnemyDefends")))
+    {
+        SetEnemyAttacking(false);
+    }
+    // -Strategy1864SkirmishAttack: the major orders his battalion to attack (his captains lead it from there).
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864SkirmishAttack")) && Major && Major->OrderComponent)
+    {
+        FStrategyOrder Attack;
+        Attack.Type = EStrategyOrderType::AttackHere;
+        Attack.TargetLocation = Middle;
+        Attack.FacingYaw = 0.0f;
+        Attack.bHasFacing = true;
+        Attack.Authority = EStrategyOrderAuthority::DirectPlayer;
+        Major->OrderComponent->SetOrder(Attack);
+    }
     // The camera behind the Danish line (as the campaign's battles).
     FieldCameraTarget = DanishLine - FVector(6000.0f, 0.0f, 0.0f);
     FieldCameraYaw = 0.0f;
@@ -1024,6 +1039,69 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
         TickDuel(DeltaSeconds);
         // The cones are the HUD's (AStrategyHUD::DrawFireCone).
     }
+}
+
+void AStrategyOOBTestScenario::SetEnemyAttacking(bool bAttack)
+{
+    bEnemyAttacking = bAttack;
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        return;
+    }
+    // Where the Danes stand (the middle of their fighting units).
+    FVector Danes = FVector::ZeroVector;
+    int32 Count = 0;
+    for (TActorIterator<AStrategyUnit> It(World); It; ++It)
+    {
+        if (It->Side == EStrategySide::Denmark && It->IsCombatEffective() && It->Echelon != EStrategyEchelon::Headquarters)
+        {
+            Danes += It->GetActorLocation();
+            ++Count;
+        }
+    }
+    if (Count == 0)
+    {
+        return;
+    }
+    Danes /= float(Count);
+    for (TActorIterator<AStrategyUnit> It(World); It; ++It)
+    {
+        AStrategyUnit* U = *It;
+        if (!IsValid(U) || U->Side == EStrategySide::Denmark || U->Side == EStrategySide::Neutral || !U->OrderComponent)
+        {
+            continue;
+        }
+        if (U->AutonomousBattleAIComponent)
+        {
+            U->AutonomousBattleAIComponent->bEnableForNonPlayerSides = bAttack;
+        }
+        if (U->DoctrineComponent)
+        {
+            U->DoctrineComponent->Doctrine = bAttack ? EStrategyDoctrine::Offensive : EStrategyDoctrine::Defensive;
+        }
+        const float Facing = (Danes - U->GetActorLocation()).Rotation().Yaw;
+        FStrategyOrder Order;
+        Order.FacingYaw = Facing;
+        Order.bHasFacing = true;
+        Order.Authority = EStrategyOrderAuthority::OfficerAI;
+        if (bAttack && U->Echelon == EStrategyEchelon::Headquarters)
+        {
+            Order.Type = EStrategyOrderType::AttackHere;
+            Order.TargetLocation = Danes;
+        }
+        else if (!bAttack && U->Echelon != EStrategyEchelon::Artillery)
+        {
+            Order.Type = EStrategyOrderType::DefendHere;
+            Order.TargetLocation = U->GetActorLocation();
+        }
+        else
+        {
+            continue;
+        }
+        U->OrderComponent->SetOrder(Order);
+    }
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-ENEMY: %s"), bAttack ? TEXT("attacks") : TEXT("defends"));
 }
 
 void AStrategyOOBTestScenario::TickShots()

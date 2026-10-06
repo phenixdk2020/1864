@@ -1149,6 +1149,25 @@ Kun ladte soldater kan blive valgt til næste salve.
   - `-Strategy1864Shots=sek:enhed:afstand:side,...` tager skærmbilleder fra spillet selv (`-Strategy1864ShotsQuit` lukker bagefter).
 - **Rettelser:** QA-klodsen i karréerne er skjult, pointtallet tæller højst den oprindelige styrke, og advarslen om RiderSocket fyldte loggen.
 
+
+### 2026-10-06 — Feltofficerer, fjendens skudvidde, fjenden som angriber/forsvarer
+- **`UStrategyFieldOfficerComponent`** på alle enheder fører kampen inden for ordren, når AI er ON. Spillerens direkte ordrer går forud.
+  - **Kaptajnen:**
+    - rykker frem til sin skudvidde ved ANGRIB/RYK FREM mod fjendens fodfolk eller kanoner, højst 400 m forbi målet;
+    - svinger fronten mod en fjende fra siden og holder formationen, når ikke-vaklende rytteri er inden for 150 m;
+    - går til bajonetangreb, når fjenden vakler inden for 60–110 m (afhængigt af aggressivitet). Han løber i dobbelt tempo med påsat bajonet, og chokket afgøres af mandtal, moral, samhold og karré;
+    - trækker sig tilbage ved under 40 % af mandskabet eller moral under 22.
+  - **Rytterofficeren:** chokerer det nærmeste mål, der er åbent for chok (et batteri uden dækning, en kolonne, en vaklende eller flygtende enhed, men aldrig en karré). Han holder afstand til formeret fodfolk og trækker sig tilbage, når eskadronen er slået.
+  - **Batterichefen:** vælger selv mål og ammunition.
+  - Hans aggressivitet og taktiske evne påvirker, hvor tidligt han angriber, og hvor ofte han tænker.
+  - Kommandopanelet viser "OFFICEREN:" med hans beslutning og begrundelse.
+- **Fjendens skudvidde** vises ikke længere som standard. INDSTILLINGER har "Fjendens skudvidde (til test)" (gemmes) og flaget `-Strategy1864ShowEnemyRange`.
+- **Fjenden ANGRIBER/FORSVARER (test)** under INDSTILLINGER (`SetEnemyAttacking`), og flaget `-Strategy1864EnemyDefends`.
+  - Angriber: fjendens stab angriber den danske linje.
+  - Forsvarer: FORSVAR HER, hvor han står, med fronten mod danskerne.
+- `-Strategy1864SkirmishAttack`: majoren beordrer angreb ved start.
+- **Rettelse:** skudkeglens stiplede linjer kunne blive til millioner af streger, når et punkt lå lige foran kameraet. Spillet løb tør for hukommelse. Sådanne linjestykker springes nu over.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -47,11 +47,14 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|UI")
     bool bSettingsOpen = false;
+    /** The enemy's fire cones (normally hidden; for testing the march and the deployment). Saved with the settings. */
+    static bool ShowEnemyRange();
+    static void SetShowEnemyRange(bool bShow);
 
 private:
     enum class EAction : uint8
     {
-        None, Minimap, FinishBattle, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, FireDrill, Pontoon
+        None, Minimap, FinishBattle, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, FireDrill, Pontoon, EnemyRange, EnemyPosture
     };
 
     struct FButton

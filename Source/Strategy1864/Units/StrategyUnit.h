@@ -22,6 +22,7 @@ class UStrategyVisibilityComponent;
 class UStrategyFireControlComponent;
 class UStrategyCombatComponent;
 class UStrategyOfficerAIComponent;
+class UStrategyFieldOfficerComponent;
 class UStrategyThreatReactionComponent;
 class UStrategyOOBStatusComponent;
 class UStrategySemanticZoomComponent;
@@ -164,6 +165,10 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Components")
     TObjectPtr<UStrategyOfficerAIComponent> OfficerAIComponent;
+
+    /** The officer leading the unit in the fight within its order (advance to range, front, bayonet, charge, fall back). */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|AI")
+    TObjectPtr<UStrategyFieldOfficerComponent> FieldOfficerComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Components")
     TObjectPtr<UStrategyThreatReactionComponent> ThreatReactionComponent;

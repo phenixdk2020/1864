@@ -1,4 +1,8 @@
 #include "StrategyHUD.h"
+#include "../AI/StrategyAITelemetryComponent.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+#include "Misc/ConfigCacheIni.h"
 
 #include "StrategyPlayerController.h"
 #include "../AI/StrategyDoctrineComponent.h"
@@ -169,7 +173,7 @@ void AStrategyHUD::DrawHUD()
         {
             for (const AStrategyUnit* Unit : ConePC->GetSelectedUnits())
             {
-                if (IsValid(Unit) && Unit->FireControlComponent && !IsCommandHQ(Unit) && !Drawn.Contains(Unit))
+                if (IsValid(Unit) && Unit->FireControlComponent && !IsCommandHQ(Unit) && !Drawn.Contains(Unit) && Unit->Side == EStrategySide::Denmark)
                 {
                     DrawFireCone(Unit, bLegend);
                     bLegend = false;
@@ -181,11 +185,25 @@ void AStrategyHUD::DrawHUD()
         {
             for (const AStrategyCompanyUnit* Company : It->GetDuelCompanies())
             {
-                if (IsValid(Company) && Company->IsCombatEffective() && !Drawn.Contains(Company))
+                if (IsValid(Company) && Company->IsCombatEffective() && !Drawn.Contains(Company) && (Company->Side == EStrategySide::Denmark || ShowEnemyRange()))
                 {
                     DrawFireCone(Company, bLegend);
                     bLegend = false;
                     Drawn.Add(Company);
+                }
+            }
+        }
+        // The enemy's reach: hidden in a real battle (the commander does not see it), shown for testing.
+        if (ShowEnemyRange())
+        {
+            for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+            {
+                const AStrategyUnit* Unit = *It;
+                if (IsValid(Unit) && Unit->Side != EStrategySide::Denmark && Unit->Side != EStrategySide::Neutral && Unit->FireControlComponent &&
+                    !IsCommandHQ(Unit) && Unit->IsCombatEffective() && !Drawn.Contains(Unit) && Unit->Echelon == EStrategyEchelon::Company)
+                {
+                    DrawFireCone(Unit, false);
+                    Drawn.Add(Unit);
                 }
             }
         }
@@ -354,8 +372,17 @@ void AStrategyHUD::DashedPolyline(const TArray<FVector>& WorldPoints, const FLin
         }
         const FVector2D A(A3.X, A3.Y), B(B3.X, B3.Y);
         const float Len = FVector2D::Distance(A, B);
+        // A point just in front of the camera projects far off the screen: such a segment is skipped (otherwise
+        // millions of dashes, and the memory runs out).
+        const float Far = 4.0f * FMath::Max(Canvas->ClipX, Canvas->ClipY);
+        if (Len > Far || FMath::Abs(A.X) > Far || FMath::Abs(A.Y) > Far || FMath::Abs(B.X) > Far || FMath::Abs(B.Y) > Far)
+        {
+            Phase += FMath::Min(Len, Far);
+            continue;
+        }
         float T = 0.0f;
-        while (T < Len)
+        int32 Guard = 0;
+        while (T < Len && ++Guard < 2000)
         {
             const float Period = Dash + Gap;
             const float InPeriod = FMath::Fmod(Phase + T, Period);
@@ -526,7 +553,7 @@ void AStrategyHUD::DrawSettings()
         return;
     }
     // A small window under the button: the camera's speed on the keys.
-    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 96.0f;
+    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 166.0f;
     DrawPanel(X, Y, W, H);
     Text(TEXT("INDSTILLINGER"), X + 12.0f, Y + 8.0f, Gold);
     const float Factor = AStrategyCameraPawn::GetKeySpeedFactor();
@@ -538,6 +565,45 @@ void AStrategyHUD::DrawSettings()
     Text(FString::Printf(TEXT("x %g"), Factor), X + 282.0f, Y + 38.0f, Gold);
     DrawButton(X + 330.0f, Y + 34.0f, 30.0f, 24.0f, TEXT("+"), EAction::CameraSpeed, FMath::Min(int32(UE_ARRAY_COUNT(Steps)) - 1, At + 1), false, nullptr, &ButtonDark);
     Text(TEXT("Shift giver tre gange så hurtigt. Gemmes til næste gang."), X + 12.0f, Y + 68.0f, Muted, 0.85f);
+    Text(TEXT("Fjendens skudvidde (til test)"), X + 12.0f, Y + 100.0f, Ink);
+    DrawButton(X + 240.0f, Y + 96.0f, 120.0f, 24.0f, ShowEnemyRange() ? TEXT("VIST") : TEXT("SKJULT"), EAction::EnemyRange, 0, ShowEnemyRange(), nullptr, ShowEnemyRange() ? nullptr : &ButtonDark);
+    for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+    {
+        const bool bAttack = It->IsEnemyAttacking();
+        Text(TEXT("Fjenden (til test)"), X + 12.0f, Y + 134.0f, Ink);
+        DrawButton(X + 180.0f, Y + 130.0f, 110.0f, 24.0f, TEXT("ANGRIBER"), EAction::EnemyPosture, 1, bAttack, nullptr, bAttack ? nullptr : &ButtonDark);
+        DrawButton(X + 296.0f, Y + 130.0f, 110.0f, 24.0f, TEXT("FORSVARER"), EAction::EnemyPosture, 0, !bAttack, nullptr, !bAttack ? nullptr : &ButtonDark);
+        break;
+    }
+}
+
+namespace
+{
+    int32 GEnemyRangeShown = -1;   // -1: not read from the settings yet
+}
+
+bool AStrategyHUD::ShowEnemyRange()
+{
+    if (GEnemyRangeShown < 0)
+    {
+        bool bShow = false;
+        if (GConfig)
+        {
+            GConfig->GetBool(TEXT("/Script/Strategy1864.Settings"), TEXT("ShowEnemyRange"), bShow, GGameUserSettingsIni);
+        }
+        GEnemyRangeShown = bShow || FParse::Param(FCommandLine::Get(), TEXT("Strategy1864ShowEnemyRange")) ? 1 : 0;
+    }
+    return GEnemyRangeShown == 1;
+}
+
+void AStrategyHUD::SetShowEnemyRange(bool bShow)
+{
+    GEnemyRangeShown = bShow ? 1 : 0;
+    if (GConfig)
+    {
+        GConfig->SetBool(TEXT("/Script/Strategy1864.Settings"), TEXT("ShowEnemyRange"), bShow, GGameUserSettingsIni);
+        GConfig->Flush(false, GGameUserSettingsIni);
+    }
 }
 
 // ------------------------------------------------------------------ minimap
@@ -627,6 +693,12 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         DrawButton(LX + 72.0f, LY + 44.0f, 60.0f, 24.0f, TEXT("DEF"), EAction::Doctrine, int32(EStrategyDoctrine::Defensive), D == EStrategyDoctrine::Defensive, Unit);
         DrawButton(LX + 138.0f, LY + 44.0f, 60.0f, 24.0f, TEXT("BAL"), EAction::Doctrine, int32(EStrategyDoctrine::Balanced), D == EStrategyDoctrine::Balanced, Unit);
         DrawButton(LX + 204.0f, LY + 44.0f, 60.0f, 24.0f, TEXT("OFF"), EAction::Doctrine, int32(EStrategyDoctrine::Offensive), D == EStrategyDoctrine::Offensive, Unit);
+    }
+    // What the officer thinks (his last decision and why).
+    if (Unit->bOfficerAIEnabled && Unit->AITelemetryComponent && !Unit->AITelemetryComponent->CurrentTask.IsEmpty())
+    {
+        Text(FString::Printf(TEXT("OFFICEREN: %s"), *Unit->AITelemetryComponent->CurrentTask.ToUpper()).Left(40), LX, LY + 72.0f, Gold, 0.8f);
+        Text(Unit->AITelemetryComponent->ReasonCode.Left(44), LX, LY + 86.0f, Ink, 0.8f);
     }
 
     // Middle: the orders (blue while it is being carried out).
@@ -777,6 +849,16 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 break;
             case EAction::SettingsToggle:
                 bSettingsOpen = !bSettingsOpen;
+                break;
+            case EAction::EnemyRange:
+                SetShowEnemyRange(!ShowEnemyRange());
+                break;
+            case EAction::EnemyPosture:
+                for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+                {
+                    It->SetEnemyAttacking(B.Value == 1);
+                    break;
+                }
                 break;
             case EAction::CameraSpeed:
             {

@@ -11,11 +11,11 @@
 namespace
 {
     // Powder smoke is a warm white; earth a dark brown; the dust of a dry field a grey brown.
-    const FLinearColor PowderSmoke(1.35f, 1.33f, 1.28f);   // above 1: the material is lit, and the smoke must stay white in the shade
-    const FLinearColor Earth(0.16f, 0.11f, 0.07f);
-    const FLinearColor Dust(0.42f, 0.36f, 0.28f);
-    const FLinearColor BlackSmoke(0.10f, 0.09f, 0.085f);
-    const FLinearColor Fire(6.0f, 2.6f, 0.6f);
+    const FLinearColor BlastPowderSmoke(1.35f, 1.33f, 1.28f);   // above 1: the material is lit, and the smoke must stay white in the shade
+    const FLinearColor BlastEarth(0.16f, 0.11f, 0.07f);
+    const FLinearColor BlastDust(0.42f, 0.36f, 0.28f);
+    const FLinearColor BlastBlackSmoke(0.10f, 0.09f, 0.085f);
+    const FLinearColor BlastFire(6.0f, 2.6f, 0.6f);
 
     UStaticMesh* SphereMesh()
     {
@@ -108,7 +108,7 @@ void AStrategyBattleBlast::AddEarth(int32 Count, float UpMin, float UpMax, float
         P.EndDiameter = P.StartDiameter * 0.8f;
         P.Life = FMath::FRandRange(1.1f, 1.8f);
         P.Opacity = 0.95f;
-        P.Colour = Earth * FMath::FRandRange(0.8f, 1.3f);
+        P.Colour = BlastEarth * FMath::FRandRange(0.8f, 1.3f);
         P.bGravity = true;
         AddPiece(P);
     }
@@ -166,7 +166,7 @@ void AStrategyBattleBlast::Build(EStrategyBlastKind Kind, const FVector& Dir, fl
         const bool bMortar = Kind == EStrategyBlastKind::MortarMuzzle;
         const FVector Out = bMortar ? (Flat * 0.35f + FVector::UpVector).GetSafeNormal() : Flat;
         AddFlash(bMortar ? 30000.f : 45000.f, 3500.f * Scale, 0.12f);
-        FPiece Core = Smoke(Out * 60.f * Scale, Out * 300.f, 40.f * Scale, 260.f * Scale, 0.14f, 1.0f, Fire);
+        FPiece Core = Smoke(Out * 60.f * Scale, Out * 300.f, 40.f * Scale, 260.f * Scale, 0.14f, 1.0f, BlastFire);
         Core.bGlow = true;
         Core.Drag = 6.f;
         AddPiece(Core);
@@ -175,13 +175,13 @@ void AStrategyBattleBlast::Build(EStrategyBlastKind Kind, const FVector& Dir, fl
         {
             const float Speed = FMath::FRandRange(500.f, 1500.f) * Scale;
             AddPiece(Smoke(Out * FMath::FRandRange(40.f, 160.f) * Scale, (RandomCone(Out, 18.f) * Speed) + FVector(0.f, 0.f, 40.f),
-                FMath::FRandRange(90.f, 160.f) * Scale, FMath::FRandRange(700.f, 1100.f) * Scale, FMath::FRandRange(7.f, 11.f), 0.78f, PowderSmoke));
+                FMath::FRandRange(90.f, 160.f) * Scale, FMath::FRandRange(700.f, 1100.f) * Scale, FMath::FRandRange(7.f, 11.f), 0.78f, BlastPowderSmoke));
         }
         // The blast blows the dust up off the ground in front of (or around) the piece.
         for (int32 i = 0; i < 4; ++i)
         {
             const FVector Side = (bMortar ? FVector(FMath::FRandRange(-1.f, 1.f), FMath::FRandRange(-1.f, 1.f), 0.f).GetSafeNormal() : (Flat + Right * FMath::FRandRange(-0.8f, 0.8f)).GetSafeNormal());
-            FPiece D = Smoke(Side * 150.f * Scale + FVector(0.f, 0.f, -60.f), Side * FMath::FRandRange(300.f, 700.f), 60.f * Scale, 300.f * Scale, 2.5f, 0.22f, Dust);
+            FPiece D = Smoke(Side * 150.f * Scale + FVector(0.f, 0.f, -60.f), Side * FMath::FRandRange(300.f, 700.f), 60.f * Scale, 300.f * Scale, 2.5f, 0.22f, BlastDust);
             AddPiece(D);
         }
         break;
@@ -192,7 +192,7 @@ void AStrategyBattleBlast::Build(EStrategyBlastKind Kind, const FVector& Dir, fl
         for (int32 i = 0; i < 3; ++i)
         {
             AddPiece(Smoke(FVector(FMath::FRandRange(-40.f, 40.f), FMath::FRandRange(-40.f, 40.f), 40.f), FVector(0.f, 0.f, FMath::FRandRange(150.f, 300.f)) + Flat * 200.f,
-                90.f * Scale, FMath::FRandRange(380.f, 520.f) * Scale, 3.2f, 0.6f, Dust));
+                90.f * Scale, FMath::FRandRange(380.f, 520.f) * Scale, 3.2f, 0.6f, BlastDust));
         }
         FPiece Scar;
         Scar.bFlat = true;
@@ -201,14 +201,14 @@ void AStrategyBattleBlast::Build(EStrategyBlastKind Kind, const FVector& Dir, fl
         Scar.EndDiameter = 170.f * Scale;
         Scar.Life = 50.f;
         Scar.Opacity = 0.35f;
-        Scar.Colour = Earth * 1.6f;
+        Scar.Colour = BlastEarth * 1.6f;
         AddPiece(Scar);
         break;
     }
     case EStrategyBlastKind::ShellBurst:
     {
         AddFlash(60000.f, 4000.f * Scale, 0.16f);
-        FPiece Ball = Smoke(FVector(0.f, 0.f, 80.f), FVector(0.f, 0.f, 200.f), 80.f * Scale, 420.f * Scale, 0.22f, 1.0f, Fire);
+        FPiece Ball = Smoke(FVector(0.f, 0.f, 80.f), FVector(0.f, 0.f, 200.f), 80.f * Scale, 420.f * Scale, 0.22f, 1.0f, BlastFire);
         Ball.bGlow = true;
         Ball.Drag = 4.f;
         AddPiece(Ball);
@@ -216,7 +216,7 @@ void AStrategyBattleBlast::Build(EStrategyBlastKind Kind, const FVector& Dir, fl
         for (int32 i = 0; i < 5; ++i)
         {
             AddPiece(Smoke(FVector(FMath::FRandRange(-60.f, 60.f), FMath::FRandRange(-60.f, 60.f), 100.f), FVector(FMath::FRandRange(-150.f, 150.f), FMath::FRandRange(-150.f, 150.f), FMath::FRandRange(250.f, 500.f)),
-                120.f * Scale, FMath::FRandRange(550.f, 800.f) * Scale, 5.5f, 0.8f, i < 3 ? BlackSmoke : Dust));
+                120.f * Scale, FMath::FRandRange(550.f, 800.f) * Scale, 5.5f, 0.8f, i < 3 ? BlastBlackSmoke : BlastDust));
         }
         FPiece Crater;
         Crater.bFlat = true;
@@ -225,27 +225,27 @@ void AStrategyBattleBlast::Build(EStrategyBlastKind Kind, const FVector& Dir, fl
         Crater.EndDiameter = 280.f * Scale;
         Crater.Life = 80.f;
         Crater.Opacity = 0.5f;
-        Crater.Colour = Earth;
+        Crater.Colour = BlastEarth;
         AddPiece(Crater);
         break;
     }
     case EStrategyBlastKind::AirBurst:
     {
         AddFlash(25000.f, 2500.f * Scale, 0.1f);
-        FPiece Spark = Smoke(FVector::ZeroVector, FVector::ZeroVector, 40.f * Scale, 160.f * Scale, 0.1f, 1.f, Fire);
+        FPiece Spark = Smoke(FVector::ZeroVector, FVector::ZeroVector, 40.f * Scale, 160.f * Scale, 0.1f, 1.f, BlastFire);
         Spark.bGlow = true;
         AddPiece(Spark);
         for (int32 i = 0; i < 3; ++i)
         {
             AddPiece(Smoke(FVector(FMath::FRandRange(-40.f, 40.f), FMath::FRandRange(-40.f, 40.f), FMath::FRandRange(-20.f, 40.f)), Flat * 250.f + FVector(0.f, 0.f, 30.f),
-                70.f * Scale, FMath::FRandRange(380.f, 480.f) * Scale, 5.f, 0.85f, PowderSmoke));
+                70.f * Scale, FMath::FRandRange(380.f, 480.f) * Scale, 5.f, 0.85f, BlastPowderSmoke));
         }
         // The balls go on in a cone and kick up the dust where they strike, a moment later.
         const float Ground = GroundZAt(GetActorLocation()) - GetActorLocation().Z;
         for (int32 i = 0; i < 9; ++i)
         {
             const FVector At = Flat * FMath::FRandRange(300.f, 1800.f) * Scale + Right * FMath::FRandRange(-500.f, 500.f) * Scale;
-            FPiece Kick = Smoke(FVector(At.X, At.Y, Ground + 20.f), FVector(0.f, 0.f, 120.f), 30.f, FMath::FRandRange(120.f, 200.f), 1.6f, 0.55f, Dust);
+            FPiece Kick = Smoke(FVector(At.X, At.Y, Ground + 20.f), FVector(0.f, 0.f, 120.f), 30.f, FMath::FRandRange(120.f, 200.f), 1.6f, 0.55f, BlastDust);
             Kick.Delay = FMath::FRandRange(0.08f, 0.25f);
             AddPiece(Kick);
         }
@@ -259,7 +259,7 @@ void AStrategyBattleBlast::Build(EStrategyBlastKind Kind, const FVector& Dir, fl
         {
             const float T = FMath::FRandRange(0.25f, 1.f);
             const FVector At = Flat * Range * T + Right * Range * T * FMath::FRandRange(-0.17f, 0.17f);
-            FPiece Kick = Smoke(FVector(At.X, At.Y, Ground + 15.f), FVector(0.f, 0.f, 150.f), 30.f, FMath::FRandRange(130.f, 220.f), 1.5f, 0.6f, Dust);
+            FPiece Kick = Smoke(FVector(At.X, At.Y, Ground + 15.f), FVector(0.f, 0.f, 150.f), 30.f, FMath::FRandRange(130.f, 220.f), 1.5f, 0.6f, BlastDust);
             Kick.Delay = T * Range / 40000.f;   // ~400 m/s
             AddPiece(Kick);
         }
@@ -267,7 +267,7 @@ void AStrategyBattleBlast::Build(EStrategyBlastKind Kind, const FVector& Dir, fl
     }
     case EStrategyBlastKind::HoofDust:
     {
-        AddPiece(Smoke(FVector::ZeroVector, FVector(0.f, 0.f, 60.f) - Flat * 120.f, 60.f * Scale, 260.f * Scale, 1.6f, 0.32f, Dust));
+        AddPiece(Smoke(FVector::ZeroVector, FVector(0.f, 0.f, 60.f) - Flat * 120.f, 60.f * Scale, 260.f * Scale, 1.6f, 0.32f, BlastDust));
         break;
     }
     }
@@ -323,7 +323,7 @@ void AStrategyBattleBlast::Tick(float DeltaTime)
         }
         P.Velocity *= FMath::Exp(-P.Drag * DeltaTime);
         P.Position += P.Velocity * DeltaTime;
-        // Earth lands and stops; the smoke rises slowly when the push is spent.
+        // BlastEarth lands and stops; the smoke rises slowly when the push is spent.
         if (P.bGravity)
         {
             const float Floor = GroundZAt(GetActorLocation() + P.Position) - GroundZ;

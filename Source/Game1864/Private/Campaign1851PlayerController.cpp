@@ -23,7 +23,7 @@ ACampaign1851PlayerController::ACampaign1851PlayerController()
 
 namespace
 {
-	FString Rd(double Amount)
+	FString PriceText(double Amount)
 	{
 		return FString::FormatAsNumber(FMath::RoundToInt(Amount)) + TEXT(" rd.");
 	}
@@ -50,7 +50,7 @@ namespace
 			const FCampaign1851SiteModule& D = ACampaign1851ConstructionSite::TownBuildings()[Module];
 			Title = FString::Printf(TEXT("Byg %s i %s?"), *D.Name.ToLower(), *CityName);
 			Text = FString::Printf(TEXT("%s (%s) opføres i %s på omkring %d dage. Det koster %s i alt: %s nu til materialerne, resten løbende mens der bygges. Bagefter koster bygningen %s om året i drift."),
-				*D.Name, *D.Type(), *CityName, FMath::RoundToInt(D.Days()), *Rd(D.Cost()), *Down, *Rd(D.Upkeep()));
+				*D.Name, *D.Type(), *CityName, FMath::RoundToInt(D.Days()), *PriceText(D.Cost()), *Down, *PriceText(D.Upkeep()));
 			return true;
 		}
 		case EB::Build:
@@ -66,7 +66,7 @@ namespace
 			}
 			Title = FString::Printf(TEXT("Byg %s?"), *Site->ModuleName(Module).ToLower());
 			Text = FString::Printf(TEXT("%s føjes til garnisonen i %s på omkring %d dage. Det koster %s: %s nu til materialerne, resten løbende."),
-				*Site->ModuleName(Module), *CityName, FMath::RoundToInt(Site->ModuleDays(Module)), *Rd(Site->ModuleCost(Module)), *Down);
+				*Site->ModuleName(Module), *CityName, FMath::RoundToInt(Site->ModuleDays(Module)), *PriceText(Site->ModuleCost(Module)), *Down);
 			return true;
 		}
 		case EB::BuildLink:
@@ -82,13 +82,13 @@ namespace
 			Title = FString::Printf(TEXT("Anlæg %s %s–%s?"), bRail ? TEXT("jernbane") : TEXT("chaussé"), *Cities[L.A].Name, *Cities[L.B].Name);
 			Text = FString::Printf(TEXT("%s Arbejdet tager omkring %d dage og koster %s, betalt efterhånden som det skrider frem."),
 				bRail ? TEXT("Tog kører tropper og forsyninger mange gange hurtigere end til fods, og handlen langs banen vokser.") : TEXT("En fast landevej: hæren og trænet marcherer hurtigere og slider mindre, også i tøbrud."),
-				FMath::RoundToInt(Map.LinkWorkDays(Link, Work)), *Rd(Map.LinkWorkCost(Link, Work)));
+				FMath::RoundToInt(Map.LinkWorkDays(Link, Work)), *PriceText(Map.LinkWorkCost(Link, Work)));
 			return true;
 		}
 		case EB::RaiseBattalion:
 			Title = FString::Printf(TEXT("Opret en bataljon i %s?"), *CityName);
 			Text = FString::Printf(TEXT("%d rekrutter indkaldes med en major og fire kaptajner. Det koster %s nu (hvervning og udrustning), og bataljonen skal derefter have sold og forplejning. Rekrutterne er grønne og skal eksercere, før de duer i felten."),
-				Campaign1851Army::RaiseMen, *Rd(Campaign1851Army::RaiseCost()));
+				Campaign1851Army::RaiseMen, *PriceText(Campaign1851Army::RaiseCost()));
 			return true;
 		case EB::UnitRaise:
 		{
@@ -96,7 +96,7 @@ namespace
 			Title = FString::Printf(TEXT("Opret %s?"), T.Name);
 			Text = FString::Printf(TEXT("%d mand%s%s indkaldes og udrustes (%d geværer, %d uniformer). Det koster omkring %s; geværer der mangler på lageret købes i udlandet oveni. Træningsprogram: %s."),
 				T.Men, T.Guns > 0 ? *FString::Printf(TEXT(", %d kanoner"), T.Guns) : TEXT(""), T.Horses > 0 ? *FString::Printf(TEXT(", %d heste"), T.Horses) : TEXT(""),
-				T.Rifles, T.Uniforms, *Rd(Map.UnitCost(Overlay.RaiseType)), Campaign1851Army::ProgramName(ECampaign1851Program(Overlay.RaiseProgram)));
+				T.Rifles, T.Uniforms, *PriceText(Map.UnitCost(Overlay.RaiseType)), Campaign1851Army::ProgramName(ECampaign1851Program(Overlay.RaiseProgram)));
 			return true;
 		}
 		case EB::ResearchStart:
@@ -107,26 +107,26 @@ namespace
 			}
 			const FCampaign1851ResearchTopic& T = Campaign1851Research::Topics()[Module];
 			Title = FString::Printf(TEXT("Forsk i %s?"), T.Name);
-			Text = FString::Printf(TEXT("%s\nDet tager %d måneder og koster %s om måneden, i alt %s."), T.Effect, T.Months, *Rd(T.CostPerMonth), *Rd(T.CostPerMonth * T.Months));
+			Text = FString::Printf(TEXT("%s\nDet tager %d måneder og koster %s om måneden, i alt %s."), T.Effect, T.Months, *PriceText(T.CostPerMonth), *PriceText(T.CostPerMonth * T.Months));
 			return true;
 		}
 		case EB::DoctrineSet:
 			Title = FString::Printf(TEXT("Skift doktrin til %s?"), Campaign1851Research::DoctrineName(Module / 10, Module % 10));
 			Text = FString::Printf(TEXT("Hæren omskoles efter den nye doktrin. Det koster %s, og i omkring %d dage, mens officerer og mænd lærer det nye, kæmper hæren dårligere."),
-				*Rd(ACampaign1851Map::DoctrineChangeCost), FMath::RoundToInt(ACampaign1851Map::DoctrineChangeDays));
+				*PriceText(ACampaign1851Map::DoctrineChangeCost), FMath::RoundToInt(ACampaign1851Map::DoctrineChangeDays));
 			return true;
 		case EB::Loan:
 			if (Module == 2)
 			{
 				Title = TEXT("Afdrag på statsgælden?");
-				Text = FString::Printf(TEXT("%s betales tilbage af statskassen. Renterne falder tilsvarende."), *Rd(100000.0));
+				Text = FString::Printf(TEXT("%s betales tilbage af statskassen. Renterne falder tilsvarende."), *PriceText(100000.0));
 			}
 			else
 			{
 				const double Amount = Module == 0 ? 100000.0 : 250000.0;
-				Title = FString::Printf(TEXT("Optag et lån på %s?"), *Rd(Amount));
+				Title = FString::Printf(TEXT("Optag et lån på %s?"), *PriceText(Amount));
 				Text = FString::Printf(TEXT("Pengene kommer i statskassen med det samme. Renten er nu %.1f %%, dvs. omkring %s om året, indtil lånet er betalt tilbage. Mere gæld gør de næste lån dyrere."),
-					Map.CreditRate() * 100.f, *Rd(Amount * Map.CreditRate()));
+					Map.CreditRate() * 100.f, *PriceText(Amount * Map.CreditRate()));
 			}
 			return true;
 		case EB::ShipOrder:
@@ -138,7 +138,7 @@ namespace
 			const FCampaign1851ShipClass& C = Campaign1851Navy::Classes()[Module];
 			Title = FString::Printf(TEXT("Bestil en %s?"), C.Name);
 			Text = FString::Printf(TEXT("Skibet bygges på Holmen på %d måneder og koster %s. Når det er i tjeneste, koster det %s om året og styrker flåden med %.0f."),
-				C.Months, *Rd(C.Cost), *Rd(C.UpkeepPerYear), C.Strength);
+				C.Months, *PriceText(C.Cost), *PriceText(C.UpkeepPerYear), C.Strength);
 			return true;
 		}
 		case EB::Blockade:
@@ -148,12 +148,12 @@ namespace
 			return true;
 		case EB::SupplyBuy:
 			Title = TEXT("Køb en trænkolonne?");
-			Text = FString::Printf(TEXT("20 vogne og 80 heste med kuske, som Intendanturen kan sende forsyninger med til hæren i felten. Det koster %s."), *Rd(Campaign1851Supply::ColumnCost));
+			Text = FString::Printf(TEXT("20 vogne og 80 heste med kuske, som Intendanturen kan sende forsyninger med til hæren i felten. Det koster %s."), *PriceText(Campaign1851Supply::ColumnCost));
 			return true;
 		case EB::KitBuy:
 			Title = Module == 1 ? TEXT("Køb 2 mortérer?") : TEXT("Køb 10 vogne?");
-			Text = Module == 1 ? FString::Printf(TEXT("To mortérer købes i udlandet og lægges på lager. Det koster %s."), *Rd(2 * Campaign1851Resources::MortarPrice))
-				: FString::Printf(TEXT("Ti vogne købes i landet og lægges på lager. Det koster %s."), *Rd(10 * Campaign1851Resources::WagonPrice));
+			Text = Module == 1 ? FString::Printf(TEXT("To mortérer købes i udlandet og lægges på lager. Det koster %s."), *PriceText(2 * Campaign1851Resources::MortarPrice))
+				: FString::Printf(TEXT("Ti vogne købes i landet og lægges på lager. Det koster %s."), *PriceText(10 * Campaign1851Resources::WagonPrice));
 			return true;
 		case EB::RawBuy:
 		{
@@ -164,12 +164,12 @@ namespace
 			const ECampaign1851Raw R = ECampaign1851Raw(Module / 10);
 			const float Amount = (R == ECampaign1851Raw::Cloth || R == ECampaign1851Raw::Leather ? 100.f : 10.f) * 10.f;
 			Title = TEXT("Køb råvarer?");
-			Text = FString::Printf(TEXT("%.0f enheder købes og lægges på lager. Det koster omkring %s."), Amount, *Rd(Amount * Map.RawPrice(R)));
+			Text = FString::Printf(TEXT("%.0f enheder købes og lægges på lager. Det koster omkring %s."), Amount, *PriceText(Amount * Map.RawPrice(R)));
 			return true;
 		}
 		case EB::OfficerRecruit:
 			Title = Module == 1 ? TEXT("Ansæt en general?") : TEXT("Ansæt en officer?");
-			Text = FString::Printf(TEXT("Han ansættes og venter på en post. Ansættelsen koster %s, og derefter får han sold, også mens han er uden post."), *Rd(Map.OfficerCost(Module == 1)));
+			Text = FString::Printf(TEXT("Han ansættes og venter på en post. Ansættelsen koster %s, og derefter får han sold, også mens han er uden post."), *PriceText(Map.OfficerCost(Module == 1)));
 			return true;
 		case EB::OfficerPromote:
 			if (!Map.GetOfficers().IsValidIndex(Module))
@@ -220,19 +220,19 @@ namespace
 			{
 			case ACampaign1851Map::EDiplomacyAction::Envoy:
 				Title = FString::Printf(TEXT("Send en gesandt til %s?"), *Who);
-				Text = FString::Printf(TEXT("Forholdet til %s bedres. Det koster %s."), *Who, *Rd(ACampaign1851Map::EnvoyCost));
+				Text = FString::Printf(TEXT("Forholdet til %s bedres. Det koster %s."), *Who, *PriceText(ACampaign1851Map::EnvoyCost));
 				break;
 			case ACampaign1851Map::EDiplomacyAction::Trade:
 				Title = FString::Printf(TEXT("Handelstraktat med %s?"), *Who);
-				Text = FString::Printf(TEXT("Toldsatserne sænkes gensidigt; handlen giver statskassen mere hvert år. Forhandlingerne koster %s."), *Rd(ACampaign1851Map::TreatyCost));
+				Text = FString::Printf(TEXT("Toldsatserne sænkes gensidigt; handlen giver statskassen mere hvert år. Forhandlingerne koster %s."), *PriceText(ACampaign1851Map::TreatyCost));
 				break;
 			case ACampaign1851Map::EDiplomacyAction::Alliance:
 				Title = FString::Printf(TEXT("Alliance med %s?"), *Who);
-				Text = FString::Printf(TEXT("%s lover at stå os bi i krig, og vi det samme. Det koster %s, og en alliance kan trække os ind i andres krige."), *Who, *Rd(Map.AllianceCostNow()));
+				Text = FString::Printf(TEXT("%s lover at stå os bi i krig, og vi det samme. Det koster %s, og en alliance kan trække os ind i andres krige."), *Who, *PriceText(Map.AllianceCostNow()));
 				break;
 			default:
 				Title = FString::Printf(TEXT("Søg garanti fra %s?"), *Who);
-				Text = FString::Printf(TEXT("%s garanterer vores grænser; spændingen stiger langsommere. Det koster %s."), *Who, *Rd(ACampaign1851Map::GuaranteeCost));
+				Text = FString::Printf(TEXT("%s garanterer vores grænser; spændingen stiger langsommere. Det koster %s."), *Who, *PriceText(ACampaign1851Map::GuaranteeCost));
 				break;
 			}
 			return true;
@@ -250,20 +250,20 @@ namespace
 			{
 				Title = TEXT("To kanoner mere i skansen?");
 				Text = FString::Printf(TEXT("To nye kanonbænke med fæstningskanoner, på %d dage. Det koster op til %s (kanoner fra statens lager sparer %s stykket)."),
-					FMath::RoundToInt(Campaign1851Forts::GunsDays), *Rd(Campaign1851Forts::GunsCost), *Rd(Campaign1851Forts::GunPrice));
+					FMath::RoundToInt(Campaign1851Forts::GunsDays), *PriceText(Campaign1851Forts::GunsCost), *PriceText(Campaign1851Forts::GunPrice));
 			}
 			else if (Button == EB::FortTrenches)
 			{
 				Title = TEXT("Grav løbegrave?");
 				Text = FString::Printf(TEXT("Løbegrave til skanserne omkring giver reserven dækning, når den skal frem. %d dage, %s."),
-					FMath::RoundToInt(Campaign1851Forts::TrenchesDays), *Rd(Campaign1851Forts::TrenchesCost(F->bLarge)));
+					FMath::RoundToInt(Campaign1851Forts::TrenchesDays), *PriceText(Campaign1851Forts::TrenchesCost(F->bLarge)));
 			}
 			else
 			{
 				const int32 Next = FMath::Min(F->Defence + 1, Campaign1851Forts::MaxDefence);
 				Title = FString::Printf(TEXT("Udbyg: %s?"), Campaign1851Forts::DefenceName(Next));
 				Text = FString::Printf(TEXT("%s Dækning for besætningen %d %%. %d dage, %s."), Campaign1851Forts::DefenceNote(Next), Campaign1851Forts::CoverPercent(Next),
-					FMath::RoundToInt(Campaign1851Forts::DefenceDays(Next)), *Rd(Campaign1851Forts::DefenceCost(Next, F->bLarge)));
+					FMath::RoundToInt(Campaign1851Forts::DefenceDays(Next)), *PriceText(Campaign1851Forts::DefenceCost(Next, F->bLarge)));
 			}
 			return true;
 		}
@@ -280,21 +280,21 @@ namespace
 				break;
 			default:
 				Title = TEXT("Slå en pontonbro?");
-				Text = FString::Printf(TEXT("Pionererne slår en pontonbro over vandet på %d dage. Det koster %s."), FMath::RoundToInt(Map.PontoonDays()), *Rd(Map.PontoonCost()));
+				Text = FString::Printf(TEXT("Pionererne slår en pontonbro over vandet på %d dage. Det koster %s."), FMath::RoundToInt(Map.PontoonDays()), *PriceText(Map.PontoonCost()));
 				break;
 			}
 			return true;
 		case EB::TrainOrder:
 			Title = TEXT("Bestil et togsæt?");
 			Text = FString::Printf(TEXT("Et lokomotiv med vogne bestilles i England og leveres til %s. Det koster %s."),
-				Cities.IsValidIndex(Module) ? *Cities[Module].Name : TEXT("København"), *Rd(ACampaign1851Map::TroopTrainCost));
+				Cities.IsValidIndex(Module) ? *Cities[Module].Name : TEXT("København"), *PriceText(ACampaign1851Map::TroopTrainCost));
 			return true;
 		case EB::TrainMove:
 		{
 			const int32 To = Module % 1000;
 			Title = TEXT("Skib toget?");
 			Text = FString::Printf(TEXT("Toget skibes til %s og kan køre på banerne der. Overførslen koster %s."),
-				Cities.IsValidIndex(To) ? *Cities[To].Name : TEXT("den anden bane"), *Rd(ACampaign1851Map::TrainTransferCost));
+				Cities.IsValidIndex(To) ? *Cities[To].Name : TEXT("den anden bane"), *PriceText(ACampaign1851Map::TrainTransferCost));
 			return true;
 		}
 		case EB::MergeUnit:
