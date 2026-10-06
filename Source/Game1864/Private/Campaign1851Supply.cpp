@@ -367,6 +367,7 @@ TArray<FString> ACampaign1851Map::SaveSupply() const
 		Out.Add(FString::Printf(TEXT("fort|%d|%.2f|%.0f|%.0f"), F.Id, F.FoodDays, F.RoundsPerGun, F.CartridgesPerMan));
 	}
 	Out.Add(FString::Printf(TEXT("prisoners|%d|%d"), DanesCaptured, EnemyCaptured));
+	Out.Add(FString::Printf(TEXT("wartotals|%d|%d|%d|%d|%d|%d|%d|%d"), EnemyKilled, EnemyWounded, EnemyCapturedTotal, CapturedRifles, CapturedGuns, CapturedHorses, CapturedWagons, CapturedColours));
 	return Out;
 }
 
@@ -395,6 +396,17 @@ void ACampaign1851Map::RestoreSupply(const TArray<FString>& Lines)
 		else if (P.Num() == 3 && P[0] == TEXT("sick") && FindRegiment(P[1]) != INDEX_NONE)
 		{
 			Regiments[FindRegiment(P[1])].Sick = FCString::Atoi(*P[2]);
+		}
+		else if (P.Num() == 9 && P[0] == TEXT("wartotals"))
+		{
+			EnemyKilled = FCString::Atoi(*P[1]);
+			EnemyWounded = FCString::Atoi(*P[2]);
+			EnemyCapturedTotal = FCString::Atoi(*P[3]);
+			CapturedRifles = FCString::Atoi(*P[4]);
+			CapturedGuns = FCString::Atoi(*P[5]);
+			CapturedHorses = FCString::Atoi(*P[6]);
+			CapturedWagons = FCString::Atoi(*P[7]);
+			CapturedColours = FCString::Atoi(*P[8]);
 		}
 		else if (P.Num() == 3 && P[0] == TEXT("prisoners"))
 		{

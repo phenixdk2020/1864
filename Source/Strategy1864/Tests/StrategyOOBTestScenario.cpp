@@ -9,6 +9,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "Camera/CameraActor.h"
+#include "UnrealClient.h"
+#include "TimerManager.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
@@ -334,6 +337,69 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
             Flag->Setup(Company, Company->Side == EStrategySide::Denmark ? TEXT("DK") : TEXT("PR"), FVector(-250.0f, 60.0f, 0.0f));
         }
     }
+    // -Strategy1864SkirmishArms: a battery, a mortar and a squadron on each side (to see the guns and the horse).
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864SkirmishArms")) && All.Num() >= 2)
+    {
+        AStrategyCompanyUnit* DanishTarget = All[1];
+        AStrategyCompanyUnit* EnemyTarget = All.Last();
+        for (int32 Side = 0; Side < 2; ++Side)
+        {
+            const bool bDane = Side == 0;
+            const FVector Line = bDane ? DanishLine : EnemyLine;
+            const float Back = bDane ? -1.0f : 1.0f;
+            AStrategyHQUnit* Hq = bDane ? Major : EnemyMajor;
+            const FString Tag = bDane ? TEXT("DK") : TEXT("EN");
+            auto Own = [&](AStrategyUnit* U)
+            {
+                U->Side = bDane ? EStrategySide::Denmark : EStrategySide::Prussia;
+                U->bPlayerControllable = bDane;
+                U->bOfficerAIEnabled = true;
+                U->SetActorRotation(FRotator(0.0f, bDane ? 0.0f : 180.0f, 0.0f));
+                U->RefreshDebugLabel();
+            };
+            if (AStrategyArtilleryBatteryUnit* Battery = SpawnArtilleryBattery(FName(*(Tag + TEXT("-SKIRMISH-BTY"))), bDane ? TEXT("2. Batteri") : TEXT("Pr. 4-pdr Batterie"),
+                Line + FVector(Back * 4000.0f, 0.0f, 0.0f), Hq))
+            {
+                Own(Battery);
+                if (Battery->ArtilleryFireMissionComponent)
+                {
+                    Battery->ArtilleryFireMissionComponent->SetMissionLimits(1000, 100000.0f);
+                    Battery->ArtilleryFireMissionComponent->SetConserveAmmunition(false, 0.0f);
+                    Battery->ArtilleryFireMissionComponent->SetAutoTargetEnabled(true);
+                }
+                if (Battery->ArtilleryAmmunitionComponent)
+                {
+                    Battery->ArtilleryAmmunitionComponent->RoundShotRounds = 120;
+                    Battery->ArtilleryAmmunitionComponent->ShellRounds = 80;
+                    Battery->ArtilleryAmmunitionComponent->ShrapnelRounds = 60;
+                    Battery->ArtilleryAmmunitionComponent->CanisterRounds = 40;
+                }
+            }
+            if (AStrategyMortarBatteryUnit* Mortar = SpawnMortarBattery(FName(*(Tag + TEXT("-SKIRMISH-MRT"))), bDane ? TEXT("Morterbatteri") : TEXT("Pr. Mörser"),
+                Line + FVector(Back * 9000.0f, 9000.0f, 0.0f), Hq))
+            {
+                Own(Mortar);
+                if (Mortar->MortarFireComponent)
+                {
+                    Mortar->MortarFireComponent->SetUnitTarget(bDane ? EnemyTarget : DanishTarget);
+                }
+            }
+            if (ACavalryUnit* Squadron = SpawnCavalry(FName(*(Tag + TEXT("-SKIRMISH-SQN"))), bDane ? TEXT("1. Eskadron") : TEXT("Pr. Husaren"),
+                Line + FVector(Back * 2000.0f, -16000.0f, 0.0f), Hq))
+            {
+                Own(Squadron);
+                if (!bDane && Squadron->OrderComponent)
+                {
+                    // The enemy's hussars ride at the Danish flank company.
+                    FStrategyOrder Order;
+                    Order.Type = EStrategyOrderType::AttackHere;
+                    Order.TargetLocation = DanishTarget->GetActorLocation();
+                    Order.Authority = EStrategyOrderAuthority::OfficerAI;
+                    Squadron->OrderComponent->SetOrder(Order);
+                }
+            }
+        }
+    }
     // The camera behind the Danish line (as the campaign's battles).
     FieldCameraTarget = DanishLine - FVector(6000.0f, 0.0f, 0.0f);
     FieldCameraYaw = 0.0f;
@@ -356,7 +422,7 @@ void AStrategyOOBTestScenario::GetBattleScore(int32& OutDanesStart, int32& OutDa
         const bool bDane = Unit->Side == EStrategySide::Denmark;
         const bool bBroken = !Unit->IsCombatEffective() || Unit->UnitState == EStrategyUnitState::Routed || Unit->UnitState == EStrategyUnitState::Destroyed;
         (bDane ? OutDanesStart : OutEnemyStart) += FMath::Max(0, Unit->InitialStrength);
-        (bDane ? OutDanesNow : OutEnemyNow) += bBroken ? 0 : FMath::Max(0, Unit->CurrentStrength);
+        (bDane ? OutDanesNow : OutEnemyNow) += bBroken ? 0 : FMath::Clamp(Unit->CurrentStrength, 0, FMath::Max(0, Unit->InitialStrength));
         (bDane ? OutDanesBroken : OutEnemyBroken) += bBroken ? 1 : 0;
     }
 }
@@ -895,6 +961,7 @@ float AStrategyOOBTestScenario::GetPontoonSecondsLeft() const
 void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    TickShots();
 
     BattleScoreTimer -= DeltaSeconds;
     if (BattleScoreTimer <= 0.0f)
@@ -957,6 +1024,81 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
         TickDuel(DeltaSeconds);
         // The cones are the HUD's (AStrategyHUD::DrawFireCone).
     }
+}
+
+void AStrategyOOBTestScenario::TickShots()
+{
+    if (!bShotsParsed)
+    {
+        bShotsParsed = true;
+        FString Plan;
+        if (FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Shots="), Plan, false))
+        {
+            Plan.ParseIntoArray(ShotPlan, TEXT(","));
+        }
+    }
+    UWorld* World = GetWorld();
+    if (!World || NextShot >= ShotPlan.Num())
+    {
+        return;
+    }
+    const float Now = World->GetTimeSeconds();
+    if (ShotTakeAt > 0.0f)
+    {
+        if (Now >= ShotTakeAt)
+        {
+            const FString File = FPaths::ProjectSavedDir() / TEXT("Screenshots") / FString::Printf(TEXT("battle_shot_%02d.png"), NextShot);
+            FScreenshotRequest::RequestScreenshot(File, false, false);
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SHOT: %s (%s)"), *File, *ShotPlan[NextShot]);
+            ShotTakeAt = -1.0f;
+            ++NextShot;
+            if (NextShot >= ShotPlan.Num() && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864ShotsQuit")))
+            {
+                FTimerHandle Quit;
+                World->GetTimerManager().SetTimer(Quit, []() { FPlatformMisc::RequestExit(false); }, 2.0f, false);
+            }
+        }
+        return;
+    }
+    TArray<FString> Parts;
+    ShotPlan[NextShot].ParseIntoArray(Parts, TEXT(":"));
+    if (Parts.Num() < 2 || Now < FCString::Atof(*Parts[0]))
+    {
+        return;
+    }
+    const float Distance = Parts.Num() > 2 ? FCString::Atof(*Parts[2]) : 4000.0f;
+    const float Side = Parts.Num() > 3 ? FCString::Atof(*Parts[3]) : 0.5f;
+    AStrategyUnit* Target = nullptr;
+    for (TActorIterator<AStrategyUnit> It(World); It; ++It)
+    {
+        if (It->StableUnitId.ToString().Contains(Parts[1]))
+        {
+            Target = *It;
+            break;
+        }
+    }
+    if (!Target)
+    {
+        ++NextShot;
+        return;
+    }
+    const FVector At = Target->GetActorLocation();
+    const FVector Fwd = Target->GetActorForwardVector().GetSafeNormal2D();
+    const FVector Right(-Fwd.Y, Fwd.X, 0.0f);
+    const FVector Eye = At - Fwd * Distance * 0.8f + Right * Distance * Side + FVector(0.0f, 0.0f, Distance * 0.4f);
+    if (!ShotCamera)
+    {
+        ShotCamera = World->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), Eye, FRotator::ZeroRotator);
+    }
+    if (ShotCamera)
+    {
+        ShotCamera->SetActorLocationAndRotation(Eye, (At + Fwd * Distance * 0.3f - Eye).Rotation());
+        if (APlayerController* PC = World->GetFirstPlayerController())
+        {
+            PC->SetViewTarget(ShotCamera);
+        }
+    }
+    ShotTakeAt = Now + 0.8f;
 }
 
 void AStrategyOOBTestScenario::TickDuel(float DeltaSeconds)

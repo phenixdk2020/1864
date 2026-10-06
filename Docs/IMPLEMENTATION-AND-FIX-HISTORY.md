@@ -1113,6 +1113,42 @@ Kun ladte soldater kan blive valgt til næste salve.
   - automatisk afgørelse og tilbagetog i slag.
 - Små skridt, fx det lille råvarekøb og knapper der kun viser eller vælger, går stadig igennem straks.
 
+
+### 2026-10-06 — Kamporden del/saml, ridende batteri, hærens status
+- **Kamporden (#24):**
+  - I enhedens kamporden står begge halvdele, når enheden er delt.
+  - Kompagnier kan trækkes fra den ene halvdel til den anden og tilbage (`MoveCompany`). De skal stå samme sted, og en halvdel beholder mindst ét kompagni.
+  - SAML IGEN, eller træk den ene halvdel hen på den anden, samler dem efter en JA/NEJ-dialog (`MergeRegiments`). Erfaring og øvelse blandes efter mandtal, og den overtallige chef bliver ledig.
+  - Ny `RemoveRegimentAt` retter alle henvisninger til enheder: officerer, skansernes kompagnier, slag, tog, trænkolonner og figurerne på kortet.
+- **Ridende batteri (#8):** knappen GØR RIDENDE findes nu også i enhedspanelet og i kampordenen for fodbatterier, ikke kun på enhedskortet.
+- **Hærens status (#9):**
+  - Nyt vindue fra Krigsministeriet i Statsrådet og fra Hæren-vinduet.
+  - Viser hæren pr. våbenart: enheder, i felten, mand, til stede, syge og sårede, heste, kanoner, morterer, erfaring.
+  - Viser vores tab (faldne, sårede, fangne, i lazarettet) og fjendens tab (dræbt, såret, fanget, sat ud af kampen).
+  - Viser erobret udstyr og de enheder, der har kæmpet mest.
+  - Erobret udstyr i `ApplyBattle`: den side, der holder slagmarken, samler geværer, kanoner, heste, vogne og faner. Det går på lager og gemmes (`wartotals`).
+
+### 2026-10-06 — 3D-slaget: kanoner, morterer, rytteri, kolonnemarch
+- **`AStrategyBattleBlast`:** effekter af kugler, cylinderskiver og punktlys, uden partikelassets.
+  - Mundingsflamme og røgbanke, nedslag med jordfontæne, støv og mærke i græsset.
+  - Granat med ild, sort røg og krater, og shrapnel, der springer i luften og sparker støv op.
+  - Kardæsk som støvkegle og hovstøv fra rytteriet.
+- **Kanonkuglen ses i luften**, og en rundkugle, der hopper hen over marken, kaster jord op ved hvert spring. Fejlsøgningsstreger vises kun på flag.
+- **Mortéren** viser nu sine skud: høj bue, egen flyvetid og en stor granateksplosion.
+- **Tabene falder, når skuddet lander**, og nærmest nedslaget (`FStrategyImpactRegistry`).
+  - Kardæsk dræber inden for keglen fra kanonen, som på brugerens tegning.
+  - Kardæsk på kort hold giver op til tre gange så mange tab (12–24 pr. kanon på 100 m).
+- **Rytteriet** vises som rækker af heste og ryttere (`UStrategyCavalryVisualComponent`).
+  - Kroppen hæver sig og vipper i skridt, trav og galop, og hovene laver støv.
+  - Rytteren sidder i sadlen og trækker sablen ved chok. Faldne heste vælter om på siden og bliver liggende.
+- **March i kolonne** (`UStrategyFormationPolicyComponent`):
+  - Infanteri og rytteri går i kolonne ved en lang marchordre (rytteriet i `CavalryColumn`).
+  - De deployerer til deres formation fra før marchen, når fjenden kommer inden for skudvidde plus en margin, 25 m før målet, eller når de standses.
+- **Test:**
+  - `-Strategy1864SkirmishArms` giver hver side et batteri, en mortér og en eskadron. Husarerne angriber.
+  - `-Strategy1864Shots=sek:enhed:afstand:side,...` tager skærmbilleder fra spillet selv (`-Strategy1864ShotsQuit` lukker bagefter).
+- **Rettelser:** QA-klodsen i karréerne er skjult, pointtallet tæller højst den oprindelige styrke, og advarslen om RiderSocket fyldte loggen.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

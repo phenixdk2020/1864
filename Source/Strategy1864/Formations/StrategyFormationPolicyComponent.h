@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "../Orders/StrategyOrderTypes.h"
+#include "StrategyFormationTypes.h"
 #include "StrategyFormationPolicyComponent.generated.h"
 
 class AStrategyUnit;
@@ -41,6 +42,17 @@ private:
     void ApplyInitialMovementFormation(const FStrategyOrder& Order);
     void EvaluateEarlyDeployment();
     AStrategyUnit* FindNearestEnemy(float& OutDistanceCm) const;
+    /** Infantry companies and cavalry change formation on the march; guns, headquarters and trains do not. */
+    bool MarchesInColumn() const;
+    bool IsColumn(EStrategyFormationType Formation) const;
+    EStrategyFormationType ColumnFormation() const;
+    float DeployDistanceCm(const AStrategyUnit* Enemy) const;
+    /** Back from column into the formation it fought in before the march. */
+    void Deploy();
+
+    /** The formation before the march (line, or square, or the cavalry's line). */
+    EStrategyFormationType BattleFormation = EStrategyFormationType::Line;
+    bool bMarching = false;
 
     UPROPERTY()
     TObjectPtr<AStrategyUnit> OwnerUnit;

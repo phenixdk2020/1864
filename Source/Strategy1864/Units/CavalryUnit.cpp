@@ -9,6 +9,7 @@
 #include "../Visual/StrategyMountedAnimationSyncComponent.h"
 #include "../Visual/StrategyUniformAppearanceComponent.h"
 #include "../Visual/StrategyHumanAnimationStateComponent.h"
+#include "../Visual/StrategyCavalryVisualComponent.h"
 
 ACavalryUnit::ACavalryUnit()
 {
@@ -26,6 +27,8 @@ ACavalryUnit::ACavalryUnit()
         MovementExecutor->MoveSpeedCmPerSecond = 900.0f;
     }
 
+    CavalryVisualComponent =
+        CreateDefaultSubobject<UStrategyCavalryVisualComponent>(TEXT("CavalryVisualComponent"));
     ChargeComponent =
         CreateDefaultSubobject<UStrategyCavalryChargeComponent>(TEXT("ChargeComponent"));
 

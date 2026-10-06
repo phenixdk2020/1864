@@ -1,7 +1,13 @@
 #include "StrategyArtilleryProjectilePresentation.h"
 
 #include "Components/SceneComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Engine/StaticMesh.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "../Terrain/StrategyTerrainQueryLibrary.h"
+#include "../Visual/StrategyBattleBlast.h"
+#include "UObject/ConstructorHelpers.h"
 
 AStrategyArtilleryProjectilePresentation::AStrategyArtilleryProjectilePresentation()
 {
@@ -11,7 +17,43 @@ AStrategyArtilleryProjectilePresentation::AStrategyArtilleryProjectilePresentati
         CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
     SetRootComponent(SceneRoot);
 
+    BallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BallMesh"));
+    BallMesh->SetupAttachment(SceneRoot);
+    BallMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    BallMesh->SetCastShadow(false);
+    BallMesh->bVisibleInRayTracing = false;
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> Sphere(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+    if (Sphere.Succeeded())
+    {
+        BallMesh->SetStaticMesh(Sphere.Object);
+    }
+    // Larger than a real 12-pounder ball (12 cm): it must be seen from the commander's height.
+    BallMesh->SetRelativeScale3D(FVector(0.28f));
+
     SetActorEnableCollision(false);
+}
+
+void AStrategyArtilleryProjectilePresentation::StrikeAt(const FVector& At, bool bBounce)
+{
+    UWorld* World = GetWorld();
+    const FVector Dir = (ImpactLocation - Spec.LaunchLocation).GetSafeNormal2D();
+    if (bBounce)
+    {
+        AStrategyBattleBlast::Spawn(World, EStrategyBlastKind::GroundImpact, At, Dir, 0.65f);
+        return;
+    }
+    switch (Spec.Style)
+    {
+    case EStrategyProjectilePresentationStyle::Shell:
+        AStrategyBattleBlast::Spawn(World, EStrategyBlastKind::ShellBurst, At, Dir, bFromMortar ? 1.4f : 1.0f);
+        break;
+    case EStrategyProjectilePresentationStyle::Shrapnel:
+        AStrategyBattleBlast::Spawn(World, EStrategyBlastKind::AirBurst, At, Dir, 1.0f);
+        break;
+    default:
+        AStrategyBattleBlast::Spawn(World, bFromMortar ? EStrategyBlastKind::ShellBurst : EStrategyBlastKind::GroundImpact, At, Dir, 1.0f);
+        break;
+    }
 }
 
 void AStrategyArtilleryProjectilePresentation::InitializePresentation(
@@ -30,10 +72,25 @@ void AStrategyArtilleryProjectilePresentation::InitializePresentation(
 
     SetActorLocation(Spec.LaunchLocation);
 
+    if (BallMesh)
+    {
+        // A dark ball: the simple translucent material, full opacity.
+        if (UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/EngineDebugMaterials/M_SimpleTranslucent.M_SimpleTranslucent")))
+        {
+            UMaterialInstanceDynamic* Mid = UMaterialInstanceDynamic::Create(Base, this);
+            Mid->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.03f, 0.03f, 0.03f, 1.0f));
+            BallMesh->SetMaterial(0, Mid);
+        }
+        BallMesh->SetRelativeScale3D(FVector(bFromMortar ? 0.4f : 0.28f));
+    }
+
     if (Spec.Style == EStrategyProjectilePresentationStyle::Canister)
     {
         bImpacted = true;
         SetActorLocation(Spec.LaunchLocation);
+        if (BallMesh) { BallMesh->SetVisibility(false); }
+        AStrategyBattleBlast::Spawn(GetWorld(), EStrategyBlastKind::Canister, Spec.LaunchLocation, Spec.PrimaryImpactLocation - Spec.LaunchLocation, 1.0f,
+            FVector::Dist2D(Spec.LaunchLocation, Spec.PrimaryImpactLocation));
     }
 }
 
@@ -77,7 +134,10 @@ void AStrategyArtilleryProjectilePresentation::Tick(float DeltaTime)
 
     if (Spec.Style == EStrategyProjectilePresentationStyle::Canister)
     {
-        DrawCanisterPresentation();
+        if (bDrawProjectilePoint)
+        {
+            DrawCanisterPresentation();
+        }
 
         PostImpactElapsedSeconds += DeltaTime;
         if (PostImpactElapsedSeconds >= 0.45f)
@@ -102,10 +162,29 @@ void AStrategyArtilleryProjectilePresentation::Tick(float DeltaTime)
 
         SetActorLocation(EvaluateTrajectory(Alpha));
 
+        // A round shot bounding over the field throws up the earth where it touches.
+        if (Spec.Style == EStrategyProjectilePresentationStyle::RoundShot && TrajectoryPoints.Num() > 2)
+        {
+            const int32 Now = FMath::FloorToInt(Alpha * (TrajectoryPoints.Num() - 1));
+            for (int32 i = FMath::Max(1, PassedPoint + 1); i <= Now && i < TrajectoryPoints.Num() - 1; ++i)
+            {
+                const FVector& P = TrajectoryPoints[i];
+                const bool bLow = P.Z - UStrategyTerrainQueryLibrary::GetEffectiveGroundZ(this, P) < 40.0f;
+                const bool bDip = P.Z <= TrajectoryPoints[i - 1].Z && P.Z <= TrajectoryPoints[i + 1].Z;
+                if (bLow && bDip)
+                {
+                    StrikeAt(P, true);
+                }
+            }
+            PassedPoint = FMath::Max(PassedPoint, Now);
+        }
+
         if (Alpha >= 1.0f)
         {
             bImpacted = true;
             SetActorLocation(ImpactLocation);
+            if (BallMesh) { BallMesh->SetVisibility(Spec.Style == EStrategyProjectilePresentationStyle::RoundShot); }
+            StrikeAt(ImpactLocation, false);
         }
     }
     else
@@ -119,7 +198,10 @@ void AStrategyArtilleryProjectilePresentation::Tick(float DeltaTime)
         }
     }
 
-    DrawPresentationDebug();
+    if (bDrawProjectilePoint || bDrawTrajectory)
+    {
+        DrawPresentationDebug();
+    }
 }
 
 void AStrategyArtilleryProjectilePresentation::DrawPresentationDebug()

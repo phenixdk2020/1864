@@ -432,7 +432,40 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 		C.bSieging = false;
 		C.SiegeTown = INDEX_NONE;
 		EnemyWarLosses += O.EnemyLosses;
-		EnemyCaptured += FMath::RoundToInt(O.EnemyLosses * (O.bDanishWin ? 0.2f : 0.05f));
+		const int32 Taken = FMath::RoundToInt(O.EnemyLosses * (O.bDanishWin ? 0.2f : 0.05f));
+		EnemyCaptured += Taken;
+		EnemyCapturedTotal += Taken;
+		// Of the rest about one in four fell, the others were wounded (the losses of 1848-50 and 1864).
+		const int32 Hit = FMath::Max(0, O.EnemyLosses - Taken);
+		const int32 Fell = FMath::RoundToInt(Hit * 0.27f);
+		EnemyKilled += Fell;
+		EnemyWounded += Hit - Fell;
+		// The side holding the field gathers what the other left on it: rifles, guns, horses, wagons, colours.
+		if (O.bDanishWin || O.bDraw)
+		{
+			const float Field = O.bDanishWin ? 1.f : 0.15f;
+			const int32 Rifles_ = FMath::RoundToInt(O.EnemyLosses * 0.6f * Field);
+			const float Broken = FMath::Clamp(float(O.EnemyLosses) / float(FMath::Max(1, C.Men + O.EnemyLosses)), 0.f, 1.f);
+			const int32 Guns_ = O.bDanishWin ? FMath::Min(C.Guns, FMath::RoundToInt(C.Guns * FMath::Min(0.3f, Broken * 0.8f))) : 0;
+			const int32 Horses_ = FMath::RoundToInt(O.EnemyLosses * 0.04f * Field);
+			const int32 Wagons_ = O.bDanishWin ? O.EnemyLosses / 400 : 0;
+			const int32 Colours_ = O.bDanishWin && O.EnemyLosses >= 1500 ? 1 : 0;
+			C.Guns -= Guns_;
+			Rifles += Rifles_;
+			GunStock += Guns_;
+			Horses += Horses_;
+			WagonStock += Wagons_;
+			CapturedRifles += Rifles_;
+			CapturedGuns += Guns_;
+			CapturedHorses += Horses_;
+			CapturedWagons += Wagons_;
+			CapturedColours += Colours_;
+			if (Rifles_ + Guns_ + Horses_ > 0)
+			{
+				News.Add(FString::Printf(TEXT("Bytte ved %s: %d geværer, %d kanoner, %d heste%s%s"), *Place, Rifles_, Guns_, Horses_,
+					Wagons_ > 0 ? *FString::Printf(TEXT(", %d vogne"), Wagons_) : TEXT(""), Colours_ > 0 ? TEXT(" og en fjendtlig fane") : TEXT("")));
+			}
+		}
 		C.bEngaged = false;
 		if (O.bDanishWin)
 		{

@@ -11,6 +11,7 @@ class UStrategyDragoonComponent;
 class UStrategyCavalryScreenAIComponent;
 class UStrategyHorseAnimationStateComponent;
 class UStrategyMountedAnimationSyncComponent;
+class UStrategyCavalryVisualComponent;
 
 UCLASS(Blueprintable)
 class STRATEGY1864_API ACavalryUnit : public AStrategyUnit
@@ -32,6 +33,10 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Cavalry")
     TObjectPtr<UStrategyCavalryChargeComponent> ChargeComponent;
+
+    /** The squadron shown as horsemen (horse and rider per few men). */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Cavalry")
+    TObjectPtr<UStrategyCavalryVisualComponent> CavalryVisualComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Cavalry")
     TObjectPtr<UStrategyDragoonComponent> DragoonComponent;

@@ -251,6 +251,293 @@ int32 ACampaign1851Map::SplitRegiment(int32 RegimentIndex, FString* OutWhy)
 	return New;
 }
 
+bool ACampaign1851Map::IsSplitPair(int32 A, int32 B) const
+{
+	if (!Regiments.IsValidIndex(A) || !Regiments.IsValidIndex(B) || A == B)
+	{
+		return false;
+	}
+	const FCampaign1851Regiment& RA = Regiments[A];
+	const FCampaign1851Regiment& RB = Regiments[B];
+	if (RA.Arm != RB.Arm || (!RA.bDetached && !RB.bDetached))
+	{
+		return false;
+	}
+	// A split-off half has the old id with a letter (1b, 1c, ...).
+	auto Base = [](const FCampaign1851Regiment& R) { return R.bDetached && R.Id.Len() > 1 ? R.Id.LeftChop(1) : R.Id; };
+	return Base(RA) == Base(RB);
+}
+
+int32 ACampaign1851Map::MergePartner(int32 RegimentIndex) const
+{
+	for (int32 i = 0; i < Regiments.Num(); ++i)
+	{
+		if (IsSplitPair(RegimentIndex, i) && CanMerge(RegimentIndex, i))
+		{
+			return i;
+		}
+	}
+	return INDEX_NONE;
+}
+
+namespace
+{
+	bool StandTogether(const FCampaign1851Regiment& A, const FCampaign1851Regiment& B)
+	{
+		if (A.IsMarching() || B.IsMarching())
+		{
+			return false;
+		}
+		return (A.Town != INDEX_NONE && A.Town == B.Town) || FVector2D::Distance(A.Km, B.Km) < 2.0;
+	}
+}
+
+bool ACampaign1851Map::CanMerge(int32 Keep, int32 Absorb, FString* OutWhy) const
+{
+	auto Fail = [OutWhy](const FString& Why) { if (OutWhy) { *OutWhy = Why; } return false; };
+	if (!IsSplitPair(Keep, Absorb))
+	{
+		return Fail(TEXT("Kun to halvdele af samme enhed kan samles"));
+	}
+	if (!StandTogether(Regiments[Keep], Regiments[Absorb]))
+	{
+		return Fail(TEXT("De to halvdele skal stå samme sted (ikke på march)"));
+	}
+	for (const FCampaign1851Battle& B : Battles)
+	{
+		if (B.Regiments.Contains(Keep) || B.Regiments.Contains(Absorb))
+		{
+			return Fail(TEXT("Ikke midt i et slag"));
+		}
+	}
+	if (Regiments[Keep].Captains.Num() + Regiments[Absorb].Captains.Num() > 10)
+	{
+		return Fail(TEXT("For mange kompagnier i én enhed"));
+	}
+	return true;
+}
+
+int32 ACampaign1851Map::MergeRegiments(int32 Keep, int32 Absorb, FString* OutWhy)
+{
+	if (!CanMerge(Keep, Absorb, OutWhy))
+	{
+		return INDEX_NONE;
+	}
+	const FCampaign1851Regiment A = Regiments[Absorb];
+	FCampaign1851Regiment& K = Regiments[Keep];
+	const float WK = float(FMath::Max(K.Men, 1)), WA = float(FMath::Max(A.Men, 1));
+	auto Mix = [WK, WA](float X, float Y) { return (X * WK + Y * WA) / (WK + WA); };
+	K.Experience = Mix(K.Experience, A.Experience);
+	for (int32 s = 0; s < int32(ECampaign1851Skill::Count); ++s) { K.Skills[s] = Mix(K.Skills[s], A.Skills[s]); }
+	for (int32 d = 0; d < 4; ++d) { K.FireDrills[d] = Mix(K.FireDrills[d], A.FireDrills[d]); }
+	K.Morale = Mix(K.Morale, A.Morale);
+	K.Cohesion = FMath::Max(10.f, Mix(K.Cohesion, A.Cohesion) - 5.f);
+	K.Food = Mix(K.Food, A.Food);
+	K.Fodder = Mix(K.Fodder, A.Fodder);
+	K.Ammo = Mix(K.Ammo, A.Ammo);
+	K.Present = Mix(K.Present, A.Present);
+	K.Men += A.Men;
+	K.MaxMen += A.MaxMen;
+	K.Sick += A.Sick;
+	K.Horses += A.Horses;
+	K.MaxHorses += A.MaxHorses;
+	K.Guns += A.Guns;
+	K.Mortars += A.Mortars;
+	K.Wagons += A.Wagons;
+	K.TotalKilled += A.TotalKilled;
+	K.TotalWounded += A.TotalWounded;
+	K.TotalCaptured += A.TotalCaptured;
+	K.TotalEnemyKilled += A.TotalEnemyKilled;
+	K.Service.Append(A.Service);
+	K.Service.Sort([](const FCampaign1851ServiceEntry& X, const FCampaign1851ServiceEntry& Y) { return X.Day < Y.Day; });
+	// Its companies come over with their captains (and those in a fort stay there, now of this unit).
+	const int32 Base = K.Captains.Num();
+	for (int32 k = 0; k < A.Captains.Num(); ++k)
+	{
+		K.Captains.Add(A.Captains[k]);
+		K.CompanyFort.Add(A.CompanyFort.IsValidIndex(k) ? A.CompanyFort[k] : 0);
+		if (Officers.IsValidIndex(A.Captains[k]))
+		{
+			Officers[A.Captains[k]].CaptainOf = Keep;
+			Officers[A.Captains[k]].Company = Base + k;
+		}
+	}
+	for (FCampaign1851Fort& F : Forts)
+	{
+		for (FCampaign1851FortCompany& C : F.Companies)
+		{
+			if (C.Regiment == Absorb)
+			{
+				C.Regiment = Keep;
+				C.Company += Base;
+			}
+		}
+	}
+	// Its chief is free for another post; a general riding with it stays with the joined unit if it has none.
+	if (Officers.IsValidIndex(A.Chief))
+	{
+		Officers[A.Chief].Regiment = INDEX_NONE;
+	}
+	if (Officers.IsValidIndex(A.General))
+	{
+		if (K.General == INDEX_NONE)
+		{
+			K.General = A.General;
+			Officers[A.General].Regiment = Keep;
+		}
+		else
+		{
+			Officers[A.General].Regiment = INDEX_NONE;
+		}
+	}
+	if (!A.bDetached)
+	{
+		// The original was the half absorbed: the joined unit takes its name and is a whole unit again.
+		K.Id = A.Id;
+		K.Name = A.Name;
+		K.bDetached = false;
+		K.bRaised = A.bRaised;
+	}
+	else if (!K.bDetached)
+	{
+		K.Name = K.Name.Replace(TEXT(" (2. halvbataljon)"), TEXT(""));
+	}
+	News.Add(FString::Printf(TEXT("%s er samlet igen (%d kompagnier, %d mand)"), *K.Name, K.Captains.Num(), K.Men));
+	RemoveRegimentAt(Absorb);
+	const int32 NewKeep = Keep > Absorb ? Keep - 1 : Keep;
+	UpdateRegimentPiece(NewKeep);
+	return NewKeep;
+}
+
+bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString* OutWhy)
+{
+	auto Fail = [OutWhy](const FString& Why) { if (OutWhy) { *OutWhy = Why; } return false; };
+	if (!Regiments.IsValidIndex(From) || !Regiments.IsValidIndex(To) || From == To || !Regiments[From].Captains.IsValidIndex(Company))
+	{
+		return Fail(TEXT("Ingen enhed"));
+	}
+	FCampaign1851Regiment& F = Regiments[From];
+	FCampaign1851Regiment& T = Regiments[To];
+	if (Campaign1851Army::CompaniesFor(T.Arm) == 0 || (F.Arm != T.Arm && !(Campaign1851Army::CompaniesFor(F.Arm) > 0)))
+	{
+		return Fail(TEXT("Kompagniet kan kun gå over til en bataljon"));
+	}
+	if (!StandTogether(F, T))
+	{
+		return Fail(TEXT("De to enheder skal stå samme sted (ikke på march)"));
+	}
+	if (F.Captains.Num() <= 1)
+	{
+		return Fail(TEXT("Enheden kan ikke afgive sit sidste kompagni"));
+	}
+	if (T.Captains.Num() >= 10)
+	{
+		return Fail(TEXT("Enheden har allerede ti kompagnier"));
+	}
+	if (F.CompanyFort.IsValidIndex(Company) && F.CompanyFort[Company] != 0)
+	{
+		return Fail(TEXT("Kompagniet ligger i en skanse; kald det hjem først"));
+	}
+	for (const FCampaign1851Battle& B : Battles)
+	{
+		if (B.Regiments.Contains(From) || B.Regiments.Contains(To))
+		{
+			return Fail(TEXT("Ikke midt i et slag"));
+		}
+	}
+	// Its share of the battalion: the men with the colours spread over the companies not in a fort.
+	int32 WithIt = 0;
+	for (int32 k = 0; k < F.Captains.Num(); ++k)
+	{
+		WithIt += F.CompanyFort.IsValidIndex(k) && F.CompanyFort[k] != 0 ? 0 : 1;
+	}
+	const float Share = 1.f / float(FMath::Max(WithIt, 1));
+	const int32 Men = FMath::RoundToInt(F.Men * Share), Sick = FMath::RoundToInt(F.Sick * Share), Max = FMath::RoundToInt(F.MaxMen / float(F.Captains.Num()));
+	const float WT = float(FMath::Max(T.Men, 1)), WF = float(FMath::Max(Men, 1));
+	auto Mix = [WT, WF](float X, float Y) { return (X * WT + Y * WF) / (WT + WF); };
+	T.Experience = Mix(T.Experience, F.Experience);
+	for (int32 s = 0; s < int32(ECampaign1851Skill::Count); ++s) { T.Skills[s] = Mix(T.Skills[s], F.Skills[s]); }
+	for (int32 d = 0; d < 4; ++d) { T.FireDrills[d] = Mix(T.FireDrills[d], F.FireDrills[d]); }
+	T.Morale = Mix(T.Morale, F.Morale);
+	T.Men += Men; F.Men -= Men;
+	T.Sick += Sick; F.Sick -= Sick;
+	T.MaxMen += Max; F.MaxMen -= Max;
+	T.Cohesion = FMath::Max(10.f, T.Cohesion - 3.f);
+	const int32 Captain = F.Captains[Company];
+	T.Captains.Add(Captain);
+	T.CompanyFort.Add(0);
+	F.Captains.RemoveAt(Company);
+	if (F.CompanyFort.IsValidIndex(Company)) { F.CompanyFort.RemoveAt(Company); }
+	if (Officers.IsValidIndex(Captain))
+	{
+		Officers[Captain].CaptainOf = To;
+		Officers[Captain].Company = T.Captains.Num() - 1;
+	}
+	// The companies after it move up one place in their battalion.
+	for (int32 k = Company; k < F.Captains.Num(); ++k)
+	{
+		if (Officers.IsValidIndex(F.Captains[k])) { Officers[F.Captains[k]].Company = k; }
+	}
+	for (FCampaign1851Fort& Fort : Forts)
+	{
+		for (FCampaign1851FortCompany& C : Fort.Companies)
+		{
+			if (C.Regiment == From && C.Company > Company) { --C.Company; }
+		}
+	}
+	UpdateRegimentPiece(From);
+	UpdateRegimentPiece(To);
+	return true;
+}
+
+void ACampaign1851Map::RemoveRegimentAt(int32 Index)
+{
+	if (!Regiments.IsValidIndex(Index))
+	{
+		return;
+	}
+	if (RegimentPieces.IsValidIndex(Index))
+	{
+		if (RegimentPieces[Index]) { RegimentPieces[Index]->DestroyComponent(); }
+		RegimentPieces.RemoveAt(Index);
+	}
+	if (RegimentCars.Num() >= (Index + 1) * 3)
+	{
+		for (int32 c = 2; c >= 0; --c)
+		{
+			if (RegimentCars[Index * 3 + c]) { RegimentCars[Index * 3 + c]->DestroyComponent(); }
+			RegimentCars.RemoveAt(Index * 3 + c);
+		}
+	}
+	Regiments.RemoveAt(Index);
+	auto Fix = [Index](int32& R) { if (R == Index) { R = INDEX_NONE; } else if (R > Index) { --R; } };
+	for (FCampaign1851Officer& O : Officers)
+	{
+		Fix(O.Regiment);
+		const bool bWasCaptain = O.CaptainOf == Index;
+		Fix(O.CaptainOf);
+		if (bWasCaptain) { O.Company = INDEX_NONE; }
+	}
+	for (FCampaign1851Fort& F : Forts)
+	{
+		F.Companies.RemoveAll([Index](const FCampaign1851FortCompany& C) { return C.Regiment == Index; });
+		for (FCampaign1851FortCompany& C : F.Companies) { Fix(C.Regiment); }
+	}
+	for (FCampaign1851Battle& B : Battles)
+	{
+		B.Regiments.Remove(Index);
+		for (int32& R : B.Regiments) { Fix(R); }
+	}
+	for (FCampaign1851TroopTrain& T : TroopTrainList)
+	{
+		Fix(T.Lead);
+	}
+	for (FCampaign1851SupplyColumn& S : SupplyColumns)
+	{
+		if (!S.bFort) { Fix(S.Target); }
+	}
+}
+
 int32 ACampaign1851Map::AddRaisedRegiment(const FString& Id, const FString& Name, ECampaign1851Arm Arm, int32 Home, int32 MaxMen)
 {
 	FCampaign1851Regiment R;

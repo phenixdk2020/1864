@@ -4,6 +4,8 @@
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../Orders/StrategyOrderComponent.h"
 #include "../Units/StrategyUnit.h"
+#include "../Units/CavalryUnit.h"
+#include "../Combat/StrategyFireControlComponent.h"
 #include "EngineUtils.h"
 
 UStrategyFormationPolicyComponent::UStrategyFormationPolicyComponent()
@@ -37,6 +39,11 @@ void UStrategyFormationPolicyComponent::HandleOrderChanged(const FStrategyOrder&
 
     if (!NewOrder.IsValidOrder() || !IsMovementMission(NewOrder.Type))
     {
+        // Halted or given another task while in column: it forms up where it stands.
+        if (bMarching)
+        {
+            Deploy();
+        }
         SetComponentTickEnabled(false);
         return;
     }
@@ -62,6 +69,11 @@ void UStrategyFormationPolicyComponent::TickComponent(
     if (!OwnerUnit->OrderComponent->IsPhysicallyExecuting() ||
         !OwnerUnit->MovementExecutor->HasMovementGoal())
     {
+        // At the goal: out of column into its formation again.
+        if (bMarching)
+        {
+            Deploy();
+        }
         SetComponentTickEnabled(false);
         return;
     }
@@ -93,57 +105,114 @@ bool UStrategyFormationPolicyComponent::IsMovementMission(EStrategyOrderType Typ
     }
 }
 
-void UStrategyFormationPolicyComponent::ApplyInitialMovementFormation(const FStrategyOrder& Order)
+bool UStrategyFormationPolicyComponent::MarchesInColumn() const
 {
+    return OwnerUnit && OwnerUnit->FormationComponent &&
+        (OwnerUnit->Echelon == EStrategyEchelon::Company || OwnerUnit->Echelon == EStrategyEchelon::Cavalry);
+}
+
+bool UStrategyFormationPolicyComponent::IsColumn(EStrategyFormationType Formation) const
+{
+    return Formation == EStrategyFormationType::MarchColumn || Formation == EStrategyFormationType::CavalryColumn || Formation == EStrategyFormationType::DefileColumn;
+}
+
+EStrategyFormationType UStrategyFormationPolicyComponent::ColumnFormation() const
+{
+    return OwnerUnit && OwnerUnit->IsA<ACavalryUnit>() ? EStrategyFormationType::CavalryColumn : EStrategyFormationType::MarchColumn;
+}
+
+float UStrategyFormationPolicyComponent::DeployDistanceCm(const AStrategyUnit* Enemy) const
+{
+    // The longest reach on either side (the enemy's rifles and guns, or our own), and a margin to form up in.
+    auto Reach = [](const AStrategyUnit* U)
+    {
+        float R = U ? U->MaximumFireRangeCm : 0.0f;
+        if (U && U->FireControlComponent)
+        {
+            R = FMath::Max(R, U->FireControlComponent->LongRangeCm);
+        }
+        return R;
+    };
+    return FMath::Max(Reach(OwnerUnit), Reach(Enemy)) + DeploySafetyBufferCm;
+}
+
+void UStrategyFormationPolicyComponent::Deploy()
+{
+    bMarching = false;
     if (!OwnerUnit || !OwnerUnit->FormationComponent)
     {
         return;
+    }
+    // A defile (a bridge, a lane) is left by the unit itself when it is through.
+    const EStrategyFormationType Now = OwnerUnit->FormationComponent->CurrentFormation;
+    if (IsColumn(Now) && Now != EStrategyFormationType::DefileColumn)
+    {
+        OwnerUnit->FormationComponent->SetFormation(BattleFormation);
+        OwnerUnit->SetUnitState(EStrategyUnitState::Reforming);
+    }
+}
+
+void UStrategyFormationPolicyComponent::ApplyInitialMovementFormation(const FStrategyOrder& Order)
+{
+    if (!MarchesInColumn())
+    {
+        return;
+    }
+    const EStrategyFormationType Now = OwnerUnit->FormationComponent->CurrentFormation;
+    if (!IsColumn(Now))
+    {
+        BattleFormation = Now;
+    }
+    else if (!bMarching)
+    {
+        BattleFormation = OwnerUnit->IsA<ACavalryUnit>() ? EStrategyFormationType::CavalryLine : EStrategyFormationType::Line;
     }
 
     const float DistanceCm = FVector::Dist2D(
         OwnerUnit->GetActorLocation(),
         Order.TargetLocation);
+    float EnemyDistanceCm = TNumericLimits<float>::Max();
+    AStrategyUnit* Enemy = FindNearestEnemy(EnemyDistanceCm);
+    const bool bEnemyClose = Enemy && EnemyDistanceCm <= DeployDistanceCm(Enemy);
 
-    if (DistanceCm >= LongMoveColumnThresholdCm)
+    // A march: in column on the way, unless the enemy is already within reach (then it moves in its formation).
+    if (DistanceCm >= LongMoveColumnThresholdCm && !bEnemyClose)
     {
-        OwnerUnit->FormationComponent->SetFormation(
-            EStrategyFormationType::MarchColumn);
+        if (Now != EStrategyFormationType::DefileColumn)
+        {
+            OwnerUnit->FormationComponent->SetFormation(ColumnFormation());
+        }
+        bMarching = true;
     }
-    else
+    else if (IsColumn(Now) && Now != EStrategyFormationType::DefileColumn)
     {
-        OwnerUnit->FormationComponent->SetFormation(
-            EStrategyFormationType::Line);
+        OwnerUnit->FormationComponent->SetFormation(BattleFormation);
+        bMarching = false;
     }
 }
 
 void UStrategyFormationPolicyComponent::EvaluateEarlyDeployment()
 {
-    if (!OwnerUnit ||
-        !OwnerUnit->FormationComponent ||
-        OwnerUnit->FormationComponent->CurrentFormation != EStrategyFormationType::MarchColumn)
+    if (!bMarching || !MarchesInColumn() || !IsColumn(OwnerUnit->FormationComponent->CurrentFormation))
     {
         return;
     }
 
     float EnemyDistanceCm = TNumericLimits<float>::Max();
     AStrategyUnit* NearestEnemy = FindNearestEnemy(EnemyDistanceCm);
-    if (!NearestEnemy)
+    if (NearestEnemy && EnemyDistanceCm <= DeployDistanceCm(NearestEnemy))
     {
+        Deploy();
         return;
     }
-
-    const float DeployDistanceCm =
-        FMath::Max(
-            OwnerUnit->MaximumFireRangeCm,
-            NearestEnemy->MaximumFireRangeCm) +
-        DeploySafetyBufferCm;
-
-    if (EnemyDistanceCm <= DeployDistanceCm)
+    // Close to the goal: it forms up for the last stretch, so it arrives in order.
+    if (OwnerUnit->OrderComponent)
     {
-        OwnerUnit->FormationComponent->SetFormation(
-            EStrategyFormationType::Line);
-
-        OwnerUnit->SetUnitState(EStrategyUnitState::Reforming);
+        const FStrategyOrder Order = OwnerUnit->OrderComponent->GetCurrentOrder();
+        if (FVector::Dist2D(OwnerUnit->GetActorLocation(), Order.TargetLocation) < 2500.0f)
+        {
+            Deploy();
+        }
     }
 }
 

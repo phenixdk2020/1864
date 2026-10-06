@@ -24,6 +24,7 @@
 #include "Misc/Parse.h"
 #include "StrategyCrowdModel.h"
 #include "../Combat/StrategyFireDrillComponent.h"
+#include "StrategyBattleBlast.h"
 
 UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
 {
@@ -175,11 +176,12 @@ void UStrategyInfantryVisualComponent::TickComponent(
     if (CachedStrength != CurrentStrength)
     {
         const int32 Desired = GetDesiredVisualCount();
-        if (bLeaveCorpses && CachedStrength != INDEX_NONE && Desired < SoldierComponents.Num())
+        const int32 Standing = SoldierComponents.Num() - PendingKillCount;
+        if (bLeaveCorpses && CachedStrength != INDEX_NONE && Desired < Standing)
         {
-            KillSoldiers(SoldierComponents.Num() - Desired);
+            QueueKills(Standing - Desired);
         }
-        EnsureVisualCount(Desired);
+        EnsureVisualCount(Desired + PendingKillCount);
         RebuildFormation();
         CachedStrength = CurrentStrength;
     }
@@ -200,6 +202,12 @@ void UStrategyInfantryVisualComponent::TickComponent(
         bCachedBayonetFixed = bBayonetFixed;
     }
 
+    // The men stand for the company: the grey block of the QA view goes (it shows inside a square).
+    if (OwnerCompany->QAPlaceholderMesh && OwnerCompany->QAPlaceholderMesh->IsVisible())
+    {
+        OwnerCompany->QAPlaceholderMesh->SetVisibility(false);
+    }
+    ProcessPendingKills();
     RefreshAnimation(false);
     UpdatePersonalActions();
     UpdateCrowdMode();
@@ -621,7 +629,51 @@ void UStrategyInfantryVisualComponent::SpawnMuzzleSmoke(const USkeletalMeshCompo
     }
 }
 
-void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count)
+void UStrategyInfantryVisualComponent::QueueKills(int32 Count)
+{
+    UWorld* World = GetWorld();
+    const float Now = World ? World->GetTimeSeconds() : 0.0f;
+    FStrategyImpactRegistry::FImpact Impact;
+    if (World && OwnerCompany && FStrategyImpactRegistry::Find(World, OwnerCompany->GetActorLocation(), 6500.0f, Now, Impact))
+    {
+        if (Impact.LandTime > Now)
+        {
+            PendingKills.Add({ Count, Impact.Location, Impact.LandTime, Impact.bCone, Impact.Origin });
+            PendingKillCount += Count;
+            return;
+        }
+        KillSoldiers(Count, &Impact.Location, Impact.bCone ? &Impact.Origin : nullptr);
+        return;
+    }
+    KillSoldiers(Count);
+}
+
+void UStrategyInfantryVisualComponent::ProcessPendingKills()
+{
+    if (PendingKills.Num() == 0)
+    {
+        return;
+    }
+    const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+    bool bAny = false;
+    for (int32 p = PendingKills.Num() - 1; p >= 0; --p)
+    {
+        if (Now >= PendingKills[p].Time || Now < PendingKills[p].Time - 10.0f)
+        {
+            const FPendingKill Due = PendingKills[p];
+            PendingKills.RemoveAt(p);
+            PendingKillCount = FMath::Max(0, PendingKillCount - Due.Count);
+            KillSoldiers(Due.Count, &Due.Location, Due.bCone ? &Due.Origin : nullptr);
+            bAny = true;
+        }
+    }
+    if (bAny)
+    {
+        RebuildFormation();
+    }
+}
+
+void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* Near, const FVector* ConeOrigin)
 {
     // The hit: random men of the company fall where they stand and stay there (not with the company).
     const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
@@ -630,12 +682,41 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count)
          OwnerCompany->HumanAnimationStateComponent->CurrentAction == EStrategyHumanAnimationAction::Run);
     for (int32 k = 0; k < Count && SoldierComponents.Num() > 0; ++k)
     {
-        const int32 i = FMath::RandRange(0, SoldierComponents.Num() - 1);
+        int32 i = FMath::RandRange(0, SoldierComponents.Num() - 1);
+        if (Near && ConeOrigin)
+        {
+            // Case shot: anyone in the cone from the gun (about 11 degrees either side of its line) may fall;
+            // outside it, no one. If the cone is empty of men, those nearest its line.
+            const FVector Axis = (*Near - *ConeOrigin).GetSafeNormal2D();
+            TArray<int32> Inside;
+            float BestOff = TNumericLimits<float>::Max();
+            int32 Nearest = i;
+            for (int32 c = 0; c < SoldierComponents.Num(); ++c)
+            {
+                if (!SoldierComponents[c]) { continue; }
+                const FVector To = (SoldierComponents[c]->GetComponentLocation() - *ConeOrigin).GetSafeNormal2D();
+                const float Cos = FVector::DotProduct(To, Axis);
+                if (Cos > 0.981f) { Inside.Add(c); }
+                if (1.0f - Cos < BestOff) { BestOff = 1.0f - Cos; Nearest = c; }
+            }
+            i = Inside.Num() > 0 ? Inside[FMath::RandRange(0, Inside.Num() - 1)] : Nearest;
+        }
+        else if (Near)
+        {
+            // A shot: the men nearest where it struck (a little scattered).
+            float Best = TNumericLimits<float>::Max();
+            for (int32 c = 0; c < SoldierComponents.Num(); ++c)
+            {
+                if (!SoldierComponents[c]) { continue; }
+                const float D = FVector::Dist2D(SoldierComponents[c]->GetComponentLocation(), *Near) + FMath::FRandRange(0.0f, 250.0f);
+                if (D < Best) { Best = D; i = c; }
+            }
+        }
         USkeletalMeshComponent* Soldier = SoldierComponents[i];
         if (Soldier)
         {
             Soldier->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-            const int32 Variant = FMath::RandRange(0, 2);
+            const int32 Variant = Near && FMath::FRand() < 0.6f ? 2 : FMath::RandRange(0, 2);
             const TSoftObjectPtr<UAnimSequence>& Death = bMoving && !DeathWalkingAsset.IsNull() && FMath::FRand() < 0.5f ? DeathWalkingAsset
                 : Variant == 0 ? DeathAsset : Variant == 1 ? DeathAsset2 : DeathAsset3;
             const float Rate = FMath::FRandRange(0.9f, 1.1f);

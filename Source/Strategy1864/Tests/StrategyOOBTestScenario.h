@@ -234,6 +234,13 @@ private:
     bool bSkirmish = false;
     FString BattleOutcome;
     bool bDanishVictory = false;
+    /** -Strategy1864Shots=sec:unit:distance,...: the view goes to the unit and a screenshot is saved (QA of the look). */
+    void TickShots();
+    TArray<FString> ShotPlan;
+    int32 NextShot = 0;
+    float ShotTakeAt = -1.0f;
+    bool bShotsParsed = false;
+    UPROPERTY() TObjectPtr<AActor> ShotCamera;
     float BattleScoreTimer = 0.0f;
     void BuildSkirmish(int32 EnemyCompanies);
     void UpdateBattleOutcome();

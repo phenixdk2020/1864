@@ -852,7 +852,13 @@ int32 UStrategyArtilleryFireMissionComponent::ResolveCasualties(
 
     HitChance = FMath::Clamp(HitChance, 0.01f, 0.95f);
 
-    const FIntPoint CasualtyRange = GetCasualtyRange(AmmoType);
+    FIntPoint CasualtyRange = GetCasualtyRange(AmmoType);
+    if (AmmoType == EStrategyArtilleryAmmoType::Canister)
+    {
+        // Case shot at close range sweeps the ranks: three times the men at a hundred metres, less at its limit.
+        const float Close = FMath::Lerp(3.0f, 0.8f, RangeFraction);
+        CasualtyRange = FIntPoint(FMath::RoundToInt(CasualtyRange.X * Close), FMath::RoundToInt(CasualtyRange.Y * Close));
+    }
 
     const float MissDispersionCm =
         FMath::Lerp(450.0f, 2800.0f, RangeFraction);

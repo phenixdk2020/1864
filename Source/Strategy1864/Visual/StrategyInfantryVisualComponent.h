@@ -222,7 +222,13 @@ private:
     UAnimSequence* ResolveAnimation(bool& bOutLooping) const;
     void DestroyVisualComponents();
     /** Soldiers hit: out of the ranks, a death animation, and left lying (Docs: the duel test). */
-    void KillSoldiers(int32 Count);
+    void KillSoldiers(int32 Count, const FVector* Near = nullptr, const FVector* ConeOrigin = nullptr);
+    /** Men lost to a shot still in the air fall when it strikes, next to the strike (the artillery's registry). */
+    void QueueKills(int32 Count);
+    void ProcessPendingKills();
+    struct FPendingKill { int32 Count = 0; FVector Location = FVector::ZeroVector; float Time = 0.0f; bool bCone = false; FVector Origin = FVector::ZeroVector; };
+    TArray<FPendingKill> PendingKills;
+    int32 PendingKillCount = 0;
     /** Rifles along the grip, from the right hand towards the left. */
     void AlignWeapons();
     /** Each soldier's own shot: raise, fire, smoke; then back to the company's animation. */

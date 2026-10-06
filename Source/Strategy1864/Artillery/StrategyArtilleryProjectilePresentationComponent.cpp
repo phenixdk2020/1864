@@ -4,6 +4,8 @@
 #include "StrategyArtilleryProjectilePresentation.h"
 #include "StrategyArtilleryTrajectoryLibrary.h"
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
+#include "../Visual/StrategyBattleBlast.h"
+#include "StrategyMortarBatteryUnit.h"
 #include "Engine/World.h"
 
 UStrategyArtilleryProjectilePresentationComponent::
@@ -127,13 +129,30 @@ PresentResolvedSalvo(
 
         FVector FinalPoint = Spec.PrimaryImpactLocation;
 
-        const TArray<FVector> Path =
-            UStrategyArtilleryTrajectoryLibrary::BuildTrajectory(
+        TArray<FVector> Path;
+        if (OwnerBattery->IsA<AStrategyMortarBatteryUnit>())
+        {
+            // A mortar throws its bomb high: a steep arc (apex about half the distance up), slow to fall.
+            const float Dist = FVector::Dist2D(Spec.LaunchLocation, FinalPoint);
+            const float Apex = FMath::Clamp(Dist * 0.55f, 1800.0f, 10000.0f);
+            for (int32 k = 0; k <= 24; ++k)
+            {
+                const float T = k / 24.0f;
+                FVector P = FMath::Lerp(Spec.LaunchLocation, FinalPoint, T);
+                P.Z += 4.0f * Apex * T * (1.0f - T);
+                Path.Add(P);
+            }
+            Spec.FlightSeconds = FMath::Clamp(Dist / 3500.0f, 1.5f, 8.0f);
+        }
+        else
+        {
+            Path = UStrategyArtilleryTrajectoryLibrary::BuildTrajectory(
                 OwnerBattery,
                 Spec,
                 TrajectorySampleCount,
                 bEnableRoundShotRicochet,
                 FinalPoint);
+        }
 
         float PathLengthCm = 0.0f;
         for (int32 PathIndex = 1; PathIndex < Path.Num(); ++PathIndex)
@@ -151,7 +170,7 @@ PresentResolvedSalvo(
                     Spec.LaunchLocation,
                     Spec.PrimaryImpactLocation));
 
-        Spec.FlightSeconds *=
+        Spec.FlightSeconds *= OwnerBattery->IsA<AStrategyMortarBatteryUnit>() ? 1.0f :
             FMath::Clamp(
                 PathLengthCm / DirectDistanceCm,
                 1.0f,
@@ -168,11 +187,30 @@ PresentResolvedSalvo(
             continue;
         }
 
+        const bool bMortar = OwnerBattery->IsA<AStrategyMortarBatteryUnit>();
+        Projectile->bFromMortar = bMortar;
         Projectile->InitializePresentation(
             Spec,
             Path,
             FinalPoint,
             bDrawDebugTrajectory);
+
+        // The discharge at the gun, and where the men will fall: next to the strike, when the shot arrives.
+        AStrategyBattleBlast::Spawn(GetWorld(), bMortar ? EStrategyBlastKind::MortarMuzzle : EStrategyBlastKind::CannonMuzzle,
+            Spec.LaunchLocation, Spec.PrimaryImpactLocation - Spec.LaunchLocation, 1.0f);
+        const float Now = GetWorld()->GetTimeSeconds();
+        const bool bCanister = Spec.Style == EStrategyProjectilePresentationStyle::Canister;
+        const bool bShrapnel = Spec.Style == EStrategyProjectilePresentationStyle::Shrapnel;
+        const FVector Strike = bShrapnel ? FinalPoint + (FinalPoint - Spec.LaunchLocation).GetSafeNormal2D() * 900.0f : FinalPoint;
+        if (bCanister)
+        {
+            FStrategyImpactRegistry::AddCone(GetWorld(), Spec.LaunchLocation, Strike, Now + 0.15f);
+        }
+        else
+        {
+            FStrategyImpactRegistry::Add(GetWorld(), Strike, Now + Spec.FlightSeconds,
+                bShrapnel ? 1000.0f : Spec.Style == EStrategyProjectilePresentationStyle::Shell ? 700.0f : 450.0f);
+        }
 
         ActiveProjectiles.Add(Projectile);
         AddHistory(Spec, FinalPoint);

@@ -6,6 +6,7 @@
 #include "StrategyArtilleryProjectilePresentation.generated.h"
 
 class USceneComponent;
+class UStaticMeshComponent;
 
 UCLASS(Blueprintable)
 class STRATEGY1864_API AStrategyArtilleryProjectilePresentation : public AActor
@@ -33,7 +34,15 @@ public:
     FVector ImpactLocation = FVector::ZeroVector;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Projectile")
-    bool bDrawProjectilePoint = true;
+    bool bDrawProjectilePoint = false;
+
+    /** Fired by a mortar: the shell bursts where it falls. */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Projectile")
+    bool bFromMortar = false;
+
+    /** The ball (or shell) itself, dark against the sky. */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Projectile")
+    TObjectPtr<UStaticMeshComponent> BallMesh;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Projectile")
     bool bDrawTrajectory = false;
@@ -62,6 +71,9 @@ private:
     void DrawPresentationDebug();
     void DrawCanisterPresentation();
 
+    void StrikeAt(const FVector& At, bool bBounce);
+
     float ElapsedSeconds = 0.0f;
     float PostImpactElapsedSeconds = 0.0f;
+    int32 PassedPoint = 0;
 };

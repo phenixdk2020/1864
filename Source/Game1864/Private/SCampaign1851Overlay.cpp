@@ -1567,8 +1567,18 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 		}
 	}
 	Y += 30.f;
+	const bool bFootBattery = bSingle && First.Arm == ECampaign1851Arm::Artillery && First.Mortars == 0;
+	if (bFootBattery)
+	{
+		FString HorseWhy;
+		const bool bCan = Map->CanUpgradeToHorseBattery(SelectedRegiments[0], &HorseWhy);
+		const FVector2D At(Pos.X + Size.X - 196.f, Y - 12.f);
+		PaintButton(Geometry, Out, Layer + 3, At, FVector2D(150.f, 24.f), TEXT("GØR RIDENDE"), EButton::HorseBattery, SelectedRegiments[0], false, !bCan);
+		AddTip(At, FVector2D(150.f, 24.f), FString::Printf(TEXT("Gør fodbatteriet ridende: alle kanonerer til hest, så det kan følge rytteriet. %d heste, %s rd.%s"),
+			ACampaign1851Map::HorseBatteryHorses, *Thousands(int32(ACampaign1851Map::HorseBatteryCost)), bCan ? TEXT("") : *FString::Printf(TEXT("  (%s)"), *HorseWhy)));
+	}
 	PaintTextFit(Geometry, Out, Layer + 2, bSingle ? FString::Printf(TEXT("%s  ·  garnison %s"), Campaign1851Army::ArmName(First.Arm), *Cities[First.Home].Name) : FString(TEXT("Marcherer samlet i den langsomstes tempo")),
-		FVector2D(Pos.X + 22.f, Y), Serif(13, EFace::Italic), Gold, Inner);
+		FVector2D(Pos.X + 22.f, Y), Serif(13, EFace::Italic), Gold, bFootBattery ? Inner - 170.f : Inner);
 	Y += 30.f;
 	const float ValueX = 130.f;
 	auto Line = [&](const FString& Label, const FString& Value)
@@ -2392,6 +2402,11 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 			PaintPortrait(Geometry, Out, Layer + 1, FVector2D(X + 158.f, Y - 8.f), FVector2D(28.f, 35.f), Min.Name, 2);
 			PaintTextFit(Geometry, Out, Layer + 1, Min.Name, FVector2D(X + 192.f, Y), Serif(12), Gold, 150.f);
 			PaintTextFit(Geometry, Out, Layer + 1, FString::Printf(TEXT("dygtig %d · sparsom %d · forsigtig %d"), Min.Skill, Min.Thrift, Min.Caution), FVector2D(X + 192.f, Y + 15.f), Serif(9, EFace::Italic), MutedInk, 200.f);
+			if (P == ECampaign1851Portfolio::War)
+			{
+				PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 192.f, Y + 23.f), FVector2D(150.f, 18.f), TEXT("HÆRENS STATUS"), EButton::MainMenu, int32(EWindow::ArmyStatus));
+				AddTip(FVector2D(X + 192.f, Y + 23.f), FVector2D(150.f, 18.f), TEXT("Krigsministerens oversigt: hæren pr. våbenart, tabene på begge sider og det erobrede udstyr."));
+			}
 			const int32 Mode = int32(Me.Modes[p]);
 			PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 400.f, Y - 6.f), FVector2D(130.f, 24.f), Campaign1851Nations::DelegationName(ECampaign1851Delegation(Mode)),
 				EButton::Delegate, p * 3 + (Mode + 1) % 3, Mode == 2);
@@ -3384,6 +3399,132 @@ void SCampaign1851Overlay::PaintBattlefield(const FGeometry& Geometry, FSlateWin
 	PaintText(Geometry, Out, Layer + 1, TEXT("Højdekurver for hver 5 m; skyggen falder fra nordvest."), FVector2D(RX, Y + 6.f), Serif(10, EFace::Italic), MutedInk, 0.f, false);
 }
 
+void SCampaign1851Overlay::PaintArmyStatus(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
+{
+	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
+	const float X = Pos.X + 24.f;
+	float Y = Pos.Y + 110.f;
+	// ---------------------------------------------------------------- the army by arm
+	struct FSum { int32 Units = 0, Men = 0, Present = 0, Sick = 0, Horses = 0, Guns = 0, Mortars = 0, Field = 0; float Exp = 0.f; };
+	const TCHAR* Kinds[] = { TEXT("Linjeinfanteri"), TEXT("Garden"), TEXT("Jægere"), TEXT("Rytteri"), TEXT("Fodartilleri"), TEXT("Ridende artilleri"), TEXT("Morterer") };
+	FSum Sums[7], Total;
+	for (const FCampaign1851Regiment& R : Regs)
+	{
+		const int32 k = R.Mortars > 0 ? 6 : FMath::Clamp(int32(R.Arm), 0, 5);
+		for (FSum* S : { &Sums[k], &Total })
+		{
+			S->Units += 1;
+			S->Men += R.Men;
+			S->Present += R.PresentMen();
+			S->Sick += R.Sick;
+			S->Horses += R.Horses;
+			S->Guns += R.Guns;
+			S->Mortars += R.Mortars;
+			S->Field += R.Formation != 0 ? 1 : 0;
+			S->Exp += R.Experience * R.Men;
+		}
+	}
+	PaintText(Geometry, Out, Layer + 1, TEXT("H Æ R E N   P R .   V Å B E N A R T"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
+	Y += 26.f;
+	const TCHAR* Heads[] = { TEXT("Våbenart"), TEXT("Enheder"), TEXT("I felten"), TEXT("Mand"), TEXT("Til stede"), TEXT("Syge og sårede"), TEXT("Heste"), TEXT("Kanoner"), TEXT("Morterer"), TEXT("Erfaring") };
+	const float ColX[] = { 0.f, 220.f, 320.f, 420.f, 530.f, 650.f, 800.f, 900.f, 1000.f, 1100.f };
+	for (int32 c = 0; c < 10; ++c)
+	{
+		PaintText(Geometry, Out, Layer + 1, Heads[c], FVector2D(X + ColX[c], Y), Serif(11, EFace::Italic), MutedInk, 0.f, false);
+	}
+	Y += 22.f;
+	auto Row = [&](const FString& Name, const FSum& S, bool bTotal)
+	{
+		const FLinearColor C = bTotal ? Gold : Ink;
+		const FString Cells[] = { Name, FString::FromInt(S.Units), FString::FromInt(S.Field), Thousands(S.Men), Thousands(S.Present), Thousands(S.Sick), Thousands(S.Horses),
+			FString::FromInt(S.Guns), FString::FromInt(S.Mortars), S.Men > 0 ? FString::Printf(TEXT("%.0f"), S.Exp / S.Men) : FString(TEXT("-")) };
+		for (int32 c = 0; c < 10; ++c)
+		{
+			PaintText(Geometry, Out, Layer + 1, Cells[c], FVector2D(X + ColX[c], Y), Serif(13, bTotal ? EFace::Bold : EFace::Regular), C, 0.f, false);
+		}
+		Y += 22.f;
+	};
+	for (int32 k = 0; k < 7; ++k)
+	{
+		if (Sums[k].Units > 0)
+		{
+			Row(Kinds[k], Sums[k], false);
+		}
+	}
+	DrawLines(Geometry, Out, Layer + 1, { FVector2D(X, Y - 10.f), FVector2D(X + 1180.f, Y - 10.f) }, Gold.CopyWithNewOpacity(0.4f), 1.f);
+	Row(TEXT("Hele hæren"), Total, true);
+	PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("På lager: %s geværer  ·  %d kanoner  ·  %s heste  ·  %d vogne  ·  %d morterer"),
+		*Thousands(Map->GetRifles()), Map->GetGunStock(), *Thousands(Map->GetHorseStock()), Map->GetWagonStock(), Map->GetMortarStock()), FVector2D(X, Y + 4.f), Serif(11, EFace::Italic), MutedInk, 0.f, false);
+	Y += 46.f;
+
+	// ---------------------------------------------------------------- the losses, both sides, and the booty
+	int32 Fallen = 0, Wounded = 0, Taken = 0, Kills = 0;
+	for (const FCampaign1851Regiment& R : Regs)
+	{
+		Fallen += R.TotalKilled;
+		Wounded += R.TotalWounded;
+		Taken += R.TotalCaptured;
+		Kills += R.TotalEnemyKilled;
+	}
+	const float ColW = 380.f;
+	auto Block = [&](float BX, const TCHAR* Head, const TArray<TPair<FString, FString>>& Lines)
+	{
+		float BY = Y;
+		PaintText(Geometry, Out, Layer + 1, Head, FVector2D(BX, BY), Serif(11), Gold, 0.f, false);
+		BY += 26.f;
+		for (const TPair<FString, FString>& L : Lines)
+		{
+			PaintText(Geometry, Out, Layer + 1, L.Key, FVector2D(BX, BY), Serif(13), Ink, 0.f, false);
+			PaintText(Geometry, Out, Layer + 1, L.Value, FVector2D(BX + ColW - 60.f, BY), Serif(14, EFace::Bold), Ink, 1.f, false);
+			BY += 22.f;
+		}
+	};
+	Block(X, TEXT("V O R E S   T A B"), {
+		{ TEXT("Faldne"), Thousands(Fallen) },
+		{ TEXT("Sårede (i alt)"), Thousands(Wounded) },
+		{ TEXT("I lazarettet nu"), Thousands(Map->SickTotal()) },
+		{ TEXT("Taget til fange"), Thousands(Taken) },
+		{ TEXT("Fanger hos fjenden nu"), Thousands(Map->GetDanesCaptured()) },
+		{ TEXT("Tab i alt (også skanserne)"), Thousands(Map->GetDanishWarLosses()) } });
+	Block(X + ColW + 20.f, TEXT("F J E N D E N S   T A B"), {
+		{ TEXT("Dræbt"), Thousands(Map->GetEnemyKilled()) },
+		{ TEXT("Såret"), Thousands(Map->GetEnemyWounded()) },
+		{ TEXT("Taget til fange"), Thousands(Map->GetEnemyCapturedTotal()) },
+		{ TEXT("Fanger hos os nu"), Thousands(Map->GetEnemyCaptured()) },
+		{ TEXT("Sat ud af kampen i alt"), Thousands(Map->GetEnemyWarLosses()) },
+		{ TEXT("Heraf af vores enheder"), Thousands(Kills) } });
+	Block(X + 2.f * (ColW + 20.f), TEXT("E R O B R E T   U D S T Y R"), {
+		{ TEXT("Geværer"), Thousands(Map->GetCapturedRifles()) },
+		{ TEXT("Kanoner"), FString::FromInt(Map->GetCapturedGuns()) },
+		{ TEXT("Heste"), Thousands(Map->GetCapturedHorses()) },
+		{ TEXT("Vogne"), FString::FromInt(Map->GetCapturedWagons()) },
+		{ TEXT("Faner"), FString::FromInt(Map->GetCapturedColours()) } });
+	AddTip(FVector2D(X + 2.f * (ColW + 20.f), Y - 14.f), FVector2D(ColW, 140.f), TEXT("Det fjenden efterlader på slagmarken, når vi holder den: geværerne, hestene og vognene går på lager, kanonerne i statens kanonbeholdning."));
+	Y += 26.f + 6.f * 22.f + 24.f;
+
+	// ---------------------------------------------------------------- the units that have fought most
+	TArray<int32> Best;
+	for (int32 i = 0; i < Regs.Num(); ++i)
+	{
+		if (Regs[i].Service.Num() > 0) { Best.Add(i); }
+	}
+	Best.Sort([&Regs](int32 A, int32 B) { return Regs[A].TotalEnemyKilled > Regs[B].TotalEnemyKilled; });
+	PaintText(Geometry, Out, Layer + 1, TEXT("E N H E D E R N E   I   K A M P"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
+	Y += 24.f;
+	if (Best.Num() == 0)
+	{
+		PaintText(Geometry, Out, Layer + 1, TEXT("Hæren har endnu ikke været i kamp."), FVector2D(X, Y), Serif(12, EFace::Italic), MutedInk, 0.f, false);
+	}
+	for (int32 n = 0; n < Best.Num() && Y < Pos.Y + Size.Y - 30.f; ++n)
+	{
+		const FCampaign1851Regiment& R = Regs[Best[n]];
+		PaintTextFit(Geometry, Out, Layer + 1, R.Name, FVector2D(X, Y), Serif(12), Ink, 260.f);
+		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("%d slag  ·  faldne %d  ·  sårede %d  ·  fangne %d  ·  fjender sat ud af kampen %d"),
+			R.Service.Num(), R.TotalKilled, R.TotalWounded, R.TotalCaptured, R.TotalEnemyKilled), FVector2D(X + 280.f, Y), Serif(11, EFace::Italic), MutedInk, 0.f, false);
+		Y += 20.f;
+	}
+}
+
 void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
 {
 	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
@@ -3831,6 +3972,14 @@ void SCampaign1851Overlay::BuildTreeRows(TArray<FTreeRow>& Rows) const
 	if (Regs.IsValidIndex(OOBFocus))
 	{
 		RegimentRow(OOBFocus, 0, true);
+		// Its other halves (split off it, or it off them): drag companies between them.
+		for (int32 i = 0; i < Regs.Num(); ++i)
+		{
+			if (Map->IsSplitPair(OOBFocus, i))
+			{
+				RegimentRow(i, 0, true);
+			}
+		}
 		return;
 	}
 	// The field army: formations and their units, top down.
@@ -3999,13 +4148,30 @@ void SCampaign1851Overlay::PaintOOB(const FGeometry& Geometry, FSlateWindowEleme
 	if (Map->GetRegiments().IsValidIndex(OOBFocus))
 	{
 		// One unit: back to the whole army, or split it in two.
-		PaintText(Geometry, Out, Layer + 2, TEXT("Én enhed  ·  del den, eller træk den ind i en formation fra hele hæren"), Pos + FVector2D(22.f, 56.f), Serif(10, EFace::Italic), MutedInk, 0.f, false);
+		PaintText(Geometry, Out, Layer + 2, TEXT("Én enhed  ·  del den, træk kompagnier mellem halvdelene, eller saml dem igen"), Pos + FVector2D(22.f, 56.f), Serif(10, EFace::Italic), MutedInk, 0.f, false);
 		PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(Size.X - 280.f, 44.f), FVector2D(120.f, 24.f), TEXT("HELE HÆREN"), EButton::OOBFocusClear, 0);
 		FString Why;
 		const FCampaign1851Regiment& Focus = Map->GetRegiments()[OOBFocus];
 		const bool bCanSplit = !Focus.IsMarching() && Focus.Captains.Num() >= 2 && Focus.Men >= 100;
-		PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(Size.X - 152.f, 44.f), FVector2D(120.f, 24.f), TEXT("DEL I TO"), EButton::SplitUnit, OOBFocus, false, !bCanSplit);
-		AddTip(Pos + FVector2D(Size.X - 152.f, 44.f), FVector2D(120.f, 24.f), TEXT("Del enheden i to: halvdelen af kompagnierne (med deres kaptajner og mænd) bliver en halvbataljon for sig, der hvor enheden står. Den nye enhed skal have en chef."));
+		const int32 Partner = Map->MergePartner(OOBFocus);
+		if (Focus.Arm == ECampaign1851Arm::Artillery && Focus.Mortars == 0)
+		{
+			const bool bCan = Map->CanUpgradeToHorseBattery(OOBFocus, &Why);
+			PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(Size.X - 152.f, 44.f), FVector2D(120.f, 24.f), TEXT("GØR RIDENDE"), EButton::HorseBattery, OOBFocus, false, !bCan);
+			AddTip(Pos + FVector2D(Size.X - 152.f, 44.f), FVector2D(120.f, 24.f), bCan ? FString(TEXT("Gør fodbatteriet ridende: alle kanonerer til hest, så det kan følge rytteriet.")) : Why);
+		}
+		else if (Partner != INDEX_NONE)
+		{
+			const int32 Keep = Focus.bDetached && !Map->GetRegiments()[Partner].bDetached ? Partner : OOBFocus;
+			const int32 Absorb = Keep == OOBFocus ? Partner : OOBFocus;
+			PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(Size.X - 152.f, 44.f), FVector2D(120.f, 24.f), TEXT("SAML IGEN"), EButton::MergeUnit, Keep * 1000 + Absorb);
+			AddTip(Pos + FVector2D(Size.X - 152.f, 44.f), FVector2D(120.f, 24.f), TEXT("Saml de to halvdele til én enhed igen (de skal stå samme sted). Du kan også trække den ene halvdel hen på den anden, eller trække enkelte kompagnier mellem dem."));
+		}
+		else
+		{
+			PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(Size.X - 152.f, 44.f), FVector2D(120.f, 24.f), TEXT("DEL I TO"), EButton::SplitUnit, OOBFocus, false, !bCanSplit);
+			AddTip(Pos + FVector2D(Size.X - 152.f, 44.f), FVector2D(120.f, 24.f), TEXT("Del enheden i to: halvdelen af kompagnierne (med deres kaptajner og mænd) bliver en halvbataljon for sig, der hvor enheden står. Bagefter kan du trække kompagnier fra den ene halvdel til den anden, eller samle dem igen."));
+		}
 	}
 	else
 	{
@@ -4593,6 +4759,7 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 		PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 300.f, 28.f), FVector2D(220.f, 28.f),
 			Map->GetFooting() == ECampaign1851Footing::Peace ? FString::Printf(TEXT("MOBILISÉR  %s rd."), *Thousands(int32(Campaign1851Mobilisation::OrderCost))) : FString(TEXT("HJEMSEND")),
 			EButton::Footing, 0, Map->GetFooting() != ECampaign1851Footing::Peace);
+		PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 530.f, 28.f), FVector2D(220.f, 28.f), TEXT("HÆRENS STATUS"), EButton::MainMenu, int32(EWindow::ArmyStatus));
 		const TArray<FTableColumn> Cols = { {TEXT("Enhed"), 170.f}, {TEXT("Våben"), 120.f}, {TEXT("Garnison"), 100.f}, {TEXT("Hvor"), 150.f},
 			{TEXT("Mand"), 60.f, true}, {TEXT("Syge"), 50.f, true}, {TEXT("Erf"), 48.f, true}, {TEXT("Lad"), 46.f, true}, {TEXT("Skyd"), 50.f, true}, {TEXT("Eks"), 46.f, true},
 			{TEXT("Felt"), 46.f, true}, {TEXT("Udh"), 46.f, true}, {TEXT("Baj"), 46.f, true}, {TEXT("Moral"), 64.f, true}, {TEXT("Samh"), 54.f, true},
@@ -4878,6 +5045,11 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 	else if (Window == EWindow::Nations)
 	{
 		PaintNations(Geometry, Out, Layer + 2, Pos, Size);
+	}
+	else if (Window == EWindow::ArmyStatus)
+	{
+		Title(TEXT("Hærens status"), TEXT("Krigsministerens oversigt: hæren pr. våbenart, tabene på begge sider og det erobrede udstyr"));
+		PaintArmyStatus(Geometry, Out, Layer + 2, Pos, Size);
 	}
 	else if (Window == EWindow::Chart)
 	{

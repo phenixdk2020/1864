@@ -864,6 +864,15 @@ public:
 	int32 SickTotal() const;
 	int32 GetDanesCaptured() const { return DanesCaptured; }
 	int32 GetEnemyCaptured() const { return EnemyCaptured; }
+	/** The whole war: enemy men killed, wounded and taken (prisoners exchanged still count), and the booty. */
+	int32 GetEnemyKilled() const { return EnemyKilled; }
+	int32 GetEnemyWounded() const { return EnemyWounded; }
+	int32 GetEnemyCapturedTotal() const { return EnemyCapturedTotal; }
+	int32 GetCapturedRifles() const { return CapturedRifles; }
+	int32 GetCapturedGuns() const { return CapturedGuns; }
+	int32 GetCapturedHorses() const { return CapturedHorses; }
+	int32 GetCapturedWagons() const { return CapturedWagons; }
+	int32 GetCapturedColours() const { return CapturedColours; }
 	void ExchangePrisoners();
 
 	// ---- Weather (Campaign1851Weather.cpp): follows from the seed, day by day.
@@ -1008,6 +1017,18 @@ public:
 	/** Split a unit in two: half its companies (with their captains and men) become a unit of their own where it
 	 *  stands (a half battalion, under no chief until one is appointed). The new unit's index, or INDEX_NONE. */
 	int32 SplitRegiment(int32 RegimentIndex, FString* OutWhy = nullptr);
+	/** Two halves of one unit (one split off the other, or both off the same). */
+	bool IsSplitPair(int32 A, int32 B) const;
+	/** A half of this unit standing with it (to join again), INDEX_NONE if none. */
+	int32 MergePartner(int32 RegimentIndex) const;
+	bool CanMerge(int32 Keep, int32 Absorb, FString* OutWhy = nullptr) const;
+	/** Joins Absorb into Keep (companies, men, horses, guns; the skills by men); Absorb is removed. The new index
+	 *  of Keep, or INDEX_NONE. */
+	int32 MergeRegiments(int32 Keep, int32 Absorb, FString* OutWhy = nullptr);
+	/** A company (with its captain and men) goes over to another unit of the same kind standing with it. */
+	bool MoveCompany(int32 From, int32 Company, int32 To, FString* OutWhy = nullptr);
+	/** Takes a unit out of the army; every index to the units after it moves down by one. */
+	void RemoveRegimentAt(int32 Index);
 
 	/** Attack a seen enemy corps within EngageKm of the given units: the battle is offered at once (these units
 	 *  fight, wherever they stand in that reach). The nearest such corps and its distance, or INDEX_NONE. */
@@ -1575,6 +1596,8 @@ private:
 	void SplitLosses(int32 RegimentIndex, int32 Lost, bool bDefeat, int32& OutPrisoners);
 	int32 DanesCaptured = 0;
 	int32 EnemyCaptured = 0;
+	int32 EnemyKilled = 0, EnemyWounded = 0, EnemyCapturedTotal = 0;
+	int32 CapturedRifles = 0, CapturedGuns = 0, CapturedHorses = 0, CapturedWagons = 0, CapturedColours = 0;
 	// Weather.
 	void DailyWeather();
 	mutable int32 WeatherCacheDay = INT32_MIN;

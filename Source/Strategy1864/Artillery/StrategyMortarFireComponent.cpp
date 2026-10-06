@@ -2,6 +2,8 @@
 #include "StrategyMortarDeploymentComponent.h"
 #include "../Units/StrategyUnit.h"
 #include "../Engineering/StrategyDefensivePosition.h"
+#include "StrategyArtilleryBatteryUnit.h"
+#include "StrategyArtilleryProjectilePresentationComponent.h"
 
 UStrategyMortarFireComponent::UStrategyMortarFireComponent()
 {
@@ -99,6 +101,11 @@ bool UStrategyMortarFireComponent::FireOneBomb()
     --AmmunitionBombs;
     ReloadRemainingSeconds = FMath::Max(0.5f, ReloadSeconds);
 
+    // The bomb in the air: thrown high, it falls a little off the aim and bursts.
+    int32 Lost = 0;
+    const float Scatter = FMath::Clamp(FVector::Dist2D(OwnerUnit->GetActorLocation(), TargetLocation) * 0.04f, 300.0f, 2500.0f);
+    const FVector Impact = TargetLocation + FVector(RandomStream.FRandRange(-Scatter, Scatter), RandomStream.FRandRange(-Scatter, Scatter), 0.0f);
+
     if (IsValid(PositionTarget))
     {
         PositionTarget->ApplyStructuralDamage(
@@ -115,8 +122,19 @@ bool UStrategyMortarFireComponent::FireOneBomb()
 
         if (RandomStream.FRand() < InfantryHitChancePerBomb * RangeFactor)
         {
-            UnitTarget->ApplyStrengthLoss(RandomStream.RandRange(1, 4));
+            Lost = RandomStream.RandRange(1, 4);
         }
+    }
+    if (AStrategyArtilleryBatteryUnit* Battery = Cast<AStrategyArtilleryBatteryUnit>(OwnerUnit))
+    {
+        if (Battery->ProjectilePresentationComponent)
+        {
+            Battery->ProjectilePresentationComponent->PresentResolvedSalvo(EStrategyArtilleryAmmoType::Shell, TargetLocation, { Impact }, { uint8(Lost > 0 ? 1 : 0) }, { Lost });
+        }
+    }
+    if (Lost > 0 && IsValid(UnitTarget))
+    {
+        UnitTarget->ApplyStrengthLoss(Lost);
     }
 
     return true;

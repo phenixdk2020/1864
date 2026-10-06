@@ -297,6 +297,20 @@ namespace
 				Cities.IsValidIndex(To) ? *Cities[To].Name : TEXT("den anden bane"), *Rd(ACampaign1851Map::TrainTransferCost));
 			return true;
 		}
+		case EB::MergeUnit:
+		{
+			const int32 Keep = Module / 1000, Absorb = Module % 1000;
+			if (!Map.GetRegiments().IsValidIndex(Keep) || !Map.GetRegiments().IsValidIndex(Absorb))
+			{
+				return false;
+			}
+			const FCampaign1851Regiment& K = Map.GetRegiments()[Keep];
+			const FCampaign1851Regiment& A = Map.GetRegiments()[Absorb];
+			Title = FString::Printf(TEXT("Saml %s og %s?"), *K.Name, *A.Name);
+			Text = FString::Printf(TEXT("De to halvdele bliver én enhed igen: %d kompagnier, %d mand. Erfaring og øvelse blandes efter mandtal, samhørigheden falder lidt en tid. %s Det koster intet."),
+				K.Captains.Num() + A.Captains.Num(), K.Men + A.Men, Map.GetOfficers().IsValidIndex(A.Chief) ? *FString::Printf(TEXT("%s bliver ledig til en anden post."), *Map.GetOfficers()[A.Chief].Name) : TEXT(""));
+			return true;
+		}
 		case EB::BattleAuto:
 			Title = TEXT("Afgør slaget automatisk?");
 			Text = TEXT("Slaget udregnes straks ud fra styrke, erfaring, terræn og ledelse, uden at du fører tropperne selv. Udfaldet kan ikke gøres om.");
@@ -1088,6 +1102,22 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		if (Button == SCampaign1851Overlay::EButton::Menu)
 		{
 			OpenGameMenu();
+		}
+		else if (Button == SCampaign1851Overlay::EButton::MergeUnit)
+		{
+			FString Why;
+			const int32 Joined = Map->MergeRegiments(Module / 1000, Module % 1000, &Why);
+			if (Joined != INDEX_NONE)
+			{
+				SelectRegiments({ Joined });
+				Overlay->FocusOOB(Joined);
+				Overlay->ShowToast(FString::Printf(TEXT("%s er samlet igen"), *Map->GetRegiments()[Joined].Name));
+				SaveToSlot(TEXT("Autosave"), true);
+			}
+			else
+			{
+				Overlay->ShowToast(Why);
+			}
 		}
 		else if (Button == SCampaign1851Overlay::EButton::HorseBattery)
 		{
@@ -2640,6 +2670,34 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 	}
 	const int32 SourceId = SCampaign1851Overlay::TreeId(Source), TargetId = SCampaign1851Overlay::TreeId(Target);
 	const K TargetKind = SCampaign1851Overlay::TreeKind(Target);
+	// A company onto another battalion (or one of its companies): it goes over with its captain and men.
+	if (SCampaign1851Overlay::TreeKind(Source) == K::Company && (TargetKind == K::Regiment || TargetKind == K::Company))
+	{
+		const int32 From = SourceId / 10, To = TargetKind == K::Regiment ? TargetId : TargetId / 10;
+		if (From != To)
+		{
+			FString Why;
+			const FString What = Overlay->TreeKeyText(Source);
+			Overlay->ShowToast(Map->MoveCompany(From, SourceId % 10, To, &Why) ? FString::Printf(TEXT("%s går over til %s"), *What, *Map->GetRegiments()[To].Name) : Why);
+		}
+		return;
+	}
+	// One half of a split unit onto the other: joined again (asked first).
+	if (SCampaign1851Overlay::TreeKind(Source) == K::Regiment && TargetKind == K::Regiment && Map->IsSplitPair(SourceId, TargetId))
+	{
+		const int32 Keep = Map->GetRegiments()[TargetId].bDetached && !Map->GetRegiments()[SourceId].bDetached ? SourceId : TargetId;
+		const int32 Absorb = Keep == TargetId ? SourceId : TargetId;
+		FString Why, Title, Text;
+		if (!Map->CanMerge(Keep, Absorb, &Why))
+		{
+			Overlay->ShowToast(Why);
+		}
+		else if (DescribeAction(*Map, *Overlay, SCampaign1851Overlay::EButton::MergeUnit, Keep * 1000 + Absorb, Title, Text))
+		{
+			Overlay->AskConfirm(Title, Text, SCampaign1851Overlay::EButton::MergeUnit, Keep * 1000 + Absorb);
+		}
+		return;
+	}
 	// A whole general command dragged into the chart.
 	if (SCampaign1851Overlay::TreeKind(Source) == K::Command && (TargetKind == K::NewFormation || TargetKind == K::Formation || TargetKind == K::FieldArmy))
 	{
