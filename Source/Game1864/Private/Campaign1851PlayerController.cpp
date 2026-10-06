@@ -617,6 +617,7 @@ void ACampaign1851PlayerController::TryInit()
 	{
 		TArray<FString> P;
 		FieldAt.ParseIntoArray(P, TEXT(","));
+		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|battlefield|test request %s (%d parts)"), *FieldAt, P.Num());
 		if (P.Num() >= 2)
 		{
 			Map->GenerateBattlefield(Map->KmAtWorld(Map->Project(FCString::Atod(*P[0]), FCString::Atod(*P[1]))), P.Num() > 2 ? FCString::Atof(*P[2]) : 8.f, TEXT("Test"));
@@ -919,6 +920,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 					else if (Key == TEXT("focus")) { Overlay->FocusOOB(FCString::Atoi(*Value)); Overlay->OpenWindow(W::Chart); }
 					else if (Key == TEXT("kamporden")) { Overlay->OpenWindow(W::Chart); Overlay->FilterOOB(Overlay->GetSelectedRegiments()); }
 					else if (Key == TEXT("selectmany")) { TArray<FString> Parts; Value.ParseIntoArray(Parts, TEXT("+")); TArray<int32> Sel; for (const FString& P : Parts) { Sel.Add(FCString::Atoi(*P)); } Overlay->SetSelectedRegiments(Sel); }
+					else if (Key == TEXT("genfield")) { TArray<FString> P; Value.ParseIntoArray(P, TEXT("+")); if (P.Num() >= 2) { Map->GenerateBattlefield(Map->KmAtWorld(Map->Project(FCString::Atod(*P[0]), FCString::Atod(*P[1]))), 8.f, TEXT("Test")); } }
 					else if (Key == TEXT("split")) { Map->SplitRegiment(FCString::Atoi(*Value)); }
 					else if (Key == TEXT("unitcard")) { Overlay->ToggleUnitCard(); }
 					else if (Key == TEXT("oob")) { Overlay->ToggleOOB(); }

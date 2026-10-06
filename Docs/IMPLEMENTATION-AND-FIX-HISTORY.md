@@ -1205,7 +1205,7 @@ Kun ladte soldater kan blive valgt til næste salve.
 - KAMPORDEN på de valgte enheder åbner det store kamporden-vindue og viser kun de valgte enheder (`FilterOOB`). HELE HÆREN viser alle igen.
 - DEL I TO og SAML IGEN ligger inde i vinduet (ved én valgt enhed). Efter delingen vises begge halvdele som store bokse med deres kompagnier, som trækkes mellem dem. Tilbage fører til listen.
 - Vinduet har en uigennemsigtig bund, så teksten ikke ligger oven på kortets tegning.
-- Feltgrænserne (hække og parceller) i slagmarksgeneratoren er ændret til en drejet og bøjet inddeling (`FParcelGrid`) med forskellige bredder og vinkler, i stedet for et firkantet net. **Ikke afprøvet:** generatoren blev ikke kørt, fordi jeg ikke fik et nyt slagmarkskort bygget. Se næste slag, der genererer et nyt.
+- Feltgrænserne (hække og parceller) i slagmarksgeneratoren er ændret til en drejet og bøjet inddeling (`FParcelGrid`) med forskellige bredder og vinkler, i stedet for et firkantet net. Kontrolleret på et nyt kort ved Rendsborg: markerne er drejet og uregelmæssige, og hækkene følger kanterne.
 
 
 ### 2026-10-06 — Deling i kamporden: den nye enhed bygges i midten
@@ -1215,6 +1215,9 @@ Kun ladte soldater kan blive valgt til næste salve.
 - Det sidste kompagni (eskadron) trukket hen på den anden halvdel samler dem (`MergeRegiments`). SAML IGEN gør det samme.
 - Uniformkortene bruger nu `pose_Front`-billederne (stående, ikke A-pose) fra `Reference/Units/MultiView` (`make_uniform_cards.py`).
 - **Ikke afprøvet:** selve trækningen i spillet (testen kan ikke trække med musen); layoutet og de to varianter af overskriften er kontrolleret på skærmbillede.
+
+### Test af slagmarken
+- `-CampaignUiShots=sek:genfield=lat+lon` genererer et slagmarkskort (`Saved/Battle/Battlefield_Test.json`) uden at spille et slag. Det findes i 3D med `-Strategy1864Field=Battlefield_Test.json`. (`-CampaignBattlefield=` virker ikke sammen med `-CampaignNew`.)
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
