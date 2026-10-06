@@ -1059,6 +1059,48 @@ Kun ladte soldater kan blive valgt til næste salve.
   - Hver mand lader sin egen fulde ladetid, så geledderne skifter rytmisk.
 - Jordmaterialet bruger kun jordtekstur, hvor farven er grålig-brun (vej, bygrund, tråd). Gule kornmarker beholder græsdetaljen.
 
+### Artilleri, testslag, sejrsregel, tjenestejournal, tooltips og kampagnens brugerflade (5.-6. oktober 2026)
+- **Artilleri i 3D** (`UStrategyArtilleryVisualComponent`, oprettes af batteriets konstruktør):
+  - kanonmodellen (×2,2) eller morteren for hver kanon, i linje med 15 m mellem kanonerne og i kolonne under march;
+  - deaktiverede kanoner står skævt, ødelagte ligger væltet;
+  - QA-kassen holdes skjult.
+- **Testslaget** (kortet `Strategy1864_Skirmish` eller `-Strategy1864Skirmish=1..4`): en dansk bataljonsstab med 2 kompagnier, som spilleren styrer, mod 1–4 fjendtlige kompagnier med stab og AI, 400 m væk på engen, i fuld figurskala, med faner og kamera bag linjen.
+- **Sejrsregel for alle slag** (`GetBattleScore`/`UpdateBattleOutcome`):
+  - Kun kæmpende enheder tæller. En side er slået under 35 % af startstyrken, eller når alle dens enheder er brudte.
+  - HUD'en viser styrken øverst og banneret SEJR, NEDERLAG eller UAFGJORT.
+  - `BattleResult` bruger den afgørelse, når den er faldet.
+  - Kompagnierne tæller deres træffere (`TotalHitsInflicted`), og de går ud som `kills` pr. enhed.
+- **Tjenestejournal** (`FCampaign1851ServiceEntry`, gemt i `FCampaign1851RegimentSave::Service`):
+  - hvert slag med dato, sted, udfald, faldne, sårede, fangne og fjender sat ud af kampen, samt totalerne;
+  - 3D-slagenes tal, eller ved automatisk afgørelse fjendens tab fordelt efter styrke.
+- **ENHEDSKORT** i enhedspanelet:
+  - uniformspladen (fra uniformsreferencerne, `Tools/Campaign/make_uniform_cards.py`; husarerne har deres egen), fanen;
+  - mand, erfaring, moral, samhørighed og øvelser;
+  - sårede og syge med halveringstid for hjemkomsten (de vender tilbage til egen enhed med erfaringen);
+  - chef med vurdering, ildmetoder og journalen.
+  - Et fodbatteri kan gøres ridende (12.000 rd., 6 kanoner, 180 mand, 230 heste).
+- **Tooltips:**
+  - Alle knapper har en forklaring (`ButtonTip`), og labels kan få deres egen (`AddTip`).
+  - Tabellernes forkortede overskrifter forklares, og officerens evner har deres betydning.
+- **Bekræftelsesdialog** (`AskConfirm`, JA/NEJ): mobilisering (pris, løn, skat, stemning, spænding), ridende batteri og deling af en enhed.
+- **Officerer:** samlet vurdering 0–100 (`Campaign1851Army::OfficerRating`) på kortet og som kolonnen "Vurd".
+- **Forskning:**
+  - Emner på samme niveau i samme gren står side om side (Infanteriet overlappede).
+  - Ny gren, Næringsliv: mergling (+8 % landskat), Landbohøjskolen (+7 %), smede (værker +15 %), dampmaskiner (værker +25 %, byskat +5 %), kreditforeninger (byskat +5 %).
+- **Byer:**
+  - Bygningslisten ruller (hjul, pile, bjælke) og er en række lavere. Klik på billede og navn åbner bygningens kort (giver, kræver, pris, vedligehold, betingelser, status her).
+  - 18 nye bygningskort er genereret med ComfyUI/SDXL (`Tools/Campaign/make_building_cards.py`, import med `import_building_cards.py`).
+- **Amter:**
+  - Navne og værdier holder sig inden for kassen.
+  - Kontrol-linjen viser, hvad der skal til. En besat by befries af 300 danske soldater inden for 3 km i 2 døgn uden fjendtlige korps inden for 10 km.
+- **Udenrigs:** spændingen med Det tyske forbund vises dér (ikke i Statsrådet) med en kortere tekst, og der er en ALLE LANDE-knap.
+- **Budget:** Statskassen har ministeriernes budgetter (−/+), puljerne og den mindste kassebeholdning. Statsrådet har knappen BUDGET OG KASSE.
+- **Kamporden:**
+  - Fra enhedspanelet vises kun den enhed med dens kompagnier. DEL I TO laver en halvbataljon (`SplitRegiment`, `bDetached`: intet ekstra underhold).
+- **Kortvisninger** over Bornholm-boksen: NORMAL, FORSYNING og KONTROL (besatte byer med befrielsesstatus).
+- **ANGRIB** i enhedspanelet: et opklaret fjendtligt korps inden for 15 km kan angribes (`EngageCorps`).
+- **Portrætter:** en pulje af officerer, generaler og ministre i 1850'er-oliemaleri (`Tools/Campaign/make_portraits.py`). De tildeles fast efter navn og er typer, ikke ligheder.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

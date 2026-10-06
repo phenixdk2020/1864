@@ -51,6 +51,57 @@ void ACampaign1851Map::CreateBattle(int32 CorpsIndex)
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|battle|%d at %s: %d units, %d forts vs %s"), B.Id, Cities.IsValidIndex(B.Town) ? *Cities[B.Town].Name : TEXT("?"), B.Regiments.Num(), B.Forts.Num(), *C.Name);
 }
 
+int32 ACampaign1851Map::EngageableCorps(const TArray<int32>& Units, double* OutKm) const
+{
+	int32 Best = INDEX_NONE;
+	double BestKm = EngageKm;
+	for (int32 c = 0; c < EnemyCorps.Num(); ++c)
+	{
+		const FCampaign1851EnemyCorps& C = EnemyCorps[c];
+		if (C.Men <= 0 || !C.bSeen || C.bEngaged || C.bSieging)
+		{
+			continue;
+		}
+		for (int32 i : Units)
+		{
+			if (Regiments.IsValidIndex(i) && Regiments[i].Men > 0)
+			{
+				const double Km = FVector2D::Distance(Regiments[i].Km, C.Km);
+				if (Km <= BestKm)
+				{
+					BestKm = Km;
+					Best = c;
+				}
+			}
+		}
+	}
+	if (OutKm) { *OutKm = BestKm; }
+	return Best;
+}
+
+bool ACampaign1851Map::EngageCorps(int32 CorpsIndex, const TArray<int32>& Units, FString* OutWhy)
+{
+	double Km = 0.0;
+	if (EngageableCorps(Units, &Km) != CorpsIndex || !EnemyCorps.IsValidIndex(CorpsIndex))
+	{
+		if (OutWhy) { *OutWhy = FString::Printf(TEXT("Intet opklaret fjendtligt korps inden for %.0f km"), EngageKm); }
+		return false;
+	}
+	CreateBattle(CorpsIndex);
+	EnemyCorps[CorpsIndex].bEngaged = true;
+	// The attacking units fight even if they stood further off than the usual contact.
+	FCampaign1851Battle& B = Battles.Last();
+	for (int32 i : Units)
+	{
+		if (Regiments.IsValidIndex(i) && Regiments[i].Men > 0)
+		{
+			B.Regiments.AddUnique(i);
+		}
+	}
+	News.Add(FString::Printf(TEXT("Angreb på %s (%.0f km)"), *EnemyCorps[CorpsIndex].Name, Km));
+	return true;
+}
+
 int32 ACampaign1851Map::CorpsIndexOf(const FCampaign1851Battle& B) const
 {
 	return EnemyCorps.IndexOfByPredicate([&B](const FCampaign1851EnemyCorps& C) { return C.Id == B.CorpsId; });
@@ -195,10 +246,12 @@ void ACampaign1851Map::PollBattleResults()
 				const int32 R = FindRegiment(U->GetStringField(TEXT("id")));
 				if (R != INDEX_NONE)
 				{
-					double Losses = 0.0, Ammo = 0.0;
+					double Losses = 0.0, Ammo = 0.0, Kills = 0.0;
 					U->TryGetNumberField(TEXT("losses"), Losses);
 					U->TryGetNumberField(TEXT("ammoUsed"), Ammo);
+					U->TryGetNumberField(TEXT("kills"), Kills);
 					O.UnitLosses.Add(R, int32(Losses));
+					O.UnitKills.Add(R, int32(Kills));
 					O.UnitAmmo.Add(R, float(Ammo));
 				}
 			}
@@ -264,6 +317,16 @@ void ACampaign1851Map::AutoResolveBattle(int32 BattleId)
 	const int32 Ci = CorpsIndexOf(B);
 	// The enemy loses what the Danes can inflict: never more than a share of their own fighting strength.
 	O.EnemyLosses = Ci != INDEX_NONE ? FMath::RoundToInt(FMath::Min(EnemyCorps[Ci].Men * EnemyShare, D * Rng.FRandRange(0.25f, 0.45f))) : 0;
+	// The enemy's losses shared by the units after their strength (for their service records).
+	int32 Engaged = 0;
+	for (int32 i : B.Regiments) { Engaged += Regiments.IsValidIndex(i) ? Regiments[i].PresentMen() : 0; }
+	for (int32 i : B.Regiments)
+	{
+		if (Regiments.IsValidIndex(i) && Engaged > 0)
+		{
+			O.UnitKills.Add(i, FMath::RoundToInt(float(O.EnemyLosses) * Regiments[i].PresentMen() / Engaged));
+		}
+	}
 	ApplyBattle(b, O);
 }
 
@@ -296,7 +359,24 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 		FCampaign1851Regiment& R = Regiments[L.Key];
 		const int32 Lost = FMath::Min(L.Value, R.Men);
 		R.Men -= Lost;
+		const int32 PrisonersBefore = Prisoners, SickBefore = R.Sick;
 		SplitLosses(L.Key, Lost, !O.bDanishWin && !O.bDraw, Prisoners);
+		// The service record: fallen, wounded, taken, and what it did to the enemy.
+		FCampaign1851ServiceEntry Entry;
+		Entry.Day = CampaignDays;
+		Entry.Place = Place;
+		Entry.Result = O.bRetreat ? 3 : O.bDanishWin ? 2 : O.bDraw ? 1 : 0;
+		Entry.Wounded = Regiments[L.Key].Sick - SickBefore;
+		Entry.Captured = Prisoners - PrisonersBefore;
+		Entry.Killed = FMath::Max(0, Lost - Entry.Wounded - Entry.Captured);
+		Entry.EnemyKilled = O.UnitKills.FindRef(L.Key);
+		Entry.bFrom3D = O.bFromBattle3D;
+		FCampaign1851Regiment& Rec = Regiments[L.Key];
+		Rec.Service.Add(Entry);
+		Rec.TotalKilled += Entry.Killed;
+		Rec.TotalWounded += Entry.Wounded;
+		Rec.TotalCaptured += Entry.Captured;
+		Rec.TotalEnemyKilled += Entry.EnemyKilled;
 		DanishLosses += Lost;
 		R.Morale = FMath::Clamp(R.Morale + (O.bDanishWin ? 0.05f : O.bDraw ? -0.05f : -0.15f), 0.05f, 1.f);
 		R.Cohesion = FMath::Max(10.f, R.Cohesion - (O.bDanishWin ? 5.f : 20.f));

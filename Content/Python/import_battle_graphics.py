@@ -158,12 +158,12 @@ macro = g.sample(tex('T_Ground_Macro'), uv_macro, sampler=unreal.MaterialSampler
 # The detail as a brightness modulator round its mean (keeps the picture's colours) plus some of its own colour.
 lum = g.node(unreal.MaterialExpressionDesaturation)
 g.link(grass, '', lum, '')
-lum_mod = g.div(g.mask(lum, r=True), g.const(0.13))                 # mean luminance of the grass texture (linear)
+lum_mod = g.div(g.mask(lum, r=True), g.const(0.196))                # mean luminance of the grass texture (linear)
 grass_tinted = g.mul(vc, lum_mod)
-grass_col = g.lerp(grass_tinted, g.mul(grass, g.const(1.15)), g.scalar('GrassDetailColour', 0.35))
+grass_col = g.lerp(grass_tinted, g.mul(grass, g.const(0.75)), g.scalar('GrassDetailColour', 0.18))
 dirt_lum = g.node(unreal.MaterialExpressionDesaturation)
 g.link(dirt, 'RGB', dirt_lum, '')
-dirt_col = g.mul(vc, g.div(g.mask(dirt_lum, r=True), g.const(0.2)))
+dirt_col = g.mul(vc, g.div(g.mask(dirt_lum, r=True), g.const(0.22)))
 # Dirt where the picture is brown (red above green), grass where it is green.
 # Dirt where the picture is a greyish brown (ways, trampled ground, the town): red over green, and blue enough
 # against red (a ripe grain field is yellow, little blue, and keeps the grass detail).
@@ -171,11 +171,17 @@ vr, vg, vb = g.mask(vc, r=True), g.mask(vc, g=True), g.mask(vc, b=True)
 browner = g.sat(g.mul(g.sub(vr, vg), g.const(25.0)))
 greyer = g.sat(g.mul(g.sub(g.div(vb, g.add(vr, g.const(0.01))), g.const(0.28)), g.const(8.0)))
 dirt_mask = g.mul(browner, greyer)
-base = g.lerp(grass_col, dirt_col, dirt_mask)
+# Grain fields where the picture is yellow (red over green, little blue): the stubble and straw texture.
+field = g.sample(tex('T_Ground_Field_D'), uv_dirt)
+field_lum = g.node(unreal.MaterialExpressionDesaturation)
+g.link(field, 'RGB', field_lum, '')
+field_col = g.mul(vc, g.div(g.mask(field_lum, r=True), g.const(0.308)))
+field_mask = g.mul(browner, g.sub(g.const(1.0), greyer))
+base = g.lerp(g.lerp(grass_col, field_col, field_mask), dirt_col, dirt_mask)
 # Macro: lush (darker, greener) and dry (yellower) patches, and a brightness swing.
 dry_tint = g.const3(0.30, 0.26, 0.10)
-base = g.lerp(base, g.mul(base, g.const3(1.25, 1.1, 0.75)), g.mul(g.mask(macro, g=True), g.scalar('DryPatches', 0.8)))
-base = g.mul(base, g.lerp(g.const(0.74), g.const(1.18), g.mask(macro, r=True)))
+base = g.lerp(base, g.mul(base, g.const3(1.25, 1.1, 0.75)), g.mul(g.mask(macro, g=True), g.scalar('DryPatches', 0.35)))
+base = g.mul(base, g.lerp(g.const(0.88), g.const(1.08), g.mask(macro, r=True)))
 base = g.mul(base, g.scalar('GroundBrightness', 1.0))
 g.out(base, unreal.MaterialProperty.MP_BASE_COLOR)
 n_grass = g.sample(tex('T_Ground_Grass_N'), uv_fine, sampler=unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL)

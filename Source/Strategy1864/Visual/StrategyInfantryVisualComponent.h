@@ -79,7 +79,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
     TSoftObjectPtr<UAnimSequence> DeathWalkingAsset;
 
-    /** The firing cycle: loading (kneeling with the ramrod: the only loading the set has), rising, ready, aiming. */
+    /** The firing cycle uses a reload matching the soldier's current stance. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
     TSoftObjectPtr<UAnimSequence> LoadAsset;
 

@@ -47,7 +47,7 @@ public:
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve, FormationDeputy, FormationStaff,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
-		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle };
+		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -63,6 +63,8 @@ public:
 	void SetCivilTab(bool bIn) { bCivilTab = bIn; }
 	/** The supply map: depot ranges and each unit's supply in colour (key F). */
 	void ToggleSupplyMap() { bSupplyMap = !bSupplyMap; }
+	/** The map's view: 0 normal, 1 supply (the depots' reach), 2 control (occupied towns and their liberation). */
+	void SetMapView(int32 View) { MapView = View; bSupplyMap = View == 1; }
 	bool IsSupplyMap() const { return bSupplyMap; }
 	/** The fort list and the choice of a new fort (the SKANSER button). */
 	void ToggleFortTool() { bFortTool = !bFortTool; }
@@ -106,6 +108,33 @@ public:
 	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council, Supply, Foreign, Research, Navy, Gazette, End, Battlefield, Materiel, Nations };
 	void OpenWindow(EWindow In) { Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
 	EWindow GetWindow() const { return Window; }
+
+	/** A question before a step that costs or cannot be undone (mobilisation, ...): the title, what it does, and
+	 *  the button it stands for (JA carries it out with the module). */
+	void AskConfirm(const FString& Title, const FString& Text, EButton Action, int32 Module)
+	{
+		ConfirmTitle = Title; ConfirmText = Text; ConfirmAction = Action; ConfirmModule = Module; bConfirmOpen = true;
+	}
+	bool IsConfirmOpen() const { return bConfirmOpen; }
+	/** JA: the action asked about (and its module); the question closes. */
+	EButton TakeConfirm(int32& OutModule) { bConfirmOpen = false; OutModule = ConfirmModule; return ConfirmAction; }
+	void CloseConfirm() { bConfirmOpen = false; }
+
+	/** The town's building list: scrolled by rows (wheel or arrows), and the card of one building. */
+	bool IsOverBuildings(const FVector2D& ViewportPixel) const
+	{
+		const FVector2D Local = ViewportPixel / FMath::Max(PaintScale, 0.01f);
+		return BuildingRowsTotal > 0 && Local.X >= BuildingMin.X && Local.Y >= BuildingMin.Y && Local.X <= BuildingMax.X && Local.Y <= BuildingMax.Y;
+	}
+	void ScrollBuildings(int32 Delta) { BuildingScroll = FMath::Clamp(BuildingScroll + Delta, 0, FMath::Max(0, BuildingRowsTotal - BuildingRowsShown)); }
+	void ToggleBuildingInfo(int32 Index) { BuildingInfo = BuildingInfo == Index ? INDEX_NONE : Index; }
+	/** The unit card beside the unit panel: the soldier in his uniform, the colours, the service record. */
+	void ToggleUnitCard() { bUnitCard = !bUnitCard; }
+	/** The order of battle for one unit only (its companies; split it there), or the whole army. */
+	void FocusOOB(int32 RegimentIndex) { OOBFocus = RegimentIndex; TreeScroll = 0; }
+
+	/** A tooltip over a part of the screen (paint coordinates); the buttons get theirs from ButtonTip. */
+	void AddTip(const FVector2D& Pos, const FVector2D& Size, const FString& Text) const { Tips.Add({ Pos, Pos + Size, Text }); }
 	/** Sort a table by a column (again: the other way round). */
 	void SetSort(int32 Column) { bSortDesc = Column == SortColumn ? !bSortDesc : Column > 3; SortColumn = Column; Page = 0; }
 	void TurnPage(int32 Delta) { Page = FMath::Max(0, Page + Delta); }
@@ -313,6 +342,7 @@ private:
 	mutable float ChartScroll = 0.f;
 	bool bFortTool = false;
 	bool bSupplyMap = false;
+	int32 MapView = 0;
 	int32 SelectedFort = 0;
 	int32 FortPlacing = 0;
 	bool bFortPickCompany = false;
@@ -325,6 +355,37 @@ private:
 	bool bDragging = false;
 	int32 DragKey = 0;
 	int32 HoverKey = 0;
+
+	// ---- tooltips and the confirmation dialog
+	struct FTipRect { FVector2D Min; FVector2D Max; FString Text; };
+	mutable TArray<FTipRect> Tips;
+	mutable FString TipShown;
+	mutable double TipSince = 0.0;
+	/** What a button does (empty: no tip). */
+	FString ButtonTip(EButton Action, int32 Module) const;
+	void PaintTooltip(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	void PaintConfirm(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
+	FString ConfirmTitle;
+	FString ConfirmText;
+	EButton ConfirmAction = EButton::None;
+	int32 ConfirmModule = 0;
+	bool bConfirmOpen = false;
+	int32 BuildingScroll = 0;
+	bool bUnitCard = false;
+	int32 OOBFocus = INDEX_NONE;
+	TArray<TSharedPtr<FSlateBrush>> UniformBrushes;   // a soldier per arm (ECampaign1851Arm)
+	TSharedPtr<FSlateBrush> FlagBrush;
+	/** Portraits (types of the time): officers, generals, ministers; one by the person's name. */
+	TArray<TSharedPtr<FSlateBrush>> OfficerPortraits, GeneralPortraits, MinisterPortraits;
+	const FSlateBrush* PortraitFor(const FString& Name, int32 Kind) const;   // 0 officer, 1 general, 2 minister
+	void PaintPortrait(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind) const;
+	void PaintUnitCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft, int32 RegimentIndex) const;
+	int32 BuildingInfo = INDEX_NONE;
+	mutable FVector2D BuildingMin = FVector2D::ZeroVector;
+	mutable FVector2D BuildingMax = FVector2D::ZeroVector;
+	mutable int32 BuildingRowsTotal = 0;
+	mutable int32 BuildingRowsShown = 0;
+	void PaintBuildingCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, int32 TypeIndex) const;
 	FVector2D DragPos = FVector2D::ZeroVector;
 	FOrderDialog OrderDialog;
 	int32 TownTab = 0;

@@ -30,6 +30,58 @@ bool ACampaign1851Map::Mobilise(FString* OutReason)
 	return true;
 }
 
+bool ACampaign1851Map::CanUpgradeToHorseBattery(int32 RegimentIndex, FString* OutWhy) const
+{
+	auto Fail = [OutWhy](const FString& Why) { if (OutWhy) { *OutWhy = Why; } return false; };
+	if (!Regiments.IsValidIndex(RegimentIndex))
+	{
+		return Fail(TEXT("Ingen enhed"));
+	}
+	const FCampaign1851Regiment& R = Regiments[RegimentIndex];
+	if (R.Arm != ECampaign1851Arm::Artillery || R.Mortars > 0 || R.Guns <= 0)
+	{
+		return Fail(TEXT("Kun et fodbatteri kan blive ridende"));
+	}
+	if (R.IsMarching())
+	{
+		return Fail(TEXT("Batteriet skal stå stille (ikke på march)"));
+	}
+	const int32 NeedHorses = FMath::Max(0, HorseBatteryHorses - R.Horses);
+	if (Horses < NeedHorses)
+	{
+		return Fail(FString::Printf(TEXT("Mangler heste: %d på lager, %d skal bruges"), Horses, NeedHorses));
+	}
+	if (Treasury < HorseBatteryCost)
+	{
+		return Fail(TEXT("Ikke råd"));
+	}
+	return true;
+}
+
+bool ACampaign1851Map::UpgradeToHorseBattery(int32 RegimentIndex, FString* OutWhy)
+{
+	if (!CanUpgradeToHorseBattery(RegimentIndex, OutWhy))
+	{
+		return false;
+	}
+	FCampaign1851Regiment& R = Regiments[RegimentIndex];
+	const int32 NeedHorses = FMath::Max(0, HorseBatteryHorses - R.Horses);
+	Horses -= NeedHorses;
+	R.Horses += NeedHorses;
+	R.MaxHorses = HorseBatteryHorses;
+	GunStock += FMath::Max(0, R.Guns - 6);
+	R.Guns = FMath::Min(R.Guns, 6);
+	R.MaxMen = FMath::Max(R.MaxMen, 180);
+	R.Arm = ECampaign1851Arm::HorseArtillery;
+	R.PaceKmPerDay = Campaign1851Army::MarchKmPerDay(R.Arm);
+	R.Name = R.Name.Replace(TEXT("Batteri"), TEXT("Ridende Batteri"));
+	// The gunners must learn to ride with the guns: the drill falls for a while.
+	R.Skills[int32(ECampaign1851Skill::Drill)] = FMath::Max(30.f, R.Skills[int32(ECampaign1851Skill::Drill)] - 15.f);
+	AddTransaction(-HorseBatteryCost, FString::Printf(TEXT("%s gøres ridende"), *R.Name));
+	News.Add(FString::Printf(TEXT("%s er nu et ridende batteri (6 kanoner, alle kanonerer til hest)"), *R.Name));
+	return true;
+}
+
 void ACampaign1851Map::Demobilise()
 {
 	if (Footing != ECampaign1851Footing::Peace)

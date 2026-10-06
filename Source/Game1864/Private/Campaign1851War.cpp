@@ -81,6 +81,31 @@ void ACampaign1851Map::DailyWar()
 	{
 		DeclareWar();
 	}
+	// Liberation: an occupied town (not ceded) is free again when 300 Danish soldiers or more have stood within
+	// 3 km of it for two days with no enemy corps within 10 km; its amt then pays again.
+	for (int32 c = 0; c < Cities.Num(); ++c)
+	{
+		FCampaign1851City& City = Cities[c];
+		if (City.Occupier.IsEmpty() || City.bCeded)
+		{
+			City.LiberationDays = 0.f;
+			continue;
+		}
+		const FVector2D At = TownKm(c);
+		int32 Men = 0;
+		for (const FCampaign1851Regiment& R : Regiments)
+		{
+			Men += !R.IsMarching() && FVector2D::Distance(R.Km, At) < 3.0 ? R.PresentMen() : 0;
+		}
+		const bool bEnemyNear = EnemyCorps.ContainsByPredicate([&](const FCampaign1851EnemyCorps& E) { return E.Men > 0 && FVector2D::Distance(E.Km, At) < 10.0; });
+		City.LiberationDays = Men >= LiberationMen && !bEnemyNear ? City.LiberationDays + 1.f : 0.f;
+		if (City.LiberationDays >= 2.f)
+		{
+			City.Occupier.Reset();
+			City.LiberationDays = 0.f;
+			News.Add(FString::Printf(TEXT("%s er befriet: de danske tropper har holdt byen i to døgn"), *City.Name));
+		}
+	}
 }
 
 void ACampaign1851Map::MonthlyWar()

@@ -40,19 +40,22 @@ UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Weapons/SM_Rifle_Bayonet_1.SM_Rifle_Bayonet_1")));
 
     IdleStandingAsset = TSoftObjectPtr<UAnimSequence>(
-        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Rifle_Idle.A_Rifle_Idle")));
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_Idle.A_Combat_Idle")));
 
     WalkStandingAsset = TSoftObjectPtr<UAnimSequence>(
-        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Walking_with_rifle.A_Walking_with_rifle")));
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_Walk.A_Combat_Walk")));
 
     RunStandingAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Running.A_Running")));
 
     AimStandingAsset = TSoftObjectPtr<UAnimSequence>(
-        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Rifle_Aiming_Idle.A_Rifle_Aiming_Idle")));
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_Aim.A_Combat_Aim")));
 
     FireStandingAsset = TSoftObjectPtr<UAnimSequence>(
-        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Firing_Rifle.A_Firing_Rifle")));
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_Fire.A_Combat_Fire")));
+
+    ReloadStandingAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_ReloadStanding.A_Combat_ReloadStanding")));
 
     IdleKneelingAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Rifle_Kneel_Idle.A_Rifle_Kneel_Idle")));
@@ -85,15 +88,15 @@ UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Bayonet_Stab.A_Bayonet_Stab")));
 
     DeathAsset = TSoftObjectPtr<UAnimSequence>(
-        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Death_From_The_Front.A_Death_From_The_Front")));
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_DeathFront.A_Combat_DeathFront")));
     DeathAsset2 = TSoftObjectPtr<UAnimSequence>(
-        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Death_From_Front_Headshot.A_Death_From_Front_Headshot")));
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_DeathHeadshot.A_Combat_DeathHeadshot")));
     DeathAsset3 = TSoftObjectPtr<UAnimSequence>(
-        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Falling_Back_Death.A_Falling_Back_Death")));
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_DeathBack.A_Combat_DeathBack")));
     RaiseToAimAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Rifle_Down_To_Aim.A_Rifle_Down_To_Aim")));
     LoadAsset = TSoftObjectPtr<UAnimSequence>(
-        FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Reload_sitting.A_Reload_sitting")));
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_ReloadStanding.A_Combat_ReloadStanding")));
     RiseFromLoadAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Rifle_Kneel_To_Stand.A_Rifle_Kneel_To_Stand")));
     ReadyAsset = TSoftObjectPtr<UAnimSequence>(
@@ -205,6 +208,23 @@ void UStrategyInfantryVisualComponent::TickComponent(
         AlignWeapons();
     }
     UpdateFormationBounds();
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864AnimationAudit")))
+    {
+        const float Now = GetWorld()->GetTimeSeconds();
+        if (FMath::FloorToInt(Now / 10.0f) != FMath::FloorToInt((Now - DeltaTime) / 10.0f))
+        {
+            int32 Walking = 0, Firing = 0, Loading = 0;
+            for (const FPlayedClip& Clip : SoldierClips)
+            {
+                const FString Name = Clip.Clip.IsValid() ? Clip.Clip->GetName() : FString();
+                Walking += Name.Contains(TEXT("Walk")) ? 1 : 0;
+                Firing += Name.Contains(TEXT("Fire")) || Name.Contains(TEXT("Firing")) ? 1 : 0;
+                Loading += Name.Contains(TEXT("Reload")) ? 1 : 0;
+            }
+            UE_LOG(LogTemp, Display, TEXT("COMBAT-ANIMATION-AUDIT %s strength=%d walk=%d fire=%d reload=%d corpses=%d"),
+                *OwnerCompany->DisplayName.ToString(), CurrentStrength, Walking, Firing, Loading, CorpseComponents.Num());
+        }
+    }
 }
 
 void UStrategyInfantryVisualComponent::SetEnabled(
@@ -443,8 +463,9 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
     const bool bInRange = bLine && IsEnemyInRange();
     // The company's loading time (the combat core's reload: every man reloads together after a volley).
     const float ReloadLeft = OwnerCompany && OwnerCompany->CombatComponent ? OwnerCompany->CombatComponent->ReloadRemainingSeconds : 0.0f;
-    UAnimSequence* Load = LoadAsset.LoadSynchronous();
-    UAnimSequence* Rise = RiseFromLoadAsset.LoadSynchronous();
+    UAnimSequence* Load = (Stance == EStrategyStance::Prone ? ReloadProneAsset :
+        Stance == EStrategyStance::Kneeling ? ReloadKneelingAsset : ReloadStandingAsset).LoadSynchronous();
+    UAnimSequence* Rise = Stance == EStrategyStance::Kneeling ? RiseFromLoadAsset.LoadSynchronous() : nullptr;
     UAnimSequence* Ready = ReadyAsset.LoadSynchronous();
     UAnimSequence* AimHold = AimHoldAsset.LoadSynchronous();
     UAnimSequence* Raise = RaiseToAimAsset.LoadSynchronous();
@@ -506,12 +527,15 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
                 {
                     if (bLine && Load)
                     {
-                        // Load: down on one knee with powder, ball and ramrod, for the musket's own reload (by rank,
-                        // the next rank fires meanwhile).
-                        PlayOnSoldier(Soldier, Load, true, false);
+                        // One loading cycle fills the actual reload interval. Standing soldiers stay standing.
+                        PlayOnSoldier(Soldier, Load, false, false);
                         Phase = PhaseLoad;
                         const float MusketReload = OwnerCompany && OwnerCompany->CombatComponent ? OwnerCompany->CombatComponent->ReloadSeconds : 18.0f;
-                        SoldierBusyUntil[i] = Now + MusketReload * FMath::FRandRange(0.9f, 1.1f);
+                        const float Duration = FMath::Max(0.1f, MusketReload * FMath::FRandRange(0.9f, 1.1f));
+                        const float Rate = Load->GetPlayLength() / Duration;
+                        Soldier->SetPlayRate(Rate);
+                        RecordClip(Soldier, Load, false, 0.0f, Rate);
+                        SoldierBusyUntil[i] = Now + Duration;
                     }
                     else
                     {

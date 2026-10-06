@@ -227,6 +227,7 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
         ShotCount,
         DistanceCm,
         Target);
+    TotalHitsInflicted += FMath::Max(0, Hits);
 
     if (Hits > 0)
     {

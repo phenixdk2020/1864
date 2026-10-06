@@ -52,6 +52,10 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Combat")
     int32 AmmunitionRounds = 1900;
 
+    /** The enemy men this unit has hit in the battle (for its service record in the campaign). */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Combat")
+    int32 TotalHitsInflicted = 0;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Combat")
     int32 MaxAmmunitionRounds = 1900;
 

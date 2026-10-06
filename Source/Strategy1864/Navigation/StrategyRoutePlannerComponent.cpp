@@ -6,6 +6,7 @@
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
+#include "../Campaign/StrategyCampaignBattlefield.h"
 
 UStrategyRoutePlannerComponent::UStrategyRoutePlannerComponent()
 {
@@ -28,6 +29,38 @@ FStrategyRoutePlan UStrategyRoutePlannerComponent::BuildRoutePlan(
     AStrategyRiverBarrier* River = FindRelevantRiverBarrier(
         StartLocation,
         EndLocation);
+
+    // The campaign's field: a broad river is crossed by a bridge (the shortest way over one), a brook waded.
+    if (!River && GetWorld())
+    {
+        for (TActorIterator<AStrategyCampaignBattlefield> It(GetWorld()); It; ++It)
+        {
+            TArray<FVector> Via;
+            if (!It->RouteAcrossRivers(StartLocation, EndLocation, Via))
+            {
+                Plan.bValid = false;
+                Plan.FailureReason = TEXT("A broad river lies across the way and there is no bridge (the pioneers can lay a pontoon bridge).");
+                return Plan;
+            }
+            if (Via.Num() > 0)
+            {
+                FVector From = StartLocation;
+                for (const FVector& Point : Via)
+                {
+                    AppendNavSegment(From, Point, Plan.Points);
+                    From = Point;
+                }
+                AppendNavSegment(From, EndLocation, Plan.Points);
+                ApplyTacticalTerrainElevation(Plan.Points);
+                if (!ValidateSlopeProfile(StartLocation, Plan.Points, Plan.FailureReason))
+                {
+                    Plan.bValid = false;
+                }
+                return Plan;
+            }
+            break;
+        }
+    }
 
     if (!River)
     {

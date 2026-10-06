@@ -18,6 +18,7 @@
 #include "../Orders/StrategyOrderComponent.h"
 #include "../Player/StrategyCameraPawn.h"
 #include "../Visual/StrategyBattleAtmosphere.h"
+#include "EngineUtils.h"
 #include "../Visual/StrategyInfantryVisualComponent.h"
 
 #include "../Command/StrategyCommandComponent.h"
@@ -236,10 +237,154 @@ void AStrategyOOBTestScenario::BeginPlay()
         }
     }
 
+    // The small test battle: map *Skirmish* or -Strategy1864Skirmish=<enemy companies>.
+    {
+        int32 SkirmishEnemies = MapName.Contains(TEXT("Skirmish")) ? 2 : 0;
+        FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Skirmish="), SkirmishEnemies);
+        if (SkirmishEnemies > 0)
+        {
+            BuildSkirmish(FMath::Clamp(SkirmishEnemies, 1, 4));
+            return;
+        }
+    }
+
     if (bBuildOnBeginPlay)
     {
         BuildTestOOB();
     }
+}
+
+void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
+{
+    ClearSpawnedUnits();
+    bLivgardenVsSwedishTest = false;
+    bSkirmish = true;
+    BattleOutcome.Reset();
+    // On the meadow (its middle): the Danes in the south facing north, the enemy 400 m north.
+    const FVector Middle = Origin + FVector(15000.0f, -7000.0f, 0.0f);
+    const FVector DanishLine = Middle - FVector(20000.0f, 0.0f, 0.0f), EnemyLine = Middle + FVector(20000.0f, 0.0f, 0.0f);
+    int32 Lod = 1;
+    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864FieldLOD="), Lod);
+
+    AStrategyHQUnit* Major = SpawnHQ(TEXT("DK-SKIRMISH-HQ"), TEXT("1. Bataillon"), static_cast<uint8>(EStrategyHQLevel::Battalion), DanishLine - FVector(9000.0f, 0.0f, 0.0f), nullptr);
+    AStrategyHQUnit* EnemyMajor = SpawnHQ(TEXT("EN-SKIRMISH-HQ"), TEXT("Pr. Bataillon"), static_cast<uint8>(EStrategyHQLevel::Battalion), EnemyLine + FVector(9000.0f, 0.0f, 0.0f), nullptr);
+    if (EnemyMajor)
+    {
+        EnemyMajor->Side = EStrategySide::Prussia;
+        EnemyMajor->bPlayerControllable = false;
+        EnemyMajor->bOfficerAIEnabled = true;
+        EnemyMajor->SetActorRotation(FRotator(0.0f, 180.0f, 0.0f));
+        EnemyMajor->RefreshDebugLabel();
+    }
+    TArray<AStrategyCompanyUnit*> All;
+    for (int32 c = 0; c < 2; ++c)
+    {
+        if (AStrategyCompanyUnit* Company = SpawnCompany(FName(*FString::Printf(TEXT("DK-SKIRMISH-C%d"), c + 1)), FString::Printf(TEXT("%d. Kompagni"), c + 1), c + 1,
+            DanishLine + FVector(0.0f, (c - 0.5f) * 7200.0f, 0.0f), Major, static_cast<uint8>(EStrategySide::Denmark)))
+        {
+            Company->bPlayerControllable = true;
+            if (Company->InfantryVisualComponent)
+            {
+                Company->InfantryVisualComponent->SoldierMeshAsset = TSoftObjectPtr<USkeletalMesh>(
+                    FSoftObjectPath(TEXT("/Game/Units/Danish/Infantry1864/Mesh/SK_DK_Infantry_1864.SK_DK_Infantry_1864")));
+            }
+            All.Add(Company);
+        }
+    }
+    for (int32 e = 0; e < EnemyCompanies; ++e)
+    {
+        if (AStrategyCompanyUnit* Company = SpawnCompany(FName(*FString::Printf(TEXT("EN-SKIRMISH-C%d"), e + 1)), FString::Printf(TEXT("Pr. %d. Kp."), e + 1), e + 1,
+            EnemyLine + FVector(0.0f, (e - (EnemyCompanies - 1) * 0.5f) * 7200.0f, 0.0f), EnemyMajor, static_cast<uint8>(EStrategySide::Prussia)))
+        {
+            Company->SetActorRotation(FRotator(0.0f, 180.0f, 0.0f));
+            Company->bPlayerControllable = false;
+            if (Company->AutonomousBattleAIComponent)
+            {
+                Company->AutonomousBattleAIComponent->bEnableForNonPlayerSides = true;
+            }
+            if (Company->InfantryVisualComponent)
+            {
+                // No Prussian model yet: the Swedish stands in.
+                Company->InfantryVisualComponent->SoldierMeshAsset = TSoftObjectPtr<USkeletalMesh>(
+                    FSoftObjectPath(TEXT("/Game/Units/Swedish/Infantry1864/Mesh/SK_SE_Infantry_1864.SK_SE_Infantry_1864")));
+            }
+            All.Add(Company);
+        }
+    }
+    for (AStrategyCompanyUnit* Company : All)
+    {
+        Company->bOfficerAIEnabled = true;
+        if (Company->InfantryVisualComponent)
+        {
+            Company->InfantryVisualComponent->SetVisualScaleDivisor(Lod);
+            Company->InfantryVisualComponent->SetEnabled(true);
+        }
+        // The meadow has no contact simulation around it: sight is enough to engage (as the duel).
+        if (Company->FireControlComponent)
+        {
+            Company->FireControlComponent->bRequireCurrentContact = false;
+        }
+        if (Company->CombatComponent)
+        {
+            Company->CombatComponent->SetDeterministicRandomSeed(QARandomSeed ^ static_cast<int32>(GetTypeHash(Company->StableUnitId)));
+        }
+        ConfigureRuntimeQALabel(Company);
+        if (AStrategyColourFlag* Flag = GetWorld()->SpawnActor<AStrategyColourFlag>(AStrategyColourFlag::StaticClass(), Company->GetActorLocation(), FRotator::ZeroRotator))
+        {
+            Flag->Setup(Company, Company->Side == EStrategySide::Denmark ? TEXT("DK") : TEXT("PR"), FVector(-250.0f, 60.0f, 0.0f));
+        }
+    }
+    // The camera behind the Danish line (as the campaign's battles).
+    FieldCameraTarget = DanishLine - FVector(6000.0f, 0.0f, 0.0f);
+    FieldCameraYaw = 0.0f;
+    bFieldCameraPlaced = false;
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SKIRMISH: 2 Danish companies against %d enemy companies, 400 m apart, figures 1:%d"), EnemyCompanies, Lod);
+}
+
+void AStrategyOOBTestScenario::GetBattleScore(int32& OutDanesStart, int32& OutDanesNow, int32& OutEnemyStart, int32& OutEnemyNow, int32& OutDanesBroken, int32& OutEnemyBroken) const
+{
+    OutDanesStart = OutDanesNow = OutEnemyStart = OutEnemyNow = OutDanesBroken = OutEnemyBroken = 0;
+    for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+    {
+        const AStrategyUnit* Unit = *It;
+        if (!IsValid(Unit) || Unit->Side == EStrategySide::Neutral || Unit->Echelon == EStrategyEchelon::Headquarters ||
+            Unit->Echelon == EStrategyEchelon::Supply || Unit->Echelon == EStrategyEchelon::Battalion || Unit->Echelon == EStrategyEchelon::Regiment ||
+            Unit->Echelon == EStrategyEchelon::Brigade || Unit->Echelon == EStrategyEchelon::Division)
+        {
+            continue;
+        }
+        const bool bDane = Unit->Side == EStrategySide::Denmark;
+        const bool bBroken = !Unit->IsCombatEffective() || Unit->UnitState == EStrategyUnitState::Routed || Unit->UnitState == EStrategyUnitState::Destroyed;
+        (bDane ? OutDanesStart : OutEnemyStart) += FMath::Max(0, Unit->InitialStrength);
+        (bDane ? OutDanesNow : OutEnemyNow) += bBroken ? 0 : FMath::Max(0, Unit->CurrentStrength);
+        (bDane ? OutDanesBroken : OutEnemyBroken) += bBroken ? 1 : 0;
+    }
+}
+
+void AStrategyOOBTestScenario::UpdateBattleOutcome()
+{
+    if (!BattleOutcome.IsEmpty() || (!bSkirmish && !bCampaignBattle))
+    {
+        return;
+    }
+    int32 DS, DN, ES, EN, DB, EB;
+    GetBattleScore(DS, DN, ES, EN, DB, EB);
+    if (DS <= 0 || ES <= 0)
+    {
+        return;
+    }
+    const bool bDanesBeaten = DN < DS * 0.35f;
+    const bool bEnemyBeaten = EN < ES * 0.35f;
+    if (!bDanesBeaten && !bEnemyBeaten)
+    {
+        return;
+    }
+    bDanishVictory = bEnemyBeaten && !bDanesBeaten;
+    BattleOutcome = bDanishVictory
+        ? FString::Printf(TEXT("SEJR — fjenden er slået (%d af %d mand står endnu, %d enheder brudt)"), EN, ES, EB)
+        : bEnemyBeaten ? FString(TEXT("UAFGJORT — begge sider er udmattede"))
+        : FString::Printf(TEXT("NEDERLAG — vore tropper er slået (%d af %d mand står endnu, %d enheder brudt)"), DN, DS, DB);
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OUTCOME: %s"), *BattleOutcome);
 }
 
 bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFile, int32 BattleId)
@@ -321,6 +466,17 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     const double ReloadRule = RuleNumber(TEXT("battleRules"), TEXT("infantry"), TEXT("reloadFactor"), 1.0);
     const double LossRule = RuleNumber(TEXT("battleRules"), nullptr, TEXT("lossFactor"), 1.0) * RuleNumber(TEXT("doctrine"), nullptr, TEXT("lossFactor"), 1.0);
     const double InfantryRule = RuleNumber(TEXT("doctrine"), nullptr, TEXT("infantryFactor"), 1.0);
+    bPioneerBridges = false;
+    {
+        const TSharedPtr<FJsonObject>* Rules = nullptr;
+        const TSharedPtr<FJsonObject>* Engineering = nullptr;
+        if (Request && Request->TryGetObjectField(TEXT("battleRules"), Rules) && (*Rules)->TryGetObjectField(TEXT("engineering"), Engineering))
+        {
+            (*Engineering)->TryGetBoolField(TEXT("pioneerBridge"), bPioneerBridges);
+        }
+        // -Strategy1864Pontoon: the pioneers whatever the research (tests).
+        bPioneerBridges |= FParse::Param(FCommandLine::Get(), TEXT("Strategy1864Pontoon"));
+    }
     EStrategyFirePolicy DanishPolicy = EStrategyFirePolicy::Medium;
     {
         FString Policy;
@@ -632,6 +788,13 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             CampaignUnitOf.Add(Company, FString());
         }
     }
+    // A check of the crossings: from the Danish line 2.5 km away from the enemy (over the place they hold).
+    {
+        TArray<FVector> Via;
+        const bool bWay = CampaignField->RouteAcrossRivers(DanishLine, DanishLine - ToEnemy * 250000.0f, Via);
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FIELD: %d bridges; the way 2.5 km back %s (%d bridge points)"), CampaignField->GetBridgeCount(),
+            bWay ? TEXT("is open") : TEXT("is blocked by a broad river"), Via.Num());
+    }
     // The camera behind the Danish line, looking towards the enemy (placed on the first tick, after the QA
     // bootstrap has placed its own).
     FieldCameraTarget = Danish(-6000.0f, 0.0f);
@@ -653,7 +816,7 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
         return;
     }
     // Losses per campaign unit, the enemy's, and the outcome by the share each side has left.
-    TMap<FString, int32> Losses;
+    TMap<FString, int32> Losses, Kills;
     int32 DanesStart = 0, DanesNow = 0, EnemyStart = 0, EnemyNow = 0;
     for (const TPair<TWeakObjectPtr<AStrategyUnit>, FString>& It : CampaignUnitOf)
     {
@@ -671,13 +834,16 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
         else
         {
             Losses.FindOrAdd(It.Value) += Lost;
+            Kills.FindOrAdd(It.Value) += Unit->CombatComponent ? Unit->CombatComponent->TotalHitsInflicted : 0;
             DanesStart += Unit->InitialStrength;
             DanesNow += FMath::Max(0, Unit->CurrentStrength);
         }
     }
     const float DanesLeft = DanesStart > 0 ? float(DanesNow) / DanesStart : 0.0f;
     const float EnemyLeft = EnemyStart > 0 ? float(EnemyNow) / EnemyStart : 0.0f;
-    const FString Outcome = DanesLeft > EnemyLeft + 0.05f ? TEXT("danish_victory") : EnemyLeft > DanesLeft + 0.05f ? TEXT("enemy_victory") : TEXT("draw");
+    // The battle's own decision when it came (a side broken), else by the share each side has left.
+    const FString Outcome = !BattleOutcome.IsEmpty() ? (bDanishVictory ? TEXT("danish_victory") : BattleOutcome.StartsWith(TEXT("UAFGJORT")) ? TEXT("draw") : TEXT("enemy_victory"))
+        : DanesLeft > EnemyLeft + 0.05f ? TEXT("danish_victory") : EnemyLeft > DanesLeft + 0.05f ? TEXT("enemy_victory") : TEXT("draw");
     TSharedRef<FJsonObject> Doc = MakeShared<FJsonObject>();
     Doc->SetStringField(TEXT("format"), TEXT("PROJECT1864-BattleResult-1"));
     Doc->SetNumberField(TEXT("battleId"), CampaignBattleId);
@@ -689,6 +855,7 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
         TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
         O->SetStringField(TEXT("id"), L.Key);
         O->SetNumberField(TEXT("losses"), L.Value);
+        O->SetNumberField(TEXT("kills"), Kills.FindRef(L.Key));
         UnitList.Add(MakeShared<FJsonValueObject>(O));
     }
     Doc->SetArrayField(TEXT("units"), UnitList);
@@ -706,9 +873,48 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
     }
 }
 
+bool AStrategyOOBTestScenario::OrderPontoonBridge(const AStrategyUnit* By)
+{
+    if (!CanLayPontoonBridges() || !By || !GetWorld() || PendingPontoons.Num() > 0)
+    {
+        return false;
+    }
+    FPendingPontoon Pending;
+    Pending.Where = By->GetActorLocation();
+    Pending.ReadyAt = GetWorld()->GetTimeSeconds() + 300.0f;
+    PendingPontoons.Add(Pending);
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FIELD: %s orders a pontoon bridge (five minutes)"), *By->DisplayName.ToString());
+    return true;
+}
+
+float AStrategyOOBTestScenario::GetPontoonSecondsLeft() const
+{
+    return PendingPontoons.Num() > 0 && GetWorld() ? FMath::Max(0.0f, PendingPontoons[0].ReadyAt - GetWorld()->GetTimeSeconds()) : 0.0f;
+}
+
 void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+
+    BattleScoreTimer -= DeltaSeconds;
+    if (BattleScoreTimer <= 0.0f)
+    {
+        BattleScoreTimer = 0.5f;
+        UpdateBattleOutcome();
+    }
+
+    // The pioneers' bridges: laid when their time is up (over the broad river nearest the ordering staff).
+    for (int32 p = PendingPontoons.Num() - 1; p >= 0; --p)
+    {
+        if (GetWorld() && GetWorld()->GetTimeSeconds() >= PendingPontoons[p].ReadyAt)
+        {
+            if (!CampaignField || !CampaignField->LayPontoonBridge(PendingPontoons[p].Where, 60000.0f))
+            {
+                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FIELD: no broad river within 600 m of the pioneers"));
+            }
+            PendingPontoons.RemoveAt(p);
+        }
+    }
 
     if (bDrawRuntimeQAVisuals)
     {
@@ -728,7 +934,7 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
         }
     }
 
-    if (bCampaignBattle && !bFieldCameraPlaced)
+    if ((bCampaignBattle || bSkirmish) && !bFieldCameraPlaced)
     {
         if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
         {

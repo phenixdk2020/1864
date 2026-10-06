@@ -169,7 +169,7 @@ void AStrategyHUD::DrawHUD()
         {
             for (const AStrategyUnit* Unit : ConePC->GetSelectedUnits())
             {
-                if (IsValid(Unit) && Unit->FireControlComponent && !Drawn.Contains(Unit))
+                if (IsValid(Unit) && Unit->FireControlComponent && !IsCommandHQ(Unit) && !Drawn.Contains(Unit))
                 {
                     DrawFireCone(Unit, bLegend);
                     bLegend = false;
@@ -194,6 +194,29 @@ void AStrategyHUD::DrawHUD()
     DrawOOB();
     DrawMinimap();
     DrawSettings();
+    // The battle's standing (the men each side has fighting) and, once decided, the outcome.
+    for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+    {
+        if (!It->IsSkirmish() && !It->IsCampaignBattle())
+        {
+            break;
+        }
+        int32 DS, DN, ES, EN, DB, EB;
+        It->GetBattleScore(DS, DN, ES, EN, DB, EB);
+        const float BW = 420.0f, BX = (Canvas->ClipX - BW) * 0.5f;
+        DrawPanel(BX, 6.0f, BW, 30.0f);
+        Text(FString::Printf(TEXT("DANSKE  %d / %d   ·   FJENDEN  %d / %d"), DN, DS, EN, ES), BX + 14.0f, 13.0f, Gold);
+        const FString& Outcome = It->GetBattleOutcome();
+        if (!Outcome.IsEmpty())
+        {
+            float TW = 0.0f, TH = 0.0f;
+            GetTextSize(Outcome, TW, TH, nullptr, 1.6f);
+            const float W = TW + 60.0f, X = (Canvas->ClipX - W) * 0.5f, Y = Canvas->ClipY * 0.28f;
+            DrawRect(It->IsDanishVictory() ? FLinearColor(0.10f, 0.22f, 0.10f, 0.88f) : FLinearColor(0.28f, 0.08f, 0.06f, 0.88f), X, Y, W, TH + 30.0f);
+            DrawText(Outcome, FLinearColor(0.98f, 0.92f, 0.70f), X + 30.0f, Y + 15.0f, nullptr, 1.6f, false);
+        }
+        break;
+    }
     // The battle from the campaign: its end and the way back.
     for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
     {
@@ -590,7 +613,8 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         : Unit->Echelon == EStrategyEchelon::Cavalry ? TEXT("RITMESTER | KAVALERIKOMMANDO")
         : Unit->Echelon == EStrategyEchelon::Artillery ? TEXT("KAPTAJN | BATTERIKOMMANDO")
         : TEXT("KAPTAJN | KOMPAGNIKOMMANDO");
-    Text(FString::Printf(TEXT("%s | %s"), *Unit->DisplayName.ToString().ToUpper(), RoleText), 10.0f, Y + 6.0f, Gold);
+    const FString Title = Unit->DisplayName.ToString().ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"));
+    Text(FString::Printf(TEXT("%s | %s"), *Title, RoleText), 10.0f, Y + 6.0f, Gold);
 
     // Left: the state and the AI.
     const float LX = 10.0f, LY = Y + 30.0f;
@@ -624,6 +648,18 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         OrderButton(MX + 182.0f, MY + 50.0f, TEXT("SAML"), EStrategyOrderType::Assemble);
         DrawButton(MX + 364.0f, MY + 50.0f, 176.0f, 26.0f, TEXT("STOP / HOLD"), EAction::Stop, 0, false, Unit,
             Current == EStrategyOrderType::Hold && bExecuting ? &ExecutingBlue : nullptr);
+        // The pioneers (Pontonnerkorpset researched): a pontoon bridge over the broad river nearest the staff.
+        for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+        {
+            if (It->CanLayPontoonBridges())
+            {
+                const float Left = It->GetPontoonSecondsLeft();
+                DrawButton(MX + 546.0f, MY + 18.0f, 176.0f, 26.0f,
+                    Left > 0.0f ? FString::Printf(TEXT("PONTONBRO %d:%02d"), int32(Left) / 60, int32(Left) % 60) : FString(TEXT("SLÅ PONTONBRO")),
+                    EAction::Pontoon, 0, Left > 0.0f, Unit, Left > 0.0f ? &ExecutingBlue : nullptr);
+            }
+            break;
+        }
     }
     else
     {
@@ -640,7 +676,7 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
                 Fire->FireConeHalfAngleDegrees), MX, MY + 48.0f, Muted, 0.85f);
         }
         // The fire method: what the regiment has researched and drilled (the locked ones dimmed).
-        if (UStrategyFireDrillComponent* Drill = Unit->FireDrillComponent)
+        if (UStrategyFireDrillComponent* Drill = Cast<AStrategyCompanyUnit>(Unit) ? Unit->FireDrillComponent.Get() : nullptr)
         {
             const TCHAR* Labels[] = { TEXT("1.GLD"), TEXT("2.GLD"), TEXT("GELED"), TEXT("SALVE"), TEXT("FRI") };
             const EStrategyFireDrillMode Modes[] = { EStrategyFireDrillMode::FrontRank, EStrategyFireDrillMode::TwoRankFire, EStrategyFireDrillMode::FireByRank,
@@ -757,6 +793,13 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 break;
             case EAction::OOBToggle:
                 bOOBOpen = !bOOBOpen;
+                break;
+            case EAction::Pontoon:
+                for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+                {
+                    It->OrderPontoonBridge(Unit);
+                    break;
+                }
                 break;
             case EAction::FireDrill:
                 if (Unit && Unit->FireDrillComponent)

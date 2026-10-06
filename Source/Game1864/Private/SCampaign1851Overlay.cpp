@@ -124,6 +124,18 @@ void SCampaign1851Overlay::Construct(const FArguments& InArgs)
 	{
 		TownBrushes.Add(CardBrush(M.Card));
 	}
+	// The soldiers in their uniforms (Tools/Campaign/make_uniform_cards.py) and the colours.
+	for (const TCHAR* Arm : { TEXT("Infantry"), TEXT("Guard"), TEXT("Jager"), TEXT("Cavalry"), TEXT("Artillery"), TEXT("HorseArtillery"), TEXT("Hussar") })
+	{
+		UniformBrushes.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Uniforms/T_Uniform_%s.T_Uniform_%s"), Arm, Arm)));
+	}
+	FlagBrush = CardBrush(TEXT("/Game/Units/Flags/T_Flag_DK.T_Flag_DK"));
+	for (int32 n = 0; n < 12; ++n)
+	{
+		OfficerPortraits.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_Officer_%02d.T_Portrait_Officer_%02d"), n, n)));
+		GeneralPortraits.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_General_%02d.T_Portrait_General_%02d"), n, n)));
+		MinisterPortraits.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_Minister_%02d.T_Portrait_Minister_%02d"), n, n)));
+	}
 	BornholmBrush = MakeShared<FSlateBrush>();
 	if (Map.IsValid() && Map->BornholmTexture)
 	{
@@ -197,6 +209,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	const float DistanceKm = Camera ? Camera->GetDistanceKm() : 600.f;
 
 	Buttons.Reset();
+	Tips.Reset();
 	PaintScale = Geometry.Scale;
 	if (Map->IsBattleView())
 	{
@@ -234,6 +247,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	{
 		// A window takes the clicks: the bar (to switch or close) and its own buttons stay live.
 		Buttons.Reset();
+		Tips.Reset();
 		PaintWindow(Geometry, Out, Layer + 10);
 		PaintMenuBar(Geometry, Out, Layer + 14);
 		if (Window == EWindow::Chart)
@@ -271,8 +285,15 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	{
 		// The menu takes the clicks: only its own buttons stay live.
 		Buttons.Reset();
+		Tips.Reset();
 		PaintMenu(Geometry, Out, Layer + 8);
 	}
+	if (bConfirmOpen)
+	{
+		Tips.Reset();
+		PaintConfirm(Geometry, Out, Layer + 60);
+	}
+	PaintTooltip(Geometry, Out, Layer + 70);
 
 	const FVector2D Size = Geometry.GetLocalSize();
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
@@ -505,6 +526,39 @@ void SCampaign1851Overlay::PaintBornholm(const FGeometry& Geometry, FSlateWindow
 	const FVector2D Image(170.f * Aspect, 170.f);
 	const FVector2D Size(Image.X + 16.f, Image.Y + 44.f);
 	const FVector2D Pos = Geometry.GetLocalSize() - Size - FVector2D(28.f, 28.f);
+	// The map's views, above the box.
+	{
+		const TCHAR* Views[] = { TEXT("NORMAL"), TEXT("FORSYNING"), TEXT("KONTROL") };
+		const TCHAR* ViewTips[] = { TEXT("Det almindelige kort"), TEXT("Forsyning: depoternes rækkevidde og enhedernes forsyning (F)"), TEXT("Kontrol: besatte byer, og hvor langt befrielsen er") };
+		const int32 Current = bSupplyMap ? 1 : MapView == 2 ? 2 : 0;
+		const float W = (Size.X - 8.f) / 3.f;
+		for (int32 v = 0; v < 3; ++v)
+		{
+			PaintButton(Geometry, Out, Layer + 1, FVector2D(Pos.X + v * (W + 4.f), Pos.Y - 30.f), FVector2D(W, 24.f), Views[v], EButton::MapView, v, Current == v);
+			AddTip(FVector2D(Pos.X + v * (W + 4.f), Pos.Y - 30.f), FVector2D(W, 24.f), ViewTips[v]);
+		}
+	}
+	// The control view: a red tag on every occupied town, with the days of liberation.
+	if (MapView == 2 && !bSupplyMap && Controller.IsValid())
+	{
+		for (const FCampaign1851City& C : Map->GetCities())
+		{
+			if (C.Occupier.IsEmpty() || C.bBornholm)
+			{
+				continue;
+			}
+			FVector2D P;
+			if (ToLocal(Geometry, C.World, P))
+			{
+				const FString TagText = C.bCeded ? FString::Printf(TEXT("%s  ·  afstået"), *C.Name)
+					: FString::Printf(TEXT("%s  ·  BESAT (%s)%s"), *C.Name, *C.Occupier, C.LiberationDays > 0.f ? *FString::Printf(TEXT("  ·  befries %.0f/2"), C.LiberationDays) : TEXT(""));
+				const FVector2D TagSize = Measure(TagText, Serif(11)) + FVector2D(14.f, 6.f);
+				const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+				FSlateDrawElement::MakeBox(Out, Layer + 4, Geometry.ToPaintGeometry(TagSize, FSlateLayoutTransform(P + FVector2D(10.f, -TagSize.Y - 4.f))), White, ESlateDrawEffect::None, FLinearColor(0.45f, 0.06f, 0.05f, 0.9f));
+				PaintText(Geometry, Out, Layer + 5, TagText, P + FVector2D(17.f, -TagSize.Y * 0.5f - 4.f), Serif(11), Ink, 0.f, false);
+			}
+		}
+	}
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	const FVector2D ImagePos = Pos + FVector2D(8.f, 8.f);
 	FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(Image, FSlateLayoutTransform(ImagePos)), BornholmBrush.Get());
@@ -737,6 +791,164 @@ void SCampaign1851Overlay::PaintButton(const FGeometry& Geometry, FSlateWindowEl
 	{
 		Buttons.Add({ Pos, Pos + Size, Action, Module });
 	}
+	const FString Tip = ButtonTip(Action, Module);
+	if (!Tip.IsEmpty())
+	{
+		Tips.Add({ Pos, Pos + Size, bDisabled ? Tip + TEXT("  (ikke muligt lige nu)") : Tip });
+	}
+}
+
+FString SCampaign1851Overlay::ButtonTip(EButton Action, int32 Module) const
+{
+	switch (Action)
+	{
+	case EButton::Menu: return TEXT("Spilmenuen: gem, indlæs, nyt spil og afslut (M)");
+	case EButton::FortTool: return TEXT("Skanser: byg og bemand feltbefæstninger på kortet");
+	case EButton::OpenGazette: return TEXT("Avisen: nyheder, statistik, grafer og opslagsværket");
+	case EButton::OpenBattlefield: return TEXT("Slagmarken (test): generér en slagmark et sted på kortet og se den i 3D");
+	case EButton::OpenMateriel: return TEXT("Materiel: geværer, kanoner, heste og råvarer på lager; køb og produktion");
+	case EButton::Speed: return TEXT("Tidens gang: pause og hastighed 1-5 (mellemrum: pause)");
+	case EButton::Treasury: return TEXT("Statskassen: klik for regnskabet med indtægter og udgifter");
+	case EButton::Footing: return Map.IsValid() && Map->GetFooting() == ECampaign1851Footing::Peace
+		? TEXT("Mobilisér hæren: de hjemsendte (65 %) kaldes ind over 2-3 uger. Koster 20.000 rd. nu og 3 rd. pr. ekstra mand om måneden; skatterne falder 10 %, og spændingen stiger")
+		: TEXT("Hjemsend: hæren går på fredsfod, og 65 % af mandskabet sendes hjem (billigere, men langsom at kalde ind igen)");
+	case EButton::TrainingProgram: return TEXT("Øvelser: hvad regimentet træner i garnison (eksercits, skydeøvelser, felt, march, bajonet, blandet). Indøver også de udforskede ildmetoder");
+	case EButton::ProgramPick: return TEXT("Vælg øvelsesprogram: eksercits og skydeøvelser indøver ildmetoderne; hvile sparer penge, men færdighederne falder");
+	case EButton::RouteMode: return TEXT("Rute: veje og tog (hurtigst), kun veje (til fods) eller lige linje over markerne (langsom)");
+	case EButton::ArmyHalt: return TEXT("Holdt: enheden standser, hvor den er");
+	case EButton::ArmyHome: return TEXT("Hjem: tilbage til garnisonsbyen");
+	case EButton::ArmyCancel: return TEXT("Fortryd ordren: tilbage til hvor ordren fandt den");
+	case EButton::OfficerChange: return TEXT("Skift chef: vælg en anden officer til enheden");
+	case EButton::GeneralChange: return TEXT("General: en general, hvis hovedkvarter marcherer med enheden");
+	case EButton::OfficerRecruit: return TEXT("Hvervning: ansæt en ny officer (løn hver måned)");
+	case EButton::OfficerPromote: return TEXT("Forfrem: højere grad giver kommando over større enheder (og højere løn)");
+	case EButton::OfficerDismiss: return TEXT("Afsked: officeren forlader hæren");
+	case EButton::OfficerInfo: return TEXT("Officerens kort: evner, erfaring, alder og karriere");
+	case EButton::OpenOOB: return TEXT("Kampordenen: hærens organisation; træk enheder mellem formationer");
+	case EButton::RaiseBattalion: return TEXT("Opret en ny bataljon: koster rekrutter fra amterne, geværer fra lageret og penge");
+	case EButton::SupplySend: return TEXT("Send forsyninger: en trænkolonne fra depotet til enheden");
+	case EButton::SupplyBuy: return TEXT("Køb forsyninger: proviant, foder og ammunition til depotet");
+	case EButton::BattleFight3D: return TEXT("Udkæmp slaget i 3D: du fører tropperne selv på slagmarken");
+	case EButton::BattleAuto: return TEXT("Afgør automatisk: slaget beregnes ud fra styrke, terræn, officerer og doktrin");
+	case EButton::BattleRetreat: return TEXT("Tilbagetog: undgå slaget (moralen falder, og fjenden rykker frem)");
+	case EButton::Diplomacy: return TEXT("Diplomati: gesandter, traktater, garantier og alliancer");
+	case EButton::MakePeace: return TEXT("Fredsforslag: tilbyd fjenden fred på de viste vilkår");
+	case EButton::ResearchStart: return TEXT("Start forskningen: betales måned for måned; kun ét projekt ad gangen");
+	case EButton::ResearchPick: return TEXT("Klik for detaljer: virkning, pris og hvad det kræver");
+	case EButton::DoctrineSet: return TEXT("Doktrin: hvordan hæren kæmper. Et skift koster penge, lidt moral og en omstillingstid");
+	case EButton::Delegate: return TEXT("Ministeriets tilstand: MANUEL (du bestemmer), RÅDGIVER (ministeriet foreslår, du udfører) eller AUTO (ministeriet handler selv inden for reserven)");
+	case EButton::DelegateAll: return TEXT("Sæt alle ministerier på samme tilstand");
+	case EButton::Reserve: return TEXT("Reserven: det beløb ministrene ikke må røre i statskassen");
+	case EButton::DecisionExecute: return TEXT("Udfør ministerens forslag");
+	case EButton::MinisterDismiss: return TEXT("Udskift ministeren: vælg en ny blandt kandidaterne (strømning og evner)");
+	case EButton::MinistryBudget: return TEXT("Ministeriets budget: hvor meget det må bruge om måneden");
+	case EButton::Loan: return TEXT("Statslån: penge nu mod renter og afdrag");
+	case EButton::Blockade: return TEXT("Blokade: flåden spærrer fjendens havne (kræver overlegenhed)");
+	case EButton::ShipOrder: return TEXT("Byg skib: orlogsværftet bygger det over måneder");
+	case EButton::TrainOrder: case EButton::TrainMove: return TEXT("Tog: kør tropper med jernbanen inden for samme banenet");
+	case EButton::BattleViewEnter: return TEXT("Se slagmarken i 3D");
+	case EButton::Build: case EButton::BuildTown: return TEXT("Byg: bygningen opføres over tid; prisen trækkes, efterhånden som der bygges");
+	case EButton::Demolish: return TEXT("Nedriv bygningen (pengene kommer ikke igen)");
+	case EButton::FortGuns: return TEXT("Kanoner i skansen: flere kanoner, stærkere forsvar");
+	case EButton::FortTrenches: return TEXT("Løbegrave: dækning for infanteriet foran skansen");
+	case EButton::ForeignTab: return TEXT("Skift mellem landene");
+	case EButton::WindowClose: case EButton::ClosePanel: return TEXT("Luk");
+	case EButton::TableSort: return TEXT("Sortér efter kolonnen (klik igen: den anden vej)");
+	default: return FString();
+	}
+}
+
+void SCampaign1851Overlay::PaintTooltip(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	// The topmost tip under the cursor, after a short moment, beside the cursor (kept on the screen).
+	const FVector2D Cursor = Geometry.AbsoluteToLocal(FSlateApplication::Get().GetCursorPos());
+	const FTipRect* Hit = nullptr;
+	for (int32 t = Tips.Num() - 1; t >= 0; --t)
+	{
+		if (Cursor.X >= Tips[t].Min.X && Cursor.Y >= Tips[t].Min.Y && Cursor.X <= Tips[t].Max.X && Cursor.Y <= Tips[t].Max.Y)
+		{
+			Hit = &Tips[t];
+			break;
+		}
+	}
+	const double Now = FPlatformTime::Seconds();
+	if (!Hit)
+	{
+		TipShown.Reset();
+		return;
+	}
+	if (Hit->Text != TipShown)
+	{
+		TipShown = Hit->Text;
+		TipSince = Now;
+	}
+	if (Now - TipSince < 0.45)
+	{
+		return;
+	}
+	// Wrapped to 420 px.
+	const FSlateFontInfo Font = Serif(12);
+	TArray<FString> Words, Lines;
+	Hit->Text.ParseIntoArray(Words, TEXT(" "));
+	FString Line;
+	for (const FString& Word : Words)
+	{
+		const FString Try = Line.IsEmpty() ? Word : Line + TEXT(" ") + Word;
+		if (Measure(Try, Font).X > 420.f && !Line.IsEmpty())
+		{
+			Lines.Add(Line);
+			Line = Word;
+		}
+		else
+		{
+			Line = Try;
+		}
+	}
+	Lines.Add(Line);
+	float W = 0.f;
+	for (const FString& L : Lines) { W = FMath::Max(W, Measure(L, Font).X); }
+	const FVector2D Size(W + 24.f, Lines.Num() * 18.f + 16.f);
+	const FVector2D Screen = Geometry.GetLocalSize();
+	FVector2D Pos = Cursor + FVector2D(18.f, 20.f);
+	Pos.X = FMath::Min(Pos.X, Screen.X - Size.X - 8.f);
+	Pos.Y = Pos.Y + Size.Y > Screen.Y - 8.f ? Cursor.Y - Size.Y - 8.f : Pos.Y;
+	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	DrawLines(Geometry, Out, Layer + 1, { Pos, Pos + FVector2D(Size.X, 0.f), Pos + Size, Pos + FVector2D(0.f, Size.Y), Pos }, Gold, 1.f);
+	for (int32 l = 0; l < Lines.Num(); ++l)
+	{
+		PaintText(Geometry, Out, Layer + 2, Lines[l], Pos + FVector2D(12.f, 8.f + l * 18.f), Font, Ink, 0.f, false);
+	}
+}
+
+void SCampaign1851Overlay::PaintConfirm(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	// The question in the middle of the screen; only its two buttons are live.
+	Buttons.Reset();
+	const FVector2D Screen = Geometry.GetLocalSize();
+	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Screen, FSlateLayoutTransform(FVector2D::ZeroVector)), White, ESlateDrawEffect::None, FLinearColor(0.f, 0.f, 0.f, 0.45f));
+	const FSlateFontInfo Font = Serif(14);
+	TArray<FString> Words, Lines;
+	ConfirmText.ParseIntoArray(Words, TEXT(" "));
+	FString Line;
+	for (const FString& Word : Words)
+	{
+		const FString Try = Line.IsEmpty() ? Word : Line + TEXT(" ") + Word;
+		if (Measure(Try, Font).X > 560.f && !Line.IsEmpty()) { Lines.Add(Line); Line = Word; }
+		else { Line = Try; }
+	}
+	Lines.Add(Line);
+	const FVector2D Size(620.f, 150.f + Lines.Num() * 22.f);
+	const FVector2D Pos((Screen - Size) * 0.5f);
+	PaintPanel(Geometry, Out, Layer + 1, Pos, Size);
+	DrawLines(Geometry, Out, Layer + 2, { Pos, Pos + FVector2D(Size.X, 0.f), Pos + Size, Pos + FVector2D(0.f, Size.Y), Pos }, Gold, 1.5f);
+	PaintText(Geometry, Out, Layer + 3, ConfirmTitle, Pos + FVector2D(30.f, 40.f), Serif(20), Ink, 0.f, false);
+	for (int32 l = 0; l < Lines.Num(); ++l)
+	{
+		PaintText(Geometry, Out, Layer + 3, Lines[l], Pos + FVector2D(30.f, 80.f + l * 22.f), Font, Ink, 0.f, false);
+	}
+	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(30.f, Size.Y - 52.f), FVector2D(260.f, 32.f), TEXT("JA, GØR DET"), EButton::ConfirmYes, 0, true);
+	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 230.f, Size.Y - 52.f), FVector2D(200.f, 32.f), TEXT("NEJ"), EButton::ConfirmNo, 0);
 }
 
 SCampaign1851Overlay::EButton SCampaign1851Overlay::HitButton(const FVector2D& ViewportPixel, int32* OutModule) const
@@ -1333,7 +1545,27 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 		V /= W;
 	}
 
-	PaintTextFit(Geometry, Out, Layer + 2, bSingle ? First.Name : FString::Printf(TEXT("Kolonne: %d enheder"), Sel.Num()), FVector2D(Pos.X + 22.f, Y), Serif(22), Ink, Inner);
+	PaintTextFit(Geometry, Out, Layer + 2, bSingle ? First.Name : FString::Printf(TEXT("Kolonne: %d enheder"), Sel.Num()), FVector2D(Pos.X + 22.f, Y), Serif(22), Ink, Inner - (bSingle ? 170.f : 0.f));
+	// A seen enemy corps within reach: attack it.
+	{
+		double Km = 0.0;
+		const int32 Corps = Map->EngageableCorps(SelectedRegiments, &Km);
+		if (Map->GetEnemyCorps().IsValidIndex(Corps))
+		{
+			const FVector2D At(Pos.X + Size.X - (bSingle ? 356.f : 196.f), Y - 12.f);
+			PaintButton(Geometry, Out, Layer + 3, At, FVector2D(150.f, 24.f), FString::Printf(TEXT("ANGRIB (%.0f KM)"), Km), EButton::Engage, Corps);
+			AddTip(At, FVector2D(150.f, 24.f), FString::Printf(TEXT("Angrib %s, der er opklaret %.0f km herfra: slaget tilbydes straks (udkæmp i 3D, afgør automatisk eller træk tilbage), og de valgte enheder kæmper."),
+				*Map->GetEnemyCorps()[Corps].Name, Km));
+		}
+	}
+	if (bSingle)
+	{
+		PaintButton(Geometry, Out, Layer + 3, FVector2D(Pos.X + Size.X - 196.f, Y - 12.f), FVector2D(150.f, 24.f), TEXT("ENHEDSKORT"), EButton::UnitCard, 0, bUnitCard);
+		if (bUnitCard)
+		{
+			PaintUnitCard(Geometry, Out, Layer + 6, FVector2D(Pos.X + Size.X + 10.f, Pos.Y + Size.Y), SelectedRegiments[0]);
+		}
+	}
 	Y += 30.f;
 	PaintTextFit(Geometry, Out, Layer + 2, bSingle ? FString::Printf(TEXT("%s  ·  garnison %s"), Campaign1851Army::ArmName(First.Arm), *Cities[First.Home].Name) : FString(TEXT("Marcherer samlet i den langsomstes tempo")),
 		FVector2D(Pos.X + 22.f, Y), Serif(13, EFace::Italic), Gold, Inner);
@@ -1530,6 +1762,140 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	PaintTextFit(Geometry, Out, Layer + 2, TEXT("Højreklik på en by eller i terrænet: march dertil  ·  Shift-klik: vælg flere  ·  Esc: fravælg"), FVector2D(Pos.X + Size.X * 0.5f, Pos.Y + Size.Y - 20.f),
 		Serif(10, EFace::Italic), MutedInk, Inner, 0.5f);
 
+}
+
+const FSlateBrush* SCampaign1851Overlay::PortraitFor(const FString& Name, int32 Kind) const
+{
+	const TArray<TSharedPtr<FSlateBrush>>& Pool = Kind == 2 ? MinisterPortraits : Kind == 1 ? GeneralPortraits : OfficerPortraits;
+	if (Pool.Num() == 0)
+	{
+		return nullptr;
+	}
+	const TSharedPtr<FSlateBrush>& B = Pool[GetTypeHash(Name) % uint32(Pool.Num())];
+	return B.IsValid() && B->GetResourceObject() ? B.Get() : nullptr;
+}
+
+void SCampaign1851Overlay::PaintPortrait(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind) const
+{
+	if (const FSlateBrush* B = PortraitFor(Name, Kind))
+	{
+		FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(Pos)), B);
+		DrawLines(Geometry, Out, Layer + 1, { Pos, Pos + FVector2D(Size.X, 0.f), Pos + Size, Pos + FVector2D(0.f, Size.Y), Pos }, Gold, 1.f);
+	}
+}
+
+void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft, int32 RegimentIndex) const
+{
+	const FCampaign1851Regiment& R = Map->GetRegiments()[RegimentIndex];
+	const TArray<FCampaign1851Officer>& Officers = Map->GetOfficers();
+	const FVector2D Size(470.f, 640.f);
+	const FVector2D Pos(BottomLeft.X, FMath::Max(130.f, BottomLeft.Y - Size.Y));
+	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	PaintText(Geometry, Out, Layer + 2, TEXT("E N H E D S K O R T"), Pos + FVector2D(22.f, 26.f), Serif(11), Gold, 0.f, false);
+	PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(Size.X - 46.f, 12.f), FVector2D(28.f, 24.f), TEXT("X"), EButton::UnitCard, 0);
+	PaintTextFit(Geometry, Out, Layer + 2, R.Name, Pos + FVector2D(22.f, 54.f), Serif(20), Ink, Size.X - 44.f);
+	PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s  ·  %s"), Campaign1851Army::ArmName(R.Arm), Campaign1851Army::ExperienceName(R.Experience)),
+		Pos + FVector2D(22.f, 78.f), Serif(12, EFace::Italic), Gold, Size.X - 44.f);
+	// The soldier in his uniform, and the colours.
+	const bool bHussar = R.Arm == ECampaign1851Arm::Cavalry && R.Name.Contains(TEXT("usar"));
+	const int32 Arm = bHussar ? 6 : FMath::Clamp(int32(R.Arm), 0, 5);
+	const FVector2D Picture(Pos.X + 22.f, Pos.Y + 96.f);
+	if (UniformBrushes.IsValidIndex(Arm) && UniformBrushes[Arm]->GetResourceObject())
+	{
+		FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(150.f, 230.f), FSlateLayoutTransform(Picture)), UniformBrushes[Arm].Get());
+	}
+	else
+	{
+		PaintText(Geometry, Out, Layer + 2, TEXT("(uniform kommer)"), Picture + FVector2D(75.f, 115.f), Serif(11, EFace::Italic), MutedInk, 0.5f, false);
+	}
+	if (FlagBrush.IsValid() && FlagBrush->GetResourceObject())
+	{
+		FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(84.f, 84.f), FSlateLayoutTransform(Picture + FVector2D(170.f, 0.f))), FlagBrush.Get());
+		PaintText(Geometry, Out, Layer + 2, TEXT("Fanen"), Picture + FVector2D(212.f, 94.f), Serif(10, EFace::Italic), MutedInk, 0.5f, false);
+	}
+	// The figures beside the picture.
+	float Y = Picture.Y + 114.f;
+	const float LX = Picture.X + 170.f;
+	auto Fact = [&](const FString& Label, const FString& Value, const FString& Tip)
+	{
+		PaintText(Geometry, Out, Layer + 2, Label, FVector2D(LX, Y), Serif(11, EFace::Italic), Gold, 0.f, false);
+		PaintTextFit(Geometry, Out, Layer + 2, Value, FVector2D(LX + 100.f, Y), Serif(12), Ink, Size.X - (LX - Pos.X) - 122.f);
+		if (!Tip.IsEmpty()) { AddTip(FVector2D(LX - 4.f, Y - 10.f), FVector2D(Size.X - (LX - Pos.X) - 18.f, 20.f), Tip); }
+		Y += 20.f;
+	};
+	Fact(TEXT("Mand"), FString::Printf(TEXT("%d af %d"), R.Men, R.MaxMen), TEXT("Mand i rullerne og etablissementets fulde styrke"));
+	Fact(TEXT("Erfaring"), FString::Printf(TEXT("%.0f"), R.Experience), TEXT("Erfaring 0-100: felttjeneste og slag"));
+	Fact(TEXT("Moral"), FString::Printf(TEXT("%.0f %%"), R.Morale * 100.f), TEXT("Kampviljen: chefens inspiration, træningen, sejre og nederlag"));
+	Fact(TEXT("Samhørighed"), FString::Printf(TEXT("%.0f"), R.Cohesion), TEXT("Hvor godt enheden hænger sammen (falder på lange marcher og i slag)"));
+	Fact(TEXT("Øvelser"), Campaign1851Army::ProgramName(R.Program), TEXT("Garnisonens træningsprogram. Eksercits og skydeøvelser indøver også de udforskede ildmetoder"));
+	// A foot battery can be made a horse battery.
+	if (R.Arm == ECampaign1851Arm::Artillery && R.Mortars == 0 && R.Guns > 0)
+	{
+		FString Why;
+		const bool bCan = Map->CanUpgradeToHorseBattery(RegimentIndex, &Why);
+		PaintButton(Geometry, Out, Layer + 2, FVector2D(LX, Y + 4.f), FVector2D(Size.X - (LX - Pos.X) - 22.f, 26.f), TEXT("GØR RIDENDE"), EButton::HorseBattery, RegimentIndex, false, !bCan);
+		AddTip(FVector2D(LX, Y + 4.f), FVector2D(Size.X - (LX - Pos.X) - 22.f, 26.f), FString::Printf(
+			TEXT("Gør batteriet ridende: alle kanonerer til hest, følger rytteriet. 6 kanoner (2 tilbage på lager), 180 mand, %d heste (fra lageret), %s rd. Eksercitsen falder en tid.%s"),
+			ACampaign1851Map::HorseBatteryHorses, *Thousands(int32(ACampaign1851Map::HorseBatteryCost)), bCan ? TEXT("") : *FString::Printf(TEXT("  %s"), *Why)));
+		Y += 32.f;
+	}
+	// The sick and wounded: in the lazaret, back to their own unit (keeping its experience) within weeks.
+	Y = Picture.Y + 246.f;
+	const float X = Pos.X + 22.f;
+	auto Line = [&](const FString& Label, const FString& Value, const FString& Tip)
+	{
+		PaintText(Geometry, Out, Layer + 2, Label, FVector2D(X, Y), Serif(12, EFace::Italic), Gold, 0.f, false);
+		PaintTextFit(Geometry, Out, Layer + 2, Value, FVector2D(X + 130.f, Y), Serif(12), Ink, Size.X - 174.f);
+		if (!Tip.IsEmpty()) { AddTip(FVector2D(X - 4.f, Y - 10.f), FVector2D(Size.X - 36.f, 20.f), Tip); }
+		Y += 22.f;
+	};
+	{
+		const bool bCare = Map->HasResearch(TEXT("sanitation")) || (Map->FindBuilding(R.Home, TEXT("Field_Hospital")) && Map->FindBuilding(R.Home, TEXT("Field_Hospital"))->IsModuleDone(0));
+		const float Rate = (bCare ? 0.05f : 0.03f) * (Map->HasResearch(TEXT("hospitals")) ? 1.4f : 1.f);
+		const int32 Half = FMath::RoundToInt(FMath::Loge(2.f) / Rate);
+		Line(TEXT("Sårede og syge"), R.Sick > 0 ? FString::Printf(TEXT("%d på lazaret  ·  halvdelen tilbage om ca. %d dage%s"), R.Sick, Half, bCare ? TEXT(" (lazaret)") : TEXT(""))
+			: FString(TEXT("ingen")), TEXT("De sårede og syge vender tilbage til deres egen enhed (med erfaringen) efterhånden: 5 % om dagen med lazaret eller sanitetsvæsen, ellers 3 %"));
+	}
+	if (Officers.IsValidIndex(R.Chief))
+	{
+		PaintPortrait(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 60.f, Y - 14.f), FVector2D(36.f, 45.f), Officers[R.Chief].Name, Officers[R.Chief].bGeneral ? 1 : 0);
+	}
+	Line(TEXT("Chef"), Officers.IsValidIndex(R.Chief) ? FString::Printf(TEXT("%s %s  ·  vurdering %d"), *Officers[R.Chief].Rank, *Officers[R.Chief].Name, Campaign1851Army::OfficerRating(Officers[R.Chief]))
+		: FString(TEXT("ingen")), TEXT("Chefens samlede vurdering 0-100 (åbn officerens kort for evnerne)"));
+	{
+		static const TCHAR* Topics[4] = { TEXT("tworank"), TEXT("firebyrank"), TEXT("volley"), TEXT("independent") };
+		static const TCHAR* Names[4] = { TEXT("2 gld"), TEXT("geled"), TEXT("salve"), TEXT("fri") };
+		FString Drills;
+		for (int32 d = 0; d < 4; ++d)
+		{
+			if (Map->HasResearch(Topics[d]))
+			{
+				Drills += FString::Printf(TEXT("%s%s %.0f%s"), Drills.IsEmpty() ? TEXT("") : TEXT("  ·  "), Names[d], R.FireDrills[d], R.FireDrills[d] >= 60.f ? TEXT(" ✓") : TEXT(""));
+			}
+		}
+		Line(TEXT("Ildmetoder"), Drills.IsEmpty() ? FString(TEXT("forreste geled")) : Drills,
+			TEXT("Udforskede ildmetoder indøves i garnison (eksercits, skydeøvelser eller blandet) og kan bruges i slaget fra 60"));
+	}
+	// The service record.
+	Y += 8.f;
+	PaintText(Geometry, Out, Layer + 2, TEXT("T J E N E S T E"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
+	Y += 22.f;
+	Line(TEXT("Slag"), FString::Printf(TEXT("%d  ·  faldne %d  ·  sårede %d  ·  fanget %d"), R.Service.Num(), R.TotalKilled, R.TotalWounded, R.TotalCaptured), FString());
+	Line(TEXT("Fjender ude"), FString::Printf(TEXT("%d (dræbte og sårede)"), R.TotalEnemyKilled), TEXT("Fjendtlige soldater enheden har sat ud af kampen: talt i 3D-slagene, fordelt efter styrke i de automatisk afgjorte"));
+	static const TCHAR* Results[4] = { TEXT("nederlag"), TEXT("uafgjort"), TEXT("sejr"), TEXT("tilbagetog") };
+	const int32 First = FMath::Max(0, R.Service.Num() - 8);
+	for (int32 e = R.Service.Num() - 1; e >= First; --e)
+	{
+		const FCampaign1851ServiceEntry& E = R.Service[e];
+		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s  ·  %s  ·  %s%s  ·  faldne %d, sårede %d, fjender %d"),
+			*ACampaign1851Map::FormatDate(ACampaign1851Map::StartDate() + FTimespan::FromDays(E.Day), true), *E.Place, Results[FMath::Min<int32>(E.Result, 3)],
+			E.bFrom3D ? TEXT(" (3D)") : TEXT(""), E.Killed, E.Wounded, E.EnemyKilled), FVector2D(X, Y), Serif(11), Ink, Size.X - 44.f);
+		Y += 19.f;
+	}
+	if (R.Service.Num() == 0)
+	{
+		PaintText(Geometry, Out, Layer + 2, TEXT("Ingen slag endnu i dette felttog"), FVector2D(X, Y), Serif(11, EFace::Italic), MutedInk, 0.f, false);
+	}
 }
 
 void SCampaign1851Overlay::PaintOrderDialog(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
@@ -1966,11 +2332,6 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 		PaintButton(Geometry, Out, Layer + 1, FVector2D(X + LeftW - 200.f, Y - 12.f), FVector2D(180.f, 24.f), TEXT("ALLE LANDE"), EButton::MainMenu, int32(EWindow::Nations));
 		Y += 34.f;
 	}
-		// The tension with the German Confederation, and war.
-		PaintText(Geometry, Out, Layer + 1, Map->IsAtWar() ? TEXT("KRIG med Preussen og Østrig") : TEXT("Spænding med Det tyske forbund"), FVector2D(X, Y), Serif(13), Map->IsAtWar() ? FLinearColor(0.95f, 0.4f, 0.35f) : Ink, 0.f, false);
-		PaintBar(Geometry, Out, Layer + 1, FVector2D(X + 260.f, Y - 5.f), 260.f, Map->GetTension() / 100.f);
-		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("%.0f / 100  (krig ved 80)"), Map->GetTension()), FVector2D(X + 530.f, Y), Serif(11), Ink, 0.f, false);
-		Y += 30.f;
 	// The government and opinion.
 	{
 		const ECampaign1851Current Gov = Map->GetGovernment();
@@ -2028,8 +2389,9 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 			const FCampaign1851Minister& Min = Map->GetMinister(P);
 			PaintText(Geometry, Out, Layer + 1, Campaign1851Nations::PortfolioName(P), FVector2D(X, Y), Serif(13), Ink, 0.f, false);
 			PaintTextFit(Geometry, Out, Layer + 1, Campaign1851Nations::PortfolioScope(P), FVector2D(X, Y + 15.f), Serif(9, EFace::Italic), MutedInk, 150.f);
-			PaintTextFit(Geometry, Out, Layer + 1, Min.Name, FVector2D(X + 158.f, Y), Serif(12), Gold, 150.f);
-			PaintTextFit(Geometry, Out, Layer + 1, FString::Printf(TEXT("dygtig %d · sparsom %d · forsigtig %d"), Min.Skill, Min.Thrift, Min.Caution), FVector2D(X + 158.f, Y + 15.f), Serif(9, EFace::Italic), MutedInk, 205.f);
+			PaintPortrait(Geometry, Out, Layer + 1, FVector2D(X + 158.f, Y - 8.f), FVector2D(28.f, 35.f), Min.Name, 2);
+			PaintTextFit(Geometry, Out, Layer + 1, Min.Name, FVector2D(X + 192.f, Y), Serif(12), Gold, 150.f);
+			PaintTextFit(Geometry, Out, Layer + 1, FString::Printf(TEXT("dygtig %d · sparsom %d · forsigtig %d"), Min.Skill, Min.Thrift, Min.Caution), FVector2D(X + 192.f, Y + 15.f), Serif(9, EFace::Italic), MutedInk, 200.f);
 			const int32 Mode = int32(Me.Modes[p]);
 			PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 400.f, Y - 6.f), FVector2D(130.f, 24.f), Campaign1851Nations::DelegationName(ECampaign1851Delegation(Mode)),
 				EButton::Delegate, p * 3 + (Mode + 1) % 3, Mode == 2);
@@ -2047,6 +2409,7 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 		PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 330.f, Y - 12.f), FVector2D(60.f, 24.f), TEXT("-"), EButton::Reserve, 0);
 		PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 396.f, Y - 12.f), FVector2D(60.f, 24.f), TEXT("+"), EButton::Reserve, 1);
 		PaintText(Geometry, Out, Layer + 1, TEXT("ministerierne bruger kun penge over denne grænse"), FVector2D(X, Y + 20.f), Serif(10, EFace::Italic), MutedInk, 0.f, false);
+		PaintButton(Geometry, Out, Layer + 1, FVector2D(X + 470.f, Y - 12.f), FVector2D(180.f, 24.f), TEXT("BUDGET OG KASSE"), EButton::MainMenu, int32(EWindow::Budget));
 	}
 	// The decisions and recommendations, newest first (or the candidates for a minister's post).
 	const float RX = Pos.X + 24.f + LeftW + 20.f, RW = Size.X - LeftW - 68.f;
@@ -2122,7 +2485,14 @@ void SCampaign1851Overlay::PaintForeign(const FGeometry& Geometry, FSlateWindowE
 	const float X = Pos.X + 24.f;
 	float Y = Pos.Y + 106.f;
 	PaintText(Geometry, Out, Layer + 1, TEXT("F O R H O L D E T   T I L   D A N M A R K"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
+	PaintButton(Geometry, Out, Layer + 1, FVector2D(Pos.X + Size.X - 260.f, Y - 14.f), FVector2D(180.f, 26.f), TEXT("ALLE LANDE"), EButton::MainMenu, int32(EWindow::Nations));
 	Y += 24.f;
+	// The tension with the German Confederation (war at 80).
+	PaintText(Geometry, Out, Layer + 1, Map->IsAtWar() ? TEXT("KRIG med Preussen og Østrig") : TEXT("Spænding, Tyske Forbund"), FVector2D(X, Y + 8.f), Serif(13), Map->IsAtWar() ? FLinearColor(0.95f, 0.4f, 0.35f) : Ink, 0.f, false);
+	PaintBar(Geometry, Out, Layer + 1, FVector2D(X + 210.f, Y + 3.f), 220.f, Map->GetTension() / 100.f);
+	PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("%.0f / 100  (krig ved 80)"), Map->GetTension()), FVector2D(X + 444.f, Y + 8.f), Serif(11), Ink, 0.f, false);
+	AddTip(FVector2D(X, Y - 4.f), FVector2D(560.f, 24.f), TEXT("Spændingen med Det tyske forbund stiger med de historiske begivenheder og jeres politik (Ejderpolitikken skærper den, garantier dæmper den). Ved 80 bryder krigen ud."));
+	Y += 32.f;
 	// The countries by group, one tab at a time.
 	{
 		const TCHAR* Tabs[] = { TEXT("STORMAGTER"), TEXT("NORDEN"), TEXT("TYSKE STATER"), TEXT("VESTEN") };
@@ -2277,6 +2647,13 @@ void SCampaign1851Overlay::PaintBranchSymbol(const FGeometry& Geometry, FSlateWi
 		L({ FVector2D(-0.6f, -0.9f), FVector2D(0.7f, -0.6f), FVector2D(-0.6f, -0.25f) }, FLinearColor(0.85f, 0.15f, 0.12f), 3.f);
 		L({ FVector2D(-0.6f, -0.9f), FVector2D(-0.6f, -0.25f) }, FLinearColor(0.85f, 0.15f, 0.12f), 3.f);
 		break;
+	case 7:   // the trades: a sheaf of corn, bound in the middle
+		for (int32 k = -2; k <= 2; ++k)
+		{
+			L({ FVector2D(k * 0.12f, 0.8f), FVector2D(k * 0.32f, -0.8f) }, Mark, 2.f);
+		}
+		L({ FVector2D(-0.45f, 0.1f), FVector2D(0.45f, 0.1f) }, FLinearColor(0.85f, 0.65f, 0.2f), 3.f);
+		break;
 	default:  // a field gun: barrel and wheel
 	{
 		L({ FVector2D(-0.9f, -0.35f), FVector2D(0.5f, 0.15f) }, Mark, 4.f);
@@ -2325,9 +2702,37 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		PaintText(Geometry, Out, Layer + 1, Campaign1851Research::Roman(r), FVector2D(X + 8.f, RY + Box.Y * 0.5f), Serif(16), Gold, 0.f, false);
 		DrawLines(Geometry, Out, Layer, { FVector2D(X + YearW - 6.f, RY - 7.f), FVector2D(X + LeftW, RY - 7.f) }, Gold.CopyWithNewOpacity(0.12f), 1.f);
 	}
+	// Topics on the same level of a branch share its column side by side.
+	auto Share = [&](const FCampaign1851ResearchTopic& T, int32& OutIndex)
+	{
+		const int32 Tier = Campaign1851Research::Tier(Campaign1851Research::FindTopic(T.Id));
+		int32 Count = 0;
+		OutIndex = 0;
+		for (int32 u = 0; u < Topics.Num(); ++u)
+		{
+			if (Topics[u].Branch == T.Branch && Campaign1851Research::Tier(u) == Tier)
+			{
+				if (FCString::Strcmp(Topics[u].Id, T.Id) == 0)
+				{
+					OutIndex = Count;
+				}
+				++Count;
+			}
+		}
+		return FMath::Max(1, Count);
+	};
+	auto TopicBoxSize = [&](const FCampaign1851ResearchTopic& T)
+	{
+		int32 Index = 0;
+		const int32 Count = Share(T, Index);
+		return FVector2D((ColW - 22.f - 6.f * (Count - 1)) / Count, Box.Y);
+	};
 	auto BoxPos = [&](const FCampaign1851ResearchTopic& T)
 	{
-		return FVector2D(X + YearW + T.Branch * ColW + (ColW - Box.X) * 0.5f, Top + Campaign1851Research::Tier(Campaign1851Research::FindTopic(T.Id)) * RowH);
+		int32 Index = 0;
+		Share(T, Index);
+		const float W = TopicBoxSize(T).X;
+		return FVector2D(X + YearW + T.Branch * ColW + 11.f + Index * (W + 6.f), Top + Campaign1851Research::Tier(Campaign1851Research::FindTopic(T.Id)) * RowH);
 	};
 	// The lines first, under the boxes.
 	for (const FCampaign1851ResearchTopic& T : Topics)
@@ -2335,8 +2740,8 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		const int32 Need = T.Needs ? Campaign1851Research::FindTopic(T.Needs) : INDEX_NONE;
 		if (Topics.IsValidIndex(Need))
 		{
-			const FVector2D From = BoxPos(Topics[Need]) + FVector2D(Box.X * 0.5f, Box.Y);
-			const FVector2D To = BoxPos(T) + FVector2D(Box.X * 0.5f, 0.f);
+			const FVector2D From = BoxPos(Topics[Need]) + FVector2D(TopicBoxSize(Topics[Need]).X * 0.5f, Box.Y);
+			const FVector2D To = BoxPos(T) + FVector2D(TopicBoxSize(T).X * 0.5f, 0.f);
 			const float MidY = To.Y - 7.f;
 			const FLinearColor C = Map->HasResearch(Topics[Need].Id) ? Gold : MutedInk.CopyWithNewOpacity(0.6f);
 			DrawLines(Geometry, Out, Layer + 1, { From, FVector2D(From.X, MidY), FVector2D(To.X, MidY), To }, C, 2.f);
@@ -2350,21 +2755,22 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		const bool bDone = Why == TEXT("færdig");
 		const bool bBusy = Map->GetResearching() == t;
 		const FVector2D P = BoxPos(T);
-		PaintButton(Geometry, Out, Layer + 2, P, Box, FString(), EButton::ResearchPick, t, bDone || ResearchPick == t);
+		const FVector2D TopicBox = TopicBoxSize(T);
+		PaintButton(Geometry, Out, Layer + 2, P, TopicBox, FString(), EButton::ResearchPick, t, bDone || ResearchPick == t);
 		const FLinearColor Main = bDone ? Dark : Why.IsEmpty() || bBusy ? Ink : MutedInk;
-		PaintTextFit(Geometry, Out, Layer + 4, T.Name, P + FVector2D(8.f, 13.f), Serif(12), Main, Box.X - 16.f);
+		PaintTextFit(Geometry, Out, Layer + 4, T.Name, P + FVector2D(8.f, 13.f), Serif(12), Main, TopicBox.X - 16.f);
 		const FString State = bDone ? FString(TEXT("færdig"))
 			: bBusy ? FString::Printf(TEXT("i gang  ·  %d af %d md."), Map->GetResearchMonths(), T.Months)
 			: Why.IsEmpty() ? FString::Printf(TEXT("%d md.  ·  %s rd./md."), T.Months, *Thousands(int32(T.CostPerMonth)))
 			: Why;
-		PaintTextFit(Geometry, Out, Layer + 4, State, P + FVector2D(8.f, 30.f), Serif(10, EFace::Italic), bDone ? Dark : bBusy ? Gold : MutedInk, Box.X - 16.f);
-		if (Box.Y > 56.f)
+		PaintTextFit(Geometry, Out, Layer + 4, State, P + FVector2D(8.f, 30.f), Serif(10, EFace::Italic), bDone ? Dark : bBusy ? Gold : MutedInk, TopicBox.X - 16.f);
+		if (TopicBox.Y > 56.f)
 		{
-			PaintTextFit(Geometry, Out, Layer + 4, T.Effect, P + FVector2D(8.f, 46.f), Serif(9, EFace::Italic), bDone ? Dark : MutedInk, Box.X - 16.f);
+			PaintTextFit(Geometry, Out, Layer + 4, T.Effect, P + FVector2D(8.f, 46.f), Serif(9, EFace::Italic), bDone ? Dark : MutedInk, TopicBox.X - 16.f);
 		}
 		if (bBusy)
 		{
-			PaintBar(Geometry, Out, Layer + 4, P + FVector2D(8.f, Box.Y - 9.f), Box.X - 16.f, float(Map->GetResearchMonths()) / float(T.Months));
+			PaintBar(Geometry, Out, Layer + 4, P + FVector2D(8.f, TopicBox.Y - 9.f), TopicBox.X - 16.f, float(Map->GetResearchMonths()) / float(T.Months));
 		}
 	}
 	// The topic clicked: what it does, what it costs, and START.
@@ -3393,7 +3799,7 @@ void SCampaign1851Overlay::BuildTreeRows(TArray<FTreeRow>& Rows) const
 	const TArray<FCampaign1851Officer>& Officers = Map->GetOfficers();
 	const TArray<FCampaign1851Command>& Commands = Map->GetCommands();
 	auto OfficerText = [&](int32 O) { return Officers.IsValidIndex(O) ? FString::Printf(TEXT("%s %s %s"), *Officers[O].Rank, *Officers[O].Name, *FString::ChrN(Campaign1851Army::Stars(Officers[O].Experience), TEXT('*'))) : FString(); };
-	auto RegimentRow = [&](int32 i, int32 Depth)
+	auto RegimentRow = [&](int32 i, int32 Depth, bool bForceOpen = false)
 	{
 		const FCampaign1851Regiment& R = Regs[i];
 		FTreeRow Row;
@@ -3404,7 +3810,7 @@ void SCampaign1851Overlay::BuildTreeRows(TArray<FTreeRow>& Rows) const
 			R.IsMarching() ? TEXT("på march") : *Map->DescribePlace(R.Town, R.Km));
 		Row.bSelected = SelectedRegiments.Contains(i);
 		Row.bHasChildren = R.Captains.Num() > 0;
-		Row.bOpen = Collapsed.Contains(Row.Key);
+		Row.bOpen = bForceOpen || Collapsed.Contains(Row.Key);
 		Rows.Add(Row);
 		if (Row.bHasChildren && Row.bOpen)
 		{
@@ -3421,6 +3827,12 @@ void SCampaign1851Overlay::BuildTreeRows(TArray<FTreeRow>& Rows) const
 			}
 		}
 	};
+	// One unit only (KAMPORDEN from its panel): the unit and its companies.
+	if (Regs.IsValidIndex(OOBFocus))
+	{
+		RegimentRow(OOBFocus, 0, true);
+		return;
+	}
 	// The field army: formations and their units, top down.
 	TFunction<void(int32, int32)> AddFormation = [&](int32 Id, int32 Depth)
 	{
@@ -3584,7 +3996,21 @@ void SCampaign1851Overlay::PaintOOB(const FGeometry& Geometry, FSlateWindowEleme
 	PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(368.f, 12.f), FVector2D(100.f, 26.f), TEXT("NYT REGIMENT"), EButton::TreeNew, int32(ECampaign1851Echelon::Regiment));
 	// The big diagram of the order of battle (the KAMPORDEN window of the menu).
 	PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(472.f, 12.f), FVector2D(100.f, 26.f), TEXT("OVERSIGT"), EButton::MainMenu, int32(EWindow::Chart), Window == EWindow::Chart);
-	PaintText(Geometry, Out, Layer + 2, TEXT("Træk enheder og formationer på plads  ·  klik: vælg  ·  hjul: rul"), Pos + FVector2D(22.f, 56.f), Serif(10, EFace::Italic), MutedInk, 0.f, false);
+	if (Map->GetRegiments().IsValidIndex(OOBFocus))
+	{
+		// One unit: back to the whole army, or split it in two.
+		PaintText(Geometry, Out, Layer + 2, TEXT("Én enhed  ·  del den, eller træk den ind i en formation fra hele hæren"), Pos + FVector2D(22.f, 56.f), Serif(10, EFace::Italic), MutedInk, 0.f, false);
+		PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(Size.X - 280.f, 44.f), FVector2D(120.f, 24.f), TEXT("HELE HÆREN"), EButton::OOBFocusClear, 0);
+		FString Why;
+		const FCampaign1851Regiment& Focus = Map->GetRegiments()[OOBFocus];
+		const bool bCanSplit = !Focus.IsMarching() && Focus.Captains.Num() >= 2 && Focus.Men >= 100;
+		PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(Size.X - 152.f, 44.f), FVector2D(120.f, 24.f), TEXT("DEL I TO"), EButton::SplitUnit, OOBFocus, false, !bCanSplit);
+		AddTip(Pos + FVector2D(Size.X - 152.f, 44.f), FVector2D(120.f, 24.f), TEXT("Del enheden i to: halvdelen af kompagnierne (med deres kaptajner og mænd) bliver en halvbataljon for sig, der hvor enheden står. Den nye enhed skal have en chef."));
+	}
+	else
+	{
+		PaintText(Geometry, Out, Layer + 2, TEXT("Træk enheder og formationer på plads  ·  klik: vælg  ·  hjul: rul"), Pos + FVector2D(22.f, 56.f), Serif(10, EFace::Italic), MutedInk, 0.f, false);
+	}
 	float Y = Pos.Y + 86.f;
 	for (int32 r = 0; r < Shown; ++r)
 	{
@@ -3782,7 +4208,15 @@ void SCampaign1851Overlay::PaintOfficerCard(const FGeometry& Geometry, FSlateWin
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseOfficerCard);
 	float Y = Pos.Y + 32.f;
-	PaintTextFit(Geometry, Out, Layer + 2, O.Name, FVector2D(Pos.X + 22.f, Y), Serif(20), Ink, Size.X - 80.f);
+	PaintTextFit(Geometry, Out, Layer + 2, O.Name, FVector2D(Pos.X + 22.f, Y), Serif(20), Ink, Size.X - 210.f);
+	PaintPortrait(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 170.f, Y - 16.f), FVector2D(64.f, 80.f), O.Name, O.bGeneral ? 1 : 0);
+	// The overall rating, big at the right.
+	{
+		const int32 Rating = Campaign1851Army::OfficerRating(O);
+		PaintText(Geometry, Out, Layer + 2, FString::FromInt(Rating), FVector2D(Pos.X + Size.X - 60.f, Y + 4.f), Serif(26), Rating >= 70 ? Gold : Rating >= 45 ? Ink : MutedInk, 0.5f, false);
+		PaintText(Geometry, Out, Layer + 2, TEXT("vurdering"), FVector2D(Pos.X + Size.X - 60.f, Y + 26.f), Serif(9, EFace::Italic), MutedInk, 0.5f, false);
+		AddTip(FVector2D(Pos.X + Size.X - 100.f, Y - 16.f), FVector2D(80.f, 52.f), TEXT("Samlet vurdering 0-100: evnerne vægtet efter betydning i felten (føring og taktik tungest; aggressivitet bedst midt imellem; politisk vægt kun for generaler) plus op til 10 for erfaring. 70+ er fremragende, under 45 svag."));
+	}
 	Y += 28.f;
 	const int32 Age = Map->GetDate().GetYear() - O.Born;
 	const FString Post = Map->OfficerRole(InspectedOfficer);
@@ -3800,6 +4234,7 @@ void SCampaign1851Overlay::PaintOfficerCard(const FGeometry& Geometry, FSlateWin
 			continue;   // only generals have political weight
 		}
 		PaintText(Geometry, Out, Layer + 2, Campaign1851Army::StatName(ECampaign1851OfficerStat(s)), FVector2D(Pos.X + 22.f, Y), Serif(12), Ink, 0.f, false);
+		AddTip(FVector2D(Pos.X + 16.f, Y - 12.f), FVector2D(Size.X - 32.f, RowHeight - 4.f), FString::Printf(TEXT("%s: %s (1-10)"), Campaign1851Army::StatName(ECampaign1851OfficerStat(s)), Meaning[s]));
 		PaintBar(Geometry, Out, Layer + 2, FVector2D(Pos.X + 150.f, Y - 3.f), 200.f, O.Stats[s] / 10.f);
 		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%d"), O.Stats[s]), FVector2D(Pos.X + 362.f, Y), Serif(12), Ink, 0.f, false);
 		PaintTextFit(Geometry, Out, Layer + 2, Meaning[s], FVector2D(Pos.X + 150.f, Y + 14.f), Serif(9, EFace::Italic), MutedInk, 290.f);
@@ -4036,6 +4471,38 @@ void SCampaign1851Overlay::PaintTable(const FGeometry& Geometry, FSlateWindowEle
 		const FString Head = C.Title + (c == Col ? (bSortDesc ? TEXT(" v") : TEXT(" ^")) : TEXT(""));
 		PaintTextFit(Geometry, Out, Layer + 2, Head, FVector2D(C.bRight ? X + C.Width - 6.f : X + 6.f, Pos.Y + 11.f), Serif(11, EFace::Italic), c == Col ? Ink : Gold, C.Width - 8.f, C.bRight ? 1.f : 0.f);
 		Buttons.Add({ FVector2D(X, Pos.Y), FVector2D(X + C.Width, Pos.Y + 22.f), EButton::TableSort, c });
+		// What a short heading means.
+		{
+			static const TMap<FString, FString> Glossary = {
+				{ TEXT("Erf"), TEXT("Erfaring 0-100: felttjeneste og slag (veteraner fra 1848-50 starter omkring 55)") },
+				{ TEXT("Lad"), TEXT("Ladegreb og ilddisciplin: ladetid, ordnede salver, ammunitionsforbrug") },
+				{ TEXT("Skyd"), TEXT("Skydning: træfsikkerhed og afstandsbedømmelse (skyttekunst for artilleriet)") },
+				{ TEXT("Eks"), TEXT("Eksercits: formationer, vendinger og udfoldning; holder geledderne") },
+				{ TEXT("Felt"), TEXT("Feltøvelse: dækning, spredt orden og brug af terrænet") },
+				{ TEXT("Udh"), TEXT("Udholdenhed: marchtempo, træthed og restitution") },
+				{ TEXT("Baj"), TEXT("Bajonet og storm: chokket og nærkampen") },
+				{ TEXT("Samh"), TEXT("Samhørighed 0-100: hvor godt enheden hænger sammen (falder på lange marcher)") },
+				{ TEXT("Moral"), TEXT("Moral: kampviljen (chefens inspiration og træningen løfter den)") },
+				{ TEXT("Syge"), TEXT("Syge og sårede på lazaret: de fleste kommer tilbage inden for uger") },
+				{ TEXT("Vurd"), TEXT("Samlet vurdering 0-100 ud fra evnerne og erfaringen") },
+				{ TEXT("Løn"), TEXT("Løn i rigsdaler om året") } };
+			FString Tip;
+			if (const FString* Found = Glossary.Find(C.Title))
+			{
+				Tip = *Found;
+			}
+			for (int32 st = 0; st < int32(ECampaign1851OfficerStat::Count) && Tip.IsEmpty(); ++st)
+			{
+				if (C.Title == Campaign1851Army::StatShort(ECampaign1851OfficerStat(st)))
+				{
+					Tip = FString::Printf(TEXT("%s (1-10)"), Campaign1851Army::StatName(ECampaign1851OfficerStat(st)));
+				}
+			}
+			if (!Tip.IsEmpty())
+			{
+				AddTip(FVector2D(X, Pos.Y), FVector2D(C.Width, 22.f), Tip);
+			}
+		}
 		X += C.Width;
 	}
 	DrawLines(Geometry, Out, Layer + 2, { FVector2D(Pos.X, Pos.Y + 24.f), FVector2D(Pos.X + Width, Pos.Y + 24.f) }, Gold.CopyWithNewOpacity(0.5f), 1.f);
@@ -4160,6 +4627,9 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 			}
 			Row.Cells.Add(Num(O.Experience));
 			Row.Keys.Add(O.Experience);
+			const int32 Rating = Campaign1851Army::OfficerRating(O);
+			Row.Cells.Add(FString::FromInt(Rating));
+			Row.Keys.Add(Rating);
 			Row.Cells.Add(Thousands(Salary));
 			Row.Keys.Add(Salary);
 			Rows.Add(Row);
@@ -4175,6 +4645,7 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 			Cols.Add({ Campaign1851Army::StatShort(ECampaign1851OfficerStat(s)), 42.f, true });
 		}
 		Cols.Add({ TEXT("Erf"), 44.f, true });
+		Cols.Add({ TEXT("Vurd"), 48.f, true });
 		Cols.Add({ TEXT("Løn"), 58.f, true });
 		PaintTable(Geometry, Out, Layer + 2, Pos + FVector2D(24.f, 96.f), VisibleRows - 2, Cols, Rows, EButton::TableRow, InspectedOfficer);
 		const float BottomY = Pos.Y + Size.Y - 48.f;
@@ -4233,6 +4704,27 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 		PaintButton(Geometry, Out, Layer + 3, FVector2D(LX, Y), FVector2D(170.f, 26.f), TEXT("LÅN 100.000"), EButton::Loan, 0, false, !Map->LoanBlockReason(100000.0).IsEmpty());
 		PaintButton(Geometry, Out, Layer + 3, FVector2D(LX + 180.f, Y), FVector2D(170.f, 26.f), TEXT("LÅN 250.000"), EButton::Loan, 1, false, !Map->LoanBlockReason(250000.0).IsEmpty());
 		PaintButton(Geometry, Out, Layer + 3, FVector2D(LX + 360.f, Y), FVector2D(170.f, 26.f), TEXT("AFDRAG 100.000"), EButton::Loan, 2, false, Map->GetDebt() < 1.0 || Map->GetTreasury() < 100000.0);
+		// The ministries' budgets: what each may spend a month on its own (AUTO), and the reserve.
+		Y += 44.f;
+		PaintText(Geometry, Out, Layer + 3, TEXT("M I N I S T E R I E R N E S   B U D G E T T E R"), FVector2D(LX, Y), Serif(11), Gold, 0.f, false);
+		Y += 24.f;
+		double AllMinistries = 0.0;
+		for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count); ++p)
+		{
+			const ECampaign1851Portfolio P = ECampaign1851Portfolio(p);
+			const double Allow = Map->GetMinistryBudget(P), Pot = Map->GetMinistryPot(P);
+			AllMinistries += Allow;
+			PaintTextFit(Geometry, Out, Layer + 3, Campaign1851Nations::PortfolioName(P), FVector2D(LX + 16.f, Y), Serif(12), Ink, 200.f);
+			PaintButton(Geometry, Out, Layer + 3, FVector2D(LX + 230.f, Y - 9.f), FVector2D(22.f, 18.f), TEXT("-"), EButton::MinistryBudget, p * 2);
+			PaintText(Geometry, Out, Layer + 3, Allow <= 0.0 ? FString(TEXT("intet")) : FString::Printf(TEXT("%s rd./md."), *Thousands(int32(Allow))), FVector2D(LX + 340.f, Y), Serif(12), Ink, 0.5f, false);
+			PaintButton(Geometry, Out, Layer + 3, FVector2D(LX + 410.f, Y - 9.f), FVector2D(22.f, 18.f), TEXT("+"), EButton::MinistryBudget, p * 2 + 1);
+			PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("pulje %s"), *Thousands(int32(Pot))), FVector2D(LX + LW, Y), Serif(11, EFace::Italic), MutedInk, 1.f, false);
+			Y += 21.f;
+		}
+		PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("I alt %s rd. om måneden  ·  mindste kassebeholdning %s rd."), *Thousands(int32(AllMinistries)), *Thousands(int32(Map->GetNations().IsValidIndex(Map->GetPlayerNation()) ? Map->GetNations()[Map->GetPlayerNation()].Reserve : 0.0))),
+			FVector2D(LX + 16.f, Y + 4.f), Serif(12, EFace::Italic), Gold, 0.f, false);
+		PaintButton(Geometry, Out, Layer + 3, FVector2D(LX + 440.f, Y - 6.f), FVector2D(28.f, 20.f), TEXT("-"), EButton::Reserve, 0);
+		PaintButton(Geometry, Out, Layer + 3, FVector2D(LX + 472.f, Y - 6.f), FVector2D(28.f, 20.f), TEXT("+"), EButton::Reserve, 1);
 
 		const float RX = Pos.X + 640.f, RW = Size.X - 640.f - 24.f;
 		const TArray<FCampaign1851Transaction>& Ledger = Map->GetLedger();
@@ -4618,7 +5110,7 @@ void SCampaign1851Overlay::PaintAmtInfo(const FGeometry& Geometry, FSlateWindowE
 			Garrisons.Add(FString::Printf(TEXT("%s%s"), *Cities[Site->GetCityIndex()].Name, Site->IsBarracksDone() ? TEXT("") : TEXT(" (under bygning)")));
 		}
 	}
-	const FVector2D Size(420.f, 318.f);
+	const FVector2D Size(420.f, 342.f);
 	const FVector2D Pos(28.f, Geometry.GetLocalSize().Y - 190.f - Size.Y);
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseSelection);
@@ -4626,10 +5118,10 @@ void SCampaign1851Overlay::PaintAmtInfo(const FGeometry& Geometry, FSlateWindowE
 	auto Line = [&](const FString& Label, const FString& Value)
 	{
 		PaintText(Geometry, Out, Layer + 2, Label, FVector2D(Pos.X + 22.f, Y), Serif(12, EFace::Italic), Gold, 0.f, false);
-		PaintText(Geometry, Out, Layer + 2, Value, FVector2D(Pos.X + 158.f, Y), Serif(13), Ink, 0.f, false);
+		PaintTextFit(Geometry, Out, Layer + 2, Value, FVector2D(Pos.X + 158.f, Y), Serif(13), Ink, Size.X - 158.f - 18.f);
 		Y += 24.f;
 	};
-	PaintText(Geometry, Out, Layer + 2, A->Name, FVector2D(Pos.X + 22.f, Y), Serif(24), Ink, 0.f);
+	PaintTextFit(Geometry, Out, Layer + 2, A->Name, FVector2D(Pos.X + 22.f, Y), Serif(24), Ink, Size.X - 70.f);
 	Y += 32.f;
 	PaintText(Geometry, Out, Layer + 2, ACampaign1851Map::RegionName(A->Region), FVector2D(Pos.X + 22.f, Y), Serif(14, EFace::Italic), Gold, 0.f, false);
 	Y += 32.f;
@@ -4639,7 +5131,16 @@ void SCampaign1851Overlay::PaintAmtInfo(const FGeometry& Geometry, FSlateWindowE
 	Line(TEXT("Købstæder"), A->Towns.Num() > 0 ? FString::Join(A->Towns, TEXT(", ")).Left(36) : TEXT("ingen"));
 	Line(TEXT("Skat til anlæg"), FString::Printf(TEXT("%s rd./år"), *Thousands(FMath::RoundToInt(ACampaign1851Map::AmtYearlyTax(*A)))));
 	Line(TEXT("Våbenføre mænd"), FString::Printf(TEXT("ca. %s (skøn)"), *Thousands(FMath::RoundToInt(A->Population * 0.09))));
-	Line(TEXT("Garnisoner"), Garrisons.Num() > 0 ? FString::Join(Garrisons, TEXT(", ")).Left(36) : TEXT("ingen"));
+	Line(TEXT("Garnisoner"), Garrisons.Num() > 0 ? FString::Join(Garrisons, TEXT(", ")) : TEXT("ingen"));
+	// Who holds it, and how it is won back.
+	if (Map->IsAmtOccupied(*A))
+	{
+		Line(TEXT("Kontrol"), FString::Printf(TEXT("BESAT  ·  befries når %d danske står ved %s i 2 døgn uden fjendtlige korps inden for 10 km"), ACampaign1851Map::LiberationMen, *A->Seat));
+	}
+	else
+	{
+		Line(TEXT("Kontrol"), TEXT("dansk  ·  går tabt, hvis fjenden besætter amtsbyen"));
+	}
 	PaintText(Geometry, Out, Layer + 2, TEXT("Befolkningstal er skøn ud fra folketællingerne omkring 1850"), FVector2D(Pos.X + Size.X * 0.5f, Pos.Y + Size.Y - 16.f),
 		Serif(9, EFace::Italic), MutedInk, 0.5f, false);
 }
@@ -4741,8 +5242,16 @@ void SCampaign1851Overlay::PaintTownBuildings(const FGeometry& Geometry, FSlateW
 		}
 	}
 	const float RowHeight = 50.f;
-	const FVector2D Size(470.f, 48.f + FMath::Max(Rows.Num(), 1) * RowHeight + 8.f);
+	// As many rows as fit above the bottom panels (one fewer, so the list never reaches the top bar); the rest
+	// by scrolling (the wheel over the list, or the arrows).
+	const int32 MaxRows = FMath::Max(3, int32((Geometry.GetLocalSize().Y - 190.f - 130.f - 56.f) / RowHeight) - 1);
+	BuildingRowsTotal = Rows.Num();
+	BuildingRowsShown = FMath::Min(Rows.Num(), MaxRows);
+	const int32 Scroll = FMath::Clamp(BuildingScroll, 0, FMath::Max(0, Rows.Num() - BuildingRowsShown));
+	const FVector2D Size(470.f, 48.f + FMath::Max(BuildingRowsShown, 1) * RowHeight + 8.f);
 	const FVector2D Pos(28.f + 440.f + 10.f, FMath::Max(130.f, Geometry.GetLocalSize().Y - 190.f - Size.Y));
+	BuildingMin = Pos;
+	BuildingMax = Pos + Size;
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseTownTab);
 	PaintText(Geometry, Out, Layer + 2, TEXT("B Y G N I N G E R"), Pos + FVector2D(22.f, 24.f), Serif(11), Gold, 0.f, false);
@@ -4757,11 +5266,26 @@ void SCampaign1851Overlay::PaintTownBuildings(const FGeometry& Geometry, FSlateW
 	{
 		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("vækst %.1f %% om året"), Map->UrbanGrowthRate(SelectedCity)), Pos + FVector2D(Size.X - 40.f, 24.f), Serif(10, EFace::Italic), Gold, 1.f, false);
 	}
-	for (int32 r = 0; r < Rows.Num(); ++r)
+	if (Rows.Num() > BuildingRowsShown)
+	{
+		// The scrollbar: the arrows and the thumb on the right edge.
+		PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 24.f, 44.f), FVector2D(18.f, 18.f), TEXT("^"), EButton::BuildingScroll, 0, false, Scroll == 0);
+		PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 24.f, Size.Y - 26.f), FVector2D(18.f, 18.f), TEXT("v"), EButton::BuildingScroll, 2, false, Scroll >= Rows.Num() - BuildingRowsShown);
+		const float TrackTop = Pos.Y + 66.f, TrackH = Size.Y - 96.f;
+		const float ThumbH = FMath::Max(20.f, TrackH * BuildingRowsShown / Rows.Num());
+		const float ThumbY = TrackTop + (TrackH - ThumbH) * Scroll / FMath::Max(1, Rows.Num() - BuildingRowsShown);
+		const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+		FSlateDrawElement::MakeBox(Out, Layer + 3, Geometry.ToPaintGeometry(FVector2D(6.f, TrackH), FSlateLayoutTransform(FVector2D(Pos.X + Size.X - 18.f, TrackTop))), White, ESlateDrawEffect::None, Gold.CopyWithNewOpacity(0.2f));
+		FSlateDrawElement::MakeBox(Out, Layer + 4, Geometry.ToPaintGeometry(FVector2D(6.f, ThumbH), FSlateLayoutTransform(FVector2D(Pos.X + Size.X - 18.f, ThumbY))), White, ESlateDrawEffect::None, Gold);
+	}
+	for (int32 r = Scroll; r < Scroll + BuildingRowsShown; ++r)
 	{
 		const int32 i = Rows[r];
 		const FCampaign1851SiteModule& Def = Types[i];
-		const FVector2D Row = Pos + FVector2D(0.f, 44.f + r * RowHeight);
+		const FVector2D Row = Pos + FVector2D(0.f, 44.f + (r - Scroll) * RowHeight);
+		// The picture and the name: click for the building's card.
+		Buttons.Add({ Row + FVector2D(14.f, 0.f), Row + FVector2D(250.f, RowHeight - 4.f), EButton::BuildingInfo, i });
+		AddTip(Row + FVector2D(14.f, 0.f), FVector2D(236.f, RowHeight - 4.f), TEXT("Klik for bygningens kort: hvad den gør, hvad den kræver og koster"));
 		TArray<FVector2D> Rule = { Row + FVector2D(18.f, -2.f), Row + FVector2D(Size.X - 18.f, -2.f) };
 		FSlateDrawElement::MakeLines(Out, Layer + 2, Geometry.ToPaintGeometry(), Rule, ESlateDrawEffect::None, Gold.CopyWithNewOpacity(0.25f), true, 1.f);
 		if (TownBrushes.IsValidIndex(i) && TownBrushes[i]->GetResourceObject())
@@ -4799,5 +5323,79 @@ void SCampaign1851Overlay::PaintTownBuildings(const FGeometry& Geometry, FSlateW
 		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s rd.  ·  %d dage%s%s"), *Thousands(Def.Cost()), int32(Def.Days()), *Effect, bAfford ? TEXT("") : TEXT("  ·  ikke råd")),
 			Row + FVector2D(70.f, 34.f), Serif(11, EFace::Italic), MutedInk, Size.X - 70.f - 110.f);
 		PaintButton(Geometry, Out, Layer + 2, ButtonPos, ButtonSize, TEXT("BYG"), EButton::BuildTown, i, false, !bAfford);
+	}
+	if (Types.IsValidIndex(BuildingInfo))
+	{
+		PaintBuildingCard(Geometry, Out, Layer + 6, FVector2D(Pos.X + Size.X + 10.f, Pos.Y), BuildingInfo);
+	}
+}
+
+void SCampaign1851Overlay::PaintBuildingCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& At, int32 TypeIndex) const
+{
+	const FCampaign1851SiteModule& Def = ACampaign1851ConstructionSite::TownBuildings()[TypeIndex];
+	const FCampaign1851BuildingDef* Data = Campaign1851Buildings::Find(Def.Key);
+	const FVector2D Size(430.f, 520.f);
+	const FVector2D Pos(At.X, FMath::Min(At.Y, Geometry.GetLocalSize().Y - 190.f - Size.Y));
+	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	PaintText(Geometry, Out, Layer + 2, Def.Name, Pos + FVector2D(22.f, 30.f), Serif(20), Ink, 0.f, false);
+	PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(Size.X - 46.f, 12.f), FVector2D(28.f, 24.f), TEXT("X"), EButton::BuildingInfo, TypeIndex);
+	float Y = Pos.Y + 52.f;
+	if (Data)
+	{
+		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s  ·  %s  ·  %s  ·  størrelse %s"), *Data->Category, *Data->Owner, *Data->Type, *Data->Size),
+			FVector2D(Pos.X + 22.f, Y), Serif(11, EFace::Italic), Gold, Size.X - 44.f);
+	}
+	Y += 18.f;
+	if (TownBrushes.IsValidIndex(TypeIndex) && TownBrushes[TypeIndex]->GetResourceObject())
+	{
+		FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(190.f, 190.f), FSlateLayoutTransform(FVector2D(Pos.X + (Size.X - 190.f) * 0.5f, Y))), TownBrushes[TypeIndex].Get());
+	}
+	else
+	{
+		PaintText(Geometry, Out, Layer + 2, TEXT("(billede kommer)"), FVector2D(Pos.X + Size.X * 0.5f, Y + 95.f), Serif(11, EFace::Italic), MutedInk, 0.5f, false);
+	}
+	Y += 200.f;
+	const float ValueX = 130.f;
+	auto Line = [&](const FString& Label, const FString& Value)
+	{
+		PaintText(Geometry, Out, Layer + 2, Label, FVector2D(Pos.X + 22.f, Y), Serif(12, EFace::Italic), Gold, 0.f, false);
+		// Long values wrap over two lines.
+		FString A = Value, B;
+		if (Measure(Value, Serif(12)).X > Size.X - ValueX - 22.f)
+		{
+			int32 Cut = Value.Len() / 2;
+			while (Cut < Value.Len() && Value[Cut] != TEXT(' ')) { ++Cut; }
+			A = Value.Left(Cut);
+			B = Value.Mid(Cut + 1);
+		}
+		PaintTextFit(Geometry, Out, Layer + 2, A, FVector2D(Pos.X + ValueX, Y), Serif(12), Ink, Size.X - ValueX - 22.f);
+		if (!B.IsEmpty())
+		{
+			Y += 18.f;
+			PaintTextFit(Geometry, Out, Layer + 2, B, FVector2D(Pos.X + ValueX, Y), Serif(12), Ink, Size.X - ValueX - 22.f);
+		}
+		Y += 24.f;
+	};
+	if (Data)
+	{
+		Line(TEXT("Giver"), Data->Provides.IsEmpty() ? FString(TEXT("-")) : Data->Provides);
+		Line(TEXT("Kræver"), Data->Requires.IsEmpty() ? FString(TEXT("intet særligt")) : Data->Requires);
+	}
+	if (const FCampaign1851CivilEffect* E = Campaign1851Nations::CivilEffect(Def.Key))
+	{
+		Line(TEXT("Virkning"), FString::Printf(TEXT("byens vækst +%.2f %% om året%s"), E->UrbanGrowth, E->IncomeRd > 0 ? *FString::Printf(TEXT(", skat +%s rd./år"), *Thousands(E->IncomeRd)) : TEXT("")));
+	}
+	Line(TEXT("Pris"), FString::Printf(TEXT("%s rd.  ·  %d dage"), *Thousands(Def.Cost()), int32(Def.Days())));
+	Line(TEXT("Vedligehold"), FString::Printf(TEXT("%s rd. om året"), *Thousands(Def.Upkeep())));
+	if (Def.MinPopulation > 0 || Def.FromYear > 0 || Def.bNeedsCoast)
+	{
+		Line(TEXT("Betingelser"), FString::Printf(TEXT("%s%s%s"), Def.MinPopulation > 0 ? *FString::Printf(TEXT("mindst %s indb.  "), *Thousands(Def.MinPopulation)) : TEXT(""),
+			Def.FromYear > 0 ? *FString::Printf(TEXT("fra %d  "), Def.FromYear) : TEXT(""), Def.bNeedsCoast ? TEXT("ved kysten") : TEXT("")));
+	}
+	if (Map->GetCities().IsValidIndex(SelectedCity))
+	{
+		const ACampaign1851ConstructionSite* Site = Map->FindBuilding(SelectedCity, Def.Key);
+		const FString Why = Map->BuildingBlockReason(SelectedCity, Def.Key);
+		Line(TEXT("Her"), Site ? (Site->IsModuleDone(0) ? FString(TEXT("står færdig")) : FString(TEXT("under opførelse"))) : Why.IsEmpty() ? FString(TEXT("kan bygges")) : Why);
 	}
 }

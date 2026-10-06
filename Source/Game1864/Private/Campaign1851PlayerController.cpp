@@ -674,8 +674,9 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	const bool bShift = IsInputKeyDown(EKeys::LeftShift) || IsInputKeyDown(EKeys::RightShift);
 	if (bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollUp))   { Overlay->ScrollChart(-2, bShift); }
 	if (bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollDown)) { Overlay->ScrollChart(2, bShift); }
-	if (!bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollUp))   { if (bOverTree) { Overlay->ScrollTree(-3); } else { Camera->Zoom(1.f, bFocus ? &Focus : nullptr); } }
-	if (!bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollDown)) { if (bOverTree) { Overlay->ScrollTree(3); } else { Camera->Zoom(-1.f, bFocus ? &Focus : nullptr); } }
+	const bool bOverBuildings = Overlay.IsValid() && Overlay->IsOverBuildings(Mouse);
+	if (!bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollUp))   { if (bOverBuildings) { Overlay->ScrollBuildings(-1); } else if (bOverTree) { Overlay->ScrollTree(-3); } else { Camera->Zoom(1.f, bFocus ? &Focus : nullptr); } }
+	if (!bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollDown)) { if (bOverBuildings) { Overlay->ScrollBuildings(1); } else if (bOverTree) { Overlay->ScrollTree(3); } else { Camera->Zoom(-1.f, bFocus ? &Focus : nullptr); } }
 	if (WasInputKeyJustPressed(EKeys::K) && Overlay.IsValid()) { Overlay->ToggleOOB(); }
 	if (WasInputKeyJustPressed(EKeys::F) && Overlay.IsValid()) { Overlay->ToggleSupplyMap(); }
 	// Tree drag and drop: pressed on a row, moved a little -> dragging; released -> drop (or a click).
@@ -770,10 +771,47 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	else if (WasInputKeyJustPressed(EKeys::LeftMouseButton))
 	{
 		int32 Module = INDEX_NONE;
-		const SCampaign1851Overlay::EButton Button = Overlay.IsValid() ? Overlay->HitButton(Mouse, &Module) : SCampaign1851Overlay::EButton::None;
+		SCampaign1851Overlay::EButton Button = Overlay.IsValid() ? Overlay->HitButton(Mouse, &Module) : SCampaign1851Overlay::EButton::None;
+		// The confirmation dialog: JA carries out the step asked about, NEJ drops it.
+		bool bConfirmed = false;
+		if (Button == SCampaign1851Overlay::EButton::ConfirmYes)
+		{
+			Button = Overlay->TakeConfirm(Module);
+			bConfirmed = true;
+		}
+		else if (Button == SCampaign1851Overlay::EButton::ConfirmNo)
+		{
+			Overlay->CloseConfirm();
+			Button = SCampaign1851Overlay::EButton::None;
+		}
 		if (Button == SCampaign1851Overlay::EButton::Menu)
 		{
 			OpenGameMenu();
+		}
+		else if (Button == SCampaign1851Overlay::EButton::HorseBattery)
+		{
+			if (!bConfirmed)
+			{
+				Overlay->AskConfirm(TEXT("Gør batteriet ridende?"), FString::Printf(TEXT("Alle kanonerer kommer til hest, og batteriet kan følge rytteriet. Det får 6 kanoner (2 går tilbage på lager), 180 mand og %d heste (de manglende tages fra lageret). Det koster %s rd., og eksercitsen falder en tid, mens mændene lærer at ride med kanonerne."),
+					ACampaign1851Map::HorseBatteryHorses, *FString::FormatAsNumber(int32(ACampaign1851Map::HorseBatteryCost))), Button, Module);
+			}
+			else
+			{
+				FString Why;
+				Overlay->ShowToast(Map->UpgradeToHorseBattery(Module, &Why) ? FString(TEXT("Batteriet er nu ridende")) : Why);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::UnitCard)
+		{
+			Overlay->ToggleUnitCard();
+		}
+		else if (Button == SCampaign1851Overlay::EButton::BuildingInfo)
+		{
+			Overlay->ToggleBuildingInfo(Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::BuildingScroll)
+		{
+			Overlay->ScrollBuildings(Module - 1);
 		}
 		else if (Button == SCampaign1851Overlay::EButton::Speed)
 		{
@@ -1121,6 +1159,20 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Overlay->ShowToast(Why);
 			}
 		}
+		else if (Button == SCampaign1851Overlay::EButton::Footing && Map->GetFooting() == ECampaign1851Footing::Peace && !bConfirmed)
+		{
+			// First the question: what it costs and what it does.
+			int32 Away = 0;
+			for (const FCampaign1851Regiment& R : Map->GetRegiments())
+			{
+				Away += FMath::RoundToInt(R.Men * (1.f - R.Present));
+			}
+			Overlay->AskConfirm(TEXT("Mobilisér hæren?"), FString::Printf(
+				TEXT("Indkaldelsen koster %s rd. nu. %s hjemsendte kaldes ind over 2-3 uger (hurtigere med mobiliseringsdepot i garnisonsbyen), og lønnen stiger med ca. %s rd. om måneden. Skatterne falder 10 %% mens mændene er væk fra gårde og værksteder; stemningen falder, og spændingen med Det tyske forbund stiger. Kassen har %s rd."),
+				*FString::FormatAsNumber(int32(Campaign1851Mobilisation::OrderCost)), *FString::FormatAsNumber(Away),
+				*FString::FormatAsNumber(FMath::RoundToInt(Away * Campaign1851Mobilisation::PayPerManMonth)), *FString::FormatAsNumber(FMath::RoundToInt(Map->GetTreasury()))),
+				SCampaign1851Overlay::EButton::Footing, 0);
+		}
 		else if (Button == SCampaign1851Overlay::EButton::Footing)
 		{
 			FString Why;
@@ -1405,7 +1457,43 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 		else if (Button == SCampaign1851Overlay::EButton::OpenOOB)
 		{
+			// From a unit's panel: the order of battle for that unit only.
+			Overlay->FocusOOB(Overlay->GetSelectedRegiments().Num() == 1 ? Overlay->GetSelectedRegiments()[0] : INDEX_NONE);
 			Overlay->ToggleOOB();
+		}
+		else if (Button == SCampaign1851Overlay::EButton::Engage)
+		{
+			FString Why;
+			if (!Map->EngageCorps(Module, Overlay->GetSelectedRegiments(), &Why))
+			{
+				Overlay->ShowToast(Why);
+			}
+		}
+		else if (Button == SCampaign1851Overlay::EButton::MapView)
+		{
+			Overlay->SetMapView(Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::OOBFocusClear)
+		{
+			Overlay->FocusOOB(INDEX_NONE);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::SplitUnit)
+		{
+			if (!bConfirmed)
+			{
+				Overlay->AskConfirm(TEXT("Del enheden i to?"), TEXT("Halvdelen af kompagnierne med deres kaptajner, mænd, heste og kanoner bliver en halvbataljon for sig, der hvor enheden står. Begge dele mister lidt samhørighed, og den nye enhed skal have en chef. Delingen kan ikke gøres om endnu."),
+					Button, Module);
+			}
+			else
+			{
+				FString Why;
+				const int32 New = Map->SplitRegiment(Module, &Why);
+				Overlay->ShowToast(New != INDEX_NONE ? FString::Printf(TEXT("Enheden er delt: %s"), *Map->GetRegiments()[New].Name) : Why);
+				if (New != INDEX_NONE)
+				{
+					Overlay->FocusOOB(INDEX_NONE);
+				}
+			}
 		}
 		else if (Button == SCampaign1851Overlay::EButton::OOBCommand)
 		{

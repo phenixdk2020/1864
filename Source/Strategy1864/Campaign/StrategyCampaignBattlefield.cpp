@@ -145,6 +145,201 @@ bool AStrategyCampaignBattlefield::IsWater(const FVector& World, float* OutWidth
     return false;
 }
 
+FVector2D AStrategyCampaignBattlefield::ToField(const FVector& World) const
+{
+    const FVector L = World - GetActorLocation();
+    const double Half = SizeCm * 0.5;
+    return FVector2D((L.Y + Half) / 100.0, (L.X + Half) / 100.0);
+}
+
+int32 AStrategyCampaignBattlefield::NearestRiver(const FVector2D& P, double& OutDistanceM, FVector2D& OutAcross) const
+{
+    int32 Best = INDEX_NONE;
+    OutDistanceM = 1e12;
+    for (int32 r = 0; r < Rivers.Num(); ++r)
+    {
+        const TArray<FVector2D>& Pts = Rivers[r].Points;
+        for (int32 s = 0; s + 1 < Pts.Num(); ++s)
+        {
+            const FVector2D A = Pts[s], D = Pts[s + 1] - A;
+            const double T = FMath::Clamp(FVector2D::DotProduct(P - A, D) / FMath::Max(D.SizeSquared(), 1e-6), 0.0, 1.0);
+            const double Dist = FVector2D::Distance(P, A + D * T);
+            if (Dist < OutDistanceM)
+            {
+                OutDistanceM = Dist;
+                Best = r;
+                const FVector2D Dir = D.GetSafeNormal();
+                OutAcross = FVector2D(-Dir.Y, Dir.X);
+            }
+        }
+    }
+    return Best;
+}
+
+bool AStrategyCampaignBattlefield::RouteAcrossRivers(const FVector& Start, const FVector& End, TArray<FVector>& OutVia) const
+{
+    OutVia.Reset();
+    FVector2D Cur = ToField(Start);
+    const FVector2D Goal = ToField(End);
+    // Where the way Cur -> Goal first meets a broad river (the parameter along the way), crossing by crossing.
+    for (int32 Guard = 0; Guard < 4; ++Guard)
+    {
+        double FirstT = 2.0;
+        int32 FirstRiver = INDEX_NONE;
+        const FVector2D W = Goal - Cur;
+        for (int32 r = 0; r < Rivers.Num(); ++r)
+        {
+            if (Rivers[r].WidthM < BroadRiverM)
+            {
+                continue;
+            }
+            const TArray<FVector2D>& Pts = Rivers[r].Points;
+            for (int32 s = 0; s + 1 < Pts.Num(); ++s)
+            {
+                const FVector2D A = Pts[s], D = Pts[s + 1] - A;
+                const double Den = W.X * D.Y - W.Y * D.X;
+                if (FMath::Abs(Den) < 1e-9)
+                {
+                    continue;
+                }
+                const FVector2D AC = A - Cur;
+                const double T = (AC.X * D.Y - AC.Y * D.X) / Den;
+                const double U = (AC.X * W.Y - AC.Y * W.X) / Den;
+                if (T > 1e-4 && T <= 1.0 && U >= 0.0 && U <= 1.0 && T < FirstT)
+                {
+                    FirstT = T;
+                    FirstRiver = r;
+                }
+            }
+        }
+        if (FirstRiver == INDEX_NONE)
+        {
+            break;
+        }
+        // The bridge on that river giving the shortest way.
+        const FBridge* Best = nullptr;
+        double BestLength = 1e12;
+        for (const FBridge& B : Bridges)
+        {
+            if (B.River == FirstRiver)
+            {
+                const double Length = FVector2D::Distance(Cur, B.Centre) + FVector2D::Distance(B.Centre, Goal);
+                if (Length < BestLength)
+                {
+                    BestLength = Length;
+                    Best = &B;
+                }
+            }
+        }
+        if (!Best)
+        {
+            return false;
+        }
+        const double Side = FVector2D::DotProduct(Cur - Best->Centre, Best->Across) >= 0.0 ? 1.0 : -1.0;
+        const double Reach = Best->LengthM * 0.5 + 25.0;
+        const FVector2D Near = Best->Centre + Best->Across * (Side * Reach), Far = Best->Centre - Best->Across * (Side * Reach);
+        OutVia.Add(FieldToWorld(Near.X, Near.Y));
+        OutVia.Add(FieldToWorld(Far.X, Far.Y));
+        Cur = Far;
+    }
+    return true;
+}
+
+float AStrategyCampaignBattlefield::WadingFactor(const FVector& World) const
+{
+    const FVector2D P = ToField(World);
+    for (const FBridge& B : Bridges)
+    {
+        const FVector2D D = P - B.Centre;
+        const FVector2D Along(-B.Across.Y, B.Across.X);
+        if (FMath::Abs(FVector2D::DotProduct(D, B.Across)) <= B.LengthM * 0.5 + 5.0 && FMath::Abs(FVector2D::DotProduct(D, Along)) <= 8.0)
+        {
+            return 1.0f;   // on the bridge
+        }
+    }
+    float WidthM = 0.0f;
+    if (!IsWater(World, &WidthM))
+    {
+        return 1.0f;
+    }
+    return WidthM > 0.0f && WidthM < BroadRiverM ? 0.35f : 0.15f;
+}
+
+void AStrategyCampaignBattlefield::AddBridgeMesh(const FBridge& Bridge, UMaterialInterface* Material)
+{
+    if (!Material)
+    {
+        return;
+    }
+    // The deck at the higher bank plus a metre, from bank to bank.
+    const FVector2D A = Bridge.Centre - Bridge.Across * (Bridge.LengthM * 0.5), B = Bridge.Centre + Bridge.Across * (Bridge.LengthM * 0.5);
+    const FVector Actor = GetActorLocation();
+    const FVector WA = FieldToWorld(A.X, A.Y), WB = FieldToWorld(B.X, B.Y);
+    const float Deck = FMath::Max(WA.Z, WB.Z) + 100.0f - Actor.Z;
+    TArray<TArray<FVector>> Pts;
+    TArray<FVector>& Line = Pts.AddDefaulted_GetRef();
+    for (int32 k = 0; k <= 8; ++k)
+    {
+        const FVector W = FMath::Lerp(WA, WB, k / 8.0f) - Actor;
+        Line.Add(FVector(W.X, W.Y, Deck));
+    }
+    UStaticMeshComponent* C = NewObject<UStaticMeshComponent>(this, MakeUniqueObjectName(this, UStaticMeshComponent::StaticClass(), TEXT("Bridge")));
+    C->SetupAttachment(Root);
+    C->SetStaticMesh(Campaign1851Scenery::BuildRibbons(Pts, Bridge.bPontoon ? 260.0f : 380.0f,
+        FLinearColor::FromSRGBColor(Bridge.bPontoon ? FColor(92, 72, 52) : FColor(132, 112, 88)), Material, TEXT("SM_Field_Bridge")));
+    C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    C->SetCastShadow(true);
+    C->bVisibleInRayTracing = false;
+    C->RegisterComponent();
+    Parts.Add(C);
+}
+
+bool AStrategyCampaignBattlefield::LayPontoonBridge(const FVector& Near, float MaxDistanceCm)
+{
+    // The broad river nearest the point; the bridge where it comes closest.
+    const FVector2D P = ToField(Near);
+    double Best = 1e12;
+    FVector2D BestPoint = FVector2D::ZeroVector, BestAcross = FVector2D(1.0, 0.0);
+    int32 BestRiver = INDEX_NONE;
+    for (int32 r = 0; r < Rivers.Num(); ++r)
+    {
+        if (Rivers[r].WidthM < BroadRiverM)
+        {
+            continue;
+        }
+        const TArray<FVector2D>& Pts = Rivers[r].Points;
+        for (int32 s = 0; s + 1 < Pts.Num(); ++s)
+        {
+            const FVector2D A = Pts[s], D = Pts[s + 1] - A;
+            const double T = FMath::Clamp(FVector2D::DotProduct(P - A, D) / FMath::Max(D.SizeSquared(), 1e-6), 0.0, 1.0);
+            const FVector2D Q = A + D * T;
+            const double Dist = FVector2D::Distance(P, Q);
+            if (Dist < Best)
+            {
+                Best = Dist;
+                BestPoint = Q;
+                const FVector2D Dir = D.GetSafeNormal();
+                BestAcross = FVector2D(-Dir.Y, Dir.X);
+                BestRiver = r;
+            }
+        }
+    }
+    if (BestRiver == INDEX_NONE || Best * 100.0 > MaxDistanceCm)
+    {
+        return false;
+    }
+    FBridge Pontoon;
+    Pontoon.Centre = BestPoint;
+    Pontoon.Across = BestAcross;
+    Pontoon.LengthM = Rivers[BestRiver].WidthM + 10.0f;
+    Pontoon.River = BestRiver;
+    Pontoon.bPontoon = true;
+    Bridges.Add(Pontoon);
+    AddBridgeMesh(Pontoon, SceneryMaterial(LoadObject<UMaterialInterface>(nullptr, FieldMaterialPath)));
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FIELD: a pontoon bridge laid over the %.0f m river at (%.0f, %.0f) m"), Rivers[BestRiver].WidthM, BestPoint.X, BestPoint.Y);
+    return true;
+}
+
 float AStrategyCampaignBattlefield::GroundZ(const FVector& World) const
 {
     const FVector L = World - GetActorLocation();
@@ -959,6 +1154,38 @@ bool AStrategyCampaignBattlefield::BuildFromFile(const FString& FileName)
     Ribbons(LinesOf(TEXT("roads")), 8.0, FLinearColor::FromSRGBColor(FColor(176, 156, 118)), 45.0, TEXT("Roads"), WayMaterial);
     Ribbons(LinesOf(TEXT("chaussees")), 10.0, FLinearColor::FromSRGBColor(FColor(190, 178, 150)), 50.0, TEXT("Chaussees"), WayMaterial);
     Ribbons(LinesOf(TEXT("railways")), 5.0, FLinearColor::FromSRGBColor(FColor(52, 46, 42)), 55.0, TEXT("Rails"), SceneryMaterial(Material));
+
+    // ---- the bridges (each on the river it crosses, across it there), drawn as decks
+    Bridges.Reset();
+    {
+        const TArray<TSharedPtr<FJsonValue>>* BridgeArray = nullptr;
+        if (Json->TryGetArrayField(TEXT("bridges"), BridgeArray))
+        {
+            for (const TSharedPtr<FJsonValue>& V : *BridgeArray)
+            {
+                const TSharedPtr<FJsonObject> B = V->AsObject();
+                FString State = TEXT("intact");
+                B->TryGetStringField(TEXT("state"), State);
+                if (State != TEXT("intact"))
+                {
+                    continue;   // a blown bridge is no crossing
+                }
+                FBridge Bridge;
+                Bridge.Centre = FVector2D(B->GetNumberField(TEXT("x")), B->GetNumberField(TEXT("y")));
+                double Distance = 0.0;
+                Bridge.River = NearestRiver(Bridge.Centre, Distance, Bridge.Across);
+                if (Bridge.River == INDEX_NONE || Distance > Rivers[Bridge.River].WidthM * 0.5 + 60.0)
+                {
+                    continue;
+                }
+                double LengthM = 30.0;
+                B->TryGetNumberField(TEXT("lengthM"), LengthM);
+                Bridge.LengthM = float(FMath::Max(LengthM, double(Rivers[Bridge.River].WidthM) + 10.0));
+                Bridges.Add(Bridge);
+                AddBridgeMesh(Bridge, SceneryMaterial(Material));
+            }
+        }
+    }
 
     // ---- instanced pieces: buildings, woods, field boundaries
     if (Material)

@@ -139,6 +139,7 @@ struct FCampaign1851BattleOutcome
 	bool bRetreat = false;
 	bool bFromBattle3D = false;
 	TMap<int32, int32> UnitLosses;   // regiment index -> men lost
+	TMap<int32, int32> UnitKills;    // regiment index -> enemy men it put out of the fight
 	TMap<int32, float> UnitAmmo;     // regiment index -> share of the load used
 	TMap<int32, float> FortLossShare;
 	TArray<int32> CapturedForts;
@@ -381,7 +382,7 @@ namespace Campaign1851Research
 {
 	const TArray<FCampaign1851ResearchTopic>& Topics();
 	int32 FindTopic(const FString& Id);
-	constexpr int32 Branches = 7;
+	constexpr int32 Branches = 8;
 	/** The level in the research tree (0 = I). */
 	int32 Tier(int32 Topic);
 	const TCHAR* Roman(int32 Tier);
@@ -420,6 +421,8 @@ struct FCampaign1851City
 	FString Occupier;
 	/** Ceded at a peace: it has left the monarchy (bForeign is then true). */
 	bool bCeded = false;
+	/** Days Danish troops have held an occupied town free of enemy corps (liberated at 2). */
+	float LiberationDays = 0.f;
 
 	/** Military building plot beside a main road at the edge of town (towns of 2,500+). */
 	bool bHasPlot = false;
@@ -570,6 +573,10 @@ public:
 	static constexpr double RuralTaxPerHead = 0.2;
 	static constexpr double UrbanTaxPerHead = 0.45;
 	static double AmtYearlyTax(const FCampaign1851Amt& Amt) { return Amt.Rural * RuralTaxPerHead + Amt.Urban * UrbanTaxPerHead; }
+	/** The trades researched (the Næringsliv branch): the farms' and the towns' taxes, and the works' output. */
+	double RuralTaxFactor() const;
+	double UrbanTaxFactor() const;
+	float WorksOutputFactor() const;
 	/** Yearly tax income of a region (K, S, H) or of the whole monarchy (empty). */
 	double YearlyTax(const FString& Region = FString()) const;
 	static FString RegionName(const FString& Code);
@@ -954,6 +961,8 @@ public:
 	void PollBattleResults();
 	/** True if an amt's seat is held by the enemy (its taxes are lost). */
 	bool IsAmtOccupied(const FCampaign1851Amt& A) const;
+	/** Danish soldiers needed at an occupied town (within 3 km, two days, no enemy corps within 10 km) to free it. */
+	static constexpr int32 LiberationMen = 300;
 
 	// ---- Peace footing and mobilisation (Campaign1851Mobilisation.cpp).
 
@@ -988,6 +997,23 @@ public:
 	bool DemolishFort(int32 Id, FString* OutReason = nullptr);
 	/** Fortress guns in the state's store (for any fort). */
 	int32 GetGunStock() const { return GunStock; }
+
+	/** A foot battery made a horse battery (every gunner mounted, keeps up with the cavalry): 6 guns instead of 8
+	 *  (two back to the store), 180 men, 230 horses (the extra from the stock) and the money. */
+	static constexpr double HorseBatteryCost = 12000.0;
+	static constexpr int32 HorseBatteryHorses = 230;
+	bool CanUpgradeToHorseBattery(int32 RegimentIndex, FString* OutWhy = nullptr) const;
+	bool UpgradeToHorseBattery(int32 RegimentIndex, FString* OutWhy = nullptr);
+
+	/** Split a unit in two: half its companies (with their captains and men) become a unit of their own where it
+	 *  stands (a half battalion, under no chief until one is appointed). The new unit's index, or INDEX_NONE. */
+	int32 SplitRegiment(int32 RegimentIndex, FString* OutWhy = nullptr);
+
+	/** Attack a seen enemy corps within EngageKm of the given units: the battle is offered at once (these units
+	 *  fight, wherever they stand in that reach). The nearest such corps and its distance, or INDEX_NONE. */
+	static constexpr double EngageKm = 15.0;
+	int32 EngageableCorps(const TArray<int32>& Units, double* OutKm = nullptr) const;
+	bool EngageCorps(int32 CorpsIndex, const TArray<int32>& Units, FString* OutWhy = nullptr);
 	void SetGunStock(int32 N) { GunStock = FMath::Max(0, N); }
 	/** Materials stored in a town (rigsdaler). */
 	double GetMaterialsIn(int32 CityIndex) const { return MaterialsIn(CityIndex); }

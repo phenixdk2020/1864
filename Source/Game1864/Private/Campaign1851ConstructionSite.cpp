@@ -128,25 +128,25 @@ const TArray<FCampaign1851SiteModule>& ACampaign1851ConstructionSite::TownBuildi
 		Add(Module(TEXT("Grain_Warehouse"), TEXT("Kornmagasin"), ESitePiece::Granary, 13.f, 5.4f, 6.4f, 10.4f, TEXT("T_Bld_Grain_Warehouse")),
 			ECampaign1851PlotRule::Edge, 0.18f, 0, false, 0);
 		// Works that fill the state's stores (Campaign1851Materiel::Production).
-		Add(Module(TEXT("Rifle_Workshop"), TEXT("Geværværksted"), ESitePiece::Workshop, 20.f, 9.f, 5.f, 15.f, TEXT("")), ECampaign1851PlotRule::Edge, 0.2f, 4000, false, 0);
-		Add(Module(TEXT("Cannon_Foundry"), TEXT("Kanonstøberi"), ESitePiece::Factory, 27.f, 16.f, 11.f, 22.f, TEXT("")), ECampaign1851PlotRule::Outside, 0.25f, 8000, false, 0);
-		Add(Module(TEXT("Ammunition_Works"), TEXT("Ammunitionsfabrik"), ESitePiece::Workshop, 20.f, 9.f, 5.f, 15.f, TEXT("")), ECampaign1851PlotRule::Outside, 0.2f, 4000, false, 0);
-		Add(Module(TEXT("Stud_Farm"), TEXT("Stutteri"), ESitePiece::Stables, 12.f, 4.4f, 3.2f, 6.4f, TEXT("")), ECampaign1851PlotRule::Outside, 0.25f, 0, false, 0);
-		Add(Module(TEXT("Remount_Depot"), TEXT("Remontedepot"), ESitePiece::Stables, 12.f, 4.4f, 3.2f, 6.4f, TEXT("")), ECampaign1851PlotRule::Outside, 0.25f, 3000, false, 0);
+		Add(Module(TEXT("Rifle_Workshop"), TEXT("Geværværksted"), ESitePiece::Workshop, 20.f, 9.f, 5.f, 15.f, TEXT("T_Bld_Rifle_Workshop")), ECampaign1851PlotRule::Edge, 0.2f, 4000, false, 0);
+		Add(Module(TEXT("Cannon_Foundry"), TEXT("Kanonstøberi"), ESitePiece::Factory, 27.f, 16.f, 11.f, 22.f, TEXT("T_Bld_Cannon_Foundry")), ECampaign1851PlotRule::Outside, 0.25f, 8000, false, 0);
+		Add(Module(TEXT("Ammunition_Works"), TEXT("Ammunitionsfabrik"), ESitePiece::Workshop, 20.f, 9.f, 5.f, 15.f, TEXT("T_Bld_Ammunition_Works")), ECampaign1851PlotRule::Outside, 0.2f, 4000, false, 0);
+		Add(Module(TEXT("Stud_Farm"), TEXT("Stutteri"), ESitePiece::Stables, 12.f, 4.4f, 3.2f, 6.4f, TEXT("T_Bld_Stud_Farm")), ECampaign1851PlotRule::Outside, 0.25f, 0, false, 0);
+		Add(Module(TEXT("Remount_Depot"), TEXT("Remontedepot"), ESitePiece::Stables, 12.f, 4.4f, 3.2f, 6.4f, TEXT("T_Bld_Remount_Depot")), ECampaign1851PlotRule::Outside, 0.25f, 3000, false, 0);
 		// Civil buildings (growth and income: Campaign1851Nations::CivilEffect).
-		Add(Module(TEXT("Schoolhouse"), TEXT("Skole"), ESitePiece::School, 11.f, 7.f, 3.4f, 8.4f, TEXT("")), ECampaign1851PlotRule::InTown, 0.12f, 800, false, 0);
-		Add(Module(TEXT("Town_Hall"), TEXT("Rådhus"), ESitePiece::TownHall, 17.f, 9.f, 7.f, 17.f, TEXT("")), ECampaign1851PlotRule::InTown, 0.15f, 3000, false, 0);
-		Add(Module(TEXT("Post_Office"), TEXT("Posthus"), ESitePiece::PostOffice, 13.f, 5.f, 5.4f, 8.6f, TEXT("")), ECampaign1851PlotRule::InTown, 0.12f, 1500, false, 0);
-		Add(Module(TEXT("Hospital"), TEXT("Sygehus"), ESitePiece::Hospital, 21.f, 13.f, 8.f, 12.f, TEXT("")), ECampaign1851PlotRule::Edge, 0.2f, 6000, false, 0);
-		Add(Module(TEXT("Harbor_Building"), TEXT("Toldbod"), ESitePiece::CustomsHouse, 12.f, 12.f, 6.f, 9.6f, TEXT("")), ECampaign1851PlotRule::Shore, 0.15f, 1500, true, 0);
-		Add(Module(TEXT("Lighthouse"), TEXT("Fyrtårn"), ESitePiece::Lighthouse, 6.f, 12.f, 17.6f, 19.f, TEXT("")), ECampaign1851PlotRule::Shore, 0.3f, 0, true, 0);
-		Add(Module(TEXT("Merchant_House"), TEXT("Købmandsgård"), ESitePiece::MerchantYard, 15.f, 14.f, 5.6f, 9.f, TEXT("")), ECampaign1851PlotRule::InTown, 0.15f, 1500, false, 0);
-		Add(Module(TEXT("Brewery"), TEXT("Bryggeri og brænderi"), ESitePiece::Brewery, 16.f, 9.f, 6.f, 13.f, TEXT("")), ECampaign1851PlotRule::Edge, 0.18f, 2500, false, 0);
-		Add(Module(TEXT("Brickworks"), TEXT("Teglværk"), ESitePiece::Brickworks, 18.f, 14.f, 3.2f, 16.f, TEXT("")), ECampaign1851PlotRule::Outside, 0.2f, 0, false, 0);
-		Add(Module(TEXT("Sawmill"), TEXT("Savværk"), ESitePiece::Sawmill, 13.f, 13.f, 3.6f, 9.f, TEXT("")), ECampaign1851PlotRule::Outside, 0.2f, 0, false, 0);
-		Add(Module(TEXT("Machine_Workshop"), TEXT("Maskinværksted"), ESitePiece::Workshop, 20.f, 9.f, 5.f, 15.f, TEXT("")), ECampaign1851PlotRule::Edge, 0.2f, 8000, false, 0);
-		Add(Module(TEXT("Textile_Mill"), TEXT("Klædefabrik"), ESitePiece::Factory, 27.f, 16.f, 11.f, 22.f, TEXT("")), ECampaign1851PlotRule::Edge, 0.25f, 10000, false, 0);
-		Add(Module(TEXT("Inn"), TEXT("Kro"), ESitePiece::Inn, 18.f, 12.f, 3.6f, 7.4f, TEXT("")), ECampaign1851PlotRule::Edge, 0.2f, 0, false, 0);
+		Add(Module(TEXT("Schoolhouse"), TEXT("Skole"), ESitePiece::School, 11.f, 7.f, 3.4f, 8.4f, TEXT("T_Bld_Schoolhouse")), ECampaign1851PlotRule::InTown, 0.12f, 800, false, 0);
+		Add(Module(TEXT("Town_Hall"), TEXT("Rådhus"), ESitePiece::TownHall, 17.f, 9.f, 7.f, 17.f, TEXT("T_Bld_Town_Hall")), ECampaign1851PlotRule::InTown, 0.15f, 3000, false, 0);
+		Add(Module(TEXT("Post_Office"), TEXT("Posthus"), ESitePiece::PostOffice, 13.f, 5.f, 5.4f, 8.6f, TEXT("T_Bld_Post_Office")), ECampaign1851PlotRule::InTown, 0.12f, 1500, false, 0);
+		Add(Module(TEXT("Hospital"), TEXT("Sygehus"), ESitePiece::Hospital, 21.f, 13.f, 8.f, 12.f, TEXT("T_Bld_Hospital")), ECampaign1851PlotRule::Edge, 0.2f, 6000, false, 0);
+		Add(Module(TEXT("Harbor_Building"), TEXT("Toldbod"), ESitePiece::CustomsHouse, 12.f, 12.f, 6.f, 9.6f, TEXT("T_Bld_Harbor_Building")), ECampaign1851PlotRule::Shore, 0.15f, 1500, true, 0);
+		Add(Module(TEXT("Lighthouse"), TEXT("Fyrtårn"), ESitePiece::Lighthouse, 6.f, 12.f, 17.6f, 19.f, TEXT("T_Bld_Lighthouse")), ECampaign1851PlotRule::Shore, 0.3f, 0, true, 0);
+		Add(Module(TEXT("Merchant_House"), TEXT("Købmandsgård"), ESitePiece::MerchantYard, 15.f, 14.f, 5.6f, 9.f, TEXT("T_Bld_Merchant_House")), ECampaign1851PlotRule::InTown, 0.15f, 1500, false, 0);
+		Add(Module(TEXT("Brewery"), TEXT("Bryggeri og brænderi"), ESitePiece::Brewery, 16.f, 9.f, 6.f, 13.f, TEXT("T_Bld_Brewery")), ECampaign1851PlotRule::Edge, 0.18f, 2500, false, 0);
+		Add(Module(TEXT("Brickworks"), TEXT("Teglværk"), ESitePiece::Brickworks, 18.f, 14.f, 3.2f, 16.f, TEXT("T_Bld_Brickworks")), ECampaign1851PlotRule::Outside, 0.2f, 0, false, 0);
+		Add(Module(TEXT("Sawmill"), TEXT("Savværk"), ESitePiece::Sawmill, 13.f, 13.f, 3.6f, 9.f, TEXT("T_Bld_Sawmill")), ECampaign1851PlotRule::Outside, 0.2f, 0, false, 0);
+		Add(Module(TEXT("Machine_Workshop"), TEXT("Maskinværksted"), ESitePiece::Workshop, 20.f, 9.f, 5.f, 15.f, TEXT("T_Bld_Machine_Workshop")), ECampaign1851PlotRule::Edge, 0.2f, 8000, false, 0);
+		Add(Module(TEXT("Textile_Mill"), TEXT("Klædefabrik"), ESitePiece::Factory, 27.f, 16.f, 11.f, 22.f, TEXT("T_Bld_Textile_Mill")), ECampaign1851PlotRule::Edge, 0.25f, 10000, false, 0);
+		Add(Module(TEXT("Inn"), TEXT("Kro"), ESitePiece::Inn, 18.f, 12.f, 3.6f, 7.4f, TEXT("T_Bld_Inn")), ECampaign1851PlotRule::Edge, 0.2f, 0, false, 0);
 		return L;
 	}();
 	return List;

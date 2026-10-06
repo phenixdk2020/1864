@@ -251,6 +251,24 @@ namespace Campaign1851Army
 		return Cost[FMath::Clamp(int32(Program), 0, int32(ECampaign1851Program::Count) - 1)];
 	}
 
+	int32 OfficerRating(const FCampaign1851Officer& O)
+	{
+		using S = ECampaign1851OfficerStat;
+		const float Weights[int32(S::Count)] = { 1.5f, 1.0f, 1.0f, 1.5f, 1.0f, 0.8f, 0.0f, 1.0f, O.bGeneral ? 0.3f : 0.f, 0.6f };
+		float Sum = 0.f, Weight = 0.f;
+		for (int32 s = 0; s < int32(S::Count); ++s)
+		{
+			Sum += Weights[s] * O.Stats[s];
+			Weight += Weights[s];
+		}
+		// Aggression: neither timid nor reckless.
+		const float Agg = 10.f - 1.6f * FMath::Abs(O.Stat(S::Aggression) - 6.f);
+		Sum += 0.6f * Agg;
+		Weight += 0.6f;
+		const float Mean = Sum / FMath::Max(Weight, 0.01f);   // 1-10
+		return FMath::Clamp(FMath::RoundToInt((Mean - 1.f) / 9.f * 90.f + O.Experience * 0.1f), 0, 100);
+	}
+
 	FBattleFactors BattleFactors(const FCampaign1851Regiment& R)
 	{
 		auto Map = [](float Skill, float Low, float High) { return FMath::Lerp(Low, High, FMath::Clamp(Skill / 100.f, 0.f, 1.f)); };
@@ -2259,6 +2277,7 @@ TArray<FCampaign1851RegimentSave> ACampaign1851Map::SaveArmy() const
 		S.Id = R.Id;
 		S.Men = R.Men;
 		S.bRaised = R.bRaised;
+		S.bDetached = R.bDetached;
 		if (R.bRaised)
 		{
 			S.Name = R.Name;
@@ -2273,6 +2292,10 @@ TArray<FCampaign1851RegimentSave> ACampaign1851Map::SaveArmy() const
 		S.Skills = TArray<float>(R.Skills, int32(ECampaign1851Skill::Count));
 		S.Program = uint8(R.Program);
 		S.FireDrills = TArray<float>(R.FireDrills, 4);
+		for (const FCampaign1851ServiceEntry& E : R.Service)
+		{
+			S.Service.Add(FString::Printf(TEXT("%.2f|%s|%d|%d|%d|%d|%d|%d"), E.Day, *E.Place, E.Result, E.Killed, E.Wounded, E.Captured, E.EnemyKilled, E.bFrom3D ? 1 : 0));
+		}
 		S.Cohesion = R.Cohesion;
 		// Where it is (town, or a point), and where it is going: a march is planned again from here on loading.
 		S.Town = !R.IsMarching() && Cities.IsValidIndex(R.Town) ? Cities[R.Town].Name : FString();
@@ -2299,6 +2322,10 @@ int32 ACampaign1851Map::RestoreArmy(const TArray<FCampaign1851RegimentSave>& Sav
 		if (i == INDEX_NONE && S.bRaised && FindCity(S.Home) != INDEX_NONE)
 		{
 			i = AddRaisedRegiment(S.Id, S.Name, ECampaign1851Arm(S.Arm), FindCity(S.Home), S.MaxMen);
+			if (i != INDEX_NONE)
+			{
+				Regiments[i].bDetached = S.bDetached;
+			}
 		}
 		if (i == INDEX_NONE)
 		{
@@ -2325,6 +2352,30 @@ int32 ACampaign1851Map::RestoreArmy(const TArray<FCampaign1851RegimentSave>& Sav
 		for (int32 d = 0; d < 4 && d < S.FireDrills.Num(); ++d)
 		{
 			R.FireDrills[d] = S.FireDrills[d];
+		}
+		R.Service.Reset();
+		R.TotalKilled = R.TotalWounded = R.TotalCaptured = R.TotalEnemyKilled = 0;
+		for (const FString& Line : S.Service)
+		{
+			TArray<FString> P;
+			Line.ParseIntoArray(P, TEXT("|"), false);
+			if (P.Num() >= 8)
+			{
+				FCampaign1851ServiceEntry E;
+				E.Day = FCString::Atod(*P[0]);
+				E.Place = P[1];
+				E.Result = uint8(FCString::Atoi(*P[2]));
+				E.Killed = FCString::Atoi(*P[3]);
+				E.Wounded = FCString::Atoi(*P[4]);
+				E.Captured = FCString::Atoi(*P[5]);
+				E.EnemyKilled = FCString::Atoi(*P[6]);
+				E.bFrom3D = P[7] == TEXT("1");
+				R.Service.Add(E);
+				R.TotalKilled += E.Killed;
+				R.TotalWounded += E.Wounded;
+				R.TotalCaptured += E.Captured;
+				R.TotalEnemyKilled += E.EnemyKilled;
+			}
 		}
 		// In a town, or out in the field (v8 saves keep the point; older ones knew only towns).
 		R.Town = FindCity(S.Town);

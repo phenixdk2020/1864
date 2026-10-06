@@ -1,6 +1,8 @@
 #include "StrategyMovementExecutorComponent.h"
 
 #include "../Orders/StrategyOrderComponent.h"
+#include "../Campaign/StrategyCampaignBattlefield.h"
+#include "EngineUtils.h"
 #include "../Command/StrategyCommandComponent.h"
 #include "../Units/StrategyUnit.h"
 #include "../Navigation/StrategyRoutePlannerComponent.h"
@@ -410,8 +412,25 @@ void UStrategyMovementExecutorComponent::TickComponent(
                 1.0f);
     }
 
+    // Wading a brook (the campaign's field): slow; on the bridges and dry ground at full pace.
+    float WadingMultiplier = 1.0f;
+    if (!CachedField.IsValid() && !bFieldLookedUp && GetWorld())
+    {
+        bFieldLookedUp = true;
+        for (TActorIterator<AStrategyCampaignBattlefield> It(GetWorld()); It; ++It)
+        {
+            CachedField = *It;
+            break;
+        }
+    }
+    if (const AStrategyCampaignBattlefield* Field = CachedField.Get())
+    {
+        WadingMultiplier = Field->WadingFactor(CurrentLocation);
+    }
+
     const float Step =
         MoveSpeedCmPerSecond *
+        WadingMultiplier *
         ConditionMultiplier *
         SlopeMultiplier *
         StanceMultiplier *

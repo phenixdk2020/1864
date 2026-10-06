@@ -146,10 +146,13 @@ struct FCampaign1851RegimentSave
 	UPROPERTY() float Experience = 0.f;
 	UPROPERTY() TArray<float> Skills;
 	UPROPERTY() TArray<float> FireDrills;
+	/** Service record: day|place|result|killed|wounded|captured|enemy|3d per battle. */
+	UPROPERTY() TArray<FString> Service;
 	UPROPERTY() uint8 Program = 1;
 	UPROPERTY() float Cohesion = 0.f;
 	/** v15: raised during the campaign, with its definition. */
 	UPROPERTY() bool bRaised = false;
+	UPROPERTY() bool bDetached = false;
 	UPROPERTY() FString Name;
 	UPROPERTY() uint8 Arm = 0;
 	UPROPERTY() FString Home;

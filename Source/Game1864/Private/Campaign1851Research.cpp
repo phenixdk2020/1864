@@ -32,6 +32,12 @@ namespace Campaign1851Research
 			{ TEXT("pontoon"),    TEXT("Pontonnerkorpset"),         TEXT("Pontonbroer koster 40 % mindre og lægges på halv tid. I slaget: pionererne kan slå en bro over en å"), 1856, 1500.0, 12, TEXT("railmob"), 2 },
 			// The fire methods (the battle's fire drill): researched here, then trained by each regiment in garrison
 			// (eksercits, skydeøvelser or blandet) to 60 before the companies may use them in battle.
+			// The trades: farms, smithies, works and credit (the land's wealth pays for the army).
+			{ TEXT("marl"),       TEXT("Mergling og dræning"),      TEXT("Landbruget mergler og dræner jorden: skatten fra landet +8 %"), 1852, 1200.0, 12, nullptr, 7 },
+			{ TEXT("agrischool"), TEXT("Landbohøjskolen"),          TEXT("Uddannede forpagtere og bedre sædskifte: skatten fra landet yderligere +7 %"), 1856, 2000.0, 18, TEXT("marl"), 7 },
+			{ TEXT("smithy"),     TEXT("Smede og redskaber"),       TEXT("Bedre smedjer og værktøj i byerne: geværværksteder og støberier yder 15 % mere"), 1853, 800.0, 8, nullptr, 7 },
+			{ TEXT("steam"),      TEXT("Dampmaskiner"),             TEXT("Dampkraft i værkstederne: værkerne yder yderligere 25 %, og skatten fra byerne +5 %"), 1855, 2500.0, 18, TEXT("smithy"), 7 },
+			{ TEXT("credit"),     TEXT("Kreditforeninger"),         TEXT("Kredit til håndværk og handel: skatten fra byerne +5 %"), 1852, 1000.0, 10, nullptr, 7 },
 			{ TEXT("tworank"),    TEXT("To-geleds ild"),            TEXT("De to forreste geledder skyder sammen. Skal derefter indøves i regimenterne (eksercits/skydeøvelser)"), 1852, 500.0, 6, nullptr, 3 },
 			{ TEXT("firebyrank"), TEXT("Geledild"),                 TEXT("Geledderne skyder på skift, så ilden aldrig hører op. Skal indøves i regimenterne"), 1853, 800.0, 8, TEXT("tworank"), 3 },
 			{ TEXT("volley"),     TEXT("Kommanderet salve"),        TEXT("Hele kompagniet på kommando: den tunge salve, der ryster fjenden. Skal indøves i regimenterne"), 1855, 900.0, 8, TEXT("firebyrank"), 3 },
@@ -66,7 +72,7 @@ namespace Campaign1851Research
 
 	const TCHAR* BranchName(int32 Branch)
 	{
-		static const TCHAR* Names[Branches] = { TEXT("Sanitet og forsyning"), TEXT("Befæstning"), TEXT("Samfærdsel"), TEXT("Infanteriet"), TEXT("Artilleriet"), TEXT("Kavaleriet"), TEXT("Kommando") };
+		static const TCHAR* Names[Branches] = { TEXT("Sanitet og forsyning"), TEXT("Befæstning"), TEXT("Samfærdsel"), TEXT("Infanteriet"), TEXT("Artilleriet"), TEXT("Kavaleriet"), TEXT("Kommando"), TEXT("Næringsliv") };
 		return Branch >= 0 && Branch < Branches ? Names[Branch] : TEXT("");
 	}
 
@@ -307,6 +313,21 @@ double ACampaign1851Map::PontoonCost() const
 float ACampaign1851Map::PontoonDays() const
 {
 	return 45.f * (HasResearch(TEXT("pontoon")) ? 0.5f : 1.f);
+}
+
+double ACampaign1851Map::RuralTaxFactor() const
+{
+	return 1.0 + (HasResearch(TEXT("marl")) ? 0.08 : 0.0) + (HasResearch(TEXT("agrischool")) ? 0.07 : 0.0);
+}
+
+double ACampaign1851Map::UrbanTaxFactor() const
+{
+	return 1.0 + (HasResearch(TEXT("steam")) ? 0.05 : 0.0) + (HasResearch(TEXT("credit")) ? 0.05 : 0.0);
+}
+
+float ACampaign1851Map::WorksOutputFactor() const
+{
+	return (HasResearch(TEXT("smithy")) ? 1.15f : 1.f) * (HasResearch(TEXT("steam")) ? 1.25f : 1.f);
 }
 
 float ACampaign1851Map::CommandReachFactor() const

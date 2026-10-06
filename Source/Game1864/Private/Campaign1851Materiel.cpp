@@ -31,7 +31,7 @@ void ACampaign1851Map::ResetMateriel()
 void ACampaign1851Map::MonthlyMateriel()
 {
 	// The arms works make as much as the iron, coal and timber in store allow.
-	const float Share = MonthlyRawMaterials();
+	const float Share = MonthlyRawMaterials() * WorksOutputFactor();   // the smithies and the steam engines
 	Campaign1851Materiel::FMateriel Made;
 	for (const ACampaign1851ConstructionSite* Site : Projects)
 	{

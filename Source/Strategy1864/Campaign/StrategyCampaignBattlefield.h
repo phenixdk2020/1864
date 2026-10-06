@@ -52,6 +52,23 @@ public:
     /** Water at a world point (a river, a lake, the sea), and how wide the river there is (m; 0 when none). */
     bool IsWater(const FVector& World, float* OutWidthM = nullptr) const;
 
+    /** A broad river (this wide or more) needs a bridge; a brook can be waded (design 46). */
+    static constexpr float BroadRiverM = 15.0f;
+
+    /** The way across the broad rivers between two points: the near and far end of each bridge to use (the one
+     *  giving the shortest way), in order. False when a broad river lies across the way with no bridge. */
+    bool RouteAcrossRivers(const FVector& Start, const FVector& End, TArray<FVector>& OutVia) const;
+
+    /** The pace in water: 1 on dry ground and on the bridges, slow wading through a brook. */
+    float WadingFactor(const FVector& World) const;
+
+    /** The pioneers lay a pontoon bridge over the broad river nearest a point (within MaxDistanceCm); false when
+     *  there is none that near. */
+    bool LayPontoonBridge(const FVector& Near, float MaxDistanceCm);
+
+    /** The bridges (world centre and length), for the map and the HUD. */
+    int32 GetBridgeCount() const { return Bridges.Num(); }
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Battlefield")
     FString Place;
 
@@ -78,6 +95,16 @@ private:
     /** The rivers (field metres) with their widths, for the crossings. */
     struct FRiver { TArray<FVector2D> Points; float WidthM = 12.0f; };
     TArray<FRiver> Rivers;
+
+    /** A crossing of a river: the centre and the direction across (field metres), its length, the river. */
+    struct FBridge { FVector2D Centre = FVector2D::ZeroVector; FVector2D Across = FVector2D(1.0, 0.0); float LengthM = 30.0f; int32 River = INDEX_NONE; bool bPontoon = false; };
+    TArray<FBridge> Bridges;
+
+    FVector2D ToField(const FVector& World) const;
+    /** The river nearest a field point: its index, the distance (m) and the direction across it there. */
+    int32 NearestRiver(const FVector2D& P, double& OutDistanceM, FVector2D& OutAcross) const;
+    /** A bridge on the map (a deck over the water at the banks' height). */
+    void AddBridgeMesh(const FBridge& Bridge, UMaterialInterface* Material);
 
     float HeightAtM(double XM, double YM) const;
 

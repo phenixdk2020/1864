@@ -192,6 +192,26 @@ public:
     /** The battle from the campaign: true when it was set up (the field and the units). */
     bool IsCampaignBattle() const { return bCampaignBattle; }
 
+    /** The pioneers (research Pontonnerkorpset): may they lay a pontoon bridge, and order one by a staff (it is
+     *  laid over the broad river nearest the staff, within 600 m, after five minutes). */
+    bool CanLayPontoonBridges() const { return bCampaignBattle && bPioneerBridges; }
+
+    /** The battle's standing (every battle): the men each side began with and has left (fighting units only:
+     *  companies, squadrons, batteries; no staffs or wagons), and how many of its units have broken. */
+    void GetBattleScore(int32& OutDanesStart, int32& OutDanesNow, int32& OutEnemyStart, int32& OutEnemyNow, int32& OutDanesBroken, int32& OutEnemyBroken) const;
+
+    /** The outcome once decided (a side below 35 % of its men, or every unit of it broken): empty while the
+     *  battle goes on. */
+    const FString& GetBattleOutcome() const { return BattleOutcome; }
+    bool IsDanishVictory() const { return bDanishVictory; }
+
+    /** The small test battle (map *Skirmish* or -Strategy1864Skirmish=<1-4>): a Danish battalion staff with two
+     *  companies under the player against one to four enemy companies with their staff and the AI. */
+    bool IsSkirmish() const { return bSkirmish; }
+    bool OrderPontoonBridge(const AStrategyUnit* By);
+    /** Seconds until the next pontoon bridge is laid (0: none being laid). */
+    float GetPontoonSecondsLeft() const;
+
     /** Writes Saved/Battle/BattleResult_<N>.json (losses per campaign unit, enemy losses, outcome) and,
      *  when the battle came from the campaign, goes back to the campaign map. */
     UFUNCTION(BlueprintCallable, Category="Strategy|Campaign")
@@ -210,6 +230,15 @@ private:
     bool bCampaignFinished = false;
     FVector FieldCameraTarget = FVector::ZeroVector;
     float FieldCameraYaw = 0.0f;
+    bool bPioneerBridges = false;
+    bool bSkirmish = false;
+    FString BattleOutcome;
+    bool bDanishVictory = false;
+    float BattleScoreTimer = 0.0f;
+    void BuildSkirmish(int32 EnemyCompanies);
+    void UpdateBattleOutcome();
+    struct FPendingPontoon { FVector Where = FVector::ZeroVector; float ReadyAt = 0.0f; };
+    TArray<FPendingPontoon> PendingPontoons;
     int32 CampaignBattleId = 0;
     /** The units of the battle and the campaign unit each belongs to ("" for the enemy). */
     TMap<TWeakObjectPtr<AStrategyUnit>, FString> CampaignUnitOf;

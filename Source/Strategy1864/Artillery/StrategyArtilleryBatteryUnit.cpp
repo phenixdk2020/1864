@@ -1,4 +1,5 @@
 #include "StrategyArtilleryBatteryUnit.h"
+#include "../Visual/StrategyArtilleryVisualComponent.h"
 
 #include "StrategyArtilleryDeploymentComponent.h"
 #include "StrategyArtilleryAmmunitionComponent.h"
@@ -20,6 +21,10 @@
 AStrategyArtilleryBatteryUnit::AStrategyArtilleryBatteryUnit()
 {
     Echelon = EStrategyEchelon::Artillery;
+
+    ArtilleryVisualComponent =
+        CreateDefaultSubobject<UStrategyArtilleryVisualComponent>(
+            TEXT("ArtilleryVisualComponent"));
 
     DeploymentComponent =
         CreateDefaultSubobject<UStrategyArtilleryDeploymentComponent>(

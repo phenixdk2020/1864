@@ -62,6 +62,10 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Artillery")
     TObjectPtr<UStrategyArtilleryDeploymentComponent> DeploymentComponent;
 
+    /** The guns (or mortars) on the field, the imported models. */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Artillery")
+    TObjectPtr<class UStrategyArtilleryVisualComponent> ArtilleryVisualComponent;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Artillery")
     TObjectPtr<UStrategyArtilleryAmmunitionComponent> ArtilleryAmmunitionComponent;
 

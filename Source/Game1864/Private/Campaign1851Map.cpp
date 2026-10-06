@@ -1937,7 +1937,7 @@ double ACampaign1851Map::YearlyTax(const FString& Region) const
 	double Total = 0.0;
 	for (const FCampaign1851Amt& A : Amter)
 	{
-		Total += (Region.IsEmpty() || A.Region == Region) && !IsAmtOccupied(A) ? AmtYearlyTax(A) : 0.0;
+		Total += (Region.IsEmpty() || A.Region == Region) && !IsAmtOccupied(A) ? A.Rural * RuralTaxPerHead * RuralTaxFactor() + A.Urban * UrbanTaxPerHead * UrbanTaxFactor() : 0.0;
 	}
 	Total *= TaxMoodFactor();   // a discontented country pays reluctantly
 	return Footing == ECampaign1851Footing::Peace ? Total : Total * Campaign1851Mobilisation::WarTaxFactor;

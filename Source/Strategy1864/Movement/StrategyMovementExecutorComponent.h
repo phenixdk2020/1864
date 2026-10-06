@@ -91,6 +91,10 @@ private:
     bool bPreserveRoutedState = false;
     float PauseRemainingSeconds = 0.0f;
 
+    /** The campaign's field (for wading the brooks), looked up once. */
+    TWeakObjectPtr<class AStrategyCampaignBattlefield> CachedField;
+    bool bFieldLookedUp = false;
+
     void UpdateBridgeFormationState(const FVector& CurrentLocation);
     void UpdateBridgeQueueState(const FVector& CurrentLocation);
     void ReleaseBridgeSlot();

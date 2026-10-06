@@ -209,6 +209,19 @@ struct FCampaign1851MarchPlan
 	FString Note;              // why it cannot, or why it marches instead
 };
 
+/** One battle in a unit's service record. */
+struct FCampaign1851ServiceEntry
+{
+	double Day = 0.0;
+	FString Place;
+	uint8 Result = 0;        // 0 defeat, 1 draw, 2 victory, 3 withdrew
+	int32 Killed = 0;        // fallen
+	int32 Wounded = 0;       // to the lazaret
+	int32 Captured = 0;      // taken prisoner
+	int32 EnemyKilled = 0;   // enemy men put out of the fight
+	bool bFrom3D = false;
+};
+
 struct FCampaign1851Regiment
 {
 	FString Id;
@@ -233,6 +246,9 @@ struct FCampaign1851Regiment
 	/** The fire methods it has trained (research first, then garrison drill): to-geleds ild, geledild,
 	 *  kommanderet salve, fri ild; 0-100, usable in battle from 60 (Campaign1851Army::FireDrillNames). */
 	float FireDrills[4] = { 0.f, 0.f, 0.f, 0.f };
+	/** Its battles (service record) and the totals. */
+	TArray<FCampaign1851ServiceEntry> Service;
+	int32 TotalKilled = 0, TotalWounded = 0, TotalCaptured = 0, TotalEnemyKilled = 0;
 	float Skill(ECampaign1851Skill S) const { return Skills[int32(S)]; }
 	/** Mean of the trained skills. */
 	float MeanSkill() const
@@ -253,6 +269,8 @@ struct FCampaign1851Regiment
 	TArray<int32> CompanyFort;
 	/** Raised during the campaign (not part of the army of 1851): saved with its definition, paid from the budget. */
 	bool bRaised = false;
+	/** Split off another unit (half its companies): saved like a raised unit, but costs no extra upkeep. */
+	bool bDetached = false;
 	/** Supply carried (Campaign1851Supply): days of rations for the men, of fodder for the horses, and the
 	 *  share of a full ammunition load (two days of battle). */
 	float Food = 4.f;
@@ -318,6 +336,10 @@ namespace Campaign1851Army
 	float ColumnPace(const TArray<const FCampaign1851Regiment*>& Column, FString* OutWhy = nullptr);
 	/** "Føring", "Inspiration", ... and the short form for tables ("Før"). */
 	const TCHAR* StatName(ECampaign1851OfficerStat Stat);
+	/** An officer's overall rating, 0-100: his qualities weighted by what they do in the field (leadership and
+	 *  tactics most; aggression is a style, best in the middle; political weight only for generals), plus up to
+	 *  10 for experience. */
+	int32 OfficerRating(const FCampaign1851Officer& O);
 	const TCHAR* StatShort(ECampaign1851OfficerStat Stat);
 	/** "Rekrutter", "Øvede", "Erfarne", "Veteraner", "Elite" for 0-100. */
 	const TCHAR* ExperienceName(float Experience);
