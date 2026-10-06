@@ -255,10 +255,37 @@ namespace
 			const FVector3f RoofIn = At(0.f, 0.f, Eave);
 			Tri(At(-HL, -HW, Eave), At(-HL, HW, Eave), At(-HL, 0.f, Ridge), Walls, RoofIn);
 			Tri(At(HL, -HW, Eave), At(HL, HW, Eave), At(HL, 0.f, Ridge), Walls, RoofIn);
-			// Roof slopes, with a little overhang.
+			// Roof slopes, with a little overhang, in courses (tiles, thatch) that alternate in shade, and a ridge cap.
 			const float Drop = (Ridge - Eave) * O / HW;
-			Quad(At(-HL - O, -HW - O, Eave - Drop), At(HL + O, -HW - O, Eave - Drop), At(HL + O, 0.f, Ridge), At(-HL - O, 0.f, Ridge), Roof, RoofIn);
-			Quad(At(-HL - O, HW + O, Eave - Drop), At(HL + O, HW + O, Eave - Drop), At(HL + O, 0.f, Ridge), At(-HL - O, 0.f, Ridge), Roof, RoofIn);
+			const int32 Courses = FMath::Clamp(FMath::RoundToInt(HW * 2.2f), 3, 8);
+			for (float Side : { -1.f, 1.f })
+			{
+				for (int32 c = 0; c < Courses; ++c)
+				{
+					const float T0 = float(c) / Courses, T1 = float(c + 1) / Courses;
+					const float W0 = Side * (HW + O) * (1.f - T0), W1 = Side * (HW + O) * (1.f - T1);
+					const float Z0 = FMath::Lerp(Eave - Drop, Ridge, T0), Z1 = FMath::Lerp(Eave - Drop, Ridge, T1);
+					const FLinearColor Shade = Roof * (c % 2 == 0 ? 1.0f : 0.86f) * (0.94f + 0.12f * T0);
+					Quad(At(-HL - O, W0, Z0), At(HL + O, W0, Z0), At(HL + O, W1, Z1), At(-HL - O, W1, Z1), Shade, RoofIn);
+				}
+			}
+			// The ridge cap and the dark eave line.
+			{
+				const FLinearColor Cap = Roof * 0.7f;
+				Quad(At(-HL - O, -0.12f, Ridge + 0.06f), At(HL + O, -0.12f, Ridge + 0.06f), At(HL + O, 0.12f, Ridge + 0.06f), At(-HL - O, 0.12f, Ridge + 0.06f), Cap, RoofIn);
+				for (float Side : { -1.f, 1.f })
+				{
+					Quad(At(-HL - O, Side * (HW + O), Eave - Drop), At(HL + O, Side * (HW + O), Eave - Drop), At(HL + O, Side * (HW + O - 0.05f), Eave - Drop + 0.22f), At(-HL - O, Side * (HW + O - 0.05f), Eave - Drop + 0.22f), Roof * 0.55f, RoofIn);
+				}
+			}
+			// A dark plinth round the foot of the walls.
+			{
+				const FLinearColor Plinth(0.09f, 0.085f, 0.08f);
+				Quad(At(-HL, -HW - 0.03f, 0.f), At(HL, -HW - 0.03f, 0.f), At(HL, -HW - 0.03f, 0.45f), At(-HL, -HW - 0.03f, 0.45f), Plinth, In);
+				Quad(At(-HL, HW + 0.03f, 0.f), At(HL, HW + 0.03f, 0.f), At(HL, HW + 0.03f, 0.45f), At(-HL, HW + 0.03f, 0.45f), Plinth, In);
+				Quad(At(-HL - 0.03f, -HW, 0.f), At(-HL - 0.03f, HW, 0.f), At(-HL - 0.03f, HW, 0.45f), At(-HL - 0.03f, -HW, 0.45f), Plinth, In);
+				Quad(At(HL + 0.03f, -HW, 0.f), At(HL + 0.03f, HW, 0.f), At(HL + 0.03f, HW, 0.45f), At(HL + 0.03f, -HW, 0.45f), Plinth, In);
+			}
 		}
 
 		/**
@@ -284,7 +311,23 @@ namespace
 					for (float Side : { -1.f, 1.f })
 					{
 						const float Y = Centre.Y + Side * HW;
+						const float Yf = Y - Side * 0.012f;   // the frame lies a hair under the glass
+						const FLinearColor Frame(0.86f, 0.83f, 0.76f);
+						Quad(FVector3f(X - 0.36f, Yf, Z0 - 0.08f), FVector3f(X + 0.36f, Yf, Z0 - 0.08f), FVector3f(X + 0.36f, Yf, Z1 + 0.08f), FVector3f(X - 0.36f, Yf, Z1 + 0.08f), Frame, In);
 						Quad(FVector3f(X - 0.28f, Y, Z0), FVector3f(X + 0.28f, Y, Z0), FVector3f(X + 0.28f, Y, Z1), FVector3f(X - 0.28f, Y, Z1), Window, In);
+						// The mullion and the transom (a window of four panes), and a sill.
+						const float Yg = Y + Side * 0.012f;
+						Quad(FVector3f(X - 0.025f, Yg, Z0), FVector3f(X + 0.025f, Yg, Z0), FVector3f(X + 0.025f, Yg, Z1), FVector3f(X - 0.025f, Yg, Z1), Frame, In);
+						Quad(FVector3f(X - 0.28f, Yg, (Z0 + Z1) * 0.5f - 0.02f), FVector3f(X + 0.28f, Yg, (Z0 + Z1) * 0.5f - 0.02f), FVector3f(X + 0.28f, Yg, (Z0 + Z1) * 0.5f + 0.02f), FVector3f(X - 0.28f, Yg, (Z0 + Z1) * 0.5f + 0.02f), Frame, In);
+						// Shutters beside the ground-floor windows.
+						if (Row == 0 && Storeys <= 2)
+						{
+							const FLinearColor Shutter(0.18f, 0.27f, 0.2f);
+							for (float Left : { -1.f, 1.f })
+							{
+								Quad(FVector3f(X + Left * 0.40f, Yg, Z0 - 0.04f), FVector3f(X + Left * 0.58f, Yg, Z0 - 0.04f), FVector3f(X + Left * 0.58f, Yg, Z1 + 0.04f), FVector3f(X + Left * 0.40f, Yg, Z1 + 0.04f), Shutter, In);
+							}
+						}
 					}
 				}
 			}

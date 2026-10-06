@@ -1194,6 +1194,12 @@ Kun ladte soldater kan blive valgt til næste salve.
 - **Marchstøv:** en marcherende kompagnikolonne rejser støv bag sig, kun nær kameraet.
 - **Advarsel:** `import_battle_graphics.py` genopbygger hele udseendet og gav en anden jordtekstur end den, der ligger i Content. Kør den ikke igen uden at sammenligne. Hvede-importen er skilt ud for netop det.
 
+
+### 2026-10-06 — Slagmarkens huse og marker
+- **Husene** (`Campaign1851Scenery.cpp`, bruges både i slaget og på kampagnekortet): taget i skifter (to nuancer skiftevis), rygkam, mørk tagfod og mørk sokkel. Vinduerne har lyse karme, en sprosse og tværsprosse og, i bygninger op til to etager, grønne skodder.
+- **Markerne** får tone i parceller på omkring 75 m og pletter på 14 m, og en let varm/kold forskydning, så hver mark er lysere eller mørkere end naboen. Hvede og jordklassificering bruger de oprindelige farver.
+- **Etiketten** (`[XX] Felthæren`) drejer nu mod kameraet og står ikke længere spejlvendt.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

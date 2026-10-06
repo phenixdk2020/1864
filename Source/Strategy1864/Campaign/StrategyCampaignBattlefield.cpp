@@ -1086,6 +1086,32 @@ bool AStrategyCampaignBattlefield::BuildFromFile(const FString& FileName)
         }
         GroundColours = Colours;
         ColourN = N;
+        // Parcel by parcel and patch by patch: each field a little lighter or darker (and a touch warmer or cooler)
+        // than its neighbour, as every farmer's field is, and small patches within it (smooth value noise on the lattice).
+        {
+            auto Lattice = [](int32 Ix, int32 Iy, uint32 Salt) { return FieldHash01(HashCombine(GetTypeHash(Ix), GetTypeHash(Iy + int32(Salt))), Salt); };
+            auto Smooth = [&](double X, double Y, double Cell, uint32 Salt)
+            {
+                const double Fx = X / Cell, Fy = Y / Cell;
+                const int32 Ix = FMath::FloorToInt(Fx), Iy = FMath::FloorToInt(Fy);
+                const double Tx = Fx - Ix, Ty = Fy - Iy;
+                const double Sx = Tx * Tx * (3.0 - 2.0 * Tx), Sy = Ty * Ty * (3.0 - 2.0 * Ty);
+                return FMath::Lerp(FMath::Lerp(Lattice(Ix, Iy, Salt), Lattice(Ix + 1, Iy, Salt), Sx), FMath::Lerp(Lattice(Ix, Iy + 1, Salt), Lattice(Ix + 1, Iy + 1, Salt), Sx), Sy);
+            };
+            for (int32 j = 0; j <= N; ++j)
+            {
+                for (int32 i = 0; i <= N; ++i)
+                {
+                    const double X = i * Step, Y = j * Step;
+                    const double Parcel = Smooth(X, Y, 75.0, 11u) - 0.5, Patch = Smooth(X, Y, 14.0, 23u) - 0.5, Warm = Smooth(X, Y, 120.0, 37u) - 0.5;
+                    const float Bright = 1.0f + 0.24f * float(Parcel) + 0.12f * float(Patch);
+                    FColor& C = Colours[j * (N + 1) + i];
+                    C.R = uint8(FMath::Clamp(C.R * Bright * (1.0f + 0.10f * float(Warm)), 0.0f, 255.0f));
+                    C.G = uint8(FMath::Clamp(C.G * Bright, 0.0f, 255.0f));
+                    C.B = uint8(FMath::Clamp(C.B * Bright * (1.0f - 0.10f * float(Warm)), 0.0f, 255.0f));
+                }
+            }
+        }
         Ground->CreateMeshSection(0, Vertices, Triangles, Normals, UVs, Colours, Tangents, false);
         if (GroundMat)
         {

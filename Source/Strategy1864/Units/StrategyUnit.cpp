@@ -418,6 +418,18 @@ void AStrategyUnit::SetSemanticZoomState(EStrategySemanticZoomState NewState)
 
         const bool bHasSoldiers = InfantryVisual && InfantryVisual->GetRenderedSoldierCount() > 0;
         DebugLabel->SetVisibility(bShowLabel && !bHasSoldiers);
+        // Always readable: the text turns to face the camera (it was fixed to the unit's own heading, mirrored from behind).
+        if (bShowLabel && !bHasSoldiers)
+        {
+            if (const APlayerController* PC = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr)
+            {
+                if (PC->PlayerCameraManager)
+                {
+                    const FVector ToCamera = PC->PlayerCameraManager->GetCameraLocation() - DebugLabel->GetComponentLocation();
+                    DebugLabel->SetWorldRotation(FRotator(0.0f, ToCamera.Rotation().Yaw, 0.0f));
+                }
+            }
+        }
     }
 
     if (bChanged)
