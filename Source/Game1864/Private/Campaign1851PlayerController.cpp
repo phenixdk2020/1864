@@ -1191,7 +1191,8 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			{
 				SelectRegiments({ Joined });
 				Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart);
-				Overlay->FocusOOB(Joined);
+				Overlay->FilterOOB({ Joined });
+				Overlay->SetOOBBuilding(INDEX_NONE);
 				Overlay->ShowToast(FString::Printf(TEXT("%s er samlet igen"), *Map->GetRegiments()[Joined].Name));
 				SaveToSlot(TEXT("Autosave"), true);
 			}
@@ -1905,7 +1906,10 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				{
 					// Both halves side by side in the big order of battle, to move companies between.
 					Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart);
-					Overlay->FocusOOB(Module);
+					TArray<int32> Both = Overlay->GetOOBFilter();
+					Both.AddUnique(Module);
+					Both.AddUnique(New);
+					Overlay->FilterOOB(Both);
 				}
 			}
 		}
@@ -2753,6 +2757,70 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 	}
 	const int32 SourceId = SCampaign1851Overlay::TreeId(Source), TargetId = SCampaign1851Overlay::TreeId(Target);
 	const K TargetKind = SCampaign1851Overlay::TreeKind(Target);
+	// A company (squadron) to the middle of the chosen units' window: the first one makes a new unit that stays there; the next
+	// ones are added to it (the unit is built in the middle).
+	if (SCampaign1851Overlay::TreeKind(Source) == K::Company && ((TargetKind == K::NewFormation && TargetId == 99999)
+		|| (TargetKind == K::Regiment && TargetId == Overlay->GetOOBBuilding())))
+	{
+		FString Why;
+		const int32 From = SourceId / 10;
+		const int32 Building = Overlay->GetOOBBuilding();
+		if (Map->GetRegiments().IsValidIndex(Building) && From != Building)
+		{
+			if (Map->MoveCompany(From, SourceId % 10, Building, &Why))
+			{
+				Overlay->ShowToast(FString::Printf(TEXT("Lagt til %s"), *Map->GetRegiments()[Building].Name));
+			}
+			else
+			{
+				Overlay->ShowToast(Why);
+			}
+			return;
+		}
+		if (From == Building)
+		{
+			return;
+		}
+		const int32 New = Map->SplitOffCompany(From, SourceId % 10, &Why);
+		if (New != INDEX_NONE)
+		{
+			TArray<int32> Units = Overlay->GetOOBFilter();
+			Units.AddUnique(From);
+			Units.AddUnique(New);
+			Overlay->FilterOOB(Units);
+			Overlay->SetOOBBuilding(New);
+			Overlay->ShowToast(FString::Printf(TEXT("%s: træk flere kompagnier hen til den"), *Map->GetRegiments()[New].Name));
+		}
+		else
+		{
+			Overlay->ShowToast(Why);
+		}
+		return;
+	}
+	// The last company (squadron) of a half onto the other half of the same unit: the halves are one unit again.
+	if (SCampaign1851Overlay::TreeKind(Source) == K::Company && (TargetKind == K::Regiment || TargetKind == K::Company))
+	{
+		const int32 From = SourceId / 10, To = TargetKind == K::Regiment ? TargetId : TargetId / 10;
+		if (From != To && Map->SubUnitCount(From) <= 1 && Map->IsSplitPair(From, To))
+		{
+			const bool bKeepTo = !(Map->GetRegiments()[To].bDetached && !Map->GetRegiments()[From].bDetached);
+			const int32 Keep = bKeepTo ? To : From, Absorb = bKeepTo ? From : To;
+			FString Why;
+			const int32 Joined = Map->MergeRegiments(Keep, Absorb, &Why);
+			if (Joined != INDEX_NONE)
+			{
+				Overlay->FilterOOB({ Joined });
+				Overlay->SetOOBBuilding(INDEX_NONE);
+				SelectRegiments({ Joined });
+				Overlay->ShowToast(FString::Printf(TEXT("%s er samlet igen"), *Map->GetRegiments()[Joined].Name));
+			}
+			else
+			{
+				Overlay->ShowToast(Why);
+			}
+			return;
+		}
+	}
 	// A company onto another battalion (or one of its companies): it goes over with its captain and men.
 	if (SCampaign1851Overlay::TreeKind(Source) == K::Company && (TargetKind == K::Regiment || TargetKind == K::Company))
 	{

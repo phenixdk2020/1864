@@ -1016,7 +1016,12 @@ public:
 
 	/** Split a unit in two: half its companies (with their captains and men) become a unit of their own where it
 	 *  stands (a half battalion, under no chief until one is appointed). The new unit's index, or INDEX_NONE. */
-	int32 SplitRegiment(int32 RegimentIndex, FString* OutWhy = nullptr);
+	int32 SplitRegiment(int32 RegimentIndex, FString* OutWhy = nullptr, int32 Moved = 0);
+	/** One company (or, for cavalry, one squadron) with its captain and men becomes a unit of its own where the unit stands. */
+	int32 SplitOffCompany(int32 RegimentIndex, int32 Company, FString* OutWhy = nullptr);
+	/** Companies of a battalion, or squadrons of cavalry (140 men each); 0 for the rest. */
+	int32 SubUnitCount(int32 RegimentIndex) const;
+	int32 SubUnitMen(int32 RegimentIndex, int32 Index) const;
 	/** Two halves of one unit (one split off the other, or both off the same). */
 	bool IsSplitPair(int32 A, int32 B) const;
 	/** A half of this unit standing with it (to join again), INDEX_NONE if none. */

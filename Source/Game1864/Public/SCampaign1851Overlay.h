@@ -106,7 +106,7 @@ public:
 	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB, CloseOrder, CloseFortPanel, CloseFort };
 	/** The big windows opened from the menu bar under the calendar (one at a time). */
 	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council, Supply, Foreign, Research, Navy, Gazette, End, Battlefield, Materiel, Nations, ArmyStatus };
-	void OpenWindow(EWindow In) { if (In == EWindow::Chart && Window != EWindow::Chart) { OOBFilter.Reset(); OOBFocus = INDEX_NONE; } Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
+	void OpenWindow(EWindow In) { if (In == EWindow::Chart && Window != EWindow::Chart) { OOBFilter.Reset(); OOBFocus = INDEX_NONE; OOBBuilding = INDEX_NONE; } Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
 	EWindow GetWindow() const { return Window; }
 
 	/** A question before a step that costs or cannot be undone (mobilisation, ...): the title, what it does, and
@@ -133,7 +133,11 @@ public:
 	/** The order of battle for one unit only (its companies; split it there), or the whole army. */
 	/** The units the order-of-battle window shows (from KAMPORDEN on a selection); empty: all of them. */
 	/** Back one step: from the two halves to the filtered list, from that to every unit. */
-	void ClearOOBView() { if (OOBFocus != INDEX_NONE) { const int32 Was = OOBFocus; OOBFocus = INDEX_NONE; if (OOBFilter.Num() > 0 && !OOBFilter.Contains(Was)) { OOBFilter.Add(Was); } } else { OOBFilter.Reset(); } TreeScroll = 0; }
+	void ClearOOBView() { OOBBuilding = INDEX_NONE; if (OOBFocus != INDEX_NONE) { const int32 Was = OOBFocus; OOBFocus = INDEX_NONE; if (OOBFilter.Num() > 0 && !OOBFilter.Contains(Was)) { OOBFilter.Add(Was); } } else { OOBFilter.Reset(); } TreeScroll = 0; }
+	const TArray<int32>& GetOOBFilter() const { return OOBFilter; }
+	/** The new unit being built in the middle of the window (companies dragged there stay there); INDEX_NONE if none. */
+	void SetOOBBuilding(int32 Unit) { OOBBuilding = Unit; }
+	int32 GetOOBBuilding() const { return OOBBuilding; }
 	void FilterOOB(const TArray<int32>& Units) { OOBFilter = Units; OOBFocus = INDEX_NONE; }
 	void FocusOOB(int32 RegimentIndex) { OOBFocus = RegimentIndex; TreeScroll = 0; }
 
@@ -389,6 +393,7 @@ private:
 	bool bUnitCard = false;
 	int32 OOBFocus = INDEX_NONE;
 	TArray<int32> OOBFilter;
+	int32 OOBBuilding = INDEX_NONE;
 	TArray<TSharedPtr<FSlateBrush>> UniformBrushes;   // a soldier per arm (ECampaign1851Arm)
 	TSharedPtr<FSlateBrush> FlagBrush;
 	/** Portraits (types of the time): officers, generals, ministers; one by the person's name. */

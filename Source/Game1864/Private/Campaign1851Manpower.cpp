@@ -173,7 +173,7 @@ int32 ACampaign1851Map::RaiseBattalion(int32 CityIndex, FString* OutReason)
 	return Index;
 }
 
-int32 ACampaign1851Map::SplitRegiment(int32 RegimentIndex, FString* OutWhy)
+int32 ACampaign1851Map::SplitRegiment(int32 RegimentIndex, FString* OutWhy, int32 MovedCount)
 {
 	auto Fail = [OutWhy](const FString& Why) { if (OutWhy) { *OutWhy = Why; } return INDEX_NONE; };
 	if (!Regiments.IsValidIndex(RegimentIndex))
@@ -189,7 +189,7 @@ int32 ACampaign1851Map::SplitRegiment(int32 RegimentIndex, FString* OutWhy)
 	{
 		return Fail(TEXT("For lille til at dele (mindst to kompagnier)"));
 	}
-	const int32 Moved = Old.Captains.Num() / 2;
+	const int32 Moved = MovedCount > 0 ? FMath::Min(MovedCount, Old.Captains.Num() - 1) : Old.Captains.Num() / 2;
 	const int32 Keep = Old.Captains.Num() - Moved;
 	const float Share = float(Moved) / Old.Captains.Num();
 	// A free id: the old one with a letter.
@@ -412,12 +412,35 @@ int32 ACampaign1851Map::MergeRegiments(int32 Keep, int32 Absorb, FString* OutWhy
 bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString* OutWhy)
 {
 	auto Fail = [OutWhy](const FString& Why) { if (OutWhy) { *OutWhy = Why; } return false; };
-	if (!Regiments.IsValidIndex(From) || !Regiments.IsValidIndex(To) || From == To || !Regiments[From].Captains.IsValidIndex(Company))
+	if (!Regiments.IsValidIndex(From) || !Regiments.IsValidIndex(To) || From == To || Company < 0 || Company >= SubUnitCount(From))
 	{
 		return Fail(TEXT("Ingen enhed"));
 	}
 	FCampaign1851Regiment& F = Regiments[From];
 	FCampaign1851Regiment& T = Regiments[To];
+	if (F.Captains.Num() == 0 && T.Captains.Num() == 0 && F.Arm == ECampaign1851Arm::Cavalry && T.Arm == ECampaign1851Arm::Cavalry)
+	{
+		if (!StandTogether(F, T))
+		{
+			return Fail(TEXT("De to enheder skal stå samme sted (ikke på march)"));
+		}
+		if (SubUnitCount(From) <= 1)
+		{
+			return Fail(TEXT("Enheden kan ikke afgive sin sidste eskadron"));
+		}
+		const float Share = 1.f / float(SubUnitCount(From));
+		const int32 Men = FMath::RoundToInt(F.Men * Share), Sick = FMath::RoundToInt(F.Sick * Share), Max = FMath::RoundToInt(F.MaxMen * Share);
+		const int32 SqHorses = FMath::RoundToInt(F.Horses * Share), SqMaxHorses = FMath::RoundToInt(F.MaxHorses * Share);
+		T.Men += Men; F.Men -= Men;
+		T.Sick += Sick; F.Sick -= Sick;
+		T.MaxMen += Max; F.MaxMen -= Max;
+		T.Horses += SqHorses; F.Horses -= SqHorses;
+		T.MaxHorses += SqMaxHorses; F.MaxHorses -= SqMaxHorses;
+		T.Cohesion = FMath::Max(10.f, T.Cohesion - 3.f);
+		UpdateRegimentPiece(From);
+		UpdateRegimentPiece(To);
+		return true;
+	}
 	if (Campaign1851Army::CompaniesFor(T.Arm) == 0 || (F.Arm != T.Arm && !(Campaign1851Army::CompaniesFor(F.Arm) > 0)))
 	{
 		return Fail(TEXT("Kompagniet kan kun gå over til en bataljon"));
@@ -536,6 +559,108 @@ void ACampaign1851Map::RemoveRegimentAt(int32 Index)
 	{
 		if (!S.bFort) { Fix(S.Target); }
 	}
+}
+
+int32 ACampaign1851Map::SubUnitCount(int32 RegimentIndex) const
+{
+	if (!Regiments.IsValidIndex(RegimentIndex))
+	{
+		return 0;
+	}
+	const FCampaign1851Regiment& R = Regiments[RegimentIndex];
+	if (R.Captains.Num() > 0)
+	{
+		return R.Captains.Num();
+	}
+	return R.Arm == ECampaign1851Arm::Cavalry ? FMath::Max(1, FMath::CeilToInt(R.MaxMen / 140.f)) : 0;
+}
+
+int32 ACampaign1851Map::SubUnitMen(int32 RegimentIndex, int32 Index) const
+{
+	if (!Regiments.IsValidIndex(RegimentIndex))
+	{
+		return 0;
+	}
+	const FCampaign1851Regiment& R = Regiments[RegimentIndex];
+	return R.Captains.Num() > 0 ? CompanyMen(RegimentIndex, Index) : FMath::RoundToInt(R.Men / float(FMath::Max(1, SubUnitCount(RegimentIndex))));
+}
+
+int32 ACampaign1851Map::SplitOffCompany(int32 RegimentIndex, int32 Company, FString* OutWhy)
+{
+	auto Fail = [OutWhy](const TCHAR* Why) { if (OutWhy) { *OutWhy = Why; } return INDEX_NONE; };
+	if (!Regiments.IsValidIndex(RegimentIndex) || Company < 0 || Company >= SubUnitCount(RegimentIndex))
+	{
+		return Fail(TEXT("Ingen enhed"));
+	}
+	FCampaign1851Regiment& R = Regiments[RegimentIndex];
+	if (R.IsMarching())
+	{
+		return Fail(TEXT("Enheden skal stå stille for at blive delt"));
+	}
+	if (SubUnitCount(RegimentIndex) < 2)
+	{
+		return Fail(TEXT("Enheden kan ikke afgive sit sidste kompagni"));
+	}
+	if (R.Captains.Num() > 0)
+	{
+		if (R.CompanyFort.IsValidIndex(Company) && R.CompanyFort[Company] != 0)
+		{
+			return Fail(TEXT("Kompagniet ligger i en skanse; kald det hjem først"));
+		}
+		// The chosen company goes last (the split takes the last companies), the others keep their order.
+		const int32 Last = R.Captains.Num() - 1;
+		if (Company != Last)
+		{
+			R.Captains.Swap(Company, Last);
+			if (R.CompanyFort.IsValidIndex(Company) && R.CompanyFort.IsValidIndex(Last)) { R.CompanyFort.Swap(Company, Last); }
+			for (int32 k : { Company, Last })
+			{
+				if (Officers.IsValidIndex(R.Captains[k])) { Officers[R.Captains[k]].Company = k; }
+			}
+		}
+		return SplitRegiment(RegimentIndex, OutWhy, 1);
+	}
+	// Cavalry: one squadron of the regiment.
+	const FCampaign1851Regiment Old = R;
+	const float Share = 1.f / float(SubUnitCount(RegimentIndex));
+	FString Id;
+	for (TCHAR L = TEXT('b'); L <= TEXT('z'); ++L)
+	{
+		Id = Old.Id + FString::Chr(L);
+		if (FindRegiment(Id) == INDEX_NONE) { break; }
+	}
+	const int32 New = AddRaisedRegiment(Id, Old.Name + TEXT(" (2. halvregiment)"), Old.Arm, Old.Home, FMath::RoundToInt(Old.MaxMen * Share));
+	FCampaign1851Regiment& N = Regiments[New];
+	FCampaign1851Regiment& Rm = Regiments[RegimentIndex];
+	N.bDetached = true;
+	N.Men = FMath::RoundToInt(Rm.Men * Share);
+	N.Sick = FMath::RoundToInt(Rm.Sick * Share);
+	N.Horses = FMath::RoundToInt(Rm.Horses * Share);
+	N.MaxHorses = FMath::RoundToInt(Rm.MaxHorses * Share);
+	N.Experience = Rm.Experience;
+	FMemory::Memcpy(N.Skills, Rm.Skills, sizeof(N.Skills));
+	FMemory::Memcpy(N.FireDrills, Rm.FireDrills, sizeof(N.FireDrills));
+	N.Program = Rm.Program;
+	N.Morale = Rm.Morale;
+	N.Cohesion = FMath::Max(10.f, Rm.Cohesion - 10.f);
+	N.Present = Rm.Present;
+	N.Food = Rm.Food;
+	N.Fodder = Rm.Fodder;
+	N.Ammo = Rm.Ammo;
+	N.Formation = Rm.Formation;
+	N.Command = Rm.Command;
+	N.Town = Rm.Town;
+	N.Km = Rm.Km;
+	Rm.Men -= N.Men;
+	Rm.Sick -= N.Sick;
+	Rm.Horses -= N.Horses;
+	Rm.MaxHorses -= N.MaxHorses;
+	Rm.MaxMen -= N.MaxMen;
+	Rm.Cohesion = FMath::Max(10.f, Rm.Cohesion - 10.f);
+	UpdateRegimentPiece(RegimentIndex);
+	UpdateRegimentPiece(New);
+	News.Add(FString::Printf(TEXT("%s er delt: en eskadron danner %s"), *Rm.Name, *N.Name));
+	return New;
 }
 
 int32 ACampaign1851Map::AddRaisedRegiment(const FString& Id, const FString& Name, ECampaign1851Arm Arm, int32 Home, int32 MaxMen)

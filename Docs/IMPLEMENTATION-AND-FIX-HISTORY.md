@@ -1207,6 +1207,15 @@ Kun ladte soldater kan blive valgt til næste salve.
 - Vinduet har en uigennemsigtig bund, så teksten ikke ligger oven på kortets tegning.
 - Feltgrænserne (hække og parceller) i slagmarksgeneratoren er ændret til en drejet og bøjet inddeling (`FParcelGrid`) med forskellige bredder og vinkler, i stedet for et firkantet net. **Ikke afprøvet:** generatoren blev ikke kørt, fordi jeg ikke fik et nyt slagmarkskort bygget. Se næste slag, der genererer et nyt.
 
+
+### 2026-10-06 — Deling i kamporden: den nye enhed bygges i midten
+- KAMPORDEN på valgte enheder viser kun dem. Venstre side hedder I GARNISON, når enhederne står hjemme, ellers DEN VALGTE ENHED (foldet ud med kompagnier, eller eskadroner for rytteriet).
+- Midten er tom med en dropzone. Det første kompagni (eskadron), man trækker derover, bliver en ny enhed (`SplitOffCompany`) og bliver stående i midten. Hvert næste kompagni, man trækker over, lægges til den (`MoveCompany`), så enheden bygges.
+- Rytteriregimenter deles i eskadroner på 140 mand (`SubUnitCount`, `SubUnitMen`), og eskadroner kan flyttes mellem halvdelene.
+- Det sidste kompagni (eskadron) trukket hen på den anden halvdel samler dem (`MergeRegiments`). SAML IGEN gør det samme.
+- Uniformkortene bruger nu `pose_Front`-billederne (stående, ikke A-pose) fra `Reference/Units/MultiView` (`make_uniform_cards.py`).
+- **Ikke afprøvet:** selve trækningen i spillet (testen kan ikke trække med musen); layoutet og de to varianter af overskriften er kontrolleret på skærmbillede.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
