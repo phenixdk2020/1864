@@ -916,6 +916,10 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 					else if (Key == TEXT("minister")) { Overlay->SetMinisterInfo(FCString::Atoi(*Value)); }
 					else if (Key == TEXT("officer")) { Overlay->InspectOfficer(FCString::Atoi(*Value)); }
 					else if (Key == TEXT("select")) { Overlay->SetSelectedRegiments({ FCString::Atoi(*Value) }); }
+					else if (Key == TEXT("focus")) { Overlay->FocusOOB(FCString::Atoi(*Value)); Overlay->OpenWindow(W::Chart); }
+					else if (Key == TEXT("kamporden")) { Overlay->OpenWindow(W::Chart); Overlay->FilterOOB(Overlay->GetSelectedRegiments()); }
+					else if (Key == TEXT("selectmany")) { TArray<FString> Parts; Value.ParseIntoArray(Parts, TEXT("+")); TArray<int32> Sel; for (const FString& P : Parts) { Sel.Add(FCString::Atoi(*P)); } Overlay->SetSelectedRegiments(Sel); }
+					else if (Key == TEXT("split")) { Map->SplitRegiment(FCString::Atoi(*Value)); }
 					else if (Key == TEXT("unitcard")) { Overlay->ToggleUnitCard(); }
 					else if (Key == TEXT("oob")) { Overlay->ToggleOOB(); }
 					else if (Key == TEXT("city")) { Overlay->SetSelectedCity(Map->FindCity(Value)); }
@@ -1186,6 +1190,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			if (Joined != INDEX_NONE)
 			{
 				SelectRegiments({ Joined });
+				Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart);
 				Overlay->FocusOOB(Joined);
 				Overlay->ShowToast(FString::Printf(TEXT("%s er samlet igen"), *Map->GetRegiments()[Joined].Name));
 				SaveToSlot(TEXT("Autosave"), true);
@@ -1864,9 +1869,9 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 		else if (Button == SCampaign1851Overlay::EButton::OpenOOB)
 		{
-			// From a unit's panel: the order of battle for that unit only.
-			Overlay->FocusOOB(Overlay->GetSelectedRegiments().Num() == 1 ? Overlay->GetSelectedRegiments()[0] : INDEX_NONE);
-			Overlay->ToggleOOB();
+			// The big order-of-battle window with only the selected units (splitting is done in there).
+			Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart);
+			Overlay->FilterOOB(Overlay->GetSelectedRegiments());
 		}
 		else if (Button == SCampaign1851Overlay::EButton::Engage)
 		{
@@ -1882,13 +1887,13 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 		else if (Button == SCampaign1851Overlay::EButton::OOBFocusClear)
 		{
-			Overlay->FocusOOB(INDEX_NONE);
+			Overlay->ClearOOBView();
 		}
 		else if (Button == SCampaign1851Overlay::EButton::SplitUnit)
 		{
 			if (!bConfirmed)
 			{
-				Overlay->AskConfirm(TEXT("Del enheden i to?"), TEXT("Halvdelen af kompagnierne med deres kaptajner, mænd, heste og kanoner bliver en halvbataljon for sig, der hvor enheden står. Begge dele mister lidt samhørighed, og den nye enhed skal have en chef. Delingen kan ikke gøres om endnu."),
+				Overlay->AskConfirm(TEXT("Del enheden i to?"), TEXT("Halvdelen af kompagnierne med deres kaptajner, mænd, heste og kanoner bliver en halvbataljon for sig, der hvor enheden står. Begge dele mister lidt samhørighed, og den nye enhed skal have en chef. Delingen kan gøres om igen: SAML IGEN i kamporden."),
 					Button, Module);
 			}
 			else
@@ -1898,7 +1903,9 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Overlay->ShowToast(New != INDEX_NONE ? FString::Printf(TEXT("Enheden er delt: %s"), *Map->GetRegiments()[New].Name) : Why);
 				if (New != INDEX_NONE)
 				{
-					Overlay->FocusOOB(INDEX_NONE);
+					// Both halves side by side in the big order of battle, to move companies between.
+					Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart);
+					Overlay->FocusOOB(Module);
 				}
 			}
 		}

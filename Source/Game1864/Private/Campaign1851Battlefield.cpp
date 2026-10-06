@@ -49,6 +49,59 @@ namespace
 		return 0.55f * BfNoise(Seed, X, Y, Lattice) + 0.3f * BfNoise(Seed + 1, X, Y, Lattice / 2.3) + 0.15f * BfNoise(Seed + 2, X, Y, Lattice / 5.1);
 	}
 
+	/**
+	 * The field parcels of a battlefield: not a square grid, but a rotated one (each place its own angle), its
+	 * lines bent by smooth noise, the columns and rows of different widths. The ground picture and the field
+	 * boundaries (hedges) both use it, so a hedge always lies along the edge of a parcel.
+	 */
+	struct FParcelGrid
+	{
+		uint32 Seed = 0;
+		float SizeM = 8000.f;
+		float Cos = 1.f, Sin = 0.f;
+		static constexpr float PW = 150.f, PH = 115.f;
+
+		FParcelGrid(uint32 InSeed, float InSizeM) : Seed(InSeed), SizeM(InSizeM)
+		{
+			const float Angle = FMath::DegreesToRadians(-24.f + 48.f * BfHash(InSeed + 901u, 3u));
+			Cos = FMath::Cos(Angle);
+			Sin = FMath::Sin(Angle);
+		}
+		FVector2D Displace(float X, float Y) const
+		{
+			return FVector2D((BfFractal(Seed + 911u, X, Y, 320.0) - 0.5f) * 90.f, (BfFractal(Seed + 913u, X, Y, 320.0) - 0.5f) * 90.f);
+		}
+		/** World -> frame (u across the columns, v along the rows). */
+		FVector2D Frame(float X, float Y) const
+		{
+			const float Cx = X - SizeM * 0.5f, Cy = Y - SizeM * 0.5f;
+			const FVector2D D = Displace(X, Y);
+			return FVector2D(Cx * Cos + Cy * Sin + D.X, -Cx * Sin + Cy * Cos + D.Y);
+		}
+		/** Frame -> world (the displacement undone by a few passes). */
+		FVector2D World(float U, float V) const
+		{
+			FVector2D P(SizeM * 0.5f + U * Cos - V * Sin, SizeM * 0.5f + U * Sin + V * Cos);
+			for (int32 Pass = 0; Pass < 4; ++Pass)
+			{
+				const FVector2D D = Displace(P.X, P.Y);
+				const float Ru = U - D.X, Rv = V - D.Y;
+				P = FVector2D(SizeM * 0.5f + Ru * Cos - Rv * Sin, SizeM * 0.5f + Ru * Sin + Rv * Cos);
+			}
+			return P;
+		}
+		/** The frame position of the i-th column's left side and the j-th row's lower side (widths vary by up to a third). */
+		float ColumnU(int32 I) const { return I * PW + (BfHash(Seed + 921u, uint32(I + 5000)) - 0.5f) * PW * 0.6f; }
+		float RowV(int32 J) const { return J * PH + (BfHash(Seed + 923u, uint32(J + 5000)) - 0.5f) * PH * 0.6f; }
+		int32 ColumnOf(float U) const { int32 I = FMath::FloorToInt(U / PW); return U < ColumnU(I) ? I - 1 : (U >= ColumnU(I + 1) ? I + 1 : I); }
+		int32 RowOf(float V) const { int32 J = FMath::FloorToInt(V / PH); return V < RowV(J) ? J - 1 : (V >= RowV(J + 1) ? J + 1 : J); }
+		uint32 ParcelId(float X, float Y) const
+		{
+			const FVector2D F = Frame(X, Y);
+			return uint32(ColumnOf(F.X) + 4000) * 92821u ^ uint32(RowOf(F.Y) + 4000) * 68917u;
+		}
+	};
+
 	FColor BfMix(const FColor& A, const FColor& B, float T)
 	{
 		return FColor(uint8(FMath::Lerp(float(A.R), float(B.R), T)), uint8(FMath::Lerp(float(A.G), float(B.G), T)), uint8(FMath::Lerp(float(A.B), float(B.B), T)), 255);
@@ -531,41 +584,38 @@ bool ACampaign1851Map::GenerateBattlefield(FVector2D CentreKm, float InSizeKm, F
 		};
 		const EHedgeKind Region = HedgeKindAt(CentreKm);
 		const float Share = Region == EHedgeKind::Knick ? 0.7f : Region == EHedgeKind::Ditch ? 0.6f : 0.45f;
-		constexpr float PW = 140.f, PH = 110.f;   // the parcels of RenderBattlefield
-		auto RowY = [](float X, int32 Row) { return Row * 110.f - 37.f * FMath::Sin(X / 400.f); };
-		// Vertical sides at x = 140 i, horizontal ones along the gently bent rows; segments of half a parcel.
-		for (int32 i = 1; i * PW < SizeM && B.Hedges.Num() < 20000; ++i)
+		const FParcelGrid Grid(PlaceSeed, SizeM);
+		const float Reach = SizeM * 0.75f;
+		const float Step = FParcelGrid::PH * 0.4f;
+		auto Inside = [&](const FVector2D& P) { return P.X > 0.f && P.Y > 0.f && P.X < SizeM && P.Y < SizeM; };
+		// The sides of the parcels in the bent, rotated frame: columns (along v) and rows (along u), in short segments
+		// that follow the bend; each segment kept or left open (gates, gaps) by the region's share.
+		for (int32 Axis = 0; Axis < 2; ++Axis)
 		{
-			const float X = i * PW;
-			TArray<FVector2D> Run;
-			for (float Y = 0.f; Y <= SizeM; Y += PH * 0.5f)
+			const float Pitch = Axis == 0 ? FParcelGrid::PW : FParcelGrid::PH;
+			for (int32 i = -int32(Reach / Pitch); i <= int32(Reach / Pitch) && B.Hedges.Num() < 20000; ++i)
 			{
-				const FVector2D M(X, Y + PH * 0.25f);
-				const bool bKeep = Open(M + FVector2D(-20.f, 0.f)) && Open(M + FVector2D(20.f, 0.f)) && !NearWay(M) && BfHash(PlaceSeed + 41u, uint32(i * 7919 + int32(Y))) < Share;
-				if (bKeep) { if (Run.Num() == 0) { Run.Add(FVector2D(X, Y)); } Run.Add(FVector2D(X, Y + PH * 0.5f)); }
-				else if (Run.Num() > 1) { B.Hedges.Add({ Region, Run }); Run.Reset(); }
-				else { Run.Reset(); }
-			}
-			if (Run.Num() > 1) { B.Hedges.Add({ Region, Run }); }
-		}
-		for (int32 Row = 0; RowY(0.f, Row) < SizeM + 60.f && B.Hedges.Num() < 20000; ++Row)
-		{
-			TArray<FVector2D> Run;
-			for (float X = 0.f; X <= SizeM; X += PW * 0.5f)
-			{
-				const FVector2D M(X + PW * 0.25f, RowY(X + PW * 0.25f, Row));
-				const bool bKeep = M.Y > 0.f && M.Y < SizeM && Open(M + FVector2D(0.f, -20.f)) && Open(M + FVector2D(0.f, 20.f)) && !NearWay(M)
-					&& BfHash(PlaceSeed + 43u, uint32(Row * 7919 + int32(X))) < Share;
-				if (bKeep)
+				const float Line = Axis == 0 ? Grid.ColumnU(i) : Grid.RowV(i);
+				TArray<FVector2D> Run;
+				for (float T = -Reach; T <= Reach; T += Step)
 				{
-					if (Run.Num() == 0) { Run.Add(FVector2D(X, RowY(X, Row))); }
-					Run.Add(FVector2D(X + PW * 0.25f, M.Y));
-					Run.Add(FVector2D(X + PW * 0.5f, RowY(X + PW * 0.5f, Row)));
+					const FVector2D A = Axis == 0 ? Grid.World(Line, T) : Grid.World(T, Line);
+					const FVector2D C = Axis == 0 ? Grid.World(Line, T + Step) : Grid.World(T + Step, Line);
+					const FVector2D M = (A + C) * 0.5f;
+					const FVector2D Side = (C - A).GetSafeNormal();
+					const FVector2D Across(-Side.Y, Side.X);
+					const bool bKeep = Inside(A) && Inside(C) && Open(M + Across * 20.f) && Open(M - Across * 20.f) && !NearWay(M)
+						&& BfHash(PlaceSeed + 41u + uint32(Axis) * 2u, uint32((i + 4000) * 7919 + int32(T / Step) + 4000)) < Share;
+					if (bKeep)
+					{
+						if (Run.Num() == 0) { Run.Add(A); }
+						Run.Add(C);
+					}
+					else if (Run.Num() > 1) { B.Hedges.Add({ Region, Run }); Run.Reset(); }
+					else { Run.Reset(); }
 				}
-				else if (Run.Num() > 1) { B.Hedges.Add({ Region, Run }); Run.Reset(); }
-				else { Run.Reset(); }
+				if (Run.Num() > 1) { B.Hedges.Add({ Region, Run }); }
 			}
-			if (Run.Num() > 1) { B.Hedges.Add({ Region, Run }); }
 		}
 	}
 	// ---- crossings: a lane or road over a river gets a small bridge (unless the campaign map has one there),
@@ -638,6 +688,7 @@ void ACampaign1851Map::RenderBattlefield()
 		auto H = [&](int32 x, int32 y) { return B.HeightM[FMath::Min(y, BfGrid - 1) * BfGrid + FMath::Min(x, BfGrid - 1)]; };
 		return FMath::Lerp(FMath::Lerp(H(I, J), H(I + 1, J), Ax), FMath::Lerp(H(I, J + 1), H(I + 1, J + 1), Ax), Ay);
 	};
+	const FParcelGrid ParcelGrid(PlaceSeed, SizeM);
 	const bool bWinter = B.bSnow;
 	const FColor FieldColours[] = { FColor(196, 178, 112), FColor(142, 162, 92), FColor(172, 150, 108), FColor(122, 152, 82), FColor(184, 170, 96) };
 	for (int32 py = 0; py < BfImage; ++py)
@@ -661,7 +712,7 @@ void ACampaign1851Map::RenderBattlefield()
 			else
 			{
 				// Fields in parcels (hedged plots of the enclosures), woods, meadows, the town.
-				const uint32 Parcel = uint32(FMath::FloorToInt(X / 140.f)) * 92821u ^ uint32(FMath::FloorToInt((Y + 37.f * FMath::Sin(X / 400.f)) / 110.f)) * 68917u;
+				const uint32 Parcel = ParcelGrid.ParcelId(X, Y);
 				C = FieldColours[int32(BfHash(PlaceSeed, Parcel) * 4.99f)];
 				if (K == EBattlefieldCell::Meadow) { C = FColor(118, 146, 104); }
 				if (K == EBattlefieldCell::Wood) { C = BfMix(FColor(46, 76, 42), FColor(64, 96, 52), BfFractal(PlaceSeed + 5u, X, Y, 40.0)); }

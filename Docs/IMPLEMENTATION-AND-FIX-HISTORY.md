@@ -1200,6 +1200,13 @@ Kun ladte soldater kan blive valgt til næste salve.
 - **Markerne** får tone i parceller på omkring 75 m og pletter på 14 m, og en let varm/kold forskydning, så hver mark er lysere eller mørkere end naboen. Hvede og jordklassificering bruger de oprindelige farver.
 - **Etiketten** (`[XX] Felthæren`) drejer nu mod kameraet og står ikke længere spejlvendt.
 
+
+### 2026-10-06 — Kamporden fra en enhed
+- KAMPORDEN på de valgte enheder åbner det store kamporden-vindue og viser kun de valgte enheder (`FilterOOB`). HELE HÆREN viser alle igen.
+- DEL I TO og SAML IGEN ligger inde i vinduet (ved én valgt enhed). Efter delingen vises begge halvdele som store bokse med deres kompagnier, som trækkes mellem dem. Tilbage fører til listen.
+- Vinduet har en uigennemsigtig bund, så teksten ikke ligger oven på kortets tegning.
+- Feltgrænserne (hække og parceller) i slagmarksgeneratoren er ændret til en drejet og bøjet inddeling (`FParcelGrid`) med forskellige bredder og vinkler, i stedet for et firkantet net. **Ikke afprøvet:** generatoren blev ikke kørt, fordi jeg ikke fik et nyt slagmarkskort bygget. Se næste slag, der genererer et nyt.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
