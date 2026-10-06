@@ -1168,6 +1168,23 @@ Kun ladte soldater kan blive valgt til næste salve.
 - `-Strategy1864SkirmishAttack`: majoren beordrer angreb ved start.
 - **Rettelse:** skudkeglens stiplede linjer kunne blive til millioner af streger, når et punkt lå lige foran kameraet. Spillet løb tør for hukommelse. Sådanne linjestykker springes nu over.
 
+
+### 2026-10-06 — Skærmbilledrettelser i kampagnen, civile bygningers indtægt, billedliste
+- **Enhedskortet** er en uigennemsigtig boks i forreste lag, der tager klikkene, og står uden for kampordenen. Chefens portræt er i en ramme.
+- **Officerskortet** har et stort portræt i en ramme (`PaintPortraitBox`), samlet vurdering stort og evnerne i fuld bredde.
+- **Ministre:** klik på ministerens billede eller navn i Statsrådet. Kortet viser portræt, ressort, tiltrædelse, strømning, evner, arbejdsform, budget og de seneste beslutninger.
+- **Hærens status:** knappen står nu øverst i Statsrådets højre kolonne (den lå over Transport-rækken).
+- **Statskassen:** ministeriernes budgetter og kassebeholdningen står i højre kolonne over regnskabet, så intet løber ud af kassen.
+- **Bygningslisten:** kommer aldrig op under menulinjen. Den står ved siden af kampordenen, hvis den er åben. Bygningens kort er uigennemsigtigt og i forreste lag.
+- **Valgpanelet** lægger sig under statskassen og ikke over den.
+- **Civile bygninger giver indtægt** (`FCampaign1851CivilEffect`: `Jobs`, `TradeRd`, `IncomeRd`).
+  - Arbejdspladser: arbejderne betaler 6 rd. om året pr. plads i skat.
+  - Told og eksport: havn, handel og industri.
+  - Afgifter og gebyrer: rådhus, post med mere.
+  - Budgettet og regnskabet viser tre linjer (told og eksport, skat af arbejdspladser, afgifter). Byggelistens linjer viser jobs og årligt udbytte, og kortet viser hele opgørelsen.
+- **Billeder:** `Docs/BILLEDER-TIL-SPILLET.md` har lister med filnavne, størrelser og regler for alle billeder (forfra, ens stil). `Tools/Campaign/Import-Billeder.bat` importerer dem. Portrætterne vælger det næste billede, der findes, hvis puljen er under tolv.
+- **Test:** `-CampaignUiShots=sek:cmd;cmd,...` åbner vinduer og kort og gemmer skærmbilleder (`-CampaignUiShotsQuit` lukker bagefter).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

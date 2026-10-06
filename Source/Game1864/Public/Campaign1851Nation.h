@@ -132,8 +132,13 @@ struct FCampaign1851CivilEffect
 {
 	float UrbanGrowth = 0.f;   // percentage points a year for the town
 	float RuralGrowth = 0.f;   // for the amt's countryside
-	int32 IncomeRd = 0;        // trade tax, customs, postage a year to the state
+	int32 IncomeRd = 0;        // fees, excise and postage a year to the state
 	bool bPrivate = false;     // private investors may raise it on their own
+	int32 Jobs = 0;            // workplaces it gives (their workers pay income and poll tax)
+	int32 TradeRd = 0;         // customs and export duties it brings in a year
+	/** Everything it brings the state in a year (fees, the tax of its workers, trade). */
+	int32 TotalRd() const { return IncomeRd + Jobs * JobTaxRd + TradeRd; }
+	static constexpr int32 JobTaxRd = 6;   // a year, per workplace
 };
 
 namespace Campaign1851Nations

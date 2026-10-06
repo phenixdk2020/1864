@@ -47,7 +47,7 @@ public:
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve, FormationDeputy, FormationStaff,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
-		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit };
+		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit, Block, MinisterInfo };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -261,12 +261,21 @@ private:
 public:
 	/** The candidates for a minister's post shown in the council (-1 none). */
 	void SetMinisterPick(int32 Portfolio) { MinisterPick = Portfolio; }
+	/** A minister's card (his portrait and record) in the council's right column; -1 none. */
+	void SetMinisterInfo(int32 Portfolio) { MinisterInfo = MinisterInfo == Portfolio ? -1 : Portfolio; MinisterPick = -1; }
+	int32 GetMinisterInfo() const { return MinisterInfo; }
 	/** The bridge shown in its panel (id, 0 = none). */
 	void SelectBridge(int32 Id) { SelectedBridge = Id; if (Id != 0) { SelectedCity = INDEX_NONE; SelectedRegiments.Reset(); SelectedFort = 0; } }
 	int32 GetSelectedBridge() const { return SelectedBridge; }
 	int32 GetMinisterPick() const { return MinisterPick; }
 private:
 	int32 MinisterPick = -1;
+	int32 MinisterInfo = -1;
+	mutable FVector2D UnitCardAnchor = FVector2D(-1.f, -1.f);
+	mutable FVector2D BuildingCardAnchor = FVector2D(-1.f, -1.f);   // set by the building list: where the building's card goes   // set by the selection panel: where the unit card goes
+	void PaintMinisterCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, int32 Portfolio) const;
+	/** A portrait in a frame of its own (dark mount, gold double frame). */
+	void PaintPortraitBox(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind) const;
 	int32 SelectedBridge = 0;
 public:
 	/** The research topic shown in its box (-1 none). */

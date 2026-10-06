@@ -1752,9 +1752,12 @@ TArray<FCampaign1851BudgetLine> ACampaign1851Map::MonthlyBudget() const
 	Lines.Add({ TEXT("Vedligehold af chausséer og jernbaner"), -RoadUpkeep });
 	Lines.Add({ TEXT("Officerslønninger"), -OfficerPayPerMonth() });
 	Lines.Add({ TEXT("Hærens øvelser"), -Training });
-	if (CivilIncomePerYear() > 0.5)
+	// The civil buildings' yield, in three lines (fees, the workers' tax, customs and export).
 	{
-		Lines.Insert({ TEXT("Erhverv, told og post"), CivilIncomePerYear() / 12.0 }, 3);
+		int32 At = 3;
+		if (CivilTradePerYear() > 0.5) { Lines.Insert({ TEXT("Told og eksport (havne, handel, industri)"), CivilTradePerYear() / 12.0 }, At++); }
+		if (CivilJobTaxPerYear() > 0.5) { Lines.Insert({ FString::Printf(TEXT("Skat af %d arbejdspladser"), CivilJobs()), CivilJobTaxPerYear() / 12.0 }, At++); }
+		if (CivilFeesPerYear() > 0.5) { Lines.Insert({ TEXT("Afgifter, post og gebyrer"), CivilFeesPerYear() / 12.0 }, At++); }
 	}
 	if (RaisedUpkeepPerMonth() > 0.5)
 	{
@@ -1860,10 +1863,9 @@ void ACampaign1851Map::CloseMonth()
 	{
 		AddTransaction(YearlyTax(Region) / 12.0, FString::Printf(TEXT("Skatter: %s"), *RegionName(Region)));
 	}
-	if (CivilIncomePerYear() > 0.5)
-	{
-		AddTransaction(CivilIncomePerYear() / 12.0, TEXT("Erhverv, told og post"));
-	}
+	if (CivilTradePerYear() > 0.5) { AddTransaction(CivilTradePerYear() / 12.0, TEXT("Told og eksport")); }
+	if (CivilJobTaxPerYear() > 0.5) { AddTransaction(CivilJobTaxPerYear() / 12.0, TEXT("Skat af arbejdspladser")); }
+	if (CivilFeesPerYear() > 0.5) { AddTransaction(CivilFeesPerYear() / 12.0, TEXT("Afgifter, post og gebyrer")); }
 	// The world moves on: towns grow, investors build, the ministries (and the other nations) decide.
 	GrowMonth();
 	MonthlyMateriel();

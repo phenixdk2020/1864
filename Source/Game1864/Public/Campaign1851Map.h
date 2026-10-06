@@ -1103,6 +1103,11 @@ public:
 	float RuralGrowthRate(int32 AmtIndex) const;
 	/** Yearly income from finished civil buildings (trade tax, customs, postage). */
 	double CivilIncomePerYear() const;
+	/** The civil buildings' yield to the state a year: fees and excise, the tax of their workers, customs and export duties. */
+	double CivilFeesPerYear() const;
+	double CivilJobTaxPerYear() const;
+	double CivilTradePerYear() const;
+	int32 CivilJobs() const;
 	FCampaign1851NationFigures NationFigures(int32 NationIndex) const;
 	void SaveWorld(UCampaign1851SaveGame* Save) const;
 	/** The civil buildings the towns already have in 1851 (town halls, schools, merchants, breweries, the industry of the big towns). */

@@ -13,6 +13,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "HAL/FileManager.h"
 #include "Misc/Paths.h"
+#include "UnrealClient.h"
 
 ACampaign1851PlayerController::ACampaign1851PlayerController()
 {
@@ -873,6 +874,73 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	{
 		return;
 	}
+	// -CampaignUiShots=sec:cmd;cmd,sec:cmd,...: opens the windows and cards by itself and saves a screenshot of each step
+	// (QA of the screens). cmd: window=army|officers|budget|towns|council|foreign|..., minister=N, officer=N, select=N (unit),
+	// unitcard, oob, city=Name, tab=N, civil=0/1, info=N (building type), clear.
+	if (Overlay.IsValid())
+	{
+		static TArray<FString> Steps;
+		static int32 NextStep = 0;
+		static float StepAt = -1.f;
+		static bool bParsed = false;
+		if (!bParsed)
+		{
+			bParsed = true;
+			FString Plan;
+			if (FParse::Value(FCommandLine::Get(), TEXT("CampaignUiShots="), Plan, false))
+			{
+				Plan.ParseIntoArray(Steps, TEXT(","));
+			}
+		}
+		const float Real = GetWorld()->GetRealTimeSeconds();
+		if (NextStep < Steps.Num())
+		{
+			FString Time, Cmds;
+			Steps[NextStep].Split(TEXT(":"), &Time, &Cmds);
+			if (StepAt < 0.f && Real >= FCString::Atof(*Time))
+			{
+				using W = SCampaign1851Overlay::EWindow;
+				TArray<FString> List;
+				Cmds.ParseIntoArray(List, TEXT(";"));
+				for (const FString& C : List)
+				{
+					FString Key, Value;
+					if (!C.Split(TEXT("="), &Key, &Value)) { Key = C; }
+					if (Key == TEXT("window"))
+					{
+						static const TMap<FString, W> Names = { { TEXT("none"), W::None }, { TEXT("army"), W::Army }, { TEXT("officers"), W::Officers }, { TEXT("budget"), W::Budget }, { TEXT("towns"), W::Towns },
+							{ TEXT("trains"), W::Trains }, { TEXT("chart"), W::Chart }, { TEXT("council"), W::Council }, { TEXT("supply"), W::Supply }, { TEXT("foreign"), W::Foreign },
+							{ TEXT("research"), W::Research }, { TEXT("navy"), W::Navy }, { TEXT("status"), W::ArmyStatus } };
+						Overlay->OpenWindow(Names.Contains(Value) ? Names[Value] : W::None);
+					}
+					else if (Key == TEXT("minister")) { Overlay->SetMinisterInfo(FCString::Atoi(*Value)); }
+					else if (Key == TEXT("officer")) { Overlay->InspectOfficer(FCString::Atoi(*Value)); }
+					else if (Key == TEXT("select")) { Overlay->SetSelectedRegiments({ FCString::Atoi(*Value) }); }
+					else if (Key == TEXT("unitcard")) { Overlay->ToggleUnitCard(); }
+					else if (Key == TEXT("oob")) { Overlay->ToggleOOB(); }
+					else if (Key == TEXT("city")) { Overlay->SetSelectedCity(Map->FindCity(Value)); }
+					else if (Key == TEXT("tab")) { Overlay->SetTownTab(FCString::Atoi(*Value)); }
+					else if (Key == TEXT("civil")) { Overlay->SetCivilTab(Value == TEXT("1")); }
+					else if (Key == TEXT("info")) { Overlay->ToggleBuildingInfo(FCString::Atoi(*Value)); }
+					else if (Key == TEXT("clear")) { Overlay->SetSelectedRegiments({}); Overlay->InspectOfficer(INDEX_NONE); Overlay->SetMinisterInfo(-1); Overlay->OpenWindow(W::None); }
+				}
+				StepAt = Real + 1.5f;
+			}
+			if (StepAt > 0.f && Real >= StepAt)
+			{
+				const FString File = FPaths::ProjectSavedDir() / TEXT("Screenshots") / FString::Printf(TEXT("ui_shot_%02d.png"), NextStep);
+				FScreenshotRequest::RequestScreenshot(File, true, false);
+				UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-UISHOT: %s (%s)"), *File, *Steps[NextStep]);
+				StepAt = -1.f;
+				++NextStep;
+				if (NextStep >= Steps.Num() && FParse::Param(FCommandLine::Get(), TEXT("CampaignUiShotsQuit")))
+				{
+					FTimerHandle Quit;
+					GetWorldTimerManager().SetTimer(Quit, []() { FPlatformMisc::RequestExit(false); }, 3.f, false);
+				}
+			}
+		}
+	}
 	// -CampaignFight3D: the first battle goes to 3D at once (test of the way to the battle and back).
 	static bool bFight3DDone = false;
 	if (!bFight3DDone && FParse::Param(FCommandLine::Get(), TEXT("CampaignFight3D")) && Map.IsValid() && Map->GetBattles().Num() > 0 &&
@@ -1099,7 +1167,15 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Button = SCampaign1851Overlay::EButton::None;
 			}
 		}
-		if (Button == SCampaign1851Overlay::EButton::Menu)
+		if (Button == SCampaign1851Overlay::EButton::Block)
+		{
+			// A card in the front: the click stays on it.
+		}
+		else if (Button == SCampaign1851Overlay::EButton::MinisterInfo)
+		{
+			Overlay->SetMinisterInfo(Module);
+		}
+		else if (Button == SCampaign1851Overlay::EButton::Menu)
 		{
 			OpenGameMenu();
 		}

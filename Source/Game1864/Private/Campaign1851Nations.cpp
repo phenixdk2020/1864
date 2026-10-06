@@ -52,19 +52,20 @@ namespace Campaign1851Nations
 	{
 		// Estimates for play: growth in percentage points a year, income in rigsdaler a year.
 		static const TMap<FString, FCampaign1851CivilEffect> Effects = {
-			{ TEXT("Schoolhouse"),      { 0.15f, 0.05f, 0, false } },
-			{ TEXT("Town_Hall"),        { 0.10f, 0.f, 500, false } },
-			{ TEXT("Post_Office"),      { 0.15f, 0.02f, 300, false } },
-			{ TEXT("Hospital"),         { 0.30f, 0.03f, 0, false } },
-			{ TEXT("Harbor_Building"),  { 0.15f, 0.f, 900, false } },
-			{ TEXT("Lighthouse"),       { 0.05f, 0.f, 300, false } },
-			{ TEXT("Merchant_House"),   { 0.30f, 0.10f, 500, true } },
-			{ TEXT("Brewery"),          { 0.20f, 0.05f, 700, true } },
-			{ TEXT("Brickworks"),       { 0.20f, 0.f, 400, true } },
-			{ TEXT("Sawmill"),          { 0.10f, 0.02f, 250, true } },
-			{ TEXT("Machine_Workshop"), { 0.40f, 0.f, 1200, true } },
-			{ TEXT("Textile_Mill"),     { 0.60f, 0.05f, 2500, true } },
-			{ TEXT("Inn"),              { 0.10f, 0.05f, 150, true } },
+			//                            urban rural fees  private jobs trade
+			{ TEXT("Schoolhouse"),      { 0.15f, 0.05f,    0, false,   6,    0 } },
+			{ TEXT("Town_Hall"),        { 0.10f, 0.f,    500, false,  12,    0 } },
+			{ TEXT("Post_Office"),      { 0.15f, 0.02f,  300, false,   8,  100 } },
+			{ TEXT("Hospital"),         { 0.30f, 0.03f,    0, false,  25,    0 } },
+			{ TEXT("Harbor_Building"),  { 0.15f, 0.f,    400, false,  40, 1500 } },
+			{ TEXT("Lighthouse"),       { 0.05f, 0.f,    100, false,   3,  300 } },
+			{ TEXT("Merchant_House"),   { 0.30f, 0.10f,  200, true,   15, 1200 } },
+			{ TEXT("Brewery"),          { 0.20f, 0.05f,  400, true,   30,  600 } },
+			{ TEXT("Brickworks"),       { 0.20f, 0.f,    200, true,   40,  400 } },
+			{ TEXT("Sawmill"),          { 0.10f, 0.02f,  100, true,   25,  300 } },
+			{ TEXT("Machine_Workshop"), { 0.40f, 0.f,    600, true,   90,  900 } },
+			{ TEXT("Textile_Mill"),     { 0.60f, 0.05f,  600, true,  200, 1800 } },
+			{ TEXT("Inn"),              { 0.10f, 0.05f,  100, true,    8,  100 } },
 		};
 		return Effects.Find(Key);
 	}
@@ -327,18 +328,47 @@ void ACampaign1851Map::GrowMonth()
 
 double ACampaign1851Map::CivilIncomePerYear() const
 {
-	double Total = 0.0;
-	for (const ACampaign1851ConstructionSite* Site : Projects)
+	return CivilFeesPerYear() + CivilJobTaxPerYear() + CivilTradePerYear();
+}
+
+namespace
+{
+	template <typename TArr, typename F>
+	double SumCivil(const TArr& Projects, F Pick)
 	{
-		if (Site && !Site->IsGarrison() && !Site->IsHistoric() && Site->IsModuleDone(0))
+		double Total = 0.0;
+		for (const ACampaign1851ConstructionSite* Site : Projects)
 		{
-			if (const FCampaign1851CivilEffect* E = Campaign1851Nations::CivilEffect(Site->GetKind()))
+			if (Site && !Site->IsGarrison() && !Site->IsHistoric() && Site->IsModuleDone(0))
 			{
-				Total += E->IncomeRd;
+				if (const FCampaign1851CivilEffect* E = Campaign1851Nations::CivilEffect(Site->GetKind()))
+				{
+					Total += Pick(*E);
+				}
 			}
 		}
+		return Total;
 	}
-	return Total;
+}
+
+double ACampaign1851Map::CivilFeesPerYear() const
+{
+	return SumCivil(Projects, [](const FCampaign1851CivilEffect& E) { return double(E.IncomeRd); });
+}
+
+double ACampaign1851Map::CivilJobTaxPerYear() const
+{
+	return SumCivil(Projects, [](const FCampaign1851CivilEffect& E) { return double(E.Jobs * FCampaign1851CivilEffect::JobTaxRd); });
+}
+
+double ACampaign1851Map::CivilTradePerYear() const
+{
+	return SumCivil(Projects, [](const FCampaign1851CivilEffect& E) { return double(E.TradeRd); });
+}
+
+int32 ACampaign1851Map::CivilJobs() const
+{
+	return int32(SumCivil(Projects, [](const FCampaign1851CivilEffect& E) { return double(E.Jobs); }));
 }
 
 void ACampaign1851Map::PrivateInvestment()
