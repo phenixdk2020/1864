@@ -1219,6 +1219,12 @@ Kun ladte soldater kan blive valgt til næste salve.
 ### Test af slagmarken
 - `-CampaignUiShots=sek:genfield=lat+lon` genererer et slagmarkskort (`Saved/Battle/Battlefield_Test.json`) uden at spille et slag. Det findes i 3D med `-Strategy1864Field=Battlefield_Test.json`. (`-CampaignBattlefield=` virker ikke sammen med `-CampaignNew`.)
 
+### Genveje til 3D-slaget
+- `Start-Slagmark-Generer.bat` laver et nyt slagmarkskort ved Rendsborg (`Saved/Battle/Battlefield_Test.json`) og lukker spillet igen.
+- `Start-3D-Slag-Test.bat` åbner 3D-slaget på det kort (kamporden med O, taktisk kort med M, INDSTILLINGER øverst).
+- `Start-3D-Skirmish-Test.bat` åbner det lille slag: 2 mod 2 kompagnier på en eng med batteri, mørtel og eskadron på hver side. Fjenden angriber, og hans skudvidde vises.
+- Himmellyset i slaget er hævet til 2,2 (skyggesiderne var for mørke).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

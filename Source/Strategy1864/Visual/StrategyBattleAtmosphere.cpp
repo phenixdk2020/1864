@@ -62,7 +62,7 @@ void AStrategyBattleAtmosphere::Apply()
         {
             Sky->SetMobility(EComponentMobility::Movable);
             Sky->bRealTimeCapture = true;
-            Sky->SetIntensity(1.0f);
+            Sky->SetIntensity(2.2f);
             Sky->SetLowerHemisphereColor(FLinearColor(0.07f, 0.08f, 0.05f));
             Sky->bLowerHemisphereIsBlack = false;
             Sky->RecaptureSky();
