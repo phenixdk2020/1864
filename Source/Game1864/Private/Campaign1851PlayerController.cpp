@@ -8,6 +8,7 @@
 #include "SCampaign1851Overlay.h"
 #include "Campaign1851ConstructionSite.h"
 #include "Campaign1851SaveGame.h"
+#include "Campaign1851Buildings.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "HAL/FileManager.h"
@@ -18,6 +19,296 @@ ACampaign1851PlayerController::ACampaign1851PlayerController()
 	bShowMouseCursor = true;
 	bEnableClickEvents = false;
 	DefaultMouseCursor = EMouseCursor::Default;
+}
+
+namespace
+{
+	FString Rd(double Amount)
+	{
+		return FString::FormatAsNumber(FMath::RoundToInt(Amount)) + TEXT(" rd.");
+	}
+
+	/**
+	 * What a costly or lasting step does and what it costs, for the confirmation dialog (JA / NEJ) before it is
+	 * taken. False for the buttons that only look or select (they act at once).
+	 */
+	bool DescribeAction(const ACampaign1851Map& Map, const SCampaign1851Overlay& Overlay, SCampaign1851Overlay::EButton Button, int32 Module, FString& Title, FString& Text)
+	{
+		using EB = SCampaign1851Overlay::EButton;
+		const TArray<FCampaign1851City>& Cities = Map.GetCities();
+		const int32 City = Overlay.GetSelectedCity();
+		const FString CityName = Cities.IsValidIndex(City) ? Cities[City].Name : FString(TEXT("byen"));
+		const FString Down = FString::Printf(TEXT("%d %%"), FMath::RoundToInt(Campaign1851Buildings::DownPayment * 100.f));
+		switch (Button)
+		{
+		case EB::BuildTown:
+		{
+			if (!ACampaign1851ConstructionSite::TownBuildings().IsValidIndex(Module))
+			{
+				return false;
+			}
+			const FCampaign1851SiteModule& D = ACampaign1851ConstructionSite::TownBuildings()[Module];
+			Title = FString::Printf(TEXT("Byg %s i %s?"), *D.Name.ToLower(), *CityName);
+			Text = FString::Printf(TEXT("%s (%s) opføres i %s på omkring %d dage. Det koster %s i alt: %s nu til materialerne, resten løbende mens der bygges. Bagefter koster bygningen %s om året i drift."),
+				*D.Name, *D.Type(), *CityName, FMath::RoundToInt(D.Days()), *Rd(D.Cost()), *Down, *Rd(D.Upkeep()));
+			return true;
+		}
+		case EB::Build:
+			Title = FString::Printf(TEXT("Anlæg garnison i %s?"), *CityName);
+			Text = FString::Printf(TEXT("Byggepladsen ryddes, og den første infanterikaserne påbegyndes. Materialerne betales med %s med det samme, resten løbende mens der bygges. Senere kan flere bygninger føjes til garnisonen."), *Down);
+			return true;
+		case EB::BuildModule:
+		{
+			const ACampaign1851ConstructionSite* Site = Map.FindProject(City);
+			if (!Site)
+			{
+				return false;
+			}
+			Title = FString::Printf(TEXT("Byg %s?"), *Site->ModuleName(Module).ToLower());
+			Text = FString::Printf(TEXT("%s føjes til garnisonen i %s på omkring %d dage. Det koster %s: %s nu til materialerne, resten løbende."),
+				*Site->ModuleName(Module), *CityName, FMath::RoundToInt(Site->ModuleDays(Module)), *Rd(Site->ModuleCost(Module)), *Down);
+			return true;
+		}
+		case EB::BuildLink:
+		{
+			const int32 Link = Module / 2;
+			if (!Map.GetLinks().IsValidIndex(Link))
+			{
+				return false;
+			}
+			const ECampaign1851LinkWork Work = Module % 2 ? ECampaign1851LinkWork::Railway : ECampaign1851LinkWork::Chaussee;
+			const FCampaign1851Link& L = Map.GetLinks()[Link];
+			const bool bRail = Work == ECampaign1851LinkWork::Railway;
+			Title = FString::Printf(TEXT("Anlæg %s %s–%s?"), bRail ? TEXT("jernbane") : TEXT("chaussé"), *Cities[L.A].Name, *Cities[L.B].Name);
+			Text = FString::Printf(TEXT("%s Arbejdet tager omkring %d dage og koster %s, betalt efterhånden som det skrider frem."),
+				bRail ? TEXT("Tog kører tropper og forsyninger mange gange hurtigere end til fods, og handlen langs banen vokser.") : TEXT("En fast landevej: hæren og trænet marcherer hurtigere og slider mindre, også i tøbrud."),
+				FMath::RoundToInt(Map.LinkWorkDays(Link, Work)), *Rd(Map.LinkWorkCost(Link, Work)));
+			return true;
+		}
+		case EB::RaiseBattalion:
+			Title = FString::Printf(TEXT("Opret en bataljon i %s?"), *CityName);
+			Text = FString::Printf(TEXT("%d rekrutter indkaldes med en major og fire kaptajner. Det koster %s nu (hvervning og udrustning), og bataljonen skal derefter have sold og forplejning. Rekrutterne er grønne og skal eksercere, før de duer i felten."),
+				Campaign1851Army::RaiseMen, *Rd(Campaign1851Army::RaiseCost()));
+			return true;
+		case EB::UnitRaise:
+		{
+			const Campaign1851Resources::FUnitType& T = Campaign1851Resources::Type(Overlay.RaiseType);
+			Title = FString::Printf(TEXT("Opret %s?"), T.Name);
+			Text = FString::Printf(TEXT("%d mand%s%s indkaldes og udrustes (%d geværer, %d uniformer). Det koster omkring %s; geværer der mangler på lageret købes i udlandet oveni. Træningsprogram: %s."),
+				T.Men, T.Guns > 0 ? *FString::Printf(TEXT(", %d kanoner"), T.Guns) : TEXT(""), T.Horses > 0 ? *FString::Printf(TEXT(", %d heste"), T.Horses) : TEXT(""),
+				T.Rifles, T.Uniforms, *Rd(Map.UnitCost(Overlay.RaiseType)), Campaign1851Army::ProgramName(ECampaign1851Program(Overlay.RaiseProgram)));
+			return true;
+		}
+		case EB::ResearchStart:
+		{
+			if (!Campaign1851Research::Topics().IsValidIndex(Module))
+			{
+				return false;
+			}
+			const FCampaign1851ResearchTopic& T = Campaign1851Research::Topics()[Module];
+			Title = FString::Printf(TEXT("Forsk i %s?"), T.Name);
+			Text = FString::Printf(TEXT("%s\nDet tager %d måneder og koster %s om måneden, i alt %s."), T.Effect, T.Months, *Rd(T.CostPerMonth), *Rd(T.CostPerMonth * T.Months));
+			return true;
+		}
+		case EB::DoctrineSet:
+			Title = FString::Printf(TEXT("Skift doktrin til %s?"), Campaign1851Research::DoctrineName(Module / 10, Module % 10));
+			Text = FString::Printf(TEXT("Hæren omskoles efter den nye doktrin. Det koster %s, og i omkring %d dage, mens officerer og mænd lærer det nye, kæmper hæren dårligere."),
+				*Rd(ACampaign1851Map::DoctrineChangeCost), FMath::RoundToInt(ACampaign1851Map::DoctrineChangeDays));
+			return true;
+		case EB::Loan:
+			if (Module == 2)
+			{
+				Title = TEXT("Afdrag på statsgælden?");
+				Text = FString::Printf(TEXT("%s betales tilbage af statskassen. Renterne falder tilsvarende."), *Rd(100000.0));
+			}
+			else
+			{
+				const double Amount = Module == 0 ? 100000.0 : 250000.0;
+				Title = FString::Printf(TEXT("Optag et lån på %s?"), *Rd(Amount));
+				Text = FString::Printf(TEXT("Pengene kommer i statskassen med det samme. Renten er nu %.1f %%, dvs. omkring %s om året, indtil lånet er betalt tilbage. Mere gæld gør de næste lån dyrere."),
+					Map.CreditRate() * 100.f, *Rd(Amount * Map.CreditRate()));
+			}
+			return true;
+		case EB::ShipOrder:
+		{
+			if (!Campaign1851Navy::Classes().IsValidIndex(Module))
+			{
+				return false;
+			}
+			const FCampaign1851ShipClass& C = Campaign1851Navy::Classes()[Module];
+			Title = FString::Printf(TEXT("Bestil en %s?"), C.Name);
+			Text = FString::Printf(TEXT("Skibet bygges på Holmen på %d måneder og koster %s. Når det er i tjeneste, koster det %s om året og styrker flåden med %.0f."),
+				C.Months, *Rd(C.Cost), *Rd(C.UpkeepPerYear), C.Strength);
+			return true;
+		}
+		case EB::Blockade:
+			Title = Module == 1 ? TEXT("Blokér fjendens havne?") : TEXT("Hæv blokaden?");
+			Text = Module == 1 ? TEXT("Flåden lægger sig ud for fjendens havne. Det kvæler hans handel og trækker krigen mod os, men skibene slides og kan møde fjendens eskadrer.")
+				: TEXT("Flåden går hjem. Fjendens handel kommer i gang igen.");
+			return true;
+		case EB::SupplyBuy:
+			Title = TEXT("Køb en trænkolonne?");
+			Text = FString::Printf(TEXT("20 vogne og 80 heste med kuske, som Intendanturen kan sende forsyninger med til hæren i felten. Det koster %s."), *Rd(Campaign1851Supply::ColumnCost));
+			return true;
+		case EB::KitBuy:
+			Title = Module == 1 ? TEXT("Køb 2 mortérer?") : TEXT("Køb 10 vogne?");
+			Text = Module == 1 ? FString::Printf(TEXT("To mortérer købes i udlandet og lægges på lager. Det koster %s."), *Rd(2 * Campaign1851Resources::MortarPrice))
+				: FString::Printf(TEXT("Ti vogne købes i landet og lægges på lager. Det koster %s."), *Rd(10 * Campaign1851Resources::WagonPrice));
+			return true;
+		case EB::RawBuy:
+		{
+			if (Module % 10 == 0)
+			{
+				return false;   // the small step goes at once
+			}
+			const ECampaign1851Raw R = ECampaign1851Raw(Module / 10);
+			const float Amount = (R == ECampaign1851Raw::Cloth || R == ECampaign1851Raw::Leather ? 100.f : 10.f) * 10.f;
+			Title = TEXT("Køb råvarer?");
+			Text = FString::Printf(TEXT("%.0f enheder købes og lægges på lager. Det koster omkring %s."), Amount, *Rd(Amount * Map.RawPrice(R)));
+			return true;
+		}
+		case EB::OfficerRecruit:
+			Title = Module == 1 ? TEXT("Ansæt en general?") : TEXT("Ansæt en officer?");
+			Text = FString::Printf(TEXT("Han ansættes og venter på en post. Ansættelsen koster %s, og derefter får han sold, også mens han er uden post."), *Rd(Map.OfficerCost(Module == 1)));
+			return true;
+		case EB::OfficerPromote:
+			if (!Map.GetOfficers().IsValidIndex(Module))
+			{
+				return false;
+			}
+			Title = FString::Printf(TEXT("Forfrem %s?"), *Map.GetOfficers()[Module].Name);
+			Text = TEXT("Han rykker en grad op og får højere gage. Bliver han general, må han forlade sin post, og regimentet skal have en ny chef.");
+			return true;
+		case EB::OfficerDismiss:
+			if (!Map.GetOfficers().IsValidIndex(Module))
+			{
+				return false;
+			}
+			Title = FString::Printf(TEXT("Afsked %s?"), *Map.GetOfficers()[Module].Name);
+			Text = TEXT("Han forlader hæren for altid, og hans post bliver ledig. Hans erfaring går tabt, men soldet spares.");
+			return true;
+		case EB::MinisterAppoint:
+			Title = TEXT("Udnævn en ny minister?");
+			Text = TEXT("Den nuværende minister går af, og den nye overtager ministeriet med sine egne evner og sin egen politik. Et skifte kan koste ro i Rigsdagen.");
+			return true;
+		case EB::MakePeace:
+		{
+			const TArray<FCampaign1851PeaceOffer> Offers = Map.PeaceOffers();
+			if (!Offers.IsValidIndex(Module))
+			{
+				return false;
+			}
+			const FCampaign1851PeaceOffer& P = Offers[Module];
+			FString Ceded;
+			for (int32 T : P.Ceded)
+			{
+				if (Cities.IsValidIndex(T))
+				{
+					Ceded += (Ceded.IsEmpty() ? TEXT("") : TEXT(", ")) + Cities[T].Name;
+				}
+			}
+			Title = FString::Printf(TEXT("Tilbyd fred: %s?"), *P.Name);
+			Text = FString::Printf(TEXT("%s Krigen slutter, hvis fjenden tager imod; ellers taber vi ansigt. Kan ikke gøres om."),
+				Ceded.IsEmpty() ? TEXT("Ingen byer afstås.") : *FString::Printf(TEXT("Disse byer afstås: %s."), *Ceded));
+			return true;
+		}
+		case EB::Diplomacy:
+		{
+			const int32 Nation = Module / 10;
+			const FString Who = Map.GetNations().IsValidIndex(Nation) ? Map.GetNations()[Nation].Name : FString(TEXT("landet"));
+			switch (ACampaign1851Map::EDiplomacyAction(Module % 10))
+			{
+			case ACampaign1851Map::EDiplomacyAction::Envoy:
+				Title = FString::Printf(TEXT("Send en gesandt til %s?"), *Who);
+				Text = FString::Printf(TEXT("Forholdet til %s bedres. Det koster %s."), *Who, *Rd(ACampaign1851Map::EnvoyCost));
+				break;
+			case ACampaign1851Map::EDiplomacyAction::Trade:
+				Title = FString::Printf(TEXT("Handelstraktat med %s?"), *Who);
+				Text = FString::Printf(TEXT("Toldsatserne sænkes gensidigt; handlen giver statskassen mere hvert år. Forhandlingerne koster %s."), *Rd(ACampaign1851Map::TreatyCost));
+				break;
+			case ACampaign1851Map::EDiplomacyAction::Alliance:
+				Title = FString::Printf(TEXT("Alliance med %s?"), *Who);
+				Text = FString::Printf(TEXT("%s lover at stå os bi i krig, og vi det samme. Det koster %s, og en alliance kan trække os ind i andres krige."), *Who, *Rd(Map.AllianceCostNow()));
+				break;
+			default:
+				Title = FString::Printf(TEXT("Søg garanti fra %s?"), *Who);
+				Text = FString::Printf(TEXT("%s garanterer vores grænser; spændingen stiger langsommere. Det koster %s."), *Who, *Rd(ACampaign1851Map::GuaranteeCost));
+				break;
+			}
+			return true;
+		}
+		case EB::FortGuns:
+		case EB::FortDefence:
+		case EB::FortTrenches:
+		{
+			const FCampaign1851Fort* F = Map.GetForts().FindByPredicate([Module](const FCampaign1851Fort& X) { return X.Id == Module; });
+			if (!F)
+			{
+				return false;
+			}
+			if (Button == EB::FortGuns)
+			{
+				Title = TEXT("To kanoner mere i skansen?");
+				Text = FString::Printf(TEXT("To nye kanonbænke med fæstningskanoner, på %d dage. Det koster op til %s (kanoner fra statens lager sparer %s stykket)."),
+					FMath::RoundToInt(Campaign1851Forts::GunsDays), *Rd(Campaign1851Forts::GunsCost), *Rd(Campaign1851Forts::GunPrice));
+			}
+			else if (Button == EB::FortTrenches)
+			{
+				Title = TEXT("Grav løbegrave?");
+				Text = FString::Printf(TEXT("Løbegrave til skanserne omkring giver reserven dækning, når den skal frem. %d dage, %s."),
+					FMath::RoundToInt(Campaign1851Forts::TrenchesDays), *Rd(Campaign1851Forts::TrenchesCost(F->bLarge)));
+			}
+			else
+			{
+				const int32 Next = FMath::Min(F->Defence + 1, Campaign1851Forts::MaxDefence);
+				Title = FString::Printf(TEXT("Udbyg: %s?"), Campaign1851Forts::DefenceName(Next));
+				Text = FString::Printf(TEXT("%s Dækning for besætningen %d %%. %d dage, %s."), Campaign1851Forts::DefenceNote(Next), Campaign1851Forts::CoverPercent(Next),
+					FMath::RoundToInt(Campaign1851Forts::DefenceDays(Next)), *Rd(Campaign1851Forts::DefenceCost(Next, F->bLarge)));
+			}
+			return true;
+		}
+		case EB::BridgeDo:
+			switch (EBridgeAction(Module % 10))
+			{
+			case EBridgeAction::Blow:
+				Title = TEXT("Spræng broen?");
+				Text = TEXT("Broen sprænges, og fjenden kan ikke gå over her. Vi kan heller ikke selv, før den er bygget op igen, hvilket tager tid og penge.");
+				break;
+			case EBridgeAction::Rebuild:
+				Title = TEXT("Genopbyg broen?");
+				Text = TEXT("Pionererne bygger broen op igen. Det koster penge og tager en rum tid.");
+				break;
+			default:
+				Title = TEXT("Slå en pontonbro?");
+				Text = FString::Printf(TEXT("Pionererne slår en pontonbro over vandet på %d dage. Det koster %s."), FMath::RoundToInt(Map.PontoonDays()), *Rd(Map.PontoonCost()));
+				break;
+			}
+			return true;
+		case EB::TrainOrder:
+			Title = TEXT("Bestil et togsæt?");
+			Text = FString::Printf(TEXT("Et lokomotiv med vogne bestilles i England og leveres til %s. Det koster %s."),
+				Cities.IsValidIndex(Module) ? *Cities[Module].Name : TEXT("København"), *Rd(ACampaign1851Map::TroopTrainCost));
+			return true;
+		case EB::TrainMove:
+		{
+			const int32 To = Module % 1000;
+			Title = TEXT("Skib toget?");
+			Text = FString::Printf(TEXT("Toget skibes til %s og kan køre på banerne der. Overførslen koster %s."),
+				Cities.IsValidIndex(To) ? *Cities[To].Name : TEXT("den anden bane"), *Rd(ACampaign1851Map::TrainTransferCost));
+			return true;
+		}
+		case EB::BattleAuto:
+			Title = TEXT("Afgør slaget automatisk?");
+			Text = TEXT("Slaget udregnes straks ud fra styrke, erfaring, terræn og ledelse, uden at du fører tropperne selv. Udfaldet kan ikke gøres om.");
+			return true;
+		case EB::BattleRetreat:
+			Title = TEXT("Træk hæren tilbage?");
+			Text = TEXT("Hæren opgiver stillingen og trækker sig tilbage. Det koster færre tab end et tabt slag, men fjenden tager feltet, og humøret falder.");
+			return true;
+		default:
+			return false;
+		}
+	}
 }
 
 void ACampaign1851PlayerController::BeginPlay()
@@ -783,6 +1074,16 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			Overlay->CloseConfirm();
 			Button = SCampaign1851Overlay::EButton::None;
+		}
+		// A step that costs money or cannot be undone: first what it does and what it costs, then JA / NEJ.
+		if (!bConfirmed && Map.IsValid() && Overlay.IsValid())
+		{
+			FString Title, Text;
+			if (DescribeAction(*Map, *Overlay, Button, Module, Title, Text))
+			{
+				Overlay->AskConfirm(Title, Text, Button, Module);
+				Button = SCampaign1851Overlay::EButton::None;
+			}
 		}
 		if (Button == SCampaign1851Overlay::EButton::Menu)
 		{

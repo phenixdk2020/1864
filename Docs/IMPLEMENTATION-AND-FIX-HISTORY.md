@@ -1101,6 +1101,18 @@ Kun ladte soldater kan blive valgt til næste salve.
 - **ANGRIB** i enhedspanelet: et opklaret fjendtligt korps inden for 15 km kan angribes (`EngageCorps`).
 - **Portrætter:** en pulje af officerer, generaler og ministre i 1850'er-oliemaleri (`Tools/Campaign/make_portraits.py`). De tildeles fast efter navn og er typer, ikke ligheder.
 
+
+### 2026-10-06 — Bekræftelse før køb og valg
+- Fælles `DescribeAction` i `Campaign1851PlayerController.cpp`: før et skridt der koster penge eller ikke kan gøres om, vises en JA/NEJ-dialog med hvad der sker og hvad det koster (pris, udbetaling, dage, drift eller rente).
+- Dækker:
+  - byggeri: bygninger, garnison og moduler, chausséer og jernbaner, skanseudbygning (kanoner, forsvar, løbegrave), broer (sprænge, genopbygge, ponton);
+  - hæren: bataljon og nye enheder, trænkolonner, mortérer og vogne, store råvarekøb, togsæt og togoverførsel;
+  - officerer og ministre: ansættelse, forfremmelse, afsked, udnævnelse;
+  - forskning og doktrinskift, lån og afdrag, skibsbestilling, blokade;
+  - diplomati (gesandt, traktat, alliance, garanti) og fredstilbud med de byer der afstås;
+  - automatisk afgørelse og tilbagetog i slag.
+- Små skridt, fx det lille råvarekøb og knapper der kun viser eller vælger, går stadig igennem straks.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
