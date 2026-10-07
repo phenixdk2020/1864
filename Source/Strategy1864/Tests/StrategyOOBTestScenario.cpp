@@ -600,6 +600,26 @@ void AStrategyOOBTestScenario::SetOfficer(AStrategyUnit* Unit, const TSharedPtr<
     P->OfficerId = Id;
     Officer->TryGetStringField(TEXT("name"), P->OfficerName);
     Officer->TryGetStringField(TEXT("rank"), P->OfficerRank);
+    const TSharedPtr<FJsonObject>* Stats = nullptr;
+    if (Officer->TryGetObjectField(TEXT("stats"), Stats))
+    {
+        auto Stat = [&](const TCHAR* Key, float& Into)
+        {
+            double V = 0.0;
+            if ((*Stats)->TryGetNumberField(Key, V)) { Into = FMath::Clamp(float(V) * 10.0f, 5.0f, 100.0f); }
+        };
+        Stat(TEXT("leadership"), P->Leadership);
+        Stat(TEXT("inspiration"), P->Inspiration);
+        Stat(TEXT("initiative"), P->Initiative);
+        Stat(TEXT("tactical"), P->TacticalSkill);
+        Stat(TEXT("staff"), P->StaffQuality);
+        Stat(TEXT("discipline"), P->Discipline);
+        Stat(TEXT("aggression"), P->Aggression);
+        Stat(TEXT("composure"), P->Composure);
+        Stat(TEXT("caution"), P->Caution);
+    }
+    double Experience = 0.0;
+    if (Officer->TryGetNumberField(TEXT("experience"), Experience)) { P->Experience = FMath::Clamp(float(Experience), 0.0f, 100.0f); }
 }
 
 void AStrategyOOBTestScenario::MakeEnemyOfficer(AStrategyUnit* Unit, int32 Kind)
@@ -616,6 +636,20 @@ void AStrategyOOBTestScenario::MakeEnemyOfficer(AStrategyUnit* Unit, int32 Kind)
     P->OfficerId = FString::Printf(TEXT("EN-OFF-%d"), ++EnemyOfficerCount);
     P->OfficerName = Names[FMath::RandRange(0, UE_ARRAY_COUNT(Names) - 1)];
     P->OfficerRank = Ranks[FMath::Clamp(Kind, 0, 2)];
+    // His abilities: the army's quality on average, each one off by up to twenty points (the officers differ: a bold fool, a careful
+    // clerk, a gifted tactician), a little better the higher the rank.
+    const float Base = EnemyOfficerBase + 4.0f * Kind;
+    auto Roll = [&]() { return FMath::Clamp(Base + FMath::FRandRange(-20.0f, 20.0f), 10.0f, 95.0f); };
+    P->Leadership = Roll();
+    P->Inspiration = Roll();
+    P->Initiative = Roll();
+    P->TacticalSkill = Roll();
+    P->StaffQuality = Roll();
+    P->Discipline = Roll();
+    P->Aggression = Roll();
+    P->Composure = Roll();
+    P->Caution = 100.0f - P->Aggression * 0.6f - FMath::FRandRange(0.0f, 20.0f);
+    P->Experience = Roll();
 }
 
 void AStrategyOOBTestScenario::FreezeReserve(AStrategyUnit* Unit)
@@ -1225,6 +1259,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     DanishArrival = Danish(-22000.0f, 0.0f);
     EnemyArrival = Hostile(-22000.0f, 0.0f);
     ArrivalSide = Lateral;
+    EnemyOfficerBase = 50.0f + float(EnemyQuality - 1.0) * 40.0f;
     // The enemy: a brigade staff, a battalion staff for every four companies, companies of 190 (at most sixteen)
     // in two lines, the AI on. His rifle and quality from the request (the Prussian needle gun loads lying and
     // three times as fast; the Danish loss factors make his fire count for more or less).

@@ -3,6 +3,7 @@
 #include "../Combat/StrategyContactComponent.h"
 #include "../Combat/StrategyFireControlComponent.h"
 #include "../Command/StrategyCommandComponent.h"
+#include "StrategyFieldOfficerComponent.h"
 #include "../Orders/StrategyOrderComponent.h"
 #include "../Units/StrategyUnit.h"
 #include "StrategyDoctrineComponent.h"
@@ -141,6 +142,27 @@ void UStrategyAutonomousBattleAIComponent::TickComponent(
             OwnerUnit->GetActorLocation(),
             Enemy->GetActorLocation());
 
+    // The leader's plan (a fire base in the middle, the others to the flanks): a company that has a place to go to goes there
+    // before it holds, also when it is already within range.
+    FVector FlankGoal = FVector::ZeroVector;
+    FString FlankNote;
+    bool bMustMove = false;
+    const bool bFlank = OwnerUnit->FieldOfficerComponent && OwnerUnit->FieldOfficerComponent->FlankPlan(Enemy, DesiredDistance, FlankGoal, FlankNote, bMustMove);
+    if (bFlank && bMustMove)
+    {
+        FStrategyOrder Order;
+        Order.Type = EStrategyOrderType::Advance;
+        Order.TargetLocation = FlankGoal;
+        Order.FacingYaw = (Enemy->GetActorLocation() - FlankGoal).Rotation().Yaw;
+        Order.bHasFacing = true;
+        Order.Authority = EStrategyOrderAuthority::OfficerAI;
+        Order.bKeepFacing = FVector::Dist2D(OwnerUnit->GetActorLocation(), FlankGoal) < 9000.0f;
+        if (OwnerUnit->OrderComponent->SetOrder(Order) && OwnerUnit->AITelemetryComponent)
+        {
+            OwnerUnit->AITelemetryComponent->SetDecision(TEXT("Rykker frem"), FlankNote);
+        }
+        return;
+    }
     if (CurrentDistance <= DesiredDistance)
     {
         // Replace the previous advance order with an explicit hold order.
@@ -175,6 +197,10 @@ void UStrategyAutonomousBattleAIComponent::TickComponent(
 
     FVector Goal =
         Enemy->GetActorLocation() + FromEnemy * DesiredDistance;
+    if (bFlank)
+    {
+        Goal = FlankGoal;   // the fire base's own place
+    }
 
     if (OwnerUnit->MissionConstraintsComponent)
     {

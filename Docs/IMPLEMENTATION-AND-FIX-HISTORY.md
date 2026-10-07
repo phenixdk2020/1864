@@ -1351,6 +1351,13 @@ Et uafhængigt Codex-review (kørt direkte med `codex.exe`) fandt:
 9. Solens dato stod fast efter første dag: dagen på året følger nu slagets dage.
 Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i logfilen (flankerne går først udenom ildbasen, derefter ind fra siden; forstærkningerne kommer).
 
+### 2026-10-07 - Fjenden flankerer også; lederne bestemmer opførslen
+
+- Fjendens kompagnier følger samme flankeplan (`FlankPlan` kaldes fra `UStrategyAutonomousBattleAIComponent`): ildbase i midten, resten ind fra siden og udenom ildbasens ildfelt. Et kompagni med en plads at gå til går dertil, før det holder, også når det allerede er inden for skudvidde.
+- **Bataljonslederens evner** (taktik 50 %, initiativ 25 %, stabsarbejde 15 %, aggressivitet 10 %): under 0,35: ingen plan, alle går lige ind; 0,35-0,55: kun de to ved siden af basen flankerer, ingen omvej uden om ildfeltet; over 0,55: alle flankerer, vinklen bredere jo bedre lederen er. En kaptajn med disciplin under 40 går i 35 % af tilfældene sin egen vej.
+- **Kaptajnens opførsel:** skudafstanden følger doktrin og dristighed (`PreferredFraction`, 55-90 % af skudvidden); hvornår kompagniet bryder, følger hans nerve (`GetDecisionStability`): den nervestærke holder til 22 % af styrken, den nervøse bryder ved 52 %.
+- **Statistikker:** de danske officerers evner (1-10) fra kampagnen bruges nu i slaget (×10; tidligere stod alle på 50); fjendens officerer får tilfældige evner efter hærens kvalitet (±20, lidt bedre jo højere rang).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

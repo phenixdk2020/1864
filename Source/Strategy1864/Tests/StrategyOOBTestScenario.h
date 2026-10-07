@@ -304,6 +304,7 @@ private:
     TMap<TWeakObjectPtr<AStrategyUnit>, FOfficerWatch> OfficerWatch;
     float OfficerTimer = 0.0f;
     int32 EnemyOfficerCount = 0;
+    float EnemyOfficerBase = 50.0f;   // the enemy officers' average ability (by his army's quality)
     void SetupObjectives(const FVector& DanishLine, const FVector& EnemyLine);
     void TickObjectives(float DeltaSeconds);
     void DrawObjectives() const;

@@ -241,6 +241,28 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
         FlankUntil = Now + 10.0f;
         return;
     }
+    // The battalion leader's grasp of the manoeuvre: tactical skill first, then initiative, staff work and boldness. A poor one has
+    // them all walk straight at the enemy; a middling one flanks with the two next to the base only; a good one with all.
+    float Skill = 0.5f;
+    if (const UStrategyOfficerProfileComponent* Leader = OwnerUnit->CommandComponent->CurrentCommandParent->OfficerProfileComponent)
+    {
+        Skill = (Leader->TacticalSkill * 0.5f + Leader->Initiative * 0.25f + Leader->StaffQuality * 0.15f + Leader->Aggression * 0.10f) / 100.0f;
+    }
+    if (Skill < 0.35f)
+    {
+        for (AStrategyUnit* U : Group)
+        {
+            if (UStrategyFieldOfficerComponent* C = U->FindComponentByClass<UStrategyFieldOfficerComponent>())
+            {
+                C->FlankRole = 0;
+                C->FlankUntil = Now + 60.0f;
+                C->FlankSkill = Skill;
+            }
+        }
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FLANK: the leader of %s (grasp %.2f) has no plan: the companies go straight in"), *OwnerUnit->DisplayName.ToString(), Skill);
+        return;
+    }
+    const int32 MaxPlaces = Skill < 0.55f ? 1 : 9;
     FVector Centre = FVector::ZeroVector;
     for (const AStrategyUnit* U : Group) { Centre += U->GetActorLocation(); }
     Centre /= float(Group.Num());
@@ -257,6 +279,13 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
         if (!C) { continue; }
         C->FlankRole = i == Base ? 1 : 2;
         C->FlankK = FMath::Abs(i - Base);
+        C->FlankSkill = Skill;
+        // Beyond the places the leader plans for, or a captain who is poorly disciplined and does his own thing: straight in.
+        const UStrategyOfficerProfileComponent* Captain = Group[i]->OfficerProfileComponent;
+        if (C->FlankK > MaxPlaces || (Captain && Captain->Discipline < 40.0f && FMath::FRand() < 0.35f))
+        {
+            C->FlankRole = 0;
+        }
         C->FlankSign = i < Base ? -1.0f : 1.0f;
         C->FlankUntil = Now + 90.0f;
         C->FlankEnemy = Enemy;
@@ -265,7 +294,30 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
     UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FLANK: %d companies against %s: %s is the fire base"), Group.Num(), *Enemy->DisplayName.ToString(), *Group[Base]->DisplayName.ToString());
 }
 
+float UStrategyFieldOfficerComponent::PreferredFraction() const
+{
+    // How close he likes to come, of his fire distance: the doctrine and his boldness (a bold officer closes in, a cautious one holds off).
+    if (OwnerUnit && OwnerUnit->DoctrineComponent)
+    {
+        return FMath::Clamp(OwnerUnit->DoctrineComponent->GetPreferredEngagementRangeFraction(OwnerUnit->OfficerProfileComponent), 0.55f, 0.9f);
+    }
+    return 0.8f;
+}
+
+bool UStrategyFieldOfficerComponent::FlankPlan(AStrategyUnit* Enemy, float Radius, FVector& OutGoal, FString& OutNote, bool& bOutMustMove)
+{
+    FVector Foe = FVector::ZeroVector;
+    OutGoal = ApproachGoalAt(Enemy, Radius, OutNote, Foe);
+    bOutMustMove = FlankRole == 2 && FVector::Dist2D(OwnerUnit->GetActorLocation(), OutGoal) > 2000.0f;
+    return FlankRole != 0;
+}
+
 FVector UStrategyFieldOfficerComponent::ApproachGoal(AStrategyUnit* Enemy, float Range, FString& OutNote, FVector& OutFoe)
+{
+    return ApproachGoalAt(Enemy, Range * PreferredFraction(), OutNote, OutFoe);
+}
+
+FVector UStrategyFieldOfficerComponent::ApproachGoalAt(AStrategyUnit* Enemy, float Radius, FString& OutNote, FVector& OutFoe)
 {
     const FVector Own = OwnerUnit->GetActorLocation();
     const float Now = GetWorld()->GetTimeSeconds();
@@ -277,7 +329,7 @@ FVector UStrategyFieldOfficerComponent::ApproachGoal(AStrategyUnit* Enemy, float
     const AStrategyUnit* Foe = FlankRole != 0 && FlankEnemy.IsValid() ? FlankEnemy.Get() : Enemy;
     const FVector Target = Foe->GetActorLocation();
     OutFoe = Target;
-    FVector Goal = Target + (Own - Target).GetSafeNormal2D() * Range * 0.8f;
+    FVector Goal = Target + (Own - Target).GetSafeNormal2D() * Radius;
     if (FlankRole == 0)
     {
         return Goal;
@@ -289,14 +341,14 @@ FVector UStrategyFieldOfficerComponent::ApproachGoal(AStrategyUnit* Enemy, float
     if (FlankRole == 1)
     {
         OutNote = TEXT("ildbasen: holder og skyder");
-        return Target + Back * Range * 0.8f;
+        return Target + Back * Radius;
     }
     // A flank: at an angle to the enemy (45 degrees for the next to the base, 90 for the second), at the same fire distance.
-    const float Angle = FMath::Min(80.0f, 45.0f * FlankK);
-    Goal = Target + Back.RotateAngleAxis(FlankSign * Angle, FVector::UpVector) * Range * 0.8f;
+    const float Angle = FMath::Min(80.0f, 45.0f * FlankK) * FMath::Lerp(0.7f, 1.1f, FlankSkill);   // a good leader sends them wider round
+    Goal = Target + Back.RotateAngleAxis(FlankSign * Angle, FVector::UpVector) * Radius;
     OutNote = TEXT("flanken: ind fra siden");
     // Not through the base's line of fire: when the way to the place crosses the cone from the base to the enemy, go round it first.
-    if (Base)
+    if (Base && FlankSkill >= 0.5f)
     {
         const FVector Axis = (Target - BasePlace).GetSafeNormal2D();
         const float Length = FVector::Dist2D(BasePlace, Target) + 500.0f;
@@ -322,7 +374,8 @@ FVector UStrategyFieldOfficerComponent::ApproachGoal(AStrategyUnit* Enemy, float
 void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float Distance)
 {
     // Heavy losses or a broken spirit: back out of the fire, to rally.
-    if (OwnerUnit->CurrentStrength < OwnerUnit->InitialStrength * BreakShare || OwnerUnit->Morale < 22.0f)
+    const float Nerve = OwnerUnit->OfficerProfileComponent ? OwnerUnit->OfficerProfileComponent->GetDecisionStability() : 0.5f;
+    if (OwnerUnit->CurrentStrength < OwnerUnit->InitialStrength * FMath::Lerp(BreakShare + 0.12f, BreakShare - 0.10f, Nerve) || OwnerUnit->Morale < FMath::Lerp(30.0f, 16.0f, Nerve))
     {
         FallBack(FString::Printf(TEXT("Svære tab: %d af %d mand, moral %.0f"), OwnerUnit->CurrentStrength, OwnerUnit->InitialStrength, OwnerUnit->Morale), 25000.0f);
         return;

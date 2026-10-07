@@ -36,6 +36,11 @@ public:
     UFUNCTION(BlueprintPure, Category="Strategy|Officer")
     bool IsCharging() const { return bCharging; }
 
+    /** The flank plan for a company of a group that closes on an enemy (for the enemy's own battle AI too): the place it is to
+     *  take at the fire distance Radius from him (or a waypoint round the base's line of fire); false when the leader's plan has
+     *  it attack straight. OutMustMove: it is not at its place yet. */
+    bool FlankPlan(AStrategyUnit* Enemy, float Radius, FVector& OutGoal, FString& OutNote, bool& bOutMustMove);
+
 private:
     void ThinkInfantry(AStrategyUnit* Enemy, float Distance);
     /** Companies of one battalion closing on the same enemy do not all walk at him and stand in each other's way: the middle
@@ -43,6 +48,8 @@ private:
      *  line of fire, and take their places at an angle to the enemy so that they fire into his side. */
     void AssignFlanks(AStrategyUnit* Enemy);
     FVector ApproachGoal(AStrategyUnit* Enemy, float Range, FString& OutNote, FVector& OutFoe);
+    FVector ApproachGoalAt(AStrategyUnit* Enemy, float Radius, FString& OutNote, FVector& OutFoe);
+    float PreferredFraction() const;
     void ThinkCavalry(AStrategyUnit* Enemy, float Distance);
     void ThinkArtillery(AStrategyUnit* Enemy, float Distance);
     void UpdateBayonetCharge();
@@ -67,6 +74,7 @@ private:
     int32 FlankK = 0;             // how many places from the base
     float FlankSign = 0.0f;       // -1 / +1: which side of the base
     float FlankUntil = 0.0f;
+    float FlankSkill = 0.5f;      // the battalion leader's grasp of it (0-1)
     TWeakObjectPtr<AStrategyUnit> FlankEnemy;
     TWeakObjectPtr<AStrategyUnit> FlankBase;
     float LastChargeTime = -1000.0f;
