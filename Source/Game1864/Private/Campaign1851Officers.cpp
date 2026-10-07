@@ -801,6 +801,18 @@ void ACampaign1851Map::ApplyOfficerCasualties(const TArray<TSharedPtr<FJsonValue
 	}
 	if (Taken > 0)
 	{
+		// Prestige: a colonel is worth more than a captain (the mood at home rises a little).
+		float Points = 0.f;
+		for (const TSharedPtr<FJsonValue>& V : Theirs)
+		{
+			const TSharedPtr<FJsonObject> O = V->AsObject();
+			if (O.IsValid() && O->GetStringField(TEXT("fate")) == TEXT("captured"))
+			{
+				const FString Rank = O->GetStringField(TEXT("rank"));
+				Points += Rank == TEXT("Oberst") ? 3.f : Rank == TEXT("Major") ? 2.f : 1.f;
+			}
+		}
+		PoliticalShock(FMath::Min(4.f, 0.3f * Points), 0.f);
 		EnemyOfficersHeld += Taken;
 		News.Add(FString::Printf(TEXT("%d fjendtlige officerer er taget til fange (bl.a. %s)"), Taken, *First));
 	}
@@ -821,6 +833,11 @@ void ACampaign1851Map::ApplyOfficerCasualties(const TArray<TSharedPtr<FJsonValue
 		VacateOfficer(Officer);
 		FCampaign1851Officer& O = Officers[Officer];
 		O.Away = bCaptured ? 2 : 1;
+		if (bCaptured)
+		{
+			// An officer lost to the enemy is a blow at home (more for a senior one).
+			PoliticalShock(-0.3f * float(1 + Campaign1851Army::RankIndex(O.Rank) / 2), 0.f);
+		}
 		// Wounded: three to twelve weeks. A prisoner: exchanged after ten weeks, sooner when we hold enemy officers too.
 		const int32 Days = bCaptured ? FMath::Max(21, 75 - 20 * EnemyOfficersHeld) : Rng.RandRange(21, 84);
 		O.AwayUntil = GetDate() + FTimespan::FromDays(Days);
@@ -841,4 +858,31 @@ void ACampaign1851Map::DailyOfficers()
 			O.Away = 0;
 		}
 	}
+}
+
+int32 ACampaign1851Map::RansomCost(int32 Officer) const
+{
+	static const int32 Cost[] = { 600, 1500, 2200, 3500, 8000, 12000, 20000 };
+	return Officers.IsValidIndex(Officer) ? Cost[FMath::Clamp(Campaign1851Army::RankIndex(Officers[Officer].Rank), 0, int32(UE_ARRAY_COUNT(Cost)) - 1)] : 0;
+}
+
+bool ACampaign1851Map::RansomOfficer(int32 Officer, FString* OutWhy)
+{
+	auto Fail = [OutWhy](const FString& Why) { if (OutWhy) { *OutWhy = Why; } return false; };
+	if (!Officers.IsValidIndex(Officer) || Officers[Officer].Away != 2)
+	{
+		return Fail(TEXT("Han er ikke krigsfange"));
+	}
+	const int32 Cost = RansomCost(Officer);
+	if (Treasury < Cost)
+	{
+		return Fail(FString::Printf(TEXT("Statskassen kan ikke betale løsesummen (%d rd.)"), Cost));
+	}
+	FCampaign1851Officer& O = Officers[Officer];
+	AddTransaction(-double(Cost), FString::Printf(TEXT("Løsesum for %s %s"), *O.Rank, *O.Name));
+	O.Away = 0;
+	EnemyOfficersHeld = FMath::Max(0, EnemyOfficersHeld - 1);
+	News.Add(FString::Printf(TEXT("%s %s er løskøbt for %d rd. og er hjemme igen"), *O.Rank, *O.Name, Cost));
+	if (OutWhy) { *OutWhy = FString::Printf(TEXT("%s er løskøbt for %d rd."), *O.Name, Cost); }
+	return true;
 }

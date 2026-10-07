@@ -1204,6 +1204,13 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Overlay->CloseTransfer();
 			Button = SCampaign1851Overlay::EButton::None;
 		}
+		if (Button == SCampaign1851Overlay::EButton::Ransom)
+		{
+			FString Why;
+			Map->RansomOfficer(Module, &Why);
+			Overlay->ShowToast(Why);
+			Button = SCampaign1851Overlay::EButton::None;
+		}
 		if (Button == SCampaign1851Overlay::EButton::EqualizeUnit)
 		{
 			FString Why;

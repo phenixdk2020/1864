@@ -1225,6 +1225,9 @@ public:
 	 *  and the enemy officers we took. */
 	void ApplyOfficerCasualties(const TArray<TSharedPtr<FJsonValue>>& Ours, const TArray<TSharedPtr<FJsonValue>>& Theirs);
 	void DailyOfficers();
+	/** What the enemy asks to let a captured officer go (by his rank), and paying it (he returns at once). */
+	int32 RansomCost(int32 Officer) const;
+	bool RansomOfficer(int32 Officer, FString* OutWhy = nullptr);
 	int32 EnemyOfficersHeld = 0;
 	/** A company's number, counted through its regiment (the 2nd battalion has companies 5-8). */
 	int32 CompanyNumber(int32 Regiment, int32 Company) const;

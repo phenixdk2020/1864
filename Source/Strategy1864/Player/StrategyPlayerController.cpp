@@ -970,7 +970,35 @@ void AStrategyPlayerController::DeliverOrder(AStrategyUnit* Unit, FStrategyOrder
         Order.TargetLocation += FVector(FMath::Cos(Angle), FMath::Sin(Angle), 0.0f) * Off;
         Remark = FString::Printf(TEXT("%s har forstået ordren løst: stedet ligger ca. %.0f m fra det ønskede"), *Unit->DisplayName.ToString(), Off / 100.0f);
     }
-    Unit->OrderComponent->QueueDelayedOrder(Order, Reaction);
+    float ExtraDelay = 0.0f;
+    // A cautious, unaggressive officer will not attack an enemy far stronger than his own men: he takes a position where he is and says so.
+    if (Profile && (Order.Type == EStrategyOrderType::AttackHere || Order.Type == EStrategyOrderType::Charge || Order.Type == EStrategyOrderType::Advance) &&
+        Profile->Caution > 70.0f && Profile->Aggression < 45.0f)
+    {
+        float Enemy = 0.0f;
+        const FVector Goal = Order.TargetLocation.IsNearlyZero() ? Unit->GetActorLocation() : Order.TargetLocation;
+        for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+        {
+            if (IsValid(*It) && It->Side != Unit->Side && It->Side != EStrategySide::Neutral && It->Echelon != EStrategyEchelon::Headquarters && It->Echelon != EStrategyEchelon::Supply &&
+                It->IsCombatEffective() && FVector::Dist2D(It->GetActorLocation(), Goal) < 60000.0f)
+            {
+                Enemy += FMath::Max(0, It->CurrentStrength);
+            }
+        }
+        if (Enemy > 1.6f * FMath::Max(1, Unit->CurrentStrength))
+        {
+            Order.Type = EStrategyOrderType::DefendHere;
+            Order.TargetLocation = Unit->GetActorLocation();
+            Remark = FString::Printf(TEXT("%s tøver: fjenden er for stærk (%.0f mand mod hans %d), han holder sin stilling i stedet"), *Unit->DisplayName.ToString(), Enemy, Unit->CurrentStrength);
+        }
+    }
+    // A poorly disciplined officer is now and then slow to carry an order out.
+    if (Profile && Profile->Discipline < 35.0f && FMath::FRand() < 0.15f)
+    {
+        ExtraDelay = 30.0f + FMath::FRand() * 30.0f;
+        if (Remark.IsEmpty()) { Remark = FString::Printf(TEXT("%s er langsom til at følge ordren (%.0f s)"), *Unit->DisplayName.ToString(), Reaction + ExtraDelay); }
+    }
+    Unit->OrderComponent->QueueDelayedOrder(Order, Reaction + ExtraDelay);
     if (AStrategyHUD* Hud = Cast<AStrategyHUD>(GetHUD()))
     {
         Hud->AddNotice(Remark.IsEmpty() ? FString::Printf(TEXT("Ordren er fremme hos %s (%.0f s til den udføres)"), *Unit->DisplayName.ToString(), Reaction) : Remark);

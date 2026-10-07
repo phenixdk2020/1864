@@ -689,6 +689,19 @@ void AStrategyOOBTestScenario::TickOfficers()
             {
                 P->Fate = 2;
                 P->Impairment = 0.4f;
+                // The loss of the chief: his unit loses heart (a staff officer: every unit near him a little).
+                Unit->Morale = FMath::Max(0.0f, Unit->Morale - 15.0f);
+                Unit->Cohesion = FMath::Max(0.0f, Unit->Cohesion - 10.0f);
+                if (bStaff)
+                {
+                    for (TActorIterator<AStrategyUnit> Near(World); Near; ++Near)
+                    {
+                        if (IsValid(*Near) && *Near != Unit && Near->Side == Unit->Side && Near->Echelon != EStrategyEchelon::Headquarters && FVector::Dist2D(Near->GetActorLocation(), Unit->GetActorLocation()) < 20000.0f)
+                        {
+                            Near->Morale = FMath::Max(0.0f, Near->Morale - 6.0f);
+                        }
+                    }
+                }
                 UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OFFICER: %s taken prisoner (%s)"), *Who, *Unit->DisplayName.ToString());
                 if (Hud) { Hud->AddNotice(bDane ? FString::Printf(TEXT("%s er taget til fange"), *Who) : FString::Printf(TEXT("Fjendens %s er taget til fange"), *Who)); }
             }

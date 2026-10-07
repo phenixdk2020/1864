@@ -1310,6 +1310,13 @@ Tidsgrænsen for pointafgørelsen er sat til tre dage (259.200 s spilletid) i st
 
 Kommandopanelet har for kompagnier en række STILLING: STÅ, KNÆ, LIG (`UStrategyStanceComponent`: knælende rammes 18 % sjældnere, liggende 35 % sjældnere, men lader langsommere og bevæger sig langsomt; gælder alle valgte enheder). For dragoner (`Role = Dragoon`, sat fra regimentets type) er der SIT AF og STIG PÅ (`DismountAtCurrentPosition` / `RequestRemount`). Før fandtes logikken, men ingen kunne bruge den i spillet.
 
+### 2026-10-07 - Fangne officerer: moral, prestige, løsesum; officerer der tøver
+
+- **Moral i slaget:** tages en chef til fange, mister hans enhed 15 moral og 10 samhørighed; en stabsofficer (bataljonschef osv.) tager 6 moral fra hver enhed inden for 200 m.
+- **Prestige:** fanger vi fjendtlige officerer, stiger stemningen hjemme (`PoliticalShock`): 0,3 pr. kaptajn, 0,6 pr. major, 0,9 pr. oberst, højst 4. Mister vi en officer, falder den (0,3 og op efter rang).
+- **Løsesum:** et krigsfange-kort har knappen LØSEKØB (`RansomOfficer`): kaptajn 600 rd., major 1.500, oberstløjtnant 2.200, oberst 3.500, generalmajor 8.000, generalløjtnant 12.000, general 20.000; officeren er hjemme med det samme. Ellers udveksles han efter højst ti uger.
+- **Officerens egen dømmekraft** (ordonnansens aflevering, `DeliverOrder`): en forsigtig og uaggressiv officer (Forsigtighed over 70, Aggressivitet under 45) angriber ikke en fjende, der er mere end 1,6 gange så stærk som hans egne mænd, men holder sin stilling og siger det. En dårligt disciplineret officer (Disciplin under 35) er i 15 % af tilfældene 30-60 sekunder længere om at udføre en ordre.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
