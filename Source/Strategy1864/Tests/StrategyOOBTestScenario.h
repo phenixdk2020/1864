@@ -233,6 +233,7 @@ public:
     const TArray<FBattleObjective>& GetObjectives() const { return Objectives; }
     void GetObjectivePoints(int32& OutDanes, int32& OutEnemy) const;
     /** Seconds left until the time limit decides the battle on points. */
+    float GetBattleClock() const { return BattleClock; }
     float GetObjectiveTimeLeft() const { return FMath::Max(0.0f, ObjectiveTimeLimit - BattleClock); }
 
     /** The small test battle (map *Skirmish* or -Strategy1864Skirmish=<1-4>): a Danish battalion staff with two
@@ -279,7 +280,7 @@ private:
     void DrawObjectives() const;
     TArray<FBattleObjective> Objectives;
     float BattleClock = 0.0f;
-    float ObjectiveTimeLimit = 5400.0f;
+    float ObjectiveTimeLimit = 259200.0f;   // a battle lasts three days at most
     float AllHeldFor = 0.0f;
     int32 AllHeldBy = 0;
     struct FPendingPontoon { FVector Where = FVector::ZeroVector; float ReadyAt = 0.0f; };

@@ -604,13 +604,13 @@ void AStrategyOOBTestScenario::UpdateBattleOutcome()
         {
             if (DanishPoints == EnemyPoints)
             {
-                BattleOutcome = FString(TEXT("UAFGJORT — tiden er gået, målene er delt"));
+                BattleOutcome = FString(TEXT("UAFGJORT — tredje dag er omme, målene er delt"));
             }
             else
             {
                 bDanishVictory = DanishPoints > EnemyPoints;
-                BattleOutcome = bDanishVictory ? FString::Printf(TEXT("SEJR PÅ POINT — tiden er gået, vi holder målene (%d mod %d)"), DanishPoints, EnemyPoints)
-                    : FString::Printf(TEXT("NEDERLAG PÅ POINT — tiden er gået, fjenden holder målene (%d mod %d)"), EnemyPoints, DanishPoints);
+                BattleOutcome = bDanishVictory ? FString::Printf(TEXT("SEJR PÅ POINT — tredje dag er omme, vi holder målene (%d mod %d)"), DanishPoints, EnemyPoints)
+                    : FString::Printf(TEXT("NEDERLAG PÅ POINT — tredje dag er omme, fjenden holder målene (%d mod %d)"), EnemyPoints, DanishPoints);
             }
         }
         if (!BattleOutcome.IsEmpty())

@@ -1280,6 +1280,10 @@ Træk et kompagni hen på et andet i samme bataljon: et vindue (`PaintTransfer`)
 - INDSTILLINGER har en ny knap: Ordonnanser TIL/FRA (gemmes; `-Strategy1864NoCouriers` slår dem fra). `-Strategy1864TestCourier` sender en testordre til den fjerneste enhed.
 - Ikke lavet endnu: officerer der nægter eller afviger efter forsigtighed/initiativ, ordrer videre gennem bataljon og brigade (kæden), og forstærkninger i slag over flere dage.
 
+### 2026-10-07 - Et slag varer højst tre dage
+
+Tidsgrænsen for pointafgørelsen er sat til tre dage (259.200 s spilletid) i stedet for 90 minutter; panelet viser "Dag d af 3 t:mm".
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
