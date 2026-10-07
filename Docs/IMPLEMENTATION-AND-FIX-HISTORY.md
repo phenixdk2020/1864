@@ -1294,6 +1294,11 @@ Tidsgrænsen for pointafgørelsen er sat til tre dage (259.200 s spilletid) i st
 - Lyset følger uret (`AStrategyBattleAtmosphere::UpdateForHour`): solens højde og retning udregnes af dagen på året (fra slagets dato i BattleRequest) og breddegraden 55,7 °N; en lav sol er rød, skumring, og om natten et blegt blåt måneskin, mørkere himmel og tåge. Kontrolleret ved kl. 05, 22:30 og 01:30.
 - Ikke med endnu: at synsvidde og kampkraft følger lyset, at hærene hviler om natten, og forstærkninger ved daggry.
 
+### 2026-10-07 - Alle 100 portrætter og nye bygningskort er i spillet
+
+- Portrætterne fra `Overførsler\Strategy1864_Portrætter` (30 unge, 30 ældre og 15 gamle officerer og 25 ministre, 512 x 640) ligger i `Reference/Campaign1851/Portraits` og er importeret (`Import-Billeder`/`import_building_cards.py`). Officerskortet viser dem efter alder med rangmærket tegnet oven på (kontrolleret på et skærmbillede).
+- De 20 bygninger fra `Strategy1864_Buildings_All_20` (768 x 768) ligger uændret i `Reference/Campaign1851/Buildings/Strategy1864`. De der passer til en bygningstype uden billede er lavet til kort (512 x 512): `T_Bld_Barn`, `Blacksmith`, `Stable`, `Railway_Station`, `Church`, `Windmill` og `Watermill`. De øvrige (Kommandobygning, Infanteribygning, Kanonbygning, Officersbolig, Mandskabsbolig, Portnerbolig, Markedshal) venter på en bygningstype.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

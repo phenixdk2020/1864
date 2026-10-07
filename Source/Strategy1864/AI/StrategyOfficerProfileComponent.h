@@ -42,6 +42,24 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Officer", meta=(ClampMin="0.0", ClampMax="100.0"))
     float Experience = 50.0f;
 
+    /** Who he is (the campaign's officer id, a name and rank), when the battle knows him. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Officer")
+    FString OfficerId;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Officer")
+    FString OfficerName;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Officer")
+    FString OfficerRank;
+
+    /** What has become of him in the battle: 0 well, 1 wounded, 2 taken prisoner (never killed). */
+    UPROPERTY(BlueprintReadWrite, Category="Strategy|Officer")
+    int32 Fate = 0;
+
+    /** How much of his ability is left (a wounded officer 0.6, a prisoner's unit has none to lead it 0.4). */
+    UPROPERTY(BlueprintReadWrite, Category="Strategy|Officer")
+    float Impairment = 1.0f;
+
     UFUNCTION(BlueprintPure, Category="Strategy|Officer")
     float GetCommandEfficiency() const;
 

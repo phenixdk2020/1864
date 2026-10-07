@@ -5,6 +5,7 @@
 #include "../Campaign/StrategyCampaignBattlefield.h"
 #include "../Visual/StrategyColourFlag.h"
 #include "../Visual/StrategyCourierRider.h"
+#include "../Player/StrategyHUD.h"
 #include "Dom/JsonObject.h"
 #include "HAL/FileManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -579,6 +580,104 @@ void AStrategyOOBTestScenario::DrawObjectives() const
     }
 }
 
+void AStrategyOOBTestScenario::SetOfficer(AStrategyUnit* Unit, const TSharedPtr<FJsonObject>& Officer)
+{
+    if (!Unit || !Unit->OfficerProfileComponent || !Officer.IsValid())
+    {
+        return;
+    }
+    bool bVacant = false;
+    Officer->TryGetBoolField(TEXT("vacant"), bVacant);
+    FString Id;
+    if (bVacant || !Officer->TryGetStringField(TEXT("id"), Id) || Id.IsEmpty())
+    {
+        return;
+    }
+    UStrategyOfficerProfileComponent* P = Unit->OfficerProfileComponent;
+    P->OfficerId = Id;
+    Officer->TryGetStringField(TEXT("name"), P->OfficerName);
+    Officer->TryGetStringField(TEXT("rank"), P->OfficerRank);
+}
+
+void AStrategyOOBTestScenario::MakeEnemyOfficer(AStrategyUnit* Unit, int32 Kind)
+{
+    // The enemy's officers have no file: a name and rank made up for the battle (0 captain, 1 major, 2 colonel).
+    if (!Unit || !Unit->OfficerProfileComponent)
+    {
+        return;
+    }
+    static const TCHAR* Names[] = { TEXT("von Moltke"), TEXT("von Roon"), TEXT("Schmidt"), TEXT("von Wrangel"), TEXT("Müller"), TEXT("von Bonin"), TEXT("von der Goltz"),
+        TEXT("Meyer"), TEXT("von Kleist"), TEXT("Hoffmann"), TEXT("von Steinmetz"), TEXT("Lange"), TEXT("Graf Gondrecourt"), TEXT("von Nostitz"), TEXT("Baron Dormus"), TEXT("Bauer") };
+    static const TCHAR* Ranks[] = { TEXT("Kaptajn"), TEXT("Major"), TEXT("Oberst") };
+    UStrategyOfficerProfileComponent* P = Unit->OfficerProfileComponent;
+    P->OfficerId = FString::Printf(TEXT("EN-OFF-%d"), ++EnemyOfficerCount);
+    P->OfficerName = Names[FMath::RandRange(0, UE_ARRAY_COUNT(Names) - 1)];
+    P->OfficerRank = Ranks[FMath::Clamp(Kind, 0, 2)];
+}
+
+void AStrategyOOBTestScenario::TickOfficers()
+{
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        return;
+    }
+    AStrategyHUD* Hud = nullptr;
+    if (APlayerController* PC = World->GetFirstPlayerController())
+    {
+        Hud = Cast<AStrategyHUD>(PC->GetHUD());
+    }
+    for (TActorIterator<AStrategyUnit> It(World); It; ++It)
+    {
+        AStrategyUnit* Unit = *It;
+        UStrategyOfficerProfileComponent* P = IsValid(Unit) ? Unit->OfficerProfileComponent : nullptr;
+        if (!P || P->OfficerId.IsEmpty() || P->Fate == 2 || Unit->Side == EStrategySide::Neutral)
+        {
+            continue;
+        }
+        FOfficerWatch& W = OfficerWatch.FindOrAdd(Unit);
+        const int32 Strength = FMath::Max(0, Unit->CurrentStrength);
+        if (W.LastStrength < 0) { W.LastStrength = Strength; }
+        const int32 Lost = W.LastStrength - Strength;
+        W.LastStrength = Strength;
+        const bool bDane = Unit->Side == EStrategySide::Denmark;
+        const bool bStaff = Unit->Echelon == EStrategyEchelon::Headquarters;
+        const FString Who = FString::Printf(TEXT("%s %s"), *P->OfficerRank, *P->OfficerName);
+        // Wounded: by the men the unit loses (the officers in front more than the staffs).
+        if (P->Fate == 0 && Lost > 0 && FMath::FRand() < FMath::Min(0.5f, Lost * 0.004f * (bStaff ? 0.4f : 1.0f)))
+        {
+            P->Fate = 1;
+            P->Impairment = 0.6f;
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OFFICER: %s wounded (%s)"), *Who, *Unit->DisplayName.ToString());
+            if (Hud) { Hud->AddNotice(bDane ? FString::Printf(TEXT("%s er såret"), *Who) : FString::Printf(TEXT("Fjendens %s er såret"), *Who)); }
+        }
+        // Taken: when the unit breaks (or is destroyed) with the enemy close.
+        const bool bBroken = Unit->UnitState == EStrategyUnitState::Routed || Unit->UnitState == EStrategyUnitState::Destroyed;
+        if (bBroken && !W.bBroke)
+        {
+            W.bBroke = true;
+            bool bEnemyNear = false;
+            for (TActorIterator<AStrategyUnit> Other(World); Other && !bEnemyNear; ++Other)
+            {
+                bEnemyNear = IsValid(*Other) && Other->Side != Unit->Side && Other->Side != EStrategySide::Neutral && Other->Echelon != EStrategyEchelon::Headquarters &&
+                    Other->Echelon != EStrategyEchelon::Supply && Other->IsCombatEffective() && FVector::Dist2D(Other->GetActorLocation(), Unit->GetActorLocation()) < 4000.0f;
+            }
+            const float Chance = (P->Fate == 1 ? 0.55f : 0.35f) * (Unit->UnitState == EStrategyUnitState::Destroyed ? 1.5f : 1.0f) * (1.0f - 0.004f * P->Composure);
+            if (bEnemyNear && FMath::FRand() < Chance)
+            {
+                P->Fate = 2;
+                P->Impairment = 0.4f;
+                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OFFICER: %s taken prisoner (%s)"), *Who, *Unit->DisplayName.ToString());
+                if (Hud) { Hud->AddNotice(bDane ? FString::Printf(TEXT("%s er taget til fange"), *Who) : FString::Printf(TEXT("Fjendens %s er taget til fange"), *Who)); }
+            }
+        }
+        else if (!bBroken)
+        {
+            W.bBroke = false;
+        }
+    }
+}
+
 void AStrategyOOBTestScenario::UpdateBattleOutcome()
 {
     if (!BattleOutcome.IsEmpty() || (!bSkirmish && !bCampaignBattle))
@@ -897,6 +996,10 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         const TSharedPtr<FJsonObject> Battle = U->GetObjectField(TEXT("battle"));
         AStrategyHQUnit* Major = SpawnHQ(FName(*FString::Printf(TEXT("DK-%s-HQ"), *Id)), U->GetStringField(TEXT("name")), static_cast<uint8>(EStrategyHQLevel::Battalion), Danish(-9000.0f, Y), Army);
         Face(Major, false);
+        {
+            const TSharedPtr<FJsonObject>* Commander = nullptr;
+            if (Battle->TryGetObjectField(TEXT("commander"), Commander)) { SetOfficer(Major, *Commander); }
+        }
         CampaignUnitOf.Add(Major, Id);
         const TArray<TSharedPtr<FJsonValue>>& Subs = Battle->GetArrayField(TEXT("subunits"));
         int32 Number = 0;
@@ -917,6 +1020,10 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
                 Face(Company, false);
                 Company->InitialStrength = Company->CurrentStrength = Men;
                 ApplyDanish(Company, U);
+                {
+                    const TSharedPtr<FJsonObject>* Captain = nullptr;
+                    if (Sub->TryGetObjectField(TEXT("captain"), Captain)) { SetOfficer(Company, *Captain); }
+                }
                 if (Company->InfantryVisualComponent)
                 {
                     // The model by arm: the jægerkorps in the jæger uniform, the guard as Livgarden, the line in the standard.
@@ -975,6 +1082,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         EnemyBrigade->Side = EnemySide;
         EnemyBrigade->bPlayerControllable = false;
         EnemyBrigade->bOfficerAIEnabled = true;
+        MakeEnemyOfficer(EnemyBrigade, 2);
         EnemyBrigade->RefreshDebugLabel();
         Face(EnemyBrigade, true);
     }
@@ -990,6 +1098,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             HQ->Side = EnemySide;
             HQ->bPlayerControllable = false;
             HQ->bOfficerAIEnabled = true;
+            MakeEnemyOfficer(HQ, 1);
             HQ->RefreshDebugLabel();
             Face(HQ, true);
         }
@@ -1005,6 +1114,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         if (Company)
         {
             Face(Company, true);
+            MakeEnemyOfficer(Company, 0);
             Company->bOfficerAIEnabled = true;
             if (Company->AutonomousBattleAIComponent)
             {
@@ -1103,6 +1213,26 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
     Doc->SetNumberField(TEXT("battleId"), CampaignBattleId);
     Doc->SetStringField(TEXT("outcome"), Outcome);
     Doc->SetNumberField(TEXT("enemyLosses"), EnemyStart - EnemyNow);
+    {
+        // The officers the battle has taken from their posts: ours (wounded, prisoners) and the enemy's.
+        TArray<TSharedPtr<FJsonValue>> Ours, Theirs;
+        for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+        {
+            const UStrategyOfficerProfileComponent* P = IsValid(*It) ? It->OfficerProfileComponent : nullptr;
+            if (!P || P->OfficerId.IsEmpty() || P->Fate == 0)
+            {
+                continue;
+            }
+            TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
+            O->SetStringField(TEXT("id"), P->OfficerId);
+            O->SetStringField(TEXT("name"), P->OfficerName);
+            O->SetStringField(TEXT("rank"), P->OfficerRank);
+            O->SetStringField(TEXT("fate"), P->Fate == 2 ? TEXT("captured") : TEXT("wounded"));
+            (It->Side == EStrategySide::Denmark ? Ours : Theirs).Add(MakeShared<FJsonValueObject>(O));
+        }
+        Doc->SetArrayField(TEXT("officers"), Ours);
+        Doc->SetArrayField(TEXT("enemyOfficers"), Theirs);
+    }
     Doc->SetNumberField(TEXT("danishPoints"), DanishPoints);
     Doc->SetNumberField(TEXT("enemyPoints"), EnemyPoints);
     TArray<TSharedPtr<FJsonValue>> UnitList;
@@ -1167,6 +1297,12 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
             TickObjectives(DeltaSeconds);
         }
         DrawObjectives();
+        OfficerTimer -= DeltaSeconds;
+        if (OfficerTimer <= 0.0f)
+        {
+            OfficerTimer = 2.0f;
+            TickOfficers();
+        }
         ClockTimer -= DeltaSeconds;
         if (ClockTimer <= 0.0f && AtmosphereActor)
         {

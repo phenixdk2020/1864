@@ -12,7 +12,7 @@ float UStrategyOfficerProfileComponent::GetCommandEfficiency() const
          Initiative * 0.20f +
          StaffQuality * 0.25f +
          TacticalSkill * 0.15f +
-         Discipline * 0.15f) / 100.0f,
+         Discipline * 0.15f) / 100.0f * Impairment,
         0.10f,
         1.0f);
 }
@@ -34,7 +34,7 @@ float UStrategyOfficerProfileComponent::GetDecisionStability() const
         (Composure * 0.40f +
          Experience * 0.30f +
          Discipline * 0.20f +
-         TacticalSkill * 0.10f) / 100.0f,
+         TacticalSkill * 0.10f) / 100.0f * Impairment,
         0.0f,
         1.0f);
 }

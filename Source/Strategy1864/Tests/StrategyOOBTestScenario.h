@@ -277,6 +277,15 @@ private:
     float BattleScoreTimer = 0.0f;
     void BuildSkirmish(int32 EnemyCompanies);
     void UpdateBattleOutcome();
+    /** Officers: the unit's officer is named (the campaign's, or made up for the enemy), may be wounded by the unit's losses
+     *  and taken prisoner when it breaks with the enemy close; never killed. The result file lists them. */
+    void SetOfficer(AStrategyUnit* Unit, const TSharedPtr<FJsonObject>& Officer);
+    void MakeEnemyOfficer(AStrategyUnit* Unit, int32 Kind);
+    void TickOfficers();
+    struct FOfficerWatch { int32 LastStrength = -1; bool bBroke = false; };
+    TMap<TWeakObjectPtr<AStrategyUnit>, FOfficerWatch> OfficerWatch;
+    float OfficerTimer = 0.0f;
+    int32 EnemyOfficerCount = 0;
     void SetupObjectives(const FVector& DanishLine, const FVector& EnemyLine);
     void TickObjectives(float DeltaSeconds);
     void DrawObjectives() const;
