@@ -1284,6 +1284,10 @@ Træk et kompagni hen på et andet i samme bataljon: et vindue (`PaintTransfer`)
 
 Tidsgrænsen for pointafgørelsen er sat til tre dage (259.200 s spilletid) i stedet for 90 minutter; panelet viser "Dag d af 3 t:mm".
 
+### 2026-10-07 - Ordonnansen er en rigtig rytter
+
+`AStrategyCourierRider` (Visual): en enkelt rytter på kavaleriets hest- og rytter-modeller galopperer fra staben til enheden (1200 cm/s, følger enheden hvis den flytter sig), støver op og venter, indtil ordren er afleveret; derefter rider han tilbage og forsvinder. Ordren afleveres, når rytteren er fremme (ikke efter et tidsur). Skudkommandoen `-Strategy1864Shots=sek:RIDER:afstand:side` følger rytteren.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

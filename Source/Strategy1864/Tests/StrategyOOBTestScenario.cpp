@@ -4,6 +4,7 @@
 #include "Misc/PackageName.h"
 #include "../Campaign/StrategyCampaignBattlefield.h"
 #include "../Visual/StrategyColourFlag.h"
+#include "../Visual/StrategyCourierRider.h"
 #include "Dom/JsonObject.h"
 #include "HAL/FileManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -1388,10 +1389,18 @@ void AStrategyOOBTestScenario::TickShots()
     }
     const float Distance = Parts.Num() > 2 ? FCString::Atof(*Parts[2]) : 4000.0f;
     const float Side = Parts.Num() > 3 ? FCString::Atof(*Parts[3]) : 0.5f;
-    AStrategyUnit* Target = nullptr;
+    AActor* Target = nullptr;
     for (TActorIterator<AStrategyUnit> It(World); It; ++It)
     {
         if (It->StableUnitId.ToString().Contains(Parts[1]))
+        {
+            Target = *It;
+            break;
+        }
+    }
+    if (Parts[1] == TEXT("RIDER"))
+    {
+        for (TActorIterator<AStrategyCourierRider> It(World); It; ++It)
         {
             Target = *It;
             break;

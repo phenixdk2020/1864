@@ -81,6 +81,7 @@ private:
         TWeakObjectPtr<AStrategyUnit> Unit;
         FStrategyOrder Order;
         FVector From = FVector::ZeroVector;
+        TWeakObjectPtr<class AStrategyCourierRider> Horseman;
         float Travel = 0.0f;
         float Elapsed = 0.0f;
     };

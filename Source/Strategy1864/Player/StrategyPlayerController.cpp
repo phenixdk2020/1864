@@ -11,6 +11,7 @@
 #include "../Units/StrategyHQUnit.h"
 #include "../AI/StrategyOfficerProfileComponent.h"
 #include "DrawDebugHelpers.h"
+#include "../Visual/StrategyCourierRider.h"
 #include "../Command/StrategyCommandComponent.h"
 #include "../Orders/StrategyOrderComponent.h"
 #include "../AI/StrategyOfficerAIComponent.h"
@@ -513,8 +514,17 @@ bool AStrategyPlayerController::IssueOrderToSelection(
         const bool bIsStaff = Unit->Echelon == EStrategyEchelon::Headquarters && (!Unit->CommandComponent || !IsValid(Unit->CommandComponent->CurrentCommandParent));
         if (bStaff && !bIsStaff && Distance > 32000.0f)
         {
+            for (const FCourier& Old : Couriers)
+            {
+                if (Old.Unit.Get() == Unit && Old.Horseman.IsValid()) { Old.Horseman->Dismiss(); }
+            }
             Couriers.RemoveAll([Unit](const FCourier& C) { return C.Unit.Get() == Unit; });
             FCourier Rider;
+            if (AStrategyCourierRider* Horseman = GetWorld()->SpawnActor<AStrategyCourierRider>(AStrategyCourierRider::StaticClass(), Staff, FRotator::ZeroRotator))
+            {
+                Horseman->Send(Staff, Unit);
+                Rider.Horseman = Horseman;
+            }
             Rider.Unit = Unit;
             Rider.Order = Order;
             Rider.From = Staff;
@@ -898,7 +908,7 @@ TArray<AStrategyPlayerController::FCourierInfo> AStrategyPlayerController::GetPe
         {
             FCourierInfo I;
             I.Unit = C.Unit;
-            I.SecondsLeft = FMath::Max(0.0f, C.Travel - C.Elapsed);
+            I.SecondsLeft = C.Horseman.IsValid() ? C.Horseman->SecondsLeft() : FMath::Max(0.0f, C.Travel - C.Elapsed);
             Out.Add(I);
         }
     }
@@ -921,14 +931,15 @@ void AStrategyPlayerController::TickCouriers(float DeltaTime)
             continue;
         }
         C.Elapsed += DeltaTime;
-        const float Alpha = FMath::Clamp(C.Elapsed / FMath::Max(C.Travel, 0.1f), 0.0f, 1.0f);
-        const FVector To = Unit->GetActorLocation();
-        const FVector Rider = FMath::Lerp(C.From, To, Alpha) + FVector(0.0f, 0.0f, 150.0f);
-        // The rider: a gold mark moving along the way, the track behind it.
-        DrawDebugLine(GetWorld(), C.From + FVector(0.0f, 0.0f, 120.0f), Rider, FColor(220, 190, 90), false, 0.0f, SDPG_World, 8.0f);
-        DrawDebugBox(GetWorld(), Rider, FVector(110.0f, 60.0f, 110.0f), FQuat::Identity, FColor(255, 225, 120), false, 0.0f, SDPG_World, 14.0f);
-        if (C.Elapsed >= C.Travel)
+        // The order is handed over when the rider is there (without one: when the time is up).
+        const bool bHere = C.Horseman.IsValid() ? C.Horseman->HasArrived() : C.Elapsed >= C.Travel;
+        if (C.Horseman.IsValid())
         {
+            DrawDebugLine(GetWorld(), C.From + FVector(0.0f, 0.0f, 120.0f), C.Horseman->GetActorLocation() + FVector(0.0f, 0.0f, 150.0f), FColor(220, 190, 90), false, 0.0f, SDPG_World, 6.0f);
+        }
+        if (bHere)
+        {
+            if (C.Horseman.IsValid()) { C.Horseman->Dismiss(); }
             const FStrategyOrder Order = C.Order;
             Couriers.RemoveAt(i);
             DeliverOrder(Unit, Order);
