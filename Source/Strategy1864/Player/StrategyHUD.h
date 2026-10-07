@@ -69,6 +69,7 @@ private:
     void DrawOOBRow(AStrategyUnit* Unit, int32 Depth, float& Y, int32 Guard);
     void DrawCommandPanel(AStrategyUnit* Unit);
     void DrawMinimap();
+    void DrawObjectiveMarkers();
     void DrawSettings();
     /** The fire cone of a unit on the ground (as the QA design): from the formation's front corners, the
      *  sides dashed at the half angle, the close, medium and long ranges as dashed arcs following the front,

@@ -209,6 +209,7 @@ void AStrategyHUD::DrawHUD()
         }
     }
 
+    DrawObjectiveMarkers();
     DrawOOB();
     DrawMinimap();
     DrawSettings();
@@ -221,9 +222,17 @@ void AStrategyHUD::DrawHUD()
         }
         int32 DS, DN, ES, EN, DB, EB;
         It->GetBattleScore(DS, DN, ES, EN, DB, EB);
-        const float BW = 420.0f, BX = (Canvas->ClipX - BW) * 0.5f;
+        int32 DanishPoints = 0, EnemyPoints = 0;
+        It->GetObjectivePoints(DanishPoints, EnemyPoints);
+        const bool bObjectives = It->GetObjectives().Num() > 0;
+        const float BW = bObjectives ? 640.0f : 420.0f, BX = (Canvas->ClipX - BW) * 0.5f;
         DrawPanel(BX, 6.0f, BW, 30.0f);
         Text(FString::Printf(TEXT("DANSKE  %d / %d   ·   FJENDEN  %d / %d"), DN, DS, EN, ES), BX + 14.0f, 13.0f, Gold);
+        if (bObjectives)
+        {
+            const int32 Left = int32(It->GetObjectiveTimeLeft());
+            Text(FString::Printf(TEXT("MÅL  %d : %d   ·   %d:%02d"), DanishPoints, EnemyPoints, Left / 60, Left % 60), BX + 440.0f, 13.0f, Gold);
+        }
         const FString& Outcome = It->GetBattleOutcome();
         if (!Outcome.IsEmpty())
         {
@@ -944,4 +953,41 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
         return true;
     }
     return IsOverPanel(P);
+}
+
+// ------------------------------------------------------------------ objectives
+
+void AStrategyHUD::DrawObjectiveMarkers()
+{
+    // The battle's objectives as flags over the field: name, worth, owner, and the capture's progress.
+    for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+    {
+        for (const AStrategyOOBTestScenario::FBattleObjective& O : It->GetObjectives())
+        {
+            const FVector Screen = Project(O.Location + FVector(0.0f, 0.0f, 2200.0f));
+            if (Screen.Z <= 0.0f || Screen.X < -100.0f || Screen.X > Canvas->ClipX + 100.0f || Screen.Y < -50.0f || Screen.Y > Canvas->ClipY + 50.0f)
+            {
+                continue;
+            }
+            const FLinearColor Colour = O.Owner == 1 ? FLinearColor(0.30f, 0.50f, 0.95f) : O.Owner == 2 ? FLinearColor(0.88f, 0.30f, 0.25f) : FLinearColor(0.85f, 0.80f, 0.60f);
+            const float Size = 11.0f;
+            DrawLine(Screen.X, Screen.Y - Size, Screen.X + Size, Screen.Y, Colour, 2.0f);
+            DrawLine(Screen.X + Size, Screen.Y, Screen.X, Screen.Y + Size, Colour, 2.0f);
+            DrawLine(Screen.X, Screen.Y + Size, Screen.X - Size, Screen.Y, Colour, 2.0f);
+            DrawLine(Screen.X - Size, Screen.Y, Screen.X, Screen.Y - Size, Colour, 2.0f);
+            const FString Label = FString::Printf(TEXT("%s  (%d)"), *O.Name, O.Points);
+            float TW = 0.0f, TH = 0.0f;
+            GetTextSize(Label, TW, TH, nullptr, 1.0f);
+            DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.55f), Screen.X - TW * 0.5f - 6.0f, Screen.Y + Size + 4.0f, TW + 12.0f, TH + 14.0f);
+            DrawText(Label, Colour, Screen.X - TW * 0.5f, Screen.Y + Size + 8.0f, nullptr, 1.0f, false);
+            // The capture: the bar fills towards the side that is taking it.
+            const float BarW = 90.0f, BarY = Screen.Y + Size + TH + 20.0f;
+            DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.6f), Screen.X - BarW * 0.5f, BarY, BarW, 6.0f);
+            const float Fill = FMath::Abs(O.Progress) * BarW * 0.5f;
+            const FLinearColor Taker = O.Progress < 0.0f ? FLinearColor(0.30f, 0.50f, 0.95f) : FLinearColor(0.88f, 0.30f, 0.25f);
+            DrawRect(Taker, O.Progress < 0.0f ? Screen.X - Fill : Screen.X, BarY, Fill, 6.0f);
+            DrawRect(FLinearColor(0.9f, 0.9f, 0.9f, 0.8f), Screen.X - 1.0f, BarY - 1.0f, 2.0f, 8.0f);
+        }
+        break;
+    }
 }

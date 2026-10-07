@@ -216,6 +216,25 @@ public:
     const FString& GetBattleOutcome() const { return BattleOutcome; }
     bool IsDanishVictory() const { return bDanishVictory; }
 
+    /** The battle's objectives (victory points): a place with a worth, held by the side that has the men there and the
+     *  enemy has not (capturing takes time). A side that holds them all for a minute wins; at the time limit the side with
+     *  the most points wins. */
+    struct FBattleObjective
+    {
+        FVector Location = FVector::ZeroVector;
+        FString Name;
+        float Radius = 10000.0f;
+        int32 Points = 100;
+        int32 Owner = 0;          // 0 nobody, 1 Denmark, 2 the enemy
+        float Progress = 0.0f;    // -1 Danish ... +1 the enemy's
+        int32 DanesIn = 0;
+        int32 EnemyIn = 0;
+    };
+    const TArray<FBattleObjective>& GetObjectives() const { return Objectives; }
+    void GetObjectivePoints(int32& OutDanes, int32& OutEnemy) const;
+    /** Seconds left until the time limit decides the battle on points. */
+    float GetObjectiveTimeLeft() const { return FMath::Max(0.0f, ObjectiveTimeLimit - BattleClock); }
+
     /** The small test battle (map *Skirmish* or -Strategy1864Skirmish=<1-4>): a Danish battalion staff with two
      *  companies under the player against one to four enemy companies with their staff and the AI. */
     bool IsSkirmish() const { return bSkirmish; }
@@ -255,6 +274,14 @@ private:
     float BattleScoreTimer = 0.0f;
     void BuildSkirmish(int32 EnemyCompanies);
     void UpdateBattleOutcome();
+    void SetupObjectives(const FVector& DanishLine, const FVector& EnemyLine);
+    void TickObjectives(float DeltaSeconds);
+    void DrawObjectives() const;
+    TArray<FBattleObjective> Objectives;
+    float BattleClock = 0.0f;
+    float ObjectiveTimeLimit = 5400.0f;
+    float AllHeldFor = 0.0f;
+    int32 AllHeldBy = 0;
     struct FPendingPontoon { FVector Where = FVector::ZeroVector; float ReadyAt = 0.0f; };
     TArray<FPendingPontoon> PendingPontoons;
     int32 CampaignBattleId = 0;

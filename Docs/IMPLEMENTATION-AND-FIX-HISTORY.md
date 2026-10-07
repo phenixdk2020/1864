@@ -1264,6 +1264,14 @@ Træk et kompagni hen på et andet i samme bataljon: et vindue (`PaintTransfer`)
 - Nyt lag: et groft verdensark (`World1851_Color`, 3000 x 3000 km, samme projektion) ligger under det detaljerede kort (`WorldSheet` i C++, materialet `M_Campaign1851World`); det detaljerede kort fader ud i det. Norge, Sverige, Storbritannien, Nordtyskland, Polen og Frankrig ses der. Senere kan flere naboegne gives egne detaljerede lag oven på.
 - Opsætning i editoren: `Tools/Campaign/setup_world_sheet.py` (importerer teksturer, bygger materialet).
 
+### 2026-10-07 - Sejrspoint og mål i 3D-slaget
+
+- Hvert slag (kampagne-slag og skirmish) får fem mål (`FBattleObjective` i `AStrategyOOBTestScenario`): vor stilling (100), midten (150), venstre og højre fløj (100 hver) og fjendens stilling (100). De to stillinger ejes fra start; resten skal tages.
+- Et sted tages ved at have mindst 30 mand i cirklen (ca. 60-120 m), mens modstanderen har under en tredjedel; det tager 90 sekunder, og stedet skifter ejer ved halvvejs (Progress -1..+1). Brudte/udslåede enheder tæller ikke.
+- Afgørelse: en side der holder alle mål i et minut vinder; efter 90 minutters kamp vinder den med flest point; ellers gælder de gamle regler (en side under 35 % af sine mænd). Afslutter spilleren slaget før, afgør point (forskel på mindst 100) før mandskabsandelen. Resultatfilen har `danishPoints`/`enemyPoints`.
+- Visning: ringe og flagstænger i verden (debug-tegning), flag med navn, værdi, ejer og fremdriftsbjælke i HUD'en, og "MÅL a : b · tid" i panelet øverst.
+- Ikke afprøvet i et helt slag endnu (kun opsætning og visning kontrolleret).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

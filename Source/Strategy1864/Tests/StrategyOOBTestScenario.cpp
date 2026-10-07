@@ -426,6 +426,7 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
     FieldCameraTarget = DanishLine - FVector(6000.0f, 0.0f, 0.0f);
     FieldCameraYaw = 0.0f;
     bFieldCameraPlaced = false;
+    SetupObjectives(DanishLine, EnemyLine);
     UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SKIRMISH: 2 Danish companies against %d enemy companies, 400 m apart, figures 1:%d"), EnemyCompanies, Lod);
 }
 
@@ -449,6 +450,131 @@ void AStrategyOOBTestScenario::GetBattleScore(int32& OutDanesStart, int32& OutDa
     }
 }
 
+void AStrategyOOBTestScenario::GetObjectivePoints(int32& OutDanes, int32& OutEnemy) const
+{
+    OutDanes = OutEnemy = 0;
+    for (const FBattleObjective& O : Objectives)
+    {
+        (O.Owner == 1 ? OutDanes : O.Owner == 2 ? OutEnemy : OutDanes) += O.Owner == 0 ? 0 : O.Points;
+    }
+}
+
+void AStrategyOOBTestScenario::SetupObjectives(const FVector& DanishLine, const FVector& EnemyLine)
+{
+    Objectives.Reset();
+    BattleClock = 0.0f;
+    AllHeldFor = 0.0f;
+    AllHeldBy = 0;
+    FVector Axis = EnemyLine - DanishLine;
+    Axis.Z = 0.0f;
+    const float Distance = Axis.Size();
+    if (Distance < 1000.0f)
+    {
+        return;
+    }
+    Axis /= Distance;
+    const FVector Left(-Axis.Y, Axis.X, 0.0f);
+    auto Add = [&](const FVector& At, const TCHAR* Name, int32 Points, int32 FirstOwner)
+    {
+        FBattleObjective O;
+        O.Location = At;
+        O.Location.Z = CampaignField ? CampaignField->GroundZ(At) : At.Z;
+        O.Name = Name;
+        O.Points = Points;
+        O.Owner = FirstOwner;
+        O.Progress = FirstOwner == 1 ? -1.0f : FirstOwner == 2 ? 1.0f : 0.0f;
+        O.Radius = FMath::Clamp(Distance * 0.12f, 6000.0f, 12000.0f);
+        Objectives.Add(O);
+    };
+    // The two lines are each side's own (held from the start); the middle and the wings are to be taken.
+    const FVector Mid = DanishLine + Axis * Distance * 0.5f;
+    Add(DanishLine, TEXT("Vor stilling"), 100, 1);
+    Add(Mid, TEXT("Midten"), 150, 0);
+    Add(Mid + Left * Distance * 0.35f, TEXT("Venstre fløj"), 100, 0);
+    Add(Mid - Left * Distance * 0.35f, TEXT("Højre fløj"), 100, 0);
+    Add(EnemyLine, TEXT("Fjendens stilling"), 100, 2);
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OBJECTIVES: %d objectives over %.0f m, radius %.0f m, time limit %.0f min"), Objectives.Num(), Distance / 100.0f, Objectives[0].Radius / 100.0f, ObjectiveTimeLimit / 60.0f);
+}
+
+void AStrategyOOBTestScenario::TickObjectives(float DeltaSeconds)
+{
+    if (Objectives.Num() == 0 || !GetWorld())
+    {
+        return;
+    }
+    BattleClock += DeltaSeconds;
+    for (FBattleObjective& O : Objectives)
+    {
+        O.DanesIn = O.EnemyIn = 0;
+    }
+    for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+    {
+        const AStrategyUnit* Unit = *It;
+        if (!IsValid(Unit) || Unit->Side == EStrategySide::Neutral || Unit->Echelon == EStrategyEchelon::Headquarters || Unit->Echelon == EStrategyEchelon::Supply ||
+            Unit->Echelon == EStrategyEchelon::Battalion || Unit->Echelon == EStrategyEchelon::Regiment || Unit->Echelon == EStrategyEchelon::Brigade ||
+            Unit->Echelon == EStrategyEchelon::Division || !Unit->IsCombatEffective() || Unit->UnitState == EStrategyUnitState::Routed || Unit->UnitState == EStrategyUnitState::Destroyed)
+        {
+            continue;
+        }
+        const bool bDane = Unit->Side == EStrategySide::Denmark;
+        for (FBattleObjective& O : Objectives)
+        {
+            if (FVector::DistSquared2D(Unit->GetActorLocation(), O.Location) <= O.Radius * O.Radius)
+            {
+                (bDane ? O.DanesIn : O.EnemyIn) += FMath::Max(0, Unit->CurrentStrength);
+            }
+        }
+    }
+    int32 Danish = 0, Enemy = 0;
+    for (FBattleObjective& O : Objectives)
+    {
+        // A side takes a place by being there with the men and the other not (a third of them at most); it takes 90 s of holding it.
+        const bool bDanes = O.DanesIn >= 30 && O.EnemyIn * 3 < O.DanesIn;
+        const bool bEnemy = O.EnemyIn >= 30 && O.DanesIn * 3 < O.EnemyIn;
+        if (bDanes)
+        {
+            O.Progress = FMath::Max(-1.0f, O.Progress - DeltaSeconds / 90.0f);
+        }
+        else if (bEnemy)
+        {
+            O.Progress = FMath::Min(1.0f, O.Progress + DeltaSeconds / 90.0f);
+        }
+        const int32 Before = O.Owner;
+        O.Owner = O.Progress < -0.5f ? 1 : O.Progress > 0.5f ? 2 : 0;
+        if (O.Owner != Before && O.Owner != 0)
+        {
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OBJECTIVES: %s taken by %s"), *O.Name, O.Owner == 1 ? TEXT("the Danes") : TEXT("the enemy"));
+        }
+        Danish += O.Owner == 1 ? 1 : 0;
+        Enemy += O.Owner == 2 ? 1 : 0;
+    }
+    const int32 Holder = Danish == Objectives.Num() ? 1 : Enemy == Objectives.Num() ? 2 : 0;
+    if (Holder != 0 && Holder == AllHeldBy)
+    {
+        AllHeldFor += DeltaSeconds;
+    }
+    else
+    {
+        AllHeldBy = Holder;
+        AllHeldFor = 0.0f;
+    }
+}
+
+void AStrategyOOBTestScenario::DrawObjectives() const
+{
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        return;
+    }
+    for (const FBattleObjective& O : Objectives)
+    {
+        const FColor Colour = O.Owner == 1 ? FColor(70, 120, 235) : O.Owner == 2 ? FColor(220, 70, 60) : FColor(210, 200, 150);
+        DrawDebugCircle(World, O.Location + FVector(0.0f, 0.0f, 60.0f), O.Radius, 56, Colour, false, 0.0f, SDPG_World, 40.0f, FVector(1.0f, 0.0f, 0.0f), FVector(0.0f, 1.0f, 0.0f), false);
+        DrawDebugLine(World, O.Location, O.Location + FVector(0.0f, 0.0f, 1800.0f), Colour, false, 0.0f, SDPG_World, 18.0f);
+    }
+}
+
 void AStrategyOOBTestScenario::UpdateBattleOutcome()
 {
     if (!BattleOutcome.IsEmpty() || (!bSkirmish && !bCampaignBattle))
@@ -465,6 +591,32 @@ void AStrategyOOBTestScenario::UpdateBattleOutcome()
     const bool bEnemyBeaten = EN < ES * 0.35f;
     if (!bDanesBeaten && !bEnemyBeaten)
     {
+        // Not decided by the men: by the places. All of them held for a minute, or the points when the time is up.
+        int32 DanishPoints = 0, EnemyPoints = 0;
+        GetObjectivePoints(DanishPoints, EnemyPoints);
+        if (Objectives.Num() > 0 && AllHeldBy != 0 && AllHeldFor >= 60.0f)
+        {
+            bDanishVictory = AllHeldBy == 1;
+            BattleOutcome = bDanishVictory ? FString(TEXT("SEJR — alle mål er taget og holdt"))
+                : FString(TEXT("NEDERLAG — fjenden har taget alle mål"));
+        }
+        else if (Objectives.Num() > 0 && BattleClock >= ObjectiveTimeLimit)
+        {
+            if (DanishPoints == EnemyPoints)
+            {
+                BattleOutcome = FString(TEXT("UAFGJORT — tiden er gået, målene er delt"));
+            }
+            else
+            {
+                bDanishVictory = DanishPoints > EnemyPoints;
+                BattleOutcome = bDanishVictory ? FString::Printf(TEXT("SEJR PÅ POINT — tiden er gået, vi holder målene (%d mod %d)"), DanishPoints, EnemyPoints)
+                    : FString::Printf(TEXT("NEDERLAG PÅ POINT — tiden er gået, fjenden holder målene (%d mod %d)"), EnemyPoints, DanishPoints);
+            }
+        }
+        if (!BattleOutcome.IsEmpty())
+        {
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OUTCOME: %s"), *BattleOutcome);
+        }
         return;
     }
     bDanishVictory = bEnemyBeaten && !bDanesBeaten;
@@ -889,6 +1041,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     FieldCameraTarget.Z = CampaignField->GroundZ(FieldCameraTarget);
     FieldCameraYaw = DanishYaw;
     bFieldCameraPlaced = false;
+    SetupObjectives(DanishLine, EnemyLine);
     UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FIELD: battle %d at %s: %d Danish units (%d battalions, %d cavalry, %d batteries), %d enemy companies (%s, %.0f men%s), figures 1:%d"),
         BattleId, *CampaignField->Place, Units.Num(), Battalions.Num(), Horse.Num(), Guns.Num(), EnemyCompanies, *EnemyNation, EnemyMen, bNeedleGun ? TEXT(", needle gun") : TEXT(""), Lod);
     UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FIELD: the enemy from %.0f deg; the Danish line %.0f m out, the enemy %.0f m out (open %.0f%% / %.0f%%); rules reload x%.2f, losses x%.2f, policy %d"),
@@ -930,13 +1083,18 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
     const float DanesLeft = DanesStart > 0 ? float(DanesNow) / DanesStart : 0.0f;
     const float EnemyLeft = EnemyStart > 0 ? float(EnemyNow) / EnemyStart : 0.0f;
     // The battle's own decision when it came (a side broken), else by the share each side has left.
+    int32 DanishPoints = 0, EnemyPoints = 0;
+    GetObjectivePoints(DanishPoints, EnemyPoints);
     const FString Outcome = !BattleOutcome.IsEmpty() ? (bDanishVictory ? TEXT("danish_victory") : BattleOutcome.StartsWith(TEXT("UAFGJORT")) ? TEXT("draw") : TEXT("enemy_victory"))
+        : DanishPoints >= EnemyPoints + 100 ? TEXT("danish_victory") : EnemyPoints >= DanishPoints + 100 ? TEXT("enemy_victory")
         : DanesLeft > EnemyLeft + 0.05f ? TEXT("danish_victory") : EnemyLeft > DanesLeft + 0.05f ? TEXT("enemy_victory") : TEXT("draw");
     TSharedRef<FJsonObject> Doc = MakeShared<FJsonObject>();
     Doc->SetStringField(TEXT("format"), TEXT("PROJECT1864-BattleResult-1"));
     Doc->SetNumberField(TEXT("battleId"), CampaignBattleId);
     Doc->SetStringField(TEXT("outcome"), Outcome);
     Doc->SetNumberField(TEXT("enemyLosses"), EnemyStart - EnemyNow);
+    Doc->SetNumberField(TEXT("danishPoints"), DanishPoints);
+    Doc->SetNumberField(TEXT("enemyPoints"), EnemyPoints);
     TArray<TSharedPtr<FJsonValue>> UnitList;
     for (const TPair<FString, int32>& L : Losses)
     {
@@ -990,6 +1148,15 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
     {
         EnemyFireTimer = 0.5f;
         EnforceEnemyHoldFire();
+    }
+
+    if (bSkirmish || bCampaignBattle)
+    {
+        if (BattleOutcome.IsEmpty())
+        {
+            TickObjectives(DeltaSeconds);
+        }
+        DrawObjectives();
     }
 
     BattleScoreTimer -= DeltaSeconds;
