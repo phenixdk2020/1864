@@ -1288,6 +1288,12 @@ Tidsgrænsen for pointafgørelsen er sat til tre dage (259.200 s spilletid) i st
 
 `AStrategyCourierRider` (Visual): en enkelt rytter på kavaleriets hest- og rytter-modeller galopperer fra staben til enheden (1200 cm/s, følger enheden hvis den flytter sig), støver op og venter, indtil ordren er afleveret; derefter rider han tilbage og forsvinder. Ordren afleveres, når rytteren er fremme (ikke efter et tidsur). Skudkommandoen `-Strategy1864Shots=sek:RIDER:afstand:side` følger rytteren.
 
+### 2026-10-07 - Tid i slaget: ur, sol, nat
+
+- Slaget har et eget ur (`BattleClock`), der løber 6 gange hurtigere end spillet (`ClockRate`; 1 spilsekund = 6 sekunder på uret), så en dag tager ca. 4 timer ved 1x. Starttidspunktet er 07:00 (`-Strategy1864StartHour=`, `-Strategy1864ClockRate=`). Panelet øverst viser "Dag d af 3 · kl. hh:mm". Tidsgrænsen på tre dage regnes på uret.
+- Lyset følger uret (`AStrategyBattleAtmosphere::UpdateForHour`): solens højde og retning udregnes af dagen på året (fra slagets dato i BattleRequest) og breddegraden 55,7 °N; en lav sol er rød, skumring, og om natten et blegt blåt måneskin, mørkere himmel og tåge. Kontrolleret ved kl. 05, 22:30 og 01:30.
+- Ikke med endnu: at synsvidde og kampkraft følger lyset, at hærene hviler om natten, og forstærkninger ved daggry.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

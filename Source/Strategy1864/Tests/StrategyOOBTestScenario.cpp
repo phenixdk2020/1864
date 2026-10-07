@@ -165,7 +165,10 @@ void AStrategyOOBTestScenario::BeginPlay()
     if (AStrategyBattleAtmosphere* Atmosphere = GetWorld()->SpawnActor<AStrategyBattleAtmosphere>(AStrategyBattleAtmosphere::StaticClass(), Origin, FRotator::ZeroRotator))
     {
         Atmosphere->Apply();
+        AtmosphereActor = Atmosphere;
     }
+    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864StartHour="), StartHour);
+    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864ClockRate="), ClockRate);
 
     // The test fields get a meadow instead of the grey box (-Strategy1864FlatQA keeps the box).
     const FString MeadowMap = FPackageName::GetShortName(GetWorld()->GetOutermost()->GetName());
@@ -503,7 +506,7 @@ void AStrategyOOBTestScenario::TickObjectives(float DeltaSeconds)
     {
         return;
     }
-    BattleClock += DeltaSeconds;
+    BattleClock += DeltaSeconds * ClockRate;
     for (FBattleObjective& O : Objectives)
     {
         O.DanesIn = O.EnemyIn = 0;
@@ -673,6 +676,12 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Request) && Request.IsValid())
         {
             for (const TSharedPtr<FJsonValue>& V : Request->GetArrayField(TEXT("danishUnitIds"))) { DanishIds.Add(V->AsString()); }
+            FString DateText;
+            FDateTime BattleDate;
+            if (AtmosphereActor && Request->TryGetStringField(TEXT("date"), DateText) && FDateTime::ParseIso8601(*DateText, BattleDate))
+            {
+                AtmosphereActor->DayOfYear = float(BattleDate.GetDayOfYear());
+            }
             const TSharedPtr<FJsonObject> Enemy = Request->GetObjectField(TEXT("enemy"));
             EnemyMen = Enemy->GetNumberField(TEXT("men"));
             EnemyNation = Enemy->GetStringField(TEXT("nation"));
@@ -1158,6 +1167,12 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
             TickObjectives(DeltaSeconds);
         }
         DrawObjectives();
+        ClockTimer -= DeltaSeconds;
+        if (ClockTimer <= 0.0f && AtmosphereActor)
+        {
+            ClockTimer = 1.0f;
+            AtmosphereActor->UpdateForHour(GetBattleHour());
+        }
     }
 
     BattleScoreTimer -= DeltaSeconds;

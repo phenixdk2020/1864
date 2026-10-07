@@ -231,8 +231,9 @@ void AStrategyHUD::DrawHUD()
         Text(FString::Printf(TEXT("DANSKE  %d / %d   ·   FJENDEN  %d / %d"), DN, DS, EN, ES), BX + 14.0f, 13.0f, Gold);
         if (bObjectives)
         {
-            const int32 Clock = int32(It->GetBattleClock()), Day = FMath::Min(3, Clock / 86400 + 1), InDay = Clock % 86400;
-            Text(FString::Printf(TEXT("MÅL  %d : %d   ·   Dag %d af 3  %d:%02d"), DanishPoints, EnemyPoints, Day, InDay / 3600, (InDay / 60) % 60), BX + 440.0f, 13.0f, Gold);
+            const int32 Clock = int32(It->GetBattleClock()), Day = FMath::Min(3, Clock / 86400 + 1);
+            const float Hour = It->GetBattleHour();
+            Text(FString::Printf(TEXT("MÅL  %d : %d   ·   Dag %d af 3  ·  kl. %02d:%02d"), DanishPoints, EnemyPoints, Day, int32(Hour), int32((Hour - int32(Hour)) * 60.0f)), BX + 440.0f, 13.0f, Gold);
         }
         const FString& Outcome = It->GetBattleOutcome();
         if (!Outcome.IsEmpty())

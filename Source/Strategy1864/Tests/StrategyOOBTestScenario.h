@@ -234,6 +234,8 @@ public:
     void GetObjectivePoints(int32& OutDanes, int32& OutEnemy) const;
     /** Seconds left until the time limit decides the battle on points. */
     float GetBattleClock() const { return BattleClock; }
+    /** The hour of the day (0-24) on the battle's clock. */
+    float GetBattleHour() const { return FMath::Fmod(StartHour + BattleClock / 3600.0f, 24.0f); }
     float GetObjectiveTimeLeft() const { return FMath::Max(0.0f, ObjectiveTimeLimit - BattleClock); }
 
     /** The small test battle (map *Skirmish* or -Strategy1864Skirmish=<1-4>): a Danish battalion staff with two
@@ -279,7 +281,11 @@ private:
     void TickObjectives(float DeltaSeconds);
     void DrawObjectives() const;
     TArray<FBattleObjective> Objectives;
-    float BattleClock = 0.0f;
+    float BattleClock = 0.0f;   // seconds of the battle's own clock (a second of play is ClockRate of them)
+    float ClockRate = 6.0f;
+    float StartHour = 7.0f;
+    float ClockTimer = 0.0f;
+    UPROPERTY(Transient) TObjectPtr<class AStrategyBattleAtmosphere> AtmosphereActor;
     float ObjectiveTimeLimit = 259200.0f;   // a battle lasts three days at most
     float AllHeldFor = 0.0f;
     int32 AllHeldBy = 0;

@@ -6,6 +6,8 @@
 
 class UExponentialHeightFogComponent;
 class UPostProcessComponent;
+class ADirectionalLight;
+class ASkyLight;
 
 /**
  * The battle's light and air (PROJECT 1864): a late-afternoon sun low in the south-west (warm, long shadows), the
@@ -35,7 +37,22 @@ public:
     UPROPERTY(EditAnywhere, Category="Strategy|Atmosphere")
     float HazeDensity = 0.012f;
 
+    /** The day of the year and the latitude: where the sun stands at an hour (Denmark 55.7 N). */
+    UPROPERTY(EditAnywhere, Category="Strategy|Atmosphere")
+    float DayOfYear = 182.0f;
+
+    UPROPERTY(EditAnywhere, Category="Strategy|Atmosphere")
+    float LatitudeDeg = 55.7f;
+
+    /** The light of an hour of the day (0-24): the sun's height and bearing from the date and place, dusk and night
+     *  with a pale moon, the sky, the haze and the exposure following. */
+    void UpdateForHour(float Hour);
+
 private:
+    TWeakObjectPtr<ADirectionalLight> SunActor;
+    TWeakObjectPtr<ASkyLight> SkyActor;
+    float LastHour = -100.0f;
+
     UPROPERTY()
     TObjectPtr<UExponentialHeightFogComponent> Fog;
 

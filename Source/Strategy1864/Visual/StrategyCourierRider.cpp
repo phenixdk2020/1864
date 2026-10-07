@@ -13,9 +13,9 @@
 
 namespace
 {
-    const TCHAR* HorsePath = TEXT("/Game/Units/Items/SM_Horse_Static.SM_Horse_Static");
-    const TCHAR* RiderPath = TEXT("/Game/Units/Danish/Livgarden1864/Mesh/SK_DK_Livgarden_1864.SK_DK_Livgarden_1864");
-    const TCHAR* SeatPath = TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Reload_sitting.A_Reload_sitting");
+    const TCHAR* CourierHorsePath = TEXT("/Game/Units/Items/SM_Horse_Static.SM_Horse_Static");
+    const TCHAR* CourierRiderPath = TEXT("/Game/Units/Danish/Livgarden1864/Mesh/SK_DK_Livgarden_1864.SK_DK_Livgarden_1864");
+    const TCHAR* CourierSeatPath = TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Reload_sitting.A_Reload_sitting");
 }
 
 AStrategyCourierRider::AStrategyCourierRider()
@@ -27,9 +27,9 @@ AStrategyCourierRider::AStrategyCourierRider()
 
 bool AStrategyCourierRider::LoadAssets()
 {
-    HorseModel = LoadObject<UStaticMesh>(nullptr, HorsePath);
-    RiderModel = LoadObject<USkeletalMesh>(nullptr, RiderPath);
-    SeatClip = LoadObject<UAnimSequence>(nullptr, SeatPath);
+    HorseModel = LoadObject<UStaticMesh>(nullptr, CourierHorsePath);
+    RiderModel = LoadObject<USkeletalMesh>(nullptr, CourierRiderPath);
+    SeatClip = LoadObject<UAnimSequence>(nullptr, CourierSeatPath);
     if (!HorseModel)
     {
         return false;
