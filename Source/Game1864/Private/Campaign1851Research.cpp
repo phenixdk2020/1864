@@ -12,6 +12,7 @@ namespace Campaign1851Research
 	const TArray<FCampaign1851ResearchTopic>& Topics()
 	{
 		static const TArray<FCampaign1851ResearchTopic> List = {
+			{ TEXT("railway"),  TEXT("Jernbaneanlæg"),          TEXT("Muliggør at bygge jernbaner på kortet (uden den kan en bane ikke anlægges). I 1851 kendes den allerede"), 1850, 2500.0, 18, nullptr, 2 },
 			{ TEXT("sanitation"), TEXT("Sanitetsvæsenet"),          TEXT("Ambulancer og feltlazaretter: tab i slag −20 %"),                          1852, 800.0,  12, nullptr, 0 },
 			{ TEXT("fortress"),   TEXT("Fæstningsbyggeri"),         TEXT("Ingeniørkorpsets skole: skansernes dækning +10 %-point"),                  1852, 1200.0, 12, nullptr, 1 },
 			{ TEXT("conserves"),  TEXT("Konserves og feltbagerier"), TEXT("Enhederne bærer 2 dages proviant mere (6 i stedet for 4)"),              1853, 1000.0, 10, TEXT("sanitation"), 0 },
@@ -119,7 +120,35 @@ void ACampaign1851Map::ResetResearch()
 
 bool ACampaign1851Map::HasResearch(const TCHAR* Id) const
 {
+	// The railway is known when the campaign starts in 1851 (the lines are building); from 1825 it has to be researched.
+	if (ActiveScenario().Year >= 1850 && FString(Id) == TEXT("railway"))
+	{
+		return true;
+	}
 	return Researched.Contains(FString(Id));
+}
+
+int32 ACampaign1851Map::ResearchOpenYear(int32 Topic) const
+{
+	// From a start in 1825 each subject opens in its own time (the early ones soon, the rifled guns not before the 1850s); from
+	// 1851 they are all open.
+	const TArray<FCampaign1851ResearchTopic>& List = Campaign1851Research::Topics();
+	if (ActiveScenario().Year >= 1850 || !List.IsValidIndex(Topic))
+	{
+		return 0;
+	}
+	static const struct { const TCHAR* Id; int32 Year; } Years[] = {
+		{ TEXT("square"), 1826 }, { TEXT("recon"), 1826 }, { TEXT("smithy"), 1826 }, { TEXT("tworank"), 1826 }, { TEXT("marl"), 1828 }, { TEXT("firebyrank"), 1828 },
+		{ TEXT("fortress"), 1830 }, { TEXT("staff"), 1830 }, { TEXT("skirmish"), 1830 }, { TEXT("shock"), 1830 }, { TEXT("pontoon"), 1830 }, { TEXT("agrischool"), 1830 },
+		{ TEXT("steam"), 1830 }, { TEXT("credit"), 1830 }, { TEXT("volley"), 1830 }, { TEXT("conserves"), 1835 }, { TEXT("carbine"), 1835 }, { TEXT("railway"), 1835 },
+		{ TEXT("sanitation"), 1840 }, { TEXT("casemates"), 1840 }, { TEXT("independent"), 1840 }, { TEXT("breech"), 1841 }, { TEXT("telegraph"), 1844 },
+		{ TEXT("hospitals"), 1845 }, { TEXT("genstaff"), 1845 }, { TEXT("railmob"), 1850 }, { TEXT("riflegun"), 1855 },
+	};
+	for (const auto& Y : Years)
+	{
+		if (FString(Y.Id) == List[Topic].Id) { return Y.Year; }
+	}
+	return 1830;
 }
 
 FString ACampaign1851Map::ResearchBlockReason(int32 Topic) const
@@ -130,7 +159,8 @@ FString ACampaign1851Map::ResearchBlockReason(int32 Topic) const
 		return TEXT("-");
 	}
 	const FCampaign1851ResearchTopic& T = List[Topic];
-	if (Researched.Contains(T.Id)) return TEXT("færdig");
+	if (Researched.Contains(T.Id) || HasResearch(T.Id)) return TEXT("færdig");
+	if (ResearchOpenYear(Topic) > GetDate().GetYear()) return FString::Printf(TEXT("åbner %d"), ResearchOpenYear(Topic));
 	if (Researching == Topic) return TEXT("i gang");
 	if (T.Needs && !Researched.Contains(T.Needs))
 	{

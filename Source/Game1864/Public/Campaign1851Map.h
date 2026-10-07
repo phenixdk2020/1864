@@ -938,6 +938,8 @@ public:
 	TSharedRef<FJsonObject> BattleOrganisationJson(int32 Regiment) const;
 	/** Why a topic cannot be started (empty: it can). */
 	FString ResearchBlockReason(int32 Topic) const;
+	/** The year a subject opens in the scenario (0: open from the start). */
+	int32 ResearchOpenYear(int32 Topic) const;
 	bool StartResearch(int32 Topic, FString* OutReason = nullptr);
 	int32 GetResearching() const { return Researching; }
 	int32 GetResearchMonths() const { return ResearchMonths; }

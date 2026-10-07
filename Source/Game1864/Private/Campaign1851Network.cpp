@@ -293,6 +293,10 @@ FString ACampaign1851Map::LinkBlockReason(int32 Link, ECampaign1851LinkWork Work
 	{
 		return TEXT("jernbanen findes");
 	}
+	if (!HasResearch(TEXT("railway")))
+	{
+		return TEXT("kræver forskning: Jernbaneanlæg");
+	}
 	if (L.RailPath.Num() < 2)
 	{
 		return L.HasFerry() ? TEXT("ingen bane over færgestedet") : TEXT("terrænet tillader ingen bane");

@@ -1386,6 +1386,11 @@ Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i
 - **Skirmish** kan nu køres mod svenskerne (`-Strategy1864SkirmishSwedes`: siden Enemy, svensk model og flag SE, "Sv. 1. Kp."), med 1-4 danske kompagnier (`-Strategy1864SkirmishDanes=N`).
 - **Starter-filer:** `Start-Test-1-Kompagni-mod-Kompagni.bat` (et dansk kompagni går frem og skyder mod et svensk, som holder sin stilling og skyder tilbage, til det ene brydes) og `Start-Test-2-Bataillon-mod-Kompagni.bat` (en bataljon mod et svensk kompagni: et kompagni i reserve, midten holder og skyder, de to andre går udenom ildfeltet og ind fra siden). Kontrolleret i loggen og på et skærmbillede.
 
+### 2026-10-07 - Forskning i 1825: emner åbner i deres egen tid; Jernbaneanlæg
+
+- Forskningsemnerne har fået en åbningstid i 1825-scenariet (`ResearchOpenYear`): de tidlige (kæde- og karré-eksercits, rytterspejdning, smede, to-geleds ild) åbner 1826-28, de fleste 1830-45 (bagladegeværet 1841, felttelegrafen 1844, riflede kanoner først 1855); en lukket står med "åbner 19xx" i træet. I 1851-scenariet er alt åbent som før.
+- Nyt emne **Jernbaneanlæg** (åbner 1835, 2.500 rd./md. i 18 måneder): uden det kan der ikke bygges jernbaner på kortet i 1825 (`LinkBlockReason`: "kræver forskning"); i 1851 kendes det på forhånd. Der er altså tog i 1825, men de skal først forskes frem; de eksisterende baner (1844 og frem) åbner på deres egne datoer.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
