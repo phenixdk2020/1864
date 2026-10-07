@@ -157,6 +157,12 @@ struct FCampaign1851RegimentSave
 	UPROPERTY() uint8 Arm = 0;
 	UPROPERTY() FString Home;
 	UPROPERTY() int32 MaxMen = 0;
+	/** v17: what a split or a move of companies changed: the number of companies (-1: as at the start), horses, guns, nation. */
+	UPROPERTY() int32 Companies = -1;
+	UPROPERTY() int32 Horses = -1;
+	UPROPERTY() int32 MaxHorses = -1;
+	UPROPERTY() int32 Guns = -1;
+	UPROPERTY() FString Nation;
 };
 
 /** A formation of the field army (v11): its place in the tree, its commander and its regiments. */

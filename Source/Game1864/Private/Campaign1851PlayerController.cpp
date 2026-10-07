@@ -300,7 +300,7 @@ namespace
 		}
 		case EB::MergeUnit:
 		{
-			const int32 Keep = Module / 1000, Absorb = Module % 1000;
+			const int32 Keep = Module / 10000, Absorb = Module % 10000;
 			if (!Map.GetRegiments().IsValidIndex(Keep) || !Map.GetRegiments().IsValidIndex(Absorb))
 			{
 				return false;
@@ -1204,7 +1204,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		else if (Button == SCampaign1851Overlay::EButton::MergeUnit)
 		{
 			FString Why;
-			const int32 Joined = Map->MergeRegiments(Module / 1000, Module % 1000, &Why);
+			const int32 Joined = Map->MergeRegiments(Module / 10000, Module % 10000, &Why);
 			if (Joined != INDEX_NONE)
 			{
 				SelectRegiments({ Joined });
@@ -2861,9 +2861,9 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		{
 			Overlay->ShowToast(Why);
 		}
-		else if (DescribeAction(*Map, *Overlay, SCampaign1851Overlay::EButton::MergeUnit, Keep * 1000 + Absorb, Title, Text))
+		else if (DescribeAction(*Map, *Overlay, SCampaign1851Overlay::EButton::MergeUnit, Keep * 10000 + Absorb, Title, Text))
 		{
-			Overlay->AskConfirm(Title, Text, SCampaign1851Overlay::EButton::MergeUnit, Keep * 1000 + Absorb);
+			Overlay->AskConfirm(Title, Text, SCampaign1851Overlay::EButton::MergeUnit, Keep * 10000 + Absorb);
 		}
 		return;
 	}

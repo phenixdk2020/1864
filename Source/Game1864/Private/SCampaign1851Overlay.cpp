@@ -4496,7 +4496,7 @@ void SCampaign1851Overlay::PaintOOB(const FGeometry& Geometry, FSlateWindowEleme
 		{
 			const int32 Keep = Focus.bDetached && !Map->GetRegiments()[Partner].bDetached ? Partner : OOBFocus;
 			const int32 Absorb = Keep == OOBFocus ? Partner : OOBFocus;
-			PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(Size.X - 152.f, 44.f), FVector2D(120.f, 24.f), TEXT("SAML IGEN"), EButton::MergeUnit, Keep * 1000 + Absorb);
+			PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(Size.X - 152.f, 44.f), FVector2D(120.f, 24.f), TEXT("SAML IGEN"), EButton::MergeUnit, Keep * 10000 + Absorb);
 			AddTip(Pos + FVector2D(Size.X - 152.f, 44.f), FVector2D(120.f, 24.f), TEXT("Saml de to halvdele til én enhed igen (de skal stå samme sted). Du kan også trække den ene halvdel hen på den anden, eller trække enkelte kompagnier mellem dem."));
 		}
 		else
@@ -5417,7 +5417,7 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 				if (Partner != INDEX_NONE)
 				{
 					const int32 Keep = Regs[u].bDetached && !Regs[Partner].bDetached ? Partner : u;
-					PaintButton(Geometry, Out, Layer + 3, FVector2D(BX + 160.f, Pos.Y + 20.f), FVector2D(150.f, 28.f), TEXT("SAML IGEN"), EButton::MergeUnit, Keep * 1000 + (Keep == u ? Partner : u));
+					PaintButton(Geometry, Out, Layer + 3, FVector2D(BX + 160.f, Pos.Y + 20.f), FVector2D(150.f, 28.f), TEXT("SAML IGEN"), EButton::MergeUnit, Keep * 10000 + (Keep == u ? Partner : u));
 					break;
 				}
 			}

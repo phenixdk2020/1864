@@ -484,7 +484,7 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 	for (FCampaign1851Regiment& R : Regiments)
 	{
 		R.Chief = R.General = INDEX_NONE;
-		R.Captains.Init(INDEX_NONE, Campaign1851Army::CompaniesFor(R.Arm));
+		R.Captains.Init(INDEX_NONE, R.SavedCompanies >= 0 ? R.SavedCompanies : Campaign1851Army::CompaniesFor(R.Arm));
 		R.CompanyFort.Init(0, R.Captains.Num());
 	}
 	for (FCampaign1851Command& C : Commands)

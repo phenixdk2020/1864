@@ -2278,12 +2278,17 @@ TArray<FCampaign1851RegimentSave> ACampaign1851Map::SaveArmy() const
 		S.Men = R.Men;
 		S.bRaised = R.bRaised;
 		S.bDetached = R.bDetached;
+		S.MaxMen = R.MaxMen;
+		S.Companies = R.Captains.Num();
+		S.Horses = R.Horses;
+		S.MaxHorses = R.MaxHorses;
+		S.Guns = R.Guns;
+		S.Nation = R.Nation;
 		if (R.bRaised)
 		{
 			S.Name = R.Name;
 			S.Arm = uint8(R.Arm);
 			S.Home = Cities.IsValidIndex(R.Home) ? Cities[R.Home].Name : FString();
-			S.MaxMen = R.MaxMen;
 		}
 		S.Morale = R.Morale;
 		S.Pace = R.PaceKmPerDay;
@@ -2332,6 +2337,13 @@ int32 ACampaign1851Map::RestoreArmy(const TArray<FCampaign1851RegimentSave>& Sav
 			continue;
 		}
 		FCampaign1851Regiment& R = Regiments[i];
+		// What a split or a move of companies changed (saves before this keep the start's figures).
+		if (S.MaxMen > 0) { R.MaxMen = S.MaxMen; }
+		if (S.Horses >= 0) { R.Horses = S.Horses; }
+		if (S.MaxHorses >= 0) { R.MaxHorses = S.MaxHorses; }
+		if (S.Guns >= 0) { R.Guns = S.Guns; }
+		if (!S.Nation.IsEmpty()) { R.Nation = S.Nation; }
+		R.SavedCompanies = S.Companies;
 		R.Men = FMath::Clamp(S.Men, 0, R.MaxMen);
 		R.Morale = S.Morale;
 		R.Route.Reset();

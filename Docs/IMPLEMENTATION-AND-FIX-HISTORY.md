@@ -1225,6 +1225,17 @@ Kun ladte soldater kan blive valgt til næste salve.
 - `Start-3D-Skirmish-Test.bat` åbner det lille slag: 2 mod 2 kompagnier på en eng med batteri, mørtel og eskadron på hver side. Fjenden angriber, og hans skudvidde vises.
 - Himmellyset i slaget er hævet til 2,2 (skyggesiderne var for mørke).
 
+### 2026-10-07 - Codex-review af kamporden: 18 fund rettet
+
+Et uafhængigt Codex-review af del/saml/flyt-koden fandt fejl, rettet her:
+- **Gem/indlæs (#4-6):** antal kompagnier, MaxMen, heste, kanoner og nation gemmes nu pr. enhed (`FCampaign1851RegimentSave`), så en delt enhed ikke vender tilbage til fire kompagnier og fuld normering.
+- **Forter (#1-3):** fort-poster følger kompagniet ved deling og ved ombytning i `SplitOffCompany`; mandskab fordeles kun over feltkompagnier.
+- **Id'er (#7-8):** `SplitBase`/`FreeSplitId`: halve af halve kan samles igen, og ingen dublet-id.
+- **Slag (#12):** `IsInBattle` blokerer deling og kavaleriflyt midt i et slag.
+- **Flyt/saml (#10-11, 13-15):** tilstedeværende, forsyninger og heste følger kompagniet; foder vægtes efter heste; eskadroner summer til regimentet, max 10, ingen enhed uden mand.
+- **Beslutninger (#9):** ventende ministerråd (træning, kaptajn til kompagni) flyttes/droppes når en enhed fjernes.
+- **Nation (#16), forhåndstjek (#17), pakning af sammenlægning 1000 -> 10000 (#18).**
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

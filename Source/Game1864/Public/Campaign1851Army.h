@@ -271,6 +271,8 @@ struct FCampaign1851Regiment
 	bool bRaised = false;
 	/** Split off another unit (half its companies): saved like a raised unit, but costs no extra upkeep. */
 	bool bDetached = false;
+	/** Loading: the number of companies the save had (-1: as at the start). */
+	int32 SavedCompanies = -1;
 	/** Supply carried (Campaign1851Supply): days of rations for the men, of fodder for the horses, and the
 	 *  share of a full ammunition load (two days of battle). */
 	float Food = 4.f;

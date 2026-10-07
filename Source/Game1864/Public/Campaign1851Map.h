@@ -1021,6 +1021,12 @@ public:
 	int32 SplitOffCompany(int32 RegimentIndex, int32 Company, FString* OutWhy = nullptr);
 	/** Companies of a battalion, or squadrons of cavalry (140 men each); 0 for the rest. */
 	int32 SubUnitCount(int32 RegimentIndex) const;
+	/** Taking part in a battle that is waiting or being fought: it cannot be split, joined or have its companies moved. */
+	bool IsInBattle(int32 RegimentIndex) const;
+	/** A free id for a half of this unit (the old id with a letter, then with two). */
+	FString FreeSplitId(const FString& OldId) const;
+	/** The id of the unit the halves came from (a letter suffix stripped from a split-off half). */
+	static FString SplitBase(const FCampaign1851Regiment& R);
 	int32 SubUnitMen(int32 RegimentIndex, int32 Index) const;
 	/** Two halves of one unit (one split off the other, or both off the same). */
 	bool IsSplitPair(int32 A, int32 B) const;
