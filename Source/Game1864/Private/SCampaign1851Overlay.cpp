@@ -133,13 +133,23 @@ void SCampaign1851Overlay::Construct(const FArguments& InArgs)
 	for (int32 n = 0; n < 12; ++n)
 	{
 		OfficerPortraits.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_Officer_%02d.T_Portrait_Officer_%02d"), n, n)));
+		GeneralPortraits.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_General_%02d.T_Portrait_General_%02d"), n, n)));
+	}
+	// The officers by age (young 30, older 30, old 15 pictures) and the ministers (25).
+	{
+		static const TCHAR* Groups[] = { TEXT("Ung"), TEXT("Aeldre"), TEXT("Gammel") };
+		static const int32 Counts[] = { 30, 30, 15 };
 		for (int32 g = 0; g < 3; ++g)
 		{
-			static const TCHAR* Groups[] = { TEXT("Ung"), TEXT("Midt"), TEXT("Gammel") };
-			AgePortraits[g].Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_Officer_%s_%02d.T_Portrait_Officer_%s_%02d"), Groups[g], n, Groups[g], n)));
+			for (int32 n = 0; n < Counts[g]; ++n)
+			{
+				AgePortraits[g].Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_Officer_%s_%02d.T_Portrait_Officer_%s_%02d"), Groups[g], n, Groups[g], n)));
+			}
 		}
-		GeneralPortraits.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_General_%02d.T_Portrait_General_%02d"), n, n)));
-		MinisterPortraits.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_Minister_%02d.T_Portrait_Minister_%02d"), n, n)));
+		for (int32 n = 0; n < 25; ++n)
+		{
+			MinisterPortraits.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_Minister_%02d.T_Portrait_Minister_%02d"), n, n)));
+		}
 	}
 	BornholmBrush = MakeShared<FSlateBrush>();
 	if (Map.IsValid() && Map->BornholmTexture)
