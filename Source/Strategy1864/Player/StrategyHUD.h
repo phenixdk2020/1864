@@ -54,7 +54,7 @@ public:
 private:
     enum class EAction : uint8
     {
-        None, Minimap, FinishBattle, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount
+        None, Minimap, FinishBattle, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount, FigureScale
     };
 
     struct FButton
@@ -70,6 +70,7 @@ private:
     void DrawCommandPanel(AStrategyUnit* Unit);
     void DrawMinimap();
     void DrawObjectiveMarkers();
+    int32 FigureDivisor = 2;
     void DrawNotices();
     TArray<TPair<FString, float>> Notices;
     void DrawSettings();

@@ -175,7 +175,7 @@ void UStrategyCavalryVisualComponent::Layout()
          OwnerCavalry->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn ||
          OwnerCavalry->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn);
     const int32 N = Horsemen.Num();
-    const int32 Ranks = bColumn ? FMath::Max(1, (N + 1) / 2) : (N > 12 ? 2 : 1);
+    const int32 Ranks = bColumn ? FMath::Max(1, FMath::DivideAndRoundUp(N, 3)) : (N > 12 ? 2 : 1);   // a column of three abreast
     const int32 Files = FMath::Max(1, FMath::DivideAndRoundUp(N, Ranks));
     for (int32 i = 0; i < N; ++i)
     {

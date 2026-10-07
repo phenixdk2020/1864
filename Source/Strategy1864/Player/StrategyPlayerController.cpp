@@ -102,6 +102,7 @@ void AStrategyPlayerController::PlayerTick(float DeltaTime)
 {
     Super::PlayerTick(DeltaTime);
     TickCouriers(DeltaTime);
+    TickRightMouse();
     // Test (-Strategy1864TestCourier): after 25 s the Danish company farthest from the staff is ordered 200 m forward.
     static bool bTestCourier = false;
     if (!bTestCourier && GetWorld() && GetWorld()->GetTimeSeconds() > 25.0f && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864TestCourier")))
@@ -484,7 +485,8 @@ bool AStrategyPlayerController::IssueOrderToSelection(
     EStrategyOrderType OrderType,
     const FVector& TargetLocation,
     float FacingYaw,
-    bool bHasFacing)
+    bool bHasFacing,
+    float SpreadCm)
 {
     if (OrderType == EStrategyOrderType::None)
     {
@@ -495,6 +497,20 @@ bool AStrategyPlayerController::IssueOrderToSelection(
     FVector Staff = FVector::ZeroVector;
     const bool bStaff = AreCouriersOn() && FindArmyStaff(Staff);
 
+    // Several units to one place: side by side across the front they are to face (or the way they come).
+    FVector Across = FVector::ZeroVector;
+    if (SpreadCm > 0.0f && SelectedUnitObjects.Num() > 1)
+    {
+        FVector Centre = FVector::ZeroVector;
+        int32 Count = 0;
+        for (const AStrategyUnit* U : SelectedUnitObjects) { if (IsValid(U)) { Centre += U->GetActorLocation(); ++Count; } }
+        FVector Front = bHasFacing ? FRotator(0.0f, FacingYaw, 0.0f).Vector() : (TargetLocation - Centre / FMath::Max(1, Count));
+        Front.Z = 0.0f;
+        Front = Front.GetSafeNormal();
+        Across = FVector(-Front.Y, Front.X, 0.0f);
+    }
+    int32 UnitNumber = 0;
+    const int32 UnitTotal = SelectedUnitObjects.Num();
     for (AStrategyUnit* Unit : SelectedUnitObjects)
     {
         if (!IsValid(Unit) || !Unit->OrderComponent)
@@ -504,7 +520,7 @@ bool AStrategyPlayerController::IssueOrderToSelection(
 
         FStrategyOrder Order;
         Order.Type = OrderType;
-        Order.TargetLocation = TargetLocation;
+        Order.TargetLocation = TargetLocation + Across * SpreadCm * (float(UnitNumber++) - 0.5f * float(UnitTotal - 1));
         Order.FacingYaw = FacingYaw;
         Order.bHasFacing = bHasFacing;
         Order.Authority = EStrategyOrderAuthority::DirectPlayer;
@@ -1009,5 +1025,59 @@ void AStrategyPlayerController::DeliverOrder(AStrategyUnit* Unit, FStrategyOrder
     if (AStrategyHUD* Hud = Cast<AStrategyHUD>(GetHUD()))
     {
         Hud->AddNotice(Remark.IsEmpty() ? FString::Printf(TEXT("Ordren er fremme hos %s (%.0f s til den udføres)"), *Unit->DisplayName.ToString(), Reaction) : Remark);
+    }
+}
+
+// ------------------------------------------------------------------ right mouse: move, and the front to end with
+
+void AStrategyPlayerController::TickRightMouse()
+{
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        return;
+    }
+    float MouseX = 0.0f, MouseY = 0.0f;
+    const bool bMouse = GetMousePosition(MouseX, MouseY);
+    if (!bRmbCommand && bMouse && !bOrderPlacementPending && WasInputKeyJustPressed(EKeys::RightMouseButton))
+    {
+        AStrategyHUD* Hud = GetStrategyHUD();
+        bool bAny = false;
+        for (const AStrategyUnit* U : SelectedUnitObjects) { bAny |= IsValid(U) && U->bPlayerControllable; }
+        FVector Ground;
+        if (bAny && !(Hud && Hud->IsOverPanel(FVector2D(MouseX, MouseY))) && ResolveGroundPointUnderCursor(Ground))
+        {
+            bRmbCommand = true;
+            bRmbDragged = false;
+            RmbStart = Ground;
+            RmbStartScreen = FVector2D(MouseX, MouseY);
+        }
+    }
+    if (!bRmbCommand)
+    {
+        return;
+    }
+    FVector Now = RmbStart;
+    ResolveGroundPointUnderCursor(Now);
+    if (bMouse && FVector2D::Distance(FVector2D(MouseX, MouseY), RmbStartScreen) > 14.0f)
+    {
+        bRmbDragged = true;
+    }
+    // The place, and while the button is held and the mouse moved, the arrow for the front.
+    DrawDebugCircle(World, RmbStart + FVector(0.0f, 0.0f, 40.0f), 350.0f, 32, FColor(255, 215, 90), false, 0.0f, SDPG_World, 14.0f, FVector(1, 0, 0), FVector(0, 1, 0), false);
+    FVector Delta = Now - RmbStart;
+    Delta.Z = 0.0f;
+    const bool bArrow = bRmbDragged && Delta.SizeSquared() > FMath::Square(150.0f);
+    if (bArrow)
+    {
+        const FVector Dir = Delta.GetSafeNormal();
+        const FVector End = RmbStart + Dir * FMath::Max(900.0f, Delta.Size());
+        DrawDebugDirectionalArrow(World, RmbStart + FVector(0.0f, 0.0f, 60.0f), End + FVector(0.0f, 0.0f, 60.0f), 500.0f, FColor(255, 215, 90), false, 0.0f, SDPG_World, 16.0f);
+    }
+    if (WasInputKeyJustReleased(EKeys::RightMouseButton) || !IsInputKeyDown(EKeys::RightMouseButton))
+    {
+        bRmbCommand = false;
+        IssueOrderToSelection(EStrategyOrderType::Move, RmbStart, bArrow ? Delta.Rotation().Yaw : 0.0f, bArrow, 7200.0f);
+        bRmbDragged = false;
     }
 }

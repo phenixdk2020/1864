@@ -6,6 +6,8 @@
 #include "StrategyContactComponent.h"
 #include "../Visual/StrategyInfantryVisualComponent.h"
 #include "DrawDebugHelpers.h"
+#include "../Units/CavalryUnit.h"
+#include "../Units/StrategyDragoonComponent.h"
 
 UStrategyFireControlComponent::UStrategyFireControlComponent()
 {
@@ -328,6 +330,13 @@ void UStrategyFireControlComponent::DrawRangeArc(
     const int32 Segments = 12;
     const float Thickness = bActive ? 12.0f : 5.0f;
 
+    if (const ACavalryUnit* Horse = Cast<ACavalryUnit>(OwnerUnit))
+    {
+        if (!Horse->DragoonComponent || Horse->DragoonComponent->MountedState == EStrategyMountedState::Mounted)
+        {
+            return;   // mounted: no fire cone
+        }
+    }
     for (int32 Face = 0; Face < (bSquare ? 4 : 1); ++Face)
     {
         const float BaseYaw = OwnerUnit->GetActorRotation().Yaw + Face * 90.0f;
@@ -382,14 +391,5 @@ void UStrategyFireControlComponent::DrawRangeArc(
             DrawDebugLine(GetWorld(), Left, Right, Color, false, 0.0f, 0, Thickness);
         }
 
-        if (OwnerUnit->bSelected)
-        {
-            const FVector LabelPosition = (Left + Right) * 0.5f +
-                FRotator(0.0f, BaseYaw, 0.0f).Vector() * (InnerRangeCm + RangeCm) * 0.5f +
-                FVector(0.0f, 0.0f, 45.0f);
-            const FString RangeLabel = FString::Printf(TEXT("%s: %.0f-%.0f m%s"), Label,
-                InnerRangeCm / 100.0f, RangeCm / 100.0f, bActive ? TEXT(" [VALGT]") : TEXT(""));
-            DrawDebugString(GetWorld(), LabelPosition, RangeLabel, nullptr, Color, 0.0f, true, 1.0f);
-        }
     }
 }

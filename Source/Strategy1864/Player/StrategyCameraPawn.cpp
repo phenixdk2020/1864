@@ -304,6 +304,8 @@ void AStrategyCameraPawn::MouseOrbitX(float Value)
     APlayerController* PC = Cast<APlayerController>(GetController());
     if (!PC || FMath::IsNearlyZero(Value)) return;
     if (bFollowingProjectile) StopProjectileFollow(true);
+    const AStrategyPlayerController* Commander = Cast<AStrategyPlayerController>(PC);
+    if (Commander && Commander->IsRightMouseCommand()) return;   // the right button is giving an order, not panning
     if (bRightMousePan || PC->IsInputKeyDown(EKeys::RightMouseButton))
     {
         AddActorWorldOffset(-GetActorRightVector() * Value * 35.0f);
@@ -318,6 +320,7 @@ void AStrategyCameraPawn::MouseOrbitY(float Value)
     APlayerController* PC = Cast<APlayerController>(GetController());
     if (!PC || !SpringArm || FMath::IsNearlyZero(Value)) return;
     if (bFollowingProjectile) StopProjectileFollow(true);
+    if (const AStrategyPlayerController* Commander = Cast<AStrategyPlayerController>(PC)) { if (Commander->IsRightMouseCommand()) return; }
     if (bRightMousePan || PC->IsInputKeyDown(EKeys::RightMouseButton))
     {
         FVector Forward = GetActorForwardVector();

@@ -270,6 +270,24 @@ private:
     TArray<uint8> SoldierFirePhase;   // a EFirePhase for each soldier
     TArray<int32> SoldierSlots;       // each soldier's formation slot (its rank: slot % ranks, for the fire drill)
 
+    /** Each man goes to his place in a new formation (running), and changes stance one after the other: not a teleport. */
+    struct FSettle
+    {
+        FVector Goal = FVector::ZeroVector;
+        float Yaw = 0.0f;
+        bool bPlaced = false;     // has been put in his first place
+        bool bActive = false;     // is on his way to Goal
+        float SwitchAt = -1.0f;   // when he takes up the pending clip (stance change), -1: none
+    };
+    TArray<FSettle> SoldierSettle;       // parallel to SoldierComponents
+    UPROPERTY(Transient)
+    TObjectPtr<UAnimSequence> PendingSequence;
+    bool bPendingLoop = true;
+    bool bPendingHold = false;
+    bool bWasSettling = false;
+    void UpdateSettling(float DeltaTime);
+    void ApplyPendingStance(float Now);
+
     /** Is an enemy inside the company's chosen range and cone (it may fire). */
     bool IsEnemyInRange() const;
     /** In battle (halted in line facing an enemy within its long range): the soldiers run the firing cycle. */

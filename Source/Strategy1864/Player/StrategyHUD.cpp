@@ -18,6 +18,7 @@
 #include "TextureResource.h"
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
 #include "../Units/StrategyCompanyUnit.h"
+#include "../Visual/StrategyInfantryVisualComponent.h"
 #include "../Units/CavalryUnit.h"
 #include "../Units/StrategyDragoonComponent.h"
 #include "../Combat/StrategyStanceComponent.h"
@@ -423,6 +424,14 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
     {
         return;
     }
+    // Horsemen have a fire cone only when they fight on foot (dismounted dragoons).
+    if (const ACavalryUnit* Horse = Cast<ACavalryUnit>(Unit))
+    {
+        if (!Horse->DragoonComponent || Horse->DragoonComponent->MountedState == EStrategyMountedState::Mounted)
+        {
+            return;
+        }
+    }
     FVector Left, Right;
     Fire->GetFireFront(Left, Right, 0);
     const FVector Lateral = (Right - Left).GetSafeNormal2D();
@@ -503,13 +512,6 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
         TArray<FVector> Side;
         for (int32 s = 0; s <= 8; ++s) { Side.Add(OnGround(Corner + Dir(Sign * Half) * Long * s / 8.0f)); }
         DashedPolyline(Side, White, 2.2f, 12.0f, 7.0f);
-        const FVector End = Project(Side.Last() + FVector(0.0f, 0.0f, 120.0f), false);
-        if (End.Z > 0.0f)
-        {
-            const FString Text = FString::Printf(TEXT("%s%.0f°"), Sign < 0.0f ? TEXT("-") : TEXT("+"), Fire->FireConeHalfAngleDegrees);
-            DrawText(Text, FLinearColor(0.0f, 0.0f, 0.0f, 0.7f), End.X - 14.0f + 1.5f, End.Y - 18.0f + 1.5f, nullptr, 1.1f, false);
-            DrawText(Text, White, End.X - 14.0f, End.Y - 18.0f, nullptr, 1.1f, false);
-        }
     }
     // The front itself.
     DashedPolyline({ OnGround(Left), OnGround(Right) }, White, 1.6f, 6.0f, 6.0f);
@@ -567,7 +569,7 @@ void AStrategyHUD::DrawSettings()
         return;
     }
     // A small window under the button: the camera's speed on the keys.
-    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 238.0f;
+    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 276.0f;
     DrawPanel(X, Y, W, H);
     Text(TEXT("INDSTILLINGER"), X + 12.0f, Y + 8.0f, Gold);
     const float Factor = AStrategyCameraPawn::GetKeySpeedFactor();
@@ -597,6 +599,13 @@ void AStrategyHUD::DrawSettings()
     Text(TEXT("Ordonnanser (ordrer tager tid)"), X + 12.0f, Y + 206.0f, Ink);
     DrawButton(X + 240.0f, Y + 202.0f, 80.0f, 24.0f, TEXT("TIL"), EAction::Couriers, 1, bRiders, nullptr, bRiders ? nullptr : &ButtonDark);
     DrawButton(X + 326.0f, Y + 202.0f, 80.0f, 24.0f, TEXT("FRA"), EAction::Couriers, 0, !bRiders, nullptr, !bRiders ? nullptr : &ButtonDark);
+    // How many men are drawn: a figure for each man, for every second or for every fifth (the GPU's load).
+    Text(TEXT("Mænd vist (en figur for ...)"), X + 12.0f, Y + 242.0f, Ink);
+    const int32 Divisors[] = { 1, 2, 5 };
+    for (int32 i = 0; i < 3; ++i)
+    {
+        DrawButton(X + 240.0f + i * 58.0f, Y + 238.0f, 54.0f, 24.0f, *FString::Printf(TEXT("%d"), Divisors[i]), EAction::FigureScale, Divisors[i], FigureDivisor == Divisors[i], nullptr, FigureDivisor == Divisors[i] ? nullptr : &ButtonDark);
+    }
 }
 
 namespace
@@ -815,7 +824,9 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
             Text(TEXT("FORMATION"), OX, MY + 50.0f, Gold, 0.85f);
             const TCHAR* Labels[] = { TEXT("LINIE"), TEXT("KOLONNE"), TEXT("KARRÉ") };
             const EStrategyFormationType Types[] = { EStrategyFormationType::Line, EStrategyFormationType::MarchColumn, EStrategyFormationType::Square };
-            for (int32 i = 0; i < 3; ++i)
+            // Horse cannot form square: line and column only.
+            const int32 FormationButtons = Cast<ACavalryUnit>(Unit) ? 2 : 3;
+            for (int32 i = 0; i < FormationButtons; ++i)
             {
                 DrawButton(OX + i * 116.0f, MY + 66.0f, 110.0f, 24.0f, Labels[i], EAction::Formation, int32(Types[i]), Formation->CurrentFormation == Types[i], Unit);
             }
@@ -893,6 +904,13 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 break;
             case EAction::SettingsToggle:
                 bSettingsOpen = !bSettingsOpen;
+                break;
+            case EAction::FigureScale:
+                FigureDivisor = B.Value;
+                for (TActorIterator<AStrategyCompanyUnit> It(GetWorld()); It; ++It)
+                {
+                    if (IsValid(*It) && It->InfantryVisualComponent) { It->InfantryVisualComponent->SetVisualScaleDivisor(B.Value); }
+                }
                 break;
             case EAction::Couriers:
                 AStrategyPlayerController::SetCouriersOn(B.Value == 1);

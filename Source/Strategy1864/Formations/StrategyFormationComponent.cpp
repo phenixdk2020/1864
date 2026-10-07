@@ -42,7 +42,7 @@ TArray<FStrategyFormationSlot> UStrategyFormationComponent::GenerateSoldierSlots
 
         if (CurrentFormation == EStrategyFormationType::CavalryColumn)
         {
-            EffectiveColumnWidth = 4;
+            EffectiveColumnWidth = 3;
         }
         else if (CurrentFormation == EStrategyFormationType::DefileColumn)
         {
@@ -163,7 +163,7 @@ float UStrategyFormationComponent::EstimateFrontageCm(int32 Strength) const
         int32 Width = FMath::Max(1, ColumnWidth);
         if (CurrentFormation == EStrategyFormationType::CavalryColumn)
         {
-            Width = 4;
+            Width = 3;
         }
         else if (CurrentFormation == EStrategyFormationType::DefileColumn)
         {

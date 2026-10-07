@@ -48,7 +48,8 @@ public:
         EStrategyOrderType OrderType,
         const FVector& TargetLocation,
         float FacingYaw,
-        bool bHasFacing);
+        bool bHasFacing,
+        float SpreadCm = 0.0f);
 
     UFUNCTION(BlueprintCallable, Category="Strategy|Orders")
     void IssueHoldToSelection();
@@ -75,7 +76,17 @@ public:
     struct FCourierInfo { TWeakObjectPtr<AStrategyUnit> Unit; float SecondsLeft = 0.0f; };
     TArray<FCourierInfo> GetPendingCouriers() const;
 
+    /** Right mouse: with units selected a click sends them there, and holding the button draws an arrow for the front they are to end with
+     *  (the camera does not pan while it is held). */
+    bool IsRightMouseCommand() const { return bRmbCommand; }
+
 private:
+    bool bRmbCommand = false;
+    bool bRmbDragged = false;
+    FVector RmbStart = FVector::ZeroVector;
+    FVector2D RmbStartScreen = FVector2D::ZeroVector;
+    void TickRightMouse();
+
     struct FCourier
     {
         TWeakObjectPtr<AStrategyUnit> Unit;

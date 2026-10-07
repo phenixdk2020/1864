@@ -208,6 +208,8 @@ void UStrategyInfantryVisualComponent::TickComponent(
         OwnerCompany->QAPlaceholderMesh->SetVisibility(false);
     }
     ProcessPendingKills();
+    UpdateSettling(DeltaTime);
+    ApplyPendingStance(GetWorld()->GetTimeSeconds());
     MarchDust(GetWorld()->GetTimeSeconds());
     RefreshAnimation(false);
     UpdatePersonalActions();
@@ -482,7 +484,7 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
     for (int32 i = 0; i < SoldierComponents.Num(); ++i)
     {
         USkeletalMeshComponent* Soldier = SoldierComponents[i];
-        if (!Soldier)
+        if (!Soldier || (SoldierSettle.IsValidIndex(i) && SoldierSettle[i].bActive))
         {
             continue;
         }
@@ -913,6 +915,7 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
         if (SoldierFireAt.IsValidIndex(LastIndex)) { SoldierFireAt.RemoveAt(LastIndex); }
         if (SoldierBusyUntil.IsValidIndex(LastIndex)) { SoldierBusyUntil.RemoveAt(LastIndex); }
         if (SoldierFirePhase.IsValidIndex(LastIndex)) { SoldierFirePhase.RemoveAt(LastIndex); }
+        if (SoldierSettle.IsValidIndex(LastIndex)) { SoldierSettle.RemoveAt(LastIndex); }
     }
 
     while (SoldierComponents.Num() < DesiredCount)
@@ -974,6 +977,7 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
         SoldierFireAt.Add(0.0f);
         SoldierBusyUntil.Add(0.0f);
         SoldierFirePhase.Add(0);
+        SoldierSettle.AddDefaulted();
     }
 
     LastAnimationAsset = nullptr;
@@ -1036,11 +1040,23 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
         const FStrategyFormationSlot& Slot =
             FullSlots[FullIndex];
 
-        Soldier->SetRelativeLocation(
-            Slot.WorldLocation);
-
-        Soldier->SetRelativeRotation(
-            FRotator(0.0f, Slot.FacingYaw + SoldierMeshYawOffset, 0.0f));
+        if (SoldierSettle.Num() != RenderedCount) { SoldierSettle.SetNumZeroed(RenderedCount); }
+        FSettle& Settle = SoldierSettle[VisualIndex];
+        if (!Settle.bPlaced || FVector::Dist2D(Soldier->GetRelativeLocation(), Slot.WorldLocation) > 4000.0f)
+        {
+            // The first placing (or a long way off, as at a deployment): at once.
+            Soldier->SetRelativeLocation(Slot.WorldLocation);
+            Soldier->SetRelativeRotation(FRotator(0.0f, Slot.FacingYaw + SoldierMeshYawOffset, 0.0f));
+            Settle.bPlaced = true;
+            Settle.bActive = false;
+        }
+        else
+        {
+            // A new formation: he runs to his new place (UpdateSettling).
+            Settle.Goal = Slot.WorldLocation;
+            Settle.Yaw = Slot.FacingYaw + SoldierMeshYawOffset;
+            Settle.bActive = true;
+        }
         if (SoldierSlots.Num() != RenderedCount)
         {
             SoldierSlots.SetNum(RenderedCount);
@@ -1080,6 +1096,105 @@ void UStrategyInfantryVisualComponent::UpdateFormationBounds()
     }
 }
 
+void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
+{
+    // The men run to their places in a new formation (out into line, in to the column) at a jog, turning the way they run, and take
+    // the company's pose when they are there.
+    const float RunCmPerSecond = 420.0f;
+    bool bAny = false;
+    UAnimSequence* Run = RunStandingAsset.LoadSynchronous();
+    for (int32 i = 0; i < SoldierComponents.Num() && i < SoldierSettle.Num(); ++i)
+    {
+        FSettle& Settle = SoldierSettle[i];
+        USkeletalMeshComponent* Soldier = SoldierComponents[i];
+        if (!Settle.bActive || !Soldier)
+        {
+            continue;
+        }
+        FVector Here = Soldier->GetRelativeLocation();
+        FVector Delta = Settle.Goal - Here;
+        Delta.Z = 0.0f;
+        const float Distance = Delta.Size();
+        if (Distance < 12.0f)
+        {
+            Soldier->SetRelativeLocation(FVector(Settle.Goal.X, Settle.Goal.Y, Here.Z));
+            Soldier->SetRelativeRotation(FRotator(0.0f, Settle.Yaw, 0.0f));
+            Settle.bActive = false;
+            bCrowdDirty = true;
+            continue;
+        }
+        bAny = true;
+        const FVector Step = Delta / Distance * FMath::Min(Distance, RunCmPerSecond * DeltaTime);
+        Soldier->SetRelativeLocation(Here + Step);
+        // He faces the way he runs while he is far from his place, and turns to the front as he comes in.
+        const float RunYaw = Delta.Rotation().Yaw + SoldierMeshYawOffset;
+        const float Yaw = Distance > 150.0f ? RunYaw : Settle.Yaw;
+        FRotator Rot = Soldier->GetRelativeRotation();
+        Rot.Yaw = FMath::FixedTurn(Rot.Yaw, Yaw, 540.0f * DeltaTime);
+        Soldier->SetRelativeRotation(Rot);
+        if (Run && SoldierClips.IsValidIndex(i) && SoldierClips[i].Clip.Get() != Run)
+        {
+            Soldier->bPauseAnims = false;
+            Soldier->PlayAnimation(Run, true);
+            Soldier->SetPlayRate(FMath::FRandRange(0.95f, 1.1f));
+            RecordClip(Soldier, Run, true, 0.0f, 1.0f);
+        }
+        bCrowdDirty = true;
+    }
+    if (bWasSettling && !bAny)
+    {
+        // Everybody is in place: back to the company's own animation.
+        RefreshAnimation(true);
+    }
+    bWasSettling = bAny;
+}
+
+void UStrategyInfantryVisualComponent::ApplyPendingStance(float Now)
+{
+    // The men take up a new stance one after the other (kneel, lie down, stand up): a ripple through the company.
+    if (!PendingSequence)
+    {
+        return;
+    }
+    bool bLeft = false;
+    for (int32 i = 0; i < SoldierComponents.Num() && i < SoldierSettle.Num(); ++i)
+    {
+        FSettle& Settle = SoldierSettle[i];
+        if (Settle.SwitchAt < 0.0f)
+        {
+            continue;
+        }
+        if (Now < Settle.SwitchAt)
+        {
+            bLeft = true;
+            continue;
+        }
+        Settle.SwitchAt = -1.0f;
+        USkeletalMeshComponent* Soldier = SoldierComponents[i];
+        if (!Soldier || Settle.bActive || (SoldierFirePhase.IsValidIndex(i) && SoldierFirePhase[i] != 0))
+        {
+            continue;
+        }
+        Soldier->bPauseAnims = false;
+        Soldier->PlayAnimation(PendingSequence, bPendingLoop);
+        const float Position = bPendingLoop && !bPendingHold ? FMath::FRandRange(0.0f, PendingSequence->GetPlayLength()) : 0.0f;
+        const float Rate = bPendingLoop && !bPendingHold ? FMath::FRandRange(0.9f, 1.1f) : 1.0f;
+        Soldier->SetPosition(Position, false);
+        Soldier->SetPlayRate(Rate);
+        RecordClip(Soldier, PendingSequence, bPendingLoop, Position, bPendingHold ? 0.0f : Rate);
+        if (bPendingHold)
+        {
+            Soldier->TickAnimation(0.0f, false);
+            Soldier->RefreshBoneTransforms();
+        }
+        Soldier->bPauseAnims = bPendingHold;
+    }
+    if (!bLeft)
+    {
+        PendingSequence = nullptr;
+    }
+}
+
 void UStrategyInfantryVisualComponent::RefreshAnimation(
     bool bForce)
 {
@@ -1110,10 +1225,32 @@ void UStrategyInfantryVisualComponent::RefreshAnimation(
         return;
     }
 
+    // A change between standing, kneeling and lying: the men change one after the other, not all in the same frame.
+    auto Family = [this](const UAnimSequence* Clip)
+    {
+        const UAnimSequence* K[] = { IdleKneelingAsset.Get(), AimKneelingAsset.Get(), FireKneelingAsset.Get(), ReloadKneelingAsset.Get() };
+        const UAnimSequence* P[] = { IdleProneAsset.Get(), CrawlProneAsset.Get(), FireProneAsset.Get(), ReloadProneAsset.Get() };
+        for (const UAnimSequence* A : K) { if (A && A == Clip) { return 1; } }
+        for (const UAnimSequence* A : P) { if (A && A == Clip) { return 2; } }
+        return 0;
+    };
+    if (!bForce && LastAnimationAsset && Family(LastAnimationAsset) != Family(Sequence) && SoldierSettle.Num() == SoldierComponents.Num())
+    {
+        const float Now = GetWorld()->GetTimeSeconds();
+        PendingSequence = Sequence;
+        bPendingLoop = bLooping;
+        bPendingHold = bHoldPose;
+        for (FSettle& Settle : SoldierSettle) { Settle.SwitchAt = Now + FMath::FRandRange(0.0f, 1.6f); }
+        LastAnimationAsset = Sequence;
+        bLastAnimationLooping = bLooping;
+        bLastHoldingPose = bHoldPose;
+        return;
+    }
+
     for (int32 Index = 0; Index < SoldierComponents.Num(); ++Index)
     {
         USkeletalMeshComponent* Soldier = SoldierComponents[Index];
-        if (!Soldier || (SoldierFirePhase.IsValidIndex(Index) && SoldierFirePhase[Index] != 0))
+        if (!Soldier || (SoldierFirePhase.IsValidIndex(Index) && SoldierFirePhase[Index] != 0) || (SoldierSettle.IsValidIndex(Index) && SoldierSettle[Index].bActive))
         {
             continue;
         }

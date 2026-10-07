@@ -1358,6 +1358,14 @@ Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i
 - **Kaptajnens opførsel:** skudafstanden følger doktrin og dristighed (`PreferredFraction`, 55-90 % af skudvidden); hvornår kompagniet bryder, følger hans nerve (`GetDecisionStability`): den nervestærke holder til 22 % af styrken, den nervøse bryder ved 52 %.
 - **Statistikker:** de danske officerers evner (1-10) fra kampagnen bruges nu i slaget (×10; tidligere stod alle på 50); fjendens officerer får tilfældige evner efter hærens kvalitet (±20, lidt bedre jo højere rang).
 
+### 2026-10-07 - Rettelser fra testen: skydekegle, kavaleri, højre mus, glidende formationer, GPU
+
+1. **Skydekeglen:** vinkeltallene (±35°) og zonenavnene (Kort/Mellem/Lang med [VALGT]) er fjernet; kun afstandsbuerne (40/70/100 m) står tilbage.
+2. **GPU:** billedraten holdes på 60 (`t.MaxFPS`, før kørte GPU'en for fuld udblæsning; `-Strategy1864NoFpsCap` løfter den), og himmellyset optages ikke længere hver frame, kun når lyset ændrer sig. INDSTILLINGER har en ny række "Mænd vist": en figur for hver mand, hver anden eller hver femte (standard nu hver anden, før hver femte: der var for få mænd på marken).
+3. **Formationsskift og stillinger:** mændene løber nu ud i linje eller ind i kolonne (420 cm/s, drejer efter vejen og vender fronten ind mod pladsen), i stedet for at blive teleporteret; skift mellem stå, knæl og lig sker mand for mand over halvandet sekund (`UpdateSettling`, `ApplyPendingStance`). Kontrolleret på skærmbilleder (kolonne og linje midt i skiftet, knælende og liggende).
+4. **Husarer/kavaleri:** skydekegle kun når et dragonregiment er afsiddet; kolonnen er tre og tre; ingen karré for ryttere (KARRÉ-knappen vises ikke); husarer kan ikke sidde af.
+5. **Højre mus:** med valgte enheder sender et klik dem derhen; holdes knappen nede og trækkes musen, tegnes en pil, og enhederne ender med fronten i pilens retning (flere enheder side om side; kameraet panorerer ikke, mens knappen giver en ordre; uden valgte enheder panorerer højre mus som før). Ikke afprøvet med rigtig mus.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -62,7 +62,7 @@ void AStrategyBattleAtmosphere::Apply()
         if (USkyLightComponent* Sky = It->GetLightComponent())
         {
             Sky->SetMobility(EComponentMobility::Movable);
-            Sky->bRealTimeCapture = true;
+            Sky->bRealTimeCapture = false;   // captured again when the light changes (UpdateForHour), not every frame
             Sky->SetIntensity(2.2f);
             Sky->SetLowerHemisphereColor(FLinearColor(0.07f, 0.08f, 0.05f));
             Sky->bLowerHemisphereIsBlack = false;

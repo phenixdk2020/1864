@@ -169,6 +169,11 @@ void AStrategyOOBTestScenario::BeginPlay()
         AtmosphereActor = Atmosphere;
     }
     FParse::Value(FCommandLine::Get(), TEXT("Strategy1864StartHour="), StartHour);
+    // The frame rate is held at 60 (the GPU ran flat out): -Strategy1864NoFpsCap lifts it.
+    if (GEngine && !FParse::Param(FCommandLine::Get(), TEXT("Strategy1864NoFpsCap")))
+    {
+        GEngine->Exec(GetWorld(), TEXT("t.MaxFPS 60"));
+    }
     FParse::Value(FCommandLine::Get(), TEXT("Strategy1864ClockRate="), ClockRate);
 
     // The test fields get a meadow instead of the grey box (-Strategy1864FlatQA keeps the box).
@@ -737,6 +742,25 @@ void AStrategyOOBTestScenario::TickOfficers()
             }
         }
     }
+    // Test (-Strategy1864TestFormation): column at 25 s, line at 55 s, kneeling at 85 s, prone at 100 s (the men should run and sink one by one).
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864TestFormation")))
+    {
+        static int32 FormStage = 0;
+        const float Seconds = World->GetTimeSeconds();
+        const float Times[] = { 25.0f, 55.0f, 85.0f, 100.0f };
+        if (FormStage < 4 && Seconds > Times[FormStage])
+        {
+            for (TActorIterator<AStrategyUnit> It(World); It; ++It)
+            {
+                if (!IsValid(*It) || It->Side != EStrategySide::Denmark || It->Echelon != EStrategyEchelon::Company) { continue; }
+                if (FormStage == 0 && It->FormationComponent) { It->FormationComponent->SetFormation(EStrategyFormationType::MarchColumn); }
+                if (FormStage == 1 && It->FormationComponent) { It->FormationComponent->SetFormation(EStrategyFormationType::Line); }
+                if (FormStage == 2 && It->StanceComponent) { It->StanceComponent->SetStance(EStrategyStance::Kneeling); }
+                if (FormStage == 3 && It->StanceComponent) { It->StanceComponent->SetStance(EStrategyStance::Prone); }
+            }
+            ++FormStage;
+        }
+    }
     // Test (-Strategy1864TestOfficers): after 20 s one Danish officer is wounded and one enemy officer taken; at 30 s the result is written.
     static int32 TestStage = 0;
     if (TestStage < 2 && World->GetTimeSeconds() > (TestStage == 0 ? 20.0f : 30.0f) && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864TestOfficers")))
@@ -1030,7 +1054,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     }
 
     // -Strategy1864FieldLOD=<1|2|5|10>: how many men a figure stands for (the simulation keeps every man).
-    int32 Lod = 5;
+    int32 Lod = 2;   // one figure for two men (it was one for five: too few men on the field)
     FParse::Value(FCommandLine::Get(), TEXT("Strategy1864FieldLOD="), Lod);
 
     TArray<TSharedPtr<FJsonObject>> Battalions, Horse, Guns;
