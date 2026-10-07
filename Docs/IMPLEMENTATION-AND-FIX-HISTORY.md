@@ -1272,6 +1272,14 @@ Træk et kompagni hen på et andet i samme bataljon: et vindue (`PaintTransfer`)
 - Visning: ringe og flagstænger i verden (debug-tegning), flag med navn, værdi, ejer og fremdriftsbjælke i HUD'en, og "MÅL a : b · tid" i panelet øverst.
 - Ikke afprøvet i et helt slag endnu (kun opsætning og visning kontrolleret).
 
+### 2026-10-07 - Ordonnanser og officerer, der læser ordrer
+
+- Spillerens ordrer i 3D-slaget (`IssueOrderToSelection`) går nu med en rytter fra hærens stab (den højeste danske stab uden overordnet) til enheden. Inden for stabens egen cirkel (320 m) kaldes ordren ud med det samme; længere væk tager det 2 s + afstand / 12 m/s (ca. 35 s til en enhed 400 m væk). En ny ordre til samme enhed erstatter den, der er på vej.
+- Rytteren tegnes som et guldfarvet mærke med spor fra staben; enheden får en tag "Ordre på vej m:ss".
+- Når ordren er fremme, læser enhedens officer den (`DeliverOrder`): reaktionstid 2-14 s efter stabsarbejde/ledelse/disciplin (`GetCommandEfficiency`); en usikker og dårlig officer (`GetDecisionStability`, `TacticalSkill`) forstår med op til 35 % sandsynlighed stedet løst og går til et punkt op til ca. 20 % af afstanden ved siden af. Spilleren får besked øverst på skærmen.
+- INDSTILLINGER har en ny knap: Ordonnanser TIL/FRA (gemmes; `-Strategy1864NoCouriers` slår dem fra). `-Strategy1864TestCourier` sender en testordre til den fjerneste enhed.
+- Ikke lavet endnu: officerer der nægter eller afviger efter forsigtighed/initiativ, ordrer videre gennem bataljon og brigade (kæden), og forstærkninger i slag over flere dage.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

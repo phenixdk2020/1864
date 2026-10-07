@@ -9,6 +9,8 @@
 #include "../Units/StrategyUnit.h"
 #include "../Units/CavalryUnit.h"
 #include "../Units/StrategyHQUnit.h"
+#include "../AI/StrategyOfficerProfileComponent.h"
+#include "DrawDebugHelpers.h"
 #include "../Command/StrategyCommandComponent.h"
 #include "../Orders/StrategyOrderComponent.h"
 #include "../AI/StrategyOfficerAIComponent.h"
@@ -98,6 +100,34 @@ void AStrategyPlayerController::SetupInputComponent()
 void AStrategyPlayerController::PlayerTick(float DeltaTime)
 {
     Super::PlayerTick(DeltaTime);
+    TickCouriers(DeltaTime);
+    // Test (-Strategy1864TestCourier): after 25 s the Danish company farthest from the staff is ordered 200 m forward.
+    static bool bTestCourier = false;
+    if (!bTestCourier && GetWorld() && GetWorld()->GetTimeSeconds() > 25.0f && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864TestCourier")))
+    {
+        bTestCourier = true;
+        FVector Staff;
+        AStrategyUnit* Far = nullptr;
+        float FarDistance = 0.0f;
+        if (FindArmyStaff(Staff))
+        {
+            for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+            {
+                if (IsValid(*It) && It->Side == EStrategySide::Denmark && It->Echelon == EStrategyEchelon::Company && FVector::Dist2D(Staff, It->GetActorLocation()) > FarDistance)
+                {
+                    Far = *It;
+                    FarDistance = FVector::Dist2D(Staff, It->GetActorLocation());
+                }
+            }
+        }
+        if (Far)
+        {
+            SelectedUnitObjects.Reset();
+            SelectedUnitObjects.Add(Far);
+            IssueOrderToSelection(EStrategyOrderType::Move, Far->GetActorLocation() + Far->GetActorForwardVector() * 20000.0f, 0.0f, false);
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-COURIER: order to %s, %.0f m from the staff, %d riders"), *Far->DisplayName.ToString(), FarDistance / 100.0f, Couriers.Num());
+        }
+    }
 
     if (!bSelectionInputDown)
     {
@@ -461,6 +491,8 @@ bool AStrategyPlayerController::IssueOrderToSelection(
     }
 
     bool bIssuedAny = false;
+    FVector Staff = FVector::ZeroVector;
+    const bool bStaff = AreCouriersOn() && FindArmyStaff(Staff);
 
     for (AStrategyUnit* Unit : SelectedUnitObjects)
     {
@@ -475,6 +507,22 @@ bool AStrategyPlayerController::IssueOrderToSelection(
         Order.FacingYaw = FacingYaw;
         Order.bHasFacing = bHasFacing;
         Order.Authority = EStrategyOrderAuthority::DirectPlayer;
+
+        // Far from the army's staff the order goes by a rider (within the staff's own circle it is called out).
+        const float Distance = FVector::Dist2D(Staff, Unit->GetActorLocation());
+        const bool bIsStaff = Unit->Echelon == EStrategyEchelon::Headquarters && (!Unit->CommandComponent || !IsValid(Unit->CommandComponent->CurrentCommandParent));
+        if (bStaff && !bIsStaff && Distance > 32000.0f)
+        {
+            Couriers.RemoveAll([Unit](const FCourier& C) { return C.Unit.Get() == Unit; });
+            FCourier Rider;
+            Rider.Unit = Unit;
+            Rider.Order = Order;
+            Rider.From = Staff;
+            Rider.Travel = 2.0f + Distance / 1200.0f;   // a rider at a hard trot over open ground: about 43 km/h
+            Couriers.Add(Rider);
+            bIssuedAny = true;
+            continue;
+        }
 
         if (Unit->OrderComponent->SetOrder(Order))
         {
@@ -781,4 +829,139 @@ void AStrategyPlayerController::ToggleProjectileTrajectoryDebug()
         Display,
         TEXT("PROJECT1864-PROJECTILE: trajectory debug=%s"),
         bNewEnabled ? TEXT("ON") : TEXT("OFF"));
+}
+
+// ------------------------------------------------------------------ couriers
+
+namespace
+{
+    int32 GCouriersOn = -1;   // -1: not read from the settings yet
+}
+
+bool AStrategyPlayerController::AreCouriersOn()
+{
+    if (GCouriersOn < 0)
+    {
+        bool bOn = true;
+        if (GConfig)
+        {
+            GConfig->GetBool(TEXT("/Script/Strategy1864.Settings"), TEXT("CouriersOn"), bOn, GGameUserSettingsIni);
+        }
+        GCouriersOn = bOn && !FParse::Param(FCommandLine::Get(), TEXT("Strategy1864NoCouriers")) ? 1 : 0;
+    }
+    return GCouriersOn == 1;
+}
+
+void AStrategyPlayerController::SetCouriersOn(bool bOn)
+{
+    GCouriersOn = bOn ? 1 : 0;
+    if (GConfig)
+    {
+        GConfig->SetBool(TEXT("/Script/Strategy1864.Settings"), TEXT("CouriersOn"), bOn, GGameUserSettingsIni);
+        GConfig->Flush(false, GGameUserSettingsIni);
+    }
+}
+
+bool AStrategyPlayerController::FindArmyStaff(FVector& OutLocation) const
+{
+    // The army's staff: the highest Danish headquarters that has none above it (the one with the most units under it when there are several).
+    const AStrategyHQUnit* Best = nullptr;
+    int32 BestLevel = -1;
+    for (TActorIterator<AStrategyHQUnit> It(GetWorld()); It; ++It)
+    {
+        const AStrategyHQUnit* Hq = *It;
+        if (!IsValid(Hq) || Hq->Side != EStrategySide::Denmark || (Hq->CommandComponent && IsValid(Hq->CommandComponent->CurrentCommandParent)))
+        {
+            continue;
+        }
+        const int32 Level = static_cast<int32>(Hq->HQLevel);
+        if (Level > BestLevel)
+        {
+            Best = Hq;
+            BestLevel = Level;
+        }
+    }
+    if (!Best)
+    {
+        return false;
+    }
+    OutLocation = Best->GetActorLocation();
+    return true;
+}
+
+TArray<AStrategyPlayerController::FCourierInfo> AStrategyPlayerController::GetPendingCouriers() const
+{
+    TArray<FCourierInfo> Out;
+    for (const FCourier& C : Couriers)
+    {
+        if (C.Unit.IsValid())
+        {
+            FCourierInfo I;
+            I.Unit = C.Unit;
+            I.SecondsLeft = FMath::Max(0.0f, C.Travel - C.Elapsed);
+            Out.Add(I);
+        }
+    }
+    return Out;
+}
+
+void AStrategyPlayerController::TickCouriers(float DeltaTime)
+{
+    if (Couriers.Num() == 0 || !GetWorld())
+    {
+        return;
+    }
+    for (int32 i = Couriers.Num() - 1; i >= 0; --i)
+    {
+        FCourier& C = Couriers[i];
+        AStrategyUnit* Unit = C.Unit.Get();
+        if (!IsValid(Unit))
+        {
+            Couriers.RemoveAt(i);
+            continue;
+        }
+        C.Elapsed += DeltaTime;
+        const float Alpha = FMath::Clamp(C.Elapsed / FMath::Max(C.Travel, 0.1f), 0.0f, 1.0f);
+        const FVector To = Unit->GetActorLocation();
+        const FVector Rider = FMath::Lerp(C.From, To, Alpha) + FVector(0.0f, 0.0f, 150.0f);
+        // The rider: a gold mark moving along the way, the track behind it.
+        DrawDebugLine(GetWorld(), C.From + FVector(0.0f, 0.0f, 120.0f), Rider, FColor(220, 190, 90), false, 0.0f, SDPG_World, 8.0f);
+        DrawDebugBox(GetWorld(), Rider, FVector(110.0f, 60.0f, 110.0f), FQuat::Identity, FColor(255, 225, 120), false, 0.0f, SDPG_World, 14.0f);
+        if (C.Elapsed >= C.Travel)
+        {
+            const FStrategyOrder Order = C.Order;
+            Couriers.RemoveAt(i);
+            DeliverOrder(Unit, Order);
+        }
+    }
+}
+
+void AStrategyPlayerController::DeliverOrder(AStrategyUnit* Unit, FStrategyOrder Order)
+{
+    if (!IsValid(Unit) || !Unit->OrderComponent)
+    {
+        return;
+    }
+    // The officer reads the order: a reaction time by the staff work, discipline and calm; and the one who is unsure of himself
+    // and poor at the craft may take the place a little wrong (a movement, an attack, a place to hold).
+    const UStrategyOfficerProfileComponent* Profile = Unit->OfficerProfileComponent;
+    const float Efficiency = Profile ? Profile->GetCommandEfficiency() : 0.5f;
+    const float Stability = Profile ? Profile->GetDecisionStability() : 0.5f;
+    const float Skill = Profile ? Profile->TacticalSkill / 100.0f : 0.5f;
+    const float Reaction = 2.0f + 12.0f * (1.0f - Efficiency);
+    FString Remark;
+    if (!Order.TargetLocation.IsNearlyZero() && FMath::FRand() < FMath::Clamp(0.45f * (1.0f - Stability) - 0.05f, 0.0f, 0.35f))
+    {
+        const FVector Here = Unit->GetActorLocation();
+        const float Distance = FVector::Dist2D(Here, Order.TargetLocation);
+        const float Off = Distance * (0.05f + 0.15f * (1.0f - Skill));
+        const float Angle = FMath::FRand() * 2.0f * PI;
+        Order.TargetLocation += FVector(FMath::Cos(Angle), FMath::Sin(Angle), 0.0f) * Off;
+        Remark = FString::Printf(TEXT("%s har forstået ordren løst: stedet ligger ca. %.0f m fra det ønskede"), *Unit->DisplayName.ToString(), Off / 100.0f);
+    }
+    Unit->OrderComponent->QueueDelayedOrder(Order, Reaction);
+    if (AStrategyHUD* Hud = Cast<AStrategyHUD>(GetHUD()))
+    {
+        Hud->AddNotice(Remark.IsEmpty() ? FString::Printf(TEXT("Ordren er fremme hos %s (%.0f s til den udføres)"), *Unit->DisplayName.ToString(), Reaction) : Remark);
+    }
 }

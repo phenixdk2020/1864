@@ -68,7 +68,27 @@ public:
     UFUNCTION(BlueprintCallable, Category="Strategy|Time")
     void SetSimulationSpeed(float NewSpeed);
 
+    /** Orders reach the units by a rider from the army's staff (the time grows with the distance), and the unit's officer
+     *  reads them by his abilities: a reaction time, and the poor ones may take the place a little wrong. */
+    static bool AreCouriersOn();
+    static void SetCouriersOn(bool bOn);
+    struct FCourierInfo { TWeakObjectPtr<AStrategyUnit> Unit; float SecondsLeft = 0.0f; };
+    TArray<FCourierInfo> GetPendingCouriers() const;
+
 private:
+    struct FCourier
+    {
+        TWeakObjectPtr<AStrategyUnit> Unit;
+        FStrategyOrder Order;
+        FVector From = FVector::ZeroVector;
+        float Travel = 0.0f;
+        float Elapsed = 0.0f;
+    };
+    TArray<FCourier> Couriers;
+    void TickCouriers(float DeltaTime);
+    bool FindArmyStaff(FVector& OutLocation) const;
+    void DeliverOrder(AStrategyUnit* Unit, FStrategyOrder Order);
+
     void SelectionPressed();
     void SelectionReleased();
     void SetSpeed1x();

@@ -210,6 +210,7 @@ void AStrategyHUD::DrawHUD()
     }
 
     DrawObjectiveMarkers();
+    DrawNotices();
     DrawOOB();
     DrawMinimap();
     DrawSettings();
@@ -562,7 +563,7 @@ void AStrategyHUD::DrawSettings()
         return;
     }
     // A small window under the button: the camera's speed on the keys.
-    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 202.0f;
+    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 238.0f;
     DrawPanel(X, Y, W, H);
     Text(TEXT("INDSTILLINGER"), X + 12.0f, Y + 8.0f, Gold);
     const float Factor = AStrategyCameraPawn::GetKeySpeedFactor();
@@ -588,6 +589,10 @@ void AStrategyHUD::DrawSettings()
         DrawButton(X + 326.0f, Y + 166.0f, 80.0f, 24.0f, TEXT("FRA"), EAction::EnemyFire, 0, !bFire, nullptr, !bFire ? nullptr : &ButtonDark);
         break;
     }
+    const bool bRiders = AStrategyPlayerController::AreCouriersOn();
+    Text(TEXT("Ordonnanser (ordrer tager tid)"), X + 12.0f, Y + 206.0f, Ink);
+    DrawButton(X + 240.0f, Y + 202.0f, 80.0f, 24.0f, TEXT("TIL"), EAction::Couriers, 1, bRiders, nullptr, bRiders ? nullptr : &ButtonDark);
+    DrawButton(X + 326.0f, Y + 202.0f, 80.0f, 24.0f, TEXT("FRA"), EAction::Couriers, 0, !bRiders, nullptr, !bRiders ? nullptr : &ButtonDark);
 }
 
 namespace
@@ -863,6 +868,9 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
             case EAction::SettingsToggle:
                 bSettingsOpen = !bSettingsOpen;
                 break;
+            case EAction::Couriers:
+                AStrategyPlayerController::SetCouriersOn(B.Value == 1);
+                break;
             case EAction::EnemyRange:
                 SetShowEnemyRange(!ShowEnemyRange());
                 break;
@@ -989,5 +997,46 @@ void AStrategyHUD::DrawObjectiveMarkers()
             DrawRect(FLinearColor(0.9f, 0.9f, 0.9f, 0.8f), Screen.X - 1.0f, BarY - 1.0f, 2.0f, 8.0f);
         }
         break;
+    }
+}
+
+// ------------------------------------------------------------------ notices and orders on their way
+
+void AStrategyHUD::AddNotice(const FString& Text)
+{
+    Notices.Add(TPair<FString, float>(Text, GetWorld() ? GetWorld()->GetTimeSeconds() + 9.0f : 9.0f));
+    if (Notices.Num() > 5) { Notices.RemoveAt(0); }
+}
+
+void AStrategyHUD::DrawNotices()
+{
+    const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+    Notices.RemoveAll([Now](const TPair<FString, float>& N) { return N.Value < Now; });
+    float Y = 44.0f;
+    for (const TPair<FString, float>& N : Notices)
+    {
+        float TW = 0.0f, TH = 0.0f;
+        GetTextSize(N.Key, TW, TH, nullptr, 1.0f);
+        const float X = (Canvas->ClipX - TW) * 0.5f;
+        DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.6f), X - 8.0f, Y, TW + 16.0f, TH + 10.0f);
+        DrawText(N.Key, FLinearColor(0.98f, 0.92f, 0.70f), X, Y + 5.0f, nullptr, 1.0f, false);
+        Y += TH + 14.0f;
+    }
+    // The units whose order is still on its way: a tag with the time left.
+    if (const AStrategyPlayerController* PC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
+    {
+        for (const AStrategyPlayerController::FCourierInfo& C : PC->GetPendingCouriers())
+        {
+            const AStrategyUnit* Unit = C.Unit.Get();
+            if (!IsValid(Unit)) { continue; }
+            const FVector Screen = Project(Unit->GetActorLocation() + FVector(0.0f, 0.0f, 900.0f));
+            if (Screen.Z <= 0.0f) { continue; }
+            const int32 Left = int32(FMath::CeilToFloat(C.SecondsLeft));
+            const FString Label = FString::Printf(TEXT("Ordre på vej  %d:%02d"), Left / 60, Left % 60);
+            float TW = 0.0f, TH = 0.0f;
+            GetTextSize(Label, TW, TH, nullptr, 0.9f);
+            DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.6f), Screen.X - TW * 0.5f - 5.0f, Screen.Y, TW + 10.0f, TH + 6.0f);
+            DrawText(Label, FLinearColor(1.0f, 0.88f, 0.45f), Screen.X - TW * 0.5f, Screen.Y + 3.0f, nullptr, 0.9f, false);
+        }
     }
 }

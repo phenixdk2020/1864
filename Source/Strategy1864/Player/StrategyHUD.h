@@ -54,7 +54,7 @@ public:
 private:
     enum class EAction : uint8
     {
-        None, Minimap, FinishBattle, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire
+        None, Minimap, FinishBattle, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers
     };
 
     struct FButton
@@ -70,6 +70,8 @@ private:
     void DrawCommandPanel(AStrategyUnit* Unit);
     void DrawMinimap();
     void DrawObjectiveMarkers();
+    void DrawNotices();
+    TArray<TPair<FString, float>> Notices;
     void DrawSettings();
     /** The fire cone of a unit on the ground (as the QA design): from the formation's front corners, the
      *  sides dashed at the half angle, the close, medium and long ranges as dashed arcs following the front,
@@ -79,6 +81,10 @@ private:
     void DrawButton(float X, float Y, float W, float H, const FString& Label, EAction Action, int32 Value, bool bActive,
         AStrategyUnit* Unit = nullptr, const FLinearColor* Colour = nullptr);
     void DrawPanel(float X, float Y, float W, float H);
+public:
+    /** A short message to the player (shown some seconds under the score panel). */
+    void AddNotice(const FString& Text);
+private:
     void Text(const FString& S, float X, float Y, const FLinearColor& Colour, float Scale = 1.0f);
 
     TArray<FButton> Buttons;
