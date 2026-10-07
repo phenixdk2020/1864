@@ -38,6 +38,11 @@ public:
 
 private:
     void ThinkInfantry(AStrategyUnit* Enemy, float Distance);
+    /** Companies of one battalion closing on the same enemy do not all walk at him and stand in each other's way: the middle
+     *  one is the fire base (it halts at its fire distance and shoots), the others go round to the flanks, outside the base's
+     *  line of fire, and take their places at an angle to the enemy so that they fire into his side. */
+    void AssignFlanks(AStrategyUnit* Enemy);
+    FVector ApproachGoal(AStrategyUnit* Enemy, float Range, FString& OutNote);
     void ThinkCavalry(AStrategyUnit* Enemy, float Distance);
     void ThinkArtillery(AStrategyUnit* Enemy, float Distance);
     void UpdateBayonetCharge();
@@ -58,6 +63,12 @@ private:
     UPROPERTY() TObjectPtr<AStrategyUnit> OwnerUnit;
     TWeakObjectPtr<AStrategyUnit> ChargeTarget;
     float Accumulator = 0.0f;
+    int32 FlankRole = 0;          // 0 none, 1 fire base, 2 flank
+    int32 FlankK = 0;             // how many places from the base
+    float FlankSign = 0.0f;       // -1 / +1: which side of the base
+    float FlankUntil = 0.0f;
+    TWeakObjectPtr<AStrategyUnit> FlankEnemy;
+    TWeakObjectPtr<AStrategyUnit> FlankBase;
     float LastChargeTime = -1000.0f;
     float LastFallBackTime = -1000.0f;
     float BayonetUntil = 0.0f;

@@ -685,6 +685,19 @@ void AStrategyOOBTestScenario::TickOfficers()
     {
         return;
     }
+    // Test (-Strategy1864TestFlank): after 10 s the Danish companies take an offensive doctrine (the captains close on the enemy by themselves).
+    static bool bFlankTest = false;
+    if (!bFlankTest && World->GetTimeSeconds() > 10.0f && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864TestFlank")))
+    {
+        bFlankTest = true;
+        for (TActorIterator<AStrategyUnit> It(World); It; ++It)
+        {
+            if (IsValid(*It) && It->Side == EStrategySide::Denmark && It->Echelon == EStrategyEchelon::Company && It->DoctrineComponent)
+            {
+                It->DoctrineComponent->Doctrine = EStrategyDoctrine::Offensive;
+            }
+        }
+    }
     // Test (-Strategy1864TestOfficers): after 20 s one Danish officer is wounded and one enemy officer taken; at 30 s the result is written.
     static int32 TestStage = 0;
     if (TestStage < 2 && World->GetTimeSeconds() > (TestStage == 0 ? 20.0f : 30.0f) && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864TestOfficers")))

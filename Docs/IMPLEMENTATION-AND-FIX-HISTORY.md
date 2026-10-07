@@ -1324,6 +1324,15 @@ Kommandopanelet har for kompagnier en række STILLING: STÅ, KNÆ, LIG (`UStrate
 - Fjenden får 2-8 kompagnier fra sit korps (to hvis det har under 16 kompagnier i forvejen; en i et lille slag), delt i to hold til anden og tredje morgen.
 - Kontrolleret med uret sat hurtigt (`-Strategy1864ClockRate=3000`): fjendens første hold kom, og "FJENDEN" gik fra 1520 til 1900 mand. De danske reserver er ikke kørt igennem endnu (testen har ingen slagbestilling).
 
+### 2026-10-07 - Kompagnier rykker ind fra siden i stedet for at stå oven i hinanden
+
+Før gik hvert dansk kompagni lige mod den nærmeste fjende og endte oven i hinanden og i hinandens ildfelt. Nu (`AssignFlanks`/`ApproachGoal` i `UStrategyFieldOfficerComponent`) arbejder kompagnierne under samme stab som ét hold mod samme fjendtlige kompagni:
+- Det mellemste kompagni er **ildbasen**: det rykker til sin skudvidde, standser og skyder.
+- De andre er **flanker**: de går udenom ildbasens ildkegle (en bue uden om en kegle på ±32° fra basen mod fjenden) og tager plads i en vinkel til fjenden, 45° for det næste ved siden af basen og op til 80° for det næste, på samme skudafstand, så de skyder ind i hans side. Pladserne holder dem fra hinanden, og de rykker frem samtidig.
+- Rollerne gælder i 90 sekunder og fordeles forfra, når holdet skifter fjende; de vises i enhedens AI-tekst ("ildbasen: holder og skyder", "flanken: ind fra siden", "går udenom egen ild").
+- Test: `-Strategy1864TestFlank` giver de danske kompagnier en offensiv doktrin; loggen viser fordelingen. Prøvet i logfilen (fire kompagnier: en base, tre flanker med hver sit omvejspunkt), ikke set i et helt slag.
+- Fjendens kompagnier følger stadig sit eget slagmarks-AI og bruger ikke dette endnu.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
