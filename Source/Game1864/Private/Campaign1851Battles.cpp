@@ -272,6 +272,14 @@ void ACampaign1851Map::PollBattleResults()
 		}
 		O.bFromBattle3D = true;
 		ApplyBattle(b, O);
+		{
+			const TArray<TSharedPtr<FJsonValue>>* OurOfficers = nullptr;
+			const TArray<TSharedPtr<FJsonValue>>* EnemyOfficers = nullptr;
+			const TArray<TSharedPtr<FJsonValue>> None;
+			Json->TryGetArrayField(TEXT("officers"), OurOfficers);
+			Json->TryGetArrayField(TEXT("enemyOfficers"), EnemyOfficers);
+			ApplyOfficerCasualties(OurOfficers ? *OurOfficers : None, EnemyOfficers ? *EnemyOfficers : None);
+		}
 		IFileManager::Get().Move(*(Path + TEXT(".read")), *Path);
 	}
 }

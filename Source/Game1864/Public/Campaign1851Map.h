@@ -1221,6 +1221,11 @@ public:
 	int32 SeniorCaptain(int32 Regiment) const;
 	/** "Divisionschef, 1. Division", "Kompagnichef, 3. Kompagni (6. Bataillon)", "ledig". */
 	FString OfficerRole(int32 Officer) const;
+	/** A 3D battle's officers: those of ours who were wounded or taken (out of their posts until they recover or are exchanged),
+	 *  and the enemy officers we took. */
+	void ApplyOfficerCasualties(const TArray<TSharedPtr<FJsonValue>>& Ours, const TArray<TSharedPtr<FJsonValue>>& Theirs);
+	void DailyOfficers();
+	int32 EnemyOfficersHeld = 0;
 	/** A company's number, counted through its regiment (the 2nd battalion has companies 5-8). */
 	int32 CompanyNumber(int32 Regiment, int32 Company) const;
 	/** A company's men (the battalion's strength spread over its companies). */

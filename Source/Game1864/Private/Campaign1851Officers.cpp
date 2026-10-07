@@ -470,6 +470,8 @@ TArray<FCampaign1851OfficerSave> ACampaign1851Map::SaveOfficers() const
 		S.Command = Commands.IsValidIndex(O.Command) ? Commands[O.Command].Id : FString();
 		S.CaptainOf = Regiments.IsValidIndex(O.CaptainOf) ? Regiments[O.CaptainOf].Id : FString();
 		S.Company = O.Company;
+		S.Away = O.Away;
+		S.AwayUntil = O.Away != 0 ? O.AwayUntil.ToIso8601() : FString();
 	}
 	return Out;
 }
@@ -506,6 +508,8 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 			O.Stats[s] = S.Stats[s];
 		}
 		O.Experience = S.Experience;
+		O.Away = S.Away;
+		if (S.Away != 0) { FDateTime::ParseIso8601(*S.AwayUntil, O.AwayUntil); }
 		const int32 Index = Officers.Add(O);
 		const int32 Regiment = FindRegiment(S.Regiment);
 		if (Regiment != INDEX_NONE)
@@ -747,6 +751,11 @@ FString ACampaign1851Map::OfficerRole(int32 Officer) const
 		return FString();
 	}
 	const FCampaign1851Officer& O = Officers[Officer];
+	if (O.Away != 0)
+	{
+		return O.Away == 2 ? FString::Printf(TEXT("Krigsfange (udveksles ca. %d.%d.)"), O.AwayUntil.GetDay(), O.AwayUntil.GetMonth())
+			: FString::Printf(TEXT("Såret (tilbage ca. %d.%d.)"), O.AwayUntil.GetDay(), O.AwayUntil.GetMonth());
+	}
 	const int32 Index = FormationIndex(O.Formation);
 	if (Index != INDEX_NONE)
 	{
@@ -773,4 +782,63 @@ FString ACampaign1851Map::OfficerRole(int32 Officer) const
 			SeniorCaptain(O.CaptainOf) == Officer ? TEXT(", næstkommanderende") : TEXT(""));
 	}
 	return TEXT("ledig");
+}
+
+void ACampaign1851Map::ApplyOfficerCasualties(const TArray<TSharedPtr<FJsonValue>>& Ours, const TArray<TSharedPtr<FJsonValue>>& Theirs)
+{
+	FRandomStream Rng(int32(HashCombine(uint32(Seed), uint32(FMath::FloorToInt(CampaignDays) * 131 + Ours.Num()))));
+	// The enemy officers we took (each shortens the exchange of ours).
+	int32 Taken = 0;
+	FString First;
+	for (const TSharedPtr<FJsonValue>& V : Theirs)
+	{
+		const TSharedPtr<FJsonObject> O = V->AsObject();
+		if (O.IsValid() && O->GetStringField(TEXT("fate")) == TEXT("captured"))
+		{
+			if (Taken == 0) { First = FString::Printf(TEXT("%s %s"), *O->GetStringField(TEXT("rank")), *O->GetStringField(TEXT("name"))); }
+			++Taken;
+		}
+	}
+	if (Taken > 0)
+	{
+		EnemyOfficersHeld += Taken;
+		News.Add(FString::Printf(TEXT("%d fjendtlige officerer er taget til fange (bl.a. %s)"), Taken, *First));
+	}
+	for (const TSharedPtr<FJsonValue>& V : Ours)
+	{
+		const TSharedPtr<FJsonObject> J = V->AsObject();
+		if (!J.IsValid())
+		{
+			continue;
+		}
+		const FString Id = J->GetStringField(TEXT("id"));
+		const bool bCaptured = J->GetStringField(TEXT("fate")) == TEXT("captured");
+		const int32 Officer = Officers.IndexOfByPredicate([&Id](const FCampaign1851Officer& O) { return O.Id == Id; });
+		if (Officer == INDEX_NONE)
+		{
+			continue;
+		}
+		VacateOfficer(Officer);
+		FCampaign1851Officer& O = Officers[Officer];
+		O.Away = bCaptured ? 2 : 1;
+		// Wounded: three to twelve weeks. A prisoner: exchanged after ten weeks, sooner when we hold enemy officers too.
+		const int32 Days = bCaptured ? FMath::Max(21, 75 - 20 * EnemyOfficersHeld) : Rng.RandRange(21, 84);
+		O.AwayUntil = GetDate() + FTimespan::FromDays(Days);
+		News.Add(bCaptured ? FString::Printf(TEXT("%s %s er taget til fange af fjenden"), *O.Rank, *O.Name)
+			: FString::Printf(TEXT("%s %s er såret og afgår fra sin post (tilbage om ca. %d dage)"), *O.Rank, *O.Name, Days));
+	}
+}
+
+void ACampaign1851Map::DailyOfficers()
+{
+	const FDateTime Now = GetDate();
+	for (FCampaign1851Officer& O : Officers)
+	{
+		if (O.Away != 0 && Now >= O.AwayUntil)
+		{
+			News.Add(O.Away == 2 ? FString::Printf(TEXT("%s %s er udvekslet og kommer hjem"), *O.Rank, *O.Name) : FString::Printf(TEXT("%s %s er rask og kan få en post igen"), *O.Rank, *O.Name));
+			if (O.Away == 2) { EnemyOfficersHeld = FMath::Max(0, EnemyOfficersHeld - 1); }
+			O.Away = 0;
+		}
+	}
 }

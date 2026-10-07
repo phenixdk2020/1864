@@ -622,6 +622,28 @@ void AStrategyOOBTestScenario::TickOfficers()
     {
         return;
     }
+    // Test (-Strategy1864TestOfficers): after 20 s one Danish officer is wounded and one enemy officer taken; at 30 s the result is written.
+    static int32 TestStage = 0;
+    if (TestStage < 2 && World->GetTimeSeconds() > (TestStage == 0 ? 20.0f : 30.0f) && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864TestOfficers")))
+    {
+        if (TestStage == 0)
+        {
+            bool bOurs = false, bTheirs = false;
+            for (TActorIterator<AStrategyUnit> It(World); It; ++It)
+            {
+                UStrategyOfficerProfileComponent* P = IsValid(*It) ? It->OfficerProfileComponent : nullptr;
+                if (!P || P->OfficerId.IsEmpty()) { continue; }
+                if (It->Side == EStrategySide::Denmark && !bOurs) { bOurs = true; P->Fate = 1; P->Impairment = 0.6f; }
+                else if (It->Side != EStrategySide::Denmark && It->Side != EStrategySide::Neutral && !bTheirs) { bTheirs = true; P->Fate = 2; P->Impairment = 0.4f; }
+            }
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OFFICER: test, ours %d, theirs %d"), bOurs ? 1 : 0, bTheirs ? 1 : 0);
+        }
+        else
+        {
+            FinishCampaignBattle();
+        }
+        ++TestStage;
+    }
     AStrategyHUD* Hud = nullptr;
     if (APlayerController* PC = World->GetFirstPlayerController())
     {

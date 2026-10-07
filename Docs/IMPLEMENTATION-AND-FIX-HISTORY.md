@@ -1299,6 +1299,13 @@ Tidsgrænsen for pointafgørelsen er sat til tre dage (259.200 s spilletid) i st
 - Portrætterne fra `Overførsler\Strategy1864_Portrætter` (30 unge, 30 ældre og 15 gamle officerer og 25 ministre, 512 x 640) ligger i `Reference/Campaign1851/Portraits` og er importeret (`Import-Billeder`/`import_building_cards.py`). Officerskortet viser dem efter alder med rangmærket tegnet oven på (kontrolleret på et skærmbillede).
 - De 20 bygninger fra `Strategy1864_Buildings_All_20` (768 x 768) ligger uændret i `Reference/Campaign1851/Buildings/Strategy1864`. De der passer til en bygningstype uden billede er lavet til kort (512 x 512): `T_Bld_Barn`, `Blacksmith`, `Stable`, `Railway_Station`, `Church`, `Windmill` og `Watermill`. De øvrige (Kommandobygning, Infanteribygning, Kanonbygning, Officersbolig, Mandskabsbolig, Portnerbolig, Markedshal) venter på en bygningstype.
 
+### 2026-10-07 - Sårede og fangne officerer (aldrig dræbte)
+
+- **3D-slaget:** hver enheds officer har nu navn og rang (de danske fra kampagnen via Units.json: kaptajnerne og bataljonschefen; fjendens er opdigtede). Mister enheden mænd, kan officeren blive såret (0,4 % pr. mand, mindre for stabe); brydes enheden (flugt eller udslettet) med fjenden inden for 40 m, kan han tages til fange (35 %, 55 % hvis allerede såret, mere ved udslettelse; roligere officerer slippes lettere). Såret giver 60 % og fange 40 % af hans evner i resten af slaget (`Impairment` i `UStrategyOfficerProfileComponent`). Ingen dør. Beskeder øverst på skærmen. `-Strategy1864TestOfficers` tvinger et sår og en fange (test).
+- **Resultatfilen** har `officers` (vore såret/fanget) og `enemyOfficers` (fjendens, vi har taget).
+- **Kampagnen** (`ApplyOfficerCasualties`): en såret officer forlader sin post og er væk 3-12 uger; en fange i op til ti uger (udvekslet tidligere jo flere fjendtlige officerer vi holder). Posten står ledig og kan besættes af råd/spiller som ellers. `DailyOfficers` sender dem hjem igen. Officerskortet viser "Såret (tilbage ca. d.m.)" eller "Krigsfange". Gemmes i savet (`Away`/`AwayUntil`).
+- Ikke med: officerer i fjendens kampagnekorps (kun en tæller af fangne fjendtlige officerer), prestige/løsesum for fangne, og at en fanget chef får enheden til at miste moral.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

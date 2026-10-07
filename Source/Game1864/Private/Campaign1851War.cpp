@@ -180,6 +180,7 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		DailyWar();
 		DailyWeather();
 		DailyHealth();
+		DailyOfficers();
 		DailySieges();
 		DailyBridges();
 		EnemyReinforcements();

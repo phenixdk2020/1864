@@ -218,6 +218,9 @@ struct FCampaign1851OfficerSave
 	/** v11: the battalion (id) and company he leads as captain, if any. */
 	UPROPERTY() FString CaptainOf;
 	UPROPERTY() int32 Company = INDEX_NONE;
+	/** v18: wounded (1) or a prisoner (2), and until when (ISO date). */
+	UPROPERTY() uint8 Away = 0;
+	UPROPERTY() FString AwayUntil;
 };
 
 /**
