@@ -1317,6 +1317,13 @@ Kommandopanelet har for kompagnier en række STILLING: STÅ, KNÆ, LIG (`UStrate
 - **Løsesum:** et krigsfange-kort har knappen LØSEKØB (`RansomOfficer`): kaptajn 600 rd., major 1.500, oberstløjtnant 2.200, oberst 3.500, generalmajor 8.000, generalløjtnant 12.000, general 20.000; officeren er hjemme med det samme. Ellers udveksles han efter højst ti uger.
 - **Officerens egen dømmekraft** (ordonnansens aflevering, `DeliverOrder`): en forsigtig og uaggressiv officer (Forsigtighed over 70, Aggressivitet under 45) angriber ikke en fjende, der er mere end 1,6 gange så stærk som hans egne mænd, men holder sin stilling og siger det. En dårligt disciplineret officer (Disciplin under 35) er i 15 % af tilfældene 30-60 sekunder længere om at udføre en ordre.
 
+### 2026-10-07 - Forstærkninger i slag over flere dage
+
+- Kampagnen sender `reserveUnitIds` i slagbestillingen: de tre nærmeste danske regimenter, der ikke er i et slag, står stille inden for 60 km og har mindst 300 mand i feltet.
+- I 3D-slaget bygges de som alle andre enheder, men venter ude af spillet (skjult, tidsdilatation 0, uden kollision: `FreezeReserve`/`DormantUnits`) og tælles hverken i stillingen, målene, officerernes skæbner eller resultatet, før de kommer. Kl. 06 på anden og tredje dag (på slagets ur) rykker de ind bag egen linje (`TickReserves`), med en besked øverst på skærmen.
+- Fjenden får 2-8 kompagnier fra sit korps (to hvis det har under 16 kompagnier i forvejen; en i et lille slag), delt i to hold til anden og tredje morgen.
+- Kontrolleret med uret sat hurtigt (`-Strategy1864ClockRate=3000`): fjendens første hold kom, og "FJENDEN" gik fra 1520 til 1900 mand. De danske reserver er ikke kørt igennem endnu (testen har ingen slagbestilling).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

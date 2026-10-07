@@ -282,6 +282,24 @@ private:
     void SetOfficer(AStrategyUnit* Unit, const TSharedPtr<FJsonObject>& Officer);
     void MakeEnemyOfficer(AStrategyUnit* Unit, int32 Kind);
     void TickOfficers();
+    /** Reinforcements in a battle of several days: units that wait out of play (hidden, frozen) and come on at six in the
+     *  morning of the second and third day, behind their own line. The Danes' are the campaign's regiments nearby
+     *  (reserveUnitIds of the request); the enemy's a few companies from his corps. */
+    struct FReserveGroup
+    {
+        TArray<TWeakObjectPtr<AStrategyUnit>> Units;
+        int32 Day = 1;
+        bool bDanish = true;
+        bool bArrived = false;
+        FString Name;
+    };
+    TArray<FReserveGroup> ReserveGroups;
+    TSet<TWeakObjectPtr<const AStrategyUnit>> DormantUnits;
+    FVector DanishArrival = FVector::ZeroVector, EnemyArrival = FVector::ZeroVector, ArrivalSide = FVector::ZeroVector;
+    float ReserveTimer = 0.0f;
+    void FreezeReserve(AStrategyUnit* Unit);
+    void TickReserves();
+    bool IsDormant(const AStrategyUnit* Unit) const { return DormantUnits.Contains(Unit); }
     struct FOfficerWatch { int32 LastStrength = -1; bool bBroke = false; };
     TMap<TWeakObjectPtr<AStrategyUnit>, FOfficerWatch> OfficerWatch;
     float OfficerTimer = 0.0f;

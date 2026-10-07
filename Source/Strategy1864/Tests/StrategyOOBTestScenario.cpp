@@ -441,7 +441,7 @@ void AStrategyOOBTestScenario::GetBattleScore(int32& OutDanesStart, int32& OutDa
     for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
     {
         const AStrategyUnit* Unit = *It;
-        if (!IsValid(Unit) || Unit->Side == EStrategySide::Neutral || Unit->Echelon == EStrategyEchelon::Headquarters ||
+        if (!IsValid(Unit) || IsDormant(Unit) || Unit->Side == EStrategySide::Neutral || Unit->Echelon == EStrategyEchelon::Headquarters ||
             Unit->Echelon == EStrategyEchelon::Supply || Unit->Echelon == EStrategyEchelon::Battalion || Unit->Echelon == EStrategyEchelon::Regiment ||
             Unit->Echelon == EStrategyEchelon::Brigade || Unit->Echelon == EStrategyEchelon::Division)
         {
@@ -515,7 +515,7 @@ void AStrategyOOBTestScenario::TickObjectives(float DeltaSeconds)
     for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
     {
         const AStrategyUnit* Unit = *It;
-        if (!IsValid(Unit) || Unit->Side == EStrategySide::Neutral || Unit->Echelon == EStrategyEchelon::Headquarters || Unit->Echelon == EStrategyEchelon::Supply ||
+        if (!IsValid(Unit) || IsDormant(Unit) || Unit->Side == EStrategySide::Neutral || Unit->Echelon == EStrategyEchelon::Headquarters || Unit->Echelon == EStrategyEchelon::Supply ||
             Unit->Echelon == EStrategyEchelon::Battalion || Unit->Echelon == EStrategyEchelon::Regiment || Unit->Echelon == EStrategyEchelon::Brigade ||
             Unit->Echelon == EStrategyEchelon::Division || !Unit->IsCombatEffective() || Unit->UnitState == EStrategyUnitState::Routed || Unit->UnitState == EStrategyUnitState::Destroyed)
         {
@@ -615,6 +615,69 @@ void AStrategyOOBTestScenario::MakeEnemyOfficer(AStrategyUnit* Unit, int32 Kind)
     P->OfficerRank = Ranks[FMath::Clamp(Kind, 0, 2)];
 }
 
+void AStrategyOOBTestScenario::FreezeReserve(AStrategyUnit* Unit)
+{
+    if (!Unit)
+    {
+        return;
+    }
+    Unit->SetActorHiddenInGame(true);
+    Unit->SetActorEnableCollision(false);
+    Unit->CustomTimeDilation = 0.0f;
+    DormantUnits.Add(Unit);
+}
+
+void AStrategyOOBTestScenario::TickReserves()
+{
+    UWorld* World = GetWorld();
+    AStrategyHUD* Hud = nullptr;
+    if (World)
+    {
+        if (APlayerController* PC = World->GetFirstPlayerController()) { Hud = Cast<AStrategyHUD>(PC->GetHUD()); }
+    }
+    for (FReserveGroup& G : ReserveGroups)
+    {
+        // Six in the morning of the group's day (day 1 is the second day), on the battle's clock.
+        const float At = G.Day * 86400.0f - StartHour * 3600.0f + 6.0f * 3600.0f;
+        if (G.bArrived || BattleClock < At)
+        {
+            continue;
+        }
+        G.bArrived = true;
+        FVector Centre = FVector::ZeroVector;
+        int32 Count = 0;
+        for (const TWeakObjectPtr<AStrategyUnit>& W : G.Units)
+        {
+            if (W.IsValid()) { Centre += W->GetActorLocation(); ++Count; }
+        }
+        if (Count == 0)
+        {
+            continue;
+        }
+        Centre /= float(Count);
+        const FVector Target = (G.bDanish ? DanishArrival : EnemyArrival) + ArrivalSide * (G.Day == 1 ? -9000.0f : 9000.0f);
+        FVector Delta = Target - Centre;
+        Delta.Z = 0.0f;
+        for (const TWeakObjectPtr<AStrategyUnit>& W : G.Units)
+        {
+            AStrategyUnit* Unit = W.Get();
+            if (!Unit) { continue; }
+            FVector Place = Unit->GetActorLocation() + Delta;
+            Place.Z = CampaignField ? CampaignField->GroundZ(Place) : Place.Z;
+            Unit->SetActorLocation(Place);
+            Unit->SetActorHiddenInGame(false);
+            Unit->SetActorEnableCollision(true);
+            Unit->CustomTimeDilation = 1.0f;
+            DormantUnits.Remove(Unit);
+        }
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-RESERVE: %s arrives (%d units, day %d)"), *G.Name, Count, G.Day + 1);
+        if (Hud)
+        {
+            Hud->AddNotice(G.bDanish ? FString::Printf(TEXT("Forstærkning: %s er ankommet bag vor linje"), *G.Name) : FString::Printf(TEXT("Fjenden får forstærkning: %s"), *G.Name));
+        }
+    }
+}
+
 void AStrategyOOBTestScenario::TickOfficers()
 {
     UWorld* World = GetWorld();
@@ -653,7 +716,7 @@ void AStrategyOOBTestScenario::TickOfficers()
     {
         AStrategyUnit* Unit = *It;
         UStrategyOfficerProfileComponent* P = IsValid(Unit) ? Unit->OfficerProfileComponent : nullptr;
-        if (!P || P->OfficerId.IsEmpty() || P->Fate == 2 || Unit->Side == EStrategySide::Neutral)
+        if (!P || P->OfficerId.IsEmpty() || P->Fate == 2 || Unit->Side == EStrategySide::Neutral || IsDormant(Unit))
         {
             continue;
         }
@@ -798,6 +861,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
 
     // The request: which Danish units fight, the enemy, the rules (research, doctrine, AI defaults).
     TArray<FString> DanishIds;
+    TArray<FString> ReserveIds;
     double EnemyMen = 1520.0;
     FString EnemyNation = TEXT("PR");
     FString EnemyRifle;
@@ -810,6 +874,11 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Request) && Request.IsValid())
         {
             for (const TSharedPtr<FJsonValue>& V : Request->GetArrayField(TEXT("danishUnitIds"))) { DanishIds.Add(V->AsString()); }
+            const TArray<TSharedPtr<FJsonValue>>* ReserveList = nullptr;
+            if (Request->TryGetArrayField(TEXT("reserveUnitIds"), ReserveList))
+            {
+                for (const TSharedPtr<FJsonValue>& V : *ReserveList) { ReserveIds.Add(V->AsString()); }
+            }
             FString DateText;
             FDateTime BattleDate;
             if (AtmosphereActor && Request->TryGetStringField(TEXT("date"), DateText) && FDateTime::ParseIso8601(*DateText, BattleDate))
@@ -890,7 +959,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
                 const FString Type = (*Battle)->GetStringField(TEXT("type"));
                 if (DanishIds.Num() > 0)
                 {
-                    if (DanishIds.Contains(U->GetStringField(TEXT("id")))) { Units.Add(U); }
+                    if (DanishIds.Contains(U->GetStringField(TEXT("id"))) || ReserveIds.Contains(U->GetStringField(TEXT("id")))) { Units.Add(U); }
                     continue;
                 }
                 // A test without a request: two battalions, a cavalry regiment and a battery.
@@ -920,6 +989,9 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     const float BattalionWidth = 4.0f * FieldSpacing + 3000.0f;
     const int32 EnemyCompanies = FMath::Clamp(FMath::RoundToInt(EnemyMen / 190.0), 1, 16);
     const int32 PerLine = FMath::Min(EnemyCompanies, 8);
+    // More from his corps for the next days: what he has beyond sixteen companies, at least two (or one in a small battle), at most eight.
+    const int32 EnemyReserve = EnemyCompanies >= 6 ? FMath::Clamp(FMath::Max(2, FMath::RoundToInt(EnemyMen / 190.0) - 16), 0, 8) : FMath::Min(1, EnemyCompanies / 2);
+    const int32 EnemyTotal = EnemyCompanies + EnemyReserve;
 
     // The two lines on open ground along the enemy's approach: the Danes in front of the place they hold (between
     // it and the enemy), at the first distance from the middle where the whole front is on open ground (no town,
@@ -1108,6 +1180,31 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         }
     }
 
+    // The Danish reserves wait out of play until their morning.
+    ReserveGroups.Reset();
+    DormantUnits.Reset();
+    for (int32 r = 0; r < ReserveIds.Num(); ++r)
+    {
+        FReserveGroup Group;
+        Group.bDanish = true;
+        Group.Day = 1 + (r % 2);
+        for (const TPair<TWeakObjectPtr<AStrategyUnit>, FString>& It : CampaignUnitOf)
+        {
+            if (It.Value == ReserveIds[r] && It.Key.IsValid())
+            {
+                Group.Units.Add(It.Key);
+                FreezeReserve(It.Key.Get());
+            }
+        }
+        if (Group.Units.Num() > 0)
+        {
+            Group.Name = ReserveIds[r];
+            ReserveGroups.Add(Group);
+        }
+    }
+    DanishArrival = Danish(-22000.0f, 0.0f);
+    EnemyArrival = Hostile(-22000.0f, 0.0f);
+    ArrivalSide = Lateral;
     // The enemy: a brigade staff, a battalion staff for every four companies, companies of 190 (at most sixteen)
     // in two lines, the AI on. His rifle and quality from the request (the Prussian needle gun loads lying and
     // three times as fast; the Danish loss factors make his fire count for more or less).
@@ -1126,7 +1223,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         Face(EnemyBrigade, true);
     }
     TArray<AStrategyHQUnit*> EnemyBattalions;
-    for (int32 b = 0; b < (EnemyCompanies + 3) / 4; ++b)
+    for (int32 b = 0; b < (EnemyTotal + 3) / 4; ++b)
     {
         const int32 First = b * 4, Line = First / PerLine;
         const float Right = ((First % PerLine) + 1.5f - (PerLine - 1) * 0.5f) * FieldSpacing;
@@ -1143,7 +1240,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         }
         EnemyBattalions.Add(HQ);
     }
-    for (int32 e = 0; e < EnemyCompanies; ++e)
+    for (int32 e = 0; e < EnemyTotal; ++e)
     {
         const int32 Line = e / PerLine, InLine = e % PerLine;
         AStrategyCompanyUnit* Company = SpawnCompany(FName(*FString::Printf(TEXT("EN-%s-C%d"), *EnemyNation, e + 1)),
@@ -1185,6 +1282,35 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             }
             ConfigureRuntimeQALabel(Company);
             CampaignUnitOf.Add(Company, FString());
+            if (e >= EnemyCompanies)
+            {
+                // A reserve company: waits out of play (a group for each of the two mornings).
+                const int32 Day = 1 + ((e - EnemyCompanies) % 2);
+                FReserveGroup* Group = ReserveGroups.FindByPredicate([Day](const FReserveGroup& G) { return !G.bDanish && G.Day == Day; });
+                if (!Group)
+                {
+                    FReserveGroup NewGroup;
+                    NewGroup.bDanish = false;
+                    NewGroup.Day = Day;
+                    NewGroup.Name = FString::Printf(TEXT("%s reserve"), *EnemyLabel);
+                    Group = &ReserveGroups.Add_GetRef(NewGroup);
+                }
+                Group->Units.Add(Company);
+                FreezeReserve(Company);
+            }
+        }
+    }
+    // A battalion staff made only of reserve companies waits with them.
+    for (int32 b = 0; b < EnemyBattalions.Num(); ++b)
+    {
+        if (b * 4 >= EnemyCompanies && EnemyBattalions[b])
+        {
+            const int32 Day = 1 + ((b * 4 - EnemyCompanies) % 2);
+            if (FReserveGroup* Group = ReserveGroups.FindByPredicate([Day](const FReserveGroup& G) { return !G.bDanish && G.Day == Day; }))
+            {
+                Group->Units.Add(EnemyBattalions[b]);
+                FreezeReserve(EnemyBattalions[b]);
+            }
         }
     }
     // A check of the crossings: from the Danish line 2.5 km away from the enemy (over the place they hold).
@@ -1221,7 +1347,7 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
     for (const TPair<TWeakObjectPtr<AStrategyUnit>, FString>& It : CampaignUnitOf)
     {
         const AStrategyUnit* Unit = It.Key.Get();
-        if (!Unit || Unit->Echelon == EStrategyEchelon::Battalion || Unit->Echelon == EStrategyEchelon::Division)
+        if (!Unit || IsDormant(Unit) || Unit->Echelon == EStrategyEchelon::Battalion || Unit->Echelon == EStrategyEchelon::Division)
         {
             continue;
         }
@@ -1336,6 +1462,12 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
             TickObjectives(DeltaSeconds);
         }
         DrawObjectives();
+        ReserveTimer -= DeltaSeconds;
+        if (ReserveTimer <= 0.0f)
+        {
+            ReserveTimer = 3.0f;
+            TickReserves();
+        }
         OfficerTimer -= DeltaSeconds;
         if (OfficerTimer <= 0.0f)
         {

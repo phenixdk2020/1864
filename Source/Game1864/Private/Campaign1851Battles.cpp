@@ -186,6 +186,25 @@ bool ACampaign1851Map::FightBattleIn3D(int32 BattleId)
 		FortIds.Add(MakeShared<FJsonValueNumber>(Id));
 	}
 	Doc->SetArrayField(TEXT("danishUnitIds"), Units);
+	{
+		// The reserves: the nearest Danish regiments not in any battle, standing still within 60 km (at most three); they come on in the morning of the second and third day.
+		TArray<TPair<float, int32>> Near;
+		for (int32 i = 0; i < Regiments.Num(); ++i)
+		{
+			const FCampaign1851Regiment& R = Regiments[i];
+			bool bBusy = false;
+			for (const FCampaign1851Battle& Other : Battles) { bBusy |= Other.Regiments.Contains(i); }
+			const float Distance = float(FVector2D::Distance(R.Km, B->Km));
+			if (!bBusy && !R.IsMarching() && R.PresentMen() >= 300 && Distance <= 60.f && !R.bDetached)
+			{
+				Near.Add(TPair<float, int32>(Distance, i));
+			}
+		}
+		Near.Sort([](const TPair<float, int32>& A, const TPair<float, int32>& C) { return A.Key < C.Key; });
+		TArray<TSharedPtr<FJsonValue>> Reserve;
+		for (int32 k = 0; k < Near.Num() && k < 3; ++k) { Reserve.Add(MakeShared<FJsonValueString>(Regiments[Near[k].Value].Id)); }
+		Doc->SetArrayField(TEXT("reserveUnitIds"), Reserve);
+	}
 	Doc->SetArrayField(TEXT("fortIds"), FortIds);
 	Doc->SetStringField(TEXT("unitsFile"), TEXT("Units.json"));
 	Doc->SetStringField(TEXT("fortsFile"), TEXT("Fortifications.json"));
