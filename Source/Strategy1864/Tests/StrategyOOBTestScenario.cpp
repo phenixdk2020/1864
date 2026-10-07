@@ -1072,6 +1072,10 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         if (ACavalryUnit* Cav = SpawnCavalry(FName(*FString::Printf(TEXT("DK-%s"), *Id)), U->GetStringField(TEXT("name")), Danish(-6000.0f, Side), Army))
         {
             Face(Cav, false);
+            if (Cav->DragoonComponent && U->GetObjectField(TEXT("battle"))->GetStringField(TEXT("type")).Contains(TEXT("dragoon")))
+            {
+                Cav->DragoonComponent->Role = EStrategyCavalryRole::Dragoon;   // dragoons can dismount to fight on foot
+            }
             const int32 Men = FMath::Max(1, int32(U->GetNumberField(TEXT("presentMen"))));
             Cav->InitialStrength = Cav->CurrentStrength = Men;
             ConfigureRuntimeQALabel(Cav);

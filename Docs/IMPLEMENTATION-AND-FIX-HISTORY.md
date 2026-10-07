@@ -1306,6 +1306,10 @@ Tidsgrænsen for pointafgørelsen er sat til tre dage (259.200 s spilletid) i st
 - **Kampagnen** (`ApplyOfficerCasualties`): en såret officer forlader sin post og er væk 3-12 uger; en fange i op til ti uger (udvekslet tidligere jo flere fjendtlige officerer vi holder). Posten står ledig og kan besættes af råd/spiller som ellers. `DailyOfficers` sender dem hjem igen. Officerskortet viser "Såret (tilbage ca. d.m.)" eller "Krigsfange". Gemmes i savet (`Away`/`AwayUntil`).
 - Ikke med: officerer i fjendens kampagnekorps (kun en tæller af fangne fjendtlige officerer), prestige/løsesum for fangne, og at en fanget chef får enheden til at miste moral.
 
+### 2026-10-07 - Knapper: stilling (stå/knæ/lig) og dragoner sidder af
+
+Kommandopanelet har for kompagnier en række STILLING: STÅ, KNÆ, LIG (`UStrategyStanceComponent`: knælende rammes 18 % sjældnere, liggende 35 % sjældnere, men lader langsommere og bevæger sig langsomt; gælder alle valgte enheder). For dragoner (`Role = Dragoon`, sat fra regimentets type) er der SIT AF og STIG PÅ (`DismountAtCurrentPosition` / `RequestRemount`). Før fandtes logikken, men ingen kunne bruge den i spillet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

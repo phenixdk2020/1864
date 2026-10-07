@@ -18,6 +18,9 @@
 #include "TextureResource.h"
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
 #include "../Units/StrategyCompanyUnit.h"
+#include "../Units/CavalryUnit.h"
+#include "../Units/StrategyDragoonComponent.h"
+#include "../Combat/StrategyStanceComponent.h"
 #include "../Tests/StrategyOOBTestScenario.h"
 #include "StrategyCameraPawn.h"
 #include "EngineUtils.h"
@@ -785,6 +788,28 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         DrawButton(OX + 116.0f, MY + 18.0f, 110.0f, 24.0f, TEXT("TILBAGE"), EAction::Order, int32(EStrategyOrderType::Withdraw), Current == EStrategyOrderType::Withdraw, Unit);
         DrawButton(OX + 232.0f, MY + 18.0f, 110.0f, 24.0f, TEXT("CHARGE"), EAction::Charge, 0, Current == EStrategyOrderType::Charge, Unit);
         DrawButton(OX + 348.0f, MY + 18.0f, 80.0f, 24.0f, TEXT("STOP"), EAction::Stop, 0, Current == EStrategyOrderType::Hold, Unit);
+        // The stance (stand, kneel, lie down: a lying unit is harder to hit but loads slower and moves slowly), and for dragoons
+        // dismounting to fight on foot and mounting again.
+        if (Cast<AStrategyCompanyUnit>(Unit) && Unit->StanceComponent)
+        {
+            Text(TEXT("STILLING"), OX + 348.0f, MY + 50.0f, Gold, 0.85f);
+            const TCHAR* StanceLabels[] = { TEXT("STÅ"), TEXT("KNÆ"), TEXT("LIG") };
+            const EStrategyStance Stances[] = { EStrategyStance::Standing, EStrategyStance::Kneeling, EStrategyStance::Prone };
+            for (int32 i = 0; i < 3; ++i)
+            {
+                DrawButton(OX + 348.0f + i * 58.0f, MY + 66.0f, 54.0f, 24.0f, StanceLabels[i], EAction::Stance, int32(Stances[i]), Unit->StanceComponent->Stance == Stances[i], Unit);
+            }
+        }
+        else if (const ACavalryUnit* Horse = Cast<ACavalryUnit>(Unit))
+        {
+            if (Horse->DragoonComponent && Horse->DragoonComponent->Role == EStrategyCavalryRole::Dragoon)
+            {
+                const bool bFoot = Horse->DragoonComponent->MountedState != EStrategyMountedState::Mounted;
+                Text(TEXT("DRAGONER"), OX + 348.0f, MY + 50.0f, Gold, 0.85f);
+                DrawButton(OX + 348.0f, MY + 66.0f, 84.0f, 24.0f, TEXT("SIT AF"), EAction::Dismount, 1, bFoot, Unit);
+                DrawButton(OX + 438.0f, MY + 66.0f, 84.0f, 24.0f, TEXT("STIG PÅ"), EAction::Dismount, 0, !bFoot, Unit);
+            }
+        }
         if (UStrategyFormationComponent* Formation = Unit->FormationComponent)
         {
             Text(TEXT("FORMATION"), OX, MY + 50.0f, Gold, 0.85f);
@@ -949,6 +974,27 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 break;
             case EAction::Stop:
                 if (PC) { PC->IssueHoldToSelection(); }
+                break;
+            case EAction::Stance:
+                if (PC)
+                {
+                    for (AStrategyUnit* Selected : PC->GetSelectedUnits())
+                    {
+                        if (IsValid(Selected) && Selected->StanceComponent) { Selected->StanceComponent->SetStance(EStrategyStance(B.Value)); }
+                    }
+                }
+                break;
+            case EAction::Dismount:
+                if (PC)
+                {
+                    for (AStrategyUnit* Selected : PC->GetSelectedUnits())
+                    {
+                        if (ACavalryUnit* Horse = Cast<ACavalryUnit>(Selected))
+                        {
+                            if (Horse->DragoonComponent) { if (B.Value == 1) { Horse->DragoonComponent->DismountAtCurrentPosition(); } else { Horse->DragoonComponent->RequestRemount(); } }
+                        }
+                    }
+                }
                 break;
             case EAction::FirePolicy:
                 if (Unit && Unit->FireControlComponent) { Unit->FireControlComponent->SetFirePolicy(EStrategyFirePolicy(B.Value)); }
