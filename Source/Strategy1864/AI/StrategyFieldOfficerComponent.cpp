@@ -385,6 +385,13 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
         Advance.FacingYaw = (Enemy->GetActorLocation() - Goal).Rotation().Yaw;
         Advance.bHasFacing = true;
         Advance.Authority = EStrategyOrderAuthority::OfficerAI;
+        // A short move (under 90 m) with the enemy close ahead: sidestep, the front stays to him (no turning the back or the flank to the fire).
+        if (FVector::Dist2D(OwnerUnit->GetActorLocation(), Goal) < 9000.0f && Distance < Range * 1.8f)
+        {
+            Advance.bKeepFacing = true;
+            if (!ApproachNote.IsEmpty()) { ApproachNote += TEXT(" · sidetrin"); }
+            else { ApproachNote = TEXT("sidetrin"); }
+        }
         if (OwnerUnit->OrderComponent->SetOrder(Advance))
         {
             UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FLANK: %s goes to %.0f,%.0f (%s), enemy at %.0f,%.0f"), *OwnerUnit->DisplayName.ToString(), Goal.X, Goal.Y, *ApproachNote, Enemy->GetActorLocation().X, Enemy->GetActorLocation().Y);

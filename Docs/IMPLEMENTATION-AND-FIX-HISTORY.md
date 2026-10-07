@@ -1333,6 +1333,10 @@ Før gik hvert dansk kompagni lige mod den nærmeste fjende og endte oven i hina
 - Test: `-Strategy1864TestFlank` giver de danske kompagnier en offensiv doktrin; loggen viser fordelingen. Prøvet i logfilen (fire kompagnier: en base, tre flanker med hver sit omvejspunkt), ikke set i et helt slag.
 - Fjendens kompagnier følger stadig sit eget slagmarks-AI og bruger ikke dette endnu.
 
+### 2026-10-07 - Sidetrin: kompagnierne flytter sig med fronten mod fjenden
+
+Ordrer har et nyt felt `bKeepFacing`: enheden holder fronten mod `FacingYaw`, mens den bevæger sig (`StrategyMovementExecutorComponent`, `bKeepFacingMove`), i stedet for at dreje mod den retning den går; til siden eller baglæns går den med tre femtedele af farten, hvis vejen ligger mere end 50° fra fronten. Kaptajnerne bruger det for korte flytninger (under 90 m) med fjenden tæt foran (`ThinkInfantry`), så kompagnierne kan rykke på plads i flanken uden at vende ryg eller flanke mod ilden. AI-teksten viser "sidetrin". Kun kompileret og logget; ikke set i et slag.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

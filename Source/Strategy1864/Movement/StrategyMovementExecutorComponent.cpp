@@ -191,6 +191,7 @@ void UStrategyMovementExecutorComponent::BeginMovementForOrder(const FStrategyOr
 
     GoalFacingYaw = Order.FacingYaw;
     bApplyGoalFacing = Order.bHasFacing;
+    bKeepFacingMove = Order.bKeepFacing && Order.bHasFacing;
     ExecutingOrderSerial = Order.OrderSerial;
     bHasMovementGoal = true;
 
@@ -428,8 +429,11 @@ void UStrategyMovementExecutorComponent::TickComponent(
         WadingMultiplier = Field->WadingFactor(CurrentLocation);
     }
 
+    // A side-step goes at three fifths of the pace when the way is more than 50 degrees off the front.
+    const float SidestepMultiplier = bKeepFacingMove && FMath::Abs(FMath::FindDeltaAngleDegrees(OwnerUnit->GetActorRotation().Yaw, Direction.Rotation().Yaw)) > 50.0f ? 0.6f : 1.0f;
     const float Step =
         MoveSpeedCmPerSecond *
+        SidestepMultiplier *
         WadingMultiplier *
         ConditionMultiplier *
         SlopeMultiplier *
@@ -458,7 +462,14 @@ void UStrategyMovementExecutorComponent::TickComponent(
 
     OwnerUnit->SetActorLocation(NewLocation);
 
-    if (!Direction.IsNearlyZero())
+    if (bKeepFacingMove)
+    {
+        // The front stays to the enemy.
+        FRotator Front = OwnerUnit->GetActorRotation();
+        Front.Yaw = FMath::FixedTurn(Front.Yaw, GoalFacingYaw, TurnSpeedDegreesPerSecond * DeltaTime);
+        OwnerUnit->SetActorRotation(Front);
+    }
+    else if (!Direction.IsNearlyZero())
     {
         const FRotator DesiredRotation = Direction.Rotation();
         const FRotator NewRotation = FMath::RInterpConstantTo(
@@ -667,6 +678,7 @@ bool UStrategyMovementExecutorComponent::TryRetargetDuringBridge(
     MovementGoal = Order.TargetLocation;
     GoalFacingYaw = Order.FacingYaw;
     bApplyGoalFacing = Order.bHasFacing;
+    bKeepFacingMove = Order.bKeepFacing && Order.bHasFacing;
     ExecutingOrderSerial = Order.OrderSerial;
     bTurningToGoalFacing = false;
 

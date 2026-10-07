@@ -64,6 +64,11 @@ struct FStrategyOrder
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool bHasFacing = false;
 
+    /** Side-step: the unit keeps its front to FacingYaw while it moves (at a slower pace to the side or back) instead of
+     *  turning to the way it goes. For short moves in front of the enemy. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bKeepFacing = false;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     EStrategyOrderAuthority Authority = EStrategyOrderAuthority::InheritedAI;
 

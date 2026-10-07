@@ -83,6 +83,7 @@ private:
     float GoalFacingYaw = 0.0f;
     bool bHasMovementGoal = false;
     bool bApplyGoalFacing = false;
+    bool bKeepFacingMove = false;   // side-step: keep the front while moving
     int32 ExecutingOrderSerial = 0;
     bool bCavalryDefileActive = false;
     bool bTurningToGoalFacing = false;
