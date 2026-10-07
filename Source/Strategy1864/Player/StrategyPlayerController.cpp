@@ -534,6 +534,13 @@ bool AStrategyPlayerController::IssueOrderToSelection(
             continue;
         }
 
+        // An order given here and now replaces one still on its way to the same unit.
+        for (const FCourier& Old : Couriers)
+        {
+            if (Old.Unit.Get() == Unit && Old.Horseman.IsValid()) { Old.Horseman->Dismiss(); }
+        }
+        Couriers.RemoveAll([Unit](const FCourier& C) { return C.Unit.Get() == Unit; });
+
         if (Unit->OrderComponent->SetOrder(Order))
         {
             bIssuedAny = true;

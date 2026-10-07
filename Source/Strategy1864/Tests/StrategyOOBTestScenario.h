@@ -310,6 +310,7 @@ private:
     TArray<FBattleObjective> Objectives;
     float BattleClock = 0.0f;   // seconds of the battle's own clock (a second of play is ClockRate of them)
     float ClockRate = 6.0f;
+    float BattleBaseDay = 182.0f;   // the day of the year the battle began on
     float StartHour = 7.0f;
     float ClockTimer = 0.0f;
     UPROPERTY(Transient) TObjectPtr<class AStrategyBattleAtmosphere> AtmosphereActor;

@@ -1337,6 +1337,20 @@ Før gik hvert dansk kompagni lige mod den nærmeste fjende og endte oven i hina
 
 Ordrer har et nyt felt `bKeepFacing`: enheden holder fronten mod `FacingYaw`, mens den bevæger sig (`StrategyMovementExecutorComponent`, `bKeepFacingMove`), i stedet for at dreje mod den retning den går; til siden eller baglæns går den med tre femtedele af farten, hvis vejen ligger mere end 50° fra fronten. Kaptajnerne bruger det for korte flytninger (under 90 m) med fjenden tæt foran (`ThinkInfantry`), så kompagnierne kan rykke på plads i flanken uden at vende ryg eller flanke mod ilden. AI-teksten viser "sidetrin". Kun kompileret og logget; ikke set i et slag.
 
+### 2026-10-07 - Codex-review af dagens slagkode: ni fund rettet
+
+Et uafhængigt Codex-review (kørt direkte med `codex.exe`) fandt:
+1. Flankens omvejspunkt lå på modsat side (forkert fortegn) og kunne gøre, at kompagniet aldrig nåede sin plads: rettet.
+2. Et kompagni, der allerede stod inden for skudvidde, rykkede aldrig til sin flankeplads: flanken flyttes nu også inden for skudvidde, når den er mere end 20 m fra pladsen.
+3. Ordren pegede mod en anden fjende end den, kompagniet gik mod: front og mål bruger nu samme fjende.
+4. Ventende forstærkninger kunne udpeges og skydes på: `bOutOfPlay` på enheden gør `IsCombatEffective` falsk, til de kommer.
+5. Et sted blev taget efter ca. 45 sekunder i stedet for 90: ejerskab skifter nu, når bjælken er fuld (90 s fra neutral); et ejet sted går til neutral, når bjælken passerer midten.
+6. En flygtende chef kunne kun tages til fange i første sekund: der slås nu terning hvert andet sekund, så længe enheden er brudt og fjenden er nær.
+7. En ældre ordonnansordre kunne overskrive en nyere: en ny ordre til samme enhed annullerer ordren på vej.
+8. Manglende hestemodel blokerede leveringen for altid: rytteren er så usynlig, men leverer.
+9. Solens dato stod fast efter første dag: dagen på året følger nu slagets dage.
+Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i logfilen (flankerne går først udenom ildbasen, derefter ind fra siden; forstærkningerne kommer).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

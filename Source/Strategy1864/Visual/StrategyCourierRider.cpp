@@ -76,7 +76,9 @@ void AStrategyCourierRider::Send(const FVector& InHome, AStrategyUnit* To)
     SetActorLocation(InHome);
     if (!bReady)
     {
-        bReady = LoadAssets();
+        // Without the horse model the rider is invisible but still carries the order.
+        LoadAssets();
+        bReady = true;
     }
 }
 

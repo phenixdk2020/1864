@@ -265,7 +265,7 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
     UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FLANK: %d companies against %s: %s is the fire base"), Group.Num(), *Enemy->DisplayName.ToString(), *Group[Base]->DisplayName.ToString());
 }
 
-FVector UStrategyFieldOfficerComponent::ApproachGoal(AStrategyUnit* Enemy, float Range, FString& OutNote)
+FVector UStrategyFieldOfficerComponent::ApproachGoal(AStrategyUnit* Enemy, float Range, FString& OutNote, FVector& OutFoe)
 {
     const FVector Own = OwnerUnit->GetActorLocation();
     const float Now = GetWorld()->GetTimeSeconds();
@@ -276,6 +276,7 @@ FVector UStrategyFieldOfficerComponent::ApproachGoal(AStrategyUnit* Enemy, float
     // The whole group works on the same enemy company (the one the fire base faces).
     const AStrategyUnit* Foe = FlankRole != 0 && FlankEnemy.IsValid() ? FlankEnemy.Get() : Enemy;
     const FVector Target = Foe->GetActorLocation();
+    OutFoe = Target;
     FVector Goal = Target + (Own - Target).GetSafeNormal2D() * Range * 0.8f;
     if (FlankRole == 0)
     {
@@ -310,7 +311,7 @@ FVector UStrategyFieldOfficerComponent::ApproachGoal(AStrategyUnit* Enemy, float
         }
         if (bCrosses)
         {
-            const FVector Round = BasePlace + Axis.RotateAngleAxis(FlankSign * (46.0f + 14.0f * (FlankK - 1)), FVector::UpVector) * (Length * (0.6f + 0.12f * (FlankK - 1)));
+            const FVector Round = BasePlace + Axis.RotateAngleAxis(-FlankSign * (46.0f + 14.0f * (FlankK - 1)), FVector::UpVector) * (Length * (0.6f + 0.12f * (FlankK - 1)));
             OutNote = TEXT("går udenom egen ild");
             return Round;
         }
@@ -370,34 +371,39 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
     }
     const FStrategyOrder Order = OwnerUnit->OrderComponent->GetCurrentOrder();
     const bool bMoving = OwnerUnit->OrderComponent->IsPhysicallyExecuting();
-    if (IsOffensive() && Distance > Range * 0.95f && !bMoving)
+    if (IsOffensive() && !bMoving)
     {
-        // On to the fire distance, straight at the enemy, but not far beyond the ground he was sent to.
         FString ApproachNote;
-        FVector Goal = ApproachGoal(Enemy, Range, ApproachNote);
-        if (Order.IsValidOrder() && FVector::Dist2D(Goal, Order.TargetLocation) > 40000.0f)
+        FVector Foe = Enemy->GetActorLocation();
+        FVector Goal = ApproachGoal(Enemy, Range, ApproachNote, Foe);
+        // On to the fire distance, or (for a flank) to the place at an angle to the enemy, even when already within range.
+        const bool bFlankToGo = FlankRole == 2 && FVector::Dist2D(OwnerUnit->GetActorLocation(), Goal) > 2000.0f;
+        if (Distance > Range * 0.95f || bFlankToGo)
         {
-            Goal = Order.TargetLocation + (Goal - Order.TargetLocation).GetSafeNormal2D() * 40000.0f;
+            if (Order.IsValidOrder() && FVector::Dist2D(Goal, Order.TargetLocation) > 40000.0f)
+            {
+                Goal = Order.TargetLocation + (Goal - Order.TargetLocation).GetSafeNormal2D() * 40000.0f;
+            }
+            FStrategyOrder Advance;
+            Advance.Type = EStrategyOrderType::Advance;
+            Advance.TargetLocation = Goal;
+            Advance.FacingYaw = (Foe - Goal).Rotation().Yaw;
+            Advance.bHasFacing = true;
+            Advance.Authority = EStrategyOrderAuthority::OfficerAI;
+            // A short move (under 90 m) with the enemy close ahead: sidestep, the front stays to him (no turning the back or the flank to the fire).
+            if (FVector::Dist2D(OwnerUnit->GetActorLocation(), Goal) < 9000.0f && Distance < Range * 1.8f)
+            {
+                Advance.bKeepFacing = true;
+                if (!ApproachNote.IsEmpty()) { ApproachNote += TEXT(" · sidetrin"); }
+                else { ApproachNote = TEXT("sidetrin"); }
+            }
+            if (OwnerUnit->OrderComponent->SetOrder(Advance))
+            {
+                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FLANK: %s goes to %.0f,%.0f (%s), enemy at %.0f,%.0f"), *OwnerUnit->DisplayName.ToString(), Goal.X, Goal.Y, *ApproachNote, Foe.X, Foe.Y);
+                Decide(TEXT("Rykker frem"), FString::Printf(TEXT("%s er %.0f m borte; vi skyder på %.0f m%s%s"), *Enemy->DisplayName.ToString(), Distance / 100.0f, Range / 100.0f, ApproachNote.IsEmpty() ? TEXT("") : TEXT(" · "), *ApproachNote));
+            }
+            return;
         }
-        FStrategyOrder Advance;
-        Advance.Type = EStrategyOrderType::Advance;
-        Advance.TargetLocation = Goal;
-        Advance.FacingYaw = (Enemy->GetActorLocation() - Goal).Rotation().Yaw;
-        Advance.bHasFacing = true;
-        Advance.Authority = EStrategyOrderAuthority::OfficerAI;
-        // A short move (under 90 m) with the enemy close ahead: sidestep, the front stays to him (no turning the back or the flank to the fire).
-        if (FVector::Dist2D(OwnerUnit->GetActorLocation(), Goal) < 9000.0f && Distance < Range * 1.8f)
-        {
-            Advance.bKeepFacing = true;
-            if (!ApproachNote.IsEmpty()) { ApproachNote += TEXT(" · sidetrin"); }
-            else { ApproachNote = TEXT("sidetrin"); }
-        }
-        if (OwnerUnit->OrderComponent->SetOrder(Advance))
-        {
-            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FLANK: %s goes to %.0f,%.0f (%s), enemy at %.0f,%.0f"), *OwnerUnit->DisplayName.ToString(), Goal.X, Goal.Y, *ApproachNote, Enemy->GetActorLocation().X, Enemy->GetActorLocation().Y);
-            Decide(TEXT("Rykker frem"), FString::Printf(TEXT("%s er %.0f m borte; vi skyder på %.0f m%s%s"), *Enemy->DisplayName.ToString(), Distance / 100.0f, Range / 100.0f, ApproachNote.IsEmpty() ? TEXT("") : TEXT(" · "), *ApproachNote));
-        }
-        return;
     }
     if (!bMoving && Distance < 50000.0f)
     {

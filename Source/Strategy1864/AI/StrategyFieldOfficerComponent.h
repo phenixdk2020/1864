@@ -42,7 +42,7 @@ private:
      *  one is the fire base (it halts at its fire distance and shoots), the others go round to the flanks, outside the base's
      *  line of fire, and take their places at an angle to the enemy so that they fire into his side. */
     void AssignFlanks(AStrategyUnit* Enemy);
-    FVector ApproachGoal(AStrategyUnit* Enemy, float Range, FString& OutNote);
+    FVector ApproachGoal(AStrategyUnit* Enemy, float Range, FString& OutNote, FVector& OutFoe);
     void ThinkCavalry(AStrategyUnit* Enemy, float Distance);
     void ThinkArtillery(AStrategyUnit* Enemy, float Distance);
     void UpdateBayonetCharge();

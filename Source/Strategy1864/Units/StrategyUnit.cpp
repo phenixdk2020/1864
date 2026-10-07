@@ -367,7 +367,7 @@ void AStrategyUnit::SetUnitState(EStrategyUnitState NewState)
 
 bool AStrategyUnit::IsCombatEffective() const
 {
-    return CurrentStrength > 0 &&
+    return !bOutOfPlay && CurrentStrength > 0 &&
         UnitState != EStrategyUnitState::Routed &&
         UnitState != EStrategyUnitState::Disabled &&
         UnitState != EStrategyUnitState::Abandoned &&

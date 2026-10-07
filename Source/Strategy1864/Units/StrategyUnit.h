@@ -356,6 +356,9 @@ public:
     UFUNCTION(BlueprintPure, Category="Strategy|Unit")
     bool IsCombatEffective() const;
 
+    /** A reinforcement that has not arrived yet: hidden and frozen, and not a target or a fighter for anyone. */
+    bool bOutOfPlay = false;
+
     UFUNCTION(BlueprintImplementableEvent, Category="Strategy|Selection")
     void OnSelectionChanged(bool bNewSelected);
 

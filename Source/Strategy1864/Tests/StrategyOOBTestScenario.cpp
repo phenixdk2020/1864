@@ -545,7 +545,10 @@ void AStrategyOOBTestScenario::TickObjectives(float DeltaSeconds)
             O.Progress = FMath::Min(1.0f, O.Progress + DeltaSeconds / 90.0f);
         }
         const int32 Before = O.Owner;
-        O.Owner = O.Progress < -0.5f ? 1 : O.Progress > 0.5f ? 2 : 0;
+        // Taken when the bar is full (90 s of holding it from neutral); an owned place falls back to neutral when the bar passes the middle.
+        if (O.Progress <= -0.99f) { O.Owner = 1; }
+        else if (O.Progress >= 0.99f) { O.Owner = 2; }
+        else if ((O.Owner == 1 && O.Progress >= 0.0f) || (O.Owner == 2 && O.Progress <= 0.0f)) { O.Owner = 0; }
         if (O.Owner != Before && O.Owner != 0)
         {
             UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OBJECTIVES: %s taken by %s"), *O.Name, O.Owner == 1 ? TEXT("the Danes") : TEXT("the enemy"));
@@ -624,6 +627,7 @@ void AStrategyOOBTestScenario::FreezeReserve(AStrategyUnit* Unit)
     Unit->SetActorHiddenInGame(true);
     Unit->SetActorEnableCollision(false);
     Unit->CustomTimeDilation = 0.0f;
+    Unit->bOutOfPlay = true;
     DormantUnits.Add(Unit);
 }
 
@@ -668,6 +672,7 @@ void AStrategyOOBTestScenario::TickReserves()
             Unit->SetActorHiddenInGame(false);
             Unit->SetActorEnableCollision(true);
             Unit->CustomTimeDilation = 1.0f;
+            Unit->bOutOfPlay = false;
             DormantUnits.Remove(Unit);
         }
         UE_LOG(LogTemp, Display, TEXT("PROJECT1864-RESERVE: %s arrives (%d units, day %d)"), *G.Name, Count, G.Day + 1);
@@ -751,7 +756,7 @@ void AStrategyOOBTestScenario::TickOfficers()
         }
         // Taken: when the unit breaks (or is destroyed) with the enemy close.
         const bool bBroken = Unit->UnitState == EStrategyUnitState::Routed || Unit->UnitState == EStrategyUnitState::Destroyed;
-        if (bBroken && !W.bBroke)
+        if (bBroken && P->Fate != 2)
         {
             W.bBroke = true;
             bool bEnemyNear = false;
@@ -760,7 +765,8 @@ void AStrategyOOBTestScenario::TickOfficers()
                 bEnemyNear = IsValid(*Other) && Other->Side != Unit->Side && Other->Side != EStrategySide::Neutral && Other->Echelon != EStrategyEchelon::Headquarters &&
                     Other->Echelon != EStrategyEchelon::Supply && Other->IsCombatEffective() && FVector::Dist2D(Other->GetActorLocation(), Unit->GetActorLocation()) < 4000.0f;
             }
-            const float Chance = (P->Fate == 1 ? 0.55f : 0.35f) * (Unit->UnitState == EStrategyUnitState::Destroyed ? 1.5f : 1.0f) * (1.0f - 0.004f * P->Composure);
+            // Rolled every two seconds while he is broken with the enemy close (a rout of half a minute: about even odds).
+            const float Chance = 0.045f * (P->Fate == 1 ? 1.5f : 1.0f) * (Unit->UnitState == EStrategyUnitState::Destroyed ? 1.5f : 1.0f) * (1.0f - 0.004f * P->Composure);
             if (bEnemyNear && FMath::FRand() < Chance)
             {
                 P->Fate = 2;
@@ -897,6 +903,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             if (AtmosphereActor && Request->TryGetStringField(TEXT("date"), DateText) && FDateTime::ParseIso8601(*DateText, BattleDate))
             {
                 AtmosphereActor->DayOfYear = float(BattleDate.GetDayOfYear());
+                BattleBaseDay = AtmosphereActor->DayOfYear;
             }
             const TSharedPtr<FJsonObject> Enemy = Request->GetObjectField(TEXT("enemy"));
             EnemyMen = Enemy->GetNumberField(TEXT("men"));
@@ -1491,6 +1498,7 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
         if (ClockTimer <= 0.0f && AtmosphereActor)
         {
             ClockTimer = 1.0f;
+            AtmosphereActor->DayOfYear = FMath::Fmod(BattleBaseDay - 1.0f + FMath::FloorToFloat((StartHour * 3600.0f + BattleClock) / 86400.0f), 365.0f) + 1.0f;
             AtmosphereActor->UpdateForHour(GetBattleHour());
         }
     }
