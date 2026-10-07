@@ -27,7 +27,7 @@ def log(msg):
 
 # ------------------------------------------------------------------ textures
 tasks = []
-for name in ("Denmark1851_Color", "Fields1851_Parcels", "Denmark1851_DetailMask", "Bornholm1851_Color", "Denmark1851_Amter"):
+for name in ("Denmark1851_Color", "Fields1851_Parcels", "Denmark1851_DetailMask", "World1851_Color", "Denmark1851_Amter"):
     t = unreal.AssetImportTask()
     t.filename = REF + name + ".png"
     t.destination_path = TEX_DEST
@@ -54,7 +54,7 @@ def texture(name, srgb, wrap=False):
 color_tex = texture("Denmark1851_Color", True)
 parcel_tex = texture("Fields1851_Parcels", True, wrap=True)
 mask_tex = texture("Denmark1851_DetailMask", False)  # alpha = farmland (no heath, dunes or woods)
-texture("Bornholm1851_Color", True)
+world_tex = texture("World1851_Color", True)
 # Amt ids (1..41) must survive exactly: no sRGB, no compression, no filtering, no mips, no resampling.
 amt_tex = lib.load_asset(TEX_DEST + "/Denmark1851_Amter")
 amt_tex.set_editor_property("srgb", False)
@@ -310,6 +310,17 @@ MEL.connect_material_property(atmos, "", unreal.MaterialProperty.MP_EMISSIVE_COL
 MEL.recompile_material(m)
 lib.save_loaded_asset(m)
 log("material M_Campaign1851Map")
+
+# The coarse world sheet under the detailed map: the same painting pipeline (seasons, clouds, sea swell).
+w = new_material("M_Campaign1851World")
+wt = MEL.create_material_expression(w, unreal.MaterialExpressionTextureSample, -1300, 0)
+wt.set_editor_property("texture", world_tex)
+w_seasoned = season(w, wt, "RGB", MAP_SEASON, -900, 0)
+w_atmos = atmosphere(w, w_seasoned, "", MAP_ATMOS, -500, 0)
+MEL.connect_material_property(w_atmos, "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+MEL.recompile_material(w)
+lib.save_loaded_asset(w)
+log("material M_Campaign1851World")
 
 # Backdrop: the colour the painted sheet fades to at its edges (sRGB 15,28,43 -> linear).
 b = new_material("M_Campaign1851Backdrop")

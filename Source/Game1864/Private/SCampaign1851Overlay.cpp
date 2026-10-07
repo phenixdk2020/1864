@@ -248,7 +248,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	PaintLegend(Geometry, Out, Layer);
 	PaintCompass(Geometry, Out, Layer, Camera ? Camera->GetYaw() : 0.f);
 	PaintScaleBar(Geometry, Out, Layer);
-	PaintBornholm(Geometry, Out, Layer);
+	// (Bornholm is on the map itself now; no inset.)
 	UnitCardAnchor = BuildingCardAnchor = FVector2D(-1.f, -1.f);
 	PaintInfo(Geometry, Out, Layer);
 	PaintSidePanels(Geometry, Out, Layer + 2);

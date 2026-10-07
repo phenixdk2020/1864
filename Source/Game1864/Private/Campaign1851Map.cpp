@@ -64,6 +64,11 @@ ACampaign1851Map::ACampaign1851Map()
 	Backdrop->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Backdrop->SetCastShadow(false);
 
+	WorldSheet = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WorldSheet"));
+	WorldSheet->SetupAttachment(Root);
+	WorldSheet->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WorldSheet->SetCastShadow(false);
+
 	CityMarkers = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("CityMarkers"));
 	CityMarkers->SetupAttachment(Root);
 	CityMarkers->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -81,6 +86,7 @@ ACampaign1851Map::ACampaign1851Map()
 	CityMarkers->SetStaticMesh(Sphere.Object);
 	ForeignMarkers->SetStaticMesh(Sphere.Object);
 	Backdrop->SetStaticMesh(Plane.Object);
+	WorldSheet->SetStaticMesh(Plane.Object);
 	if (Material.Succeeded())
 	{
 		MapMaterial = Material.Object;
@@ -173,7 +179,15 @@ bool ACampaign1851Map::LoadData()
 		Out.Projection = Projection;
 	};
 	ReadExtent(Json->GetObjectField(TEXT("extentKm")), Extent);
-	ReadExtent(Json->GetObjectField(TEXT("bornholmKm")), Bornholm);
+	if (const TSharedPtr<FJsonObject>* BornholmObj = nullptr; Json->TryGetObjectField(TEXT("bornholmKm"), BornholmObj))
+	{
+		ReadExtent(*BornholmObj, Bornholm);   // old data: Bornholm as an inset
+	}
+	if (const TSharedPtr<FJsonObject>* WorldObj = nullptr; Json->TryGetObjectField(TEXT("worldKm"), WorldObj))
+	{
+		ReadExtent(*WorldObj, WorldExtent);
+		bHasWorld = true;
+	}
 	SizeKm = FVector2D(Extent.XMax - Extent.XMin, Extent.YMax - Extent.YMin);
 	Json->TryGetNumberField(TEXT("detailTileKm"), DetailTileKm);
 
@@ -387,6 +401,23 @@ void ACampaign1851Map::BuildTerrain()
 	if (UMaterialInterface* Parent = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Campaign1851/M_Campaign1851Backdrop.M_Campaign1851Backdrop")))
 	{
 		Backdrop->SetMaterial(0, Parent);
+	}
+	if (bHasWorld)
+	{
+		// The coarse sheet of the world under the detailed map: its own place and size (km, same frame as the map).
+		const double WorldW = WorldExtent.XMax - WorldExtent.XMin, WorldH = WorldExtent.YMax - WorldExtent.YMin;
+		const double Dx = (WorldExtent.XMin + WorldExtent.XMax) * 0.5 - (Extent.XMin + Extent.XMax) * 0.5;
+		const double Dy = (WorldExtent.YMin + WorldExtent.YMax) * 0.5 - (Extent.YMin + Extent.YMax) * 0.5;
+		WorldSheet->SetRelativeLocation(FVector(Dx * KmToUnits, -Dy * KmToUnits, -20.0));
+		WorldSheet->SetRelativeScale3D(FVector(WorldW * KmToUnits / 100.0, WorldH * KmToUnits / 100.0, 1.0));
+		if (UMaterialInterface* WorldMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Campaign1851/M_Campaign1851World.M_Campaign1851World")))
+		{
+			WorldSheet->SetMaterial(0, WorldMat);
+		}
+	}
+	else
+	{
+		WorldSheet->SetVisibility(false);
 	}
 }
 

@@ -1,0 +1,1229 @@
+{
+ "note": "Administrative division of the Danish monarchy c. 1851. Borders are approximated: every land pixel of a region (K kingdom, S Schleswig, H Holstein + Lauenburg) goes to the nearest anchor of an amt in the same region. Anchors are the amt seat plus towns/places known to lie in the amt. Schleswig and Holstein amter are grouped where they were small (e.g. Bredsted + Eiderstedt with Husum, Reinbek/Trittau/Tremsbuettel as Stormarn).",
+ "population1850": {
+  "note": "Rounded census-era totals (c. 1845-1850), game estimates. Towns take their own figures from cities1850.json; the rest is spread over each region's amter by land area.",
+  "K": 1415000,
+  "S": 363000,
+  "H": 520000
+ },
+ "amter": [
+  {
+   "name": "Hjørring Amt",
+   "seat": "Hjørring",
+   "region": "K",
+   "anchors": [
+    [
+     9.98,
+     57.46
+    ],
+    [
+     10.54,
+     57.44
+    ],
+    [
+     10.59,
+     57.72
+    ],
+    [
+     9.95,
+     57.27
+    ],
+    [
+     10.52,
+     57.33
+    ],
+    [
+     11.0,
+     57.28
+    ],
+    [
+     9.6,
+     57.37
+    ]
+   ]
+  },
+  {
+   "name": "Thisted Amt",
+   "seat": "Thisted",
+   "region": "K",
+   "anchors": [
+    [
+     8.69,
+     56.96
+    ],
+    [
+     8.86,
+     56.79
+    ],
+    [
+     9.26,
+     57.09
+    ],
+    [
+     8.62,
+     57.12
+    ],
+    [
+     8.55,
+     56.8
+    ],
+    [
+     9.05,
+     57.05
+    ]
+   ]
+  },
+  {
+   "name": "Aalborg Amt",
+   "seat": "Aalborg",
+   "region": "K",
+   "anchors": [
+    [
+     9.92,
+     57.05
+    ],
+    [
+     9.64,
+     56.98
+    ],
+    [
+     9.52,
+     56.8
+    ],
+    [
+     10.31,
+     57.0
+    ],
+    [
+     9.25,
+     56.97
+    ],
+    [
+     9.95,
+     56.85
+    ],
+    [
+     10.1,
+     57.07
+    ]
+   ]
+  },
+  {
+   "name": "Viborg Amt",
+   "seat": "Viborg",
+   "region": "K",
+   "anchors": [
+    [
+     9.4,
+     56.45
+    ],
+    [
+     9.03,
+     56.57
+    ],
+    [
+     9.0,
+     56.72
+    ],
+    [
+     9.25,
+     56.6
+    ],
+    [
+     9.43,
+     56.3
+    ],
+    [
+     9.6,
+     56.55
+    ]
+   ]
+  },
+  {
+   "name": "Randers Amt",
+   "seat": "Randers",
+   "region": "K",
+   "anchors": [
+    [
+     10.04,
+     56.46
+    ],
+    [
+     10.88,
+     56.41
+    ],
+    [
+     10.68,
+     56.2
+    ],
+    [
+     9.98,
+     56.65
+    ],
+    [
+     9.79,
+     56.64
+    ],
+    [
+     10.45,
+     56.45
+    ],
+    [
+     10.3,
+     56.3
+    ]
+   ]
+  },
+  {
+   "name": "Aarhus Amt",
+   "seat": "Aarhus",
+   "region": "K",
+   "anchors": [
+    [
+     10.21,
+     56.16
+    ],
+    [
+     10.15,
+     55.97
+    ],
+    [
+     10.6,
+     55.85
+    ],
+    [
+     10.05,
+     56.12
+    ]
+   ]
+  },
+  {
+   "name": "Skanderborg Amt",
+   "seat": "Skanderborg",
+   "region": "K",
+   "anchors": [
+    [
+     9.93,
+     56.04
+    ],
+    [
+     9.55,
+     56.17
+    ],
+    [
+     9.76,
+     56.09
+    ],
+    [
+     9.6,
+     56.0
+    ]
+   ]
+  },
+  {
+   "name": "Vejle Amt",
+   "seat": "Vejle",
+   "region": "K",
+   "anchors": [
+    [
+     9.53,
+     55.71
+    ],
+    [
+     9.85,
+     55.86
+    ],
+    [
+     9.47,
+     55.49
+    ],
+    [
+     9.75,
+     55.57
+    ],
+    [
+     9.24,
+     55.84
+    ],
+    [
+     9.3,
+     55.6
+    ]
+   ]
+  },
+  {
+   "name": "Ringkøbing Amt",
+   "seat": "Ringkøbing",
+   "region": "K",
+   "anchors": [
+    [
+     8.24,
+     56.09
+    ],
+    [
+     8.62,
+     56.36
+    ],
+    [
+     8.31,
+     56.55
+    ],
+    [
+     8.97,
+     56.14
+    ],
+    [
+     8.5,
+     55.95
+    ],
+    [
+     8.25,
+     56.35
+    ],
+    [
+     8.95,
+     56.35
+    ]
+   ]
+  },
+  {
+   "name": "Ribe Amt",
+   "seat": "Ribe",
+   "region": "K",
+   "anchors": [
+    [
+     8.76,
+     55.33
+    ],
+    [
+     8.48,
+     55.62
+    ],
+    [
+     8.93,
+     55.76
+    ],
+    [
+     8.4,
+     55.42
+    ],
+    [
+     8.8,
+     55.5
+    ],
+    [
+     9.05,
+     55.55
+    ]
+   ]
+  },
+  {
+   "name": "Odense Amt",
+   "seat": "Odense",
+   "region": "K",
+   "anchors": [
+    [
+     10.39,
+     55.4
+    ],
+    [
+     10.09,
+     55.57
+    ],
+    [
+     9.73,
+     55.51
+    ],
+    [
+     9.9,
+     55.27
+    ],
+    [
+     10.66,
+     55.45
+    ],
+    [
+     10.1,
+     55.4
+    ]
+   ]
+  },
+  {
+   "name": "Svendborg Amt",
+   "seat": "Svendborg",
+   "region": "K",
+   "anchors": [
+    [
+     10.61,
+     55.06
+    ],
+    [
+     10.24,
+     55.1
+    ],
+    [
+     10.79,
+     55.31
+    ],
+    [
+     10.71,
+     54.94
+    ],
+    [
+     10.75,
+     55.12
+    ],
+    [
+     10.5,
+     55.2
+    ]
+   ]
+  },
+  {
+   "name": "Københavns Amt",
+   "seat": "København",
+   "region": "K",
+   "anchors": [
+    [
+     12.57,
+     55.68
+    ],
+    [
+     12.08,
+     55.64
+    ],
+    [
+     12.18,
+     55.46
+    ],
+    [
+     12.3,
+     55.65
+    ],
+    [
+     12.4,
+     55.75
+    ]
+   ]
+  },
+  {
+   "name": "Frederiksborg Amt",
+   "seat": "Hillerød",
+   "region": "K",
+   "anchors": [
+    [
+     12.3,
+     55.93
+    ],
+    [
+     12.61,
+     56.03
+    ],
+    [
+     12.07,
+     55.84
+    ],
+    [
+     11.86,
+     55.96
+    ],
+    [
+     12.4,
+     56.05
+    ]
+   ]
+  },
+  {
+   "name": "Holbæk Amt",
+   "seat": "Holbæk",
+   "region": "K",
+   "anchors": [
+    [
+     11.71,
+     55.72
+    ],
+    [
+     11.09,
+     55.68
+    ],
+    [
+     11.67,
+     55.92
+    ],
+    [
+     11.55,
+     55.85
+    ],
+    [
+     11.4,
+     55.65
+    ]
+   ]
+  },
+  {
+   "name": "Sorø Amt",
+   "seat": "Sorø",
+   "region": "K",
+   "anchors": [
+    [
+     11.56,
+     55.43
+    ],
+    [
+     11.35,
+     55.4
+    ],
+    [
+     11.14,
+     55.33
+    ],
+    [
+     11.79,
+     55.44
+    ],
+    [
+     11.29,
+     55.25
+    ]
+   ]
+  },
+  {
+   "name": "Præstø Amt",
+   "seat": "Præstø",
+   "region": "K",
+   "anchors": [
+    [
+     12.05,
+     55.12
+    ],
+    [
+     11.76,
+     55.23
+    ],
+    [
+     11.91,
+     55.01
+    ],
+    [
+     12.29,
+     54.99
+    ],
+    [
+     12.45,
+     54.95
+    ],
+    [
+     12.0,
+     55.3
+    ]
+   ]
+  },
+  {
+   "name": "Maribo Amt",
+   "seat": "Maribo",
+   "region": "K",
+   "anchors": [
+    [
+     11.5,
+     54.78
+    ],
+    [
+     11.14,
+     54.83
+    ],
+    [
+     11.87,
+     54.77
+    ],
+    [
+     11.95,
+     54.65
+    ],
+    [
+     11.3,
+     54.7
+    ]
+   ]
+  },
+  {
+   "name": "Bornholms Amt",
+   "seat": "Rønne",
+   "region": "K",
+   "anchors": [
+    [
+     14.7,
+     55.1
+    ],
+    [
+     14.95,
+     55.12
+    ]
+   ],
+   "areaKm2": 588,
+   "population": 27000
+  },
+  {
+   "name": "Haderslev Amt",
+   "seat": "Haderslev",
+   "region": "S",
+   "anchors": [
+    [
+     9.49,
+     55.25
+    ],
+    [
+     9.48,
+     55.36
+    ],
+    [
+     9.06,
+     55.37
+    ],
+    [
+     9.3,
+     55.3
+    ]
+   ]
+  },
+  {
+   "name": "Aabenraa Amt",
+   "seat": "Aabenraa",
+   "region": "S",
+   "anchors": [
+    [
+     9.42,
+     55.04
+    ],
+    [
+     9.25,
+     55.05
+    ]
+   ]
+  },
+  {
+   "name": "Sønderborg Amt",
+   "seat": "Sønderborg",
+   "region": "S",
+   "anchors": [
+    [
+     9.79,
+     54.91
+    ],
+    [
+     9.75,
+     55.06
+    ],
+    [
+     9.87,
+     54.95
+    ]
+   ]
+  },
+  {
+   "name": "Tønder Amt",
+   "seat": "Tønder",
+   "region": "S",
+   "anchors": [
+    [
+     8.86,
+     54.94
+    ],
+    [
+     8.95,
+     55.06
+    ],
+    [
+     8.69,
+     54.96
+    ],
+    [
+     8.55,
+     55.12
+    ],
+    [
+     8.32,
+     54.9
+    ]
+   ]
+  },
+  {
+   "name": "Flensborg Amt",
+   "seat": "Flensborg",
+   "region": "S",
+   "anchors": [
+    [
+     9.43,
+     54.78
+    ],
+    [
+     9.55,
+     54.83
+    ],
+    [
+     9.73,
+     54.73
+    ],
+    [
+     9.25,
+     54.75
+    ]
+   ]
+  },
+  {
+   "name": "Husum Amt",
+   "seat": "Husum",
+   "region": "S",
+   "anchors": [
+    [
+     9.05,
+     54.48
+    ],
+    [
+     8.97,
+     54.62
+    ],
+    [
+     8.94,
+     54.32
+    ],
+    [
+     8.55,
+     54.7
+    ],
+    [
+     8.7,
+     54.4
+    ]
+   ]
+  },
+  {
+   "name": "Gottorp Amt",
+   "seat": "Slesvig",
+   "region": "S",
+   "anchors": [
+    [
+     9.57,
+     54.52
+    ],
+    [
+     9.94,
+     54.66
+    ],
+    [
+     9.77,
+     54.64
+    ],
+    [
+     9.35,
+     54.55
+    ]
+   ]
+  },
+  {
+   "name": "Hütten Amt",
+   "seat": "Egernførde",
+   "region": "S",
+   "anchors": [
+    [
+     9.84,
+     54.47
+    ],
+    [
+     9.72,
+     54.42
+    ],
+    [
+     9.6,
+     54.38
+    ]
+   ]
+  },
+  {
+   "name": "Ærø",
+   "seat": "Ærøskøbing",
+   "region": "S",
+   "anchors": [
+    [
+     10.42,
+     54.89
+    ]
+   ]
+  },
+  {
+   "name": "Femern",
+   "seat": "Burg",
+   "region": "S",
+   "anchors": [
+    [
+     11.19,
+     54.44
+    ]
+   ]
+  },
+  {
+   "name": "Kiel Amt",
+   "seat": "Kiel",
+   "region": "H",
+   "anchors": [
+    [
+     10.14,
+     54.32
+    ],
+    [
+     10.03,
+     54.18
+    ],
+    [
+     10.0,
+     54.4
+    ]
+   ]
+  },
+  {
+   "name": "Rendsborg Amt",
+   "seat": "Rendsborg",
+   "region": "H",
+   "anchors": [
+    [
+     9.67,
+     54.3
+    ],
+    [
+     9.66,
+     54.09
+    ],
+    [
+     9.45,
+     54.25
+    ]
+   ]
+  },
+  {
+   "name": "Nørre Ditmarsken",
+   "seat": "Heide",
+   "region": "H",
+   "anchors": [
+    [
+     9.09,
+     54.2
+    ],
+    [
+     8.9,
+     54.2
+    ]
+   ]
+  },
+  {
+   "name": "Søndre Ditmarsken",
+   "seat": "Meldorf",
+   "region": "H",
+   "anchors": [
+    [
+     9.08,
+     54.09
+    ],
+    [
+     8.99,
+     53.95
+    ],
+    [
+     9.15,
+     53.98
+    ]
+   ]
+  },
+  {
+   "name": "Steinborg Amt",
+   "seat": "Itzehoe",
+   "region": "H",
+   "anchors": [
+    [
+     9.52,
+     53.93
+    ],
+    [
+     9.42,
+     53.79
+    ],
+    [
+     9.72,
+     53.95
+    ],
+    [
+     9.35,
+     53.9
+    ]
+   ]
+  },
+  {
+   "name": "Pinneberg Amt",
+   "seat": "Pinneberg",
+   "region": "H",
+   "anchors": [
+    [
+     9.8,
+     53.66
+    ],
+    [
+     9.93,
+     53.55
+    ],
+    [
+     9.65,
+     53.75
+    ]
+   ]
+  },
+  {
+   "name": "Neumünster Amt",
+   "seat": "Neumünster",
+   "region": "H",
+   "anchors": [
+    [
+     9.98,
+     54.07
+    ]
+   ]
+  },
+  {
+   "name": "Segeberg Amt",
+   "seat": "Segeberg",
+   "region": "H",
+   "anchors": [
+    [
+     10.31,
+     53.94
+    ],
+    [
+     9.88,
+     53.92
+    ],
+    [
+     10.1,
+     53.85
+    ]
+   ]
+  },
+  {
+   "name": "Plön Amt",
+   "seat": "Plön",
+   "region": "H",
+   "anchors": [
+    [
+     10.42,
+     54.16
+    ],
+    [
+     10.28,
+     54.23
+    ],
+    [
+     10.59,
+     54.3
+    ]
+   ]
+  },
+  {
+   "name": "Cismar Amt",
+   "seat": "Oldenborg",
+   "region": "H",
+   "anchors": [
+    [
+     10.88,
+     54.29
+    ],
+    [
+     10.81,
+     54.11
+    ],
+    [
+     11.0,
+     54.37
+    ]
+   ]
+  },
+  {
+   "name": "Stormarn",
+   "seat": "Reinbek",
+   "region": "H",
+   "anchors": [
+    [
+     10.25,
+     53.51
+    ],
+    [
+     10.4,
+     53.62
+    ],
+    [
+     10.26,
+     53.73
+    ],
+    [
+     10.1,
+     53.65
+    ]
+   ]
+  },
+  {
+   "name": "Lauenborg",
+   "seat": "Ratzeburg",
+   "region": "H",
+   "label": false,
+   "anchors": [
+    [
+     10.75,
+     53.7
+    ],
+    [
+     10.69,
+     53.63
+    ],
+    [
+     10.57,
+     53.37
+    ],
+    [
+     10.48,
+     53.5
+    ],
+    [
+     10.85,
+     53.5
+    ]
+   ]
+  }
+ ],
+ "ferries": [
+  {
+   "name": "Storebælt (Nyborg–Korsør)",
+   "a": [
+    10.8,
+    55.31
+   ],
+   "b": [
+    11.13,
+    55.33
+   ],
+   "link": [
+    "Nyborg",
+    "Slagelse"
+   ]
+  },
+  {
+   "name": "Lillebælt (Snoghøj–Middelfart)",
+   "a": [
+    9.71,
+    55.545
+   ],
+   "b": [
+    9.738,
+    55.504
+   ],
+   "link": [
+    "Fredericia",
+    "Middelfart"
+   ]
+  },
+  {
+   "name": "Limfjorden (Aalborg–Nørresundby)",
+   "a": [
+    9.92,
+    57.048
+   ],
+   "b": [
+    9.92,
+    57.062
+   ],
+   "link": [
+    "Aalborg",
+    "Hjørring"
+   ]
+  },
+  {
+   "name": "Aggersund",
+   "a": [
+    9.3,
+    56.995
+   ],
+   "b": [
+    9.3,
+    57.008
+   ]
+  },
+  {
+   "name": "Oddesund",
+   "a": [
+    8.56,
+    56.585
+   ],
+   "b": [
+    8.555,
+    56.568
+   ]
+  },
+  {
+   "name": "Vilsund",
+   "a": [
+    8.635,
+    56.878
+   ],
+   "b": [
+    8.65,
+    56.865
+   ]
+  },
+  {
+   "name": "Sallingsund",
+   "a": [
+    8.905,
+    56.775
+   ],
+   "b": [
+    8.93,
+    56.765
+   ]
+  },
+  {
+   "name": "Hals–Egense",
+   "a": [
+    10.31,
+    56.995
+   ],
+   "b": [
+    10.31,
+    57.008
+   ]
+  },
+  {
+   "name": "Alssund",
+   "a": [
+    9.795,
+    54.912
+   ],
+   "b": [
+    9.775,
+    54.91
+   ]
+  },
+  {
+   "name": "Svendborgsund",
+   "a": [
+    10.61,
+    55.058
+   ],
+   "b": [
+    10.61,
+    55.045
+   ]
+  },
+  {
+   "name": "Tåsinge–Langeland",
+   "a": [
+    10.69,
+    54.955
+   ],
+   "b": [
+    10.715,
+    54.945
+   ]
+  },
+  {
+   "name": "Guldborgsund",
+   "a": [
+    11.745,
+    54.868
+   ],
+   "b": [
+    11.765,
+    54.868
+   ]
+  },
+  {
+   "name": "Storstrømmen (Orehoved–Vordingborg)",
+   "a": [
+    11.85,
+    54.955
+   ],
+   "b": [
+    11.89,
+    54.995
+   ],
+   "link": [
+    "Nykøbing F",
+    "Vordingborg"
+   ]
+  },
+  {
+   "name": "Ulvsund (Kalvehave–Stege)",
+   "a": [
+    12.165,
+    55.0
+   ],
+   "b": [
+    12.2,
+    54.99
+   ]
+  },
+  {
+   "name": "Bornholmerbåden (København–Rønne)",
+   "a": [
+    12.575,
+    55.69
+   ],
+   "b": [
+    14.69,
+    55.1
+   ],
+   "link": [
+    "København",
+    "Rønne"
+   ]
+  },
+  {
+   "name": "Alssund (Sønderborg–Dybbøl)",
+   "a": [
+    9.765,
+    54.912
+   ],
+   "b": [
+    9.795,
+    54.909
+   ],
+   "link": [
+    "Sønderborg",
+    "Aabenraa"
+   ]
+  },
+  {
+   "name": "Vilsund (Mors–Thy)",
+   "a": [
+    8.835,
+    56.795
+   ],
+   "b": [
+    8.76,
+    56.78
+   ],
+   "link": [
+    "Nykøbing M",
+    "Thisted"
+   ]
+  },
+  {
+   "name": "Langelandsbæltet (Rudkøbing–Svendborg)",
+   "a": [
+    10.705,
+    54.94
+   ],
+   "b": [
+    10.62,
+    55.06
+   ],
+   "link": [
+    "Rudkøbing",
+    "Svendborg"
+   ]
+  }
+ ]
+}

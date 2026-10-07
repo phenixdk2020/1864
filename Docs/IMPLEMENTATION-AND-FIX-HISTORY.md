@@ -1256,6 +1256,14 @@ Træk et kompagni hen på et andet i samme bataljon: et vindue (`PaintTransfer`)
 - Rytteriets eskadroner har nu egen styrke (samme vægte som kompagnier). `CompanyMen`/`SubUnitMen`/`FreezeCompanyStrength`/`CompanyCapacity` gælder begge dele; "Udjævn" findes også for eskadroner. Deling og flyt af en eskadron tager den valgte eskadrons faktiske mandskab med.
 - `TransferCompanyMen` flytter mænd mellem to kompagnier/eskadroner også i to forskellige enheder (samme våbenart, samme sted, ikke på march, ikke i slag). Mændene tager træning, moral og forsyninger med (blandes efter mandskab). Vinduet har en knap "FLYT HELE ENHEDEN" mellem to enheder (flytter hele kompagniet/eskadronen som før).
 
+### 2026-10-07 - Kortet udvidet: Bornholm på kortet og et grovt verdensark under
+
+- Kortgeneratoren ligger nu i projektet: `Tools/Map1851/build_map.py` (Natural Earth 10m i `SourceAssets/NaturalEarth`, ikke i git). Kør `python build_map.py <NaturalEarth> --height=4096 --out=<mappe>` og kopier filerne til `Reference/Campaign1851` og `Data/Campaign1851`.
+- Det detaljerede kort er udvidet til 7.6-15.75 °Ø og 53.0-57.9 °N (545 x 558 km): Bornholm, Skåne, Blekinge, Halland, Gøteborg, Mecklenburg, Pommern og Bremen er med. Bornholm-boksen (indsat kort) er fjernet; Rønne ligger på kortet med færgen København-Rønne. Nye færger: Alssund (Sønderborg), Vilsund (Mors) og Langeland-Svendborg, så de byer ikke står uden forbindelse.
+- Nye udenlandske byer (Sverige, Mecklenburg, Pommern, Bremen); nye etiketter.
+- Nyt lag: et groft verdensark (`World1851_Color`, 3000 x 3000 km, samme projektion) ligger under det detaljerede kort (`WorldSheet` i C++, materialet `M_Campaign1851World`); det detaljerede kort fader ud i det. Norge, Sverige, Storbritannien, Nordtyskland, Polen og Frankrig ses der. Senere kan flere naboegne gives egne detaljerede lag oven på.
+- Opsætning i editoren: `Tools/Campaign/setup_world_sheet.py` (importerer teksturer, bygger materialet).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

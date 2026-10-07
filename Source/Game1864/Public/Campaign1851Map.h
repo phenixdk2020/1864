@@ -1353,6 +1353,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> Backdrop;
 
+	/** The coarse painted sheet of the world under the detailed map (one plane, the same projection). */
+	UPROPERTY()
+	TObjectPtr<UStaticMeshComponent> WorldSheet;
+
 	/** Main roads between the towns (routed by build_map.py). */
 	UPROPERTY(Transient)
 	TObjectPtr<UStaticMeshComponent> Roads;
@@ -1413,6 +1417,9 @@ private:
 
 	FCampaign1851Extent Extent;
 	FCampaign1851Extent Bornholm;
+	/** The coarse world sheet under the detailed map (same projection): the backdrop plane covers it. */
+	FCampaign1851Extent WorldExtent;
+	bool bHasWorld = false;
 	FVector2D SizeKm = FVector2D(1.0, 1.0);
 	float DetailTileKm = 2.5f;
 	TArray<FCampaign1851City> Cities;
