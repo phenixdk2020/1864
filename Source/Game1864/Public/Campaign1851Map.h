@@ -599,7 +599,24 @@ public:
 	static FString FormatClock(const FDateTime& Date) { return FString::Printf(TEXT("%02d:%02d"), Date.GetHour(), Date.GetMinute()); }
 	double GetCampaignDays() const { return CampaignDays; }
 	void SetCampaignDays(double Days) { CampaignDays = FMath::Max(FMath::RoundToDouble(Days * 1440.0) / 1440.0, 0.0); MinuteCarry = 0.0; UpdateSeason(); }
-	static FDateTime StartDate() { return FDateTime(1851, 7, 1); }
+	/** The scenarios the campaign can start in: 1825 (the default, a peaceful beginning that leads to the war of 1848) and 1851
+	 *  (just after the three years' war). The choice is kept in the settings and takes effect when the map is loaded. */
+	struct FScenario
+	{
+		FString Id;
+		FString Name;
+		FString Text;
+		int32 Year = 1851;
+		float PopulationFactor = 1.f;   // the towns' and amter's people against the 1851 figures
+		float ArmyFactor = 1.f;         // the peacetime army against the 1851 one
+		float ExperienceFactor = 1.f;   // the army's seasoning (1851 has just fought a war)
+		float StartTension = 25.f;
+	};
+	static const TArray<FScenario>& Scenarios();
+	static int32 ScenarioIndex();
+	static const FScenario& ActiveScenario() { return Scenarios()[ScenarioIndex()]; }
+	static void SetScenarioIndex(int32 Index);
+	static FDateTime StartDate() { return FDateTime(ActiveScenario().Year, 7, 1); }
 	FDateTime GetDate() const { return StartDate() + FTimespan::FromDays(CampaignDays); }
 	/** "1. juli 1851", or "1. jul. 1851" with bShort. */
 	static FString FormatDate(const FDateTime& Date, bool bShort = false);

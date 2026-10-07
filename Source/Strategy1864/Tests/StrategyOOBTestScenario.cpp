@@ -583,7 +583,20 @@ void AStrategyOOBTestScenario::DrawObjectives() const
     for (const FBattleObjective& O : Objectives)
     {
         const FColor Colour = O.Owner == 1 ? FColor(70, 120, 235) : O.Owner == 2 ? FColor(220, 70, 60) : FColor(210, 200, 150);
-        DrawDebugCircle(World, O.Location + FVector(0.0f, 0.0f, 60.0f), O.Radius, 56, Colour, false, 0.0f, SDPG_World, 40.0f, FVector(1.0f, 0.0f, 0.0f), FVector(0.0f, 1.0f, 0.0f), false);
+        // The ring follows the ground (a flat circle sinks into the hills): a point every few degrees at the height of the field there.
+        const int32 Segments = 72;
+        FVector Previous = FVector::ZeroVector;
+        for (int32 i = 0; i <= Segments; ++i)
+        {
+            const float Angle = 2.0f * PI * float(i) / float(Segments);
+            FVector P = O.Location + FVector(FMath::Cos(Angle), FMath::Sin(Angle), 0.0f) * O.Radius;
+            P.Z = (CampaignField ? CampaignField->GroundZ(P) : O.Location.Z) + 45.0f;
+            if (i > 0)
+            {
+                DrawDebugLine(World, Previous, P, Colour, false, 0.0f, SDPG_World, 40.0f);
+            }
+            Previous = P;
+        }
         DrawDebugLine(World, O.Location, O.Location + FVector(0.0f, 0.0f, 1800.0f), Colour, false, 0.0f, SDPG_World, 18.0f);
     }
 }

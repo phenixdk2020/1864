@@ -200,7 +200,7 @@ bool ACampaign1851Map::LoadData()
 			C.Name = O->GetStringField(TEXT("name"));
 			C.Lat = O->GetNumberField(TEXT("lat"));
 			C.Lon = O->GetNumberField(TEXT("lon"));
-			C.Population = int32(O->GetNumberField(TEXT("pop")));
+			C.Population = FMath::RoundToInt(float(O->GetNumberField(TEXT("pop"))) * ActiveScenario().PopulationFactor);
 			O->TryGetStringField(TEXT("region"), C.Region);
 			O->TryGetBoolField(TEXT("capital"), C.bCapital);
 			O->TryGetBoolField(TEXT("bornholm"), C.bBornholm);
@@ -242,6 +242,9 @@ bool ACampaign1851Map::LoadData()
 			O->TryGetNumberField(TEXT("population"), A.Population);
 			O->TryGetNumberField(TEXT("urban"), A.Urban);
 			O->TryGetNumberField(TEXT("rural"), A.Rural);
+			A.Population = FMath::RoundToInt(A.Population * ActiveScenario().PopulationFactor);
+			A.Urban = FMath::RoundToInt(A.Urban * ActiveScenario().PopulationFactor);
+			A.Rural = FMath::RoundToInt(A.Rural * ActiveScenario().PopulationFactor);
 			double Area = 0.0;
 			O->TryGetNumberField(TEXT("areaKm2"), Area);
 			A.AreaKm2 = float(Area);

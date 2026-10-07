@@ -430,7 +430,7 @@ void SCampaign1851Overlay::PaintTitle(const FGeometry& Geometry, FSlateWindowEle
 	DrawLines(Geometry, Out, Layer + 2, { {Cx - 82.f, Pos.Y + 14.f}, {Cx - 12.f, Pos.Y + 14.f} }, Gold, 1.5f);
 	DrawLines(Geometry, Out, Layer + 2, { {Cx + 12.f, Pos.Y + 14.f}, {Cx + 82.f, Pos.Y + 14.f} }, Gold, 1.5f);
 	PaintText(Geometry, Out, Layer + 2, TEXT("DANMARK"), FVector2D(Cx, Pos.Y + 62.f), Serif(46), Ink, 0.5f);
-	PaintText(Geometry, Out, Layer + 2, TEXT("1851"), FVector2D(Cx, Pos.Y + 112.f), Serif(29), Ink, 0.5f);
+	PaintText(Geometry, Out, Layer + 2, *FString::FromInt(ACampaign1851Map::ActiveScenario().Year), FVector2D(Cx, Pos.Y + 112.f), Serif(29), Ink, 0.5f);
 	DrawLines(Geometry, Out, Layer + 2, { {Pos.X + 86.f, Pos.Y + 138.f}, {Pos.X + Size.X - 86.f, Pos.Y + 138.f} }, Gold, 1.5f);
 	PaintText(Geometry, Out, Layer + 2, TEXT("KONGERIGET  ·  HERTUGDØMMERNE"), FVector2D(Cx, Pos.Y + 152.f), Serif(11), Gold, 0.5f, false);
 }
@@ -5568,7 +5568,7 @@ void SCampaign1851Overlay::PaintMenu(const FGeometry& Geometry, FSlateWindowElem
 	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Screen, FSlateLayoutTransform(FVector2D::ZeroVector)), White, ESlateDrawEffect::None, FLinearColor(0.f, 0.f, 0.f, 0.45f));
 
 	const float RowHeight = 62.f;
-	const FVector2D Size(720.f, 120.f + MenuSlots.Num() * RowHeight + 60.f);
+	const FVector2D Size(720.f, 120.f + MenuSlots.Num() * RowHeight + 104.f);
 	const FVector2D Pos = (Screen - Size) * 0.5f;
 	PaintPanel(Geometry, Out, Layer + 1, Pos, Size);
 	PaintText(Geometry, Out, Layer + 3, TEXT("S P I L L E T"), Pos + FVector2D(Size.X * 0.5f, 40.f), Serif(22), Ink, 0.5f);
@@ -5589,6 +5589,18 @@ void SCampaign1851Overlay::PaintMenu(const FGeometry& Geometry, FSlateWindowElem
 		if (S.bExists)
 		{
 			PaintButton(Geometry, Out, Layer + 3, Row + FVector2D(Size.X - 118.f, 10.f), FVector2D(94.f, 28.f), TEXT("INDLÆS"), EButton::LoadSlot, i);
+		}
+	}
+	// The scenario of the next new game.
+	{
+		const int32 Chosen = MenuScenario >= 0 ? MenuScenario : ACampaign1851Map::ScenarioIndex();
+		PaintText(Geometry, Out, Layer + 3, TEXT("Scenarie"), Pos + FVector2D(24.f, Size.Y - 104.f), Serif(12, EFace::Italic), Gold, 0.f, false);
+		const TArray<ACampaign1851Map::FScenario>& List = ACampaign1851Map::Scenarios();
+		for (int32 i = 0; i < List.Num(); ++i)
+		{
+			const FVector2D At = Pos + FVector2D(110.f + i * 170.f, Size.Y - 112.f);
+			PaintButton(Geometry, Out, Layer + 3, At, FVector2D(160.f, 28.f), *List[i].Name, EButton::Scenario, i, Chosen == i);
+			AddTip(At, FVector2D(160.f, 28.f), List[i].Text);
 		}
 	}
 	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(24.f, Size.Y - 50.f), FVector2D(bConfirmNewGame ? 210.f : 130.f, 30.f),

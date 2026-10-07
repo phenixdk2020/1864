@@ -238,6 +238,8 @@ public:
 	static constexpr int32 CurrentVersion = 27;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
+	/** The scenario it was played in (an index into ACampaign1851Map::Scenarios; saves from before the scenarios are 1851 = 1). */
+	UPROPERTY() int32 Scenario = 1;
 	UPROPERTY() FDateTime SavedAt;
 	/** One line for the load menu, e.g. "Aalborg: kaserne, stalde". */
 	UPROPERTY() FString Summary;

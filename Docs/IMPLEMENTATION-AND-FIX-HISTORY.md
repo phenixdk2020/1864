@@ -1373,6 +1373,13 @@ Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i
 - **Enhedskortet:** fanen er 25 % bredere (105 x 84); for en enhed med flere kompagnier/eskadroner er der knapper ALLE og 1-10: ALLE viser kortet som gennemsnit for enheden, et nummer viser det kompagni: dets mand (x/190) og dets kaptajn med portræt (erfaring, moral, øvelser og tjeneste er enhedens, og det står på kortet).
 - Ikke gjort: at fjerne et højere hovedkvarter (division/brigade) direkte i delingsvisningen; kortet kan i dag kun flytte enheder mellem dem.
 
+### 2026-10-07 - Scenarier: 1825 (standard) og 1851; rettelser
+
+- **Scenarier** (`ACampaign1851Map::FScenario`, `Campaign1851Scenarios.cpp`): Danmark 1825 er standard, Danmark 1851 kan vælges i spilmenuen (række "Scenarie" ved NYT SPIL; kortet genindlæses for det valgte scenarie, og hvert gemt spil husker sit: `Scenario` i savet, gamle saves = 1851; `-CampaignScenario=1825|1851` til test). 1825 starter 1. juli 1825, byer og amter har 80 % af folketallet, hæren 55 % af styrken (kanonerne beholdes) og 80 % af erfaringen, spændingen starter på 10, og begivenhederne er vejen til 1848 (Julirevolutionen, stænderforsamlingerne, Christian VIII, Det åbne brev, Kiel, de preussiske tropper). Jernbanerne åbner på deres egne datoer (ingen i 1825). Officerernes alder følger startåret. Titelkortet viser årstallet.
+- Første udgave: 1825 er 1851-data skaleret ned; rigtige 1825-tal for hær, officerer, byer og nationer mangler.
+- **Målenes ringe** i 3D-slaget følger nu terrænet (de var flade og forsvandt ind i bakkerne).
+- **Enhedskortets knapper** (ALLE, kompagni, flyt mænd, udjævn, løsekøb, fold ud): klikket falder ikke længere igennem til kortet, så kortet lukker ikke.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

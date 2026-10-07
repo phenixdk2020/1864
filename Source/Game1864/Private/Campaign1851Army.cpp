@@ -357,6 +357,12 @@ bool ACampaign1851Map::LoadArmy()
 			continue;
 		}
 		R.Men = R.MaxMen = int32(O->GetNumberField(TEXT("men")));
+		O->TryGetNumberField(TEXT("guns"), R.Guns);
+		if (R.Guns == 0)
+		{
+			// The peacetime army of an earlier year is smaller (the batteries keep their guns).
+			R.Men = R.MaxMen = FMath::Max(100, FMath::RoundToInt(R.MaxMen * ActiveScenario().ArmyFactor));
+		}
 		O->TryGetNumberField(TEXT("horses"), R.Horses);
 		R.MaxHorses = R.Horses;
 		O->TryGetNumberField(TEXT("guns"), R.Guns);
@@ -364,7 +370,7 @@ bool ACampaign1851Map::LoadArmy()
 		// The army of 1851 has just come out of a war: seasoned, drilled; arms have their strengths.
 		double Xp = 55.0;
 		O->TryGetNumberField(TEXT("experience"), Xp);
-		R.Experience = float(Xp);
+		R.Experience = float(Xp) * ActiveScenario().ExperienceFactor;
 		const TSharedPtr<FJsonObject>* SkillObj = nullptr;
 		if (O->TryGetObjectField(TEXT("skills"), SkillObj))
 		{

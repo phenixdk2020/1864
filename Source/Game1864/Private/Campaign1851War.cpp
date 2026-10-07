@@ -23,12 +23,21 @@ namespace
 		{ TEXT("execution"),   1863, 12, 23, 12.f,  TEXT("Forbundseksekutionen: saksiske og hannoveranske tropper rykker ind i Holsten") },
 		{ TEXT("ultimatum"),   1864, 1, 16,  15.f,  TEXT("Preussen og Østrig stiller ultimatum: Novemberforfatningen skal ophæves på 48 timer") },
 	};
+	// The road to 1848 from a start in 1825 (dates historical; the effect on the tension is the game's estimate).
+	const FHistoricEvent Events1825[] = {
+		{ TEXT("julirevolution"), 1830, 7, 29,  3.f,  TEXT("Julirevolutionen i Paris: uro og forfatningskrav i Europa") },
+		{ TEXT("stander"),        1834, 5, 28,  3.f,  TEXT("Stænderforsamlingerne åbnes: sprogstriden og kravet om en fælles forfatning for Slesvig-Holsten") },
+		{ TEXT("christian8"),     1839, 12, 3,  2.f,  TEXT("Christian VIII bliver konge: forhåbninger og frygt for helstaten") },
+		{ TEXT("abent"),          1846, 7, 8,   15.f, TEXT("Det åbne brev: Kongen erklærer arveretten i Slesvig, og Holsten og Slesvig vil høre sammen") },
+		{ TEXT("kiel"),           1848, 3, 24,  28.f, TEXT("Kiel: den provisoriske regering for Slesvig-Holsten rejser sig") },
+		{ TEXT("preussen"),       1848, 4, 10,  22.f, TEXT("Preussiske tropper rykker ind i Slesvig til hjælp for oprørerne") },
+	};
 	constexpr float WarThreshold = 80.f;
 }
 
 void ACampaign1851Map::ResetWar()
 {
-	Tension = 25.f;   // after the war of 1848-50: an uneasy peace
+	Tension = ActiveScenario().StartTension;   // 1851: after the war of 1848-50 an uneasy peace; 1825: a quiet one
 	bAtWar = false;
 	EventsFired.Reset();
 	EnemyCorps.Reset();
@@ -40,8 +49,12 @@ void ACampaign1851Map::ResetWar()
 	// Each event's date and weight vary with the campaign; some may never come.
 	EventPlan.Reset();
 	FRandomStream Rng(int32(HashCombine(uint32(Seed), 0x1864u)));
-	for (const FHistoricEvent& E : Events)
+	const bool bEarly = ActiveScenario().Year < 1850;
+	const FHistoricEvent* List = bEarly ? Events1825 : Events;
+	const int32 ListCount = bEarly ? int32(UE_ARRAY_COUNT(Events1825)) : int32(UE_ARRAY_COUNT(Events));
+	for (int32 e = 0; e < ListCount; ++e)
 	{
+		const FHistoricEvent& E = List[e];
 		FPlannedEvent P;
 		P.Id = E.Id;
 		P.Text = E.Text;

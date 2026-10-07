@@ -389,8 +389,21 @@ void ACampaign1851PlayerController::TryInit()
 		LoadFromSlot(TEXT("Autosave"));
 		Map->PollBattleResults();
 	}
+	else if (!bTestStart && IFileManager::Get().FileExists(*(FPaths::ProjectSavedDir() / TEXT("Campaign/NewGame.flag"))))
+	{
+		IFileManager::Get().Delete(*(FPaths::ProjectSavedDir() / TEXT("Campaign/NewGame.flag")));
+		CampaignNewGame();   // the new game of the scenario chosen in the menu
+	}
 	else if (!bTestStart && !FParse::Param(FCommandLine::Get(), TEXT("CampaignNew")) && UGameplayStatics::DoesSaveGameExist(TEXT("Autosave"), 0))
 	{
+		// A save from the other scenario: the map is reloaded for it first (the data of the years differ).
+		const UCampaign1851SaveGame* Peek = Cast<UCampaign1851SaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("Autosave"), 0));
+		if (Peek && Peek->Scenario != ACampaign1851Map::ScenarioIndex() && Peek->Scenario >= 0 && Peek->Scenario < ACampaign1851Map::Scenarios().Num())
+		{
+			ACampaign1851Map::SetScenarioIndex(Peek->Scenario);
+			UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851")));
+			return;
+		}
 		LoadFromSlot(TEXT("Autosave"));
 	}
 	else if (!bTestStart)
@@ -1127,11 +1140,27 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			LoadFromSlot(SaveSlots()[Row]);
 			Overlay->CloseMenu();
 		}
+		else if (Button == SCampaign1851Overlay::EButton::Scenario)
+		{
+			Overlay->SetMenuScenario(Row);
+		}
 		else if (Button == SCampaign1851Overlay::EButton::NewGame)
 		{
 			if (Overlay->IsConfirmingNewGame())
 			{
-				CampaignNewGame();
+				const int32 Chosen = Overlay->GetMenuScenario() >= 0 ? Overlay->GetMenuScenario() : ACampaign1851Map::ScenarioIndex();
+				if (Chosen != ACampaign1851Map::ScenarioIndex())
+				{
+					// Another scenario: the map's data are read again for it, and the new game starts on the fresh level.
+					ACampaign1851Map::SetScenarioIndex(Chosen);
+					IFileManager::Get().MakeDirectory(*(FPaths::ProjectSavedDir() / TEXT("Campaign")), true);
+					FFileHelper::SaveStringToFile(TEXT("new"), *(FPaths::ProjectSavedDir() / TEXT("Campaign/NewGame.flag")));
+					UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851")));
+				}
+				else
+				{
+					CampaignNewGame();
+				}
 			}
 			else
 			{
@@ -1182,7 +1211,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			if (Module == 5000) { Overlay->SetTransferCount(Overlay->GetTransferMax()); }
 			else if (Module == 5001) { Overlay->SetTransferCount((Map->CompanyMen(Reg, From) - Map->CompanyMen(Reg, To)) / 2); }
 			else { Overlay->SetTransferCount(Cur + (Module - 1000)); }
-			Button = SCampaign1851Overlay::EButton::None;
+			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
 		if (Button == SCampaign1851Overlay::EButton::TransferYes)
 		{
@@ -1190,7 +1219,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Map->TransferCompanyMen(Overlay->GetTransferReg(), Overlay->GetTransferFrom(), Overlay->GetTransferToReg(), Overlay->GetTransferTo(), Overlay->GetTransferCount(), &Why);
 			Overlay->CloseTransfer();
 			Overlay->ShowToast(Why);
-			Button = SCampaign1851Overlay::EButton::None;
+			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
 		if (Button == SCampaign1851Overlay::EButton::TransferWhole)
 		{
@@ -1199,36 +1228,36 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			const bool bMoved = Map->MoveCompany(Overlay->GetTransferReg(), Overlay->GetTransferFrom(), Overlay->GetTransferToReg(), &Why, &NewTo);
 			Overlay->CloseTransfer();
 			Overlay->ShowToast(bMoved ? FString::Printf(TEXT("Hele enheden går over til %s"), *Map->GetRegiments()[NewTo].Name) : Why);
-			Button = SCampaign1851Overlay::EButton::None;
+			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
 		if (Button == SCampaign1851Overlay::EButton::TransferNo)
 		{
 			Overlay->CloseTransfer();
-			Button = SCampaign1851Overlay::EButton::None;
+			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
 		if (Button == SCampaign1851Overlay::EButton::Ransom)
 		{
 			FString Why;
 			Map->RansomOfficer(Module, &Why);
 			Overlay->ShowToast(Why);
-			Button = SCampaign1851Overlay::EButton::None;
+			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
 		if (Button == SCampaign1851Overlay::EButton::UnitCardPart)
 		{
 			Overlay->SetUnitCardCompany(Module - 1);
-			Button = SCampaign1851Overlay::EButton::None;
+			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
 		if (Button == SCampaign1851Overlay::EButton::PoolFold)
 		{
 			Overlay->TogglePoolOpen(Module);
-			Button = SCampaign1851Overlay::EButton::None;
+			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
 		if (Button == SCampaign1851Overlay::EButton::EqualizeUnit)
 		{
 			FString Why;
 			Map->EqualizeCompanies(Module, &Why);
 			Overlay->ShowToast(Why);
-			Button = SCampaign1851Overlay::EButton::None;
+			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
 		if (Button == SCampaign1851Overlay::EButton::TestBattle)
 		{
@@ -2281,6 +2310,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	}
 	const ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
 	UCampaign1851SaveGame* Save = Cast<UCampaign1851SaveGame>(UGameplayStatics::CreateSaveGameObject(UCampaign1851SaveGame::StaticClass()));
+	if (Save) { Save->Scenario = ACampaign1851Map::ScenarioIndex(); }
 	Save->SavedAt = FDateTime::Now();
 	Save->CameraTarget = Camera ? Camera->GetTarget() : LastCameraTarget;
 	Save->CameraDistanceKm = Camera ? Camera->GetDistanceKm() : LastCameraDistanceKm;
@@ -2540,7 +2570,7 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	{
 		Overlay->SetSelectedCity(INDEX_NONE);
 		Overlay->CloseMenu();
-		Overlay->ShowToast(TEXT("Nyt spil  ·  Danmark 1851"));
+		Overlay->ShowToast(FString::Printf(TEXT("Nyt spil  ·  %s"), *ACampaign1851Map::ActiveScenario().Name));
 	}
 	// The blank campaign replaces the autosave, so a restart does not bring the old game back.
 	SaveToSlot(TEXT("Autosave"), true);
