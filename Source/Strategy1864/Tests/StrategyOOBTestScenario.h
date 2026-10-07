@@ -200,6 +200,12 @@ public:
     void SetEnemyAttacking(bool bAttack);
     bool IsEnemyAttacking() const { return bEnemyAttacking; }
     bool bEnemyAttacking = true;
+    /** Testing: the enemy fires (true), or holds fire whatever happens (false). */
+    void SetEnemyFiring(bool bFire);
+    bool IsEnemyFiring() const { return bEnemyFiring; }
+    bool bEnemyFiring = true;
+    float EnemyFireTimer = 0.0f;
+    void EnforceEnemyHoldFire();
 
     /** The battle's standing (every battle): the men each side began with and has left (fighting units only:
      *  companies, squadrons, batteries; no staffs or wagons), and how many of its units have broken. */

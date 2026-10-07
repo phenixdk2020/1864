@@ -3509,9 +3509,11 @@ void SCampaign1851Overlay::PaintBattlefield(const FGeometry& Geometry, FSlateWin
 	Y += 44.f;
 	PaintButton(Geometry, Out, Layer + 1, FVector2D(RX, Y), FVector2D(280.f, 32.f), TEXT("GENERÉR HER"), EButton::BattlefieldHere, 0);
 	PaintButton(Geometry, Out, Layer + 1, FVector2D(RX + 290.f, Y), FVector2D(250.f, 32.f), TEXT("GÅ IND PÅ SLAGMARKEN"), EButton::BattleViewEnter, 0, false, !Map->GetBattlefield().IsValid());
+	PaintButton(Geometry, Out, Layer + 1, FVector2D(RX, Y + 78.f), FVector2D(540.f, 36.f), TEXT("TEST ET SLAG PÅ DENNE SLAGMARK (3D)"), EButton::TestBattle, 0, false, !Map->GetBattlefield().IsValid());
+	AddTip(FVector2D(RX, Y + 78.f), FVector2D(540.f, 36.f), TEXT("Åbner 3D-slaget på den genererede slagmark med din hær (og en fjende) til at prøve: kamporden, kanoner, rytteri, officerernes beslutninger. Det påvirker ikke kampagnen; AFSLUT SLAGET fører tilbage hertil. Under INDSTILLINGER i slaget kan du slå fjendens skud fra."));
 	PaintTextFit(Geometry, Out, Layer + 1, TEXT("Midt på kortets udsnit. Et slag bygger sin egen slagmark (SE SLAGMARKEN i slagpanelet)."), FVector2D(RX, Y + 46.f), Serif(10, EFace::Italic), MutedInk, Pos.X + Size.X - RX - 30.f);
 	// Legend.
-	Y += 80.f;
+	Y += 130.f;
 	const TPair<const TCHAR*, FLinearColor> Legend[] = {
 		{ TEXT("Mark"), FLinearColor::FromSRGBColor(FColor(172, 160, 104)) }, { TEXT("Eng og strand"), FLinearColor::FromSRGBColor(FColor(118, 146, 104)) },
 		{ TEXT("Skov"), FLinearColor::FromSRGBColor(FColor(52, 84, 46)) }, { TEXT("By"), FLinearColor::FromSRGBColor(FColor(158, 130, 104)) },

@@ -553,7 +553,7 @@ void AStrategyHUD::DrawSettings()
         return;
     }
     // A small window under the button: the camera's speed on the keys.
-    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 166.0f;
+    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 202.0f;
     DrawPanel(X, Y, W, H);
     Text(TEXT("INDSTILLINGER"), X + 12.0f, Y + 8.0f, Gold);
     const float Factor = AStrategyCameraPawn::GetKeySpeedFactor();
@@ -573,6 +573,10 @@ void AStrategyHUD::DrawSettings()
         Text(TEXT("Fjenden (til test)"), X + 12.0f, Y + 134.0f, Ink);
         DrawButton(X + 180.0f, Y + 130.0f, 110.0f, 24.0f, TEXT("ANGRIBER"), EAction::EnemyPosture, 1, bAttack, nullptr, bAttack ? nullptr : &ButtonDark);
         DrawButton(X + 296.0f, Y + 130.0f, 110.0f, 24.0f, TEXT("FORSVARER"), EAction::EnemyPosture, 0, !bAttack, nullptr, !bAttack ? nullptr : &ButtonDark);
+        const bool bFire = It->IsEnemyFiring();
+        Text(TEXT("Fjenden skyder (til test)"), X + 12.0f, Y + 170.0f, Ink);
+        DrawButton(X + 240.0f, Y + 166.0f, 80.0f, 24.0f, TEXT("TIL"), EAction::EnemyFire, 1, bFire, nullptr, bFire ? nullptr : &ButtonDark);
+        DrawButton(X + 326.0f, Y + 166.0f, 80.0f, 24.0f, TEXT("FRA"), EAction::EnemyFire, 0, !bFire, nullptr, !bFire ? nullptr : &ButtonDark);
         break;
     }
 }
@@ -852,6 +856,13 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 break;
             case EAction::EnemyRange:
                 SetShowEnemyRange(!ShowEnemyRange());
+                break;
+            case EAction::EnemyFire:
+                for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+                {
+                    It->SetEnemyFiring(B.Value == 1);
+                    break;
+                }
                 break;
             case EAction::EnemyPosture:
                 for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)

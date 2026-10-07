@@ -214,6 +214,13 @@ void AStrategyOOBTestScenario::BeginPlay()
         }
         FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Battle="), BattleId);
         FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Field="), FieldFile);
+        // A battlefield given in the map's address (a test battle from the campaign's SLAGMARK window): back to the campaign after.
+        const FString FieldOption = GetWorld()->URL.GetOption(TEXT("Field="), TEXT(""));
+        if (!FieldOption.IsEmpty())
+        {
+            FieldFile = FieldOption;
+            bReturnToCampaign = true;
+        }
         if (BattleId > 0 && FieldFile.IsEmpty())
         {
             FieldFile = FString::Printf(TEXT("Battlefield_Battle_%d.json"), BattleId);
@@ -977,6 +984,13 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     TickShots();
+    // The enemy holds fire (a test): kept so, also for units the AI or a new order would set to fire again.
+    EnemyFireTimer -= DeltaSeconds;
+    if (!bEnemyFiring && EnemyFireTimer <= 0.0f)
+    {
+        EnemyFireTimer = 0.5f;
+        EnforceEnemyHoldFire();
+    }
 
     BattleScoreTimer -= DeltaSeconds;
     if (BattleScoreTimer <= 0.0f)
@@ -1038,6 +1052,67 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
     {
         TickDuel(DeltaSeconds);
         // The cones are the HUD's (AStrategyHUD::DrawFireCone).
+    }
+}
+
+void AStrategyOOBTestScenario::SetEnemyFiring(bool bFire)
+{
+    bEnemyFiring = bFire;
+    if (UWorld* World = GetWorld())
+    {
+        for (TActorIterator<AStrategyUnit> It(World); It; ++It)
+        {
+            AStrategyUnit* U = *It;
+            if (!IsValid(U) || U->Side == EStrategySide::Denmark || U->Side == EStrategySide::Neutral)
+            {
+                continue;
+            }
+            if (bFire)
+            {
+                if (U->FireControlComponent && U->FireControlComponent->FirePolicy == EStrategyFirePolicy::Hold)
+                {
+                    U->FireControlComponent->SetFirePolicy(EStrategyFirePolicy::Long);
+                }
+                if (AStrategyArtilleryBatteryUnit* Battery = Cast<AStrategyArtilleryBatteryUnit>(U))
+                {
+                    if (Battery->ArtilleryFireMissionComponent) { Battery->ArtilleryFireMissionComponent->SetHoldFire(false); }
+                }
+            }
+        }
+    }
+    if (!bFire)
+    {
+        EnforceEnemyHoldFire();
+    }
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-ENEMY: fire %s"), bFire ? TEXT("on") : TEXT("off"));
+}
+
+void AStrategyOOBTestScenario::EnforceEnemyHoldFire()
+{
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        return;
+    }
+    for (TActorIterator<AStrategyUnit> It(World); It; ++It)
+    {
+        AStrategyUnit* U = *It;
+        if (!IsValid(U) || U->Side == EStrategySide::Denmark || U->Side == EStrategySide::Neutral)
+        {
+            continue;
+        }
+        if (U->FireControlComponent && U->FireControlComponent->FirePolicy != EStrategyFirePolicy::Hold)
+        {
+            U->FireControlComponent->SetFirePolicy(EStrategyFirePolicy::Hold);
+        }
+        if (AStrategyArtilleryBatteryUnit* Battery = Cast<AStrategyArtilleryBatteryUnit>(U))
+        {
+            if (Battery->ArtilleryFireMissionComponent) { Battery->ArtilleryFireMissionComponent->SetHoldFire(true); }
+            if (AStrategyMortarBatteryUnit* Mortar = Cast<AStrategyMortarBatteryUnit>(Battery))
+            {
+                if (Mortar->MortarFireComponent) { Mortar->MortarFireComponent->HoldFire(); }
+            }
+        }
     }
 }
 

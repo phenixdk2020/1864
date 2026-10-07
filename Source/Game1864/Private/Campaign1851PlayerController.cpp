@@ -1173,6 +1173,22 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Button = SCampaign1851Overlay::EButton::None;
 			}
 		}
+		if (Button == SCampaign1851Overlay::EButton::TestBattle)
+		{
+			// A test battle on the generated field: the campaign is saved, the battle map opens on that field file and
+			// comes back here (the result is not used by the campaign).
+			if (Map->GetBattlefield().IsValid())
+			{
+				SaveToSlot(TEXT("Autosave"), true);
+				if (GEngine && GEngine->GameViewport && Overlay.IsValid())
+				{
+					GEngine->GameViewport->RemoveViewportWidgetContent(Overlay.ToSharedRef());
+				}
+				UGameplayStatics::OpenLevel(this, FName(TEXT("Strategy1864_Field")), true, FString::Printf(TEXT("Field=%s"), *FPaths::GetCleanFilename(Map->BattlefieldFile())));
+				return;
+			}
+			Button = SCampaign1851Overlay::EButton::None;
+		}
 		if (Button == SCampaign1851Overlay::EButton::Block)
 		{
 			// A card in the front: the click stays on it.
