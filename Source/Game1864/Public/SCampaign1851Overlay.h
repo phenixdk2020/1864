@@ -283,7 +283,9 @@ private:
 	mutable FVector2D BuildingCardAnchor = FVector2D(-1.f, -1.f);   // set by the building list: where the building's card goes   // set by the selection panel: where the unit card goes
 	void PaintMinisterCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, int32 Portfolio) const;
 	/** A portrait in a frame of its own (dark mount, gold double frame). */
-	void PaintPortraitBox(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind) const;
+	void PaintPortraitBox(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind, int32 Age = -1, int32 Rank = -1) const;
+	/** The rank as a badge (epaulettes and stars) drawn over the portrait's lower corner: the picture is the person, this is the rank. */
+	void PaintRankBadge(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Corner, float Scale, int32 Rank) const;
 	int32 SelectedBridge = 0;
 public:
 	/** The research topic shown in its box (-1 none). */
@@ -398,7 +400,8 @@ private:
 	TSharedPtr<FSlateBrush> FlagBrush;
 	/** Portraits (types of the time): officers, generals, ministers; one by the person's name. */
 	TArray<TSharedPtr<FSlateBrush>> OfficerPortraits, GeneralPortraits, MinisterPortraits;
-	const FSlateBrush* PortraitFor(const FString& Name, int32 Kind) const;   // 0 officer, 1 general, 2 minister
+	const FSlateBrush* PortraitFor(const FString& Name, int32 Kind, int32 Age = -1) const;   // 0 officer, 1 general, 2 minister; Age picks the age group of the officers' pool
+	TArray<TSharedPtr<FSlateBrush>> AgePortraits[3];   // officers by age: young, middle, old (no rank on the coat)
 	void PaintPortrait(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind) const;
 	void PaintUnitCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft, int32 RegimentIndex) const;
 	int32 BuildingInfo = INDEX_NONE;

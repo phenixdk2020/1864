@@ -133,6 +133,11 @@ void SCampaign1851Overlay::Construct(const FArguments& InArgs)
 	for (int32 n = 0; n < 12; ++n)
 	{
 		OfficerPortraits.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_Officer_%02d.T_Portrait_Officer_%02d"), n, n)));
+		for (int32 g = 0; g < 3; ++g)
+		{
+			static const TCHAR* Groups[] = { TEXT("Ung"), TEXT("Midt"), TEXT("Gammel") };
+			AgePortraits[g].Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_Officer_%s_%02d.T_Portrait_Officer_%s_%02d"), Groups[g], n, Groups[g], n)));
+		}
 		GeneralPortraits.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_General_%02d.T_Portrait_General_%02d"), n, n)));
 		MinisterPortraits.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_Minister_%02d.T_Portrait_Minister_%02d"), n, n)));
 	}
@@ -1791,8 +1796,24 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 
 }
 
-const FSlateBrush* SCampaign1851Overlay::PortraitFor(const FString& Name, int32 Kind) const
+const FSlateBrush* SCampaign1851Overlay::PortraitFor(const FString& Name, int32 Kind, int32 Age) const
 {
+	// Officers by age (a general is older than a captain), the same face for the whole career whatever the rank: the
+	// age group's pool when it has pictures, else the old pools.
+	if (Kind != 2 && Age >= 0)
+	{
+		const int32 Group = Age < 38 ? 0 : Age < 50 ? 1 : 2;
+		const TArray<TSharedPtr<FSlateBrush>>& Aged = AgePortraits[Group];
+		TArray<const FSlateBrush*> Have;
+		for (const TSharedPtr<FSlateBrush>& B : Aged)
+		{
+			if (B.IsValid() && B->GetResourceObject()) { Have.Add(B.Get()); }
+		}
+		if (Have.Num() > 0)
+		{
+			return Have[GetTypeHash(Name) % uint32(Have.Num())];
+		}
+	}
 	const TArray<TSharedPtr<FSlateBrush>>& Pool = Kind == 2 ? MinisterPortraits : Kind == 1 ? GeneralPortraits : OfficerPortraits;
 	if (Pool.Num() == 0)
 	{
@@ -1820,13 +1841,13 @@ void SCampaign1851Overlay::PaintPortrait(const FGeometry& Geometry, FSlateWindow
 	}
 }
 
-void SCampaign1851Overlay::PaintPortraitBox(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind) const
+void SCampaign1851Overlay::PaintPortraitBox(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind, int32 Age, int32 Rank) const
 {
 	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
 	// The mount, then the picture inside it, then the double gold frame.
 	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(Pos)), White, ESlateDrawEffect::None, FLinearColor(0.035f, 0.028f, 0.02f, 1.f));
 	const float Pad = 8.f;
-	if (const FSlateBrush* B = PortraitFor(Name, Kind))
+	if (const FSlateBrush* B = PortraitFor(Name, Kind, Age))
 	{
 		FSlateDrawElement::MakeBox(Out, Layer + 1, Geometry.ToPaintGeometry(Size - FVector2D(2.f * Pad, 2.f * Pad), FSlateLayoutTransform(Pos + FVector2D(Pad, Pad))), B);
 	}
@@ -1841,6 +1862,50 @@ void SCampaign1851Overlay::PaintPortraitBox(const FGeometry& Geometry, FSlateWin
 	};
 	Frame(0.f, Gold, 2.f);
 	Frame(Pad - 2.f, Gold.CopyWithNewOpacity(0.5f), 1.f);
+	if (Rank >= 0)
+	{
+		PaintRankBadge(Geometry, Out, Layer + 3, Pos + Size - FVector2D(Pad + 2.f, Pad + 2.f), FMath::Clamp(Size.X / 178.f, 0.35f, 1.2f), Rank);
+	}
+}
+
+void SCampaign1851Overlay::PaintRankBadge(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Corner, float Scale, int32 Rank) const
+{
+	// An epaulette in the lower right corner: silver for the captain to the colonel, gold for the generals; one to three stars,
+	// a fringe for the colonel and above.  Kaptajn 0, Major 1, Oberstløjtnant 2, Oberst 3, Generalmajor 4, Generalløjtnant 5, General 6.
+	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+	const bool bGeneral = Rank >= 4;
+	const FLinearColor Metal = bGeneral ? FLinearColor::FromSRGBColor(FColor(214, 176, 78)) : FLinearColor::FromSRGBColor(FColor(206, 208, 214));
+	const FLinearColor Dark = FLinearColor::FromSRGBColor(FColor(30, 36, 62));
+	const float W = 62.f * Scale, H = 22.f * Scale;
+	const FVector2D Min = Corner - FVector2D(W, H);
+	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(FVector2D(W + 4.f * Scale, H + 4.f * Scale), FSlateLayoutTransform(Min - FVector2D(2.f * Scale, 2.f * Scale))), White, ESlateDrawEffect::None, FLinearColor(0.02f, 0.02f, 0.03f, 0.9f));
+	FSlateDrawElement::MakeBox(Out, Layer + 1, Geometry.ToPaintGeometry(FVector2D(W, H), FSlateLayoutTransform(Min)), White, ESlateDrawEffect::None, Dark);
+	FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(W, 3.f * Scale), FSlateLayoutTransform(Min)), White, ESlateDrawEffect::None, Metal);
+	FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(W, 3.f * Scale), FSlateLayoutTransform(Min + FVector2D(0.f, H - 3.f * Scale))), White, ESlateDrawEffect::None, Metal);
+	// The stars: captain one, major two, lieutenant colonel three, colonel three with fringe; generals one to three.
+	static const int32 Stars[] = { 1, 2, 3, 3, 1, 2, 3 };
+	const int32 N = Stars[FMath::Clamp(Rank, 0, 6)];
+	const float Step = 14.f * Scale;
+	const float X0 = Min.X + (W - (N - 1) * Step) * 0.5f;
+	for (int32 i = 0; i < N; ++i)
+	{
+		const FVector2D C(X0 + i * Step, Min.Y + H * 0.5f);
+		const float R = 5.f * Scale;
+		TArray<FVector2D> Pts;
+		for (int32 p = 0; p <= 10; ++p)
+		{
+			const float Ang = -PI * 0.5f + p * PI / 5.f, Rad = (p % 2 == 0) ? R : R * 0.42f;
+			Pts.Add(C + FVector2D(FMath::Cos(Ang) * Rad, FMath::Sin(Ang) * Rad));
+		}
+		DrawLines(Geometry, Out, Layer + 3, Pts, Metal, FMath::Max(1.f, 1.6f * Scale));
+	}
+	if (Rank >= 3)
+	{
+		for (float X = Min.X + 2.f * Scale; X < Min.X + W; X += 5.f * Scale)
+		{
+			FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(1.5f * Scale, 5.f * Scale), FSlateLayoutTransform(FVector2D(X, Min.Y + H))), White, ESlateDrawEffect::None, Metal);
+		}
+	}
 }
 
 void SCampaign1851Overlay::PaintMinisterCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, int32 Portfolio) const
@@ -1996,7 +2061,8 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 	}
 	if (Officers.IsValidIndex(R.Chief))
 	{
-		PaintPortraitBox(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 82.f, Y - 6.f), FVector2D(62.f, 78.f), Officers[R.Chief].Name, Officers[R.Chief].bGeneral ? 1 : 0);
+		PaintPortraitBox(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 82.f, Y - 6.f), FVector2D(62.f, 78.f), Officers[R.Chief].Name, Officers[R.Chief].bGeneral ? 1 : 0,
+			Map->GetDate().GetYear() - Officers[R.Chief].Born, Campaign1851Army::RankIndex(Officers[R.Chief].Rank));
 	}
 	Line(TEXT("Chef"), Officers.IsValidIndex(R.Chief) ? FString::Printf(TEXT("%s %s (%d)"), *Officers[R.Chief].Rank, *Officers[R.Chief].Name, Campaign1851Army::OfficerRating(Officers[R.Chief]))
 		: FString(TEXT("ingen")), TEXT("Chefens samlede vurdering 0-100 (åbn officerens kort for evnerne)"));
@@ -4636,7 +4702,7 @@ void SCampaign1851Overlay::PaintOfficerCard(const FGeometry& Geometry, FSlateWin
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseOfficerCard);
 	// Left: the portrait in its frame. Right: the name, rank, post, rating and experience.
 	const FVector2D Picture(Pos.X + 22.f, Pos.Y + 46.f);
-	PaintPortraitBox(Geometry, Out, Layer + 2, Picture, FVector2D(178.f, PortraitH), O.Name, O.bGeneral ? 1 : 0);
+	PaintPortraitBox(Geometry, Out, Layer + 2, Picture, FVector2D(178.f, PortraitH), O.Name, O.bGeneral ? 1 : 0, Map->GetDate().GetYear() - O.Born, Campaign1851Army::RankIndex(O.Rank));
 	const float TX = Picture.X + 198.f, TW = Size.X - (TX - Pos.X) - 24.f;
 	float Y = Picture.Y + 8.f;
 	PaintTextFit(Geometry, Out, Layer + 2, O.Name, FVector2D(TX, Y), Serif(22), Ink, TW - 40.f);
