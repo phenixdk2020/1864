@@ -469,8 +469,9 @@ int32 ACampaign1851Map::MergeRegiments(int32 Keep, int32 Absorb, FString* OutWhy
 	return NewKeep;
 }
 
-bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString* OutWhy)
+bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString* OutWhy, int32* OutTo)
 {
+	if (OutTo) { *OutTo = To; }
 	auto Fail = [OutWhy](const FString& Why) { if (OutWhy) { *OutWhy = Why; } return false; };
 	if (!Regiments.IsValidIndex(From) || !Regiments.IsValidIndex(To) || From == To || Company < 0 || Company >= SubUnitCount(From))
 	{
@@ -488,17 +489,14 @@ bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString*
 		{
 			return Fail(TEXT("Ikke midt i et slag"));
 		}
-		if (SubUnitCount(From) <= 1)
-		{
-			return Fail(TEXT("Enheden kan ikke afgive sin sidste eskadron"));
-		}
+		const bool bLastSquadron = SubUnitCount(From) <= 1;   // the last one empties the unit: it is disbanded
 		if (SubUnitCount(To) >= 10)
 		{
 			return Fail(TEXT("Regimentet har allerede ti eskadroner"));
 		}
 		const float Share = 1.f / float(SubUnitCount(From));
 		const int32 Men = FMath::RoundToInt(F.Men * Share), Sick = FMath::RoundToInt(F.Sick * Share), Max = FMath::RoundToInt(F.MaxMen * Share);
-		if (Men <= 0 || F.Men - Men <= 0)
+		if (Men <= 0 || (!bLastSquadron && F.Men - Men <= 0))
 		{
 			return Fail(TEXT("For få mand til at dele eskadronen"));
 		}
@@ -518,8 +516,16 @@ bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString*
 		T.Horses += SqHorses; F.Horses -= SqHorses;
 		T.MaxHorses += SqMaxHorses; F.MaxHorses -= SqMaxHorses;
 		T.Cohesion = FMath::Max(10.f, T.Cohesion - 3.f);
-		UpdateRegimentPiece(From);
 		UpdateRegimentPiece(To);
+		if (bLastSquadron)
+		{
+			RemoveRegimentAt(From);
+			if (OutTo && To > From) { *OutTo = To - 1; }
+		}
+		else
+		{
+			UpdateRegimentPiece(From);
+		}
 		return true;
 	}
 	if (Campaign1851Army::CompaniesFor(T.Arm) == 0 || (F.Arm != T.Arm && !(Campaign1851Army::CompaniesFor(F.Arm) > 0)))
@@ -534,10 +540,7 @@ bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString*
 	{
 		return Fail(TEXT("Ikke midt i et slag"));
 	}
-	if (F.Captains.Num() <= 1)
-	{
-		return Fail(TEXT("Enheden kan ikke afgive sit sidste kompagni"));
-	}
+	const bool bLastCompany = F.Captains.Num() <= 1;   // the last one empties the unit: it is disbanded
 	if (T.Captains.Num() >= 10)
 	{
 		return Fail(TEXT("Enheden har allerede ti kompagnier"));
@@ -603,8 +606,16 @@ bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString*
 			if (C.Regiment == From && C.Company > Company) { --C.Company; }
 		}
 	}
-	UpdateRegimentPiece(From);
 	UpdateRegimentPiece(To);
+	if (bLastCompany)
+	{
+		RemoveRegimentAt(From);
+		if (OutTo && To > From) { *OutTo = To - 1; }
+	}
+	else
+	{
+		UpdateRegimentPiece(From);
+	}
 	return true;
 }
 

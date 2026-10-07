@@ -1037,7 +1037,7 @@ public:
 	 *  of Keep, or INDEX_NONE. */
 	int32 MergeRegiments(int32 Keep, int32 Absorb, FString* OutWhy = nullptr);
 	/** A company (with its captain and men) goes over to another unit of the same kind standing with it. */
-	bool MoveCompany(int32 From, int32 Company, int32 To, FString* OutWhy = nullptr);
+	bool MoveCompany(int32 From, int32 Company, int32 To, FString* OutWhy = nullptr, int32* OutTo = nullptr);
 	/** Takes a unit out of the army; every index to the units after it moves down by one. */
 	void RemoveRegimentAt(int32 Index);
 

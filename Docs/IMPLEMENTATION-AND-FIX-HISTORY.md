@@ -1236,6 +1236,10 @@ Et uafhængigt Codex-review af del/saml/flyt-koden fandt fejl, rettet her:
 - **Beslutninger (#9):** ventende ministerråd (træning, kaptajn til kompagni) flyttes/droppes når en enhed fjernes.
 - **Nation (#16), forhåndstjek (#17), pakning af sammenlægning 1000 -> 10000 (#18).**
 
+### 2026-10-07 - Flyttes sidste kompagni/eskadron, nedlægges enheden
+
+`MoveCompany` afviser ikke længere den sidste; hele enheden går over til modtageren og tomme enhed fjernes (`RemoveRegimentAt`). `OutTo` giver modtagerens nye indeks, så kamporden og toast peger rigtigt.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

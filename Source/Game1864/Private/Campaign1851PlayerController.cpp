@@ -2785,9 +2785,11 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		const int32 Building = Overlay->GetOOBBuilding();
 		if (Map->GetRegiments().IsValidIndex(Building) && From != Building)
 		{
-			if (Map->MoveCompany(From, SourceId % 10, Building, &Why))
+			int32 NewBuilding = Building;
+			if (Map->MoveCompany(From, SourceId % 10, Building, &Why, &NewBuilding))
 			{
-				Overlay->ShowToast(FString::Printf(TEXT("Lagt til %s"), *Map->GetRegiments()[Building].Name));
+				if (NewBuilding != Building) { Overlay->SetOOBBuilding(NewBuilding); }
+				Overlay->ShowToast(FString::Printf(TEXT("Lagt til %s"), *Map->GetRegiments()[NewBuilding].Name));
 			}
 			else
 			{
@@ -2847,7 +2849,9 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		{
 			FString Why;
 			const FString What = Overlay->TreeKeyText(Source);
-			Overlay->ShowToast(Map->MoveCompany(From, SourceId % 10, To, &Why) ? FString::Printf(TEXT("%s går over til %s"), *What, *Map->GetRegiments()[To].Name) : Why);
+			int32 NewTo = To;
+			const bool bMoved = Map->MoveCompany(From, SourceId % 10, To, &Why, &NewTo);
+			Overlay->ShowToast(bMoved ? FString::Printf(TEXT("%s går over til %s"), *What, *Map->GetRegiments()[NewTo].Name) : Why);
 		}
 		return;
 	}
