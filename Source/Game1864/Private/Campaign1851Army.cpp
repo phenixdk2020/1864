@@ -2284,6 +2284,7 @@ TArray<FCampaign1851RegimentSave> ACampaign1851Map::SaveArmy() const
 		S.MaxHorses = R.MaxHorses;
 		S.Guns = R.Guns;
 		S.Nation = R.Nation;
+		S.CompanyWeight = R.CompanyWeight;
 		if (R.bRaised)
 		{
 			S.Name = R.Name;
@@ -2344,6 +2345,7 @@ int32 ACampaign1851Map::RestoreArmy(const TArray<FCampaign1851RegimentSave>& Sav
 		if (S.Guns >= 0) { R.Guns = S.Guns; }
 		if (!S.Nation.IsEmpty()) { R.Nation = S.Nation; }
 		R.SavedCompanies = S.Companies;
+		R.CompanyWeight = S.CompanyWeight;
 		R.Men = FMath::Clamp(S.Men, 0, R.MaxMen);
 		R.Morale = S.Morale;
 		R.Route.Reset();

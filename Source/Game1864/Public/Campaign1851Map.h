@@ -1225,6 +1225,12 @@ public:
 	int32 CompanyNumber(int32 Regiment, int32 Company) const;
 	/** A company's men (the battalion's strength spread over its companies). */
 	int32 CompanyMen(int32 Regiment, int32 Company) const;
+	/** The companies' strengths fixed as they are now (before something changes the battalion's men or companies). */
+	void FreezeCompanyStrength(int32 Regiment);
+	/** Two companies of the same battalion share their men evenly (the stronger gives to the weaker). */
+	bool BalanceCompanies(int32 Regiment, int32 A, int32 B, FString* OutWhy = nullptr);
+	/** All the battalion's companies in the field get the same number of men. */
+	bool EqualizeCompanies(int32 Regiment, FString* OutWhy = nullptr);
 	/** Hires a new officer or general into the pool (pays the cost); INDEX_NONE if the treasury cannot. */
 	int32 RecruitOfficer(bool bGeneral);
 	/** The general of a stack or column: the first general attached to one of its regiments. */

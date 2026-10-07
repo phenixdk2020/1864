@@ -197,21 +197,21 @@ int32 ACampaign1851Map::SplitRegiment(int32 RegimentIndex, FString* OutWhy, int3
 	const int32 Keep = Old.Captains.Num() - Moved;
 	const float Share = float(Moved) / Old.Captains.Num();
 	// The men with the colours belong to the companies that are not in a fort: their share is that of the moved field companies.
-	int32 FieldAll = 0, FieldMoved = 0;
+	TArray<int32> CompMen;
+	int32 MovedMen = 0;
 	for (int32 k = 0; k < Old.Captains.Num(); ++k)
 	{
 		const bool bField = !(Old.CompanyFort.IsValidIndex(k) && Old.CompanyFort[k] != 0);
-		FieldAll += bField ? 1 : 0;
-		FieldMoved += bField && k >= Keep ? 1 : 0;
+		CompMen.Add(CompanyMen(RegimentIndex, k));
+		MovedMen += bField && k >= Keep ? CompMen[k] : 0;
 	}
-	const float MenShare = FieldAll > 0 ? float(FieldMoved) / FieldAll : 0.f;
 	const FString Id = FreeSplitId(Old.Id);
 	const int32 New = AddRaisedRegiment(Id, Old.Name + TEXT(" (2. halvbataljon)"), Old.Arm, Old.Home, FMath::RoundToInt(Old.MaxMen * Share));
 	FCampaign1851Regiment& N = Regiments[New];
 	FCampaign1851Regiment& R = Regiments[RegimentIndex];
 	N.bDetached = true;
 	N.Nation = R.Nation;
-	N.Men = FMath::RoundToInt(R.Men * MenShare);
+	N.Men = FMath::Min(MovedMen, R.Men);
 	N.Sick = FMath::RoundToInt(R.Sick * Share);
 	N.Horses = FMath::RoundToInt(R.Horses * Share);
 	N.MaxHorses = FMath::RoundToInt(R.MaxHorses * Share);
@@ -233,10 +233,12 @@ int32 ACampaign1851Map::SplitRegiment(int32 RegimentIndex, FString* OutWhy, int3
 	// The last companies go with their captains.
 	N.Captains.Reset();
 	N.CompanyFort.Reset();
+	N.CompanyWeight.Reset();
 	for (int32 k = Keep; k < R.Captains.Num(); ++k)
 	{
 		const int32 Captain = R.Captains[k];
 		N.Captains.Add(Captain);
+		N.CompanyWeight.Add(float(CompMen[k]));
 		N.CompanyFort.Add(R.CompanyFort.IsValidIndex(k) ? R.CompanyFort[k] : 0);
 		if (Officers.IsValidIndex(Captain))
 		{
@@ -258,6 +260,8 @@ int32 ACampaign1851Map::SplitRegiment(int32 RegimentIndex, FString* OutWhy, int3
 	}
 	R.Captains.SetNum(Keep);
 	R.CompanyFort.SetNum(Keep);
+	R.CompanyWeight.Reset();
+	for (int32 k = 0; k < Keep; ++k) { R.CompanyWeight.Add(float(CompMen[k])); }
 	R.Men -= N.Men;
 	R.Sick -= N.Sick;
 	R.Horses -= N.Horses;
@@ -396,6 +400,8 @@ int32 ACampaign1851Map::MergeRegiments(int32 Keep, int32 Absorb, FString* OutWhy
 	}
 	K.Ammo = Mix(K.Ammo, A.Ammo);
 	K.Present = Mix(K.Present, A.Present);
+	FreezeCompanyStrength(Keep);
+	FreezeCompanyStrength(Absorb);
 	K.Men += A.Men;
 	K.MaxMen += A.MaxMen;
 	K.Sick += A.Sick;
@@ -416,6 +422,7 @@ int32 ACampaign1851Map::MergeRegiments(int32 Keep, int32 Absorb, FString* OutWhy
 	{
 		K.Captains.Add(A.Captains[k]);
 		K.CompanyFort.Add(A.CompanyFort.IsValidIndex(k) ? A.CompanyFort[k] : 0);
+		K.CompanyWeight.Add(A.CompanyWeight.IsValidIndex(k) ? A.CompanyWeight[k] : 0.f);
 		if (Officers.IsValidIndex(A.Captains[k]))
 		{
 			Officers[A.Captains[k]].CaptainOf = Keep;
@@ -556,6 +563,8 @@ bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString*
 			return Fail(TEXT("Ikke midt i et slag"));
 		}
 	}
+	FreezeCompanyStrength(From);
+	FreezeCompanyStrength(To);
 	// Its share of the battalion: the men with the colours spread over the companies not in a fort.
 	int32 WithIt = 0;
 	for (int32 k = 0; k < F.Captains.Num(); ++k)
@@ -563,7 +572,7 @@ bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString*
 		WithIt += F.CompanyFort.IsValidIndex(k) && F.CompanyFort[k] != 0 ? 0 : 1;
 	}
 	const float Share = 1.f / float(FMath::Max(WithIt, 1));
-	const int32 Men = FMath::RoundToInt(F.Men * Share), Sick = FMath::RoundToInt(F.Sick * Share), Max = FMath::RoundToInt(F.MaxMen / float(F.Captains.Num()));
+	const int32 Men = CompanyMen(From, Company), Sick = FMath::RoundToInt(F.Sick * Share), Max = FMath::RoundToInt(F.MaxMen / float(F.Captains.Num()));
 	const float WT = float(FMath::Max(T.Men, 1)), WF = float(FMath::Max(Men, 1));
 	auto Mix = [WT, WF](float X, float Y) { return (X * WT + Y * WF) / (WT + WF); };
 	T.Experience = Mix(T.Experience, F.Experience);
@@ -587,6 +596,8 @@ bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString*
 	const int32 Captain = F.Captains[Company];
 	T.Captains.Add(Captain);
 	T.CompanyFort.Add(0);
+	T.CompanyWeight.Add(F.CompanyWeight.IsValidIndex(Company) ? F.CompanyWeight[Company] : float(Men));
+	if (F.CompanyWeight.IsValidIndex(Company)) { F.CompanyWeight.RemoveAt(Company); }
 	F.Captains.RemoveAt(Company);
 	if (F.CompanyFort.IsValidIndex(Company)) { F.CompanyFort.RemoveAt(Company); }
 	if (Officers.IsValidIndex(Captain))
@@ -752,6 +763,8 @@ int32 ACampaign1851Map::SplitOffCompany(int32 RegimentIndex, int32 Company, FStr
 		const int32 Last = R.Captains.Num() - 1;
 		if (Company != Last)
 		{
+			FreezeCompanyStrength(RegimentIndex);
+			if (R.CompanyWeight.IsValidIndex(Company) && R.CompanyWeight.IsValidIndex(Last)) { R.CompanyWeight.Swap(Company, Last); }
 			R.Captains.Swap(Company, Last);
 			if (R.CompanyFort.IsValidIndex(Company) && R.CompanyFort.IsValidIndex(Last)) { R.CompanyFort.Swap(Company, Last); }
 			for (FCampaign1851Fort& Fort : Forts)

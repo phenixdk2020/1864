@@ -267,6 +267,8 @@ struct FCampaign1851Regiment
 	TArray<int32> Captains;
 	/** Per company: the fort (id) it holds, 0 = with the battalion. Its men are then not in Men. */
 	TArray<int32> CompanyFort;
+	/** Per company: its relative strength (the men it had when last set); the battalion's Men are spread by it over the companies in the field. Empty = equal. */
+	TArray<float> CompanyWeight;
 	/** Raised during the campaign (not part of the army of 1851): saved with its definition, paid from the budget. */
 	bool bRaised = false;
 	/** Split off another unit (half its companies): saved like a raised unit, but costs no extra upkeep. */

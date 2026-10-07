@@ -3793,12 +3793,17 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 				{
 					PaintTextFit(Geometry, Out, Layer + 3, FString::Printf(TEXT("%d. Eskadron"), k + 1), FVector2D(Pos.X + 24.f, Y), Serif(11), Ink, 100.f);
 				}
-				PaintText(Geometry, Out, Layer + 3, FString::FromInt(Map->SubUnitMen(u, k)), FVector2D(Pos.X + PoolW - 6.f, Y), Serif(10), Ink, 1.f, false);
+				PaintText(Geometry, Out, Layer + 3, R.Captains.Num() > 0 ? FString::Printf(TEXT("%d/%d"), Map->SubUnitMen(u, k), R.MaxMen / FMath::Max(1, R.Captains.Num())) : FString::FromInt(Map->SubUnitMen(u, k)), FVector2D(Pos.X + PoolW - 6.f, Y), Serif(10), Ink, 1.f, false);
 				Y += 22.f;
+			}
+			if (R.Captains.Num() > 1)
+			{
+				PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 14.f, Y - 9.f), FVector2D(PoolW - 14.f, 20.f), TEXT("Udjævn kompagnierne"), EButton::EqualizeUnit, u);
+				Y += 24.f;
 			}
 			Y += 10.f;
 		}
-		PaintTextFit(Geometry, Out, Layer + 3, TEXT("Træk til højre: ny enhed. Træk hen på en anden halvdel: flyt. Det sidste samler halvdelene."), FVector2D(Pos.X, Y + 6.f), Serif(10, EFace::Italic), MutedInk, PoolW);
+		PaintTextFit(Geometry, Out, Layer + 3, TEXT("Træk til højre: ny enhed. Træk hen på en anden halvdel: flyt. Træk et kompagni hen på et andet i samme bataljon: de deler mændene lige. Det sidste samler halvdelene."), FVector2D(Pos.X, Y + 6.f), Serif(10, EFace::Italic), MutedInk, PoolW);
 	}
 	else
 	{

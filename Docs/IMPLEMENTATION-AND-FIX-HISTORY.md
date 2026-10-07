@@ -1240,6 +1240,13 @@ Et uafhængigt Codex-review af del/saml/flyt-koden fandt fejl, rettet her:
 
 `MoveCompany` afviser ikke længere den sidste; hele enheden går over til modtageren og tomme enhed fjernes (`RemoveRegimentAt`). `OutTo` giver modtagerens nye indeks, så kamporden og toast peger rigtigt.
 
+### 2026-10-07 - Styrke pr. kompagni: fordel mændene mellem kompagnierne
+
+Før delte `CompanyMen` bataljonens mænd ligeligt, så kompagnierne kunne ikke være ulige stærke. Nu har hvert kompagni en vægt (`CompanyWeight`, gemmes): `CompanyMen` fordeler `Men` efter vægtene (summen er præcis `Men`), så tab, sygdom og alt andet, der ændrer `Men`, virker uændret og rammer kompagnierne forholdsmæssigt.
+- Kamporden: trækkes et kompagni hen på et andet i samme bataljon, deler de mændene lige (`BalanceCompanies`, max normeringen pr. kompagni). Knappen "Udjævn kompagnierne" (`EqualizeCompanies`) giver alle det samme. Kompagnilisten viser nu mand/normering.
+- Deling, flyt og sammenlægning (`SplitRegiment`, `MoveCompany`, `MergeRegiments`) fryser vægtene først (`FreezeCompanyStrength`) og tager kompagniets rigtige mandskab med.
+- Ældre gemte spil: ingen vægte = lige fordeling.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

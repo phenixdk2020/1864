@@ -486,6 +486,7 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 		R.Chief = R.General = INDEX_NONE;
 		R.Captains.Init(INDEX_NONE, R.SavedCompanies >= 0 ? R.SavedCompanies : Campaign1851Army::CompaniesFor(R.Arm));
 		R.CompanyFort.Init(0, R.Captains.Num());
+		if (R.CompanyWeight.Num() != R.Captains.Num()) { R.CompanyWeight.Reset(); }
 	}
 	for (FCampaign1851Command& C : Commands)
 	{
@@ -576,7 +577,85 @@ int32 ACampaign1851Map::CompanyMen(int32 Regiment, int32 Company) const
 		}
 	}
 	With = FMath::Max(With, 1);
-	return R.Men / With + (Index < R.Men % With ? 1 : 0);
+	// Spread by the companies' weights (equal when none are set): the shares add up to exactly the men there are.
+	const bool bWeights = R.CompanyWeight.Num() == R.Captains.Num();
+	auto Weight = [&](int32 k) { return bWeights ? FMath::Max(R.CompanyWeight[k], 0.f) : 1.f; };
+	double All = 0.0, Before = 0.0;
+	for (int32 k = 0; k < R.Captains.Num(); ++k)
+	{
+		if (!R.CompanyFort.IsValidIndex(k) || R.CompanyFort[k] == 0)
+		{
+			All += Weight(k);
+			Before += k < Company ? Weight(k) : 0.f;
+		}
+	}
+	if (All <= 0.0)
+	{
+		return R.Men / With + (Index < R.Men % With ? 1 : 0);
+	}
+	const double Mine = Weight(Company);
+	return int32(FMath::RoundToDouble(R.Men * (Before + Mine) / All) - FMath::RoundToDouble(R.Men * Before / All));
+}
+
+void ACampaign1851Map::FreezeCompanyStrength(int32 Regiment)
+{
+	if (!Regiments.IsValidIndex(Regiment) || Regiments[Regiment].Captains.Num() == 0)
+	{
+		return;
+	}
+	TArray<float> W;
+	for (int32 k = 0; k < Regiments[Regiment].Captains.Num(); ++k)
+	{
+		W.Add(float(CompanyMen(Regiment, k)));
+	}
+	Regiments[Regiment].CompanyWeight = W;
+}
+
+bool ACampaign1851Map::BalanceCompanies(int32 Regiment, int32 A, int32 B, FString* OutWhy)
+{
+	auto Fail = [OutWhy](const FString& Why) { if (OutWhy) { *OutWhy = Why; } return false; };
+	if (!Regiments.IsValidIndex(Regiment) || A == B || A < 0 || B < 0 || A >= Regiments[Regiment].Captains.Num() || B >= Regiments[Regiment].Captains.Num())
+	{
+		return Fail(TEXT("Ingen kompagnier"));
+	}
+	FCampaign1851Regiment& R = Regiments[Regiment];
+	if (IsInBattle(Regiment))
+	{
+		return Fail(TEXT("Ikke midt i et slag"));
+	}
+	if ((R.CompanyFort.IsValidIndex(A) && R.CompanyFort[A] != 0) || (R.CompanyFort.IsValidIndex(B) && R.CompanyFort[B] != 0))
+	{
+		return Fail(TEXT("Et kompagni i en skanse kan ikke få mænd herfra"));
+	}
+	FreezeCompanyStrength(Regiment);
+	const int32 Ma = CompanyMen(Regiment, A), Mb = CompanyMen(Regiment, B), Total = Ma + Mb;
+	const int32 Cap = FMath::Max(1, R.MaxMen / R.Captains.Num());
+	const int32 High = FMath::Min((Total + 1) / 2, Cap), Low = Total - High;
+	const int32 NewA = Ma >= Mb ? High : Low, NewB = Total - NewA;
+	if (NewA == Ma || Low > Cap)
+	{
+		return Fail(TEXT("Kompagnierne er allerede jævne"));
+	}
+	R.CompanyWeight[A] = float(NewA);
+	R.CompanyWeight[B] = float(NewB);
+	if (OutWhy) { *OutWhy = FString::Printf(TEXT("Kompagnierne er udjævnet: %d og %d mand"), NewA, NewB); }
+	return true;
+}
+
+bool ACampaign1851Map::EqualizeCompanies(int32 Regiment, FString* OutWhy)
+{
+	auto Fail = [OutWhy](const FString& Why) { if (OutWhy) { *OutWhy = Why; } return false; };
+	if (!Regiments.IsValidIndex(Regiment) || Regiments[Regiment].Captains.Num() < 2)
+	{
+		return Fail(TEXT("Enheden har ikke flere kompagnier"));
+	}
+	if (IsInBattle(Regiment))
+	{
+		return Fail(TEXT("Ikke midt i et slag"));
+	}
+	Regiments[Regiment].CompanyWeight.Reset();
+	if (OutWhy) { *OutWhy = FString::Printf(TEXT("%s: mændene er fordelt ligeligt over kompagnierne"), *Regiments[Regiment].Name); }
+	return true;
 }
 
 FString ACampaign1851Map::OfficerRole(int32 Officer) const

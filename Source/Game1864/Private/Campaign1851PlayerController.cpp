@@ -1173,6 +1173,13 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Button = SCampaign1851Overlay::EButton::None;
 			}
 		}
+		if (Button == SCampaign1851Overlay::EButton::EqualizeUnit)
+		{
+			FString Why;
+			Map->EqualizeCompanies(Module, &Why);
+			Overlay->ShowToast(Why);
+			Button = SCampaign1851Overlay::EButton::None;
+		}
 		if (Button == SCampaign1851Overlay::EButton::TestBattle)
 		{
 			// A test battle on the generated field: the campaign is saved, the battle map opens on that field file and
@@ -2842,6 +2849,14 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		}
 	}
 	// A company onto another battalion (or one of its companies): it goes over with its captain and men.
+	if (SCampaign1851Overlay::TreeKind(Source) == K::Company && TargetKind == K::Company && SourceId / 10 == TargetId / 10 && SourceId != TargetId)
+	{
+		// Two companies of the same battalion: they share their men evenly.
+		FString Why;
+		Map->BalanceCompanies(SourceId / 10, SourceId % 10, TargetId % 10, &Why);
+		Overlay->ShowToast(Why);
+		return;
+	}
 	if (SCampaign1851Overlay::TreeKind(Source) == K::Company && (TargetKind == K::Regiment || TargetKind == K::Company))
 	{
 		const int32 From = SourceId / 10, To = TargetKind == K::Regiment ? TargetId : TargetId / 10;

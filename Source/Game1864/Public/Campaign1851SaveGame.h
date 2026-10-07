@@ -163,6 +163,7 @@ struct FCampaign1851RegimentSave
 	UPROPERTY() int32 MaxHorses = -1;
 	UPROPERTY() int32 Guns = -1;
 	UPROPERTY() FString Nation;
+	UPROPERTY() TArray<float> CompanyWeight;
 };
 
 /** A formation of the field army (v11): its place in the tree, its commander and its regiments. */
