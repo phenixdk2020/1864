@@ -297,10 +297,29 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
         EnemyMajor->RefreshDebugLabel();
     }
     TArray<AStrategyCompanyUnit*> All;
-    for (int32 c = 0; c < 2; ++c)
+    // -Strategy1864SkirmishDanes=N (1-4 companies), -Strategy1864SkirmishSwedes (the enemy are Swedes), -Strategy1864HoldReserve (the leader keeps one back).
+    int32 DaneCount = 2;
+    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864SkirmishDanes="), DaneCount);
+    DaneCount = FMath::Clamp(DaneCount, 1, 4);
+    const bool bSwedes = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864SkirmishSwedes"));
+    const EStrategySide FoeSide = bSwedes ? EStrategySide::Enemy : EStrategySide::Prussia;
+    if (EnemyMajor)
+    {
+        EnemyMajor->Side = FoeSide;
+    }
+    if (Major && Major->OfficerProfileComponent && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864HoldReserve")))
+    {
+        // A level-headed battalion leader who knows his craft and does not throw everything in at once.
+        Major->OfficerProfileComponent->TacticalSkill = 75.0f;
+        Major->OfficerProfileComponent->Initiative = 65.0f;
+        Major->OfficerProfileComponent->StaffQuality = 65.0f;
+        Major->OfficerProfileComponent->Caution = 70.0f;
+        Major->OfficerProfileComponent->Aggression = 45.0f;
+    }
+    for (int32 c = 0; c < DaneCount; ++c)
     {
         if (AStrategyCompanyUnit* Company = SpawnCompany(FName(*FString::Printf(TEXT("DK-SKIRMISH-C%d"), c + 1)), FString::Printf(TEXT("%d. Kompagni"), c + 1), c + 1,
-            DanishLine + FVector(0.0f, (c - 0.5f) * 7200.0f, 0.0f), Major, static_cast<uint8>(EStrategySide::Denmark)))
+            DanishLine + FVector(0.0f, (c - (DaneCount - 1) * 0.5f) * 7200.0f, 0.0f), Major, static_cast<uint8>(EStrategySide::Denmark)))
         {
             Company->bPlayerControllable = true;
             if (Company->InfantryVisualComponent)
@@ -313,8 +332,8 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
     }
     for (int32 e = 0; e < EnemyCompanies; ++e)
     {
-        if (AStrategyCompanyUnit* Company = SpawnCompany(FName(*FString::Printf(TEXT("EN-SKIRMISH-C%d"), e + 1)), FString::Printf(TEXT("Pr. %d. Kp."), e + 1), e + 1,
-            EnemyLine + FVector(0.0f, (e - (EnemyCompanies - 1) * 0.5f) * 7200.0f, 0.0f), EnemyMajor, static_cast<uint8>(EStrategySide::Prussia)))
+        if (AStrategyCompanyUnit* Company = SpawnCompany(FName(*FString::Printf(TEXT("EN-SKIRMISH-C%d"), e + 1)), FString::Printf(TEXT("%s %d. Kp."), bSwedes ? TEXT("Sv.") : TEXT("Pr."), e + 1), e + 1,
+            EnemyLine + FVector(0.0f, (e - (EnemyCompanies - 1) * 0.5f) * 7200.0f, 0.0f), EnemyMajor, static_cast<uint8>(FoeSide)))
         {
             Company->SetActorRotation(FRotator(0.0f, 180.0f, 0.0f));
             Company->bPlayerControllable = false;
@@ -351,7 +370,7 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
         ConfigureRuntimeQALabel(Company);
         if (AStrategyColourFlag* Flag = GetWorld()->SpawnActor<AStrategyColourFlag>(AStrategyColourFlag::StaticClass(), Company->GetActorLocation(), FRotator::ZeroRotator))
         {
-            Flag->Setup(Company, Company->Side == EStrategySide::Denmark ? TEXT("DK") : TEXT("PR"), FVector(-250.0f, 60.0f, 0.0f));
+            Flag->Setup(Company, Company->Side == EStrategySide::Denmark ? TEXT("DK") : bSwedes ? TEXT("SE") : TEXT("PR"), FVector(-250.0f, 60.0f, 0.0f));
         }
     }
     // -Strategy1864SkirmishArms: a battery, a mortar and a squadron on each side (to see the guns and the horse).
@@ -437,7 +456,7 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
     FieldCameraYaw = 0.0f;
     bFieldCameraPlaced = false;
     SetupObjectives(DanishLine, EnemyLine);
-    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SKIRMISH: 2 Danish companies against %d enemy companies, 400 m apart, figures 1:%d"), EnemyCompanies, Lod);
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SKIRMISH: %d Danish companies against %d enemy companies, 400 m apart, figures 1:%d"), DaneCount, EnemyCompanies, Lod);
 }
 
 void AStrategyOOBTestScenario::GetBattleScore(int32& OutDanesStart, int32& OutDanesNow, int32& OutEnemyStart, int32& OutEnemyNow, int32& OutDanesBroken, int32& OutEnemyBroken) const

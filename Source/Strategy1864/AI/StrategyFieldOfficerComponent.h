@@ -74,6 +74,7 @@ private:
     int32 FlankK = 0;             // how many places from the base
     float FlankSign = 0.0f;       // -1 / +1: which side of the base
     float FlankUntil = 0.0f;
+    float FlankSince = 0.0f;      // when the plan was made (a reserve is put in after a time at the latest)
     float FlankSkill = 0.5f;      // the battalion leader's grasp of it (0-1)
     TWeakObjectPtr<AStrategyUnit> FlankEnemy;
     TWeakObjectPtr<AStrategyUnit> FlankBase;

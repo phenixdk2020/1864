@@ -14,6 +14,8 @@
 #include "../Units/StrategyUnit.h"
 #include "../Visual/StrategyEquipmentVisualComponent.h"
 #include "Algo/Sort.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
 
@@ -263,6 +265,23 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
         return;
     }
     const int32 MaxPlaces = Skill < 0.55f ? 1 : 9;
+    // A reserve: a cautious, level-headed leader with four companies or more keeps the rearmost back, behind the fire base, to
+    // put in where it is needed (-Strategy1864HoldReserve forces it for a test).
+    AStrategyUnit* Reserve = nullptr;
+    {
+        const UStrategyOfficerProfileComponent* Leader = OwnerUnit->CommandComponent->CurrentCommandParent->OfficerProfileComponent;
+        const float Hold = Leader ? Leader->Caution * 0.4f + Leader->TacticalSkill * 0.3f - Leader->Aggression * 0.2f : 20.0f;
+        if (Group.Num() >= 4 && (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864HoldReserve")) || Hold > 32.0f))
+        {
+            float Farthest = -1.0f;
+            for (AStrategyUnit* U : Group)
+            {
+                const float D = FVector::Dist2D(U->GetActorLocation(), Enemy->GetActorLocation());
+                if (D > Farthest) { Farthest = D; Reserve = U; }
+            }
+            Group.Remove(Reserve);
+        }
+    }
     FVector Centre = FVector::ZeroVector;
     for (const AStrategyUnit* U : Group) { Centre += U->GetActorLocation(); }
     Centre /= float(Group.Num());
@@ -291,7 +310,25 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
         C->FlankEnemy = Enemy;
         C->FlankBase = Group[Base];
     }
-    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FLANK: %d companies against %s: %s is the fire base"), Group.Num(), *Enemy->DisplayName.ToString(), *Group[Base]->DisplayName.ToString());
+    if (Reserve)
+    {
+        if (UStrategyFieldOfficerComponent* C = Reserve->FindComponentByClass<UStrategyFieldOfficerComponent>())
+        {
+            C->FlankRole = 3;
+            C->FlankK = 0;
+            C->FlankSkill = Skill;
+            C->FlankUntil = Now + 90.0f;
+            C->FlankSince = Now;
+            C->FlankEnemy = Enemy;
+            C->FlankBase = Group[Base];
+        }
+    }
+    for (AStrategyUnit* U : Group)
+    {
+        if (UStrategyFieldOfficerComponent* C = U->FindComponentByClass<UStrategyFieldOfficerComponent>()) { C->FlankSince = Now; }
+    }
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FLANK: %d companies against %s: %s is the fire base%s"), Group.Num() + (Reserve ? 1 : 0), *Enemy->DisplayName.ToString(), *Group[Base]->DisplayName.ToString(),
+        Reserve ? *FString::Printf(TEXT(", %s in reserve"), *Reserve->DisplayName.ToString()) : TEXT(""));
 }
 
 float UStrategyFieldOfficerComponent::PreferredFraction() const
@@ -308,7 +345,7 @@ bool UStrategyFieldOfficerComponent::FlankPlan(AStrategyUnit* Enemy, float Radiu
 {
     FVector Foe = FVector::ZeroVector;
     OutGoal = ApproachGoalAt(Enemy, Radius, OutNote, Foe);
-    bOutMustMove = FlankRole == 2 && FVector::Dist2D(OwnerUnit->GetActorLocation(), OutGoal) > 2000.0f;
+    bOutMustMove = (FlankRole == 2 || FlankRole == 3) && FVector::Dist2D(OwnerUnit->GetActorLocation(), OutGoal) > 2000.0f;
     return FlankRole != 0;
 }
 
@@ -338,6 +375,19 @@ FVector UStrategyFieldOfficerComponent::ApproachGoalAt(AStrategyUnit* Enemy, flo
     const AStrategyUnit* Base = FlankBase.Get();
     const FVector BasePlace = Base ? Base->GetActorLocation() : Own;
     FVector Back = (BasePlace - Target).GetSafeNormal2D();
+    if (FlankRole == 3)
+    {
+        // The reserve stands ninety metres behind the fire base, until the base is hurt, the time is up, or the base is gone.
+        const bool bRelease = !Base || !Base->IsCombatEffective() || Base->CurrentStrength < Base->InitialStrength * 0.75f || Base->Morale < 55.0f || Now - FlankSince > 240.0f;
+        if (bRelease)
+        {
+            FlankRole = 0;
+            OutNote = TEXT("reserven sættes ind");
+            return Target + (Own - Target).GetSafeNormal2D() * Radius;
+        }
+        OutNote = TEXT("i reserve");
+        return BasePlace + Back * 9000.0f;
+    }
     if (FlankRole == 1)
     {
         OutNote = TEXT("ildbasen: holder og skyder");
@@ -430,7 +480,7 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
         FVector Foe = Enemy->GetActorLocation();
         FVector Goal = ApproachGoal(Enemy, Range, ApproachNote, Foe);
         // On to the fire distance, or (for a flank) to the place at an angle to the enemy, even when already within range.
-        const bool bFlankToGo = FlankRole == 2 && FVector::Dist2D(OwnerUnit->GetActorLocation(), Goal) > 2000.0f;
+        const bool bFlankToGo = (FlankRole == 2 || FlankRole == 3) && FVector::Dist2D(OwnerUnit->GetActorLocation(), Goal) > 2000.0f;
         if (Distance > Range * 0.95f || bFlankToGo)
         {
             if (Order.IsValidOrder() && FVector::Dist2D(Goal, Order.TargetLocation) > 40000.0f)

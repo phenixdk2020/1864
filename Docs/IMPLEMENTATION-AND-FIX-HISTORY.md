@@ -1380,6 +1380,12 @@ Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i
 - **Målenes ringe** i 3D-slaget følger nu terrænet (de var flade og forsvandt ind i bakkerne).
 - **Enhedskortets knapper** (ALLE, kompagni, flyt mænd, udjævn, løsekøb, fold ud): klikket falder ikke længere igennem til kortet, så kortet lukker ikke.
 
+### 2026-10-07 - Reserver og to testslag: dansk kompagni og dansk bataljon mod svenskerne
+
+- **Reserve:** en forsigtig og besindig bataljonsleder (Forsigtighed 40 %, taktik 30 % minus aggressivitet 20 % over 32) med fire kompagnier eller flere holder det bageste tilbage 90 m bag ildbasen (rolle 3 i `AssignFlanks`/`ApproachGoalAt`). Det sættes ind, når ildbasen er nede på 75 % af styrken eller under 55 moral, når basen er væk, eller efter fire minutter. `-Strategy1864HoldReserve` tvinger det (og giver chefen forsigtige evner).
+- **Skirmish** kan nu køres mod svenskerne (`-Strategy1864SkirmishSwedes`: siden Enemy, svensk model og flag SE, "Sv. 1. Kp."), med 1-4 danske kompagnier (`-Strategy1864SkirmishDanes=N`).
+- **Starter-filer:** `Start-Test-1-Kompagni-mod-Kompagni.bat` (et dansk kompagni går frem og skyder mod et svensk, som holder sin stilling og skyder tilbage, til det ene brydes) og `Start-Test-2-Bataillon-mod-Kompagni.bat` (en bataljon mod et svensk kompagni: et kompagni i reserve, midten holder og skyder, de to andre går udenom ildfeltet og ind fra siden). Kontrolleret i loggen og på et skærmbillede.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
