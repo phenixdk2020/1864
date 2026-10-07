@@ -642,6 +642,39 @@ bool ACampaign1851Map::BalanceCompanies(int32 Regiment, int32 A, int32 B, FStrin
 	return true;
 }
 
+int32 ACampaign1851Map::CompanyCapacity(int32 Regiment) const
+{
+	return Regiments.IsValidIndex(Regiment) && Regiments[Regiment].Captains.Num() > 0 ? FMath::Max(1, Regiments[Regiment].MaxMen / Regiments[Regiment].Captains.Num()) : 0;
+}
+
+bool ACampaign1851Map::TransferCompanyMen(int32 Regiment, int32 From, int32 To, int32 Count, FString* OutWhy)
+{
+	auto Fail = [OutWhy](const FString& Why) { if (OutWhy) { *OutWhy = Why; } return false; };
+	if (!Regiments.IsValidIndex(Regiment) || From == To || From < 0 || To < 0 || From >= Regiments[Regiment].Captains.Num() || To >= Regiments[Regiment].Captains.Num())
+	{
+		return Fail(TEXT("Ingen kompagnier"));
+	}
+	FCampaign1851Regiment& R = Regiments[Regiment];
+	if (IsInBattle(Regiment))
+	{
+		return Fail(TEXT("Ikke midt i et slag"));
+	}
+	if ((R.CompanyFort.IsValidIndex(From) && R.CompanyFort[From] != 0) || (R.CompanyFort.IsValidIndex(To) && R.CompanyFort[To] != 0))
+	{
+		return Fail(TEXT("Et kompagni i en skanse kan ikke få mænd herfra"));
+	}
+	FreezeCompanyStrength(Regiment);
+	const int32 N = FMath::Min3(Count, CompanyMen(Regiment, From), CompanyCapacity(Regiment) - CompanyMen(Regiment, To));
+	if (N <= 0)
+	{
+		return Fail(TEXT("Ingen mænd at flytte"));
+	}
+	R.CompanyWeight[From] -= float(N);
+	R.CompanyWeight[To] += float(N);
+	if (OutWhy) { *OutWhy = FString::Printf(TEXT("%d mand flyttet: %d. kompagni har nu %d, %d. kompagni har %d"), N, CompanyNumber(Regiment, From), CompanyMen(Regiment, From), CompanyNumber(Regiment, To), CompanyMen(Regiment, To)); }
+	return true;
+}
+
 bool ACampaign1851Map::EqualizeCompanies(int32 Regiment, FString* OutWhy)
 {
 	auto Fail = [OutWhy](const FString& Why) { if (OutWhy) { *OutWhy = Why; } return false; };

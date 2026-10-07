@@ -1173,6 +1173,28 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Button = SCampaign1851Overlay::EButton::None;
 			}
 		}
+		if (Button == SCampaign1851Overlay::EButton::TransferAdj)
+		{
+			const int32 Cur = Overlay->GetTransferCount();
+			const int32 Reg = Overlay->GetTransferReg(), From = Overlay->GetTransferFrom(), To = Overlay->GetTransferTo();
+			if (Module == 5000) { Overlay->SetTransferCount(Overlay->GetTransferMax()); }
+			else if (Module == 5001) { Overlay->SetTransferCount((Map->CompanyMen(Reg, From) - Map->CompanyMen(Reg, To)) / 2); }
+			else { Overlay->SetTransferCount(Cur + (Module - 1000)); }
+			Button = SCampaign1851Overlay::EButton::None;
+		}
+		if (Button == SCampaign1851Overlay::EButton::TransferYes)
+		{
+			FString Why;
+			Map->TransferCompanyMen(Overlay->GetTransferReg(), Overlay->GetTransferFrom(), Overlay->GetTransferTo(), Overlay->GetTransferCount(), &Why);
+			Overlay->CloseTransfer();
+			Overlay->ShowToast(Why);
+			Button = SCampaign1851Overlay::EButton::None;
+		}
+		if (Button == SCampaign1851Overlay::EButton::TransferNo)
+		{
+			Overlay->CloseTransfer();
+			Button = SCampaign1851Overlay::EButton::None;
+		}
 		if (Button == SCampaign1851Overlay::EButton::EqualizeUnit)
 		{
 			FString Why;
@@ -2851,10 +2873,18 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 	// A company onto another battalion (or one of its companies): it goes over with its captain and men.
 	if (SCampaign1851Overlay::TreeKind(Source) == K::Company && TargetKind == K::Company && SourceId / 10 == TargetId / 10 && SourceId != TargetId)
 	{
-		// Two companies of the same battalion: they share their men evenly.
-		FString Why;
-		Map->BalanceCompanies(SourceId / 10, SourceId % 10, TargetId % 10, &Why);
-		Overlay->ShowToast(Why);
+		// Two companies of the same battalion: a window asks how many men go over.
+		const int32 Reg = SourceId / 10, From = SourceId % 10, To = TargetId % 10;
+		const int32 Ma = Map->CompanyMen(Reg, From), Mb = Map->CompanyMen(Reg, To);
+		const int32 Max = FMath::Min(Ma, Map->CompanyCapacity(Reg) - Mb);
+		if (Max <= 0)
+		{
+			Overlay->ShowToast(Ma <= 0 ? TEXT("Kompagniet har ingen mænd at give") : TEXT("Det andet kompagni er fuldt"));
+		}
+		else
+		{
+			Overlay->OpenTransfer(Reg, From, To, Max, FMath::Clamp((Ma - Mb) / 2, 1, Max));
+		}
 		return;
 	}
 	if (SCampaign1851Overlay::TreeKind(Source) == K::Company && (TargetKind == K::Regiment || TargetKind == K::Company))

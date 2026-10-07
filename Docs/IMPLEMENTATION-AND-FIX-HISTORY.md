@@ -1247,6 +1247,10 @@ Før delte `CompanyMen` bataljonens mænd ligeligt, så kompagnierne kunne ikke 
 - Deling, flyt og sammenlægning (`SplitRegiment`, `MoveCompany`, `MergeRegiments`) fryser vægtene først (`FreezeCompanyStrength`) og tager kompagniets rigtige mandskab med.
 - Ældre gemte spil: ingen vægte = lige fordeling.
 
+### 2026-10-07 - Flyt et valgfrit antal mand mellem kompagnier
+
+Træk et kompagni hen på et andet i samme bataljon: et vindue (`PaintTransfer`) spørger, hvor mange mand der flyttes. Knapper: -10, -1, +1, +10, ALLE (højst hvad giveren har og modtageren har plads til) og LIGE (jævner de to). FLYT udfører (`TransferCompanyMen`), FORTRYD lukker. `CompanyCapacity` er normeringen pr. kompagni.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

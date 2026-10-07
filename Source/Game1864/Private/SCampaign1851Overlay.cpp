@@ -322,6 +322,11 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 		Tips.Reset();
 		PaintConfirm(Geometry, Out, Layer + 60);
 	}
+	else if (bTransferOpen)
+	{
+		Tips.Reset();
+		PaintTransfer(Geometry, Out, Layer + 60);
+	}
 	PaintTooltip(Geometry, Out, Layer + 70);
 
 	const FVector2D Size = Geometry.GetLocalSize();
@@ -978,6 +983,33 @@ void SCampaign1851Overlay::PaintConfirm(const FGeometry& Geometry, FSlateWindowE
 	}
 	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(30.f, Size.Y - 52.f), FVector2D(260.f, 32.f), TEXT("JA, GØR DET"), EButton::ConfirmYes, 0, true);
 	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 230.f, Size.Y - 52.f), FVector2D(200.f, 32.f), TEXT("NEJ"), EButton::ConfirmNo, 0);
+}
+
+void SCampaign1851Overlay::PaintTransfer(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
+{
+	// How many men go from one company to the other: the number is changed with the buttons; only this window is live.
+	Buttons.Reset();
+	const FVector2D Screen = Geometry.GetLocalSize();
+	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Screen, FSlateLayoutTransform(FVector2D::ZeroVector)), White, ESlateDrawEffect::None, FLinearColor(0.f, 0.f, 0.f, 0.45f));
+	const FVector2D Size(560.f, 300.f);
+	const FVector2D Pos((Screen - Size) * 0.5f);
+	PaintPanel(Geometry, Out, Layer + 1, Pos, Size);
+	DrawLines(Geometry, Out, Layer + 2, { Pos, Pos + FVector2D(Size.X, 0.f), Pos + Size, Pos + FVector2D(0.f, Size.Y), Pos }, Gold, 1.5f);
+	PaintText(Geometry, Out, Layer + 3, TEXT("Flyt mænd mellem kompagnier"), Pos + FVector2D(30.f, 36.f), Serif(20), Ink, 0.f, false);
+	const int32 A = Map->CompanyMen(TransferReg, TransferFrom), B = Map->CompanyMen(TransferReg, TransferTo), Cap = Map->CompanyCapacity(TransferReg);
+	PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("%d. kompagni:  %d/%d  →  %d"), Map->CompanyNumber(TransferReg, TransferFrom), A, Cap, A - TransferCount), Pos + FVector2D(30.f, 82.f), Serif(15), Ink, 0.f, false);
+	PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("%d. kompagni:  %d/%d  →  %d"), Map->CompanyNumber(TransferReg, TransferTo), B, Cap, B + TransferCount), Pos + FVector2D(30.f, 110.f), Serif(15), Ink, 0.f, false);
+	PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("Flyt  %d  mand  (højst %d)"), TransferCount, TransferMax), Pos + FVector2D(Size.X * 0.5f, 160.f), Serif(22, EFace::Bold), Gold, 0.5f, false);
+	const float BW = 70.f, BY = 190.f;
+	const TCHAR* Labels[] = { TEXT("-10"), TEXT("-1"), TEXT("+1"), TEXT("+10"), TEXT("ALLE"), TEXT("LIGE") };
+	const int32 Modules[] = { 990, 999, 1001, 1010, 5000, 5001 };
+	for (int32 i = 0; i < 6; ++i)
+	{
+		PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(30.f + i * (BW + 12.f), BY), FVector2D(BW, 30.f), Labels[i], EButton::TransferAdj, Modules[i]);
+	}
+	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(30.f, Size.Y - 52.f), FVector2D(260.f, 32.f), TEXT("FLYT"), EButton::TransferYes, 0, true);
+	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 230.f, Size.Y - 52.f), FVector2D(200.f, 32.f), TEXT("FORTRYD"), EButton::TransferNo, 0);
 }
 
 SCampaign1851Overlay::EButton SCampaign1851Overlay::HitButton(const FVector2D& ViewportPixel, int32* OutModule) const
@@ -3803,7 +3835,7 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 			}
 			Y += 10.f;
 		}
-		PaintTextFit(Geometry, Out, Layer + 3, TEXT("Træk til højre: ny enhed. Træk hen på en anden halvdel: flyt. Træk et kompagni hen på et andet i samme bataljon: de deler mændene lige. Det sidste samler halvdelene."), FVector2D(Pos.X, Y + 6.f), Serif(10, EFace::Italic), MutedInk, PoolW);
+		PaintTextFit(Geometry, Out, Layer + 3, TEXT("Træk til højre: ny enhed. Træk hen på en anden halvdel: flyt. Træk et kompagni hen på et andet i samme bataljon: vælg hvor mange mand der flyttes. Det sidste samler halvdelene."), FVector2D(Pos.X, Y + 6.f), Serif(10, EFace::Italic), MutedInk, PoolW);
 	}
 	else
 	{
