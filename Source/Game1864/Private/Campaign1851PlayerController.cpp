@@ -923,6 +923,8 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 					else if (Key == TEXT("genfield")) { TArray<FString> P; Value.ParseIntoArray(P, TEXT("+")); if (P.Num() >= 2) { Map->GenerateBattlefield(Map->KmAtWorld(Map->Project(FCString::Atod(*P[0]), FCString::Atod(*P[1]))), 8.f, TEXT("Test")); } }
 					else if (Key == TEXT("split")) { Map->SplitRegiment(FCString::Atoi(*Value)); }
 					else if (Key == TEXT("unitcard")) { Overlay->ToggleUnitCard(); }
+					else if (Key == TEXT("pool")) { Overlay->TogglePoolOpen(FCString::Atoi(*Value)); }
+					else if (Key == TEXT("unitco")) { Overlay->SetUnitCardCompany(FCString::Atoi(*Value)); }
 					else if (Key == TEXT("oob")) { Overlay->ToggleOOB(); }
 					else if (Key == TEXT("city")) { Overlay->SetSelectedCity(Map->FindCity(Value)); }
 					else if (Key == TEXT("tab")) { Overlay->SetTownTab(FCString::Atoi(*Value)); }
@@ -1209,6 +1211,16 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			FString Why;
 			Map->RansomOfficer(Module, &Why);
 			Overlay->ShowToast(Why);
+			Button = SCampaign1851Overlay::EButton::None;
+		}
+		if (Button == SCampaign1851Overlay::EButton::UnitCardPart)
+		{
+			Overlay->SetUnitCardCompany(Module - 1);
+			Button = SCampaign1851Overlay::EButton::None;
+		}
+		if (Button == SCampaign1851Overlay::EButton::PoolFold)
+		{
+			Overlay->TogglePoolOpen(Module);
 			Button = SCampaign1851Overlay::EButton::None;
 		}
 		if (Button == SCampaign1851Overlay::EButton::EqualizeUnit)

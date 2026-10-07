@@ -1366,6 +1366,13 @@ Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i
 4. **Husarer/kavaleri:** skydekegle kun når et dragonregiment er afsiddet; kolonnen er tre og tre; ingen karré for ryttere (KARRÉ-knappen vises ikke); husarer kan ikke sidde af.
 5. **Højre mus:** med valgte enheder sender et klik dem derhen; holdes knappen nede og trækkes musen, tegnes en pil, og enhederne ender med fronten i pilens retning (flere enheder side om side; kameraet panorerer ikke, mens knappen giver en ordre; uden valgte enheder panorerer højre mus som før). Ikke afprøvet med rigtig mus.
 
+### 2026-10-07 - Kamporden som organisationsdiagram ved deling, udfoldelige enheder, enhedskort pr. kompagni
+
+- **Deling i kamporden:** når man deler en hær eller enhed, står hele felthærens organisationsdiagram (Felthæren, division, brigader, regimenter, bataljoner og kompagnier) nu i midten, så man kan lægge en brigade eller division på og trække enheder mellem dem; den nye enhed (kassen og "Træk herover") står i en kolonne til højre.
+- **Garnisonslisten** (gruppen "I GARNISON" efter generalkommando) har en lille +/- ved hver enhed, der folder kompagnierne (eller eskadronerne) ud med kaptajn og mandskab.
+- **Enhedskortet:** fanen er 25 % bredere (105 x 84); for en enhed med flere kompagnier/eskadroner er der knapper ALLE og 1-10: ALLE viser kortet som gennemsnit for enheden, et nummer viser det kompagni: dets mand (x/190) og dets kaptajn med portræt (erfaring, moral, øvelser og tjeneste er enhedens, og det står på kortet).
+- Ikke gjort: at fjerne et højere hovedkvarter (division/brigade) direkte i delingsvisningen; kortet kan i dag kun flytte enheder mellem dem.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
