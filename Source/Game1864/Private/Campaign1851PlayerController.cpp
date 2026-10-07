@@ -1185,9 +1185,18 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		if (Button == SCampaign1851Overlay::EButton::TransferYes)
 		{
 			FString Why;
-			Map->TransferCompanyMen(Overlay->GetTransferReg(), Overlay->GetTransferFrom(), Overlay->GetTransferTo(), Overlay->GetTransferCount(), &Why);
+			Map->TransferCompanyMen(Overlay->GetTransferReg(), Overlay->GetTransferFrom(), Overlay->GetTransferToReg(), Overlay->GetTransferTo(), Overlay->GetTransferCount(), &Why);
 			Overlay->CloseTransfer();
 			Overlay->ShowToast(Why);
+			Button = SCampaign1851Overlay::EButton::None;
+		}
+		if (Button == SCampaign1851Overlay::EButton::TransferWhole)
+		{
+			FString Why;
+			int32 NewTo = Overlay->GetTransferToReg();
+			const bool bMoved = Map->MoveCompany(Overlay->GetTransferReg(), Overlay->GetTransferFrom(), Overlay->GetTransferToReg(), &Why, &NewTo);
+			Overlay->CloseTransfer();
+			Overlay->ShowToast(bMoved ? FString::Printf(TEXT("Hele enheden går over til %s"), *Map->GetRegiments()[NewTo].Name) : Why);
 			Button = SCampaign1851Overlay::EButton::None;
 		}
 		if (Button == SCampaign1851Overlay::EButton::TransferNo)
@@ -2871,19 +2880,23 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		}
 	}
 	// A company onto another battalion (or one of its companies): it goes over with its captain and men.
-	if (SCampaign1851Overlay::TreeKind(Source) == K::Company && TargetKind == K::Company && SourceId / 10 == TargetId / 10 && SourceId != TargetId)
+	if (SCampaign1851Overlay::TreeKind(Source) == K::Company && TargetKind == K::Company && SourceId != TargetId
+		&& Map->GetRegiments().IsValidIndex(SourceId / 10) && Map->GetRegiments().IsValidIndex(TargetId / 10)
+		&& Map->GetRegiments()[SourceId / 10].Arm == Map->GetRegiments()[TargetId / 10].Arm
+		&& (Map->GetRegiments()[SourceId / 10].Captains.Num() > 0) == (Map->GetRegiments()[TargetId / 10].Captains.Num() > 0))
 	{
-		// Two companies of the same battalion: a window asks how many men go over.
-		const int32 Reg = SourceId / 10, From = SourceId % 10, To = TargetId % 10;
-		const int32 Ma = Map->CompanyMen(Reg, From), Mb = Map->CompanyMen(Reg, To);
-		const int32 Max = FMath::Min(Ma, Map->CompanyCapacity(Reg) - Mb);
+		// Two companies (or squadrons), in the same unit or in two units standing together: a window asks how many men go over
+		// (and for two units it can move the whole company instead).
+		const int32 Reg = SourceId / 10, From = SourceId % 10, ToReg = TargetId / 10, To = TargetId % 10;
+		const int32 Ma = Map->CompanyMen(Reg, From), Mb = Map->CompanyMen(ToReg, To);
+		const int32 Max = FMath::Min(Ma, Map->CompanyCapacity(ToReg) - Mb);
 		if (Max <= 0)
 		{
 			Overlay->ShowToast(Ma <= 0 ? TEXT("Kompagniet har ingen mænd at give") : TEXT("Det andet kompagni er fuldt"));
 		}
 		else
 		{
-			Overlay->OpenTransfer(Reg, From, To, Max, FMath::Clamp((Ma - Mb) / 2, 1, Max));
+			Overlay->OpenTransfer(Reg, From, ToReg, To, Max, FMath::Clamp((Ma - Mb) / 2, 1, Max));
 		}
 		return;
 	}

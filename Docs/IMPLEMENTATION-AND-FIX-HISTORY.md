@@ -1251,6 +1251,11 @@ Før delte `CompanyMen` bataljonens mænd ligeligt, så kompagnierne kunne ikke 
 
 Træk et kompagni hen på et andet i samme bataljon: et vindue (`PaintTransfer`) spørger, hvor mange mand der flyttes. Knapper: -10, -1, +1, +10, ALLE (højst hvad giveren har og modtageren har plads til) og LIGE (jævner de to). FLYT udfører (`TransferCompanyMen`), FORTRYD lukker. `CompanyCapacity` er normeringen pr. kompagni.
 
+### 2026-10-07 - Eskadroner og andre enheder: flyt mænd på tværs
+
+- Rytteriets eskadroner har nu egen styrke (samme vægte som kompagnier). `CompanyMen`/`SubUnitMen`/`FreezeCompanyStrength`/`CompanyCapacity` gælder begge dele; "Udjævn" findes også for eskadroner. Deling og flyt af en eskadron tager den valgte eskadrons faktiske mandskab med.
+- `TransferCompanyMen` flytter mænd mellem to kompagnier/eskadroner også i to forskellige enheder (samme våbenart, samme sted, ikke på march, ikke i slag). Mændene tager træning, moral og forsyninger med (blandes efter mandskab). Vinduet har en knap "FLYT HELE ENHEDEN" mellem to enheder (flytter hele kompagniet/eskadronen som før).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

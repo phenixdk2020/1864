@@ -417,6 +417,7 @@ int32 ACampaign1851Map::MergeRegiments(int32 Keep, int32 Absorb, FString* OutWhy
 	K.Service.Append(A.Service);
 	K.Service.Sort([](const FCampaign1851ServiceEntry& X, const FCampaign1851ServiceEntry& Y) { return X.Day < Y.Day; });
 	// Its companies come over with their captains (and those in a fort stay there, now of this unit).
+	if (A.Captains.Num() == 0) { K.CompanyWeight.Append(A.CompanyWeight); }
 	const int32 Base = K.Captains.Num();
 	for (int32 k = 0; k < A.Captains.Num(); ++k)
 	{
@@ -501,8 +502,10 @@ bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString*
 		{
 			return Fail(TEXT("Regimentet har allerede ti eskadroner"));
 		}
+		FreezeCompanyStrength(From);
+		FreezeCompanyStrength(To);
 		const float Share = 1.f / float(SubUnitCount(From));
-		const int32 Men = FMath::RoundToInt(F.Men * Share), Sick = FMath::RoundToInt(F.Sick * Share), Max = FMath::RoundToInt(F.MaxMen * Share);
+		const int32 Men = CompanyMen(From, Company), Sick = FMath::RoundToInt(F.Sick * Share), Max = FMath::RoundToInt(F.MaxMen * Share);
 		if (Men <= 0 || (!bLastSquadron && F.Men - Men <= 0))
 		{
 			return Fail(TEXT("For få mand til at dele eskadronen"));
@@ -517,6 +520,8 @@ bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString*
 			T.Ammo = MixIn(T.Ammo, F.Ammo);
 		}
 		const int32 SqHorses = FMath::RoundToInt(F.Horses * Share), SqMaxHorses = FMath::RoundToInt(F.MaxHorses * Share);
+		T.CompanyWeight.Add(F.CompanyWeight.IsValidIndex(Company) ? F.CompanyWeight[Company] : float(Men));
+		if (F.CompanyWeight.IsValidIndex(Company)) { F.CompanyWeight.RemoveAt(Company); }
 		T.Men += Men; F.Men -= Men;
 		T.Sick += Sick; F.Sick -= Sick;
 		T.MaxMen += Max; F.MaxMen -= Max;
@@ -720,13 +725,7 @@ int32 ACampaign1851Map::SubUnitMen(int32 RegimentIndex, int32 Index) const
 		return 0;
 	}
 	const FCampaign1851Regiment& R = Regiments[RegimentIndex];
-	if (R.Captains.Num() > 0)
-	{
-		return CompanyMen(RegimentIndex, Index);
-	}
-	// Squadrons: the men shared out whole (the first ones take the remainder), so they add up to the regiment.
-	const int32 Count = FMath::Max(1, SubUnitCount(RegimentIndex));
-	return R.Men / Count + (Index < R.Men % Count ? 1 : 0);
+	return CompanyMen(RegimentIndex, Index);
 }
 
 int32 ACampaign1851Map::SplitOffCompany(int32 RegimentIndex, int32 Company, FString* OutWhy)
@@ -785,10 +784,13 @@ int32 ACampaign1851Map::SplitOffCompany(int32 RegimentIndex, int32 Company, FStr
 		}
 		return SplitRegiment(RegimentIndex, OutWhy, 1);
 	}
-	// Cavalry: one squadron of the regiment.
+	// Cavalry: the chosen squadron of the regiment, with the men it has.
+	const int32 Sq = FMath::Clamp(Company, 0, SubUnitCount(RegimentIndex) - 1);
+	FreezeCompanyStrength(RegimentIndex);
+	const int32 SqMen = CompanyMen(RegimentIndex, Sq);
 	const FCampaign1851Regiment Old = R;
 	const float Share = 1.f / float(SubUnitCount(RegimentIndex));
-	if (FMath::RoundToInt(Old.Men * Share) <= 0 || Old.Men - FMath::RoundToInt(Old.Men * Share) <= 0)
+	if (SqMen <= 0 || Old.Men - SqMen <= 0)
 	{
 		return Fail(TEXT("For få mand til at dele eskadronen"));
 	}
@@ -798,7 +800,8 @@ int32 ACampaign1851Map::SplitOffCompany(int32 RegimentIndex, int32 Company, FStr
 	FCampaign1851Regiment& Rm = Regiments[RegimentIndex];
 	N.bDetached = true;
 	N.Nation = Rm.Nation;
-	N.Men = FMath::RoundToInt(Rm.Men * Share);
+	N.Men = SqMen;
+	N.CompanyWeight = { float(SqMen) };
 	N.Sick = FMath::RoundToInt(Rm.Sick * Share);
 	N.Horses = FMath::RoundToInt(Rm.Horses * Share);
 	N.MaxHorses = FMath::RoundToInt(Rm.MaxHorses * Share);
@@ -816,6 +819,7 @@ int32 ACampaign1851Map::SplitOffCompany(int32 RegimentIndex, int32 Company, FStr
 	N.Command = Rm.Command;
 	N.Town = Rm.Town;
 	N.Km = Rm.Km;
+	if (Rm.CompanyWeight.IsValidIndex(Sq)) { Rm.CompanyWeight.RemoveAt(Sq); }
 	Rm.Men -= N.Men;
 	Rm.Sick -= N.Sick;
 	Rm.Horses -= N.Horses;

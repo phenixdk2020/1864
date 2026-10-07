@@ -47,7 +47,7 @@ public:
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationChief, FormationDissolve, FormationDeputy, FormationStaff,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
-		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit, Block, MinisterInfo, TestBattle, EqualizeUnit, TransferAdj, TransferYes, TransferNo };
+		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit, Block, MinisterInfo, TestBattle, EqualizeUnit, TransferAdj, TransferYes, TransferNo, TransferWhole };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -117,12 +117,13 @@ public:
 	}
 	bool IsConfirmOpen() const { return bConfirmOpen; }
 	/** Moving men from one company to another: the window with the number to move (buttons change it). */
-	void OpenTransfer(int32 Regiment, int32 From, int32 To, int32 Max, int32 Count) { TransferReg = Regiment; TransferFrom = From; TransferTo = To; TransferMax = Max; TransferCount = FMath::Clamp(Count, 1, FMath::Max(Max, 1)); bTransferOpen = true; }
+	void OpenTransfer(int32 Regiment, int32 From, int32 ToRegiment, int32 To, int32 Max, int32 Count) { TransferReg = Regiment; TransferToReg = ToRegiment; TransferFrom = From; TransferTo = To; TransferMax = Max; TransferCount = FMath::Clamp(Count, 1, FMath::Max(Max, 1)); bTransferOpen = true; }
 	bool IsTransferOpen() const { return bTransferOpen; }
 	void CloseTransfer() { bTransferOpen = false; }
 	int32 GetTransferReg() const { return TransferReg; }
 	int32 GetTransferFrom() const { return TransferFrom; }
 	int32 GetTransferTo() const { return TransferTo; }
+	int32 GetTransferToReg() const { return TransferToReg; }
 	int32 GetTransferCount() const { return TransferCount; }
 	void SetTransferCount(int32 N) { TransferCount = FMath::Clamp(N, 1, FMath::Max(TransferMax, 1)); }
 	int32 GetTransferMax() const { return TransferMax; }
@@ -398,6 +399,7 @@ private:
 	void PaintConfirm(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	void PaintTransfer(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;
 	bool bTransferOpen = false;
+	int32 TransferToReg = INDEX_NONE;
 	int32 TransferReg = INDEX_NONE, TransferFrom = 0, TransferTo = 0, TransferCount = 1, TransferMax = 1;
 	FString ConfirmTitle;
 	FString ConfirmText;

@@ -997,9 +997,16 @@ void SCampaign1851Overlay::PaintTransfer(const FGeometry& Geometry, FSlateWindow
 	PaintPanel(Geometry, Out, Layer + 1, Pos, Size);
 	DrawLines(Geometry, Out, Layer + 2, { Pos, Pos + FVector2D(Size.X, 0.f), Pos + Size, Pos + FVector2D(0.f, Size.Y), Pos }, Gold, 1.5f);
 	PaintText(Geometry, Out, Layer + 3, TEXT("Flyt mænd mellem kompagnier"), Pos + FVector2D(30.f, 36.f), Serif(20), Ink, 0.f, false);
-	const int32 A = Map->CompanyMen(TransferReg, TransferFrom), B = Map->CompanyMen(TransferReg, TransferTo), Cap = Map->CompanyCapacity(TransferReg);
-	PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("%d. kompagni:  %d/%d  →  %d"), Map->CompanyNumber(TransferReg, TransferFrom), A, Cap, A - TransferCount), Pos + FVector2D(30.f, 82.f), Serif(15), Ink, 0.f, false);
-	PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("%d. kompagni:  %d/%d  →  %d"), Map->CompanyNumber(TransferReg, TransferTo), B, Cap, B + TransferCount), Pos + FVector2D(30.f, 110.f), Serif(15), Ink, 0.f, false);
+	const int32 A = Map->CompanyMen(TransferReg, TransferFrom), B = Map->CompanyMen(TransferToReg, TransferTo), Cap = Map->CompanyCapacity(TransferToReg), CapFrom = Map->CompanyCapacity(TransferReg);
+	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
+	auto Label = [&](int32 Reg, int32 K)
+	{
+		const bool bCompany = Regs.IsValidIndex(Reg) && Regs[Reg].Captains.Num() > 0;
+		const FString Unit = TransferReg != TransferToReg && Regs.IsValidIndex(Reg) ? FString::Printf(TEXT("%s, "), *Regs[Reg].Name) : FString();
+		return FString::Printf(TEXT("%s%d. %s"), *Unit, bCompany ? Map->CompanyNumber(Reg, K) : K + 1, bCompany ? TEXT("kompagni") : TEXT("eskadron"));
+	};
+	PaintTextFit(Geometry, Out, Layer + 3, FString::Printf(TEXT("%s:  %d/%d  →  %d"), *Label(TransferReg, TransferFrom), A, CapFrom, A - TransferCount), Pos + FVector2D(30.f, 82.f), Serif(15), Ink, Size.X - 60.f);
+	PaintTextFit(Geometry, Out, Layer + 3, FString::Printf(TEXT("%s:  %d/%d  →  %d"), *Label(TransferToReg, TransferTo), B, Cap, B + TransferCount), Pos + FVector2D(30.f, 110.f), Serif(15), Ink, Size.X - 60.f);
 	PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("Flyt  %d  mand  (højst %d)"), TransferCount, TransferMax), Pos + FVector2D(Size.X * 0.5f, 160.f), Serif(22, EFace::Bold), Gold, 0.5f, false);
 	const float BW = 70.f, BY = 190.f;
 	const TCHAR* Labels[] = { TEXT("-10"), TEXT("-1"), TEXT("+1"), TEXT("+10"), TEXT("ALLE"), TEXT("LIGE") };
@@ -1008,8 +1015,12 @@ void SCampaign1851Overlay::PaintTransfer(const FGeometry& Geometry, FSlateWindow
 	{
 		PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(30.f + i * (BW + 12.f), BY), FVector2D(BW, 30.f), Labels[i], EButton::TransferAdj, Modules[i]);
 	}
-	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(30.f, Size.Y - 52.f), FVector2D(260.f, 32.f), TEXT("FLYT"), EButton::TransferYes, 0, true);
-	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 230.f, Size.Y - 52.f), FVector2D(200.f, 32.f), TEXT("FORTRYD"), EButton::TransferNo, 0);
+	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(30.f, Size.Y - 52.f), FVector2D(150.f, 32.f), TEXT("FLYT"), EButton::TransferYes, 0, true);
+	if (TransferReg != TransferToReg)
+	{
+		PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(195.f, Size.Y - 52.f), FVector2D(210.f, 32.f), TEXT("FLYT HELE ENHEDEN"), EButton::TransferWhole, 0);
+	}
+	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 150.f, Size.Y - 52.f), FVector2D(120.f, 32.f), TEXT("FORTRYD"), EButton::TransferNo, 0);
 }
 
 SCampaign1851Overlay::EButton SCampaign1851Overlay::HitButton(const FVector2D& ViewportPixel, int32* OutModule) const
@@ -3825,17 +3836,17 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 				{
 					PaintTextFit(Geometry, Out, Layer + 3, FString::Printf(TEXT("%d. Eskadron"), k + 1), FVector2D(Pos.X + 24.f, Y), Serif(11), Ink, 100.f);
 				}
-				PaintText(Geometry, Out, Layer + 3, R.Captains.Num() > 0 ? FString::Printf(TEXT("%d/%d"), Map->SubUnitMen(u, k), R.MaxMen / FMath::Max(1, R.Captains.Num())) : FString::FromInt(Map->SubUnitMen(u, k)), FVector2D(Pos.X + PoolW - 6.f, Y), Serif(10), Ink, 1.f, false);
+				PaintText(Geometry, Out, Layer + 3, Map->CompanyCapacity(u) > 0 ? FString::Printf(TEXT("%d/%d"), Map->SubUnitMen(u, k), Map->CompanyCapacity(u)) : FString::FromInt(Map->SubUnitMen(u, k)), FVector2D(Pos.X + PoolW - 6.f, Y), Serif(10), Ink, 1.f, false);
 				Y += 22.f;
 			}
-			if (R.Captains.Num() > 1)
+			if (Parts > 1)
 			{
-				PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 14.f, Y - 9.f), FVector2D(PoolW - 14.f, 20.f), TEXT("Udjævn kompagnierne"), EButton::EqualizeUnit, u);
+				PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 14.f, Y - 9.f), FVector2D(PoolW - 14.f, 20.f), R.Captains.Num() > 0 ? TEXT("Udjævn kompagnierne") : TEXT("Udjævn eskadronerne"), EButton::EqualizeUnit, u);
 				Y += 24.f;
 			}
 			Y += 10.f;
 		}
-		PaintTextFit(Geometry, Out, Layer + 3, TEXT("Træk til højre: ny enhed. Træk hen på en anden halvdel: flyt. Træk et kompagni hen på et andet i samme bataljon: vælg hvor mange mand der flyttes. Det sidste samler halvdelene."), FVector2D(Pos.X, Y + 6.f), Serif(10, EFace::Italic), MutedInk, PoolW);
+		PaintTextFit(Geometry, Out, Layer + 3, TEXT("Træk til højre: ny enhed. Træk hen på en anden halvdel: flyt. Træk et kompagni eller en eskadron hen på en anden (også i en anden enhed, der står samme sted): vælg hvor mange mand der flyttes. Det sidste samler halvdelene."), FVector2D(Pos.X, Y + 6.f), Serif(10, EFace::Italic), MutedInk, PoolW);
 	}
 	else
 	{

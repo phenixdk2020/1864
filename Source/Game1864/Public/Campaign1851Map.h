@@ -1229,7 +1229,7 @@ public:
 	void FreezeCompanyStrength(int32 Regiment);
 	/** Two companies of the same battalion share their men evenly (the stronger gives to the weaker). */
 	/** Count men from one company to another of the same battalion (at most what the first has and the second has room for). */
-	bool TransferCompanyMen(int32 Regiment, int32 From, int32 To, int32 Count, FString* OutWhy = nullptr);
+	bool TransferCompanyMen(int32 FromRegiment, int32 From, int32 ToRegiment, int32 To, int32 Count, FString* OutWhy = nullptr);
 	/** The room a company has for men (the battalion's establishment per company). */
 	int32 CompanyCapacity(int32 Regiment) const;
 	bool BalanceCompanies(int32 Regiment, int32 A, int32 B, FString* OutWhy = nullptr);

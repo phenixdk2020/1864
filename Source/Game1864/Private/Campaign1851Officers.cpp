@@ -486,7 +486,7 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 		R.Chief = R.General = INDEX_NONE;
 		R.Captains.Init(INDEX_NONE, R.SavedCompanies >= 0 ? R.SavedCompanies : Campaign1851Army::CompaniesFor(R.Arm));
 		R.CompanyFort.Init(0, R.Captains.Num());
-		if (R.CompanyWeight.Num() != R.Captains.Num()) { R.CompanyWeight.Reset(); }
+		if (R.Captains.Num() > 0 && R.CompanyWeight.Num() != R.Captains.Num()) { R.CompanyWeight.Reset(); }
 	}
 	for (FCampaign1851Command& C : Commands)
 	{
@@ -553,37 +553,43 @@ int32 ACampaign1851Map::CompanyNumber(int32 Regiment, int32 Company) const
 
 int32 ACampaign1851Map::CompanyMen(int32 Regiment, int32 Company) const
 {
-	if (!Regiments.IsValidIndex(Regiment) || Regiments[Regiment].Captains.Num() == 0)
+	if (!Regiments.IsValidIndex(Regiment))
 	{
 		return 0;
 	}
-	// A company in a fort has its own men there; the battalion's men spread over the companies with it.
+	// A company of a battalion or a squadron of a cavalry regiment.
 	const FCampaign1851Regiment& R = Regiments[Regiment];
-	const int32 FortId = R.CompanyFort.IsValidIndex(Company) ? R.CompanyFort[Company] : 0;
-	if (FortId != 0)
+	const int32 Parts = SubUnitCount(Regiment);
+	if (Parts <= 0 || Company < 0 || Company >= Parts)
 	{
-		const int32 FortIdx = FortIndex(FortId);
+		return 0;
+	}
+	auto InFort = [&](int32 k) { return R.Captains.Num() > 0 && R.CompanyFort.IsValidIndex(k) && R.CompanyFort[k] != 0; };
+	// A company in a fort has its own men there; the battalion's men spread over the companies with it.
+	if (InFort(Company))
+	{
+		const int32 FortIdx = FortIndex(R.CompanyFort[Company]);
 		const FCampaign1851FortCompany* C = FortIdx == INDEX_NONE ? nullptr
 			: Forts[FortIdx].Companies.FindByPredicate([&](const FCampaign1851FortCompany& X) { return X.Regiment == Regiment && X.Company == Company; });
 		return C ? C->Men : 0;
 	}
 	int32 With = 0, Index = 0;
-	for (int32 k = 0; k < R.Captains.Num(); ++k)
+	for (int32 k = 0; k < Parts; ++k)
 	{
-		if (!R.CompanyFort.IsValidIndex(k) || R.CompanyFort[k] == 0)
+		if (!InFort(k))
 		{
 			Index += k < Company ? 1 : 0;
 			++With;
 		}
 	}
 	With = FMath::Max(With, 1);
-	// Spread by the companies' weights (equal when none are set): the shares add up to exactly the men there are.
-	const bool bWeights = R.CompanyWeight.Num() == R.Captains.Num();
+	// Spread by the weights (equal when none are set): the shares add up to exactly the men there are.
+	const bool bWeights = R.CompanyWeight.Num() == Parts;
 	auto Weight = [&](int32 k) { return bWeights ? FMath::Max(R.CompanyWeight[k], 0.f) : 1.f; };
 	double All = 0.0, Before = 0.0;
-	for (int32 k = 0; k < R.Captains.Num(); ++k)
+	for (int32 k = 0; k < Parts; ++k)
 	{
-		if (!R.CompanyFort.IsValidIndex(k) || R.CompanyFort[k] == 0)
+		if (!InFort(k))
 		{
 			All += Weight(k);
 			Before += k < Company ? Weight(k) : 0.f;
@@ -599,12 +605,12 @@ int32 ACampaign1851Map::CompanyMen(int32 Regiment, int32 Company) const
 
 void ACampaign1851Map::FreezeCompanyStrength(int32 Regiment)
 {
-	if (!Regiments.IsValidIndex(Regiment) || Regiments[Regiment].Captains.Num() == 0)
+	if (!Regiments.IsValidIndex(Regiment) || SubUnitCount(Regiment) <= 0)
 	{
 		return;
 	}
 	TArray<float> W;
-	for (int32 k = 0; k < Regiments[Regiment].Captains.Num(); ++k)
+	for (int32 k = 0; k < SubUnitCount(Regiment); ++k)
 	{
 		W.Add(float(CompanyMen(Regiment, k)));
 	}
@@ -644,41 +650,84 @@ bool ACampaign1851Map::BalanceCompanies(int32 Regiment, int32 A, int32 B, FStrin
 
 int32 ACampaign1851Map::CompanyCapacity(int32 Regiment) const
 {
-	return Regiments.IsValidIndex(Regiment) && Regiments[Regiment].Captains.Num() > 0 ? FMath::Max(1, Regiments[Regiment].MaxMen / Regiments[Regiment].Captains.Num()) : 0;
+	return Regiments.IsValidIndex(Regiment) && SubUnitCount(Regiment) > 0 ? FMath::Max(1, Regiments[Regiment].MaxMen / SubUnitCount(Regiment)) : 0;
 }
 
-bool ACampaign1851Map::TransferCompanyMen(int32 Regiment, int32 From, int32 To, int32 Count, FString* OutWhy)
+bool ACampaign1851Map::TransferCompanyMen(int32 FromReg, int32 From, int32 ToReg, int32 To, int32 Count, FString* OutWhy)
 {
 	auto Fail = [OutWhy](const FString& Why) { if (OutWhy) { *OutWhy = Why; } return false; };
-	if (!Regiments.IsValidIndex(Regiment) || From == To || From < 0 || To < 0 || From >= Regiments[Regiment].Captains.Num() || To >= Regiments[Regiment].Captains.Num())
+	if (!Regiments.IsValidIndex(FromReg) || !Regiments.IsValidIndex(ToReg) || (FromReg == ToReg && From == To)
+		|| From < 0 || To < 0 || From >= SubUnitCount(FromReg) || To >= SubUnitCount(ToReg))
 	{
 		return Fail(TEXT("Ingen kompagnier"));
 	}
-	FCampaign1851Regiment& R = Regiments[Regiment];
-	if (IsInBattle(Regiment))
+	FCampaign1851Regiment& F = Regiments[FromReg];
+	FCampaign1851Regiment& T = Regiments[ToReg];
+	if (F.Arm != T.Arm || (F.Captains.Num() > 0) != (T.Captains.Num() > 0))
+	{
+		return Fail(TEXT("Mændene kan kun flyttes mellem enheder af samme slags"));
+	}
+	if (IsInBattle(FromReg) || IsInBattle(ToReg))
 	{
 		return Fail(TEXT("Ikke midt i et slag"));
 	}
-	if ((R.CompanyFort.IsValidIndex(From) && R.CompanyFort[From] != 0) || (R.CompanyFort.IsValidIndex(To) && R.CompanyFort[To] != 0))
+	if (FromReg != ToReg)
+	{
+		const bool bTogether = !F.IsMarching() && !T.IsMarching() && ((F.Town != INDEX_NONE && F.Town == T.Town) || FVector2D::Distance(F.Km, T.Km) < 2.0);
+		if (!bTogether)
+		{
+			return Fail(TEXT("De to enheder skal stå samme sted (ikke på march)"));
+		}
+	}
+	auto InFort = [](const FCampaign1851Regiment& R, int32 k) { return R.Captains.Num() > 0 && R.CompanyFort.IsValidIndex(k) && R.CompanyFort[k] != 0; };
+	if (InFort(F, From) || InFort(T, To))
 	{
 		return Fail(TEXT("Et kompagni i en skanse kan ikke få mænd herfra"));
 	}
-	FreezeCompanyStrength(Regiment);
-	const int32 N = FMath::Min3(Count, CompanyMen(Regiment, From), CompanyCapacity(Regiment) - CompanyMen(Regiment, To));
+	FreezeCompanyStrength(FromReg);
+	FreezeCompanyStrength(ToReg);
+	const int32 N = FMath::Min3(Count, CompanyMen(FromReg, From), CompanyCapacity(ToReg) - CompanyMen(ToReg, To));
 	if (N <= 0)
 	{
 		return Fail(TEXT("Ingen mænd at flytte"));
 	}
-	R.CompanyWeight[From] -= float(N);
-	R.CompanyWeight[To] += float(N);
-	if (OutWhy) { *OutWhy = FString::Printf(TEXT("%d mand flyttet: %d. kompagni har nu %d, %d. kompagni har %d"), N, CompanyNumber(Regiment, From), CompanyMen(Regiment, From), CompanyNumber(Regiment, To), CompanyMen(Regiment, To)); }
+	if (FromReg != ToReg)
+	{
+		// The men bring their training, morale and supplies with them: the receiving unit's figures are mixed by men.
+		const float WT = float(FMath::Max(T.Men, 1)), WN = float(N);
+		auto Mix = [WT, WN](float X, float Y) { return (X * WT + Y * WN) / (WT + WN); };
+		T.Experience = Mix(T.Experience, F.Experience);
+		for (int32 s = 0; s < int32(ECampaign1851Skill::Count); ++s) { T.Skills[s] = Mix(T.Skills[s], F.Skills[s]); }
+		for (int32 d = 0; d < 4; ++d) { T.FireDrills[d] = Mix(T.FireDrills[d], F.FireDrills[d]); }
+		T.Morale = Mix(T.Morale, F.Morale);
+		T.Present = Mix(T.Present, F.Present);
+		T.Food = Mix(T.Food, F.Food);
+		T.Fodder = Mix(T.Fodder, F.Fodder);
+		T.Ammo = Mix(T.Ammo, F.Ammo);
+		F.Men -= N;
+		T.Men += N;
+	}
+	F.CompanyWeight[From] -= float(N);
+	T.CompanyWeight[To] += float(N);
+	const bool bCompanies = F.Captains.Num() > 0;
+	if (FromReg != ToReg)
+	{
+		UpdateRegimentPiece(FromReg);
+		UpdateRegimentPiece(ToReg);
+	}
+	if (OutWhy)
+	{
+		*OutWhy = FString::Printf(TEXT("%d mand flyttet: %s har nu %d, %s har %d"), N,
+			*FString::Printf(TEXT("%d. %s"), bCompanies ? CompanyNumber(FromReg, From) : From + 1, bCompanies ? TEXT("kompagni") : TEXT("eskadron")), CompanyMen(FromReg, From),
+			*FString::Printf(TEXT("%d. %s"), bCompanies ? CompanyNumber(ToReg, To) : To + 1, bCompanies ? TEXT("kompagni") : TEXT("eskadron")), CompanyMen(ToReg, To));
+	}
 	return true;
 }
 
 bool ACampaign1851Map::EqualizeCompanies(int32 Regiment, FString* OutWhy)
 {
 	auto Fail = [OutWhy](const FString& Why) { if (OutWhy) { *OutWhy = Why; } return false; };
-	if (!Regiments.IsValidIndex(Regiment) || Regiments[Regiment].Captains.Num() < 2)
+	if (!Regiments.IsValidIndex(Regiment) || SubUnitCount(Regiment) < 2)
 	{
 		return Fail(TEXT("Enheden har ikke flere kompagnier"));
 	}
