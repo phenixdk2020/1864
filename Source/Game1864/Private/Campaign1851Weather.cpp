@@ -8,8 +8,8 @@
 
 namespace
 {
-	const float MeanTemp[12] = { 0.f, 0.f, 2.f, 6.f, 11.f, 15.f, 17.f, 16.f, 13.f, 9.f, 5.f, 2.f };
-	const float WetChance[12] = { 0.45f, 0.4f, 0.4f, 0.38f, 0.38f, 0.4f, 0.45f, 0.48f, 0.5f, 0.55f, 0.58f, 0.52f };
+	const float CampaignWeatherMeanTemp[12] = { 0.f, 0.f, 2.f, 6.f, 11.f, 15.f, 17.f, 16.f, 13.f, 9.f, 5.f, 2.f };
+	const float CampaignWeatherWetChance[12] = { 0.45f, 0.4f, 0.4f, 0.38f, 0.38f, 0.4f, 0.45f, 0.48f, 0.5f, 0.55f, 0.58f, 0.52f };
 
 	float WeatherHash01(uint32 A, uint32 B)
 	{
@@ -36,7 +36,7 @@ float ACampaign1851Map::TemperatureOn(int32 Day) const
 	const int32 M = Date.GetMonth() - 1;
 	// Between the monthly means, so the year warms and cools smoothly.
 	const float Along = (Date.GetDay() - 15) / 30.f;
-	const float Mean = FMath::Lerp(MeanTemp[M], MeanTemp[(M + (Along >= 0.f ? 1 : 11)) % 12], FMath::Abs(Along));
+	const float Mean = FMath::Lerp(CampaignWeatherMeanTemp[M], CampaignWeatherMeanTemp[(M + (Along >= 0.f ? 1 : 11)) % 12], FMath::Abs(Along));
 	// A hard or mild winter by the year (the winter of 1864 was hard); spells of some days; the day itself.
 	const int32 WinterYear = Date.GetMonth() >= 7 ? Date.GetYear() : Date.GetYear() - 1;
 	const bool bWinter = Date.GetMonth() >= 11 || Date.GetMonth() <= 3;
@@ -69,7 +69,7 @@ ECampaign1851Weather ACampaign1851Map::WeatherOn(int32 Day) const
 			return ECampaign1851Weather::Thaw;
 		}
 	}
-	if (WeatherHash01(uint32(Seed) + 29u, uint32(Day)) < WetChance[M])
+	if (WeatherHash01(uint32(Seed) + 29u, uint32(Day)) < CampaignWeatherWetChance[M])
 	{
 		return T < 0.5f ? ECampaign1851Weather::Snow : ECampaign1851Weather::Rain;
 	}
@@ -79,17 +79,14 @@ ECampaign1851Weather ACampaign1851Map::WeatherOn(int32 Day) const
 ECampaign1851Weather ACampaign1851Map::GetWeather() const
 {
 	const int32 Day = FMath::FloorToInt(CampaignDays);
-	if (Day != WeatherCacheDay)
+	if (Day != WeatherCacheDay || Seed != WeatherCacheSeed || StartDate().GetYear() != WeatherCacheStartYear)
 	{
 		WeatherCacheDay = Day;
+		WeatherCacheSeed = Seed;
+		WeatherCacheStartYear = StartDate().GetYear();
 		WeatherCache = WeatherOn(Day);
 		TemperatureCache = TemperatureOn(Day);
-		int32 Cold = 0;
-		for (int32 d = 0; d < 14; ++d)
-		{
-			Cold += TemperatureOn(Day - d) < -2.f ? 1 : 0;
-		}
-		bIceCache = Cold >= 8;
+		bIceCache = IceWinterOn(Day);
 	}
 	return WeatherCache;
 }
@@ -98,6 +95,16 @@ float ACampaign1851Map::GetTemperature() const
 {
 	GetWeather();
 	return TemperatureCache;
+}
+
+bool ACampaign1851Map::IceWinterOn(int32 Day) const
+{
+	int32 Cold = 0;
+	for (int32 d = 0; d < 14; ++d)
+	{
+		Cold += TemperatureOn(Day - d) < -2.f ? 1 : 0;
+	}
+	return Cold >= 8;
 }
 
 bool ACampaign1851Map::IsIceWinter() const
@@ -155,17 +162,18 @@ float ACampaign1851Map::LegPace(const FCampaign1851Leg& Leg) const
 void ACampaign1851Map::DailyWeather()
 {
 	const bool bIce = IsIceWinter();
-	if (bIce && !bIceNoted)
+	// Derive yesterday too: loading or resetting the world must not replay an ice transition.
+	const bool bIceBefore = IceWinterOn(FMath::FloorToInt(CampaignDays) - 1);
+	if (bIce && !bIceBefore)
 	{
 		News.Add(TEXT("Isvinter: Slien og de smalle sunde er frosset til og kan passeres på isen"));
 	}
-	if (!bIce && bIceNoted)
+	if (!bIce && bIceBefore)
 	{
 		News.Add(TEXT("Isen går op i sundene"));
 	}
-	bIceNoted = bIce;
 	if (GetWeather() == ECampaign1851Weather::Storm)
 	{
-		News.Add(TEXT("Storm: færgerne ligger stille"));
+		News.Add(TEXT("Storm: færgerne sejler med stærkt nedsat fart"));
 	}
 }

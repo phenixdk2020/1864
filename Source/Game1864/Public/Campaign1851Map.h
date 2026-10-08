@@ -1667,11 +1667,13 @@ private:
 	int32 CapturedRifles = 0, CapturedGuns = 0, CapturedHorses = 0, CapturedWagons = 0, CapturedColours = 0;
 	// Weather.
 	void DailyWeather();
+	bool IceWinterOn(int32 Day) const;
 	mutable int32 WeatherCacheDay = INT32_MIN;
+	mutable int32 WeatherCacheSeed = 0;
+	mutable int32 WeatherCacheStartYear = 0;
 	mutable ECampaign1851Weather WeatherCache = ECampaign1851Weather::Clear;
 	mutable float TemperatureCache = 0.f;
 	mutable bool bIceCache = false;
-	bool bIceNoted = false;
 	// The navy.
 	void MonthlyNavy();
 	TArray<FCampaign1851Ship> Ships;

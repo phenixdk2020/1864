@@ -1432,6 +1432,14 @@ Forskningsvinduet bruger nu hele bredden. En gren, hvis emner står side om side
 - 1851-starttal, navne, historiske ministeriedatoer og balanceformler er bevaret; fælles fejlrettelser gælder begge scenarier.
 - Uafklaret: historisk 1825-rådgivermodel, månedlig opinion og besættelsesstraf kontra design, fremtidige skibe i startflåden, krigens søstyrkevækst, faste finansbeløb, doktrinrådets våbenhistorik og øvrige nationers manglende gemning af prioriteter. Detaljer i Politics1851.md.
 - Kontrol: kildekode-/diffgennemgang, statiske kontroller og beregningseksempler for scenarier og oprunding; ingen build eller kørsel af spillet. UI og langsigtet balance er ikke afprøvet.
+### 2026-10-08 - Audit af vejr og føre (1825 og 1851)
+
+- Vejrcachen bruger nu dag, seed og startår; nyt spil og indlæsning på samme dag kan ikke beholde den gamle verdens vejr, temperatur eller is.
+- Ismeldinger sammenligner dagens og gårsdagens beregnede isforhold. Den ugemte `bIceNoted` er fjernet; seed, scenarie og kampagnedag er tilstrækkelige til gendannelse.
+- Kalenderen viser isvinter. Stormmeldingen beskriver færgernes eksisterende fartfaktor 0,25. Fil-lokale klimakonstanter har vejrspecifikke navne af hensyn til unity builds.
+- Klima, isgrænser, marchfart og trænets faktor er uændrede i begge scenarier. 1825 bruger sit eget startår; vejrsystemet tilføjer hverken tog eller krig.
+- Kontrol: statisk gennemgang af design, save/load, kalender, march, træn, fjendens vandpassager og slagbestilling; diff- og kildekontrol. Spillet er hverken bygget eller kørt.
+- Uafklaret: lokal istykkelse/tøbrud, temperaturens små spring ved månedsskift, historisk klimakalibrering og kalenderens faktiske layout. Disse balanceændringer er ikke foretaget for at bevare 1851-reglerne.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
