@@ -3196,6 +3196,9 @@ void AStrategyOOBTestScenario::DrawRuntimeQAVisuals() const
             }
         }
 
+        FVector LabelAnchor = Unit->GetVisualCentroid();
+        LabelAnchor.Z = FMath::Max(LabelAnchor.Z, Center.Z + Extent.Z);
+
         if (Unit->bSelected)
         {
             // Selection is a footprint on the ground, never a box around the soldiers.
@@ -3265,7 +3268,7 @@ void AStrategyOOBTestScenario::DrawRuntimeQAVisuals() const
 
         DrawDebugString(
             World,
-            Center + FVector(0.0f, 0.0f, Extent.Z + LabelHeight),
+            LabelAnchor + FVector(0.0f, 0.0f, LabelHeight),
             UnitLabel,
             nullptr,
             Color,

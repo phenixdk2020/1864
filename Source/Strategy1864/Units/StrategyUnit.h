@@ -344,6 +344,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Strategy|Identity")
     void RefreshDebugLabel();
 
+    /** Living figures' centroid, falling back to the actor when no figures are available. */
+    FVector GetVisualCentroid() const;
+
     UFUNCTION(BlueprintCallable, Category="Strategy|QA")
     void RefreshQAPlaceholderVisual();
 

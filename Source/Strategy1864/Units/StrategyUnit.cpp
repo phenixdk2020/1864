@@ -1,4 +1,5 @@
 #include "StrategyUnit.h"
+#include "../Visual/StrategyCavalryVisualComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/TextRenderComponent.h"
@@ -193,6 +194,20 @@ void AStrategyUnit::SetSelected(bool bNewSelected)
 
     bSelected = bNewSelected;
     OnSelectionChanged(bSelected);
+}
+
+FVector AStrategyUnit::GetVisualCentroid() const
+{
+    FVector LocalCentroid;
+    if (const UStrategyInfantryVisualComponent* Visual = FindComponentByClass<UStrategyInfantryVisualComponent>())
+    {
+        if (Visual->GetFigureLocalCentroid(LocalCentroid)) { return GetActorTransform().TransformPosition(LocalCentroid); }
+    }
+    if (const UStrategyCavalryVisualComponent* Visual = FindComponentByClass<UStrategyCavalryVisualComponent>())
+    {
+        if (Visual->GetFigureLocalCentroid(LocalCentroid)) { return GetActorTransform().TransformPosition(LocalCentroid); }
+    }
+    return GetActorLocation();
 }
 
 void AStrategyUnit::RefreshDebugLabel()
@@ -417,6 +432,7 @@ void AStrategyUnit::SetSemanticZoomState(EStrategySemanticZoomState NewState)
             bStrategic;
 
         const bool bHasSoldiers = InfantryVisual && InfantryVisual->GetRenderedSoldierCount() > 0;
+        DebugLabel->SetWorldLocation(GetVisualCentroid() + FVector(0.0f, 0.0f, 220.0f));
         DebugLabel->SetVisibility(bShowLabel && !bHasSoldiers);
         // Always readable: the text turns to face the camera (it was fixed to the unit's own heading, mirrored from behind).
         if (bShowLabel && !bHasSoldiers)
