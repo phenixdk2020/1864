@@ -205,6 +205,9 @@ namespace Campaign1851Resources
 	constexpr double MortarPrice = 900.0;   // bought abroad
 	constexpr double WagonPrice = 60.0;     // bought in the country
 	const FUnitType& Type(int32 T);
+	int32 RaiseParts(int32 T, int32 Size);
+	FUnitType SizedType(int32 T, int32 Size);
+	FString RaiseSizeName(int32 T, int32 Size);
 }
 
 /** The battlefield generator (Campaign1851Battlefield.cpp). */
@@ -761,10 +764,10 @@ public:
 	void RawFlow(float OutMade[int32(ECampaign1851Raw::Count)], float OutUsed[int32(ECampaign1851Raw::Count)]) const;
 	bool RaiseTownOk(int32 Town) const;
 	TArray<int32> RaiseTowns() const;
-	FString UnitBlockReason(int32 Type, int32 Town) const;
-	double UnitCost(int32 Type) const;
+	FString UnitBlockReason(int32 Type, int32 Town, int32 Size = 2) const;
+	double UnitCost(int32 Type, int32 Size = 2) const;
 	/** Raises a unit of a type at a garrison town, under a general command, with a training programme. */
-	int32 RaiseUnit(int32 Type, int32 Town, int32 Command, ECampaign1851Program Program, FString* OutReason = nullptr);
+	int32 RaiseUnit(int32 Type, int32 Town, int32 Command, ECampaign1851Program Program, FString* OutReason = nullptr, int32 Size = 2);
 	TArray<FString> SaveResources() const;
 	void RestoreResources(const TArray<FString>& Lines);
 

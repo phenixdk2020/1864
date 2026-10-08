@@ -1471,6 +1471,14 @@ Forskningsvinduet bruger nu hele bredden. En gren, hvis emner står side om side
 ### 2026-10-08 – Codex-arbejde samlet og bygget
 Tolv Codex-opgaver (hver i sin worktree) er gennemgået og merget: civile bygninger 1825, etiketposition i slaget, fjern stab i delingsbilledet, batteri-sektioner, indkaldelse og træning med tidlig indsættelse, GPU-kvalitetsvalg, kortlægning af Unity-AI (Docs/Unity-AI-Mapping.md) samt gennemgang af sygdom, politik, gæld, vejr og rekognoscering. Ét navnesammenstød rettet (Horses skyggede for et medlem i FreezeCompanyStrength). Bygget og kontrolleret med skærmbilleder af kamporden, forskning og et testslag; ikke afprøvet i fuldt spil.
 
+### 2026-10-08 ? Valg af størrelse ved indkaldelse
+
+- Ny størrelsesvælger: 1/2/4 kompagnier eller eskadroner; fodartilleri 2/4/8 kanoner; ridende batteri og morterer 2/4/6 skyts med bevaret fuld normering.
+- Fælles beregning af rekrutter, geværer, uniformer, læder, heste, skyts, vogne og pris. Manglende heste medregnes i pris og betalingsevne; manglende geværer kan kun importeres med adgang til import.
+- Delvise enheder får passende navne, kompagnital og delingsvægte. Nyindkaldte enheder af samme type og garnison kan samles op til fuld normering efter indsættelse. Underhold skaleres efter normeret styrke, inklusive delte enheder.
+- Grunduddannelse beholder tiden pr. soldat. Træningsliste og tidlig indsættelse genbruger eksisterende kode. Styrke, kompagnital og delingsvægte gemmes allerede; ingen nye gemmefelter eller formatændring.
+- Statisk kontrol og git diff --check; spillet er hverken bygget eller startet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

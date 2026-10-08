@@ -93,11 +93,11 @@ namespace
 			return true;
 		case EB::UnitRaise:
 		{
-			const Campaign1851Resources::FUnitType& T = Campaign1851Resources::Type(Overlay.RaiseType);
+			const Campaign1851Resources::FUnitType T = Campaign1851Resources::SizedType(Overlay.RaiseType, Overlay.RaiseSize);
 			Title = FString::Printf(TEXT("Opret %s?"), T.Name);
-			Text = FString::Printf(TEXT("%d mand%s%s indkaldes og udrustes (%d geværer, %d uniformer). Det koster omkring %s; geværer der mangler på lageret købes i udlandet oveni. Træningsprogram: %s."),
+			Text = FString::Printf(TEXT("%d mand%s%s indkaldes og udrustes (%d geværer, %d uniformer). Det koster omkring %s inklusive indkøb af manglende geværer, heste og vogne. Træningsprogram: %s."),
 				T.Men, T.Guns > 0 ? *FString::Printf(TEXT(", %d kanoner"), T.Guns) : TEXT(""), T.Horses > 0 ? *FString::Printf(TEXT(", %d heste"), T.Horses) : TEXT(""),
-				T.Rifles, T.Uniforms, *PriceText(Map.UnitCost(Overlay.RaiseType)), Campaign1851Army::ProgramName(ECampaign1851Program(Overlay.RaiseProgram)));
+				T.Rifles, T.Uniforms, *PriceText(Map.UnitCost(Overlay.RaiseType, Overlay.RaiseSize)), Campaign1851Army::ProgramName(ECampaign1851Program(Overlay.RaiseProgram)));
 			return true;
 		}
 		case EB::ResearchStart:
@@ -1886,7 +1886,12 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Overlay->ShowToast(Why);
 			}
 		}
-		else if (Button == SCampaign1851Overlay::EButton::UnitType)
+		if (Button == SCampaign1851Overlay::EButton::UnitSize)
+		{
+			Overlay->RaiseSize = (Overlay->RaiseSize + Module + 3) % 3;
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
+		if (Button == SCampaign1851Overlay::EButton::UnitType)
 		{
 			Overlay->RaiseType = Module;
 		}
@@ -1910,7 +1915,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			const int32 NC = Map->GetCommands().Num();
 			const int32 Command = NC > 0 ? ((Overlay->RaiseCommand % NC) + NC) % NC : INDEX_NONE;
 			FString Why;
-			const int32 New = Map->RaiseUnit(Overlay->RaiseType, Town, Command, ECampaign1851Program(Overlay->RaiseProgram), &Why);
+			const int32 New = Map->RaiseUnit(Overlay->RaiseType, Town, Command, ECampaign1851Program(Overlay->RaiseProgram), &Why, Overlay->RaiseSize);
 			Overlay->ShowToast(New != INDEX_NONE ? FString::Printf(TEXT("%s er oprettet"), *Map->GetRegiments()[New].Name) : Why);
 		}
 		else if (Button == SCampaign1851Overlay::EButton::OpenBattlefield)

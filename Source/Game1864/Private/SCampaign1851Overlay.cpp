@@ -3620,7 +3620,7 @@ void SCampaign1851Overlay::PaintMateriel(const FGeometry& Geometry, FSlateWindow
 		PaintButton(Geometry, Out, Layer + 1, FVector2D(RX + t * (TW + 6.f), RY), FVector2D(TW, 28.f), Short[t], EButton::UnitType, t, RaiseType == t);
 	}
 	RY += 40.f;
-	const Campaign1851Resources::FUnitType& Preview = Campaign1851Resources::Type(RaiseType);
+	const Campaign1851Resources::FUnitType Preview = Campaign1851Resources::SizedType(RaiseType, RaiseSize);
 	const int32 PictureArms[] = { 0, 2, 3, 4, 5, 4 };
 	const int32 PictureArm = PictureArms[FMath::Clamp(RaiseType, 0, 5)];
 	const FVector2D Picture(RX, RY);
@@ -3653,7 +3653,7 @@ void SCampaign1851Overlay::PaintMateriel(const FGeometry& Geometry, FSlateWindow
 	PreviewUnit.Program = PreviewProgram;
 	PaintTextFit(Geometry, Out, Layer + 1, Preview.Name, Picture + FVector2D(90.f, 12.f), Serif(16), Ink, RW - 96.f);
 	PaintTextFit(Geometry, Out, Layer + 1, FString::Printf(TEXT("%d mand  |  %d kanoner  |  %d morterer  |  %d heste"), Preview.Men, Preview.Guns, Preview.Mortars, Preview.Horses), Picture + FVector2D(90.f, 36.f), Serif(12), Ink, RW - 96.f);
-	PaintTextFit(Geometry, Out, Layer + 1, FString::Printf(TEXT("%s rd.  |  Grunduddannelse: %s"), *Thousands(int32(Map->UnitCost(RaiseType))), PreviewUnit.RaisingRate() > 0.f ? *FString::Printf(TEXT("%d dage"), PreviewUnit.RaisingDaysLeft()) : TEXT("pause (hvile)")), Picture + FVector2D(90.f, 60.f), Serif(12), Gold, RW - 96.f);
+	PaintTextFit(Geometry, Out, Layer + 1, FString::Printf(TEXT("%s rd.  |  Grunduddannelse: %s"), *Thousands(int32(Map->UnitCost(RaiseType, RaiseSize))), PreviewUnit.RaisingRate() > 0.f ? *FString::Printf(TEXT("%d dage"), PreviewUnit.RaisingDaysLeft()) : TEXT("pause (hvile)")), Picture + FVector2D(90.f, 60.f), Serif(12), Gold, RW - 96.f);
 	PaintTextFit(Geometry, Out, Layer + 1, Roles[FMath::Clamp(RaiseType, 0, 5)], Picture + FVector2D(90.f, 84.f), Serif(12, EFace::Italic), MutedInk, RW - 96.f);
 	RY += 124.f;
 	const TArray<int32> Towns = Map->RaiseTowns();
@@ -3668,12 +3668,13 @@ void SCampaign1851Overlay::PaintMateriel(const FGeometry& Geometry, FSlateWindow
 		PaintButton(Geometry, Out, Layer + 1, FVector2D(RX + RW - 34.f, RY - 12.f), FVector2D(34.f, 24.f), TEXT(">"), Action, 1);
 		RY += 36.f;
 	};
+	Chooser(TEXT("Størrelse"), FString::Printf(TEXT("%s | %d mand | %d heste | %d skyts"), *Campaign1851Resources::RaiseSizeName(RaiseType, RaiseSize), Preview.Men, Preview.Horses, Preview.Guns + Preview.Mortars), EButton::UnitSize);
 	Chooser(TEXT("Garnison"), Town != INDEX_NONE ? Map->GetCities()[Town].Name : FString(TEXT("ingen by med kaserne")), EButton::UnitTown);
 	Chooser(TEXT("Hører under"), Command != INDEX_NONE ? Commands[Command].Name : FString(TEXT("-")), EButton::UnitCommand);
 	Chooser(TEXT("Øvelser"), Campaign1851Army::ProgramName(ECampaign1851Program(FMath::Clamp(RaiseProgram, 0, int32(ECampaign1851Program::Count) - 1))), EButton::UnitProgram);
 	RY += 8.f;
 	// What it takes, and what there is.
-	const Campaign1851Resources::FUnitType& T = Campaign1851Resources::Type(RaiseType);
+	const Campaign1851Resources::FUnitType T = Campaign1851Resources::SizedType(RaiseType, RaiseSize);
 	const int32 Amt = Town != INDEX_NONE ? Map->AmtIndexOfTown(Town) : INDEX_NONE;
 	const float Reserve = Map->GetAmtManpower().IsValidIndex(Amt) ? Map->GetAmtManpower()[Amt] : 0.f;
 	PaintText(Geometry, Out, Layer + 1, TEXT("D E T   K R Æ V E R"), FVector2D(RX, RY), Serif(11), Gold, 0.f, false);
@@ -3695,9 +3696,9 @@ void SCampaign1851Overlay::PaintMateriel(const FGeometry& Geometry, FSlateWindow
 	Need(TEXT("Uniformer (klæde)"), T.Uniforms, Map->GetRaw(ECampaign1851Raw::Cloth), TEXT(""));
 	Need(TEXT("Remtøj og sadler (læder)"), T.Leather, Map->GetRaw(ECampaign1851Raw::Leather), TEXT(""));
 	Need(TEXT("Heste"), T.Horses, Map->GetHorseStock(), TEXT("det manglende købes i amterne"));
-	Need(TEXT("Penge (rd.)"), float(Map->UnitCost(RaiseType)), float(Map->GetTreasury()), TEXT("udrustning og sold"));
+	Need(TEXT("Penge (rd.)"), float(Map->UnitCost(RaiseType, RaiseSize)), float(Map->GetTreasury()), TEXT("udrustning og sold"));
 	RY += 14.f;
-	const FString Why = Map->UnitBlockReason(RaiseType, Town);
+	const FString Why = Map->UnitBlockReason(RaiseType, Town, RaiseSize);
 	PaintButton(Geometry, Out, Layer + 1, FVector2D(RX, RY), FVector2D(RW, 34.f), Why.IsEmpty() ? FString::Printf(TEXT("OPRET %s"), *FString(T.Name).ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"))) : Why,
 		EButton::UnitRaise, 0, false, !Why.IsEmpty());
 }
