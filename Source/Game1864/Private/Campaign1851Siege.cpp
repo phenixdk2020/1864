@@ -7,6 +7,7 @@
 // its strength has grown enough, or after five weeks.
 
 #include "Campaign1851Map.h"
+#include "Misc/DefaultValueHelper.h"
 
 namespace
 {
@@ -215,8 +216,88 @@ void ACampaign1851Map::DailySieges()
 			C.bSieging = false;
 			C.bEngaged = true;
 			News.Add(FString::Printf(TEXT("%s stormer stillingen ved %s efter %d dages belejring"), *C.Name, *Cities[C.SiegeTown].Name, Days));
+			C.Km = At;
+			C.Town = C.SiegeTown;
 			C.SiegeTown = INDEX_NONE;
 			CreateBattle(k);
 		}
+	}
+}
+
+// A reproducible new-campaign fixture; defenders and works are the scenario's existing ones.
+bool ACampaign1851Map::StartSiegeTest(const FString& Request)
+{
+	FString SiegeTownName = Request, SiegeDaysText;
+	int32 SiegeTestDays = 45;
+	if (Request.Split(TEXT(":"), &SiegeTownName, &SiegeDaysText)
+		&& (!FDefaultValueHelper::ParseInt(SiegeDaysText, SiegeTestDays) || SiegeTestDays < 1 || SiegeTestDays > 365))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|siege|afvist: dage skal være 1..365"));
+		return false;
+	}
+	const int32 SiegeTarget = FindCity(SiegeTownName);
+	if (!Cities.IsValidIndex(SiegeTarget) || Cities[SiegeTarget].bForeign || !Cities[SiegeTarget].Occupier.IsEmpty()
+		|| (!HasFortsNear(SiegeTarget) && EnemyEstimateOfDefence(SiegeTarget) <= 1.f))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|siege|afvist: %s skal være en ubesat egen by med garnison eller færdig skanse"), *SiegeTownName);
+		return false;
+	}
+	if (!bAtWar) { ForceWar(); }
+	bAtWar = true;
+	const int32 SiegeBefore = EnemyCorps.Num();
+	SpawnCorps(TEXT("Belejringstestkorps"), TEXT("PR"), 0.01f, Cities[SiegeTarget].Name, { Cities[SiegeTarget].Name }, 0.f);
+	if (EnemyCorps.Num() == SiegeBefore) { return false; }
+	FCampaign1851EnemyCorps& SiegeCorps = EnemyCorps.Last();
+	SiegeCorps.Km = TownKm(SiegeTarget) + FVector2D(0.0, -8.9);
+	SiegeCorps.Town = INDEX_NONE;
+	SiegeCorps.SiegeTown = SiegeTarget;
+	SiegeCorps.Guns = 0;
+	// Comparable strength forces the regular siege-start path, rather than an immediate storm.
+	SiegeCorps.Men = FMath::Max(1, FMath::RoundToInt(EnemyEstimateOfDefence(SiegeTarget) / 1.3f));
+	SiegeCorps.StartMen = SiegeCorps.Men;
+	SiegeTestTown = SiegeTarget;
+	SiegeTestCorpsId = SiegeCorps.Id;
+	SiegeTestEndDay = CampaignDays + SiegeTestDays;
+	SetSpeed(NumSpeeds() - 1);
+	LogSiegeTest(TEXT("opstilling"));
+	return true;
+}
+
+void ACampaign1851Map::LogSiegeTest(const TCHAR* Phase)
+{
+	if (!Cities.IsValidIndex(SiegeTestTown)) { return; }
+	const FCampaign1851EnemyCorps* SiegeCorps = EnemyCorps.FindByPredicate([this](const FCampaign1851EnemyCorps& SiegeEntry) { return SiegeEntry.Id == SiegeTestCorpsId; });
+	int32 SiegeGarrison = 0, SiegeFortMen = 0, SiegeFortGuns = 0;
+	float SiegeFood = 0.f, SiegeAmmo = 0.f;
+	FString SiegeWorks;
+	for (const FCampaign1851Regiment& SiegeRegiment : Regiments)
+	{
+		if (FVector2D::Distance(SiegeRegiment.Km, TownKm(SiegeTestTown)) < 10.0)
+		{
+			SiegeGarrison += SiegeRegiment.PresentMen();
+			SiegeFood += SiegeRegiment.Food;
+			SiegeAmmo += SiegeRegiment.Ammo;
+		}
+	}
+	for (const FCampaign1851Fort& SiegeFort : Forts)
+	{
+		if (SiegeFort.bBuilt && FVector2D::Distance(SiegeFort.Km, TownKm(SiegeTestTown)) < 10.0)
+		{
+			SiegeFortMen += SiegeFort.Garrison;
+			SiegeFortGuns += SiegeFort.Guns;
+			SiegeWorks += FString::Printf(TEXT("%d:forsvar=%d,proviant=%.1f,skud=%.1f;"), SiegeFort.Id, SiegeFort.Defence, SiegeFort.FoodDays, SiegeFort.RoundsPerGun);
+		}
+	}
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|siege|%s|dag=%.0f|korps=%d:%s|mand=%d|by=%s|garnison=%d|skansemænd=%d|kanoner=%d|belejrer=%d|slag=%d|forløb=%.0f/35|regimentsproviant-sum=%.1f|ammo-sum=%.2f|skanser=%s|faldet=%d|besættelse=%s|prestige=ikke implementeret|stemning=%.1f"),
+		Phase, CampaignDays, SiegeTestCorpsId, SiegeCorps ? *SiegeCorps->Name : TEXT("opløst"), SiegeCorps ? SiegeCorps->Men : 0,
+		*Cities[SiegeTestTown].Name, SiegeGarrison, SiegeFortMen, SiegeFortGuns,
+		SiegeCorps && SiegeCorps->bSieging ? 1 : 0, SiegeCorps && SiegeCorps->bEngaged ? 1 : 0,
+		SiegeCorps ? CampaignDays - SiegeCorps->SiegeStart : 0.0, SiegeFood, SiegeAmmo, *SiegeWorks,
+		Cities[SiegeTestTown].Occupier.IsEmpty() ? 0 : 1, *Cities[SiegeTestTown].Occupier, Mood);
+	if (CampaignDays >= SiegeTestEndDay)
+	{
+		SetSpeed(0);
+		SiegeTestTown = INDEX_NONE;
+		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|siege|test afsluttet; kampagnen er sat på pause"));
 	}
 }

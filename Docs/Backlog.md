@@ -26,7 +26,7 @@ Status pr. v00.00.50: alle 20 opgaver er lavet. Detaljerne står i de nævnte do
 | 20 | Balance og slutning | Endgame1851.md |
 
 ## Ikke testet endnu
-- En belejring er ikke fremprovokeret i en test.
+- En belejring er ikke fremprovokeret i en kørt test. Testflag og kørselsvejledning er tilføjet 2026-10-08: [Siege-Test.md](Siege-Test.md); afventer build og afprøvning.
 - Søtransport af tropper er endnu ikke lavet.
 - Testbeløbet i statskassen (5.000.000 rd.) skal ned på 150.000 før rigtigt spil.
 

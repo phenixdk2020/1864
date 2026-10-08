@@ -382,7 +382,10 @@ void ACampaign1851PlayerController::TryInit()
 	bInitialised = true;
 
 	FString BuildCity;
-	const bool bTestStart = FParse::Value(FCommandLine::Get(), TEXT("CampaignBuild="), BuildCity, false);
+	bool bSiegeTestNewCampaign = false;
+	FString SiegeTestRequest;
+	const bool bSiegeTestStart = FParse::Value(FCommandLine::Get(), TEXT("CampaignTestSiege="), SiegeTestRequest, false);
+	const bool bTestStart = FParse::Value(FCommandLine::Get(), TEXT("CampaignBuild="), BuildCity, false) || bSiegeTestStart;
 	// Back from a 3D battle: the campaign as it was left (whatever the command line says); the result is read in.
 	const FString ReturnFlag = FPaths::ProjectSavedDir() / TEXT("Battle/ReturnToCampaign.flag");
 	const bool bBackFromBattle = IFileManager::Get().FileExists(*ReturnFlag) && UGameplayStatics::DoesSaveGameExist(TEXT("Autosave"), 0);
@@ -421,10 +424,11 @@ void ACampaign1851PlayerController::TryInit()
 		Overlay->ShowStartMenu();
 		return;
 	}
-	if (bTestStart)
+	if (bTestStart && (!bSiegeTestStart || !bCampaignStarted))
 	{
 		bCampaignStarted = true;
-		CampaignBuild(BuildCity);
+		if (bSiegeTestStart) { CampaignNewGame(); bSiegeTestNewCampaign = true; }
+		else { CampaignBuild(BuildCity); }
 	}
 	// Test starts: -CampaignSpeed=0..3, -CampaignDate=1852-01-20 (e.g. to see the winter).
 	int32 StartSpeed = 0;
@@ -732,6 +736,10 @@ void ACampaign1851PlayerController::TryInit()
 	}
 	// -CampaignAutoBattles resolves each battle at once (test).
 	bAutoBattles = FParse::Param(FCommandLine::Get(), TEXT("CampaignAutoBattles"));
+	if (bSiegeTestNewCampaign && Map->StartSiegeTest(SiegeTestRequest))
+	{
+		bAutoBattles = true;
+	}
 	// -CampaignMobilise calls the army in at once (test).
 	if (!bResumedFromBattle && FParse::Param(FCommandLine::Get(), TEXT("CampaignMobilise")))
 	{

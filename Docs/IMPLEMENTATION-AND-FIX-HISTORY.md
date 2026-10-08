@@ -1,4 +1,4 @@
-﻿# PROJECT 1864 — Implementation & Fix History
+# PROJECT 1864 — Implementation & Fix History
 
 > **Dokumentet vedligeholdes nu her i Game1864-projektet** (`1864-Campaign/Docs`). Slaget og kampagnen er samlet i ét projekt siden 1. oktober 2026.
 > - Afsnit 1–8 er Unity-prototypens historik. Den er uændret fra `Strategy/docs/IMPLEMENTATION-AND-FIX-HISTORY.md`.
@@ -1685,6 +1685,13 @@ Codex' to opgaver er merget: flaget følger de tegnede mænd (ikke den simulered
 
 ### 2026-10-08 – Ny HUD, annullering ved stop-og-skyd, formationskasse, stabens afstand
 Codex' to opgaver er merget: en ny bundbjælke i slaget med fem paneler (ENHED, LEDELSE & ILD, ORDRER, FORMATION, UNDERLAGTE) og reglen om, at en enhed der stopper og skyder inden for sin skydegrænse får gå-ordren annulleret (destinationskassen og vejlinjen forsvinder, enheden holder til ny ordre); destinationskassen viser nu kampformationens form og ikke kolonnen. Stabens afstand bag formationen er sat til 60 m (bataljon), 120 m (regiment), 250 m (brigade) og 400 m (division) i AI/StrategyHQFollowComponent.cpp. Efter dette er der ikke bygget eller testet (aftalt med spilleren).
+
+### 2026-10-08 — Kampagnetest af belejring
+
+- Tilføjet `-CampaignTestSiege=<by>[:<dage>]`: ny kampagne, eksisterende krigstilstand, korps via `SpawnCorps`, højeste hastighed og automatisk slagafgørelse. Daglig `CAMPAIGN-1851|siege|`-log viser forsvar, forsyninger, forløb, besættelse og stemning; prestige markeres som ikke implementeret.
+- Rettet stormens slagposition/rækkevidde, for tidlig besættelse af skansebyer, afstand ved belejringsstart, gammel belejringshensigt efter nyt mål, manuel undsætning og marchtilstand ved indlæsning af aktiv belejring. Gemmeformatet er uændret.
+- `Docs/Siege-Test.md` dokumenterer præcis testkommando, forventet log og åbne spørgsmål om 120 dage, ophævelse, forsyning og garnisonstab. Backlog står fortsat som ikke afprøvet.
+- Kontrolleret statisk og med `git diff --check`; ingen build, spilstart eller commit.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

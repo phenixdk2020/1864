@@ -101,6 +101,9 @@ bool ACampaign1851Map::EventFact(const FString& Key, float& Out) const
 
 void ACampaign1851Map::ResetWar()
 {
+	SiegeTestTown = INDEX_NONE;
+	SiegeTestCorpsId = 0;
+	SiegeTestEndDay = -1.0;
 	Tension = ActiveScenario().StartTension;   // 1851: after the war of 1848-50 an uneasy peace; 1825: a quiet one
 	bAtWar = false;
 	EventsFired.Reset();
@@ -382,6 +385,7 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		DailyHealth();
 		DailyOfficers();
 		DailySieges();
+		LogSiegeTest(TEXT("døgn"));
 		DailyBridges();
 		EnemyReinforcements();
 	}
@@ -401,6 +405,9 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		// Come before the position it means to besiege: it digs in there.
 		if (bAtWar && Cities.IsValidIndex(C.SiegeTown) && !C.bSieging && FVector2D::Distance(C.Km, TownKm(C.SiegeTown)) < 9.0)
 		{
+			const FVector2D SiegeCentre = TownKm(C.SiegeTown);
+			const FVector2D SiegeOffset = C.Km - SiegeCentre;
+			C.Km = SiegeCentre + (SiegeOffset.SizeSquared() > 0.01 ? SiegeOffset / SiegeOffset.Size() : FVector2D(0.0, -1.0)) * 8.9;
 			C.bSieging = true;
 			C.SiegeStart = CampaignDays;
 			C.Route.Reset();
@@ -516,7 +523,7 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 			const int32 Goal = C.Objectives.Num() > 0 ? C.Objectives[0] : INDEX_NONE;
 			C.Route.Reset();
 			C.Town = Goal;
-			const bool bDefended = Cities.IsValidIndex(Goal) && Regiments.ContainsByPredicate([&](const FCampaign1851Regiment& R) { return R.Men > 0 && FVector2D::Distance(R.Km, TownKm(Goal)) < 5.0; });
+			const bool bDefended = Cities.IsValidIndex(Goal) && (HasFortsNear(Goal) || C.SiegeTown == Goal || Regiments.ContainsByPredicate([&](const FCampaign1851Regiment& R) { return R.Men > 0 && FVector2D::Distance(R.Km, TownKm(Goal)) < 5.0; }));
 			if (Cities.IsValidIndex(Goal) && bDefended)
 			{
 				C.Km = TownKm(Goal);   // the defenders are met at the town: contact next day
@@ -663,6 +670,7 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 			C.SiegeTown = FindCity(P[2]);
 			C.bSieging = P[3] == TEXT("1");
 			C.SiegeStart = FCString::Atod(*P[4]);
+			if (C.bSieging) { C.Route.Reset(); C.Town = INDEX_NONE; }
 		}
 		else if (P.Num() == 2 && P[0] == TEXT("blocked"))
 		{ EventsBlocked.AddUnique(P[1]); }
