@@ -1697,6 +1697,12 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Rettet dialogklik, instansbaseret auto-klik-parsning, importkrav ved våbenopgradering, feltofficerens world-guards/logtimer/nævner, genstart af kolonnespor, HQ-fallback og kampagnevåbnets ladningsmetode i slaget.
 - Højeste resterende fund: gamle 1825-gemninger mister oprindelige regimenter ved legacy-migrering; kavaleritrussel har dyre indlejrede world-scanninger. Øvrige fund rangeret i rapporten.
 - Statisk kontrol og git diff --check; ingen build, spilstart eller commit. Ingen nye savefelter eller scenariedata.
+### 2026-10-08 — Dokumentation af enhedsregler, testflag og aktuel backlog
+
+- Enhedsadfaerd1864.md opdateret efter kode og historik: march/ild, annulleret rute, ordonnanser, stabsafstande, karré/rytteri, sving, vejpunkter, grafik og tidsknapper. Visuel kontrol, logobservation, build og endnu uafprøvet adfærd er skilt ad.
+- Ny TestFlags.md dækker alle Campaign-/Strategy1864-parserflag, inklusive ryttervisningens hjælpefunktion, syntaks, begrænsninger, eksisterende launchere og midlertidige startmenuknapper. CampaignNew er ikke længere parserunderstøttet; startmenuens tidlige retur kan hindre ældre launcher-testopsætninger.
+- Backlog.md bevarer sektionerne og opdaterer udført arbejde, manglende build/kamptest og resterende søtransport, Sverige-Norge-kort, belejring, grafik, flag og HQ. AGENTS.md suppleret med API-headerkontrol, klik-kæde, spiltest-/commitregler og aktuelle launcherfilnavne.
+- Validering: statisk kilde-/historikgennemgang, komplethedskontrol af flag og git diff --check. Kun dokumentation ændret; ingen build, spilstart eller commit.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

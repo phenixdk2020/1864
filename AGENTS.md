@@ -48,13 +48,18 @@ By-ikoner på campaign-kortet følger "Isometric Miniature Town"-konceptet: små
 ## Regler for agenter
 
 - Svar og skriv brugerrettet tekst på **dansk**.
+- **Unreal 5.8 API:** kontrollér altid nye/ændrede API-kald og includes mod headerne i `I:/Spil/Epic Games/UE_5.8/Engine/Source` som statisk kompileringskontrol. Antag ikke API fra andre versioner: `FBox2D.bIsValid`, JSON-nøgler `UE::FSharedString`; `Misc/LexFromString.h` findes ikke. Dette giver ikke tilladelse til at bygge.
+- **Klik-kæden:** indsæt ikke en selvstændig `if` midt i en eksisterende `else if`-kæde; slutgrenen kan ellers rydde valget. Eksisterende kædegrene bevares som `else if`; nye selvstændige handlere placeres uden for kæden og konsumerer klikket med `Button = EButton::Block`.
+- **Spiltests:** kør ikke launchere, automatiske skærmbilledtests eller andre tests, der starter spil/editor, uden udtrykkelig anmodning. Statisk kontrol er tilladt.
+- **Commit:** brugerens anmodning om ingen commit går forud. Ellers gælder Co-Authored-By-konventionen nedenfor med agentens navn og noreply-adresse. Ved sandboxbegrænsning efterlades opgavens ændringer uden commit og rapporteres i svaret.
 - **Unity builds:** filer samles i store oversættelsesenheder, så lokale navne må ikke støde sammen (et lokalt navn kan skygge for et klassemedlem). Brug præfikser og undgå generiske navne som `Owner`, `Horses`, `Buttons`.
 - Nye klik-handlere i `Campaign1851PlayerController.cpp` skal være selvstændige `if`-blokke, der sætter `Button = EButton::Block`, ellers falder klikket igennem til kortet.
 - Gem og indlæs: nye felter skal gemmes i `UCampaign1851SaveGame` (hæv versionen, hvis formatet ændres).
 - **Byg ikke og start ikke spillet**, medmindre du er bedt om det. Brugerens eget spil kan køre og holde `UnrealEditor-Game1864.dll` låst. Luk aldrig brugerens spil eller editor.
 - Commit med linjen `Co-Authored-By: <agent> <noreply@...>`. Hvis sandboxen ikke kan committe, så lad ændringerne ligge rene i arbejdstræet og skriv det i svaret.
 - Statskassens testbeløb (5.000.000 rd.) skal ned på 150.000 før rigtigt spil.
-- Test: kampagnen kan tage skærmbilleder af vinduer med `-CampaignUiShots=sek:kommando;kommando,...`; slag testes med `Start-Test-1-Kompagni-mod-Kompagni.bat` og `Start-Test-2-Bataljon-mod-Kompagni.bat` samt flagene `-Strategy1864Shots`, `-Strategy1864HoldReserve`, `-Strategy1864SkirmishDanes=N`.
+- Test: kampagnen kan tage skærmbilleder af vinduer med `-CampaignUiShots=sek:kommando;kommando,...`; slag testes med `Start-Test-1-Kompagni-mod-Kompagni.bat`, `Start-Test-2-Bataillon-mod-Kompagni.bat` og `Start-Test-3-Rytteri.bat` samt flagene `-Strategy1864Shots`, `-Strategy1864HoldReserve`, `-Strategy1864SkirmishDanes=N`. Se `Docs/TestFlags.md` for fuld flagliste og startbegrænsninger.
+- Øvrige launchere: `Start-3D-Skirmish-Test.bat`, `Start-Livgarden-Svensk-Test.bat`, `Start-Slagmark-Generer.bat`, `Start-3D-Slag-Test.bat`, `Start-Kampagne.bat`, `Start-Kampagne-NytSpil.bat`, `Start-Kampagne-Test-Felthaer.bat`. Ældre launcherkommentarer og `CampaignNew` svarer ikke længere til startmenuens kode; se TestFlags.md. Listen giver ikke tilladelse til at køre dem.
 
 ## Arbejdsdeling mellem agenter
 

@@ -1,6 +1,6 @@
 # Backlog: status for de 20 opgaver (campaign-kortet)
 
-Status pr. v00.00.50: alle 20 opgaver er lavet. Detaljerne står i de nævnte dokumenter.
+Status pr. 2026-10-08: de oprindelige 20 opgaver blev registreret som lavet i v00.00.50. Det betyder implementering, ikke fuld afprøvning; Sverige-Norge har fortsat kun forberedelse, og søtransport mangler. Detaljerne står i de nævnte dokumenter.
 
 | # | Opgave | Dokument |
 |---|---|---|
@@ -26,6 +26,11 @@ Status pr. v00.00.50: alle 20 opgaver er lavet. Detaljerne står i de nævnte do
 | 20 | Balance og slutning | Endgame1851.md |
 
 ## Ikke testet endnu
+
+- Spredt orden/nedlægning og rejsning under fjernild.
+- Rytteri mod fast/svækket karré i et rigtigt slag; charge er set i loggen, men udfaldet er ikke bekræftet.
+- Stop-og-skyd med annullering, ny fempanel-HUD og stabsafstande: seneste merge er hverken bygget eller testet.
+- ALT-vejpunkter, destinationsboks, 30°-sving og figurskalaskift; kontrollér hop i grafikken samt flag og HQ under march, standsning og sving.
 - En belejring er ikke fremprovokeret i en test.
 - Søtransport af tropper er endnu ikke lavet.
 - Testbeløbet i statskassen (5.000.000 rd.) skal ned på 150.000 før rigtigt spil.
@@ -36,6 +41,13 @@ Status pr. v00.00.50: alle 20 opgaver er lavet. Detaljerne står i de nævnte do
 - Jernbanemobilisering koblet til køreplaner på kortet.
 
 ## Bygget 2026-10 (kampagne og slag), ikke afprøvet i et rigtigt slag
+
+Overskriften omfatter også implementerede/mergede ændringer; merge alene er ikke bevis for build eller test.
+
+- Udført siden sidste opdatering: særskilte 1825-data; datadrevne events med spillerpåvirkelige betingelser; militære/civile forskningsfaner; navne, uniformpalette og våbenombygning (Events.md og UnitCustomisation.md). Skov i sigtelinjen, skjul og dækning er merget og bygget. Runtime-forløb og balance mangler; uniformmaterialernes asset-forberedelse og visuelle kontrol udestår.
+- Implementeret: karré med fire 90°-ildzoner og bajonetter, fartafhængig rytteritrussel, kavalerichok og afvisning ved stabil karré. Afprøvning af hele regelforløbet mangler.
+- Implementeret/merget: nyt HUD, stop-og-skyd annullering, kampformationsboks, ALT-vejpunkter, kompakte figurer, flag/HQ-følgning og naturligere gang. Nyeste HUD/annullering/stabsafstande er endnu ikke bygget.
+- Startmenu med levende Danmarkskort og testknapper er lavet; menu og tidligere slagvisning er kontrolleret med skærmbilleder. Standard: MIDDEL grafik og selvstændig figurskala 1:1. Tid: pause, x½, x1, x2, x3, x5, x10.
 - Scenarier: 1825 (standard) og 1851 (vælges i spilmenuen); gem gemmer scenariet.
 - Forskning: åbner efter år i 1825, militær og civil i to spor med faner; Jernbaneanlæg kræver forskning.
 - Kamporden: organisationsdiagram, kompagnier foldes ud, enhedskort pr. kompagni, styrke pr. kompagni og overførsel af mænd (også eskadroner og på tværs af enheder).
@@ -43,10 +55,10 @@ Status pr. v00.00.50: alle 20 opgaver er lavet. Detaljerne står i de nævnte do
 - Slag: sejrspoint, ordonnanser (synlige ryttere) og officerers tolkning af ordrer, slagur og tid på dagen, højst 3 dage, forstærkninger dag 2 og 3.
 - Officerer: såret/fanget med løsesum, prestige og moral; fanget chef giver enheden lavere moral.
 - Taktik: holdning- og afsidningsknapper, flankering for begge sider efter lederens egenskaber, sidetrin, reserve-kompagni.
-- Testslag: Start-Test-1 (kompagni mod kompagni) og Start-Test-2 (bataljon med reserve mod kompagni).
+- Testslag: Start-Test-1 (kompagni mod kompagni), Start-Test-2 (bataljon med reserve mod kompagni) og Start-Test-3 (rytteri); præcise filnavne og flag i TestFlags.md.
 - Ikke prøvet endnu: højreklik-kommando med retningspil, skift af scenarie i menuen, dragonernes afsidning, de to testslag fra ende til anden, "LG 1"-etiketten der sidder for langt til venstre, danske reserver der ankommer.
-- Åbne ønsker: fjern en overordnet stab direkte i delingsbilledet; rigtige 1825-data (hær, officerer, byer, nationer); flere civile forskningsemner (post, dampskibe) med reel effekt.
+- Udført siden denne listes første version: fjern overordnet stab i delingsbilledet samt særskilte 1825-data for hær, officerer, byer og nationer. Historisk validering/balance udestår. Åbent ønske: flere civile forskningsemner (post, dampskibe) med reel effekt.
 
 ## Testslag (midlertidigt)
-- Knapperne "TEST 1 MOD 1" og "TEST 4 MOD 1" i startmenuen, med et slagmarksbillede som baggrund. Fjernes igen, når testene er færdige.
+- Knapperne "TEST 1 MOD 1", "TEST 4 MOD 1" og "TEST RYTTERI" i startmenuen, med det levende Danmarkskort som baggrund. De første to starter passivt; rytteri-testens husarer får en fremrykningsordre. Fjernes igen, når testene er færdige.
 - Derefter større testslag: to bataljoner under regiment-HQ, brigade og division ovenpå, flere fjendtlige kompagnier (flankering, reserver, ordonnanser) og forstærkninger dag 2 og 3.
