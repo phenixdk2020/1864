@@ -1594,6 +1594,14 @@ Codex' opgave om rytteritruslen (tidligere udløsning efter lukningsfart, bajone
 ### 2026-10-08 – Passive testslag, kamera under pause, forlad-knap, HØJ som standard
 Testslagene (startmenuens knapper og bat-filerne) starter nu med -Strategy1864SkirmishPassive: bataljonens AI er slået fra, kompagniernes doktrin er defensiv, og der gives ingen angrebsordre, så ingen angriber, før spilleren giver ordren (kompagnierne reagerer stadig: front, ild, karré). Kameraet kan flyttes under pause (tick, akser og handlinger kører under pause) og kører i realtid uanset kampens fart. Slaget har fået x½ (minimum 0,5) og en altid synlig udgangsknap: AFSLUT SLAGET -> KAMPAGNEN i et kampagneslag, FORLAD SLAGET -> STARTMENU i et testslag. Kompagniets navneskilt står 6,5 m bag bageste geled (var 18 m). Grafikkvalitet starter på HØJ (en figur for hver mand), og testslagene tvinger ikke længere figurskalaen.
 
+### 2026-10-08 — Rytteri-test med svensk husareskadron
+
+- Tilføjet `-Strategy1864SkirmishCavalry`: én fjendtlig husareskadron 40 m til siden på fjendens linje, cirka 450 m fra danskerne. Defensiv grundholdning og aktiv officer-AI; en indledende `Advance`-ordre med `OfficerAI`-autoritet mod nærmeste danske kompagni får eskadronen frem. `ThinkCavalry` vælger åbne mål og undgår faste karréer. Fast infanterilinje er nu også et muligt mål for rytteri med en igangværende fremryknings-/angrebsordre; tidligere blev kun kolonner og vaklende mål accepteret.
+- Danske kompagnier afventer spillerordrer med reaktiv officer-AI. Begge HQ'er har AI slået fra i rytteri-testen. Svensk fodfolk forsvarer med officer-AI slået fra, så det ikke starter bajonetmodangreb. Passiv start tilsidesætter et eventuelt `SkirmishAttack`-flag.
+- Tilføjet **TEST RYTTERI** i startmenuen (række 9) og `Start-Test-3-Rytteri.bat`: to danske kompagnier, svensk forsvarer og husarer; intet FieldLOD-flag.
+- Officerens kavaleriangreb kræver nu en eksisterende fremryknings-/angrebsordre; offensiv doktrin alene udløser ikke et angreb.
+- Statisk kodegennemgang og diff-kontrol. Ingen build, spilstart eller commit. Angreb inden for første minut og karréreaktion skal stadig bekræftes i spillet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

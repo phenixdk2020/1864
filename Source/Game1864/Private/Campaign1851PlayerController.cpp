@@ -926,7 +926,14 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			{
 				// Temporary test battles: the flags the Start-Test-*.bat files give (1 or 4 Danish companies against one Swedish).
 				FCommandLine::Append(TEXT(" -Strategy1864Skirmish=1 -Strategy1864SkirmishSwedes -Strategy1864EnemyDefends -Strategy1864SkirmishPassive"));
-				FCommandLine::Append(StartRow >= 4 ? TEXT(" -Strategy1864SkirmishDanes=4 -Strategy1864HoldReserve") : TEXT(" -Strategy1864SkirmishDanes=1"));
+				if (StartRow == 9)
+				{
+					FCommandLine::Append(TEXT(" -Strategy1864SkirmishDanes=2 -Strategy1864SkirmishCavalry"));
+				}
+				else
+				{
+					FCommandLine::Append(StartRow >= 4 ? TEXT(" -Strategy1864SkirmishDanes=4 -Strategy1864HoldReserve") : TEXT(" -Strategy1864SkirmishDanes=1"));
+				}
 				UGameplayStatics::OpenLevel(this, FName(TEXT("Strategy1864_Skirmish")));
 				Button = EButton::Block;
 			}
