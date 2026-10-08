@@ -120,7 +120,7 @@ namespace
 			if (Module == 2)
 			{
 				Title = TEXT("Afdrag på statsgælden?");
-				Text = FString::Printf(TEXT("%s betales tilbage af statskassen. Renterne falder tilsvarende."), *PriceText(100000.0));
+				Text = FString::Printf(TEXT("%s betales tilbage af statskassen. Renterne falder tilsvarende."), *PriceText(FMath::Min(100000.0, Map.GetDebt())));
 			}
 			else
 			{

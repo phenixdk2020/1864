@@ -1400,6 +1400,14 @@ Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i
 ### 2026-10-08 – Backlog opdateret
 Backlog.md har fået et afsnit med det, der er bygget i oktober (scenarier, delt forskning, kamporden, slagets nye systemer), og en liste over det, der endnu ikke er afprøvet i et rigtigt slag.
 
+### 2026-10-08 - Statsgæld og lån: audit af 1825 og 1851
+
+- Restgæld under 100.000 rd. kan nu betales, når kassen dækker restbeløbet; knappen og bekræftelsen viser den faktiske betaling. Ved fuld indfrielse vises grundrenten 4 % igen.
+- Lån og afdrag afviser negative, nul og ikke-endelige beløb. Gæld og vægtet rente gemmes uden den tidligere afrunding; indlæsning normaliserer ugyldig gæld og rente og bevarer det eksisterende saveformat.
+- Statskassen viser ledig kredit og månedlig rentebetaling. Rammen bruger fortsat tre års aktuelle skatter, udførselstold og udenlandsindtægter, så den mindre befolkning i 1825 indgår automatisk. Gyldige låns renteberegning, beløb og 1851-balancering er bevaret.
+- Usikkert: historiske 1825-tal for Øresundstold, handel, startreserve og passende lånestørrelser er ikke dokumenteret; de eksisterende estimater er beholdt. Afdrag reducerer den samlede gæld forholdsmæssigt til gennemsnitsrenten; enkelte lån kan ikke indfries separat. Visuel plads til den nye kreditlinje skal kontrolleres i spillet.
+- Kontrol: statisk gennemgang af månedsbetaling, budget, ministerhandlinger og save/restore, numeriske kanttilfælde samt `git diff --check`. Spillet er hverken bygget eller startet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

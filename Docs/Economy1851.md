@@ -24,6 +24,10 @@
   - AFDRAG 100.000.
   - Renten trækkes hver måned.
 
+- **Afdrag:** er restgælden mindre end 100.000 rd., betales kun restgælden; knappen og bekræftelsen viser dette. Ved fuld indfrielse nulstilles den viste gældsrente til 4 %.
+- **1825:** samme lånebeløb og renteregler som i 1851; rammen følger de aktuelle indtægter fra den mindre befolkning. Ledig kredit vises i statskassen.
+- **Gemning:** gæld og vægtet rente gemmes med præcision til numerisk round-trip; gamle `debt`-linjer kan stadig indlæses. Ugyldige beløb afvises, og ugyldige gemte gældstal normaliseres.
+
 ## AVISEN (knappen ved siden af SKANSER)
 - **AVISEN:** alle nyheder efter dato, med den nyeste som overskrift. De sidste 120 gemmes.
 - **MARKEDET:** prisindeks, udførsel og told pr. vare, samt statsgælden.
