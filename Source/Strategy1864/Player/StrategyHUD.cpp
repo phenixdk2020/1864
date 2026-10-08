@@ -1094,7 +1094,7 @@ void AStrategyHUD::DrawNotices()
         {
             const AStrategyUnit* Unit = C.Unit.Get();
             if (!IsValid(Unit)) { continue; }
-            const FVector Screen = Project(Unit->GetActorLocation() + FVector(0.0f, 0.0f, 900.0f));
+            const FVector Screen = Project(Unit->GetVisualCentroid() + FVector(0.0f, 0.0f, 900.0f));
             if (Screen.Z <= 0.0f) { continue; }
             const int32 Left = int32(FMath::CeilToFloat(C.SecondsLeft));
             const FString Label = FString::Printf(TEXT("Ordre på vej  %d:%02d"), Left / 60, Left % 60);

@@ -65,6 +65,8 @@ void UStrategyCavalryVisualComponent::EndPlay(const EEndPlayReason::Type Reason)
         if (H.Sabre) { H.Sabre->DestroyComponent(); }
     }
     Horsemen.Reset();
+    CentroidFigureCount = 0;
+    bReady = false;
     Super::EndPlay(Reason);
 }
 
@@ -225,6 +227,12 @@ void UStrategyCavalryVisualComponent::TickComponent(float DeltaTime, ELevelTick 
     }
 }
 
+bool UStrategyCavalryVisualComponent::GetFigureLocalCentroid(FVector& OutCentroid) const
+{
+    OutCentroid = FigureLocalCentroid;
+    return bReady && CentroidFigureCount > 0;
+}
+
 void UStrategyCavalryVisualComponent::UpdatePace(float DeltaTime)
 {
     const FVector Here = OwnerCavalry->GetActorLocation();
@@ -240,6 +248,8 @@ void UStrategyCavalryVisualComponent::UpdatePace(float DeltaTime)
     const float Now = GetWorld()->GetTimeSeconds();
     const FTransform Unit = OwnerCavalry->GetActorTransform();
     const float UnitZ = Here.Z;
+    FigureLocalCentroid = FVector::ZeroVector;
+    CentroidFigureCount = 0;
     for (FHorseman& H : Horsemen)
     {
         if (!H.Horse)
@@ -262,6 +272,8 @@ void UStrategyCavalryVisualComponent::UpdatePace(float DeltaTime)
             H.Rider->SetRelativeLocation(FVector(H.Shown.X - 10.f, H.Shown.Y, Ground + SaddleHeightCm - RiderSeatCm + Rise * (0.55f + 0.45f * RiderWave)));
             H.Rider->SetRelativeRotation(FRotator(-6.f * FMath::Min(Gait, 1.f), -90.f, 0.f));
         }
+        FigureLocalCentroid += H.Rider ? H.Rider->GetRelativeLocation() : Local;
+        ++CentroidFigureCount;
         if (H.Sabre)
         {
             H.Sabre->SetVisibility(bCharge);
@@ -276,4 +288,5 @@ void UStrategyCavalryVisualComponent::UpdatePace(float DeltaTime)
             }
         }
     }
+    if (CentroidFigureCount > 0) { FigureLocalCentroid /= CentroidFigureCount; }
 }

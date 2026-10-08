@@ -41,6 +41,9 @@ public:
     UPROPERTY(EditAnywhere, Category="Strategy|Visual|Cavalry")
     float RankSpacingCm = 330.0f;
 
+    /** Cached centroid of the living horsemen, in unit-local space. */
+    bool GetFigureLocalCentroid(FVector& OutCentroid) const;
+
 private:
     struct FHorseman
     {
@@ -85,6 +88,8 @@ private:
     float HorseLift = 0.0f;      // its feet to the ground
     float SaddleHeightCm = 120.0f;
     float RiderSeatCm = 45.0f;   // the seated pose's pelvis above its root
+    FVector FigureLocalCentroid = FVector::ZeroVector;
+    int32 CentroidFigureCount = 0;
     int32 CachedStrength = INDEX_NONE;
     uint8 CachedFormation = 255;
     bool bReady = false;

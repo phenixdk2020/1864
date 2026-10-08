@@ -1072,15 +1072,25 @@ bool UStrategyInfantryVisualComponent::GetFormationLocalBounds(FBox& OutBounds) 
     return bEnabled && OutBounds.IsValid != 0;
 }
 
+bool UStrategyInfantryVisualComponent::GetFigureLocalCentroid(FVector& OutCentroid) const
+{
+    OutCentroid = FigureLocalCentroid;
+    return bEnabled && LoadedSoldierMesh && CentroidFigureCount > 0;
+}
+
 void UStrategyInfantryVisualComponent::UpdateFormationBounds()
 {
     FBox& OutBounds = FormationLocalBounds;
     OutBounds = FBox(ForceInit);
+    FigureLocalCentroid = FVector::ZeroVector;
+    CentroidFigureCount = 0;
     if (!bEnabled || !LoadedSoldierMesh) return;
     for (const USkeletalMeshComponent* Soldier : SoldierComponents)
     {
         if (IsValid(Soldier))
         {
+            FigureLocalCentroid += Soldier->GetRelativeLocation();
+            ++CentroidFigureCount;
             // Imported reference-pose bounds stay below ground when an animation
             // moves the hips. Use the evaluated pose so kneeling/prone also fit.
             FBox PoseBounds(ForceInit);
@@ -1094,6 +1104,7 @@ void UStrategyInfantryVisualComponent::UpdateFormationBounds()
             }
         }
     }
+    if (CentroidFigureCount > 0) { FigureLocalCentroid /= CentroidFigureCount; }
 }
 
 void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
@@ -1516,6 +1527,7 @@ void UStrategyInfantryVisualComponent::DestroyVisualComponents()
     bLastHoldingPose = false;
     bLoadAttempted = false;
     FormationLocalBounds = FBox(ForceInit);
+    CentroidFigureCount = 0;
 }
 
 // ------------------------------------------------------------------ the hybrid: the far men baked

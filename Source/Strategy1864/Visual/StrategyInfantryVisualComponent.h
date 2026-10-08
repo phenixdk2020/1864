@@ -190,6 +190,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Strategy|Visual|Infantry")
     void RefreshVisuals();
 
+    /** Cached centroid of the living figures, in unit-local space (also valid in crowd mode). */
+    bool GetFigureLocalCentroid(FVector& OutCentroid) const;
+
     bool GetFormationLocalBounds(FBox& OutBounds) const;
 
     UFUNCTION(BlueprintPure, Category="Strategy|Visual|Infantry")
@@ -293,6 +296,8 @@ private:
     /** In battle (halted in line facing an enemy within its long range): the soldiers run the firing cycle. */
     bool IsInFiringLine() const;
 
+    FVector FigureLocalCentroid = FVector::ZeroVector;
+    int32 CentroidFigureCount = 0;
     int32 CachedStrength = INDEX_NONE;
     uint8 CachedFormationValue = 255;
     bool bCachedBayonetFixed = false;
