@@ -26,6 +26,10 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Formation")
     float BaseReformSeconds = 3.0f;
+    UPROPERTY(EditAnywhere, Category="Strategy|Square")
+    float SquareReformSeconds = 25.0f;
+    UPROPERTY(EditAnywhere, Category="Strategy|Square")
+    float SquareFormTimeFactor = 1.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Formation")
     float SecondsPer100Men = 1.0f;

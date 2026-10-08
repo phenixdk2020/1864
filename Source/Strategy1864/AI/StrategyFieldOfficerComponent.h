@@ -35,6 +35,7 @@ public:
 
     UFUNCTION(BlueprintPure, Category="Strategy|Officer")
     bool IsCharging() const { return bCharging; }
+    void SetDeterministicRandomSeed(int32 Seed);
 
     /** The flank plan for a company of a group that closes on an enemy (for the enemy's own battle AI too): the place it is to
      *  take at the fire distance Radius from him (or a waypoint round the base's line of fire); false when the leader's plan has
@@ -69,6 +70,9 @@ private:
 
     UPROPERTY() TObjectPtr<AStrategyUnit> OwnerUnit;
     TWeakObjectPtr<AStrategyUnit> ChargeTarget;
+    FRandomStream DecisionRandom;
+    float ReserveHeldSince = -1.0f;
+    bool bReserveReleased = false;
     float Accumulator = 0.0f;
     int32 FlankRole = 0;          // 0 none, 1 fire base, 2 flank
     int32 FlankK = 0;             // how many places from the base

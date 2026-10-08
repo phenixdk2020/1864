@@ -1,4 +1,5 @@
 #include "StrategyDetachmentComponent.h"
+#include "StrategyCombatComponent.h"
 #include "../Units/StrategyUnit.h"
 #include "StrategyCombatComponent.h"
 
@@ -99,6 +100,7 @@ bool UStrategyDetachmentComponent::RecallDetachment(FName DetachmentId)
                 FMath::Min(OwnerUnit->Cohesion, Record->Cohesion) - 0.5f,
                 0.0f,
                 100.0f);
+        if (OwnerUnit->CombatComponent) { OwnerUnit->CombatComponent->EvaluateRoutState(); }
     }
 
     Record->RemainingAmmoRounds = 0;

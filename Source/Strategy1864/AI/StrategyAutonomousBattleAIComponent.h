@@ -10,6 +10,8 @@ UCLASS(ClassGroup=(Strategy1864), meta=(BlueprintSpawnableComponent))
 class STRATEGY1864_API UStrategyAutonomousBattleAIComponent : public UActorComponent
 {
     GENERATED_BODY()
+public:
+    void SetDeterministicRandomSeed(int32 Seed) { DecisionRandom.Initialize(Seed ^ 0x1864A1); }
 
 public:
     UStrategyAutonomousBattleAIComponent();

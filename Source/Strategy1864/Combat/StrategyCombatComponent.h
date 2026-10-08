@@ -50,14 +50,16 @@ public:
     FStrategyVolleyVisualEvent OnVolleyVisualEvent;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Combat")
-    int32 AmmunitionRounds = 1900;
+    int32 AmmunitionRounds = 11400; // Initialized to men * carrying capacity in BeginPlay.
+    UPROPERTY(EditAnywhere, Category="Strategy|Combat")
+    float CartridgesCapacityPerMan = 60.0f;
 
     /** The enemy men this unit has hit in the battle (for its service record in the campaign). */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Combat")
     int32 TotalHitsInflicted = 0;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Combat")
-    int32 MaxAmmunitionRounds = 1900;
+    int32 MaxAmmunitionRounds = 11400;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Combat")
     bool bOutOfAmmo = false;
@@ -117,14 +119,21 @@ public:
     UFUNCTION(BlueprintPure, Category="Strategy|Combat")
     bool IsOutOfAmmo() const { return bOutOfAmmo; }
 
+    // Balance estimates, deliberately tunable rather than historical casualty claims.
+    UPROPERTY(EditAnywhere, Category="Strategy|Square")
+    float SquareInfantryCasualtyMultiplier = 1.2f;
+    UPROPERTY(EditAnywhere, Category="Strategy|Square")
+    float SquareArtilleryCasualtyMultiplier = 1.5f;
+    void EvaluateRoutState();
+    int32 ScaleIncomingCasualties(int32 Casualties, bool bArtillery) const;
+    void ConfigureCartridgesPerMan(float CartridgesPerMan = 60.0f);
+
 private:
     AStrategyUnit* FindBestTarget() const;
     int32 ResolveHits(
         int32 ShotCount,
         float DistanceCm,
         const AStrategyUnit* Target);
-    void EvaluateRoutState();
-
     UPROPERTY()
     TObjectPtr<AStrategyUnit> OwnerUnit;
 

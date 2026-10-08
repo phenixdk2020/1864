@@ -650,7 +650,7 @@ bool UStrategyArtilleryFireMissionComponent::FireAt(
     TArray<uint8> HitFlags;
     TArray<int32> CasualtiesPerProjectile;
 
-    const int32 Casualties =
+    int32 Casualties =
         ResolveCasualties(
             Target,
             Consumed,
@@ -661,6 +661,8 @@ bool UStrategyArtilleryFireMissionComponent::FireAt(
 
     const EStrategyArtilleryAmmoType AmmoType =
         OwnerBattery->ArtilleryAmmunitionComponent->SelectedAmmo;
+
+    if (Target->CombatComponent) { Casualties = Target->CombatComponent->ScaleIncomingCasualties(Casualties, true); }
 
     if (AStrategyArtilleryBatteryUnit* TargetBattery =
         Cast<AStrategyArtilleryBatteryUnit>(Target))
@@ -1051,6 +1053,7 @@ bool UStrategyArtilleryFireMissionComponent::FireAtLocation(
             continue;
         }
 
+        if (Target->CombatComponent) { Casualties = Target->CombatComponent->ScaleIncomingCasualties(Casualties, true); }
         TotalCasualties += Casualties;
 
         if (AStrategyArtilleryBatteryUnit* TargetBattery =

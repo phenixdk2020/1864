@@ -171,6 +171,7 @@ bool ACampaign1851Map::FightBattleIn3D(int32 BattleId)
 	const FDateTime Now = GetDate();
 	Doc->SetStringField(TEXT("format"), TEXT("PROJECT1864-BattleRequest-1"));
 	Doc->SetNumberField(TEXT("battleId"), B->Id);
+	Doc->SetNumberField(TEXT("battleSeed"), int32(HashCombine(uint32(Seed), uint32(B->Id * 7919))));
 	Doc->SetStringField(TEXT("date"), Now.ToIso8601());
 	Doc->SetStringField(TEXT("season"), GetSeasonName());
 	WriteDoctrineJson(Doc);

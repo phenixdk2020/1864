@@ -360,6 +360,7 @@ int32 AStrategyUnit::ApplyStrengthLoss(int32 RequestedLoss)
         SetUnitState(EStrategyUnitState::Destroyed);
     }
 
+    if (CombatComponent) { CombatComponent->EvaluateRoutState(); }
     RefreshDebugLabel();
 
     OnCasualtyVisualEvent.Broadcast(

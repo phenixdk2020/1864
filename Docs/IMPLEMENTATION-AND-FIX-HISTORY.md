@@ -1556,6 +1556,16 @@ Startmenuen (scenarie, land, afvigelse, NYT SPIL, INDLÆS SPIL, AFSLUT; spilmenu
 
 ### 2026-10-08 – Skov, begivenheder og enhedstilpasning merget; tidsknapper i slaget; kort bag startmenuen
 Codex' tre opgaver er merget og bygget: skov i synslinjen (se Docs-afsnittet om skov i historikken), data-drevne begivenheder (Events*.json, EventFact, Docs/Events.md) og navn, uniform og våbenopgradering (Docs/UnitCustomisation.md; hattestil er ikke understøttet af hatmodellerne endnu). Tre kompileringsfejl i begivenhedskoden rettet (Misc/LexFromString.h findes ikke i 5.8, migreringskode stod i AdvanceWar og hører til RestoreWar, JSON-nøglen er en delt streng i 5.8). Slaget har fået knapper til PAUSE/FORTSÆT og x1, x2, x3, x5 øverst ved pointlinjen; klik virker under pause, og hastighedsloftet er x5. Startmenuens baggrund er det levende Danmarkskort; slagmarksbilledet er fjernet. Kontrolleret med skærmbilleder af slaget og menuen.
+### 2026-10-08 — Kampregler: karré, kavalerichok og officer-AI
+
+- Karréild fordeles på fire 90° sektorer: 25 % pr. side, 30 % med forskning; et hjørnemål rammes fra begge nabosider. Skydedrill reducerer ikke sideandelen endnu en gang.
+- Dannelse tager som udgangspunkt 25 sekunder (kampagnens forskningsfaktor anvendes), fikserer bajonetter og blokerer ild under omformering. Bajonetter fjernes ved udtræden. Karré bevæger sig med 8 % fart og tager 1,2 gange salvetab / 1,5 gange artilleritab. Alle balanceværdier er justerbare estimater.
+- Kavalerichok beregnes ud fra styrke, moral, sammenhold, momentum, formation og flanke/bagfra-retning; kampagnens flankeforskning anvendes. En stabil, færdig karré med ammunition afviser rytterne omkring 40 m; svækkede karréer kan brydes. Tilgangen bruger almindelig ild og ammunition.
+- Patroner læses fra Units.json i battle-request-forløbet (standard 60 pr. mand). Bærekapacitet og forsyningsvognens refill bruger samme maksimum; tomme lagre bevares.
+- Rut vurderes ved styrketab, morale-/sammenholdstab, artilleri, kavalerichok og terræn-/udmattelsesopdateringer, med en kontrol pr. combat-tick som sikkerhedsnet. Afsluttet omformering ophæver ikke rut/destruktion.
+- Battle request eksporterer battleSeed; officerens lokale random-stream seedes med battle seed og stabilt unit-id. Global FRand er fjernet fra feltofficeren, og autonom AI modtager samme seedgrundlag.
+- Afsluttede spillerordrer udløser ikke ny forfølgelse. Reservens første tilbageholdelsestid bevares gennem nye flankeplaner, og en frigivet reserve holdes ikke tilbage igen. Artilleriets automatik slås fra med officer-AI. Hold efter bajonetangreb kræver afvisning eller bortfaldet mål.
+- Validering: statisk diff-/kildekontrol og kontrol af sektor-/forsyningsgrænser. Eksisterende testflag er bevaret. Ingen Unreal-build, spilstart eller commit er udført; runtime-balance og kompilation skal efterprøves senere.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

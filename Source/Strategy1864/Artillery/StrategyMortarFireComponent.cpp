@@ -1,4 +1,5 @@
 #include "StrategyMortarFireComponent.h"
+#include "../Combat/StrategyCombatComponent.h"
 #include "StrategyMortarDeploymentComponent.h"
 #include "../Units/StrategyUnit.h"
 #include "../Engineering/StrategyDefensivePosition.h"
@@ -134,7 +135,9 @@ bool UStrategyMortarFireComponent::FireOneBomb()
     }
     if (Lost > 0 && IsValid(UnitTarget))
     {
+        if (UnitTarget->CombatComponent) { Lost = UnitTarget->CombatComponent->ScaleIncomingCasualties(Lost, true); }
         UnitTarget->ApplyStrengthLoss(Lost);
+        if (UnitTarget->CombatComponent) { UnitTarget->CombatComponent->NotifyIncomingVolley(Lost); }
     }
 
     return true;

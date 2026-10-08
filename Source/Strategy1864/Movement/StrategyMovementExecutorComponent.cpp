@@ -1,4 +1,6 @@
 #include "StrategyMovementExecutorComponent.h"
+#include "../Formations/StrategyFormationComponent.h"
+#include "../Combat/StrategyCombatComponent.h"
 
 #include "../Orders/StrategyOrderComponent.h"
 #include "../Campaign/StrategyCampaignBattlefield.h"
@@ -433,6 +435,7 @@ void UStrategyMovementExecutorComponent::TickComponent(
     const float SidestepMultiplier = bKeepFacingMove && FMath::Abs(FMath::FindDeltaAngleDegrees(OwnerUnit->GetActorRotation().Yaw, Direction.Rotation().Yaw)) > 50.0f ? 0.6f : 1.0f;
     const float Step =
         MoveSpeedCmPerSecond *
+        (OwnerUnit->FormationComponent && OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square ? SquareMoveSpeedMultiplier : 1.0f) *
         SidestepMultiplier *
         WadingMultiplier *
         ConditionMultiplier *
