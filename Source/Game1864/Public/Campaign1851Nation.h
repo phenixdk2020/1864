@@ -147,7 +147,7 @@ namespace Campaign1851Nations
 	/** What the portfolio covers, for the player. */
 	const TCHAR* PortfolioScope(ECampaign1851Portfolio P);
 	const TCHAR* DelegationName(ECampaign1851Delegation D);
-	/** Civil buildings' effects by building key (null for military and other buildings). */
+	/** Civil buildings' effects for the active scenario by building key (null for other buildings). */
 	const FCampaign1851CivilEffect* CivilEffect(const FString& Key);
 
 	/** Base growth a year (%) before buildings and railways: the kingdom of the 1850s. */

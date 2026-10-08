@@ -1402,6 +1402,11 @@ Backlog.md har fået et afsnit med det, der er bygget i oktober (scenarier, delt
 
 ### 2026-10-08 – Forskning: store infanterikasser og egen doktrinfane
 Forskningsvinduet bruger nu hele bredden. En gren, hvis emner står side om side på et niveau (infanteriet), får en søjle så bred som sit bredeste niveau, så kasserne bliver store og læsbare. Doktrinerne har fået en fane for sig (MILITÆR / CIVIL / DOKTRINER) med fuld bredde; den smalle doktrinspalte i siden er fjernet. Kontrolleret med skærmbilleder af alle tre faner (-CampaignUiShots rtab=0/1/2).
+### 2026-10-08 - Civile bygningers økonomi i 1825
+
+- `Campaign1851Nations::CivilEffect` vælger nu en uforanderlig tabel efter det aktive scenaries startår: 1825 har 80 % af 1851-arbejdspladserne og afgifterne (afrundet pr. bygning), svarende til scenariets befolkningsfaktor på 0,80. Told og eksport giver 60 % som et forsigtigt skøn for mindre handel før jernbanenettet. Skatten er fortsat 6 rd. pr. arbejdsplads om året; vækstbonusser og privat ejerskab er uændrede. 1851 bruger præcis den hidtidige tabel.
+- Samme opslag bruges af statsøkonomien, private investeringer, byggerådgiveren og byggeriets liste og bygningskort, så viste og beregnede tal følges ad, også efter scenarieskift. Byggeomkostninger, vedligehold, befolkningskrav og jernbanernes åbningstider er uændrede.
+- Eksempel: en toldbod giver i 1825 32 job, 320 rd. i afgifter og 900 rd. i told/eksport, i alt 1.412 rd./år mod 2.140 i 1851. Faktorerne er spilbalance-estimater, ikke historiske regnskabstal, og gælder hele 1825-kampagnen. Kontrolleret ved kildegennemgang og diff; spillet er hverken bygget eller startet. Balancen skal afprøves i spillet senere.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
