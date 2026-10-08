@@ -2,6 +2,9 @@
 
 #include "../Navigation/StrategyNavigationObstacle.h"
 #include "EngineUtils.h"
+#include "../Units/StrategyUnit.h"
+#include "../Terrain/StrategyTerrainQueryLibrary.h"
+#include "../Campaign/StrategyCampaignBattlefield.h"
 
 UStrategyDirectionalCoverComponent::UStrategyDirectionalCoverComponent()
 {
@@ -19,6 +22,10 @@ float UStrategyDirectionalCoverComponent::CalculateIncomingHitMultiplier(
 
     const FVector UnitLocation = OwnerActor->GetActorLocation();
     float BestMultiplier = 1.0f;
+    const AStrategyUnit* ForestUnit = Cast<AStrategyUnit>(OwnerActor);
+    const AStrategyCampaignBattlefield* ForestField = UStrategyTerrainQueryLibrary::GetForestBattlefield(this);
+    if (ForestUnit && ForestUnit->Echelon <= EStrategyEchelon::Division && ForestField &&
+        ForestField->HasForestCover(UnitLocation, ShooterLocation)) BestMultiplier = 0.75f;
 
     for (TActorIterator<AStrategyNavigationObstacle> It(GetWorld()); It; ++It)
     {

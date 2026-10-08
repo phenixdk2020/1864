@@ -83,7 +83,7 @@ AStrategyUnit* UStrategyThreatReactionComponent::FindVisibleEnemyCavalry() const
 
         if (DistanceCm > CavalryThreatDistanceCm ||
             DistanceCm >= BestDistanceCm ||
-            !OwnerUnit->VisibilityComponent->HasLineOfSightTo(Candidate))
+            !OwnerUnit->VisibilityComponent->CanDetectTarget(Candidate, CavalryThreatDistanceCm))
         {
             continue;
         }

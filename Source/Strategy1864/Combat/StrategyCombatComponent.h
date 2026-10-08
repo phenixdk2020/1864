@@ -84,6 +84,9 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Combat")
     float ReloadRemainingSeconds = 0.0f;
 
+    UPROPERTY(Transient, BlueprintReadOnly, Category="Strategy|Combat")
+    float LastFiredTimeSeconds = -1000000.0f;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Combat")
     float UnderFireDurationSeconds = 2.5f;
 

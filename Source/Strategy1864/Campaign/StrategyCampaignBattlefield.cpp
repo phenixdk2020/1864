@@ -1,4 +1,5 @@
 #include "StrategyCampaignBattlefield.h"
+#include "../Terrain/StrategyTerrainQueryLibrary.h"
 
 #include "Campaign1851Scenery.h"
 #include "Camera/PlayerCameraManager.h"
@@ -765,6 +766,11 @@ namespace
 
 void AStrategyCampaignBattlefield::BuildMeadow(float InSizeM, int32 Seed)
 {
+    ForestDensityGrid.Reset();
+    ForestCoverGrid.Empty();
+    ForestHedges.Reset();
+    ForestHedgeCells.Reset();
+    UStrategyTerrainQueryLibrary::RegisterForestBattlefield(this);
     const uint32 S = uint32(Seed);
     Place = TEXT("Testmark");
     SizeCm = InSizeM * 100.0f;
@@ -988,6 +994,7 @@ bool AStrategyCampaignBattlefield::BuildFromFile(const FString& FileName)
     Place = Json->GetStringField(TEXT("place"));
     const double SizeM = Json->GetNumberField(TEXT("sizeM"));
     Grid = int32(Json->GetNumberField(TEXT("grid")));
+    if (Grid <= 0 || Grid > 4096 || !FMath::IsFinite(SizeM) || SizeM <= 0.0) return false;
     SizeCm = float(SizeM * 100.0);
     HeightM.Reset();
     for (const TSharedPtr<FJsonValue>& V : Json->GetArrayField(TEXT("heightDm")))
@@ -1003,6 +1010,10 @@ bool AStrategyCampaignBattlefield::BuildFromFile(const FString& FileName)
     for (float H : HeightM) { MinHeightM = FMath::Min(MinHeightM, H); }
     ResetNoGrass();
     KindsGrid = Json->GetStringField(TEXT("kinds"));
+    ForestDensityGrid.Reset();
+    Json->TryGetStringField(TEXT("woodDensity"), ForestDensityGrid);
+    BuildForestCoverGrid();
+    UStrategyTerrainQueryLibrary::RegisterForestBattlefield(this);
     Rivers.Reset();
 
     // The picture (row 0 north): the ground's colours.
@@ -1285,7 +1296,7 @@ bool AStrategyCampaignBattlefield::BuildFromFile(const FString& FileName)
         }
         // Woods: a tree in about every 18 m square of the wood cells, not on the ways.
         const FString Kinds = Json->GetStringField(TEXT("kinds"));
-        const FString Woods = Json->GetStringField(TEXT("woodDensity"));
+        const FString& Woods = ForestDensityGrid;
         const double Cell = SizeM / Grid;
         const uint32 Seed = GetTypeHash(Place);
         for (int32 k = 0; k < Kinds.Len() && k < Grid * Grid; ++k)
@@ -1323,6 +1334,32 @@ bool AStrategyCampaignBattlefield::BuildFromFile(const FString& FileName)
                 const FString Kind = H->GetStringField(TEXT("kind"));
                 const EPiece Piece = Kind == TEXT("knick") ? EPiece::Knick : Kind == TEXT("dike") ? EPiece::StoneDike : EPiece::Ditch;
                 const TArray<FVector2D> P = ReadPoints(H->GetArrayField(TEXT("points")));
+                if (Kind == TEXT("knick"))
+                {
+                    const double ForestCellM = SizeM / Grid;
+                    for (int32 ForestSegment = 0; ForestSegment + 1 < P.Num(); ++ForestSegment)
+                    {
+                        const int32 ForestHedgeIndex = ForestHedges.Add({P[ForestSegment], P[ForestSegment + 1]});
+                        const int32 ForestSteps = FMath::Max(1, FMath::CeilToInt(FVector2D::Distance(P[ForestSegment], P[ForestSegment + 1]) / (ForestCellM * 0.5)));
+                        for (int32 ForestStep = 0; ForestStep <= ForestSteps; ++ForestStep)
+                        {
+                            const FVector2D ForestPoint = FMath::Lerp(P[ForestSegment], P[ForestSegment + 1], double(ForestStep) / ForestSteps);
+                            const int32 ForestRadius = FMath::CeilToInt(15.0 / ForestCellM) + 1;
+                            const int32 ForestX = FMath::FloorToInt(ForestPoint.X / ForestCellM), ForestY = FMath::FloorToInt(ForestPoint.Y / ForestCellM);
+                            for (int32 ForestDY = -ForestRadius; ForestDY <= ForestRadius; ++ForestDY)
+                            for (int32 ForestDX = -ForestRadius; ForestDX <= ForestRadius; ++ForestDX)
+                            {
+                                const int32 ForestCX = ForestX + ForestDX, ForestCY = ForestY + ForestDY;
+                                if (ForestCX >= 0 && ForestCY >= 0 && ForestCX < Grid && ForestCY < Grid &&
+                                    FVector2D::Distance(ForestPoint, FVector2D((ForestCX + 0.5) * ForestCellM, (ForestCY + 0.5) * ForestCellM)) <= 15.0 + ForestCellM * 0.71)
+                                {
+                                    ForestCoverGrid[ForestCY * Grid + ForestCX] = true;
+                                    ForestHedgeCells.FindOrAdd(ForestCY * Grid + ForestCX).AddUnique(ForestHedgeIndex);
+                                }
+                            }
+                        }
+                    }
+                }
                 if (Piece == EPiece::Knick && bBattleFoliage)
                 {
                     PlaceKnick(Bushes, KnickTrees, P, HedgeSeed += 7919u);
@@ -1372,4 +1409,74 @@ bool AStrategyCampaignBattlefield::BuildFromFile(const FString& FileName)
     UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FIELD: %s, %.0f m square, grid %d, %d parts, picture %dx%d, grass %s"), *Place, SizeM, Grid, Parts.Num(), ImageW, ImageH,
         IsActorTickEnabled() ? TEXT("streamed") : TEXT("off"));
     return true;
+}
+
+float AStrategyCampaignBattlefield::GetForestDensityAt(const FVector& WorldLocation) const
+{
+    const FVector2D ForestPoint = ToField(WorldLocation);
+    const double ForestSizeM = SizeCm / 100.0;
+    if (Grid <= 0 || ForestSizeM <= 0 || ForestDensityGrid.Len() != Grid * Grid ||
+        ForestPoint.X < 0 || ForestPoint.Y < 0 || ForestPoint.X >= ForestSizeM || ForestPoint.Y >= ForestSizeM) return 0.0f;
+    const int32 ForestIndex = FMath::FloorToInt(ForestPoint.Y / ForestSizeM * Grid) * Grid + FMath::FloorToInt(ForestPoint.X / ForestSizeM * Grid);
+    const TCHAR ForestDigit = ForestDensityGrid[ForestIndex];
+    return ForestDigit >= TCHAR('0') && ForestDigit <= TCHAR('9') ? float(ForestDigit - TCHAR('0')) / 9.0f : 0.0f;
+}
+
+void AStrategyCampaignBattlefield::BuildForestCoverGrid()
+{
+    ForestHedges.Reset();
+    ForestHedgeCells.Reset();
+    ForestCoverGrid.Init(false, Grid * Grid);
+    if (ForestDensityGrid.Len() != Grid * Grid || Grid <= 0 || SizeCm <= 0) return;
+    const double ForestCellM = SizeCm / 100.0 / Grid;
+    const int32 ForestRadius = FMath::CeilToInt(15.0 / ForestCellM);
+    for (int32 ForestY = 0; ForestY < Grid; ++ForestY)
+    for (int32 ForestX = 0; ForestX < Grid; ++ForestX)
+    {
+        if (ForestDensityGrid[ForestY * Grid + ForestX] <= TCHAR('0') || ForestDensityGrid[ForestY * Grid + ForestX] > TCHAR('9')) continue;
+        for (int32 ForestDY = -ForestRadius; ForestDY <= ForestRadius; ++ForestDY)
+        for (int32 ForestDX = -ForestRadius; ForestDX <= ForestRadius; ++ForestDX)
+        {
+            const int32 ForestCX = ForestX + ForestDX, ForestCY = ForestY + ForestDY;
+            if (ForestCX >= 0 && ForestCY >= 0 && ForestCX < Grid && ForestCY < Grid &&
+                FMath::Square(FMath::Max(0, FMath::Abs(ForestDX) - 1) * ForestCellM) +
+                FMath::Square(FMath::Max(0, FMath::Abs(ForestDY) - 1) * ForestCellM) <= 225.0)
+                ForestCoverGrid[ForestCY * Grid + ForestCX] = true;
+        }
+    }
+}
+
+bool AStrategyCampaignBattlefield::HasForestCover(const FVector& UnitLocation, const FVector& ShooterLocation) const
+{
+    if (GetForestDensityAt(UnitLocation) > 0.0f) return true;
+    const FVector2D ForestPoint = ToField(UnitLocation), ForestShooter = ToField(ShooterLocation);
+    const double ForestSizeM = SizeCm / 100.0;
+    if (Grid <= 0 || ForestSizeM <= 0 || ForestPoint.X < 0 || ForestPoint.Y < 0 || ForestPoint.X >= ForestSizeM || ForestPoint.Y >= ForestSizeM) return false;
+    const double ForestCellM = ForestSizeM / Grid;
+    const int32 ForestX = FMath::FloorToInt(ForestPoint.X / ForestCellM), ForestY = FMath::FloorToInt(ForestPoint.Y / ForestCellM);
+    const int32 ForestIndex = ForestY * Grid + ForestX;
+    if (ForestCoverGrid.Num() != Grid * Grid || !ForestCoverGrid[ForestIndex]) return false;
+    const FVector2D ForestDirection = (ForestShooter - ForestPoint).GetSafeNormal();
+    const int32 ForestRadius = FMath::CeilToInt(15.0 / ForestCellM);
+    if (ForestDensityGrid.Len() == Grid * Grid)
+    for (int32 ForestDY = -ForestRadius; ForestDY <= ForestRadius; ++ForestDY)
+    for (int32 ForestDX = -ForestRadius; ForestDX <= ForestRadius; ++ForestDX)
+    {
+        const int32 ForestCX = ForestX + ForestDX, ForestCY = ForestY + ForestDY;
+        if (ForestCX < 0 || ForestCY < 0 || ForestCX >= Grid || ForestCY >= Grid || (ForestDensityGrid[ForestCY * Grid + ForestCX] <= TCHAR('0') || ForestDensityGrid[ForestCY * Grid + ForestCX] > TCHAR('9'))) continue;
+        const FVector2D ForestClosest(FMath::Clamp(ForestPoint.X, ForestCX * ForestCellM, (ForestCX + 1) * ForestCellM),
+            FMath::Clamp(ForestPoint.Y, ForestCY * ForestCellM, (ForestCY + 1) * ForestCellM));
+        const FVector2D ForestOffset = ForestClosest - ForestPoint;
+        if (ForestOffset.SizeSquared() <= 225.0 && FVector2D::DotProduct(ForestOffset, ForestDirection) > 0.0) return true;
+    }
+    if (const TArray<int32>* ForestSegments = ForestHedgeCells.Find(ForestIndex))
+    for (int32 ForestSegmentIndex : *ForestSegments)
+    {
+        const auto& ForestSegment = ForestHedges[ForestSegmentIndex];
+        const FVector2D ForestDelta = ForestSegment.End - ForestSegment.Start;
+        const double ForestT = FMath::Clamp(FVector2D::DotProduct(ForestPoint - ForestSegment.Start, ForestDelta) / FMath::Max(0.0001, ForestDelta.SizeSquared()), 0.0, 1.0);
+        const FVector2D ForestOffset = ForestSegment.Start + ForestDelta * ForestT - ForestPoint;
+        if (ForestOffset.SizeSquared() <= 225.0 && FVector2D::DotProduct(ForestOffset, ForestDirection) >= 0.0) return true;
+    }
+    return false;
 }

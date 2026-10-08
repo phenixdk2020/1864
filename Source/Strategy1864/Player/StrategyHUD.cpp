@@ -1,4 +1,7 @@
 #include "StrategyHUD.h"
+#include "../Combat/StrategyContactComponent.h"
+#include "../Combat/StrategyVisibilityComponent.h"
+#include "../Campaign/StrategyCampaignBattlefield.h"
 #include "StrategyBattleQuality.h"
 #include "../AI/StrategyAITelemetryComponent.h"
 #include "Misc/CommandLine.h"
@@ -667,11 +670,18 @@ void AStrategyHUD::DrawMinimap()
     Text(TEXT("TAKTISK KORT / KAMERA  [M]"), X + 10.0f, Y + 6.0f, Gold, 0.9f);
     const float MX = X + 8.0f, MY = Y + 26.0f, MW = W - 16.0f, MH = H - 6.0f;
     DrawRect(FLinearColor::FromSRGBColor(FColor(52, 78, 44, 240)), MX, MY, MW, MH);
-    // What it shows: all units with a margin, at least 600 m square, kept to the frame's shape.
+    TSet<FName> ForestVisibleEnemies;
+    for (TActorIterator<AStrategyUnit> ForestObserver(GetWorld()); ForestObserver; ++ForestObserver)
+    {
+        if (!IsValid(*ForestObserver) || ForestObserver->Side != EStrategySide::Denmark || !ForestObserver->IsCombatEffective() || !ForestObserver->ContactComponent) continue;
+        for (const FStrategyContactRecord& ForestContact : ForestObserver->ContactComponent->GetKnownContacts())
+            if (ForestContact.bCurrentlyVisible) ForestVisibleEnemies.Add(ForestContact.StableUnitId);
+    }
+    // Hidden enemies must not affect the map bounds either.
     FBox Bounds(ForceInit);
     for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
     {
-        if (IsValid(*It)) { Bounds += It->GetActorLocation(); }
+        if (IsValid(*It) && (It->Side == EStrategySide::Denmark || ForestVisibleEnemies.Contains(It->StableUnitId))) { Bounds += It->GetActorLocation(); }
     }
     if (!Bounds.IsValid) { Bounds = FBox(FVector(-30000.0f), FVector(30000.0f)); }
     FVector Centre = Bounds.GetCenter();
@@ -681,11 +691,21 @@ void AStrategyHUD::DrawMinimap()
     MinimapRect = FBox2D(FVector2D(MX, MY), FVector2D(MX + MW, MY + MH));
     const float Scale = MW / (2.0f * Half);
     // World +X is north (up the map), +Y east (right).
+    // Fixed raster budget, direct cached-grid lookups; no forest-grid scan per frame.
+    for (int32 ForestRow = 0; ForestRow < 24; ++ForestRow)
+    for (int32 ForestColumn = 0; ForestColumn < 32; ++ForestColumn)
+    {
+        const FVector ForestWorld(Centre.X + Half * (1.0 - 2.0 * (ForestRow + 0.5) / 24.0) * MH / MW,
+            Centre.Y + Half * (2.0 * (ForestColumn + 0.5) / 32.0 - 1.0), 0.0);
+        const float ForestDensity = UStrategyTerrainQueryLibrary::GetForestDensityAt(this, ForestWorld);
+        if (ForestDensity > 0.0f) DrawRect(FLinearColor(0.015f, 0.10f, 0.025f, ForestDensity), MX + ForestColumn * MW / 32.0f, MY + ForestRow * MH / 24.0f, MW / 32.0f, MH / 24.0f);
+    }
     auto ToMap = [&](const FVector& P) { return FVector2D(MX + MW * 0.5f + (P.Y - Centre.Y) * Scale, MY + MH * 0.5f - (P.X - Centre.X) * Scale); };
     for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
     {
         const AStrategyUnit* Unit = *It;
-        if (!IsValid(Unit) || Unit->CurrentStrength <= 0)
+        if (!IsValid(Unit) || Unit->CurrentStrength <= 0 ||
+            (Unit->Side != EStrategySide::Denmark && !ForestVisibleEnemies.Contains(Unit->StableUnitId)))
         {
             continue;
         }
@@ -694,6 +714,8 @@ void AStrategyHUD::DrawMinimap()
         const float S = IsCommandHQ(Unit) ? 5.0f : 4.0f;
         const FLinearColor C = Unit->bSelected ? Gold : Unit->Side == EStrategySide::Denmark ? FLinearColor::FromSRGBColor(FColor(70, 220, 255)) : FLinearColor::FromSRGBColor(FColor(235, 50, 40));
         DrawRect(C, P.X - S, P.Y - S * 0.6f, S * 2.0f, S * 1.2f);
+        if (Unit->Side == EStrategySide::Denmark && Unit->VisibilityComponent && Unit->VisibilityComponent->IsConcealedInForest(Unit))
+            Text(TEXT("skjult"), P.X + S + 2.0f, P.Y - 5.0f, Ink, 0.6f);
     }
     if (const APlayerController* PC = GetOwningPlayerController())
     {

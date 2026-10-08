@@ -42,6 +42,10 @@ public:
     /** The field's size in cm (a square), and the ground height at a world point (cm). */
     float GetSizeCm() const { return SizeCm; }
     float GroundZ(const FVector& World) const;
+    float GetForestDensityAt(const FVector& WorldLocation) const;
+    bool HasForestCover(const FVector& UnitLocation, const FVector& ShooterLocation) const;
+    int32 GetForestGridSize() const { return Grid; }
+
 
     /** Battlefield metres (x east, y north) to world. */
     FVector FieldToWorld(double XM, double YM, double LiftCm = 0.0) const;
@@ -90,6 +94,12 @@ private:
     float SizeCm = 800000.0f;
     float MinHeightM = 0.0f;
     TArray<float> HeightM;   // Grid x Grid, row 0 at the south
+    FString ForestDensityGrid;
+    struct FForestHedgeSegment { FVector2D Start, End; };
+    TArray<FForestHedgeSegment> ForestHedges;
+    TMap<int32, TArray<int32>> ForestHedgeCells;
+    TBitArray<> ForestCoverGrid; // Forest and hedge proximity, baked once on load.
+    void BuildForestCoverGrid();
     FString KindsGrid;       // Grid x Grid, the generator's cell kinds (. field ~ sea m meadow w wood t town o water)
 
     /** The rivers (field metres) with their widths, for the crossings. */

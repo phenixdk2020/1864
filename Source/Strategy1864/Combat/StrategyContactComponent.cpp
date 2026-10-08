@@ -61,11 +61,6 @@ void UStrategyContactComponent::RefreshContacts(float ElapsedSeconds)
             continue;
         }
 
-        const float DistanceCm =
-            FVector::Dist2D(
-                OwnerUnit->GetActorLocation(),
-                Candidate->GetActorLocation());
-
         const float SkirmisherMultiplier =
             OwnerUnit->SkirmisherComponent
             ? OwnerUnit->SkirmisherComponent->GetAwarenessRangeMultiplier()
@@ -80,8 +75,7 @@ void UStrategyContactComponent::RefreshContacts(float ElapsedSeconds)
         const float AwarenessMultiplier =
             SkirmisherMultiplier * TerrainMultiplier;
 
-        if (DistanceCm > MaximumAwarenessRangeCm * AwarenessMultiplier ||
-            !OwnerUnit->VisibilityComponent->HasLineOfSightTo(Candidate))
+        if (!OwnerUnit->VisibilityComponent->CanDetectTarget(Candidate, MaximumAwarenessRangeCm * AwarenessMultiplier))
         {
             continue;
         }

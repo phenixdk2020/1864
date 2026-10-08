@@ -287,7 +287,7 @@ bool UStrategyFireControlComponent::CanEngageTarget(const AStrategyUnit* Target)
     }
 
     return Unit->VisibilityComponent &&
-        Unit->VisibilityComponent->HasLineOfSightTo(Target);
+        Unit->VisibilityComponent->CanDetectTarget(Target, GetActiveRangeCm());
 }
 
 

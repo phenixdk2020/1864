@@ -116,7 +116,7 @@ AStrategyUnit* UStrategyCavalryScreenAIComponent::FindNearestVisibleEnemy() cons
                 Candidate->GetActorLocation());
 
         if (Distance >= BestDistance ||
-            !OwnerCavalry->VisibilityComponent->HasLineOfSightTo(Candidate))
+            !OwnerCavalry->VisibilityComponent->CanDetectTarget(Candidate, DetectionRangeCm))
         {
             continue;
         }
