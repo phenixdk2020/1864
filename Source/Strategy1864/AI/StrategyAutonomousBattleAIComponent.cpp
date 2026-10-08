@@ -49,6 +49,9 @@ void UStrategyAutonomousBattleAIComponent::TickComponent(
         return;
     }
 
+    if (OwnerUnit->FieldOfficerComponent &&
+        (OwnerUnit->FieldOfficerComponent->IsTakingFireCover() || OwnerUnit->FieldOfficerComponent->IsStandingUpFromFireCover())) return;
+
     float ReactionMultiplier = 1.0f;
 
     if (OwnerUnit->AIDifficultyComponent)

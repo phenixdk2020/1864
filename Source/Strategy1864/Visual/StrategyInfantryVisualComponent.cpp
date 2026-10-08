@@ -187,10 +187,15 @@ void UStrategyInfantryVisualComponent::TickComponent(
         CachedStrength = CurrentStrength;
     }
 
-    if (CachedFormationValue != CurrentFormationValue)
+    const float CoverVisualLateralSpacing = OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->SoldierLateralSpacingCm : 0.0f;
+    const float CoverVisualRankSpacing = OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->SoldierRankSpacingCm : 0.0f;
+    if (CachedFormationValue != CurrentFormationValue || CachedCoverLateralSpacing != CoverVisualLateralSpacing ||
+        CachedCoverRankSpacing != CoverVisualRankSpacing)
     {
         RebuildFormation();
         CachedFormationValue = CurrentFormationValue;
+        CachedCoverLateralSpacing = CoverVisualLateralSpacing;
+        CachedCoverRankSpacing = CoverVisualRankSpacing;
     }
 
     const bool bBayonetFixed =

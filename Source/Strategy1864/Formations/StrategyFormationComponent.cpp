@@ -1,4 +1,6 @@
 #include "StrategyFormationComponent.h"
+#include "../Units/StrategyUnit.h"
+#include "../AI/StrategyFieldOfficerComponent.h"
 
 UStrategyFormationComponent::UStrategyFormationComponent()
 {
@@ -12,6 +14,8 @@ void UStrategyFormationComponent::SetFormation(EStrategyFormationType NewFormati
         return;
     }
 
+    if (AStrategyUnit* CoverFormationUnit = Cast<AStrategyUnit>(GetOwner()))
+        if (CoverFormationUnit->FieldOfficerComponent) CoverFormationUnit->FieldOfficerComponent->LeaveAutomaticFireCover();
     const EStrategyFormationType OldFormation = CurrentFormation;
     CurrentFormation = NewFormation;
     OnFormationChanged.Broadcast(OldFormation, CurrentFormation);

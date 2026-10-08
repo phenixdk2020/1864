@@ -1,4 +1,6 @@
 #include "StrategyOrderComponent.h"
+#include "../Units/StrategyUnit.h"
+#include "../AI/StrategyFieldOfficerComponent.h"
 
 UStrategyOrderComponent::UStrategyOrderComponent()
 {
@@ -52,6 +54,11 @@ bool UStrategyOrderComponent::SetOrder(const FStrategyOrder& NewOrder)
         SetExecutionState(EStrategyOrderExecutionState::Superseded);
     }
 
+    if (NewOrder.Type != EStrategyOrderType::Hold && NewOrder.Type != EStrategyOrderType::ArtilleryFireMission)
+    {
+        if (AStrategyUnit* CoverOrderUnit = Cast<AStrategyUnit>(GetOwner()))
+            if (CoverOrderUnit->FieldOfficerComponent) CoverOrderUnit->FieldOfficerComponent->LeaveAutomaticFireCover();
+    }
     CurrentOrder = NewOrder;
     CurrentOrder.OrderSerial = NextOrderSerial++;
     SetExecutionState(EStrategyOrderExecutionState::Pending);

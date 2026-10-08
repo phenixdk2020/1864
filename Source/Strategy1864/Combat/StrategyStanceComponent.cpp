@@ -1,6 +1,8 @@
 #include "StrategyStanceComponent.h"
+#include "../AI/StrategyFieldOfficerComponent.h"
 
 #include "../Units/StrategyUnit.h"
+#include "../Formations/StrategyFormationComponent.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 
 UStrategyStanceComponent::UStrategyStanceComponent()
@@ -13,12 +15,17 @@ bool UStrategyStanceComponent::SetStance(EStrategyStance NewStance)
     AStrategyUnit* Unit = Cast<AStrategyUnit>(GetOwner());
     if (!Unit ||
         Unit->Echelon != EStrategyEchelon::Company ||
+        (NewStance != EStrategyStance::Standing &&
+            ((Unit->FieldOfficerComponent && Unit->FieldOfficerComponent->IsCharging()) ||
+             (Unit->FormationComponent && Unit->FormationComponent->CurrentFormation == EStrategyFormationType::Square))) ||
         Unit->UnitState == EStrategyUnitState::Routed ||
         Unit->UnitState == EStrategyUnitState::Destroyed)
     {
         return false;
     }
 
+    if (NewStance != EStrategyStance::Prone && Unit->FieldOfficerComponent)
+        Unit->FieldOfficerComponent->LeaveAutomaticFireCover();
     Stance = NewStance;
     return true;
 }
@@ -51,6 +58,9 @@ float UStrategyStanceComponent::GetReloadMultiplier() const
 
 float UStrategyStanceComponent::GetIncomingHitMultiplier() const
 {
+    const AStrategyUnit* CoverStanceUnit = Cast<AStrategyUnit>(GetOwner());
+    if (Stance == EStrategyStance::Prone && CoverStanceUnit && CoverStanceUnit->FieldOfficerComponent &&
+        CoverStanceUnit->FieldOfficerComponent->IsTakingFireCover()) return 0.60f;
     if (Stance == EStrategyStance::Prone)
     {
         return FMath::Clamp(ProneIncomingHitMultiplier, 0.05f, 1.0f);

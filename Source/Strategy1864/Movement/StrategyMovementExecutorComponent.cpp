@@ -1,4 +1,5 @@
 #include "StrategyMovementExecutorComponent.h"
+#include "../AI/StrategyFieldOfficerComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "../Combat/StrategyCombatComponent.h"
 
@@ -224,6 +225,7 @@ void UStrategyMovementExecutorComponent::TickComponent(
         return;
     }
 
+    if (OwnerUnit->FieldOfficerComponent && OwnerUnit->FieldOfficerComponent->IsStandingUpFromFireCover()) return;
     const FStrategyOrder CurrentOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
     if (CurrentOrder.OrderSerial != ExecutingOrderSerial || !IsMovementOrder(CurrentOrder.Type))
     {
