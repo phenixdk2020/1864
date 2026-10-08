@@ -613,6 +613,19 @@ void ACampaign1851Map::FreezeCompanyStrength(int32 Regiment)
 	{
 		return;
 	}
+	if (Regiments[Regiment].Arm == ECampaign1851Arm::Artillery)
+	{
+		TArray<float> Guns, Horses, MaxHorses;
+		for (int32 k = 0; k < SubUnitCount(Regiment); ++k)
+		{
+			Guns.Add(float(SectionResource(Regiment, k, 0)));
+			Horses.Add(float(SectionResource(Regiment, k, 1)));
+			MaxHorses.Add(float(SectionResource(Regiment, k, 2)));
+		}
+		Regiments[Regiment].SectionGuns = Guns;
+		Regiments[Regiment].SectionHorses = Horses;
+		Regiments[Regiment].SectionMaxHorses = MaxHorses;
+	}
 	TArray<float> W;
 	for (int32 k = 0; k < SubUnitCount(Regiment); ++k)
 	{
@@ -722,8 +735,8 @@ bool ACampaign1851Map::TransferCompanyMen(int32 FromReg, int32 From, int32 ToReg
 	if (OutWhy)
 	{
 		*OutWhy = FString::Printf(TEXT("%d mand flyttet: %s har nu %d, %s har %d"), N,
-			*FString::Printf(TEXT("%d. %s"), bCompanies ? CompanyNumber(FromReg, From) : From + 1, bCompanies ? TEXT("kompagni") : TEXT("eskadron")), CompanyMen(FromReg, From),
-			*FString::Printf(TEXT("%d. %s"), bCompanies ? CompanyNumber(ToReg, To) : To + 1, bCompanies ? TEXT("kompagni") : TEXT("eskadron")), CompanyMen(ToReg, To));
+			*FString::Printf(TEXT("%d. %s"), bCompanies ? CompanyNumber(FromReg, From) : From + 1, bCompanies ? TEXT("kompagni") : F.Arm == ECampaign1851Arm::Artillery ? TEXT("sektion") : TEXT("eskadron")), CompanyMen(FromReg, From),
+			*FString::Printf(TEXT("%d. %s"), bCompanies ? CompanyNumber(ToReg, To) : To + 1, bCompanies ? TEXT("kompagni") : F.Arm == ECampaign1851Arm::Artillery ? TEXT("sektion") : TEXT("eskadron")), CompanyMen(ToReg, To));
 	}
 	return true;
 }
@@ -739,7 +752,8 @@ bool ACampaign1851Map::EqualizeCompanies(int32 Regiment, FString* OutWhy)
 	{
 		return Fail(TEXT("Ikke midt i et slag"));
 	}
-	Regiments[Regiment].CompanyWeight.Reset();
+	const int32 Parts = SubUnitCount(Regiment);
+	Regiments[Regiment].CompanyWeight.Init(1.f, Parts);
 	if (OutWhy) { *OutWhy = FString::Printf(TEXT("%s: mændene er fordelt ligeligt over kompagnierne"), *Regiments[Regiment].Name); }
 	return true;
 }
@@ -884,5 +898,52 @@ bool ACampaign1851Map::RansomOfficer(int32 Officer, FString* OutWhy)
 	EnemyOfficersHeld = FMath::Max(0, EnemyOfficersHeld - 1);
 	News.Add(FString::Printf(TEXT("%s %s er løskøbt for %d rd. og er hjemme igen"), *O.Rank, *O.Name, Cost));
 	if (OutWhy) { *OutWhy = FString::Printf(TEXT("%s er løskøbt for %d rd."), *O.Name, Cost); }
+	return true;
+}
+
+// Cumulative rounding preserves every resource, including odd totals and depleted sections.
+int32 ACampaign1851Map::SectionResource(int32 Regiment, int32 Section, int32 Resource) const
+{
+	if (!Regiments.IsValidIndex(Regiment)) { return 0; }
+	const FCampaign1851Regiment& R = Regiments[Regiment];
+	const int32 Parts = SubUnitCount(Regiment);
+	if (Section < 0 || Section >= Parts) { return 0; }
+	const TArray<float>& Weights = Resource == 0 ? R.SectionGuns : Resource == 1 ? R.SectionHorses : R.SectionMaxHorses;
+	const int32 Total = Resource == 0 ? R.Guns : Resource == 1 ? R.Horses : R.MaxHorses;
+	double All = 0.0, Before = 0.0, Mine = 0.0;
+	for (int32 k = 0; k < Parts; ++k)
+	{
+		const double Weight = Weights.Num() == Parts ? FMath::Max(0.f, Weights[k])
+			: Resource == 0 && Total <= Parts * 2 ? FMath::Clamp(Total - k * 2, 0, 2) : 1.0;
+		All += Weight;
+		if (k < Section) { Before += Weight; }
+		if (k == Section) { Mine = Weight; }
+	}
+	if (All <= 0.0) { return Total / Parts + (Section < Total % Parts ? 1 : 0); }
+	return int32(FMath::RoundToDouble(Total * (Before + Mine) / All) - FMath::RoundToDouble(Total * Before / All));
+}
+
+bool ACampaign1851Map::TransferSectionGuns(int32 FromReg, int32 From, int32 ToReg, int32 To, int32 Count, FString* OutWhy)
+{
+	auto Fail = [OutWhy](const TCHAR* Why) { if (OutWhy) { *OutWhy = Why; } return false; };
+	if (!Regiments.IsValidIndex(FromReg) || !Regiments.IsValidIndex(ToReg)
+		|| From < 0 || To < 0 || From >= SubUnitCount(FromReg) || To >= SubUnitCount(ToReg)
+		|| (FromReg == ToReg && From == To)) { return Fail(TEXT("Ingen sektioner")); }
+	FCampaign1851Regiment& F = Regiments[FromReg];
+	FCampaign1851Regiment& T = Regiments[ToReg];
+	if (F.Arm != ECampaign1851Arm::Artillery || T.Arm != ECampaign1851Arm::Artillery) { return Fail(TEXT("Kun mellem batterier")); }
+	if (IsInBattle(FromReg) || IsInBattle(ToReg) || F.IsMarching() || T.IsMarching()
+		|| (FromReg != ToReg && !((F.Town != INDEX_NONE && F.Town == T.Town) || FVector2D::Distance(F.Km, T.Km) < 2.0)))
+	{ return Fail(TEXT("Batterierne skal stå sammen og være uden for kamp")); }
+	FreezeCompanyStrength(FromReg);
+	FreezeCompanyStrength(ToReg);
+	const int32 N = FMath::Min(Count, SectionResource(FromReg, From, 0));
+	if (N <= 0) { return Fail(TEXT("Ingen kanoner at flytte")); }
+	F.SectionGuns[From] -= float(N);
+	T.SectionGuns[To] += float(N);
+	if (FromReg != ToReg) { F.Guns -= N; T.Guns += N; }
+	UpdateRegimentPiece(FromReg);
+	if (FromReg != ToReg) { UpdateRegimentPiece(ToReg); }
+	if (OutWhy) { *OutWhy = FString::Printf(TEXT("%d kanoner flyttet"), N); }
 	return true;
 }

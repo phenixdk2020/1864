@@ -1210,7 +1210,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			const int32 Cur = Overlay->GetTransferCount();
 			const int32 Reg = Overlay->GetTransferReg(), From = Overlay->GetTransferFrom(), To = Overlay->GetTransferTo();
 			if (Module == 5000) { Overlay->SetTransferCount(Overlay->GetTransferMax()); }
-			else if (Module == 5001) { Overlay->SetTransferCount((Map->CompanyMen(Reg, From) - Map->CompanyMen(Reg, To)) / 2); }
+			else if (Module == 5001) { Overlay->SetTransferCount((Map->CompanyMen(Reg, From) - Map->CompanyMen(Overlay->GetTransferToReg(), To)) / 2); }
 			else { Overlay->SetTransferCount(Cur + (Module - 1000)); }
 			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
@@ -1221,6 +1221,13 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Overlay->CloseTransfer();
 			Overlay->ShowToast(Why);
 			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
+		}
+		if (Button == SCampaign1851Overlay::EButton::TransferGun)
+		{
+			FString Why;
+			Map->TransferSectionGuns(Overlay->GetTransferReg(), Overlay->GetTransferFrom(), Overlay->GetTransferToReg(), Overlay->GetTransferTo(), 1, &Why);
+			Overlay->ShowToast(Why);
+			Button = SCampaign1851Overlay::EButton::Block;
 		}
 		if (Button == SCampaign1851Overlay::EButton::TransferWhole)
 		{
@@ -2945,13 +2952,13 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		const int32 Reg = SourceId / 10, From = SourceId % 10, ToReg = TargetId / 10, To = TargetId % 10;
 		const int32 Ma = Map->CompanyMen(Reg, From), Mb = Map->CompanyMen(ToReg, To);
 		const int32 Max = FMath::Min(Ma, Map->CompanyCapacity(ToReg) - Mb);
-		if (Max <= 0)
+		if (Max <= 0 && Map->GetRegiments()[Reg].Arm != ECampaign1851Arm::Artillery)
 		{
 			Overlay->ShowToast(Ma <= 0 ? TEXT("Kompagniet har ingen mænd at give") : TEXT("Det andet kompagni er fuldt"));
 		}
 		else
 		{
-			Overlay->OpenTransfer(Reg, From, ToReg, To, Max, FMath::Clamp((Ma - Mb) / 2, 1, Max));
+			Overlay->OpenTransfer(Reg, From, ToReg, To, FMath::Max(0, Max), FMath::Clamp((Ma - Mb) / 2, 1, FMath::Max(1, Max)));
 		}
 		return;
 	}
