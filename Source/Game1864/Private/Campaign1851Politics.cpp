@@ -48,6 +48,7 @@ const TCHAR* Campaign1851Politics::CurrentEffect(ECampaign1851Current C)
 void ACampaign1851Map::ResetPolitics()
 {
 	// The ministries' AUTO budgets as at the start (rd. a month; the pot begins with one month).
+	LoadScenarioMinisters();
 	const bool bEarly = ActiveScenario().Year < 1850;
 	const double Budgets[] = { 5000.0, 15000.0, 10000.0, 10000.0, 5000.0, 2000.0, 10000.0, 10000.0 };
 	for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count); ++p)
@@ -60,7 +61,7 @@ void ACampaign1851Map::ResetPolitics()
 	Support[1] = (bEarly ? 10.f : 40.f) + 10.f * Deviation * Rng.FRandRange(-1.f, 1.f);
 	Support[2] = 100.f - Support[0] - Support[1];
 	Mood = 60.f;
-	PrimeMinister = bEarly ? TEXT("Det kongelige statsråd") : TEXT("A.W. Moltke");
+	PrimeMinister = ActiveScenario().Id == TEXT("1825") ? TEXT("Frederik VI og gehejmestatsrådet") : bEarly ? TEXT("Det kongelige statsråd") : TEXT("A.W. Moltke");
 	Government = ECampaign1851Current::Helstat;
 	GovernmentSince = 0.0;
 	NextCabinet = 0;
@@ -196,6 +197,15 @@ void ACampaign1851Map::MonthlyPolitics()
 			PeaceTalksDay = CampaignDays;
 			News.Add(FString::Printf(TEXT("%s tilbyder mægling: en fredskonference samles"), *N.Name));
 		}
+	}
+	// Under absolutism opinion cannot dismiss the king or appoint a party cabinet.
+	if (ActiveScenario().Id == TEXT("1825") && GetDate() < FDateTime(1848, 3, 22))
+	{
+		PrimeMinister = GetDate() < FDateTime(1839, 12, 3)
+			? TEXT("Frederik VI og gehejmestatsrådet") : GetDate() < FDateTime(1848, 1, 20)
+			? TEXT("Christian VIII og gehejmestatsrådet") : TEXT("Frederik VII og gehejmestatsrådet");
+		Government = ECampaign1851Current::Helstat;
+		return;
 	}
 	// Cabinets: the historical one on its date if its current is strong enough, else the leading current's.
 	const FDateTime Now = GetDate();

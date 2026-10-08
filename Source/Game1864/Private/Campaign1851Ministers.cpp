@@ -5,6 +5,11 @@
 // foreign affairs, the navy and finance act like the others: MANUAL, ADVISORY (they recommend) or AUTO.
 
 #include "Campaign1851Map.h"
+#include "Dom/JsonObject.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 
 namespace
 {
@@ -41,8 +46,53 @@ namespace
 	}
 }
 
+bool ACampaign1851Map::LoadScenarioMinisters()
+{
+	for (TArray<FCampaign1851Minister>& Pool : ScenarioMinisterPools) { Pool.Reset(); }
+	if (ActiveScenario().Id != TEXT("1825")) { return true; }
+	FString Text;
+	TSharedPtr<FJsonObject> Json;
+	if (!FFileHelper::LoadFileToString(Text, *(FPaths::ProjectDir() / TEXT("Data/Campaign1851/Ministers_1825.json")))
+		|| !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Json) || !Json.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN|1825|ministers|cannot load Ministers_1825.json"));
+		return false;
+	}
+	const TArray<TSharedPtr<FJsonValue>>& Portfolios = Json->GetArrayField(TEXT("portfolios"));
+	if (Portfolios.Num() != int32(ECampaign1851Portfolio::Count)) { return false; }
+	for (int32 p = 0; p < Portfolios.Num(); ++p)
+	{
+		for (const TSharedPtr<FJsonValue>& Value : Portfolios[p]->AsObject()->GetArrayField(TEXT("candidates")))
+		{
+			const TSharedPtr<FJsonObject> Entry = Value->AsObject();
+			FCampaign1851Minister M;
+			M.Name = Entry->GetStringField(TEXT("name"));
+			M.Line = ECampaign1851Current::Helstat;
+			M.Skill = uint8(FMath::Clamp(FMath::RoundToInt(Entry->GetNumberField(TEXT("skill")) / 10.0), 1, 10));
+			M.Thrift = uint8(FMath::Clamp(FMath::RoundToInt(Entry->GetNumberField(TEXT("thrift")) / 10.0), 1, 10));
+			M.Caution = uint8(FMath::Clamp(FMath::RoundToInt(Entry->GetNumberField(TEXT("caution")) / 10.0), 1, 10));
+			ScenarioMinisterPools[p].Add(M);
+		}
+		if (ScenarioMinisterPools[p].IsEmpty()) { return false; }
+	}
+	return true;
+}
+
 FCampaign1851Minister ACampaign1851Map::MakeMinister(ECampaign1851Portfolio P, ECampaign1851Current Line, const FString& Avoid) const
 {
+	if (ActiveScenario().Id == TEXT("1825") && GetDate() < FDateTime(1848, 3, 22) && int32(P) >= 0 && int32(P) < int32(ECampaign1851Portfolio::Count))
+	{
+		const TArray<FCampaign1851Minister>& Pool = ScenarioMinisterPools[int32(P)];
+		for (const FCampaign1851Minister& Candidate : Pool)
+		{
+			if (Candidate.Name != Avoid)
+			{
+				FCampaign1851Minister M = Candidate;
+				M.Since = CampaignDays;
+				return M;
+			}
+		}
+	}
 	const TArray<FCampaignPoliticsMinisterName>& Names = CampaignPoliticsMinisterPool(P, ActiveScenario().Year < 1850 && GetDate().GetYear() < 1848);
 	TArray<int32> Fit;
 	for (int32 i = 0; i < Names.Num(); ++i)
@@ -90,6 +140,14 @@ TArray<FCampaign1851Minister> ACampaign1851Map::MinisterCandidates(ECampaign1851
 {
 	TArray<FCampaign1851Minister> Out;
 	if (int32(P) < 0 || int32(P) >= int32(ECampaign1851Portfolio::Count)) { return Out; }
+	if (ActiveScenario().Id == TEXT("1825") && GetDate() < FDateTime(1848, 3, 22) && !ScenarioMinisterPools[int32(P)].IsEmpty())
+	{
+		for (FCampaign1851Minister M : ScenarioMinisterPools[int32(P)])
+		{
+			if (M.Name != Ministers[int32(P)].Name) { M.Since = CampaignDays; Out.Add(M); }
+		}
+		return Out;
+	}
 	for (const FCampaignPoliticsMinisterName& N : CampaignPoliticsMinisterPool(P, ActiveScenario().Year < 1850 && GetDate().GetYear() < 1848))
 	{
 		if (Ministers[int32(P)].Name == N.Name)

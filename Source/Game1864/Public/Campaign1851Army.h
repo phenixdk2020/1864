@@ -88,7 +88,7 @@ struct FCampaign1851Officer
 	/** A staff post at a formation's headquarters (FCampaign1851Formation::Id, 0 = none): 1 deputy, 2 chief of staff. */
 	int32 StaffOf = 0;
 	int32 StaffPost = 0;
-	/** Out of service after a battle: 1 wounded (back when recovered), 2 prisoner of the enemy (back when exchanged). */
+	/** Out of service after a battle: 1 wounded (back when recovered), 2 prisoner of the enemy (back when exchanged), 3 study leave. */
 	uint8 Away = 0;
 	FDateTime AwayUntil;
 	bool IsFree() const { return Away == 0 && Regiment == INDEX_NONE && Command == INDEX_NONE && Formation == 0 && CaptainOf == INDEX_NONE && StaffOf == 0; }

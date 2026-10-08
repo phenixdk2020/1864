@@ -1,0 +1,194 @@
+{
+  "note": "Frederik VI og gehejmestatsrådet under enevælden. De otte ressorter er semantiske spilposter, ikke en historisk ministerliste. Alle kandidater repræsenterer kongelig tjeneste (Helstat i spillet). Evner 0–100. Se Docs/Data1825-officers.md.",
+  "sovereign": {
+    "name": "Frederik VI",
+    "born": 1768,
+    "government": "Enevælde og gehejmestatsråd"
+  },
+  "portfolios": [
+    {
+      "portfolio": "Interior",
+      "candidates": [
+        {
+          "name": "Frederik Julius Kaas",
+          "born": 1758,
+          "role": "Præsident for Danske Kancelli og justitsminister",
+          "historical": true,
+          "skill": 75,
+          "thrift": 65,
+          "caution": 85
+        },
+        {
+          "name": "Peter Ludvig Schøller",
+          "born": 1770,
+          "role": "Fiktiv kongelig rådgiver og udskiftningskandidat",
+          "historical": false,
+          "skill": 60,
+          "thrift": 75,
+          "caution": 80
+        }
+      ]
+    },
+    {
+      "portfolio": "PublicWorks",
+      "candidates": [
+        {
+          "name": "Otto Joachim Moltke",
+          "born": 1770,
+          "role": "Præsident for Slesvig-Holsten-Lauenborgske Kancelli; offentlige arbejder er spillets fordeling",
+          "historical": true,
+          "skill": 70,
+          "thrift": 75,
+          "caution": 85
+        },
+        {
+          "name": "Christian Georg Bruun",
+          "born": 1771,
+          "role": "Fiktiv kongelig rådgiver og udskiftningskandidat",
+          "historical": false,
+          "skill": 60,
+          "thrift": 75,
+          "caution": 80
+        }
+      ]
+    },
+    {
+      "portfolio": "War",
+      "candidates": [
+        {
+          "name": "Frantz Christopher Bülow",
+          "born": 1769,
+          "role": "Generaladjudant; militær rådgiver under kongen",
+          "historical": true,
+          "skill": 65,
+          "thrift": 45,
+          "caution": 80
+        },
+        {
+          "name": "Carl Frederik Caroc",
+          "born": 1772,
+          "role": "Fiktiv kongelig rådgiver og udskiftningskandidat",
+          "historical": false,
+          "skill": 60,
+          "thrift": 75,
+          "caution": 80
+        }
+      ]
+    },
+    {
+      "portfolio": "Transport",
+      "candidates": [
+        {
+          "name": "Hans Christian Holm",
+          "born": 1778,
+          "role": "Fiktiv kongelig transportembedsmand; ingen jernbanestyrelse i 1825",
+          "historical": false,
+          "skill": 60,
+          "thrift": 75,
+          "caution": 80
+        },
+        {
+          "name": "Niels Andreas Leth",
+          "born": 1773,
+          "role": "Fiktiv kongelig rådgiver og udskiftningskandidat",
+          "historical": false,
+          "skill": 60,
+          "thrift": 75,
+          "caution": 80
+        }
+      ]
+    },
+    {
+      "portfolio": "Intendance",
+      "candidates": [
+        {
+          "name": "Jens Frederik Wichmann",
+          "born": 1775,
+          "role": "Fiktiv embedsmand ved militær forsyning og regnskaber",
+          "historical": false,
+          "skill": 65,
+          "thrift": 80,
+          "caution": 75
+        },
+        {
+          "name": "Johan Wilhelm Rist",
+          "born": 1774,
+          "role": "Fiktiv kongelig rådgiver og udskiftningskandidat",
+          "historical": false,
+          "skill": 60,
+          "thrift": 75,
+          "caution": 80
+        }
+      ]
+    },
+    {
+      "portfolio": "Foreign",
+      "candidates": [
+        {
+          "name": "Ernst Schimmelmann",
+          "born": 1747,
+          "role": "Udenrigsminister fra 1824",
+          "historical": true,
+          "skill": 70,
+          "thrift": 65,
+          "caution": 90
+        },
+        {
+          "name": "Frederik Henrik Lemvigh",
+          "born": 1775,
+          "role": "Fiktiv kongelig rådgiver og udskiftningskandidat",
+          "historical": false,
+          "skill": 60,
+          "thrift": 75,
+          "caution": 80
+        }
+      ]
+    },
+    {
+      "portfolio": "Navy",
+      "candidates": [
+        {
+          "name": "Steen Andersen Bille",
+          "born": 1751,
+          "role": "Ledende søofficer ved Admiralitets- og Kommissariatskollegiet; ikke konstitutionel marineminister",
+          "historical": true,
+          "skill": 75,
+          "thrift": 70,
+          "caution": 80
+        },
+        {
+          "name": "Hans Ditlev Krabbe",
+          "born": 1776,
+          "role": "Fiktiv kongelig rådgiver og udskiftningskandidat",
+          "historical": false,
+          "skill": 60,
+          "thrift": 75,
+          "caution": 80
+        }
+      ]
+    },
+    {
+      "portfolio": "Finance",
+      "candidates": [
+        {
+          "name": "Johan Sigismund von Møsting",
+          "born": 1759,
+          "role": "Finansminister og præsident for Rentekammeret",
+          "historical": true,
+          "skill": 85,
+          "thrift": 85,
+          "caution": 90
+        },
+        {
+          "name": "Andreas Otto Neergaard",
+          "born": 1777,
+          "role": "Fiktiv kongelig rådgiver og udskiftningskandidat",
+          "historical": false,
+          "skill": 60,
+          "thrift": 75,
+          "caution": 80
+        }
+      ]
+    }
+  ]
+}

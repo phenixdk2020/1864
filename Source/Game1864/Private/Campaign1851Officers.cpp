@@ -41,16 +41,20 @@ namespace
 
 bool ACampaign1851Map::LoadOfficers()
 {
+	const bool b1825 = ActiveScenario().Id == TEXT("1825");
+	const FString File = b1825 ? TEXT("Officers_1825.json") : TEXT("Officers1851.json");
+	OfficerScenarioData.Reset();
+	OfficerStartCommands.Reset();
 	FString Text;
 	TSharedPtr<FJsonObject> Json;
-	const FString ArmyOfficerFile = ActiveScenario().Id == TEXT("1825") ? TEXT("Data/Campaign1851/Officers_1825.json") : TEXT("Data/Campaign1851/Officers1851.json");
-	if (!FFileHelper::LoadFileToString(Text, *(FPaths::ProjectDir() / ArmyOfficerFile))
+	if (!FFileHelper::LoadFileToString(Text, *(FPaths::ProjectDir() / (TEXT("Data/Campaign1851/") + File)))
 		|| !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Json) || !Json.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|officers|cannot load %s"), *ArmyOfficerFile);
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN|officers|cannot load %s"), *File);
 		return false;
 	}
 	GeneralsAtStart.Reset();
+	if (b1825) { OfficerScenarioData = Json; }
 	for (const TSharedPtr<FJsonValue>& Value : Json->GetArrayField(TEXT("generals")))
 	{
 		const TSharedPtr<FJsonObject> O = Value->AsObject();
@@ -59,12 +63,20 @@ bool ACampaign1851Map::LoadOfficers()
 		G.Name = O->GetStringField(TEXT("name"));
 		G.Rank = O->GetStringField(TEXT("rank"));
 		O->TryGetNumberField(TEXT("born"), G.Born);
+		int32 StartAway = 0;
+		O->TryGetNumberField(TEXT("away"), StartAway);
+		G.Away = uint8(FMath::Clamp(StartAway, 0, 3));
+		FString AwayDate;
+		if (O->TryGetStringField(TEXT("awayUntil"), AwayDate)) { FDateTime::ParseIso8601(*AwayDate, G.AwayUntil); }
 		G.bGeneral = true;
+		O->TryGetBoolField(TEXT("general"), G.bGeneral);
+		FString StartCommand;
+		if (O->TryGetStringField(TEXT("command"), StartCommand)) { OfficerStartCommands.Add(G.Id, StartCommand); }
 		for (int32 s = 0; s < NumStats; ++s)
 		{
 			int32 V = 5;
 			O->TryGetNumberField(StatKeys[s], V);
-			G.Stats[s] = uint8(FMath::Clamp(V, 1, 10));
+			G.Stats[s] = uint8(FMath::Clamp(b1825 ? FMath::RoundToInt(V / 10.f) : V, 1, 10));
 		}
 		double Xp = 50.0;
 		O->TryGetNumberField(TEXT("experience"), Xp);
@@ -105,6 +117,19 @@ FCampaign1851Officer ACampaign1851Map::MakeOfficer(FRandomStream& Rng, bool bGen
 	}
 	O.Experience = bGeneral ? Rng.FRandRange(50.f, 80.f) : Rng.FRandRange(25.f, 65.f);
 	O.Born = GetDate().GetYear() - (bGeneral ? Rng.RandRange(50, 64) : Rng.RandRange(34, 52));
+	if (OfficerScenarioData.IsValid())
+	{
+		const TSharedPtr<FJsonObject> Profiles = OfficerScenarioData->GetObjectField(TEXT("profiles"));
+		const FString Role = bGeneral ? TEXT("general") : Rank == TEXT("Kaptajn") ? TEXT("captain") : TEXT("chief");
+		const TSharedPtr<FJsonObject> Profile = Profiles->GetObjectField(Role);
+		for (int32 s = 0; s < NumStats; ++s)
+		{
+			const int32 Base = Profile->GetIntegerField(StatKeys[s]);
+			O.Stats[s] = uint8(FMath::Clamp(FMath::RoundToInt((Base + Rng.RandRange(-10, 10)) / 10.f), 1, 10));
+		}
+		O.Born = GetDate().GetYear() - Rng.RandRange(Profile->GetIntegerField(TEXT("ageMin")), Profile->GetIntegerField(TEXT("ageMax")));
+		O.Experience = Rng.FRandRange(float(Profile->GetNumberField(TEXT("experienceMin"))), float(Profile->GetNumberField(TEXT("experienceMax"))));
+	}
 	return O;
 }
 
@@ -157,7 +182,15 @@ void ACampaign1851Map::ResetOfficers()
 	for (int32 c = 0; c < Commands.Num(); ++c)
 	{
 		Commands[c].General = INDEX_NONE;
-		const int32 G = Officers.IndexOfByPredicate([&](const FCampaign1851Officer& O) { return O.bGeneral && CommandGeneralIds.IsValidIndex(c) && O.Id == CommandGeneralIds[c]; });
+		const int32 G = Officers.IndexOfByPredicate([&](const FCampaign1851Officer& O)
+		{
+			if (OfficerScenarioData.IsValid())
+			{
+				const FString* CommandId = OfficerStartCommands.Find(O.Id);
+				return O.bGeneral && CommandId && *CommandId == Commands[c].Id;
+			}
+			return O.bGeneral && CommandGeneralIds.IsValidIndex(c) && O.Id == CommandGeneralIds[c];
+		});
 		if (G != INDEX_NONE)
 		{
 			AssignCommandGeneral(G, c);
@@ -357,7 +390,7 @@ TArray<int32> ACampaign1851Map::OfficerPool(bool bGenerals) const
 
 bool ACampaign1851Map::AssignOfficer(int32 Officer, int32 Regiment)
 {
-	if (!Officers.IsValidIndex(Officer) || !Regiments.IsValidIndex(Regiment))
+	if (!Officers.IsValidIndex(Officer) || !Regiments.IsValidIndex(Regiment) || Officers[Officer].Away == 3)
 	{
 		return false;
 	}
@@ -779,7 +812,8 @@ FString ACampaign1851Map::OfficerRole(int32 Officer) const
 	const FCampaign1851Officer& O = Officers[Officer];
 	if (O.Away != 0)
 	{
-		return O.Away == 2 ? FString::Printf(TEXT("Krigsfange (udveksles ca. %d.%d.)"), O.AwayUntil.GetDay(), O.AwayUntil.GetMonth())
+		return O.Away == 3 ? FString::Printf(TEXT("Studieorlov (tilbage ca. %d.%d.%d)"), O.AwayUntil.GetDay(), O.AwayUntil.GetMonth(), O.AwayUntil.GetYear())
+			: O.Away == 2 ? FString::Printf(TEXT("Krigsfange (udveksles ca. %d.%d.)"), O.AwayUntil.GetDay(), O.AwayUntil.GetMonth())
 			: FString::Printf(TEXT("Såret (tilbage ca. %d.%d.)"), O.AwayUntil.GetDay(), O.AwayUntil.GetMonth());
 	}
 	const int32 Index = FormationIndex(O.Formation);
@@ -879,7 +913,8 @@ void ACampaign1851Map::DailyOfficers()
 	{
 		if (O.Away != 0 && Now >= O.AwayUntil)
 		{
-			News.Add(O.Away == 2 ? FString::Printf(TEXT("%s %s er udvekslet og kommer hjem"), *O.Rank, *O.Name) : FString::Printf(TEXT("%s %s er rask og kan få en post igen"), *O.Rank, *O.Name));
+			News.Add(O.Away == 3 ? FString::Printf(TEXT("%s %s vender tilbage fra studieorlov"), *O.Rank, *O.Name)
+				: O.Away == 2 ? FString::Printf(TEXT("%s %s er udvekslet og kommer hjem"), *O.Rank, *O.Name) : FString::Printf(TEXT("%s %s er rask og kan få en post igen"), *O.Rank, *O.Name));
 			if (O.Away == 2) { EnemyOfficersHeld = FMath::Max(0, EnemyOfficersHeld - 1); }
 			O.Away = 0;
 		}

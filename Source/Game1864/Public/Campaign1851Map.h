@@ -1519,6 +1519,8 @@ private:
 	FCampaign1851Officer MakeOfficer(FRandomStream& Rng, bool bGeneral, const FString& Rank) const;
 	TArray<FCampaign1851Officer> Officers;
 	TArray<FCampaign1851Officer> GeneralsAtStart;
+	TSharedPtr<FJsonObject> OfficerScenarioData;
+	TMap<FString, FString> OfficerStartCommands;
 	TArray<FString> FirstNames, Surnames;
 	int32 OfficerPay = 600, GeneralPay = 3000, OfficerRecruitCost = 1500, GeneralRecruitCost = 6000;
 	int32 NextOfficerNumber = 1;
@@ -1623,6 +1625,8 @@ private:
 	int32 BattlefieldVersion = 0;
 	// Ministers.
 	FCampaign1851Minister MakeMinister(ECampaign1851Portfolio P, ECampaign1851Current Line, const FString& Avoid) const;
+	bool LoadScenarioMinisters();
+	TArray<FCampaign1851Minister> ScenarioMinisterPools[int32(ECampaign1851Portfolio::Count)];
 	void AppointCabinet(ECampaign1851Current Line);
 	TArray<FCampaign1851Decision> MinisterOptions(ECampaign1851Portfolio P, double Budget) const;
 	bool CarryOutMinister(const FCampaign1851Decision& D);
