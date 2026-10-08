@@ -1514,6 +1514,15 @@ Codex' tre 1825-delopgaver (hær og våben, officerer og ministre, nationer/byer
 - Officersvælger og nyrekruttering anvender de ønskede grader for chef, NK og stabschef. Eksisterende scenarie- og gemte officersposter bevares. Kompagni-/sektionsflytning og eksisterende formationsgemning genbruges; nye felter eller formatændringer er ikke tilføjet.
 - Validering: statisk gennemgang af hierarki, klikblokering og gem/indlæs samt `git diff --check`. Spillet er ikke bygget eller startet; ingen commit.
 
+### 2026-10-08 — Startmenu og reduceret spilmenu
+
+- Kampagnen åbner nu i startmenuen uden automatisk nyt spil eller automatisk indlæsning af Autosave. Kampagnetid, kortinput, genvejstaster og autosave er blokeret, indtil spilleren starter eller indlæser et spil.
+- Startmenuen tilbyder 1825 som standard og 1851 med scenarietekst og startdato; Danmark og den allerede understøttede abstrakte Sverige-Norge-model kan vælges. Øvrige stormagter vises nedtonet med »kommer senere«. Historisk afvigelse er flyttet med til startmenuen.
+- Indlæsning genbruger de fem eksisterende gemmepladser og viser gemmetidspunkt, scenarie, nation og kampagneoversigt. Oplysningerne kommer fra eksisterende save-felter; save-formatet er uændret.
+- Spilmenuen indeholder gem/indlæs, tilbage til spillet, startmenu og afslut. Retur til startmenuen gemmer først Autosave og standser kampagnen.
+- Scenarieskift genindlæser fortsat Campaign1851; NewGame.flag medfører land og afvigelse. Indlæsning fra et andet scenarie fortsætter via det eksisterende pending-slot-flow uden at EndPlay overskriver Autosave. Retur fra taktiske slag bevarer sit eksisterende indlæsningsflow.
+- Kontrol: statisk gennemgang og git diff --check. Spillet er ikke bygget eller startet; ændringerne er ikke committet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

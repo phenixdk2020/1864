@@ -340,7 +340,7 @@ void ACampaign1851PlayerController::BeginPlay()
 void ACampaign1851PlayerController::EndPlay(const EEndPlayReason::Type Reason)
 {
 	// The campaign survives a restart: always leave an autosave behind.
-	if (bInitialised)
+	if (bInitialised && bCampaignStarted)
 	{
 		SaveToSlot(TEXT("Autosave"), true);
 	}
@@ -378,6 +378,7 @@ void ACampaign1851PlayerController::TryInit()
 		Overlay = SNew(SCampaign1851Overlay).Map(Map).Controller(this);
 		GEngine->GameViewport->AddViewportWidgetContent(Overlay.ToSharedRef(), 10);
 	}
+	if (!Overlay.IsValid()) { return; }
 	bInitialised = true;
 
 	FString BuildCity;
@@ -404,27 +405,25 @@ void ACampaign1851PlayerController::TryInit()
 	}
 	else if (!bTestStart && IFileManager::Get().FileExists(*(FPaths::ProjectSavedDir() / TEXT("Campaign/NewGame.flag"))))
 	{
+		FString StartNation;
+		FFileHelper::LoadFileToString(StartNation, *(FPaths::ProjectSavedDir() / TEXT("Campaign/NewGame.flag")));
+		FString StartDeviation;
+		if (StartNation.Split(TEXT("|"), &Map->NewGameNation, &StartDeviation))
+		{ Map->NewGameDeviation = FCString::Atof(*StartDeviation); }
+		else { Map->NewGameNation = StartNation == TEXT("SE") ? TEXT("SE") : TEXT("DK"); }
 		IFileManager::Get().Delete(*(FPaths::ProjectSavedDir() / TEXT("Campaign/NewGame.flag")));
 		CampaignNewGame();   // the new game of the scenario chosen in the menu
 	}
-	else if (!bTestStart && !FParse::Param(FCommandLine::Get(), TEXT("CampaignNew")) && UGameplayStatics::DoesSaveGameExist(TEXT("Autosave"), 0))
-	{
-		// A save from the other scenario: the map is reloaded for it first (the data of the years differ).
-		const UCampaign1851SaveGame* Peek = Cast<UCampaign1851SaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("Autosave"), 0));
-		if (Peek && Peek->Scenario != ACampaign1851Map::ScenarioIndex() && Peek->Scenario >= 0 && Peek->Scenario < ACampaign1851Map::Scenarios().Num())
-		{
-			ACampaign1851Map::SetScenarioIndex(Peek->Scenario);
-			UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851")));
-			return;
-		}
-		LoadFromSlot(TEXT("Autosave"));
-	}
 	else if (!bTestStart)
 	{
-		CampaignNewGame();   // a world of its own: new seed, the historical deviation, officers and experience varied
+		Map->SetSpeed(0);
+		OpenGameMenu();
+		Overlay->ShowStartMenu();
+		return;
 	}
 	if (bTestStart)
 	{
+		bCampaignStarted = true;
 		CampaignBuild(BuildCity);
 	}
 	// Test starts: -CampaignSpeed=0..3, -CampaignDate=1852-01-20 (e.g. to see the winter).
@@ -901,6 +900,43 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	{
 		return;
 	}
+	if (Overlay.IsValid() && Overlay->IsStartMenu())
+	{
+		Map->SetSpeed(0);
+		float StartX = 0.f, StartY = 0.f;
+		if (GetMousePosition(StartX, StartY) && WasInputKeyJustPressed(EKeys::LeftMouseButton))
+		{
+			int32 StartRow = INDEX_NONE;
+			auto Button = Overlay->HitButton(FVector2D(StartX, StartY), &StartRow);
+			using EButton = SCampaign1851Overlay::EButton;
+			if (Button == EButton::Scenario) { Overlay->SetMenuScenario(StartRow); Button = EButton::Block; }
+			if (Button == EButton::NewGameNation) { Map->NewGameNation = StartRow == 1 ? TEXT("SE") : TEXT("DK"); Button = EButton::Block; }
+			if (Button == EButton::Deviation) { Map->NewGameDeviation = StartRow / 100.f; Button = EButton::Block; }
+			if (Button == EButton::StartLoad) { Overlay->ShowStartLoad(true); Button = EButton::Block; }
+			if (Button == EButton::CloseMenu) { Overlay->ShowStartLoad(false); Button = EButton::Block; }
+			if (Button == EButton::LoadSlot && SaveSlots().IsValidIndex(StartRow))
+			{
+				if (LoadFromSlot(SaveSlots()[StartRow])) { Overlay->CloseMenu(); }
+				Button = EButton::Block;
+			}
+			if (Button == EButton::NewGame)
+			{
+				const int32 StartScenario = Overlay->GetMenuScenario();
+				if (StartScenario != ACampaign1851Map::ScenarioIndex())
+				{
+					IFileManager::Get().MakeDirectory(*(FPaths::ProjectSavedDir() / TEXT("Campaign")), true);
+					if (FFileHelper::SaveStringToFile(Map->NewGameNation + TEXT("|") + FString::SanitizeFloat(Map->NewGameDeviation), *(FPaths::ProjectSavedDir() / TEXT("Campaign/NewGame.flag"))))
+					{ ACampaign1851Map::SetScenarioIndex(StartScenario); UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851"))); }
+					else { Overlay->ShowToast(TEXT("Kunne ikke starte det valgte scenarie")); }
+				}
+				else { CampaignNewGame(); }
+				Button = EButton::Block;
+			}
+			if (Button == EButton::ExitGame) { UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false); Button = EButton::Block; }
+		}
+		return;
+	}
+	if (!bCampaignStarted) { return; }
 	// -CampaignUiShots=sec:cmd;cmd,sec:cmd,...: opens the windows and cards by itself and saves a screenshot of each step
 	// (QA of the screens). cmd: window=army|officers|budget|towns|council|foreign|..., minister=N, officer=N, select=N (unit),
 	// unitcard, oob, city=Name, tab=N, civil=0/1, info=N (building type), clear.
@@ -1143,7 +1179,16 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	if (WasInputKeyJustPressed(EKeys::LeftMouseButton) && Overlay.IsValid() && Overlay->IsMenuOpen())
 	{
 		int32 Row = INDEX_NONE;
-		const SCampaign1851Overlay::EButton Button = Overlay->HitButton(Mouse, &Row);
+		SCampaign1851Overlay::EButton Button = Overlay->HitButton(Mouse, &Row);
+		if (Button == SCampaign1851Overlay::EButton::StartMenu)
+		{
+			SaveToSlot(TEXT("Autosave"), true);
+			bCampaignStarted = false;
+			Map->SetSpeed(0);
+			OpenGameMenu();
+			Overlay->ShowStartMenu();
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
 		if (Button == SCampaign1851Overlay::EButton::SaveSlot && SaveSlots().IsValidIndex(Row))
 		{
 			SaveToSlot(SaveSlots()[Row]);
@@ -1151,35 +1196,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 		else if (Button == SCampaign1851Overlay::EButton::LoadSlot && SaveSlots().IsValidIndex(Row))
 		{
-			LoadFromSlot(SaveSlots()[Row]);
-			Overlay->CloseMenu();
-		}
-		else if (Button == SCampaign1851Overlay::EButton::Scenario)
-		{
-			Overlay->SetMenuScenario(Row);
-		}
-		else if (Button == SCampaign1851Overlay::EButton::NewGame)
-		{
-			if (Overlay->IsConfirmingNewGame())
-			{
-				const int32 Chosen = Overlay->GetMenuScenario() >= 0 ? Overlay->GetMenuScenario() : ACampaign1851Map::ScenarioIndex();
-				if (Chosen != ACampaign1851Map::ScenarioIndex())
-				{
-					// Another scenario: the map's data are read again for it, and the new game starts on the fresh level.
-					ACampaign1851Map::SetScenarioIndex(Chosen);
-					IFileManager::Get().MakeDirectory(*(FPaths::ProjectSavedDir() / TEXT("Campaign")), true);
-					FFileHelper::SaveStringToFile(TEXT("new"), *(FPaths::ProjectSavedDir() / TEXT("Campaign/NewGame.flag")));
-					UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851")));
-				}
-				else
-				{
-					CampaignNewGame();
-				}
-			}
-			else
-			{
-				Overlay->SetConfirmNewGame(true);
-			}
+			if (LoadFromSlot(SaveSlots()[Row])) { Overlay->CloseMenu(); }
 		}
 		else if (Button == SCampaign1851Overlay::EButton::CloseMenu)
 		{
@@ -2361,9 +2378,9 @@ void ACampaign1851PlayerController::CampaignLoad(const FString& Slot)
 
 bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 {
-	if (!Map.IsValid())
+	if (!Map.IsValid() || !bCampaignStarted)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|save|%s|skipped: the map is gone"), *Slot);
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|save|%s|skipped: no active campaign"), *Slot);
 		return false;
 	}
 	const ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
@@ -2475,10 +2492,13 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	{
 		GCampaignOfficerScenarioPendingSlot = Slot;
 		GCampaignOfficerScenarioPendingBattle = bResumedFromBattle;
+		// Do not overwrite the slot being loaded with the outgoing scenario in EndPlay.
+		bCampaignStarted = false;
 		ACampaign1851Map::SetScenarioIndex(Save->Scenario);
 		UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851")));
 		return true; // restoration continues after the scenario's map data have loaded
 	}
+	bCampaignStarted = true;
 	Map->ClearProjects();
 	// v1 saves had no calendar: they start on 1 July 1851 at normal speed.
 	Map->SetCampaignDays(Save->SaveVersion >= 2 ? Save->CampaignDays : 0.0);
@@ -2587,6 +2607,7 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	Camera->SetView(Save->CameraTarget, Save->CameraDistanceKm, Save->CameraYaw);
 	if (Overlay.IsValid())
 	{
+		Overlay->CloseMenu();
 		Overlay->SetSelectedCity(Map->FindCity(Save->SelectedCity));
 		Overlay->ShowToast(FString::Printf(TEXT("Indlæst  ·  %s  ·  gemt %s"), *SlotLabel(Slot), *Save->SavedAt.ToString(TEXT("%d-%m-%Y %H:%M"))));
 	}
@@ -2603,6 +2624,8 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	{
 		return;
 	}
+	bCampaignStarted = true;
+	AutosaveTimer = 0.f;
 	Map->ClearProjects();
 	Map->SetCampaignDays(0.0);
 	Map->SetSpeed(0);
@@ -2659,7 +2682,21 @@ void ACampaign1851PlayerController::OpenGameMenu()
 		Row.bExists = Save != nullptr;
 		// One line under the slot name, clear of the buttons.
 		const FString Summary = Save && Save->Summary.Len() > 64 ? Save->Summary.Left(62) + TEXT(" …") : Save ? Save->Summary : FString();
-		Row.Info = Save ? FString::Printf(TEXT("%s  ·  %s"), *Save->SavedAt.ToString(TEXT("%d-%m-%Y %H:%M")), *Summary) : TEXT("Tom");
+		FString SavedNation = TEXT("Danmark");
+		if (Save)
+		{
+			for (const auto& SavedNationRow : Save->Nations)
+			{
+				if (SavedNationRow.bPlayer)
+				{
+					const auto& MenuNations = Map->GetNations();
+					const int32 MenuNationIndex = MenuNations.IndexOfByPredicate([&SavedNationRow](const FCampaign1851Nation& MenuNation) { return MenuNation.Id == SavedNationRow.Id; });
+					SavedNation = MenuNations.IsValidIndex(MenuNationIndex) ? MenuNations[MenuNationIndex].Name : SavedNationRow.Id;
+				}
+			}
+		}
+		const FString SavedScenario = Save && ACampaign1851Map::Scenarios().IsValidIndex(Save->Scenario) ? ACampaign1851Map::Scenarios()[Save->Scenario].Id : TEXT("ukendt");
+		Row.Info = Save ? FString::Printf(TEXT("%s · %s · %s · %s"), *Save->SavedAt.ToString(TEXT("%d-%m-%Y %H:%M")), *SavedScenario, *SavedNation, *Summary) : TEXT("Tom");
 	}
 	Overlay->OpenMenu(Rows);
 }
