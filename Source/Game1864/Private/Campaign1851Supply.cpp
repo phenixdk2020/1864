@@ -58,7 +58,11 @@ FCampaign1851DepotCapacity ACampaign1851Map::DepotCapacity(int32 CityIndex) cons
 	FCampaign1851DepotCapacity C;
 	if (Cities.IsValidIndex(CityIndex))
 	{
-		for (const FMagazine1851& M : Magazines1851)
+		if (ActiveScenario().Id == TEXT("1825"))
+		{
+			if (const FCampaign1851DepotCapacity* ArmyCap = ArmyScenarioMagazines.Find(Cities[CityIndex].Name)) { C = *ArmyCap; }
+		}
+		else for (const FMagazine1851& M : Magazines1851)
 		{
 			if (Cities[CityIndex].Name == M.Town)
 			{
@@ -143,7 +147,7 @@ void ACampaign1851Map::ResetSupply()
 		}
 	}
 	SupplyColumns.Reset();
-	SupplyColumnCount = Campaign1851Supply::ColumnsAtStart;
+	SupplyColumnCount = int32(ArmyEquipmentNumber(TEXT("columns"), Campaign1851Supply::ColumnsAtStart));
 	UpdateSupplyColumnPieces();
 	for (FCampaign1851Regiment& R : Regiments)
 	{
@@ -465,6 +469,10 @@ TSharedRef<FJsonObject> ACampaign1851Map::BattleOrganisationJson(int32 Regiment)
 	const TCHAR* Type = R.Arm == ECampaign1851Arm::Guard ? TEXT("guard_battalion") : R.Arm == ECampaign1851Arm::Jager ? TEXT("jager_battalion")
 		: R.Arm == ECampaign1851Arm::Cavalry ? (bHussars ? TEXT("hussar_regiment") : TEXT("dragoon_regiment"))
 		: R.Arm == ECampaign1851Arm::Artillery ? TEXT("foot_battery") : R.Arm == ECampaign1851Arm::HorseArtillery ? TEXT("horse_battery") : TEXT("infantry_battalion");
+	if (ActiveScenario().Id == TEXT("1825") && R.Arm == ECampaign1851Arm::Cavalry && !R.Name.Contains(TEXT("Dragon")) && !bHussars)
+	{
+		Type = R.Name.Contains(TEXT("Lansener")) ? TEXT("lancer_regiment") : TEXT("cuirassier_regiment");
+	}
 	O->SetStringField(TEXT("type"), Type);
 	O->SetStringField(TEXT("symbol"), R.Arm == ECampaign1851Arm::Cavalry ? TEXT("II/CAV") : R.Guns > 0 ? TEXT("I/ART") : TEXT("II"));
 	O->SetObjectField(TEXT("commander"), OfficerJson(R.Chief));
@@ -542,6 +550,11 @@ void ACampaign1851Map::ExportUnits() const
 		O->SetStringField(TEXT("id"), R.Id);
 		O->SetStringField(TEXT("name"), R.Name);
 		O->SetStringField(TEXT("arm"), Campaign1851Army::ArmName(R.Arm));
+		if (ActiveScenario().Id == TEXT("1825"))
+		{
+			O->SetStringField(TEXT("weapon"), ArmyWeaponText(R.Arm));
+			O->SetStringField(TEXT("uniform"), ArmyUniformText(R.Arm));
+		}
 		O->SetNumberField(TEXT("lat"), LatLon.X);
 		O->SetNumberField(TEXT("lon"), LatLon.Y);
 		O->SetStringField(TEXT("place"), DescribePlace(R.Town, R.Km));
@@ -558,7 +571,7 @@ void ACampaign1851Map::ExportUnits() const
 		O->SetNumberField(TEXT("ammoFraction"), R.Ammo);
 		O->SetNumberField(TEXT("cartridgesPerMan"), R.Guns > 0 ? 0.0 : R.Ammo * Campaign1851Supply::CartridgesCarried);
 		O->SetNumberField(TEXT("roundsPerGun"), R.Guns > 0 ? R.Ammo * Campaign1851Supply::RoundsPerGun : 0.0);
-		const Campaign1851Army::FBattleFactors B = Campaign1851Army::BattleFactors(R);
+		const Campaign1851Army::FBattleFactors B = ArmyBattleFactors(R);
 		TSharedRef<FJsonObject> Bf = MakeShared<FJsonObject>();
 		Bf->SetNumberField(TEXT("reloadTime"), B.ReloadTime);
 		Bf->SetNumberField(TEXT("accuracy"), B.Accuracy);
@@ -894,7 +907,7 @@ TArray<FString> ACampaign1851Map::SaveSupplyColumns() const
 void ACampaign1851Map::RestoreSupplyColumns(const TArray<FString>& Lines)
 {
 	SupplyColumns.Reset();
-	SupplyColumnCount = Campaign1851Supply::ColumnsAtStart;
+	SupplyColumnCount = int32(ArmyEquipmentNumber(TEXT("columns"), Campaign1851Supply::ColumnsAtStart));
 	for (const FString& Line : Lines)
 	{
 		TArray<FString> P;

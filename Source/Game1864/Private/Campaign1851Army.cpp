@@ -333,11 +333,32 @@ bool ACampaign1851Map::LoadArmy()
 {
 	FString Text;
 	TSharedPtr<FJsonObject> Json;
-	if (!FFileHelper::LoadFileToString(Text, *(FPaths::ProjectDir() / TEXT("Data/Campaign1851/Army1851.json")))
+	const FString ArmyDataFile = ActiveScenario().Id == TEXT("1825") ? TEXT("Data/Campaign1851/Army_1825.json") : TEXT("Data/Campaign1851/Army1851.json");
+	if (!FFileHelper::LoadFileToString(Text, *(FPaths::ProjectDir() / ArmyDataFile))
 		|| !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Json) || !Json.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|army|no Data/Campaign1851/Army1851.json"));
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|army|cannot load %s"), *ArmyDataFile);
 		return false;
+	}
+	ArmyScenarioEquipment.Reset();
+	ArmyScenarioMagazines.Reset();
+	const TSharedPtr<FJsonObject>* ArmyEquipmentObject = nullptr;
+	if (Json->TryGetObjectField(TEXT("equipment"), ArmyEquipmentObject))
+	{
+		ArmyScenarioEquipment = *ArmyEquipmentObject;
+	}
+	const TArray<TSharedPtr<FJsonValue>>* ArmyMagazineArray = nullptr;
+	if (Json->TryGetArrayField(TEXT("magazines"), ArmyMagazineArray))
+	{
+		for (const TSharedPtr<FJsonValue>& V : *ArmyMagazineArray)
+		{
+			const TSharedPtr<FJsonObject> M = V->AsObject();
+			FCampaign1851DepotCapacity Cap;
+			Cap.Food = float(M->GetNumberField(TEXT("food")));
+			Cap.Fodder = float(M->GetNumberField(TEXT("fodder")));
+			Cap.Ammo = float(M->GetNumberField(TEXT("ammo")));
+			ArmyScenarioMagazines.Add(M->GetStringField(TEXT("town")), Cap);
+		}
 	}
 	ArmyAtStart.Reset();
 	FString Nation = TEXT("DK");
@@ -358,11 +379,8 @@ bool ACampaign1851Map::LoadArmy()
 		}
 		R.Men = R.MaxMen = int32(O->GetNumberField(TEXT("men")));
 		O->TryGetNumberField(TEXT("guns"), R.Guns);
-		if (R.Guns == 0)
-		{
-			// The peacetime army of an earlier year is smaller (the batteries keep their guns).
-			R.Men = R.MaxMen = FMath::Max(100, FMath::RoundToInt(R.MaxMen * ActiveScenario().ArmyFactor));
-		}
+		R.Present = ArmyPeacePresent(R.Arm);
+		O->TryGetNumberField(TEXT("companies"), R.SavedCompanies);
 		O->TryGetNumberField(TEXT("horses"), R.Horses);
 		R.MaxHorses = R.Horses;
 		O->TryGetNumberField(TEXT("guns"), R.Guns);
@@ -370,7 +388,7 @@ bool ACampaign1851Map::LoadArmy()
 		// The army of 1851 has just come out of a war: seasoned, drilled; arms have their strengths.
 		double Xp = 55.0;
 		O->TryGetNumberField(TEXT("experience"), Xp);
-		R.Experience = float(Xp) * ActiveScenario().ExperienceFactor;
+		R.Experience = float(Xp);
 		const TSharedPtr<FJsonObject>* SkillObj = nullptr;
 		if (O->TryGetObjectField(TEXT("skills"), SkillObj))
 		{
@@ -461,6 +479,55 @@ void ACampaign1851Map::ResetArmy()
 	{
 		UpdateRegimentPiece(i);
 	}
+}
+
+double ACampaign1851Map::ArmyEquipmentNumber(const TCHAR* Key, double Fallback) const
+{
+	double Value = Fallback;
+	if (ArmyScenarioEquipment.IsValid()) { ArmyScenarioEquipment->TryGetNumberField(Key, Value); }
+	return Value;
+}
+
+float ACampaign1851Map::ArmyPeacePresent(ECampaign1851Arm Arm) const
+{
+	if (ActiveScenario().Id != TEXT("1825")) { return Campaign1851Mobilisation::PeacePresent; }
+	if (Arm == ECampaign1851Arm::Guard) { return 1.f; }
+	if (Arm == ECampaign1851Arm::Cavalry) { return 0.6f; }
+	if (Arm == ECampaign1851Arm::Artillery || Arm == ECampaign1851Arm::HorseArtillery) { return 0.65f; }
+	return 0.35f;
+}
+
+FString ACampaign1851Map::ArmyWeaponText(ECampaign1851Arm Arm) const
+{
+	if (!ArmyScenarioEquipment.IsValid()) { return FString(); }
+	const bool bGuns = Arm == ECampaign1851Arm::Artillery || Arm == ECampaign1851Arm::HorseArtillery;
+	if (bGuns && HasResearch(TEXT("riflegun"))) { return TEXT("Riflet forladeskyts (udforsket)"); }
+	if (!bGuns && Arm != ECampaign1851Arm::Cavalry && HasResearch(TEXT("breech"))) { return TEXT("Bagladegevær (udforsket)"); }
+	FString Value;
+	ArmyScenarioEquipment->TryGetStringField(bGuns ? TEXT("artilleryWeapon") : Arm == ECampaign1851Arm::Cavalry ? TEXT("cavalryWeapon") : TEXT("infantryWeapon"), Value);
+	return Value;
+}
+
+FString ACampaign1851Map::ArmyUniformText(ECampaign1851Arm Arm) const
+{
+	TArray<FString> Values;
+	if (ArmyScenarioEquipment.IsValid()) { ArmyScenarioEquipment->TryGetStringArrayField(TEXT("uniforms"), Values); }
+	return Values.IsValidIndex(int32(Arm)) ? Values[int32(Arm)] : FString();
+}
+
+Campaign1851Army::FBattleFactors ACampaign1851Map::ArmyBattleFactors(const FCampaign1851Regiment& R) const
+{
+	Campaign1851Army::FBattleFactors F = Campaign1851Army::BattleFactors(R);
+	if (R.Arm == ECampaign1851Arm::Infantry || R.Arm == ECampaign1851Arm::Guard || R.Arm == ECampaign1851Arm::Jager)
+	{
+		// A researched breechloader replaces the flintlock; do not multiply its bonus by the obsolete weapon.
+		if (!HasResearch(TEXT("breech")))
+		{
+			F.ReloadTime *= float(ArmyEquipmentNumber(TEXT("infantryReload"), 1.0));
+			F.Accuracy *= float(ArmyEquipmentNumber(TEXT("infantryAccuracy"), 1.0));
+		}
+	}
+	return F;
 }
 
 // ------------------------------------------------------------------ queries
@@ -2362,17 +2429,31 @@ TArray<FCampaign1851RegimentSave> ACampaign1851Map::SaveArmy() const
 int32 ACampaign1851Map::RestoreArmy(const TArray<FCampaign1851RegimentSave>& Saves)
 {
 	int32 Restored = 0;
+	// Old 1825 saves contain the scaled 1851 roster. Keep that saved army rather than adding a second one.
+	const bool bLegacy1825Army = ActiveScenario().Id == TEXT("1825") && Saves.ContainsByPredicate([](const FCampaign1851RegimentSave& S)
+	{
+		return !S.bRaised && !S.Id.StartsWith(TEXT("1825_"));
+	});
+	if (bLegacy1825Army)
+	{
+		for (auto& Piece : RegimentPieces) { if (Piece) { Piece->DestroyComponent(); } }
+		for (auto& Car : RegimentCars) { if (Car) { Car->DestroyComponent(); } }
+		RegimentPieces.Reset();
+		RegimentCars.Reset();
+		Regiments.Reset();
+	}
 	TArray<TPair<int32, int32>> Marches;   // regiment, save index
 	for (int32 k = 0; k < Saves.Num(); ++k)
 	{
 		const FCampaign1851RegimentSave& S = Saves[k];
 		int32 i = FindRegiment(S.Id);
-		if (i == INDEX_NONE && S.bRaised && FindCity(S.Home) != INDEX_NONE)
+		if (i == INDEX_NONE && (S.bRaised || bLegacy1825Army) && FindCity(S.Home) != INDEX_NONE)
 		{
 			i = AddRaisedRegiment(S.Id, S.Name, ECampaign1851Arm(S.Arm), FindCity(S.Home), S.MaxMen);
 			if (i != INDEX_NONE)
 			{
 				Regiments[i].bDetached = S.bDetached;
+				if (bLegacy1825Army) { Regiments[i].bRaised = S.bRaised; }
 			}
 		}
 		if (i == INDEX_NONE)

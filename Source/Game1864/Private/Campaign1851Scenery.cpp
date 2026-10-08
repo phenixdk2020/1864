@@ -1,6 +1,7 @@
 #include "Campaign1851Scenery.h"
 
 #include "Campaign1851Fort.h"
+#include "Campaign1851Map.h"
 
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInterface.h"
@@ -1096,7 +1097,7 @@ namespace Campaign1851Scenery
 		{
 			// Four ranks of eight files behind the colour party; the officer ahead with drawn sabre.
 			const bool bGuard = Piece == ESitePiece::FormationGuard, bJager = Piece == ESitePiece::FormationJager;
-			const FLinearColor Coat = bGuard ? Srgb(176, 30, 34) : bJager ? Srgb(46, 70, 44) : Srgb(34, 44, 86);
+			const FLinearColor Coat = bGuard ? Srgb(176, 30, 34) : bJager ? Srgb(46, 70, 44) : ACampaign1851Map::ActiveScenario().Id == TEXT("1825") ? Srgb(176, 30, 34) : Srgb(34, 44, 86);
 			const FLinearColor Trousers = bJager ? Srgb(60, 76, 58) : Srgb(122, 150, 190);
 			const FLinearColor Hat = bGuard ? Srgb(24, 22, 22) : Srgb(30, 30, 36);
 			const FLinearColor Belts = bJager ? Srgb(40, 32, 24) : Srgb(236, 232, 220);

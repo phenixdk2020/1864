@@ -18,8 +18,12 @@ namespace
 	FString BattleDir() { return FPaths::ProjectSavedDir() / TEXT("Battle"); }
 
 	/** The enemy's fighting quality: the Prussian needle gun loads lying down, three times as fast. */
-	float EnemyQuality(const FString& Nation) { return Nation == TEXT("PR") ? 1.3f : Nation == TEXT("AT") ? 1.05f : 0.9f; }
-	const TCHAR* EnemyRifle(const FString& Nation) { return Nation == TEXT("PR") ? TEXT("Dreyse tændnålsgevær (bagladeriffel)") : Nation == TEXT("AT") ? TEXT("Lorenz-riffel (forladeriffel)") : TEXT("forladeriffel"); }
+	float EnemyQuality(const FString& Nation, int32 WeaponYear) { return Nation == TEXT("PR") ? (WeaponYear >= 1841 ? 1.3f : 1.f) : Nation == TEXT("AT") ? 1.05f : 0.9f; }
+	const TCHAR* EnemyRifle(const FString& Nation, int32 WeaponYear)
+	{
+		if (WeaponYear < 1841) { return TEXT("Glatløbet flintlåsgevær"); }
+		return Nation == TEXT("PR") ? TEXT("Dreyse tændnålsgevær (bagladeriffel)") : Nation == TEXT("AT") && WeaponYear >= 1854 ? TEXT("Lorenz-riffel (forladeriffel)") : TEXT("glatløbet forladergevær");
+	}
 	constexpr float GunWorth = 60.f;   // a gun in the balance, in men
 }
 
@@ -118,10 +122,11 @@ void ACampaign1851Map::BattleStrengths(const FCampaign1851Battle& B, float& OutD
 			continue;
 		}
 		const FCampaign1851Regiment& R = Regiments[i];
-		const Campaign1851Army::FBattleFactors F = Campaign1851Army::BattleFactors(R);
+		const Campaign1851Army::FBattleFactors F = ArmyBattleFactors(R);
 		const float Quality = (F.Accuracy + 1.f / FMath::Max(F.ReloadTime, 0.5f) + F.Assault) / 3.f * (0.6f + 0.4f * F.Morale) * (0.7f + 0.3f * F.Cohesion);
 		const float Supply = FMath::Clamp(0.4f + 0.6f * R.Ammo, 0.4f, 1.f) * (R.Food > 0.f ? 1.f : 0.8f);
-		OutDanish += R.PresentMen() * Quality * Supply * DoctrineMul * (R.Arm == ECampaign1851Arm::Infantry ? InfantryFactor() : 1.f) + R.Guns * GunWorth * DanishGunFactor() + R.Mortars * GunWorth * 0.8f;
+		const bool bInfantryWeapon = R.Arm == ECampaign1851Arm::Infantry || (ActiveScenario().Id == TEXT("1825") && (R.Arm == ECampaign1851Arm::Guard || R.Arm == ECampaign1851Arm::Jager));
+		OutDanish += R.PresentMen() * Quality * Supply * DoctrineMul * (bInfantryWeapon ? InfantryFactor() : 1.f) + R.Guns * GunWorth * DanishGunFactor() + R.Mortars * GunWorth * 0.8f;
 	}
 	for (int32 Id : B.Forts)
 	{
@@ -138,7 +143,7 @@ void ACampaign1851Map::BattleStrengths(const FCampaign1851Battle& B, float& OutD
 			+ F.Guns * GunWorth * DanishGunFactor() * FMath::Clamp(F.RoundsPerGun / 120.f, 0.2f, 1.f);
 	}
 	const int32 Ci = CorpsIndexOf(B);
-	OutEnemy = Ci != INDEX_NONE ? EnemyCorps[Ci].Men * EnemyQuality(EnemyCorps[Ci].Nation) + EnemyCorps[Ci].Guns * GunWorth : 0.f;
+	OutEnemy = Ci != INDEX_NONE ? EnemyCorps[Ci].Men * EnemyQuality(EnemyCorps[Ci].Nation, ActiveScenario().Id == TEXT("1825") ? GetDate().GetYear() : 1864) + EnemyCorps[Ci].Guns * GunWorth : 0.f;
 }
 
 float ACampaign1851Map::BattleOdds(const FCampaign1851Battle& B) const
@@ -213,8 +218,8 @@ bool ACampaign1851Map::FightBattleIn3D(int32 BattleId)
 	Enemy->SetStringField(TEXT("nation"), C.Nation);
 	Enemy->SetNumberField(TEXT("men"), C.Men);
 	Enemy->SetNumberField(TEXT("guns"), C.Guns);
-	Enemy->SetStringField(TEXT("rifle"), EnemyRifle(C.Nation));
-	Enemy->SetNumberField(TEXT("quality"), EnemyQuality(C.Nation));
+	Enemy->SetStringField(TEXT("rifle"), ActiveScenario().Id == TEXT("1825") ? EnemyRifle(C.Nation, GetDate().GetYear()) : C.Nation == TEXT("PR") ? TEXT("Dreyse tændnålsgevær (bagladeriffel)") : C.Nation == TEXT("AT") ? TEXT("Lorenz-riffel (forladeriffel)") : TEXT("forladeriffel"));
+	Enemy->SetNumberField(TEXT("quality"), EnemyQuality(C.Nation, ActiveScenario().Id == TEXT("1825") ? GetDate().GetYear() : 1864));
 	// Where the enemy comes from (degrees north of east, the battlefield's axes): from his corps; from the south
 	// (the border) when he stands on the battle's own ground.
 	const FVector2D Away = C.Km - B->Km;

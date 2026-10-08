@@ -898,6 +898,8 @@ int32 ACampaign1851Map::AddRaisedRegiment(const FString& Id, const FString& Name
 	R.Id = Id;
 	R.Name = Name;
 	R.Arm = Arm;
+	R.Present = ArmyPeacePresent(Arm);
+	if (ActiveScenario().Id == TEXT("1825") && Arm == ECampaign1851Arm::Infantry) { R.SavedCompanies = 5; }
 	R.Home = Home;
 	R.Town = Home;
 	R.Men = R.MaxMen = MaxMen;
@@ -912,7 +914,7 @@ int32 ACampaign1851Map::AddRaisedRegiment(const FString& Id, const FString& Name
 		for (float& Skill : R.Skills) { Skill = Campaign1851Army::RecruitSkill; }
 	}
 	R.Command = CommandsAtStart.IndexOfByPredicate([Home](const FCampaign1851Command& C) { return C.Towns.Contains(Home); });
-	R.Captains.Init(INDEX_NONE, Campaign1851Army::CompaniesFor(Arm));
+	R.Captains.Init(INDEX_NONE, R.SavedCompanies >= 0 ? R.SavedCompanies : Campaign1851Army::CompaniesFor(Arm));
 	R.CompanyFort.Init(0, R.Captains.Num());
 	R.PaceKmPerDay = Campaign1851Army::MarchKmPerDay(Arm);
 	const int32 Index = Regiments.Add(R);
