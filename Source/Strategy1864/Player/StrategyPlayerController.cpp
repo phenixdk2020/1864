@@ -1124,3 +1124,16 @@ FStrategyOrder AStrategyPlayerController::GetRequestedRoute(const AStrategyUnit*
         RequestedRoute.NextWaypointIndex = FMath::Max(RequestedRoute.NextWaypointIndex, ExecutingRoute.NextWaypointIndex);
     return RequestedRoute;
 }
+
+void AStrategyPlayerController::CancelRequestedWaypointRoute(const AStrategyUnit* RouteUnit, const FGuid& RouteId)
+{
+    if (!RouteId.IsValid()) return;
+    for (const FCourier& CancelledRouteCourier : Couriers)
+        if (CancelledRouteCourier.Unit.Get() == RouteUnit && CancelledRouteCourier.Order.WaypointRouteId == RouteId &&
+            CancelledRouteCourier.Horseman.IsValid())
+            CancelledRouteCourier.Horseman->Dismiss();
+    Couriers.RemoveAll([RouteUnit, RouteId](const FCourier& CancelledRouteCourier)
+    {
+        return CancelledRouteCourier.Unit.Get() == RouteUnit && CancelledRouteCourier.Order.WaypointRouteId == RouteId;
+    });
+}

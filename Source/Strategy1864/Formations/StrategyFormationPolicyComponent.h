@@ -34,6 +34,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Formation")
     float ThreatScanIntervalSeconds = 0.25f;
 
+    /** Formation at the destination; a marching column displays its battle footprint. */
+    EStrategyFormationType GetDestinationFormation() const;
+
 private:
     UFUNCTION()
     void HandleOrderChanged(const FStrategyOrder& NewOrder);

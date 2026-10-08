@@ -1,11 +1,13 @@
 #include "StrategyMovementExecutorComponent.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
+#include "../Formations/StrategyFormationPolicyComponent.h"
 #include "../Combat/StrategyCombatComponent.h"
 #include "../Combat/StrategyFireControlComponent.h"
 #include "../Combat/StrategyFireDisciplineComponent.h"
 #include "../Formations/StrategyFormationTransitionComponent.h"
 #include "../Units/StrategyCompanyUnit.h"
+#include "../Player/StrategyPlayerController.h"
 
 #include "../Orders/StrategyOrderComponent.h"
 #include "../Campaign/StrategyCampaignBattlefield.h"
@@ -224,7 +226,7 @@ void UStrategyMovementExecutorComponent::TickComponent(
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
     ExecutedVelocity = FVector::ZeroVector;
 
-    if (!bHasMovementGoal || !OwnerUnit || !OwnerUnit->OrderComponent)
+    if ((!bHasMovementGoal && !bHoldingForFire) || !OwnerUnit || !OwnerUnit->OrderComponent)
     {
         SetComponentTickEnabled(false);
         return;
@@ -232,26 +234,48 @@ void UStrategyMovementExecutorComponent::TickComponent(
 
     if (OwnerUnit->FieldOfficerComponent && OwnerUnit->FieldOfficerComponent->IsStandingUpFromFireCover()) return;
     const FStrategyOrder CurrentOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
-    if (CurrentOrder.OrderSerial != ExecutingOrderSerial || !IsMovementOrder(CurrentOrder.Type))
+    if (CurrentOrder.OrderSerial != ExecutingOrderSerial ||
+        (!IsMovementOrder(CurrentOrder.Type) && !(bHoldingForFire && CurrentOrder.Type == EStrategyOrderType::Hold)))
     {
         StopMovement();
         return;
     }
 
-    // Preserve route and order serial through every reload. No timed one-volley halt.
-    const bool bFireMission = CurrentOrder.Type == EStrategyOrderType::Advance ||
+    // March orders never stop for fire; an advance/attack ends at first engagement.
+    const bool bFireMission = bHoldingForFire || CurrentOrder.Type == EStrategyOrderType::Advance ||
         CurrentOrder.Type == EStrategyOrderType::AttackHere;
     AStrategyUnit* MovementFireTarget = bFireMission && OwnerUnit->IsA<AStrategyCompanyUnit>() &&
         OwnerUnit->CombatComponent && OwnerUnit->FireControlComponent &&
         (!OwnerUnit->FireDisciplineComponent || OwnerUnit->FireDisciplineComponent->AllowsAutomaticFire()) ?
         OwnerUnit->CombatComponent->FindBestTarget(false) : nullptr;
-    const bool bWasHoldingForFire = bHoldingForFire;
-    bHoldingForFire = MovementFireTarget != nullptr;
-    if (bHoldingForFire)
+    if (MovementFireTarget)
     {
+        const EStrategyFormationType FireBattleFormation = OwnerUnit->FormationPolicy ?
+            OwnerUnit->FormationPolicy->GetDestinationFormation() : EStrategyFormationType::Line;
+        if (!bHoldingForFire)
+        {
+            FStrategyOrder FireHoldOrder;
+            FireHoldOrder.Type = EStrategyOrderType::Hold;
+            FireHoldOrder.TargetLocation = OwnerUnit->GetActorLocation();
+            FireHoldOrder.Authority = OwnerUnit->bPlayerControllable ?
+                EStrategyOrderAuthority::DirectPlayer : CurrentOrder.Authority;
+            FireHoldOrder.bKeepFacing = CurrentOrder.bKeepFacing;
+            FireHoldOrder.bHasFacing = CurrentOrder.bKeepFacing;
+            FireHoldOrder.FacingYaw = OwnerUnit->GetActorRotation().Yaw;
+            // A fresh standing order drops every waypoint and prevents resuming the old march.
+            // The order notification stops movement and deploys the saved battle formation.
+            if (AStrategyPlayerController* FireRouteController = Cast<AStrategyPlayerController>(GetWorld()->GetFirstPlayerController()))
+                FireRouteController->CancelRequestedWaypointRoute(OwnerUnit, CurrentOrder.WaypointRouteId);
+            OwnerUnit->OrderComponent->SetOrder(FireHoldOrder);
+            ExecutingOrderSerial = OwnerUnit->OrderComponent->GetCurrentOrder().OrderSerial;
+            bHoldingForFire = true;
+            SetComponentTickEnabled(true); // Continue turning to fire, with no movement goal.
+        }
         if (OwnerUnit->FormationComponent &&
-            OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn)
-            OwnerUnit->FormationComponent->SetFormation(EStrategyFormationType::Line);
+            (OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
+             OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn ||
+             OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::CavalryColumn))
+            OwnerUnit->FormationComponent->SetFormation(FireBattleFormation);
         if (!OwnerUnit->FormationTransition || !OwnerUnit->FormationTransition->IsReforming())
             OwnerUnit->SetUnitState(EStrategyUnitState::Ready);
         if (!CurrentOrder.bKeepFacing)
@@ -261,12 +285,13 @@ void UStrategyMovementExecutorComponent::TickComponent(
             FireRotation.Yaw = FMath::FixedTurn(FireRotation.Yaw, FireFacingYaw, TurnSpeedDegreesPerSecond * DeltaTime);
             OwnerUnit->SetActorRotation(FireRotation);
         }
-        // Other pauses still expire while the engagement keeps the company stationary.
-        PauseRemainingSeconds = FMath::Max(0.0f, PauseRemainingSeconds - DeltaTime);
         return;
     }
-    if (bWasHoldingForFire && (!OwnerUnit->FormationTransition || !OwnerUnit->FormationTransition->IsReforming()))
-        OwnerUnit->SetUnitState(EStrategyUnitState::Moving);
+    if (bHoldingForFire)
+    {
+        StopMovement(); // The standing hold remains even when the target leaves range.
+        return;
+    }
 
     if (PauseRemainingSeconds > 0.0f)
     {
