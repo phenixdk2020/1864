@@ -1504,6 +1504,9 @@ Fri ild fyldte to kasser, fordi søjlens bredde afhang af niveauet; nu har alle 
 - Indlæsning fra et andet scenarie genåbner kortet før restore og bevarer tilbagekomst fra slag. Gemmeformatet er uændret.
 - Danske kilder og antagelser i Docs/Data1825-officers.md; synkronisering via Tools/Map1851/sync_officers1825.py. Statisk JSON-, reference-, save-/restore- og diffkontrol; spillet er hverken bygget eller kørt.
 
+### 2026-10-08 – 1825-data samlet (hær, officerer, nationer) og indkaldelsesstørrelse
+Codex' tre 1825-delopgaver (hær og våben, officerer og ministre, nationer/byer/økonomi) og valget af enhedsstørrelse ved indkaldelse (kompagni/eskadron/deling op til hel enhed) er merget. Begge hær- og officersopgaven oprettede Officers_1825.json; officersgrenens fulde version er brugt. Et navnesammenstød rettet (Role -> ProfileKey i MakeOfficer). Kontrolleret: 1825-kampagnen starter med 59 enheder og 220 officerer med 1825-navne. Docs/Data1825-*.md beskriver antagelserne; mange tal er skøn.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

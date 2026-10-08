@@ -120,8 +120,8 @@ FCampaign1851Officer ACampaign1851Map::MakeOfficer(FRandomStream& Rng, bool bGen
 	if (OfficerScenarioData.IsValid())
 	{
 		const TSharedPtr<FJsonObject> Profiles = OfficerScenarioData->GetObjectField(TEXT("profiles"));
-		const FString Role = bGeneral ? TEXT("general") : Rank == TEXT("Kaptajn") ? TEXT("captain") : TEXT("chief");
-		const TSharedPtr<FJsonObject> Profile = Profiles->GetObjectField(Role);
+		const FString ProfileKey = bGeneral ? TEXT("general") : Rank == TEXT("Kaptajn") ? TEXT("captain") : TEXT("chief");
+		const TSharedPtr<FJsonObject> Profile = Profiles->GetObjectField(ProfileKey);
 		for (int32 s = 0; s < NumStats; ++s)
 		{
 			const int32 Base = Profile->GetIntegerField(StatKeys[s]);
