@@ -1,6 +1,6 @@
 # Enhedernes opførsel i slaget: hvornår reagerer de, og hvordan bruger AI'en dem
 
-Status: **designdokument, 2026-10-08.** Det beskriver, hvordan hver enhedstype skal opføre sig, og hvad der allerede findes i koden (`Source/Strategy1864`).
+Status: **kode- og teststatus, 2026-10-08.** Dokumentet beskriver reglerne i `Source/Strategy1864`; [findes] betyder implementeret, ikke nødvendigvis bygget eller afprøvet. Se teststatus nederst.
 Hvert punkt er markeret: **[findes]**, **[delvist]** eller **[mangler]**. Tallene er startværdier, der kan justeres i spillet.
 
 Reglen for alt nedenfor: **en reaktion har en udløser, en handling og en afslutning.** En enhed gør noget, fordi noget bestemt er sket, og den holder op igen, når det ikke gælder mere. Spillerens ordre vinder over officerens egne valg, men officeren bestemmer, *hvordan* ordren udføres.
@@ -30,9 +30,9 @@ Reglen for alt nedenfor: **en reaktion har en udløser, en handling og en afslut
 
 | Tilstand | Udløser | Handling | Afslutning |
 |---|---|---|---|
-| **Marchkolonne** | Flytning på 120 m eller mere og ingen fjende inden for rækkevidde | Marcherer i kolonne, 4 i bredden | Fjende inden for rækkevidde + 35 m, eller under 25 m fra målet |
+| **Marchkolonne** | Resterende rute over 120 m og ingen nær fjende | Marcherer i kolonne, 4 i bredden | Fjende inden for egen lange ildrækkevidde + 35 m, eller under 25 m fra slutmålet |
 | **Formering** | Se ovenfor | Går til kampformation (linje), mændene løber på plads; tilstand "Reforming" | Når mændene står; derefter "Holder formationen" |
-| **Fremrykning mod fjenden** | Ordre eller ingen fjende på skudhold | Rykker til skudafstand (typisk 70 m for linjen) med fronten mod fjenden | Skudafstand nået |
+| **Fremrykning mod fjenden** | Fremryknings-/angrebsordre | Rykker til valgt skudafstand med fronten mod fjenden | Skudafstand nået |
 | **Hold og skyd** | På skudhold under fremrykning/angreb, eller spillerordre afsluttet | Annullerer bevægelsesordren og alle vejpunkter; står og skyder efter fire-politik og valgt rækkevidde | Når fjenden forlader skudhold, holder enheden stadig stedet indtil en ny spillerordre |
 | **Vend front** ("svinger fronten") | Fjenden kommer fra siden (over ca. 60°) | Drejer langsomt (36°/s) mod nærmeste fjende, **det nærmeste kompagni** først | Fronten vender mod fjenden |
 | **Sidetrin** | Kort flytning (under 90 m) med fjenden tæt foran | Går sidelæns, fronten forbliver mod fjenden | Målet nået |
@@ -47,15 +47,15 @@ Reglen for alt nedenfor: **en reaktion har en udløser, en handling og en afslut
 
 ### 2.2 Marchen i detaljer [delvist]
 
-1. **Lang flytning** (120 m eller mere): kolonne, 4 i bredden.
+1. **Ren FLYT:** ingen ild under marchordren, heller ikke under korte pauser. Resterende rute over 120 m går i kolonne, 4 i bredden, hvis fjenden ikke allerede er nær. Til og med 120 m bevares kampformationen; vejpunkter tæller med i rutelængden.
 2. **Fjende i syne inden for rækkevidde + 35 m:** kolonnen opløses, kompagniet går i linje og går **det sidste stykke i formation**.
 3. **Under 25 m fra målet:** samme, så det ankommer i orden.
 4. **Defilé** (bro, smal vej): 2 i bredden; enheden forlader selv defilé, når den er igennem.
-5. **Drejning:** et kompagni drejer langsomt (36°/s); mændene går i bue om midten, de svinger ikke som en hel flok. [delvist: drejehastigheden er sat, mændenes gang i bue er ikke set endnu]
+5. **Drejning:** fodfolkets simulerede front drejer op til 36°/s (rytteri 80°/s). Historikken beskriver **30°-reglen**: små sving som fløjsving, større sving ved gang til nye pladser. Den aktuelle fælles `StrategyVisualFormationPath.h` har dog ingen 30°-grænse: den bruger pivot ved ikke-kolonnedrejning og begrænser visuel fart efter formationens radius. Overensstemmelsen med reglen og grafikspring skal kontrolleres; den er ikke verificeret som aktuel kodeadfærd.
 
 ### 2.3 Under ild uden fjende i nærheden [findes i kode; ikke afprøvet]
 
-Når kompagniet **står stille**, fjendens kanoner skyder på det, og **ingen fjende er inden for skudhold:**
+Når kompagniet **står stille**, det modtager fjernild fra artilleri, mortérer eller infanteri over 150 m (også uden tab), og **ingen fjende er inden for 150 m:**
 
 - En **god officer** (initiativ og ro over ca. 60) beordrer **spredt orden**: mændene breder sig (større afstand) og **lægger sig ned**. Det gør dem sværere at ramme (mindre træf pr. skud), men de skyder langsommere og kan ikke gå af sted med det samme.
 - En **middel officer** gør det efter nogle sekunders ild.
@@ -63,7 +63,7 @@ Når kompagniet **står stille**, fjendens kanoner skyder på det, og **ingen fj
 - **Afslutning:** ilden holder op i 10 sek., eller en fjende kommer inden for 150 m, eller der kommer en ordre om at rykke. Så rejser de sig og går tilbage til den tidligere formation.
 - **Grænser:** kan ikke kombineres med karré eller bajonetangreb. Kavaleriet lægger sig ikke. Artilleriet kan ikke.
 
-Implementeret 2026-10-08 i `StrategyFieldOfficerComponent::UpdateAutomaticLooseOrderUnderFire`: initiativ og ro over 60 giver 3 sekunders reaktion; 40–60 giver 8 sekunder; under 40 reagerer ikke (laveste egenskab, justeret for svækkelse). Formationsafstande fordobles; liggende/spredt orden giver −40 % træfchance og dobbelt genladningstid. Rejsning forsinker march 3 sekunder. Stance og formationsafstande genbruges, mens udskilte skytter bevares. Tiderne er justerbare balanceestimater. Ingen build eller afprøvning i spillet endnu.
+Implementeret 2026-10-08 i `StrategyFieldOfficerComponent::UpdateAutomaticLooseOrderUnderFire`: initiativ og ro over 60 giver 3 sekunders reaktion; 40–60 giver 8 sekunder; under 40 reagerer ikke (laveste egenskab, justeret for svækkelse). Formationsafstande fordobles; liggende/spredt orden giver −40 % træfchance og dobbelt genladningstid. Rejsning forsinker march 3 sekunder. Stance og formationsafstande genbruges, mens udskilte skytter bevares. Tiderne er justerbare balanceestimater. Merget og bygget ifølge historikken; reaktionen er ikke afprøvet i et rigtigt slag.
 
 ---
 
@@ -74,7 +74,7 @@ Implementeret 2026-10-08 i `StrategyFieldOfficerComponent::UpdateAutomaticLooseO
 | **Marchkolonne** | Lang flytning | 4 i bredden (defilé: 2) |
 | **Linje** | Nær fjenden eller på ordre | Knæ ved knæ, 1–2 rækker |
 | **Skærm** (`CavalryScreenAI`) | Spejdeordre | Holder afstand, ser, melder; angriber ikke |
-| **Angreb** (`CavalryCharge`) | Ordre, eller officeren ser et mål åbent for angreb inden for 400–700 m (efter aggression) | Galop frem, kontakt |
+| **Angreb** (`CavalryCharge`) | Angrebsordre, eller officeren vælger åbent mål under eksisterende fremryknings-/angrebsordre (400–700 m efter aggression) | Galop frem, kontakt |
 | **Afstigning** (dragoner) | Ordre eller knap | Stiger af, skyder som fodfolk; kegle vises først da |
 | **Tilbagetrækning** | Tab og moral som ved fodfolk | Samler sig bag egne linjer |
 
@@ -89,17 +89,17 @@ Implementeret 2026-10-08 i `StrategyFieldOfficerComponent::UpdateAutomaticLooseO
 
 ## 4. Karré og trusler fra rytteri
 
-### Udløser [delvist]
+### Udløser [implementeret; kamptest mangler]
 
-- I dag: synligt fjendtligt rytteri **inden for 120 m**. For sent: rytteriet dækker det på ca. 10 sek., karréen skal bruge 20–30.
-- **Skal være:** rytteri, der er synligt og **bevæger sig mod enheden**, inden for en afstand beregnet af rytteriets fart og karréens dannelsestid (ca. **250–350 m**). Rytteri, der ikke er på vej mod enheden, udløser ingenting.
+- Implementeret: synligt, kampdygtigt rytteri skal nærme sig med mindst 7 m/s lukningsfart. Kun nærmeste kampdygtige kompagni på angrebslinjen vælges (retningsprikprodukt mindst 0,95; korridor med 25 m halv bredde).
+- Varslingsafstand: **min(350 m, lukningsfart × 25 sek.)**, fx 300 m ved 12 m/s. Eksplicit formationsordre fra spilleren reducerer nødreaktionens afstand til 65 %. Stillestående eller bortvendt rytteri udløser ikke karré. Rigtig kamptest mangler.
 
 ### Reaktionen
 
 1. **Kun det kompagni, rytteriet er på vej mod**, reagerer (det nærmeste på angrebslinjen). Naboerne danner kun karré, hvis rytteriet vender mod dem.
 2. **Kolonne går direkte til karré** uden mellemtrin.
 3. **Bajonetterne sættes på** samtidig. [findes ved karré fra kampregelpakken; prøves]
-4. Dannelsen tager **20–30 sek.**, og enheden er sårbar imens.
+4. Dannelsen tager som udgangspunkt **25 sek.**, påvirket af forskning; enheden er sårbar og skyder ikke under omformering.
 5. **Fire fra karréen:** fire sider à 90°, hver med sine **25 % af mændene** (30 % med karré-forskning). Kun de sider, fjenden står foran, skyder; hjørnet dækkes af to sider. [findes fra kampregelpakken; prøves]
 6. **Tab mod karréen:** artilleri og salver gør **flere tab** mod en karré (tæt, ubevægeligt mål): ca. ×1,5 for artilleri, ×1,2 for infanteriild. En karré bevæger sig meget langsomt.
 7. **Afslutning:** rytteriet er væk, vendt om eller ødelagt, og der er gået 8 sek. uden trussel: **bajonetterne tages af, og enheden går tilbage til sin tidligere formation.**
@@ -126,8 +126,8 @@ Auto-målvalg skal **nulstilles**, når officer-AI'en slås fra (kendt fejl, ret
 
 ## 6. Stab og kommandokæde
 
-- **HQ følger sine kompagnier** (bag dem på 65–145 m efter niveau). HQ'et gør ikke selv noget i slaget, men bærer ordrer.
-- **Ordrer sendes med ordonnans** (synlig rytter); tiden vokser med afstanden. Officeren **læser** ordren efter sine egenskaber: en dårlig kan tage fejl af stedet lidt.
+- **HQ følger sine kompagnier**, også gennem underlagte HQ'er: **60 m bataljon / 120 m regiment / 250 m brigade / 400 m division** bag formationen. Følgning bruger den tegnede bagkant og går uden om formationsaftryk; direkte spillerordre om HQ-flytning har forrang. Seneste afstande er merget, men ikke bygget eller afprøvet.
+- **Ordreforløb:** spillerordre → ordonnans fra staben (synlig rytter, afstandsafhængig levering) → officerens læseforsinkelse → udførelse. Direkte spillerflytning bevarer det præcise mål; øvrig officerfortolkning afhænger af ordrevejen. Vejpunkter følger levering og læsetid; annullering ved stop-og-skyd rydder også ventende udvidelser af den gamle rute.
 - **Chefens valg**: hvor mange kompagnier der angriber, hvem der er ildbase, hvem der flankerer, og om der holdes reserve (se 7).
 
 ---
@@ -172,7 +172,7 @@ Auto-målvalg skal **nulstilles**, når officer-AI'en slås fra (kendt fejl, ret
 | Lang flytning = kolonne | 120 m | `FormationPolicy.LongMoveColumnThresholdCm` |
 | Formering før fjenden | rækkevidde + 35 m | `FormationPolicy.DeploySafetyBufferCm` |
 | Formering før mål | 25 m | `FormationPolicy` |
-| Rytteritrussel (karré) | 120 m, skal være 250–350 m | `ThreatReaction.CavalryThreatDistanceCm` |
+| Rytteritrussel (karré) | min(350 m, lukningsfart × 25 sek.) | `ThreatReaction` |
 | Karré slippes efter | 8 sek. | `ThreatReaction.SquareReleaseDelaySeconds` |
 | Drejehastighed fodfolk / rytteri | 36° / 80° pr. sek. | `MovementExecutor.TurnSpeedDegreesPerSecond` |
 | Kolonnebredde fodfolk / rytteri / defilé | 4 / 4 / 2 | `FormationComponent` |
@@ -184,7 +184,25 @@ Auto-målvalg skal **nulstilles**, når officer-AI'en slås fra (kendt fejl, ret
 ## 9. Åbne punkter til afklaring
 
 1. **Spredt orden og ned** (2.3): implementeret med initiativ/ro, −40 % træf og dobbelt genladningstid; afprøv reaktionstid, rejsning og karréprioritet i spillet.
-2. **Karréens udløser** (4): fastlæg afstanden ud fra rytteriets fart, så der er tid.
-3. **Fodfolk i kolonne under ild:** skal de straks gå i linje, eller først når fjenden er inden for skudhold?
-4. **Mændenes gang ved drejning:** de skal gå i bue, ikke dreje på stedet (visuelt).
+2. **Karréens udløser** (4): afprøv den implementerede fartafhængige reaktion og rytteri mod fast/svækket karré i et rigtigt slag.
+3. **March og ild:** afprøv ren FLYT forbi fjenden og fremrykning/angreb gennem flere salver. Stop-og-skyd annullerer nu ruten; enheden holder også efter målet forsvinder. HoldFire tillader ikke ildstoppet.
+4. **Mændenes gang ved drejning:** afprøv sving over/under 30°, crowd-skift og figurskala; kontrollér hop i grafikken samt flag og HQ under march, stop og sving.
 5. **HQ og floder:** HQ'et går i dag direkte og passerer floder og hegn (C-20 fra gennemgangen).
+
+## 10. Betjening og dokumenteret teststatus
+
+- **ALT+højreklik** udvider march-/fremryknings-/angrebsruten; almindeligt højreklik erstatter den. Træk angiver slutfronten. Gruppens forskydning bevares; STOP/HOLD rydder køen. HUD viser nummererede punkter, stiplet rute og kampformationens aftryk ved målet.
+- **Grafik:** LAV/MIDDEL/HØJ vælger kvalitet og 70/85/100 % renderopløsning. **MIDDEL** er standard. Figurskala er selvstændig: 1/2/5/10 mænd pr. figur, **1:1** som standard; gemte valg kan ændre begge. Færre figurer giver kompakte tegnede formationer og kegler, mens simulationens mandtal og ildfelt bevares.
+- **Tid:** PAUSE/FORTSÆT, x½, x1, x2, x3, x5, x10. Kameraet kan flyttes under pause og følger realtid. Slaguret har egen omregning; historikken målte 3/6/30 slagsekunder pr. realtidssekund ved x½/x1/x5.
+- **HUD:** fem bundpaneler: ENHED, LEDELSE & ILD, ORDRER, FORMATION, UNDERLAGTE; underlagte kan vælges og rulles. Keglen skjules i kolonne/omformering, mens enhedstag viser march/formering/ild/hold.
+
+Kilde: `IMPLEMENTATION-AND-FIX-HISTORY.md`, sammenholdt med koden. Ingen nye spiltests ved denne dokumentopdatering.
+
+| Status | Dokumenteret kontrol |
+|---|---|
+| Visuelt afprøvet i Duel-testslag | Kolonne til 133 m, linje, stop ved 65 m, salve/røg, knæ/ladning, rejsning/sigte, faldne og faner. Det beviser den tidligere adfærd, ikke de nyeste ændringer. |
+| Skærmbilledkontrol | Tidligere slagvisning/tidsknapper, startmenuens levende Danmarkskort, kamporden og forskning. Intet dokumenteret fuldt slag. |
+| Observeret i log | Husarernes charge/“Chok!” omkring 450 m og slagurets x½/x1/x5. Karréafvisning er ikke dermed afprøvet. |
+| Merget og bygget; kamptest mangler | Skov/LOS, events, enhedstilpasning og spredt orden/nedlægning. Karré-/kavalerireglernes fulde forløb er ikke dokumenteret testet. |
+| Merget; seneste version ikke bygget eller testet | Stop-og-skyd med annullering, kampformationsboks, fempanel-HUD og stabsafstandene 60/120/250/400 m. |
+| Merget; runtime-kontrol udestår | ALT-vejpunkter, kompakte figurer, 30°-sving, naturligere gang, flag/HQ-følgning og x10. Merge alene er ikke bevis for build eller bestået test. |
