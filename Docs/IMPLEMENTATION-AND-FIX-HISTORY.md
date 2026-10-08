@@ -1711,6 +1711,12 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Rytteri og stab har udjævnede tegningspositioner. Artilleriets 0,25-sekunders formationsopdatering er erstattet af hver-frame-interpolation. Kamerafokus glider til det tegnede centrum. Scenariet tvinger ikke længere 60 FPS; valgfri `-Strategy1864FpsCap=N` til målinger.
 - Tilføjet `-Strategy1864DebugSmooth`: én målelinje pr. realtidssekund med største frameafstand for centrum, anker og fem stabile prøvefigurer samt største framedelta/tidsfaktor. Se `Docs/Smoothness-Battle.md`.
 - Kontrol: UE 5.8-headerkontrol, `git diff --check` og numerisk kontrol af 20 FPS/tidsfaktor-kombinationer. Ingen build, spilstart eller commit; runtime-validering udføres af lead.
+### 2026-10-08 — Kampagnetest af belejring
+
+- Tilføjet `-CampaignTestSiege=<by>[:<dage>]`: ny kampagne, eksisterende krigstilstand, korps via `SpawnCorps`, højeste hastighed og automatisk slagafgørelse. Daglig `CAMPAIGN-1851|siege|`-log viser forsvar, forsyninger, forløb, besættelse og stemning; prestige markeres som ikke implementeret.
+- Rettet stormens slagposition/rækkevidde, for tidlig besættelse af skansebyer, afstand ved belejringsstart, gammel belejringshensigt efter nyt mål, manuel undsætning og marchtilstand ved indlæsning af aktiv belejring. Gemmeformatet er uændret.
+- `Docs/Siege-Test.md` dokumenterer præcis testkommando, forventet log og åbne spørgsmål om 120 dage, ophævelse, forsyning og garnisonstab. Backlog står fortsat som ikke afprøvet.
+- Kontrolleret statisk og med `git diff --check`; ingen build, spilstart eller commit.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

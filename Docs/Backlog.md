@@ -31,7 +31,7 @@ Status pr. 2026-10-08: de oprindelige 20 opgaver blev registreret som lavet i v0
 - Rytteri mod fast/svækket karré i et rigtigt slag; charge er set i loggen, men udfaldet er ikke bekræftet.
 - Stop-og-skyd med annullering, ny fempanel-HUD og stabsafstande: seneste merge er hverken bygget eller testet.
 - ALT-vejpunkter, destinationsboks, 30°-sving og figurskalaskift; kontrollér hop i grafikken samt flag og HQ under march, standsning og sving.
-- En belejring er ikke fremprovokeret i en test.
+- En belejring er ikke fremprovokeret i en kørt test. Testflag og kørselsvejledning er tilføjet 2026-10-08: [Siege-Test.md](Siege-Test.md); afventer build og afprøvning.
 - Søtransport af tropper er endnu ikke lavet.
 - Testbeløbet i statskassen (5.000.000 rd.) skal ned på 150.000 før rigtigt spil.
 

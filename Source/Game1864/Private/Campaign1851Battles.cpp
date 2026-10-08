@@ -62,13 +62,14 @@ int32 ACampaign1851Map::EngageableCorps(const TArray<int32>& Units, double* OutK
 	for (int32 c = 0; c < EnemyCorps.Num(); ++c)
 	{
 		const FCampaign1851EnemyCorps& C = EnemyCorps[c];
-		if (C.Men <= 0 || !C.bSeen || C.bEngaged || C.bSieging)
+		if (C.Men <= 0 || !C.bSeen || C.bEngaged)
 		{
 			continue;
 		}
 		for (int32 i : Units)
 		{
-			if (Regiments.IsValidIndex(i) && Regiments[i].Men > 0)
+			if (Regiments.IsValidIndex(i) && Regiments[i].Men > 0
+				&& (!C.bSieging || !Cities.IsValidIndex(C.SiegeTown) || FVector2D::Distance(Regiments[i].Km, TownKm(C.SiegeTown)) > 10.0))
 			{
 				const double Km = FVector2D::Distance(Regiments[i].Km, C.Km);
 				if (Km <= BestKm)
@@ -597,6 +598,7 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 	D.Reasons = FString::Printf(TEXT("danske tab %d  ·  fjendens tab %d"), DanishLosses, O.EnemyLosses);
 	D.bDone = true;
 	AddDecision(D);
+	LogSiegeTest(Result);
 	ExportUnits();
 	ExportForts();
 }

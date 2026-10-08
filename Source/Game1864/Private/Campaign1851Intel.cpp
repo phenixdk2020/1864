@@ -216,6 +216,7 @@ bool ACampaign1851Map::ChooseCorpsObjective(int32 CorpsIndex)
 		return false;
 	}
 	C.bWaitingNoted = false;
+	C.SiegeTown = INDEX_NONE; // A new storm/march objective cancels the old siege intention.
 	if (C.Objectives.Num() == 0 || C.Objectives[0] != Best)
 	{
 		const FString Was = C.Objectives.Num() > 0 && Cities.IsValidIndex(C.Objectives[0]) ? Cities[C.Objectives[0]].Name : FString();

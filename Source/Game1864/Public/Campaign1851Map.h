@@ -835,6 +835,8 @@ public:
 	/** True once when the campaign has ended (1 January 1867, or the peace after a war). */
 	bool TakeEndPending();
 
+	bool StartSiegeTest(const FString& Request);
+	void LogSiegeTest(const TCHAR* Phase);
 	// ---- The historical works and sieges (Campaign1851Siege.cpp).
 
 	void ResetFortProgrammes();
@@ -1672,6 +1674,9 @@ private:
 	// Works and sieges.
 	void MonthlyFortProgrammes();
 	void DailySieges();
+	// Command-line harness only; no campaign/save data.
+	int32 SiegeTestTown = INDEX_NONE, SiegeTestCorpsId = 0;
+	double SiegeTestEndDay = -1.0;
 	TArray<FString> SaveFortProgrammes() const;
 	void RestoreFortProgramme(int32 Index, int32 State, double Day);
 	TArray<double> ProgrammeDay;
