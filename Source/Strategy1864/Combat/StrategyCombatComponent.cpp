@@ -73,6 +73,8 @@ void UStrategyCombatComponent::TickComponent(
         }
     }
 
+    NearestEnemyRefreshSeconds = FMath::Max(0.0f, NearestEnemyRefreshSeconds - DeltaTime);
+
     if (ReloadRemainingSeconds > 0.0f)
     {
         ReloadRemainingSeconds = FMath::Max(
@@ -100,29 +102,38 @@ void UStrategyCombatComponent::TickComponent(
     // before evaluating the fire cone. Movement orders can leave the actor
     // rotation unchanged, which otherwise makes a valid target permanently
     // fail CanEngageTarget().
-    if (!OwnerUnit->bPlayerControllable && OwnerUnit->FireControlComponent)
+    const bool bCommittedFacing = OwnerUnit->OrderComponent &&
+        (OwnerUnit->OrderComponent->GetCurrentOrder().bHasFacing ||
+         OwnerUnit->OrderComponent->GetCurrentOrder().bKeepFacing);
+    if (!OwnerUnit->bPlayerControllable && OwnerUnit->FireControlComponent && !bCommittedFacing)
     {
-        AStrategyUnit* NearestEnemy = nullptr;
-        float NearestDistanceCm = TNumericLimits<float>::Max();
-        for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+        if (NearestEnemyRefreshSeconds <= 0.0f)
         {
-            AStrategyUnit* Candidate = *It;
-            if (!IsValid(Candidate) || Candidate == OwnerUnit ||
-                Candidate->Side == OwnerUnit->Side ||
-                Candidate->Side == EStrategySide::Neutral ||
-                !Candidate->IsCombatEffective())
+            CachedNearestEnemy.Reset();
+            NearestEnemyRefreshSeconds = 0.25f;
+            float NearestDistanceCm = TNumericLimits<float>::Max();
+            for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
             {
-                continue;
-            }
-            const float DistanceCm = FVector::Dist2D(
-                OwnerUnit->GetActorLocation(), Candidate->GetActorLocation());
-            if (DistanceCm < NearestDistanceCm)
-            {
-                NearestDistanceCm = DistanceCm;
-                NearestEnemy = Candidate;
+                AStrategyUnit* Candidate = *It;
+                if (!IsValid(Candidate) || Candidate == OwnerUnit ||
+                    Candidate->Side == OwnerUnit->Side ||
+                    Candidate->Side == EStrategySide::Neutral ||
+                    !Candidate->IsCombatEffective())
+                {
+                    continue;
+                }
+                const float DistanceCm = FVector::Dist2D(
+                    OwnerUnit->GetActorLocation(), Candidate->GetActorLocation());
+                if (DistanceCm < NearestDistanceCm)
+                {
+                    NearestDistanceCm = DistanceCm;
+                    CachedNearestEnemy = Candidate;
+                }
             }
         }
-        if (NearestEnemy)
+        AStrategyUnit* NearestEnemy = CachedNearestEnemy.Get();
+        if (IsValid(NearestEnemy) && NearestEnemy->IsCombatEffective() &&
+            NearestEnemy->Side != OwnerUnit->Side && NearestEnemy->Side != EStrategySide::Neutral)
         {
             const FVector ToEnemy =
                 NearestEnemy->GetActorLocation() - OwnerUnit->GetActorLocation();

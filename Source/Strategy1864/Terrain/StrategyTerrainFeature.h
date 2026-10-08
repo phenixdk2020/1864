@@ -13,6 +13,12 @@ class STRATEGY1864_API AStrategyTerrainFeature : public AActor
 public:
     AStrategyTerrainFeature();
 
+protected:
+    virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+public:
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Terrain")
     EStrategyTerrainFeatureType FeatureType =
         EStrategyTerrainFeatureType::Hill;

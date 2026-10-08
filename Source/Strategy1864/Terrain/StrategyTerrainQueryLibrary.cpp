@@ -4,6 +4,27 @@
 #include "EngineUtils.h"
 #include "Engine/World.h"
 
+namespace StrategyTerrainElevationCache
+{
+    constexpr float CellSizeCm = 10000.0f;
+    struct FWorldCache
+    {
+        bool bBuilt = false;
+        TMap<FIntPoint, TArray<TWeakObjectPtr<AStrategyTerrainFeature>>> Cells;
+        TMap<FVector2D, float> Offsets;
+    };
+    TMap<TWeakObjectPtr<UWorld>, FWorldCache> Worlds;
+    FIntPoint CellAt(const FVector& Point)
+    {
+        return FIntPoint(FMath::FloorToInt(Point.X / CellSizeCm), FMath::FloorToInt(Point.Y / CellSizeCm));
+    }
+}
+
+void UStrategyTerrainQueryLibrary::InvalidateFeatureElevationCache(UWorld* World)
+{
+    StrategyTerrainElevationCache::Worlds.Remove(TWeakObjectPtr<UWorld>(World));
+}
+
 UWorld* UStrategyTerrainQueryLibrary::ResolveWorld(
     const UObject* WorldContextObject)
 {
@@ -51,7 +72,7 @@ float UStrategyTerrainQueryLibrary::GetPhysicalGroundZ(
             ObjectParams,
             QueryParams);
 
-    return bHit ? Hit.ImpactPoint.Z : 0.0f;
+    return bHit ? Hit.ImpactPoint.Z : WorldLocation.Z;
 }
 
 float UStrategyTerrainQueryLibrary::GetFeatureElevationOffset(
@@ -64,20 +85,49 @@ float UStrategyTerrainQueryLibrary::GetFeatureElevationOffset(
         return 0.0f;
     }
 
-    float Offset = 0.0f;
-
-    for (TActorIterator<AStrategyTerrainFeature> It(World); It; ++It)
+    // Features are static. Index their conservative XY bounds once and cache exact
+    // offsets without quantization, so narrow crests retain their original shape.
+    for (auto CacheIt = StrategyTerrainElevationCache::Worlds.CreateIterator(); CacheIt; ++CacheIt)
     {
-        const AStrategyTerrainFeature* Feature = *It;
-
-        if (!IsValid(Feature) || !Feature->bAffectsGameplay)
-        {
-            continue;
-        }
-
-        Offset += Feature->GetHeightOffsetAt(WorldLocation);
+        if (!CacheIt.Key().IsValid()) { CacheIt.RemoveCurrent(); }
     }
-
+    auto& ElevationCache = StrategyTerrainElevationCache::Worlds.FindOrAdd(TWeakObjectPtr<UWorld>(World));
+    if (!ElevationCache.bBuilt)
+    {
+        for (TActorIterator<AStrategyTerrainFeature> FeatureIt(World); FeatureIt; ++FeatureIt)
+        {
+            AStrategyTerrainFeature* TerrainFeature = *FeatureIt;
+            if (!IsValid(TerrainFeature) || !TerrainFeature->bAffectsGameplay) { continue; }
+            const float BoundsRadius = FMath::Max(1.0f, FMath::Max(TerrainFeature->RadiusXcm, TerrainFeature->RadiusYcm));
+            const FVector FeatureCenter = TerrainFeature->GetActorLocation();
+            const FIntPoint MinCell = StrategyTerrainElevationCache::CellAt(FeatureCenter - FVector(BoundsRadius, BoundsRadius, 0.0f));
+            const FIntPoint MaxCell = StrategyTerrainElevationCache::CellAt(FeatureCenter + FVector(BoundsRadius, BoundsRadius, 0.0f));
+            for (int32 CellX = MinCell.X; CellX <= MaxCell.X; ++CellX)
+            {
+                for (int32 CellY = MinCell.Y; CellY <= MaxCell.Y; ++CellY)
+                {
+                    ElevationCache.Cells.FindOrAdd(FIntPoint(CellX, CellY)).Add(TerrainFeature);
+                }
+            }
+        }
+        ElevationCache.bBuilt = true;
+    }
+    const FVector2D ElevationKey(WorldLocation.X, WorldLocation.Y);
+    if (const float* CachedOffset = ElevationCache.Offsets.Find(ElevationKey)) { return *CachedOffset; }
+    float Offset = 0.0f;
+    if (const auto* LocalFeatures = ElevationCache.Cells.Find(StrategyTerrainElevationCache::CellAt(WorldLocation)))
+    {
+        for (const auto& FeaturePtr : *LocalFeatures)
+        {
+            if (const AStrategyTerrainFeature* TerrainFeature = FeaturePtr.Get())
+            {
+                Offset += TerrainFeature->GetHeightOffsetAt(WorldLocation);
+            }
+        }
+    }
+    // Bound memory for continuously moving observers without changing sample heights.
+    if (ElevationCache.Offsets.Num() >= 8192) { ElevationCache.Offsets.Reset(); }
+    ElevationCache.Offsets.Add(ElevationKey, Offset);
     return Offset;
 }
 
@@ -161,7 +211,7 @@ bool UStrategyTerrainQueryLibrary::IsTerrainProfileOccluded(
 {
     const int32 Samples = FMath::Clamp(SampleCount, 6, 128);
 
-    for (int32 Index = 1; Index < Samples; ++Index)
+    for (int32 Index = 0; Index <= Samples; ++Index)
     {
         const float Alpha =
             static_cast<float>(Index) /

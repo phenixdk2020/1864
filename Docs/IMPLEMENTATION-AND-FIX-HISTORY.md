@@ -1526,6 +1526,17 @@ Codex' tre 1825-delopgaver (hær og våben, officerer og ministre, nationer/byer
 ### 2026-10-08 – Startmenu (Codex) med midlertidige testslag, rytterkolonne
 Startmenuen (scenarie, land, afvigelse, NYT SPIL, INDLÆS SPIL, AFSLUT; spilmenuen under Esc er reduceret) er merget fra Codex. Oven på den: baggrund (Data/Campaign1851/MenuBackground.jpg, et HUD-frit billede fra 3D-slaget) og to midlertidige knapper, TEST 1 MOD 1 og TEST 4 MOD 1, som starter testbanen med samme flag som Start-Test-1/2 (de fjernes igen). Nye testflag: -Strategy1864NoHud (HUD skjult til rene skærmbilleder) og -CampaignMenuShot (skærmbillede af startmenuen). Rytteriet: kolonnen er tre i bredden, men fik tilfældig forskydning (25 cm langs, 12 cm på tværs) og et sidste led langt til siden; nu næsten ingen forskydning i kolonne og et kort sidste led midtstilles. Ikke set på skærmbillede.
 
+### 2026-10-08 - Robusthedsrettelser efter kodereview
+
+- Slagresultater validerer JSON, format og kendt udfald; ugyldige filer giver en advarsel og lader slaget vente. Ugyldige enheds-/fortelementer ignoreres. Ammunition beskyttes med indekskontrol og intervallet 0-1.
+- Flodelementer og Units.json-enheder kontrolleres før objektadgang.
+- Karréens frontbredde har samme minimum som tegningen (600 cm); mandskabet fordeles ligeligt mellem siderne. Ubrugt RowCount er fjernet. Kavaleriets marchkolonne er fortsat fire mand bred.
+- Terræntrace uden træf beholder input-Z. Statiske features indekseres i rumlige celler, og præcise offsets caches pr. verden (højst 8192 punkter). BeginPlay/EndPlay invaliderer cachen; senere geometriændringer kræver InvalidateFeatureElevationCache. Profiltesten inkluderer endepunkterne.
+- Automatisk frontdrejning søger nærmeste fjende højst hvert 0,25 sekund og respekterer ordrer med fastlagt front.
+- Begge officersgeneratorer bruger kampagnens seed. Gemmeversionshistorikken er rekonstrueret til v28 ud fra feltkommentarerne; format/version er uændret.
+- HQ-følgebevægelse bruger bevægelseseksekveringen via en arvet MOVE-ordre og bevarer spillerens aktive MOVE-kontrol. Nye forsøg sker højst hver 0,25 sekund; igangværende ruter afsluttes før næste følgemål. Negative RearOffsetCm/FollowSpeedCmPerSecond vælger niveau-standard; eksplicitte ikke-negative værdier bevares.
+- Validering: statisk kodegennemgang, formationsfordeling og git diff --check. Ingen build, spilstart eller commit. Ingen reviewpunkter sprunget over; runtime-adfærd er ikke afprøvet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

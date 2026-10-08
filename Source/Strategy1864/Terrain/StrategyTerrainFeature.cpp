@@ -1,4 +1,17 @@
 #include "StrategyTerrainFeature.h"
+#include "StrategyTerrainQueryLibrary.h"
+
+void AStrategyTerrainFeature::BeginPlay()
+{
+    Super::BeginPlay();
+    UStrategyTerrainQueryLibrary::InvalidateFeatureElevationCache(GetWorld());
+}
+
+void AStrategyTerrainFeature::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    UStrategyTerrainQueryLibrary::InvalidateFeatureElevationCache(GetWorld());
+    Super::EndPlay(EndPlayReason);
+}
 
 #include "Components/SceneComponent.h"
 

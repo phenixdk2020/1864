@@ -1058,9 +1058,20 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         if (FFileHelper::LoadFileToString(Text, *(Dir / TEXT("Units.json"))) && FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Json) && Json.IsValid())
         {
             int32 Infantry = 0, Cavalry = 0, Batteries = 0;
-            for (const TSharedPtr<FJsonValue>& V : Json->GetArrayField(TEXT("units")))
+            const TArray<TSharedPtr<FJsonValue>> EmptyUnitEntries;
+            const TArray<TSharedPtr<FJsonValue>>* UnitEntries = nullptr;
+            if (!Json->TryGetArrayField(TEXT("units"), UnitEntries))
             {
-                const TSharedPtr<FJsonObject> U = V->AsObject();
+                UE_LOG(LogTemp, Warning, TEXT("Units.json mangler et gyldigt units-array"));
+            }
+            for (const TSharedPtr<FJsonValue>& V : UnitEntries ? *UnitEntries : EmptyUnitEntries)
+            {
+                const TSharedPtr<FJsonObject> U = V.IsValid() && V->Type == EJson::Object ? V->AsObject() : nullptr;
+                if (!U.IsValid())
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("Ugyldig enhed i Units.json ignoreret"));
+                    continue;
+                }
                 const TSharedPtr<FJsonObject>* Battle = nullptr;
                 if (!U->TryGetObjectField(TEXT("battle"), Battle))
                 {

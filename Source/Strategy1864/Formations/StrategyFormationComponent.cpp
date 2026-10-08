@@ -48,7 +48,6 @@ TArray<FStrategyFormationSlot> UStrategyFormationComponent::GenerateSoldierSlots
         {
             EffectiveColumnWidth = 2;
         }
-        const int32 RowCount = FMath::CeilToInt(static_cast<float>(Strength) / EffectiveColumnWidth);
 
         for (int32 Index = 0; Index < Strength; ++Index)
         {
@@ -78,12 +77,14 @@ TArray<FStrategyFormationSlot> UStrategyFormationComponent::GenerateSoldierSlots
 
         for (int32 Index = 0; Index < Strength; ++Index)
         {
-            const int32 Side = FMath::Min(3, Index / PerSide);
-            const int32 Along = Index % PerSide;
+            // Round-robin gives each side floor(N/4) or ceil(N/4) men.
+            const int32 Side = Index % SideCount;
+            const int32 Along = Index / SideCount;
+            const int32 MenOnSide = Strength / SideCount + (Side < Strength % SideCount ? 1 : 0);
             const float Alpha =
-                PerSide <= 1
+                MenOnSide <= 1
                 ? 0.5f
-                : static_cast<float>(Along) / static_cast<float>(PerSide - 1);
+                : static_cast<float>(Along) / static_cast<float>(MenOnSide - 1);
             const float Offset = FMath::Lerp(-HalfExtent, HalfExtent, Alpha);
 
             FVector LocalOffset = FVector::ZeroVector;
@@ -175,7 +176,7 @@ float UStrategyFormationComponent::EstimateFrontageCm(int32 Strength) const
     if (CurrentFormation == EStrategyFormationType::Square)
     {
         const int32 PerSide = FMath::Max(1, FMath::CeilToInt(static_cast<float>(Strength) / 4.0f));
-        return FMath::Max(0, PerSide - 1) * SoldierLateralSpacingCm;
+        return 2.0f * FMath::Max(300.0f, (PerSide - 1) * SoldierLateralSpacingCm * 0.5f);
     }
 
     const int32 EffectiveRanks =
