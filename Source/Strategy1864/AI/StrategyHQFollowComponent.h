@@ -34,7 +34,7 @@ public:
     float SettleToleranceCm = 150.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|HQ Follow")
-    /** Negative selects the HQ level default; zero is a valid explicit override. */
+    /** Margin behind the drawn rear; negative selects the level default. Staff clearance is at least 15 m. */
     float RearOffsetCm = -1.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|HQ Follow")

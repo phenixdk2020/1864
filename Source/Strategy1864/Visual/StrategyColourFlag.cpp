@@ -1,4 +1,5 @@
 #include "StrategyColourFlag.h"
+#include "StrategyInfantryVisualComponent.h"
 
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -11,6 +12,7 @@
 AStrategyColourFlag::AStrategyColourFlag()
 {
     PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.TickGroup = TG_PostPhysics;
     Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Flag"));
     SetRootComponent(Mesh);
     Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -21,6 +23,12 @@ void AStrategyColourFlag::Setup(AActor* InFollow, const FString& Nation, const F
 {
     Follow = InFollow;
     LocalOffset = Offset;
+    if (InFollow)
+    {
+        AddTickPrerequisiteActor(InFollow);
+        if (UStrategyInfantryVisualComponent* ColourVisual = InFollow->FindComponentByClass<UStrategyInfantryVisualComponent>())
+            AddTickPrerequisiteComponent(ColourVisual);
+    }
     // The model: 2 m as imported, 2.8 m on the field; the cloth streams to +X from the pole, turned to -X here.
     if (UStaticMesh* Standard = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Units/Items/SM_Flag_Standard.SM_Flag_Standard")))
     {
@@ -108,7 +116,9 @@ void AStrategyColourFlag::Tick(float DeltaSeconds)
         return;
     }
     Age += DeltaSeconds;
-    const FVector P = Target->GetActorTransform().TransformPosition(LocalOffset);
+    FVector P = Target->GetActorTransform().TransformPosition(LocalOffset);
+    if (const UStrategyInfantryVisualComponent* ColourVisual = Target->FindComponentByClass<UStrategyInfantryVisualComponent>())
+        ColourVisual->GetDrawnColourPosition(LocalOffset, P);
     const FVector Ground = UStrategyTerrainQueryLibrary::ProjectPointToTerrain(this, P);
     // The flag streams with the wind (from the west), swinging a little.
     SetActorLocationAndRotation(Ground, FRotator(0.0f, 90.0f + 12.0f * FMath::Sin(Age * 1.3f), 0.0f));

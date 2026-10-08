@@ -2,6 +2,7 @@
 
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
 #include "../Units/StrategyHQUnit.h"
+#include "../AI/StrategyHQFollowComponent.h"
 #include "Animation/AnimSequence.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -21,6 +22,7 @@ namespace
 UStrategyHQVisualComponent::UStrategyHQVisualComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
+    PrimaryComponentTick.TickGroup = TG_PostUpdateWork;
 }
 
 void UStrategyHQVisualComponent::BeginPlay()
@@ -29,6 +31,8 @@ void UStrategyHQVisualComponent::BeginPlay()
     OwnerHQ = Cast<AStrategyHQUnit>(GetOwner());
     if (OwnerHQ)
     {
+        if (UStrategyHQFollowComponent* StaffFollow = OwnerHQ->FindComponentByClass<UStrategyHQFollowComponent>())
+            AddTickPrerequisiteComponent(StaffFollow);
         LastLocation = OwnerHQ->GetActorLocation();
         Yaw = OwnerHQ->GetActorRotation().Yaw;
     }
