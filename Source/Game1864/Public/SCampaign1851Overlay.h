@@ -60,7 +60,7 @@ public:
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationInsertHQ, FormationChief, FormationDissolve, FormationDeputy, FormationStaff, FormationChiefRemove,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
-		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitSize, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit, Block, MinisterInfo, TestBattle, EqualizeUnit, TransferAdj, TransferYes, TransferNo, TransferWhole, TransferGun, Ransom, PoolFold, UnitCardPart, StartMenu, StartLoad, StartTest, ScrollBarV, ScrollBarH, Scenario, UnitDeployEarly, RaisingPage, UnitRename, UnitUniform, UnitUniformSwatch, UnitUpgrade, UnitCustomClose, ResearchTab };
+		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitSize, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit, Block, MinisterInfo, TestBattle, EqualizeUnit, TransferAdj, TransferYes, TransferNo, TransferWhole, TransferGun, Ransom, PoolFold, UnitCardPart, StartMenu, StartLoad, StartTest, ScrollBarV, ScrollBarH, StackList, Scenario, UnitDeployEarly, RaisingPage, UnitRename, UnitUniform, UnitUniformSwatch, UnitUpgrade, UnitCustomClose, ResearchTab };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -75,10 +75,12 @@ public:
 	void BeginScrollDrag(int32 Which, const FVector2D& ViewportPixel);
 	void DragScrollTo(const FVector2D& ViewportPixel);
 	void EndScrollDrag() { ScrollDrag = 0; }
+	void ToggleStackList() { bStackListOpen = !bStackListOpen; StackScroll = 0; }
 	void ScrollStack(int32 Rows) { StackScroll = FMath::Clamp(StackScroll + Rows, 0, FMath::Max(0, StackScrollMax)); }
 	bool IsOverUnitCard(const FVector2D& ViewportPixel) const
 	{
 		const FVector2D Local = ViewportPixel / FMath::Max(PaintScale, 0.01f);
+		if (!SelectedRegiments.IsEmpty() && bStackListOpen && Local.X >= StackListMin.X && Local.Y >= StackListMin.Y && Local.X <= StackListMax.X && Local.Y <= StackListMax.Y) { return true; }
 		return !SelectedRegiments.IsEmpty() && UnitCardMax.X > UnitCardMin.X && Local.X >= UnitCardMin.X && Local.Y >= UnitCardMin.Y && Local.X <= UnitCardMax.X && Local.Y <= UnitCardMax.Y;
 	}
 	bool IsScrollDragging() const { return ScrollDrag != 0; }
@@ -428,6 +430,8 @@ private:
 	int32 ScrollDrag = 0;          // 0 none, 1 chart vertical, 2 chart horizontal, 3 the stack list on the unit card
 	// The stack table on the unit card: the first row shown, and its scrollbar.
 	mutable int32 StackScroll = 0, StackScrollMax = 0;
+	bool bStackListOpen = false;   // the box with all the units of a stack
+	mutable FVector2D StackListMin = FVector2D::ZeroVector, StackListMax = FVector2D::ZeroVector;
 	mutable FVector2D UnitCardMin = FVector2D::ZeroVector, UnitCardMax = FVector2D::ZeroVector;
 	mutable FVector2D CardBarMin = FVector2D::ZeroVector, CardBarMax = FVector2D::ZeroVector;
 	mutable float CardThumb0 = 0.f, CardThumb1 = 0.f;
@@ -469,6 +473,7 @@ private:
 	TArray<TSharedPtr<FSlateBrush>> AgePortraits[3];   // officers by age: young, middle, old (no rank on the coat)
 	void PaintPortrait(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind) const;
 	void PaintUnitCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft, int32 RegimentIndex) const;
+	void PaintStackList(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& CardPos, const FVector2D& CardSize, const TArray<const FCampaign1851Regiment*>& Sel) const;
 	int32 BuildingInfo = INDEX_NONE;
 	mutable FVector2D BuildingMin = FVector2D::ZeroVector;
 	mutable FVector2D BuildingMax = FVector2D::ZeroVector;

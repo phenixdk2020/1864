@@ -1361,6 +1361,11 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Overlay->ShowToast(Why);
 			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
+		if (Button == SCampaign1851Overlay::EButton::StackList)
+		{
+			Overlay->ToggleStackList();
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
 		if (Button == SCampaign1851Overlay::EButton::ScrollBarV || Button == SCampaign1851Overlay::EButton::ScrollBarH)
 		{
 			Overlay->BeginScrollDrag(Button == SCampaign1851Overlay::EButton::ScrollBarV ? (Module == 1 ? 3 : 1) : 2, Mouse);

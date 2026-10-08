@@ -1660,11 +1660,9 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	const float RowHeight = 21.f;
 	const float Room = Geometry.GetLocalSize().Y - 190.f - 360.f - Height - 34.f;
 	const int32 Fit = FMath::Max(7, FMath::FloorToInt(Room / RowHeight));
-	const int32 Rows = bSingle ? 0 : FMath::Min(Sel.Num(), Sel.Num() > Fit ? FMath::Max(0, Fit - 1) : Fit);
-	const bool bMore = !bSingle && Rows < Sel.Num();
-	StackScrollMax = bSingle ? 0 : FMath::Max(0, Sel.Num() - Rows);
-	StackScroll = FMath::Clamp(StackScroll, 0, StackScrollMax);
-	Height += bSingle ? 0.f : 30.f + (Rows + (bMore ? 1 : 0)) * RowHeight;
+	// A stack: the units are listed in a box of their own (the button on the card), the card only says how many.
+	const int32 CardRows = 0;
+	Height += bSingle ? 0.f : 44.f;
 	const FVector2D Size(Size0.X, Height);
 	// Under the treasury panel (it ends at 312): if it does not fit above the bottom bar, it takes some of the bar's room.
 	FVector2D Pos(28.f, Geometry.GetLocalSize().Y - 190.f - Size.Y);
@@ -1875,51 +1873,16 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	}
 	OfficerBlock(TEXT("General"), General, GeneralIndex, EButton::GeneralChange, General ? TEXT("SKIFT") : TEXT("UDNÆVN"), TEXT("ingen general over stakken"));
 
-	// ---- A stack: its units as a table (click a row to pick that unit alone; shift-click drops it).
+	// ---- A stack: how many, and a button that opens the list of all its units.
 	if (!bSingle)
 	{
 		Y += 8.f;
-		struct FCol { const TCHAR* Head; float X; float Align; };
-		const FCol Cols[] = { {TEXT("Enhed"), 0.f, 0.f}, {TEXT("Mand"), 178.f, 1.f}, {TEXT("Erf"), 212.f, 1.f},
-			{TEXT("Lad"), 244.f, 1.f}, {TEXT("Skyd"), 276.f, 1.f}, {TEXT("Eks"), 308.f, 1.f}, {TEXT("Felt"), 340.f, 1.f}, {TEXT("Udh"), 372.f, 1.f}, {TEXT("Baj"), 404.f, 1.f},
-			{TEXT("Moral"), 444.f, 1.f} };
-		const float X0 = Pos.X + 26.f;
-		for (const FCol& C : Cols)
+		PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("%d enheder til stede"), Sel.Num()), FVector2D(Pos.X + 26.f, Y + 6.f), Serif(13), Ink, 0.f, false);
+		PaintButton(Geometry, Out, Layer + 3, FVector2D(Pos.X + Size.X - 22.f - 230.f, Y - 4.f), FVector2D(230.f, 26.f), bStackListOpen ? TEXT("LUK LISTEN OVER ENHEDER") : TEXT("VIS ALLE ENHEDER"), EButton::StackList, 0, bStackListOpen);
+		Y += 30.f;
+		if (bStackListOpen)
 		{
-			PaintText(Geometry, Out, Layer + 3, C.Head, FVector2D(X0 + C.X, Y), Serif(10, EFace::Italic), Gold, C.Align, false);
-		}
-		Y += 18.f;
-		const float TableTop = Y - 10.f;
-		for (int32 r0 = 0; r0 < Rows; ++r0)
-		{
-			const int32 r = StackScroll + r0;
-			const FCampaign1851Regiment& R = *Sel[r];
-			PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 18.f, Y - 10.f), FVector2D(Size.X - 44.f, RowHeight - 2.f), FString(), EButton::RegimentRow, SelectedRegiments[r]);
-			PaintTextFit(Geometry, Out, Layer + 4, R.Name, FVector2D(X0, Y), Serif(11), Ink, 150.f);
-			const float Values[] = { float(R.Men), R.Experience, R.Skills[0], R.Skills[1], R.Skills[2], R.Skills[3], R.Skills[4], R.Skills[5] };
-			for (int32 c = 0; c < UE_ARRAY_COUNT(Values); ++c)
-			{
-				PaintText(Geometry, Out, Layer + 4, FString::Printf(TEXT("%.0f"), Values[c]), FVector2D(X0 + Cols[c + 1].X, Y), Serif(11), Ink, 1.f, false);
-			}
-			PaintText(Geometry, Out, Layer + 4, FString::Printf(TEXT("%.0f %%"), R.Morale * 100.f), FVector2D(X0 + Cols[9].X, Y), Serif(11), Ink, 1.f, false);
-			Y += RowHeight;
-		}
-		if (bMore)
-		{
-			// The rest of the stack: the mouse wheel over the card or the bar to the right scrolls the list.
-			const float TableBottom = Y - 10.f + 8.f;
-			CardBarMin = FVector2D(Pos.X + Size.X - 22.f, TableTop);
-			CardBarMax = FVector2D(Pos.X + Size.X - 12.f, TableBottom);
-			const float TrackLen = CardBarMax.Y - CardBarMin.Y;
-			const float ThumbLen = FMath::Clamp(TrackLen * float(Rows) / float(Sel.Num()), 24.f, TrackLen);
-			const float Ratio = StackScrollMax > 0 ? float(StackScroll) / float(StackScrollMax) : 0.f;
-			CardThumb0 = CardBarMin.Y + Ratio * (TrackLen - ThumbLen);
-			CardThumb1 = CardThumb0 + ThumbLen;
-			FSlateDrawElement::MakeBox(Out, Layer + 3, Geometry.ToPaintGeometry(CardBarMax - CardBarMin, FSlateLayoutTransform(CardBarMin)), FCoreStyle::Get().GetBrush("WhiteBrush"), ESlateDrawEffect::None, FLinearColor(0.f, 0.f, 0.f, 0.35f));
-			FSlateDrawElement::MakeBox(Out, Layer + 4, Geometry.ToPaintGeometry(FVector2D(6.f, ThumbLen), FSlateLayoutTransform(FVector2D(CardBarMin.X + 2.f, CardThumb0))), FCoreStyle::Get().GetBrush("WhiteBrush"), ESlateDrawEffect::None, Gold.CopyWithNewOpacity(0.8f));
-			Buttons.Add({ CardBarMin, CardBarMax, EButton::ScrollBarV, 1 });
-			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("viser %d–%d af %d enheder  ·  hjul eller bjælke ruller"), StackScroll + 1, StackScroll + Rows, Sel.Num()), FVector2D(Pos.X + Size.X * 0.5f, Y), Serif(11, EFace::Italic), MutedInk, 0.5f, false);
-			Y += RowHeight;
+			PaintStackList(Geometry, Out, Layer + 6, Pos, Size, Sel);
 		}
 	}
 
@@ -2205,6 +2168,70 @@ FReply SCampaign1851Overlay::OnKeyDown(const FGeometry& Geometry, const FKeyEven
 		else { UnitNameDraft = UnitNameDraft.Left(FMath::Max(0, UnitNameDraft.Len() - 1)); }
 	}
 	return FReply::Handled();
+}
+
+void SCampaign1851Overlay::PaintStackList(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& CardPos, const FVector2D& CardSize, const TArray<const FCampaign1851Regiment*>& Sel) const
+{
+	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
+	const float RowHeight = 21.f;
+	const int32 MaxRows = FMath::Max(5, FMath::Min(16, FMath::FloorToInt((CardPos.Y + CardSize.Y - 130.f) / RowHeight)));
+	const int32 Rows = FMath::Min(Sel.Num(), MaxRows);
+	const bool bMore = Rows < Sel.Num();
+	StackScrollMax = FMath::Max(0, Sel.Num() - Rows);
+	StackScroll = FMath::Clamp(StackScroll, 0, StackScrollMax);
+	const FVector2D Size(590.f, 74.f + Rows * RowHeight + (bMore ? 22.f : 0.f));
+	const FVector2D Pos(CardPos.X + CardSize.X + 14.f, FMath::Max(40.f, CardPos.Y + CardSize.Y - Size.Y));
+	StackListMin = Pos;
+	StackListMax = Pos + Size;
+	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("Enheder til stede: %d"), Sel.Num()), Pos + FVector2D(22.f, 26.f), Serif(18), Ink, 0.f, false);
+	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 36.f, 10.f), FVector2D(24.f, 22.f), TEXT("X"), EButton::StackList, 0);
+	float Y = Pos.Y + 52.f;
+	struct FCol { const TCHAR* Head; float X; float Align; };
+	const FCol Cols[] = { {TEXT("Enhed"), 0.f, 0.f}, {TEXT("Mand"), 178.f, 1.f}, {TEXT("Erf"), 212.f, 1.f},
+		{TEXT("Lad"), 244.f, 1.f}, {TEXT("Skyd"), 276.f, 1.f}, {TEXT("Eks"), 308.f, 1.f}, {TEXT("Felt"), 340.f, 1.f}, {TEXT("Udh"), 372.f, 1.f}, {TEXT("Baj"), 404.f, 1.f},
+		{TEXT("Moral"), 444.f, 1.f} };
+	const float X0 = Pos.X + 26.f;
+	for (const FCol& C : Cols)
+	{
+		PaintText(Geometry, Out, Layer + 3, C.Head, FVector2D(X0 + C.X, Y), Serif(10, EFace::Italic), Gold, C.Align, false);
+	}
+	Y += 18.f;
+	const float TableTop = Y - 10.f;
+	for (int32 r0 = 0; r0 < Rows; ++r0)
+	{
+		const int32 r = StackScroll + r0;
+		const FCampaign1851Regiment& R = *Sel[r];
+		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 18.f, Y - 10.f), FVector2D(Size.X - 52.f, RowHeight - 2.f), FString(), EButton::RegimentRow, SelectedRegiments[r]);
+		PaintTextFit(Geometry, Out, Layer + 4, R.Name, FVector2D(X0, Y), Serif(11), Ink, 150.f);
+		const float Values[] = { float(R.Men), R.Experience, R.Skills[0], R.Skills[1], R.Skills[2], R.Skills[3], R.Skills[4], R.Skills[5] };
+		for (int32 c = 0; c < UE_ARRAY_COUNT(Values); ++c)
+		{
+			PaintText(Geometry, Out, Layer + 4, FString::Printf(TEXT("%.0f"), Values[c]), FVector2D(X0 + Cols[c + 1].X, Y), Serif(11), Ink, 1.f, false);
+		}
+		PaintText(Geometry, Out, Layer + 4, FString::Printf(TEXT("%.0f %%"), R.Morale * 100.f), FVector2D(X0 + Cols[9].X, Y), Serif(11), Ink, 1.f, false);
+		Y += RowHeight;
+	}
+	if (bMore)
+	{
+		// The scrollbar to the right of the rows; the mouse wheel over the box scrolls too.
+		const float TableBottom = Y - 10.f + 8.f;
+		CardBarMin = FVector2D(Pos.X + Size.X - 26.f, TableTop);
+		CardBarMax = FVector2D(Pos.X + Size.X - 14.f, TableBottom);
+		const float TrackLen = CardBarMax.Y - CardBarMin.Y;
+		const float ThumbLen = FMath::Clamp(TrackLen * float(Rows) / float(Sel.Num()), 24.f, TrackLen);
+		const float Ratio = StackScrollMax > 0 ? float(StackScroll) / float(StackScrollMax) : 0.f;
+		CardThumb0 = CardBarMin.Y + Ratio * (TrackLen - ThumbLen);
+		CardThumb1 = CardThumb0 + ThumbLen;
+		FSlateDrawElement::MakeBox(Out, Layer + 3, Geometry.ToPaintGeometry(CardBarMax - CardBarMin, FSlateLayoutTransform(CardBarMin)), White, ESlateDrawEffect::None, FLinearColor(0.f, 0.f, 0.f, 0.35f));
+		FSlateDrawElement::MakeBox(Out, Layer + 4, Geometry.ToPaintGeometry(FVector2D(8.f, ThumbLen), FSlateLayoutTransform(FVector2D(CardBarMin.X + 2.f, CardThumb0))), White, ESlateDrawEffect::None, Gold.CopyWithNewOpacity(0.8f));
+		Buttons.Add({ CardBarMin, CardBarMax, EButton::ScrollBarV, 1 });
+		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("viser %d–%d af %d  ·  hjul eller bjælke ruller  ·  klik på en række vælger den enhed"), StackScroll + 1, StackScroll + Rows, Sel.Num()), FVector2D(Pos.X + Size.X * 0.5f, Y + 2.f), Serif(11, EFace::Italic), MutedInk, 0.5f, false);
+	}
+	else
+	{
+		PaintText(Geometry, Out, Layer + 2, TEXT("Klik på en række for at vælge den enhed alene"), FVector2D(Pos.X + Size.X * 0.5f, Y + 4.f), Serif(11, EFace::Italic), MutedInk, 0.5f, false);
+	}
 }
 
 void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft, int32 RegimentIndex) const

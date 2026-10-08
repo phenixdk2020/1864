@@ -1087,44 +1087,9 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
             continue;
         }
 
-<<<<<<< HEAD
         if (bScaleOnlyRebuild && SoldierSettle.IsValidIndex(VisualIndex) && SoldierSettle[VisualIndex].bPlaced)
             continue;
-        // A column keeps its full width at a thinned figure scale: whole rows are skipped, not every second man (which kept two of four files).
-        const bool bColumnFormation = OwnerCompany && OwnerCompany->FormationComponent &&
-            (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
-             OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn);
-        const int32 ColumnFiles = bColumnFormation ?
-            (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn ? 2 :
-             FMath::Max(1, OwnerCompany->FormationComponent->ColumnWidth)) : 1;
-        const int32 RowStride = VisualScaleDivisor <= 1 ? 1 : VisualScaleDivisor <= 2 ? 2 : VisualScaleDivisor <= 5 ? 5 : 10;
-        int32 FullIndex =
-            bColumnFormation && RowStride > 1 && FullSlots.Num() > 0
-            ? FMath::Clamp((VisualIndex / ColumnFiles) * ColumnFiles * RowStride + (VisualIndex % ColumnFiles), 0, FullSlots.Num() - 1)
-            : RenderedCount <= 1
-            ? 0
-            : FMath::Clamp(
-                FMath::RoundToInt(
-                    static_cast<float>(VisualIndex) *
-                    static_cast<float>(FullSlots.Num() - 1) /
-                    static_cast<float>(RenderedCount - 1)),
-                0,
-                FullSlots.Num() - 1);
-
-        if (bScaleOnlyRebuild)
-        {
-            TSet<int32> OccupiedScaleSlots;
-            for (int32 ScaleIndex = 0; ScaleIndex < SoldierSettle.Num(); ++ScaleIndex)
-                if (SoldierSettle[ScaleIndex].bPlaced && SoldierSlots.IsValidIndex(ScaleIndex)) OccupiedScaleSlots.Add(SoldierSlots[ScaleIndex]);
-            if (OccupiedScaleSlots.Contains(FullIndex))
-                for (int32 FreeScaleSlot = 0; FreeScaleSlot < FullSlots.Num(); ++FreeScaleSlot)
-                    if (!OccupiedScaleSlots.Contains(FreeScaleSlot)) { FullIndex = FreeScaleSlot; break; }
-        }
-        const FStrategyFormationSlot& Slot =
-            FullSlots[FullIndex];
-=======
         const FStrategyFormationSlot& Slot = DrawnSlots[VisualIndex];
->>>>>>> codex-lowq
 
         if (SoldierSettle.Num() != RenderedCount) { SoldierSettle.SetNum(RenderedCount); }
         FSettle& Settle = SoldierSettle[VisualIndex];
