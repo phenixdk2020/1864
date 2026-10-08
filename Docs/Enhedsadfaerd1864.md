@@ -33,13 +33,17 @@ Reglen for alt nedenfor: **en reaktion har en udløser, en handling og en afslut
 | **Marchkolonne** | Flytning på 120 m eller mere og ingen fjende inden for rækkevidde | Marcherer i kolonne, 4 i bredden | Fjende inden for rækkevidde + 35 m, eller under 25 m fra målet |
 | **Formering** | Se ovenfor | Går til kampformation (linje), mændene løber på plads; tilstand "Reforming" | Når mændene står; derefter "Holder formationen" |
 | **Fremrykning mod fjenden** | Ordre eller ingen fjende på skudhold | Rykker til skudafstand (typisk 70 m for linjen) med fronten mod fjenden | Skudafstand nået |
-| **Hold og skyd** | På skudhold, eller spillerordre afsluttet | Står og skyder efter fire-politik | Ny ordre, fjenden væk, eller tilbagetrækning |
+| **Hold og skyd** | På skudhold under fremrykning/angreb, eller spillerordre afsluttet | Annullerer bevægelsesordren og alle vejpunkter; står og skyder efter fire-politik og valgt rækkevidde | Når fjenden forlader skudhold, holder enheden stadig stedet indtil en ny spillerordre |
 | **Vend front** ("svinger fronten") | Fjenden kommer fra siden (over ca. 60°) | Drejer langsomt (36°/s) mod nærmeste fjende, **det nærmeste kompagni** først | Fronten vender mod fjenden |
 | **Sidetrin** | Kort flytning (under 90 m) med fjenden tæt foran | Går sidelæns, fronten forbliver mod fjenden | Målet nået |
 | **Bajonetangreb** | Fjenden vakler inden for 60–110 m, mændene står fast, officeren vil | Sætter bajonetter på, løber frem | 30 sek., eller kontakt |
 | **Karré** | Rytteri på vej mod enheden (se 4) | Danner karré, sætter bajonetter på | Truslen er væk i 8 sek. |
 | **Tilbagetrækning** | Tab over grænsen eller moral under 16–30 (efter officerens ro) | Trækker sig ud af ilden for at samle sig | Samlet, eller ny ordre |
 | **Reserve** | Chef med 4+ kompagnier, forsigtig og besindig | Holder et kompagni 90 m bag ildbasen | Basen er såret, moral under 55, eller 240 sek. efter [mangler: tidsudløsning rettet i kode, afprøves] |
+
+**Stop og skyd annullerer marchen [findes i kode; ikke afprøvet]:** Når en fremryknings- eller angrebsordre standses for at skyde på en fjende inden for den valgte fire-politik og rækkevidde, erstattes ordren af hold på stedet. Alle vejpunkter samt destinationsboks og rutelinje fjernes straks, også vejpunktsudvidelser på vej med ordonnans. Enheden skyder, mens et gyldigt mål er på skudhold, og genoptager ikke marchen, når målet forsvinder. En ren **FLYT**-ordre er march uden ild og annulleres ikke af fjender.
+
+**Destinationsboksen** viser kampformationen ved målet, også under march i kolonne: linjens bredde beregnes af antal mand, normal afstand og rækker; rytteri viser kavalerilinje. Karré vises kun, når enheden allerede står i og beholder karré. Boksen følger ordrens frontretning og har frontpil og enhedens navn; den stiplede rute går gennem vejpunkterne til boksen.
 
 ### 2.2 Marchen i detaljer [delvist]
 
@@ -133,7 +137,7 @@ Auto-målvalg skal **nulstilles**, når officer-AI'en slås fra (kendt fejl, ret
 ### 7.1 Angreb med flere kompagnier [findes]
 
 1. Chefen deler gruppen: **ét kompagni er ildbase** (midten), **to flankerer** (hver sin side).
-2. Ildbasen rykker til skudafstand og holder og skyder.
+2. Ildbasen rykker til skudafstand og holder og skyder. Stop for ild efter fire-politik og rækkevidde annullerer fremryknings-/angrebsordren og alle vejpunkter; destinationsboks og rute forsvinder. Enheden bliver stående, også når fjenden forlader skudhold, indtil spilleren giver en ny ordre. Ren FLYT fortsætter uden at standse for ild.
 3. Flankerne **går udenom ildlinjen** (ikke gennem egen ild) og **ind fra siden**, med vinkel 45° og 90° efter chefens taktik.
 4. Gode chefer sender flankerne **videre ud**; dårlige holder dem tæt på og rykker frem på linje.
 5. **Sidetrin** bruges, når en flytning er under 90 m med fjenden tæt foran.

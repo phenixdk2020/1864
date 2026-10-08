@@ -78,6 +78,9 @@ public:
     struct FCourierInfo { TWeakObjectPtr<AStrategyUnit> Unit; float SecondsLeft = 0.0f; };
     TArray<FCourierInfo> GetPendingCouriers() const;
 
+    /** Discard in-flight extensions of a waypoint route cancelled by engagement. */
+    void CancelRequestedWaypointRoute(const AStrategyUnit* RouteUnit, const FGuid& RouteId);
+
     /** Right mouse: with units selected a click sends them there, and holding the button draws an arrow for the front they are to end with
      *  (the camera does not pan while it is held). */
     bool IsRightMouseCommand() const { return bRmbCommand; }

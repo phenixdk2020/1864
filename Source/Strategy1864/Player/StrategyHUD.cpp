@@ -22,6 +22,7 @@
 #include "../Combat/StrategyFireDrillComponent.h"
 #include "../Command/StrategyCommandComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
+#include "../Formations/StrategyFormationPolicyComponent.h"
 #include "../Orders/StrategyOrderComponent.h"
 #include "../Orders/StrategyOrderTypes.h"
 #include "../Units/StrategyUnit.h"
@@ -484,10 +485,10 @@ void AStrategyHUD::DrawMovementRoute(const AStrategyUnit* Unit, bool bSelected)
     const bool bRouteActive = (bRequestedRoute || Unit->OrderComponent->IsPhysicallyExecuting()) &&
         (RouteOrder.Type == EStrategyOrderType::Move || RouteOrder.Type == EStrategyOrderType::Advance ||
          RouteOrder.Type == EStrategyOrderType::AttackHere || !RouteOrder.Waypoints.IsEmpty());
-    if (!bSelected && !bRouteActive) return;
+    if (!bRouteActive) return;
     const FLinearColor RouteColour = bSelected ? Gold : FLinearColor(1.0f, 1.0f, 1.0f, 0.22f);
     const float RouteYaw = RouteOrder.bHasFacing ? RouteOrder.FacingYaw : Unit->GetActorRotation().Yaw;
-    const FVector RouteGoal = bRouteActive ? RouteOrder.TargetLocation : Unit->GetActorLocation();
+    const FVector RouteGoal = RouteOrder.TargetLocation;
     const FVector RouteForward = FRotator(0.0f, RouteYaw, 0.0f).Vector();
     const FVector RouteRight(-RouteForward.Y, RouteForward.X, 0.0f);
     auto RouteOnGround = [&](const FVector& RoutePoint)
@@ -510,11 +511,25 @@ void AStrategyHUD::DrawMovementRoute(const AStrategyUnit* Unit, bool bSelected)
     float RouteHalfWidth = 250.0f, RouteHalfDepth = 150.0f;
     if (Unit->FormationComponent)
     {
-        RouteHalfWidth = Unit->FormationComponent->EstimateFrontageCm(Unit->CurrentStrength) * 0.5f;
-        const TArray<FStrategyFormationSlot> RouteSlots = Unit->FormationComponent->GenerateSoldierSlots(FVector::ZeroVector, 0.0f, Unit->CurrentStrength);
-        FBox RouteBounds(ForceInit);
-        for (const FStrategyFormationSlot& RouteSlot : RouteSlots) RouteBounds += RouteSlot.WorldLocation;
-        if (RouteBounds.IsValid) RouteHalfDepth = FMath::Max(Unit->FormationComponent->SoldierRankSpacingCm, RouteBounds.GetSize().X) * 0.5f;
+        const UStrategyFormationComponent* RouteFormation = Unit->FormationComponent;
+        const EStrategyFormationType RouteBattleFormation = Unit->FormationPolicy ?
+            Unit->FormationPolicy->GetDestinationFormation() : RouteFormation->CurrentFormation;
+        if (RouteBattleFormation == EStrategyFormationType::Square)
+        {
+            const int32 RouteMenPerSide = FMath::Max(1, FMath::CeilToInt(Unit->CurrentStrength / 4.0f));
+            RouteHalfWidth = RouteHalfDepth = FMath::Max(300.0f,
+                (RouteMenPerSide - 1) * RouteFormation->SoldierLateralSpacingCm * 0.5f);
+        }
+        else
+        {
+            // Match the battle slot layout, including the cavalry line's four ranks.
+            const int32 RouteRanks = RouteBattleFormation == EStrategyFormationType::CavalryLine ?
+                4 : FMath::Max(1, RouteFormation->RankCount);
+            const int32 RouteFiles = FMath::Max(1, FMath::CeilToInt(float(Unit->CurrentStrength) / RouteRanks));
+            RouteHalfWidth = FMath::Max(1, RouteFiles - 1) * RouteFormation->SoldierLateralSpacingCm * 0.5f;
+            RouteHalfDepth = FMath::Max(1, FMath::Min(RouteRanks, Unit->CurrentStrength) - 1) *
+                RouteFormation->SoldierRankSpacingCm * 0.5f;
+        }
     }
     const FVector RouteFront = RouteForward * RouteHalfDepth, RouteSide = RouteRight * RouteHalfWidth;
     RouteLine({ RouteGoal + RouteFront + RouteSide, RouteGoal + RouteFront - RouteSide,
@@ -524,7 +539,15 @@ void AStrategyHUD::DrawMovementRoute(const AStrategyUnit* Unit, bool bSelected)
     RouteLine({ RouteArrowBase, RouteArrowTip });
     RouteLine({ RouteArrowTip - RouteForward * 250.0f + RouteRight * 180.0f, RouteArrowTip,
                 RouteArrowTip - RouteForward * 250.0f - RouteRight * 180.0f });
-    if (!bRouteActive) return;
+    const FVector RouteLabelScreen = Project(RouteOnGround(RouteGoal), false);
+    if (RouteLabelScreen.Z > 0)
+    {
+        const FString RouteUnitLabel = Unit->DisplayName.ToString();
+        float RouteLabelWidth = 0.0f, RouteLabelHeight = 0.0f;
+        GetTextSize(RouteUnitLabel, RouteLabelWidth, RouteLabelHeight, nullptr, 0.85f);
+        Text(RouteUnitLabel, RouteLabelScreen.X - RouteLabelWidth * 0.5f,
+            RouteLabelScreen.Y - RouteLabelHeight * 0.5f, RouteColour, 0.85f);
+    }
     TArray<FVector> RouteVertices { Unit->GetActorLocation() };
     if (Unit->MovementExecutor && Unit->MovementExecutor->HasMovementGoal() &&
         (!bRequestedRoute || RouteOrder.WaypointRouteId == ExecutingRoute.WaypointRouteId))

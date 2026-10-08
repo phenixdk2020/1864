@@ -1668,6 +1668,13 @@ Codex' tre opgaver er merget: bevægelse (skydekegle skjult i kolonne og under f
 
 ### 2026-10-08 – Flag og stab følger formationen, mere naturlig gang, x10
 Codex' to opgaver er merget: flaget følger de tegnede mænd (ikke den simulerede enhed), staben holder sig bag formationen og går uden om kompagnierne, og mændene har personlig variation i tempo, start og skridtfase med glidende drejninger; en kort bevægelse udføres i formation, en længere går straks i kolonne. Slaget har fået en x10-hastighed. Uret i slaget følger hastigheden (målt med -Strategy1864DebugClock: 3, 6 og 30 slagsekunder pr. sekund ved x½, x1 og x5).
+### 2026-10-08 — Stop-og-skyd afslutter bevægelse; destinationsboks viser kampformation
+
+- `StrategyMovementExecutorComponent`: stop for ild under fremrykning/angreb erstatter bevægelsesordren med hold på stedet uden vejpunkter. Bevægelsesmål og rute ryddes; fronten kan fortsat drejes mod målet. Spillerenheder beholder hold, indtil spilleren giver en ny ordre. Ren FLYT annulleres ikke af fjender.
+- `StrategyPlayerController`: ordonnanser med udvidelser af den annullerede vejpunktsrute fjernes, så de ikke genstarter den eller efterlader ruten i HUD'en.
+- `StrategyFormationPolicyComponent` og `StrategyHUD`: destinationsboksen bruger kampformationens bredde og dybde frem for marchkolonnen, med kavalerilinje, karré kun ved bevaret karré, ordrefront, frontpil og enhedsnavn. Den stiplede vejpunktsrute bevares for aktive ordrer; afsluttede ordrer viser ingen destinationsboks.
+- `Enhedsadfaerd1864.md`, afsnit 2.1 og 7.1, beskriver annullering og fastholdelse på stedet samt formationsboksen.
+- Validering: statisk gennemgang af ordre-, bevægelses-, formations- og HUD-forløb samt `git diff --check`. Ingen build, start af spil eller commit; adfærden skal afprøves i Unreal senere.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

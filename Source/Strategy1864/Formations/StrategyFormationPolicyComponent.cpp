@@ -117,6 +117,18 @@ bool UStrategyFormationPolicyComponent::IsColumn(EStrategyFormationType Formatio
     return Formation == EStrategyFormationType::MarchColumn || Formation == EStrategyFormationType::CavalryColumn || Formation == EStrategyFormationType::DefileColumn;
 }
 
+EStrategyFormationType UStrategyFormationPolicyComponent::GetDestinationFormation() const
+{
+    if (OwnerUnit && OwnerUnit->FormationComponent &&
+        !IsColumn(OwnerUnit->FormationComponent->CurrentFormation))
+        return OwnerUnit->FormationComponent->CurrentFormation;
+    // A square is previewed only while the unit is actually keeping that square.
+    if (BattleFormation != EStrategyFormationType::Square && !IsColumn(BattleFormation) &&
+        !(OwnerUnit && OwnerUnit->IsA<ACavalryUnit>() && BattleFormation == EStrategyFormationType::Line))
+        return BattleFormation;
+    return OwnerUnit && OwnerUnit->IsA<ACavalryUnit>() ? EStrategyFormationType::CavalryLine : EStrategyFormationType::Line;
+}
+
 EStrategyFormationType UStrategyFormationPolicyComponent::ColumnFormation() const
 {
     return OwnerUnit && OwnerUnit->IsA<ACavalryUnit>() ? EStrategyFormationType::CavalryColumn : EStrategyFormationType::MarchColumn;
