@@ -161,6 +161,14 @@ bool UStrategyFieldOfficerComponent::IsOpenToCharge(const AStrategyUnit* U, FStr
         OutWhy = TEXT("fjenden er i kolonne");
         return true;
     }
+    // A cavalry captain may charge a line while carrying out an explicit advance/attack mission.
+    if (F == EStrategyFormationType::Line && U->Echelon == EStrategyEchelon::Company &&
+        Cast<ACavalryUnit>(OwnerUnit) && IsOffensive() &&
+        OwnerUnit->OrderComponent->GetCurrentOrder().Type != EStrategyOrderType::None)
+    {
+        OutWhy = TEXT("fjenden står i linje");
+        return true;
+    }
     if (U->UnitState == EStrategyUnitState::Routed)
     {
         OutWhy = TEXT("fjenden flygter");
@@ -730,7 +738,8 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
             Why = W;
         }
     }
-    if (IsOffensive() && Target && OwnerUnit->Morale > 55.0f && Now - LastChargeTime > 45.0f && Cavalry)
+    if (Target && IsOffensive() && Order.Type != EStrategyOrderType::None &&
+        OwnerUnit->Morale > 55.0f && Now - LastChargeTime > 45.0f && Cavalry)
     {
         FStrategyOrder Charge;
         Charge.Type = EStrategyOrderType::Charge;

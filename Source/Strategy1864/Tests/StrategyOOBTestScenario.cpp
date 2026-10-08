@@ -283,9 +283,11 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
     bLivgardenVsSwedishTest = false;
     bSkirmish = true;
     BattleOutcome.Reset();
-    // On the meadow (its middle): the Danes in the south facing north, the enemy 400 m north.
+    const bool bSkirmishCavalry = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864SkirmishCavalry"));
+    const bool bSkirmishPassive = bSkirmishCavalry || FParse::Param(FCommandLine::Get(), TEXT("Strategy1864SkirmishPassive"));
+    // The cavalry test opens at 450 m; existing infantry tests remain at 400 m.
     const FVector Middle = Origin + FVector(15000.0f, -7000.0f, 0.0f);
-    const FVector DanishLine = Middle - FVector(20000.0f, 0.0f, 0.0f), EnemyLine = Middle + FVector(20000.0f, 0.0f, 0.0f);
+    const FVector DanishLine = Middle - FVector(20000.0f, 0.0f, 0.0f), EnemyLine = Middle + FVector(bSkirmishCavalry ? 25000.0f : 20000.0f, 0.0f, 0.0f);
     const int32 Lod = Strategy1864BattleQuality::GetFigureDivisor();
 
     AStrategyHQUnit* Major = SpawnHQ(TEXT("DK-SKIRMISH-HQ"), TEXT("1. Bataillon"), static_cast<uint8>(EStrategyHQLevel::Battalion), DanishLine - FVector(9000.0f, 0.0f, 0.0f), nullptr);
@@ -319,7 +321,7 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
         Major->OfficerProfileComponent->Aggression = 45.0f;
     }
     // -Strategy1864SkirmishPassive: the Danish headquarters' AI is off and nothing attacks before the player orders it.
-    if (Major && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864SkirmishPassive")))
+    if (Major && bSkirmishPassive)
     {
         Major->bOfficerAIEnabled = false;
     }
@@ -329,7 +331,7 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
             DanishLine + FVector(0.0f, (c - (DaneCount - 1) * 0.5f) * 7200.0f, 0.0f), Major, static_cast<uint8>(EStrategySide::Denmark)))
         {
             Company->bPlayerControllable = true;
-            if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864SkirmishPassive")) && Company->DoctrineComponent)
+            if (bSkirmishPassive && Company->DoctrineComponent)
             {
                 // The player gives the orders: the company's own AI reacts (front, fire, square) but does not seek the fight.
                 Company->DoctrineComponent->Doctrine = EStrategyDoctrine::Defensive;
@@ -364,7 +366,8 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
     }
     for (AStrategyCompanyUnit* Company : All)
     {
-        Company->bOfficerAIEnabled = true;
+        // In the cavalry test the Swedish infantry only holds and fires, without bayonet counterattacks.
+        Company->bOfficerAIEnabled = !bSkirmishCavalry || Company->Side == EStrategySide::Denmark;
         if (Company->InfantryVisualComponent)
         {
             Company->InfantryVisualComponent->SetVisualScaleDivisor(Lod);
@@ -448,12 +451,60 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
             }
         }
     }
-    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864EnemyDefends")))
+    if (bSkirmishCavalry || FParse::Param(FCommandLine::Get(), TEXT("Strategy1864EnemyDefends")))
     {
         SetEnemyAttacking(false);
     }
+    if (bSkirmishCavalry)
+    {
+        if (EnemyMajor) { EnemyMajor->bOfficerAIEnabled = false; }
+        // Spawn after the defence orders so they cannot replace the squadron's initial advance.
+        // No HQ parent: its captain leads this explicit test mission, without screening orders from a staff.
+        const FVector SkirmishCavalryLocation = EnemyLine + FVector(0.0f, 4000.0f, 0.0f);
+        if (ACavalryUnit* SkirmishHussars = SpawnCavalry(TEXT("EN-SKIRMISH-HUSSARS"), bSwedes ? TEXT("Sv. Husareskadron") : TEXT("Pr. Husareskadron"),
+            SkirmishCavalryLocation, nullptr))
+        {
+            SkirmishHussars->Side = FoeSide;
+            SkirmishHussars->bPlayerControllable = false;
+            SkirmishHussars->bOfficerAIEnabled = true;
+            SkirmishHussars->SetActorRotation(FRotator(0.0f, 180.0f, 0.0f));
+            if (SkirmishHussars->DoctrineComponent)
+            {
+                SkirmishHussars->DoctrineComponent->Doctrine = EStrategyDoctrine::Defensive;
+            }
+            if (SkirmishHussars->AutonomousBattleAIComponent)
+            {
+                SkirmishHussars->AutonomousBattleAIComponent->bEnableForNonPlayerSides = false;
+            }
+            SkirmishHussars->RefreshDebugLabel();
+            ConfigureRuntimeQALabel(SkirmishHussars);
+            AStrategyCompanyUnit* SkirmishCavalryTarget = nullptr;
+            float SkirmishCavalryNearestSq = TNumericLimits<float>::Max();
+            for (AStrategyCompanyUnit* SkirmishCandidate : All)
+            {
+                if (SkirmishCandidate->Side != EStrategySide::Denmark) { continue; }
+                const float SkirmishCandidateSq = FVector::DistSquared2D(SkirmishCandidate->GetActorLocation(), SkirmishHussars->GetActorLocation());
+                if (SkirmishCandidateSq < SkirmishCavalryNearestSq)
+                {
+                    SkirmishCavalryNearestSq = SkirmishCandidateSq;
+                    SkirmishCavalryTarget = SkirmishCandidate;
+                }
+            }
+            if (SkirmishCavalryTarget && SkirmishHussars->OrderComponent)
+            {
+                // An explicit advance gets them moving; ThinkCavalry selects an open target and avoids steady squares.
+                FStrategyOrder SkirmishCavalryAdvance;
+                SkirmishCavalryAdvance.Type = EStrategyOrderType::Advance;
+                SkirmishCavalryAdvance.TargetLocation = SkirmishCavalryTarget->GetActorLocation();
+                SkirmishCavalryAdvance.FacingYaw = (SkirmishCavalryAdvance.TargetLocation - SkirmishHussars->GetActorLocation()).Rotation().Yaw;
+                SkirmishCavalryAdvance.bHasFacing = true;
+                SkirmishCavalryAdvance.Authority = EStrategyOrderAuthority::OfficerAI;
+                SkirmishHussars->OrderComponent->SetOrder(SkirmishCavalryAdvance);
+            }
+        }
+    }
     // -Strategy1864SkirmishAttack: the major orders his battalion to attack (his captains lead it from there).
-    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864SkirmishAttack")) && Major && Major->OrderComponent)
+    if (!bSkirmishPassive && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864SkirmishAttack")) && Major && Major->OrderComponent)
     {
         FStrategyOrder Attack;
         Attack.Type = EStrategyOrderType::AttackHere;
@@ -470,7 +521,7 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
     FieldCameraYaw = 0.0f;
     bFieldCameraPlaced = false;
     SetupObjectives(DanishLine, EnemyLine);
-    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SKIRMISH: %d Danish companies against %d enemy companies, 400 m apart, figures 1:%d"), DaneCount, EnemyCompanies, Lod);
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SKIRMISH: %d Danish companies against %d enemy companies, %.0f m apart, cavalry %s, figures 1:%d"), DaneCount, EnemyCompanies, FVector::Dist2D(DanishLine, EnemyLine) / 100.0f, bSkirmishCavalry ? TEXT("yes") : TEXT("no"), Lod);
 }
 
 void AStrategyOOBTestScenario::GetBattleScore(int32& OutDanesStart, int32& OutDanesNow, int32& OutEnemyStart, int32& OutEnemyNow, int32& OutDanesBroken, int32& OutEnemyBroken) const

@@ -5962,6 +5962,7 @@ void SCampaign1851Overlay::PaintMenu(const FGeometry& Geometry, FSlateWindowElem
 		PaintText(Geometry, Out, Layer + 3, TEXT("Midlertidigt: testslag"), FVector2D(24.f, Screen.Y - 92.f), Serif(12, EFace::Italic), Gold, 0.f, false);
 		PaintButton(Geometry, Out, Layer + 3, FVector2D(24.f, Screen.Y - 70.f), FVector2D(210.f, 34.f), TEXT("TEST 1 MOD 1"), EButton::StartTest, 1);
 		PaintButton(Geometry, Out, Layer + 3, FVector2D(246.f, Screen.Y - 70.f), FVector2D(210.f, 34.f), TEXT("TEST 4 MOD 1"), EButton::StartTest, 4);
+		PaintButton(Geometry, Out, Layer + 3, FVector2D(468.f, Screen.Y - 70.f), FVector2D(210.f, 34.f), TEXT("TEST RYTTERI"), EButton::StartTest, 9);
 		const FVector2D StartSize(820.f, 570.f);
 		const FVector2D StartPos = (Screen - StartSize) * 0.5f;
 		PaintPanel(Geometry, Out, Layer + 1, StartPos, StartSize);

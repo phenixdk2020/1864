@@ -1611,6 +1611,13 @@ Fejl: efter indkaldelsesstørrelsen blev en selvstændig `if (Button == UnitSize
 - F?lles drejeberegning aktiveres ved mere end 1? yaw-afvigelse og afsluttes glidende. Slotgr?nser caches ved layout, og en f?lles rutehistorik afgr?nses efter kolonnens l?ngde; ingen nye terr?n- eller navigationsopslag pr. mand.
 - Kun visuelle komponenter er ?ndret. Enhedspositioner, bev?gelseseksekvering, simulation og angrebsordrer er u?ndrede; ?ndringen giver ingen enhed ret til selv at starte et angreb.
 - Validering: statisk diff-kontrol og numerisk kontrol af pivot, buer, hastighedsgr?nse og yaw over ?180?. Ikke bygget eller startet; visuel kontrol i Unreal mangler. Ingen commit.
+### 2026-10-08 — Rytteri-test med svensk husareskadron
+
+- Tilføjet `-Strategy1864SkirmishCavalry`: én fjendtlig husareskadron 40 m til siden på fjendens linje, cirka 450 m fra danskerne. Defensiv grundholdning og aktiv officer-AI; en indledende `Advance`-ordre med `OfficerAI`-autoritet mod nærmeste danske kompagni får eskadronen frem. `ThinkCavalry` vælger åbne mål og undgår faste karréer. Fast infanterilinje er nu også et muligt mål for rytteri med en igangværende fremryknings-/angrebsordre; tidligere blev kun kolonner og vaklende mål accepteret.
+- Danske kompagnier afventer spillerordrer med reaktiv officer-AI. Begge HQ'er har AI slået fra i rytteri-testen. Svensk fodfolk forsvarer med officer-AI slået fra, så det ikke starter bajonetmodangreb. Passiv start tilsidesætter et eventuelt `SkirmishAttack`-flag.
+- Tilføjet **TEST RYTTERI** i startmenuen (række 9) og `Start-Test-3-Rytteri.bat`: to danske kompagnier, svensk forsvarer og husarer; intet FieldLOD-flag.
+- Officerens kavaleriangreb kræver nu en eksisterende fremryknings-/angrebsordre; offensiv doktrin alene udløser ikke et angreb.
+- Statisk kodegennemgang og diff-kontrol. Ingen build, spilstart eller commit. Angreb inden for første minut og karréreaktion skal stadig bekræftes i spillet.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
