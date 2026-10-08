@@ -1205,6 +1205,16 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Button = SCampaign1851Overlay::EButton::None;
 			}
 		}
+		if (Button == SCampaign1851Overlay::EButton::UnitDeployEarly)
+		{
+			if (Map->DeployRaisedUnit(Module)) { Overlay->ShowToast(TEXT("Enheden kan nu marchere med sin nuværende uddannelse")); }
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
+		if (Button == SCampaign1851Overlay::EButton::RaisingPage)
+		{
+			Overlay->RaisingPageIndex += Module;
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
 		if (Button == SCampaign1851Overlay::EButton::TransferAdj)
 		{
 			const int32 Cur = Overlay->GetTransferCount();

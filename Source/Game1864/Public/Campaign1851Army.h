@@ -278,6 +278,17 @@ struct FCampaign1851Regiment
 	TArray<float> SectionMaxHorses;
 	/** Raised during the campaign (not part of the army of 1851): saved with its definition, paid from the budget. */
 	bool bRaised = false;
+	/** Initial garrison training; deployment ends this phase without changing qualities. */
+	bool bTraining = false;
+	float RaisingProgress = 0.f;
+	int32 RaisingType = 0;
+	float RaisingRate() const
+	{
+		return Program == ECampaign1851Program::Rest ? 0.f
+			: Program == ECampaign1851Program::Drill ? 1.f / 60.f
+			: Program == ECampaign1851Program::Mixed ? 1.f / 75.f : 1.f / 90.f;
+	}
+	int32 RaisingDaysLeft() const { return RaisingRate() > 0.f ? FMath::CeilToInt((1.f - RaisingProgress) / RaisingRate()) : -1; }
 	/** Split off another unit (half its companies): saved like a raised unit, but costs no extra upkeep. */
 	bool bDetached = false;
 	/** Loading: the number of companies the save had (-1: as at the start). */

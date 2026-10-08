@@ -1460,6 +1460,13 @@ Forskningsvinduet bruger nu hele bredden. En gren, hvis emner står side om side
 - Den eksisterende split-/flytte-/samlelogik og SplitBase genbruges. Mandskab bruger CompanyWeight; kanoner og heste får gemte sektionsandele med kumulativ afrunding, så alle totaler bevares ved deling, flytning, samling og indlæsning. Sektionsantal bevares også efter mandskabsudjævning.
 - Overførselsvinduet flytter mænd mellem sektioner og har en knap til at flytte én kanon ad gangen, også når den modtagende sektion er fuldt bemandet. Den nye klikhandler er en selvstændig if-blok med EButton::Block.
 - Kontrol: statisk diff-/kildegennemgang og selvstændige beregningskontroller med ulige totaler og gentagne split-/flytte-/samleforløb. Spillet er hverken bygget eller startet.
+### 2026-10-08: Materiel og indkaldelse i separate paneler
+
+- Indkaldelse har egen ramme, uniformsillustration pr. type (Slate-silhuet ved manglende tekstur), rolle, mandskab, skyts, heste, pris og uddannelsestid.
+- Under lageret vises alle enheder under grunduddannelse med navn, type, garnison, procent, dage tilbage og INDSÆT TIDLIGT; sideknapper giver adgang til hele listen.
+- Nye indkaldte enheder starter med rekrutuddannelse, 20 i sammenhold og 45 % moral. Grunduddannelsen forbedrer uddannelse, erfaring, sammenhold og moral i garnison: eksercits 60 dage, blandet 75, specialprogrammer 90; hvile pauser. Tidlig indsættelse bevarer kvaliteterne og frigiver marchordrer. Kortmarkører viser træningsprocent.
+- Gemmeversion 28 gemmer fase, fremdrift og type; gamle gemninger og startstyrker i 1851/1825 forbliver uden den nye rekrutfase. Delinger arver træningsstatus. Nye klikbehandlere er selvstændige if-blokke og blokerer gennemklik.
+- Kontrol: statisk gennemgang og git diff --check. Spillet er hverken bygget eller kørt; visuel kontrol og indlæsning i Unreal udestår.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

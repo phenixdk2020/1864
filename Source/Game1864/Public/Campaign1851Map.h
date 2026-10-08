@@ -692,6 +692,7 @@ public:
 	FString RaiseBlockReason(int32 CityIndex) const;
 	/** Raises a battalion of recruits at the town's barracks from its amt's reserve; its index or INDEX_NONE. */
 	int32 RaiseBattalion(int32 CityIndex, FString* OutReason = nullptr);
+	bool DeployRaisedUnit(int32 RegimentIndex);
 	/** Upkeep a month of the battalions raised since 1851. */
 	double RaisedUpkeepPerMonth() const;
 	/** A battalion's strength to fill up to (less its companies in forts). */
@@ -1725,7 +1726,7 @@ private:
 	// The manpower layer (Campaign1851Manpower.cpp).
 	void ResetManpower();
 	void MonthlyManpower();
-	int32 AddRaisedRegiment(const FString& Id, const FString& Name, ECampaign1851Arm Arm, int32 Home, int32 MaxMen);
+	int32 AddRaisedRegiment(const FString& Id, const FString& Name, ECampaign1851Arm Arm, int32 Home, int32 MaxMen, bool bTraining = false);
 	TArray<float> AmtManpower;
 
 	// The fort layer (Campaign1851Forts.cpp).
