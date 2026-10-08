@@ -75,6 +75,24 @@ struct FStrategyOrder
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     int32 OrderSerial = 0;
 
+    /** Player route, including the final destination. Travels with delayed orders. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TArray<FVector> Waypoints;
+
+    UPROPERTY()
+    FGuid WaypointRouteId;
+
+    UPROPERTY()
+    int32 NextWaypointIndex = 0;
+
+    UPROPERTY()
+    FVector GroupRouteOffset = FVector::ZeroVector;
+
+    FVector ActiveDestination() const
+    {
+        return Waypoints.IsValidIndex(NextWaypointIndex) ? Waypoints[NextWaypointIndex] : TargetLocation;
+    }
+
     bool IsStandingIntent() const
     {
         return Type == EStrategyOrderType::DefendHere ||

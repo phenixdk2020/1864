@@ -1619,6 +1619,14 @@ Fejl: efter indkaldelsesstørrelsen blev en selvstændig `if (Button == UnitSize
 - Officerens kavaleriangreb kræver nu en eksisterende fremryknings-/angrebsordre; offensiv doktrin alene udløser ikke et angreb.
 - Statisk kodegennemgang og diff-kontrol. Ingen build, spilstart eller commit. Angreb inden for første minut og karréreaktion skal stadig bekræftes i spillet.
 
+### 2026-10-08 — Synlige marchmål og ALT-vejpunkter i slaget
+
+- HUD viser formationsaftryk, frontpil og stiplet terrænfølgende rute: guld for valgte enheder og svag hvid for øvrige spillerstyrede enheder med aktive bevægelsesordrer. Vejpunkter har nummererede markører; sidste punkt er slutmålet.
+- ALT+højreklik udvider den eksisterende march-/fremryknings-/angrebsrute, og træk angiver slutfronten. Almindeligt højreklik erstatter ruten; STOP/HOLD rydder køen. Gruppens eksisterende forskydning bevares ved nye punkter.
+- Vejpunkter, ruteidentitet og fremdrift ligger i ordren og følger ordonnans og officerens læseforsinkelse. En forsinket udvidelse bevarer allerede passerede punkter. Hvert delmål bruger den eksisterende ruteplanlægger og brokø; fronten færdiggøres kun ved sidste punkt.
+- Ordrelinjerne viser resterende vejpunkter, og ventende ordrer vises i ruteoversigten. Angrebsordrens afstandsgenvej afslutter ikke en ufuldført vejpunktskø. Ingen ny automatisk angrebsadfærd eller ændring af testflag.
+- Validering: statisk gennemgang og `git diff --check`. Ingen build, spilstart eller commit; visuel kontrol og afprøvning i Unreal udestår.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

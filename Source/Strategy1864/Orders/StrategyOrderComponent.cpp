@@ -59,7 +59,12 @@ bool UStrategyOrderComponent::SetOrder(const FStrategyOrder& NewOrder)
         if (AStrategyUnit* CoverOrderUnit = Cast<AStrategyUnit>(GetOwner()))
             if (CoverOrderUnit->FieldOfficerComponent) CoverOrderUnit->FieldOfficerComponent->LeaveAutomaticFireCover();
     }
-    CurrentOrder = NewOrder;
+    FStrategyOrder RouteOrder = NewOrder;
+    // A courier may carry an extension of a route whose earlier points have since been reached.
+    if (RouteOrder.WaypointRouteId.IsValid() && RouteOrder.WaypointRouteId == CurrentOrder.WaypointRouteId)
+        RouteOrder.NextWaypointIndex = FMath::Max(RouteOrder.NextWaypointIndex, CurrentOrder.NextWaypointIndex);
+    if (RouteOrder.Type == EStrategyOrderType::Hold) RouteOrder.Waypoints.Reset();
+    CurrentOrder = RouteOrder;
     CurrentOrder.OrderSerial = NextOrderSerial++;
     SetExecutionState(EStrategyOrderExecutionState::Pending);
     OnOrderChanged.Broadcast(CurrentOrder);

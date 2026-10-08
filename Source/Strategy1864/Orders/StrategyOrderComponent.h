@@ -66,6 +66,9 @@ public:
     UFUNCTION(BlueprintPure, Category="Strategy|Orders")
     EStrategyCommandVisualState GetCommandVisualState() const;
 
+    FStrategyOrder GetLatestRequestedOrder() const { return bHasDelayedOrder ? DelayedOrder : CurrentOrder; }
+    void AdvanceWaypoint() { ++CurrentOrder.NextWaypointIndex; }
+
 private:
     bool CanReplaceCurrentOrder(const FStrategyOrder& NewOrder) const;
     void SetExecutionState(EStrategyOrderExecutionState NewState);

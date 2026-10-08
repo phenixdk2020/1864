@@ -1,4 +1,5 @@
 #include "StrategyHUD.h"
+#include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
 #include "../Combat/StrategyContactComponent.h"
 #include "../Combat/StrategyThreatReactionComponent.h"
@@ -66,7 +67,7 @@ namespace
             Unit->Echelon == EStrategyEchelon::Headquarters;
     }
 
-    FString OrderLabel(const AStrategyUnit* Unit)
+    FString BaseOrderLabel(const AStrategyUnit* Unit)
     {
         if (!Unit->OrderComponent)
         {
@@ -86,6 +87,19 @@ namespace
             case EStrategyOrderType::Charge: return TEXT("CHARGE");
             default: return TEXT("SKYD");
         }
+    }
+
+    FString OrderLabel(const AStrategyUnit* Unit)
+    {
+        FString RouteLabel = BaseOrderLabel(Unit);
+        if (Unit->OrderComponent)
+        {
+            const AStrategyPlayerController* LabelPC = Cast<AStrategyPlayerController>(Unit->GetWorld()->GetFirstPlayerController());
+            const FStrategyOrder LabelOrder = LabelPC ? LabelPC->GetRequestedRoute(Unit) : Unit->OrderComponent->GetLatestRequestedOrder();
+            const int32 RemainingWaypoints = FMath::Max(0, LabelOrder.Waypoints.Num() - LabelOrder.NextWaypointIndex);
+            if (RemainingWaypoints > 0) RouteLabel += FString::Printf(TEXT(" (%d vejpunkter)"), RemainingWaypoints);
+        }
+        return RouteLabel;
     }
 
     TArray<AStrategyUnit*> Subordinates(const AStrategyUnit* Unit);
@@ -186,6 +200,13 @@ void AStrategyHUD::DrawHUD()
         Text(BuildMarker, 12.0f, 9.0f, Ink);
     }
     DrawButton(342.0f, 6.0f, 130.0f, 22.0f, TEXT("INDSTILLINGER"), EAction::SettingsToggle, 0, bSettingsOpen, nullptr, bSettingsOpen ? nullptr : &ButtonDark);
+
+    if (const AStrategyPlayerController* RoutePC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
+    {
+        const TArray<AStrategyUnit*> RouteSelection = RoutePC->GetSelectedUnits();
+        for (TActorIterator<AStrategyUnit> RouteIt(GetWorld()); RouteIt; ++RouteIt)
+            if (RouteIt->bPlayerControllable) DrawMovementRoute(*RouteIt, RouteSelection.Contains(*RouteIt));
+    }
 
     // Fire cones under the panels: the selected units', and the duel's two companies.
     {
@@ -448,6 +469,80 @@ void AStrategyHUD::DashedPolyline(const TArray<FVector>& WorldPoints, const FLin
         }
         Phase += Len;
     }
+}
+
+void AStrategyHUD::DrawMovementRoute(const AStrategyUnit* Unit, bool bSelected)
+{
+    if (!Unit || !Unit->OrderComponent) return;
+    const AStrategyPlayerController* RoutePC = Cast<AStrategyPlayerController>(GetOwningPlayerController());
+    const FStrategyOrder RouteOrder = RoutePC ? RoutePC->GetRequestedRoute(Unit) : Unit->OrderComponent->GetCurrentOrder();
+    const FStrategyOrder ExecutingRoute = Unit->OrderComponent->GetCurrentOrder();
+    const bool bRequestedRoute = RouteOrder.OrderSerial != ExecutingRoute.OrderSerial ||
+        RouteOrder.WaypointRouteId != ExecutingRoute.WaypointRouteId || Unit->OrderComponent->HasDelayedOrder();
+    const bool bRouteActive = (bRequestedRoute || Unit->OrderComponent->IsPhysicallyExecuting()) &&
+        (RouteOrder.Type == EStrategyOrderType::Move || RouteOrder.Type == EStrategyOrderType::Advance ||
+         RouteOrder.Type == EStrategyOrderType::AttackHere || !RouteOrder.Waypoints.IsEmpty());
+    if (!bSelected && !bRouteActive) return;
+    const FLinearColor RouteColour = bSelected ? Gold : FLinearColor(1.0f, 1.0f, 1.0f, 0.22f);
+    const float RouteYaw = RouteOrder.bHasFacing ? RouteOrder.FacingYaw : Unit->GetActorRotation().Yaw;
+    const FVector RouteGoal = bRouteActive ? RouteOrder.TargetLocation : Unit->GetActorLocation();
+    const FVector RouteForward = FRotator(0.0f, RouteYaw, 0.0f).Vector();
+    const FVector RouteRight(-RouteForward.Y, RouteForward.X, 0.0f);
+    auto RouteOnGround = [&](const FVector& RoutePoint)
+    {
+        return UStrategyTerrainQueryLibrary::ProjectPointToTerrain(this, RoutePoint) + FVector(0, 0, 30);
+    };
+    // Sample every segment so lines follow hills rather than joining only projected endpoints.
+    auto RouteLine = [&](const TArray<FVector>& RouteVertices)
+    {
+        TArray<FVector> GroundVertices;
+        for (int32 RouteVertex = 1; RouteVertex < RouteVertices.Num(); ++RouteVertex)
+        {
+            const int32 RouteSamples = FMath::Clamp(FMath::CeilToInt(FVector::Dist2D(RouteVertices[RouteVertex - 1], RouteVertices[RouteVertex]) / 500.0f), 1, 256);
+            for (int32 RouteSample = 0; RouteSample < RouteSamples; ++RouteSample)
+                GroundVertices.Add(RouteOnGround(FMath::Lerp(RouteVertices[RouteVertex - 1], RouteVertices[RouteVertex], float(RouteSample) / RouteSamples)));
+        }
+        if (!RouteVertices.IsEmpty()) GroundVertices.Add(RouteOnGround(RouteVertices.Last()));
+        DashedPolyline(GroundVertices, RouteColour, bSelected ? 2.0f : 1.0f, 10.0f, 6.0f);
+    };
+    float RouteHalfWidth = 250.0f, RouteHalfDepth = 150.0f;
+    if (Unit->FormationComponent)
+    {
+        RouteHalfWidth = Unit->FormationComponent->EstimateFrontageCm(Unit->CurrentStrength) * 0.5f;
+        const TArray<FStrategyFormationSlot> RouteSlots = Unit->FormationComponent->GenerateSoldierSlots(FVector::ZeroVector, 0.0f, Unit->CurrentStrength);
+        FBox RouteBounds(ForceInit);
+        for (const FStrategyFormationSlot& RouteSlot : RouteSlots) RouteBounds += RouteSlot.WorldLocation;
+        if (RouteBounds.IsValid) RouteHalfDepth = FMath::Max(Unit->FormationComponent->SoldierRankSpacingCm, RouteBounds.GetSize().X) * 0.5f;
+    }
+    const FVector RouteFront = RouteForward * RouteHalfDepth, RouteSide = RouteRight * RouteHalfWidth;
+    RouteLine({ RouteGoal + RouteFront + RouteSide, RouteGoal + RouteFront - RouteSide,
+                RouteGoal - RouteFront - RouteSide, RouteGoal - RouteFront + RouteSide, RouteGoal + RouteFront + RouteSide });
+    const FVector RouteArrowBase = RouteGoal + RouteFront;
+    const FVector RouteArrowTip = RouteArrowBase + RouteForward * 700.0f;
+    RouteLine({ RouteArrowBase, RouteArrowTip });
+    RouteLine({ RouteArrowTip - RouteForward * 250.0f + RouteRight * 180.0f, RouteArrowTip,
+                RouteArrowTip - RouteForward * 250.0f - RouteRight * 180.0f });
+    if (!bRouteActive) return;
+    TArray<FVector> RouteVertices { Unit->GetActorLocation() };
+    if (Unit->MovementExecutor && Unit->MovementExecutor->HasMovementGoal() &&
+        (!bRequestedRoute || RouteOrder.WaypointRouteId == ExecutingRoute.WaypointRouteId))
+        RouteVertices.Append(Unit->MovementExecutor->GetRemainingRoutePoints());
+    for (int32 RouteWaypoint = RouteOrder.NextWaypointIndex; RouteWaypoint < RouteOrder.Waypoints.Num(); ++RouteWaypoint)
+    {
+        const FVector RoutePoint = RouteOrder.Waypoints[RouteWaypoint];
+        if (!RouteVertices.Last().Equals(RoutePoint, 1.0f)) RouteVertices.Add(RoutePoint);
+        TArray<FVector> RouteMarker;
+        for (int32 RouteCorner = 0; RouteCorner <= 12; ++RouteCorner)
+        {
+            const float RouteAngle = RouteCorner * 2.0f * PI / 12.0f;
+            RouteMarker.Add(RoutePoint + FVector(FMath::Cos(RouteAngle), FMath::Sin(RouteAngle), 0) * 180.0f);
+        }
+        RouteLine(RouteMarker);
+        const FVector RouteScreen = Project(RouteOnGround(RoutePoint), false);
+        if (RouteScreen.Z > 0) Text(FString::FromInt(RouteWaypoint + 1), RouteScreen.X + 5, RouteScreen.Y - 12, RouteColour, 0.85f);
+    }
+    if (!RouteVertices.Last().Equals(RouteGoal, 1.0f)) RouteVertices.Add(RouteGoal);
+    RouteLine(RouteVertices);
 }
 
 void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
@@ -773,6 +868,8 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         : TEXT("KAPTAJN | KOMPAGNIKOMMANDO");
     const FString Title = Unit->DisplayName.ToString().ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"));
     Text(FString::Printf(TEXT("%s | %s"), *Title, RoleText), 10.0f, Y + 6.0f, Gold);
+
+    Text(OrderLabel(Unit), W - 300.0f, Y + 6.0f, Muted, 0.85f);
 
     // Left: the state and the AI.
     const float LX = 10.0f, LY = Y + 30.0f;

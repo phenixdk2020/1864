@@ -24,6 +24,7 @@ public:
 
     UFUNCTION(BlueprintPure, Category="Strategy|Selection")
     TArray<AStrategyUnit*> GetSelectedUnits() const;
+    FStrategyOrder GetRequestedRoute(const AStrategyUnit* RouteUnit) const;
 
     UFUNCTION(BlueprintCallable, Category="Strategy|OOB")
     void SelectUnitFromOOB(AStrategyUnit* Unit, bool bFocusCamera);
@@ -49,7 +50,8 @@ public:
         const FVector& TargetLocation,
         float FacingYaw,
         bool bHasFacing,
-        float SpreadCm = 0.0f);
+        float SpreadCm = 0.0f,
+        bool bAppendWaypoint = false);
 
     UFUNCTION(BlueprintCallable, Category="Strategy|Orders")
     void IssueHoldToSelection();
@@ -83,6 +85,7 @@ public:
 private:
     bool bRmbCommand = false;
     bool bRmbDragged = false;
+    bool bRmbAppendWaypoint = false;
     FVector RmbStart = FVector::ZeroVector;
     FVector2D RmbStartScreen = FVector2D::ZeroVector;
     void TickRightMouse();
