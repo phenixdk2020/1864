@@ -53,7 +53,11 @@ private:
         TObjectPtr<UStaticMeshComponent> Sabre;
         FVector Slot = FVector::ZeroVector;     // local to the unit
         FVector Shown = FVector::ZeroVector;    // local, eased towards the slot
+        FVector ShownVelocity = FVector::ZeroVector;
         float FacingYaw = 0.f;
+        float FacingVelocity = 0.f;
+        float GroundZ = 0.f;
+        bool bGroundPlaced = false;
         bool bPlaced = false;
         float Phase = 0.0f;
         float NextDust = 0.0f;
@@ -70,7 +74,7 @@ private:
 
     bool LoadAssets();
     void EnsureCount(int32 Count);
-    void Layout();
+    void Layout(bool bPreserveSlots);
     FHorseman MakeHorseman();
     void Fall(int32 Index);
     void UpdatePace(float DeltaTime);

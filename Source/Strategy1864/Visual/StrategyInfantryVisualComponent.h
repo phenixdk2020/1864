@@ -287,6 +287,7 @@ private:
     {
         FVector Goal = FVector::ZeroVector;
         FVector Slot = FVector::ZeroVector;
+        FVector WorldVelocity = FVector::ZeroVector;
         float Pace = FMath::FRandRange(0.94f, 1.06f);
         float WalkPhase = FMath::FRand();
         float StartDelay = FMath::FRandRange(0.f, 0.5f);
@@ -294,6 +295,7 @@ private:
         float HaltRemaining = 0.f;
         float SlotYaw = 0.f;
         float Yaw = 0.0f;
+        float YawVelocity = 0.f;
         bool bPlaced = false;     // has been put in his first place
         bool bActive = false;     // is on his way to Goal
         float SwitchAt = -1.0f;   // when he takes up the pending clip (stance change), -1: none
@@ -309,6 +311,17 @@ private:
     bool bWasVisualTravel = false;
     void UpdateSettling(float DeltaTime);
     void ApplyPendingStance(float Now);
+    void DebugSmooth();
+    double SmoothLogAt = 0.0;
+    FVector SmoothPreviousAnchor = FVector::ZeroVector;
+    float SmoothMaxAnchor = 0.f;
+    float SmoothMaxRealDelta = 0.f;
+    FVector SmoothPreviousCenter = FVector::ZeroVector;
+    float SmoothMaxCenter = 0.f;
+    TWeakObjectPtr<USkeletalMeshComponent> SmoothSamples[5];
+    FVector SmoothPreviousMen[5];
+    float SmoothMaxMen[5] = {};
+    bool bSmoothSampled = false;
 
     /** Is an enemy inside the company's chosen range and cone (it may fire). */
     bool IsEnemyInRange() const;
@@ -329,14 +342,17 @@ private:
 
     // ---- the hybrid (baked far men)
     /** What a man plays (so either form can take over where the other was): the clip, when it started (its
-     *  position = (now - start) * rate), the rate (0: a held pose), looping or once. */
+     *  position = (VisualAnimationTime - start) * rate), the rate (0: HeldPosition), looping or once. */
     struct FPlayedClip
     {
         TWeakObjectPtr<UAnimSequence> Clip;
         float Start = 0.0f;
         float Rate = 1.0f;
+        float HeldPosition = 0.f;
         bool bLoop = true;
     };
+    float VisualAnimationTime = 0.f;
+    bool MakeCrowdClipData(const FPlayedClip& Played, float* Out) const;
     TArray<FPlayedClip> SoldierClips;   // parallel to SoldierComponents
     TArray<FPlayedClip> CorpseClips;    // parallel to CorpseComponents
 
@@ -349,6 +365,7 @@ private:
     UPROPERTY(Transient)
     TObjectPtr<UStrategyCrowdModel> CrowdModel;
 
+    bool bResumeCrowdPosesNextTick = false;
     bool bCrowdMode = false;
     bool bCrowdDirty = false;       // the instances to rebuild (men added, fallen, moved in the formation)
     bool bCrowdDataDirty = false;   // a man's clip changed

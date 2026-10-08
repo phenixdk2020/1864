@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "StrategyVisualFormationPath.h"
 #include "StrategyArtilleryVisualComponent.generated.h"
 
 class UInstancedStaticMeshComponent;
@@ -33,6 +34,10 @@ public:
 
 private:
     void Rebuild();
+    FStrategyVisualFormationPath ArtilleryVisualPath;
+    TArray<FTransform> GunGoals;
+    TArray<FVector> GunVelocities;
+    TArray<float> GunTurnVelocities;
 
     UPROPERTY(Transient)
     TObjectPtr<UInstancedStaticMeshComponent> Guns;

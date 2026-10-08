@@ -92,6 +92,8 @@ private:
     void PresetTactical();
     void PresetSoldiers();
     void PresetTopDown();
+    bool bFocusTransition = false;
+    FVector FocusTarget = FVector::ZeroVector;
     bool bPresetTransition = false;
     bool bRightMousePan = false;
     float PresetArmLength = 18000.0f;

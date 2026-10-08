@@ -1686,6 +1686,15 @@ Codex' to opgaver er merget: flaget følger de tegnede mænd (ikke den simulered
 ### 2026-10-08 – Ny HUD, annullering ved stop-og-skyd, formationskasse, stabens afstand
 Codex' to opgaver er merget: en ny bundbjælke i slaget med fem paneler (ENHED, LEDELSE & ILD, ORDRER, FORMATION, UNDERLAGTE) og reglen om, at en enhed der stopper og skyder inden for sin skydegrænse får gå-ordren annulleret (destinationskassen og vejlinjen forsvinder, enheden holder til ny ordre); destinationskassen viser nu kampformationens form og ikke kolonnen. Stabens afstand bag formationen er sat til 60 m (bataljon), 120 m (regiment), 250 m (brigade) og 400 m (division) i AI/StrategyHQFollowComponent.cpp. Efter dette er der ikke bygget eller testet (aftalt med spilleren).
 
+### 2026-10-08 — Jævn bevægelse fra simulation til tegnede enheder
+
+- Gennemgået bevægelsesexecutor, formationssti, figurer, crowd/VAT, kamerafokus, framegrænse og tidsfaktorer. Simulationspositioner og ankomst-/ordreregler bevares; tegnelagets position, hastighed og drejning udjævnes hver frame.
+- Fjernet direkte arv af actor-spring i visuelt centrum, randpivotens indhentningsryk og 1°-porten. Interne delstep håndterer store delta ved x10. Kolonnen får en frisk afstandskoordinat ved ny sti.
+- Tab og figurtæthedsændringer bevarer overlevendes pladser og animationsfase. Rateændringer/genstart bevarer gangfasen; VAT følger lokal animationsklokke/CustomTimeDilation. Rettet loopperiode og bevaret holdte fraktionelle poser uden nye materialeassets.
+- Rytteri og stab har udjævnede tegningspositioner. Artilleriets 0,25-sekunders formationsopdatering er erstattet af hver-frame-interpolation. Kamerafokus glider til det tegnede centrum. Scenariet tvinger ikke længere 60 FPS; valgfri `-Strategy1864FpsCap=N` til målinger.
+- Tilføjet `-Strategy1864DebugSmooth`: én målelinje pr. realtidssekund med største frameafstand for centrum, anker og fem stabile prøvefigurer samt største framedelta/tidsfaktor. Se `Docs/Smoothness-Battle.md`.
+- Kontrol: UE 5.8-headerkontrol, `git diff --check` og numerisk kontrol af 20 FPS/tidsfaktor-kombinationer. Ingen build, spilstart eller commit; runtime-validering udføres af lead.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

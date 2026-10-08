@@ -85,16 +85,32 @@ UStrategyCrowdModel* UStrategyCrowdModel::Find(UWorld* World, USkeletalMesh* Sol
     return Model;
 }
 
-bool UStrategyCrowdModel::MakeCustomData(const UAnimSequence* Clip, float StartTime, float PlayRate, bool bLoop, float Out[CustomDataFloats]) const
+bool UStrategyCrowdModel::MakeCustomData(const UAnimSequence* Clip, float StartTime, float PlayRate, bool bLoop, float Out[CustomDataFloats], float Now, float HeldPosition) const
 {
     const FStrategyCrowdClip* C = Clip ? Clips.Find(Clip) : nullptr;
     if (!C)
     {
         return false;
     }
-    const float Fps = FramesPerSecond * FMath::Max(0.0f, PlayRate);
+    // Existing VAT shader interpolates rows. A very slow, rebased non-looping clock
+    // preserves an arbitrary frozen phase without requiring a material asset rebuild.
+    if (PlayRate <= 0.f && HeldPosition > 0.f)
+    {
+        StartTime = Now - FMath::Clamp(HeldPosition, 0.f, C->Length) / 0.001f;
+        PlayRate = 0.001f;
+        bLoop = false;
+    }
+    if (PlayRate <= 0.f)
+    {
+        Out[0] = float(C->StartRow);
+        Out[1] = 1.f;
+        Out[2] = Now;
+        Out[3] = 0.f;
+        return true;
+    }
+    const float Fps = (C->Frames - 1) / FMath::Max(0.001f, C->Length) * FMath::Max(0.0f, PlayRate);
     Out[0] = float(C->StartRow);
-    Out[1] = float(C->Frames);
+    Out[1] = float(bLoop ? FMath::Max(1, C->Frames - 1) : C->Frames); // endpoint is not an extra looping frame
     Out[2] = StartTime;
     Out[3] = bLoop ? Fps : -FMath::Max(Fps, 0.0001f);
     return true;
@@ -308,7 +324,7 @@ bool UStrategyCrowdModel::Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMes
         Poser->PlayAnimation(Clip, false);
         for (int32 f = 0; f < C.Frames; ++f)
         {
-            Poser->SetPosition(FMath::Min(f / FramesPerSecond, C.Length), false);
+            Poser->SetPosition(C.Length * f / FMath::Max(1, C.Frames - 1), false);
             Poser->TickAnimation(0.0f, false);
             Poser->RefreshBoneTransforms();
             const TArray<FTransform>& Space = Poser->GetComponentSpaceTransforms();

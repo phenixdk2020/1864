@@ -3,6 +3,7 @@
 #include "Misc/ConfigCacheIni.h"
 #include "StrategyPlayerController.h"
 #include "../Units/StrategyUnit.h"
+#include "../Visual/StrategyInfantryVisualComponent.h"
 #include "GameFramework/PlayerController.h"
 
 #include "Camera/CameraComponent.h"
@@ -98,6 +99,12 @@ void AStrategyCameraPawn::Tick(float DeltaTime)
     }
     if (!bFollowingProjectile)
     {
+        if (bFocusTransition)
+        {
+            const float FocusAlpha = 1.f - FMath::Exp(-8.f * DeltaTime);
+            SetActorLocation(FMath::Lerp(GetActorLocation(), FocusTarget, FocusAlpha));
+            if (GetActorLocation().Equals(FocusTarget, 0.1f)) bFocusTransition = false;
+        }
         return;
     }
 
@@ -115,8 +122,8 @@ void AStrategyCameraPawn::Tick(float DeltaTime)
             FMath::VInterpTo(
                 GetActorLocation(),
                 Desired,
-                DeltaTime,
-                ProjectileFollowSmoothing));
+                1.f,
+                1.f - FMath::Exp(-ProjectileFollowSmoothing * DeltaTime)));
 
         if (SpringArm)
         {
@@ -149,8 +156,8 @@ void AStrategyCameraPawn::Tick(float DeltaTime)
             FMath::VInterpTo(
                 GetActorLocation(),
                 Desired,
-                DeltaTime,
-                ProjectileFollowSmoothing));
+                1.f,
+                1.f - FMath::Exp(-ProjectileFollowSmoothing * DeltaTime)));
 
         return;
     }
@@ -191,6 +198,7 @@ void AStrategyCameraPawn::MoveForward(float Value)
     {
         return;
     }
+    bFocusTransition = false;
 
     FVector Direction = GetActorForwardVector();
     Direction.Z = 0.0f;
@@ -209,6 +217,7 @@ void AStrategyCameraPawn::MoveRight(float Value)
     {
         return;
     }
+    bFocusTransition = false;
 
     FVector Direction = GetActorRightVector();
     Direction.Z = 0.0f;
@@ -269,7 +278,8 @@ void AStrategyCameraPawn::FocusOnWorldLocation(const FVector& WorldLocation)
     NewLocation.X = WorldLocation.X;
     NewLocation.Y = WorldLocation.Y;
     NewLocation.Z = WorldLocation.Z + 100.0f;
-    SetActorLocation(NewLocation);
+    FocusTarget = NewLocation;
+    bFocusTransition = true;
 }
 
 
@@ -287,6 +297,7 @@ void AStrategyCameraPawn::BeginProjectileFollow(AActor* ProjectileActor)
             SpringArm ? SpringArm->TargetArmLength : 2600.0f;
     }
 
+    bFocusTransition = false;
     ProjectileFollowTarget = ProjectileActor;
     LastProjectileLocation = ProjectileActor->GetActorLocation();
     ImpactHoldRemainingSeconds = ProjectileImpactHoldSeconds;
@@ -330,6 +341,7 @@ void AStrategyCameraPawn::MouseOrbitX(float Value)
     if (Commander && Commander->IsRightMouseCommand()) return;   // the right button is giving an order, not panning
     if (bRightMousePan || PC->IsInputKeyDown(EKeys::RightMouseButton))
     {
+        bFocusTransition = false;
         AddActorWorldOffset(-GetActorRightVector() * Value * 35.0f);
     }
     else if (PC->IsInputKeyDown(EKeys::MiddleMouseButton))
@@ -347,6 +359,7 @@ void AStrategyCameraPawn::MouseOrbitY(float Value)
     {
         FVector Forward = GetActorForwardVector();
         Forward.Z = 0.0f;
+        bFocusTransition = false;
         AddActorWorldOffset(-Forward.GetSafeNormal() * Value * 35.0f);
     }
     else if (PC->IsInputKeyDown(EKeys::MiddleMouseButton))
@@ -366,18 +379,24 @@ void AStrategyCameraPawn::FocusSelected()
         const TArray<AStrategyUnit*> Units = PC->GetSelectedUnits();
         FVector Center = FVector::ZeroVector;
         int32 Count = 0;
-        for (AStrategyUnit* Unit : Units) if (IsValid(Unit)) { Center += Unit->GetActorLocation(); ++Count; }
+        for (AStrategyUnit* FocusUnit : Units)
+        {
+            if (!IsValid(FocusUnit)) continue;
+            FVector FocusPoint = FocusUnit->GetActorLocation();
+            if (const UStrategyInfantryVisualComponent* FocusVisual = FocusUnit->FindComponentByClass<UStrategyInfantryVisualComponent>())
+            {
+                FVector FocusCentroid;
+                if (FocusVisual->GetFigureLocalCentroid(FocusCentroid)) FocusPoint = FocusUnit->GetActorTransform().TransformPosition(FocusCentroid);
+            }
+            Center += FocusPoint;
+            ++Count;
+        }
         if (Count > 0) { if (bFollowingProjectile) StopProjectileFollow(true); FocusOnWorldLocation(Center / Count); }
     }
 }
 void AStrategyCameraPawn::ApplyPreset(float ArmLength, float Pitch)
 {
     if (bFollowingProjectile) StopProjectileFollow(true);
-    FocusSelected();
-    FVector Position = GetActorLocation();
-    Position.Z = 100.0f;
-    // Preserve the selected unit's terrain elevation when available.
-    SetActorLocation(Position);
     FocusSelected();
     PresetArmLength = FMath::Clamp(ArmLength, MinZoom, MaxZoom);
     PresetPitch = Pitch;
