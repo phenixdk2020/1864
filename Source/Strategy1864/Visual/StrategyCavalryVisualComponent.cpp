@@ -4,6 +4,7 @@
 #include "../Units/CavalryUnit.h"
 #include "../Combat/StrategyCavalryChargeComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
+#include "../Player/StrategyBattleQuality.h"
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
 #include "Animation/AnimSequence.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -53,6 +54,7 @@ void UStrategyCavalryVisualComponent::BeginPlay()
         OwnerCavalry->RiderMesh->SetVisibility(false, true);
     }
     LastLocation = OwnerCavalry->GetActorLocation();
+    MenPerHorseman = Strategy1864BattleQuality::GetFigureDivisor();
     bReady = true;
 }
 
@@ -213,10 +215,11 @@ void UStrategyCavalryVisualComponent::TickComponent(float DeltaTime, ELevelTick 
     if (OwnerCavalry->QAPlaceholderMesh && OwnerCavalry->QAPlaceholderMesh->IsVisible()) { OwnerCavalry->QAPlaceholderMesh->SetVisibility(false); }
     const int32 Strength = FMath::Max(0, OwnerCavalry->CurrentStrength);
     const uint8 Formation = OwnerCavalry->FormationComponent ? uint8(OwnerCavalry->FormationComponent->CurrentFormation) : 255;
-    if (Strength != CachedStrength || Formation != CachedFormation)
+    if (Strength != CachedStrength || Formation != CachedFormation || MenPerHorseman != CachedMenPerHorseman)
     {
         EnsureCount(FMath::DivideAndRoundUp(Strength, FMath::Max(1, MenPerHorseman)));
         Layout();
+        CachedMenPerHorseman = MenPerHorseman;
         CachedStrength = Strength;
         CachedFormation = Formation;
     }

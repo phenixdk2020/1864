@@ -1622,6 +1622,15 @@ Fejl: efter indkaldelsesstørrelsen blev en selvstændig `if (Button == UnitSize
 ### 2026-10-08 – Spredt orden, rytteri-testslag og bue ved drejning merget
 Codex' tre opgaver er merget og bygget: spredt orden og nedlægning under artilleriild, et rytteri-testslag (TEST RYTTERI i startmenuen og Start-Test-3-Rytteri.bat; et svensk husar-eskadron går i charge mod danske kompagnier, set i loggen som "Chok!" ved 450 m) og mændene går i bue ved drejning (kun tegningen). En flettekonflikt i rytteriets chargebetingelse er løst ved at kræve en ordre (ingen angreb uden ordre).
 
+### 2026-10-08 — Kompakte formationer ved lavere grafikkvalitet
+
+- Infanteriets formation genereres nu med én sammenhængende plads pr. synlig figur (`ceil(styrke/divisor)`, med eksisterende figurloft). Linje, marchkolonne, defilé og karré bliver mindre ved færre figurer; kolonner bevarer deres filer. Karré fordeler figurerne over fire sider med højst én figurs forskel og bevarer sideretninger samt eksisterende bajonetlogik. Ved divisor over 1 fjernes den simulerede karrés minimumsstørrelse fra tegningen; divisor 1 beholder generatorens eksisterende pladser.
+- Eksisterende figurer går fortsat på plads via `UpdateSettling` og formationsstien. Ventende tab bliver synlige til projektilnedslaget og udløser derefter kompakt opstilling. Skudanimationer bruger de tegnede pladsers rang-/sideindeks og sideretning; antal synlige skud rundes op efter divisoren.
+- HUD bruger `GetDrawnFireFront` fra levende figurers aktuelle bounds med samme padding som tidligere. Buer, stiplede sider og fyld følger den synlige front, også under omformering og efter tab.
+- Den simulerede front og målets prøvepunkter beregnes fra fuld aktuel styrke uden visuelle bounds. Tidligere påvirkede animerede figur-bounds også ildberegningen; denne kobling er fjernet. Rækkevidder, vinkler, kollisions- og ordrelogik er uændrede. Ved lav kvalitet er HUD-keglen bevidst smallere end det virkelige ildfelt: den viser den tegnede formation.
+- Kavaleriets eksisterende kompakte linje-/kolonnelayout følger grafikdivisoren ved start og ændringer under slaget. Ændret divisor udløser nyt figurantal og layout med eksisterende glidende bevægelse.
+- Validering: statisk gennemgang af slotmapping, rang-/sideindeks, ventende tab, HUD-front og fuldstyrke-geometri samt `git diff --check`. Ingen build, spilstart eller commit; visuel afprøvning i Unreal udestår.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

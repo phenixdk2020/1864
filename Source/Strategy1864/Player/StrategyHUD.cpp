@@ -466,7 +466,12 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
         }
     }
     FVector Left, Right;
-    Fire->GetFireFront(Left, Right, 0);
+    // Presentation follows the compact drawn formation; simulation uses full strength.
+    const UStrategyInfantryVisualComponent* ConeVisual = Unit->FindComponentByClass<UStrategyInfantryVisualComponent>();
+    if (!ConeVisual || !ConeVisual->GetDrawnFireFront(Left, Right))
+    {
+        Fire->GetFireFront(Left, Right, 0);
+    }
     const FVector Lateral = (Right - Left).GetSafeNormal2D();
     const FVector Forward(Lateral.Y, -Lateral.X, 0.0f);
     const float Half = FMath::DegreesToRadians(Fire->FireConeHalfAngleDegrees);

@@ -367,7 +367,8 @@ void UStrategyInfantryVisualComponent::HandleVolleyVisualEvent(
     SoldierFireAt.SetNumZeroed(Count);
     SoldierBusyUntil.SetNumZeroed(Count);
     SoldierFirePhase.SetNumZeroed(Count);
-    const int32 Firing = FMath::Clamp(Shots / FMath::Max(1, VisualScaleDivisor), 1, Count);
+    if (Count == 0 || Shots <= 0) return;
+    const int32 Firing = FMath::Clamp(FMath::DivideAndRoundUp(Shots, FMath::Max(1, VisualScaleDivisor)), 1, Count);
     // Those who can bear on the target first (their own place, angle and range); the rest only to make up the number.
     TArray<int32> Order, Others;
     const AStrategyUnit* Target = OwnerCompany->CombatComponent ? OwnerCompany->CombatComponent->LastVolleyTarget.Get() : nullptr;
@@ -382,7 +383,8 @@ void UStrategyInfantryVisualComponent::HandleVolleyVisualEvent(
             continue;
         }
         const bool bBears = !Target || !Fire || !SoldierComponents[i] ||
-            Fire->CanPointBearOn(SoldierComponents[i]->GetComponentLocation(), OwnerCompany->GetActorForwardVector(), Target, Fire->GetActiveRangeCm());
+            Fire->CanPointBearOn(SoldierComponents[i]->GetComponentLocation(), FRotator(0.0f, OwnerCompany->GetActorRotation().Yaw +
+                (SoldierSettle.IsValidIndex(i) ? SoldierSettle[i].SlotYaw : 0.0f), 0.0f).Vector(), Target, Fire->GetActiveRangeCm());
         (bBears ? Order : Others).Add(i);
     }
     // How the shots spread: a volley goes off together, fire by rank in a ripple, independent fire man by man.
@@ -1000,30 +1002,30 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
         return;
     }
 
-    const int32 Strength =
-        FMath::Max(0, OwnerCompany->CurrentStrength);
-
-    if (Strength <= 0)
-    {
-        return;
-    }
-
-    const TArray<FStrategyFormationSlot> FullSlots =
+    // One contiguous slot per figure; never sample a sparse full-strength layout.
+    // Pending casualties remain visible until impact, then ProcessPendingKills rebuilds.
+    const int32 RenderedCount = SoldierComponents.Num();
+    TArray<FStrategyFormationSlot> DrawnSlots =
         OwnerCompany->FormationComponent->GenerateSoldierSlots(
-            FVector::ZeroVector,
-            0.0f,
-            Strength);
+            FVector::ZeroVector, 0.0f, RenderedCount);
 
-    if (FullSlots.Num() == 0)
+    // The simulated square has a 3 m minimum half-extent. At reduced quality,
+    // keep ordinary figure spacing even for a tiny square instead of retaining that floor.
+    if (VisualScaleDivisor > 1 && OwnerCompany->FormationComponent->UsesSquareVisualOwnership())
     {
-        return;
+        const int32 DrawnPerSide = FMath::DivideAndRoundUp(RenderedCount, 4);
+        const float DrawnHalfExtent = FMath::Max(1, DrawnPerSide - 1) *
+            OwnerCompany->FormationComponent->SoldierLateralSpacingCm * 0.5f;
+        const float DrawnSquareScale = DrawnHalfExtent / FMath::Max(300.0f,
+            (DrawnPerSide - 1) * OwnerCompany->FormationComponent->SoldierLateralSpacingCm * 0.5f);
+        for (FStrategyFormationSlot& DrawnSquareSlot : DrawnSlots)
+        {
+            DrawnSquareSlot.WorldLocation *= DrawnSquareScale;
+        }
     }
-
-    const int32 RenderedCount =
-        SoldierComponents.Num();
 
     VisualPath.SlotBounds = FBox(ForceInit);
-    for (const FStrategyFormationSlot& VisualSlot : FullSlots) { VisualPath.SlotBounds += VisualSlot.WorldLocation; }
+    for (const FStrategyFormationSlot& VisualSlot : DrawnSlots) { VisualPath.SlotBounds += VisualSlot.WorldLocation; }
 
     for (int32 VisualIndex = 0;
          VisualIndex < RenderedCount;
@@ -1037,26 +1039,7 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
             continue;
         }
 
-        // A column keeps its full width at a thinned figure scale: whole rows are skipped, not every second man (which kept two of four files).
-        const bool bColumnFormation = OwnerCompany && OwnerCompany->FormationComponent &&
-            OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn;
-        const int32 ColumnFiles = bColumnFormation ? FMath::Max(1, OwnerCompany->FormationComponent->ColumnWidth) : 1;
-        const int32 RowStride = VisualScaleDivisor <= 1 ? 1 : VisualScaleDivisor <= 2 ? 2 : VisualScaleDivisor <= 5 ? 5 : 10;
-        const int32 FullIndex =
-            bColumnFormation && RowStride > 1 && FullSlots.Num() > 0
-            ? FMath::Clamp((VisualIndex / ColumnFiles) * ColumnFiles * RowStride + (VisualIndex % ColumnFiles), 0, FullSlots.Num() - 1)
-            : RenderedCount <= 1
-            ? 0
-            : FMath::Clamp(
-                FMath::RoundToInt(
-                    static_cast<float>(VisualIndex) *
-                    static_cast<float>(FullSlots.Num() - 1) /
-                    static_cast<float>(RenderedCount - 1)),
-                0,
-                FullSlots.Num() - 1);
-
-        const FStrategyFormationSlot& Slot =
-            FullSlots[FullIndex];
+        const FStrategyFormationSlot& Slot = DrawnSlots[VisualIndex];
 
         if (SoldierSettle.Num() != RenderedCount) { SoldierSettle.SetNum(RenderedCount); }
         FSettle& Settle = SoldierSettle[VisualIndex];
@@ -1083,9 +1066,20 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
         {
             SoldierSlots.SetNum(RenderedCount);
         }
-        SoldierSlots[VisualIndex] = Slot.SlotIndex >= 0 ? Slot.SlotIndex : FullIndex;
+        SoldierSlots[VisualIndex] = Slot.SlotIndex >= 0 ? Slot.SlotIndex : VisualIndex;
     }
     bCrowdDirty = true;
+}
+
+bool UStrategyInfantryVisualComponent::GetDrawnFireFront(FVector& OutLeft, FVector& OutRight) const
+{
+    FBox DrawnFrontBounds(ForceInit);
+    if (!OwnerCompany || !GetFormationLocalBounds(DrawnFrontBounds)) return false;
+    DrawnFrontBounds = DrawnFrontBounds.ExpandBy(15.0f);
+    const FTransform DrawnUnitTransform = OwnerCompany->GetActorTransform();
+    OutLeft = DrawnUnitTransform.TransformPosition(FVector(DrawnFrontBounds.Max.X, DrawnFrontBounds.Min.Y, 0.0f));
+    OutRight = DrawnUnitTransform.TransformPosition(FVector(DrawnFrontBounds.Max.X, DrawnFrontBounds.Max.Y, 0.0f));
+    return true;
 }
 
 bool UStrategyInfantryVisualComponent::GetFormationLocalBounds(FBox& OutBounds) const

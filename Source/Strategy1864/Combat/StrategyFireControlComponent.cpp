@@ -96,18 +96,14 @@ void UStrategyFireControlComponent::GetFireFront(FVector& Left, FVector& Right, 
     if (!Unit) return;
 
     FBox Bounds(ForceInit);
-    const UStrategyInfantryVisualComponent* Visual =
-        Unit->FindComponentByClass<UStrategyInfantryVisualComponent>();
-    if (Visual && Visual->GetFormationLocalBounds(Bounds))
+    // Gameplay geometry must not depend on graphics quality or animated figure bounds.
+    if (Unit->FormationComponent && Unit->CurrentStrength > 0)
     {
-        // Match the yellow selection box, including its padding.
-        Bounds = Bounds.ExpandBy(15.0f);
-    }
-    else if (Unit->FormationComponent && Unit->CurrentStrength > 0)
-    {
-        const TArray<FStrategyFormationSlot> Slots =
-            Unit->FormationComponent->GenerateSoldierSlots(FVector::ZeroVector, 0.0f, Unit->CurrentStrength);
-        for (const FStrategyFormationSlot& Slot : Slots) Bounds += Slot.WorldLocation;
+        for (const FStrategyFormationSlot& SimulatedSlot :
+             Unit->FormationComponent->GenerateSoldierSlots(FVector::ZeroVector, 0.0f, Unit->CurrentStrength))
+        {
+            Bounds += SimulatedSlot.WorldLocation;
+        }
         Bounds = Bounds.ExpandBy(35.0f);
     }
     if (!Bounds.IsValid) Bounds = FBox(FVector(-300.0f, -130.0f, 0.0f), FVector(300.0f, 130.0f, 140.0f));
@@ -141,11 +137,7 @@ TArray<FVector> UStrategyFireControlComponent::GetTargetSamplePoints(const AStra
     }
     Points.Add(Target->GetActorLocation());
     FBox Bounds(ForceInit);
-    if (const UStrategyInfantryVisualComponent* Visual = Target->FindComponentByClass<UStrategyInfantryVisualComponent>())
-    {
-        Visual->GetFormationLocalBounds(Bounds);
-    }
-    if (!Bounds.IsValid && Target->FormationComponent && Target->CurrentStrength > 0)
+    if (Target->FormationComponent && Target->CurrentStrength > 0)
     {
         for (const FStrategyFormationSlot& Slot : Target->FormationComponent->GenerateSoldierSlots(FVector::ZeroVector, 0.0f, Target->CurrentStrength))
         {

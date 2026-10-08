@@ -94,6 +94,7 @@ private:
     float RiderSeatCm = 45.0f;   // the seated pose's pelvis above its root
     FVector FigureLocalCentroid = FVector::ZeroVector;
     int32 CentroidFigureCount = 0;
+    int32 CachedMenPerHorseman = INDEX_NONE;
     int32 CachedStrength = INDEX_NONE;
     uint8 CachedFormation = 255;
     bool bReady = false;

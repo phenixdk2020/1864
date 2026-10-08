@@ -194,6 +194,9 @@ public:
     /** Cached centroid of the living figures, in unit-local space (also valid in crowd mode). */
     bool GetFigureLocalCentroid(FVector& OutCentroid) const;
 
+    /** World-space front corners of the living drawn figures, including settling and pose padding. HUD only. */
+    bool GetDrawnFireFront(FVector& OutLeft, FVector& OutRight) const;
+
     bool GetFormationLocalBounds(FBox& OutBounds) const;
 
     UFUNCTION(BlueprintPure, Category="Strategy|Visual|Infantry")
