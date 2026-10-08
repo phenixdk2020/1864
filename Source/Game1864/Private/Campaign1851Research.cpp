@@ -46,7 +46,23 @@ namespace Campaign1851Research
 			{ TEXT("volley"),     TEXT("Kommanderet salve"),        TEXT("Hele kompagniet på kommando: den tunge salve, der ryster fjenden. Skal indøves i regimenterne"), 1855, 900.0, 8, TEXT("firebyrank"), 3 },
 			{ TEXT("independent"), TEXT("Fri ild"),                 TEXT("Hver mand skyder, når han har ladt og sigtet: hurtigere ild, svagere salver. Skal indøves i regimenterne"), 1857, 1000.0, 10, TEXT("volley"), 3 },
 		};
-		return List;
+		static const TArray<FCampaign1851ResearchTopic> Army1825Topics = [&]()
+		{
+			TArray<FCampaign1851ResearchTopic> Out = List;
+			for (FCampaign1851ResearchTopic& T : Out)
+			{
+				if (FString(T.Id) == TEXT("carbine"))
+				{
+					T.Effect = TEXT("Afsiddede dragoner: rækkevidde 45/90/130 m; flintlåskarabinens ladetid × 5/7 (18 til ca. 13 s). Kampværdi +2 % med rytteri");
+				}
+				if (FString(T.Id) == TEXT("breech"))
+				{
+					T.Effect = TEXT("Flintlåsgeværet erstattes af en forsøgsbaglader: ladning liggende og ladetid × 0,35 på slagets grundværdi; flintlåsens ulemper bortfalder. Kampværdi +25 %");
+				}
+			}
+			return Out;
+		}();
+		return ACampaign1851Map::ActiveScenario().Id == TEXT("1825") ? Army1825Topics : List;
 	}
 
 	bool IsCivil(int32 Topic)
@@ -323,7 +339,7 @@ float ACampaign1851Map::DanishQualityFactor(const FCampaign1851Battle& B) const
 	}
 	else if (Doctrine[2] == 1)
 	{
-		F *= Enemy == TEXT("PR") ? 0.85f : 1.1f;
+		F *= Enemy == TEXT("PR") && (ActiveScenario().Id != TEXT("1825") || GetDate().GetYear() >= 1841) ? 0.85f : 1.1f;
 	}
 	else
 	{
@@ -361,7 +377,7 @@ float ACampaign1851Map::InfantryFactor() const
 
 float ACampaign1851Map::FoodCap() const
 {
-	return Campaign1851Supply::FoodCarried + (HasResearch(TEXT("conserves")) ? 2.f : 0.f);
+	return float(ArmyEquipmentNumber(TEXT("foodDays"), Campaign1851Supply::FoodCarried)) + (HasResearch(TEXT("conserves")) ? 2.f : 0.f);
 }
 
 float ACampaign1851Map::CallInFactor() const
@@ -422,7 +438,8 @@ void ACampaign1851Map::WriteBattleRulesJson(const TSharedRef<FJsonObject>& Doc) 
 	TSharedRef<FJsonObject> Cav = MakeShared<FJsonObject>();
 	const bool bCarbine = HasResearch(TEXT("carbine"));
 	Cav->SetArrayField(TEXT("carbineRangesM"), bCarbine ? Array({ 45.0, 90.0, 130.0 }) : Array({ 35.0, 70.0, 100.0 }));
-	Num(Cav, TEXT("carbineReloadS"), bCarbine ? 5.0 : 7.0);
+	const double ArmyCarbineSeconds = ArmyEquipmentNumber(TEXT("carbineReload"), 7.0);
+	Num(Cav, TEXT("carbineReloadS"), ArmyCarbineSeconds * (bCarbine ? 5.0 / 7.0 : 1.0));
 	Num(Cav, TEXT("reformSpeedFactor"), HasResearch(TEXT("shock")) ? 1.25 : 1.0);
 	Num(Cav, TEXT("flankShockFactor"), HasResearch(TEXT("shock")) ? 1.2 : 1.0);
 	Cav->SetBoolField(TEXT("reconOrder"), HasResearch(TEXT("recon")));

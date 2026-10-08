@@ -103,7 +103,7 @@ void ACampaign1851Map::AdvanceFooting(float DeltaDays)
 		FCampaign1851Regiment& R = Regiments[i];
 		if (Footing == ECampaign1851Footing::Peace)
 		{
-			R.Present = FMath::Max(Campaign1851Mobilisation::PeacePresent, R.Present - DeltaDays * Campaign1851Mobilisation::SendHomePerDay);
+			R.Present = FMath::Max(ArmyPeacePresent(R.Arm), R.Present - DeltaDays * Campaign1851Mobilisation::SendHomePerDay);
 			continue;
 		}
 		// The men come to their battalion's garrison; a mobilisation depot there hurries them along.
@@ -124,7 +124,7 @@ double ACampaign1851Map::MobilisedPayPerMonth() const
 	double Men = 0.0;
 	for (const FCampaign1851Regiment& R : Regiments)
 	{
-		Men += FMath::Max(0.f, R.Present - Campaign1851Mobilisation::PeacePresent) * R.Men;
+		Men += FMath::Max(0.f, R.Present - ArmyPeacePresent(R.Arm)) * R.Men;
 	}
 	return Men * Campaign1851Mobilisation::PayPerManMonth;
 }

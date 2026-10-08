@@ -23,9 +23,9 @@ namespace Campaign1851Materiel
 void ACampaign1851Map::ResetMateriel()
 {
 	// After the war: the depots hold spare rifles, the arsenal field guns, the army a remount reserve.
-	Rifles = Campaign1851Materiel::RiflesAtStart;
-	Horses = Campaign1851Materiel::HorsesAtStart;
-	GunStock = Campaign1851Materiel::GunsAtStart;
+	Rifles = int32(ArmyEquipmentNumber(TEXT("rifles"), Campaign1851Materiel::RiflesAtStart));
+	Horses = int32(ArmyEquipmentNumber(TEXT("horses"), Campaign1851Materiel::HorsesAtStart));
+	GunStock = int32(ArmyEquipmentNumber(TEXT("guns"), Campaign1851Materiel::GunsAtStart));
 }
 
 void ACampaign1851Map::MonthlyMateriel()

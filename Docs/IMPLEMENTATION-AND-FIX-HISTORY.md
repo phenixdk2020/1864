@@ -1473,6 +1473,15 @@ Tolv Codex-opgaver (hver i sin worktree) er gennemgået og merget: civile bygnin
 
 ### 2026-10-08 – Forskningsvinduet: niveauer, kassebredde og faner
 Fri ild fyldte to kasser, fordi søjlens bredde afhang af niveauet; nu har alle kasser i en gren samme bredde, og et emne alene på sit niveau står under det, det kræver. Jernbanemobilisering lå et niveau for langt nede, fordi dens forudsætning (Telegraf) ligger på den civile fane; vinduet tæller nu kun forudsætninger på samme fane (DisplayTier). Fanerne MILITÆR/CIVIL/DOKTRINER er rykket lidt op.
+### 2026-10-08 – Selvstændig hær og våbenbeholdning i 1825
+
+- `Army_1825.json` erstatter skalering af 1851-hæren: 13 infanteriregimenter med to linjebataljoner hver, fire jægerkorps, livgarder, ni øvrige rytterregimenter og 18 batterier. Fem kompagnier pr. linjebataljon; fire administrative kommandoer. Styrker og garnisoner er kildeunderstøttede rekonstruktioner med dokumenterede skøn.
+- Separate startlagre, heste, uniforms-/remtøjsbeholdninger, magasiner og trænkolonner indlæses før verdens nulstilling. Mand i rullerne og fremmøde i fred behandles særskilt. 1825-indkaldelse bruger periodens størrelser; 1851-filer og standardtal bevares.
+- Glatløbede flintlåsgeværer og glatløbet forladeskyts ved start. Infanteriets våbenfaktorer indgår i kampberegning og eksport; bagladerforskning erstatter flintlåsens ulemper. Karabinforskning beholder forholdet 5/7 med 18 s som 1825-grundværdi. Tidlige fjender får ingen preussisk nålegeværbonus. Forsknings-id'er og gemmeformat bevares.
+- `Officers_1825.json` bruger Frederik af Hessen i hertugdømmerne. Kortets linjeinfanteri får rød frakke, og enhedskort viser danske 1825-uniforms-/våbenbeskrivelser. Kyrasserer og lansenerer eksporteres som egne ryttertyper.
+- Ældre 1825-gemninger bevarer den gemte skalerede hær uden at få den nye startopstilling oveni. Nye gemninger bruger stabile 1825-id'er og eksisterende poster for styrke, kompagnier, fremmøde, materiel, forsyning og forskning.
+- Kilder, antagelser, garnisonsoversigt, historiske jægerriflers bevidste udeladelse og begrænsninger i hestemobilisering/3D-import er dokumenteret i `Docs/Data1825-Army.md`.
+- Kontrol: JSON- og referencetjek, organisationssummer, statisk C++-parentes-/diffkontrol og uændrede oprindelige 1851-data. Ingen build, kørsel eller commit.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

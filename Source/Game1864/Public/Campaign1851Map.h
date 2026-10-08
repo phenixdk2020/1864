@@ -959,6 +959,11 @@ public:
 	float FortCoverBonus() const;
 	float DanishGunFactor() const;
 	float InfantryFactor() const;
+	double ArmyEquipmentNumber(const TCHAR* Key, double Fallback) const;
+	float ArmyPeacePresent(ECampaign1851Arm Arm) const;
+	FString ArmyWeaponText(ECampaign1851Arm Arm) const;
+	FString ArmyUniformText(ECampaign1851Arm Arm) const;
+	Campaign1851Army::FBattleFactors ArmyBattleFactors(const FCampaign1851Regiment& R) const;
 	float FoodCap() const;
 	float CallInFactor() const;
 	/** "doctrine" and "research" for Units.json and the battle request. */
@@ -1520,6 +1525,9 @@ private:
 	void UpdateRegimentPiece(int32 Regiment);
 	TArray<FCampaign1851Regiment> Regiments;
 	TArray<FCampaign1851Regiment> ArmyAtStart;
+	/** Immutable scenario equipment; mutable stocks are saved by the existing save records. */
+	TSharedPtr<FJsonObject> ArmyScenarioEquipment;
+	TMap<FString, FCampaign1851DepotCapacity> ArmyScenarioMagazines;
 	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> RegimentPieces;
 	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMesh>> ArmyMeshes;   // per ECampaign1851Arm
 

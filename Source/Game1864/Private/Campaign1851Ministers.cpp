@@ -280,7 +280,7 @@ TArray<FCampaign1851Decision> ACampaign1851Map::MinisterOptions(ECampaign1851Por
 		for (int32 r = 0; r < int32(ECampaign1851Raw::Count); ++r)
 		{
 			const ECampaign1851Raw R = ECampaign1851Raw(r);
-			const float Need = R == ECampaign1851Raw::Cloth || R == ECampaign1851Raw::Leather ? 1600.f * (ActiveScenario().Year < 1850 ? ActiveScenario().ArmyFactor : 1.f) : R == ECampaign1851Raw::Powder ? 200.f : 3.f * FMath::Max(0.f, Used[r] - Made[r]);
+			const float Need = R == ECampaign1851Raw::Cloth || R == ECampaign1851Raw::Leather ? float(ArmyEquipmentNumber(TEXT("kitReserve"), 1600.0)) : R == ECampaign1851Raw::Powder ? 200.f : 3.f * FMath::Max(0.f, Used[r] - Made[r]);
 			const float Short = Need - RawStock[r];
 			const int32 Amount = FMath::CeilToInt(Short);
 			if (Short > 0.5f && RawPrice(R) * Amount <= Budget)

@@ -43,10 +43,11 @@ bool ACampaign1851Map::LoadOfficers()
 {
 	FString Text;
 	TSharedPtr<FJsonObject> Json;
-	if (!FFileHelper::LoadFileToString(Text, *(FPaths::ProjectDir() / TEXT("Data/Campaign1851/Officers1851.json")))
+	const FString ArmyOfficerFile = ActiveScenario().Id == TEXT("1825") ? TEXT("Data/Campaign1851/Officers_1825.json") : TEXT("Data/Campaign1851/Officers1851.json");
+	if (!FFileHelper::LoadFileToString(Text, *(FPaths::ProjectDir() / ArmyOfficerFile))
 		|| !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Json) || !Json.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|officers|no Data/Campaign1851/Officers1851.json"));
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|officers|cannot load %s"), *ArmyOfficerFile);
 		return false;
 	}
 	GeneralsAtStart.Reset();
@@ -134,7 +135,7 @@ void ACampaign1851Map::ResetOfficers()
 	// A captain for every company of the battalions (drawn after the chiefs, so they keep their names).
 	for (int32 i = 0; i < Regiments.Num(); ++i)
 	{
-		Regiments[i].Captains.Init(INDEX_NONE, Campaign1851Army::CompaniesFor(Regiments[i].Arm));
+		Regiments[i].Captains.Init(INDEX_NONE, Regiments[i].SavedCompanies >= 0 ? Regiments[i].SavedCompanies : Campaign1851Army::CompaniesFor(Regiments[i].Arm));
 		Regiments[i].CompanyFort.Init(0, Regiments[i].Captains.Num());
 		for (int32 k = 0; k < Regiments[i].Captains.Num(); ++k)
 		{

@@ -18,8 +18,8 @@ const TArray<ACampaign1851Map::FScenario>& ACampaign1851Map::Scenarios()
 		Peace.Text = TEXT("En fredelig begyndelse: hæren er lille og uprøvet, byerne mindre og der er ingen jernbaner. Spændingen med Forbundet vokser fra Julirevolutionen til krigen i 1848.");
 		Peace.Year = 1825;
 		Peace.PopulationFactor = 0.80f;
-		Peace.ArmyFactor = 0.55f;
-		Peace.ExperienceFactor = 0.80f;
+		Peace.ArmyFactor = 1.f; // army and equipment have their own 1825 data
+		Peace.ExperienceFactor = 1.f;
 		Peace.StartTension = 10.f;
 		L.Add(Peace);
 		FScenario War;

@@ -10,6 +10,7 @@
 #include "Campaign1851Map.h"
 
 #include "Campaign1851ConstructionSite.h"
+#include "Dom/JsonObject.h"
 
 namespace Campaign1851Resources
 {
@@ -59,7 +60,15 @@ namespace Campaign1851Resources
 			{ TEXT("Ridende batteri"),   TEXT("Ridende Batteri"), TEXT("RA"), ECampaign1851Arm::HorseArtillery, 180, 0,   6, 230, 180,  460,  1.5 },
 			{ TEXT("Morterbatteri"),     TEXT("Morterbatteri"),   TEXT("M"),  ECampaign1851Arm::Artillery,      120, 0,   0, 72,  120,  240,  1.2, 6, 12 },
 		};
-		return List[FMath::Clamp(T, 0, UnitTypes - 1)];
+		static const FUnitType Army1825UnitTypes[] = {
+			{ TEXT("Linjebataljon (5 kompagnier)"), TEXT("Bataljon"), TEXT("B"), ECampaign1851Arm::Infantry, 900, 900, 0, 10, 900, 900, 1.0 },
+			{ TEXT("Jægerkorps"), TEXT("Jægerkorps"), TEXT("J"), ECampaign1851Arm::Jager, 600, 600, 0, 8, 600, 600, 1.15 },
+			{ TEXT("Dragonregiment"), TEXT("Dragonregiment"), TEXT("D"), ECampaign1851Arm::Cavalry, 600, 600, 0, 640, 600, 1200, 1.6 },
+			{ TEXT("Batteri"), TEXT("Batteri"), TEXT("A"), ECampaign1851Arm::Artillery, 150, 0, 8, 110, 150, 300, 1.3 },
+			{ TEXT("Ridende batteri"), TEXT("Ridende Batteri"), TEXT("RA"), ECampaign1851Arm::HorseArtillery, 180, 0, 6, 230, 180, 460, 1.5 },
+			{ TEXT("Morterbatteri"), TEXT("Morterbatteri"), TEXT("M"), ECampaign1851Arm::Artillery, 120, 0, 0, 72, 120, 240, 1.2, 6, 12 },
+		};
+		return (ACampaign1851Map::ActiveScenario().Id == TEXT("1825") ? Army1825UnitTypes : List)[FMath::Clamp(T, 0, UnitTypes - 1)];
 	}
 }
 
@@ -69,8 +78,16 @@ void ACampaign1851Map::ResetResources()
 	{
 		RawStock[r] = Campaign1851Resources::Info(ECampaign1851Raw(r)).Start;
 	}
-	MortarStock = 12;   // the arsenal's mortars after 1848-50 (estimate)
-	WagonStock = 150;
+	const TArray<TSharedPtr<FJsonValue>>* ArmyRawArray = nullptr;
+	if (ArmyScenarioEquipment.IsValid() && ArmyScenarioEquipment->TryGetArrayField(TEXT("raw"), ArmyRawArray))
+	{
+		for (int32 r = 0; r < int32(ECampaign1851Raw::Count) && r < ArmyRawArray->Num(); ++r)
+		{
+			RawStock[r] = float((*ArmyRawArray)[r]->AsNumber());
+		}
+	}
+	MortarStock = int32(ArmyEquipmentNumber(TEXT("mortars"), 12));   // the arsenal's mortars after 1848-50 (estimate)
+	WagonStock = int32(ArmyEquipmentNumber(TEXT("wagons"), 150));
 }
 
 bool ACampaign1851Map::BuyKit(bool bMortars, int32 Count, FString* OutReason)

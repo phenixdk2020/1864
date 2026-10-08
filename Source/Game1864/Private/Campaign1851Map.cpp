@@ -130,8 +130,9 @@ void ACampaign1851Map::BeginPlay()
 	ResetEconomy();
 	ResetNetwork();
 	LoadNations();
+	const bool bArmyDataLoaded = LoadArmy(); // scenario stores must exist before ResetResources in ResetWorld
 	ResetWorld(1851, 0.f);
-	if (LoadArmy())
+	if (bArmyDataLoaded)
 	{
 		LoadOfficers();
 		ResetArmy();

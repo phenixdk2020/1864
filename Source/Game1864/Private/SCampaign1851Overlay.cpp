@@ -2091,7 +2091,14 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 	const bool bHussar = R.Arm == ECampaign1851Arm::Cavalry && R.Name.Contains(TEXT("usar"));
 	const int32 Arm = bHussar ? 6 : FMath::Clamp(int32(R.Arm), 0, 5);
 	const FVector2D Picture(Pos.X + 22.f, Pos.Y + 96.f + ChipsH);
-	if (UniformBrushes.IsValidIndex(Arm) && UniformBrushes[Arm]->GetResourceObject())
+	if (Map->ActiveScenario().Id == TEXT("1825"))
+	{
+		PaintText(Geometry, Out, Layer + 2, TEXT("UNIFORM 1825"), Picture + FVector2D(75.f, 65.f), Serif(12), Gold, 0.5f, false);
+		PaintTextFit(Geometry, Out, Layer + 2, Map->ArmyUniformText(R.Arm), Picture + FVector2D(0.f, 100.f), Serif(10), Ink, 150.f);
+		PaintTextFit(Geometry, Out, Layer + 2, Map->ArmyWeaponText(R.Arm), Picture + FVector2D(0.f, 135.f), Serif(10), Ink, 150.f);
+		AddTip(Picture, FVector2D(150.f, 225.f), Map->ArmyUniformText(R.Arm) + TEXT(". ") + Map->ArmyWeaponText(R.Arm));
+	}
+	else if (UniformBrushes.IsValidIndex(Arm) && UniformBrushes[Arm]->GetResourceObject())
 	{
 		FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(150.f, 225.f), FSlateLayoutTransform(Picture)), UniformBrushes[Arm].Get());
 	}
@@ -3639,7 +3646,7 @@ void SCampaign1851Overlay::PaintMateriel(const FGeometry& Geometry, FSlateWindow
 	const int32 PictureArms[] = { 0, 2, 3, 4, 5, 4 };
 	const int32 PictureArm = PictureArms[FMath::Clamp(RaiseType, 0, 5)];
 	const FVector2D Picture(RX, RY);
-	if (UniformBrushes.IsValidIndex(PictureArm) && UniformBrushes[PictureArm]->GetResourceObject())
+	if (Map->ActiveScenario().Id != TEXT("1825") && UniformBrushes.IsValidIndex(PictureArm) && UniformBrushes[PictureArm]->GetResourceObject())
 	{
 		FSlateDrawElement::MakeBox(Out, Layer + 1, Geometry.ToPaintGeometry(FVector2D(68.f, 102.f), FSlateLayoutTransform(Picture)), UniformBrushes[PictureArm].Get(), ESlateDrawEffect::None, FLinearColor::White);
 	}

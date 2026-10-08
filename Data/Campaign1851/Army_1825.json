@@ -1,0 +1,1305 @@
+{
+  "scenario": "1825",
+  "nation": "DK",
+  "note": "Rekonstruktion til spillet, ikke en afskrift af en mønstringsliste. Styrker er mand i linjens ruller; fredens fremmøde beregnes særskilt. Garnisoner, heste, batterier og lagre er delvis skøn. Se Docs/Data1825-Army.md. Jægere bruger efter opgavens afgrænsning også glatløbede flintlåsgeværer; historiske jægerrifler er ikke modelleret.",
+  "commands": [
+    {
+      "id": "GK1",
+      "name": "Generalkommandoen på Sjælland",
+      "area": "Sjælland og tilliggende øer",
+      "hq": "København",
+      "general": "",
+      "towns": [
+        "København",
+        "Helsingør",
+        "Roskilde",
+        "Køge",
+        "Holbæk",
+        "Kalundborg",
+        "Slagelse",
+        "Næstved",
+        "Vordingborg",
+        "Stege",
+        "Nykøbing F",
+        "Nakskov",
+        "Rønne"
+      ]
+    },
+    {
+      "id": "GK2",
+      "name": "Generalkommandoen på Fyn",
+      "area": "Fyn og Langeland",
+      "hq": "Odense",
+      "general": "",
+      "towns": [
+        "Odense",
+        "Nyborg",
+        "Svendborg",
+        "Faaborg",
+        "Assens",
+        "Middelfart",
+        "Bogense",
+        "Rudkøbing"
+      ]
+    },
+    {
+      "id": "GK3",
+      "name": "Generalkommandoen i Nørrejylland",
+      "area": "Nørrejylland",
+      "hq": "Aarhus",
+      "general": "",
+      "towns": [
+        "Aalborg",
+        "Aarhus",
+        "Randers",
+        "Horsens",
+        "Fredericia",
+        "Vejle",
+        "Kolding",
+        "Viborg",
+        "Skanderborg",
+        "Grenaa",
+        "Hjørring",
+        "Frederikshavn",
+        "Skagen",
+        "Thisted",
+        "Nykøbing M",
+        "Holstebro",
+        "Ringkøbing",
+        "Ribe",
+        "Varde"
+      ]
+    },
+    {
+      "id": "GK4",
+      "name": "Generalkommandoen i hertugdømmerne",
+      "area": "Slesvig, Holsten og Lauenborg",
+      "hq": "Rendsborg",
+      "general": "G_HESSEN_1825",
+      "towns": [
+        "Haderslev",
+        "Aabenraa",
+        "Sønderborg",
+        "Tønder",
+        "Flensborg",
+        "Slesvig",
+        "Husum",
+        "Egernførde",
+        "Kiel",
+        "Rendsborg",
+        "Itzehoe",
+        "Glückstadt",
+        "Altona",
+        "Neumünster",
+        "Ratzeburg"
+      ]
+    }
+  ],
+  "regiments": [
+    {
+      "id": "1825_LG",
+      "name": "Livgarden til Fods",
+      "arm": "guard",
+      "home": "København",
+      "men": 700,
+      "horses": 12,
+      "guns": 0,
+      "experience": 40,
+      "skills": {
+        "loading": 65,
+        "marksmanship": 45,
+        "drill": 75,
+        "fieldcraft": 35,
+        "endurance": 55,
+        "assault": 60
+      },
+      "companies": 4
+    },
+    {
+      "id": "1825_L1_1",
+      "name": "1. Livregiment, 1. bataljon",
+      "arm": "infantry",
+      "home": "København",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_L1_2",
+      "name": "1. Livregiment, 2. bataljon",
+      "arm": "infantry",
+      "home": "København",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_L2_1",
+      "name": "2. Livregiment, 1. bataljon",
+      "arm": "infantry",
+      "home": "København",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_L2_2",
+      "name": "2. Livregiment, 2. bataljon",
+      "arm": "infantry",
+      "home": "København",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_KR_1",
+      "name": "Kongens Regiment, 1. bataljon",
+      "arm": "infantry",
+      "home": "København",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_KR_2",
+      "name": "Kongens Regiment, 2. bataljon",
+      "arm": "infantry",
+      "home": "København",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_DR_1",
+      "name": "Dronningens Livregiment, 1. bataljon",
+      "arm": "infantry",
+      "home": "Glückstadt",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_DR_2",
+      "name": "Dronningens Livregiment, 2. bataljon",
+      "arm": "infantry",
+      "home": "Glückstadt",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_PC_1",
+      "name": "Prins Christian Frederiks Regiment, 1. bataljon",
+      "arm": "infantry",
+      "home": "København",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_PC_2",
+      "name": "Prins Christian Frederiks Regiment, 2. bataljon",
+      "arm": "infantry",
+      "home": "København",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_KN_1",
+      "name": "Kronens Regiment, 1. bataljon",
+      "arm": "infantry",
+      "home": "København",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_KN_2",
+      "name": "Kronens Regiment, 2. bataljon",
+      "arm": "infantry",
+      "home": "København",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_SJ_1",
+      "name": "Sjællandske Infanteriregiment, 1. bataljon",
+      "arm": "infantry",
+      "home": "Helsingør",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_SJ_2",
+      "name": "Sjællandske Infanteriregiment, 2. bataljon",
+      "arm": "infantry",
+      "home": "Helsingør",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_FY_1",
+      "name": "Fynske Infanteriregiment, 1. bataljon",
+      "arm": "infantry",
+      "home": "København",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_FY_2",
+      "name": "Fynske Infanteriregiment, 2. bataljon",
+      "arm": "infantry",
+      "home": "København",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_JY_1",
+      "name": "Jyske Infanteriregiment, 1. bataljon",
+      "arm": "infantry",
+      "home": "Fredericia",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_JY_2",
+      "name": "Jyske Infanteriregiment, 2. bataljon",
+      "arm": "infantry",
+      "home": "Fredericia",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_FA_1",
+      "name": "Falsterske Infanteriregiment, 1. bataljon",
+      "arm": "infantry",
+      "home": "Aalborg",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_FA_2",
+      "name": "Falsterske Infanteriregiment, 2. bataljon",
+      "arm": "infantry",
+      "home": "Aalborg",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_SL_1",
+      "name": "Slesvigske Infanteriregiment, 1. bataljon",
+      "arm": "infantry",
+      "home": "Slesvig",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_SL_2",
+      "name": "Slesvigske Infanteriregiment, 2. bataljon",
+      "arm": "infantry",
+      "home": "Slesvig",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_HO_1",
+      "name": "Holstenske Infanteriregiment, 1. bataljon",
+      "arm": "infantry",
+      "home": "Rendsborg",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_HO_2",
+      "name": "Holstenske Infanteriregiment, 2. bataljon",
+      "arm": "infantry",
+      "home": "Rendsborg",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_OL_1",
+      "name": "Oldenborgske Infanteriregiment, 1. bataljon",
+      "arm": "infantry",
+      "home": "Rendsborg",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_OL_2",
+      "name": "Oldenborgske Infanteriregiment, 2. bataljon",
+      "arm": "infantry",
+      "home": "Rendsborg",
+      "men": 900,
+      "horses": 10,
+      "guns": 0,
+      "experience": 25,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 40,
+        "drill": 60,
+        "fieldcraft": 35,
+        "endurance": 50,
+        "assault": 50
+      },
+      "companies": 5
+    },
+    {
+      "id": "1825_J_SJ",
+      "name": "Sjællandske Jægerkorps",
+      "arm": "jager",
+      "home": "Helsingør",
+      "men": 600,
+      "horses": 8,
+      "guns": 0,
+      "experience": 30,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 60,
+        "drill": 50,
+        "fieldcraft": 65,
+        "endurance": 55,
+        "assault": 45
+      },
+      "companies": 4
+    },
+    {
+      "id": "1825_J_FY",
+      "name": "Fynske Jægerkorps",
+      "arm": "jager",
+      "home": "København",
+      "men": 600,
+      "horses": 8,
+      "guns": 0,
+      "experience": 30,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 60,
+        "drill": 50,
+        "fieldcraft": 65,
+        "endurance": 55,
+        "assault": 45
+      },
+      "companies": 4
+    },
+    {
+      "id": "1825_J_SL",
+      "name": "Slesvigske Jægerkorps",
+      "arm": "jager",
+      "home": "Kiel",
+      "men": 600,
+      "horses": 8,
+      "guns": 0,
+      "experience": 30,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 60,
+        "drill": 50,
+        "fieldcraft": 65,
+        "endurance": 55,
+        "assault": 45
+      },
+      "companies": 4
+    },
+    {
+      "id": "1825_J_LA",
+      "name": "Lauenborgske Jægerkorps",
+      "arm": "jager",
+      "home": "Ratzeburg",
+      "men": 600,
+      "horses": 8,
+      "guns": 0,
+      "experience": 30,
+      "skills": {
+        "loading": 55,
+        "marksmanship": 60,
+        "drill": 50,
+        "fieldcraft": 65,
+        "endurance": 55,
+        "assault": 45
+      },
+      "companies": 4
+    },
+    {
+      "id": "1825_LH",
+      "name": "Livgarden til Hest (2 eskadroner)",
+      "arm": "cavalry",
+      "home": "København",
+      "men": 200,
+      "horses": 220,
+      "guns": 0,
+      "experience": 40,
+      "skills": {
+        "loading": 40,
+        "marksmanship": 35,
+        "drill": 60,
+        "fieldcraft": 55,
+        "endurance": 60,
+        "assault": 60
+      }
+    },
+    {
+      "id": "1825_SK",
+      "name": "Sjællandske Kyrasserregiment",
+      "arm": "cavalry",
+      "home": "Næstved",
+      "men": 600,
+      "horses": 400,
+      "guns": 0,
+      "experience": 30,
+      "skills": {
+        "loading": 40,
+        "marksmanship": 35,
+        "drill": 60,
+        "fieldcraft": 55,
+        "endurance": 60,
+        "assault": 60
+      }
+    },
+    {
+      "id": "1825_SLK",
+      "name": "Slesvigske Kyrasserregiment",
+      "arm": "cavalry",
+      "home": "Horsens",
+      "men": 600,
+      "horses": 400,
+      "guns": 0,
+      "experience": 30,
+      "skills": {
+        "loading": 40,
+        "marksmanship": 35,
+        "drill": 60,
+        "fieldcraft": 55,
+        "endurance": 60,
+        "assault": 60
+      }
+    },
+    {
+      "id": "1825_SLA",
+      "name": "Sjællandske Lansenerregiment",
+      "arm": "cavalry",
+      "home": "København",
+      "men": 600,
+      "horses": 400,
+      "guns": 0,
+      "experience": 30,
+      "skills": {
+        "loading": 40,
+        "marksmanship": 35,
+        "drill": 60,
+        "fieldcraft": 55,
+        "endurance": 60,
+        "assault": 60
+      }
+    },
+    {
+      "id": "1825_HLA",
+      "name": "Holstenske Lansenerregiment",
+      "arm": "cavalry",
+      "home": "Slesvig",
+      "men": 600,
+      "horses": 400,
+      "guns": 0,
+      "experience": 30,
+      "skills": {
+        "loading": 40,
+        "marksmanship": 35,
+        "drill": 60,
+        "fieldcraft": 55,
+        "endurance": 60,
+        "assault": 60
+      }
+    },
+    {
+      "id": "1825_LD",
+      "name": "Livregiment lette Dragoner",
+      "arm": "cavalry",
+      "home": "København",
+      "men": 600,
+      "horses": 400,
+      "guns": 0,
+      "experience": 30,
+      "skills": {
+        "loading": 40,
+        "marksmanship": 35,
+        "drill": 60,
+        "fieldcraft": 55,
+        "endurance": 60,
+        "assault": 60
+      }
+    },
+    {
+      "id": "1825_DD",
+      "name": "Dronningens Livregiment Dragoner",
+      "arm": "cavalry",
+      "home": "Randers",
+      "men": 600,
+      "horses": 400,
+      "guns": 0,
+      "experience": 30,
+      "skills": {
+        "loading": 40,
+        "marksmanship": 35,
+        "drill": 60,
+        "fieldcraft": 55,
+        "endurance": 60,
+        "assault": 60
+      }
+    },
+    {
+      "id": "1825_JD",
+      "name": "Jyske Dragonregiment",
+      "arm": "cavalry",
+      "home": "Randers",
+      "men": 600,
+      "horses": 400,
+      "guns": 0,
+      "experience": 30,
+      "skills": {
+        "loading": 40,
+        "marksmanship": 35,
+        "drill": 60,
+        "fieldcraft": 55,
+        "endurance": 60,
+        "assault": 60
+      }
+    },
+    {
+      "id": "1825_FD",
+      "name": "Fynske Dragonregiment",
+      "arm": "cavalry",
+      "home": "Odense",
+      "men": 600,
+      "horses": 400,
+      "guns": 0,
+      "experience": 30,
+      "skills": {
+        "loading": 40,
+        "marksmanship": 35,
+        "drill": 60,
+        "fieldcraft": 55,
+        "endurance": 60,
+        "assault": 60
+      }
+    },
+    {
+      "id": "1825_HU",
+      "name": "Husarregimentet (4 eskadroner)",
+      "arm": "cavalry",
+      "home": "København",
+      "men": 600,
+      "horses": 400,
+      "guns": 0,
+      "experience": 30,
+      "skills": {
+        "loading": 40,
+        "marksmanship": 35,
+        "drill": 60,
+        "fieldcraft": 55,
+        "endurance": 60,
+        "assault": 60
+      }
+    },
+    {
+      "id": "1825_A1",
+      "name": "1. Artilleriregiment, 1. batteri",
+      "arm": "artillery",
+      "home": "København",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A2",
+      "name": "1. Artilleriregiment, 2. batteri",
+      "arm": "artillery",
+      "home": "København",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A3",
+      "name": "1. Artilleriregiment, 3. batteri",
+      "arm": "artillery",
+      "home": "København",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A4",
+      "name": "1. Artilleriregiment, 4. batteri",
+      "arm": "artillery",
+      "home": "København",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A5",
+      "name": "1. Artilleriregiment, 5. batteri",
+      "arm": "artillery",
+      "home": "København",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A6",
+      "name": "1. Artilleriregiment, 6. batteri",
+      "arm": "artillery",
+      "home": "København",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A7",
+      "name": "1. Artilleriregiment, 7. batteri",
+      "arm": "artillery",
+      "home": "København",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A8",
+      "name": "1. Artilleriregiment, 8. batteri",
+      "arm": "artillery",
+      "home": "København",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A9",
+      "name": "1. Artilleriregiment, 9. batteri",
+      "arm": "artillery",
+      "home": "København",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A10",
+      "name": "1. Artilleriregiment, 10. batteri",
+      "arm": "artillery",
+      "home": "København",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A11",
+      "name": "1. Artilleriregiment, 11. batteri",
+      "arm": "artillery",
+      "home": "København",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A12",
+      "name": "1. Artilleriregiment, 12. batteri",
+      "arm": "artillery",
+      "home": "København",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A13",
+      "name": "2. Artilleriregiment, 1. batteri",
+      "arm": "artillery",
+      "home": "Rendsborg",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A14",
+      "name": "2. Artilleriregiment, 2. batteri",
+      "arm": "artillery",
+      "home": "Rendsborg",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A15",
+      "name": "2. Artilleriregiment, 3. batteri",
+      "arm": "artillery",
+      "home": "Rendsborg",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A16",
+      "name": "2. Artilleriregiment, 4. batteri",
+      "arm": "artillery",
+      "home": "Rendsborg",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A17",
+      "name": "2. Artilleriregiment, 5. batteri",
+      "arm": "artillery",
+      "home": "Rendsborg",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    },
+    {
+      "id": "1825_A18",
+      "name": "2. Artilleriregiment, 6. batteri",
+      "arm": "artillery",
+      "home": "Rendsborg",
+      "men": 150,
+      "horses": 40,
+      "guns": 8,
+      "experience": 35,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 55,
+        "drill": 60,
+        "fieldcraft": 40,
+        "endurance": 45,
+        "assault": 35
+      }
+    }
+  ],
+  "equipment": {
+    "rifles": 12000,
+    "guns": 32,
+    "horses": 350,
+    "mortars": 16,
+    "wagons": 90,
+    "raw": [
+      40,
+      30,
+      160,
+      220,
+      2400,
+      1800
+    ],
+    "foodDays": 4,
+    "columns": 6,
+    "infantryReload": 1.2,
+    "infantryAccuracy": 0.85,
+    "carbineReload": 18,
+    "infantryWeapon": "Glatløbet flintlåsgevær (M/1794, M/1807 og M/1822); bajonet",
+    "cavalryWeapon": "Flintlåskarabin og pistol; sabel, lanse eller kyras efter regiment",
+    "artilleryWeapon": "Glatløbet forladeskyts: 6-/12-pundige kanoner og haubitser",
+    "uniforms": [
+      "Rød kjole, lyseblå bukser og sort chakot; hvidt remtøj",
+      "Rød gardekjole og bjørneskindshue; hvidt remtøj",
+      "Grøn jægerkjole og mørkt remtøj; hovedbeklædning efter korps",
+      "Regimentsbestemt rytteruniform; kyras, lanse eller husarudstyr",
+      "Mørkeblå artillerikjole og sort chakot; hvidt remtøj",
+      "Artilleriuniform med rideudstyr; alle kanonerer beredne"
+    ],
+    "kitReserve": 1800
+  },
+  "magazines": [
+    {
+      "town": "København",
+      "food": 100000,
+      "fodder": 40000,
+      "ammo": 100
+    },
+    {
+      "town": "Rendsborg",
+      "food": 70000,
+      "fodder": 24000,
+      "ammo": 70
+    },
+    {
+      "town": "Nyborg",
+      "food": 24000,
+      "fodder": 10000,
+      "ammo": 20
+    },
+    {
+      "town": "Helsingør",
+      "food": 22000,
+      "fodder": 6000,
+      "ammo": 20
+    },
+    {
+      "town": "Fredericia",
+      "food": 18000,
+      "fodder": 8000,
+      "ammo": 15
+    },
+    {
+      "town": "Glückstadt",
+      "food": 20000,
+      "fodder": 6000,
+      "ammo": 20
+    },
+    {
+      "town": "Aalborg",
+      "food": 12000,
+      "fodder": 6000,
+      "ammo": 8
+    },
+    {
+      "town": "Randers",
+      "food": 12000,
+      "fodder": 16000,
+      "ammo": 8
+    },
+    {
+      "town": "Horsens",
+      "food": 10000,
+      "fodder": 12000,
+      "ammo": 6
+    },
+    {
+      "town": "Odense",
+      "food": 12000,
+      "fodder": 12000,
+      "ammo": 8
+    },
+    {
+      "town": "Slesvig",
+      "food": 18000,
+      "fodder": 18000,
+      "ammo": 12
+    },
+    {
+      "town": "Kiel",
+      "food": 12000,
+      "fodder": 4000,
+      "ammo": 10
+    },
+    {
+      "town": "Ratzeburg",
+      "food": 8000,
+      "fodder": 2000,
+      "ammo": 6
+    }
+  ]
+}
