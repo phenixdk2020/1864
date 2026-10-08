@@ -380,6 +380,8 @@ struct FCampaign1851ResearchTopic
 
 namespace Campaign1851Research
 {
+	/** A civil subject (farming, trades, roads, railways, the telegraph) against a military one. */
+	bool IsCivil(int32 Topic);
 	const TArray<FCampaign1851ResearchTopic>& Topics();
 	int32 FindTopic(const FString& Id);
 	constexpr int32 Branches = 8;
@@ -941,8 +943,9 @@ public:
 	/** The year a subject opens in the scenario (0: open from the start). */
 	int32 ResearchOpenYear(int32 Topic) const;
 	bool StartResearch(int32 Topic, FString* OutReason = nullptr);
-	int32 GetResearching() const { return Researching; }
-	int32 GetResearchMonths() const { return ResearchMonths; }
+	/** Research runs on two tracks, a military and a civil one (a project at a time in each). */
+	int32 GetResearching(bool bCivil = false) const { return bCivil ? ResearchingCivil : Researching; }
+	int32 GetResearchMonths(bool bCivil = false) const { return bCivil ? ResearchMonthsCivil : ResearchMonths; }
 	int32 GetDoctrine(int32 Level) const { return Level >= 0 && Level < 3 ? Doctrine[Level] : 0; }
 	bool SetDoctrine(int32 Level, int32 Choice, FString* OutReason = nullptr);
 	bool IsDoctrineChanging() const { return CampaignDays < DoctrineSettledDay; }
@@ -1676,6 +1679,9 @@ private:
 	int32 Researching = INDEX_NONE;
 	int32 ResearchMonths = 0;
 	bool bResearchStalled = false;
+	int32 ResearchingCivil = INDEX_NONE;
+	int32 ResearchMonthsCivil = 0;
+	bool bResearchStalledCivil = false;
 	int32 Doctrine[3] = { 0, 0, 1 };
 	double DoctrineSettledDay = 0.0;
 	TArray<FString> EventsFired;

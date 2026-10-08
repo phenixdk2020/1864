@@ -314,7 +314,7 @@ int32 ACampaign1851Map::LinkWorkCost(int32 Link, ECampaign1851LinkWork Work) con
 	double Cost = 0.0;
 	if (Work == ECampaign1851LinkWork::Chaussee)
 	{
-		Cost = L.RoadKm * Campaign1851Network::ChausseeRdPerKm;
+		Cost = L.RoadKm * Campaign1851Network::ChausseeRdPerKm * (HasResearch(TEXT("roads")) ? 0.85 : 1.0);
 	}
 	else if (Work == ECampaign1851LinkWork::Railway)
 	{

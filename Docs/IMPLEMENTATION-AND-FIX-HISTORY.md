@@ -1391,6 +1391,12 @@ Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i
 - Forskningsemnerne har fået en åbningstid i 1825-scenariet (`ResearchOpenYear`): de tidlige (kæde- og karré-eksercits, rytterspejdning, smede, to-geleds ild) åbner 1826-28, de fleste 1830-45 (bagladegeværet 1841, felttelegrafen 1844, riflede kanoner først 1855); en lukket står med "åbner 19xx" i træet. I 1851-scenariet er alt åbent som før.
 - Nyt emne **Jernbaneanlæg** (åbner 1835, 2.500 rd./md. i 18 måneder): uden det kan der ikke bygges jernbaner på kortet i 1825 (`LinkBlockReason`: "kræver forskning"); i 1851 kendes det på forhånd. Der er altså tog i 1825, men de skal først forskes frem; de eksisterende baner (1844 og frem) åbner på deres egne datoer.
 
+### 2026-10-08 - Militær og civil forskning i to spor
+
+- Forskningen er delt i to spor med hvert sit projekt ad gangen (`Researching`/`ResearchingCivil`, `MonthlyResearch`): det militære betales af Krigsministeriet, det civile af Indenrigsministeriet (hver med sin automatik/rådgivning og sin pengepost). Forskningsvinduet har faner MILITÆR og CIVIL med hver sine kolonner.
+- Civile emner (`Campaign1851Research::IsCivil`): hele Næringsliv-kolonnen (mergling, landbohøjskole, smede, dampmaskiner, kreditforeninger, nyt: Landboreformer, skat fra landet +6 %), samt Jernbaneanlæg, Felttelegrafen og nyt: Vej- og kanalbyggeri (chausséer 15 % billigere). Jernbanemobilisering og pontonerne er militære.
+- De nye emner åbner i 1825-scenariet 1828 (landboreformer) og 1830 (veje).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

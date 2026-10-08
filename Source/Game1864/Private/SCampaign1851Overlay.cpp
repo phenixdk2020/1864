@@ -2969,17 +2969,30 @@ void SCampaign1851Overlay::PaintBranchSymbol(const FGeometry& Geometry, FSlateWi
 void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
 {
 	PaintText(Geometry, Out, Layer + 1, TEXT("Forskning og doktriner"), Pos + FVector2D(24.f, 34.f), Serif(22), Ink, 0.f);
-	PaintTextFit(Geometry, Out, Layer + 1, TEXT("Krigsministeriet udvikler ét projekt ad gangen, betalt måned for måned; doktrinen bestemmer, hvordan hæren kæmper"),
+	PaintTextFit(Geometry, Out, Layer + 1, TEXT("Krigsministeriet og Indenrigsministeriet forsker hver med ét projekt ad gangen, betalt måned for måned; doktrinen bestemmer, hvordan hæren kæmper"),
 		Pos + FVector2D(24.f, 64.f), Serif(12, EFace::Italic), Gold, Size.X - 170.f);
 	const float X = Pos.X + 24.f;
 	float Y = Pos.Y + 106.f;
 	const float LeftW = FMath::Min(1040.f, Size.X * 0.66f);
 	PaintText(Geometry, Out, Layer + 1, TEXT("F O R S K N I N G"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
+	// Two tracks: the military research (the War Ministry) and the civil (the Interior Ministry); a project at a time in each.
+	PaintButton(Geometry, Out, Layer + 3, FVector2D(X + 170.f, Y - 8.f), FVector2D(150.f, 24.f), TEXT("MILITÆR"), EButton::ResearchTab, 0, ResearchTab == 0);
+	PaintButton(Geometry, Out, Layer + 3, FVector2D(X + 326.f, Y - 8.f), FVector2D(150.f, 24.f), TEXT("CIVIL"), EButton::ResearchTab, 1, ResearchTab == 1);
 	Y += 24.f;
 	// Columns by branch, rows by year (1852 at the top), a box per topic; click a box to start it.
 	const TArray<FCampaign1851ResearchTopic>& Topics = Campaign1851Research::Topics();
 	const float YearW = 46.f;
-	const float ColW = (LeftW - YearW) / Campaign1851Research::Branches;
+	// The columns of this tab: the branches that have a subject in it.
+	const bool bResearchCivil = ResearchTab == 1;
+	TArray<int32> TabColumns;
+	for (int32 t = 0; t < Topics.Num(); ++t)
+	{
+		if (Campaign1851Research::IsCivil(t) == bResearchCivil) { TabColumns.AddUnique(Topics[t].Branch); }
+	}
+	TabColumns.Sort();
+	auto ColumnOf = [&TabColumns](int32 Branch) { return FMath::Max(0, TabColumns.IndexOfByKey(Branch)); };
+	auto InTab = [&](int32 Topic) { return Campaign1851Research::IsCivil(Topic) == bResearchCivil; };
+	const float ColW = (LeftW - YearW) / FMath::Max(1, TabColumns.Num());
 	const float Top = Y + 84.f;   // the headings, then the branch symbols
 	int32 Years = 1;   // the number of levels
 	for (int32 t = 0; t < Topics.Num(); ++t)
@@ -2988,10 +3001,11 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 	}
 	const float RowH = FMath::Min(120.f, (Pos.Y + Size.Y - 30.f - Top) / Years);
 	const FVector2D Box(ColW - 22.f, RowH - 14.f);
-	for (int32 c = 0; c < Campaign1851Research::Branches; ++c)
+	for (int32 ci = 0; ci < TabColumns.Num(); ++ci)
 	{
-		PaintBranchSymbol(Geometry, Out, Layer + 1, c, FVector2D(X + YearW + c * ColW + ColW * 0.5f, Y + 44.f), 22.f);
-		PaintTextFit(Geometry, Out, Layer + 1, FString(Campaign1851Research::BranchName(c)).ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å")), FVector2D(X + YearW + c * ColW + ColW * 0.5f - Box.X * 0.5f, Y), Serif(10), Gold, Box.X);
+		const int32 c = ci;
+		PaintBranchSymbol(Geometry, Out, Layer + 1, TabColumns[ci], FVector2D(X + YearW + c * ColW + ColW * 0.5f, Y + 44.f), 22.f);
+		PaintTextFit(Geometry, Out, Layer + 1, FString(Campaign1851Research::BranchName(TabColumns[ci])).ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å")), FVector2D(X + YearW + c * ColW + ColW * 0.5f - Box.X * 0.5f, Y), Serif(10), Gold, Box.X);
 	}
 	for (int32 r = 0; r < Years; ++r)
 	{
@@ -3007,7 +3021,7 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		OutIndex = 0;
 		for (int32 u = 0; u < Topics.Num(); ++u)
 		{
-			if (Topics[u].Branch == T.Branch && Campaign1851Research::Tier(u) == Tier)
+			if (Topics[u].Branch == T.Branch && Campaign1851Research::Tier(u) == Tier && InTab(u))
 			{
 				if (FCString::Strcmp(Topics[u].Id, T.Id) == 0)
 				{
@@ -3029,13 +3043,13 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		int32 Index = 0;
 		Share(T, Index);
 		const float W = TopicBoxSize(T).X;
-		return FVector2D(X + YearW + T.Branch * ColW + 11.f + Index * (W + 6.f), Top + Campaign1851Research::Tier(Campaign1851Research::FindTopic(T.Id)) * RowH);
+		return FVector2D(X + YearW + ColumnOf(T.Branch) * ColW + 11.f + Index * (W + 6.f), Top + Campaign1851Research::Tier(Campaign1851Research::FindTopic(T.Id)) * RowH);
 	};
 	// The lines first, under the boxes.
 	for (const FCampaign1851ResearchTopic& T : Topics)
 	{
 		const int32 Need = T.Needs ? Campaign1851Research::FindTopic(T.Needs) : INDEX_NONE;
-		if (Topics.IsValidIndex(Need))
+		if (Topics.IsValidIndex(Need) && InTab(Campaign1851Research::FindTopic(T.Id)) && InTab(Need))
 		{
 			const FVector2D From = BoxPos(Topics[Need]) + FVector2D(TopicBoxSize(Topics[Need]).X * 0.5f, Box.Y);
 			const FVector2D To = BoxPos(T) + FVector2D(TopicBoxSize(T).X * 0.5f, 0.f);
@@ -3047,17 +3061,21 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 	const FLinearColor Dark = FLinearColor::FromSRGBColor(FColor(30, 22, 12));
 	for (int32 t = 0; t < Topics.Num(); ++t)
 	{
+		if (!InTab(t))
+		{
+			continue;
+		}
 		const FCampaign1851ResearchTopic& T = Topics[t];
 		const FString Why = Map->ResearchBlockReason(t);
 		const bool bDone = Why == TEXT("færdig");
-		const bool bBusy = Map->GetResearching() == t;
+		const bool bBusy = Map->GetResearching(bResearchCivil) == t;
 		const FVector2D P = BoxPos(T);
 		const FVector2D TopicBox = TopicBoxSize(T);
 		PaintButton(Geometry, Out, Layer + 2, P, TopicBox, FString(), EButton::ResearchPick, t, bDone || ResearchPick == t);
 		const FLinearColor Main = bDone ? Dark : Why.IsEmpty() || bBusy ? Ink : MutedInk;
 		PaintTextFit(Geometry, Out, Layer + 4, T.Name, P + FVector2D(8.f, 13.f), Serif(12), Main, TopicBox.X - 16.f);
 		const FString State = bDone ? FString(TEXT("færdig"))
-			: bBusy ? FString::Printf(TEXT("i gang  ·  %d af %d md."), Map->GetResearchMonths(), T.Months)
+			: bBusy ? FString::Printf(TEXT("i gang  ·  %d af %d md."), Map->GetResearchMonths(bResearchCivil), T.Months)
 			: Why.IsEmpty() ? FString::Printf(TEXT("%d md.  ·  %s rd./md."), T.Months, *Thousands(int32(T.CostPerMonth)))
 			: Why;
 		PaintTextFit(Geometry, Out, Layer + 4, State, P + FVector2D(8.f, 30.f), Serif(10, EFace::Italic), bDone ? Dark : bBusy ? Gold : MutedInk, TopicBox.X - 16.f);
@@ -3067,7 +3085,7 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		}
 		if (bBusy)
 		{
-			PaintBar(Geometry, Out, Layer + 4, P + FVector2D(8.f, TopicBox.Y - 9.f), TopicBox.X - 16.f, float(Map->GetResearchMonths()) / float(T.Months));
+			PaintBar(Geometry, Out, Layer + 4, P + FVector2D(8.f, TopicBox.Y - 9.f), TopicBox.X - 16.f, float(Map->GetResearchMonths(bResearchCivil)) / float(T.Months));
 		}
 	}
 	// The topic clicked: what it does, what it costs, and START.
@@ -3111,9 +3129,10 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		{
 			PaintTextFit(Geometry, Out, Layer + 8, FString::Printf(TEXT("Kræver først: %s"), Topics[Need].Name), FVector2D(BP.X + 24.f, TY + 20.f), Serif(12, EFace::Italic), Gold, BoxSize.X - 48.f);
 		}
-		const bool bBusy = Map->GetResearching() == ResearchPick;
-		const FString Label = Why == TEXT("færdig") ? FString(TEXT("FÆRDIG")) : bBusy ? FString::Printf(TEXT("I GANG  ·  %d AF %d MD."), Map->GetResearchMonths(), T.Months)
-			: Why.IsEmpty() ? (Map->GetResearching() != INDEX_NONE ? FString(TEXT("START (AFBRYDER DET NUVÆRENDE)")) : FString(TEXT("START"))) : Why;
+		const bool bPickCivil = Campaign1851Research::IsCivil(ResearchPick);
+		const bool bBusy = Map->GetResearching(bPickCivil) == ResearchPick;
+		const FString Label = Why == TEXT("færdig") ? FString(TEXT("FÆRDIG")) : bBusy ? FString::Printf(TEXT("I GANG  ·  %d AF %d MD."), Map->GetResearchMonths(bPickCivil), T.Months)
+			: Why.IsEmpty() ? (Map->GetResearching(bPickCivil) != INDEX_NONE ? FString(TEXT("START (AFBRYDER DET NUVÆRENDE)")) : FString(TEXT("START"))) : Why;
 		PaintButton(Geometry, Out, Layer + 8, FVector2D(BP.X + 24.f, BP.Y + BoxSize.Y - 54.f), FVector2D(330.f, 32.f), Label, EButton::ResearchStart, ResearchPick, false, !Why.IsEmpty());
 		PaintButton(Geometry, Out, Layer + 8, FVector2D(BP.X + BoxSize.X - 144.f, BP.Y + BoxSize.Y - 54.f), FVector2D(120.f, 32.f), TEXT("LUK"), EButton::ResearchPick, -1);
 	}

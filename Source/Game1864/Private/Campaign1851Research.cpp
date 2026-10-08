@@ -12,6 +12,8 @@ namespace Campaign1851Research
 	const TArray<FCampaign1851ResearchTopic>& Topics()
 	{
 		static const TArray<FCampaign1851ResearchTopic> List = {
+			{ TEXT("roads"),    TEXT("Vej- og kanalbyggeri"),     TEXT("Ingeniørkunst på vejene: chausséer anlægges 15 % billigere"), 1850, 1200.0, 12, nullptr, 2 },
+			{ TEXT("landreform"), TEXT("Landboreformer"),           TEXT("Udskiftning og fæstebøndernes frikøb: skatten fra landet +6 %"), 1850, 1000.0, 12, nullptr, 7 },
 			{ TEXT("railway"),  TEXT("Jernbaneanlæg"),          TEXT("Muliggør at bygge jernbaner på kortet (uden den kan en bane ikke anlægges). I 1851 kendes den allerede"), 1850, 2500.0, 18, nullptr, 2 },
 			{ TEXT("sanitation"), TEXT("Sanitetsvæsenet"),          TEXT("Ambulancer og feltlazaretter: tab i slag −20 %"),                          1852, 800.0,  12, nullptr, 0 },
 			{ TEXT("fortress"),   TEXT("Fæstningsbyggeri"),         TEXT("Ingeniørkorpsets skole: skansernes dækning +10 %-point"),                  1852, 1200.0, 12, nullptr, 1 },
@@ -45,6 +47,17 @@ namespace Campaign1851Research
 			{ TEXT("independent"), TEXT("Fri ild"),                 TEXT("Hver mand skyder, når han har ladt og sigtet: hurtigere ild, svagere salver. Skal indøves i regimenterne"), 1857, 1000.0, 10, TEXT("volley"), 3 },
 		};
 		return List;
+	}
+
+	bool IsCivil(int32 Topic)
+	{
+		const TArray<FCampaign1851ResearchTopic>& List = Topics();
+		if (!List.IsValidIndex(Topic))
+		{
+			return false;
+		}
+		const FString Id = List[Topic].Id;
+		return List[Topic].Branch == 7 || Id == TEXT("railway") || Id == TEXT("telegraph") || Id == TEXT("roads");
 	}
 
 	int32 FindTopic(const FString& Id)
@@ -109,6 +122,9 @@ void ACampaign1851Map::ResetResearch()
 {
 	Researched.Reset();
 	Researching = INDEX_NONE;
+	ResearchMonthsCivil = 0;
+	ResearchingCivil = INDEX_NONE;
+	bResearchStalledCivil = false;
 	ResearchMonths = 0;
 	bResearchStalled = false;
 	// As the army stood after 1848-50: Dannevirke, concentration, the bayonet.
@@ -138,7 +154,7 @@ int32 ACampaign1851Map::ResearchOpenYear(int32 Topic) const
 		return 0;
 	}
 	static const struct { const TCHAR* Id; int32 Year; } Years[] = {
-		{ TEXT("square"), 1826 }, { TEXT("recon"), 1826 }, { TEXT("smithy"), 1826 }, { TEXT("tworank"), 1826 }, { TEXT("marl"), 1828 }, { TEXT("firebyrank"), 1828 },
+		{ TEXT("landreform"), 1828 }, { TEXT("roads"), 1830 }, { TEXT("square"), 1826 }, { TEXT("recon"), 1826 }, { TEXT("smithy"), 1826 }, { TEXT("tworank"), 1826 }, { TEXT("marl"), 1828 }, { TEXT("firebyrank"), 1828 },
 		{ TEXT("fortress"), 1830 }, { TEXT("staff"), 1830 }, { TEXT("skirmish"), 1830 }, { TEXT("shock"), 1830 }, { TEXT("pontoon"), 1830 }, { TEXT("agrischool"), 1830 },
 		{ TEXT("steam"), 1830 }, { TEXT("credit"), 1830 }, { TEXT("volley"), 1830 }, { TEXT("conserves"), 1835 }, { TEXT("carbine"), 1835 }, { TEXT("railway"), 1835 },
 		{ TEXT("sanitation"), 1840 }, { TEXT("casemates"), 1840 }, { TEXT("independent"), 1840 }, { TEXT("breech"), 1841 }, { TEXT("telegraph"), 1844 },
@@ -161,7 +177,7 @@ FString ACampaign1851Map::ResearchBlockReason(int32 Topic) const
 	const FCampaign1851ResearchTopic& T = List[Topic];
 	if (Researched.Contains(T.Id) || HasResearch(T.Id)) return TEXT("færdig");
 	if (ResearchOpenYear(Topic) > GetDate().GetYear()) return FString::Printf(TEXT("åbner %d"), ResearchOpenYear(Topic));
-	if (Researching == Topic) return TEXT("i gang");
+	if (Researching == Topic || ResearchingCivil == Topic) return TEXT("i gang");
 	if (T.Needs && !Researched.Contains(T.Needs))
 	{
 		const int32 Need = Campaign1851Research::FindTopic(T.Needs);
@@ -179,10 +195,19 @@ bool ACampaign1851Map::StartResearch(int32 Topic, FString* OutReason)
 		if (OutReason) { *OutReason = Why; }
 		return false;
 	}
-	// Switching drops what was done on the old project.
-	Researching = Topic;
-	ResearchMonths = 0;
-	bResearchStalled = false;
+	// Switching drops what was done on the old project of that track.
+	if (Campaign1851Research::IsCivil(Topic))
+	{
+		ResearchingCivil = Topic;
+		ResearchMonthsCivil = 0;
+		bResearchStalledCivil = false;
+	}
+	else
+	{
+		Researching = Topic;
+		ResearchMonths = 0;
+		bResearchStalled = false;
+	}
 	const FCampaign1851ResearchTopic& T = Campaign1851Research::Topics()[Topic];
 	News.Add(FString::Printf(TEXT("Forskning: %s påbegyndt (%d måneder, %s rd./md.)"), T.Name, T.Months, *FString::FromInt(int32(T.CostPerMonth))));
 	return true;
@@ -191,52 +216,61 @@ bool ACampaign1851Map::StartResearch(int32 Topic, FString* OutReason)
 void ACampaign1851Map::MonthlyResearch()
 {
 	const TArray<FCampaign1851ResearchTopic>& List = Campaign1851Research::Topics();
-	// The War Ministry on AUTO (or ADVISORY: it proposes) takes up the first project open to it.
-	const bool bAuto = Nations.IsValidIndex(PlayerNation) && Nations[PlayerNation].Mode(ECampaign1851Portfolio::War) == ECampaign1851Delegation::Auto;
-	if (Researching == INDEX_NONE && bAuto)
+	// Each track: the War Ministry (military) and the Interior Ministry (civil), on AUTO (or ADVISORY: it proposes), take up the first
+	// project open to them; each pays its project month by month.
+	for (int32 Track = 0; Track < 2; ++Track)
 	{
-		for (int32 t = 0; t < List.Num(); ++t)
+		const bool bCivil = Track == 1;
+		int32& Current = bCivil ? ResearchingCivil : Researching;
+		int32& Months = bCivil ? ResearchMonthsCivil : ResearchMonths;
+		bool& Stalled = bCivil ? bResearchStalledCivil : bResearchStalled;
+		const ECampaign1851Portfolio Ministry = bCivil ? ECampaign1851Portfolio::Interior : ECampaign1851Portfolio::War;
+		const bool bAuto = Nations.IsValidIndex(PlayerNation) && Nations[PlayerNation].Mode(Ministry) == ECampaign1851Delegation::Auto;
+		if (Current == INDEX_NONE && bAuto)
 		{
-			if (ResearchBlockReason(t).IsEmpty() && Treasury - List[t].CostPerMonth * List[t].Months > Nations[PlayerNation].Reserve
-				&& MinistryCanSpend(ECampaign1851Portfolio::War, List[t].CostPerMonth * List[t].Months))
+			for (int32 t = 0; t < List.Num(); ++t)
 			{
-				MinistrySpend(ECampaign1851Portfolio::War, List[t].CostPerMonth * List[t].Months);
-				StartResearch(t);
-				FCampaign1851Decision D;
-				D.Day = CampaignDays;
-				D.Nation = PlayerNation;
-				D.Portfolio = ECampaign1851Portfolio::War;
-				D.Action = FString::Printf(TEXT("Forskning: %s"), List[t].Name);
-				D.Reasons = List[t].Effect;
-				D.Cost = List[t].CostPerMonth * List[t].Months;
-				D.bDone = true;
-				AddDecision(D);
-				break;
+				if (Campaign1851Research::IsCivil(t) == bCivil && ResearchBlockReason(t).IsEmpty() && Treasury - List[t].CostPerMonth * List[t].Months > Nations[PlayerNation].Reserve
+					&& MinistryCanSpend(Ministry, List[t].CostPerMonth * List[t].Months))
+				{
+					MinistrySpend(Ministry, List[t].CostPerMonth * List[t].Months);
+					StartResearch(t);
+					FCampaign1851Decision D;
+					D.Day = CampaignDays;
+					D.Nation = PlayerNation;
+					D.Portfolio = Ministry;
+					D.Action = FString::Printf(TEXT("Forskning: %s"), List[t].Name);
+					D.Reasons = List[t].Effect;
+					D.Cost = List[t].CostPerMonth * List[t].Months;
+					D.bDone = true;
+					AddDecision(D);
+					break;
+				}
 			}
 		}
-	}
-	if (!List.IsValidIndex(Researching))
-	{
-		return;
-	}
-	const FCampaign1851ResearchTopic& T = List[Researching];
-	if (Treasury < T.CostPerMonth)
-	{
-		if (!bResearchStalled)
+		if (!List.IsValidIndex(Current))
 		{
-			News.Add(FString::Printf(TEXT("Forskning: %s står stille (ingen penge)"), T.Name));
+			continue;
 		}
-		bResearchStalled = true;
-		return;
-	}
-	bResearchStalled = false;
-	AddTransaction(-T.CostPerMonth, FString::Printf(TEXT("Forskning: %s"), T.Name));
-	if (++ResearchMonths >= T.Months)
-	{
-		Researched.Add(T.Id);
-		News.Add(FString::Printf(TEXT("Forskning færdig: %s. %s"), T.Name, T.Effect));
-		Researching = INDEX_NONE;
-		ResearchMonths = 0;
+		const FCampaign1851ResearchTopic& T = List[Current];
+		if (Treasury < T.CostPerMonth)
+		{
+			if (!Stalled)
+			{
+				News.Add(FString::Printf(TEXT("Forskning: %s står stille (ingen penge)"), T.Name));
+			}
+			Stalled = true;
+			continue;
+		}
+		Stalled = false;
+		AddTransaction(-T.CostPerMonth, FString::Printf(TEXT("Forskning: %s"), T.Name));
+		if (++Months >= T.Months)
+		{
+			Researched.Add(T.Id);
+			News.Add(FString::Printf(TEXT("Forskning færdig: %s. %s"), T.Name, T.Effect));
+			Current = INDEX_NONE;
+			Months = 0;
+		}
 	}
 }
 
@@ -347,7 +381,7 @@ float ACampaign1851Map::PontoonDays() const
 
 double ACampaign1851Map::RuralTaxFactor() const
 {
-	return 1.0 + (HasResearch(TEXT("marl")) ? 0.08 : 0.0) + (HasResearch(TEXT("agrischool")) ? 0.07 : 0.0);
+	return 1.0 + (HasResearch(TEXT("marl")) ? 0.08 : 0.0) + (HasResearch(TEXT("agrischool")) ? 0.07 : 0.0) + (HasResearch(TEXT("landreform")) ? 0.06 : 0.0);
 }
 
 double ACampaign1851Map::UrbanTaxFactor() const
