@@ -152,6 +152,10 @@ struct FCampaign1851RegimentSave
 	UPROPERTY() float Cohesion = 0.f;
 	/** v15: raised during the campaign, with its definition. */
 	UPROPERTY() bool bRaised = false;
+	/** v28: initial garrison training; older saves retain deployed units. */
+	UPROPERTY() bool bTraining = false;
+	UPROPERTY() float RaisingProgress = 0.f;
+	UPROPERTY() int32 RaisingType = 0;
 	UPROPERTY() bool bDetached = false;
 	UPROPERTY() FString Name;
 	UPROPERTY() uint8 Arm = 0;
@@ -235,7 +239,7 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 
 public:
 	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands. 10: + troop trains on the map. 11: + field formations. */
-	static constexpr int32 CurrentVersion = 27;
+	static constexpr int32 CurrentVersion = 28;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	/** The scenario it was played in (an index into ACampaign1851Map::Scenarios; saves from before the scenarios are 1851 = 1). */

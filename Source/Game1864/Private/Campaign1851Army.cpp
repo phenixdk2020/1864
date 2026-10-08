@@ -911,6 +911,14 @@ bool ACampaign1851Map::OrderMarch(const TArray<int32>& Column, int32 CityIndex, 
 
 bool ACampaign1851Map::OrderMarchTo(const TArray<int32>& Column, int32 CityIndex, const FVector2D& TargetKm, ECampaign1851RouteMode Mode, FString* OutReason)
 {
+	for (int32 Index : Column)
+	{
+		if (Regiments.IsValidIndex(Index) && Regiments[Index].bTraining)
+		{
+			if (OutReason) { *OutReason = TEXT("Enheden træner i garnison. Vælg INDSÆT TIDLIGT først."); }
+			return false;
+		}
+	}
 	const FCampaign1851MarchPlan Plan = PlanColumn(Column, CityIndex, TargetKm, Mode);
 	if (!Plan.bOk)
 	{
@@ -1062,6 +1070,11 @@ FCampaign1851MarchPlan ACampaign1851Map::PlanColumn(const TArray<int32>& Column,
 	{
 		if (Regiments.IsValidIndex(i))
 		{
+			if (Regiments[i].bTraining)
+			{
+				Plan.Note = TEXT("Enheden træner i garnison. Vælg INDSÆT TIDLIGT først.");
+				return Plan;
+			}
 			Members.Add(&Regiments[i]);
 			Plan.TrainsNeeded += Campaign1851Army::TrainsNeeded(Regiments[i]);
 		}
@@ -1475,10 +1488,27 @@ void ACampaign1851Map::AdvanceArmy(float DeltaDays, float DeltaSeconds)
 		const float Lead = Chief ? Chief->Stat(ECampaign1851OfficerStat::Leadership) : 3.f;
 		const float Insp = Chief ? Chief->Stat(ECampaign1851OfficerStat::Inspiration) : 3.f;
 		const float Endurance = R.Skill(ECampaign1851Skill::Endurance);
+		if (R.bTraining && !R.IsMarching() && R.Town == R.Home && !IsInBattle(i))
+		{
+			const float Gain = FMath::Min(1.f - R.RaisingProgress, DeltaDays * R.RaisingRate());
+			R.RaisingProgress += Gain;
+			for (float& Skill : R.Skills) { Skill = FMath::Min(60.f, Skill + Gain * 40.f); }
+			R.Experience = FMath::Min(40.f, R.Experience + Gain * 20.f);
+			R.Cohesion = FMath::Min(80.f, R.Cohesion + Gain * 60.f);
+			R.Morale = FMath::Min(0.8f, R.Morale + Gain * 0.35f);
+			if (R.RaisingProgress >= 1.f - KINDA_SMALL_NUMBER)
+			{
+				R.bTraining = false;
+				R.RaisingProgress = 1.f;
+				News.Add(R.Name + TEXT(" har afsluttet grunduddannelsen"));
+			}
+			continue; // Initial training has its own rates; no veteran stat floors.
+		}
+		if (R.bTraining) { continue; } // Pause initial training away from home or during battle.
 		if (R.IsMarching())
 		{
 			// A fit unit and a good chief keep it together on the road; the march itself hardens it a little.
-			R.Cohesion = FMath::Max(40.f, R.Cohesion - DeltaDays * 0.4f * (1.2f - Lead / 12.f) * (1.3f - Endurance / 100.f));
+			R.Cohesion = FMath::Max(FMath::Min(40.f, R.Cohesion), R.Cohesion - DeltaDays * 0.4f * (1.2f - Lead / 12.f) * (1.3f - Endurance / 100.f));
 			R.Experience = FMath::Min(70.f, R.Experience + DeltaDays * 0.02f);   // field service, up to seasoned
 			float& Fit = R.Skills[int32(ECampaign1851Skill::Endurance)];
 			Fit = FMath::Min(70.f, Fit + DeltaDays * 0.02f);
@@ -1501,7 +1531,7 @@ void ACampaign1851Map::AdvanceArmy(float DeltaDays, float DeltaSeconds)
 				}
 				else if (Weight <= 0.f)
 				{
-					V = FMath::Max(30.f, V - DeltaDays * (Skill == ECampaign1851Skill::Endurance ? 0.03f : 0.01f));
+					V = FMath::Max(FMath::Min(30.f, V), V - DeltaDays * (Skill == ECampaign1851Skill::Endurance ? 0.03f : 0.01f));
 				}
 			}
 			R.Cohesion = FMath::Min(90.f, R.Cohesion + DeltaDays * 0.3f);
@@ -2283,6 +2313,9 @@ TArray<FCampaign1851RegimentSave> ACampaign1851Map::SaveArmy() const
 		S.Id = R.Id;
 		S.Men = R.Men;
 		S.bRaised = R.bRaised;
+		S.bTraining = R.bTraining;
+		S.RaisingProgress = R.RaisingProgress;
+		S.RaisingType = R.RaisingType;
 		S.bDetached = R.bDetached;
 		S.MaxMen = R.MaxMen;
 		S.Companies = R.Captains.Num();
@@ -2350,6 +2383,9 @@ int32 ACampaign1851Map::RestoreArmy(const TArray<FCampaign1851RegimentSave>& Sav
 		if (S.MaxHorses >= 0) { R.MaxHorses = S.MaxHorses; }
 		if (S.Guns >= 0) { R.Guns = S.Guns; }
 		if (!S.Nation.IsEmpty()) { R.Nation = S.Nation; }
+		R.bTraining = S.bTraining;
+		R.RaisingProgress = FMath::Clamp(S.RaisingProgress, 0.f, 1.f);
+		R.RaisingType = FMath::Clamp(S.RaisingType, 0, Campaign1851Resources::UnitTypes - 1);
 		R.SavedCompanies = S.Companies;
 		R.CompanyWeight = S.CompanyWeight;
 		R.Men = FMath::Clamp(S.Men, 0, R.MaxMen);

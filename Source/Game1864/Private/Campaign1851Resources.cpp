@@ -257,13 +257,14 @@ int32 ACampaign1851Map::RaiseUnit(int32 Type, int32 Town, int32 Command, ECampai
 	{
 		++Number;
 	}
-	const int32 Index = AddRaisedRegiment(FString::Printf(TEXT("%s%d"), T.IdPrefix, Number), FString::Printf(TEXT("%d. %s"), Number, T.NameSuffix), T.Arm, Town, T.Men);
+	const int32 Index = AddRaisedRegiment(FString::Printf(TEXT("%s%d"), T.IdPrefix, Number), FString::Printf(TEXT("%d. %s"), Number, T.NameSuffix), T.Arm, Town, T.Men, true);
 	FCampaign1851Regiment& R = Regiments[Index];
 	R.Experience = Campaign1851Army::RecruitExperience;
 	for (float& S : R.Skills)
 	{
 		S = Campaign1851Army::RecruitSkill;
 	}
+	R.RaisingType = FMath::Clamp(Type, 0, Campaign1851Resources::UnitTypes - 1);
 	R.Horses = R.MaxHorses = T.Horses;
 	R.Guns = TakeGunsFromStock(T.Guns);
 	R.Mortars = FMath::Min(T.Mortars, MortarStock);

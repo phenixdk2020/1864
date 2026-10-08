@@ -142,7 +142,7 @@ int32 ACampaign1851Map::RaiseBattalion(int32 CityIndex, FString* OutReason)
 	{
 		++Number;
 	}
-	const int32 Index = AddRaisedRegiment(FString::Printf(TEXT("B%d"), Number), FString::Printf(TEXT("%d. Bataillon"), Number), ECampaign1851Arm::Infantry, CityIndex, Campaign1851Army::RaiseMen);
+	const int32 Index = AddRaisedRegiment(FString::Printf(TEXT("B%d"), Number), FString::Printf(TEXT("%d. Bataillon"), Number), ECampaign1851Arm::Infantry, CityIndex, Campaign1851Army::RaiseMen, true);
 	FCampaign1851Regiment& R = Regiments[Index];
 	R.Experience = Campaign1851Army::RecruitExperience;
 	for (float& S : R.Skills)
@@ -210,6 +210,9 @@ int32 ACampaign1851Map::SplitRegiment(int32 RegimentIndex, FString* OutWhy, int3
 	FCampaign1851Regiment& N = Regiments[New];
 	FCampaign1851Regiment& R = Regiments[RegimentIndex];
 	N.bDetached = true;
+	N.bTraining = Old.bTraining;
+	N.RaisingProgress = Old.RaisingProgress;
+	N.RaisingType = Old.RaisingType;
 	N.Nation = R.Nation;
 	N.Men = FMath::Min(MovedMen, R.Men);
 	N.Sick = FMath::RoundToInt(R.Sick * Share);
@@ -361,6 +364,10 @@ bool ACampaign1851Map::CanMerge(int32 Keep, int32 Absorb, FString* OutWhy) const
 	if (!IsSplitPair(Keep, Absorb))
 	{
 		return Fail(TEXT("Kun to halvdele af samme enhed kan samles"));
+	}
+	if (Regiments[Keep].bTraining || Regiments[Absorb].bTraining)
+	{
+		return Fail(TEXT("Indsæt begge halvdele, før de samles"));
 	}
 	if (!StandTogether(Regiments[Keep], Regiments[Absorb]))
 	{
@@ -799,6 +806,9 @@ int32 ACampaign1851Map::SplitOffCompany(int32 RegimentIndex, int32 Company, FStr
 	FCampaign1851Regiment& N = Regiments[New];
 	FCampaign1851Regiment& Rm = Regiments[RegimentIndex];
 	N.bDetached = true;
+	N.bTraining = Old.bTraining;
+	N.RaisingProgress = Old.RaisingProgress;
+	N.RaisingType = Old.RaisingType;
 	N.Nation = Rm.Nation;
 	N.Men = SqMen;
 	N.CompanyWeight = { float(SqMen) };
@@ -832,7 +842,7 @@ int32 ACampaign1851Map::SplitOffCompany(int32 RegimentIndex, int32 Company, FStr
 	return New;
 }
 
-int32 ACampaign1851Map::AddRaisedRegiment(const FString& Id, const FString& Name, ECampaign1851Arm Arm, int32 Home, int32 MaxMen)
+int32 ACampaign1851Map::AddRaisedRegiment(const FString& Id, const FString& Name, ECampaign1851Arm Arm, int32 Home, int32 MaxMen, bool bTraining)
 {
 	FCampaign1851Regiment R;
 	R.Id = Id;
@@ -843,6 +853,14 @@ int32 ACampaign1851Map::AddRaisedRegiment(const FString& Id, const FString& Name
 	R.Men = R.MaxMen = MaxMen;
 	R.Horses = R.MaxHorses = 14;
 	R.bRaised = true;
+	R.bTraining = bTraining;
+	if (bTraining)
+	{
+		R.Experience = Campaign1851Army::RecruitExperience;
+		R.Cohesion = 20.f;
+		R.Morale = 0.45f;
+		for (float& Skill : R.Skills) { Skill = Campaign1851Army::RecruitSkill; }
+	}
 	R.Command = CommandsAtStart.IndexOfByPredicate([Home](const FCampaign1851Command& C) { return C.Towns.Contains(Home); });
 	R.Captains.Init(INDEX_NONE, Campaign1851Army::CompaniesFor(Arm));
 	R.CompanyFort.Init(0, R.Captains.Num());
@@ -851,4 +869,14 @@ int32 ACampaign1851Map::AddRaisedRegiment(const FString& Id, const FString& Name
 	PlaceInTown(Index);
 	UpdateRegimentPiece(Index);
 	return Index;
+}
+
+
+bool ACampaign1851Map::DeployRaisedUnit(int32 RegimentIndex)
+{
+	if (!Regiments.IsValidIndex(RegimentIndex) || !Regiments[RegimentIndex].bTraining) { return false; }
+	FCampaign1851Regiment& R = Regiments[RegimentIndex];
+	R.bTraining = false;
+	News.Add(FString::Printf(TEXT("%s indsat tidligt efter %.0f %% af grunduddannelsen"), *R.Name, R.RaisingProgress * 100.f));
+	return true;
 }

@@ -1400,6 +1400,14 @@ Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i
 ### 2026-10-08 – Backlog opdateret
 Backlog.md har fået et afsnit med det, der er bygget i oktober (scenarier, delt forskning, kamporden, slagets nye systemer), og en liste over det, der endnu ikke er afprøvet i et rigtigt slag.
 
+### 2026-10-08: Materiel og indkaldelse i separate paneler
+
+- Indkaldelse har egen ramme, uniformsillustration pr. type (Slate-silhuet ved manglende tekstur), rolle, mandskab, skyts, heste, pris og uddannelsestid.
+- Under lageret vises alle enheder under grunduddannelse med navn, type, garnison, procent, dage tilbage og INDSÆT TIDLIGT; sideknapper giver adgang til hele listen.
+- Nye indkaldte enheder starter med rekrutuddannelse, 20 i sammenhold og 45 % moral. Grunduddannelsen forbedrer uddannelse, erfaring, sammenhold og moral i garnison: eksercits 60 dage, blandet 75, specialprogrammer 90; hvile pauser. Tidlig indsættelse bevarer kvaliteterne og frigiver marchordrer. Kortmarkører viser træningsprocent.
+- Gemmeversion 28 gemmer fase, fremdrift og type; gamle gemninger og startstyrker i 1851/1825 forbliver uden den nye rekrutfase. Delinger arver træningsstatus. Nye klikbehandlere er selvstændige if-blokke og blokerer gennemklik.
+- Kontrol: statisk gennemgang og git diff --check. Spillet er hverken bygget eller kørt; visuel kontrol og indlæsning i Unreal udestår.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
