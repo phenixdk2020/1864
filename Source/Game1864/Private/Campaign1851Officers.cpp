@@ -626,16 +626,16 @@ void ACampaign1851Map::FreezeCompanyStrength(int32 Regiment)
 	}
 	if (Regiments[Regiment].Arm == ECampaign1851Arm::Artillery)
 	{
-		TArray<float> Guns, Horses, MaxHorses;
+		TArray<float> SecGuns, SecHorses, SecMaxHorses;
 		for (int32 k = 0; k < SubUnitCount(Regiment); ++k)
 		{
-			Guns.Add(float(SectionResource(Regiment, k, 0)));
-			Horses.Add(float(SectionResource(Regiment, k, 1)));
-			MaxHorses.Add(float(SectionResource(Regiment, k, 2)));
+			SecGuns.Add(float(SectionResource(Regiment, k, 0)));
+			SecHorses.Add(float(SectionResource(Regiment, k, 1)));
+			SecMaxHorses.Add(float(SectionResource(Regiment, k, 2)));
 		}
-		Regiments[Regiment].SectionGuns = Guns;
-		Regiments[Regiment].SectionHorses = Horses;
-		Regiments[Regiment].SectionMaxHorses = MaxHorses;
+		Regiments[Regiment].SectionGuns = SecGuns;
+		Regiments[Regiment].SectionHorses = SecHorses;
+		Regiments[Regiment].SectionMaxHorses = SecMaxHorses;
 	}
 	TArray<float> W;
 	for (int32 k = 0; k < SubUnitCount(Regiment); ++k)
