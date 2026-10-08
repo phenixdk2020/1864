@@ -8,17 +8,17 @@
 namespace
 {
 	/** Sight of a unit (km): cavalry scouts far ahead; forts watch from their parapets. */
-	float SightKm(ECampaign1851Arm Arm)
+	float IntelSightKm(ECampaign1851Arm Arm)
 	{
 		return Arm == ECampaign1851Arm::Cavalry || Arm == ECampaign1851Arm::HorseArtillery ? 20.f : 8.f;
 	}
-	constexpr float FortSightKm = 10.f;
+	constexpr float IntelFortSightKm = 10.f;
 	/** Towns of the monarchy report enemy columns within this distance. */
-	constexpr float TownReportKm = 12.f;
+	constexpr float IntelTownReportKm = 12.f;
 	/** How the enemy weighs a corps (the needle gun). */
-	float CorpsQuality(const FString& Nation) { return Nation == TEXT("PR") ? 1.3f : Nation == TEXT("AT") ? 1.05f : 0.9f; }
+	float IntelCorpsQuality(const FString& Nation) { return Nation == TEXT("PR") ? 1.3f : Nation == TEXT("AT") ? 1.05f : 0.9f; }
 	/** A stable error in [-1, 1] for a sighting (the same count for the same corps on the same day). */
-	float Noise(int32 A, int32 B)
+	float IntelNoise(int32 A, int32 B)
 	{
 		return FRandomStream(int32(HashCombine(uint32(A) * 7919u, uint32(B)))).FRandRange(-1.f, 1.f);
 	}
@@ -27,6 +27,8 @@ namespace
 void ACampaign1851Map::UpdateIntel()
 {
 	const int32 Day = FMath::FloorToInt(CampaignDays);
+	const float SightRounding = ActiveScenario().Year < 1850 ? 10.f : 100.f;
+	const float ReportRounding = ActiveScenario().Year < 1850 ? 100.f : 1000.f;
 	for (FCampaign1851EnemyCorps& C : EnemyCorps)
 	{
 		// In peace the attachés and the newspapers tell where every corps stands.
@@ -43,7 +45,7 @@ void ACampaign1851Map::UpdateIntel()
 		for (const FCampaign1851Regiment& R : Regiments)
 		{
 			// Rytterspejdning: the cavalry sees half as far again.
-			const float Sight = SightKm(R.Arm) * (R.Arm == ECampaign1851Arm::Cavalry && HasResearch(TEXT("recon")) ? 1.5f : 1.f);
+			const float Sight = IntelSightKm(R.Arm) * (R.Arm == ECampaign1851Arm::Cavalry && HasResearch(TEXT("recon")) ? 1.5f : 1.f);
 			if (R.Men > 0 && FVector2D::Distance(R.Km, C.Km) < Sight)
 			{
 				const float E = Sight > 10.f ? 0.05f : 0.25f;
@@ -52,7 +54,7 @@ void ACampaign1851Map::UpdateIntel()
 		}
 		for (const FCampaign1851Fort& F : Forts)
 		{
-			if (F.bBuilt && FVector2D::Distance(F.Km, C.Km) < FortSightKm)
+			if (F.bBuilt && FVector2D::Distance(F.Km, C.Km) < IntelFortSightKm)
 			{
 				Error = Error < 0.f ? 0.25f : FMath::Min(Error, 0.25f);
 			}
@@ -62,7 +64,7 @@ void ACampaign1851Map::UpdateIntel()
 		{
 			C.SeenKm = C.Km;
 			C.SeenDay = CampaignDays;
-			C.SeenMen = FMath::RoundToInt(C.Men * (1.f + Error * Noise(C.Id, Day)) / 100.f) * 100;
+			C.SeenMen = FMath::RoundToInt(C.Men * (1.f + Error * IntelNoise(C.Id, Day)) / SightRounding) * int32(SightRounding);
 			C.ReportArrive = -1.0;
 			continue;
 		}
@@ -84,7 +86,7 @@ void ACampaign1851Map::UpdateIntel()
 			for (int32 t = 0; t < Cities.Num(); ++t)
 			{
 				const FCampaign1851City& Town = Cities[t];
-				if (Town.bForeign || !Town.Occupier.IsEmpty() || FVector2D::Distance(TownKm(t), C.Km) > TownReportKm)
+				if (Town.bForeign || !Town.Occupier.IsEmpty() || FVector2D::Distance(TownKm(t), C.Km) > IntelTownReportKm)
 				{
 					continue;
 				}
@@ -92,7 +94,7 @@ void ACampaign1851Map::UpdateIntel()
 				C.ReportKm = C.Km;
 				C.ReportDay = CampaignDays;
 				C.ReportArrive = CampaignDays + Delay;
-				C.ReportMen = FMath::RoundToInt(C.Men * (1.f + 0.4f * Noise(C.Id + 77, Day)) / 1000.f) * 1000;
+				C.ReportMen = FMath::RoundToInt(C.Men * (1.f + 0.4f * IntelNoise(C.Id + 77, Day)) / ReportRounding) * int32(ReportRounding);
 				break;
 			}
 		}
@@ -112,7 +114,7 @@ float ACampaign1851Map::EnemyEstimateOfDefence(int32 Town) const
 			continue;
 		}
 		const bool bWatched = EnemyCorps.ContainsByPredicate([&R](const FCampaign1851EnemyCorps& C) { return FVector2D::Distance(C.Km, R.Km) < 15.0; });
-		Men += R.PresentMen() * (bWatched ? 1.f : 1.f + 0.3f * Noise(i, Town)) + R.Guns * 60.f;
+		Men += R.PresentMen() * (bWatched ? 1.f : 1.f + 0.3f * IntelNoise(i, Town)) + R.Guns * 60.f;
 	}
 	for (const FCampaign1851Fort& F : Forts)
 	{
@@ -134,7 +136,7 @@ bool ACampaign1851Map::ChooseCorpsObjective(int32 CorpsIndex)
 		return C.Objectives.Num() > 0;
 	}
 	C.NextThink = CampaignDays + 1.0;
-	const float Strength = C.Men * CorpsQuality(C.Nation) + C.Guns * 60.f;
+	const float Strength = C.Men * IntelCorpsQuality(C.Nation) + C.Guns * 60.f;
 	// Towns over water are open again when the fleet no longer holds the sea (or the sounds freeze).
 	if (!HasSeaControl() || IsIceWinter())
 	{

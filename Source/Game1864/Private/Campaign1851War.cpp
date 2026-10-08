@@ -361,6 +361,7 @@ TArray<FString> ACampaign1851Map::SaveWar() const
 {
 	TArray<FString> Out;
 	Out.Add(FString::Printf(TEXT("state|%.2f|%d"), Tension, bAtWar ? 1 : 0));
+	Out.Add(FString::Printf(TEXT("intel-clock|%d"), LastWarDay));
 	for (const FString& E : EventsFired)
 	{
 		Out.Add(FString::Printf(TEXT("fired|%s"), *E));
@@ -388,6 +389,15 @@ TArray<FString> ACampaign1851Map::SaveWar() const
 	{
 		const FCampaign1851EnemyCorps& C = EnemyCorps[k];
 		Out.Add(FString::Printf(TEXT("intel|%d|%.3f|%.3f|%.2f|%d|%d"), k, C.SeenKm.X, C.SeenKm.Y, C.SeenDay, C.SeenMen, C.StartMen));
+		FString Barred;
+		for (int32 Town : C.Barred)
+		{
+			Barred += (Barred.IsEmpty() ? TEXT("") : TEXT(",")) + FString::FromInt(Town);
+		}
+		Out.Add(FString::Printf(TEXT("intel-runtime|%d|%d|%d|%.6f|%.6f|%.6f|%.6f|%d|%.6f|%.6f|%d|%.6f|%s"),
+			k, C.Id, C.bSeen ? 1 : 0, C.ReportKm.X, C.ReportKm.Y, C.ReportDay, C.ReportArrive, C.ReportMen,
+			C.RestUntil, C.NextThink, C.bWaitingNoted ? 1 : 0, C.CrossingReadyDay,
+			*Barred));
 		if (Cities.IsValidIndex(C.SiegeTown))
 		{
 			Out.Add(FString::Printf(TEXT("siege|%d|%s|%d|%.2f"), k, *Cities[C.SiegeTown].Name, C.bSieging ? 1 : 0, C.SiegeStart));
@@ -408,6 +418,7 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 {
 	// The plan (dates, weights) comes from the seed; the state from the save.
 	ResetWar();
+	LastWarDay = FMath::FloorToInt(CampaignDays);
 	for (const FString& Line : Lines)
 	{
 		TArray<FString> P;
@@ -417,13 +428,39 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 			Tension = FCString::Atof(*P[1]);
 			bAtWar = P[2] == TEXT("1");
 		}
+		else if (P.Num() == 2 && P[0] == TEXT("intel-clock"))
+		{
+			LastWarDay = FCString::Atoi(*P[1]);
+		}
+		else if (P.Num() == 14 && P[0] == TEXT("intel-runtime") && EnemyCorps.IsValidIndex(FCString::Atoi(*P[1])))
+		{
+			FCampaign1851EnemyCorps& C = EnemyCorps[FCString::Atoi(*P[1])];
+			C.Id = FCString::Atoi(*P[2]);
+			NextCorpsId = FMath::Max(NextCorpsId, C.Id + 1);
+			C.bSeen = P[3] == TEXT("1");
+			C.ReportKm = FVector2D(FCString::Atod(*P[4]), FCString::Atod(*P[5]));
+			C.ReportDay = FCString::Atod(*P[6]);
+			C.ReportArrive = FCString::Atod(*P[7]);
+			C.ReportMen = FCString::Atoi(*P[8]);
+			C.RestUntil = FCString::Atod(*P[9]);
+			C.NextThink = FCString::Atod(*P[10]);
+			C.bWaitingNoted = P[11] == TEXT("1");
+			C.CrossingReadyDay = FCString::Atod(*P[12]);
+			TArray<FString> Barred;
+			P[13].ParseIntoArray(Barred, TEXT(","));
+			for (const FString& Town : Barred)
+			{
+				const int32 Index = FCString::Atoi(*Town);
+				if (Cities.IsValidIndex(Index)) { C.Barred.AddUnique(Index); }
+			}
+		}
 		else if (P.Num() == 7 && P[0] == TEXT("intel") && EnemyCorps.IsValidIndex(FCString::Atoi(*P[1])))
 		{
 			FCampaign1851EnemyCorps& C = EnemyCorps[FCString::Atoi(*P[1])];
 			C.SeenKm = FVector2D(FCString::Atod(*P[2]), FCString::Atod(*P[3]));
 			C.SeenDay = FCString::Atod(*P[4]);
 			C.SeenMen = FCString::Atoi(*P[5]);
-			C.StartMen = FMath::Max(C.Men, FCString::Atoi(*P[6]));
+			C.StartMen = FMath::Max(0, FCString::Atoi(*P[6]));
 		}
 		else if (P.Num() == 5 && P[0] == TEXT("siege") && EnemyCorps.IsValidIndex(FCString::Atoi(*P[1])))
 		{
@@ -491,6 +528,7 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 			C.StartMen = C.Men;
 			C.SeenKm = C.Km;
 			C.SeenMen = C.Men;
+			C.bSeen = !bAtWar;
 			EnemyCorps.Add(C);
 		}
 	}

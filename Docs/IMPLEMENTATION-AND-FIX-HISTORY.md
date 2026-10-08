@@ -1440,6 +1440,15 @@ Forskningsvinduet bruger nu hele bredden. En gren, hvis emner står side om side
 - Klima, isgrænser, marchfart og trænets faktor er uændrede i begge scenarier. 1825 bruger sit eget startår; vejrsystemet tilføjer hverken tog eller krig.
 - Kontrol: statisk gennemgang af design, save/load, kalender, march, træn, fjendens vandpassager og slagbestilling; diff- og kildekontrol. Spillet er hverken bygget eller kørt.
 - Uafklaret: lokal istykkelse/tøbrud, temperaturens små spring ved månedsskift, historisk klimakalibrering og kalenderens faktiske layout. Disse balanceændringer er ikke foretaget for at bevare 1851-reglerne.
+### 2026-10-08 - Audit: rekognoscering og tåge
+
+- Læst Intel1851-designet, rekognoscering/AI, War-gemning, scenarier og kortets fjendemærker. Ingen AGENTS.md fundet i worktree.
+- Save/restore bevarer nu meldinger undervejs, synlighed, korps-id'er, hvile, næste overvejelse, ventebesked, bådenes klargøring og flådespærrede mål. Sidste krigsdag gemmes for at undgå gentagne forstærkninger ved indlæsning. Ældre saves accepteres stadig.
+- Startstyrken gendannes som gemt: forstærkede korps får ikke længere et højere forstærkningsloft efter indlæsning.
+- I 1825 afrundes observationer til 10 mand og bymeldinger til 100; 1851 beholder 100/1.000. Synsvidder, usikkerhed, leveringstider og forstærkningstal er uændrede.
+- Kortets forskydning af fjendemærker bruger kun kendte positioner. Intel-funktioner og konstanter har filspecifikke navne af hensyn til unity builds.
+- Kontrol: statisk gennemgang af save/restore og `git diff --check`; ingen build eller kørsel.
+- Uafklaret: historisk 1825-korpskvalitet (nålegevær-bonus), absolutte forstærkningstal og befolkningsvægt kræver balancering. Første by vælges som melder frem for hurtigste; generel War-gemning flytter marcherende korps til vejstrækningens slutby. Begge forhold er bevaret af hensyn til 1851. Nye korps annonceres fortsat med præcis styrke ved krigsudbrud; om denne efterretning skal skjules, kræver afklaring.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
