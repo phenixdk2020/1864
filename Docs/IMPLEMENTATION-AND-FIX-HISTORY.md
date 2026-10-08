@@ -1619,6 +1619,9 @@ Fejl: efter indkaldelsesstørrelsen blev en selvstændig `if (Button == UnitSize
 - Officerens kavaleriangreb kræver nu en eksisterende fremryknings-/angrebsordre; offensiv doktrin alene udløser ikke et angreb.
 - Statisk kodegennemgang og diff-kontrol. Ingen build, spilstart eller commit. Angreb inden for første minut og karréreaktion skal stadig bekræftes i spillet.
 
+### 2026-10-08 – Spredt orden, rytteri-testslag og bue ved drejning merget
+Codex' tre opgaver er merget og bygget: spredt orden og nedlægning under artilleriild, et rytteri-testslag (TEST RYTTERI i startmenuen og Start-Test-3-Rytteri.bat; et svensk husar-eskadron går i charge mod danske kompagnier, set i loggen som "Chok!" ved 450 m) og mændene går i bue ved drejning (kun tegningen). En flettekonflikt i rytteriets chargebetingelse er løst ved at kræve en ordre (ingen angreb uden ordre).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
