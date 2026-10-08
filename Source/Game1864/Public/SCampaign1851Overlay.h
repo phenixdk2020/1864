@@ -60,7 +60,7 @@ public:
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationInsertHQ, FormationChief, FormationDissolve, FormationDeputy, FormationStaff, FormationChiefRemove,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
-		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitSize, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit, Block, MinisterInfo, TestBattle, EqualizeUnit, TransferAdj, TransferYes, TransferNo, TransferWhole, TransferGun, Ransom, PoolFold, UnitCardPart, StartMenu, StartLoad, StartTest, Scenario, UnitDeployEarly, RaisingPage, UnitRename, UnitUniform, UnitUniformSwatch, UnitUpgrade, UnitCustomClose, ResearchTab };
+		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitSize, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit, Block, MinisterInfo, TestBattle, EqualizeUnit, TransferAdj, TransferYes, TransferNo, TransferWhole, TransferGun, Ransom, PoolFold, UnitCardPart, StartMenu, StartLoad, StartTest, ScrollBarV, ScrollBarH, Scenario, UnitDeployEarly, RaisingPage, UnitRename, UnitUniform, UnitUniformSwatch, UnitUpgrade, UnitCustomClose, ResearchTab };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -71,6 +71,11 @@ public:
 	bool IsOverTree(const FVector2D& ViewportPixel) const;
 	/** Over the order-of-battle chart (the wheel scrolls it sideways). */
 	bool IsOverChart(const FVector2D& ViewportPixel) const;
+	/** The scrollbars of the order-of-battle chart: a click on the thumb or the track starts a drag. */
+	void BeginScrollDrag(int32 Which, const FVector2D& ViewportPixel);
+	void DragScrollTo(const FVector2D& ViewportPixel);
+	void EndScrollDrag() { ScrollDrag = 0; }
+	bool IsScrollDragging() const { return ScrollDrag != 0; }
 	void ScrollChart(int32 Steps, bool bVertical = false) { float& S = bVertical ? ChartScrollY : ChartScroll; S = FMath::Max(0.f, S + Steps * 60.f); }
 	bool IsOOBOpen() const { return bOOB; }
 	void SetCivilTab(bool bIn) { bCivilTab = bIn; }
@@ -410,6 +415,12 @@ private:
 	/** The town's building list: military (false) or civil (true). */
 	bool bCivilTab = false;
 	mutable float ChartScrollY = 0.f;
+	// The chart's scrollbars: the size of the content (measured while painting), the bars and the drag in progress.
+	mutable float ChartContentH = 1200.f, ChartContentW = 0.f, ChartViewH = 0.f, ChartViewW = 0.f;
+	mutable FVector2D BarVMin = FVector2D::ZeroVector, BarVMax = FVector2D::ZeroVector, BarHMin = FVector2D::ZeroVector, BarHMax = FVector2D::ZeroVector;
+	mutable float ThumbV0 = 0.f, ThumbV1 = 0.f, ThumbH0 = 0.f, ThumbH1 = 0.f;
+	int32 ScrollDrag = 0;          // 0 none, 1 vertical, 2 horizontal
+	float ScrollGrab = 0.f;
 	mutable FVector2D ChartMin = FVector2D::ZeroVector, ChartMax = FVector2D::ZeroVector;
 	mutable FVector2D TreeMin = FVector2D::ZeroVector, TreeMax = FVector2D::ZeroVector;
 	bool bDragging = false;

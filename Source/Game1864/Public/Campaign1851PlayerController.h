@@ -99,6 +99,16 @@ private:
 	/** Save slots in menu order. */
 	static const TArray<FString>& SaveSlots();
 	bool bCampaignStarted = false;
+	// -CampaignAutoClick=seconds:x:y;seconds:x:y: left clicks made by the game itself (QA of the clicks), at the given pixels.
+	bool bAutoMouse = false;
+	FVector2D AutoMouse = FVector2D::ZeroVector;
+	float AutoReleaseAt = -1.f;
+	int32 NextAutoClick = 0;
+	TArray<FVector> AutoClicks;
+	bool bAutoClickFrame = false;   // the tick of an automatic click
+	bool LeftJustPressed() const { return bAutoClickFrame || WasInputKeyJustPressed(EKeys::LeftMouseButton); }
+	bool PointerPosition(float& X, float& Y) const;
+	void TickAutoClicks();
 	float AutosaveTimer = 0.f;
 	/** Test: a town building to put the camera on once it stands (-CampaignFocusBuilding=Town:Key). */
 	FString FocusBuildingOrder;

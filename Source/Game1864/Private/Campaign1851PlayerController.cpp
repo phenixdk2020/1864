@@ -900,6 +900,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	{
 		return;
 	}
+	TickAutoClicks();
 	if (Overlay.IsValid() && Overlay->IsStartMenu())
 	{
 		Map->SetSpeed(0);
@@ -913,7 +914,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			GetWorldTimerManager().SetTimer(Quit, []() { FPlatformMisc::RequestExit(false); }, 3.f, false);
 		}
 		float StartX = 0.f, StartY = 0.f;
-		if (GetMousePosition(StartX, StartY) && WasInputKeyJustPressed(EKeys::LeftMouseButton))
+		if (PointerPosition(StartX, StartY) && LeftJustPressed())
 		{
 			int32 StartRow = INDEX_NONE;
 			auto Button = Overlay->HitButton(FVector2D(StartX, StartY), &StartRow);
@@ -954,6 +955,41 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		return;
 	}
 	if (!bCampaignStarted) { return; }
+	// -CampaignDebugClicks: logs every left click (what it hits and the state) and takes -CampaignShotAt=T1,T2 screenshots (QA of the clicks).
+	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignDebugClicks")) && Overlay.IsValid())
+	{
+		{
+			static int32 LastSelected = -1;
+			const int32 NowSelected = Overlay->GetSelectedRegiments().Num();
+			if (NowSelected != LastSelected)
+			{
+				UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-CLICK: the selection is now %d regiments (was %d)"), NowSelected, LastSelected);
+				LastSelected = NowSelected;
+			}
+		}
+		float DX = 0.f, DY = 0.f;
+		if (LeftJustPressed() && PointerPosition(DX, DY))
+		{
+			int32 DRow = INDEX_NONE;
+			const SCampaign1851Overlay::EButton DHit = Overlay->HitButton(FVector2D(DX, DY), &DRow);
+			UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-CLICK: at %.0f,%.0f hit=%d row=%d menuOpen=%d startMenu=%d selected=%d window=%d"), DX, DY, int32(DHit), DRow,
+				Overlay->IsMenuOpen() ? 1 : 0, Overlay->IsStartMenu() ? 1 : 0, Overlay->GetSelectedRegiments().Num(), int32(Overlay->GetWindow()));
+		}
+		FString ShotTimes;
+		static TArray<float> Times;
+		static int32 NextShot = 0;
+		if (Times.Num() == 0 && FParse::Value(FCommandLine::Get(), TEXT("CampaignShotAt="), ShotTimes, false))
+		{
+			TArray<FString> Parts;
+			ShotTimes.ParseIntoArray(Parts, TEXT(","));
+			for (const FString& P : Parts) { Times.Add(FCString::Atof(*P)); }
+		}
+		if (NextShot < Times.Num() && GetWorld()->GetRealTimeSeconds() >= Times[NextShot])
+		{
+			FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / FString::Printf(TEXT("Screenshots/timed_shot_%d.png"), NextShot), true, false);
+			++NextShot;
+		}
+	}
 	// -CampaignUiShots=sec:cmd;cmd,sec:cmd,...: opens the windows and cards by itself and saves a screenshot of each step
 	// (QA of the screens). cmd: window=army|officers|budget|towns|council|foreign|..., minister=N, officer=N, select=N (unit),
 	// unitcard, oob, city=Name, tab=N, civil=0/1, info=N (building type), clear.
@@ -1074,7 +1110,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 
 	// Drag pan: keep the ground point under the cursor.
 	float MX = 0.f, MY = 0.f;
-	GetMousePosition(MX, MY);
+	PointerPosition(MX, MY);
 	const FVector2D Mouse(MX, MY);
 	const bool bDragging = IsInputKeyDown(EKeys::RightMouseButton) || IsInputKeyDown(EKeys::MiddleMouseButton);
 	if (bDragging && !(WasInputKeyJustPressed(EKeys::RightMouseButton) || WasInputKeyJustPressed(EKeys::MiddleMouseButton)))
@@ -1196,7 +1232,11 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		SaveToSlot(TEXT("Autosave"), true);
 	}
 
-	if (WasInputKeyJustPressed(EKeys::LeftMouseButton) && Overlay.IsValid() && Overlay->IsMenuOpen())
+	if (Overlay.IsValid() && Overlay->IsScrollDragging())
+	{
+		if (IsInputKeyDown(EKeys::LeftMouseButton)) { Overlay->DragScrollTo(Mouse); } else { Overlay->EndScrollDrag(); }
+	}
+	if (LeftJustPressed() && Overlay.IsValid() && Overlay->IsMenuOpen())
 	{
 		int32 Row = INDEX_NONE;
 		SCampaign1851Overlay::EButton Button = Overlay->HitButton(Mouse, &Row);
@@ -1229,7 +1269,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
 		}
 	}
-	else if (WasInputKeyJustPressed(EKeys::LeftMouseButton))
+	else if (LeftJustPressed())
 	{
 		int32 Module = INDEX_NONE;
 		SCampaign1851Overlay::EButton Button = Overlay.IsValid() ? Overlay->HitButton(Mouse, &Module) : SCampaign1851Overlay::EButton::None;
@@ -1309,6 +1349,11 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Map->RansomOfficer(Module, &Why);
 			Overlay->ShowToast(Why);
 			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
+		}
+		if (Button == SCampaign1851Overlay::EButton::ScrollBarV || Button == SCampaign1851Overlay::EButton::ScrollBarH)
+		{
+			Overlay->BeginScrollDrag(Button == SCampaign1851Overlay::EButton::ScrollBarV ? 1 : 2, Mouse);
+			Button = SCampaign1851Overlay::EButton::Block;
 		}
 		if (Button == SCampaign1851Overlay::EButton::ResearchTab)
 		{
@@ -1470,6 +1515,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			// Click a counter: its whole stack; shift-click adds or removes it.
 			TArray<int32> Stack = StackOf(Module);
+			UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-CLICK: counter of regiment %d, stack of %d"), Module, Stack.Num());
 			if (IsInputKeyDown(EKeys::LeftShift) || IsInputKeyDown(EKeys::RightShift))
 			{
 				TArray<int32> Sel = Overlay->GetSelectedRegiments();
@@ -1481,6 +1527,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Stack = Sel;
 			}
 			SelectRegiments(Stack);
+			UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-CLICK: after SelectRegiments the selection is %d"), Overlay->GetSelectedRegiments().Num());
 		}
 		else if (Button == SCampaign1851Overlay::EButton::RegimentPiece)
 		{
@@ -1970,12 +2017,11 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				Overlay->ShowToast(Why);
 			}
 		}
-		if (Button == SCampaign1851Overlay::EButton::UnitSize)
+		else if (Button == SCampaign1851Overlay::EButton::UnitSize)
 		{
 			Overlay->RaiseSize = (Overlay->RaiseSize + Module + 3) % 3;
-			Button = SCampaign1851Overlay::EButton::Block;
 		}
-		if (Button == SCampaign1851Overlay::EButton::UnitType)
+		else if (Button == SCampaign1851Overlay::EButton::UnitType)
 		{
 			Overlay->RaiseType = Module;
 		}
@@ -2306,6 +2352,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Overlay->ShowToast(News);
 		}
 	}
+	if (FParse::Param(FCommandLine::Get(), TEXT("CampaignDebugClicks")) && Overlay.IsValid() && bAutoClickFrame) { UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-CLICK: at the end of the tick the selection is %d"), Overlay->GetSelectedRegiments().Num()); }
 	Map->UpdateMarkers(Camera->GetDistanceKm());
 	LastCameraTarget = Camera->GetTarget();
 	LastCameraDistanceKm = Camera->GetDistanceKm();
@@ -2661,6 +2708,48 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	AutosaveTimer = 0.f;
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|load|%s|projects=%d/%d|links=%d/%d|version=%d"), *Slot, Restored, Save->Projects.Num(), LinksRestored, Save->Links.Num(), Save->SaveVersion);
 	return true;
+}
+
+bool ACampaign1851PlayerController::PointerPosition(float& X, float& Y) const
+{
+	if (bAutoMouse)
+	{
+		X = float(AutoMouse.X);
+		Y = float(AutoMouse.Y);
+		return true;
+	}
+	return GetMousePosition(X, Y);
+}
+
+void ACampaign1851PlayerController::TickAutoClicks()
+{
+	static bool bParsed = false;
+	if (!bParsed)
+	{
+		bParsed = true;
+		FString Plan;
+		if (FParse::Value(FCommandLine::Get(), TEXT("CampaignAutoClick="), Plan, false))
+		{
+			TArray<FString> Items;
+			Plan.ParseIntoArray(Items, TEXT(";"));
+			for (const FString& Item : Items)
+			{
+				TArray<FString> P;
+				Item.ParseIntoArray(P, TEXT(":"));
+				if (P.Num() == 3) { AutoClicks.Add(FVector(FCString::Atof(*P[0]), FCString::Atof(*P[1]), FCString::Atof(*P[2]))); }
+			}
+		}
+	}
+	const float Real = GetWorld()->GetRealTimeSeconds();
+	bAutoClickFrame = false;
+	if (AutoClicks.IsValidIndex(NextAutoClick) && Real >= AutoClicks[NextAutoClick].X)
+	{
+		AutoMouse = FVector2D(AutoClicks[NextAutoClick].Y, AutoClicks[NextAutoClick].Z);
+		bAutoMouse = true;
+		bAutoClickFrame = true;
+		++NextAutoClick;
+		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-AUTOCLICK: click %d at %.0f,%.0f"), NextAutoClick, AutoMouse.X, AutoMouse.Y);
+	}
 }
 
 void ACampaign1851PlayerController::CampaignNewGame()

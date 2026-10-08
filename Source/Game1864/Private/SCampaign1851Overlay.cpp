@@ -1034,6 +1034,46 @@ void SCampaign1851Overlay::PaintTransfer(const FGeometry& Geometry, FSlateWindow
 	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 150.f, Size.Y - 52.f), FVector2D(120.f, 32.f), TEXT("FORTRYD"), EButton::TransferNo, 0);
 }
 
+void SCampaign1851Overlay::BeginScrollDrag(int32 Which, const FVector2D& ViewportPixel)
+{
+	const FVector2D Local = ViewportPixel / FMath::Max(PaintScale, 0.01f);
+	ScrollDrag = Which;
+	if (Which == 1)
+	{
+		const float Len = ThumbV1 - ThumbV0;
+		ScrollGrab = (Local.Y >= ThumbV0 && Local.Y <= ThumbV1) ? Local.Y - ThumbV0 : Len * 0.5f;   // a click on the track puts the thumb under the pointer
+	}
+	else
+	{
+		const float Len = ThumbH1 - ThumbH0;
+		ScrollGrab = (Local.X >= ThumbH0 && Local.X <= ThumbH1) ? Local.X - ThumbH0 : Len * 0.5f;
+	}
+	DragScrollTo(ViewportPixel);
+}
+
+void SCampaign1851Overlay::DragScrollTo(const FVector2D& ViewportPixel)
+{
+	const FVector2D Local = ViewportPixel / FMath::Max(PaintScale, 0.01f);
+	if (ScrollDrag == 1)
+	{
+		const float TrackLen = BarVMax.Y - BarVMin.Y, ThumbLen = ThumbV1 - ThumbV0;
+		const float MaxY = FMath::Max(0.f, ChartContentH + 40.f - ChartViewH);
+		if (TrackLen > ThumbLen + 1.f)
+		{
+			ChartScrollY = FMath::Clamp((Local.Y - ScrollGrab - BarVMin.Y) / (TrackLen - ThumbLen), 0.f, 1.f) * MaxY;
+		}
+	}
+	else if (ScrollDrag == 2)
+	{
+		const float TrackLen = BarHMax.X - BarHMin.X, ThumbLen = ThumbH1 - ThumbH0;
+		const float MaxX = FMath::Max(0.f, ChartContentW - ChartViewW);
+		if (TrackLen > ThumbLen + 1.f)
+		{
+			ChartScroll = FMath::Clamp((Local.X - ScrollGrab - BarHMin.X) / (TrackLen - ThumbLen), 0.f, 1.f) * MaxX;
+		}
+	}
+}
+
 SCampaign1851Overlay::EButton SCampaign1851Overlay::HitButton(const FVector2D& ViewportPixel, int32* OutModule) const
 {
 	const FVector2D Local = ViewportPixel / FMath::Max(PaintScale, 0.01f);
@@ -4362,7 +4402,12 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 	for (int32 OOBRoot : OOBRoots) { OOBForestWidth += MeasureNode(OOBRoot) + Gap; }
 	const float MaxScroll = FMath::Max(0.f, OOBForestWidth + 24.f - AreaSize.X);
 	ChartScroll = FMath::Clamp(ChartScroll, 0.f, MaxScroll);
-	ChartScrollY = FMath::Clamp(ChartScrollY, 0.f, 1200.f);
+	const float MaxScrollY = FMath::Max(0.f, ChartContentH + 40.f - AreaSize.Y);
+	ChartScrollY = FMath::Clamp(ChartScrollY, 0.f, MaxScrollY);
+	ChartContentW = OOBForestWidth + 24.f;
+	ChartViewW = AreaSize.X;
+	ChartViewH = AreaSize.Y;
+	float MeasuredBottom = 0.f;
 
 	const int32 OOBChartButtonStart = Buttons.Num();
 	Out.PushClip(FSlateClippingZone(Geometry.ToPaintGeometry(AreaSize, FSlateLayoutTransform(Area))));
@@ -4382,6 +4427,7 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 		const FLinearColor Text = bLit ? Dark : Ink;
 		FSlateDrawElement::MakeBox(Out, Layer + 3, Geometry.ToPaintGeometry(BoxSize, FSlateLayoutTransform(Min)), White, ESlateDrawEffect::None, Fill);
 		const FVector2D Max = Min + BoxSize;
+		MeasuredBottom = FMath::Max(MeasuredBottom, Max.Y + ChartScrollY - Area.Y);
 		DrawLines(Geometry, Out, Layer + 4, { Min, FVector2D(Max.X, Min.Y), Max, FVector2D(Min.X, Max.Y), Min }, Style == 3 ? MutedInk : Gold, Style == 0 ? 2.f : 1.f);
 		const float Step = Style == 2 ? 12.f : 13.5f;
 		for (int32 l = 0; l < Lines.Num(); ++l)
@@ -4570,6 +4616,7 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 		OOBRootX += Nodes[OOBRoot].SubW + Gap;
 	}
 	Out.PopClip();
+	ChartContentH = FMath::Max(200.f, MeasuredBottom);
 	// Hit rectangles follow the same clip as the drawing, including officer/HQ buttons.
 	for (int32 OOBRectIndex = OOBChartButtonStart; OOBRectIndex < Buttons.Num(); ++OOBRectIndex)
 	{
@@ -4578,6 +4625,41 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 		OOBRect.Min.Y = FMath::Max(OOBRect.Min.Y, Area.Y);
 		OOBRect.Max.X = FMath::Min(OOBRect.Max.X, Area.X + AreaSize.X);
 		OOBRect.Max.Y = FMath::Min(OOBRect.Max.Y, Area.Y + AreaSize.Y);
+	}
+	// Scrollbars: down the right edge and along the bottom of the chart, drawn only when the chart is bigger than its window.
+	{
+		const float BarW = 12.f;
+		const bool bNeedV = ChartContentH + 40.f > AreaSize.Y + 1.f;
+		const bool bNeedH = ChartContentW > AreaSize.X + 1.f;
+		const FLinearColor TrackColour = FLinearColor(0.f, 0.f, 0.f, 0.35f);
+		const FLinearColor ThumbColour = Gold.CopyWithNewOpacity(0.75f);
+		if (bNeedV)
+		{
+			BarVMin = FVector2D(Area.X + AreaSize.X - BarW, Area.Y);
+			BarVMax = FVector2D(Area.X + AreaSize.X, Area.Y + AreaSize.Y - (bNeedH ? BarW : 0.f));
+			const float TrackLen = BarVMax.Y - BarVMin.Y;
+			const float Content = ChartContentH + 40.f;
+			const float ThumbLen = FMath::Clamp(TrackLen * AreaSize.Y / Content, 30.f, TrackLen);
+			const float Ratio = MaxScrollY > 0.f ? ChartScrollY / MaxScrollY : 0.f;
+			ThumbV0 = BarVMin.Y + Ratio * (TrackLen - ThumbLen);
+			ThumbV1 = ThumbV0 + ThumbLen;
+			FSlateDrawElement::MakeBox(Out, Layer + 7, Geometry.ToPaintGeometry(BarVMax - BarVMin, FSlateLayoutTransform(BarVMin)), White, ESlateDrawEffect::None, TrackColour);
+			FSlateDrawElement::MakeBox(Out, Layer + 8, Geometry.ToPaintGeometry(FVector2D(BarW - 4.f, ThumbLen), FSlateLayoutTransform(FVector2D(BarVMin.X + 2.f, ThumbV0))), White, ESlateDrawEffect::None, ThumbColour);
+			Buttons.Add({ BarVMin, BarVMax, EButton::ScrollBarV, 0 });
+		}
+		if (bNeedH)
+		{
+			BarHMin = FVector2D(Area.X, Area.Y + AreaSize.Y - BarW);
+			BarHMax = FVector2D(Area.X + AreaSize.X - (bNeedV ? BarW : 0.f), Area.Y + AreaSize.Y);
+			const float TrackLen = BarHMax.X - BarHMin.X;
+			const float ThumbLen = FMath::Clamp(TrackLen * AreaSize.X / ChartContentW, 30.f, TrackLen);
+			const float Ratio = MaxScroll > 0.f ? ChartScroll / MaxScroll : 0.f;
+			ThumbH0 = BarHMin.X + Ratio * (TrackLen - ThumbLen);
+			ThumbH1 = ThumbH0 + ThumbLen;
+			FSlateDrawElement::MakeBox(Out, Layer + 7, Geometry.ToPaintGeometry(BarHMax - BarHMin, FSlateLayoutTransform(BarHMin)), White, ESlateDrawEffect::None, TrackColour);
+			FSlateDrawElement::MakeBox(Out, Layer + 8, Geometry.ToPaintGeometry(FVector2D(ThumbLen, BarW - 4.f), FSlateLayoutTransform(FVector2D(ThumbH0, BarHMin.Y + 2.f))), White, ESlateDrawEffect::None, ThumbColour);
+			Buttons.Add({ BarHMin, BarHMax, EButton::ScrollBarH, 0 });
+		}
 	}
 	// The colours of the arms, top right.
 	for (int32 a = 0; a < 4; ++a)
