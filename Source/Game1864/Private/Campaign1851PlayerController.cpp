@@ -1258,6 +1258,20 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Overlay->TogglePoolOpen(Module);
 			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
+		if (Button == SCampaign1851Overlay::EButton::FormationChiefRemove)
+		{
+			if (Map->RemoveFormationCommander(Module))
+			{
+				Overlay->ShowToast(TEXT("Chefen er tilbage i officerspuljen"));
+			}
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
+		if (Button == SCampaign1851Overlay::EButton::FormationDissolve)
+		{
+			Map->DissolveFormation(Module);
+			Overlay->ShowToast(TEXT("Hovedkvarteret er opløst; underordnede enheder er flyttet et niveau op"));
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
 		if (Button == SCampaign1851Overlay::EButton::EqualizeUnit)
 		{
 			FString Why;
@@ -1942,11 +1956,6 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			// Staff posts are filled by officers (a division's deputy is typically its senior colonel).
 			Overlay->OpenFormationPicker(Module, false, Button == SCampaign1851Overlay::EButton::FormationDeputy ? 1 : 2);
-		}
-		else if (Button == SCampaign1851Overlay::EButton::FormationDissolve)
-		{
-			Map->DissolveFormation(Module);
-			Overlay->ShowToast(TEXT("Formationen er opløst"));
 		}
 		else if (Button == SCampaign1851Overlay::EButton::OrderAll || Button == SCampaign1851Overlay::EButton::OrderUnit)
 		{

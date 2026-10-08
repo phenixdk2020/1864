@@ -321,6 +321,17 @@ bool ACampaign1851Map::TransferTrain(int32 Train, int32 Station, FString* OutRea
 	return true;
 }
 
+bool ACampaign1851Map::RemoveFormationCommander(int32 Formation)
+{
+	const int32 Index = FormationIndex(Formation);
+	if (Index == INDEX_NONE || !Officers.IsValidIndex(Formations[Index].Commander))
+	{
+		return false;
+	}
+	VacateOfficer(Formations[Index].Commander);
+	return true;
+}
+
 TArray<int32> ACampaign1851Map::OfficerPool(bool bGenerals) const
 {
 	TArray<int32> Out;

@@ -1301,6 +1301,8 @@ public:
 	TArray<int32> FormationRegiments(int32 Id) const;
 	/** Makes an officer the commander of a formation (he leaves any other post). */
 	bool AssignFormationCommander(int32 Officer, int32 Formation);
+	/** Releases a formation's commander to the officer pool, keeping the HQ and its units. */
+	bool RemoveFormationCommander(int32 Formation);
 	/** For testing: a field army of two divisions and a reserve (brigades, commanders) from the garrisons. */
 	void BuildTestFieldArmy();
 	TArray<FCampaign1851FormationSave> SaveFormations() const;
