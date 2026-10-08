@@ -1,4 +1,4 @@
-# PROJECT 1864 — Implementation & Fix History
+﻿# PROJECT 1864 — Implementation & Fix History
 
 > **Dokumentet vedligeholdes nu her i Game1864-projektet** (`1864-Campaign/Docs`). Slaget og kampagnen er samlet i ét projekt siden 1. oktober 2026.
 > - Afsnit 1–8 er Unity-prototypens historik. Den er uændret fra `Strategy/docs/IMPLEMENTATION-AND-FIX-HISTORY.md`.
@@ -1675,6 +1675,13 @@ Codex' to opgaver er merget: flaget følger de tegnede mænd (ikke den simulered
 - `StrategyFormationPolicyComponent` og `StrategyHUD`: destinationsboksen bruger kampformationens bredde og dybde frem for marchkolonnen, med kavalerilinje, karré kun ved bevaret karré, ordrefront, frontpil og enhedsnavn. Den stiplede vejpunktsrute bevares for aktive ordrer; afsluttede ordrer viser ingen destinationsboks.
 - `Enhedsadfaerd1864.md`, afsnit 2.1 og 7.1, beskriver annullering og fastholdelse på stedet samt formationsboksen.
 - Validering: statisk gennemgang af ordre-, bevægelses-, formations- og HUD-forløb samt `git diff --check`. Ingen build, start af spil eller commit; adfærden skal afprøves i Unreal senere.
+### 2026-10-08: Nyt kommando-HUD til 3D-slaget
+
+- Bundbjælken har fem afrundede, mørke paneler: enhed, ledelse/ild, ordrer, formation og underlagte. Bredderne normaliseres fra forholdet 20/26/16/22/24; højden er 226 px for at give plads til alle betjeninger.
+- Styrke, moral og samhold vises med farvede bjælker; AI, doktrin, ild, salvemetode, formation og stilling bruger eksisterende handlinger. HQ-ordrer, pontonbro og dragonernes af-/påstigning er bevaret.
+- Underlagte vises i en klikbar tabel med ordre-/AI-piller, tilknytning, musehjulsrulning og en lille rulleindikator. Musehjulet over tabellen ruller listen frem for kameraet.
+- Tomt valg viser Ingen enhed valgt. Minikortet er flyttet op, og OOB-rækker begrænses over bundbjælken; topbjælke, beskeder og indstillinger er uændrede.
+- Validering: statisk kontrol af enum-/handlingskoblinger og git diff --check. Ingen build, spilstart eller commit; visuel afprøvning i Unreal udestår.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

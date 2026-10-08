@@ -1,4 +1,5 @@
-#include "StrategyHUD.h"
+﻿#include "StrategyHUD.h"
+#include "../AI/StrategyOfficerProfileComponent.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
 #include "../Combat/StrategyContactComponent.h"
@@ -170,10 +171,15 @@ void AStrategyHUD::DrawPanel(float X, float Y, float W, float H)
 void AStrategyHUD::DrawButton(float X, float Y, float W, float H, const FString& Label, EAction Action, int32 Value, bool bActive,
     AStrategyUnit* Unit, const FLinearColor* Colour)
 {
-    DrawRect(Colour ? *Colour : bActive ? ActiveGreen : OrderRed, X, Y, W, H);
+    if (bCommandStyle)
+    {
+        DrawRounded(X, Y, W, H, bActive ? ActiveGreen : Colour ? *Colour : FLinearColor(0.035f, 0.055f, 0.085f, 1.f));
+    }
+    else { DrawRect(Colour ? *Colour : bActive ? ActiveGreen : OrderRed, X, Y, W, H); }
     float TW = 0.0f, TH = 0.0f;
     GetTextSize(Label, TW, TH, nullptr, 1.0f);
-    Text(Label, X + (W - TW) * 0.5f, Y + (H - TH) * 0.5f, Ink);
+    const float ButtonScale = bCommandStyle ? FMath::Min(0.85f, (W - 8.f) / FMath::Max(1.f, TW)) : 1.f;
+    Text(Label, X + (W - TW * ButtonScale) * 0.5f, Y + (H - TH * ButtonScale) * 0.5f, bCommandStyle && Action == EAction::None ? Muted : Ink, ButtonScale);
     FButton B;
     B.Box = FBox2D(FVector2D(X, Y), FVector2D(X + W, Y + H));
     B.Action = Action;
@@ -322,10 +328,7 @@ void AStrategyHUD::DrawHUD()
     if (const AStrategyPlayerController* PC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
     {
         const TArray<AStrategyUnit*> Selected = PC->GetSelectedUnits();
-        if (Selected.Num() > 0 && IsValid(Selected[0]))
-        {
-            DrawCommandPanel(Selected[0]);
-        }
+        DrawCommandPanel(Selected.Num() > 0 && IsValid(Selected[0]) ? Selected[0] : nullptr);
     }
 
     if (!bSelectionBoxActive)
@@ -389,7 +392,7 @@ void AStrategyHUD::DrawOOB()
 
 void AStrategyHUD::DrawOOBRow(AStrategyUnit* Unit, int32 Depth, float& Y, int32 Guard)
 {
-    if (!IsValid(Unit) || Guard > 12 || Y > Canvas->ClipY - 190.0f)
+    if (!IsValid(Unit) || Guard > 12 || Y > Canvas->ClipY - CommandHeight() - 38.0f)
     {
         return;
     }
@@ -831,7 +834,7 @@ void AStrategyHUD::DrawMinimap()
 {
     // The battlefield from above, bottom right above the command panel: every unit, the camera's place.
     const float W = 300.0f, H = 200.0f;
-    const float X = Canvas->ClipX - W - 8.0f, Y = Canvas->ClipY - 128.0f - H - 36.0f;
+    const float X = Canvas->ClipX - W - 8.0f, Y = Canvas->ClipY - CommandHeight() - H - 36.0f;
     DrawPanel(X, Y, W, H + 28.0f);
     Text(TEXT("TAKTISK KORT / KAMERA  [M]"), X + 10.0f, Y + 6.0f, Gold, 0.9f);
     const float MX = X + 8.0f, MY = Y + 26.0f, MW = W - 16.0f, MH = H - 6.0f;
@@ -903,164 +906,222 @@ void AStrategyHUD::DrawMinimap()
 
 // ------------------------------------------------------------------ command panel
 
+float AStrategyHUD::CommandHeight() const
+{
+    return 226.f;
+}
+
+void AStrategyHUD::DrawRounded(float X, float Y, float W, float H, const FLinearColor& Fill)
+{
+    // Scanline rounded rectangles need no textures or additional fonts.
+    const float Radius = FMath::Min(7.f, H * 0.5f);
+    const FLinearColor Border = Fill.Equals(ActiveGreen) ? FLinearColor(0.3f, 0.85f, 0.48f, 1.f) : FLinearColor(0.19f, 0.24f, 0.30f, 0.8f);
+    for (float Row = 0.f; Row < H; Row += 1.f)
+    {
+        const float Edge = FMath::Min(Row, H - 1.f - Row);
+        const float Inset = Edge < Radius ? Radius - FMath::Sqrt(FMath::Max(0.f, Radius * Radius - FMath::Square(Radius - Edge))) : 0.f;
+        DrawRect(Border, X + Inset, Y + Row, FMath::Max(0.f, W - 2.f * Inset), 1.f);
+        if (Row > 0.f && Row < H - 1.f) DrawRect(Fill, X + Inset + 1.f, Y + Row, FMath::Max(0.f, W - 2.f * Inset - 2.f), 1.f);
+    }
+}
+
+void AStrategyHUD::DrawHeading(const FString& Label, float X, float Y, float W)
+{
+    DrawLine(X, Y + 3.f, X + 10.f, Y + 13.f, Muted, 1.f);
+    DrawLine(X + 10.f, Y + 3.f, X, Y + 13.f, Muted, 1.f);
+    float TW = 0.f, TH = 0.f;
+    GetTextSize(Label, TW, TH);
+    Text(Label, X + 17.f, Y, Muted, FMath::Min(0.82f, (W - 17.f) / FMath::Max(TW, 1.f)));
+}
+
+void AStrategyHUD::DrawStatBar(const FString& Label, const FString& Value, float Fraction, float X, float Y, float W)
+{
+    Text(Label, X, Y, Muted, 0.72f);
+    float TW = 0.f, TH = 0.f;
+    GetTextSize(Value, TW, TH, nullptr, 0.8f);
+    Text(Value, X + W - TW, Y, Ink, 0.8f);
+    const float Level = FMath::Clamp(Fraction, 0.f, 1.f);
+    DrawRect(RowColour, X, Y + 17.f, W, 3.f);
+    DrawRect(Level < 0.3f ? FLinearColor(0.85f, 0.18f, 0.16f) : Level < 0.6f ? Gold : ActiveGreen, X, Y + 17.f, W * Level, 3.f);
+}
+
+bool AStrategyHUD::HandleScroll(const FVector2D& Point, float Delta)
+{
+    if (!SubordinateRect.IsValid || !SubordinateRect.IsInside(Point)) return false;
+    SubordinateOffset = FMath::Clamp(SubordinateOffset + (Delta > 0.f ? -1 : 1), 0, SubordinateMaxOffset);
+    return true;
+}
+
 void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
 {
-    const float H = 128.0f;
-    const float Y = Canvas->ClipY - H;
-    const float W = Canvas->ClipX;
-    DrawPanel(0.0f, Y, W, H);
-    const bool bHQ = IsCommandHQ(Unit);
-    const TCHAR* RoleText = Unit->Echelon == EStrategyEchelon::Division ? TEXT("DIVISIONSCHEF | HØJERE KOMMANDO")
-        : Unit->Echelon == EStrategyEchelon::Brigade ? TEXT("BRIGADECHEF | HØJERE KOMMANDO")
-        : Unit->Echelon == EStrategyEchelon::Regiment ? TEXT("OBERSTLØJTNANT | REGIMENTSKOMMANDO")
-        : Unit->Echelon == EStrategyEchelon::Battalion ? TEXT("MAJOR | BATAILLONSKOMMANDO")
-        : Unit->Echelon == EStrategyEchelon::Cavalry ? TEXT("RITMESTER | KAVALERIKOMMANDO")
-        : Unit->Echelon == EStrategyEchelon::Artillery ? TEXT("KAPTAJN | BATTERIKOMMANDO")
-        : TEXT("KAPTAJN | KOMPAGNIKOMMANDO");
-    const FString Title = Unit->DisplayName.ToString().ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"));
-    Text(FString::Printf(TEXT("%s | %s"), *Title, RoleText), 10.0f, Y + 6.0f, Gold);
-
-    Text(OrderLabel(Unit), W - 300.0f, Y + 6.0f, Muted, 0.85f);
-
-    // Left: the state and the AI.
-    const float LX = 10.0f, LY = Y + 30.0f;
-    Text(TEXT("STANDSINFO / AI"), LX, LY, Gold, 0.85f);
-    Text(FString::Printf(TEXT("Styrke %d/%d  ·  Moral %.0f  ·  Samhold %.0f"), Unit->CurrentStrength, Unit->InitialStrength, Unit->Morale, Unit->Cohesion), LX, LY + 18.0f, Ink, 0.9f);
-    DrawButton(LX, LY + 44.0f, 66.0f, 24.0f, Unit->bOfficerAIEnabled ? TEXT("AI ON") : TEXT("AI OFF"), EAction::AIToggle, 0, Unit->bOfficerAIEnabled, Unit);
-    if (Unit->DoctrineComponent)
+    bCommandStyle = true;
+    const float HudY = Canvas->ClipY - CommandHeight();
+    const float HudWeights[] = {20.f, 26.f, 16.f, 22.f, 24.f};
+    float HudX[5], HudW[5], HudCursor = 8.f;
+    const TCHAR* HudTitles[] = {TEXT("E N H E D"), TEXT("LEDELSE & ILD"), TEXT("O R D R E R"), TEXT("FORMATION"), TEXT("UNDERLAGTE")};
+    Panels.Add(FBox2D(FVector2D(0.f, HudY), FVector2D(Canvas->ClipX, Canvas->ClipY)));
+    for (int32 PanelIndex = 0; PanelIndex < 5; ++PanelIndex)
     {
-        const EStrategyDoctrine D = Unit->DoctrineComponent->Doctrine;
-        DrawButton(LX + 72.0f, LY + 44.0f, 60.0f, 24.0f, TEXT("DEF"), EAction::Doctrine, int32(EStrategyDoctrine::Defensive), D == EStrategyDoctrine::Defensive, Unit);
-        DrawButton(LX + 138.0f, LY + 44.0f, 60.0f, 24.0f, TEXT("BAL"), EAction::Doctrine, int32(EStrategyDoctrine::Balanced), D == EStrategyDoctrine::Balanced, Unit);
-        DrawButton(LX + 204.0f, LY + 44.0f, 60.0f, 24.0f, TEXT("OFF"), EAction::Doctrine, int32(EStrategyDoctrine::Offensive), D == EStrategyDoctrine::Offensive, Unit);
+        HudW[PanelIndex] = FMath::Max(1.f, (Canvas->ClipX - 48.f) * HudWeights[PanelIndex] / 108.f);
+        HudX[PanelIndex] = HudCursor + 10.f;
+        DrawRounded(HudCursor, HudY + 4.f, HudW[PanelIndex], CommandHeight() - 12.f, FLinearColor(0.012f, 0.023f, 0.042f, 0.96f));
+        DrawHeading(HudTitles[PanelIndex], HudX[PanelIndex], HudY + 14.f, HudW[PanelIndex] - 20.f);
+        HudCursor += HudW[PanelIndex] + 8.f;
+        HudW[PanelIndex] -= 20.f;
     }
-    // What the officer thinks (his last decision and why).
-    if (Unit->bOfficerAIEnabled && Unit->AITelemetryComponent && !Unit->AITelemetryComponent->CurrentTask.IsEmpty())
+    SubordinateRect = FBox2D(ForceInit);
+    if (ScrollUnit.Get() != Unit) { ScrollUnit = Unit; SubordinateOffset = 0; }
+    if (!Unit)
     {
-        Text(FString::Printf(TEXT("OFFICEREN: %s"), *Unit->AITelemetryComponent->CurrentTask.ToUpper()).Left(40), LX, LY + 72.0f, Gold, 0.8f);
-        Text(Unit->AITelemetryComponent->ReasonCode.Left(44), LX, LY + 86.0f, Ink, 0.8f);
+        Text(TEXT("Ingen enhed valgt"), HudX[0], HudY + 58.f, Ink, 0.9f);
+        bCommandStyle = false;
+        return;
     }
-
-    // Middle: the orders (blue while it is being carried out).
-    const float MX = 300.0f, MY = Y + 30.0f;
-    const EStrategyOrderType Current = Unit->OrderComponent ? Unit->OrderComponent->GetCurrentOrder().Type : EStrategyOrderType::None;
-    const bool bExecuting = Unit->OrderComponent && Unit->OrderComponent->GetCommandVisualState() == EStrategyCommandVisualState::Blue;
-    auto OrderButton = [&](float X, float BY, const TCHAR* Label, EStrategyOrderType Type)
+    const bool HudHQ = IsCommandHQ(Unit);
+    const FString HudRank = Unit->OfficerProfileComponent && !Unit->OfficerProfileComponent->OfficerRank.IsEmpty()
+        ? Unit->OfficerProfileComponent->OfficerRank.ToUpper()
+        : Unit->Echelon == EStrategyEchelon::Battalion ? TEXT("MAJOR") : Unit->Echelon == EStrategyEchelon::Regiment ? TEXT("OBERSTL\u00d8JTNANT")
+        : Unit->Echelon == EStrategyEchelon::Cavalry ? TEXT("RITMESTER") : HudHQ ? TEXT("CHEF") : TEXT("KAPTAJN");
+    DrawRounded(HudX[0], HudY + 42.f, 30.f, 30.f, RowColour);
+    Text(EchelonMark(Unit), HudX[0] + 8.f, HudY + 50.f, Ink, 0.8f);
+    float HudTW = 0.f, HudTH = 0.f;
+    GetTextSize(Unit->DisplayName.ToString(), HudTW, HudTH);
+    Text(Unit->DisplayName.ToString(), HudX[0] + 38.f, HudY + 43.f, Ink, FMath::Min(1.25f, (HudW[0] - 38.f) / FMath::Max(1.f, HudTW)));
+    Text(HudRank, HudX[0], HudY + 79.f, Muted, 0.72f);
+    Text(HudHQ ? TEXT("STABSKOMMANDO") : Unit->Echelon == EStrategyEchelon::Artillery ? TEXT("BATTERIKOMMANDO") : Unit->Echelon == EStrategyEchelon::Cavalry ? TEXT("KAVALERIKOMMANDO") : TEXT("KOMPAGNIKOMMANDO"), HudX[0], HudY + 96.f, Muted, 0.66f);
+    DrawStatBar(TEXT("STYRKE"), FString::Printf(TEXT("%d/%d"), Unit->CurrentStrength, Unit->InitialStrength), float(Unit->CurrentStrength) / FMath::Max(1, Unit->InitialStrength), HudX[0], HudY + 121.f, HudW[0]);
+    DrawStatBar(TEXT("MORAL"), FString::Printf(TEXT("%.0f"), Unit->Morale), Unit->Morale / 100.f, HudX[0], HudY + 150.f, HudW[0]);
+    DrawStatBar(TEXT("SAMHOLD"), FString::Printf(TEXT("%.0f"), Unit->Cohesion), Unit->Cohesion / 100.f, HudX[0], HudY + 179.f, HudW[0]);
+    auto HudPills = [&](int32 Panel, float RowY, const TCHAR* const* Labels, int32 Count, EAction Action, int32 Active, bool Enabled = true)
     {
-        const FLinearColor* C = Current == Type && bExecuting ? &ExecutingBlue : nullptr;
-        DrawButton(X, BY, 176.0f, 26.0f, Label, EAction::Order, int32(Type), false, Unit, C);
+        const float PillW = (HudW[Panel] - (Count - 1) * 4.f) / Count;
+        for (int32 PillIndex = 0; PillIndex < Count; ++PillIndex)
+            DrawButton(HudX[Panel] + PillIndex * (PillW + 4.f), HudY + RowY, PillW, 23.f, Labels[PillIndex], Enabled ? Action : EAction::None, PillIndex, Active == PillIndex && Enabled, Unit);
     };
-    if (bHQ)
+    Text(TEXT("AI"), HudX[1], HudY + 42.f, Muted, 0.7f);
+    const TCHAR* HudAI[] = {TEXT("ON"), TEXT("OFF")};
+    HudPills(1, 57.f, HudAI, 2, EAction::AIToggle, Unit->bOfficerAIEnabled ? 0 : 1);
+    Text(TEXT("DOKTRIN"), HudX[1], HudY + 84.f, Muted, 0.7f);
+    const TCHAR* HudDoctrine[] = {TEXT("DEF"), TEXT("BAL"), TEXT("OFF")};
+    HudPills(1, 99.f, HudDoctrine, 3, EAction::Doctrine, Unit->DoctrineComponent ? int32(Unit->DoctrineComponent->Doctrine) : -1, Unit->DoctrineComponent != nullptr);
+    Text(TEXT("SKYDNING"), HudX[1], HudY + 126.f, Muted, 0.7f);
+    const TCHAR* HudFire[] = {TEXT("HOLD"), TEXT("CLOSE"), TEXT("MED"), TEXT("LONG")};
+    HudPills(1, 141.f, HudFire, 4, EAction::FirePolicy, Unit->FireControlComponent ? int32(Unit->FireControlComponent->FirePolicy) : -1, !HudHQ && Unit->FireControlComponent);
+    Text(TEXT("SALVEMETODE"), HudX[1], HudY + 168.f, Muted, 0.7f);
+    const TCHAR* HudDrills[] = {TEXT("1.GLD"), TEXT("2.GLD"), TEXT("GELED"), TEXT("SALVE"), TEXT("FRI")};
+    const EStrategyFireDrillMode HudModes[] = {EStrategyFireDrillMode::FrontRank, EStrategyFireDrillMode::TwoRankFire, EStrategyFireDrillMode::FireByRank, EStrategyFireDrillMode::Volley, EStrategyFireDrillMode::Independent};
+    for (int32 DrillIndex = 0; DrillIndex < 5; ++DrillIndex)
     {
-        Text(TEXT("ORDRER — KLIK = POSITION, TRÆK = FRONT"), MX, MY, Gold, 0.85f);
-        OrderButton(MX, MY + 18.0f, TEXT("ANGRIB HER"), EStrategyOrderType::AttackHere);
-        OrderButton(MX + 182.0f, MY + 18.0f, TEXT("FORSVAR HER"), EStrategyOrderType::DefendHere);
-        OrderButton(MX + 364.0f, MY + 18.0f, TEXT("RYK FREM"), EStrategyOrderType::Advance);
-        OrderButton(MX, MY + 50.0f, TEXT("TILBAGETRÆK"), EStrategyOrderType::Withdraw);
-        OrderButton(MX + 182.0f, MY + 50.0f, TEXT("SAML"), EStrategyOrderType::Assemble);
-        DrawButton(MX + 364.0f, MY + 50.0f, 176.0f, 26.0f, TEXT("STOP / HOLD"), EAction::Stop, 0, false, Unit,
-            Current == EStrategyOrderType::Hold && bExecuting ? &ExecutingBlue : nullptr);
-        // The pioneers (Pontonnerkorpset researched): a pontoon bridge over the broad river nearest the staff.
-        for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+        const bool HudUnlocked = Cast<AStrategyCompanyUnit>(Unit) && Unit->FireDrillComponent && Unit->FireDrillComponent->IsDrillModeUnlocked(HudModes[DrillIndex]);
+        const float HudPillW = (HudW[1] - 16.f) / 5.f;
+        DrawButton(HudX[1] + DrillIndex * (HudPillW + 4.f), HudY + 183.f, HudPillW, 23.f, HudDrills[DrillIndex], HudUnlocked ? EAction::FireDrill : EAction::None, int32(HudModes[DrillIndex]), HudUnlocked && Unit->FireDrillComponent->DrillMode == HudModes[DrillIndex], Unit);
+    }
+    const EStrategyOrderType HudCurrent = Unit->OrderComponent ? Unit->OrderComponent->GetCurrentOrder().Type : EStrategyOrderType::None;
+    const float HudOrderW = (HudW[2] - 5.f) / 2.f;
+    const TCHAR* HudOrders[] = {TEXT("> RYK FREM"), TEXT("< TILBAGE"), TEXT("X CHARGE"), TEXT("[] STOP")};
+    const EAction HudActions[] = {EAction::Order, EAction::Order, EAction::Charge, EAction::Stop};
+    const EStrategyOrderType HudTypes[] = {EStrategyOrderType::Advance, EStrategyOrderType::Withdraw, EStrategyOrderType::Charge, EStrategyOrderType::Hold};
+    for (int32 OrderIndex = 0; OrderIndex < 4; ++OrderIndex)
+    {
+        const FLinearColor* HudColour = OrderIndex == 0 ? &ExecutingBlue : OrderIndex == 2 ? &ActiveGreen : &OrderRed;
+        DrawButton(HudX[2] + (OrderIndex % 2) * (HudOrderW + 5.f), HudY + 43.f + (OrderIndex / 2) * 44.f, HudOrderW, 38.f, HudOrders[OrderIndex], HudActions[OrderIndex], int32(HudTypes[OrderIndex]), HudCurrent == HudTypes[OrderIndex], Unit, HudColour);
+    }
+    if (HudHQ)
+    {
+        const TCHAR* HudExtra[] = {TEXT("ANGRIB"), TEXT("FORSVAR"), TEXT("SAML")};
+        const EStrategyOrderType HudExtraTypes[] = {EStrategyOrderType::AttackHere, EStrategyOrderType::DefendHere, EStrategyOrderType::Assemble};
+        for (int32 ExtraIndex = 0; ExtraIndex < 3; ++ExtraIndex)
+            DrawButton(HudX[2], HudY + 132.f + ExtraIndex * 25.f, HudW[2], 22.f, HudExtra[ExtraIndex], EAction::Order, int32(HudExtraTypes[ExtraIndex]), HudCurrent == HudExtraTypes[ExtraIndex], Unit);
+        for (TActorIterator<AStrategyOOBTestScenario> HudScenario(GetWorld()); HudScenario; ++HudScenario)
         {
-            if (It->CanLayPontoonBridges())
-            {
-                const float Left = It->GetPontoonSecondsLeft();
-                DrawButton(MX + 546.0f, MY + 18.0f, 176.0f, 26.0f,
-                    Left > 0.0f ? FString::Printf(TEXT("PONTONBRO %d:%02d"), int32(Left) / 60, int32(Left) % 60) : FString(TEXT("SLÅ PONTONBRO")),
-                    EAction::Pontoon, 0, Left > 0.0f, Unit, Left > 0.0f ? &ExecutingBlue : nullptr);
-            }
+            if (HudScenario->CanLayPontoonBridges()) DrawButton(HudX[3], HudY + 183.f, HudW[3], 23.f, TEXT("SL\u00c5 PONTONBRO"), EAction::Pontoon, 0, HudScenario->GetPontoonSecondsLeft() > 0.f, Unit);
             break;
         }
     }
-    else
+    const TCHAR* HudFormation[] = {TEXT("LINJE"), TEXT("KOLONNE"), TEXT("KARRE")};
+    const EStrategyFormationType HudFormTypes[] = {EStrategyFormationType::Line, EStrategyFormationType::MarchColumn, EStrategyFormationType::Square};
+    const int32 HudFormCount = Cast<ACavalryUnit>(Unit) ? 2 : 3;
+    for (int32 FormIndex = 0; FormIndex < HudFormCount; ++FormIndex)
     {
-        // A company: fire policy, the order buttons and the formation.
-        Text(TEXT("SKYDNING"), MX, MY, Gold, 0.85f);
-        if (UStrategyFireControlComponent* Fire = Unit->FireControlComponent)
+        const float HudFW = (HudW[3] - (HudFormCount - 1) * 4.f) / HudFormCount;
+        DrawButton(HudX[3] + FormIndex * (HudFW + 4.f), HudY + 43.f, HudFW, 23.f, HudFormation[FormIndex], !HudHQ && Unit->FormationComponent ? EAction::Formation : EAction::None, int32(HudFormTypes[FormIndex]), !HudHQ && Unit->FormationComponent && Unit->FormationComponent->CurrentFormation == HudFormTypes[FormIndex], Unit);
+    }
+    Text(TEXT("STILLING"), HudX[3], HudY + 78.f, Muted, 0.7f);
+    const TCHAR* HudStances[] = {TEXT("STA"), TEXT("KNAE"), TEXT("LIG")};
+    const EStrategyStance HudStanceTypes[] = {EStrategyStance::Standing, EStrategyStance::Kneeling, EStrategyStance::Prone};
+    for (int32 StanceIndex = 0; StanceIndex < 3; ++StanceIndex)
+    {
+        const float HudSW = (HudW[3] - 8.f) / 3.f;
+        const bool HudCanStance = Cast<AStrategyCompanyUnit>(Unit) && Unit->StanceComponent;
+        DrawButton(HudX[3] + StanceIndex * (HudSW + 4.f), HudY + 94.f, HudSW, 23.f, HudStances[StanceIndex], HudCanStance ? EAction::Stance : EAction::None, int32(HudStanceTypes[StanceIndex]), HudCanStance && Unit->StanceComponent->Stance == HudStanceTypes[StanceIndex], Unit);
+    }
+    if (const ACavalryUnit* HudHorse = Cast<ACavalryUnit>(Unit))
+    {
+        if (HudHorse->DragoonComponent && HudHorse->DragoonComponent->Role == EStrategyCavalryRole::Dragoon)
         {
-            const TCHAR* Labels[] = { TEXT("HOLD"), TEXT("CLOSE"), TEXT("MED"), TEXT("LONG") };
-            for (int32 i = 0; i < 4; ++i)
-            {
-                DrawButton(MX + i * 64.0f, MY + 18.0f, 60.0f, 24.0f, Labels[i], EAction::FirePolicy, i, int32(Fire->FirePolicy) == i, Unit);
-            }
-            Text(FString::Printf(TEXT("%.0f m / %.0f m / %.0f m  ·  kegle ±%.0f°"), Fire->CloseRangeCm / 100.0f, Fire->MediumRangeCm / 100.0f, Fire->LongRangeCm / 100.0f,
-                Fire->FireConeHalfAngleDegrees), MX, MY + 48.0f, Muted, 0.85f);
-        }
-        // The fire method: what the regiment has researched and drilled (the locked ones dimmed).
-        if (UStrategyFireDrillComponent* Drill = Cast<AStrategyCompanyUnit>(Unit) ? Unit->FireDrillComponent.Get() : nullptr)
-        {
-            const TCHAR* Labels[] = { TEXT("1.GLD"), TEXT("2.GLD"), TEXT("GELED"), TEXT("SALVE"), TEXT("FRI") };
-            const EStrategyFireDrillMode Modes[] = { EStrategyFireDrillMode::FrontRank, EStrategyFireDrillMode::TwoRankFire, EStrategyFireDrillMode::FireByRank,
-                EStrategyFireDrillMode::Volley, EStrategyFireDrillMode::Independent };
-            for (int32 i = 0; i < 5; ++i)
-            {
-                const bool bOpen = Drill->IsDrillModeUnlocked(Modes[i]);
-                DrawButton(MX + i * 56.0f, MY + 66.0f, 52.0f, 24.0f, Labels[i], EAction::FireDrill, int32(Modes[i]), Drill->DrillMode == Modes[i], Unit,
-                    bOpen ? nullptr : &ButtonDark);
-            }
-        }
-        const float OX = MX + 280.0f;
-        Text(TEXT("ORDRER / BEVÆGELSE"), OX, MY, Gold, 0.85f);
-        DrawButton(OX, MY + 18.0f, 110.0f, 24.0f, TEXT("RYK FREM"), EAction::Order, int32(EStrategyOrderType::Advance), Current == EStrategyOrderType::Advance, Unit);
-        DrawButton(OX + 116.0f, MY + 18.0f, 110.0f, 24.0f, TEXT("TILBAGE"), EAction::Order, int32(EStrategyOrderType::Withdraw), Current == EStrategyOrderType::Withdraw, Unit);
-        DrawButton(OX + 232.0f, MY + 18.0f, 110.0f, 24.0f, TEXT("CHARGE"), EAction::Charge, 0, Current == EStrategyOrderType::Charge, Unit);
-        DrawButton(OX + 348.0f, MY + 18.0f, 80.0f, 24.0f, TEXT("STOP"), EAction::Stop, 0, Current == EStrategyOrderType::Hold, Unit);
-        // The stance (stand, kneel, lie down: a lying unit is harder to hit but loads slower and moves slowly), and for dragoons
-        // dismounting to fight on foot and mounting again.
-        if (Cast<AStrategyCompanyUnit>(Unit) && Unit->StanceComponent)
-        {
-            Text(TEXT("STILLING"), OX + 348.0f, MY + 50.0f, Gold, 0.85f);
-            const TCHAR* StanceLabels[] = { TEXT("STÅ"), TEXT("KNÆ"), TEXT("LIG") };
-            const EStrategyStance Stances[] = { EStrategyStance::Standing, EStrategyStance::Kneeling, EStrategyStance::Prone };
-            for (int32 i = 0; i < 3; ++i)
-            {
-                DrawButton(OX + 348.0f + i * 58.0f, MY + 66.0f, 54.0f, 24.0f, StanceLabels[i], EAction::Stance, int32(Stances[i]), Unit->StanceComponent->Stance == Stances[i], Unit);
-            }
-        }
-        else if (const ACavalryUnit* Horse = Cast<ACavalryUnit>(Unit))
-        {
-            if (Horse->DragoonComponent && Horse->DragoonComponent->Role == EStrategyCavalryRole::Dragoon)
-            {
-                const bool bFoot = Horse->DragoonComponent->MountedState != EStrategyMountedState::Mounted;
-                Text(TEXT("DRAGONER"), OX + 348.0f, MY + 50.0f, Gold, 0.85f);
-                DrawButton(OX + 348.0f, MY + 66.0f, 84.0f, 24.0f, TEXT("SIT AF"), EAction::Dismount, 1, bFoot, Unit);
-                DrawButton(OX + 438.0f, MY + 66.0f, 84.0f, 24.0f, TEXT("STIG PÅ"), EAction::Dismount, 0, !bFoot, Unit);
-            }
-        }
-        if (UStrategyFormationComponent* Formation = Unit->FormationComponent)
-        {
-            Text(TEXT("FORMATION"), OX, MY + 50.0f, Gold, 0.85f);
-            const TCHAR* Labels[] = { TEXT("LINIE"), TEXT("KOLONNE"), TEXT("KARRÉ") };
-            const EStrategyFormationType Types[] = { EStrategyFormationType::Line, EStrategyFormationType::MarchColumn, EStrategyFormationType::Square };
-            // Horse cannot form square: line and column only.
-            const int32 FormationButtons = Cast<ACavalryUnit>(Unit) ? 2 : 3;
-            for (int32 i = 0; i < FormationButtons; ++i)
-            {
-                DrawButton(OX + i * 116.0f, MY + 66.0f, 110.0f, 24.0f, Labels[i], EAction::Formation, int32(Types[i]), Formation->CurrentFormation == Types[i], Unit);
-            }
+            const bool HudFoot = HudHorse->DragoonComponent->MountedState != EStrategyMountedState::Mounted;
+            DrawButton(HudX[3], HudY + 94.f, (HudW[3] - 4.f) / 2.f, 23.f, TEXT("SIT AF"), EAction::Dismount, 1, HudFoot, Unit);
+            DrawButton(HudX[3] + (HudW[3] + 4.f) / 2.f, HudY + 94.f, (HudW[3] - 4.f) / 2.f, 23.f, TEXT("STIG P\u00c5"), EAction::Dismount, 0, !HudFoot, Unit);
         }
     }
-
-    // Right: the subordinates, their status and AI.
-    const float RX = FMath::Max(860.0f, W - 520.0f), RY = Y + 30.0f;
-    const TArray<AStrategyUnit*> Subs = Subordinates(Unit);
-    if (Subs.Num() > 0)
+    Text(TEXT("SKUDAFSTAND"), HudX[3], HudY + 130.f, Muted, 0.7f);
+    if (!HudHQ && Unit->FireControlComponent)
     {
-        Text(TEXT("UNDERLAGTE — STATUS / AI / TILKNYTNING"), RX, RY, Gold, 0.85f);
-        for (int32 i = 0; i < Subs.Num() && i < 5; ++i)
+        const UStrategyFireControlComponent* HudFC = Unit->FireControlComponent;
+        const float HudRanges[] = {HudFC->CloseRangeCm, HudFC->MediumRangeCm, HudFC->LongRangeCm};
+        DrawLine(HudX[3] + 12.f, HudY + 158.f, HudX[3] + HudW[3] - 12.f, HudY + 158.f, Muted, 1.f);
+        for (int32 RangeIndex = 0; RangeIndex < 3; ++RangeIndex)
         {
-            const AStrategyUnit* Sub = Subs[i];
-            const bool bAttached = Sub->CommandComponent && Sub->CommandComponent->CurrentCommandParent != Sub->CommandComponent->OrganicParent;
-            Text(FString::Printf(TEXT("%s  ·  %d  ·  %s  ·  AI %s%s"), *Sub->DisplayName.ToString(), Sub->CurrentStrength, *OrderLabel(Sub),
-                Sub->bOfficerAIEnabled ? TEXT("ON") : TEXT("OFF"), bAttached ? TEXT("  ·  ATT") : TEXT("")), RX, RY + 18.0f + i * 16.0f, Ink, 0.85f);
+            const float HudRX = HudX[3] + 12.f + RangeIndex * (HudW[3] - 24.f) / 2.f;
+            const bool HudChosen = int32(HudFC->FirePolicy) == RangeIndex + 1;
+            DrawRect(HudChosen ? Gold : Muted, HudRX - 2.f, HudY + 154.f, 4.f, 8.f);
+            Text(FString::Printf(TEXT("%.0f m"), HudRanges[RangeIndex] / 100.f), HudRX - 12.f, HudY + 165.f, HudChosen ? Gold : Muted, 0.66f);
+        }
+        Text(FString::Printf(TEXT("KEGLE +-%.0f"), HudFC->FireConeHalfAngleDegrees), HudX[3], HudY + 191.f, Muted, 0.72f);
+    }
+    if (HudHQ && Unit->bOfficerAIEnabled && Unit->AITelemetryComponent && !Unit->AITelemetryComponent->CurrentTask.IsEmpty())
+    {
+        Text(TEXT("OFFICEREN"), HudX[3], HudY + 132.f, Muted, 0.7f);
+        const FString HudTask = Unit->AITelemetryComponent->CurrentTask;
+        GetTextSize(HudTask, HudTW, HudTH);
+        Text(HudTask, HudX[3], HudY + 148.f, Ink, FMath::Min(0.72f, HudW[3] / FMath::Max(1.f, HudTW)));
+        const FString HudReason = Unit->AITelemetryComponent->ReasonCode;
+        GetTextSize(HudReason, HudTW, HudTH);
+        Text(HudReason, HudX[3], HudY + 164.f, Muted, FMath::Min(0.66f, HudW[3] / FMath::Max(1.f, HudTW)));
+    }
+    const TArray<AStrategyUnit*> HudSubs = Subordinates(Unit);
+    const float HudTableW = HudW[4] - 9.f;
+    const float HudColumns[] = {0.f, 0.40f, 0.54f, 0.79f, 0.90f};
+    const TCHAR* HudColumnNames[] = {TEXT("ENHED"), TEXT("M\u00c6ND"), TEXT("ORDRE"), TEXT("AI"), TEXT("TILK")};
+    for (int32 ColumnIndex = 0; ColumnIndex < 5; ++ColumnIndex) Text(HudColumnNames[ColumnIndex], HudX[4] + HudColumns[ColumnIndex] * HudTableW, HudY + 43.f, Muted, 0.62f);
+    const int32 HudVisible = 5;
+    SubordinateMaxOffset = FMath::Max(0, HudSubs.Num() - HudVisible);
+    SubordinateOffset = FMath::Clamp(SubordinateOffset, 0, SubordinateMaxOffset);
+    SubordinateRect = FBox2D(FVector2D(HudX[4], HudY + 62.f), FVector2D(HudX[4] + HudW[4], HudY + 207.f));
+    for (int32 SubIndex = SubordinateOffset; SubIndex < FMath::Min(HudSubs.Num(), SubordinateOffset + HudVisible); ++SubIndex)
+    {
+        AStrategyUnit* HudSub = HudSubs[SubIndex];
+        const float HudRowY = HudY + 64.f + (SubIndex - SubordinateOffset) * 28.f;
+        DrawButton(HudX[4], HudRowY, HudTableW, 25.f, TEXT(""), EAction::OOBRow, 0, false, HudSub);
+        const bool HudAttached = HudSub->CommandComponent && HudSub->CommandComponent->CurrentCommandParent != HudSub->CommandComponent->OrganicParent;
+        const FString HudCells[] = {HudSub->DisplayName.ToString(), FString::FromInt(MenUnder(HudSub)), BaseOrderLabel(HudSub).IsEmpty() ? FString(TEXT("-")) : BaseOrderLabel(HudSub), HudSub->bOfficerAIEnabled ? TEXT("ON") : TEXT("OFF"), HudAttached ? TEXT("ATT") : TEXT("-")};
+        for (int32 CellIndex = 0; CellIndex < 5; ++CellIndex)
+        {
+            const float HudCellX = HudX[4] + HudColumns[CellIndex] * HudTableW;
+            const float HudCellW = ((CellIndex == 4 ? 1.f : HudColumns[CellIndex + 1]) - HudColumns[CellIndex]) * HudTableW - 3.f;
+            if (CellIndex == 2 || CellIndex == 3) DrawRounded(HudCellX, HudRowY + 3.f, HudCellW, 19.f, CellIndex == 3 && HudSub->bOfficerAIEnabled ? ActiveGreen : RowColour);
+            GetTextSize(HudCells[CellIndex], HudTW, HudTH);
+            Text(HudCells[CellIndex], HudCellX + 2.f, HudRowY + 6.f, Ink, FMath::Min(0.72f, (HudCellW - 4.f) / FMath::Max(1.f, HudTW)));
         }
     }
-    else if (const UStrategyFireControlComponent* Fire = Unit->FireControlComponent)
+    if (HudSubs.IsEmpty()) Text(TEXT("Ingen underlagte"), HudX[4], HudY + 73.f, Muted, 0.8f);
+    if (SubordinateMaxOffset > 0)
     {
-        Text(TEXT("SKYDEAFSTAND"), RX, RY, Gold, 0.85f);
-        Text(FString::Printf(TEXT("Aktiv: %s"), *Fire->GetActiveRangeLabel()), RX, RY + 18.0f, Ink, 0.9f);
+        const float HudTrackH = 140.f, HudThumbH = HudTrackH * HudVisible / HudSubs.Num();
+        DrawRounded(HudX[4] + HudW[4] - 5.f, HudY + 64.f, 5.f, HudTrackH, RowColour);
+        DrawRounded(HudX[4] + HudW[4] - 5.f, HudY + 64.f + (HudTrackH - HudThumbH) * SubordinateOffset / SubordinateMaxOffset, 5.f, HudThumbH, Muted);
     }
+    bCommandStyle = false;
 }
 
 // ------------------------------------------------------------------ clicks
@@ -1087,6 +1148,12 @@ bool AStrategyHUD::IsOverPanel(const FVector2D& P) const
 bool AStrategyHUD::HandleClick(const FVector2D& P)
 {
     AStrategyPlayerController* PC = Cast<AStrategyPlayerController>(GetOwningPlayerController());
+    if (SubordinateMaxOffset > 0 && SubordinateRect.IsValid && SubordinateRect.IsInside(P) && P.X >= SubordinateRect.Max.X - 8.f)
+    {
+        const float ScrollFraction = FMath::Clamp((P.Y - SubordinateRect.Min.Y) / SubordinateRect.GetSize().Y, 0.f, 1.f);
+        SubordinateOffset = FMath::RoundToInt(ScrollFraction * SubordinateMaxOffset);
+        return true;
+    }
     // The last button drawn lies on top.
     for (int32 i = Buttons.Num() - 1; i >= 0; --i)
     {
@@ -1211,7 +1278,7 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 }
                 break;
             case EAction::AIToggle:
-                if (Unit) { Unit->bOfficerAIEnabled = !Unit->bOfficerAIEnabled; }
+                if (Unit) { Unit->bOfficerAIEnabled = B.Value == 0; }
                 break;
             case EAction::Doctrine:
                 if (Unit && Unit->DoctrineComponent) { Unit->DoctrineComponent->Doctrine = EStrategyDoctrine(B.Value); }
