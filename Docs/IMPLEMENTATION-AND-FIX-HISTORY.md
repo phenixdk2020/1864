@@ -1400,6 +1400,9 @@ Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i
 ### 2026-10-08 – Backlog opdateret
 Backlog.md har fået et afsnit med det, der er bygget i oktober (scenarier, delt forskning, kamporden, slagets nye systemer), og en liste over det, der endnu ikke er afprøvet i et rigtigt slag.
 
+### 2026-10-08 – Forskning: store infanterikasser og egen doktrinfane
+Forskningsvinduet bruger nu hele bredden. En gren, hvis emner står side om side på et niveau (infanteriet), får en søjle så bred som sit bredeste niveau, så kasserne bliver store og læsbare. Doktrinerne har fået en fane for sig (MILITÆR / CIVIL / DOKTRINER) med fuld bredde; den smalle doktrinspalte i siden er fjernet. Kontrolleret med skærmbilleder af alle tre faner (-CampaignUiShots rtab=0/1/2).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

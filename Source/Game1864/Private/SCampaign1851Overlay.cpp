@@ -2973,11 +2973,13 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		Pos + FVector2D(24.f, 64.f), Serif(12, EFace::Italic), Gold, Size.X - 170.f);
 	const float X = Pos.X + 24.f;
 	float Y = Pos.Y + 106.f;
-	const float LeftW = FMath::Min(1040.f, Size.X * 0.66f);
+	const bool bDoc = ResearchTab == 2;   // the doctrines have a tab of their own
+	const float LeftW = bDoc ? 0.f : Size.X - 80.f;
 	PaintText(Geometry, Out, Layer + 1, TEXT("F O R S K N I N G"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
 	// Two tracks: the military research (the War Ministry) and the civil (the Interior Ministry); a project at a time in each.
 	PaintButton(Geometry, Out, Layer + 3, FVector2D(X + 170.f, Y - 8.f), FVector2D(150.f, 24.f), TEXT("MILITÆR"), EButton::ResearchTab, 0, ResearchTab == 0);
 	PaintButton(Geometry, Out, Layer + 3, FVector2D(X + 326.f, Y - 8.f), FVector2D(150.f, 24.f), TEXT("CIVIL"), EButton::ResearchTab, 1, ResearchTab == 1);
+	PaintButton(Geometry, Out, Layer + 3, FVector2D(X + 482.f, Y - 8.f), FVector2D(150.f, 24.f), TEXT("DOKTRINER"), EButton::ResearchTab, 2, bDoc);
 	Y += 24.f;
 	// Columns by branch, rows by year (1852 at the top), a box per topic; click a box to start it.
 	const TArray<FCampaign1851ResearchTopic>& Topics = Campaign1851Research::Topics();
@@ -2991,8 +2993,37 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 	}
 	TabColumns.Sort();
 	auto ColumnOf = [&TabColumns](int32 Branch) { return FMath::Max(0, TabColumns.IndexOfByKey(Branch)); };
-	auto InTab = [&](int32 Topic) { return Campaign1851Research::IsCivil(Topic) == bResearchCivil; };
-	const float ColW = (LeftW - YearW) / FMath::Max(1, TabColumns.Num());
+	auto InTab = [&](int32 Topic) { return !bDoc && Campaign1851Research::IsCivil(Topic) == bResearchCivil; };
+	if (bDoc) { TabColumns.Reset(); }
+	// A branch whose topics stand side by side on a level (the infantry) gets a column as wide as its widest level, so the boxes stay large.
+	TArray<float> ColX, ColWid;
+	{
+		TArray<float> Weight;
+		float Sum = 0.f;
+		for (int32 ci = 0; ci < TabColumns.Num(); ++ci)
+		{
+			int32 Most = 1;
+			for (int32 t = 0; t < Topics.Num(); ++t)
+			{
+				if (Topics[t].Branch != TabColumns[ci] || !InTab(t)) { continue; }
+				int32 Same = 0;
+				for (int32 u = 0; u < Topics.Num(); ++u)
+				{
+					if (Topics[u].Branch == TabColumns[ci] && InTab(u) && Campaign1851Research::Tier(u) == Campaign1851Research::Tier(t)) { ++Same; }
+				}
+				Most = FMath::Max(Most, Same);
+			}
+			Weight.Add(float(Most));
+			Sum += float(Most);
+		}
+		float At = X + YearW;
+		for (int32 ci = 0; ci < Weight.Num(); ++ci)
+		{
+			ColX.Add(At);
+			ColWid.Add((LeftW - YearW) * Weight[ci] / FMath::Max(1.f, Sum));
+			At += ColWid[ci];
+		}
+	}
 	const float Top = Y + 84.f;   // the headings, then the branch symbols
 	int32 Years = 1;   // the number of levels
 	for (int32 t = 0; t < Topics.Num(); ++t)
@@ -3000,14 +3031,14 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		Years = FMath::Max(Years, Campaign1851Research::Tier(t) + 1);
 	}
 	const float RowH = FMath::Min(120.f, (Pos.Y + Size.Y - 30.f - Top) / Years);
-	const FVector2D Box(ColW - 22.f, RowH - 14.f);
+	const FVector2D Box(0.f, RowH - 14.f);   // the height of a box (the width is the column's)
 	for (int32 ci = 0; ci < TabColumns.Num(); ++ci)
 	{
 		const int32 c = ci;
-		PaintBranchSymbol(Geometry, Out, Layer + 1, TabColumns[ci], FVector2D(X + YearW + c * ColW + ColW * 0.5f, Y + 44.f), 22.f);
-		PaintTextFit(Geometry, Out, Layer + 1, FString(Campaign1851Research::BranchName(TabColumns[ci])).ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å")), FVector2D(X + YearW + c * ColW + ColW * 0.5f - Box.X * 0.5f, Y), Serif(10), Gold, Box.X);
+		PaintBranchSymbol(Geometry, Out, Layer + 1, TabColumns[ci], FVector2D(ColX[c] + ColWid[c] * 0.5f, Y + 44.f), 22.f);
+		PaintTextFit(Geometry, Out, Layer + 1, FString(Campaign1851Research::BranchName(TabColumns[ci])).ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å")), FVector2D(ColX[c] + 11.f, Y), Serif(10), Gold, ColWid[c] - 22.f);
 	}
-	for (int32 r = 0; r < Years; ++r)
+	for (int32 r = 0; r < (bDoc ? 0 : Years); ++r)
 	{
 		const float RY = Top + r * RowH;
 		PaintText(Geometry, Out, Layer + 1, Campaign1851Research::Roman(r), FVector2D(X + 8.f, RY + Box.Y * 0.5f), Serif(16), Gold, 0.f, false);
@@ -3036,14 +3067,14 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 	{
 		int32 Index = 0;
 		const int32 Count = Share(T, Index);
-		return FVector2D((ColW - 22.f - 6.f * (Count - 1)) / Count, Box.Y);
+		return FVector2D((ColWid[ColumnOf(T.Branch)] - 22.f - 6.f * (Count - 1)) / Count, Box.Y);
 	};
 	auto BoxPos = [&](const FCampaign1851ResearchTopic& T)
 	{
 		int32 Index = 0;
 		Share(T, Index);
 		const float W = TopicBoxSize(T).X;
-		return FVector2D(X + YearW + ColumnOf(T.Branch) * ColW + 11.f + Index * (W + 6.f), Top + Campaign1851Research::Tier(Campaign1851Research::FindTopic(T.Id)) * RowH);
+		return FVector2D(ColX[ColumnOf(T.Branch)] + 11.f + Index * (W + 6.f), Top + Campaign1851Research::Tier(Campaign1851Research::FindTopic(T.Id)) * RowH);
 	};
 	// The lines first, under the boxes.
 	for (const FCampaign1851ResearchTopic& T : Topics)
@@ -3137,9 +3168,12 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		PaintButton(Geometry, Out, Layer + 8, FVector2D(BP.X + BoxSize.X - 144.f, BP.Y + BoxSize.Y - 54.f), FVector2D(120.f, 32.f), TEXT("LUK"), EButton::ResearchPick, -1);
 	}
 	// The doctrines.
-	const float RX = X + LeftW + 30.f, RW = Size.X - LeftW - 90.f;
-	float RY = Pos.Y + 106.f;
-	DrawLines(Geometry, Out, Layer + 1, { FVector2D(RX - 14.f, RY - 10.f), FVector2D(RX - 14.f, Pos.Y + Size.Y - 24.f) }, Gold.CopyWithNewOpacity(0.3f), 1.f);
+	if (!bDoc)
+	{
+		return;
+	}
+	const float RX = X, RW = FMath::Min(900.f, Size.X - 80.f);
+	float RY = Pos.Y + 150.f;
 	PaintText(Geometry, Out, Layer + 1, TEXT("D O K T R I N E R"), FVector2D(RX, RY), Serif(11), Gold, 0.f, false);
 	RY += 20.f;
 	PaintTextFit(Geometry, Out, Layer + 1, Map->IsDoctrineChanging()
