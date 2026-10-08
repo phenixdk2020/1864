@@ -1288,6 +1288,13 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Overlay->TogglePoolOpen(Module);
 			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
+		if (Button == SCampaign1851Overlay::EButton::FormationInsertHQ)
+		{
+			const int32 OOBNewHQ = Map->InsertFormationHQ(Module / 10, ECampaign1851Echelon(Module % 10));
+			const int32 OOBNewIndex = Map->FormationIndex(OOBNewHQ);
+			Overlay->ShowToast(OOBNewIndex != INDEX_NONE ? FString::Printf(TEXT("%s oprettet; underordnede er flyttet ind under staben"), *Map->GetFormations()[OOBNewIndex].Name) : FString(TEXT("Dette HQ passer ikke ind i hierarkiet")));
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
 		if (Button == SCampaign1851Overlay::EButton::FormationChiefRemove)
 		{
 			if (Map->RemoveFormationCommander(Module))
@@ -1483,7 +1490,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			const int32 Regiment = Overlay->GetSelectedRegiments().Num() > 0 ? Overlay->GetSelectedRegiments()[0] : INDEX_NONE;
 			if (Overlay->GetPicker() == SCampaign1851Overlay::EPicker::FormationGeneral || Overlay->GetPicker() == SCampaign1851Overlay::EPicker::FormationOfficer)
 			{
-				if (Map->AssignFormationStaff(Module, Overlay->GetPickerFormation(), Overlay->GetPickerPost()))
+				if (Map->CanAssignFormationPost(Module, Overlay->GetPickerFormation(), Overlay->GetPickerPost()) && Map->AssignFormationStaff(Module, Overlay->GetPickerFormation(), Overlay->GetPickerPost()))
 				{
 					Overlay->ShowToast(FString::Printf(TEXT("%s: %s"), *Map->GetOfficers()[Module].Name, *Map->OfficerRole(Module)));
 					Overlay->OpenPicker(SCampaign1851Overlay::EPicker::None);
@@ -1511,7 +1518,8 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 		else if (Button == SCampaign1851Overlay::EButton::OfficerRecruit)
 		{
-			const int32 New = Map->RecruitOfficer(Module == 1);
+			const bool OOBFormationPicker = Overlay->GetPicker() == SCampaign1851Overlay::EPicker::FormationGeneral || Overlay->GetPicker() == SCampaign1851Overlay::EPicker::FormationOfficer;
+			const int32 New = Map->RecruitOfficer(Module == 1, OOBFormationPicker ? Map->FormationPostRank(Overlay->GetPickerFormation(), Overlay->GetPickerPost()) : nullptr);
 			if (New != INDEX_NONE)
 			{
 				const FCampaign1851Officer& O = Map->GetOfficers()[New];
@@ -2920,47 +2928,70 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 	}
 	const int32 SourceId = SCampaign1851Overlay::TreeId(Source), TargetId = SCampaign1851Overlay::TreeId(Target);
 	const K TargetKind = SCampaign1851Overlay::TreeKind(Target);
-	// A company (squadron) to the middle of the chosen units' window: the first one makes a new unit that stays there; the next
-	// ones are added to it (the unit is built in the middle).
-	if (SCampaign1851Overlay::TreeKind(Source) == K::Company && ((TargetKind == K::NewFormation && TargetId == 99999)
-		|| (TargetKind == K::Regiment && TargetId == Overlay->GetOOBBuilding())))
+	const K OOBSourceKind = SCampaign1851Overlay::TreeKind(Source);
+	auto OOBDetachPart = [&](int32 OOBPartKey, FString& OOBWhy) -> int32
 	{
-		FString Why;
-		const int32 From = SourceId / 10;
-		const int32 Building = Overlay->GetOOBBuilding();
-		if (Map->GetRegiments().IsValidIndex(Building) && From != Building)
+		const int32 OOBUnit = OOBPartKey / 10;
+		if (Map->GetRegiments().IsValidIndex(OOBUnit) && OOBPartKey % 10 < Map->SubUnitCount(OOBUnit) && Map->SubUnitCount(OOBUnit) == 1) { return OOBUnit; }
+		return Map->SplitOffCompany(OOBUnit, OOBPartKey % 10, &OOBWhy);
+	};
+	// The permanent right target always starts an independent army, without intermediate HQs.
+	if (TargetKind == K::NewFormation && TargetId == 99999)
+	{
+		TArray<int32> OOBUnits;
+		FString OOBWhy;
+		if (OOBSourceKind == K::Company)
 		{
-			int32 NewBuilding = Building;
-			if (Map->MoveCompany(From, SourceId % 10, Building, &Why, &NewBuilding))
-			{
-				if (NewBuilding != Building) { Overlay->SetOOBBuilding(NewBuilding); }
-				Overlay->ShowToast(FString::Printf(TEXT("Lagt til %s"), *Map->GetRegiments()[NewBuilding].Name));
-			}
-			else
-			{
-				Overlay->ShowToast(Why);
-			}
+			const int32 OOBDetached = OOBDetachPart(SourceId, OOBWhy);
+			if (OOBDetached == INDEX_NONE) { Overlay->ShowToast(OOBWhy); return; }
+			OOBUnits.Add(OOBDetached);
+		}
+		else if (OOBSourceKind == K::Regiment && Map->GetRegiments().IsValidIndex(SourceId))
+		{
+			OOBUnits = Overlay->GetSelectedRegiments().Contains(SourceId) ? Overlay->GetSelectedRegiments() : TArray<int32> { SourceId };
+		}
+		else if (OOBSourceKind == K::Formation)
+		{
+			const int32 OOBSourceIndex = Map->FormationIndex(SourceId);
+			if (OOBSourceIndex == INDEX_NONE || Map->GetFormations()[OOBSourceIndex].Echelon == ECampaign1851Echelon::Army) { Overlay->ShowToast(TEXT("En felthær kan ikke ligge under en anden felthær")); return; }
+			const int32 OOBArmy = Map->CreateFormation(ECampaign1851Echelon::Army, 0);
+			Map->MoveFormation(SourceId, OOBArmy);
+			Overlay->ShowToast(TEXT("Ny felthær med den trukne formation direkte under sig"));
 			return;
 		}
-		if (From == Building)
+		else if (OOBSourceKind == K::Command)
 		{
-			return;
+			for (int32 OOBUnit = 0; OOBUnit < Map->GetRegiments().Num(); ++OOBUnit)
+			{
+				if (Map->GetRegiments()[OOBUnit].Command == SourceId && Map->GetRegiments()[OOBUnit].Formation == 0) { OOBUnits.Add(OOBUnit); }
+			}
 		}
-		const int32 New = Map->SplitOffCompany(From, SourceId % 10, &Why);
-		if (New != INDEX_NONE)
-		{
-			TArray<int32> Units = Overlay->GetOOBFilter();
-			Units.AddUnique(From);
-			Units.AddUnique(New);
-			Overlay->FilterOOB(Units);
-			Overlay->SetOOBBuilding(New);
-			Overlay->ShowToast(FString::Printf(TEXT("%s: træk flere kompagnier hen til den"), *Map->GetRegiments()[New].Name));
-		}
-		else
-		{
-			Overlay->ShowToast(Why);
-		}
+		if (OOBUnits.Num() == 0) { Overlay->ShowToast(TEXT("Træk en enhed eller et kompagni herover")); return; }
+		const int32 OOBArmy = Map->CreateFormation(ECampaign1851Echelon::Army, 0);
+		for (int32 OOBUnit : OOBUnits) { Map->MoveRegimentToFormation(OOBUnit, OOBArmy); }
+		Overlay->SetOOBBuilding(INDEX_NONE);
+		Overlay->ShowToast(FString::Printf(TEXT("Ny felthær med %d enheder direkte under sig"), OOBUnits.Num()));
 		return;
+	}
+	// Validate all units before changing anything, including a company's source before splitting.
+	if (TargetKind == K::Garrisons || TargetKind == K::Command || TargetKind == K::ArmGroup)
+	{
+		TArray<int32> OOBReturning;
+		if (OOBSourceKind == K::Regiment) { OOBReturning.Add(SourceId); }
+		else if (OOBSourceKind == K::Company) { OOBReturning.Add(SourceId / 10); }
+		else if (OOBSourceKind == K::Formation) { OOBReturning = Map->FormationRegiments(SourceId); }
+		FString OOBWhy;
+		for (int32 OOBUnit : OOBReturning)
+		{
+			if (!Map->CanReturnToGarrison(OOBUnit, &OOBWhy)) { Overlay->ShowToast(OOBWhy); return; }
+		}
+		if (OOBSourceKind == K::Company)
+		{
+			const int32 OOBDetached = OOBDetachPart(SourceId, OOBWhy);
+			if (OOBDetached != INDEX_NONE && Map->MoveRegimentToFormation(OOBDetached, 0)) { Overlay->ShowToast(TEXT("Underenheden er tilbage i garnison")); }
+			else { Overlay->ShowToast(OOBWhy); }
+			return;
+		}
 	}
 	// The last company (squadron) of a half onto the other half of the same unit: the halves are one unit again.
 	if (SCampaign1851Overlay::TreeKind(Source) == K::Company && (TargetKind == K::Regiment || TargetKind == K::Company))
@@ -3036,30 +3067,18 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		}
 		return;
 	}
-	// A whole general command dragged into the chart.
-	if (SCampaign1851Overlay::TreeKind(Source) == K::Command && (TargetKind == K::NewFormation || TargetKind == K::Formation || TargetKind == K::FieldArmy))
+	// Whole commands add their units directly, without generating a division/brigade.
+	if (OOBSourceKind == K::Command && (TargetKind == K::Formation || TargetKind == K::FieldArmy))
 	{
-		const int32 Parent = TargetKind == K::FieldArmy ? 0 : TargetId;
-		const int32 Id = Map->FormFromCommand(SourceId, Parent);
-		const int32 Index = Map->FormationIndex(Id);
-		Overlay->ShowToast(Index != INDEX_NONE ? FString::Printf(TEXT("%s oprettet af %s (%d enheder)"), *Map->GetFormations()[Index].Name, *Map->GetCommands()[SourceId].Name, Map->FormationRegiments(Id).Num())
-			: FString(TEXT("Kommandoen har ingen enheder i garnison")));
-		return;
-	}
-	if (TargetKind == K::NewFormation)
-	{
-		// "Drag here for a new unit": a new formation one level below the one it stands by, with the unit in it.
-		if (SCampaign1851Overlay::TreeKind(Source) != K::Regiment)
+		TArray<int32> OOBCommandUnits;
+		for (int32 OOBUnit = 0; OOBUnit < Map->GetRegiments().Num(); ++OOBUnit)
 		{
-			Overlay->ShowToast(TEXT("Træk en bataljon, eskadron eller et batteri herover"));
-			return;
+			if (Map->GetRegiments()[OOBUnit].Command == SourceId && Map->GetRegiments()[OOBUnit].Formation == 0) { OOBCommandUnits.Add(OOBUnit); }
 		}
-		const int32 ParentIndex = Map->FormationIndex(TargetId);
-		const ECampaign1851Echelon Above = ParentIndex == INDEX_NONE ? ECampaign1851Echelon::Army : Map->GetFormations()[ParentIndex].Echelon;
-		const ECampaign1851Echelon Echelon = Above == ECampaign1851Echelon::Army ? ECampaign1851Echelon::Division : Above == ECampaign1851Echelon::Division ? ECampaign1851Echelon::Brigade : ECampaign1851Echelon::Regiment;
-		const int32 Id = Map->CreateFormation(Echelon, ParentIndex == INDEX_NONE ? 0 : TargetId);
-		Map->MoveRegimentToFormation(SourceId, Id);
-		Overlay->ShowToast(FString::Printf(TEXT("%s oprettet med %s"), *Map->GetFormations()[Map->FormationIndex(Id)].Name, *Overlay->TreeKeyText(Source)));
+		if (OOBCommandUnits.Num() == 0) { Overlay->ShowToast(TEXT("Kommandoen har ingen enheder i garnison")); return; }
+		const int32 OOBInto = TargetKind == K::FieldArmy ? Map->CreateFormation(ECampaign1851Echelon::Army, 0) : TargetId;
+		for (int32 OOBUnit : OOBCommandUnits) { Map->MoveRegimentToFormation(OOBUnit, OOBInto); }
+		Overlay->ShowToast(TEXT("Kommandoens enheder er flyttet direkte ind under hovedkvarteret"));
 		return;
 	}
 	// Where the drop puts things: a formation, the formation of a regiment dropped on, or the garrisons (0).
@@ -3078,7 +3097,25 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 	}
 	else if (TargetKind == K::FieldArmy)
 	{
-		Into = -1;   // the top of the field army: only formations can stand there
+		Into = -1;
+		if (OOBSourceKind == K::Regiment || OOBSourceKind == K::Company)
+		{
+			FString OOBWhy;
+			const int32 OOBUnit = OOBSourceKind == K::Company ? OOBDetachPart(SourceId, OOBWhy) : SourceId;
+			if (!Map->GetRegiments().IsValidIndex(OOBUnit)) { Overlay->ShowToast(OOBWhy); return; }
+			Into = Map->CreateFormation(ECampaign1851Echelon::Army, 0);
+			Map->MoveRegimentToFormation(OOBUnit, Into);
+			Overlay->ShowToast(TEXT("Enheden står direkte under den nye felthær"));
+			return;
+		}
+	}
+	if (OOBSourceKind == K::Company && Into > 0)
+	{
+		FString OOBWhy;
+		const int32 OOBDetached = OOBDetachPart(SourceId, OOBWhy);
+		if (OOBDetached != INDEX_NONE && Map->MoveRegimentToFormation(OOBDetached, Into)) { Overlay->ShowToast(TEXT("Underenheden er flyttet direkte ind under hovedkvarteret")); }
+		else { Overlay->ShowToast(OOBWhy); }
+		return;
 	}
 	bool bDone = false;
 	FString What;
