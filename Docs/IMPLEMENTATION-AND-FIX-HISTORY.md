@@ -1449,6 +1449,11 @@ Forskningsvinduet bruger nu hele bredden. En gren, hvis emner står side om side
 - Kortets forskydning af fjendemærker bruger kun kendte positioner. Intel-funktioner og konstanter har filspecifikke navne af hensyn til unity builds.
 - Kontrol: statisk gennemgang af save/restore og `git diff --check`; ingen build eller kørsel.
 - Uafklaret: historisk 1825-korpskvalitet (nålegevær-bonus), absolutte forstærkningstal og befolkningsvægt kræver balancering. Første by vælges som melder frem for hurtigste; generel War-gemning flytter marcherende korps til vejstrækningens slutby. Begge forhold er bevaret af hensyn til 1851. Nye korps annonceres fortsat med præcis styrke ved krigsudbrud; om denne efterretning skal skjules, kræver afklaring.
+### 2026-10-08 – GPU-audit og kvalitetsvalg i 3D-slag
+
+- HUD har LAV/MIDDEL/HØJ: Unreal-scalability Medium/High/Epic, renderopløsning 70/85/100 % og infanteridivisor 5/2/1. MIDDEL er standard; profilen gemmes og bruges i begge scenarier. FieldLOD har forrang ved start.
+- Fjerne ISM/VAT-figurer og rifler kaster ikke længere skygger; nærfigurer beholder dem. Mundingsrøg bruger 2/3/4 sfærer efter profil og render-cull ved 300 m. TSR er eksplicit valgt.
+- `Docs/Performance-Battle.md` dokumenterer audit, usikkerheder ved binære maps og måleplan. Statisk kontrolleret; hverken bygget eller kørt.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

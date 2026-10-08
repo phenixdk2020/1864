@@ -1,4 +1,5 @@
 #include "StrategyMuzzleSmokePuff.h"
+#include "../Player/StrategyBattleQuality.h"
 
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -29,13 +30,15 @@ void AStrategyMuzzleSmokePuff::BeginPlay()
         Destroy();
         return;
     }
-    for (int32 b = 0; b < SmokeBalls; ++b)
+    const int32 BattleSmokeBallCount = FMath::Min(SmokeBalls, 2 + Strategy1864BattleQuality::GetPreset());
+    for (int32 b = 0; b < BattleSmokeBallCount; ++b)
     {
         UStaticMeshComponent* Ball = NewObject<UStaticMeshComponent>(this);
         Ball->SetupAttachment(Root);
         Ball->SetStaticMesh(Sphere);
         Ball->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Ball->SetCastShadow(false);
+        Ball->SetCullDistance(30000.0f);
         Ball->bVisibleInRayTracing = false;
         Ball->RegisterComponent();
         UMaterialInstanceDynamic* Mid = Translucent ? UMaterialInstanceDynamic::Create(Translucent, this) : nullptr;

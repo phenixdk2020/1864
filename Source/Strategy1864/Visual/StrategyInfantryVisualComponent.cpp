@@ -950,7 +950,7 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
         {
             Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             Weapon->SetGenerateOverlapEvents(false);
-            Weapon->SetCastShadow(true);
+            Weapon->SetCastShadow(false); // the soldier retains the readable near shadow
             Weapon->bVisibleInRayTracing = false;
             Weapon->RegisterComponent();
             Weapon->AttachToComponent(
@@ -1694,7 +1694,7 @@ void UStrategyInfantryVisualComponent::EnterCrowdMode()
         Crowd->SetNumCustomDataFloats(UStrategyCrowdModel::CustomDataFloats);
         Crowd->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Crowd->SetGenerateOverlapEvents(false);
-        Crowd->SetCastShadow(true);
+        Crowd->SetCastShadow(false); // far VAT figures: avoid animated VSM invalidation
         Crowd->bVisibleInRayTracing = false;
         Crowd->bAffectDistanceFieldLighting = false;
         if (bWorldSpace)

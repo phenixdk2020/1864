@@ -1,4 +1,5 @@
 #include "StrategyOOBTestScenario.h"
+#include "../Player/StrategyBattleQuality.h"
 
 #include "Misc/CommandLine.h"
 #include "Misc/PackageName.h"
@@ -283,8 +284,7 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
     // On the meadow (its middle): the Danes in the south facing north, the enemy 400 m north.
     const FVector Middle = Origin + FVector(15000.0f, -7000.0f, 0.0f);
     const FVector DanishLine = Middle - FVector(20000.0f, 0.0f, 0.0f), EnemyLine = Middle + FVector(20000.0f, 0.0f, 0.0f);
-    int32 Lod = 1;
-    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864FieldLOD="), Lod);
+    const int32 Lod = Strategy1864BattleQuality::GetFigureDivisor();
 
     AStrategyHQUnit* Major = SpawnHQ(TEXT("DK-SKIRMISH-HQ"), TEXT("1. Bataillon"), static_cast<uint8>(EStrategyHQLevel::Battalion), DanishLine - FVector(9000.0f, 0.0f, 0.0f), nullptr);
     AStrategyHQUnit* EnemyMajor = SpawnHQ(TEXT("EN-SKIRMISH-HQ"), TEXT("Pr. Bataillon"), static_cast<uint8>(EStrategyHQLevel::Battalion), EnemyLine + FVector(9000.0f, 0.0f, 0.0f), nullptr);
@@ -1086,8 +1086,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     }
 
     // -Strategy1864FieldLOD=<1|2|5|10>: how many men a figure stands for (the simulation keeps every man).
-    int32 Lod = 2;   // one figure for two men (it was one for five: too few men on the field)
-    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864FieldLOD="), Lod);
+    const int32 Lod = Strategy1864BattleQuality::GetFigureDivisor();
 
     TArray<TSharedPtr<FJsonObject>> Battalions, Horse, Guns;
     for (const TSharedPtr<FJsonObject>& U : Units)

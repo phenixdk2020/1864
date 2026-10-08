@@ -2,6 +2,7 @@
 
 #include "StrategyCameraPawn.h"
 #include "StrategyHUD.h"
+#include "StrategyBattleQuality.h"
 #include "StrategyPlayerController.h"
 #include "../Tests/StrategyOOBTestScenario.h"
 #include "../Tests/StrategyScenarioStateComponent.h"
@@ -23,6 +24,7 @@ AStrategyGameMode::AStrategyGameMode()
 void AStrategyGameMode::BeginPlay()
 {
     Super::BeginPlay();
+    Strategy1864BattleQuality::ApplyPreset(GetWorld(), Strategy1864BattleQuality::GetPreset(), false);
 
     if (!bSpawnOOBTestScenario || !OOBTestScenarioClass || !GetWorld())
     {
