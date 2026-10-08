@@ -1028,8 +1028,15 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
             continue;
         }
 
+        // A column keeps its full width at a thinned figure scale: whole rows are skipped, not every second man (which kept two of four files).
+        const bool bColumnFormation = OwnerCompany && OwnerCompany->FormationComponent &&
+            OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn;
+        const int32 ColumnFiles = bColumnFormation ? FMath::Max(1, OwnerCompany->FormationComponent->ColumnWidth) : 1;
+        const int32 RowStride = VisualScaleDivisor <= 1 ? 1 : VisualScaleDivisor <= 2 ? 2 : VisualScaleDivisor <= 5 ? 5 : 10;
         const int32 FullIndex =
-            RenderedCount <= 1
+            bColumnFormation && RowStride > 1 && FullSlots.Num() > 0
+            ? FMath::Clamp((VisualIndex / ColumnFiles) * ColumnFiles * RowStride + (VisualIndex % ColumnFiles), 0, FullSlots.Num() - 1)
+            : RenderedCount <= 1
             ? 0
             : FMath::Clamp(
                 FMath::RoundToInt(

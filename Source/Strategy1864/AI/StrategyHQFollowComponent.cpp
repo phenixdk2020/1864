@@ -101,21 +101,13 @@ void UStrategyHQFollowComponent::TickComponent(
         return;
     }
 
-    // Let the movement executor own navigation, bridge queues and terrain movement.
-    // Finish the current follow route before requesting a new one; do not reset it each frame.
-    if (OwnerHQ->MovementExecutor && OwnerHQ->OrderComponent &&
-        !OwnerHQ->MovementExecutor->HasMovementGoal() && FollowRetrySeconds <= 0.0f)
-    {
-        FollowRetrySeconds = 0.25f;
-        FStrategyOrder HQFollowOrder;
-        HQFollowOrder.Type = EStrategyOrderType::Move;
-        HQFollowOrder.Authority = EStrategyOrderAuthority::InheritedAI;
-        HQFollowOrder.TargetLocation = Desired;
-        if (OwnerHQ->OrderComponent->SetOrder(HQFollowOrder))
-        {
-            OwnerHQ->MovementExecutor->MoveSpeedCmPerSecond = FollowSpeedCmPerSecond;
-        }
-    }
+    // The HQ follows its companies directly. (Moving it through its order channel replaced the commander's own order, an
+    // attack ordered by the player, with a follow move, so the companies lost their mission.)
+    const FVector Step =
+        Delta.GetSafeNormal() *
+        FMath::Min(Distance, FollowSpeedCmPerSecond * DeltaTime);
+
+    OwnerHQ->SetActorLocation(Current + Step);
 }
 
 FVector UStrategyHQFollowComponent::CalculateDesiredHQPosition() const

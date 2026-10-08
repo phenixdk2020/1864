@@ -1366,9 +1366,9 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
                 U->TryGetNumberField(TEXT("cartridgesPerMan"), CavalryCartridges);
                 Cav->CombatComponent->ConfigureCartridgesPerMan(float(CavalryCartridges));
             }
-            if (Cav->CavalryChargeComponent)
+            if (Cav->ChargeComponent)
             {
-                Cav->CavalryChargeComponent->FlankShockFactor = float(RuleNumber(
+                Cav->ChargeComponent->FlankShockFactor = float(RuleNumber(
                     TEXT("battleRules"), TEXT("cavalry"), TEXT("flankShockFactor"), 1.0));
             }
             ConfigureRuntimeQALabel(Cav);

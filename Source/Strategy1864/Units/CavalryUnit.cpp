@@ -25,6 +25,7 @@ ACavalryUnit::ACavalryUnit()
     if (MovementExecutor)
     {
         MovementExecutor->MoveSpeedCmPerSecond = 900.0f;
+        MovementExecutor->TurnSpeedDegreesPerSecond = 80.0f;   // horsemen wheel faster than a column of foot
     }
 
     CavalryVisualComponent =

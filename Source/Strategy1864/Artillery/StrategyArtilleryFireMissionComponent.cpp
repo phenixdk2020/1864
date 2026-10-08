@@ -1046,7 +1046,7 @@ bool UStrategyArtilleryFireMissionComponent::FireAtLocation(
     for (TPair<AStrategyUnit*, int32>& Pair : CasualtiesByTarget)
     {
         AStrategyUnit* Target = Pair.Key;
-        const int32 Casualties = Pair.Value;
+        int32 Casualties = Pair.Value;
 
         if (!IsValid(Target) || Casualties <= 0)
         {

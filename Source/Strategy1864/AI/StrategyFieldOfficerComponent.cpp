@@ -22,6 +22,25 @@
 #include "Engine/World.h"
 #include "EngineUtils.h"
 
+namespace
+{
+    // A player order that is over: it is no longer carried out physically. ATTACK HERE is carried out by the officers themselves
+    // (it never is "physically executing"), so it is over only when the unit has reached its target; until then the officers lead the attack.
+    bool IsFinishedPlayerOrder(const AStrategyUnit* Owner, const FStrategyOrder& Order)
+    {
+        if (!Owner || !Owner->OrderComponent || Order.Authority != EStrategyOrderAuthority::DirectPlayer || !Order.IsValidOrder() ||
+            Owner->OrderComponent->IsPhysicallyExecuting())
+        {
+            return false;
+        }
+        if (Order.Type == EStrategyOrderType::AttackHere)
+        {
+            return FVector::Dist2D(Owner->GetActorLocation(), Order.TargetLocation) <= 6000.0f;
+        }
+        return true;
+    }
+}
+
 UStrategyFieldOfficerComponent::UStrategyFieldOfficerComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
@@ -126,8 +145,8 @@ bool UStrategyFieldOfficerComponent::IsOpenToCharge(const AStrategyUnit* U, FStr
     if (F == EStrategyFormationType::Square)
     {
         const ACavalryUnit* OfficerCavalry = Cast<ACavalryUnit>(OwnerUnit);
-        if (OfficerCavalry && OfficerCavalry->CavalryChargeComponent &&
-            OfficerCavalry->CavalryChargeComponent->IsSteadySquare(U)) { return false; }
+        if (OfficerCavalry && OfficerCavalry->ChargeComponent &&
+            OfficerCavalry->ChargeComponent->IsSteadySquare(U)) { return false; }
         OutWhy = TEXT("karréen vakler eller mangler ammunition");
         return true;
     }
@@ -454,8 +473,7 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
         return;
     }
     const FStrategyOrder InfantryPlayerOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
-    if (InfantryPlayerOrder.Authority == EStrategyOrderAuthority::DirectPlayer &&
-        !OwnerUnit->OrderComponent->IsPhysicallyExecuting() && InfantryPlayerOrder.IsValidOrder())
+    if (IsFinishedPlayerOrder(OwnerUnit, InfantryPlayerOrder))
     {
         Decide(TEXT("Holder stillingen"), TEXT("Spillerens ordre er afsluttet; holder og skyder"));
         return;
@@ -578,7 +596,7 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
         return;
     }
     if (PlayerOrderUnderWay() || !Enemy ||
-        (Order.Authority == EStrategyOrderAuthority::DirectPlayer && Order.IsValidOrder() && !OwnerUnit->OrderComponent->IsPhysicallyExecuting()))
+        IsFinishedPlayerOrder(OwnerUnit, Order))
     {
         return;
     }

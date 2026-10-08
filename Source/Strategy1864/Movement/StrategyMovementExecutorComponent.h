@@ -35,7 +35,7 @@ public:
     float ArrivalToleranceCm = 50.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Movement")
-    float TurnSpeedDegreesPerSecond = 120.0f;
+    float TurnSpeedDegreesPerSecond = 36.0f;   // a body of men wheels slowly (cavalry sets its own)
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Movement")
     float FinalFacingToleranceDegrees = 2.0f;

@@ -9,6 +9,7 @@ class UStrategyParentFormationPlannerComponent;
 class UStrategyHQFollowComponent;
 class UStrategyCommandZoneComponent;
 class UStrategyCavalryTaskingComponent;
+class UStrategyHQVisualComponent;
 
 UENUM(BlueprintType)
 enum class EStrategyHQLevel : uint8
@@ -51,6 +52,9 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|HQ")
     TObjectPtr<UStrategyCavalryTaskingComponent> CavalryTaskingComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|HQ")
+    TObjectPtr<UStrategyHQVisualComponent> StaffVisualComponent;
 
     UFUNCTION(BlueprintCallable, Category="Strategy|HQ")
     void ApplyHQLevelDefaults();
