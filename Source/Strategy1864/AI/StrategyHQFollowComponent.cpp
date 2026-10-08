@@ -177,25 +177,25 @@ void UStrategyHQFollowComponent::ApplyLevelDefaults()
     switch (OwnerHQ->HQLevel)
     {
         case EStrategyHQLevel::Battalion:
-            if (RearOffsetCm < 0.0f) { RearOffsetCm = 6500.0f; }
+            if (RearOffsetCm < 0.0f) { RearOffsetCm = 6000.0f; }
             LateralOffsetCm = 0.0f;
             if (FollowSpeedCmPerSecond < 0.0f) { FollowSpeedCmPerSecond = 650.0f; }
             break;
 
         case EStrategyHQLevel::Regiment:
-            if (RearOffsetCm < 0.0f) { RearOffsetCm = 9000.0f; }
+            if (RearOffsetCm < 0.0f) { RearOffsetCm = 12000.0f; }
             LateralOffsetCm = 0.0f;
             if (FollowSpeedCmPerSecond < 0.0f) { FollowSpeedCmPerSecond = 630.0f; }
             break;
 
         case EStrategyHQLevel::Brigade:
-            if (RearOffsetCm < 0.0f) { RearOffsetCm = 12000.0f; }
+            if (RearOffsetCm < 0.0f) { RearOffsetCm = 25000.0f; }
             LateralOffsetCm = 6500.0f;
             if (FollowSpeedCmPerSecond < 0.0f) { FollowSpeedCmPerSecond = 620.0f; }
             break;
 
         case EStrategyHQLevel::Division:
-            if (RearOffsetCm < 0.0f) { RearOffsetCm = 14500.0f; }
+            if (RearOffsetCm < 0.0f) { RearOffsetCm = 40000.0f; }
             LateralOffsetCm = -7500.0f;
             if (FollowSpeedCmPerSecond < 0.0f) { FollowSpeedCmPerSecond = 590.0f; }
             break;
