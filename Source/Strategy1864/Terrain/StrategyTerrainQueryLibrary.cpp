@@ -1,6 +1,7 @@
 #include "StrategyTerrainQueryLibrary.h"
 
 #include "StrategyTerrainFeature.h"
+#include "../Campaign/StrategyCampaignBattlefield.h"
 #include "EngineUtils.h"
 #include "Engine/World.h"
 
@@ -262,4 +263,37 @@ float UStrategyTerrainQueryLibrary::GetElevationAdvantageCm(
     return
         GetEffectiveGroundZ(WorldContextObject, ObserverLocation) -
         GetEffectiveGroundZ(WorldContextObject, TargetLocation);
+}
+
+namespace
+{
+    TMap<TWeakObjectPtr<UWorld>, TWeakObjectPtr<AStrategyCampaignBattlefield>> StrategyForestBattlefields;
+}
+void UStrategyTerrainQueryLibrary::RegisterForestBattlefield(AStrategyCampaignBattlefield* Battlefield)
+{
+    if (!IsValid(Battlefield) || !Battlefield->GetWorld()) return;
+    for (auto ForestIt = StrategyForestBattlefields.CreateIterator(); ForestIt; ++ForestIt)
+        if (!ForestIt.Key().IsValid() || !ForestIt.Value().IsValid()) ForestIt.RemoveCurrent();
+    StrategyForestBattlefields.Add(TWeakObjectPtr<UWorld>(Battlefield->GetWorld()), TWeakObjectPtr<AStrategyCampaignBattlefield>(Battlefield));
+}
+AStrategyCampaignBattlefield* UStrategyTerrainQueryLibrary::GetForestBattlefield(const UObject* WorldContextObject)
+{
+    const auto* ForestEntry = StrategyForestBattlefields.Find(TWeakObjectPtr<UWorld>(ResolveWorld(WorldContextObject)));
+    return ForestEntry ? ForestEntry->Get() : nullptr;
+}
+float UStrategyTerrainQueryLibrary::GetForestDensityAt(const UObject* WorldContextObject, const FVector& WorldLocation)
+{
+    const auto* ForestField = GetForestBattlefield(WorldContextObject);
+    return ForestField ? ForestField->GetForestDensityAt(WorldLocation) : 0.0f;
+}
+float UStrategyTerrainQueryLibrary::ForestDepthAlong(const UObject* WorldContextObject, const FVector& Start, const FVector& End)
+{
+    const auto* ForestField = GetForestBattlefield(WorldContextObject);
+    if (!ForestField) return 0.0f;
+    const float ForestLengthM = FVector::Dist2D(Start, End) / 100.0f;
+    const int32 ForestSamples = FMath::Clamp(FMath::CeilToInt(ForestLengthM / 5.0f), 1, 40);
+    float ForestDensitySum = 0.0f;
+    for (int32 ForestSample = 0; ForestSample < ForestSamples; ++ForestSample)
+        ForestDensitySum += ForestField->GetForestDensityAt(FMath::Lerp(Start, End, (ForestSample + 0.5f) / ForestSamples));
+    return ForestLengthM * ForestDensitySum / ForestSamples;
 }

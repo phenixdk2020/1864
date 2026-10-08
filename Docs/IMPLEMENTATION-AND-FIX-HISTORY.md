@@ -1526,6 +1526,15 @@ Codex' tre 1825-delopgaver (hær og våben, officerer og ministre, nationer/byer
 ### 2026-10-08 – Startmenu (Codex) med midlertidige testslag, rytterkolonne
 Startmenuen (scenarie, land, afvigelse, NYT SPIL, INDLÆS SPIL, AFSLUT; spilmenuen under Esc er reduceret) er merget fra Codex. Oven på den: baggrund (Data/Campaign1851/MenuBackground.jpg, et HUD-frit billede fra 3D-slaget) og to midlertidige knapper, TEST 1 MOD 1 og TEST 4 MOD 1, som starter testbanen med samme flag som Start-Test-1/2 (de fjernes igen). Nye testflag: -Strategy1864NoHud (HUD skjult til rene skærmbilleder) og -CampaignMenuShot (skærmbillede af startmenuen). Rytteriet: kolonnen er tre i bredden, men fik tilfældig forskydning (25 cm langs, 12 cm på tværs) og et sidste led langt til siden; nu næsten ingen forskydning i kolonne og et kort sidste led midtstilles. Ikke set på skærmbillede.
 
+### 2026-10-08 ? Skov i taktiske slag: synlighed, skjul og d?kning
+
+- Kampagneslagmarkens `woodDensity` gemmes som et querybart 0?1-grid. Manglende data og testenge giver sikkert 0. Skovdybde m?les i densitetsv?gtede meter med h?jst 40 midpoint-samples pr. foresp?rgsel.
+- F?lles skovkontrol i synlighedskomponenten bruges af kontaktregistrering, trusselsreaktion, ildkontrol, artilleri og kavalerisk?rm. Standard: 50 m blokerer, mindre dybde reducerer synsafstand; t?t skov skjuler over 120 m med 8 sekunders afsl?ring efter skud. Affyring oph?ver aldrig blokerende skov, bakker eller fysisk LOS.
+- Infanteri f?r op til 25 % reduceret indg?ende tr?feffekt i skov eller inden for 15 m af skovkant/knick mod skytten. Eksisterende st?rkere d?kning bevares. Hedge-segmenter indekseres ved indl?sning og afstand/retning kontrolleres ved brug.
+- Taktisk kort viser m?rkere skovfelter, udelader fjender uden aktuel venlig kontakt (ogs? fra kortets udstr?kning) og m?rker egne skjulte enheder med ?skjult?. Fast rasterbudget og eksisterende kontaktdata undg?r ekstra LOS-scanninger hver frame.
+- `-Strategy1864DebugForest` logger skovkontrollens dybde, afstand, skjul og afg?relse. Ingen nye kampagne-savefelter.
+- Validering: statisk kodegennemgang og diffkontrol; spil/editor er ikke bygget eller startet, og ?ndringerne er ikke committet efter brugerens instruktion.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

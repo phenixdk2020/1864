@@ -442,7 +442,7 @@ bool UStrategyArtilleryFireMissionComponent::CanObserveTarget(
     }
 
     return OwnerBattery->ContactComponent->HasCurrentContact(Target) &&
-        OwnerBattery->VisibilityComponent->HasLineOfSightTo(Target);
+        OwnerBattery->VisibilityComponent->CanDetectTarget(Target, OwnerBattery->VisibilityComponent->ForestSightRangeCm);
 }
 
 bool UStrategyArtilleryFireMissionComponent::CanObserveLocation(
@@ -735,6 +735,7 @@ bool UStrategyArtilleryFireMissionComponent::FireAt(
             0.0f,
             100.0f);
 
+    if (OwnerBattery->CombatComponent) OwnerBattery->CombatComponent->LastFiredTimeSeconds = GetWorld()->GetTimeSeconds();
     OnArtilleryShotResolved.Broadcast(
         Target,
         AmmoType,
@@ -1120,6 +1121,7 @@ bool UStrategyArtilleryFireMissionComponent::FireAtLocation(
             0.0f,
             100.0f);
 
+    if (OwnerBattery->CombatComponent) OwnerBattery->CombatComponent->LastFiredTimeSeconds = GetWorld()->GetTimeSeconds();
     OnArtilleryShotResolved.Broadcast(
         nullptr,
         AmmoType,

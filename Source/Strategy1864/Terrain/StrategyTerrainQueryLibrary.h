@@ -5,6 +5,7 @@
 #include "StrategyTerrainQueryLibrary.generated.h"
 
 class UWorld;
+class AStrategyCampaignBattlefield;
 
 UCLASS()
 class STRATEGY1864_API UStrategyTerrainQueryLibrary
@@ -13,6 +14,14 @@ class STRATEGY1864_API UStrategyTerrainQueryLibrary
     GENERATED_BODY()
 
 public:
+    static void RegisterForestBattlefield(AStrategyCampaignBattlefield* Battlefield);
+    static AStrategyCampaignBattlefield* GetForestBattlefield(const UObject* WorldContextObject);
+    UFUNCTION(BlueprintPure, Category="Strategy|Terrain", meta=(WorldContext="WorldContextObject"))
+    static float GetForestDensityAt(const UObject* WorldContextObject, const FVector& WorldLocation);
+    /** Density-weighted horizontal forest depth in metres; at most 40 midpoint samples. */
+    UFUNCTION(BlueprintPure, Category="Strategy|Terrain", meta=(WorldContext="WorldContextObject"))
+    static float ForestDepthAlong(const UObject* WorldContextObject, const FVector& Start, const FVector& End);
+
     UFUNCTION(BlueprintPure, Category="Strategy|Terrain", meta=(WorldContext="WorldContextObject"))
     static float GetFeatureElevationOffset(
         const UObject* WorldContextObject,

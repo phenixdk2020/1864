@@ -23,6 +23,7 @@
 #include "../Terrain/StrategyTerrainAwarenessComponent.h"
 #include "../Logistics/StrategySupplyWagonUnit.h"
 #include "EngineUtils.h"
+#include "Engine/World.h"
 
 UStrategyCombatComponent::UStrategyCombatComponent()
 {
@@ -220,6 +221,7 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
         return false;
     }
 
+    LastFiredTimeSeconds = GetWorld()->GetTimeSeconds();
     AmmunitionRounds -= ShotCount;
     bOutOfAmmo = AmmunitionRounds <= 0;
 
