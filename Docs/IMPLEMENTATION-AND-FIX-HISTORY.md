@@ -1,4 +1,4 @@
-﻿# PROJECT 1864 — Implementation & Fix History
+# PROJECT 1864 — Implementation & Fix History
 
 > **Dokumentet vedligeholdes nu her i Game1864-projektet** (`1864-Campaign/Docs`). Slaget og kampagnen er samlet i ét projekt siden 1. oktober 2026.
 > - Afsnit 1–8 er Unity-prototypens historik. Den er uændret fra `Strategy/docs/IMPLEMENTATION-AND-FIX-HISTORY.md`.
@@ -1691,6 +1691,12 @@ INDSTILLINGER i slaget har en række "Skygger" (TIL/FRA), som slukker eller tæn
 
 ### 2026-10-08 – Indstillinger gemmes med et gemt spil
 UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektionen /Script/Strategy1864.Settings i GameUserSettings (grafikpakke, figurantal, skygger, ordonnanser, fjendens rækkevidde, kameraets tastaturhastighed m.fl.) gemmes ved SaveToSlot og skrives tilbage ved LoadFromSlot (kun for gemmer fra version 30 og nyere; ældre gemmer rører ikke indstillingerne). Bygget, ikke prøvet.
+### 2026-10-08 — Statisk review af merges siden 4458fe7 (Codex)
+
+- Gennemgået kampagne-/slagændringer til HEAD 74e8914 med fokus på klik, overlay, saves/scenarier, events, komponentguards og tick/caches. Fund og anbefalinger: `Docs/Review-2026-10-08.md`.
+- Rettet dialogklik, instansbaseret auto-klik-parsning, importkrav ved våbenopgradering, feltofficerens world-guards/logtimer/nævner, genstart af kolonnespor, HQ-fallback og kampagnevåbnets ladningsmetode i slaget.
+- Højeste resterende fund: gamle 1825-gemninger mister oprindelige regimenter ved legacy-migrering; kavaleritrussel har dyre indlejrede world-scanninger. Øvrige fund rangeret i rapporten.
+- Statisk kontrol og git diff --check; ingen build, spilstart eller commit. Ingen nye savefelter eller scenariedata.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

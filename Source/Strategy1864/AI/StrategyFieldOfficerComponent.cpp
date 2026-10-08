@@ -232,7 +232,7 @@ void UStrategyFieldOfficerComponent::LeaveAutomaticFireCover()
     LastLongRangeFireTime = -1000000.0f;
     if (!bTakingFireCover || !OwnerUnit) return;
     bTakingFireCover = false;
-    FireCoverStandUpUntil = GetWorld()->GetTimeSeconds() + FMath::Max(0.0f, FireCoverStandUpSeconds);
+    FireCoverStandUpUntil = GetWorld() ? GetWorld()->GetTimeSeconds() + FMath::Max(0.0f, FireCoverStandUpSeconds) : -1.0f;
     if (OwnerUnit->StanceComponent) OwnerUnit->StanceComponent->Stance = EStrategyStance::Standing;
     if (OwnerUnit->FormationComponent)
     {
@@ -246,7 +246,7 @@ void UStrategyFieldOfficerComponent::LeaveAutomaticFireCover()
 
 bool UStrategyFieldOfficerComponent::UpdateAutomaticLooseOrderUnderFire()
 {
-    if (!OwnerUnit || OwnerUnit->Echelon != EStrategyEchelon::Company || !OwnerUnit->StanceComponent || !OwnerUnit->FormationComponent) return false;
+    if (!OwnerUnit || !GetWorld() || OwnerUnit->Echelon != EStrategyEchelon::Company || !OwnerUnit->StanceComponent || !OwnerUnit->FormationComponent) return false;
     const float CoverNow = GetWorld()->GetTimeSeconds();
     // Most companies are not exposed: avoid a world-wide enemy scan every frame for them.
     if (!bTakingFireCover && !IsStandingUpFromFireCover() && CoverNow - LastLongRangeFireTime >= FireCoverReleaseSeconds)
@@ -352,8 +352,7 @@ void UStrategyFieldOfficerComponent::TickComponent(float DeltaTime, ELevelTick T
     AStrategyUnit* Enemy = NearestEnemy(Distance, 150000.0f);
     if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugOfficer")))
     {
-        static TMap<const UStrategyFieldOfficerComponent*, float> NextLog;
-        float& Next = NextLog.FindOrAdd(this);
+        float& Next = NextOfficerDebugLogTime;
         const float Time = GetWorld()->GetTimeSeconds();
         if (Time >= Next)
         {
@@ -870,7 +869,7 @@ void UStrategyFieldOfficerComponent::ResolveShock(AStrategyUnit* Enemy)
         if (U->FormationComponent && U->FormationComponent->CurrentFormation == EStrategyFormationType::Square) { W *= 1.25f; }
         return W;
     };
-    const float Ratio = FMath::Clamp(Weight(OwnerUnit) / Weight(Enemy), 0.4f, 2.5f);
+    const float Ratio = FMath::Clamp(Weight(OwnerUnit) / FMath::Max(1.0f, Weight(Enemy)), 0.4f, 2.5f);
     const int32 EnemyLoss = FMath::RoundToInt(OwnerUnit->CurrentStrength * DecisionRandom.FRandRange(0.05f, 0.10f) * Ratio);
     const int32 OwnLoss = FMath::RoundToInt(Enemy->CurrentStrength * DecisionRandom.FRandRange(0.03f, 0.07f) / Ratio);
     Enemy->ApplyStrengthLoss(EnemyLoss);

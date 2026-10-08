@@ -1321,7 +1321,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		else if (Button == SCampaign1851Overlay::EButton::ConfirmNo)
 		{
 			Overlay->CloseConfirm();
-			Button = SCampaign1851Overlay::EButton::None;
+			Button = SCampaign1851Overlay::EButton::Block;
 		}
 		// A step that costs money or cannot be undone: first what it does and what it costs, then JA / NEJ.
 		if (!bConfirmed && Map.IsValid() && Overlay.IsValid())
@@ -1330,7 +1330,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			if (DescribeAction(*Map, *Overlay, Button, Module, Title, Text))
 			{
 				Overlay->AskConfirm(Title, Text, Button, Module);
-				Button = SCampaign1851Overlay::EButton::None;
+				Button = SCampaign1851Overlay::EButton::Block;
 			}
 		}
 		if (Button == SCampaign1851Overlay::EButton::UnitDeployEarly)
@@ -1481,7 +1481,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				UGameplayStatics::OpenLevel(this, FName(TEXT("Strategy1864_Field")), true, FString::Printf(TEXT("Field=%s"), *FPaths::GetCleanFilename(Map->BattlefieldFile())));
 				return;
 			}
-			Button = SCampaign1851Overlay::EButton::None;
+			Button = SCampaign1851Overlay::EButton::Block;
 		}
 		if (Button == SCampaign1851Overlay::EButton::Block)
 		{
@@ -2771,10 +2771,9 @@ bool ACampaign1851PlayerController::PointerPosition(float& X, float& Y) const
 
 void ACampaign1851PlayerController::TickAutoClicks()
 {
-	static bool bParsed = false;
-	if (!bParsed)
+	if (!bAutoClicksParsed)
 	{
-		bParsed = true;
+		bAutoClicksParsed = true;
 		FString Plan;
 		if (FParse::Value(FCommandLine::Get(), TEXT("CampaignAutoClick="), Plan, false))
 		{

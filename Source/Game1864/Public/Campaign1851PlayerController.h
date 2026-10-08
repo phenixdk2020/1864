@@ -104,6 +104,7 @@ private:
 	FVector2D AutoMouse = FVector2D::ZeroVector;
 	float AutoReleaseAt = -1.f;
 	int32 NextAutoClick = 0;
+	bool bAutoClicksParsed = false;
 	TArray<FVector> AutoClicks;
 	bool bAutoClickFrame = false;   // the tick of an automatic click
 	bool LeftJustPressed() const { return bAutoClickFrame || WasInputKeyJustPressed(EKeys::LeftMouseButton); }
