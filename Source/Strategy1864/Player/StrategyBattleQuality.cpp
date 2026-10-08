@@ -4,6 +4,8 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "EngineUtils.h"
+#include "Components/LightComponent.h"
+#include "UObject/UObjectIterator.h"
 #include "../Units/StrategyCompanyUnit.h"
 #include "../Visual/StrategyInfantryVisualComponent.h"
 #include "../Units/CavalryUnit.h"
@@ -11,6 +13,41 @@
 
 namespace Strategy1864BattleQuality
 {
+    bool GetShadowsOn()
+    {
+        if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864NoShadows"))) { return false; }
+        int32 On = 1;
+        if (GConfig) { GConfig->GetInt(TEXT("/Script/Strategy1864.Settings"), TEXT("Shadows"), On, GGameUserSettingsIni); }
+        return On != 0;
+    }
+
+    void ApplyShadows(UWorld* World)
+    {
+        if (!World) { return; }
+        // The shadow casting each light had before the player switched the shadows off, so that they come back as they were.
+        static TMap<TWeakObjectPtr<ULightComponent>, bool> Originals;
+        const bool bOn = GetShadowsOn();
+        for (TObjectIterator<ULightComponent> It; It; ++It)
+        {
+            ULightComponent* Light = *It;
+            if (!IsValid(Light) || Light->GetWorld() != World) { continue; }
+            const TWeakObjectPtr<ULightComponent> Key(Light);
+            if (!Originals.Contains(Key)) { Originals.Add(Key, Light->CastShadows); }
+            const bool bWanted = bOn ? Originals[Key] : false;
+            if (Light->CastShadows != bWanted) { Light->SetCastShadows(bWanted); }
+        }
+    }
+
+    void SetShadowsOn(UWorld* World, bool bOn, bool bSave)
+    {
+        if (bSave && GConfig)
+        {
+            GConfig->SetInt(TEXT("/Script/Strategy1864.Settings"), TEXT("Shadows"), bOn ? 1 : 0, GGameUserSettingsIni);
+            GConfig->Flush(false, GGameUserSettingsIni);
+        }
+        ApplyShadows(World);
+    }
+
     int32 GetPreset()
     {
         int32 Preset = 1;   // MIDDEL until the player chooses otherwise
@@ -46,6 +83,7 @@ namespace Strategy1864BattleQuality
         const float Resolution[] = { 70.0f, 85.0f, 100.0f };
         Quality.ResolutionQuality = Resolution[Preset];
         Scalability::SetQualityLevels(Quality);
+        ApplyShadows(World);
         const int32 Divisor = GetFigureDivisor();
         if (World)
         {

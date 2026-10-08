@@ -200,6 +200,15 @@ void AStrategyHUD::DrawHUD()
         FigureDivisor = Strategy1864BattleQuality::GetFigureDivisor();
         BattleQualityPreset = Strategy1864BattleQuality::GetPreset();
     }
+    {
+        static double LastShadowCheck = 0.0;
+        const double Now = FPlatformTime::Seconds();
+        if (Now - LastShadowCheck > 2.0)
+        {
+            LastShadowCheck = Now;
+            Strategy1864BattleQuality::ApplyShadows(GetWorld());
+        }
+    }
     Buttons.Reset();
     Panels.Reset();
 
@@ -753,7 +762,7 @@ void AStrategyHUD::DrawSettings()
         return;
     }
     // A small window under the button: the camera's speed on the keys.
-    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 340.0f;
+    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 380.0f;
     DrawPanel(X, Y, W, H);
     Text(TEXT("INDSTILLINGER"), X + 12.0f, Y + 8.0f, Gold);
     const float Factor = AStrategyCameraPawn::GetKeySpeedFactor();
@@ -792,6 +801,13 @@ void AStrategyHUD::DrawSettings()
         DrawButton(X + 180.0f + i * 76.0f, Y + 274.0f, 72.0f, 24.0f, QualityLabels[i], EAction::BattleQuality, i, BattleQualityPreset == i, nullptr, BattleQualityPreset == i ? nullptr : &ButtonDark);
     }
     Text(TEXT("70 / 85 / 100 % opløsning. Kvalitet gemmes."), X + 12.0f, Y + 308.0f, Muted, 0.85f);
+    // All shadows on or off (the lights' shadow casting): the cheapest way to save the GPU.
+    Text(TEXT("Skygger"), X + 12.0f, Y + 342.0f, Ink);
+    {
+        const bool bShadows = Strategy1864BattleQuality::GetShadowsOn();
+        DrawButton(X + 180.0f, Y + 338.0f, 72.0f, 24.0f, TEXT("TIL"), EAction::Shadows, 1, bShadows, nullptr, bShadows ? nullptr : &ButtonDark);
+        DrawButton(X + 256.0f, Y + 338.0f, 72.0f, 24.0f, TEXT("FRA"), EAction::Shadows, 0, !bShadows, nullptr, !bShadows ? nullptr : &ButtonDark);
+    }
     const int32 Divisors[] = { 1, 2, 5 };
     for (int32 i = 0; i < 3; ++i)
     {
@@ -1184,6 +1200,9 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
             case EAction::BattleQuality:
                 BattleQualityPreset = B.Value;   // the graphics preset; the number of figures is its own setting
                 Strategy1864BattleQuality::ApplyPreset(GetWorld(), B.Value, true);
+                break;
+            case EAction::Shadows:
+                Strategy1864BattleQuality::SetShadowsOn(GetWorld(), B.Value != 0, true);
                 break;
             case EAction::TimeControl:
                 if (AStrategyPlayerController* TimePC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
