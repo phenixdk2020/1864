@@ -4163,7 +4163,7 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 	};
 	Build(0);
 	const float BoxW = 160.f, Gap = 14.f, VGap = 24.f;
-	const float HQH = 90.f, UnitH = 78.f, CompH = 42.f;
+	const float HQH = 108.f, UnitH = 78.f, CompH = 42.f;
 	auto Parts = [&](const FNode& N)
 	{
 		TArray<float> W;
@@ -4273,6 +4273,19 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 				if (Visible(PlusMin, PlusMin + FVector2D(14.f, 12.f)))
 				{
 					PaintButton(Geometry, Out, Layer + 6, PlusMin, FVector2D(14.f, 12.f), TEXT("+"), Posts[Post], F.Id);
+				}
+			}
+			if (F.Echelon == ECampaign1851Echelon::Brigade || F.Echelon == ECampaign1851Echelon::Division)
+			{
+				const FVector2D ChiefMin(Min.X + BoxW - 34.f, Min.Y + 30.f);
+				if (Officers.IsValidIndex(F.Commander) && Visible(ChiefMin, ChiefMin + FVector2D(14.f, 12.f)))
+				{
+					PaintButton(Geometry, Out, Layer + 6, ChiefMin, FVector2D(14.f, 12.f), TEXT("-"), EButton::FormationChiefRemove, F.Id);
+				}
+				const FVector2D RemoveMin(Min.X + 5.f, Min.Y + HQH - 17.f);
+				if (Visible(RemoveMin, RemoveMin + FVector2D(86.f, 13.f)))
+				{
+					PaintButton(Geometry, Out, Layer + 6, RemoveMin, FVector2D(86.f, 13.f), TEXT("OPLØS STAB"), EButton::FormationDissolve, F.Id);
 				}
 			}
 		}
