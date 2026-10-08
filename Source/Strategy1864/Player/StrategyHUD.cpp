@@ -281,16 +281,17 @@ void AStrategyHUD::DrawHUD()
         }
         break;
     }
-    // The battle from the campaign: its end and the way back.
-    for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+    // The way out of the battle: back to the campaign for a campaign battle, to the start menu for a test battle.
     {
-        if (It->IsCampaignBattle())
+        bool bCampaignBattle = false;
+        for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
         {
-            const float BW = 300.0f, BX = Canvas->ClipX - BW - 8.0f;
-            DrawPanel(BX - 6.0f, 40.0f, BW + 12.0f, 44.0f);
-            DrawButton(BX, 46.0f, BW, 32.0f, TEXT("AFSLUT SLAGET  →  KAMPAGNEN"), EAction::FinishBattle, 0, false, nullptr, &ExecutingBlue);
+            bCampaignBattle = It->IsCampaignBattle();
             break;
         }
+        const float BW = 300.0f, BX = Canvas->ClipX - BW - 8.0f;
+        DrawPanel(BX - 6.0f, 40.0f, BW + 12.0f, 44.0f);
+        DrawButton(BX, 46.0f, BW, 32.0f, bCampaignBattle ? TEXT("AFSLUT SLAGET  →  KAMPAGNEN") : TEXT("FORLAD SLAGET  →  STARTMENU"), EAction::FinishBattle, 0, false, nullptr, &ExecutingBlue);
     }
 
     if (const AStrategyPlayerController* PC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
@@ -549,7 +550,7 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
 
     // The unit's tag behind it (as the QA design): its name, its men, formation and fire policy.
     {
-        const FVector Behind = Project(OnGround((Left + Right) * 0.5f - Forward * 1800.0f), false);
+        const FVector Behind = Project(OnGround((Left + Right) * 0.5f - Forward * 650.0f), false);   // a few metres behind the rear rank
         if (Behind.Z > 0.0f)
         {
             const TCHAR* Formation = !Unit->FormationComponent ? TEXT("") :
@@ -1009,10 +1010,21 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 break;
             }
             case EAction::FinishBattle:
-                for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
                 {
-                    It->FinishCampaignBattle();
-                    break;
+                    bool bCampaignBattle = false;
+                    for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+                    {
+                        bCampaignBattle = It->IsCampaignBattle();
+                        if (bCampaignBattle) { It->FinishCampaignBattle(); }
+                        break;
+                    }
+                    if (!bCampaignBattle)
+                    {
+                        // A test battle (from the start menu or a launcher): the way back is the campaign's start menu.
+                        UGameplayStatics::SetGamePaused(this, false);
+                        UGameplayStatics::SetGlobalTimeDilation(this, 1.0f);
+                        UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851")));
+                    }
                 }
                 break;
             case EAction::OOBToggle:

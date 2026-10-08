@@ -318,12 +318,22 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
         Major->OfficerProfileComponent->Caution = 70.0f;
         Major->OfficerProfileComponent->Aggression = 45.0f;
     }
+    // -Strategy1864SkirmishPassive: the Danish headquarters' AI is off and nothing attacks before the player orders it.
+    if (Major && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864SkirmishPassive")))
+    {
+        Major->bOfficerAIEnabled = false;
+    }
     for (int32 c = 0; c < DaneCount; ++c)
     {
         if (AStrategyCompanyUnit* Company = SpawnCompany(FName(*FString::Printf(TEXT("DK-SKIRMISH-C%d"), c + 1)), FString::Printf(TEXT("%d. Kompagni"), c + 1), c + 1,
             DanishLine + FVector(0.0f, (c - (DaneCount - 1) * 0.5f) * 7200.0f, 0.0f), Major, static_cast<uint8>(EStrategySide::Denmark)))
         {
             Company->bPlayerControllable = true;
+            if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864SkirmishPassive")) && Company->DoctrineComponent)
+            {
+                // The player gives the orders: the company's own AI reacts (front, fire, square) but does not seek the fight.
+                Company->DoctrineComponent->Doctrine = EStrategyDoctrine::Defensive;
+            }
             if (Company->InfantryVisualComponent)
             {
                 Company->InfantryVisualComponent->SoldierMeshAsset = TSoftObjectPtr<USkeletalMesh>(

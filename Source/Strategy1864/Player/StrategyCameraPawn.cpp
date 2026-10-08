@@ -6,6 +6,8 @@
 
 #include "Camera/CameraComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "Kismet/GameplayStatics.h"
+#include "Misc/App.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/InputComponent.h"
@@ -13,6 +15,7 @@
 AStrategyCameraPawn::AStrategyCameraPawn()
 {
     PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bTickEvenWhenPaused = true;   // the camera moves while the battle is paused
 
     SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
     SetRootComponent(SceneRoot);
@@ -30,6 +33,7 @@ AStrategyCameraPawn::AStrategyCameraPawn()
     Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 
     MovementComponent = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("MovementComponent"));
+    MovementComponent->PrimaryComponentTick.bTickEvenWhenPaused = true;
     MovementComponent->MaxSpeed = 3000.0f;
     MovementComponent->Acceleration = 8000.0f;
     MovementComponent->Deceleration = 10000.0f;
@@ -68,6 +72,12 @@ void AStrategyCameraPawn::SetKeySpeedFactor(float Factor)
 void AStrategyCameraPawn::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+    // The camera runs in real time whatever the battle's speed (half speed, fast, paused).
+    {
+        const float Dilation = FMath::Max(0.05f, UGameplayStatics::GetGlobalTimeDilation(this));
+        CustomTimeDilation = 1.0f / Dilation;
+        DeltaTime = FApp::GetDeltaTime();
+    }
 
     if (MovementComponent)
     {
@@ -153,20 +163,20 @@ void AStrategyCameraPawn::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
     check(PlayerInputComponent);
 
-    PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AStrategyCameraPawn::MoveForward);
-    PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AStrategyCameraPawn::MoveRight);
-    PlayerInputComponent->BindAxis(TEXT("CameraZoom"), this, &AStrategyCameraPawn::ZoomCamera);
-    PlayerInputComponent->BindAxis(TEXT("CameraYaw"), this, &AStrategyCameraPawn::RotateCamera);
-    PlayerInputComponent->BindAxis(TEXT("CameraTilt"), this, &AStrategyCameraPawn::TiltCamera);
-    PlayerInputComponent->BindAxis(TEXT("CameraOrbitX"), this, &AStrategyCameraPawn::MouseOrbitX);
-    PlayerInputComponent->BindAxis(TEXT("CameraOrbitY"), this, &AStrategyCameraPawn::MouseOrbitY);
-    PlayerInputComponent->BindAction(TEXT("CameraPan"), IE_Pressed, this, &AStrategyCameraPawn::BeginCameraPan);
-    PlayerInputComponent->BindAction(TEXT("CameraPan"), IE_Released, this, &AStrategyCameraPawn::EndCameraPan);
-    PlayerInputComponent->BindAction(TEXT("CameraFocus"), IE_Pressed, this, &AStrategyCameraPawn::FocusSelected);
-    PlayerInputComponent->BindAction(TEXT("CameraOverview"), IE_Pressed, this, &AStrategyCameraPawn::PresetOverview);
-    PlayerInputComponent->BindAction(TEXT("CameraTactical"), IE_Pressed, this, &AStrategyCameraPawn::PresetTactical);
-    PlayerInputComponent->BindAction(TEXT("CameraSoldiers"), IE_Pressed, this, &AStrategyCameraPawn::PresetSoldiers);
-    PlayerInputComponent->BindAction(TEXT("CameraTopDown"), IE_Pressed, this, &AStrategyCameraPawn::PresetTopDown);
+    PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AStrategyCameraPawn::MoveForward).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AStrategyCameraPawn::MoveRight).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAxis(TEXT("CameraZoom"), this, &AStrategyCameraPawn::ZoomCamera).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAxis(TEXT("CameraYaw"), this, &AStrategyCameraPawn::RotateCamera).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAxis(TEXT("CameraTilt"), this, &AStrategyCameraPawn::TiltCamera).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAxis(TEXT("CameraOrbitX"), this, &AStrategyCameraPawn::MouseOrbitX).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAxis(TEXT("CameraOrbitY"), this, &AStrategyCameraPawn::MouseOrbitY).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAction(TEXT("CameraPan"), IE_Pressed, this, &AStrategyCameraPawn::BeginCameraPan).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAction(TEXT("CameraPan"), IE_Released, this, &AStrategyCameraPawn::EndCameraPan).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAction(TEXT("CameraFocus"), IE_Pressed, this, &AStrategyCameraPawn::FocusSelected).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAction(TEXT("CameraOverview"), IE_Pressed, this, &AStrategyCameraPawn::PresetOverview).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAction(TEXT("CameraTactical"), IE_Pressed, this, &AStrategyCameraPawn::PresetTactical).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAction(TEXT("CameraSoldiers"), IE_Pressed, this, &AStrategyCameraPawn::PresetSoldiers).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAction(TEXT("CameraTopDown"), IE_Pressed, this, &AStrategyCameraPawn::PresetTopDown).bExecuteWhenPaused = true;
 }
 
 void AStrategyCameraPawn::MoveForward(float Value)
@@ -237,7 +247,7 @@ void AStrategyCameraPawn::RotateCamera(float Value)
         return;
     }
 
-    AddActorLocalRotation(FRotator(0.0f, Value * RotationSpeedDegrees * GetWorld()->GetDeltaSeconds(), 0.0f));
+    AddActorLocalRotation(FRotator(0.0f, Value * RotationSpeedDegrees * FApp::GetDeltaTime(), 0.0f));
 }
 
 
@@ -296,7 +306,7 @@ void AStrategyCameraPawn::TiltCamera(float Value)
     if (bFollowingProjectile) StopProjectileFollow(true);
     bPresetTransition = false;
     FRotator Rotation = SpringArm->GetRelativeRotation();
-    Rotation.Pitch = FMath::Clamp(Rotation.Pitch - Value * 45.0f * GetWorld()->GetDeltaSeconds(), -85.0f, -10.0f);
+    Rotation.Pitch = FMath::Clamp(Rotation.Pitch - Value * 45.0f * FApp::GetDeltaTime(), -85.0f, -10.0f);
     SpringArm->SetRelativeRotation(Rotation);
 }
 void AStrategyCameraPawn::MouseOrbitX(float Value)

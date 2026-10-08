@@ -11,7 +11,7 @@ namespace Strategy1864BattleQuality
 {
     int32 GetPreset()
     {
-        int32 Preset = 1;
+        int32 Preset = 2;   // HØJ until the player chooses otherwise
         if (GConfig) { GConfig->GetInt(TEXT("/Script/Strategy1864.Settings"), TEXT("BattleQuality"), Preset, GGameUserSettingsIni); }
         return FMath::Clamp(Preset, 0, 2);
     }

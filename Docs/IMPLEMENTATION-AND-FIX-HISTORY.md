@@ -1591,6 +1591,9 @@ Kampregelpakken (karré med fire skydezoner og bajonetter, rytterangreb efter st
 ### 2026-10-08 – Rytteritrussel merget; testslagets angreb ledes af officererne
 Codex' opgave om rytteritruslen (tidligere udløsning efter lukningsfart, bajonetter, kun det truede kompagni danner karré) er merget. Diagnose af at kompagnierne ikke flankerede i testslagene: med spillerautoritet udføres ANGRIB HER som en fysisk march til målet, og efter en afsluttet spillerordre holder enheden og skyder (ingen ny jagt, jf. gennemgangen C-17); flankering, ildbase og reserve kører kun, når officererne leder angrebet. Testslagenes bataljonschef giver derfor angrebsordren med officerens autoritet (-Strategy1864SkirmishAttack). Nyt testflag: -Strategy1864DebugOfficer logger hvert kompagnis ordre, fjende og flankerolle hvert fjerde sekund.
 
+### 2026-10-08 – Passive testslag, kamera under pause, forlad-knap, HØJ som standard
+Testslagene (startmenuens knapper og bat-filerne) starter nu med -Strategy1864SkirmishPassive: bataljonens AI er slået fra, kompagniernes doktrin er defensiv, og der gives ingen angrebsordre, så ingen angriber, før spilleren giver ordren (kompagnierne reagerer stadig: front, ild, karré). Kameraet kan flyttes under pause (tick, akser og handlinger kører under pause) og kører i realtid uanset kampens fart. Slaget har fået x½ (minimum 0,5) og en altid synlig udgangsknap: AFSLUT SLAGET -> KAMPAGNEN i et kampagneslag, FORLAD SLAGET -> STARTMENU i et testslag. Kompagniets navneskilt står 6,5 m bag bageste geled (var 18 m). Grafikkvalitet starter på HØJ (en figur for hver mand), og testslagene tvinger ikke længere figurskalaen.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
