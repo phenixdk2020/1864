@@ -226,6 +226,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	Buttons.Reset();
 	Tips.Reset();
 	PaintScale = Geometry.Scale;
+	if (bStartMenu) { PaintMenu(Geometry, Out, Layer); PaintToast(Geometry, Out, Layer + 10); return Layer + 20; }
 	if (Map->IsBattleView())
 	{
 		// On the battlefield model: no map signs; its name, and the way back.
@@ -2426,7 +2427,7 @@ void SCampaign1851Overlay::PaintFort(const FGeometry& Geometry, FSlateWindowElem
 		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("%d. Kompagni (%s)  ·  %s  ·  %d mand  ·  %s"), Map->CompanyNumber(C.Regiment, C.Company), *R.Name,
 			Officers.IsValidIndex(Captain) ? *FString::Printf(TEXT("Kaptajn %s"), *Officers[Captain].Name) : TEXT("ingen kaptajn"), C.Men, *Where),
 			FVector2D(Pos.X + 22.f, Y), Serif(11), Ink, Size.X - 150.f);
-		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 118.f, Y - 11.f), FVector2D(96.f, 22.f), TEXT("TRÆK UD"), EButton::FortReturn, c);
+		PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 136.f, Y - 11.f), FVector2D(96.f, 22.f), TEXT("TRÆK UD"), EButton::FortReturn, c);
 		Y += 24.f;
 	}
 	if (bFortPickCompany)
@@ -5721,11 +5722,47 @@ void SCampaign1851Overlay::PaintMenu(const FGeometry& Geometry, FSlateWindowElem
 	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
 	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Screen, FSlateLayoutTransform(FVector2D::ZeroVector)), White, ESlateDrawEffect::None, FLinearColor(0.f, 0.f, 0.f, 0.45f));
 
+	if (bStartMenu && !bStartLoad)
+	{
+		const FVector2D StartSize(820.f, 570.f);
+		const FVector2D StartPos = (Screen - StartSize) * 0.5f;
+		PaintPanel(Geometry, Out, Layer + 1, StartPos, StartSize);
+		PaintText(Geometry, Out, Layer + 3, TEXT("DANMARK · 1864"), StartPos + FVector2D(410.f, 46.f), Serif(32), Ink, 0.5f);
+		PaintText(Geometry, Out, Layer + 3, TEXT("Vælg dit felttog"), StartPos + FVector2D(410.f, 86.f), Serif(16, EFace::Italic), Gold, 0.5f);
+		const auto& StartScenarios = ACampaign1851Map::Scenarios();
+		const int32 StartChosen = StartScenarios.IsValidIndex(MenuScenario) ? MenuScenario : 0;
+		for (int32 StartIndex = 0; StartIndex < StartScenarios.Num(); ++StartIndex)
+		{
+			PaintButton(Geometry, Out, Layer + 3, StartPos + FVector2D(32.f + StartIndex * 230.f, 118.f), FVector2D(218.f, 34.f), StartScenarios[StartIndex].Name, EButton::Scenario, StartIndex, StartChosen == StartIndex);
+		}
+		PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("Startdato: %s"), *ACampaign1851Map::FormatDate(FDateTime(StartScenarios[StartChosen].Year, 7, 1))), StartPos + FVector2D(32.f, 181.f), Serif(16), Ink, 0.f, false);
+		// Two fitted lines keep the scenario descriptions readable at the menu's fixed width.
+		const FString StartDescription = StartScenarios[StartChosen].Text;
+		int32 StartBreak = StartDescription.Find(TEXT(" "), ESearchCase::CaseSensitive, ESearchDir::FromStart, StartDescription.Len() / 2);
+		if (StartBreak == INDEX_NONE) { StartBreak = StartDescription.Len(); }
+		PaintTextFit(Geometry, Out, Layer + 3, StartDescription.Left(StartBreak), StartPos + FVector2D(32.f, 215.f), Serif(14), Ink, 756.f);
+		PaintTextFit(Geometry, Out, Layer + 3, StartDescription.Mid(StartBreak).TrimStart(), StartPos + FVector2D(32.f, 240.f), Serif(14), Ink, 756.f);
+		PaintText(Geometry, Out, Layer + 3, TEXT("Spil som"), StartPos + FVector2D(32.f, 287.f), Serif(16), Gold, 0.f, false);
+		PaintButton(Geometry, Out, Layer + 3, StartPos + FVector2D(32.f, 310.f), FVector2D(200.f, 34.f), TEXT("DANMARK"), EButton::NewGameNation, 0, Map->NewGameNation == TEXT("DK"));
+		PaintButton(Geometry, Out, Layer + 3, StartPos + FVector2D(244.f, 310.f), FVector2D(280.f, 34.f), TEXT("SVERIGE-NORGE"), EButton::NewGameNation, 1, Map->NewGameNation == TEXT("SE"));
+		PaintText(Geometry, Out, Layer + 3, TEXT("Sverige-Norge benytter den eksisterende abstrakte nationsmodel."), StartPos + FVector2D(32.f, 372.f), Serif(12, EFace::Italic), MutedInk, 0.f, false);
+		PaintText(Geometry, Out, Layer + 3, TEXT("Preussen · Østrig · Rusland · Storbritannien · Frankrig — kommer senere"), StartPos + FVector2D(32.f, 403.f), Serif(12), MutedInk, 0.f, false);
+		PaintText(Geometry, Out, Layer + 3, TEXT("Afvigelse fra historien"), StartPos + FVector2D(32.f, 447.f), Serif(12, EFace::Italic), Gold, 0.f, false);
+		const int32 StartDeviations[] = { 0, 10, 20, 35 };
+		for (int32 StartStep = 0; StartStep < 4; ++StartStep)
+		{
+			PaintButton(Geometry, Out, Layer + 3, StartPos + FVector2D(230.f + StartStep * 85.f, 430.f), FVector2D(76.f, 28.f), FString::Printf(TEXT("%d %%"), StartDeviations[StartStep]), EButton::Deviation, StartDeviations[StartStep], FMath::RoundToInt(Map->NewGameDeviation * 100.f) == StartDeviations[StartStep]);
+		}
+		PaintButton(Geometry, Out, Layer + 3, StartPos + FVector2D(32.f, 480.f), FVector2D(220.f, 40.f), TEXT("NYT SPIL"), EButton::NewGame);
+		PaintButton(Geometry, Out, Layer + 3, StartPos + FVector2D(270.f, 480.f), FVector2D(260.f, 40.f), TEXT("INDLÆS SPIL"), EButton::StartLoad);
+		PaintButton(Geometry, Out, Layer + 3, StartPos + FVector2D(548.f, 480.f), FVector2D(240.f, 40.f), TEXT("AFSLUT"), EButton::ExitGame);
+		return;
+	}
 	const float RowHeight = 62.f;
-	const FVector2D Size(720.f, 120.f + MenuSlots.Num() * RowHeight + 104.f);
+	const FVector2D Size(820.f, 120.f + MenuSlots.Num() * RowHeight + 64.f);
 	const FVector2D Pos = (Screen - Size) * 0.5f;
 	PaintPanel(Geometry, Out, Layer + 1, Pos, Size);
-	PaintText(Geometry, Out, Layer + 3, TEXT("S P I L L E T"), Pos + FVector2D(Size.X * 0.5f, 40.f), Serif(22), Ink, 0.5f);
+	PaintText(Geometry, Out, Layer + 3, bStartMenu ? TEXT("INDLÆS SPIL") : TEXT("S P I L M E N U"), Pos + FVector2D(Size.X * 0.5f, 40.f), Serif(22), Ink, 0.5f);
 	PaintText(Geometry, Out, Layer + 3, TEXT("Gem og indlæs felttoget"), Pos + FVector2D(Size.X * 0.5f, 72.f), Serif(12, EFace::Italic), Gold, 0.5f, false);
 
 	for (int32 i = 0; i < MenuSlots.Num(); ++i)
@@ -5735,52 +5772,24 @@ void SCampaign1851Overlay::PaintMenu(const FGeometry& Geometry, FSlateWindowElem
 		TArray<FVector2D> Rule = { Row + FVector2D(24.f, 0.f), Row + FVector2D(Size.X - 24.f, 0.f) };
 		FSlateDrawElement::MakeLines(Out, Layer + 3, Geometry.ToPaintGeometry(), Rule, ESlateDrawEffect::None, Gold.CopyWithNewOpacity(0.3f), true, 1.f);
 		PaintText(Geometry, Out, Layer + 3, S.Label, Row + FVector2D(32.f, 22.f), Serif(16), Ink, 0.f, false);
-		PaintText(Geometry, Out, Layer + 3, S.Info, Row + FVector2D(32.f, 46.f), Serif(11, EFace::Italic), S.bExists ? Ink : MutedInk, 0.f, false);
-		if (S.bCanSave)
+		PaintTextFit(Geometry, Out, Layer + 3, S.Info, Row + FVector2D(32.f, 46.f), Serif(11, EFace::Italic), S.bExists ? Ink : MutedInk, Size.X - 64.f);
+		if (S.bCanSave && !bStartMenu)
 		{
-			PaintButton(Geometry, Out, Layer + 3, Row + FVector2D(Size.X - 216.f, 10.f), FVector2D(88.f, 28.f), TEXT("GEM"), EButton::SaveSlot, i);
+			PaintButton(Geometry, Out, Layer + 3, Row + FVector2D(Size.X - 254.f, 10.f), FVector2D(110.f, 28.f), TEXT("GEM SPIL"), EButton::SaveSlot, i);
 		}
 		if (S.bExists)
 		{
-			PaintButton(Geometry, Out, Layer + 3, Row + FVector2D(Size.X - 118.f, 10.f), FVector2D(94.f, 28.f), TEXT("INDLÆS"), EButton::LoadSlot, i);
+			PaintButton(Geometry, Out, Layer + 3, Row + FVector2D(Size.X - 118.f, 10.f), FVector2D(120.f, 28.f), TEXT("INDLÆS SPIL"), EButton::LoadSlot, i);
 		}
 	}
-	// The scenario of the next new game.
+	if (bStartMenu)
 	{
-		const int32 Chosen = MenuScenario >= 0 ? MenuScenario : ACampaign1851Map::ScenarioIndex();
-		PaintText(Geometry, Out, Layer + 3, TEXT("Scenarie"), Pos + FVector2D(24.f, Size.Y - 104.f), Serif(12, EFace::Italic), Gold, 0.f, false);
-		const TArray<ACampaign1851Map::FScenario>& List = ACampaign1851Map::Scenarios();
-		for (int32 i = 0; i < List.Num(); ++i)
-		{
-			const FVector2D At = Pos + FVector2D(110.f + i * 170.f, Size.Y - 112.f);
-			PaintButton(Geometry, Out, Layer + 3, At, FVector2D(160.f, 28.f), *List[i].Name, EButton::Scenario, i, Chosen == i);
-			AddTip(At, FVector2D(160.f, 28.f), List[i].Text);
-		}
+		PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(24.f, Size.Y - 50.f), FVector2D(200.f, 30.f), TEXT("TILBAGE"), EButton::CloseMenu);
+		return;
 	}
-	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(24.f, Size.Y - 50.f), FVector2D(bConfirmNewGame ? 210.f : 130.f, 30.f),
-		bConfirmNewGame ? TEXT("BEKRÆFT: NYT SPIL") : TEXT("NYT SPIL"), EButton::NewGame);
-	if (bConfirmNewGame)
-	{
-		PaintText(Geometry, Out, Layer + 3, TEXT("Alle byggerier slettes"), Pos + FVector2D(248.f, Size.Y - 35.f), Serif(11, EFace::Italic), Gold, 0.f, false);
-		// How far the new world may stray from history (seeded: every game its own).
-		PaintText(Geometry, Out, Layer + 3, TEXT("Afvigelse fra historien"), Pos + FVector2D(24.f, Size.Y - 78.f), Serif(12, EFace::Italic), Gold, 0.f, false);
-		const int32 Steps[] = { 0, 10, 20, 35 };
-		for (int32 k = 0; k < 4; ++k)
-		{
-			PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(200.f + k * 74.f, Size.Y - 92.f), FVector2D(68.f, 26.f), FString::Printf(TEXT("%d %%"), Steps[k]), EButton::Deviation, Steps[k],
-				FMath::RoundToInt(Map->NewGameDeviation * 100.f) == Steps[k]);
-		}
-		// The nation to play (Sweden-Norway on the abstract model, a first step).
-		PaintText(Geometry, Out, Layer + 3, TEXT("Spil som"), Pos + FVector2D(24.f, Size.Y - 112.f), Serif(12, EFace::Italic), Gold, 0.f, false);
-		const TCHAR* Ids[] = { TEXT("DK"), TEXT("SE") };
-		const TCHAR* Names[] = { TEXT("DANMARK"), TEXT("SVERIGE-NORGE") };
-		for (int32 k = 0; k < 2; ++k)
-		{
-			PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(200.f + k * 150.f, Size.Y - 126.f), FVector2D(144.f, 26.f), Names[k], EButton::NewGameNation, k, Map->NewGameNation == Ids[k]);
-		}
-	}
-	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 144.f, Size.Y - 50.f), FVector2D(120.f, 30.f), TEXT("LUK"), EButton::CloseMenu);
-	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 314.f, Size.Y - 50.f), FVector2D(160.f, 30.f), TEXT("AFSLUT SPIL"), EButton::ExitGame);
+	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(24.f, Size.Y - 50.f), FVector2D(170.f, 30.f), TEXT("STARTMENU"), EButton::StartMenu);
+	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(204.f, Size.Y - 50.f), FVector2D(120.f, 30.f), TEXT("AFSLUT"), EButton::ExitGame);
+	PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 270.f, Size.Y - 50.f), FVector2D(246.f, 30.f), TEXT("TILBAGE TIL SPILLET"), EButton::CloseMenu);
 }
 
 void SCampaign1851Overlay::PaintToast(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const
