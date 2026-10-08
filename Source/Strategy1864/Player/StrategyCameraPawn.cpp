@@ -1,4 +1,5 @@
-#include "StrategyCameraPawn.h"
+﻿#include "StrategyCameraPawn.h"
+#include "StrategyHUD.h"
 #include "Misc/ConfigCacheIni.h"
 #include "StrategyPlayerController.h"
 #include "../Units/StrategyUnit.h"
@@ -217,6 +218,17 @@ void AStrategyCameraPawn::MoveRight(float Value)
 
 void AStrategyCameraPawn::ZoomCamera(float Value)
 {
+    if (!FMath::IsNearlyZero(Value))
+    {
+        if (APlayerController* HudPC = Cast<APlayerController>(GetController()))
+        {
+            float HudMouseX = 0.f, HudMouseY = 0.f;
+            if (AStrategyHUD* CommandHUD = Cast<AStrategyHUD>(HudPC->GetHUD()))
+            {
+                if (HudPC->GetMousePosition(HudMouseX, HudMouseY) && CommandHUD->HandleScroll(FVector2D(HudMouseX, HudMouseY), Value)) return;
+            }
+        }
+    }
     if (!FMath::IsNearlyZero(Value) && bFollowingProjectile)
     {
         StopProjectileFollow(true);

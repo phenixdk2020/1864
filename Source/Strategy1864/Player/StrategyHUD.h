@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
@@ -25,6 +25,8 @@ public:
     void EndSelectionBox();
 
     /** A click on a panel: carried out here; true when it was on the screen's panels (not the battlefield). */
+    bool HandleScroll(const FVector2D& ScreenPoint, float Delta);
+
     bool HandleClick(const FVector2D& ScreenPoint);
 
     /** Is the point over one of the panels. */
@@ -67,6 +69,15 @@ private:
 
     void DrawOOB();
     void DrawOOBRow(AStrategyUnit* Unit, int32 Depth, float& Y, int32 Guard);
+    float CommandHeight() const;
+    void DrawRounded(float X, float Y, float W, float H, const FLinearColor& Fill);
+    void DrawHeading(const FString& Label, float X, float Y, float W);
+    void DrawStatBar(const FString& Label, const FString& Value, float Fraction, float X, float Y, float W);
+    bool bCommandStyle = false;
+    FBox2D SubordinateRect = FBox2D(ForceInit);
+    TWeakObjectPtr<AStrategyUnit> ScrollUnit;
+    int32 SubordinateOffset = 0;
+    int32 SubordinateMaxOffset = 0;
     void DrawCommandPanel(AStrategyUnit* Unit);
     void DrawMinimap();
     void DrawObjectiveMarkers();

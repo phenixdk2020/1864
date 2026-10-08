@@ -1,4 +1,4 @@
-# PROJECT 1864 — Implementation & Fix History
+﻿# PROJECT 1864 — Implementation & Fix History
 
 > **Dokumentet vedligeholdes nu her i Game1864-projektet** (`1864-Campaign/Docs`). Slaget og kampagnen er samlet i ét projekt siden 1. oktober 2026.
 > - Afsnit 1–8 er Unity-prototypens historik. Den er uændret fra `Strategy/docs/IMPLEMENTATION-AND-FIX-HISTORY.md`.
@@ -1649,6 +1649,14 @@ Codex' tre opgaver er merget og bygget: spredt orden og nedlægning under artill
 
 ### 2026-10-08 – Bevægelse, waypoints og formationsstørrelse merget; liste over enheder i egen boks
 Codex' tre opgaver er merget: bevægelse (skydekegle skjult i kolonne og under formationsskift, enheder under ryk-frem/angrib stopper og skyder til målet er væk, statusmarkering på skiltet, dæmpet fodstøv, glattere bevægelse), waypoints (destinationskasse, vejlinje, ALT+højreklik) og lavere grafik giver mindre formationer og kegle. Enhedskortet for en stak har fået en knap, VIS ALLE ENHEDER, som åbner en boks med alle enhederne (rulbar, rækker vælger en enhed); markører for enheder under oplæring skjules bag kortet. Store drejninger (over 30 grader) får mændene til at gå til de nye pladser i stedet for en stiv fløjsving. Standard er medium grafik og en figur pr. mand; antallet af figurer er en indstilling for sig. Flettekonflikt i InfantryVisualComponent løst (kompakte pladser fra lowq og forhindring af spring fra motion).
+
+### 2026-10-08: Nyt kommando-HUD til 3D-slaget
+
+- Bundbjælken har fem afrundede, mørke paneler: enhed, ledelse/ild, ordrer, formation og underlagte. Bredderne normaliseres fra forholdet 20/26/16/22/24; højden er 226 px for at give plads til alle betjeninger.
+- Styrke, moral og samhold vises med farvede bjælker; AI, doktrin, ild, salvemetode, formation og stilling bruger eksisterende handlinger. HQ-ordrer, pontonbro og dragonernes af-/påstigning er bevaret.
+- Underlagte vises i en klikbar tabel med ordre-/AI-piller, tilknytning, musehjulsrulning og en lille rulleindikator. Musehjulet over tabellen ruller listen frem for kameraet.
+- Tomt valg viser Ingen enhed valgt. Minikortet er flyttet op, og OOB-rækker begrænses over bundbjælken; topbjælke, beskeder og indstillinger er uændrede.
+- Validering: statisk kontrol af enum-/handlingskoblinger og git diff --check. Ingen build, spilstart eller commit; visuel afprøvning i Unreal udestår.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
