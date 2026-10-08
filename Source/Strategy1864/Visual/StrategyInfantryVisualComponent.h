@@ -287,6 +287,11 @@ private:
     {
         FVector Goal = FVector::ZeroVector;
         FVector Slot = FVector::ZeroVector;
+        float Pace = FMath::FRandRange(0.94f, 1.06f);
+        float WalkPhase = FMath::FRand();
+        float StartDelay = FMath::FRandRange(0.f, 0.5f);
+        float StartRemaining = 0.f;
+        float HaltRemaining = 0.f;
         float SlotYaw = 0.f;
         float Yaw = 0.0f;
         bool bPlaced = false;     // has been put in his first place
@@ -301,6 +306,7 @@ private:
     bool bPendingLoop = true;
     bool bPendingHold = false;
     bool bWasSettling = false;
+    bool bWasVisualTravel = false;
     void UpdateSettling(float DeltaTime);
     void ApplyPendingStance(float Now);
 

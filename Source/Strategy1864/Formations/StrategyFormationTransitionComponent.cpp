@@ -68,7 +68,9 @@ void UStrategyFormationTransitionComponent::HandleFormationChanged(
         (NewFormation == EStrategyFormationType::Line || NewFormation == EStrategyFormationType::CavalryLine);
     const bool bDeployWhileWalking = bColumnToLine && OwnerUnit->CombatComponent &&
         !OwnerUnit->CombatComponent->FindBestTarget(false);
-    if (!bDeployWhileWalking && OwnerUnit->MovementExecutor &&
+    const bool bEnterMarchWhileWalking = NewFormation == EStrategyFormationType::MarchColumn ||
+        NewFormation == EStrategyFormationType::CavalryColumn;
+    if (!bEnterMarchWhileWalking && !bDeployWhileWalking && OwnerUnit->MovementExecutor &&
         OwnerUnit->MovementExecutor->HasMovementGoal())
     {
         OwnerUnit->MovementExecutor->PauseMovementForSeconds(
