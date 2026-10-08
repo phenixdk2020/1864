@@ -82,10 +82,18 @@ float ACampaign1851Map::CreditRate() const
 	return FMath::Min(0.09f, 0.04f + 0.02f * float(Debt / Revenue) + (bAtWar ? 0.015f : 0.f) + (Mood < 30.f ? 0.01f : 0.f));
 }
 
+double ACampaign1851Map::LoanLimit() const
+{
+	return FMath::Max(0.0, 3.0 * (YearlyTax() + ExportDutyPerYear() + ForeignIncomePerYear()));
+}
+
 FString ACampaign1851Map::LoanBlockReason(double Amount) const
 {
-	const double Revenue = YearlyTax() + ExportDutyPerYear() + ForeignIncomePerYear();
-	if (Debt + Amount > 3.0 * Revenue)
+	if (!FMath::IsFinite(Amount) || Amount <= 0.0)
+	{
+		return TEXT("lånebeløbet skal være positivt og endeligt");
+	}
+	if (Debt + Amount > LoanLimit())
 	{
 		return TEXT("kreditten slår ikke til (højst 3 års indtægter)");
 	}
@@ -94,6 +102,7 @@ FString ACampaign1851Map::LoanBlockReason(double Amount) const
 
 bool ACampaign1851Map::TakeLoan(double Amount, FString* OutReason)
 {
+	if (OutReason) { OutReason->Reset(); }
 	const FString Why = LoanBlockReason(Amount);
 	if (!Why.IsEmpty())
 	{
@@ -111,12 +120,17 @@ bool ACampaign1851Map::TakeLoan(double Amount, FString* OutReason)
 
 bool ACampaign1851Map::RepayLoan(double Amount)
 {
+	if (!FMath::IsFinite(Amount) || Amount <= 0.0)
+	{
+		return false;
+	}
 	Amount = FMath::Min(Amount, Debt);
 	if (Amount <= 0.0 || Treasury < Amount)
 	{
 		return false;
 	}
 	Debt -= Amount;
+	if (Debt == 0.0) { DebtRate = 0.04f; }
 	AddTransaction(-Amount, TEXT("Afdrag på statsgælden"));
 	return true;
 }
@@ -164,7 +178,7 @@ TArray<FString> ACampaign1851Map::TakeNews()
 TArray<FString> ACampaign1851Map::SaveEconomy() const
 {
 	TArray<FString> Out;
-	Out.Add(FString::Printf(TEXT("debt|%.2f|%.5f"), Debt, DebtRate));
+	Out.Add(FString::Printf(TEXT("debt|%.17g|%.9g"), Debt, DebtRate));
 	for (const FCampaign1851Record& R : History)
 	{
 		Out.Add(FString::Printf(TEXT("h|%.1f|%.0f|%.0f|%.0f|%.1f|%.2f|%.2f|%.3f|%.0f"), R.Day, R.Population, R.Treasury, R.ArmyMen, R.RailKm, R.Tension, R.Mood, R.Grain, R.Debt));
@@ -193,8 +207,10 @@ void ACampaign1851Map::RestoreEconomy(const TArray<FString>& Lines)
 		Line.ParseIntoArray(P, TEXT("|"), false);
 		if (P.Num() == 3 && P[0] == TEXT("debt"))
 		{
-			Debt = FCString::Atod(*P[1]);
-			DebtRate = FCString::Atof(*P[2]);
+			const double SavedDebt = FCString::Atod(*P[1]);
+			const float SavedRate = FCString::Atof(*P[2]);
+			Debt = FMath::IsFinite(SavedDebt) ? FMath::Max(0.0, SavedDebt) : 0.0;
+			DebtRate = Debt > 0.0 && FMath::IsFinite(SavedRate) ? FMath::Clamp(SavedRate, 0.04f, 0.09f) : 0.04f;
 		}
 		else if (P.Num() == 10 && P[0] == TEXT("h"))
 		{

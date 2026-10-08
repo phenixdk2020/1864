@@ -845,6 +845,8 @@ public:
 	float GetDebtRate() const { return DebtRate; }
 	/** The rate a new loan would cost now. */
 	float CreditRate() const;
+	/** Three years of current tax, export duty and foreign income, in either scenario. */
+	double LoanLimit() const;
 	FString LoanBlockReason(double Amount) const;
 	bool TakeLoan(double Amount, FString* OutReason = nullptr);
 	bool RepayLoan(double Amount);

@@ -5373,10 +5373,13 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 		Y += 26.f;
 		PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("Gæld %s rd. til %.1f %%  ·  nyt lån nu til %.1f %%"), *Thousands(FMath::RoundToInt(Map->GetDebt())), Map->GetDebtRate() * 100.f, Map->CreditRate() * 100.f),
 			FVector2D(LX, Y), Serif(13), Ink, 0.f, false);
+		Y += 22.f;
+		PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("Ledig kredit %s rd.  ·  højst 3 års indtægter  ·  renter betales månedligt"), *Thousands(FMath::RoundToInt(FMath::Max(0.0, Map->LoanLimit() - Map->GetDebt())))),
+			FVector2D(LX, Y), Serif(10, EFace::Italic), MutedInk, 0.f, false);
 		Y += 18.f;
 		PaintButton(Geometry, Out, Layer + 3, FVector2D(LX, Y), FVector2D(170.f, 26.f), TEXT("LÅN 100.000"), EButton::Loan, 0, false, !Map->LoanBlockReason(100000.0).IsEmpty());
 		PaintButton(Geometry, Out, Layer + 3, FVector2D(LX + 180.f, Y), FVector2D(170.f, 26.f), TEXT("LÅN 250.000"), EButton::Loan, 1, false, !Map->LoanBlockReason(250000.0).IsEmpty());
-		PaintButton(Geometry, Out, Layer + 3, FVector2D(LX + 360.f, Y), FVector2D(170.f, 26.f), TEXT("AFDRAG 100.000"), EButton::Loan, 2, false, Map->GetDebt() < 1.0 || Map->GetTreasury() < 100000.0);
+		PaintButton(Geometry, Out, Layer + 3, FVector2D(LX + 360.f, Y), FVector2D(170.f, 26.f), Map->GetDebt() < 100000.0 ? TEXT("BETAL RESTGÆLD") : TEXT("AFDRAG 100.000"), EButton::Loan, 2, false, Map->GetDebt() <= 0.0 || Map->GetTreasury() < FMath::Min(100000.0, Map->GetDebt()));
 		// Right column: the ministries' budgets (what each may spend a month on its own, AUTO) and the reserve, then the account book.
 		const float RX = Pos.X + 640.f, RW = Size.X - 640.f - 24.f;
 		float MY = Pos.Y + 110.f;

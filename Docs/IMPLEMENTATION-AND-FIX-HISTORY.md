@@ -1407,6 +1407,13 @@ Forskningsvinduet bruger nu hele bredden. En gren, hvis emner står side om side
 - `Campaign1851Nations::CivilEffect` vælger nu en uforanderlig tabel efter det aktive scenaries startår: 1825 har 80 % af 1851-arbejdspladserne og afgifterne (afrundet pr. bygning), svarende til scenariets befolkningsfaktor på 0,80. Told og eksport giver 60 % som et forsigtigt skøn for mindre handel før jernbanenettet. Skatten er fortsat 6 rd. pr. arbejdsplads om året; vækstbonusser og privat ejerskab er uændrede. 1851 bruger præcis den hidtidige tabel.
 - Samme opslag bruges af statsøkonomien, private investeringer, byggerådgiveren og byggeriets liste og bygningskort, så viste og beregnede tal følges ad, også efter scenarieskift. Byggeomkostninger, vedligehold, befolkningskrav og jernbanernes åbningstider er uændrede.
 - Eksempel: en toldbod giver i 1825 32 job, 320 rd. i afgifter og 900 rd. i told/eksport, i alt 1.412 rd./år mod 2.140 i 1851. Faktorerne er spilbalance-estimater, ikke historiske regnskabstal, og gælder hele 1825-kampagnen. Kontrolleret ved kildegennemgang og diff; spillet er hverken bygget eller startet. Balancen skal afprøves i spillet senere.
+### 2026-10-08 - Statsgæld og lån: audit af 1825 og 1851
+
+- Restgæld under 100.000 rd. kan nu betales, når kassen dækker restbeløbet; knappen og bekræftelsen viser den faktiske betaling. Ved fuld indfrielse vises grundrenten 4 % igen.
+- Lån og afdrag afviser negative, nul og ikke-endelige beløb. Gæld og vægtet rente gemmes uden den tidligere afrunding; indlæsning normaliserer ugyldig gæld og rente og bevarer det eksisterende saveformat.
+- Statskassen viser ledig kredit og månedlig rentebetaling. Rammen bruger fortsat tre års aktuelle skatter, udførselstold og udenlandsindtægter, så den mindre befolkning i 1825 indgår automatisk. Gyldige låns renteberegning, beløb og 1851-balancering er bevaret.
+- Usikkert: historiske 1825-tal for Øresundstold, handel, startreserve og passende lånestørrelser er ikke dokumenteret; de eksisterende estimater er beholdt. Afdrag reducerer den samlede gæld forholdsmæssigt til gennemsnitsrenten; enkelte lån kan ikke indfries separat. Visuel plads til den nye kreditlinje skal kontrolleres i spillet.
+- Kontrol: statisk gennemgang af månedsbetaling, budget, ministerhandlinger og save/restore, numeriske kanttilfælde samt `git diff --check`. Spillet er hverken bygget eller startet.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
