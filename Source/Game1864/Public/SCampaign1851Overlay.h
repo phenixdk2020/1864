@@ -47,7 +47,7 @@ public:
 	void SetSelectedCity(int32 Index) { SelectedCity = Index; }
 	int32 GetSelectedCity() const { return SelectedCity; }
 	/** Regiments selected (a stack, a column or single ones); they take the info panel. */
-	void SetSelectedRegiments(const TArray<int32>& In) { if (In != SelectedRegiments) { CloseUnitCustomisation(); } SelectedRegiments = In; if (In.Num() == 0) { Picker = EPicker::None; InspectedOfficer = INDEX_NONE; } }
+	void SetSelectedRegiments(const TArray<int32>& In) { if (In != SelectedRegiments) { CloseUnitCustomisation(); StackScroll = 0; } SelectedRegiments = In; if (In.Num() == 0) { Picker = EPicker::None; InspectedOfficer = INDEX_NONE; } }
 	const TArray<int32>& GetSelectedRegiments() const { return SelectedRegiments; }
 	/** Amt to show when no town is selected (0 = none). */
 	void SetSelectedAmt(int32 Id) { SelectedAmt = Id; }
@@ -75,6 +75,12 @@ public:
 	void BeginScrollDrag(int32 Which, const FVector2D& ViewportPixel);
 	void DragScrollTo(const FVector2D& ViewportPixel);
 	void EndScrollDrag() { ScrollDrag = 0; }
+	void ScrollStack(int32 Rows) { StackScroll = FMath::Clamp(StackScroll + Rows, 0, FMath::Max(0, StackScrollMax)); }
+	bool IsOverUnitCard(const FVector2D& ViewportPixel) const
+	{
+		const FVector2D Local = ViewportPixel / FMath::Max(PaintScale, 0.01f);
+		return !SelectedRegiments.IsEmpty() && UnitCardMax.X > UnitCardMin.X && Local.X >= UnitCardMin.X && Local.Y >= UnitCardMin.Y && Local.X <= UnitCardMax.X && Local.Y <= UnitCardMax.Y;
+	}
 	bool IsScrollDragging() const { return ScrollDrag != 0; }
 	void ScrollChart(int32 Steps, bool bVertical = false) { float& S = bVertical ? ChartScrollY : ChartScroll; S = FMath::Max(0.f, S + Steps * 60.f); }
 	bool IsOOBOpen() const { return bOOB; }
@@ -419,7 +425,12 @@ private:
 	mutable float ChartContentH = 1200.f, ChartContentW = 0.f, ChartViewH = 0.f, ChartViewW = 0.f;
 	mutable FVector2D BarVMin = FVector2D::ZeroVector, BarVMax = FVector2D::ZeroVector, BarHMin = FVector2D::ZeroVector, BarHMax = FVector2D::ZeroVector;
 	mutable float ThumbV0 = 0.f, ThumbV1 = 0.f, ThumbH0 = 0.f, ThumbH1 = 0.f;
-	int32 ScrollDrag = 0;          // 0 none, 1 vertical, 2 horizontal
+	int32 ScrollDrag = 0;          // 0 none, 1 chart vertical, 2 chart horizontal, 3 the stack list on the unit card
+	// The stack table on the unit card: the first row shown, and its scrollbar.
+	mutable int32 StackScroll = 0, StackScrollMax = 0;
+	mutable FVector2D UnitCardMin = FVector2D::ZeroVector, UnitCardMax = FVector2D::ZeroVector;
+	mutable FVector2D CardBarMin = FVector2D::ZeroVector, CardBarMax = FVector2D::ZeroVector;
+	mutable float CardThumb0 = 0.f, CardThumb1 = 0.f;
 	float ScrollGrab = 0.f;
 	mutable FVector2D ChartMin = FVector2D::ZeroVector, ChartMax = FVector2D::ZeroVector;
 	mutable FVector2D TreeMin = FVector2D::ZeroVector, TreeMax = FVector2D::ZeroVector;

@@ -1315,6 +1315,8 @@ public:
 	bool CanAssignFormationPost(int32 Officer, int32 Formation, int32 Post) const;
 	/** Dissolves a formation: its units and sub-formations go up a level. */
 	void DissolveFormation(int32 Id);
+	/** A field army with no units and no sub-formations left is taken away (its box disappears from the order of battle). */
+	void PruneEmptyFormations();
 	/** A formation and all under it dissolved, its units back in garrison; returns the number of units. */
 	int32 ReturnFormationToGarrison(int32 Id);
 	/** True if formation Id is Ancestor or lies under it. */

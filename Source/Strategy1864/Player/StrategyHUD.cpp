@@ -174,8 +174,6 @@ void AStrategyHUD::DrawHUD()
     {
         FigureDivisor = Strategy1864BattleQuality::GetFigureDivisor();
         BattleQualityPreset = Strategy1864BattleQuality::GetPreset();
-        const int32 PresetDivisors[] = { 5, 2, 1 };
-        if (FigureDivisor != PresetDivisors[BattleQualityPreset]) { BattleQualityPreset = -1; }
     }
     Buttons.Reset();
     Panels.Reset();
@@ -967,8 +965,7 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 bSettingsOpen = !bSettingsOpen;
                 break;
             case EAction::BattleQuality:
-                BattleQualityPreset = B.Value;
-                FigureDivisor = B.Value == 0 ? 5 : B.Value == 1 ? 2 : 1;
+                BattleQualityPreset = B.Value;   // the graphics preset; the number of figures is its own setting
                 Strategy1864BattleQuality::ApplyPreset(GetWorld(), B.Value, true);
                 break;
             case EAction::TimeControl:
@@ -979,8 +976,8 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 }
                 break;
             case EAction::FigureScale:
-                BattleQualityPreset = -1;
                 FigureDivisor = B.Value;
+                Strategy1864BattleQuality::SetFigureDivisor(B.Value);
                 for (TActorIterator<AStrategyCompanyUnit> It(GetWorld()); It; ++It)
                 {
                     if (IsValid(*It) && It->InfantryVisualComponent) { It->InfantryVisualComponent->SetVisualScaleDivisor(B.Value); }

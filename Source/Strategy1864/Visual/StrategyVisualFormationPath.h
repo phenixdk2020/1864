@@ -32,7 +32,15 @@ struct FStrategyVisualFormationPath
         if (!bInitialized) { Reset(Unit); }
         const FVector Translation = Unit.GetLocation() - PreviousUnit.GetLocation();
         Center += Translation;
-        const float Remaining = FMath::FindDeltaAngleDegrees(Facing, Unit.Rotator().Yaw);
+        float Remaining = FMath::FindDeltaAngleDegrees(Facing, Unit.Rotator().Yaw);
+        if (!bColumn && FMath::Abs(Remaining) > 30.f)
+        {
+            // A long line cannot wheel through a big turn in step with the unit (the outer man's pace limits it to a few degrees a
+            // second, so the men would stand slantwise for twenty seconds): after a big turn the men turn and walk to their new places.
+            Facing = Unit.Rotator().Yaw;
+            Center = Unit.GetLocation();
+            Remaining = 0.f;
+        }
         // The one-degree gate is shared by all figures; once started, finish smoothly.
         bTurning = FMath::Abs(Remaining) > (bTurning ? 0.01f : 1.f);
         const FVector Pivot = SlotBounds.IsValid

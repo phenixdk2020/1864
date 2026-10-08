@@ -1038,7 +1038,12 @@ void SCampaign1851Overlay::BeginScrollDrag(int32 Which, const FVector2D& Viewpor
 {
 	const FVector2D Local = ViewportPixel / FMath::Max(PaintScale, 0.01f);
 	ScrollDrag = Which;
-	if (Which == 1)
+	if (Which == 3)
+	{
+		const float Len = CardThumb1 - CardThumb0;
+		ScrollGrab = (Local.Y >= CardThumb0 && Local.Y <= CardThumb1) ? Local.Y - CardThumb0 : Len * 0.5f;
+	}
+	else if (Which == 1)
 	{
 		const float Len = ThumbV1 - ThumbV0;
 		ScrollGrab = (Local.Y >= ThumbV0 && Local.Y <= ThumbV1) ? Local.Y - ThumbV0 : Len * 0.5f;   // a click on the track puts the thumb under the pointer
@@ -1054,7 +1059,15 @@ void SCampaign1851Overlay::BeginScrollDrag(int32 Which, const FVector2D& Viewpor
 void SCampaign1851Overlay::DragScrollTo(const FVector2D& ViewportPixel)
 {
 	const FVector2D Local = ViewportPixel / FMath::Max(PaintScale, 0.01f);
-	if (ScrollDrag == 1)
+	if (ScrollDrag == 3)
+	{
+		const float TrackLen = CardBarMax.Y - CardBarMin.Y, ThumbLen = CardThumb1 - CardThumb0;
+		if (TrackLen > ThumbLen + 1.f)
+		{
+			StackScroll = FMath::Clamp(FMath::RoundToInt(FMath::Clamp((Local.Y - ScrollGrab - CardBarMin.Y) / (TrackLen - ThumbLen), 0.f, 1.f) * StackScrollMax), 0, StackScrollMax);
+		}
+	}
+	else if (ScrollDrag == 1)
 	{
 		const float TrackLen = BarVMax.Y - BarVMin.Y, ThumbLen = ThumbV1 - ThumbV0;
 		const float MaxY = FMath::Max(0.f, ChartContentH + 40.f - ChartViewH);
@@ -1247,6 +1260,7 @@ void SCampaign1851Overlay::PaintArmy(const FGeometry& Geometry, FSlateWindowElem
 		const FCampaign1851Regiment& R = Regs[i];
 		FVector2D At;
 		if (!R.bTraining || !ToLocal(Geometry, Map->RegimentWorld(i), At)) { continue; }
+		if (!SelectedRegiments.IsEmpty() && UnitCardMax.X > UnitCardMin.X && At.X > UnitCardMin.X - 160.f && At.X < UnitCardMax.X && At.Y > UnitCardMin.Y - 20.f && At.Y < UnitCardMax.Y) { continue; }   // the card is see-through: no tag behind it
 		int32 Offset = 0;
 		for (int32 j = 0; j < i; ++j) { Offset += Regs[j].bTraining && Regs[j].Town == R.Town ? 1 : 0; }
 		At += FVector2D(32.f, 20.f + Offset * 20.f);
@@ -1645,9 +1659,11 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	Height += 76.f;                                             // buttons and hint
 	const float RowHeight = 21.f;
 	const float Room = Geometry.GetLocalSize().Y - 190.f - 360.f - Height - 34.f;
-	const int32 Fit = FMath::Max(3, FMath::FloorToInt(Room / RowHeight));
+	const int32 Fit = FMath::Max(7, FMath::FloorToInt(Room / RowHeight));
 	const int32 Rows = bSingle ? 0 : FMath::Min(Sel.Num(), Sel.Num() > Fit ? FMath::Max(0, Fit - 1) : Fit);
 	const bool bMore = !bSingle && Rows < Sel.Num();
+	StackScrollMax = bSingle ? 0 : FMath::Max(0, Sel.Num() - Rows);
+	StackScroll = FMath::Clamp(StackScroll, 0, StackScrollMax);
 	Height += bSingle ? 0.f : 30.f + (Rows + (bMore ? 1 : 0)) * RowHeight;
 	const FVector2D Size(Size0.X, Height);
 	// Under the treasury panel (it ends at 312): if it does not fit above the bottom bar, it takes some of the bar's room.
@@ -1657,6 +1673,8 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 		Pos.Y = FMath::Max(322.f, Geometry.GetLocalSize().Y - 70.f - Size.Y);
 	}
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
+	UnitCardMin = Pos;
+	UnitCardMax = Pos + Size;
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseSelection);
 
 	// ---- Totals and strength-weighted means.
@@ -1871,10 +1889,12 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 			PaintText(Geometry, Out, Layer + 3, C.Head, FVector2D(X0 + C.X, Y), Serif(10, EFace::Italic), Gold, C.Align, false);
 		}
 		Y += 18.f;
-		for (int32 r = 0; r < Rows; ++r)
+		const float TableTop = Y - 10.f;
+		for (int32 r0 = 0; r0 < Rows; ++r0)
 		{
+			const int32 r = StackScroll + r0;
 			const FCampaign1851Regiment& R = *Sel[r];
-			PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 18.f, Y - 10.f), FVector2D(Size.X - 36.f, RowHeight - 2.f), FString(), EButton::RegimentRow, SelectedRegiments[r]);
+			PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 18.f, Y - 10.f), FVector2D(Size.X - 44.f, RowHeight - 2.f), FString(), EButton::RegimentRow, SelectedRegiments[r]);
 			PaintTextFit(Geometry, Out, Layer + 4, R.Name, FVector2D(X0, Y), Serif(11), Ink, 150.f);
 			const float Values[] = { float(R.Men), R.Experience, R.Skills[0], R.Skills[1], R.Skills[2], R.Skills[3], R.Skills[4], R.Skills[5] };
 			for (int32 c = 0; c < UE_ARRAY_COUNT(Values); ++c)
@@ -1886,7 +1906,19 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 		}
 		if (bMore)
 		{
-			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("+ %d enheder mere"), Sel.Num() - Rows), FVector2D(Pos.X + Size.X * 0.5f, Y), Serif(11, EFace::Italic), MutedInk, 0.5f, false);
+			// The rest of the stack: the mouse wheel over the card or the bar to the right scrolls the list.
+			const float TableBottom = Y - 10.f + 8.f;
+			CardBarMin = FVector2D(Pos.X + Size.X - 22.f, TableTop);
+			CardBarMax = FVector2D(Pos.X + Size.X - 12.f, TableBottom);
+			const float TrackLen = CardBarMax.Y - CardBarMin.Y;
+			const float ThumbLen = FMath::Clamp(TrackLen * float(Rows) / float(Sel.Num()), 24.f, TrackLen);
+			const float Ratio = StackScrollMax > 0 ? float(StackScroll) / float(StackScrollMax) : 0.f;
+			CardThumb0 = CardBarMin.Y + Ratio * (TrackLen - ThumbLen);
+			CardThumb1 = CardThumb0 + ThumbLen;
+			FSlateDrawElement::MakeBox(Out, Layer + 3, Geometry.ToPaintGeometry(CardBarMax - CardBarMin, FSlateLayoutTransform(CardBarMin)), FCoreStyle::Get().GetBrush("WhiteBrush"), ESlateDrawEffect::None, FLinearColor(0.f, 0.f, 0.f, 0.35f));
+			FSlateDrawElement::MakeBox(Out, Layer + 4, Geometry.ToPaintGeometry(FVector2D(6.f, ThumbLen), FSlateLayoutTransform(FVector2D(CardBarMin.X + 2.f, CardThumb0))), FCoreStyle::Get().GetBrush("WhiteBrush"), ESlateDrawEffect::None, Gold.CopyWithNewOpacity(0.8f));
+			Buttons.Add({ CardBarMin, CardBarMax, EButton::ScrollBarV, 1 });
+			PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("viser %d–%d af %d enheder  ·  hjul eller bjælke ruller"), StackScroll + 1, StackScroll + Rows, Sel.Num()), FVector2D(Pos.X + Size.X * 0.5f, Y), Serif(11, EFace::Italic), MutedInk, 0.5f, false);
 			Y += RowHeight;
 		}
 	}
@@ -4369,11 +4401,31 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 		return Me;
 	};
 	TArray<int32> OOBRoots;
+	// With chosen units (the filter) only the armies that hold them are shown: units in garrison give an empty chart.
+	auto HoldsFiltered = [&](int32 ArmyId, bool bLegacy) -> bool
+	{
+		if (OOBFilter.Num() == 0) { return true; }
+		for (int32 u : OOBFilter)
+		{
+			if (!Regs.IsValidIndex(u) || Regs[u].Formation == 0) { continue; }
+			int32 Top = Regs[u].Formation;
+			for (int32 Guard = 0; Guard < 32; ++Guard)
+			{
+				const int32 At = Map->FormationIndex(Top);
+				if (At == INDEX_NONE || Forms[At].Parent == 0) { break; }
+				Top = Forms[At].Parent;
+			}
+			const int32 TopAt = Map->FormationIndex(Top);
+			const bool bArmyRoot = TopAt != INDEX_NONE && Forms[TopAt].Echelon == ECampaign1851Echelon::Army;
+			if (bLegacy ? !bArmyRoot : (bArmyRoot && Top == ArmyId)) { return true; }
+		}
+		return false;
+	};
 	const int32 OOBLegacyRoot = Build(0);
-	if (Forms.Num() == 0 || Forms.ContainsByPredicate([](const FCampaign1851Formation& OOBForm) { return OOBForm.Parent == 0 && OOBForm.Echelon != ECampaign1851Echelon::Army; })) { OOBRoots.Add(OOBLegacyRoot); }
+	if ((Forms.Num() == 0 || Forms.ContainsByPredicate([](const FCampaign1851Formation& OOBForm) { return OOBForm.Parent == 0 && OOBForm.Echelon != ECampaign1851Echelon::Army; })) && HoldsFiltered(0, true)) { OOBRoots.Add(OOBLegacyRoot); }
 	for (const FCampaign1851Formation& OOBArmy : Forms)
 	{
-		if (OOBArmy.Parent == 0 && OOBArmy.Echelon == ECampaign1851Echelon::Army) { OOBRoots.Add(Build(OOBArmy.Id)); }
+		if (OOBArmy.Parent == 0 && OOBArmy.Echelon == ECampaign1851Echelon::Army && HoldsFiltered(OOBArmy.Id, false)) { OOBRoots.Add(Build(OOBArmy.Id)); }
 	}
 	const float BoxW = 160.f, Gap = 14.f, VGap = 82.f;
 	const float HQH = 108.f, UnitH = 78.f, CompH = 42.f;

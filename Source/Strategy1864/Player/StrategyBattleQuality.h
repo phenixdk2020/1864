@@ -7,5 +7,6 @@ namespace Strategy1864BattleQuality
 {
     int32 GetPreset();
     int32 GetFigureDivisor();
+    void SetFigureDivisor(int32 Divisor);   // how many men a figure stands for (saved); the quality preset does not change it
     void ApplyPreset(UWorld* World, int32 Preset, bool bSave);
 }

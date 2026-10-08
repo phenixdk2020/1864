@@ -901,6 +901,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		return;
 	}
 	TickAutoClicks();
+	if (bCampaignStarted && Map.IsValid()) { Map->PruneEmptyFormations(); }
 	if (Overlay.IsValid() && Overlay->IsStartMenu())
 	{
 		Map->SetSpeed(0);
@@ -1182,8 +1183,11 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	if (bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollUp))   { Overlay->ScrollChart(-2, bShift); }
 	if (bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollDown)) { Overlay->ScrollChart(2, bShift); }
 	const bool bOverBuildings = Overlay.IsValid() && Overlay->IsOverBuildings(Mouse);
-	if (!bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollUp))   { if (bOverBuildings) { Overlay->ScrollBuildings(-1); } else if (bOverTree) { Overlay->ScrollTree(-3); } else { Camera->Zoom(1.f, bFocus ? &Focus : nullptr); } }
-	if (!bOverChart && WasInputKeyJustPressed(EKeys::MouseScrollDown)) { if (bOverBuildings) { Overlay->ScrollBuildings(1); } else if (bOverTree) { Overlay->ScrollTree(3); } else { Camera->Zoom(-1.f, bFocus ? &Focus : nullptr); } }
+	const bool bOverCard = Overlay.IsValid() && Overlay->IsOverUnitCard(Mouse);
+	if (bOverCard && WasInputKeyJustPressed(EKeys::MouseScrollUp))   { Overlay->ScrollStack(-1); }
+	if (bOverCard && WasInputKeyJustPressed(EKeys::MouseScrollDown)) { Overlay->ScrollStack(1); }
+	if (!bOverChart && !bOverCard && WasInputKeyJustPressed(EKeys::MouseScrollUp))   { if (bOverBuildings) { Overlay->ScrollBuildings(-1); } else if (bOverTree) { Overlay->ScrollTree(-3); } else { Camera->Zoom(1.f, bFocus ? &Focus : nullptr); } }
+	if (!bOverChart && !bOverCard && WasInputKeyJustPressed(EKeys::MouseScrollDown)) { if (bOverBuildings) { Overlay->ScrollBuildings(1); } else if (bOverTree) { Overlay->ScrollTree(3); } else { Camera->Zoom(-1.f, bFocus ? &Focus : nullptr); } }
 	if (WasInputKeyJustPressed(EKeys::K) && Overlay.IsValid()) { Overlay->ToggleOOB(); }
 	if (WasInputKeyJustPressed(EKeys::F) && Overlay.IsValid()) { Overlay->ToggleSupplyMap(); }
 	// Tree drag and drop: pressed on a row, moved a little -> dragging; released -> drop (or a click).
@@ -1359,7 +1363,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 		if (Button == SCampaign1851Overlay::EButton::ScrollBarV || Button == SCampaign1851Overlay::EButton::ScrollBarH)
 		{
-			Overlay->BeginScrollDrag(Button == SCampaign1851Overlay::EButton::ScrollBarV ? 1 : 2, Mouse);
+			Overlay->BeginScrollDrag(Button == SCampaign1851Overlay::EButton::ScrollBarV ? (Module == 1 ? 3 : 1) : 2, Mouse);
 			Button = SCampaign1851Overlay::EButton::Block;
 		}
 		if (Button == SCampaign1851Overlay::EButton::ResearchTab)

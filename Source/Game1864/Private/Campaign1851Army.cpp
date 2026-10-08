@@ -2016,6 +2016,33 @@ void ACampaign1851Map::DissolveFormation(int32 Id)
 	Formations.RemoveAt(Index);
 }
 
+void ACampaign1851Map::PruneEmptyFormations()
+{
+	for (int32 Guard = 0; Guard < 16; ++Guard)
+	{
+		int32 EmptyId = 0;
+		for (const FCampaign1851Formation& F : Formations)
+		{
+			if (F.Echelon != ECampaign1851Echelon::Army || F.Parent != 0)
+			{
+				continue;
+			}
+			const bool bHasUnit = Regiments.ContainsByPredicate([&F](const FCampaign1851Regiment& R) { return R.Formation == F.Id; });
+			const bool bHasChild = Formations.ContainsByPredicate([&F](const FCampaign1851Formation& K) { return K.Parent == F.Id; });
+			if (!bHasUnit && !bHasChild)
+			{
+				EmptyId = F.Id;
+				break;
+			}
+		}
+		if (EmptyId == 0)
+		{
+			return;
+		}
+		DissolveFormation(EmptyId);
+	}
+}
+
 bool ACampaign1851Map::IsInside(int32 Id, int32 Ancestor) const
 {
 	for (int32 At = Id, Guard = 0; At != 0 && Guard < 64; ++Guard)
