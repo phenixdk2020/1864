@@ -1596,6 +1596,13 @@ Testslagene (startmenuens knapper og bat-filerne) starter nu med -Strategy1864Sk
 
 ### 2026-10-08 – Hærklik rettet, scrollbars i Kamporden, klik-testværktøj
 Fejl: efter indkaldelsesstørrelsen blev en selvstændig `if (Button == UnitSize)` sat midt i `else if`-kæden i Campaign1851PlayerController, så kæden blev delt i to; den anden halvdel endte i grenen "klik på tomt kort" (SelectFort(0); PickCity()) og ryddede valget i samme tick, når første halvdel havde håndteret klikket. Derfor kunne en hær ikke vælges. Rettet ved at gøre UnitSize og UnitType til `else if`. Kamporden har fået en lodret og en vandret scrollbar (træk i håndtaget, klik i sporet; indholdets højde måles under tegningen). Nyt testværktøj: -CampaignAutoClick=sek:x:y;... lader spillet selv klikke (til at reproducere klikfejl), -CampaignDebugClicks logger klik og ændringer i valget, -CampaignShotAt=T1,T2 tager skærmbilleder.
+### 2026-10-08 - Spredt orden og liggende fodfolk under fjernild
+
+- Feltofficeren reagerer deterministisk på artilleri, mortérer eller infanteriild fra over 150 m, også ved skud uden tab. Kun stillestående, kampdygtige kompagnier uden fjende inden for 150 m reagerer. Laveste værdi af initiativ og ro, justeret for svækkelse: over 60 giver 3 sekunder, 40-60 giver 8 sekunder, under 40 giver ingen reaktion. Tiderne er justerbare balanceestimater.
+- Genbruger Stance og fordobler formationsafstandene uden at ændre formationstype eller udskilte skytter. Visuelle slots opdateres ved afstandsskift. Liggende/spredt orden giver 0,60 gange træfchance og dobbelt genladningstid uden dobbelt liggende genladningsstraf. Beskyttelsen bruges af direkte artilleri, områdeild og mortérer.
+- Afsluttes efter 10 sekunder uden ild, ved fjende inden for 150 m, ny march-/angrebsordre, formationsskift, karré, bajonetangreb eller deaktiveret officer. Tidligere afstande gendannes; march venter 3 sekunder på rejsning, også ved gentagne ordrer. Karré får normal afstand tilbage før dannelsen.
+- Enhedstag og AI-DIAG viser 'ligger ned / spredt orden' og 'Rejser sig'. DebugOfficer logger start og slut. Offensiv doktrin alene starter ikke angreb; officerens bajonet-/rytterangreb kræver offensiv ordre. Eksisterende testflag er bevaret.
+- Validering: statisk gennemgang af ordre-, formations-, bevægelses-, visuel- og ildveje samt git diff --check. Ingen build, spilstart eller commit; adfærden er ikke afprøvet i Unreal.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

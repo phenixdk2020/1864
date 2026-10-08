@@ -1,4 +1,5 @@
 #include "StrategyThreatReactionComponent.h"
+#include "../AI/StrategyFieldOfficerComponent.h"
 
 #include "StrategyVisibilityComponent.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
@@ -150,6 +151,8 @@ void UStrategyThreatReactionComponent::EnterSquare()
     {
         return;
     }
+
+    if (OwnerUnit->FieldOfficerComponent) OwnerUnit->FieldOfficerComponent->LeaveAutomaticFireCover();
 
     if (!bRespondingToCavalry)
     {

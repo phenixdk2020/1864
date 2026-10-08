@@ -1,5 +1,6 @@
 #include "StrategyFieldOfficerComponent.h"
 #include "../Combat/StrategyCombatComponent.h"
+#include "../Combat/StrategyStanceComponent.h"
 #include "../Combat/StrategyCavalryChargeComponent.h"
 #include "../Formations/StrategyFormationTransitionComponent.h"
 
@@ -87,8 +88,8 @@ bool UStrategyFieldOfficerComponent::IsOffensive() const
     {
         return true;
     }
-    // Without an order of attack, an offensive doctrine (or a hot-headed officer) seeks the fight all the same.
-    return T == EStrategyOrderType::None && OwnerUnit->DoctrineComponent && OwnerUnit->DoctrineComponent->Doctrine == EStrategyDoctrine::Offensive;
+    // An officer needs an offensive order before starting an attack.
+    return false;
 }
 
 bool UStrategyFieldOfficerComponent::PlayerOrderUnderWay() const
@@ -199,9 +200,99 @@ bool UStrategyFieldOfficerComponent::FallBack(const FString& Why, float Distance
     return false;
 }
 
+bool UStrategyFieldOfficerComponent::IsStandingUpFromFireCover() const
+{
+    return GetWorld() && GetWorld()->GetTimeSeconds() < FireCoverStandUpUntil;
+}
+
+void UStrategyFieldOfficerComponent::NotifyIncomingFire(bool bLongRange)
+{
+    if (!GetWorld()) return;
+    const float CoverNow = GetWorld()->GetTimeSeconds();
+    LastIncomingFireTime = CoverNow;
+    if (bLongRange)
+    {
+        if (CoverNow - LastLongRangeFireTime >= FireCoverReleaseSeconds) FireCoverSince = CoverNow;
+        LastLongRangeFireTime = CoverNow;
+    }
+}
+
+void UStrategyFieldOfficerComponent::LeaveAutomaticFireCover()
+{
+    FireCoverSince = -1.0f;
+    LastLongRangeFireTime = -1000000.0f;
+    if (!bTakingFireCover || !OwnerUnit) return;
+    bTakingFireCover = false;
+    FireCoverStandUpUntil = GetWorld()->GetTimeSeconds() + FMath::Max(0.0f, FireCoverStandUpSeconds);
+    if (OwnerUnit->StanceComponent) OwnerUnit->StanceComponent->Stance = EStrategyStance::Standing;
+    if (OwnerUnit->FormationComponent)
+    {
+        OwnerUnit->FormationComponent->SoldierLateralSpacingCm = FireCoverPreviousLateralSpacing;
+        OwnerUnit->FormationComponent->SoldierRankSpacingCm = FireCoverPreviousRankSpacing;
+    }
+    Decide(TEXT("Rejser sig"), TEXT("Tilbage til den tidligere formationsafstand"));
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugOfficer")))
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OFFICER: %s rejser sig fra spredt orden"), *OwnerUnit->StableUnitId.ToString());
+}
+
+bool UStrategyFieldOfficerComponent::UpdateAutomaticLooseOrderUnderFire()
+{
+    if (!OwnerUnit || OwnerUnit->Echelon != EStrategyEchelon::Company || !OwnerUnit->StanceComponent || !OwnerUnit->FormationComponent) return false;
+    const float CoverNow = GetWorld()->GetTimeSeconds();
+    // Most companies are not exposed: avoid a world-wide enemy scan every frame for them.
+    if (!bTakingFireCover && !IsStandingUpFromFireCover() && CoverNow - LastLongRangeFireTime >= FireCoverReleaseSeconds)
+    {
+        FireCoverSince = -1.0f;
+        return false;
+    }
+    float CoverEnemyDistance = 0.0f;
+    const bool bCoverEnemyClose = NearestEnemy(CoverEnemyDistance, 15000.1f) != nullptr;
+    const bool bCoverMoving = OwnerUnit->MovementExecutor && OwnerUnit->MovementExecutor->HasMovementGoal();
+    const FStrategyOrder CoverOrder = OwnerUnit->OrderComponent ? OwnerUnit->OrderComponent->GetCurrentOrder() : FStrategyOrder();
+    const bool bCoverAttackUnderWay = IsOffensive() && OwnerUnit->OrderComponent &&
+        (OwnerUnit->OrderComponent->IsPhysicallyExecuting() ||
+         (CoverOrder.Type == EStrategyOrderType::AttackHere && FVector::Dist2D(OwnerUnit->GetActorLocation(), CoverOrder.TargetLocation) > 6000.0f));
+    const bool bCoverExcluded = !OwnerUnit->bOfficerAIEnabled || !OwnerUnit->IsCombatEffective() || bCharging ||
+        OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square || bCoverMoving || bCoverEnemyClose || bCoverAttackUnderWay;
+    if (bTakingFireCover && (bCoverExcluded || CoverNow - LastIncomingFireTime >= FireCoverReleaseSeconds ||
+        OwnerUnit->StanceComponent->Stance != EStrategyStance::Prone)) LeaveAutomaticFireCover();
+    if (IsStandingUpFromFireCover())
+    {
+        Decide(TEXT("Rejser sig"), TEXT("Afventer at mændene er på benene"));
+        return true;
+    }
+    if (bTakingFireCover)
+    {
+        Decide(TEXT("ligger ned / spredt orden"), TEXT("Under fjendtlig fjernild; ingen fjende inden for 150 m"));
+        return true;
+    }
+    if (bCoverExcluded || CoverNow - LastLongRangeFireTime >= FireCoverReleaseSeconds)
+    {
+        FireCoverSince = -1.0f;
+        return false;
+    }
+    const UStrategyOfficerProfileComponent* CoverProfile = OwnerUnit->OfficerProfileComponent;
+    const float CoverQuality = CoverProfile ? FMath::Min(CoverProfile->Initiative, CoverProfile->Composure) * CoverProfile->Impairment : 0.0f;
+    if (CoverQuality < 40.0f || OwnerUnit->StanceComponent->Stance != EStrategyStance::Standing) return false;
+    if (FireCoverSince < 0.0f) FireCoverSince = CoverNow;
+    const float CoverDelay = CoverQuality > 60.0f ? GoodFireCoverDelaySeconds : MiddlingFireCoverDelaySeconds;
+    if (CoverNow - FireCoverSince < FMath::Max(0.0f, CoverDelay)) return false;
+    if (!OwnerUnit->StanceComponent->SetStance(EStrategyStance::Prone)) return false;
+    FireCoverPreviousLateralSpacing = OwnerUnit->FormationComponent->SoldierLateralSpacingCm;
+    FireCoverPreviousRankSpacing = OwnerUnit->FormationComponent->SoldierRankSpacingCm;
+    OwnerUnit->FormationComponent->SoldierLateralSpacingCm *= 2.0f;
+    OwnerUnit->FormationComponent->SoldierRankSpacingCm *= 2.0f;
+    bTakingFireCover = true;
+    Decide(TEXT("ligger ned / spredt orden"), TEXT("Officeren søger dækning mod fjernild"));
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugOfficer")))
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OFFICER: %s ligger ned / spredt orden quality=%.0f delay=%.1f"), *OwnerUnit->StableUnitId.ToString(), CoverQuality, CoverDelay);
+    return true;
+}
+
 void UStrategyFieldOfficerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    if (UpdateAutomaticLooseOrderUnderFire()) return;
     if (!OwnerUnit || !OwnerUnit->bOfficerAIEnabled || !OwnerUnit->OrderComponent ||
         OwnerUnit->UnitState == EStrategyUnitState::Routed || OwnerUnit->UnitState == EStrategyUnitState::Destroyed || !OwnerUnit->IsCombatEffective())
     {
@@ -509,7 +600,7 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
     const float Now = GetWorld()->GetTimeSeconds();
     // The bayonet: the enemy wavers within ninety metres, the men are steady, the officer is willing.
     const float ChargeReach = FMath::Lerp(6000.0f, 11000.0f, Aggression() / 100.0f);
-    if ((IsOffensive() || bEnemySide) && Distance < ChargeReach && IsWavering(Enemy) && OwnerUnit->Morale > 50.0f &&
+    if (IsOffensive() && Distance < ChargeReach && IsWavering(Enemy) && OwnerUnit->Morale > 50.0f &&
         Now - LastChargeTime > 30.0f && Enemy->Echelon != EStrategyEchelon::Cavalry)
     {
         StartCharge(Enemy, FString::Printf(TEXT("%s vakler %.0f m borte: fæld bajonet!"), *Enemy->DisplayName.ToString(), Distance / 100.0f));
@@ -639,7 +730,7 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
             Why = W;
         }
     }
-    if (Target && OwnerUnit->Morale > 55.0f && Now - LastChargeTime > 45.0f && Cavalry)
+    if (IsOffensive() && Target && OwnerUnit->Morale > 55.0f && Now - LastChargeTime > 45.0f && Cavalry)
     {
         FStrategyOrder Charge;
         Charge.Type = EStrategyOrderType::Charge;

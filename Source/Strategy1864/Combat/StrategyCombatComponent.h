@@ -105,7 +105,7 @@ public:
     bool TryFireAt(AStrategyUnit* Target);
 
     UFUNCTION(BlueprintCallable, Category="Strategy|Combat")
-    void NotifyIncomingVolley(int32 Hits);
+    void NotifyIncomingVolley(int32 Hits, bool bLongRangeFire = false);
 
     UFUNCTION(BlueprintPure, Category="Strategy|Combat")
     bool IsReloading() const { return ReloadRemainingSeconds > 0.0f; }

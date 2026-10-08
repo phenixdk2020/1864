@@ -300,6 +300,8 @@ private:
     int32 CentroidFigureCount = 0;
     int32 CachedStrength = INDEX_NONE;
     uint8 CachedFormationValue = 255;
+    float CachedCoverLateralSpacing = -1.0f;
+    float CachedCoverRankSpacing = -1.0f;
     bool bCachedBayonetFixed = false;
     bool bLastAnimationLooping = false;
     bool bLastHoldingPose = false;

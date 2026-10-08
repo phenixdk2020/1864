@@ -699,7 +699,7 @@ bool UStrategyArtilleryFireMissionComponent::FireAt(
 
     if (Target->CombatComponent)
     {
-        Target->CombatComponent->NotifyIncomingVolley(Casualties);
+        Target->CombatComponent->NotifyIncomingVolley(Casualties, true);
     }
 
     const float CrewRatio =
@@ -1022,6 +1022,8 @@ bool UStrategyArtilleryFireMissionComponent::FireAtLocation(
             GetBaseGunHitChance(AmmoType) * WeaponAccuracyFactor *
             FMath::Lerp(1.0f, 0.45f, RangeFraction);
 
+        CasualtiesByTarget.FindOrAdd(BestTarget); // Include misses in the single incoming-fire notification per salvo.
+        if (BestTarget->StanceComponent) HitChance *= BestTarget->StanceComponent->GetIncomingHitMultiplier();
         if (RandomStream.FRand() <= HitChance)
         {
             const FIntPoint Range = GetCasualtyRange(AmmoType);
@@ -1048,7 +1050,7 @@ bool UStrategyArtilleryFireMissionComponent::FireAtLocation(
         AStrategyUnit* Target = Pair.Key;
         int32 Casualties = Pair.Value;
 
-        if (!IsValid(Target) || Casualties <= 0)
+        if (!IsValid(Target))
         {
             continue;
         }
@@ -1088,7 +1090,7 @@ bool UStrategyArtilleryFireMissionComponent::FireAtLocation(
 
         if (Target->CombatComponent)
         {
-            Target->CombatComponent->NotifyIncomingVolley(Casualties);
+            Target->CombatComponent->NotifyIncomingVolley(Casualties, true);
         }
     }
 

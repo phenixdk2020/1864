@@ -49,7 +49,7 @@ Reglen for alt nedenfor: **en reaktion har en udløser, en handling og en afslut
 4. **Defilé** (bro, smal vej): 2 i bredden; enheden forlader selv defilé, når den er igennem.
 5. **Drejning:** et kompagni drejer langsomt (36°/s); mændene går i bue om midten, de svinger ikke som en hel flok. [delvist: drejehastigheden er sat, mændenes gang i bue er ikke set endnu]
 
-### 2.3 Under ild uden fjende i nærheden [mangler]
+### 2.3 Under ild uden fjende i nærheden [findes i kode; ikke afprøvet]
 
 Når kompagniet **står stille**, fjendens kanoner skyder på det, og **ingen fjende er inden for skudhold:**
 
@@ -59,7 +59,7 @@ Når kompagniet **står stille**, fjendens kanoner skyder på det, og **ingen fj
 - **Afslutning:** ilden holder op i 10 sek., eller en fjende kommer inden for 150 m, eller der kommer en ordre om at rykke. Så rejser de sig og går tilbage til den tidligere formation.
 - **Grænser:** kan ikke kombineres med karré eller bajonetangreb. Kavaleriet lægger sig ikke. Artilleriet kan ikke.
 
-Findes delvist: `StrategyStanceComponent` har tre holdninger (stående, knælende, liggende) som et manuelt valg, og `StrategySkirmisherComponent` kan sprede mændene. Det **automatiske** skift, udløst af artilleriild og officerens egenskaber, mangler.
+Implementeret 2026-10-08 i `StrategyFieldOfficerComponent::UpdateAutomaticLooseOrderUnderFire`: initiativ og ro over 60 giver 3 sekunders reaktion; 40–60 giver 8 sekunder; under 40 reagerer ikke (laveste egenskab, justeret for svækkelse). Formationsafstande fordobles; liggende/spredt orden giver −40 % træfchance og dobbelt genladningstid. Rejsning forsinker march 3 sekunder. Stance og formationsafstande genbruges, mens udskilte skytter bevares. Tiderne er justerbare balanceestimater. Ingen build eller afprøvning i spillet endnu.
 
 ---
 
@@ -144,7 +144,7 @@ Auto-målvalg skal **nulstilles**, når officer-AI'en slås fra (kendt fejl, ret
 - **Hold stillingen**, vend fronten mod fjenden, skyd efter fire-politik.
 - **Bajonetangreb** mod en vaklende fjende nær skudhold.
 - **Tilbagetrækning** i orden, når tab eller moral siger det; reserven dækker.
-- [mangler] **Spredt orden og ned** under artilleriild (2.3).
+- [findes i kode; ikke afprøvet] **Spredt orden og ned** under artilleriild (2.3).
 
 ### 7.3 Fjendens AI
 
@@ -179,7 +179,7 @@ Auto-målvalg skal **nulstilles**, når officer-AI'en slås fra (kendt fejl, ret
 
 ## 9. Åbne punkter til afklaring
 
-1. **Spredt orden og ned** (2.3): hvilke egenskaber afgør det, og hvor meget sværere bliver mændene at ramme (forslag: −40 % træf, −50 % skudfart)?
+1. **Spredt orden og ned** (2.3): implementeret med initiativ/ro, −40 % træf og dobbelt genladningstid; afprøv reaktionstid, rejsning og karréprioritet i spillet.
 2. **Karréens udløser** (4): fastlæg afstanden ud fra rytteriets fart, så der er tid.
 3. **Fodfolk i kolonne under ild:** skal de straks gå i linje, eller først når fjenden er inden for skudhold?
 4. **Mændenes gang ved drejning:** de skal gå i bue, ikke dreje på stedet (visuelt).

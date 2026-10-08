@@ -1,4 +1,5 @@
 #include "StrategyMortarFireComponent.h"
+#include "../Combat/StrategyStanceComponent.h"
 #include "../Combat/StrategyCombatComponent.h"
 #include "StrategyMortarDeploymentComponent.h"
 #include "../Units/StrategyUnit.h"
@@ -121,7 +122,8 @@ bool UStrategyMortarFireComponent::FireOneBomb()
         const float RangeFactor =
             FMath::Clamp(1.0f - (Distance / FMath::Max(1.0f, MaxRangeCm)) * 0.35f, 0.45f, 1.0f);
 
-        if (RandomStream.FRand() < InfantryHitChancePerBomb * RangeFactor)
+        const float MortarStanceMultiplier = UnitTarget->StanceComponent ? UnitTarget->StanceComponent->GetIncomingHitMultiplier() : 1.0f;
+        if (RandomStream.FRand() < InfantryHitChancePerBomb * RangeFactor * MortarStanceMultiplier)
         {
             Lost = RandomStream.RandRange(1, 4);
         }
@@ -137,7 +139,10 @@ bool UStrategyMortarFireComponent::FireOneBomb()
     {
         if (UnitTarget->CombatComponent) { Lost = UnitTarget->CombatComponent->ScaleIncomingCasualties(Lost, true); }
         UnitTarget->ApplyStrengthLoss(Lost);
-        if (UnitTarget->CombatComponent) { UnitTarget->CombatComponent->NotifyIncomingVolley(Lost); }
+    }
+    if (IsValid(UnitTarget) && !IsValid(PositionTarget) && UnitTarget->CombatComponent)
+    {
+        UnitTarget->CombatComponent->NotifyIncomingVolley(Lost, true);
     }
 
     return true;

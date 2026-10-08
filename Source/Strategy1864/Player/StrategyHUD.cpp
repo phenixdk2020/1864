@@ -1,4 +1,5 @@
 #include "StrategyHUD.h"
+#include "../AI/StrategyFieldOfficerComponent.h"
 #include "../Combat/StrategyContactComponent.h"
 #include "../Combat/StrategyThreatReactionComponent.h"
 #include "../Combat/StrategyVisibilityComponent.h"
@@ -557,7 +558,9 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
                 Unit->FormationComponent->CurrentFormation == EStrategyFormationType::Line ? TEXT("Linie") :
                 Unit->FormationComponent->CurrentFormation == EStrategyFormationType::Square ? TEXT("Karré") : TEXT("Kolonne");
             const FString Name = Unit->DisplayName.ToString();
-            const FString Info = FString::Printf(TEXT("%d mand | %s | Ild: %s"), Unit->CurrentStrength, Formation, bHold ? TEXT("HOLD") : *Fire->GetActiveRangeLabel().ToUpper());
+            FString Info = FString::Printf(TEXT("%d mand | %s | Ild: %s"), Unit->CurrentStrength, Formation, bHold ? TEXT("HOLD") : *Fire->GetActiveRangeLabel().ToUpper());
+            if (Unit->FieldOfficerComponent && Unit->FieldOfficerComponent->IsTakingFireCover()) Info += TEXT(" | ligger ned / spredt orden");
+            else if (Unit->FieldOfficerComponent && Unit->FieldOfficerComponent->IsStandingUpFromFireCover()) Info += TEXT(" | rejser sig");
             float NW = 0.0f, NH = 0.0f, IW = 0.0f, IH = 0.0f;
             GetTextSize(Name, NW, NH, nullptr, 1.15f);
             GetTextSize(Info, IW, IH, nullptr, 1.0f);

@@ -36,6 +36,20 @@ public:
     UFUNCTION(BlueprintPure, Category="Strategy|Officer")
     bool IsCharging() const { return bCharging; }
     void SetDeterministicRandomSeed(int32 Seed);
+    bool IsTakingFireCover() const { return bTakingFireCover; }
+    bool IsStandingUpFromFireCover() const;
+    void NotifyIncomingFire(bool bLongRange);
+    void LeaveAutomaticFireCover();
+
+    // Balance estimates: good officers react in 3 s, middling in 8 s, poor never.
+    UPROPERTY(EditAnywhere, Category="Strategy|Officer|FireCover")
+    float GoodFireCoverDelaySeconds = 3.0f;
+    UPROPERTY(EditAnywhere, Category="Strategy|Officer|FireCover")
+    float MiddlingFireCoverDelaySeconds = 8.0f;
+    UPROPERTY(EditAnywhere, Category="Strategy|Officer|FireCover")
+    float FireCoverReleaseSeconds = 10.0f;
+    UPROPERTY(EditAnywhere, Category="Strategy|Officer|FireCover")
+    float FireCoverStandUpSeconds = 3.0f;
 
     /** The flank plan for a company of a group that closes on an enemy (for the enemy's own battle AI too): the place it is to
      *  take at the fire distance Radius from him (or a waypoint round the base's line of fire); false when the leader's plan has
@@ -43,6 +57,14 @@ public:
     bool FlankPlan(AStrategyUnit* Enemy, float Radius, FVector& OutGoal, FString& OutNote, bool& bOutMustMove);
 
 private:
+    bool UpdateAutomaticLooseOrderUnderFire();
+    bool bTakingFireCover = false;
+    float FireCoverSince = -1.0f;
+    float LastIncomingFireTime = -1000000.0f;
+    float LastLongRangeFireTime = -1000000.0f;
+    float FireCoverStandUpUntil = -1.0f;
+    float FireCoverPreviousLateralSpacing = 75.0f;
+    float FireCoverPreviousRankSpacing = 90.0f;
     void ThinkInfantry(AStrategyUnit* Enemy, float Distance);
     /** Companies of one battalion closing on the same enemy do not all walk at him and stand in each other's way: the middle
      *  one is the fire base (it halts at its fire distance and shoots), the others go round to the flanks, outside the base's

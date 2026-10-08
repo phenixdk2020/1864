@@ -290,7 +290,7 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
 
     if (Target->CombatComponent)
     {
-        Target->CombatComponent->NotifyIncomingVolley(Hits);
+        Target->CombatComponent->NotifyIncomingVolley(Hits, DistanceCm > 15000.0f);
     }
 
     const float ReloadMultiplier =
@@ -321,8 +321,8 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
     ReloadRemainingSeconds =
         ReloadSeconds *
         ReloadMultiplier *
-        StanceReloadMultiplier *
-        FireDrillReloadMultiplier *
+        ((OwnerUnit->FieldOfficerComponent && OwnerUnit->FieldOfficerComponent->IsTakingFireCover())
+            ? 2.0f : StanceReloadMultiplier * FireDrillReloadMultiplier) *
         NCOReloadMultiplier;
     OnVolleyResolved.Broadcast(Target, ShotCount, Hits);
 
@@ -533,12 +533,14 @@ int32 UStrategyCombatComponent::ResolveHits(
 }
 
 
-void UStrategyCombatComponent::NotifyIncomingVolley(int32 Hits)
+void UStrategyCombatComponent::NotifyIncomingVolley(int32 Hits, bool bLongRangeFire)
 {
     if (!OwnerUnit || !OwnerUnit->IsCombatEffective())
     {
         return;
     }
+
+    if (OwnerUnit->FieldOfficerComponent) OwnerUnit->FieldOfficerComponent->NotifyIncomingFire(bLongRangeFire);
 
     const float StressReactionMultiplier =
         OwnerUnit->OfficerProfileComponent
