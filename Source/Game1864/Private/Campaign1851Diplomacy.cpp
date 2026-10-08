@@ -115,6 +115,10 @@ bool ACampaign1851Map::DoDiplomacy(int32 NationIndex, EDiplomacyAction Action, F
 	D.Portfolio = ECampaign1851Portfolio::Interior;
 	D.Action = FString::Printf(TEXT("Udenrigs: %s  ·  %s"), Action == EDiplomacyAction::Envoy ? TEXT("gesandt") : Action == EDiplomacyAction::Trade ? TEXT("handelstraktat")
 		: Action == EDiplomacyAction::Alliance ? TEXT("alliance") : TEXT("garanti"), *N.Name);
+	D.Key = TEXT("forhold.") + N.Id;
+	if (N.Id == TEXT("SE")) D.Key += TEXT(",opinion.skandinavisk,opinion.helstat,opinion.ejder");
+	if (Action == EDiplomacyAction::Guarantee) D.Key += TEXT(",garant.") + N.Id;
+	if (Action == EDiplomacyAction::Alliance) D.Key += TEXT(",spaending,opinion.ejder,opinion.helstat,opinion.skandinavisk");
 	D.Reasons = FString::Printf(TEXT("forholdet er nu %.0f"), N.Relation);
 	D.bDone = true;
 	AddDecision(D);

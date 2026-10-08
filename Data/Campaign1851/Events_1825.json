@@ -1,0 +1,122 @@
+[
+  {
+    "id": "julirevolution",
+    "navn": "Dansk politisk reaktion: Julirevolutionen i Paris: uro og forfatningskrav i Europa",
+    "vindue": {
+      "aar": 1830,
+      "maaned": 7
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "ikke mobiliseret",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": 3
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500
+    },
+    "avis": "Julirevolutionen i Paris: uro og forfatningskrav i Europa; den hjemlige politiske reaktion tager til",
+    "log": "Dansk politisk reaktion: Julirevolutionen i Paris: uro og forfatningskrav i Europa"
+  },
+  {
+    "id": "stander",
+    "navn": "Dansk politisk reaktion: Stænderforsamlingerne åbnes: sprogstriden og kravet om en fælles forfatning for Slesvig-Holsten",
+    "vindue": {
+      "aar": 1834,
+      "maaned": 5
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "ikke mobiliseret",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": 3
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500
+    },
+    "avis": "Stænderforsamlingerne åbnes: sprogstriden og kravet om en fælles forfatning for Slesvig-Holsten; den hjemlige politiske reaktion tager til",
+    "log": "Dansk politisk reaktion: Stænderforsamlingerne åbnes: sprogstriden og kravet om en fælles forfatning for Slesvig-Holsten"
+  },
+  {
+    "id": "christian8",
+    "navn": "Dansk politisk reaktion: Christian VIII bliver konge: forhåbninger og frygt for helstaten",
+    "vindue": {
+      "aar": 1839,
+      "maaned": 12
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "ikke mobiliseret",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": 2
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500
+    },
+    "avis": "Christian VIII bliver konge: forhåbninger og frygt for helstaten; den hjemlige politiske reaktion tager til",
+    "log": "Dansk politisk reaktion: Christian VIII bliver konge: forhåbninger og frygt for helstaten"
+  },
+  {
+    "id": "abent",
+    "navn": "Det åbne brev: Kongen erklærer arveretten i Slesvig, og Holsten og Slesvig vil høre sammen",
+    "vindue": {
+      "aar": 1846,
+      "maaned": 7
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "spaending >= 30 og opinion.helstat < 75",
+    "blokeringer": "garant.GB",
+    "effekter": {
+      "spaending": 15
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500
+    },
+    "avis": "Det åbne brev: Kongen erklærer arveretten i Slesvig, og Holsten og Slesvig vil høre sammen",
+    "log": "Det åbne brev: Kongen erklærer arveretten i Slesvig, og Holsten og Slesvig vil høre sammen"
+  },
+  {
+    "id": "kiel",
+    "navn": "Kiel: den provisoriske regering for Slesvig-Holsten rejser sig",
+    "vindue": {
+      "aar": 1848,
+      "maaned": 3
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "spaending >= 45 og opinion.ejder >= 25 og ikke besat.Kiel",
+    "blokeringer": "garant.GB og forhold.PR >= 45",
+    "effekter": {
+      "spaending": 25
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500
+    },
+    "avis": "Kiel: den provisoriske regering for Slesvig-Holsten rejser sig",
+    "log": "Kiel: den provisoriske regering for Slesvig-Holsten rejser sig"
+  },
+  {
+    "id": "preussen",
+    "navn": "Preussiske tropper rykker ind i Slesvig til hjælp for oprørerne",
+    "vindue": {
+      "aar": 1848,
+      "maaned": 4
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "spaending >= 60 og forhold.PR < 30 og ikke maegling",
+    "blokeringer": "garant.GB og garant.RU",
+    "effekter": {
+      "spaending": 22
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500
+    },
+    "avis": "Preussiske tropper rykker ind i Slesvig til hjælp for oprørerne",
+    "log": "Preussiske tropper rykker ind i Slesvig til hjælp for oprørerne"
+  }
+]

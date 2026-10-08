@@ -26,6 +26,15 @@ bool ACampaign1851Map::Mobilise(FString* OutReason)
 	}
 	AddTransaction(-Campaign1851Mobilisation::OrderCost, TEXT("Mobilisering: indkaldelse af de hjemsendte"));
 	Footing = ECampaign1851Footing::Mobilising;
+	FCampaign1851Decision MobilisationDecision;
+	MobilisationDecision.Day = CampaignDays;
+	MobilisationDecision.Nation = PlayerNation;
+	MobilisationDecision.Portfolio = ECampaign1851Portfolio::War;
+	MobilisationDecision.Action = TEXT("Mobilisering: indkaldelse af de hjemsendte");
+	MobilisationDecision.Reasons = TEXT("mobiliseret = 1; den valgte krigsfod kan blokere fredelige events");
+	MobilisationDecision.Key = TEXT("mobiliseret,spaending,stemning,opinion.ejder,opinion.helstat,opinion.skandinavisk");
+	MobilisationDecision.bDone = true;
+	AddDecision(MobilisationDecision);
 	News.Add(TEXT("Hæren mobiliseres: de hjemsendte kaldes ind"));
 	return true;
 }
@@ -87,6 +96,15 @@ void ACampaign1851Map::Demobilise()
 	if (Footing != ECampaign1851Footing::Peace)
 	{
 		Footing = ECampaign1851Footing::Peace;
+		FCampaign1851Decision DemobilisationDecision;
+		DemobilisationDecision.Day = CampaignDays;
+		DemobilisationDecision.Nation = PlayerNation;
+		DemobilisationDecision.Portfolio = ECampaign1851Portfolio::War;
+		DemobilisationDecision.Action = TEXT("Demobilisering: mandskabet hjemsendes");
+		DemobilisationDecision.Reasons = TEXT("mobiliseret = 0; fredsfod reducerer den videre optrapning");
+		DemobilisationDecision.Key = TEXT("mobiliseret,spaending,stemning,opinion.ejder,opinion.helstat,opinion.skandinavisk");
+		DemobilisationDecision.bDone = true;
+		AddDecision(DemobilisationDecision);
 		News.Add(TEXT("Hæren sættes på fredsfod: mandskabet hjemsendes"));
 	}
 }

@@ -1534,6 +1534,15 @@ Startmenuen (scenarie, land, afvigelse, NYT SPIL, INDLÆS SPIL, AFSLUT; spilmenu
 - Taktisk kort viser m?rkere skovfelter, udelader fjender uden aktuel venlig kontakt (ogs? fra kortets udstr?kning) og m?rker egne skjulte enheder med ?skjult?. Fast rasterbudget og eksisterende kontaktdata undg?r ekstra LOS-scanninger hver frame.
 - `-Strategy1864DebugForest` logger skovkontrollens dybde, afstand, skjul og afg?relse. Ingen nye kampagne-savefelter.
 - Validering: statisk kodegennemgang og diffkontrol; spil/editor er ikke bygget eller startet, og ?ndringerne er ikke committet efter brugerens instruktion.
+### 2026-10-08 — Datadrevet event-system, MVP E-1–E-6
+
+- De seks 1825-events og syv 1851-events er flyttet fra hardcodede tabeller til `Events_1825.json` og `Events.json`. Månedsloopet afgør events ud fra et lukket fakta-/udtrykssprog med sammenligninger, `og` og `ikke`; `bSkip` er fjernet.
+- Én `EventFact`-funktion læser eksisterende spænding, stemning, opinionsstrømme, relationer, forskning, besættelse, mobilisering, garantier, værksprogrammer, mægling og kasse. Alle events har spillerpåvirkelige forudsætninger og konkrete følger ved udeblivelse; ingen kræver et tidligere event-id.
+- Effektkeys og id'er valideres ved indlæsning; ugyldige events afvises med advarsel. Grænser: spænding ±25, stemning ±10, forhold ±15 og kasse ±50.000 rd. Gældsrente bruger procentpoint, forskning eksisterende emner. Forbundskorpset er en eksplicit tilladt dataeffekt. Krigsgrænsen 80 bevares.
+- Chance bruger den ønskede afvigelsesformel; separate seedkast afhænger af scenarie, event-id og kampagnedag. Gemmeversion 29 gemmer udløste/afviste id'er via War-feltet; gamle gemninger får passerede vinduer lukket uden efterfølgende effekter.
+- Avis og Statsråd får overskrift og årsagslinje med faktaværdier, konkrete følger og relevant registreret egen beslutning, når den findes. Diplomati og mobilisering markerer påvirkede fakta i eksisterende gemte beslutninger. `CampaignEvents`, `CampaignEventLog` og `CampaignEventWhy` er tilføjet.
+- Danske regler, dataformat, enheder, historiske spilskøn og begrænsninger er beskrevet i `Docs/Events.md`. De tre simple 1825-events repræsenterer dansk politisk reaktion på de historiske hændelser.
+- Kontrol: JSON-schema, id-/nationsreferencer, udtryksgrammatik, effektgrænser, spillerpåvirkelige forudsætninger, statisk C++-gennemgang og `git diff --check`. Ingen build, spilkørsel eller commit; runtime og save/load i Unreal udestår.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

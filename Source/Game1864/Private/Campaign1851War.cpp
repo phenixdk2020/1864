@@ -1,38 +1,102 @@
-// War and peace of the 1851 campaign (Docs/Backlog.md item 8): the tension with the German Confederation,
-// the historical events that raise or lower it (each varied by the campaign seed: earlier, later, stronger,
-// weaker, or not at all), the outbreak of war, the enemy corps marching north, and the towns they occupy.
+// Data-driven monthly events (Docs/Events.md), war outbreak, enemy corps and occupation.
 
 #include "Campaign1851Map.h"
 
-namespace
+#include "Dom/JsonObject.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+#include "Misc/LexFromString.h"
+
+namespace CampaignEventMVP
 {
-	struct FHistoricEvent
-	{
-		const TCHAR* Id;
-		int32 Year, Month, Day;
-		float Tension;
-		const TCHAR* Text;
-	};
-	// The road to 1864 (dates historical; the effect on the tension is the game's estimate).
-	const FHistoricEvent Events[] = {
-		{ TEXT("london"),      1852, 5, 8,   -10.f, TEXT("London-protokollen: stormagterne garanterer helstaten") },
-		{ TEXT("helstat"),     1855, 10, 2,   5.f,  TEXT("Helstatsforfatningen vedtages; Holsten og Lauenborg protesterer") },
-		{ TEXT("suspension"),  1858, 11, 6,   8.f,  TEXT("Helstatsforfatningen ophæves for Holsten og Lauenborg efter krav fra Forbundet") },
-		{ TEXT("marts"),       1863, 3, 30,  12.f,  TEXT("Martskundgørelsen: Holsten får særstilling, Slesvig knyttes tættere til kongeriget") },
-		{ TEXT("november"),    1863, 11, 18, 22.f,  TEXT("Novemberforfatningen: fælles forfatning for Danmark og Slesvig") },
-		{ TEXT("execution"),   1863, 12, 23, 12.f,  TEXT("Forbundseksekutionen: saksiske og hannoveranske tropper rykker ind i Holsten") },
-		{ TEXT("ultimatum"),   1864, 1, 16,  15.f,  TEXT("Preussen og Østrig stiller ultimatum: Novemberforfatningen skal ophæves på 48 timer") },
-	};
-	// The road to 1848 from a start in 1825 (dates historical; the effect on the tension is the game's estimate).
-	const FHistoricEvent Events1825[] = {
-		{ TEXT("julirevolution"), 1830, 7, 29,  3.f,  TEXT("Julirevolutionen i Paris: uro og forfatningskrav i Europa") },
-		{ TEXT("stander"),        1834, 5, 28,  3.f,  TEXT("Stænderforsamlingerne åbnes: sprogstriden og kravet om en fælles forfatning for Slesvig-Holsten") },
-		{ TEXT("christian8"),     1839, 12, 3,  2.f,  TEXT("Christian VIII bliver konge: forhåbninger og frygt for helstaten") },
-		{ TEXT("abent"),          1846, 7, 8,   15.f, TEXT("Det åbne brev: Kongen erklærer arveretten i Slesvig, og Holsten og Slesvig vil høre sammen") },
-		{ TEXT("kiel"),           1848, 3, 24,  28.f, TEXT("Kiel: den provisoriske regering for Slesvig-Holsten rejser sig") },
-		{ TEXT("preussen"),       1848, 4, 10,  22.f, TEXT("Preussiske tropper rykker ind i Slesvig til hjælp for oprørerne") },
-	};
 	constexpr float WarThreshold = 80.f;
+	// Grammar: conjunction of atoms; an atom is [ikke] fact [comparison number].
+	bool Expression(const FString& Input, TFunctionRef<bool(const FString&, float&)> Fact, FString& Why, bool& Valid)
+	{
+		Valid = true;
+		if (Input.IsEmpty()) { Why = TEXT("ingen blokering"); return true; }
+		TArray<FString> Atoms, Details;
+		Input.ParseIntoArray(Atoms, TEXT(" og "), false);
+		bool Result = true;
+		for (FString Atom : Atoms)
+		{
+			Atom.TrimStartAndEndInline();
+			const bool Negate = Atom.RemoveFromStart(TEXT("ikke "));
+			TArray<FString> Tokens; Atom.ParseIntoArrayWS(Tokens);
+			float Value = 0.f;
+			bool Ok = Tokens.Num() == 1 || Tokens.Num() == 3;
+			Ok = Ok && Fact(Tokens[0], Value);
+			bool Truth = Value != 0.f;
+			if (Ok && Tokens.Num() == 3)
+			{
+				double Limit = 0;
+				Ok = LexTryParseString(Limit, *Tokens[2]) && FMath::IsFinite(Limit);
+				const FString& Op = Tokens[1];
+				if (Op == TEXT("<")) Truth = Value < Limit;
+				else if (Op == TEXT("<=")) Truth = Value <= Limit;
+				else if (Op == TEXT(">")) Truth = Value > Limit;
+				else if (Op == TEXT(">=")) Truth = Value >= Limit;
+				else if (Op == TEXT("==")) Truth = Value == Limit;
+				else if (Op == TEXT("!=")) Truth = Value != Limit;
+				else Ok = false;
+			}
+			Truth = Ok && (Negate ? !Truth : Truth);
+			Valid &= Ok; Result &= Truth;
+			Details.Add(FString::Printf(TEXT("%s%s: %s (værdi %.2f)"), Negate ? TEXT("ikke ") : TEXT(""), *Atom, !Ok ? TEXT("ugyldigt") : Truth ? TEXT("sand") : TEXT("falsk"), Value));
+		}
+		Why = FString::Join(Details, TEXT("; "));
+		return Result && Valid;
+	}
+}
+
+bool ACampaign1851Map::EventFact(const FString& Key, float& Out) const
+{
+	Out = 0.f;
+	if (Key == TEXT("spaending")) Out = Tension;
+	else if (Key == TEXT("stemning")) Out = Mood;
+	else if (Key == TEXT("kasse")) Out = float(Treasury);
+	else if (Key == TEXT("mobiliseret")) Out = Footing != ECampaign1851Footing::Peace ? 1.f : 0.f;
+	else if (Key == TEXT("maegling")) Out = HasPeaceConference() ? 1.f : 0.f;
+	else if (Key.StartsWith(TEXT("opinion.")))
+	{
+		const FString EventCurrent = Key.Mid(8);
+		const int32 EventIndex = EventCurrent == TEXT("helstat") ? 0 : EventCurrent == TEXT("ejder") ? 1 : EventCurrent == TEXT("skandinavisk") ? 2 : INDEX_NONE;
+		if (EventIndex == INDEX_NONE) return false;
+		Out = Support[EventIndex];
+	}
+	else if (Key.StartsWith(TEXT("forhold.")) || Key.StartsWith(TEXT("garant.")))
+	{
+		const bool EventRelation = Key.StartsWith(TEXT("forhold."));
+		const FString EventNationId = Key.Mid(EventRelation ? 8 : 7);
+		const FCampaign1851Nation* EventNation = Nations.FindByPredicate([&](const FCampaign1851Nation& N) { return N.Id == EventNationId; });
+		if (!EventNation) return false;
+		Out = EventRelation ? EventNation->Relation : EventNation->bGuarantee ? 1.f : 0.f;
+	}
+	else if (Key.StartsWith(TEXT("forskning.")))
+	{
+		const FString EventTopic = Key.Mid(10);
+		if (Campaign1851Research::FindTopic(EventTopic) == INDEX_NONE) return false;
+		Out = HasResearch(*EventTopic) ? 1.f : 0.f;
+	}
+	else if (Key.StartsWith(TEXT("besat.")))
+	{
+		const int32 EventTown = FindCity(Key.Mid(6));
+		if (!Cities.IsValidIndex(EventTown)) return false;
+		Out = Cities[EventTown].Occupier.IsEmpty() ? 0.f : 1.f;
+	}
+	else if (Key.StartsWith(TEXT("vaerk.")))
+	{
+		const FString EventWork = Key.Mid(6);
+		const int32 EventIndex = EventWork == TEXT("dannevirke") ? 0 : EventWork == TEXT("dybbol") ? 1 : EventWork == TEXT("fredericia") ? 2 : INDEX_NONE;
+		if (EventIndex == INDEX_NONE) return false;
+		Out = ProgrammeState.IsValidIndex(EventIndex) && ProgrammeState[EventIndex] == 2 ? 1.f : 0.f;
+	}
+	else return false;
+	return true;
 }
 
 void ACampaign1851Map::ResetWar()
@@ -40,57 +104,179 @@ void ACampaign1851Map::ResetWar()
 	Tension = ActiveScenario().StartTension;   // 1851: after the war of 1848-50 an uneasy peace; 1825: a quiet one
 	bAtWar = false;
 	EventsFired.Reset();
+	EventsBlocked.Reset();
 	EnemyCorps.Reset();
 	Battles.Reset();
 	for (FCampaign1851City& C : Cities)
 	{
 		C.Occupier.Reset();
 	}
-	// Each event's date and weight vary with the campaign; some may never come.
 	EventPlan.Reset();
-	FRandomStream Rng(int32(HashCombine(uint32(Seed), 0x1864u)));
-	const bool bEarly = ActiveScenario().Year < 1850;
-	const FHistoricEvent* List = bEarly ? Events1825 : Events;
-	const int32 ListCount = bEarly ? int32(UE_ARRAY_COUNT(Events1825)) : int32(UE_ARRAY_COUNT(Events));
-	for (int32 e = 0; e < ListCount; ++e)
+	FString EventJson;
+	const FString EventPath = FPaths::ProjectDir() / TEXT("Data/Campaign1851") / (ActiveScenario().Id == TEXT("1825") ? TEXT("Events_1825.json") : TEXT("Events.json"));
+	TArray<TSharedPtr<FJsonValue>> EventRows;
+	if (!FFileHelper::LoadFileToString(EventJson, *EventPath) || !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(EventJson), EventRows))
 	{
-		const FHistoricEvent& E = List[e];
-		FPlannedEvent P;
-		P.Id = E.Id;
-		P.Text = E.Text;
-		P.Day = (FDateTime(E.Year, E.Month, E.Day) - StartDate()).GetTotalDays() + Deviation * 365.0 * Rng.FRandRange(-1.f, 1.f);
-		P.Tension = E.Tension * (1.f + Deviation * Rng.FRandRange(-1.f, 1.f));
-		P.bSkip = Rng.FRand() < Deviation * 0.5f;
-		EventPlan.Add(P);
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-EVENT|kunne ikke læse %s"), *EventPath); return;
 	}
+	TSet<FString> EventIds;
+	for (const TSharedPtr<FJsonValue>& EventRow : EventRows)
+	{
+		const TSharedPtr<FJsonObject> EventObj = EventRow->Type == EJson::Object ? EventRow->AsObject() : nullptr;
+		FPlannedEvent Event;
+		const TSharedPtr<FJsonObject>* EventWindow = nullptr;
+		double EventYear = 0, EventMonth = 0, EventChance = 0;
+		bool EventValid = EventObj.IsValid() && EventObj->TryGetStringField(TEXT("id"), Event.Id) && !Event.Id.IsEmpty() && !EventIds.Contains(Event.Id)
+			&& EventObj->TryGetStringField(TEXT("navn"), Event.Text) && EventObj->TryGetObjectField(TEXT("vindue"), EventWindow)
+			&& (*EventWindow)->TryGetNumberField(TEXT("aar"), EventYear) && (*EventWindow)->TryGetNumberField(TEXT("maaned"), EventMonth)
+			&& FMath::IsFinite(EventYear) && FMath::IsFinite(EventMonth) && EventYear >= 1 && EventYear <= 9998 && EventMonth >= 1 && EventMonth <= 12 && EventYear == FMath::FloorToDouble(EventYear) && EventMonth == FMath::FloorToDouble(EventMonth)
+			&& EventObj->TryGetNumberField(TEXT("sandsynlighed"), EventChance) && FMath::IsFinite(EventChance) && EventChance >= 0 && EventChance <= 1
+			&& EventObj->TryGetStringField(TEXT("forudsaetninger"), Event.Preconditions) && !Event.Preconditions.IsEmpty()
+			&& EventObj->TryGetStringField(TEXT("blokeringer"), Event.Blockers)
+			&& EventObj->TryGetStringField(TEXT("avis"), Event.Gazette) && EventObj->TryGetStringField(TEXT("log"), Event.CouncilLog);
+		if (EventValid)
+		{
+			FString EventWhy; bool EventExpressionValid;
+			const auto EventFacts = [this](const FString& EventK, float& V) { return EventFact(EventK, V); };
+			CampaignEventMVP::Expression(Event.Preconditions, EventFacts, EventWhy, EventExpressionValid); EventValid &= EventExpressionValid;
+			CampaignEventMVP::Expression(Event.Blockers, EventFacts, EventWhy, EventExpressionValid); EventValid &= EventExpressionValid;
+			const auto EventReadEffects = [&](const TCHAR* EventField, TMap<FString, float>& EventDest)
+			{
+				const TSharedPtr<FJsonObject>* EventEffectObject = nullptr;
+				if (!EventObj->TryGetObjectField(EventField, EventEffectObject) || (*EventEffectObject)->Values.IsEmpty()) return false;
+				for (const auto& EventPair : (*EventEffectObject)->Values)
+				{
+					double EventAmount = 0; float EventExisting = 0;
+					const FString& EventK = EventPair.Key;
+					double EventCap = EventK == TEXT("spaending") ? 25 : EventK == TEXT("stemning") ? 10 : EventK == TEXT("kasse") ? 50000 : EventK == TEXT("gaeldrente") ? 100 : EventK == TEXT("forbundskorps") ? 1 : EventK.StartsWith(TEXT("forhold.")) ? 15 : EventK.StartsWith(TEXT("forskning.")) ? 1 : -1;
+					if (EventCap < 0 || !EventPair.Value->TryGetNumber(EventAmount) || !FMath::IsFinite(EventAmount) || FMath::Abs(EventAmount) > EventCap
+						|| ((EventK.StartsWith(TEXT("forhold.")) || EventK.StartsWith(TEXT("forskning."))) && !EventFact(EventK, EventExisting))
+						|| ((EventK.StartsWith(TEXT("forskning.")) || EventK == TEXT("forbundskorps")) && EventAmount != 1))
+					{ UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-EVENT|%s|afvist effekt %s"), *Event.Id, *EventK); return false; }
+					EventDest.Add(EventK, float(EventAmount));
+				}
+				return true;
+			};
+			EventValid &= EventReadEffects(TEXT("effekter"), Event.Effects);
+			EventValid &= EventReadEffects(TEXT("udeblivelse"), Event.BlockedEffects);
+			EventValid &= Event.BlockedEffects.FindRef(TEXT("spaending")) != 0.f || Event.BlockedEffects.FindRef(TEXT("kasse")) != 0.f || Event.BlockedEffects.FindRef(TEXT("stemning")) != 0.f;
+		}
+		if (!EventValid) { UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-EVENT|afvist event %s"), *Event.Id); continue; }
+		EventIds.Add(Event.Id);
+		Event.Day = (FDateTime(int32(EventYear), int32(EventMonth), 1) - StartDate()).GetTotalDays();
+		Event.Probability = float(EventChance);
+		EventPlan.Add(MoveTemp(Event));
+	}
+}
+
+void ACampaign1851Map::EvaluateEvents(bool bMonthly)
+{
+	FString EventForcedText, EventWhyId;
+	FParse::Value(FCommandLine::Get(), TEXT("CampaignEvents="), EventForcedText);
+	FParse::Value(FCommandLine::Get(), TEXT("CampaignEventWhy="), EventWhyId);
+	TArray<FString> EventForced; EventForcedText.ParseIntoArray(EventForced, TEXT(","), true);
+	const bool EventVerbose = FParse::Param(FCommandLine::Get(), TEXT("CampaignEventLog"));
+	const int32 EventToday = FMath::FloorToInt(CampaignDays);
+	for (const FPlannedEvent& Event : EventPlan)
+	{
+		const bool EventForce = EventForced.Contains(Event.Id);
+		const bool EventResolved = EventsFired.Contains(Event.Id) || EventsBlocked.Contains(Event.Id);
+		if (!bMonthly && !EventForce && Event.Id != EventWhyId) continue;
+		FString EventWhy, EventBlockWhy; bool EventValid = true, EventBlockValid = true;
+		const auto EventFacts = [this](const FString& EventK, float& V) { return EventFact(EventK, V); };
+		const bool EventPreconditions = CampaignEventMVP::Expression(Event.Preconditions, EventFacts, EventWhy, EventValid);
+		const bool EventBlocked = !Event.Blockers.IsEmpty() && CampaignEventMVP::Expression(Event.Blockers, EventFacts, EventBlockWhy, EventBlockValid);
+		const float EventChance = FMath::Clamp(Event.Probability * (1.f + (0.5f - Event.Probability) * Deviation), 0.f, 1.f);
+		// Stateless draw: ordering, debug explanations and save/load never consume random state.
+		const uint32 EventSeed = HashCombine(HashCombine(uint32(Seed), GetTypeHash(ActiveScenario().Id)), GetTypeHash(Event.Id));
+		const float EventRoll = FRandomStream(int32(HashCombine(EventSeed, uint32(EventToday)))).FRand();
+		const bool EventDue = CampaignDays >= Event.Day;
+		if (EventVerbose || Event.Id == EventWhyId)
+			UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-EVENT|%s|dag=%d|vindue=%d|afgjort=%d|chance=%.4f|kast=%.4f|%s|blokering: %s"),
+				*Event.Id, EventToday, EventDue ? 1 : 0, EventResolved ? 1 : 0, EventChance, EventRoll, *EventWhy, *EventBlockWhy);
+		if (EventResolved || (!EventForce && (!bMonthly || !EventDue))) continue;
+		const bool EventFired = EventForce || (EventValid && EventBlockValid && EventPreconditions && !EventBlocked && EventRoll < EventChance);
+		if (EventFired) EventsFired.AddUnique(Event.Id); else EventsBlocked.AddUnique(Event.Id);
+		FString EventExplanation = EventForce ? TEXT("Tvunget af CampaignEvents") : !EventPreconditions ? EventWhy : EventBlocked ? TEXT("Blokering: ") + EventBlockWhy
+			: EventFired ? EventWhy : FString::Printf(TEXT("Forudsætninger opfyldt: %s; tilfældighed %.3f >= %.3f"), *EventWhy, EventRoll, EventChance);
+		// Cite an existing related decision, never invent a player action for a random failure.
+		const FString CausalExpression = !EventPreconditions ? Event.Preconditions : EventBlocked ? Event.Blockers : Event.Preconditions;
+		FString EventSource = TEXT("Kilde: kampagnens aktuelle tilstand; ingen registreret relevant handling");
+		for (int32 DecisionIndex = Decisions.Num() - 1; DecisionIndex >= 0; --DecisionIndex)
+		{
+			const FCampaign1851Decision& EventPrevious = Decisions[DecisionIndex];
+			if (EventPrevious.Nation != PlayerNation || !EventPrevious.bDone || EventPrevious.Action.StartsWith(TEXT("Begivenhed:"))) continue;
+			TArray<FString> SourceFacts; EventPrevious.Key.ParseIntoArray(SourceFacts, TEXT(","), true);
+			const bool EventRelated = SourceFacts.ContainsByPredicate([&](const FString& EventK)
+			{
+				TArray<FString> SourceAtoms; CausalExpression.ParseIntoArray(SourceAtoms, TEXT(" og "), false);
+				for (FString SourceAtom : SourceAtoms)
+				{
+					SourceAtom.TrimStartAndEndInline();
+					FString SourceKey = SourceAtom; SourceKey.RemoveFromStart(TEXT("ikke "));
+					TArray<FString> SourceTokens; SourceKey.ParseIntoArrayWS(SourceTokens);
+					if (SourceTokens.IsEmpty() || SourceTokens[0] != EventK) continue;
+					FString SourceWhy; bool SourceValid;
+					const bool SourceTrue = CampaignEventMVP::Expression(SourceAtom, EventFacts, SourceWhy, SourceValid);
+					if (SourceValid && (EventPreconditions || !SourceTrue)) return true;
+				}
+				return false;
+			});
+			if (!EventRelated) continue;
+			EventSource = FString::Printf(TEXT("Kilde: egen registreret beslutning '%s' (dag %.0f); aktuel tilstand ovenfor"), *EventPrevious.Action, EventPrevious.Day);
+			break;
+		}
+		EventExplanation += TEXT(". ") + EventSource;
+		const TMap<FString, float>& EventApplied = EventFired ? Event.Effects : Event.BlockedEffects;
+		TArray<FString> EffectKeys; EventApplied.GetKeys(EffectKeys); EffectKeys.Sort();
+		TArray<FString> EffectSummary;
+		for (const FString& EventK : EffectKeys)
+		{
+			const float EventAmount = EventApplied[EventK];
+			float EventActualAmount = EventAmount;
+			const float EventBeforeTension = Tension, EventBeforeMood = Mood, EventBeforeRate = DebtRate;
+			if (EventK == TEXT("spaending")) Tension = FMath::Clamp(Tension + FMath::Clamp(EventAmount * (EventAmount > 0.f ? GuaranteeDamping() * GovernmentTensionFactor() : 1.f), -25.f, 25.f), 0.f, 100.f);
+			else if (EventK == TEXT("stemning")) Mood = FMath::Clamp(Mood + EventAmount, 0.f, 100.f);
+			else if (EventK == TEXT("kasse")) AddTransaction(EventAmount, Event.Text);
+			else if (EventK == TEXT("gaeldrente")) DebtRate = FMath::Clamp(DebtRate + EventAmount / 100.f, 0.f, 1.f);
+			else if (EventK.StartsWith(TEXT("forskning."))) GrantResearch(EventK.Mid(10));
+			else if (EventK.StartsWith(TEXT("forhold.")))
+			{
+				for (FCampaign1851Nation& EventNation : Nations)
+					if (EventNation.Id == EventK.Mid(8))
+					{
+						const float EventBeforeRelation = EventNation.Relation;
+						EventNation.Relation = FMath::Clamp(EventNation.Relation + EventAmount, -100.f, 100.f);
+						EventActualAmount = EventNation.Relation - EventBeforeRelation;
+					}
+			}
+			if (EventK == TEXT("spaending")) EventActualAmount = Tension - EventBeforeTension;
+			else if (EventK == TEXT("stemning")) EventActualAmount = Mood - EventBeforeMood;
+			else if (EventK == TEXT("gaeldrente")) EventActualAmount = (DebtRate - EventBeforeRate) * 100.f;
+			EffectSummary.Add(FString::Printf(TEXT("%s %+.2f"), *EventK, EventActualAmount));
+		}
+		const FString EventHeadline = EventFired ? Event.Gazette : Event.Text + TEXT(" udebliver");
+		News.Add(EventHeadline);
+		News.Add(EventExplanation + TEXT(". Følger: ") + FString::Join(EffectSummary, TEXT(", ")));
+		FCampaign1851Decision EventDecision;
+		EventDecision.Day = CampaignDays;
+		EventDecision.Nation = PlayerNation;
+		EventDecision.Portfolio = ECampaign1851Portfolio::War;
+		EventDecision.Action = TEXT("Begivenhed: ") + (EventFired ? Event.CouncilLog : Event.Text + TEXT(" udebliver"));
+		EventDecision.Reasons = EventExplanation + TEXT(". Følger: ") + FString::Join(EffectSummary, TEXT(", "));
+		EventDecision.bDone = true;
+		AddDecision(EventDecision);
+		// Closed, explicit military consequence selected by the data.
+		if (EventApplied.Contains(TEXT("forbundskorps")) && !bAtWar)
+			SpawnCorps(TEXT("Forbundskorpset (Sachsen, Hannover)"), TEXT("DE"), 0.09f, TEXT("Altona"), { TEXT("Rendsborg") }, 0.f);
+	}
+	if (!bAtWar && Tension >= CampaignEventMVP::WarThreshold) DeclareWar();
 }
 
 void ACampaign1851Map::DailyWar()
 {
-	// Events due today.
-	for (const FPlannedEvent& P : EventPlan)
-	{
-		if (P.bSkip || EventsFired.Contains(P.Id) || CampaignDays < P.Day)
-		{
-			continue;
-		}
-		EventsFired.Add(P.Id);
-		Tension = FMath::Clamp(Tension + P.Tension * (P.Tension > 0.f ? GuaranteeDamping() * GovernmentTensionFactor() : 1.f), 0.f, 100.f);
-		News.Add(FString::Printf(TEXT("%s (spænding %.0f)"), *P.Text, Tension));
-		FCampaign1851Decision D;
-		D.Day = CampaignDays;
-		D.Nation = Nations.IndexOfByPredicate([](const FCampaign1851Nation& N) { return N.Id == TEXT("PR"); });
-		D.Portfolio = ECampaign1851Portfolio::War;
-		D.Action = P.Text;
-		D.Reasons = FString::Printf(TEXT("spændingen med Det tyske forbund %+.0f til %.0f"), P.Tension, Tension);
-		D.bDone = true;
-		AddDecision(D);
-		if (P.Id == TEXT("execution") && !bAtWar)
-		{
-			SpawnCorps(TEXT("Forbundskorpset (Sachsen, Hannover)"), TEXT("DE"), 0.09f, TEXT("Altona"), { TEXT("Rendsborg") }, 0.f);
-		}
-	}
-	if (!bAtWar && Tension >= WarThreshold)
+	EvaluateEvents(false);
+	if (!bAtWar && Tension >= CampaignEventMVP::WarThreshold)
 	{
 		DeclareWar();
 	}
@@ -123,6 +309,7 @@ void ACampaign1851Map::DailyWar()
 
 void ACampaign1851Map::MonthlyWar()
 {
+	EvaluateEvents(true);
 	// The tension drifts back towards an uneasy peace; a mobilised Danish army raises it.
 	if (!bAtWar)
 	{
@@ -190,6 +377,11 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 	if (FMath::FloorToInt(CampaignDays) != LastWarDay)
 	{
 		LastWarDay = FMath::FloorToInt(CampaignDays);
+	if (!Lines.Contains(TEXT("events-format|29")))
+	{
+		for (const FPlannedEvent& Event : EventPlan)
+			if (Event.Day < CampaignDays) EventsBlocked.AddUnique(Event.Id);
+	}
 		DailyWar();
 		DailyWeather();
 		DailyHealth();
@@ -362,6 +554,8 @@ TArray<FString> ACampaign1851Map::SaveWar() const
 	TArray<FString> Out;
 	Out.Add(FString::Printf(TEXT("state|%.2f|%d"), Tension, bAtWar ? 1 : 0));
 	Out.Add(FString::Printf(TEXT("intel-clock|%d"), LastWarDay));
+	Out.Add(TEXT("events-format|29"));
+	for (const FString& EventId : EventsBlocked) Out.Add(TEXT("blocked|") + EventId);
 	for (const FString& E : EventsFired)
 	{
 		Out.Add(FString::Printf(TEXT("fired|%s"), *E));
@@ -416,7 +610,7 @@ TArray<FString> ACampaign1851Map::SaveWar() const
 
 void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 {
-	// The plan (dates, weights) comes from the seed; the state from the save.
+	// Definitions come from scenario data; resolved outcomes come from the save.
 	ResetWar();
 	LastWarDay = FMath::FloorToInt(CampaignDays);
 	for (const FString& Line : Lines)
@@ -469,9 +663,12 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 			C.bSieging = P[3] == TEXT("1");
 			C.SiegeStart = FCString::Atod(*P[4]);
 		}
+		else if (P.Num() == 2 && P[0] == TEXT("blocked"))
+		{ EventsBlocked.AddUnique(P[1]); }
 		else if (P.Num() == 2 && P[0] == TEXT("fired"))
 		{
-			EventsFired.Add(P[1]);
+			EventsFired.AddUnique(P[1]);
+			EventsBlocked.Remove(P[1]);
 		}
 		else if (P.Num() == 3 && P[0] == TEXT("occupied") && FindCity(P[1]) != INDEX_NONE)
 		{

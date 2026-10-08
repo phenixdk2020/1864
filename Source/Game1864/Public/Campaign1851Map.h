@@ -146,14 +146,13 @@ struct FCampaign1851BattleOutcome
 	int32 EnemyLosses = 0;
 };
 
-/** A historical event on the road to 1864, as this campaign has it (date and weight varied, or skipped). */
+/** Data-driven monthly event; no executable script or event dependencies. */
 struct FPlannedEvent
 {
-	FString Id;
-	FString Text;
+	FString Id, Text, Preconditions, Blockers, Gazette, CouncilLog;
 	double Day = 0.0;
-	float Tension = 0.f;
-	bool bSkip = false;
+	float Probability = 1.f;
+	TMap<FString, float> Effects, BlockedEffects;
 };
 
 /** A bridge on a road link, or a sound where a pontoon bridge can be laid (Campaign1851Bridges.cpp). */
@@ -988,6 +987,8 @@ public:
 	const TArray<FCampaign1851EnemyCorps>& GetEnemyCorps() const { return EnemyCorps; }
 	const TArray<FPlannedEvent>& GetEventPlan() const { return EventPlan; }
 	void ResetWar();
+	bool EventFact(const FString& Key, float& Out) const;
+	void EvaluateEvents(bool bMonthly);
 	/** For tests: the federal execution and the declaration of war now. */
 	void ForceWar() { SpawnCorps(TEXT("Forbundskorpset (Sachsen, Hannover)"), TEXT("DE"), 0.09f, TEXT("Altona"), { TEXT("Rendsborg") }, 0.f); Tension = 80.f; DeclareWar(); }
 	TArray<FString> SaveWar() const;
@@ -1718,6 +1719,7 @@ private:
 	int32 Doctrine[3] = { 0, 0, 1 };
 	double DoctrineSettledDay = 0.0;
 	TArray<FString> EventsFired;
+	TArray<FString> EventsBlocked;
 	TArray<FPlannedEvent> EventPlan;
 	TArray<FCampaign1851EnemyCorps> EnemyCorps;
 	int32 NextCorpsId = 1;

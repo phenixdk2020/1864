@@ -242,7 +242,7 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 
 public:
 	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands. 10: + troop trains on the map. 11: + field formations. */
-	static constexpr int32 CurrentVersion = 28;
+	static constexpr int32 CurrentVersion = 29;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	/** The scenario it was played in (an index into ACampaign1851Map::Scenarios; saves from before the scenarios are 1851 = 1). */
@@ -300,7 +300,7 @@ public:
 	UPROPERTY() int32 HorseStock = 0;
 	/** Footing (v21) and each unit's men present (in Supply lines as "present|id|share"). */
 	UPROPERTY() uint8 Footing = 0;
-	/** War and peace (v22): tension, events, occupied towns, enemy corps. */
+	/** War and peace (v22; v29 adds blocked events and event-format migration). */
 	UPROPERTY() TArray<FString> War;
 	/** Foreign affairs (v23): relations, treaties, the Sound Dues, ceded towns. */
 	UPROPERTY() TArray<FString> Diplomacy;
