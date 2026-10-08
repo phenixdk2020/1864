@@ -1,6 +1,7 @@
 #include "StrategyFireControlComponent.h"
 
 #include "StrategyVisibilityComponent.h"
+#include "../Formations/StrategyFormationTransitionComponent.h"
 #include "../Units/StrategyUnit.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "StrategyContactComponent.h"
@@ -285,7 +286,7 @@ bool UStrategyFireControlComponent::IsLocationInsideFireField(FVector Location, 
     return false;
 }
 
-bool UStrategyFireControlComponent::CanEngageTarget(const AStrategyUnit* Target) const
+bool UStrategyFireControlComponent::CanEngageTarget(const AStrategyUnit* Target, bool bRequireFireCone) const
 {
     const AStrategyUnit* Unit = OwnerUnit ? OwnerUnit.Get() : Cast<AStrategyUnit>(GetOwner());
     if (!Unit ||
@@ -299,7 +300,8 @@ bool UStrategyFireControlComponent::CanEngageTarget(const AStrategyUnit* Target)
         return false;
     }
 
-    if (!IsLocationInsideFireField(Target->GetActorLocation(), GetActiveRangeCm()))
+    if (bRequireFireCone ? !IsLocationInsideFireField(Target->GetActorLocation(), GetActiveRangeCm()) :
+        FVector::Dist2D(Unit->GetActorLocation(), Target->GetActorLocation()) > GetActiveRangeCm())
     {
         return false;
     }
@@ -316,8 +318,20 @@ bool UStrategyFireControlComponent::CanEngageTarget(const AStrategyUnit* Target)
 }
 
 
+bool UStrategyFireControlComponent::IsBattleFormationReady() const
+{
+    const AStrategyUnit* FireUnit = OwnerUnit ? OwnerUnit.Get() : Cast<AStrategyUnit>(GetOwner());
+    if (!FireUnit || !FireUnit->FormationComponent ||
+        FireUnit->UnitState == EStrategyUnitState::Reforming ||
+        (FireUnit->FormationTransition && FireUnit->FormationTransition->IsReforming())) return false;
+    const EStrategyFormationType FireFormation = FireUnit->FormationComponent->CurrentFormation;
+    return FireFormation == EStrategyFormationType::Line || FireFormation == EStrategyFormationType::Square ||
+        FireFormation == EStrategyFormationType::CavalryLine;
+}
+
 void UStrategyFireControlComponent::DrawQARangeCones() const
 {
+    if (!IsBattleFormationReady()) return;
     DrawRangeArc(
         0.0f,
         CloseRangeCm,

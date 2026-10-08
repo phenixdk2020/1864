@@ -1,6 +1,10 @@
 #include "StrategyHUD.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
 #include "../Combat/StrategyContactComponent.h"
+#include "../Combat/StrategyCombatComponent.h"
+#include "../Combat/StrategyFireDisciplineComponent.h"
+#include "../Movement/StrategyMovementExecutorComponent.h"
+#include "../Formations/StrategyFormationTransitionComponent.h"
 #include "../Combat/StrategyThreatReactionComponent.h"
 #include "../Combat/StrategyVisibilityComponent.h"
 #include "../Campaign/StrategyCampaignBattlefield.h"
@@ -455,12 +459,13 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
     {
         return;
     }
+    bool bTagMounted = false;
     // Horsemen have a fire cone only when they fight on foot (dismounted dragoons).
     if (const ACavalryUnit* Horse = Cast<ACavalryUnit>(Unit))
     {
         if (!Horse->DragoonComponent || Horse->DragoonComponent->MountedState == EStrategyMountedState::Mounted)
         {
-            return;
+            bTagMounted = true;
         }
     }
     FVector Left, Right;
@@ -487,65 +492,69 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
     const float ActiveRange = Fire->GetActiveRangeCm();
     const bool bHold = Fire->FirePolicy == EStrategyFirePolicy::Hold;
 
-    // The chosen band filled (front to the chosen range), translucent; the enemy's cone only in outline (its fill
-    // would lie over our own line).
-    if (!bHold && bDanish)
-    {
-        const TArray<FVector> Edge = Outline(ActiveRange, 10);
-        TArray<FVector2D> Screen;
-        for (const FVector& P : Edge)
-        {
-            const FVector S = Project(P, false);
-            if (S.Z <= 0.0f) { Screen.Reset(); break; }
-            Screen.Add(FVector2D(S.X, S.Y));
-        }
-        const FVector LS = Project(OnGround(Left), false), RS = Project(OnGround(Right), false);
-        if (Screen.Num() > 2 && LS.Z > 0.0f && RS.Z > 0.0f)
-        {
-            // A fan from the middle of the front (the band is convex).
-            const FVector2D Centre((LS.X + RS.X) * 0.5f, (LS.Y + RS.Y) * 0.5f);
-            Screen.Insert(FVector2D(LS.X, LS.Y), 0);
-            Screen.Add(FVector2D(RS.X, RS.Y));
-            FLinearColor Fill = Active;
-            Fill.A = 0.26f;
-            for (int32 i = 0; i + 1 < Screen.Num(); ++i)
-            {
-                FCanvasTriangleItem Tri(Centre, Screen[i], Screen[i + 1], GWhiteTexture);
-                Tri.SetColor(Fill);
-                Tri.BlendMode = SE_BLEND_Translucent;
-                Canvas->DrawItem(Tri);
-            }
-        }
-    }
-    // The ranges: the chosen one strong and orange, the others white and faint.
     struct FRange { float Cm; const TCHAR* Name; };
     const FRange Ranges[] = { { Fire->CloseRangeCm, TEXT("CLOSE") }, { Fire->MediumRangeCm, TEXT("MEDIUM") }, { Fire->LongRangeCm, TEXT("LONG") } };
-    for (const FRange& R : Ranges)
+    if (!bTagMounted && Fire->IsBattleFormationReady())
     {
-        const bool bActive = !bHold && FMath::IsNearlyEqual(R.Cm, ActiveRange, 1.0f);
-        DashedPolyline(Outline(R.Cm, 12), bActive ? Active : Faint, bActive ? 3.5f : 1.6f, bActive ? 16.0f : 10.0f, bActive ? 8.0f : 8.0f);
-        // Its distance on the middle of the arc.
-        const FVector Label = Project(OnGround((Left + Right) * 0.5f + Forward * R.Cm) + FVector(0.0f, 0.0f, 120.0f), false);
-        if (Label.Z > 0.0f)
+        // The chosen band filled (front to the chosen range), translucent; the enemy's cone only in outline (its fill
+        // would lie over our own line).
+        if (!bHold && bDanish)
         {
-            const FString Text = FString::Printf(TEXT("%.0f m"), R.Cm / 100.0f);
-            float TW = 0.0f, TH = 0.0f;
-            GetTextSize(Text, TW, TH, nullptr, bActive ? 1.25f : 1.05f);
-            DrawText(Text, FLinearColor(0.0f, 0.0f, 0.0f, 0.7f), Label.X - TW * 0.5f + 1.5f, Label.Y - TH + 1.5f, nullptr, bActive ? 1.25f : 1.05f, false);
-            DrawText(Text, bActive ? Active : White, Label.X - TW * 0.5f, Label.Y - TH, nullptr, bActive ? 1.25f : 1.05f, false);
+            const TArray<FVector> Edge = Outline(ActiveRange, 10);
+            TArray<FVector2D> Screen;
+            for (const FVector& P : Edge)
+            {
+                const FVector S = Project(P, false);
+                if (S.Z <= 0.0f) { Screen.Reset(); break; }
+                Screen.Add(FVector2D(S.X, S.Y));
+            }
+            const FVector LS = Project(OnGround(Left), false), RS = Project(OnGround(Right), false);
+            if (Screen.Num() > 2 && LS.Z > 0.0f && RS.Z > 0.0f)
+            {
+                // A fan from the middle of the front (the band is convex).
+                const FVector2D Centre((LS.X + RS.X) * 0.5f, (LS.Y + RS.Y) * 0.5f);
+                Screen.Insert(FVector2D(LS.X, LS.Y), 0);
+                Screen.Add(FVector2D(RS.X, RS.Y));
+                FLinearColor Fill = Active;
+                Fill.A = 0.26f;
+                for (int32 i = 0; i + 1 < Screen.Num(); ++i)
+                {
+                    FCanvasTriangleItem Tri(Centre, Screen[i], Screen[i + 1], GWhiteTexture);
+                    Tri.SetColor(Fill);
+                    Tri.BlendMode = SE_BLEND_Translucent;
+                    Canvas->DrawItem(Tri);
+                }
+            }
         }
-    }
-    // The sides from the front corners out to the long range, dashed white, with their angles.
-    const float Long = Fire->LongRangeCm;
-    for (const float Sign : { -1.0f, 1.0f })
-    {
-        const FVector Corner = Sign < 0.0f ? Left : Right;
-        TArray<FVector> Side;
-        for (int32 s = 0; s <= 8; ++s) { Side.Add(OnGround(Corner + Dir(Sign * Half) * Long * s / 8.0f)); }
-        DashedPolyline(Side, White, 2.2f, 12.0f, 7.0f);
-    }
-    // The front itself.
-    DashedPolyline({ OnGround(Left), OnGround(Right) }, White, 1.6f, 6.0f, 6.0f);
+        // The ranges: the chosen one strong and orange, the others white and faint.
+        for (const FRange& R : Ranges)
+        {
+            const bool bActive = !bHold && FMath::IsNearlyEqual(R.Cm, ActiveRange, 1.0f);
+            DashedPolyline(Outline(R.Cm, 12), bActive ? Active : Faint, bActive ? 3.5f : 1.6f, bActive ? 16.0f : 10.0f, bActive ? 8.0f : 8.0f);
+            // Its distance on the middle of the arc.
+            const FVector Label = Project(OnGround((Left + Right) * 0.5f + Forward * R.Cm) + FVector(0.0f, 0.0f, 120.0f), false);
+            if (Label.Z > 0.0f)
+            {
+                const FString Text = FString::Printf(TEXT("%.0f m"), R.Cm / 100.0f);
+                float TW = 0.0f, TH = 0.0f;
+                GetTextSize(Text, TW, TH, nullptr, bActive ? 1.25f : 1.05f);
+                DrawText(Text, FLinearColor(0.0f, 0.0f, 0.0f, 0.7f), Label.X - TW * 0.5f + 1.5f, Label.Y - TH + 1.5f, nullptr, bActive ? 1.25f : 1.05f, false);
+                DrawText(Text, bActive ? Active : White, Label.X - TW * 0.5f, Label.Y - TH, nullptr, bActive ? 1.25f : 1.05f, false);
+            }
+        }
+        // The sides from the front corners out to the long range, dashed white, with their angles.
+        const float Long = Fire->LongRangeCm;
+        for (const float Sign : { -1.0f, 1.0f })
+        {
+            const FVector Corner = Sign < 0.0f ? Left : Right;
+            TArray<FVector> Side;
+            for (int32 s = 0; s <= 8; ++s) { Side.Add(OnGround(Corner + Dir(Sign * Half) * Long * s / 8.0f)); }
+            DashedPolyline(Side, White, 2.2f, 12.0f, 7.0f);
+        }
+        // The front itself.
+        DashedPolyline({ OnGround(Left), OnGround(Right) }, White, 1.6f, 6.0f, 6.0f);
+
+    } // battle formation ready
 
     // The unit's tag behind it (as the QA design): its name, its men, formation and fire policy.
     {
@@ -559,11 +568,27 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
             FString Info = FString::Printf(TEXT("%d mand | %s | Ild: %s"), Unit->CurrentStrength, Formation, bHold ? TEXT("HOLD") : *Fire->GetActiveRangeLabel().ToUpper());
             if (Unit->FieldOfficerComponent && Unit->FieldOfficerComponent->IsTakingFireCover()) Info += TEXT(" | ligger ned / spredt orden");
             else if (Unit->FieldOfficerComponent && Unit->FieldOfficerComponent->IsStandingUpFromFireCover()) Info += TEXT(" | rejser sig");
+            const bool bTagReforming = Unit->UnitState == EStrategyUnitState::Reforming ||
+                (Unit->FormationTransition && Unit->FormationTransition->IsReforming());
+            const bool bTagMoving = Unit->MovementExecutor && !Unit->MovementExecutor->GetExecutedVelocity().IsNearlyZero();
+            const bool bTagFiring = Fire->IsBattleFormationReady() && Unit->CombatComponent &&
+                Unit->CombatComponent->AmmunitionRounds > 0 && Unit->CombatComponent->FindBestTarget() &&
+                (!Unit->FireDisciplineComponent || Unit->FireDisciplineComponent->AllowsAutomaticFire()) &&
+                (!Unit->MovementExecutor || !Unit->MovementExecutor->HasMovementGoal() || Unit->MovementExecutor->IsHoldingForFire());
+            const bool bTagAdvance = Unit->OrderComponent &&
+                (Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Advance ||
+                 Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::AttackHere);
+            const TCHAR* TagStatus = bTagReforming ? TEXT("FORMERER") : bTagFiring ? TEXT("SKYDER") :
+                bTagMoving ? (bTagAdvance ? TEXT("RYKKER FREM") : TEXT("MARCHERER")) : TEXT("HOLDER");
+            const FLinearColor TagColour = bTagReforming ? FLinearColor(1.f, 0.8f, 0.1f) :
+                bTagFiring ? FLinearColor(1.f, 0.15f, 0.1f) : bTagMoving ? FLinearColor(0.2f, 0.5f, 1.f) : FLinearColor(0.6f, 0.6f, 0.6f);
+            Info = FString(TagStatus) + TEXT(" | ") + Info;
             float NW = 0.0f, NH = 0.0f, IW = 0.0f, IH = 0.0f;
             GetTextSize(Name, NW, NH, nullptr, 1.15f);
             GetTextSize(Info, IW, IH, nullptr, 1.0f);
             const float BoxW = FMath::Max(NW, IW) + 20.0f;
             DrawRect(FLinearColor(0.02f, 0.025f, 0.03f, 0.7f), Behind.X - BoxW * 0.5f, Behind.Y, BoxW, NH + IH + 10.0f);
+            DrawRect(TagColour, Behind.X - BoxW * 0.5f + 4.f, Behind.Y + 5.f, 6.f, 6.f);
             // A NATO infantry mark above the tag.
             const float MX = Behind.X - 16.0f, MY = Behind.Y - 26.0f;
             DrawRect(bDanish ? FLinearColor(0.1f, 0.3f, 0.75f, 0.95f) : FLinearColor(0.75f, 0.15f, 0.1f, 0.95f), MX, MY, 32.0f, 22.0f);
@@ -575,7 +600,7 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
     }
 
     // The legend for the first cone (top right, under the battle's end button).
-    if (bWithLegend)
+    if (bWithLegend && !bTagMounted && Fire->IsBattleFormationReady())
     {
         const float W = 330.0f, X = Canvas->ClipX - W - 8.0f, Y = 92.0f;
         DrawPanel(X, Y, W, 136.0f);

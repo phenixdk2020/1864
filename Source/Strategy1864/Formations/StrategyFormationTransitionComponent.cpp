@@ -4,6 +4,8 @@
 #include "../Visual/StrategyEquipmentVisualComponent.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../Orders/StrategyOrderComponent.h"
+#include "../Combat/StrategyFireControlComponent.h"
+#include "../Combat/StrategyCombatComponent.h"
 #include "../Units/StrategyUnit.h"
 #include "../AI/StrategyNCOComponent.h"
 
@@ -61,7 +63,12 @@ void UStrategyFormationTransitionComponent::HandleFormationChanged(
         OwnerUnit->EquipmentVisualComponent->SetBayonetFixed(NewFormation == EStrategyFormationType::Square);
     }
 
-    if (OwnerUnit->MovementExecutor &&
+    const bool bColumnToLine =
+        (OldFormation == EStrategyFormationType::MarchColumn || OldFormation == EStrategyFormationType::CavalryColumn) &&
+        (NewFormation == EStrategyFormationType::Line || NewFormation == EStrategyFormationType::CavalryLine);
+    const bool bDeployWhileWalking = bColumnToLine && OwnerUnit->CombatComponent &&
+        !OwnerUnit->CombatComponent->FindBestTarget(false);
+    if (!bDeployWhileWalking && OwnerUnit->MovementExecutor &&
         OwnerUnit->MovementExecutor->HasMovementGoal())
     {
         OwnerUnit->MovementExecutor->PauseMovementForSeconds(
@@ -113,6 +120,7 @@ void UStrategyFormationTransitionComponent::CompleteReform()
 
     OwnerUnit->SetUnitState(
         bMissionStillMoving
+        && !OwnerUnit->MovementExecutor->IsHoldingForFire()
         ? EStrategyUnitState::Moving
         : EStrategyUnitState::Ready);
 

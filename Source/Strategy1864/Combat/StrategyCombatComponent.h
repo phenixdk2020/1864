@@ -128,8 +128,11 @@ public:
     int32 ScaleIncomingCasualties(int32 Casualties, bool bArtillery) const;
     void ConfigureCartridgesPerMan(float CartridgesPerMan = 60.0f);
 
+    // Shared by movement and HUD; does not depend on reload or formation readiness.
+    AStrategyUnit* FindBestTarget(bool bRequireFireCone = true) const;
+
 private:
-    AStrategyUnit* FindBestTarget() const;
+
     int32 ResolveHits(
         int32 ShotCount,
         float DistanceCm,

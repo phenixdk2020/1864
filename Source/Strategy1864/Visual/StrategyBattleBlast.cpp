@@ -142,11 +142,16 @@ void AStrategyBattleBlast::AddPiece(const FPiece& In)
     C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     C->SetCastShadow(false);
     C->bVisibleInRayTracing = false;
+    C->SetRelativeLocation(P.Position);
+    const float PieceInitialDiameter = P.StartDiameter / 100.f;
+    C->SetRelativeScale3D(P.bFlat ? FVector(PieceInitialDiameter, PieceInitialDiameter, 0.02f) :
+        FVector(PieceInitialDiameter, PieceInitialDiameter, PieceInitialDiameter * 0.85f));
     C->SetVisibility(P.Delay <= 0.0f);
     C->RegisterComponent();
     if (UMaterialInterface* Base = TranslucentMaterial())
     {
         P.Material = UMaterialInstanceDynamic::Create(Base, this);
+        P.Material->SetVectorParameterValue(TEXT("Color"), FLinearColor(P.Colour.R, P.Colour.G, P.Colour.B, P.Opacity));
         C->SetMaterial(0, P.Material);
     }
     P.Mesh = C;
@@ -263,6 +268,12 @@ void AStrategyBattleBlast::Build(EStrategyBlastKind Kind, const FVector& Dir, fl
             Kick.Delay = T * Range / 40000.f;   // ~400 m/s
             AddPiece(Kick);
         }
+        break;
+    }
+    case EStrategyBlastKind::FootstepDust:
+    {
+        AddPiece(Smoke(FVector::ZeroVector, FVector(0.f, 0.f, 10.f) - Flat * 15.f,
+            12.f * Scale, 45.f * Scale, 0.45f, 0.14f, BlastEarth));
         break;
     }
     case EStrategyBlastKind::HoofDust:

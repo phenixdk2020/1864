@@ -56,7 +56,9 @@ public:
     void PauseMovementForSeconds(float DurationSeconds);
 
     UFUNCTION(BlueprintPure, Category="Strategy|Movement")
-    bool IsTemporarilyPaused() const { return PauseRemainingSeconds > 0.0f; }
+    bool IsTemporarilyPaused() const { return PauseRemainingSeconds > 0.0f || bHoldingForFire; }
+
+    bool IsHoldingForFire() const { return bHoldingForFire; }
 
     UFUNCTION(BlueprintPure, Category="Strategy|Movement")
     bool HasMovementGoal() const { return bHasMovementGoal; }
@@ -71,6 +73,7 @@ public:
     FVector GetExecutedVelocity() const { return ExecutedVelocity; }
 
 private:
+    bool bHoldingForFire = false;
     FVector ExecutedVelocity = FVector::ZeroVector;
     UFUNCTION()
     void HandleOrderChanged(const FStrategyOrder& NewOrder);

@@ -66,7 +66,7 @@ public:
     bool IsInsideFireCone(const AStrategyUnit* Target) const;
 
     UFUNCTION(BlueprintPure, Category="Strategy|Fire")
-    bool CanEngageTarget(const AStrategyUnit* Target) const;
+    bool CanEngageTarget(const AStrategyUnit* Target, bool bRequireFireCone = true) const;
 
     UFUNCTION(BlueprintPure, Category="Strategy|Fire")
     void GetFireFront(FVector& Left, FVector& Right, int32 FaceIndex = 0) const;
@@ -84,6 +84,9 @@ public:
 
     /** Points across the target's formation (its front, centre and rear corners), for the checks above. */
     TArray<FVector> GetTargetSamplePoints(const AStrategyUnit* Target) const;
+
+    // Readiness is separate from target geometry: deployment may still be underway.
+    bool IsBattleFormationReady() const;
 
 private:
     void DrawQARangeCones() const;

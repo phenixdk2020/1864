@@ -594,7 +594,8 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
         Decide(TEXT("Holder stillingen"), TEXT("Spillerens ordre er afsluttet; holder og skyder"));
         return;
     }
-    if (bCharging || PlayerOrderUnderWay())
+    if (bCharging || PlayerOrderUnderWay() ||
+        (OwnerUnit->MovementExecutor && OwnerUnit->MovementExecutor->IsHoldingForFire()))
     {
         return;
     }
