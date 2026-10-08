@@ -597,6 +597,16 @@ void AStrategyOOBTestScenario::TickObjectives(float DeltaSeconds)
         return;
     }
     BattleClock += DeltaSeconds * ClockRate;
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugClock")))
+    {
+        static double LastLog = 0.0;
+        const double RealNow = FPlatformTime::Seconds();
+        if (RealNow - LastLog > 5.0)
+        {
+            LastLog = RealNow;
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-CLOCK: real %.1f s, battle clock %.1f s, delta %.4f, dilation %.2f, world time %.1f"), RealNow, BattleClock, DeltaSeconds, GetWorld()->GetWorldSettings()->GetEffectiveTimeDilation(), GetWorld()->GetTimeSeconds());
+        }
+    }
     for (FBattleObjective& O : Objectives)
     {
         O.DanesIn = O.EnemyIn = 0;
