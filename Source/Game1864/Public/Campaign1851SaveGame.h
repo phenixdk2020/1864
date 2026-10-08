@@ -258,11 +258,15 @@ public:
 	 * 18: historical projects and wounded/captured officers; 19: supply columns;
 	 * 20: rifle/horse stocks; 21: footing/present strength; 22: war state;
 	 * 23: diplomacy/research/doctrine; 24: navy; 25: politics; 26: economy;
-	 * 27: bridges; 28: initial garrison training; 29: event files (fired and blocked events).
+	 * 27: bridges; 28: initial garrison training; 29: event files (fired and blocked events);
+	 * 30: the player's settings (graphics, figures, shadows, couriers, camera speed, ...).
 	 */
-	static constexpr int32 CurrentVersion = 29;
+	static constexpr int32 CurrentVersion = 30;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
+	/** The player's settings at the time of the save (the battle's settings section of GameUserSettings: graphics preset, figure scale, shadows,
+	 *  couriers, enemy range, camera speed, ...). They come back when the game is loaded. */
+	UPROPERTY() TMap<FString, FString> Settings;
 	/** The scenario it was played in (an index into ACampaign1851Map::Scenarios; saves from before the scenarios are 1851 = 1). */
 	UPROPERTY() int32 Scenario = 1;
 	UPROPERTY() FDateTime SavedAt;

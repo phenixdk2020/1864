@@ -27,6 +27,33 @@ namespace
 	// Survives an OpenLevel when a manual save needs another scenario's data.
 	FString GCampaignOfficerScenarioPendingSlot;
 	bool GCampaignOfficerScenarioPendingBattle = false;
+
+	// The player's settings live in GameUserSettings (the battle's section); a save carries them along and a load puts them back.
+	const TCHAR* const GSettingsSection = TEXT("/Script/Strategy1864.Settings");
+
+	void CaptureSettings(TMap<FString, FString>& Out)
+	{
+		Out.Reset();
+		TArray<FString> Lines;
+		if (GConfig && GConfig->GetSection(GSettingsSection, Lines, GGameUserSettingsIni))
+		{
+			for (const FString& Line : Lines)
+			{
+				FString Key, Value;
+				if (Line.Split(TEXT("="), &Key, &Value)) { Out.Add(Key, Value); }
+			}
+		}
+	}
+
+	void RestoreSettings(const TMap<FString, FString>& In)
+	{
+		if (!GConfig || In.Num() == 0) { return; }
+		for (const TPair<FString, FString>& Pair : In)
+		{
+			GConfig->SetString(GSettingsSection, *Pair.Key, *Pair.Value, GGameUserSettingsIni);
+		}
+		GConfig->Flush(false, GGameUserSettingsIni);
+	}
 	FString PriceText(double Amount)
 	{
 		return FString::FormatAsNumber(FMath::RoundToInt(Amount)) + TEXT(" rd.");
@@ -2552,6 +2579,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Trains = Map->SaveTrains();
 	Save->Formations = Map->SaveFormations();
 	Save->TrainOrders = Map->GetTrainOrders();
+	CaptureSettings(Save->Settings);
 	Map->SaveWorld(Save);
 	Save->Forts = Map->SaveForts();
 	Save->AmtManpower = Map->GetAmtManpower();
@@ -2637,6 +2665,10 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	if (Save->SaveVersion >= 10)
 	{
 		Map->RestoreTrains(Save->Trains, Save->TrainOrders);
+	}
+	if (Save->SaveVersion >= 30)
+	{
+		RestoreSettings(Save->Settings);
 	}
 	if (Save->SaveVersion >= 11)
 	{

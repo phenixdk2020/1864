@@ -1689,6 +1689,9 @@ Codex' to opgaver er merget: en ny bundbjælke i slaget med fem paneler (ENHED, 
 ### 2026-10-08 – Skyggekontakt i slaget
 INDSTILLINGER i slaget har en række "Skygger" (TIL/FRA), som slukker eller tænder alle lys' skygger (ULightComponent::SetCastShadows; lysenes oprindelige værdi huskes, så de kommer tilbage som før). Valget gemmes i GameUserSettings (/Script/Strategy1864.Settings, Shadows); lys der kommer til senere fanges hvert andet sekund; -Strategy1864NoShadows starter uden skygger. Bygget, ikke prøvet i et slag.
 
+### 2026-10-08 – Indstillinger gemmes med et gemt spil
+UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektionen /Script/Strategy1864.Settings i GameUserSettings (grafikpakke, figurantal, skygger, ordonnanser, fjendens rækkevidde, kameraets tastaturhastighed m.fl.) gemmes ved SaveToSlot og skrives tilbage ved LoadFromSlot (kun for gemmer fra version 30 og nyere; ældre gemmer rører ikke indstillingerne). Bygget, ikke prøvet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
