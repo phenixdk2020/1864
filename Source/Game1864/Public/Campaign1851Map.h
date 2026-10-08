@@ -572,9 +572,12 @@ public:
 	void SetHighlightedAmt(int32 Id);
 
 	/** Taxes per head and year that go to construction (the state's development share). */
+	static double EconomyValue(const TCHAR* Key, double Value1851);
+	static double RuralTaxRate() { return EconomyValue(TEXT("ruralTax"), RuralTaxPerHead); }
+	static double UrbanTaxRate() { return EconomyValue(TEXT("urbanTax"), UrbanTaxPerHead); }
 	static constexpr double RuralTaxPerHead = 0.2;
 	static constexpr double UrbanTaxPerHead = 0.45;
-	static double AmtYearlyTax(const FCampaign1851Amt& Amt) { return Amt.Rural * RuralTaxPerHead + Amt.Urban * UrbanTaxPerHead; }
+	static double AmtYearlyTax(const FCampaign1851Amt& Amt) { return Amt.Rural * RuralTaxRate() + Amt.Urban * UrbanTaxRate(); }
 	/** The trades researched (the Næringsliv branch): the farms' and the towns' taxes, and the works' output. */
 	double RuralTaxFactor() const;
 	double UrbanTaxFactor() const;

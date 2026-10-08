@@ -1,0 +1,462 @@
+{
+  "note": "1825: individuelle afrundede skøn; ingen folketælling dette år. Se Docs/Data1825-Nations-Towns-Economy.md. Kortets administrative enheder og rækkefølge bevares.",
+  "amter": [
+    {
+      "id": 1,
+      "name": "Hjørring Amt",
+      "towns": [
+        "Hjørring",
+        "Skagen",
+        "Frederikshavn"
+      ],
+      "urban": 3200,
+      "rural": 58000,
+      "population": 61200,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 2,
+      "name": "Thisted Amt",
+      "towns": [
+        "Thisted",
+        "Nykøbing M"
+      ],
+      "urban": 2500,
+      "rural": 44500,
+      "population": 47000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 3,
+      "name": "Aalborg Amt",
+      "towns": [
+        "Aalborg"
+      ],
+      "urban": 6600,
+      "rural": 67000,
+      "population": 73600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 4,
+      "name": "Viborg Amt",
+      "towns": [
+        "Viborg"
+      ],
+      "urban": 3100,
+      "rural": 60000,
+      "population": 63100,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 5,
+      "name": "Randers Amt",
+      "towns": [
+        "Randers",
+        "Grenaa"
+      ],
+      "urban": 6800,
+      "rural": 77000,
+      "population": 83800,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 6,
+      "name": "Aarhus Amt",
+      "towns": [
+        "Aarhus"
+      ],
+      "urban": 6000,
+      "rural": 23000,
+      "population": 29000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 7,
+      "name": "Skanderborg Amt",
+      "towns": [
+        "Skanderborg"
+      ],
+      "urban": 700,
+      "rural": 38000,
+      "population": 38700,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 8,
+      "name": "Vejle Amt",
+      "towns": [
+        "Fredericia",
+        "Horsens",
+        "Vejle",
+        "Kolding"
+      ],
+      "urban": 12500,
+      "rural": 58000,
+      "population": 70500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 9,
+      "name": "Ringkøbing Amt",
+      "towns": [
+        "Holstebro",
+        "Ringkøbing"
+      ],
+      "urban": 2200,
+      "rural": 102000,
+      "population": 104200,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 10,
+      "name": "Ribe Amt",
+      "towns": [
+        "Ribe",
+        "Varde"
+      ],
+      "urban": 3600,
+      "rural": 59000,
+      "population": 62600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 11,
+      "name": "Odense Amt",
+      "towns": [
+        "Odense",
+        "Assens",
+        "Middelfart",
+        "Bogense"
+      ],
+      "urban": 12400,
+      "rural": 46000,
+      "population": 58400,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 12,
+      "name": "Svendborg Amt",
+      "towns": [
+        "Svendborg",
+        "Nyborg",
+        "Rudkøbing",
+        "Faaborg"
+      ],
+      "urban": 8900,
+      "rural": 39000,
+      "population": 47900,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 13,
+      "name": "Københavns Amt",
+      "towns": [
+        "København",
+        "Roskilde",
+        "Køge"
+      ],
+      "urban": 118600,
+      "rural": 40000,
+      "population": 158600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 14,
+      "name": "Frederiksborg Amt",
+      "towns": [
+        "Helsingør"
+      ],
+      "urban": 6600,
+      "rural": 32000,
+      "population": 38600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 15,
+      "name": "Holbæk Amt",
+      "towns": [
+        "Holbæk",
+        "Kalundborg"
+      ],
+      "urban": 3600,
+      "rural": 39000,
+      "population": 42600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 16,
+      "name": "Sorø Amt",
+      "towns": [
+        "Slagelse"
+      ],
+      "urban": 2600,
+      "rural": 39000,
+      "population": 41600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 17,
+      "name": "Præstø Amt",
+      "towns": [
+        "Næstved",
+        "Stege",
+        "Vordingborg"
+      ],
+      "urban": 4800,
+      "rural": 44000,
+      "population": 48800,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 18,
+      "name": "Maribo Amt",
+      "towns": [
+        "Nykøbing F",
+        "Nakskov"
+      ],
+      "urban": 3600,
+      "rural": 42000,
+      "population": 45600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 19,
+      "name": "Bornholms Amt",
+      "towns": [
+        "Rønne"
+      ],
+      "urban": 3500,
+      "rural": 18000,
+      "population": 21500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 20,
+      "name": "Haderslev Amt",
+      "towns": [
+        "Haderslev"
+      ],
+      "urban": 4200,
+      "rural": 45500,
+      "population": 49700,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 21,
+      "name": "Aabenraa Amt",
+      "towns": [
+        "Aabenraa"
+      ],
+      "urban": 3500,
+      "rural": 19000,
+      "population": 22500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 22,
+      "name": "Sønderborg Amt",
+      "towns": [
+        "Sønderborg"
+      ],
+      "urban": 2300,
+      "rural": 11500,
+      "population": 13800,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 23,
+      "name": "Tønder Amt",
+      "towns": [
+        "Tønder"
+      ],
+      "urban": 2600,
+      "rural": 40000,
+      "population": 42600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 24,
+      "name": "Flensborg Amt",
+      "towns": [
+        "Flensborg"
+      ],
+      "urban": 14500,
+      "rural": 31000,
+      "population": 45500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 25,
+      "name": "Husum Amt",
+      "towns": [
+        "Husum"
+      ],
+      "urban": 3500,
+      "rural": 36000,
+      "population": 39500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 26,
+      "name": "Gottorp Amt",
+      "towns": [
+        "Slesvig"
+      ],
+      "urban": 9000,
+      "rural": 30000,
+      "population": 39000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 27,
+      "name": "Hütten Amt",
+      "towns": [
+        "Egernførde"
+      ],
+      "urban": 3200,
+      "rural": 26000,
+      "population": 29200,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 28,
+      "name": "Ærø",
+      "towns": [],
+      "urban": 0,
+      "rural": 8500,
+      "population": 8500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 29,
+      "name": "Femern",
+      "towns": [],
+      "urban": 0,
+      "rural": 7500,
+      "population": 7500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 30,
+      "name": "Kiel Amt",
+      "towns": [
+        "Kiel"
+      ],
+      "urban": 8500,
+      "rural": 23500,
+      "population": 32000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 31,
+      "name": "Rendsborg Amt",
+      "towns": [
+        "Rendsborg"
+      ],
+      "urban": 7500,
+      "rural": 36500,
+      "population": 44000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 32,
+      "name": "Nørre Ditmarsken",
+      "towns": [],
+      "urban": 0,
+      "rural": 18000,
+      "population": 18000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 33,
+      "name": "Søndre Ditmarsken",
+      "towns": [],
+      "urban": 0,
+      "rural": 23500,
+      "population": 23500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 34,
+      "name": "Steinborg Amt",
+      "towns": [
+        "Itzehoe",
+        "Glückstadt"
+      ],
+      "urban": 10200,
+      "rural": 28000,
+      "population": 38200,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 35,
+      "name": "Pinneberg Amt",
+      "towns": [
+        "Altona"
+      ],
+      "urban": 25500,
+      "rural": 23000,
+      "population": 48500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 36,
+      "name": "Neumünster Amt",
+      "towns": [
+        "Neumünster"
+      ],
+      "urban": 2200,
+      "rural": 12500,
+      "population": 14700,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 37,
+      "name": "Segeberg Amt",
+      "towns": [],
+      "urban": 0,
+      "rural": 45000,
+      "population": 45000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 38,
+      "name": "Plön Amt",
+      "towns": [],
+      "urban": 0,
+      "rural": 36000,
+      "population": 36000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 39,
+      "name": "Cismar Amt",
+      "towns": [],
+      "urban": 0,
+      "rural": 34000,
+      "population": 34000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 40,
+      "name": "Stormarn",
+      "towns": [],
+      "urban": 0,
+      "rural": 30500,
+      "population": 30500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 41,
+      "name": "Lauenborg",
+      "towns": [
+        "Ratzeburg"
+      ],
+      "urban": 2200,
+      "rural": 39500,
+      "population": 41700,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    }
+  ]
+}

@@ -1471,6 +1471,14 @@ Forskningsvinduet bruger nu hele bredden. En gren, hvis emner står side om side
 ### 2026-10-08 – Codex-arbejde samlet og bygget
 Tolv Codex-opgaver (hver i sin worktree) er gennemgået og merget: civile bygninger 1825, etiketposition i slaget, fjern stab i delingsbilledet, batteri-sektioner, indkaldelse og træning med tidlig indsættelse, GPU-kvalitetsvalg, kortlægning af Unity-AI (Docs/Unity-AI-Mapping.md) samt gennemgang af sygdom, politik, gæld, vejr og rekognoscering. Ét navnesammenstød rettet (Horses skyggede for et medlem i FreezeCompanyStrength). Bygget og kontrolleret med skærmbilleder af kamporden, forskning og et testslag; ikke afprøvet i fuldt spil.
 
+### 2026-10-08 – Nationer, byer og økonomi: selvstændige 1825-data
+
+- Tilføjet 1825-befolkning for alle kortbyer og amtsgrupper, nationsdata med periodens fredsstyrker og relationer samt særskilte økonomisatser. Historiske kilder, hvert befolkningsskøn og antagelser beskrives i `Docs/Data1825-Nations-Towns-Economy.md`.
+- Scenarie-id vælger befolkningsoverlay, nationer og økonomi; 1851-filer bevares. Sverige-Norge og Nederlandene samles uden dobbelttælling; hansestæder tilføjes, Forbundet vises som politisk oversigt. 1825 starter uden historiske jernbaner.
+- Skatter, handelsgrundlag, landbrugskrisens priser, råvarepriser, kredit og bygningskontrakternes pris/lønbetaling følger 1825-satser. Civilvirkninger bruger individuelle periode-skøn.
+- Gemmeformat, by-/amtsrækkefølge og tidligere nationsindeks bevares. Eksportør skriver samme overlay til runtime-data og kortværktøjets Resources-output.
+- Kontrol: JSON-dækning, amts-/bysummer, reproducerbar eksport, statisk kildegennemgang og git diff --check. Spillet er hverken bygget eller kørt; runtime-gemning er ikke afprøvet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

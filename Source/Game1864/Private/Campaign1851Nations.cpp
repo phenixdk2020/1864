@@ -67,22 +67,23 @@ namespace Campaign1851Nations
 			{ TEXT("Textile_Mill"),     { 0.60f, 0.05f,  600, true,  200, 1800 } },
 			{ TEXT("Inn"),              { 0.10f, 0.05f,  100, true,    8,  100 } },
 		};
-		// Smaller establishments in 1825: jobs and fees follow the 80% population baseline.
-		// Trade is lower still before the railway network; these are balance estimates, not census data.
-		// Keep both tables immutable so switching scenarios also updates the economy and building cards.
-		static const TMap<FString, FCampaign1851CivilEffect> Effects1825 = []()
-		{
-			TMap<FString, FCampaign1851CivilEffect> Scaled = Effects;
-			for (TPair<FString, FCampaign1851CivilEffect>& Pair : Scaled)
-			{
-				FCampaign1851CivilEffect& E = Pair.Value;
-				E.IncomeRd = FMath::RoundToInt(E.IncomeRd * 0.80f);
-				E.Jobs = FMath::RoundToInt(E.Jobs * 0.80f);
-				E.TradeRd = FMath::RoundToInt(E.TradeRd * 0.60f);
-			}
-			return Scaled;
-		}();
-		return ACampaign1851Map::ActiveScenario().Year == 1825 ? Effects1825.Find(Key) : Effects.Find(Key);
+		// Individual pre-industrial establishment estimates; see the 1825 data note.
+		static const TMap<FString, FCampaign1851CivilEffect> Effects1825 = {
+			{ TEXT("Schoolhouse"),      { 0.12f, 0.05f,   0, false,   4,    0 } },
+			{ TEXT("Town_Hall"),        { 0.08f, 0.f,   250, false,   7,    0 } },
+			{ TEXT("Post_Office"),      { 0.10f, 0.02f, 180, false,   5,   70 } },
+			{ TEXT("Hospital"),         { 0.20f, 0.02f,   0, false,  15,    0 } },
+			{ TEXT("Harbor_Building"),  { 0.12f, 0.f,   350, false,  30, 1100 } },
+			{ TEXT("Lighthouse"),       { 0.05f, 0.f,    90, false,   3,  250 } },
+			{ TEXT("Merchant_House"),   { 0.20f, 0.07f, 160, true,   10,  800 } },
+			{ TEXT("Brewery"),          { 0.12f, 0.03f, 220, true,   18,  350 } },
+			{ TEXT("Brickworks"),       { 0.15f, 0.f,   150, true,   25,  280 } },
+			{ TEXT("Sawmill"),          { 0.10f, 0.02f,  90, true,   18,  240 } },
+			{ TEXT("Machine_Workshop"), { 0.20f, 0.f,   300, true,   35,  400 } },
+			{ TEXT("Textile_Mill"),     { 0.30f, 0.03f, 350, true,   80,  800 } },
+			{ TEXT("Inn"),              { 0.10f, 0.04f,  80, true,    6,   90 } },
+		};
+		return ACampaign1851Map::ActiveScenario().Id == TEXT("1825") ? Effects1825.Find(Key) : Effects.Find(Key);
 	}
 }
 
@@ -111,10 +112,10 @@ bool ACampaign1851Map::LoadNations()
 {
 	FString Text;
 	TSharedPtr<FJsonObject> Json;
-	if (!FFileHelper::LoadFileToString(Text, *(FPaths::ProjectDir() / TEXT("Data/Campaign1851/Nations1851.json")))
+	if (!FFileHelper::LoadFileToString(Text, *(FPaths::ProjectDir() / (ActiveScenario().Id == TEXT("1825") ? TEXT("Data/Campaign1851/Nations_1825.json") : TEXT("Data/Campaign1851/Nations1851.json"))))
 		|| !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Json) || !Json.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|nations|no Data/Campaign1851/Nations1851.json; Denmark alone"));
+		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN|nations|missing or invalid scenario data; Denmark alone"));
 		FCampaign1851Nation Dk;
 		Dk.Id = TEXT("DK");
 		Dk.Name = TEXT("Danmark");
@@ -551,8 +552,8 @@ TArray<FCampaign1851Decision> ACampaign1851Map::DecisionOptions(int32 NationInde
 				{
 					continue;
 				}
-				const double Yearly = E->IncomeRd + E->UrbanGrowth / 100.0 * City.Population * UrbanTaxPerHead * 6.0
-					+ (Amt ? E->RuralGrowth / 100.0 * Amt->Rural * RuralTaxPerHead * 6.0 : 0.0);
+				const double Yearly = E->IncomeRd + E->UrbanGrowth / 100.0 * City.Population * UrbanTaxRate() * 6.0
+					+ (Amt ? E->RuralGrowth / 100.0 * Amt->Rural * RuralTaxRate() * 6.0 : 0.0);
 				FCampaign1851Decision D;
 				D.Kind = ECampaign1851DecisionKind::CivilBuilding;
 				D.A = c;
@@ -596,7 +597,7 @@ TArray<FCampaign1851Decision> ACampaign1851Map::DecisionOptions(int32 NationInde
 				const bool bRail = Work == ECampaign1851LinkWork::Railway;
 				const double Pop = double(Cities[L.A].Population + Cities[L.B].Population);
 				// Trade and taxes along the line, and the growth a station or paved road gives both towns.
-				const double Yearly = Pop * (bRail ? 0.05 : 0.02) + Pop * (bRail ? Campaign1851Nations::StationGrowth : Campaign1851Nations::ChausseeGrowth) / 100.0 * UrbanTaxPerHead * 6.0;
+				const double Yearly = Pop * (bRail ? 0.05 : 0.02) + Pop * (bRail ? Campaign1851Nations::StationGrowth : Campaign1851Nations::ChausseeGrowth) / 100.0 * UrbanTaxRate() * 6.0;
 				FCampaign1851Decision D;
 				D.Kind = ECampaign1851DecisionKind::LinkWork;
 				D.A = l;
@@ -900,7 +901,10 @@ void ACampaign1851Map::RunAbstractNation(int32 NationIndex)
 	for (int32 p = 0; p <= int32(ECampaign1851Portfolio::Intendance); ++p) { WeightSum += N.Weights[p]; }
 	auto Share = [&](ECampaign1851Portfolio P) { return Spend * N.Weights[int32(P)] / FMath::Max(WeightSum, 0.1f); };
 	const double RailBefore = N.RailKm, ArmyBefore = N.ArmyMen;
-	N.RailKm += Share(ECampaign1851Portfolio::PublicWorks) / 14000.0 + Share(ECampaign1851Portfolio::Transport) / 40000.0;
+	if (ActiveScenario().Id != TEXT("1825") || GetDate().GetYear() >= (N.Id == TEXT("GB") ? 1826 : 1835))
+	{
+		N.RailKm += Share(ECampaign1851Portfolio::PublicWorks) / 14000.0 + Share(ECampaign1851Portfolio::Transport) / 40000.0;
+	}
 	N.ArmyMen = FMath::Min(N.ArmyMen + Share(ECampaign1851Portfolio::War) / 90.0, N.Population * 0.015);
 	N.Industry += Share(ECampaign1851Portfolio::Interior) / FMath::Max(N.Population * 3.0, 1.0);
 	N.Treasury -= Spend;
