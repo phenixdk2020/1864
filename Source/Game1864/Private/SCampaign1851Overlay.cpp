@@ -687,7 +687,7 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 				Pos + FVector2D(22.f, 166.f), Serif(11, EFace::Italic), Ink, Size.X - 44.f);
 		}
 		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Skat %s rd./år  ·  reserve %s mand (+%s/år)"),
-			*Thousands(FMath::RoundToInt(C.Population * ACampaign1851Map::UrbanTaxPerHead)), *Thousands(FMath::FloorToInt(Map->GetManpower(AmtIndex))),
+			*Thousands(FMath::RoundToInt(C.Population * ACampaign1851Map::UrbanTaxRate())), *Thousands(FMath::FloorToInt(Map->GetManpower(AmtIndex))),
 			*Thousands(FMath::RoundToInt(Map->YearlyClass(AmtIndex)))),
 			Pos + FVector2D(22.f, 146.f), Serif(12, EFace::Italic), Gold, Size.X - 44.f);
 		const TCHAR* Tabs[] = { TEXT("GARNISON"), TEXT("BYGNINGER"), TEXT("VEJE OG BANER") };
@@ -5737,9 +5737,9 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 			FTableRow Row;
 			Row.Id = c;
 			Row.Cells = { C.Name, Amt ? Amt->Name : FString(TEXT("-")), ACampaign1851Map::RegionName(C.Region), Thousands(C.Population),
-				Thousands(FMath::RoundToInt(C.Population * ACampaign1851Map::UrbanTaxPerHead)), Thousands(FMath::RoundToInt(C.Population * 0.09)),
+				Thousands(FMath::RoundToInt(C.Population * ACampaign1851Map::UrbanTaxRate())), Thousands(FMath::RoundToInt(C.Population * 0.09)),
 				FString::FromInt(Units), Thousands(Men), FString::FromInt(Built), Map->HasStation(c) ? FString(TEXT("ja")) : FString(TEXT("-")) };
-			Row.Keys = { Text, Text, Text, double(C.Population), C.Population * ACampaign1851Map::UrbanTaxPerHead, C.Population * 0.09, double(Units), double(Men), double(Built), Text };
+			Row.Keys = { Text, Text, Text, double(C.Population), C.Population * ACampaign1851Map::UrbanTaxRate(), C.Population * 0.09, double(Units), double(Men), double(Built), Text };
 			Rows.Add(Row);
 		}
 		Title(TEXT("Byerne"), FString::Printf(TEXT("%d købstæder  ·  %s indbyggere i byerne  ·  klik på en by for at gå dertil"), Rows.Num(), *Thousands(Population)));

@@ -215,7 +215,7 @@ bool ACampaign1851Map::LoadNetwork(const FJsonObject& Json)
 		}
 	}
 	const TArray<TSharedPtr<FJsonValue>>* RailArray = nullptr;
-	if (Json.TryGetArrayField(TEXT("railways"), RailArray))
+	if (ActiveScenario().Id != TEXT("1825") && Json.TryGetArrayField(TEXT("railways"), RailArray))
 	{
 		for (const TSharedPtr<FJsonValue>& Value : *RailArray)
 		{

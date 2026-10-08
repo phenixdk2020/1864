@@ -5,6 +5,11 @@
 // credit. Each month the state of the country is written down for the newspaper and the statistics.
 
 #include "Campaign1851Map.h"
+#include "Dom/JsonObject.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 
 namespace
 {
@@ -16,6 +21,25 @@ namespace
 	{
 		return FRandomStream(int32(HashCombine(A * 40503u, B))).FRand();
 	}
+}
+
+double ACampaign1851Map::EconomyValue(const TCHAR* Key, double Value1851)
+{
+	if (ActiveScenario().Id != TEXT("1825")) { return Value1851; }
+	static const TSharedPtr<FJsonObject> Economy1825Data = []()
+	{
+		FString Text1825;
+		TSharedPtr<FJsonObject> Result1825;
+		if (!FFileHelper::LoadFileToString(Text1825, *(FPaths::ProjectDir() / TEXT("Data/Campaign1851/Economy_1825.json")))
+			|| !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text1825), Result1825))
+		{
+			UE_LOG(LogTemp, Error, TEXT("CAMPAIGN-1825|mangler gyldige økonomidata"));
+		}
+		return Result1825;
+	}();
+	double Value1825 = Value1851;
+	if (Economy1825Data.IsValid()) { Economy1825Data->TryGetNumberField(Key, Value1825); }
+	return Value1825;
 }
 
 const TCHAR* Campaign1851Economy::GoodName(ECampaign1851Good G)
@@ -43,7 +67,10 @@ float ACampaign1851Map::PriceIndex(ECampaign1851Good G) const
 		Times *= 0.7f;
 	}
 	// Harvest scarcity lifts the price as the harvest lowers the quantity.
-	return Walk * Times / FMath::Sqrt(Harvest);
+	const TCHAR* PriceKey = G == ECampaign1851Good::Grain ? TEXT("grainPrice") : G == ECampaign1851Good::Cattle ? TEXT("cattlePrice") : TEXT("butterPrice");
+	// The agricultural depression eases after 1828; the 1851 index remains unchanged.
+	const float EarlyPrice = Now.GetYear() <= 1828 ? float(EconomyValue(PriceKey, 1.0)) : 1.f;
+	return Walk * Times * EarlyPrice / FMath::Sqrt(Harvest);
 }
 
 double ACampaign1851Map::ExportValuePerYear(ECampaign1851Good G) const
@@ -62,7 +89,8 @@ double ACampaign1851Map::ExportValuePerYear(ECampaign1851Good G) const
 		War = G == ECampaign1851Good::Cattle ? 0.5f : 0.8f;
 		War *= HasSeaControl() ? 1.f : 0.5f;
 	}
-	return Rural * GoodPerHead[int32(G)] * Harvest * PriceIndex(G) * War;
+	const TCHAR* QuantityKey = G == ECampaign1851Good::Grain ? TEXT("grainPerHead") : G == ECampaign1851Good::Cattle ? TEXT("cattlePerHead") : TEXT("butterPerHead");
+	return Rural * EconomyValue(QuantityKey, GoodPerHead[int32(G)]) * Harvest * PriceIndex(G) * War;
 }
 
 double ACampaign1851Map::ExportDutyPerYear() const
@@ -72,14 +100,14 @@ double ACampaign1851Map::ExportDutyPerYear() const
 	{
 		Total += ExportValuePerYear(ECampaign1851Good(g));
 	}
-	return Total * ExportDuty;
+	return Total * EconomyValue(TEXT("exportDuty"), ExportDuty);
 }
 
 float ACampaign1851Map::CreditRate() const
 {
 	// 4 % for a sound state; more with debt against revenue, war and a discontented country.
 	const double Revenue = FMath::Max(1.0, YearlyTax() + ExportDutyPerYear() + ForeignIncomePerYear());
-	return FMath::Min(0.09f, 0.04f + 0.02f * float(Debt / Revenue) + (bAtWar ? 0.015f : 0.f) + (Mood < 30.f ? 0.01f : 0.f));
+	return FMath::Min(0.09f, float(EconomyValue(TEXT("creditBase"), 0.04)) + 0.02f * float(Debt / Revenue) + (bAtWar ? 0.015f : 0.f) + (Mood < 30.f ? 0.01f : 0.f));
 }
 
 double ACampaign1851Map::LoanLimit() const
@@ -130,7 +158,7 @@ bool ACampaign1851Map::RepayLoan(double Amount)
 		return false;
 	}
 	Debt -= Amount;
-	if (Debt == 0.0) { DebtRate = 0.04f; }
+	if (Debt == 0.0) { DebtRate = float(EconomyValue(TEXT("creditBase"), 0.04)); }
 	AddTransaction(-Amount, TEXT("Afdrag på statsgælden"));
 	return true;
 }
@@ -197,7 +225,7 @@ TArray<FString> ACampaign1851Map::SaveEconomy() const
 void ACampaign1851Map::RestoreEconomy(const TArray<FString>& Lines)
 {
 	Debt = 0.0;
-	DebtRate = 0.04f;
+	DebtRate = float(EconomyValue(TEXT("creditBase"), 0.04));
 	TArray<FString> ResourceLines;
 	History.Reset();
 	NewsLog.Reset();
@@ -210,7 +238,7 @@ void ACampaign1851Map::RestoreEconomy(const TArray<FString>& Lines)
 			const double SavedDebt = FCString::Atod(*P[1]);
 			const float SavedRate = FCString::Atof(*P[2]);
 			Debt = FMath::IsFinite(SavedDebt) ? FMath::Max(0.0, SavedDebt) : 0.0;
-			DebtRate = Debt > 0.0 && FMath::IsFinite(SavedRate) ? FMath::Clamp(SavedRate, 0.04f, 0.09f) : 0.04f;
+			DebtRate = Debt > 0.0 && FMath::IsFinite(SavedRate) ? FMath::Clamp(SavedRate, 0.04f, 0.09f) : float(EconomyValue(TEXT("creditBase"), 0.04));
 		}
 		else if (P.Num() == 10 && P[0] == TEXT("h"))
 		{

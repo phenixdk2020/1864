@@ -192,6 +192,40 @@ bool ACampaign1851Map::LoadData()
 	SizeKm = FVector2D(Extent.XMax - Extent.XMin, Extent.YMax - Extent.YMin);
 	Json->TryGetNumberField(TEXT("detailTileKm"), DetailTileKm);
 
+	// Population overlays retain map indices and geography for save compatibility.
+	if (ActiveScenario().Id == TEXT("1825"))
+	{
+		FString PopulationText;
+		TSharedPtr<FJsonObject> PopulationJson;
+		if (!FFileHelper::LoadFileToString(PopulationText, *DataPath(TEXT("Population_1825.json")))
+			|| !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(PopulationText), PopulationJson) || !PopulationJson.IsValid())
+		{
+			UE_LOG(LogTemp, Error, TEXT("CAMPAIGN-1825|mangler gyldige befolkningsdata"));
+			return false;
+		}
+		for (const TCHAR* ArrayName : { TEXT("cities"), TEXT("foreignCities"), TEXT("amter") })
+		{
+			const bool bAmt = FString(ArrayName) == TEXT("amter");
+			const TArray<TSharedPtr<FJsonValue>>* PopulationRows = nullptr;
+			if (!PopulationJson->TryGetArrayField(ArrayName, PopulationRows)) { return false; }
+			for (const TSharedPtr<FJsonValue>& MapValue : Json->GetArrayField(ArrayName))
+			{
+				const TSharedPtr<FJsonObject> MapRow = MapValue->AsObject();
+				const TSharedPtr<FJsonValue>* Found = PopulationRows->FindByPredicate([&](const TSharedPtr<FJsonValue>& Entry)
+				{
+					return bAmt ? Entry->AsObject()->GetNumberField(TEXT("id")) == MapRow->GetNumberField(TEXT("id"))
+						: Entry->AsObject()->GetStringField(TEXT("name")) == MapRow->GetStringField(TEXT("name"));
+				});
+				if (!Found) { UE_LOG(LogTemp, Error, TEXT("CAMPAIGN-1825|ufuldstændige befolkningsdata")); return false; }
+				for (const TCHAR* Field : { TEXT("pop"), TEXT("population"), TEXT("urban"), TEXT("rural") })
+				{
+					double PopulationValue = 0;
+					if ((*Found)->AsObject()->TryGetNumberField(Field, PopulationValue)) { MapRow->SetNumberField(Field, PopulationValue); }
+				}
+			}
+		}
+	}
+
 	auto ReadCities = [this](const TArray<TSharedPtr<FJsonValue>>& Array, bool bForeign)
 	{
 		for (const TSharedPtr<FJsonValue>& Value : Array)
@@ -201,7 +235,7 @@ bool ACampaign1851Map::LoadData()
 			C.Name = O->GetStringField(TEXT("name"));
 			C.Lat = O->GetNumberField(TEXT("lat"));
 			C.Lon = O->GetNumberField(TEXT("lon"));
-			C.Population = FMath::RoundToInt(float(O->GetNumberField(TEXT("pop"))) * ActiveScenario().PopulationFactor);
+			C.Population = FMath::RoundToInt(float(O->GetNumberField(TEXT("pop"))));
 			O->TryGetStringField(TEXT("region"), C.Region);
 			O->TryGetBoolField(TEXT("capital"), C.bCapital);
 			O->TryGetBoolField(TEXT("bornholm"), C.bBornholm);
@@ -243,9 +277,6 @@ bool ACampaign1851Map::LoadData()
 			O->TryGetNumberField(TEXT("population"), A.Population);
 			O->TryGetNumberField(TEXT("urban"), A.Urban);
 			O->TryGetNumberField(TEXT("rural"), A.Rural);
-			A.Population = FMath::RoundToInt(A.Population * ActiveScenario().PopulationFactor);
-			A.Urban = FMath::RoundToInt(A.Urban * ActiveScenario().PopulationFactor);
-			A.Rural = FMath::RoundToInt(A.Rural * ActiveScenario().PopulationFactor);
 			double Area = 0.0;
 			O->TryGetNumberField(TEXT("areaKm2"), Area);
 			A.AreaKm2 = float(Area);
@@ -1974,7 +2005,7 @@ double ACampaign1851Map::YearlyTax(const FString& Region) const
 	double Total = 0.0;
 	for (const FCampaign1851Amt& A : Amter)
 	{
-		Total += (Region.IsEmpty() || A.Region == Region) && !IsAmtOccupied(A) ? A.Rural * RuralTaxPerHead * RuralTaxFactor() + A.Urban * UrbanTaxPerHead * UrbanTaxFactor() : 0.0;
+		Total += (Region.IsEmpty() || A.Region == Region) && !IsAmtOccupied(A) ? A.Rural * RuralTaxRate() * RuralTaxFactor() + A.Urban * UrbanTaxRate() * UrbanTaxFactor() : 0.0;
 	}
 	Total *= TaxMoodFactor();   // a discontented country pays reluctantly
 	return Footing == ECampaign1851Footing::Peace ? Total : Total * Campaign1851Mobilisation::WarTaxFactor;

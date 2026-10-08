@@ -1,0 +1,21 @@
+{
+  "note": "Rigsdaler sølv som sammenlignelig spilregneenhed, ikke rekonstruktion af papirpengekurs. Alle satser er skøn; se datanotatet.",
+  "ruralTax": 0.16,
+  "urbanTax": 0.36,
+  "grainPerHead": 0.38,
+  "cattlePerHead": 0.24,
+  "butterPerHead": 0.07,
+  "grainPrice": 0.72,
+  "cattlePrice": 0.9,
+  "butterPrice": 0.85,
+  "exportDuty": 0.02,
+  "creditBase": 0.05,
+  "constructionCost": 0.9,
+  "unskilledDailyWage": 0.25,
+  "ironPrice": 45,
+  "coalPrice": 16,
+  "timberPrice": 5,
+  "powderPrice": 28,
+  "clothPrice": 5,
+  "leatherPrice": 3.5
+}

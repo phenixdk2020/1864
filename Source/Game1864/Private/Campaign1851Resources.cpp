@@ -24,7 +24,21 @@ namespace Campaign1851Resources
 			{ TEXT("Klæde"),       TEXT("uniformer"), 6.0, 3000.f, 150.f, false },
 			{ TEXT("Læder"),       TEXT("sæt"),       4.0, 2500.f, 100.f, false },
 		};
-		return List[FMath::Clamp(int32(R), 0, int32(ECampaign1851Raw::Count) - 1)];
+		if (ACampaign1851Map::ActiveScenario().Id != TEXT("1825")) { return List[FMath::Clamp(int32(R), 0, int32(ECampaign1851Raw::Count) - 1)]; }
+		static const TArray<FRawInfo> Prices1825 = []()
+		{
+			TArray<FRawInfo> Result;
+			const TCHAR* Keys[] = { TEXT("ironPrice"), TEXT("coalPrice"), TEXT("timberPrice"), TEXT("powderPrice"), TEXT("clothPrice"), TEXT("leatherPrice") };
+			for (int32 Index = 0; Index < int32(ECampaign1851Raw::Count); ++Index)
+			{
+				FRawInfo Entry = List[Index];
+				Entry.Price = ACampaign1851Map::EconomyValue(Keys[Index], Entry.Price);
+				Result.Add(Entry);
+			}
+			return Result;
+		}();
+		const int32 RawIndex = FMath::Clamp(int32(R), 0, int32(ECampaign1851Raw::Count) - 1);
+		return ACampaign1851Map::ActiveScenario().Id == TEXT("1825") ? Prices1825[RawIndex] : List[RawIndex];
 	}
 
 	/** A month's output of a finished works: raw materials made, and what the arms works turn them into. */

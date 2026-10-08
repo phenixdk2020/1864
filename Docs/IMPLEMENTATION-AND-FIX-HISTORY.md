@@ -1482,6 +1482,13 @@ Fri ild fyldte to kasser, fordi søjlens bredde afhang af niveauet; nu har alle 
 - Ældre 1825-gemninger bevarer den gemte skalerede hær uden at få den nye startopstilling oveni. Nye gemninger bruger stabile 1825-id'er og eksisterende poster for styrke, kompagnier, fremmøde, materiel, forsyning og forskning.
 - Kilder, antagelser, garnisonsoversigt, historiske jægerriflers bevidste udeladelse og begrænsninger i hestemobilisering/3D-import er dokumenteret i `Docs/Data1825-Army.md`.
 - Kontrol: JSON- og referencetjek, organisationssummer, statisk C++-parentes-/diffkontrol og uændrede oprindelige 1851-data. Ingen build, kørsel eller commit.
+### 2026-10-08 – Nationer, byer og økonomi: selvstændige 1825-data
+
+- Tilføjet 1825-befolkning for alle kortbyer og amtsgrupper, nationsdata med periodens fredsstyrker og relationer samt særskilte økonomisatser. Historiske kilder, hvert befolkningsskøn og antagelser beskrives i `Docs/Data1825-Nations-Towns-Economy.md`.
+- Scenarie-id vælger befolkningsoverlay, nationer og økonomi; 1851-filer bevares. Sverige-Norge og Nederlandene samles uden dobbelttælling; hansestæder tilføjes, Forbundet vises som politisk oversigt. 1825 starter uden historiske jernbaner.
+- Skatter, handelsgrundlag, landbrugskrisens priser, råvarepriser, kredit og bygningskontrakternes pris/lønbetaling følger 1825-satser. Civilvirkninger bruger individuelle periode-skøn.
+- Gemmeformat, by-/amtsrækkefølge og tidligere nationsindeks bevares. Eksportør skriver samme overlay til runtime-data og kortværktøjets Resources-output.
+- Kontrol: JSON-dækning, amts-/bysummer, reproducerbar eksport, statisk kildegennemgang og git diff --check. Spillet er hverken bygget eller kørt; runtime-gemning er ikke afprøvet.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

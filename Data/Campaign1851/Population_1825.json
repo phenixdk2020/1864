@@ -1,0 +1,952 @@
+{
+  "scenario": "1825",
+  "note": "1825: individuelle afrundede skøn; ingen folketælling dette år. Se Docs/Data1825-Nations-Towns-Economy.md. Kortets administrative enheder og rækkefølge bevares.",
+  "cities": [
+    {
+      "name": "København",
+      "pop": 114300,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 100975,
+      "census1834": 119292
+    },
+    {
+      "name": "Helsingør",
+      "pop": 6600,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 5282,
+      "census1834": 7122
+    },
+    {
+      "name": "Roskilde",
+      "pop": 2500,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1768,
+      "census1834": 2828
+    },
+    {
+      "name": "Køge",
+      "pop": 1800,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1527,
+      "census1834": 1921
+    },
+    {
+      "name": "Holbæk",
+      "pop": 1700,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1332,
+      "census1834": 1887
+    },
+    {
+      "name": "Kalundborg",
+      "pop": 1900,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1322,
+      "census1834": 2082
+    },
+    {
+      "name": "Slagelse",
+      "pop": 2600,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1732,
+      "census1834": 2915
+    },
+    {
+      "name": "Næstved",
+      "pop": 2100,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1785,
+      "census1834": 2279
+    },
+    {
+      "name": "Vordingborg",
+      "pop": 1300,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 931,
+      "census1834": 1476
+    },
+    {
+      "name": "Stege",
+      "pop": 1400,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 917,
+      "census1834": 1627
+    },
+    {
+      "name": "Nykøbing F",
+      "pop": 1500,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1079,
+      "census1834": 1610
+    },
+    {
+      "name": "Nakskov",
+      "pop": 2100,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1671,
+      "census1834": 2204
+    },
+    {
+      "name": "Odense",
+      "pop": 7900,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 5782,
+      "census1834": 8709
+    },
+    {
+      "name": "Nyborg",
+      "pop": 2600,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1866,
+      "census1834": 2873
+    },
+    {
+      "name": "Svendborg",
+      "pop": 3000,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1942,
+      "census1834": 3358
+    },
+    {
+      "name": "Faaborg",
+      "pop": 1800,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1081,
+      "census1834": 2111
+    },
+    {
+      "name": "Assens",
+      "pop": 2100,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1443,
+      "census1834": 2313
+    },
+    {
+      "name": "Middelfart",
+      "pop": 1300,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1019,
+      "census1834": 1402
+    },
+    {
+      "name": "Bogense",
+      "pop": 1100,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 760,
+      "census1834": 1210
+    },
+    {
+      "name": "Rudkøbing",
+      "pop": 1500,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1141,
+      "census1834": 1580
+    },
+    {
+      "name": "Aalborg",
+      "pop": 6600,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 5579,
+      "census1834": 7048
+    },
+    {
+      "name": "Aarhus",
+      "pop": 6000,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 4102,
+      "census1834": 6765
+    },
+    {
+      "name": "Randers",
+      "pop": 5900,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 4562,
+      "census1834": 6407
+    },
+    {
+      "name": "Horsens",
+      "pop": 4200,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 2396,
+      "census1834": 4846
+    },
+    {
+      "name": "Fredericia",
+      "pop": 4000,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 3474,
+      "census1834": 4141
+    },
+    {
+      "name": "Vejle",
+      "pop": 2100,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1310,
+      "census1834": 2409
+    },
+    {
+      "name": "Kolding",
+      "pop": 2200,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1872,
+      "census1834": 2309
+    },
+    {
+      "name": "Viborg",
+      "pop": 3100,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 2379,
+      "census1834": 3419
+    },
+    {
+      "name": "Skanderborg",
+      "pop": 700,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 488,
+      "census1834": 831
+    },
+    {
+      "name": "Grenaa",
+      "pop": 900,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 760,
+      "census1834": 965
+    },
+    {
+      "name": "Hjørring",
+      "pop": 1200,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 744,
+      "census1834": 1388
+    },
+    {
+      "name": "Frederikshavn",
+      "pop": 1000,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 483,
+      "census1834": 1163
+    },
+    {
+      "name": "Skagen",
+      "pop": 1000,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 834,
+      "census1834": 1107
+    },
+    {
+      "name": "Thisted",
+      "pop": 1500,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1088,
+      "census1834": 1599
+    },
+    {
+      "name": "Nykøbing M",
+      "pop": 1000,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 651,
+      "census1834": 1097
+    },
+    {
+      "name": "Holstebro",
+      "pop": 1100,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 853,
+      "census1834": 1184
+    },
+    {
+      "name": "Ringkøbing",
+      "pop": 1100,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 771,
+      "census1834": 1199
+    },
+    {
+      "name": "Ribe",
+      "pop": 2300,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1994,
+      "census1834": 2365
+    },
+    {
+      "name": "Varde",
+      "pop": 1300,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 1020,
+      "census1834": 1430
+    },
+    {
+      "name": "Rønne",
+      "pop": 3500,
+      "status": "interpoleret skøn 1801–1834; afrundet til 100",
+      "source": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=19910&sid=byersfolk1801",
+      "census1801": 2436,
+      "census1834": 3897
+    },
+    {
+      "name": "Haderslev",
+      "pop": 4200,
+      "status": "skøn"
+    },
+    {
+      "name": "Aabenraa",
+      "pop": 3500,
+      "status": "skøn"
+    },
+    {
+      "name": "Sønderborg",
+      "pop": 2300,
+      "status": "skøn"
+    },
+    {
+      "name": "Tønder",
+      "pop": 2600,
+      "status": "skøn"
+    },
+    {
+      "name": "Flensborg",
+      "pop": 14500,
+      "status": "skøn"
+    },
+    {
+      "name": "Slesvig",
+      "pop": 9000,
+      "status": "skøn"
+    },
+    {
+      "name": "Husum",
+      "pop": 3500,
+      "status": "skøn"
+    },
+    {
+      "name": "Egernførde",
+      "pop": 3200,
+      "status": "skøn"
+    },
+    {
+      "name": "Kiel",
+      "pop": 8500,
+      "status": "skøn"
+    },
+    {
+      "name": "Rendsborg",
+      "pop": 7500,
+      "status": "skøn"
+    },
+    {
+      "name": "Itzehoe",
+      "pop": 4500,
+      "status": "skøn"
+    },
+    {
+      "name": "Glückstadt",
+      "pop": 5700,
+      "status": "skøn"
+    },
+    {
+      "name": "Altona",
+      "pop": 25500,
+      "status": "skøn"
+    },
+    {
+      "name": "Neumünster",
+      "pop": 2200,
+      "status": "skøn"
+    },
+    {
+      "name": "Ratzeburg",
+      "pop": 2200,
+      "status": "skøn"
+    }
+  ],
+  "foreignCities": [
+    {
+      "name": "Hamborg",
+      "pop": 110000,
+      "status": "skøn"
+    },
+    {
+      "name": "Lübeck",
+      "pop": 23500,
+      "status": "skøn"
+    },
+    {
+      "name": "Malmø",
+      "pop": 7500,
+      "status": "skøn"
+    },
+    {
+      "name": "Helsingborg",
+      "pop": 2500,
+      "status": "skøn"
+    },
+    {
+      "name": "Landskrona",
+      "pop": 2800,
+      "status": "skøn"
+    },
+    {
+      "name": "Lund",
+      "pop": 4300,
+      "status": "skøn"
+    },
+    {
+      "name": "Ystad",
+      "pop": 2800,
+      "status": "skøn"
+    },
+    {
+      "name": "Trelleborg",
+      "pop": 500,
+      "status": "skøn"
+    },
+    {
+      "name": "Kristianstad",
+      "pop": 4300,
+      "status": "skøn"
+    },
+    {
+      "name": "Karlskrona",
+      "pop": 10500,
+      "status": "skøn"
+    },
+    {
+      "name": "Halmstad",
+      "pop": 2200,
+      "status": "skøn"
+    },
+    {
+      "name": "Göteborg",
+      "pop": 21000,
+      "status": "skøn"
+    },
+    {
+      "name": "Rostock",
+      "pop": 18000,
+      "status": "skøn"
+    },
+    {
+      "name": "Wismar",
+      "pop": 8500,
+      "status": "skøn"
+    },
+    {
+      "name": "Schwerin",
+      "pop": 12000,
+      "status": "skøn"
+    },
+    {
+      "name": "Stralsund",
+      "pop": 16000,
+      "status": "skøn"
+    },
+    {
+      "name": "Stettin",
+      "pop": 27000,
+      "status": "skøn"
+    },
+    {
+      "name": "Bremen",
+      "pop": 40000,
+      "status": "skøn"
+    }
+  ],
+  "amter": [
+    {
+      "id": 1,
+      "name": "Hjørring Amt",
+      "towns": [
+        "Hjørring",
+        "Skagen",
+        "Frederikshavn"
+      ],
+      "urban": 3200,
+      "rural": 58000,
+      "population": 61200,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 2,
+      "name": "Thisted Amt",
+      "towns": [
+        "Thisted",
+        "Nykøbing M"
+      ],
+      "urban": 2500,
+      "rural": 44500,
+      "population": 47000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 3,
+      "name": "Aalborg Amt",
+      "towns": [
+        "Aalborg"
+      ],
+      "urban": 6600,
+      "rural": 67000,
+      "population": 73600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 4,
+      "name": "Viborg Amt",
+      "towns": [
+        "Viborg"
+      ],
+      "urban": 3100,
+      "rural": 60000,
+      "population": 63100,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 5,
+      "name": "Randers Amt",
+      "towns": [
+        "Randers",
+        "Grenaa"
+      ],
+      "urban": 6800,
+      "rural": 77000,
+      "population": 83800,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 6,
+      "name": "Aarhus Amt",
+      "towns": [
+        "Aarhus"
+      ],
+      "urban": 6000,
+      "rural": 23000,
+      "population": 29000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 7,
+      "name": "Skanderborg Amt",
+      "towns": [
+        "Skanderborg"
+      ],
+      "urban": 700,
+      "rural": 38000,
+      "population": 38700,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 8,
+      "name": "Vejle Amt",
+      "towns": [
+        "Fredericia",
+        "Horsens",
+        "Vejle",
+        "Kolding"
+      ],
+      "urban": 12500,
+      "rural": 58000,
+      "population": 70500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 9,
+      "name": "Ringkøbing Amt",
+      "towns": [
+        "Holstebro",
+        "Ringkøbing"
+      ],
+      "urban": 2200,
+      "rural": 102000,
+      "population": 104200,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 10,
+      "name": "Ribe Amt",
+      "towns": [
+        "Ribe",
+        "Varde"
+      ],
+      "urban": 3600,
+      "rural": 59000,
+      "population": 62600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 11,
+      "name": "Odense Amt",
+      "towns": [
+        "Odense",
+        "Assens",
+        "Middelfart",
+        "Bogense"
+      ],
+      "urban": 12400,
+      "rural": 46000,
+      "population": 58400,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 12,
+      "name": "Svendborg Amt",
+      "towns": [
+        "Svendborg",
+        "Nyborg",
+        "Rudkøbing",
+        "Faaborg"
+      ],
+      "urban": 8900,
+      "rural": 39000,
+      "population": 47900,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 13,
+      "name": "Københavns Amt",
+      "towns": [
+        "København",
+        "Roskilde",
+        "Køge"
+      ],
+      "urban": 118600,
+      "rural": 40000,
+      "population": 158600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 14,
+      "name": "Frederiksborg Amt",
+      "towns": [
+        "Helsingør"
+      ],
+      "urban": 6600,
+      "rural": 32000,
+      "population": 38600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 15,
+      "name": "Holbæk Amt",
+      "towns": [
+        "Holbæk",
+        "Kalundborg"
+      ],
+      "urban": 3600,
+      "rural": 39000,
+      "population": 42600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 16,
+      "name": "Sorø Amt",
+      "towns": [
+        "Slagelse"
+      ],
+      "urban": 2600,
+      "rural": 39000,
+      "population": 41600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 17,
+      "name": "Præstø Amt",
+      "towns": [
+        "Næstved",
+        "Stege",
+        "Vordingborg"
+      ],
+      "urban": 4800,
+      "rural": 44000,
+      "population": 48800,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 18,
+      "name": "Maribo Amt",
+      "towns": [
+        "Nykøbing F",
+        "Nakskov"
+      ],
+      "urban": 3600,
+      "rural": 42000,
+      "population": 45600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 19,
+      "name": "Bornholms Amt",
+      "towns": [
+        "Rønne"
+      ],
+      "urban": 3500,
+      "rural": 18000,
+      "population": 21500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 20,
+      "name": "Haderslev Amt",
+      "towns": [
+        "Haderslev"
+      ],
+      "urban": 4200,
+      "rural": 45500,
+      "population": 49700,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 21,
+      "name": "Aabenraa Amt",
+      "towns": [
+        "Aabenraa"
+      ],
+      "urban": 3500,
+      "rural": 19000,
+      "population": 22500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 22,
+      "name": "Sønderborg Amt",
+      "towns": [
+        "Sønderborg"
+      ],
+      "urban": 2300,
+      "rural": 11500,
+      "population": 13800,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 23,
+      "name": "Tønder Amt",
+      "towns": [
+        "Tønder"
+      ],
+      "urban": 2600,
+      "rural": 40000,
+      "population": 42600,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 24,
+      "name": "Flensborg Amt",
+      "towns": [
+        "Flensborg"
+      ],
+      "urban": 14500,
+      "rural": 31000,
+      "population": 45500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 25,
+      "name": "Husum Amt",
+      "towns": [
+        "Husum"
+      ],
+      "urban": 3500,
+      "rural": 36000,
+      "population": 39500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 26,
+      "name": "Gottorp Amt",
+      "towns": [
+        "Slesvig"
+      ],
+      "urban": 9000,
+      "rural": 30000,
+      "population": 39000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 27,
+      "name": "Hütten Amt",
+      "towns": [
+        "Egernførde"
+      ],
+      "urban": 3200,
+      "rural": 26000,
+      "population": 29200,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 28,
+      "name": "Ærø",
+      "towns": [],
+      "urban": 0,
+      "rural": 8500,
+      "population": 8500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 29,
+      "name": "Femern",
+      "towns": [],
+      "urban": 0,
+      "rural": 7500,
+      "population": 7500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 30,
+      "name": "Kiel Amt",
+      "towns": [
+        "Kiel"
+      ],
+      "urban": 8500,
+      "rural": 23500,
+      "population": 32000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 31,
+      "name": "Rendsborg Amt",
+      "towns": [
+        "Rendsborg"
+      ],
+      "urban": 7500,
+      "rural": 36500,
+      "population": 44000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 32,
+      "name": "Nørre Ditmarsken",
+      "towns": [],
+      "urban": 0,
+      "rural": 18000,
+      "population": 18000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 33,
+      "name": "Søndre Ditmarsken",
+      "towns": [],
+      "urban": 0,
+      "rural": 23500,
+      "population": 23500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 34,
+      "name": "Steinborg Amt",
+      "towns": [
+        "Itzehoe",
+        "Glückstadt"
+      ],
+      "urban": 10200,
+      "rural": 28000,
+      "population": 38200,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 35,
+      "name": "Pinneberg Amt",
+      "towns": [
+        "Altona"
+      ],
+      "urban": 25500,
+      "rural": 23000,
+      "population": 48500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 36,
+      "name": "Neumünster Amt",
+      "towns": [
+        "Neumünster"
+      ],
+      "urban": 2200,
+      "rural": 12500,
+      "population": 14700,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 37,
+      "name": "Segeberg Amt",
+      "towns": [],
+      "urban": 0,
+      "rural": 45000,
+      "population": 45000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 38,
+      "name": "Plön Amt",
+      "towns": [],
+      "urban": 0,
+      "rural": 36000,
+      "population": 36000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 39,
+      "name": "Cismar Amt",
+      "towns": [],
+      "urban": 0,
+      "rural": 34000,
+      "population": 34000,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 40,
+      "name": "Stormarn",
+      "towns": [],
+      "urban": 0,
+      "rural": 30500,
+      "population": 30500,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    },
+    {
+      "id": 41,
+      "name": "Lauenborg",
+      "towns": [
+        "Ratzeburg"
+      ],
+      "urban": 2200,
+      "rural": 39500,
+      "population": 41700,
+      "status": "skøn; 1851-kortets geografiske gruppering"
+    }
+  ]
+}

@@ -1088,6 +1088,10 @@ def main():
     with open(os.path.join(OUT_DIR, "Denmark1851_Map.json"), "w", encoding="utf-8") as f:
         json.dump(meta, f, ensure_ascii=False, indent=1)
 
+    from pathlib import Path
+    from export_1825 import export as export_population_1825
+    export_population_1825(Path(OUT_DIR))
+
     if preview:
         Image.fromarray(colour).resize((WIDTH_PX // 4, HEIGHT_PX // 4), Image.LANCZOS).save(os.path.join(HERE, "preview.png"))
     print(f"roads: {sum(r['kind'] == 'main' for r in meta['roads'])} road runs, {sum(r['kind'] == 'ferry' for r in meta['roads'])} ferries; amter: {len(meta['amter'])}")

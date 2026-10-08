@@ -25,7 +25,7 @@
   - Renten trækkes hver måned.
 
 - **Afdrag:** er restgælden mindre end 100.000 rd., betales kun restgælden; knappen og bekræftelsen viser dette. Ved fuld indfrielse nulstilles den viste gældsrente til 4 %.
-- **1825:** samme lånebeløb og renteregler som i 1851; rammen følger de aktuelle indtægter fra den mindre befolkning. Ledig kredit vises i statskassen.
+- **1825:** samme lånebeløb og risikotillæg; grundrenten er 5 %, og rammen følger scenariets indtægter. Se [1825-data og kilder](Data1825-Nations-Towns-Economy.md). Ledig kredit vises i statskassen.
 - **Gemning:** gæld og vægtet rente gemmes med præcision til numerisk round-trip; gamle `debt`-linjer kan stadig indlæses. Ugyldige beløb afvises, og ugyldige gemte gældstal normaliseres.
 
 ## AVISEN (knappen ved siden af SKANSER)

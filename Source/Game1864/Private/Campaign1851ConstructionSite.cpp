@@ -1,6 +1,7 @@
 #include "Campaign1851ConstructionSite.h"
 
 #include "Campaign1851Buildings.h"
+#include "Campaign1851Map.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
@@ -38,7 +39,8 @@ namespace
 int32 FCampaign1851SiteModule::Cost() const
 {
 	const FCampaign1851BuildingDef* Data = Campaign1851Buildings::Find(Key);
-	return Data ? Data->CostRd : 0;
+	if (ACampaign1851Map::ActiveScenario().Id != TEXT("1825")) { return Data ? Data->CostRd : 0; }
+	return Data ? FMath::RoundToInt(Data->CostRd * ACampaign1851Map::EconomyValue(TEXT("constructionCost"), 1.0)) : 0;
 }
 
 float FCampaign1851SiteModule::Days() const
