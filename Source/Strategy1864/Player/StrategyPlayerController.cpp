@@ -101,6 +101,23 @@ void AStrategyPlayerController::SetupInputComponent()
 
 void AStrategyPlayerController::PlayerTick(float DeltaTime)
 {
+    // -Strategy1864Select=<unit id>: selects that unit a few seconds into the battle (QA of the HUD).
+    {
+        static bool bAutoSelected = false;
+        FString WantedId;
+        if (!bAutoSelected && GetWorld() && GetWorld()->GetRealTimeSeconds() > 6.0f && FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Select="), WantedId))
+        {
+            for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+            {
+                if (IsValid(*It) && It->StableUnitId.ToString() == WantedId)
+                {
+                    bAutoSelected = true;
+                    SelectUnitFromOOB(*It, false);
+                    break;
+                }
+            }
+        }
+    }
     Super::PlayerTick(DeltaTime);
     TickCouriers(DeltaTime);
     TickRightMouse();
