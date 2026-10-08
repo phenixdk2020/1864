@@ -2,6 +2,10 @@
 #include "../AI/StrategyFieldOfficerComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "../Combat/StrategyCombatComponent.h"
+#include "../Combat/StrategyFireControlComponent.h"
+#include "../Combat/StrategyFireDisciplineComponent.h"
+#include "../Formations/StrategyFormationTransitionComponent.h"
+#include "../Units/StrategyCompanyUnit.h"
 
 #include "../Orders/StrategyOrderComponent.h"
 #include "../Campaign/StrategyCampaignBattlefield.h"
@@ -101,6 +105,7 @@ void UStrategyMovementExecutorComponent::HandleOrderChanged(const FStrategyOrder
 
 void UStrategyMovementExecutorComponent::BeginMovementForOrder(const FStrategyOrder& Order)
 {
+    bHoldingForFire = false;
     ReleaseBridgeSlot();
 
     if (AStrategyArtilleryBatteryUnit* Battery =
@@ -232,6 +237,36 @@ void UStrategyMovementExecutorComponent::TickComponent(
         StopMovement();
         return;
     }
+
+    // Preserve route and order serial through every reload. No timed one-volley halt.
+    const bool bFireMission = CurrentOrder.Type == EStrategyOrderType::Advance ||
+        CurrentOrder.Type == EStrategyOrderType::AttackHere;
+    AStrategyUnit* MovementFireTarget = bFireMission && OwnerUnit->IsA<AStrategyCompanyUnit>() &&
+        OwnerUnit->CombatComponent && OwnerUnit->FireControlComponent &&
+        (!OwnerUnit->FireDisciplineComponent || OwnerUnit->FireDisciplineComponent->AllowsAutomaticFire()) ?
+        OwnerUnit->CombatComponent->FindBestTarget(false) : nullptr;
+    const bool bWasHoldingForFire = bHoldingForFire;
+    bHoldingForFire = MovementFireTarget != nullptr;
+    if (bHoldingForFire)
+    {
+        if (OwnerUnit->FormationComponent &&
+            OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn)
+            OwnerUnit->FormationComponent->SetFormation(EStrategyFormationType::Line);
+        if (!OwnerUnit->FormationTransition || !OwnerUnit->FormationTransition->IsReforming())
+            OwnerUnit->SetUnitState(EStrategyUnitState::Ready);
+        if (!CurrentOrder.bKeepFacing)
+        {
+            const float FireFacingYaw = (MovementFireTarget->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
+            FRotator FireRotation = OwnerUnit->GetActorRotation();
+            FireRotation.Yaw = FMath::FixedTurn(FireRotation.Yaw, FireFacingYaw, TurnSpeedDegreesPerSecond * DeltaTime);
+            OwnerUnit->SetActorRotation(FireRotation);
+        }
+        // Other pauses still expire while the engagement keeps the company stationary.
+        PauseRemainingSeconds = FMath::Max(0.0f, PauseRemainingSeconds - DeltaTime);
+        return;
+    }
+    if (bWasHoldingForFire && (!OwnerUnit->FormationTransition || !OwnerUnit->FormationTransition->IsReforming()))
+        OwnerUnit->SetUnitState(EStrategyUnitState::Moving);
 
     if (PauseRemainingSeconds > 0.0f)
     {
@@ -531,6 +566,7 @@ void UStrategyMovementExecutorComponent::FinishMovement()
 
 void UStrategyMovementExecutorComponent::StopMovement()
 {
+    bHoldingForFire = false;
     ExecutedVelocity = FVector::ZeroVector;
     if (bCavalryDefileActive)
     {

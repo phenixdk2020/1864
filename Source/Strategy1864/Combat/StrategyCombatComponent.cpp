@@ -39,6 +39,7 @@ void UStrategyCombatComponent::BeginPlay()
 
     OwnerUnit = Cast<AStrategyUnit>(GetOwner());
     ConfigureCartridgesPerMan();
+    if (OwnerUnit && OwnerUnit->MovementExecutor) AddTickPrerequisiteComponent(OwnerUnit->MovementExecutor);
 
     const int32 Seed =
         OwnerUnit
@@ -162,6 +163,10 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
     if (!OwnerUnit ||
         !OwnerUnit->FireControlComponent ||
         !OwnerUnit->FireControlComponent->CanEngageTarget(Target) ||
+        !OwnerUnit->FireControlComponent->IsBattleFormationReady() ||
+        (OwnerUnit->FireDisciplineComponent && !OwnerUnit->FireDisciplineComponent->AllowsAutomaticFire()) ||
+        (OwnerUnit->MovementExecutor && OwnerUnit->MovementExecutor->HasMovementGoal() &&
+         !OwnerUnit->MovementExecutor->IsHoldingForFire()) ||
         OwnerUnit->UnitState == EStrategyUnitState::Reforming ||
         (OwnerUnit->FormationTransition && OwnerUnit->FormationTransition->IsReforming()) ||
         ReloadRemainingSeconds > 0.0f ||
@@ -410,7 +415,7 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
     return true;
 }
 
-AStrategyUnit* UStrategyCombatComponent::FindBestTarget() const
+AStrategyUnit* UStrategyCombatComponent::FindBestTarget(bool bRequireFireCone) const
 {
     if (!OwnerUnit || !OwnerUnit->FireControlComponent || !GetWorld())
     {
@@ -426,7 +431,7 @@ AStrategyUnit* UStrategyCombatComponent::FindBestTarget() const
 
         if (!IsValid(Candidate) ||
             Candidate == OwnerUnit ||
-            !OwnerUnit->FireControlComponent->CanEngageTarget(Candidate))
+            !OwnerUnit->FireControlComponent->CanEngageTarget(Candidate, bRequireFireCone))
         {
             continue;
         }

@@ -18,7 +18,8 @@ enum class EStrategyBlastKind : uint8
     ShellBurst,     // a shell bursts on the ground: fire, black smoke, more earth, a crater
     AirBurst,       // a shrapnel shell bursts above the men: a white puff, the balls kick up the dust below
     Canister,       // case shot: a cone of dust kicked up in front of the gun
-    HoofDust        // a galloping horse: a small puff of dust
+    HoofDust,       // a galloping horse: a small puff of dust
+    FootstepDust   // low, short-lived infantry dust
 };
 
 /**

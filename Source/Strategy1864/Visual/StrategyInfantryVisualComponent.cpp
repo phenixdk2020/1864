@@ -1,4 +1,7 @@
 #include "StrategyInfantryVisualComponent.h"
+#include "../Movement/StrategyMovementExecutorComponent.h"
+#include "../Formations/StrategyFormationTransitionComponent.h"
+#include "../Terrain/StrategyTerrainQueryLibrary.h"
 
 #include "Animation/AnimSequence.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -30,7 +33,7 @@
 UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
-    PrimaryComponentTick.TickInterval = RefreshIntervalSeconds;
+    PrimaryComponentTick.TickInterval = 0.0f;
 
     SoldierMeshAsset = TSoftObjectPtr<USkeletalMesh>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Mesh/SK_DK_Livgarden_1864.SK_DK_Livgarden_1864")));
@@ -123,8 +126,10 @@ void UStrategyInfantryVisualComponent::BeginPlay()
             &UStrategyInfantryVisualComponent::HandleVolleyVisualEvent);
     }
 
-    PrimaryComponentTick.TickInterval =
-        FMath::Max(0.02f, RefreshIntervalSeconds);
+    PrimaryComponentTick.TickInterval = 0.0f;
+    if (OwnerCompany && OwnerCompany->MovementExecutor) AddTickPrerequisiteComponent(OwnerCompany->MovementExecutor);
+    if (OwnerCompany && OwnerCompany->HumanAnimationStateComponent) AddTickPrerequisiteComponent(OwnerCompany->HumanAnimationStateComponent);
+    if (OwnerCompany && OwnerCompany->CombatComponent) AddTickPrerequisiteComponent(OwnerCompany->CombatComponent);
 
     if (bEnabled)
     {
@@ -291,11 +296,47 @@ void UStrategyInfantryVisualComponent::SetVisualScaleDivisor(
 
     VisualScaleDivisor = NormalizedDivisor;
 
-    if (bEnabled)
+    if (bEnabled && OwnerCompany && LoadedSoldierMesh)
     {
-        EnsureVisualCount(GetDesiredVisualCount());
+        const int32 ScaleOldCount = SoldierComponents.Num();
+        const int32 ScaleDesiredCount = GetDesiredVisualCount();
+        // Thin evenly across the existing company; survivors keep position, slot and animation phase.
+        TSet<int32> ScaleKeep;
+        const bool bScaleColumn = OwnerCompany->FormationComponent &&
+            (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
+             OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn);
+        const int32 ScaleFiles = bScaleColumn ?
+            (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn ? 2 :
+             FMath::Max(1, OwnerCompany->FormationComponent->ColumnWidth)) : 1;
+        const int32 ScaleOldRows = FMath::DivideAndRoundUp(ScaleOldCount, ScaleFiles);
+        const int32 ScaleNewRows = FMath::DivideAndRoundUp(ScaleDesiredCount, ScaleFiles);
+        for (int32 ScaleIndex = 0; ScaleIndex < FMath::Min(ScaleDesiredCount, ScaleOldCount); ++ScaleIndex)
+        {
+            const int32 ScaleRow = ScaleNewRows <= 1 ? 0 : FMath::FloorToInt(float(ScaleIndex / ScaleFiles) * ScaleOldRows / ScaleNewRows);
+            ScaleKeep.Add(FMath::Min(ScaleOldCount - 1, ScaleRow * ScaleFiles + ScaleIndex % ScaleFiles));
+        }
+        if (ScaleDesiredCount < ScaleOldCount)
+        {
+            for (int32 ScaleIndex = ScaleOldCount - 1; ScaleIndex >= 0; --ScaleIndex)
+            {
+                if (ScaleKeep.Contains(ScaleIndex)) continue;
+                if (SoldierComponents[ScaleIndex]) SoldierComponents[ScaleIndex]->DestroyComponent();
+                if (WeaponComponents.IsValidIndex(ScaleIndex) && WeaponComponents[ScaleIndex]) WeaponComponents[ScaleIndex]->DestroyComponent();
+                SoldierComponents.RemoveAt(ScaleIndex);
+                WeaponComponents.RemoveAt(ScaleIndex);
+                SoldierClips.RemoveAt(ScaleIndex);
+                SoldierSettle.RemoveAt(ScaleIndex);
+                if (SoldierSlots.IsValidIndex(ScaleIndex)) SoldierSlots.RemoveAt(ScaleIndex);
+                SoldierFireAt.RemoveAt(ScaleIndex);
+                SoldierBusyUntil.RemoveAt(ScaleIndex);
+                SoldierFirePhase.RemoveAt(ScaleIndex);
+            }
+        }
+        EnsureVisualCount(ScaleDesiredCount);
+        bScaleOnlyRebuild = true;
         RebuildFormation();
-        RefreshAnimation(true);
+        bScaleOnlyRebuild = false;
+        RefreshAnimation(false);
         UpdateFormationBounds();
     }
 }
@@ -432,7 +473,7 @@ bool UStrategyInfantryVisualComponent::IsEnemyInRange() const
     for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
     {
         if (IsValid(*It) && It->Side != OwnerCompany->Side && It->Side != EStrategySide::Neutral && It->IsCombatEffective() &&
-            Fire->IsLocationInsideFireField(It->GetActorLocation(), Fire->GetActiveRangeCm()))
+            Fire->CanEngageTarget(*It))
         {
             return true;
         }
@@ -449,7 +490,7 @@ bool UStrategyInfantryVisualComponent::IsInFiringLine() const
     const bool bMoving = OwnerCompany->HumanAnimationStateComponent &&
         (OwnerCompany->HumanAnimationStateComponent->CurrentAction == EStrategyHumanAnimationAction::Walk ||
          OwnerCompany->HumanAnimationStateComponent->CurrentAction == EStrategyHumanAnimationAction::Run);
-    const bool bLine = !OwnerCompany->FormationComponent || OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Line;
+    const bool bLine = OwnerCompany->FireControlComponent->IsBattleFormationReady();
     if (bMoving || !bLine)
     {
         return false;
@@ -649,7 +690,11 @@ void UStrategyInfantryVisualComponent::MarchDust(float Now)
     {
         return;
     }
-    NextMarchDust = Now + FMath::FRandRange(0.6f, 1.2f);
+    if (!OwnerCompany->MovementExecutor || OwnerCompany->MovementExecutor->GetExecutedVelocity().Size2D() < 5.f ||
+        !OwnerCompany->FormationComponent ||
+        (OwnerCompany->FormationComponent->CurrentFormation != EStrategyFormationType::MarchColumn &&
+         OwnerCompany->FormationComponent->CurrentFormation != EStrategyFormationType::DefileColumn)) return;
+    NextMarchDust = Now + FMath::FRandRange(0.3f, 0.5f);
     // Only near the camera (a sight for the commander, nothing for the far field).
     if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
     {
@@ -659,9 +704,11 @@ void UStrategyInfantryVisualComponent::MarchDust(float Now)
         }
     }
     const FVector Fwd = OwnerCompany->GetActorForwardVector().GetSafeNormal2D();
-    const FVector Right(-Fwd.Y, Fwd.X, 0.0f);
-    const FVector At = OwnerCompany->GetActorLocation() - Fwd * 500.0f + Right * FMath::FRandRange(-1200.0f, 1200.0f);
-    AStrategyBattleBlast::Spawn(GetWorld(), EStrategyBlastKind::HoofDust, At + FVector(0.0f, 0.0f, 20.0f), Fwd, 3.2f);
+    if (SoldierComponents.IsEmpty()) return;
+    const USkeletalMeshComponent* DustSoldier = SoldierComponents[FMath::RandRange(0, SoldierComponents.Num() - 1)];
+    if (!DustSoldier) return;
+    const FVector DustGround = UStrategyTerrainQueryLibrary::ProjectPointToTerrain(this, DustSoldier->GetComponentLocation());
+    AStrategyBattleBlast::Spawn(GetWorld(), EStrategyBlastKind::FootstepDust, DustGround + FVector(0.f, 0.f, 8.f), Fwd);
 }
 
 void UStrategyInfantryVisualComponent::QueueKills(int32 Count)
@@ -918,6 +965,7 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
 
         SoldierComponents.RemoveAt(LastIndex);
         if (SoldierClips.IsValidIndex(LastIndex)) { SoldierClips.RemoveAt(LastIndex); }
+        if (SoldierSlots.IsValidIndex(LastIndex)) { SoldierSlots.RemoveAt(LastIndex); }
         bCrowdDirty = true;
         if (SoldierFireAt.IsValidIndex(LastIndex)) { SoldierFireAt.RemoveAt(LastIndex); }
         if (SoldierBusyUntil.IsValidIndex(LastIndex)) { SoldierBusyUntil.RemoveAt(LastIndex); }
@@ -1037,12 +1085,17 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
             continue;
         }
 
+        if (bScaleOnlyRebuild && SoldierSettle.IsValidIndex(VisualIndex) && SoldierSettle[VisualIndex].bPlaced)
+            continue;
         // A column keeps its full width at a thinned figure scale: whole rows are skipped, not every second man (which kept two of four files).
         const bool bColumnFormation = OwnerCompany && OwnerCompany->FormationComponent &&
-            OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn;
-        const int32 ColumnFiles = bColumnFormation ? FMath::Max(1, OwnerCompany->FormationComponent->ColumnWidth) : 1;
+            (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
+             OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn);
+        const int32 ColumnFiles = bColumnFormation ?
+            (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn ? 2 :
+             FMath::Max(1, OwnerCompany->FormationComponent->ColumnWidth)) : 1;
         const int32 RowStride = VisualScaleDivisor <= 1 ? 1 : VisualScaleDivisor <= 2 ? 2 : VisualScaleDivisor <= 5 ? 5 : 10;
-        const int32 FullIndex =
+        int32 FullIndex =
             bColumnFormation && RowStride > 1 && FullSlots.Num() > 0
             ? FMath::Clamp((VisualIndex / ColumnFiles) * ColumnFiles * RowStride + (VisualIndex % ColumnFiles), 0, FullSlots.Num() - 1)
             : RenderedCount <= 1
@@ -1055,6 +1108,15 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
                 0,
                 FullSlots.Num() - 1);
 
+        if (bScaleOnlyRebuild)
+        {
+            TSet<int32> OccupiedScaleSlots;
+            for (int32 ScaleIndex = 0; ScaleIndex < SoldierSettle.Num(); ++ScaleIndex)
+                if (SoldierSettle[ScaleIndex].bPlaced && SoldierSlots.IsValidIndex(ScaleIndex)) OccupiedScaleSlots.Add(SoldierSlots[ScaleIndex]);
+            if (OccupiedScaleSlots.Contains(FullIndex))
+                for (int32 FreeScaleSlot = 0; FreeScaleSlot < FullSlots.Num(); ++FreeScaleSlot)
+                    if (!OccupiedScaleSlots.Contains(FreeScaleSlot)) { FullIndex = FreeScaleSlot; break; }
+        }
         const FStrategyFormationSlot& Slot =
             FullSlots[FullIndex];
 
@@ -1139,10 +1201,12 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
          OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn);
     if (!VisualPath.bInitialized) { VisualPath.Reset(VisualUnit); }
-    VisualPath.Advance(VisualUnit, DeltaTime, bVisualColumn, RunCmPerSecond);
+    const float ActualMarchSpeed = OwnerCompany->MovementExecutor ? OwnerCompany->MovementExecutor->GetExecutedVelocity().Size2D() : 0.f;
+    const float VisualWalkSpeed = FMath::Max(160.f, ActualMarchSpeed);
+    VisualPath.Advance(VisualUnit, DeltaTime, bVisualColumn, VisualWalkSpeed);
     const bool bActorMoved = !VisualUnit.Equals(VisualPath.PreviousUnit, 0.001f);
     const bool bVisualTravel = VisualPath.bMovingVisuals || bActorMoved;
-    UAnimSequence* Walk = bVisualTravel ? WalkStandingAsset.LoadSynchronous() : nullptr;
+    UAnimSequence* Walk = WalkStandingAsset.LoadSynchronous();
     bool bAny = false;
     UAnimSequence* Run = RunStandingAsset.LoadSynchronous();
     for (int32 i = 0; i < SoldierComponents.Num() && i < SoldierSettle.Num(); ++i)
@@ -1182,7 +1246,9 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             continue;
         }
         bAny = true;
-        const FVector Step = Delta / Distance * FMath::Min(Distance, RunCmPerSecond * DeltaTime);
+        const bool bSlotReforming = OwnerCompany->FormationTransition && OwnerCompany->FormationTransition->IsReforming();
+        const float FigureSpeed = bSlotReforming ? FMath::Max(RunCmPerSecond, ActualMarchSpeed) : VisualWalkSpeed;
+        const FVector Step = Delta / Distance * FMath::Min(Distance, FigureSpeed * DeltaTime);
         Soldier->SetRelativeLocation(Here + Step);
         // He faces the way he runs while he is far from his place, and turns to the front as he comes in.
         const float RunYaw = Delta.Rotation().Yaw + SoldierMeshYawOffset;
@@ -1190,7 +1256,7 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         FRotator Rot = Soldier->GetRelativeRotation();
         Rot.Yaw = FMath::FixedTurn(Rot.Yaw, Yaw, 120.0f * DeltaTime);
         Soldier->SetRelativeRotation(Rot);
-        UAnimSequence* TravelClip = bVisualTravel && Walk ? Walk : Run;
+        UAnimSequence* TravelClip = !bSlotReforming && Walk ? Walk : Run;
         if (TravelClip && SoldierClips.IsValidIndex(i) && SoldierClips[i].Clip.Get() != TravelClip)
         {
             Soldier->bPauseAnims = false;
@@ -1198,9 +1264,9 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             Soldier->SetPlayRate(FMath::FRandRange(0.95f, 1.1f));
             RecordClip(Soldier, TravelClip, true, 0.0f, 1.0f);
         }
-        if (bVisualTravel && TravelClip && SoldierClips.IsValidIndex(i))
+        if (TravelClip && SoldierClips.IsValidIndex(i))
         {
-            const float VisualRate = FMath::Clamp(Step.Size2D() / FMath::Max(0.001f, DeltaTime) / 160.f, 0.15f, 2.6f);
+            const float VisualRate = FMath::Clamp(Step.Size2D() / FMath::Max(0.001f, DeltaTime) / (TravelClip == Run ? RunCmPerSecond : 160.f), 0.15f, 4.f);
             const FPlayedClip PreviousClip = SoldierClips[i];
             const float VisualNow = GetWorld()->GetTimeSeconds();
             Soldier->SetPlayRate(VisualRate);
@@ -1288,10 +1354,10 @@ void UStrategyInfantryVisualComponent::RefreshAnimation(
          Sequence == IdleProneAsset.Get() || Sequence == AimStandingAsset.Get() ||
          Sequence == AimKneelingAsset.Get());
 
-    if (!bForce &&
-        LastAnimationAsset == Sequence &&
-        bLastAnimationLooping == bLooping &&
-        bLastHoldingPose == bHoldPose)
+    const bool bAnimationUnchanged = !bForce && LastAnimationAsset == Sequence &&
+        bLastAnimationLooping == bLooping && bLastHoldingPose == bHoldPose;
+    if (bAnimationUnchanged && !SoldierClips.ContainsByPredicate(
+        [](const FPlayedClip& VisualClip) { return !VisualClip.Clip.IsValid(); }))
     {
         return;
     }
@@ -1321,7 +1387,8 @@ void UStrategyInfantryVisualComponent::RefreshAnimation(
     for (int32 Index = 0; Index < SoldierComponents.Num(); ++Index)
     {
         USkeletalMeshComponent* Soldier = SoldierComponents[Index];
-        if (!Soldier || (SoldierFirePhase.IsValidIndex(Index) && SoldierFirePhase[Index] != 0) || (SoldierSettle.IsValidIndex(Index) && SoldierSettle[Index].bActive))
+        if (!Soldier || (bAnimationUnchanged && SoldierClips.IsValidIndex(Index) && SoldierClips[Index].Clip.IsValid()) ||
+            (SoldierFirePhase.IsValidIndex(Index) && SoldierFirePhase[Index] != 0) || (SoldierSettle.IsValidIndex(Index) && SoldierSettle[Index].bActive))
         {
             continue;
         }
@@ -1888,26 +1955,34 @@ void UStrategyInfantryVisualComponent::RebuildCrowdInstances()
     };
     float Data[UStrategyCrowdModel::CustomDataFloats];
 
-    CrowdLiving->ClearInstances();
     TArray<FTransform> Living;
     for (const USkeletalMeshComponent* Soldier : SoldierComponents)
     {
         Living.Add(Soldier ? Soldier->GetRelativeTransform() : FTransform::Identity);
     }
-    CrowdLiving->AddInstances(Living, false, false);
+    if (CrowdLiving->GetInstanceCount() != Living.Num())
+    {
+        CrowdLiving->ClearInstances();
+        CrowdLiving->AddInstances(Living, false, false);
+    }
+    else if (!Living.IsEmpty()) CrowdLiving->BatchUpdateInstancesTransforms(0, Living, false, false, false);
     for (int32 i = 0; i < Living.Num(); ++i)
     {
         DataFor(SoldierClips.IsValidIndex(i) ? &SoldierClips[i] : nullptr, Data);
         CrowdLiving->SetCustomData(i, TArrayView<const float>(Data, UStrategyCrowdModel::CustomDataFloats), false);
     }
 
-    CrowdFallen->ClearInstances();
     TArray<FTransform> Fallen;
     for (const USkeletalMeshComponent* Corpse : CorpseComponents)
     {
         Fallen.Add(Corpse ? Corpse->GetComponentTransform() : FTransform::Identity);
     }
-    CrowdFallen->AddInstances(Fallen, false, true);
+    if (CrowdFallen->GetInstanceCount() != Fallen.Num())
+    {
+        CrowdFallen->ClearInstances();
+        CrowdFallen->AddInstances(Fallen, false, true);
+    }
+    else if (!Fallen.IsEmpty()) CrowdFallen->BatchUpdateInstancesTransforms(0, Fallen, true, false, false);
     for (int32 i = 0; i < Fallen.Num(); ++i)
     {
         DataFor(CorpseClips.IsValidIndex(i) ? &CorpseClips[i] : nullptr, Data);

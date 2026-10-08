@@ -285,6 +285,7 @@ private:
         bool bActive = false;     // is on his way to Goal
         float SwitchAt = -1.0f;   // when he takes up the pending clip (stance change), -1: none
     };
+    bool bScaleOnlyRebuild = false;
     FStrategyVisualFormationPath VisualPath;
     TArray<FSettle> SoldierSettle;       // parallel to SoldierComponents
     UPROPERTY(Transient)

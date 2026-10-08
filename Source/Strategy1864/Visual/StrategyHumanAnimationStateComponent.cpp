@@ -1,6 +1,7 @@
 #include "StrategyHumanAnimationStateComponent.h"
 
 #include "../Units/StrategyUnit.h"
+#include "../Movement/StrategyMovementExecutorComponent.h"
 
 UStrategyHumanAnimationStateComponent::
 UStrategyHumanAnimationStateComponent()
@@ -17,6 +18,7 @@ void UStrategyHumanAnimationStateComponent::BeginPlay()
     if (OwnerUnit)
     {
         PreviousLocation = OwnerUnit->GetActorLocation();
+        if (OwnerUnit->MovementExecutor) AddTickPrerequisiteComponent(OwnerUnit->MovementExecutor);
     }
 
     RefreshBaseLocomotion();

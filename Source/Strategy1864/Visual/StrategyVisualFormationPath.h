@@ -65,7 +65,7 @@ struct FStrategyVisualFormationPath
                 Trail.Add({Lead, Facing, 0.f});
             }
             const float Travel = FVector::Dist2D(Trail.Last().Position, Lead);
-            if (Travel >= 10.f)
+            if (Travel > KINDA_SMALL_NUMBER)
             {
                 TrailDistance += Travel;
                 Trail.Add({Lead, Facing, TrailDistance});
