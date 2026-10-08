@@ -1400,6 +1400,12 @@ Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i
 ### 2026-10-08 – Backlog opdateret
 Backlog.md har fået et afsnit med det, der er bygget i oktober (scenarier, delt forskning, kamporden, slagets nye systemer), og en liste over det, der endnu ikke er afprøvet i et rigtigt slag.
 
+### 2026-10-08 – GPU-audit og kvalitetsvalg i 3D-slag
+
+- HUD har LAV/MIDDEL/HØJ: Unreal-scalability Medium/High/Epic, renderopløsning 70/85/100 % og infanteridivisor 5/2/1. MIDDEL er standard; profilen gemmes og bruges i begge scenarier. FieldLOD har forrang ved start.
+- Fjerne ISM/VAT-figurer og rifler kaster ikke længere skygger; nærfigurer beholder dem. Mundingsrøg bruger 2/3/4 sfærer efter profil og render-cull ved 300 m. TSR er eksplicit valgt.
+- `Docs/Performance-Battle.md` dokumenterer audit, usikkerheder ved binære maps og måleplan. Statisk kontrolleret; hverken bygget eller kørt.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

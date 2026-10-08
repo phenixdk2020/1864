@@ -1,4 +1,5 @@
 #include "StrategyHUD.h"
+#include "StrategyBattleQuality.h"
 #include "../AI/StrategyAITelemetryComponent.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
@@ -159,6 +160,13 @@ void AStrategyHUD::DrawButton(float X, float Y, float W, float H, const FString&
 void AStrategyHUD::DrawHUD()
 {
     Super::DrawHUD();
+    if (FigureDivisor < 0)
+    {
+        FigureDivisor = Strategy1864BattleQuality::GetFigureDivisor();
+        BattleQualityPreset = Strategy1864BattleQuality::GetPreset();
+        const int32 PresetDivisors[] = { 5, 2, 1 };
+        if (FigureDivisor != PresetDivisors[BattleQualityPreset]) { BattleQualityPreset = -1; }
+    }
     Buttons.Reset();
     Panels.Reset();
 
@@ -569,7 +577,7 @@ void AStrategyHUD::DrawSettings()
         return;
     }
     // A small window under the button: the camera's speed on the keys.
-    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 276.0f;
+    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 340.0f;
     DrawPanel(X, Y, W, H);
     Text(TEXT("INDSTILLINGER"), X + 12.0f, Y + 8.0f, Gold);
     const float Factor = AStrategyCameraPawn::GetKeySpeedFactor();
@@ -601,6 +609,13 @@ void AStrategyHUD::DrawSettings()
     DrawButton(X + 326.0f, Y + 202.0f, 80.0f, 24.0f, TEXT("FRA"), EAction::Couriers, 0, !bRiders, nullptr, !bRiders ? nullptr : &ButtonDark);
     // How many men are drawn: a figure for each man, for every second or for every fifth (the GPU's load).
     Text(TEXT("Mænd vist (en figur for ...)"), X + 12.0f, Y + 242.0f, Ink);
+    Text(TEXT("Grafikkvalitet"), X + 12.0f, Y + 278.0f, Ink);
+    const TCHAR* QualityLabels[] = { TEXT("LAV"), TEXT("MIDDEL"), TEXT("HØJ") };
+    for (int32 i = 0; i < 3; ++i)
+    {
+        DrawButton(X + 180.0f + i * 76.0f, Y + 274.0f, 72.0f, 24.0f, QualityLabels[i], EAction::BattleQuality, i, BattleQualityPreset == i, nullptr, BattleQualityPreset == i ? nullptr : &ButtonDark);
+    }
+    Text(TEXT("70 / 85 / 100 % opløsning. Kvalitet gemmes."), X + 12.0f, Y + 308.0f, Muted, 0.85f);
     const int32 Divisors[] = { 1, 2, 5 };
     for (int32 i = 0; i < 3; ++i)
     {
@@ -905,7 +920,13 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
             case EAction::SettingsToggle:
                 bSettingsOpen = !bSettingsOpen;
                 break;
+            case EAction::BattleQuality:
+                BattleQualityPreset = B.Value;
+                FigureDivisor = B.Value == 0 ? 5 : B.Value == 1 ? 2 : 1;
+                Strategy1864BattleQuality::ApplyPreset(GetWorld(), B.Value, true);
+                break;
             case EAction::FigureScale:
+                BattleQualityPreset = -1;
                 FigureDivisor = B.Value;
                 for (TActorIterator<AStrategyCompanyUnit> It(GetWorld()); It; ++It)
                 {
