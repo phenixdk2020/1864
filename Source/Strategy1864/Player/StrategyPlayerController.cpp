@@ -625,7 +625,7 @@ void AStrategyPlayerController::TogglePauseSimulation()
 
 void AStrategyPlayerController::SetSimulationSpeed(float NewSpeed)
 {
-    SimulationSpeed = FMath::Clamp(NewSpeed, 1.0f, 5.0f);
+    SimulationSpeed = FMath::Clamp(NewSpeed, 0.5f, 5.0f);
     UGameplayStatics::SetGlobalTimeDilation(this, SimulationSpeed);
 
     if (UGameplayStatics::IsGamePaused(this))

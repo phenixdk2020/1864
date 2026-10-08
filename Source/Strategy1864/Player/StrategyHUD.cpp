@@ -256,10 +256,11 @@ void AStrategyHUD::DrawHUD()
             const float Speed = TimePC ? TimePC->SimulationSpeed : 1.0f;
             const float TX = BX + BW + 10.0f;
             DrawButton(TX, 8.0f, 74.0f, 26.0f, bPaused ? TEXT("FORTSÆT") : TEXT("PAUSE"), EAction::TimeControl, 0, bPaused);
-            const int32 Speeds[] = { 1, 2, 3, 5 };
-            for (int32 i = 0; i < 4; ++i)
+            const int32 Speeds[] = { -1, 1, 2, 3, 5 };   // -1 is half speed
+            for (int32 i = 0; i < 5; ++i)
             {
-                DrawButton(TX + 82.0f + i * 42.0f, 8.0f, 38.0f, 26.0f, *FString::Printf(TEXT("x%d"), Speeds[i]), EAction::TimeControl, Speeds[i], !bPaused && FMath::IsNearlyEqual(Speed, float(Speeds[i])));
+                const float Value = Speeds[i] < 0 ? 0.5f : float(Speeds[i]);
+                DrawButton(TX + 82.0f + i * 42.0f, 8.0f, 38.0f, 26.0f, Speeds[i] < 0 ? FString(TEXT("x½")) : FString::Printf(TEXT("x%d"), Speeds[i]), EAction::TimeControl, Speeds[i], !bPaused && FMath::IsNearlyEqual(Speed, Value));
             }
         }
         Text(FString::Printf(TEXT("DANSKE  %d / %d   ·   FJENDEN  %d / %d"), DN, DS, EN, ES), BX + 14.0f, 13.0f, Gold);
@@ -970,7 +971,7 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 if (AStrategyPlayerController* TimePC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
                 {
                     if (B.Value == 0) { TimePC->TogglePauseSimulation(); }
-                    else { TimePC->SetSimulationSpeed(float(B.Value)); }
+                    else { TimePC->SetSimulationSpeed(B.Value < 0 ? 0.5f : float(B.Value)); }
                 }
                 break;
             case EAction::FigureScale:
