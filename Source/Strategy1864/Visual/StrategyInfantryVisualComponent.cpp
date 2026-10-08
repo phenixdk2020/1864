@@ -29,11 +29,15 @@
 #include "../Combat/StrategyFireDrillComponent.h"
 #include "StrategyBattleBlast.h"
 #include "StrategyUniformAppearanceComponent.h"
+#include "HAL/PlatformTime.h"
+#include "Misc/App.h"
+#include "Kismet/GameplayStatics.h"
 
 UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
     PrimaryComponentTick.TickInterval = 0.0f;
+    PrimaryComponentTick.bTickEvenWhenPaused = true;
 
     SoldierMeshAsset = TSoftObjectPtr<USkeletalMesh>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Mesh/SK_DK_Livgarden_1864.SK_DK_Livgarden_1864")));
@@ -117,6 +121,7 @@ void UStrategyInfantryVisualComponent::BeginPlay()
     Super::BeginPlay();
 
     OwnerCompany = Cast<AStrategyCompanyUnit>(GetOwner());
+    VisualAnimationTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
 
     if (OwnerCompany &&
         OwnerCompany->CombatComponent)
@@ -170,6 +175,26 @@ void UStrategyInfantryVisualComponent::TickComponent(
         return;
     }
 
+    VisualAnimationTime += FMath::Max(0.f, DeltaTime);
+    if (DeltaTime <= 0.f)
+    {
+        if (bCrowdMode) { bCrowdDirty = true; UpdateCrowdMode(); }
+        DebugSmooth();
+        return;
+    }
+
+    if (bResumeCrowdPosesNextTick)
+    {
+        // The switch frame already evaluated the exact VAT phase. Do not advance it twice.
+        for (int32 ResumeIndex = 0; ResumeIndex < SoldierComponents.Num(); ++ResumeIndex)
+            if (SoldierComponents[ResumeIndex] && SoldierClips.IsValidIndex(ResumeIndex))
+                SoldierComponents[ResumeIndex]->bPauseAnims = SoldierClips[ResumeIndex].Rate <= 0.f;
+        for (int32 ResumeIndex = 0; ResumeIndex < CorpseComponents.Num(); ++ResumeIndex)
+            if (CorpseComponents[ResumeIndex] && CorpseClips.IsValidIndex(ResumeIndex))
+                CorpseComponents[ResumeIndex]->bPauseAnims = CorpseClips[ResumeIndex].Rate <= 0.f;
+        bResumeCrowdPosesNextTick = false;
+    }
+
     const int32 CurrentStrength =
         FMath::Max(0, OwnerCompany->CurrentStrength);
 
@@ -188,7 +213,9 @@ void UStrategyInfantryVisualComponent::TickComponent(
             QueueKills(Standing - Desired);
         }
         EnsureVisualCount(Desired + PendingKillCount);
+        bScaleOnlyRebuild = true; // Losses leave holes; surviving identities keep their slots.
         RebuildFormation();
+        bScaleOnlyRebuild = false;
         CachedStrength = CurrentStrength;
     }
 
@@ -230,6 +257,7 @@ void UStrategyInfantryVisualComponent::TickComponent(
         AlignWeapons();
     }
     UpdateFormationBounds();
+    DebugSmooth();
     if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864AnimationAudit")))
     {
         const float Now = GetWorld()->GetTimeSeconds();
@@ -753,7 +781,9 @@ void UStrategyInfantryVisualComponent::ProcessPendingKills()
     }
     if (bAny)
     {
+        bScaleOnlyRebuild = true;
         RebuildFormation();
+        bScaleOnlyRebuild = false;
     }
 }
 
@@ -799,6 +829,7 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
         USkeletalMeshComponent* Soldier = SoldierComponents[i];
         if (Soldier)
         {
+            Soldier->RemoveTickPrerequisiteComponent(this);
             Soldier->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
             const int32 Variant = Near && FMath::FRand() < 0.6f ? 2 : FMath::RandRange(0, 2);
             const TSoftObjectPtr<UAnimSequence>& Death = bMoving && !DeathWalkingAsset.IsNull() && FMath::FRand() < 0.5f ? DeathWalkingAsset
@@ -810,7 +841,7 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
             CorpseComponents.Add(Soldier);
             FPlayedClip Fallen;
             Fallen.Clip = Death.LoadSynchronous();
-            Fallen.Start = Now;
+            Fallen.Start = VisualAnimationTime;
             Fallen.Rate = Rate;
             Fallen.bLoop = false;
             CorpseClips.Add(Fallen);
@@ -996,6 +1027,9 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
         Soldier->bVisibleInRayTracing = false;
         Soldier->SetupAttachment(OwnerCompany->SceneRoot);
         Soldier->RegisterComponent();
+        Soldier->bEnableUpdateRateOptimizations = false;
+        Soldier->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+        Soldier->AddTickPrerequisiteComponent(this);
         if (OwnerCompany->UniformAppearanceComponent) { OwnerCompany->UniformAppearanceComponent->ApplyAppearanceToMesh(Soldier); }
 
         UStaticMeshComponent* Weapon =
@@ -1038,7 +1072,6 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
         SoldierSettle.AddDefaulted();
     }
 
-    LastAnimationAsset = nullptr;
 }
 
 void UStrategyInfantryVisualComponent::RebuildFormation()
@@ -1072,8 +1105,14 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
         }
     }
 
-    VisualPath.SlotBounds = FBox(ForceInit);
-    for (const FStrategyFormationSlot& VisualSlot : DrawnSlots) { VisualPath.SlotBounds += VisualSlot.WorldLocation; }
+    if (!bScaleOnlyRebuild) VisualPath.SlotBounds = FBox(ForceInit);
+    if (bScaleOnlyRebuild)
+    {
+        for (const FSettle& ExistingSettle : SoldierSettle)
+            if (ExistingSettle.bPlaced) VisualPath.SlotBounds += ExistingSettle.Slot;
+    }
+    else
+        for (const FStrategyFormationSlot& VisualSlot : DrawnSlots) VisualPath.SlotBounds += VisualSlot.WorldLocation;
 
     for (int32 VisualIndex = 0;
          VisualIndex < RenderedCount;
@@ -1089,18 +1128,42 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
 
         if (bScaleOnlyRebuild && SoldierSettle.IsValidIndex(VisualIndex) && SoldierSettle[VisualIndex].bPlaced)
             continue;
-        const FStrategyFormationSlot& Slot = DrawnSlots[VisualIndex];
+        int32 DrawnSlotIndex = VisualIndex;
+        if (bScaleOnlyRebuild)
+        {
+            // Added figures choose an unoccupied slot; no survivor is remapped.
+            for (int32 DrawnCandidate = 0; DrawnCandidate < DrawnSlots.Num(); ++DrawnCandidate)
+            {
+                const FVector DrawnCandidatePosition = DrawnSlots[DrawnCandidate].WorldLocation;
+                if (!SoldierSettle.ContainsByPredicate([&](const FSettle& ExistingSettle)
+                    { return ExistingSettle.bPlaced && ExistingSettle.Slot.Equals(DrawnCandidatePosition, 0.1f); }))
+                {
+                    DrawnSlotIndex = DrawnCandidate;
+                    break;
+                }
+            }
+        }
+        const FStrategyFormationSlot& Slot = DrawnSlots[DrawnSlotIndex];
 
         if (SoldierSettle.Num() != RenderedCount) { SoldierSettle.SetNum(RenderedCount); }
         FSettle& Settle = SoldierSettle[VisualIndex];
         Settle.Slot = Slot.WorldLocation;
+        if (bScaleOnlyRebuild)
+        {
+            while (SoldierSettle.ContainsByPredicate([&](const FSettle& ExistingSettle)
+                { return ExistingSettle.bPlaced && ExistingSettle.Slot.Equals(Settle.Slot, 0.1f); }))
+                Settle.Slot.X -= FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierRankSpacingCm);
+        }
+        VisualPath.SlotBounds += Settle.Slot;
         Settle.SlotYaw = Slot.FacingYaw;
-        Settle.Goal = Slot.WorldLocation;
+        Settle.Goal = Settle.Slot;
         Settle.Yaw = Slot.FacingYaw + SoldierMeshYawOffset;
         if (!Settle.bPlaced)
         {
             // Only newly created figures are placed immediately; existing men always walk.
-            Soldier->SetRelativeLocation(Slot.WorldLocation);
+            float InitialDrawnYaw = 0.f;
+            Soldier->SetRelativeLocation(VisualPath.bInitialized ? OwnerCompany->GetActorTransform().InverseTransformPosition(
+                VisualPath.Goal(Settle.Slot, false, InitialDrawnYaw)) : Settle.Slot);
             Soldier->SetRelativeRotation(FRotator(0.0f, Slot.FacingYaw + SoldierMeshYawOffset, 0.0f));
             Settle.bPlaced = true;
             Settle.bActive = false;
@@ -1108,7 +1171,7 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
         else
         {
             // A new formation: he runs to his new place (UpdateSettling).
-            Settle.Goal = Slot.WorldLocation;
+            Settle.Goal = Settle.Slot;
             Settle.Yaw = Slot.FacingYaw + SoldierMeshYawOffset;
             Settle.bActive = true;
         }
@@ -1273,29 +1336,30 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         {
             Soldier->bPauseAnims = true;
             if (SoldierClips.IsValidIndex(i) && SoldierClips[i].Clip.IsValid())
-                RecordClip(Soldier, SoldierClips[i].Clip.Get(), true, 0.f, 0.f);
+                RecordClip(Soldier, SoldierClips[i].Clip.Get(), true,
+                    SoldierClips[i].Rate > 0.f ? (VisualAnimationTime - SoldierClips[i].Start) * SoldierClips[i].Rate : SoldierClips[i].HeldPosition, 0.f);
             bAny = true;
             continue;
         }
         FVector Here = Soldier->GetRelativeLocation();
         FVector Delta = Settle.Goal - Here;
-        Delta.Z = 0.0f;
         const float Distance = Delta.Size();
-        if (Distance < 1.0f)
+        if (Distance < 0.1f && Settle.WorldVelocity.Size() < 1.f && !bVisualTravel)
         {
-            Soldier->SetRelativeLocation(FVector(Settle.Goal.X, Settle.Goal.Y, Here.Z));
+            Settle.WorldVelocity = FVector::ZeroVector;
             FRotator ArrivedRotation = Soldier->GetRelativeRotation();
-            ArrivedRotation.Yaw = FMath::FixedTurn(ArrivedRotation.Yaw, Settle.Yaw, 120.f * DeltaTime);
+            ArrivedRotation.Yaw = FStrategyVisualFormationPath::SmoothFacing(ArrivedRotation.Yaw, Settle.YawVelocity, Settle.Yaw, DeltaTime, 120.f);
             ArrivedRotation.Roll = FMath::FInterpTo(ArrivedRotation.Roll, 0.f, DeltaTime, 8.f);
             Soldier->SetRelativeRotation(ArrivedRotation);
             Settle.bActive = Settle.HaltRemaining > 0.f || FMath::Abs(FMath::FindDeltaAngleDegrees(ArrivedRotation.Yaw, Settle.Yaw)) > 0.1f;
             Soldier->bPauseAnims = true;
             if (Walk && SoldierClips.IsValidIndex(i) &&
                 (SoldierClips[i].Clip.Get() == Walk || SoldierClips[i].Clip.Get() == Run))
-                RecordClip(Soldier, SoldierClips[i].Clip.Get(), true, 0.f, 0.f);
+                RecordClip(Soldier, SoldierClips[i].Clip.Get(), true,
+                    SoldierClips[i].Rate > 0.f ? (VisualAnimationTime - SoldierClips[i].Start) * SoldierClips[i].Rate : SoldierClips[i].HeldPosition, 0.f);
             if (!Settle.bActive && !bVisualTravel && SettleIdle)
             {
-                Soldier->PlayAnimation(SettleIdle, bSettleIdleLoop);
+                if (SoldierClips.IsValidIndex(i) && SoldierClips[i].Clip.Get() != SettleIdle) Soldier->PlayAnimation(SettleIdle, bSettleIdleLoop);
                 Soldier->SetPlayRate(1.f);
                 Soldier->bPauseAnims = !bAnimateIdle;
                 RecordClip(Soldier, SettleIdle, bSettleIdleLoop, 0.f, bAnimateIdle ? 1.f : 0.f);
@@ -1309,19 +1373,25 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         // Carry the slot at unit speed; personal pace only affects closing a slot error.
         const float FigureSpeed = ActualMarchSpeed +
             (bSlotReforming ? RunCmPerSecond : 160.f) * Settle.Pace;
-        const FVector Step = Delta / Distance * FMath::Min(Distance, FigureSpeed * DeltaTime);
-        Soldier->SetRelativeLocation(Here + Step);
+        FVector FigureWorld = VisualUnit.TransformPosition(Here);
+        const FVector FigureBefore = FigureWorld;
+        const FVector FigureTarget = VisualUnit.TransformPosition(Settle.Goal);
+        // Integrate presentation velocity every frame, with braking near the slot.
+        // Substeps affect no orders, simulation positions, collision or game clocks.
+        FStrategyVisualFormationPath::SmoothTravel(FigureWorld, Settle.WorldVelocity, FigureTarget, DeltaTime, FigureSpeed);
+        const FVector Step = FigureWorld - FigureBefore;
+        Soldier->SetRelativeLocation(VisualUnit.InverseTransformPosition(FigureWorld));
         // He faces the way he runs while he is far from his place, and turns to the front as he comes in.
-        const float RunYaw = Delta.Rotation().Yaw + SoldierMeshYawOffset;
+        const float RunYaw = VisualUnit.InverseTransformVectorNoScale(Settle.WorldVelocity).Rotation().Yaw + SoldierMeshYawOffset;
         const float Yaw = bVisualTravel || Distance > 150.0f ? RunYaw : Settle.Yaw;
         FRotator Rot = Soldier->GetRelativeRotation();
         const float FigureTurn = FMath::FindDeltaAngleDegrees(Rot.Yaw, Yaw);
         Rot.Roll = FMath::FInterpTo(Rot.Roll, FMath::Clamp(FigureTurn * 0.08f, -4.f, 4.f), DeltaTime, 8.f);
-        Rot.Yaw = FMath::FixedTurn(Rot.Yaw, Yaw, 120.0f * DeltaTime);
+        Rot.Yaw = FStrategyVisualFormationPath::SmoothFacing(Rot.Yaw, Settle.YawVelocity, Yaw, DeltaTime, 120.f);
         Soldier->SetRelativeRotation(Rot);
         Soldier->bPauseAnims = false;
         UAnimSequence* TravelClip = !bSlotReforming && Walk ? Walk : Run;
-        if (TravelClip && SoldierClips.IsValidIndex(i) && (SoldierClips[i].Clip.Get() != TravelClip || SoldierClips[i].Rate <= 0.f))
+        if (TravelClip && SoldierClips.IsValidIndex(i) && (SoldierClips[i].Clip.Get() != TravelClip))
         {
             Soldier->bPauseAnims = false;
             Soldier->PlayAnimation(TravelClip, true);
@@ -1331,12 +1401,13 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         }
         if (TravelClip && SoldierClips.IsValidIndex(i))
         {
-            const float VisualRate = FMath::Clamp(Step.Size2D() / FMath::Max(0.001f, DeltaTime) / (TravelClip == Run ? RunCmPerSecond : 160.f), 0.15f, 4.f);
             const FPlayedClip PreviousClip = SoldierClips[i];
-            const float VisualNow = GetWorld()->GetTimeSeconds();
+            const float DesiredVisualRate = FMath::Clamp(Step.Size2D() / FMath::Max(0.001f, DeltaTime) / (TravelClip == Run ? RunCmPerSecond : 160.f), 0.01f, 4.f);
+            const float VisualRate = FMath::Lerp(PreviousClip.Rate, DesiredVisualRate, 1.f - FMath::Exp(-12.f * DeltaTime));
+            const float VisualNow = VisualAnimationTime;
             Soldier->SetPlayRate(VisualRate);
             // Preserve animation phase when changing rate (also for distant VAT figures).
-            SoldierClips[i].Start = VisualNow - (VisualNow - PreviousClip.Start) * PreviousClip.Rate / VisualRate;
+            SoldierClips[i].Start = VisualNow - (PreviousClip.Rate > 0.f ? (VisualNow - PreviousClip.Start) * PreviousClip.Rate : PreviousClip.HeldPosition) / VisualRate;
             SoldierClips[i].Rate = VisualRate;
             bCrowdDataDirty = true;
         }
@@ -1659,6 +1730,13 @@ void UStrategyInfantryVisualComponent::DestroyVisualComponents()
 {
     VisualPath.bInitialized = false;
     VisualPath.Trail.Reset();
+    bSmoothSampled = false;
+    SmoothMaxCenter = 0.f;
+    for (int32 SmoothResetIndex = 0; SmoothResetIndex < 5; ++SmoothResetIndex)
+    {
+        SmoothSamples[SmoothResetIndex].Reset();
+        SmoothMaxMen[SmoothResetIndex] = 0.f;
+    }
     for (UStaticMeshComponent* Weapon :
          WeaponComponents)
     {
@@ -1696,6 +1774,7 @@ void UStrategyInfantryVisualComponent::DestroyVisualComponents()
     }
     CrowdModel = nullptr;
     bCrowdMode = false;
+    bResumeCrowdPosesNextTick = false;
     bCrowdDirty = false;
     bCrowdDataDirty = false;
     SoldierClips.Reset();
@@ -1739,16 +1818,18 @@ void UStrategyInfantryVisualComponent::RecordClip(USkeletalMeshComponent* Soldie
     {
         SoldierClips.SetNum(SoldierComponents.Num());
     }
-    const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+    const float Now = VisualAnimationTime;
     FPlayedClip& Played = SoldierClips[Index];
     Played.Clip = Clip;
     Played.bLoop = bLoop;
     Played.Rate = Rate;
+    const float PlayedLength = Clip ? Clip->GetPlayLength() : 0.f;
+    Played.HeldPosition = bLoop && PlayedLength > 0.f ? FMath::Fmod(FMath::Max(0.f, Position), PlayedLength) : Position;
     Played.Start = Rate > 0.0f ? Now - Position / Rate : Now;
     if (bCrowdMode && !bCrowdDirty && CrowdLiving && CrowdModel && Index < CrowdLiving->GetInstanceCount())
     {
         float Data[UStrategyCrowdModel::CustomDataFloats];
-        if (CrowdModel->MakeCustomData(Clip, Played.Start, Rate, bLoop, Data))
+        if (MakeCrowdClipData(Played, Data))
         {
             CrowdLiving->SetCustomData(Index, TArrayView<const float>(Data, UStrategyCrowdModel::CustomDataFloats), false);
             bCrowdDataDirty = true;
@@ -1864,6 +1945,9 @@ void UStrategyInfantryVisualComponent::UpdateCrowdMode()
     }
     if (bCrowdMode)
     {
+        // Rebase frozen phases against shader time every frame, including paused clips.
+        if (OwnerCompany->CustomTimeDilation != 1.f) bCrowdDirty = true;
+        if (SoldierClips.ContainsByPredicate([](const FPlayedClip& CrowdClip) { return CrowdClip.Rate <= 0.f && CrowdClip.HeldPosition > 0.f; })) bCrowdDirty = true;
         if (bCrowdDirty)
         {
             RebuildCrowdInstances();
@@ -1946,7 +2030,7 @@ void UStrategyInfantryVisualComponent::RestoreClip(USkeletalMeshComponent* Soldi
         return;
     }
     const float Length = FMath::Max(Clip->GetPlayLength(), 0.01f);
-    float Position = Played.Rate > 0.0f ? FMath::Max(0.0f, (Now - Played.Start) * Played.Rate) : 0.0f;
+    float Position = Played.Rate > 0.0f ? FMath::Max(0.0f, (Now - Played.Start) * Played.Rate) : Played.HeldPosition;
     Position = Played.bLoop ? FMath::Fmod(Position, Length) : FMath::Min(Position, Length);
     Soldier->PlayAnimation(Clip, Played.bLoop);
     Soldier->SetPosition(Position, false);
@@ -1959,7 +2043,8 @@ void UStrategyInfantryVisualComponent::RestoreClip(USkeletalMeshComponent* Soldi
 void UStrategyInfantryVisualComponent::LeaveCrowdMode()
 {
     bCrowdMode = false;
-    const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+    bResumeCrowdPosesNextTick = true;
+    const float Now = VisualAnimationTime;
     // Back to full animation, each man where his baked clip had got to.
     for (int32 i = 0; i < SoldierComponents.Num(); ++i)
     {
@@ -1970,6 +2055,7 @@ void UStrategyInfantryVisualComponent::LeaveCrowdMode()
             if (SoldierClips.IsValidIndex(i))
             {
                 RestoreClip(Soldier, SoldierClips[i], Now);
+                Soldier->bPauseAnims = true;
             }
         }
     }
@@ -1982,6 +2068,7 @@ void UStrategyInfantryVisualComponent::LeaveCrowdMode()
             if (CorpseClips.IsValidIndex(i))
             {
                 RestoreClip(Corpse, CorpseClips[i], Now);
+                Corpse->bPauseAnims = true;
             }
         }
     }
@@ -2006,7 +2093,7 @@ void UStrategyInfantryVisualComponent::RebuildCrowdInstances()
     UAnimSequence* Idle = IdleStandingAsset.Get();
     auto DataFor = [&](const FPlayedClip* Played, float Out[UStrategyCrowdModel::CustomDataFloats])
     {
-        if (!Played || !CrowdModel->MakeCustomData(Played->Clip.Get(), Played->Start, Played->Rate, Played->bLoop, Out))
+        if (!Played || !MakeCrowdClipData(*Played, Out))
         {
             if (!CrowdModel->MakeCustomData(Idle, 0.0f, 0.0f, true, Out))
             {
@@ -2053,4 +2140,81 @@ void UStrategyInfantryVisualComponent::RebuildCrowdInstances()
     CrowdFallen->MarkRenderStateDirty();
     bCrowdDirty = false;
     bCrowdDataDirty = false;
+}
+
+void UStrategyInfantryVisualComponent::DebugSmooth()
+{
+    static const bool bSmoothDebug = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugSmooth"));
+    if (!bSmoothDebug || !GetWorld()) return;
+    // First enabled company in this world; no static actor pointer survives PIE/world changes.
+    for (TActorIterator<AStrategyCompanyUnit> SmoothCompanyIt(GetWorld()); SmoothCompanyIt; ++SmoothCompanyIt)
+    {
+        UStrategyInfantryVisualComponent* SmoothVisual = SmoothCompanyIt->FindComponentByClass<UStrategyInfantryVisualComponent>();
+        if (SmoothVisual && SmoothVisual->bEnabled)
+        {
+            if (SmoothVisual != this) return;
+            break;
+        }
+    }
+    const double SmoothNow = FPlatformTime::Seconds();
+    SmoothMaxRealDelta = FMath::Max(SmoothMaxRealDelta, float(FApp::GetDeltaTime()));
+    const FVector SmoothDrawnCenter = CentroidFigureCount > 0 ? OwnerCompany->GetActorTransform().TransformPosition(FigureLocalCentroid) : VisualPath.Center;
+    if (!bSmoothSampled)
+    {
+        SmoothPreviousCenter = SmoothDrawnCenter;
+        SmoothPreviousAnchor = VisualPath.Center;
+        SmoothLogAt = SmoothNow + 1.0;
+        bSmoothSampled = true;
+    }
+    SmoothMaxCenter = FMath::Max(SmoothMaxCenter, float(FVector::Dist(SmoothDrawnCenter, SmoothPreviousCenter)));
+    SmoothPreviousCenter = SmoothDrawnCenter;
+    SmoothMaxAnchor = FMath::Max(SmoothMaxAnchor, float(FVector::Dist(VisualPath.Center, SmoothPreviousAnchor)));
+    SmoothPreviousAnchor = VisualPath.Center;
+    for (int32 SmoothIndex = 0; SmoothIndex < 5; ++SmoothIndex)
+    {
+        USkeletalMeshComponent* SmoothMan = SmoothSamples[SmoothIndex].Get();
+        if (!SmoothMan || !SoldierComponents.Contains(SmoothMan))
+        {
+            SmoothSamples[SmoothIndex].Reset();
+            for (USkeletalMeshComponent* SmoothCandidate : SoldierComponents)
+            {
+                bool bAlreadySampled = false;
+                for (const auto& SmoothExisting : SmoothSamples) bAlreadySampled |= SmoothExisting.Get() == SmoothCandidate;
+                if (SmoothCandidate && !bAlreadySampled)
+                {
+                    SmoothMan = SmoothCandidate;
+                    SmoothSamples[SmoothIndex] = SmoothMan;
+                    SmoothPreviousMen[SmoothIndex] = SmoothMan->GetComponentLocation();
+                    break;
+                }
+            }
+        }
+        if (!SmoothSamples[SmoothIndex].IsValid()) continue;
+        const FVector SmoothPosition = SmoothMan->GetComponentLocation();
+        SmoothMaxMen[SmoothIndex] = FMath::Max(SmoothMaxMen[SmoothIndex], float(FVector::Dist(SmoothPosition, SmoothPreviousMen[SmoothIndex])));
+        SmoothPreviousMen[SmoothIndex] = SmoothPosition;
+    }
+    if (SmoothNow >= SmoothLogAt)
+    {
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864DebugSmooth %s max-frame-cm centre=%.3f anchor=%.3f men=[%.3f,%.3f,%.3f,%.3f,%.3f] crowd=%d max-frame-ms=%.3f dilation=%.3f"),
+            *OwnerCompany->StableUnitId.ToString(), SmoothMaxCenter, SmoothMaxAnchor, SmoothMaxMen[0], SmoothMaxMen[1], SmoothMaxMen[2], SmoothMaxMen[3], SmoothMaxMen[4], bCrowdMode, SmoothMaxRealDelta * 1000.f, UGameplayStatics::GetGlobalTimeDilation(this) * OwnerCompany->CustomTimeDilation);
+        SmoothMaxCenter = 0.f;
+        SmoothMaxAnchor = 0.f;
+        SmoothMaxRealDelta = 0.f;
+        for (float& SmoothMaximum : SmoothMaxMen) SmoothMaximum = 0.f;
+        SmoothLogAt = SmoothNow + 1.0;
+    }
+}
+
+bool UStrategyInfantryVisualComponent::MakeCrowdClipData(const FPlayedClip& Played, float* Out) const
+{
+    if (!CrowdModel || !GetWorld()) return false;
+    const UAnimSequence* PlayedSequence = Played.Clip.Get();
+    float PlayedPosition = Played.Rate > 0.f ? FMath::Max(0.f, (VisualAnimationTime - Played.Start) * Played.Rate) : Played.HeldPosition;
+    if (PlayedSequence && Played.bLoop && PlayedSequence->GetPlayLength() > 0.f)
+        PlayedPosition = FMath::Fmod(PlayedPosition, PlayedSequence->GetPlayLength());
+    const float PlayedWorldRate = Played.Rate * FMath::Max(0.f, OwnerCompany->CustomTimeDilation);
+    const float PlayedWorldNow = GetWorld()->GetTimeSeconds();
+    const float PlayedWorldStart = PlayedWorldRate > 0.f ? PlayedWorldNow - PlayedPosition / PlayedWorldRate : PlayedWorldNow;
+    return CrowdModel->MakeCustomData(PlayedSequence, PlayedWorldStart, PlayedWorldRate, Played.bLoop, Out, PlayedWorldNow, PlayedPosition);
 }

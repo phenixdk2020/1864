@@ -172,10 +172,12 @@ void AStrategyOOBTestScenario::BeginPlay()
         AtmosphereActor = Atmosphere;
     }
     FParse::Value(FCommandLine::Get(), TEXT("Strategy1864StartHour="), StartHour);
-    // The frame rate is held at 60 (the GPU ran flat out): -Strategy1864NoFpsCap lifts it.
-    if (GEngine && !FParse::Param(FCommandLine::Get(), TEXT("Strategy1864NoFpsCap")))
+    // Respect the user's frame limit/high-refresh monitor. Tests may request a limit explicitly.
+    float StrategyBattleFpsCap = 0.f;
+    if (GEngine && FParse::Value(FCommandLine::Get(), TEXT("Strategy1864FpsCap="), StrategyBattleFpsCap) &&
+        !FParse::Param(FCommandLine::Get(), TEXT("Strategy1864NoFpsCap")))
     {
-        GEngine->Exec(GetWorld(), TEXT("t.MaxFPS 60"));
+        GEngine->Exec(GetWorld(), *FString::Printf(TEXT("t.MaxFPS %.3f"), FMath::Max(0.f, StrategyBattleFpsCap)));
     }
     FParse::Value(FCommandLine::Get(), TEXT("Strategy1864ClockRate="), ClockRate);
 

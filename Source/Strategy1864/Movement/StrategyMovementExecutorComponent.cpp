@@ -30,6 +30,7 @@
 UStrategyMovementExecutorComponent::UStrategyMovementExecutorComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
+    PrimaryComponentTick.TickInterval = 0.f;
     PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 

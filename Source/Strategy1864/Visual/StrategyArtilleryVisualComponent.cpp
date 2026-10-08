@@ -2,6 +2,7 @@
 
 #include "../Artillery/StrategyArtilleryBatteryUnit.h"
 #include "../Artillery/StrategyMortarBatteryUnit.h"
+#include "../Movement/StrategyMovementExecutorComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -19,7 +20,7 @@ namespace
 UStrategyArtilleryVisualComponent::UStrategyArtilleryVisualComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
-    PrimaryComponentTick.TickInterval = 0.25f;
+    PrimaryComponentTick.TickInterval = 0.f;
 }
 
 void UStrategyArtilleryVisualComponent::BeginPlay()
@@ -27,6 +28,7 @@ void UStrategyArtilleryVisualComponent::BeginPlay()
     Super::BeginPlay();
     AStrategyArtilleryBatteryUnit* Battery = Cast<AStrategyArtilleryBatteryUnit>(GetOwner());
     bMortar = Cast<AStrategyMortarBatteryUnit>(Battery) != nullptr;
+    if (Battery && Battery->MovementExecutor) AddTickPrerequisiteComponent(Battery->MovementExecutor);
     GunMesh = LoadObject<UStaticMesh>(nullptr, bMortar ? TEXT("/Game/Units/Items/SM_Mortar_1864.SM_Mortar_1864") : TEXT("/Game/Units/Items/SM_Cannon_1864.SM_Cannon_1864"));
     if (!Battery || !GunMesh)
     {
@@ -45,12 +47,34 @@ void UStrategyArtilleryVisualComponent::BeginPlay()
         Battery->QAPlaceholderMesh->SetVisibility(false, true);
     }
     Rebuild();
+    if (Battery) ArtilleryVisualPath.Reset(Battery->GetActorTransform());
 }
 
 void UStrategyArtilleryVisualComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
     Rebuild();
+    if (!Guns || !GetOwner() || DeltaTime <= 0.f) return;
+    ArtilleryVisualPath.Advance(GetOwner()->GetActorTransform(), DeltaTime, false, 160.f);
+    Guns->SetWorldLocation(ArtilleryVisualPath.Center);
+    Guns->SetWorldRotation(FRotator(0.f, ArtilleryVisualPath.Facing, 0.f));
+    for (int32 GunIndex = 0; GunIndex < GunGoals.Num(); ++GunIndex)
+    {
+        FTransform GunShown;
+        if (!Guns->GetInstanceTransform(GunIndex, GunShown, false)) continue;
+        FVector GunPosition = GunShown.GetLocation();
+        FStrategyVisualFormationPath::SmoothTravel(GunPosition, GunVelocities[GunIndex], GunGoals[GunIndex].GetLocation(), DeltaTime, 420.f);
+        FRotator GunRotation = GunShown.Rotator();
+        GunRotation.Yaw = FStrategyVisualFormationPath::SmoothFacing(GunRotation.Yaw, GunTurnVelocities[GunIndex], GunGoals[GunIndex].Rotator().Yaw, DeltaTime, 120.f);
+        const float GunAlpha = 1.f - FMath::Exp(-12.f * DeltaTime);
+        GunRotation.Roll = FMath::Lerp(GunRotation.Roll, GunGoals[GunIndex].Rotator().Roll, GunAlpha);
+        GunShown.SetLocation(GunPosition);
+        GunShown.SetRotation(GunRotation.Quaternion());
+        GunShown.SetScale3D(FMath::Lerp(GunShown.GetScale3D(), GunGoals[GunIndex].GetScale3D(), GunAlpha));
+        Guns->UpdateInstanceTransform(GunIndex, GunShown, false, false, false);
+    }
+    Guns->MarkRenderStateDirty();
+    ArtilleryVisualPath.PreviousUnit = GetOwner()->GetActorTransform();
 }
 
 void UStrategyArtilleryVisualComponent::Rebuild()
@@ -103,6 +127,12 @@ void UStrategyArtilleryVisualComponent::Rebuild()
         FRotator Rotation(0.0f, Yaw + (bDisabled ? 14.0f : 0.0f), bDestroyed ? 38.0f : 0.0f);
         Instances.Emplace(Rotation, Place * Unscale, Unscale * Scale);
     }
-    Guns->ClearInstances();
-    Guns->AddInstances(Instances, false, false);
+    GunGoals = Instances;
+    GunVelocities.SetNumZeroed(Instances.Num());
+    GunTurnVelocities.SetNumZeroed(Instances.Num());
+    if (Guns->GetInstanceCount() != Instances.Num())
+    {
+        Guns->ClearInstances();
+        Guns->AddInstances(Instances, false, false);
+    }
 }

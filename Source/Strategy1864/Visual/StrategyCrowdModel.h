@@ -54,8 +54,9 @@ public:
     UMaterialInterface* GetMaterial(int32 Index) const;
 
     /** An instance's custom data: the clip's first row, its frames, the start time, and the frame rate (negative:
-     *  play once and hold the last frame). False when the clip was not baked. */
-    bool MakeCustomData(const UAnimSequence* Clip, float StartTime, float PlayRate, bool bLoop, float Out[CustomDataFloats]) const;
+     *  play once and hold the last frame). Now/HeldPosition preserve a frozen fractional phase.
+     *  False when the clip was not baked. */
+    bool MakeCustomData(const UAnimSequence* Clip, float StartTime, float PlayRate, bool bLoop, float Out[CustomDataFloats], float Now = 0.f, float HeldPosition = 0.f) const;
 
 private:
     bool Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMesh* Rifle, const TArray<UAnimSequence*>& InClips, const FStrategyCrowdRifleGrip& Grip);

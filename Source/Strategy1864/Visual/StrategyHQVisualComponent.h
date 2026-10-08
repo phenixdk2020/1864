@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "StrategyVisualFormationPath.h"
 #include "StrategyHQVisualComponent.generated.h"
 
 class AStrategyHQUnit;
@@ -48,6 +49,9 @@ private:
     UPROPERTY() TObjectPtr<USkeletalMesh> RiderModel;
     UPROPERTY() TObjectPtr<UAnimSequence> SeatClip;
     TArray<FStaffRider> Riders;
+    FVector ShownLocation = FVector::ZeroVector;
+    FVector ShownVelocity = FVector::ZeroVector;
+    float YawVelocity = 0.f;
     FVector LastLocation = FVector::ZeroVector;
     float Yaw = 0.0f;
     float Pace = 0.0f;

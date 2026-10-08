@@ -10,18 +10,62 @@ struct FStrategyVisualFormationPath
     TArray<FSample> Trail;
     FTransform PreviousUnit = FTransform::Identity;
     FVector Center = FVector::ZeroVector;
+    FVector CenterVelocity = FVector::ZeroVector;
     FBox SlotBounds = FBox(ForceInit);
     float Facing = 0.f;
+    float FacingVelocity = 0.f;
     float TrailDistance = 0.f;
     bool bInitialized = false;
     bool bTurning = false;
     bool bMovingVisuals = false;
 
+    static void SmoothPosition(FVector& Position, FVector& Velocity, const FVector& Target,
+                               float Dt, float Frequency)
+    {
+        if (Dt <= 0.f) return;
+        const FVector Error = Position - Target;
+        const FVector Term = Velocity + Error * Frequency;
+        const float Decay = FMath::Exp(-Frequency * Dt);
+        Position = Target + (Error + Term * Dt) * Decay;
+        Velocity = (Velocity - Term * (Frequency * Dt)) * Decay;
+    }
+
+    static void SmoothTravel(FVector& Position, FVector& Velocity, const FVector& Target, float Dt, float MaxSpeed)
+    {
+        for (float TravelTimeLeft = Dt; TravelTimeLeft > SMALL_NUMBER; )
+        {
+            const float TravelDt = FMath::Min(TravelTimeLeft, 1.f / 120.f);
+            const FVector TravelError = Target - Position;
+            const FVector DesiredVelocity = TravelError.GetSafeNormal() * FMath::Min(MaxSpeed, TravelError.Size() * 12.f);
+            const float TravelDecay = FMath::Exp(-12.f * TravelDt);
+            Position += DesiredVelocity * TravelDt + (Velocity - DesiredVelocity) * ((1.f - TravelDecay) / 12.f);
+            Velocity = DesiredVelocity + (Velocity - DesiredVelocity) * TravelDecay;
+            TravelTimeLeft -= TravelDt;
+        }
+    }
+
+    static float SmoothFacing(float Yaw, float& AngularVelocity, float Target, float Dt, float MaxRate)
+    {
+        // Small presentation-only integration steps keep x10/hitches from overshooting.
+        for (float Left = Dt; Left > SMALL_NUMBER; )
+        {
+            const float StepTime = FMath::Min(Left, 1.f / 120.f);
+            const float DesiredRate = FMath::Clamp(FMath::FindDeltaAngleDegrees(Yaw, Target) * 12.f, -MaxRate, MaxRate);
+            const float Decay = FMath::Exp(-12.f * StepTime);
+            Yaw += DesiredRate * StepTime + (AngularVelocity - DesiredRate) * ((1.f - Decay) / 12.f);
+            AngularVelocity = DesiredRate + (AngularVelocity - DesiredRate) * Decay;
+            Left -= StepTime;
+        }
+        return FRotator::NormalizeAxis(Yaw);
+    }
+
     void Reset(const FTransform& Unit)
     {
         PreviousUnit = Unit;
         Center = Unit.GetLocation();
+        CenterVelocity = FVector::ZeroVector;
         Facing = Unit.Rotator().Yaw;
+        FacingVelocity = 0.f;
         TrailDistance = 0.f;
         Trail.Reset();
         bInitialized = true;
@@ -30,30 +74,16 @@ struct FStrategyVisualFormationPath
     void Advance(const FTransform& Unit, float Dt, bool bColumn, float WalkSpeed)
     {
         if (!bInitialized) { Reset(Unit); }
-        const FVector Translation = Unit.GetLocation() - PreviousUnit.GetLocation();
-        Center += Translation;
-        float Remaining = FMath::FindDeltaAngleDegrees(Facing, Unit.Rotator().Yaw);
-        // The one-degree gate is shared by all figures; once started, finish smoothly.
-        bTurning = FMath::Abs(Remaining) > (bTurning ? 0.01f : 1.f);
-        const FVector Pivot = SlotBounds.IsValid
-            ? FVector(Remaining >= 0.f ? SlotBounds.Max.X : SlotBounds.Min.X,
-                      Remaining >= 0.f ? SlotBounds.Max.Y : SlotBounds.Min.Y, 0.f)
-            : FVector::ZeroVector;
+        // Exact critically damped presentation spring: never inherit an actor snap.
+        // Velocity survives starts, stops, route corners and speed changes.
+        SmoothPosition(Center, CenterVelocity, Unit.GetLocation(), Dt, 24.f);
+        const float Remaining = FMath::FindDeltaAngleDegrees(Facing, Unit.Rotator().Yaw);
+        bTurning = FMath::Abs(Remaining) > 0.01f;
         const float Radius = SlotBounds.IsValid ? SlotBounds.GetSize().Size2D() : 1.f;
         const float TurnRate = FMath::Min(36.f, FMath::RadiansToDegrees(WalkSpeed / FMath::Max(1.f, Radius)));
-        const float NewFacing = bTurning ? FMath::FixedTurn(Facing, Unit.Rotator().Yaw, TurnRate * Dt) : Facing;
-        if (bTurning && !bColumn)
-        {
-            // Keep the end of the front/rear rank fixed while the rest walks its arc.
-            Center += FRotator(0.f, Facing, 0.f).RotateVector(Pivot)
-                    - FRotator(0.f, NewFacing, 0.f).RotateVector(Pivot);
-        }
-        else
-        {
-            Center = FMath::VInterpConstantTo(Center, Unit.GetLocation(), Dt, WalkSpeed);
-        }
+        const float NewFacing = SmoothFacing(Facing, FacingVelocity, Unit.Rotator().Yaw, Dt, TurnRate);
         Facing = NewFacing;
-        bMovingVisuals = bTurning || !Center.Equals(Unit.GetLocation(), 0.1f);
+        bMovingVisuals = bTurning || FMath::Abs(FacingVelocity) > 0.01f || CenterVelocity.SizeSquared() > 0.01f || !Center.Equals(Unit.GetLocation(), 0.1f);
         if (bColumn)
         {
             const float Front = SlotBounds.IsValid ? SlotBounds.Max.X : 0.f;

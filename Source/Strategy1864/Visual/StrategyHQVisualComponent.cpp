@@ -34,6 +34,7 @@ void UStrategyHQVisualComponent::BeginPlay()
         if (UStrategyHQFollowComponent* StaffFollow = OwnerHQ->FindComponentByClass<UStrategyHQFollowComponent>())
             AddTickPrerequisiteComponent(StaffFollow);
         LastLocation = OwnerHQ->GetActorLocation();
+        ShownLocation = LastLocation;
         Yaw = OwnerHQ->GetActorRotation().Yaw;
     }
 }
@@ -125,6 +126,9 @@ void UStrategyHQVisualComponent::TickComponent(float DeltaTime, ELevelTick TickT
         return;
     }
     FVector Here = OwnerHQ->GetActorLocation();
+    Here.Z = UStrategyTerrainQueryLibrary::GetEffectiveGroundZ(this, Here);
+    FStrategyVisualFormationPath::SmoothPosition(ShownLocation, ShownVelocity, Here, DeltaTime, 24.f);
+    Here = ShownLocation;
     FVector Moved = Here - LastLocation;
     Moved.Z = 0.0f;
     const float Speed = Moved.Size() / DeltaTime;
@@ -132,11 +136,10 @@ void UStrategyHQVisualComponent::TickComponent(float DeltaTime, ELevelTick TickT
     if (Speed > 30.0f)
     {
         // Turn with the way it goes, at a horse's pace (not at once).
-        Yaw = FMath::FixedTurn(Yaw, Moved.Rotation().Yaw, 90.0f * DeltaTime);
+        Yaw = FStrategyVisualFormationPath::SmoothFacing(Yaw, YawVelocity, Moved.Rotation().Yaw, DeltaTime, 90.f);
     }
     Pace = FMath::Fmod(Pace + FMath::Clamp(Speed / 600.0f, 0.0f, 1.5f) * 1.6f * DeltaTime, 1.0f);
-    const float Walk = Speed > 30.0f ? 1.0f : 0.0f;
-    Here.Z = UStrategyTerrainQueryLibrary::GetEffectiveGroundZ(this, Here);
+    const float Walk = FMath::Clamp(Speed / 30.f, 0.f, 1.f);
     Pivot->SetWorldLocation(Here);
     Pivot->SetWorldRotation(FRotator(0.0f, Yaw, 0.0f));
     for (FStaffRider& R : Riders)
