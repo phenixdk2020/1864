@@ -199,6 +199,11 @@ public:
 
     bool GetFormationLocalBounds(FBox& OutBounds) const;
 
+    /** Actual living men in a world-space drawn-facing frame; includes curved columns and settling. */
+    bool GetDrawnFormation(FTransform& OutFrame, FBox& OutBounds) const;
+    bool GetDrawnFormationEnds(FVector& OutFront, FVector& OutRear) const;
+    bool GetDrawnColourPosition(const FVector& Offset, FVector& OutPosition) const;
+
     UFUNCTION(BlueprintPure, Category="Strategy|Visual|Infantry")
     int32 GetRenderedSoldierCount() const
     {

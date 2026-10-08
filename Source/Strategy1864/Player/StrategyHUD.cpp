@@ -658,7 +658,7 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
 
     // The unit's tag behind it (as the QA design): its name, its men, formation and fire policy.
     {
-        const FVector Behind = Project(OnGround((Left + Right) * 0.5f - Forward * 650.0f), false);   // a few metres behind the rear rank
+        const FVector Behind = Project(OnGround(Unit->GetVisualCentroid() - Forward * 650.0f), false);   // offset from the living drawn centre
         if (Behind.Z > 0.0f)
         {
             const TCHAR* Formation = !Unit->FormationComponent ? TEXT("") :

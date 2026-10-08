@@ -1144,6 +1144,57 @@ bool UStrategyInfantryVisualComponent::GetFigureLocalCentroid(FVector& OutCentro
     return bEnabled && LoadedSoldierMesh && CentroidFigureCount > 0;
 }
 
+bool UStrategyInfantryVisualComponent::GetDrawnFormation(FTransform& OutFrame, FBox& OutBounds) const
+{
+    FVector DrawnCentroid;
+    if (!OwnerCompany || !VisualPath.bInitialized || !GetFigureLocalCentroid(DrawnCentroid)) return false;
+    OutFrame = FTransform(FRotator(0.f, VisualPath.Facing, 0.f),
+        OwnerCompany->GetActorTransform().TransformPosition(DrawnCentroid));
+    OutBounds = FBox(ForceInit);
+    for (const USkeletalMeshComponent* DrawnSoldier : SoldierComponents)
+    {
+        if (IsValid(DrawnSoldier))
+            OutBounds += OutFrame.InverseTransformPosition(DrawnSoldier->GetComponentLocation());
+    }
+    // Body/weapon padding, independent of animation evaluation and crowd LOD.
+    if (OutBounds.IsValid) OutBounds = OutBounds.ExpandBy(100.f);
+    return OutBounds.IsValid != 0;
+}
+
+bool UStrategyInfantryVisualComponent::GetDrawnFormationEnds(FVector& OutFront, FVector& OutRear) const
+{
+    FTransform DrawnFrame;
+    FBox DrawnBounds(ForceInit);
+    if (!GetDrawnFormation(DrawnFrame, DrawnBounds)) return false;
+    OutFront = DrawnFrame.TransformPosition(FVector(DrawnBounds.Max.X, 0.f, 0.f));
+    OutRear = DrawnFrame.TransformPosition(FVector(DrawnBounds.Min.X, 0.f, 0.f));
+    return true;
+}
+
+bool UStrategyInfantryVisualComponent::GetDrawnColourPosition(const FVector& Offset, FVector& OutPosition) const
+{
+    FTransform ColourFrame;
+    FBox ColourBounds(ForceInit);
+    if (!GetDrawnFormation(ColourFrame, ColourBounds)) return false;
+    const bool bColourColumn = OwnerCompany->FormationComponent &&
+        (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
+         OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn);
+    const FVector ColourGoal = ColourFrame.TransformPosition(FVector(
+        bColourColumn ? ColourBounds.Max.X - 100.f : 0.f, Offset.Y, 0.f));
+    double ColourBest = TNumericLimits<double>::Max();
+    for (const USkeletalMeshComponent* ColourSoldier : SoldierComponents)
+    {
+        if (!IsValid(ColourSoldier)) continue;
+        const double ColourDistance = FVector::DistSquared2D(ColourGoal, ColourSoldier->GetComponentLocation());
+        if (ColourDistance < ColourBest)
+        {
+            ColourBest = ColourDistance;
+            OutPosition = ColourSoldier->GetComponentLocation() + FVector(0.f, 0.f, Offset.Z);
+        }
+    }
+    return ColourBest < TNumericLimits<double>::Max();
+}
+
 void UStrategyInfantryVisualComponent::UpdateFormationBounds()
 {
     FBox& OutBounds = FormationLocalBounds;

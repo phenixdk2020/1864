@@ -1650,6 +1650,15 @@ Codex' tre opgaver er merget og bygget: spredt orden og nedlægning under artill
 ### 2026-10-08 – Bevægelse, waypoints og formationsstørrelse merget; liste over enheder i egen boks
 Codex' tre opgaver er merget: bevægelse (skydekegle skjult i kolonne og under formationsskift, enheder under ryk-frem/angrib stopper og skyder til målet er væk, statusmarkering på skiltet, dæmpet fodstøv, glattere bevægelse), waypoints (destinationskasse, vejlinje, ALT+højreklik) og lavere grafik giver mindre formationer og kegle. Enhedskortet for en stak har fået en knap, VIS ALLE ENHEDER, som åbner en boks med alle enhederne (rulbar, rækker vælger en enhed); markører for enheder under oplæring skjules bag kortet. Store drejninger (over 30 grader) får mændene til at gå til de nye pladser i stedet for en stiv fløjsving. Standard er medium grafik og en figur pr. mand; antallet af figurer er en indstilling for sig. Flettekonflikt i InfantryVisualComponent løst (kompakte pladser fra lowq og forhindring af spring fra motion).
 
+### 2026-10-08 — Fane og HQ følger de tegnede mænd
+
+- Infanteriets visual-komponent eksponerer tegnet center, facing, footprint, for-/bagkant og faneplads. Faktiske levende figurer bruges også under formering og crowd-LOD; buede kolonner dækkes konservativt.
+- Fanen følger en tegnet mand centralt i linjen eller ved kolonnens hoved. Uden tegnet infanteri bruges actor-offset. NATO-markør og HUD-tag forankres i det tegnede center.
+- HQ-målet beregnes bag den bageste tegnede kant langs chefens front med RearOffsetCm som margin, mindst 15 m fri plads og 5 m ekstra til stabens udstrækning. Kompagnier findes også gennem flere HQ-niveauer.
+- HQ går rundt om udvidede footprints via synlige hjørner. Hvis en svingende formation omslutter HQ, går det mod nærmeste frie kant med egen følgehastighed; ingen teleportering. Tick-rækkefølgen er infanteri, HQ-følgning, stabsryttere.
+- Aktiv direkte spillerordre om HQ-flytning har fortsat forrang. Følgning sender ingen ordrer og ændrer ikke angrebsadfærd.
+- Validering: statisk kodegennemgang, geometriske kontrolberegninger og `git diff --check`. Ingen Unreal-build, spilstart eller commit. Visuel afprøvning af march, standsning og sving mangler fortsat.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
