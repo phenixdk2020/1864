@@ -74,6 +74,9 @@ public:
         return !BasePreset.bLockHistoricalPalette;
     }
 
+    /** Called when a formation creates a soldier after BeginPlay. */
+    void ApplyAppearanceToMesh(USkeletalMeshComponent* CustomMesh);
+
 private:
     bool ShouldTargetMesh(const USkeletalMeshComponent* Mesh) const;
     void ApplyColorsToMesh(

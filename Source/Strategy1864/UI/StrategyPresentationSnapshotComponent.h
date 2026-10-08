@@ -163,6 +163,9 @@ struct FStrategyUnitPresentationSnapshot
     FLinearColor UniformFacingColor = FLinearColor::White;
 
     UPROPERTY(BlueprintReadOnly)
+    FLinearColor UniformHeadgearColor = FLinearColor::White;
+
+    UPROPERTY(BlueprintReadOnly)
     FName PrimaryWeaponId = NAME_None;
 
     UPROPERTY(BlueprintReadOnly)

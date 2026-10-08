@@ -148,6 +148,7 @@ UStrategyPresentationSnapshotComponent::BuildSnapshot() const
         Snapshot.UniformCoatColor = ResolvedColors.Coat;
         Snapshot.UniformTrouserColor = ResolvedColors.Trousers;
         Snapshot.UniformFacingColor = ResolvedColors.Facings;
+        Snapshot.UniformHeadgearColor = ResolvedColors.HeadgearDetail;
     }
 
     if (Unit->EquipmentVisualComponent)

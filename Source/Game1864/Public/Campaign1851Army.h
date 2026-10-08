@@ -227,6 +227,13 @@ struct FCampaign1851ServiceEntry
 
 struct FCampaign1851Regiment
 {
+	/** Name mirrors CustomName after a rename, keeping all existing labels and exports consistent. */
+	FString CustomName;
+	FString OriginalName; // stable identity for cavalry type; never inferred from a player name
+	int32 UniformPalette[3] = { -1, -1, -1 }; // coat, trousers, headgear; -1 = national default
+	int32 WeaponLevel = -1; // -1 = scenario default; firearms 0..3, guns 0..1
+	int32 PendingWeaponLevel = -1;
+	float WeaponConversionDays = 0.f;
 	FString Id;
 	FString Name;
 	FString Nation = TEXT("DK");
@@ -380,6 +387,7 @@ namespace Campaign1851Army
 	/** What the 3D battles take from a unit's training (multipliers on the base values). */
 	struct FBattleFactors
 	{
+		float WeaponRange = 1.f; // range relative to the battle module
 		float ReloadTime = 1.f;     // 1.3 raw .. 0.85 well trained
 		float Accuracy = 1.f;       // 0.7 .. 1.25
 		float DeploySpeed = 1.f;    // 0.75 .. 1.2

@@ -222,6 +222,12 @@ int32 ACampaign1851Map::SplitRegiment(int32 RegimentIndex, FString* OutWhy, int3
 	const int32 New = AddRaisedRegiment(Id, Old.Name + TEXT(" (2. halvbataljon)"), Old.Arm, Old.Home, FMath::RoundToInt(Old.MaxMen * Share));
 	FCampaign1851Regiment& N = Regiments[New];
 	FCampaign1851Regiment& R = Regiments[RegimentIndex];
+	N.OriginalName = Old.OriginalName.IsEmpty() ? Old.Name : Old.OriginalName;
+	if (!Old.CustomName.IsEmpty()) { N.CustomName = N.Name.Left(80); N.Name = N.CustomName; }
+	FMemory::Memcpy(N.UniformPalette, Old.UniformPalette, sizeof(N.UniformPalette));
+	N.WeaponLevel = UnitWeaponLevel(Old);
+	N.PendingWeaponLevel = Old.PendingWeaponLevel;
+	N.WeaponConversionDays = Old.WeaponConversionDays;
 	N.bDetached = true;
 	N.bTraining = Old.bTraining;
 	N.RaisingProgress = Old.RaisingProgress;
@@ -382,6 +388,10 @@ bool ACampaign1851Map::CanMerge(int32 Keep, int32 Absorb, FString* OutWhy) const
 	{
 		return Fail(TEXT("Kun to halvdele af samme enhed kan samles"));
 	}
+	if (!CompatibleUnitWeapons(Regiments[Keep], Regiments[Absorb]))
+	{
+		return Fail(TEXT("Enhederne skal have samme våben og afsluttet ombygning"));
+	}
 	if (Regiments[Keep].bTraining || Regiments[Absorb].bTraining)
 	{
 		return Fail(TEXT("Indsæt begge halvdele, før de samles"));
@@ -492,13 +502,14 @@ int32 ACampaign1851Map::MergeRegiments(int32 Keep, int32 Absorb, FString* OutWhy
 	{
 		// The original was the half absorbed: the joined unit takes its name and is a whole unit again.
 		K.Id = A.Id;
-		K.Name = A.Name;
+		if (K.CustomName.IsEmpty()) { K.Name = A.Name; K.CustomName = A.CustomName; }
+		K.OriginalName = A.OriginalName;
 		K.bDetached = false;
 		K.bRaised = A.bRaised;
 	}
 	else if (!K.bDetached)
 	{
-		K.Name = K.Name.Replace(TEXT(" (2. halvbataljon)"), TEXT(""));
+		if (K.CustomName.IsEmpty()) { K.Name = K.Name.Replace(TEXT(" (2. halvbataljon)"), TEXT("")); }
 	}
 	News.Add(FString::Printf(TEXT("%s er samlet igen (%d kompagnier, %d mand)"), *K.Name, K.Captains.Num(), K.Men));
 	RemoveRegimentAt(Absorb);
@@ -517,6 +528,7 @@ bool ACampaign1851Map::MoveCompany(int32 From, int32 Company, int32 To, FString*
 	}
 	FCampaign1851Regiment& F = Regiments[From];
 	FCampaign1851Regiment& T = Regiments[To];
+	if (!CompatibleUnitWeapons(F, T)) { return Fail(TEXT("Enhederne skal have samme våben og afsluttet ombygning")); }
 	if (F.Captains.Num() == 0 && T.Captains.Num() == 0 && F.Arm == T.Arm && (F.Arm == ECampaign1851Arm::Cavalry || (F.Arm == ECampaign1851Arm::Artillery || F.Arm == ECampaign1851Arm::HorseArtillery)))
 	{
 		if (!StandTogether(F, T))
@@ -850,6 +862,12 @@ int32 ACampaign1851Map::SplitOffCompany(int32 RegimentIndex, int32 Company, FStr
 	const int32 New = AddRaisedRegiment(Id, Old.Name + ((Old.Arm == ECampaign1851Arm::Artillery || Old.Arm == ECampaign1851Arm::HorseArtillery) ? TEXT(" (halvbatteri)") : TEXT(" (2. halvregiment)")), Old.Arm, Old.Home, SectionMax);
 	FCampaign1851Regiment& N = Regiments[New];
 	FCampaign1851Regiment& Rm = Regiments[RegimentIndex];
+	N.OriginalName = Old.OriginalName.IsEmpty() ? Old.Name : Old.OriginalName;
+	if (!Old.CustomName.IsEmpty()) { N.CustomName = N.Name.Left(80); N.Name = N.CustomName; }
+	FMemory::Memcpy(N.UniformPalette, Old.UniformPalette, sizeof(N.UniformPalette));
+	N.WeaponLevel = UnitWeaponLevel(Old);
+	N.PendingWeaponLevel = Old.PendingWeaponLevel;
+	N.WeaponConversionDays = Old.WeaponConversionDays;
 	N.bDetached = true;
 	N.bTraining = Old.bTraining;
 	N.RaisingProgress = Old.RaisingProgress;
@@ -909,6 +927,7 @@ int32 ACampaign1851Map::AddRaisedRegiment(const FString& Id, const FString& Name
 	FCampaign1851Regiment R;
 	R.Id = Id;
 	R.Name = Name;
+	R.OriginalName = Name;
 	R.Arm = Arm;
 	R.Present = ArmyPeacePresent(Arm);
 	if (ActiveScenario().Id == TEXT("1825") && Arm == ECampaign1851Arm::Infantry) { R.SavedCompanies = 5; }

@@ -441,3 +441,45 @@ void ACampaign1851Map::RestoreResources(const TArray<FString>& Lines)
 		}
 	}
 }
+
+FString ACampaign1851Map::UnitUpgradeDescription(int32 RegimentIndex, bool* OutCan) const
+{
+	if (OutCan) { *OutCan = false; }
+	if (!Regiments.IsValidIndex(RegimentIndex)) { return TEXT("Ingen enhed valgt"); }
+	const FCampaign1851Regiment& CustomRegiment = Regiments[RegimentIndex];
+	if (CustomRegiment.WeaponConversionDays > 0.f) { return FString::Printf(TEXT("Ombygning: %.0f dage tilbage; halv træfsikkerhed og dobbelt ladetid"), float(FMath::CeilToInt(CustomRegiment.WeaponConversionDays))); }
+	const bool CustomGun = (CustomRegiment.Arm == ECampaign1851Arm::Artillery || CustomRegiment.Arm == ECampaign1851Arm::HorseArtillery);
+	const int32 CustomNext = UnitWeaponLevel(CustomRegiment) + 1;
+	if (CustomRegiment.Mortars > 0 || CustomNext > (CustomGun ? 1 : 3)) { return TEXT("Ingen yderligere våbenopgradering"); }
+	const TCHAR* CustomTopic = CustomGun ? TEXT("riflegun") : CustomNext == 1 ? TEXT("percussion") : CustomNext == 2 ? TEXT("minie") : TEXT("breech");
+	const TCHAR* CustomRequirement = CustomGun ? TEXT("Riflede kanoner") : CustomNext == 1 ? TEXT("Perkussionslås") : CustomNext == 2 ? TEXT("Minié-riffel") : TEXT("Bagladegeværet");
+	const int32 CustomCount = CustomGun ? CustomRegiment.Guns : CustomRegiment.MaxMen;
+	const int32 CustomStock = FMath::Max(0, CustomGun ? GunStock : Rifles);
+	// Estimated gameplay procurement prices; generic stock requires conversion as well.
+	const double CustomPrice = CustomGun ? 400.0 : CustomNext == 3 ? 18.0 : CustomNext == 2 ? 12.0 : 6.0;
+	const double CustomCost = CustomCount * (CustomGun ? 40.0 : 1.0) + FMath::Max(0, CustomCount - CustomStock) * CustomPrice;
+	const bool CustomFree = !CustomRegiment.IsMarching() && !IsInBattle(RegimentIndex) && !CustomRegiment.bTraining && CustomCount > 0;
+	if (OutCan) { *OutCan = CustomFree && HasResearch(CustomTopic) && Treasury >= CustomCost; }
+	return FString::Printf(TEXT("%d %s fra lager (resten købes), %.0f rd.; %d dage. Kræver %s%s%s"), FMath::Min(CustomCount, CustomStock), CustomGun ? TEXT("kanoner") : TEXT("geværer"), CustomCost, CustomGun ? 14 : 10, CustomRequirement,
+		HasResearch(CustomTopic) ? TEXT(" (udforsket)") : TEXT(" (mangler)"), !CustomFree ? TEXT("; enheden skal stå stille uden kamp/uddannelse") : Treasury < CustomCost ? TEXT("; ikke råd") : TEXT(""));
+}
+
+bool ACampaign1851Map::UpgradeUnitWeapon(int32 RegimentIndex)
+{
+	bool CustomCan = false;
+	UnitUpgradeDescription(RegimentIndex, &CustomCan);
+	if (!CustomCan) { return false; }
+	FCampaign1851Regiment& CustomRegiment = Regiments[RegimentIndex];
+	const bool CustomGun = (CustomRegiment.Arm == ECampaign1851Arm::Artillery || CustomRegiment.Arm == ECampaign1851Arm::HorseArtillery);
+	const int32 CustomNext = UnitWeaponLevel(CustomRegiment) + 1;
+	const int32 CustomCount = CustomGun ? CustomRegiment.Guns : CustomRegiment.MaxMen;
+	int32& CustomStock = CustomGun ? GunStock : Rifles;
+	const int32 CustomTaken = FMath::Min(CustomCount, FMath::Max(0, CustomStock));
+	const double CustomPrice = CustomGun ? 400.0 : CustomNext == 3 ? 18.0 : CustomNext == 2 ? 12.0 : 6.0;
+	AddTransaction(-(CustomCount * (CustomGun ? 40.0 : 1.0) + (CustomCount - CustomTaken) * CustomPrice), TEXT("Våbenombygning: ") + CustomRegiment.Name);
+	CustomStock -= CustomTaken;
+	CustomRegiment.PendingWeaponLevel = CustomNext;
+	CustomRegiment.WeaponConversionDays = CustomGun ? 14.f : 10.f;
+	News.Add(CustomRegiment.Name + TEXT(" påbegynder våbenombygning"));
+	return true;
+}

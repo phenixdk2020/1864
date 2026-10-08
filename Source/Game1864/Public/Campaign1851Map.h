@@ -968,6 +968,15 @@ public:
 	float ArmyPeacePresent(ECampaign1851Arm Arm) const;
 	FString ArmyWeaponText(ECampaign1851Arm Arm) const;
 	FString ArmyUniformText(ECampaign1851Arm Arm) const;
+	bool RenameUnit(int32 RegimentIndex, const FString& NewName);
+	bool SetUnitUniform(int32 RegimentIndex, int32 Piece, int32 PaletteIndex);
+	static FLinearColor UnitPaletteColor(int32 PaletteIndex);
+	FLinearColor UnitUniformColor(const FCampaign1851Regiment& Regiment, int32 Piece) const;
+	int32 UnitWeaponLevel(const FCampaign1851Regiment& Regiment) const;
+	FString UnitWeaponName(const FCampaign1851Regiment& Regiment) const;
+	FString UnitUpgradeDescription(int32 RegimentIndex, bool* OutCan = nullptr) const;
+	bool UpgradeUnitWeapon(int32 RegimentIndex);
+	bool CompatibleUnitWeapons(const FCampaign1851Regiment& First, const FCampaign1851Regiment& Second) const;
 	Campaign1851Army::FBattleFactors ArmyBattleFactors(const FCampaign1851Regiment& R) const;
 	float FoodCap() const;
 	float CallInFactor() const;

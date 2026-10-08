@@ -124,6 +124,13 @@ USTRUCT()
 struct FCampaign1851RegimentSave
 {
 	GENERATED_BODY()
+	/** v29: per-unit names, palette and paid weapon conversion. */
+	UPROPERTY() FString CustomName;
+	UPROPERTY() FString OriginalName;
+	UPROPERTY() TArray<int32> UniformPalette;
+	UPROPERTY() int32 WeaponLevel = -1;
+	UPROPERTY() int32 PendingWeaponLevel = -1;
+	UPROPERTY() float WeaponConversionDays = 0.f;
 
 	UPROPERTY() FString Id;
 	/** The town it stands in, or the town the current stretch started from. */

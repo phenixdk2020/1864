@@ -95,6 +95,10 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Artillery")
     float FiringFatiguePerGun = 0.20f;
 
+    /** Per-battery weapon and conversion readiness; research alone never changes it. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Artillery")
+    float WeaponAccuracyFactor = 1.0f;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Artillery")
     float ReloadRemainingSeconds = 0.0f;
 

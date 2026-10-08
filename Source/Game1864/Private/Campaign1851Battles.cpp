@@ -126,7 +126,7 @@ void ACampaign1851Map::BattleStrengths(const FCampaign1851Battle& B, float& OutD
 		const float Quality = (F.Accuracy + 1.f / FMath::Max(F.ReloadTime, 0.5f) + F.Assault) / 3.f * (0.6f + 0.4f * F.Morale) * (0.7f + 0.3f * F.Cohesion);
 		const float Supply = FMath::Clamp(0.4f + 0.6f * R.Ammo, 0.4f, 1.f) * (R.Food > 0.f ? 1.f : 0.8f);
 		const bool bInfantryWeapon = R.Arm == ECampaign1851Arm::Infantry || (ActiveScenario().Id == TEXT("1825") && (R.Arm == ECampaign1851Arm::Guard || R.Arm == ECampaign1851Arm::Jager));
-		OutDanish += R.PresentMen() * Quality * Supply * DoctrineMul * (bInfantryWeapon ? InfantryFactor() : 1.f) + R.Guns * GunWorth * DanishGunFactor() + R.Mortars * GunWorth * 0.8f;
+		OutDanish += R.PresentMen() * Quality * Supply * DoctrineMul * (bInfantryWeapon ? InfantryFactor() : 1.f) + R.Guns * GunWorth * (UnitWeaponLevel(R) == 1 ? 1.4f : 1.f) * (R.WeaponConversionDays > 0.f ? 0.25f : 1.f) + R.Mortars * GunWorth * 0.8f;
 	}
 	for (int32 Id : B.Forts)
 	{

@@ -22,9 +22,9 @@ namespace Campaign1851Research
 			{ TEXT("staff"),      TEXT("Stabsskolen"),              TEXT("Uddannede stabsofficerer: kampværdi +5 %. I slaget: kommandozonerne 15 % større"), 1855, 1000.0, 18, nullptr, 6 },
 			{ TEXT("railmob"),    TEXT("Jernbanemobilisering"),     TEXT("Køreplaner for indkaldelsen: yderligere 25 % hurtigere"),                  1856, 1500.0, 12, TEXT("telegraph"), 2 },
 			{ TEXT("hospitals"),  TEXT("Militærhospitaler"),        TEXT("Syge og sårede kommer 40 % hurtigere tilbage"),                           1857, 1200.0, 12, TEXT("conserves"), 0 },
-			{ TEXT("riflegun"),   TEXT("Riflede kanoner"),          TEXT("Længere rækkevidde og træfsikkerhed: kanonerne tæller 40 % mere"),         1858, 3000.0, 18, nullptr, 4 },
+			{ TEXT("riflegun"),   TEXT("Riflede kanoner"),          TEXT("Åbner betalt ombygning af batterier til riflede kanoner"),         1858, 3000.0, 18, nullptr, 4 },
 			{ TEXT("casemates"),  TEXT("Kasematter og blendinger"), TEXT("Skansernes dækning yderligere +10 %-point"),                              1859, 2000.0, 15, TEXT("fortress"), 1 },
-			{ TEXT("breech"),     TEXT("Bagladegeværet"),           TEXT("Infanteriet lader liggende og tre gange så hurtigt: kampværdi +25 %. I slaget: ladetid × 0,35"), 1860, 4000.0, 24, TEXT("skirmish"), 3 },
+			{ TEXT("breech"),     TEXT("Bagladegeværet"),           TEXT("Åbner betalt ombygning til bagladegeværer på enhedskortet; ladetid × 0,35 efter ombygningen"), 1860, 4000.0, 24, TEXT("minie"), 3 },
 			// Tied to the 3D battle's own systems (Docs/BattleLink1851.md): they go out in battleRules.
 			{ TEXT("square"),     TEXT("Karré-eksercitsen"),        TEXT("Kompagniet danner karré på 30 % kortere tid, og hver side skyder 30 % i stedet for 25 %. Kampværdi +2 %"), 1852, 600.0, 8, nullptr, 3 },
 			{ TEXT("skirmish"),   TEXT("Kædelinjer og jægertaktik"), TEXT("Spredt orden i kornet og bag hegnene: dækningen der × 1,25, skyttekamp +15 %, tab −10 %"), 1854, 1000.0, 12, TEXT("square"), 3 },
@@ -45,6 +45,9 @@ namespace Campaign1851Research
 			{ TEXT("firebyrank"), TEXT("Geledild"),                 TEXT("Geledderne skyder på skift, så ilden aldrig hører op. Skal indøves i regimenterne"), 1853, 800.0, 8, TEXT("tworank"), 3 },
 			{ TEXT("volley"),     TEXT("Kommanderet salve"),        TEXT("Hele kompagniet på kommando: den tunge salve, der ryster fjenden. Skal indøves i regimenterne"), 1855, 900.0, 8, TEXT("firebyrank"), 3 },
 			{ TEXT("independent"), TEXT("Fri ild"),                 TEXT("Hver mand skyder, når han har ladt og sigtet: hurtigere ild, svagere salver. Skal indøves i regimenterne"), 1857, 1000.0, 10, TEXT("volley"), 3 },
+			// Append rather than insert: active projects in older saves are stored by index.
+			{ TEXT("percussion"), TEXT("Perkussionslås"), TEXT("Åbner betalt ombygning af flintlåsvåben på enhedskortet"), 1830, 900.0, 8, nullptr, 3 },
+			{ TEXT("minie"), TEXT("Minié-riffel"), TEXT("Åbner betalt ombygning til riflede håndvåben med længere rækkevidde"), 1849, 2000.0, 12, TEXT("percussion"), 3 },
 		};
 		static const TArray<FCampaign1851ResearchTopic> Army1825Topics = [&]()
 		{
@@ -57,7 +60,7 @@ namespace Campaign1851Research
 				}
 				if (FString(T.Id) == TEXT("breech"))
 				{
-					T.Effect = TEXT("Flintlåsgeværet erstattes af en forsøgsbaglader: ladning liggende og ladetid × 0,35 på slagets grundværdi; flintlåsens ulemper bortfalder. Kampværdi +25 %");
+					T.Effect = TEXT("Åbner betalt ombygning fra Minié-riffel til bagladegevær; ladetid × 0,35 efter ombygningen");
 				}
 			}
 			return Out;
@@ -152,8 +155,8 @@ void ACampaign1851Map::ResetResearch()
 
 bool ACampaign1851Map::HasResearch(const TCHAR* Id) const
 {
-	// The railway is known when the campaign starts in 1851 (the lines are building); from 1825 it has to be researched.
-	if (ActiveScenario().Year >= 1850 && FString(Id) == TEXT("railway"))
+	// Railway construction and percussion locks are known in the 1851 start; 1825 must research both.
+	if (ActiveScenario().Year >= 1850 && (FString(Id) == TEXT("railway") || FString(Id) == TEXT("percussion")))
 	{
 		return true;
 	}
@@ -174,7 +177,7 @@ int32 ACampaign1851Map::ResearchOpenYear(int32 Topic) const
 		{ TEXT("fortress"), 1830 }, { TEXT("staff"), 1830 }, { TEXT("skirmish"), 1830 }, { TEXT("shock"), 1830 }, { TEXT("pontoon"), 1830 }, { TEXT("agrischool"), 1830 },
 		{ TEXT("steam"), 1830 }, { TEXT("credit"), 1830 }, { TEXT("volley"), 1830 }, { TEXT("conserves"), 1835 }, { TEXT("carbine"), 1835 }, { TEXT("railway"), 1835 },
 		{ TEXT("sanitation"), 1840 }, { TEXT("casemates"), 1840 }, { TEXT("independent"), 1840 }, { TEXT("breech"), 1841 }, { TEXT("telegraph"), 1844 },
-		{ TEXT("hospitals"), 1845 }, { TEXT("genstaff"), 1845 }, { TEXT("railmob"), 1850 }, { TEXT("riflegun"), 1855 },
+		{ TEXT("percussion"), 1830 }, { TEXT("minie"), 1849 }, { TEXT("hospitals"), 1845 }, { TEXT("genstaff"), 1845 }, { TEXT("railmob"), 1850 }, { TEXT("riflegun"), 1855 },
 	};
 	for (const auto& Y : Years)
 	{
@@ -194,7 +197,7 @@ FString ACampaign1851Map::ResearchBlockReason(int32 Topic) const
 	if (Researched.Contains(T.Id) || HasResearch(T.Id)) return TEXT("færdig");
 	if (ResearchOpenYear(Topic) > GetDate().GetYear()) return FString::Printf(TEXT("åbner %d"), ResearchOpenYear(Topic));
 	if (Researching == Topic || ResearchingCivil == Topic) return TEXT("i gang");
-	if (T.Needs && !Researched.Contains(T.Needs))
+	if (T.Needs && !HasResearch(T.Needs))
 	{
 		const int32 Need = Campaign1851Research::FindTopic(T.Needs);
 		return FString::Printf(TEXT("kræver %s"), List.IsValidIndex(Need) ? List[Need].Name : T.Needs);
@@ -367,12 +370,12 @@ float ACampaign1851Map::FortCoverBonus() const
 
 float ACampaign1851Map::DanishGunFactor() const
 {
-	return HasResearch(TEXT("riflegun")) ? 1.4f : 1.f;
+	return 1.f; // guns improve only after each battery is converted
 }
 
 float ACampaign1851Map::InfantryFactor() const
 {
-	return HasResearch(TEXT("breech")) ? 1.25f : 1.f;
+	return 1.f; // firearm bonuses live in ArmyBattleFactors per unit
 }
 
 float ACampaign1851Map::FoodCap() const
@@ -427,8 +430,8 @@ void ACampaign1851Map::WriteBattleRulesJson(const TSharedRef<FJsonObject>& Doc) 
 	};
 	TSharedRef<FJsonObject> Rules = MakeShared<FJsonObject>();
 	TSharedRef<FJsonObject> Inf = MakeShared<FJsonObject>();
-	Num(Inf, TEXT("reloadFactor"), HasResearch(TEXT("breech")) ? 0.35 : 1.0);
-	Inf->SetBoolField(TEXT("proneLoading"), HasResearch(TEXT("breech")));
+	Num(Inf, TEXT("reloadFactor"), 1.0); // already included in each unit's factors
+	Inf->SetBoolField(TEXT("proneLoading"), false); // per-unit weaponLevel governs loading
 	Num(Inf, TEXT("squareFormTimeFactor"), HasResearch(TEXT("square")) ? 0.7 : 1.0);
 	Num(Inf, TEXT("squareFaceFireShare"), HasResearch(TEXT("square")) ? 0.3 : 0.25);
 	Num(Inf, TEXT("concealmentFactor"), HasResearch(TEXT("skirmish")) ? 1.25 : 1.0);
@@ -445,8 +448,8 @@ void ACampaign1851Map::WriteBattleRulesJson(const TSharedRef<FJsonObject>& Doc) 
 	Cav->SetBoolField(TEXT("reconOrder"), HasResearch(TEXT("recon")));
 	Rules->SetObjectField(TEXT("cavalry"), Cav);
 	TSharedRef<FJsonObject> Art = MakeShared<FJsonObject>();
-	Num(Art, TEXT("rangeFactor"), HasResearch(TEXT("riflegun")) ? 1.4 : 1.0);
-	Num(Art, TEXT("accuracyFactor"), HasResearch(TEXT("riflegun")) ? 1.3 : 1.0);
+	Num(Art, TEXT("rangeFactor"), 1.0);
+	Num(Art, TEXT("accuracyFactor"), 1.0);
 	Rules->SetObjectField(TEXT("artillery"), Art);
 	TSharedRef<FJsonObject> Cmd = MakeShared<FJsonObject>();
 	const double Reach = CommandReachFactor();

@@ -1063,6 +1063,8 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 	}
 
+	// Slate owns the name field; letter keys must not pan the campaign map.
+	if (Overlay.IsValid() && Overlay->bEditingUnitName) { return; }
 	FVector2D Pan = FVector2D::ZeroVector;
 	if (IsInputKeyDown(EKeys::W) || IsInputKeyDown(EKeys::Up))    { Pan.Y += 1.f; }
 	if (IsInputKeyDown(EKeys::S) || IsInputKeyDown(EKeys::Down))  { Pan.Y -= 1.f; }
@@ -1113,7 +1115,8 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	}
 	if (WasInputKeyJustPressed(EKeys::Escape) && Overlay.IsValid())
 	{
-		if (Overlay->GetWindow() != SCampaign1851Overlay::EWindow::None)
+		if (Overlay->bEditingUnitUniform) { Overlay->CloseUnitCustomisation(); }
+		else if (Overlay->GetWindow() != SCampaign1851Overlay::EWindow::None)
 		{
 			Overlay->OpenWindow(SCampaign1851Overlay::EWindow::None);
 		}
@@ -1310,6 +1313,32 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		if (Button == SCampaign1851Overlay::EButton::ResearchTab)
 		{
 			Overlay->SetResearchTab(Module);
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
+		if (Button == SCampaign1851Overlay::EButton::UnitRename)
+		{
+			Overlay->BeginUnitRename(Module);
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
+		if (Button == SCampaign1851Overlay::EButton::UnitUniform)
+		{
+			Overlay->OpenUnitUniform(Module);
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
+		if (Button == SCampaign1851Overlay::EButton::UnitUniformSwatch)
+		{
+			Overlay->ChooseUnitUniform(Module);
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
+		if (Button == SCampaign1851Overlay::EButton::UnitCustomClose)
+		{
+			Overlay->CloseUnitCustomisation(Module == 1);
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
+		if (Button == SCampaign1851Overlay::EButton::UnitUpgrade)
+		{
+			Map->UpgradeUnitWeapon(Module);
+			Overlay->ShowToast(Map->UnitUpgradeDescription(Module));
 			Button = SCampaign1851Overlay::EButton::Block;
 		}
 		if (Button == SCampaign1851Overlay::EButton::UnitCardPart)
