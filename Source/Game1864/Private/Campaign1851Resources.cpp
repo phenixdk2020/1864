@@ -86,6 +86,39 @@ namespace Campaign1851Resources
 	}
 }
 
+namespace Campaign1851Resources
+{
+	int32 RaiseParts(int32 T, int32 Size)
+	{
+		return Size <= 0 ? 1 : Size == 1 ? 2 : (T >= 4 ? 3 : 4);
+	}
+
+	FUnitType SizedType(int32 T, int32 Size)
+	{
+		FUnitType RaiseSpec = Type(T);
+		const int32 RaiseTotal = RaiseParts(T, 2), RaiseCount = RaiseParts(T, Size);
+		// Integer equipment and manpower: the same rounded values are checked, paid and assigned.
+		auto ScaleRaise = [RaiseTotal, RaiseCount](int32 Value) { return (Value * RaiseCount + RaiseTotal / 2) / RaiseTotal; };
+		RaiseSpec.Men = ScaleRaise(RaiseSpec.Men);
+		RaiseSpec.Rifles = ScaleRaise(RaiseSpec.Rifles);
+		RaiseSpec.Guns = ScaleRaise(RaiseSpec.Guns);
+		RaiseSpec.Horses = ScaleRaise(RaiseSpec.Horses);
+		RaiseSpec.Uniforms = ScaleRaise(RaiseSpec.Uniforms);
+		RaiseSpec.Leather = ScaleRaise(RaiseSpec.Leather);
+		RaiseSpec.Mortars = ScaleRaise(RaiseSpec.Mortars);
+		RaiseSpec.Wagons = ScaleRaise(RaiseSpec.Wagons);
+		return RaiseSpec;
+	}
+
+	FString RaiseSizeName(int32 T, int32 Size)
+	{
+		if (Size >= 2) { return T <= 1 ? TEXT("Hel bataljon (4 kompagnier)") : T == 2 ? TEXT("Helt regiment (4 eskadroner)") : TEXT("Helt batteri"); }
+		return T <= 1 ? (Size == 0 ? TEXT("1 kompagni") : TEXT("2 kompagnier"))
+			: T == 2 ? (Size == 0 ? TEXT("1 eskadron") : TEXT("2 eskadroner"))
+			: Size == 0 ? TEXT("1 deling (2 skyts)") : T == 3 ? TEXT("Halvbatteri (4 kanoner)") : TEXT("2 delinger (4 skyts)");
+	}
+}
+
 void ACampaign1851Map::ResetResources()
 {
 	for (int32 r = 0; r < int32(ECampaign1851Raw::Count); ++r)
@@ -225,9 +258,9 @@ float ACampaign1851Map::MonthlyRawMaterials()
 	return Share;
 }
 
-FString ACampaign1851Map::UnitBlockReason(int32 Type, int32 Town) const
+FString ACampaign1851Map::UnitBlockReason(int32 Type, int32 Town, int32 Size) const
 {
-	const Campaign1851Resources::FUnitType& T = Campaign1851Resources::Type(Type);
+	const Campaign1851Resources::FUnitType T = Campaign1851Resources::SizedType(Type, Size);
 	if (!Cities.IsValidIndex(Town) || Cities[Town].bForeign)
 	{
 		return TEXT("vælg en garnisonsby");
@@ -257,31 +290,32 @@ FString ACampaign1851Map::UnitBlockReason(int32 Type, int32 Town) const
 	{
 		return TEXT("mangler læder til remtøj og sadler");
 	}
-	if (Treasury < UnitCost(Type))
+	if (T.Rifles > Rifles && !CanImport()) { return TEXT("ingen import af manglende geværer"); }
+	if (Treasury < UnitCost(Type, Size))
 	{
 		return TEXT("ikke råd");
 	}
 	return FString();
 }
 
-double ACampaign1851Map::UnitCost(int32 Type) const
+double ACampaign1851Map::UnitCost(int32 Type, int32 Size) const
 {
 	// Pay, kit and quarters in the first months; rifles missing from the store are bought abroad on top.
-	const Campaign1851Resources::FUnitType& T = Campaign1851Resources::Type(Type);
+	const Campaign1851Resources::FUnitType T = Campaign1851Resources::SizedType(Type, Size);
 	const int32 MissingRifles = FMath::Max(0, T.Rifles - Rifles);
 	const int32 MissingWagons = FMath::Max(0, T.Wagons - WagonStock);
-	return Campaign1851Army::RaiseCost() * T.CostFactor * T.Men / 760.0 + MissingRifles * double(Campaign1851Materiel::RifleImportPrice) + MissingWagons * Campaign1851Resources::WagonPrice;
+	return Campaign1851Army::RaiseCost() * T.CostFactor * T.Men / 760.0 + MissingRifles * double(Campaign1851Materiel::RifleImportPrice) + MissingWagons * Campaign1851Resources::WagonPrice + FMath::Max(0, T.Horses - Horses) * double(Campaign1851Materiel::HorsePrice);
 }
 
-int32 ACampaign1851Map::RaiseUnit(int32 Type, int32 Town, int32 Command, ECampaign1851Program Program, FString* OutReason)
+int32 ACampaign1851Map::RaiseUnit(int32 Type, int32 Town, int32 Command, ECampaign1851Program Program, FString* OutReason, int32 Size)
 {
-	const FString Why = UnitBlockReason(Type, Town);
+	const FString Why = UnitBlockReason(Type, Town, Size);
 	if (!Why.IsEmpty())
 	{
 		if (OutReason) { *OutReason = Why; }
 		return INDEX_NONE;
 	}
-	const Campaign1851Resources::FUnitType& T = Campaign1851Resources::Type(Type);
+	const Campaign1851Resources::FUnitType T = Campaign1851Resources::SizedType(Type, Size);
 	// The next free number of its kind.
 	int32 Number = 1;
 	while (FindRegiment(FString::Printf(TEXT("%s%d"), T.IdPrefix, Number)) != INDEX_NONE)
@@ -295,6 +329,18 @@ int32 ACampaign1851Map::RaiseUnit(int32 Type, int32 Town, int32 Command, ECampai
 	{
 		S = Campaign1851Army::RecruitSkill;
 	}
+	if (Size < 2)
+	{
+		R.Name = FString::Printf(TEXT("%d. %s%s"), Number, Type <= 1 ? TEXT("Kompagni") : Type == 2 ? TEXT("Eskadron") : TEXT("Deling"), Type == 1 ? TEXT(" (Jæger)") : Type == 4 ? TEXT(" (Ridende)") : Type == 5 ? TEXT(" (Morterer)") : TEXT(""));
+		if (Size == 1) { R.Name += Type <= 1 ? TEXT(" (2 kompagnier)") : Type == 2 ? TEXT(" (2 eskadroner)") : TEXT(" (2 delinger)"); }
+	}
+	const int32 RaiseCount = Campaign1851Resources::RaiseParts(Type, Size);
+	if (Type <= 1)
+	{
+		R.Captains.Init(INDEX_NONE, RaiseCount);
+		R.CompanyFort.Init(0, RaiseCount);
+	}
+	R.CompanyWeight.Init(1.f, RaiseCount);
 	R.RaisingType = FMath::Clamp(Type, 0, Campaign1851Resources::UnitTypes - 1);
 	R.Horses = R.MaxHorses = T.Horses;
 	R.Guns = TakeGunsFromStock(T.Guns);
@@ -310,6 +356,12 @@ int32 ACampaign1851Map::RaiseUnit(int32 Type, int32 Town, int32 Command, ECampai
 	if (R.Mortars > 0)
 	{
 		R.PaceKmPerDay *= 0.8f;
+	}
+	if (Type >= 3)
+	{
+		R.SectionGuns.Init(float(R.Guns) / RaiseCount, RaiseCount);
+		R.SectionHorses.Init(float(R.Horses) / RaiseCount, RaiseCount);
+		R.SectionMaxHorses = R.SectionHorses;
 	}
 	R.Program = Program;
 	if (Commands.IsValidIndex(Command))

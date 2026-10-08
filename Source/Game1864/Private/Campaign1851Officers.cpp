@@ -625,7 +625,7 @@ void ACampaign1851Map::FreezeCompanyStrength(int32 Regiment)
 	{
 		return;
 	}
-	if (Regiments[Regiment].Arm == ECampaign1851Arm::Artillery)
+	if ((Regiments[Regiment].Arm == ECampaign1851Arm::Artillery || Regiments[Regiment].Arm == ECampaign1851Arm::HorseArtillery))
 	{
 		TArray<float> SecGuns, SecHorses, SecMaxHorses;
 		for (int32 k = 0; k < SubUnitCount(Regiment); ++k)
@@ -747,8 +747,8 @@ bool ACampaign1851Map::TransferCompanyMen(int32 FromReg, int32 From, int32 ToReg
 	if (OutWhy)
 	{
 		*OutWhy = FString::Printf(TEXT("%d mand flyttet: %s har nu %d, %s har %d"), N,
-			*FString::Printf(TEXT("%d. %s"), bCompanies ? CompanyNumber(FromReg, From) : From + 1, bCompanies ? TEXT("kompagni") : F.Arm == ECampaign1851Arm::Artillery ? TEXT("sektion") : TEXT("eskadron")), CompanyMen(FromReg, From),
-			*FString::Printf(TEXT("%d. %s"), bCompanies ? CompanyNumber(ToReg, To) : To + 1, bCompanies ? TEXT("kompagni") : F.Arm == ECampaign1851Arm::Artillery ? TEXT("sektion") : TEXT("eskadron")), CompanyMen(ToReg, To));
+			*FString::Printf(TEXT("%d. %s"), bCompanies ? CompanyNumber(FromReg, From) : From + 1, bCompanies ? TEXT("kompagni") : (F.Arm == ECampaign1851Arm::Artillery || F.Arm == ECampaign1851Arm::HorseArtillery) ? TEXT("sektion") : TEXT("eskadron")), CompanyMen(FromReg, From),
+			*FString::Printf(TEXT("%d. %s"), bCompanies ? CompanyNumber(ToReg, To) : To + 1, bCompanies ? TEXT("kompagni") : (F.Arm == ECampaign1851Arm::Artillery || F.Arm == ECampaign1851Arm::HorseArtillery) ? TEXT("sektion") : TEXT("eskadron")), CompanyMen(ToReg, To));
 	}
 	return true;
 }

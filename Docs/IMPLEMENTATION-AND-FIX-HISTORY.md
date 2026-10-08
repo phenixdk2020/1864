@@ -1489,6 +1489,13 @@ Fri ild fyldte to kasser, fordi søjlens bredde afhang af niveauet; nu har alle 
 - Skatter, handelsgrundlag, landbrugskrisens priser, råvarepriser, kredit og bygningskontrakternes pris/lønbetaling følger 1825-satser. Civilvirkninger bruger individuelle periode-skøn.
 - Gemmeformat, by-/amtsrækkefølge og tidligere nationsindeks bevares. Eksportør skriver samme overlay til runtime-data og kortværktøjets Resources-output.
 - Kontrol: JSON-dækning, amts-/bysummer, reproducerbar eksport, statisk kildegennemgang og git diff --check. Spillet er hverken bygget eller kørt; runtime-gemning er ikke afprøvet.
+### 2026-10-08 ? Valg af størrelse ved indkaldelse
+
+- Ny størrelsesvælger: 1/2/4 kompagnier eller eskadroner; fodartilleri 2/4/8 kanoner; ridende batteri og morterer 2/4/6 skyts med bevaret fuld normering.
+- Fælles beregning af rekrutter, geværer, uniformer, læder, heste, skyts, vogne og pris. Manglende heste medregnes i pris og betalingsevne; manglende geværer kan kun importeres med adgang til import.
+- Delvise enheder får passende navne, kompagnital og delingsvægte. Nyindkaldte enheder af samme type og garnison kan samles op til fuld normering efter indsættelse. Underhold skaleres efter normeret styrke, inklusive delte enheder.
+- Grunduddannelse beholder tiden pr. soldat. Træningsliste og tidlig indsættelse genbruger eksisterende kode. Styrke, kompagnital og delingsvægte gemmes allerede; ingen nye gemmefelter eller formatændring.
+- Statisk kontrol og git diff --check; spillet er hverken bygget eller startet.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
