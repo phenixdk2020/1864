@@ -3,6 +3,7 @@
 #include "Campaign1851Army.h"
 
 #include "Campaign1851Map.h"
+#include "Campaign1851ConstructionSite.h"
 #include "Algo/Reverse.h"
 #include "Campaign1851Scenery.h"
 #include "Components/StaticMeshComponent.h"
@@ -1761,6 +1762,9 @@ int32 ACampaign1851Map::FormationIndex(int32 Id) const
 
 int32 ACampaign1851Map::CreateFormation(ECampaign1851Echelon Echelon, int32 Parent)
 {
+	const int32 OOBParentIndex = FormationIndex(Parent);
+	if ((Parent != 0 && (OOBParentIndex == INDEX_NONE || Formations[OOBParentIndex].Echelon >= Echelon))
+		|| (Echelon == ECampaign1851Echelon::Army && Parent != 0)) { return 0; }
 	// Numbered per level: "1. Division", "3. Brigade".
 	int32 Number = 1;
 	for (const FCampaign1851Formation& F : Formations)
@@ -1774,6 +1778,70 @@ int32 ACampaign1851Map::CreateFormation(ECampaign1851Echelon Echelon, int32 Pare
 	F.Parent = FormationIndex(Parent) != INDEX_NONE ? Parent : 0;
 	Formations.Add(F);
 	return F.Id;
+}
+
+bool ACampaign1851Map::CanInsertFormationHQ(int32 Parent, ECampaign1851Echelon Echelon) const
+{
+	const int32 OOBParentIndex = FormationIndex(Parent);
+	if (Echelon < ECampaign1851Echelon::Division || Echelon > ECampaign1851Echelon::Regiment
+		|| (Parent != 0 && (OOBParentIndex == INDEX_NONE || Formations[OOBParentIndex].Echelon >= Echelon))) { return false; }
+	for (const FCampaign1851Formation& OOBChild : Formations)
+	{
+		if (OOBChild.Parent == Parent && OOBChild.Echelon > Echelon) { return true; }
+	}
+	for (const FCampaign1851Regiment& OOBUnit : Regiments)
+	{
+		if (Parent != 0 && OOBUnit.Formation == Parent) { return true; }
+	}
+	return false;
+}
+
+int32 ACampaign1851Map::InsertFormationHQ(int32 Parent, ECampaign1851Echelon Echelon)
+{
+	if (!CanInsertFormationHQ(Parent, Echelon)) { return 0; }
+	const int32 OOBNewHQ = CreateFormation(Echelon, Parent);
+	for (FCampaign1851Formation& OOBChild : Formations)
+	{
+		if (OOBChild.Id != OOBNewHQ && OOBChild.Parent == Parent && OOBChild.Echelon > Echelon) { OOBChild.Parent = OOBNewHQ; }
+	}
+	for (FCampaign1851Regiment& OOBUnit : Regiments)
+	{
+		if (Parent != 0 && OOBUnit.Formation == Parent) { OOBUnit.Formation = OOBNewHQ; }
+	}
+	return OOBNewHQ;
+}
+
+bool ACampaign1851Map::CanReturnToGarrison(int32 Regiment, FString* OutReason) const
+{
+	if (!Regiments.IsValidIndex(Regiment))
+	{
+		if (OutReason) { *OutReason = TEXT("Enheden findes ikke længere"); }
+		return false;
+	}
+	const FCampaign1851Regiment& OOBUnit = Regiments[Regiment];
+	if (OOBUnit.IsMarching())
+	{
+		if (OutReason) { *OutReason = TEXT("Enheden marcherer; stands den ved en garnisonsby eller et fort først"); }
+		return false;
+	}
+	const int32 OOBAmt = AmtAtWorld(WorldAtKm(OOBUnit.Km));
+	for (int32 OOBCityIndex = 0; OOBCityIndex < Cities.Num(); ++OOBCityIndex)
+	{
+		const FCampaign1851City& OOBCity = Cities[OOBCityIndex];
+		if (OOBCity.bForeign || !OOBCity.Occupier.IsEmpty()) { continue; }
+		const ACampaign1851ConstructionSite* OOBGarrisonSite = FindProject(OOBCityIndex);
+		bool OOBHasGarrison = OOBGarrisonSite && OOBGarrisonSite->IsBarracksDone();
+		for (const FCampaign1851Regiment& OOBHomeUnit : Regiments) { OOBHasGarrison |= OOBHomeUnit.Home == OOBCityIndex; }
+		if (OOBHasGarrison && ((OOBAmt != 0 && OOBCity.AmtId == OOBAmt)
+			|| FVector2D::Distance(OOBUnit.Km, TownKm(OOBCityIndex)) <= TownRadiusKm(OOBCity.Population))) { return true; }
+	}
+	for (const FCampaign1851Fort& OOBFort : Forts)
+	{
+		if (OOBFort.bBuilt && ((OOBAmt != 0 && AmtAtWorld(WorldAtKm(OOBFort.Km)) == OOBAmt)
+			|| FVector2D::Distance(OOBUnit.Km, OOBFort.Km) <= 1.0)) { return true; }
+	}
+	if (OutReason) { *OutReason = FString::Printf(TEXT("%s står ikke i samme provins som en garnisonsby eller et fort og er heller ikke inden for garnisonsbyen"), *OOBUnit.Name); }
+	return false;
 }
 
 int32 ACampaign1851Map::FormFromCommand(int32 Command, int32 Parent)
@@ -1882,6 +1950,9 @@ bool ACampaign1851Map::MoveFormation(int32 Id, int32 NewParent)
 	{
 		return false;   // no loops: a formation cannot go under itself or its own sub-formations
 	}
+	const int32 OOBNewParentIndex = FormationIndex(NewParent);
+	if (OOBNewParentIndex != INDEX_NONE && Formations[OOBNewParentIndex].Echelon >= Formations[Index].Echelon) { return false; }
+	if (Formations[Index].Echelon == ECampaign1851Echelon::Army && NewParent != 0) { return false; }
 	Formations[Index].Parent = NewParent;
 	return true;
 }
@@ -1893,6 +1964,7 @@ int32 ACampaign1851Map::ReturnFormationToGarrison(int32 Id)
 		return 0;
 	}
 	const TArray<int32> Units = FormationRegiments(Id);
+	for (int32 OOBUnit : Units) { if (!CanReturnToGarrison(OOBUnit)) { return 0; } }
 	for (int32 i : Units)
 	{
 		Regiments[i].Formation = 0;
@@ -1919,6 +1991,7 @@ bool ACampaign1851Map::MoveRegimentToFormation(int32 Regiment, int32 Formation)
 	{
 		return false;
 	}
+	if (Formation == 0 && !CanReturnToGarrison(Regiment)) { return false; }
 	Regiments[Regiment].Formation = Formation;
 	return true;
 }

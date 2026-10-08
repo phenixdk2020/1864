@@ -1272,7 +1272,7 @@ public:
 	/** All the battalion's companies in the field get the same number of men. */
 	bool EqualizeCompanies(int32 Regiment, FString* OutWhy = nullptr);
 	/** Hires a new officer or general into the pool (pays the cost); INDEX_NONE if the treasury cannot. */
-	int32 RecruitOfficer(bool bGeneral);
+	int32 RecruitOfficer(bool bGeneral, const TCHAR* RecruitmentRank = nullptr);
 	/** The general of a stack or column: the first general attached to one of its regiments. */
 	const FCampaign1851Officer* ColumnGeneral(const TArray<int32>& Column) const;
 	int32 OfficerCost(bool bGeneral) const { return bGeneral ? GeneralRecruitCost : OfficerRecruitCost; }
@@ -1287,6 +1287,11 @@ public:
 	int32 FormationIndex(int32 Id) const;
 	/** A new, numbered formation under Parent (0 = the field army itself); returns its id. */
 	int32 CreateFormation(ECampaign1851Echelon Echelon, int32 Parent);
+	bool CanInsertFormationHQ(int32 Parent, ECampaign1851Echelon Echelon) const;
+	int32 InsertFormationHQ(int32 Parent, ECampaign1851Echelon Echelon);
+	bool CanReturnToGarrison(int32 Regiment, FString* OutReason = nullptr) const;
+	const TCHAR* FormationPostRank(int32 Formation, int32 Post) const;
+	bool CanAssignFormationPost(int32 Officer, int32 Formation, int32 Post) const;
 	/** Dissolves a formation: its units and sub-formations go up a level. */
 	void DissolveFormation(int32 Id);
 	/** A formation and all under it dissolved, its units back in garrison; returns the number of units. */

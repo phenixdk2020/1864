@@ -1471,6 +1471,14 @@ Forskningsvinduet bruger nu hele bredden. En gren, hvis emner står side om side
 ### 2026-10-08 – Codex-arbejde samlet og bygget
 Tolv Codex-opgaver (hver i sin worktree) er gennemgået og merget: civile bygninger 1825, etiketposition i slaget, fjern stab i delingsbilledet, batteri-sektioner, indkaldelse og træning med tidlig indsættelse, GPU-kvalitetsvalg, kortlægning af Unity-AI (Docs/Unity-AI-Mapping.md) samt gennemgang af sygdom, politik, gæld, vejr og rekognoscering. Ét navnesammenstød rettet (Horses skyggede for et medlem i FreezeCompanyStrength). Bygget og kontrolleret med skærmbilleder af kamporden, forskning og et testslag; ikke afprøvet i fuldt spil.
 
+### 2026-10-08 — Kamporden: selvstændige felthære og eksplicitte HQ'er
+
+- Organisationsdiagrammet vises også ved tom felthær; den store centrale dropboks er fjernet. Højre »Træk herover« har sin egen plads inden for vinduet og opretter en ny felthær med de trukne enheder direkte under sig, uden automatisk divisions-, brigade- eller regimentstab.
+- Små knapper over underordnede indsætter regiment-, brigade- og divisions-HQ i korrekt rangorden. Direkte enheder og lavere formationer flyttes under den nye stab; højere/sidestillede formationer bliver stående. Regiment-HQ kan også opløses, så underordnede rykker et niveau op.
+- Garnisonslisten modtager enheder, underenheder og hele formationer. Alle berørte enheder kontrolleres før flytningen: de skal stå stille i samme amt som en garnisonsby/et bygget fort eller inden for garnisonsbyens radius (ved fort uden amt: højst 1 km). Afvisninger forklares i en besked.
+- Officersvælger og nyrekruttering anvender de ønskede grader for chef, NK og stabschef. Eksisterende scenarie- og gemte officersposter bevares. Kompagni-/sektionsflytning og eksisterende formationsgemning genbruges; nye felter eller formatændringer er ikke tilføjet.
+- Validering: statisk gennemgang af hierarki, klikblokering og gem/indlæs samt `git diff --check`. Spillet er ikke bygget eller startet; ingen commit.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

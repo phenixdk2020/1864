@@ -384,7 +384,7 @@ bool ACampaign1851Map::AssignOfficer(int32 Officer, int32 Regiment)
 	return true;
 }
 
-int32 ACampaign1851Map::RecruitOfficer(bool bGeneral)
+int32 ACampaign1851Map::RecruitOfficer(bool bGeneral, const TCHAR* RecruitmentRank)
 {
 	const int32 Cost = OfficerCost(bGeneral);
 	if (Treasury < Cost)
@@ -392,7 +392,7 @@ int32 ACampaign1851Map::RecruitOfficer(bool bGeneral)
 		return INDEX_NONE;
 	}
 	FRandomStream Rng{ int32(FPlatformTime::Cycles()) };
-	FCampaign1851Officer O = MakeOfficer(Rng, bGeneral, bGeneral ? TEXT("Generalmajor") : TEXT("Major"));
+	FCampaign1851Officer O = MakeOfficer(Rng, bGeneral, RecruitmentRank ? RecruitmentRank : bGeneral ? TEXT("Generalmajor") : TEXT("Major"));
 	O.Id = FString::Printf(TEXT("R%d"), NextOfficerNumber++);
 	O.bRecruited = true;
 	AddTransaction(-Cost, FString::Printf(TEXT("%s: %s %s"), bGeneral ? TEXT("Udnævnelse") : TEXT("Officer ansat"), *O.Rank, *O.Name));
@@ -957,4 +957,26 @@ bool ACampaign1851Map::TransferSectionGuns(int32 FromReg, int32 From, int32 ToRe
 	if (FromReg != ToReg) { UpdateRegimentPiece(ToReg); }
 	if (OutWhy) { *OutWhy = FString::Printf(TEXT("%d kanoner flyttet"), N); }
 	return true;
+}
+
+// Rank requirements apply to new appointments; existing scenario/save posts are retained.
+const TCHAR* ACampaign1851Map::FormationPostRank(int32 Formation, int32 Post) const
+{
+	const int32 OOBFormationIndex = FormationIndex(Formation);
+	if (OOBFormationIndex == INDEX_NONE || Post < 0 || Post > 2) { return nullptr; }
+	const ECampaign1851Echelon OOBEchelon = Formations[OOBFormationIndex].Echelon;
+	if (OOBEchelon == ECampaign1851Echelon::Army || OOBEchelon == ECampaign1851Echelon::Division)
+	{
+		return Post == 0 ? TEXT("Generalmajor") : Post == 1 ? TEXT("Oberst") : TEXT("Major");
+	}
+	if (OOBEchelon == ECampaign1851Echelon::Brigade) { return Post == 0 ? TEXT("Oberst") : Post == 1 ? TEXT("Oberstløjtnant") : TEXT("Kaptajn"); }
+	return Post == 0 ? TEXT("Oberstløjtnant") : Post == 1 ? TEXT("Major") : TEXT("Kaptajn");
+}
+
+bool ACampaign1851Map::CanAssignFormationPost(int32 Officer, int32 Formation, int32 Post) const
+{
+	const TCHAR* OOBRequiredRank = FormationPostRank(Formation, Post);
+	if (!Officers.IsValidIndex(Officer) || !OOBRequiredRank) { return false; }
+	const FString& OOBRank = Officers[Officer].Rank;
+	return OOBRank == OOBRequiredRank || (Post == 0 && FCString::Strcmp(OOBRequiredRank, TEXT("Generalmajor")) == 0 && OOBRank == TEXT("Generalløjtnant"));
 }
