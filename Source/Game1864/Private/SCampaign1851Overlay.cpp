@@ -2622,9 +2622,14 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 	// The government and opinion.
 	{
 		const ECampaign1851Current Gov = Map->GetGovernment();
-		PaintText(Geometry, Out, Layer + 1, FString::Printf(TEXT("Regeringen %s  ·  %s  ·  siden %s"), *Map->GetPrimeMinister(), Campaign1851Politics::CurrentName(Gov),
-			*ACampaign1851Map::FormatDate(ACampaign1851Map::StartDate() + FTimespan::FromDays(Map->GetGovernmentSince()), true)), FVector2D(X, Y), Serif(13), Gold, 0.f, false);
+		PaintTextFit(Geometry, Out, Layer + 1, FString::Printf(TEXT("Regeringen %s  ·  %s  ·  siden %s"), *Map->GetPrimeMinister(), Campaign1851Politics::CurrentName(Gov),
+			*ACampaign1851Map::FormatDate(ACampaign1851Map::StartDate() + FTimespan::FromDays(Map->GetGovernmentSince()), true)), FVector2D(X, Y), Serif(13), Gold, LeftW - 10.f);
 		PaintTextFit(Geometry, Out, Layer + 1, Campaign1851Politics::CurrentEffect(Gov), FVector2D(X, Y + 17.f), Serif(10, EFace::Italic), MutedInk, LeftW - 10.f);
+		if (ACampaign1851Map::ActiveScenario().Year < 1850 && Map->GetDate().GetYear() < 1848)
+		{
+			AddTip(FVector2D(X, Y - 14.f), FVector2D(LeftW - 10.f, 40.f),
+				TEXT("1825: Statsrådet og rådgiverne er en forenklet model af enevælden. Strømningerne viser politiske tendenser, ikke partier eller valg."));
+		}
 		Y += 40.f;
 		for (int32 c = 0; c < 3; ++c)
 		{

@@ -10,14 +10,14 @@
 
 namespace
 {
-	struct FCabinet
+	struct FCampaignPoliticsCabinet
 	{
 		int32 Year, Month, Day;
 		const TCHAR* Name;
 		ECampaign1851Current Line;
 	};
 	// The cabinets of the period (dates historical; their line simplified for the game).
-	const FCabinet Cabinets[] = {
+	const FCampaignPoliticsCabinet CampaignPoliticsCabinets[] = {
 		{ 1852, 1, 27,  TEXT("C.A. Bluhme"),  ECampaign1851Current::Helstat },
 		{ 1853, 4, 21,  TEXT("A.S. Ørsted"),  ECampaign1851Current::Helstat },
 		{ 1854, 12, 12, TEXT("P.G. Bang"),    ECampaign1851Current::Helstat },
@@ -27,7 +27,7 @@ namespace
 		{ 1860, 2, 24,  TEXT("C.C. Hall"),    ECampaign1851Current::Ejder },
 		{ 1863, 12, 31, TEXT("D.G. Monrad"),  ECampaign1851Current::Ejder },
 	};
-	const TCHAR* Alternates[3][3] = {
+	const TCHAR* CampaignPoliticsAlternates[3][3] = {
 		{ TEXT("L.N. Scheele"), TEXT("F. Moltke"), TEXT("C. Moltke") },
 		{ TEXT("Orla Lehmann"), TEXT("A.F. Krieger"), TEXT("C.F. Tietgen") },
 		{ TEXT("Carl Ploug"), TEXT("J.F. Schouw"), TEXT("C. Hostrup") } };
@@ -48,18 +48,19 @@ const TCHAR* Campaign1851Politics::CurrentEffect(ECampaign1851Current C)
 void ACampaign1851Map::ResetPolitics()
 {
 	// The ministries' AUTO budgets as at the start (rd. a month; the pot begins with one month).
+	const bool bEarly = ActiveScenario().Year < 1850;
 	const double Budgets[] = { 5000.0, 15000.0, 10000.0, 10000.0, 5000.0, 2000.0, 10000.0, 10000.0 };
 	for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count); ++p)
 	{
-		MinistryBudget[p] = MinistryPot[p] = Budgets[p];
+		MinistryBudget[p] = MinistryPot[p] = Budgets[p] * (bEarly ? ActiveScenario().PopulationFactor : 1.f);
 	}
-	// Summer 1851: the whole state restored after the war, the National Liberals strong in Copenhagen.
+	// 1825 uses an estimated conservative majority; summer 1851: the whole state restored after the war, the National Liberals strong in Copenhagen.
 	FRandomStream Rng(int32(HashCombine(uint32(Seed), 0x9011u)));
-	Support[0] = 45.f + 10.f * Deviation * Rng.FRandRange(-1.f, 1.f);
-	Support[1] = 40.f + 10.f * Deviation * Rng.FRandRange(-1.f, 1.f);
+	Support[0] = (bEarly ? 80.f : 45.f) + 10.f * Deviation * Rng.FRandRange(-1.f, 1.f);
+	Support[1] = (bEarly ? 10.f : 40.f) + 10.f * Deviation * Rng.FRandRange(-1.f, 1.f);
 	Support[2] = 100.f - Support[0] - Support[1];
 	Mood = 60.f;
-	PrimeMinister = TEXT("A.W. Moltke");
+	PrimeMinister = bEarly ? TEXT("Det kongelige statsråd") : TEXT("A.W. Moltke");
 	Government = ECampaign1851Current::Helstat;
 	GovernmentSince = 0.0;
 	NextCabinet = 0;
@@ -198,9 +199,9 @@ void ACampaign1851Map::MonthlyPolitics()
 	}
 	// Cabinets: the historical one on its date if its current is strong enough, else the leading current's.
 	const FDateTime Now = GetDate();
-	while (NextCabinet < int32(UE_ARRAY_COUNT(Cabinets)) && Now >= FDateTime(Cabinets[NextCabinet].Year, Cabinets[NextCabinet].Month, Cabinets[NextCabinet].Day))
+	while (NextCabinet < int32(UE_ARRAY_COUNT(CampaignPoliticsCabinets)) && Now >= FDateTime(CampaignPoliticsCabinets[NextCabinet].Year, CampaignPoliticsCabinets[NextCabinet].Month, CampaignPoliticsCabinets[NextCabinet].Day))
 	{
-		const FCabinet& K = Cabinets[NextCabinet++];
+		const FCampaignPoliticsCabinet& K = CampaignPoliticsCabinets[NextCabinet++];
 		if (Support[int32(K.Line)] >= 30.f)
 		{
 			FormGovernment(K.Name, K.Line, FString::Printf(TEXT("%s har %.0f %% af opinionen bag sig"), Campaign1851Politics::CurrentName(K.Line), Support[int32(K.Line)]));
@@ -211,7 +212,10 @@ void ACampaign1851Map::MonthlyPolitics()
 	{
 		const ECampaign1851Current Lead = LeadingCurrent();
 		FRandomStream Rng(int32(HashCombine(uint32(Seed), uint32(Now.GetYear() * 12 + Now.GetMonth()))));
-		FormGovernment(Alternates[int32(Lead)][Rng.RandHelper(3)], Lead, Mood < 25.f
+		const TCHAR* EarlyCouncils[] = { TEXT("Statsrådet (helstat)"), TEXT("Statsrådet (Slesvig)"), TEXT("Statsrådet (nordisk samling)") };
+		const FString Name = ActiveScenario().Year < 1850 && Now.GetYear() < 1848
+			? FString(EarlyCouncils[int32(Lead)]) : FString(CampaignPoliticsAlternates[int32(Lead)][Rng.RandHelper(3)]);
+		FormGovernment(Name, Lead, Mood < 25.f
 			? FString::Printf(TEXT("regeringen faldt: stemningen i landet er nede på %.0f"), Mood)
 			: FString::Printf(TEXT("regeringen faldt: %s har kun %.0f %% bag sig"), Campaign1851Politics::CurrentName(Government), Mine));
 	}
@@ -222,6 +226,10 @@ TArray<FString> ACampaign1851Map::SavePolitics() const
 	TArray<FString> Out;
 	Out.Add(FString::Printf(TEXT("state|%.2f|%.2f|%.2f|%.2f|%s|%d|%.2f|%d|%d|%d"), Support[0], Support[1], Support[2], Mood, *PrimeMinister, int32(Government), GovernmentSince, NextCabinet,
 		DanishWarLosses, EnemyWarLosses));
+	if (Nations.IsValidIndex(PlayerNation))
+	{
+		Out.Add(FString::Printf(TEXT("warweight|%.9g"), Nations[PlayerNation].Weights[int32(ECampaign1851Portfolio::War)]));
+	}
 	Out.Append(SaveMinisters());
 	return Out;
 }
@@ -229,6 +237,8 @@ TArray<FString> ACampaign1851Map::SavePolitics() const
 void ACampaign1851Map::RestorePolitics(const TArray<FString>& Lines)
 {
 	ResetPolitics();
+	bool bWarWeightRestored = false;
+	bool MinistersRestored[int32(ECampaign1851Portfolio::Count)] = {};
 	for (const FString& Line : Lines)
 	{
 		TArray<FString> P;
@@ -236,29 +246,63 @@ void ACampaign1851Map::RestorePolitics(const TArray<FString>& Lines)
 		if (P.Num() == 8 && P[0] == TEXT("min"))
 		{
 			RestoreMinister(P);
+			const int32 Portfolio = FCString::Atoi(*P[1]);
+			if (Portfolio >= 0 && Portfolio < int32(ECampaign1851Portfolio::Count) && !P[2].IsEmpty())
+			{
+				MinistersRestored[Portfolio] = true;
+			}
+		}
+		else if (P.Num() == 2 && P[0] == TEXT("warweight") && Nations.IsValidIndex(PlayerNation))
+		{
+			const float Weight = FCString::Atof(*P[1]);
+			if (FMath::IsFinite(Weight) && Weight >= 0.f)
+			{
+				Nations[PlayerNation].Weights[int32(ECampaign1851Portfolio::War)] = Weight;
+				bWarWeightRestored = true;
+			}
 		}
 		else if (P.Num() == 4 && P[0] == TEXT("budget"))
 		{
 			const int32 p = FCString::Atoi(*P[1]);
 			if (p >= 0 && p < int32(ECampaign1851Portfolio::Count))
 			{
-				MinistryBudget[p] = FCString::Atod(*P[2]);
-				MinistryPot[p] = FCString::Atod(*P[3]);
+				const double Budget = FCString::Atod(*P[2]), Pot = FCString::Atod(*P[3]);
+				if (FMath::IsFinite(Budget) && FMath::IsFinite(Pot))
+				{
+					MinistryBudget[p] = FMath::Clamp(Budget, 0.0, 100000.0);
+					MinistryPot[p] = FMath::Clamp(Pot, 0.0, MinistryBudget[p] * 3.0);
+				}
 			}
 		}
 		else if (P.Num() == 11 && P[0] == TEXT("state"))
 		{
 			for (int32 s = 0; s < 3; ++s)
 			{
-				Support[s] = FCString::Atof(*P[1 + s]);
+				const float Value = FCString::Atof(*P[1 + s]);
+				if (FMath::IsFinite(Value)) { Support[s] = FMath::Clamp(Value, 0.f, 100.f); }
 			}
-			Mood = FCString::Atof(*P[4]);
+			const float SavedMood = FCString::Atof(*P[4]);
+			if (FMath::IsFinite(SavedMood)) { Mood = FMath::Clamp(SavedMood, 0.f, 100.f); }
 			PrimeMinister = P[5];
 			Government = ECampaign1851Current(FMath::Clamp(FCString::Atoi(*P[6]), 0, 2));
 			GovernmentSince = FCString::Atod(*P[7]);
-			NextCabinet = FCString::Atoi(*P[8]);
-			DanishWarLosses = FCString::Atoi(*P[9]);
-			EnemyWarLosses = FCString::Atoi(*P[10]);
+			NextCabinet = FMath::Clamp(FCString::Atoi(*P[8]), 0, int32(UE_ARRAY_COUNT(CampaignPoliticsCabinets)));
+			DanishWarLosses = FMath::Max(0, FCString::Atoi(*P[9]));
+			EnemyWarLosses = FMath::Max(0, FCString::Atoi(*P[10]));
 		}
+	}
+	// Older politics saves contain no ministers or government priority; reconstruct without news.
+	for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count); ++p)
+	{
+		if (!MinistersRestored[p])
+		{
+			Ministers[p] = MakeMinister(ECampaign1851Portfolio(p), Government, FString());
+		}
+	}
+	if (!bWarWeightRestored && GovernmentSince > 0.0 && Nations.IsValidIndex(PlayerNation))
+	{
+		FCampaign1851Nation& N = Nations[PlayerNation];
+		N.Weights[int32(ECampaign1851Portfolio::War)] = N.BaseWeights[int32(ECampaign1851Portfolio::War)]
+			* (Government == ECampaign1851Current::Ejder ? 1.15f : Government == ECampaign1851Current::Helstat ? 0.9f : 1.f);
 	}
 }

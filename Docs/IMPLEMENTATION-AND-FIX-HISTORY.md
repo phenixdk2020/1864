@@ -1423,6 +1423,15 @@ Forskningsvinduet bruger nu hele bredden. En gren, hvis emner står side om side
 - Kolerafaktoren gælder kun Københavns garnison, som designet beskriver, og fortsat kun juni-september 1853. I 1825 skalerer sygdom allerede med tilstedeværende mænd; grundrater, forskning og 1851-balancen er bevaret. Ingen jernbanekrav i sundhedssystemet.
 - Uafklaret: Lazarettet følger fortsat `Home`, også når enheden er i felten; om behandling skal følge opholdsbyen eller kræve transport, kræver en designbeslutning. Lazarettets 200 senge og sygestuens 60 senge i bygningsdata er ikke modelleret som kapacitet/behandling; en kapacitetsmodel og historiske 1825-priser bør afklares før balancen ændres. Daglig behandling afhænger af den fælles dagsopdatering; lange tidsspring og genindlæsning samme dag er ikke runtime-verificeret.
 - Kontrol: statisk gennemgang af save/restore og UI, beregningskontrol af tabsandele samt `git diff --check`. Ingen build eller kørsel af spillet efter brugerens instruktion.
+### 2026-10-08 – Audit: Ministre og politik (1825 og 1851)
+
+- Læst Politics1851.md, Ministers1851.md samt politik, ministre, national AI, Statsråd og gemme-/indlæsningsforløbet. Ingen AGENTS.md fundet i projektet eller de kontrollerede overliggende mapper.
+- 1825: konservativ startopinion, statsråd og fiktive rådgivertitler før 1848, befolkningsskalerede startbudgetter, hærskaleret tøj/lædermål og fredeligt flådemål uden østrigsk eskadre eller vækst regnet fra 1825 frem mod 1851. Statsrådet forklarer abstraktionen i en hjælpetekst, og regeringsrækken tilpasses den tilgængelige bredde.
+- Gemning: regeringens militære prioritet gemmes i en valgfri Politics-linje; ældre saves rekonstruerer den efter regeringsskifte. Manglende ministerposter bruger den indlæste regerings strømning. Indlæste evner, budgetter, puljer, tab og ministeriumsindeks begrænses til gyldige værdier.
+- Rettet råvarekøb, hvor pris/pulje tidligere brugte en brøkmængde, mens bestillingen rundede op. Fil-lokale politik-/ministerhjælpere har entydige navne til unity builds.
+- 1851-starttal, navne, historiske ministeriedatoer og balanceformler er bevaret; fælles fejlrettelser gælder begge scenarier.
+- Uafklaret: historisk 1825-rådgivermodel, månedlig opinion og besættelsesstraf kontra design, fremtidige skibe i startflåden, krigens søstyrkevækst, faste finansbeløb, doktrinrådets våbenhistorik og øvrige nationers manglende gemning af prioriteter. Detaljer i Politics1851.md.
+- Kontrol: kildekode-/diffgennemgang, statiske kontroller og beregningseksempler for scenarier og oprunding; ingen build eller kørsel af spillet. UI og langsigtet balance er ikke afprøvet.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

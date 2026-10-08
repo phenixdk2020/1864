@@ -64,3 +64,18 @@ Alt vises i **STATSRÅD** (regering og opinion) og i **UDENRIGS** (fred).
 
 ## Gemning (v25)
 `Politics`-linjen: `state|helstat|ejder|skand|stemning|statsminister|linje|siden|næste ministerium|danske tab|fjendens tab`.
+
+## Scenarieaudit 2026-10-08
+- 1851 beholder startopinion, ministre, regeringsnavne, budgetter og flådemål.
+- 1825 starter med anslået opinion 80 % helstat, 10 % Slesvig/Ejder og resten nordisk orientering (samme seedafvigelse som før). Det kongelige statsråd og fiktive rådgivertitler bruges før 1848; strømningerne er en abstraktion af politiske tendenser under enevælden, forklaret i Statsrådets hjælpetekst. Historiske kandidater bliver tilgængelige fra 1848, men siddende rådgivere beholdes efter de normale regler.
+- Startbudgetter/puljer skaleres med scenariets befolkningsfaktor (1825: 0,8). Intendanturens tøj/lædermål skaleres med hærfaktoren (1825: 0,55). Fredelig flådeplanlægning i 1825 regner uden en østrigsk eskadre og uden 26 års vækst allerede i 1851; krigens mål er uændret.
+- Ny valgfri Politics-linje: `warweight|vægt`. Den gemmer den aktuelle militære prioritet; ældre gemninger rekonstruerer regeringens faktor efter et regeringsskifte. Manglende ministerposter rekonstrueres fra den indlæste regerings strømning. Ministerevner, budgetter, puljer og næste ministerium begrænses ved indlæsning.
+- Råvareforslag bruger nu samme oprundede mængde til pris, budgetkontrol og bestilling.
+
+### Uafklaret efter audit
+- Startopinion og rådgivermodellen for 1825 er spillets skøn; historiske rådgivere, overgang til 1848-ministerier og politiske strømningers åbningstid kræver et særskilt design.
+- Månedlig opinion normaliserer alle tre strømninger, selv om tabellen ovenfor siger, at helstaten er resten. Besatte byer koster aktuelt 0,5 stemning pr. måned (højst fem), mod dokumentets 1 pr. by. Begge dele beholdes for at bevare 1851-balancen.
+- Flådens startliste indeholder skibe bygget efter 1825, og fjendens søstyrke i krig tæller år fra scenariestart. Det kræver en separat flådeaudit; denne ændring retter kun ministerens fredelige mål.
+- Finansministerens faste låne-/afdragsbeløb og doktrinrådets generelle omtale af tændnålsgeværet er stadig 1851-prægede. Den langsigtede 1825-balance samt budgetpuljernes evne til at betale store skibe og lån kræver spiltest.
+- Nationernes øvrige, manuelt ændrede prioriteter gemmes ikke i SaveWorld. Denne audit gemmer kun den militære vægt, som regeringsskiftet ændrer.
+- Gamle 1825-gemninger med historiske minister-/regeringsnavne beholder disse; de erstattes ikke automatisk.
