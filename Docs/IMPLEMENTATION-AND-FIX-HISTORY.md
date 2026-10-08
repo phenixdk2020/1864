@@ -1650,6 +1650,14 @@ Codex' tre opgaver er merget og bygget: spredt orden og nedlægning under artill
 ### 2026-10-08 – Bevægelse, waypoints og formationsstørrelse merget; liste over enheder i egen boks
 Codex' tre opgaver er merget: bevægelse (skydekegle skjult i kolonne og under formationsskift, enheder under ryk-frem/angrib stopper og skyder til målet er væk, statusmarkering på skiltet, dæmpet fodstøv, glattere bevægelse), waypoints (destinationskasse, vejlinje, ALT+højreklik) og lavere grafik giver mindre formationer og kegle. Enhedskortet for en stak har fået en knap, VIS ALLE ENHEDER, som åbner en boks med alle enhederne (rulbar, rækker vælger en enhed); markører for enheder under oplæring skjules bag kortet. Store drejninger (over 30 grader) får mændene til at gå til de nye pladser i stedet for en stiv fløjsving. Standard er medium grafik og en figur pr. mand; antallet af figurer er en indstilling for sig. Flettekonflikt i InfantryVisualComponent løst (kompakte pladser fra lowq og forhindring af spring fra motion).
 
+### 2026-10-08 - Naturligere march og formationsskift ved flytteordrer
+
+- Hver mand har personlig fartvariation (+/-6 %), startforsinkelse (0-0,5 s) og gangfase. Normal march holder pladsen ved kompagniets fart; personlig fart bruges til at lukke afstand til pladsen. Vending sker med 120 grader/s og let glidende kropshældning. Det pludselige store drejespring i formationsstien er fjernet.
+- Animationens fart følger faktisk bevægelse. Gang stopper ved ankomst, og mændene falder individuelt til ro efter en lille forsinkelse. Samme klipdata bruges af de fjerne VAT-mænd; ingen nye individuelle verdensstier eller terrænforespørgsler.
+- Flytning til og med den justerbare 120 m-grænse bevarer kampformationen. Længere ruter medregner resterende waypoints; marchkolonne dannes ved leveret ordre uden formationspause. Udfoldning sker ved sidste rutepunkt inden for 25 m eller egen ildrækkevidde + 35 m. En fjern kanons maksimumsrækkevidde spærrer ikke marchen.
+- Direkte flytteordrer fra spilleren bevarer mål og ruter for hele udvalget uden tilfældig målforskydning ved levering. Ordonnans og læsetid bevares. Ingen nye autonome angreb er tilføjet.
+- Validering: statisk gennemgang og git diff --check. Ingen build, spilstart eller commit; visuel afprøvning udestår.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -1012,7 +1012,8 @@ void AStrategyPlayerController::DeliverOrder(AStrategyUnit* Unit, FStrategyOrder
     const float Skill = Profile ? Profile->TacticalSkill / 100.0f : 0.5f;
     const float Reaction = 2.0f + 12.0f * (1.0f - Efficiency);
     FString Remark;
-    if (!Order.TargetLocation.IsNearlyZero() && FMath::FRand() < FMath::Clamp(0.45f * (1.0f - Stability) - 0.05f, 0.0f, 0.35f))
+    if (!(Order.Authority == EStrategyOrderAuthority::DirectPlayer && Order.Type == EStrategyOrderType::Move) &&
+        !Order.TargetLocation.IsNearlyZero() && FMath::FRand() < FMath::Clamp(0.45f * (1.0f - Stability) - 0.05f, 0.0f, 0.35f))
     {
         const FVector Here = Unit->GetActorLocation();
         const float Distance = FVector::Dist2D(Here, Order.TargetLocation);

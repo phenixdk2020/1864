@@ -124,17 +124,11 @@ EStrategyFormationType UStrategyFormationPolicyComponent::ColumnFormation() cons
 
 float UStrategyFormationPolicyComponent::DeployDistanceCm(const AStrategyUnit* Enemy) const
 {
-    // The longest reach on either side (the enemy's rifles and guns, or our own), and a margin to form up in.
-    auto Reach = [](const AStrategyUnit* U)
-    {
-        float R = U ? U->MaximumFireRangeCm : 0.0f;
-        if (U && U->FireControlComponent)
-        {
-            R = FMath::Max(R, U->FireControlComponent->LongRangeCm);
-        }
-        return R;
-    };
-    return FMath::Max(Reach(OwnerUnit), Reach(Enemy)) + DeploySafetyBufferCm;
+    // Deploy for our fire range, not a distant enemy gun's maximum reach.
+    const float PolicyFireRange = OwnerUnit && OwnerUnit->FireControlComponent
+        ? OwnerUnit->FireControlComponent->LongRangeCm
+        : (OwnerUnit ? OwnerUnit->MaximumFireRangeCm : 0.0f);
+    return PolicyFireRange + DeploySafetyBufferCm;
 }
 
 void UStrategyFormationPolicyComponent::Deploy()
@@ -173,15 +167,20 @@ void UStrategyFormationPolicyComponent::ApplyInitialMovementFormation(const FStr
         BattleFormation = OwnerUnit->IsA<ACavalryUnit>() ? EStrategyFormationType::CavalryLine : EStrategyFormationType::Line;
     }
 
-    const float DistanceCm = FVector::Dist2D(
-        OwnerUnit->GetActorLocation(),
-        Order.TargetLocation);
+    float DistanceCm = 0.0f;
+    FVector RoutePrevious = OwnerUnit->GetActorLocation();
+    for (int32 RouteIndex = FMath::Max(0, Order.NextWaypointIndex); RouteIndex < Order.Waypoints.Num(); ++RouteIndex)
+    {
+        DistanceCm += FVector::Dist2D(RoutePrevious, Order.Waypoints[RouteIndex]);
+        RoutePrevious = Order.Waypoints[RouteIndex];
+    }
+    DistanceCm += FVector::Dist2D(RoutePrevious, Order.TargetLocation);
     float EnemyDistanceCm = TNumericLimits<float>::Max();
     AStrategyUnit* Enemy = FindNearestEnemy(EnemyDistanceCm);
     const bool bEnemyClose = Enemy && EnemyDistanceCm <= DeployDistanceCm(Enemy);
 
     // A march: in column on the way, unless the enemy is already within reach (then it moves in its formation).
-    if (DistanceCm >= LongMoveColumnThresholdCm && !bEnemyClose)
+    if (DistanceCm > LongMoveColumnThresholdCm && !bEnemyClose)
     {
         if (Now != EStrategyFormationType::DefileColumn)
         {
@@ -216,7 +215,8 @@ void UStrategyFormationPolicyComponent::EvaluateEarlyDeployment()
     if (OwnerUnit->OrderComponent)
     {
         const FStrategyOrder Order = OwnerUnit->OrderComponent->GetCurrentOrder();
-        if (FVector::Dist2D(OwnerUnit->GetActorLocation(), Order.TargetLocation) < 2500.0f)
+        if (Order.NextWaypointIndex >= Order.Waypoints.Num() - 1 &&
+            FVector::Dist2D(OwnerUnit->GetActorLocation(), Order.TargetLocation) <= 2500.0f)
         {
             Deploy();
         }
