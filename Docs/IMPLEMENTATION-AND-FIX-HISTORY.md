@@ -1397,6 +1397,9 @@ Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i
 - Civile emner (`Campaign1851Research::IsCivil`): hele Næringsliv-kolonnen (mergling, landbohøjskole, smede, dampmaskiner, kreditforeninger, nyt: Landboreformer, skat fra landet +6 %), samt Jernbaneanlæg, Felttelegrafen og nyt: Vej- og kanalbyggeri (chausséer 15 % billigere). Jernbanemobilisering og pontonerne er militære.
 - De nye emner åbner i 1825-scenariet 1828 (landboreformer) og 1830 (veje).
 
+### 2026-10-08 – Backlog opdateret
+Backlog.md har fået et afsnit med det, der er bygget i oktober (scenarier, delt forskning, kamporden, slagets nye systemer), og en liste over det, der endnu ikke er afprøvet i et rigtigt slag.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

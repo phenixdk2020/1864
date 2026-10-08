@@ -35,3 +35,15 @@ Status pr. v00.00.50: alle 20 opgaver er lavet. Detaljerne står i de nævnte do
 - Søtransport af regimenter mellem havne.
 - Jernbanemobilisering koblet til køreplaner på kortet.
 - Gennemgå de civile bygningers tal (afgifter, arbejdspladser og skat, told og eksport; `FCampaign1851CivilEffect`) for 1825-scenariet, hvor byerne er mindre og der ingen jernbaner er.
+
+## Bygget 2026-10 (kampagne og slag), ikke afprøvet i et rigtigt slag
+- Scenarier: 1825 (standard) og 1851 (vælges i spilmenuen); gem gemmer scenariet.
+- Forskning: åbner efter år i 1825, militær og civil i to spor med faner; Jernbaneanlæg kræver forskning.
+- Kamporden: organisationsdiagram, kompagnier foldes ud, enhedskort pr. kompagni, styrke pr. kompagni og overførsel af mænd (også eskadroner og på tværs af enheder).
+- Kort: Bornholm og grov verdensflade; naboer til Danmark skal detaljeres senere.
+- Slag: sejrspoint, ordonnanser (synlige ryttere) og officerers tolkning af ordrer, slagur og tid på dagen, højst 3 dage, forstærkninger dag 2 og 3.
+- Officerer: såret/fanget med løsesum, prestige og moral; fanget chef giver enheden lavere moral.
+- Taktik: holdning- og afsidningsknapper, flankering for begge sider efter lederens egenskaber, sidetrin, reserve-kompagni.
+- Testslag: Start-Test-1 (kompagni mod kompagni) og Start-Test-2 (bataljon med reserve mod kompagni).
+- Ikke prøvet endnu: højreklik-kommando med retningspil, skift af scenarie i menuen, dragonernes afsidning, de to testslag fra ende til anden, "LG 1"-etiketten der sidder for langt til venstre, danske reserver der ankommer.
+- Åbne ønsker: fjern en overordnet stab direkte i delingsbilledet; rigtige 1825-data (hær, officerer, byer, nationer); flere civile forskningsemner (post, dampskibe) med reel effekt.
