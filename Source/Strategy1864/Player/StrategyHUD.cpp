@@ -1,5 +1,6 @@
 #include "StrategyHUD.h"
 #include "../Combat/StrategyContactComponent.h"
+#include "../Combat/StrategyThreatReactionComponent.h"
 #include "../Combat/StrategyVisibilityComponent.h"
 #include "../Campaign/StrategyCampaignBattlefield.h"
 #include "StrategyBattleQuality.h"
@@ -1065,7 +1066,14 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 if (Unit && Unit->FireControlComponent) { Unit->FireControlComponent->SetFirePolicy(EStrategyFirePolicy(B.Value)); }
                 break;
             case EAction::Formation:
-                if (Unit && Unit->FormationComponent) { Unit->FormationComponent->SetFormation(EStrategyFormationType(B.Value)); }
+                if (Unit && Unit->FormationComponent)
+                {
+                    if (Unit->ThreatReactionComponent)
+                    {
+                        Unit->ThreatReactionComponent->NotifyPlayerFormationOrder(EStrategyFormationType(B.Value));
+                    }
+                    Unit->FormationComponent->SetFormation(EStrategyFormationType(B.Value));
+                }
                 break;
             default:
                 break;

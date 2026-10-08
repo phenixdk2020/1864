@@ -214,6 +214,7 @@ void UStrategyMovementExecutorComponent::TickComponent(
     FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    ExecutedVelocity = FVector::ZeroVector;
 
     if (!bHasMovementGoal || !OwnerUnit || !OwnerUnit->OrderComponent)
     {
@@ -461,6 +462,11 @@ void UStrategyMovementExecutorComponent::TickComponent(
             VerticalAlpha);
 
     OwnerUnit->SetActorLocation(NewLocation);
+    if (DeltaTime > SMALL_NUMBER)
+    {
+        ExecutedVelocity = (OwnerUnit->GetActorLocation() - CurrentLocation) / DeltaTime;
+        ExecutedVelocity.Z = 0.0f;
+    }
 
     if (bKeepFacingMove)
     {
@@ -484,6 +490,7 @@ void UStrategyMovementExecutorComponent::TickComponent(
 
 void UStrategyMovementExecutorComponent::FinishMovement()
 {
+    ExecutedVelocity = FVector::ZeroVector;
     bHasMovementGoal = false;
     SetComponentTickEnabled(false);
 
@@ -519,6 +526,7 @@ void UStrategyMovementExecutorComponent::FinishMovement()
 
 void UStrategyMovementExecutorComponent::StopMovement()
 {
+    ExecutedVelocity = FVector::ZeroVector;
     if (bCavalryDefileActive)
     {
         if (ACavalryUnit* Cavalry = Cast<ACavalryUnit>(OwnerUnit))
@@ -604,6 +612,7 @@ void UStrategyMovementExecutorComponent::PauseMovementForSeconds(float DurationS
         return;
     }
 
+    ExecutedVelocity = FVector::ZeroVector;
     PauseRemainingSeconds = FMath::Max(PauseRemainingSeconds, DurationSeconds);
     OwnerUnit->SetUnitState(EStrategyUnitState::UnderFire);
 

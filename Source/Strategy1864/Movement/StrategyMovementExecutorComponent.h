@@ -64,7 +64,11 @@ public:
     UFUNCTION(BlueprintPure, Category="Strategy|Movement")
     TArray<FVector> GetRoutePoints() const { return RoutePoints; }
 
+    // Actual displacement velocity: APawn::GetVelocity does not track SetActorLocation.
+    FVector GetExecutedVelocity() const { return ExecutedVelocity; }
+
 private:
+    FVector ExecutedVelocity = FVector::ZeroVector;
     UFUNCTION()
     void HandleOrderChanged(const FStrategyOrder& NewOrder);
 

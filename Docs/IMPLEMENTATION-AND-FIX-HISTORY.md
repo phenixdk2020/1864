@@ -1554,6 +1554,15 @@ Startmenuen (scenarie, land, afvigelse, NYT SPIL, INDLÆS SPIL, AFSLUT; spilmenu
 - Gemmeformat hævet til v29: navn, originalnavn, palette, våbentrin, ventende våbentrin og resterende dage. Delte enheder arver tilpasning/ombygning; sammenlægning og overførsel mellem enheder kræver samme våben og afsluttet ombygning. Alle fem nye controllerklik er selvstændige if-blokke med EButton::Block; navnefeltet blokerer kortets tastaturgenveje.
 - Validering: statisk kontrol af forskningsindekser, gemmefelter, klikblokering, C++-delimitere og Python-syntaks samt git diff --check. Ingen build, editorstart, spiltest eller commit. Midlertidige redigeringsscripts er fjernet fra arbejdstræet.
 
+### 2026-10-08 - Retningsbestemt kavaleritrussel
+
+- Synligt, kampdygtigt kavaleri udløser firkant ved faktisk lukkehastighed på mindst 7 m/s. Varsling: hastighed gange 25 sekunder, højst 350 m. Alle tærskler kan justeres i headeren.
+- Kun nærmeste kompagni langs fremrykningsretningen reagerer. Afgrænset korridor og stabil identitet ved afstandslighed; ingen nye tilfældighedskilder. Langsomt, standset og bortvendt kavaleri ignoreres.
+- Marchpolitikken kontrollerer truslen inden deployering, så kolonne kan gå direkte til firkant. Spillernes eksplicitte formationsvalg bruger en forkortet nødgrænse (65 %).
+- Formationens bajonethåndtering får første prioritet; trusselskomponenten har fallback. Officerens bajonettimer afmonterer ikke bajonetter i firkant. Efter 8 sekunder uden trussel genetableres tidligere formation; formationsovergangen beholder reformeringstilstanden.
+- MovementExecutor eksponerer faktisk forskydningshastighed og nulstiller ved pause, stop og afslutning, da SetActorLocation ikke giver normal pawn-velocity.
+- Validering: statisk gennemgang, syv geometriske kontrolscenarier og git diff --check. Ingen build, spilstart eller commit.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
