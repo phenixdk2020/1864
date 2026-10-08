@@ -1,4 +1,5 @@
 #include "StrategyConditionComponent.h"
+#include "StrategyCombatComponent.h"
 
 #include "../Units/StrategyUnit.h"
 
@@ -46,6 +47,7 @@ void UStrategyConditionComponent::TickComponent(
         OwnerUnit->Fatigue + DeltaFatigue * DeltaTime,
         0.0f,
         100.0f);
+    if (OwnerUnit->CombatComponent) { OwnerUnit->CombatComponent->EvaluateRoutState(); }
 }
 
 float UStrategyConditionComponent::GetMovementSpeedMultiplier() const

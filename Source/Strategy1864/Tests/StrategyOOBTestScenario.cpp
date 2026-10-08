@@ -32,6 +32,8 @@
 #include "../Units/StrategyHQUnit.h"
 #include "../Units/StrategyUnit.h"
 #include "../Units/CavalryUnit.h"
+#include "../Combat/StrategyCavalryChargeComponent.h"
+#include "../Formations/StrategyFormationTransitionComponent.h"
 #include "../Units/StrategyDragoonComponent.h"
 #include "../Navigation/StrategyRiverBarrier.h"
 #include "../Combat/StrategyCombatComponent.h"
@@ -864,6 +866,7 @@ void AStrategyOOBTestScenario::TickOfficers()
                 // The loss of the chief: his unit loses heart (a staff officer: every unit near him a little).
                 Unit->Morale = FMath::Max(0.0f, Unit->Morale - 15.0f);
                 Unit->Cohesion = FMath::Max(0.0f, Unit->Cohesion - 10.0f);
+                if (Unit->CombatComponent) { Unit->CombatComponent->EvaluateRoutState(); }
                 if (bStaff)
                 {
                     for (TActorIterator<AStrategyUnit> Near(World); Near; ++Near)
@@ -871,6 +874,7 @@ void AStrategyOOBTestScenario::TickOfficers()
                         if (IsValid(*Near) && *Near != Unit && Near->Side == Unit->Side && Near->Echelon != EStrategyEchelon::Headquarters && FVector::Dist2D(Near->GetActorLocation(), Unit->GetActorLocation()) < 20000.0f)
                         {
                             Near->Morale = FMath::Max(0.0f, Near->Morale - 6.0f);
+                            if (Near->CombatComponent) { Near->CombatComponent->EvaluateRoutState(); }
                         }
                     }
                 }
@@ -982,6 +986,8 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         if (BattleId > 0 && FFileHelper::LoadFileToString(Text, *(Dir / FString::Printf(TEXT("BattleRequest_%d.json"), BattleId))) &&
             FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Request) && Request.IsValid())
         {
+            double RequestBattleSeed = QARandomSeed;
+            if (Request->TryGetNumberField(TEXT("battleSeed"), RequestBattleSeed)) { QARandomSeed = int32(RequestBattleSeed); }
             for (const TSharedPtr<FJsonValue>& V : Request->GetArrayField(TEXT("danishUnitIds"))) { DanishIds.Add(V->AsString()); }
             const TArray<TSharedPtr<FJsonValue>>* ReserveList = nullptr;
             if (Request->TryGetArrayField(TEXT("reserveUnitIds"), ReserveList))
@@ -1172,13 +1178,23 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         }
         if (Company->CombatComponent)
         {
+            double CompanyCartridges = 60.0;
+            U->TryGetNumberField(TEXT("cartridgesPerMan"), CompanyCartridges);
+            Company->CombatComponent->ConfigureCartridgesPerMan(float(CompanyCartridges));
             Company->CombatComponent->ReloadSeconds *= float(Reload * ReloadRule);
             Company->CombatComponent->BaseHitChance *= float(Accuracy * InfantryRule);
+        }
+        if (Company->FormationTransition)
+        {
+            Company->FormationTransition->SquareFormTimeFactor = float(FMath::Clamp(
+                RuleNumber(TEXT("battleRules"), TEXT("infantry"), TEXT("squareFormTimeFactor"), 1.0), 0.2, 3.0));
         }
         if (Morale >= 0.0) { Company->Morale = float(FMath::Clamp(Morale * 100.0, 10.0, 100.0)); }
         if (Cohesion >= 0.0) { Company->Cohesion = float(FMath::Clamp(Cohesion * 100.0, 10.0, 100.0)); }
         if (Company->FireControlComponent)
         {
+            Company->FireControlComponent->SquareFaceFireShare = float(FMath::Clamp(
+                RuleNumber(TEXT("battleRules"), TEXT("infantry"), TEXT("squareFaceFireShare"), 0.25), 0.0, 0.5));
             Company->FireControlComponent->SetFirePolicy(DanishPolicy);
         }
         if (UStrategyFireDrillComponent* Drill = Company->FireDrillComponent)
@@ -1272,6 +1288,17 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             }
             const int32 Men = FMath::Max(1, int32(U->GetNumberField(TEXT("presentMen"))));
             Cav->InitialStrength = Cav->CurrentStrength = Men;
+            if (Cav->CombatComponent)
+            {
+                double CavalryCartridges = 60.0;
+                U->TryGetNumberField(TEXT("cartridgesPerMan"), CavalryCartridges);
+                Cav->CombatComponent->ConfigureCartridgesPerMan(float(CavalryCartridges));
+            }
+            if (Cav->CavalryChargeComponent)
+            {
+                Cav->CavalryChargeComponent->FlankShockFactor = float(RuleNumber(
+                    TEXT("battleRules"), TEXT("cavalry"), TEXT("flankShockFactor"), 1.0));
+            }
             ConfigureRuntimeQALabel(Cav);
             CampaignUnitOf.Add(Cav, Id);
         }
@@ -1421,6 +1448,13 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
                 Group->Units.Add(EnemyBattalions[b]);
                 FreezeReserve(EnemyBattalions[b]);
             }
+        }
+    }
+    for (AStrategyUnit* BattleSeedUnit : SpawnedUnitObjects)
+    {
+        if (IsValid(BattleSeedUnit) && BattleSeedUnit->CombatComponent)
+        {
+            BattleSeedUnit->CombatComponent->SetDeterministicRandomSeed(QARandomSeed ^ static_cast<int32>(GetTypeHash(BattleSeedUnit->StableUnitId)));
         }
     }
     // A check of the crossings: from the Danish line 2.5 km away from the enemy (over the place they hold).
@@ -2772,6 +2806,7 @@ AStrategyCompanyUnit* AStrategyOOBTestScenario::SpawnCompany(
         }
     }
 
+    if (Company->CombatComponent) { Company->CombatComponent->ConfigureCartridgesPerMan(); }
     SpawnedUnitObjects.Add(Company);
     return Company;
 }
@@ -2807,6 +2842,7 @@ ACavalryUnit* AStrategyOOBTestScenario::SpawnCavalry(
     Cavalry->DisplayName = FText::FromString(Name);
     Cavalry->InitialStrength = 80;
     Cavalry->CurrentStrength = 80;
+    if (Cavalry->CombatComponent) { Cavalry->CombatComponent->ConfigureCartridgesPerMan(); }
     Cavalry->Side = EStrategySide::Denmark;
     Cavalry->bPlayerControllable = true;
     Cavalry->RefreshDebugLabel();

@@ -179,6 +179,12 @@ bool UStrategyFireDrillComponent::IsFormationSlotEligibleToFire(
         return false;
     }
 
+    const AStrategyUnit* SquareDrillUnit = Cast<AStrategyUnit>(GetOwner());
+    if (SquareDrillUnit && SquareDrillUnit->FormationComponent &&
+        SquareDrillUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square)
+    {
+        return true; // Face eligibility is determined by the square fire bearing.
+    }
     const int32 RankCount = GetConfiguredRankCount();
     const int32 RankIndex = SlotIndex % RankCount;
 
@@ -203,6 +209,12 @@ bool UStrategyFireDrillComponent::IsFormationSlotEligibleToFire(
 float UStrategyFireDrillComponent::GetEligibleFiringFraction(
     EStrategyStance Stance) const
 {
+    const AStrategyUnit* SquareUnit = Cast<AStrategyUnit>(GetOwner());
+    if (SquareUnit && SquareUnit->FormationComponent &&
+        SquareUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square)
+    {
+        return 1.0f; // The bearing calculation applies each engaged face's 25/30 percent once.
+    }
     const int32 RankCount = GetConfiguredRankCount();
     const EStrategyFireDrillMode EffectiveMode =
         NormalizeLegacyMode(DrillMode);
@@ -251,6 +263,9 @@ float UStrategyFireDrillComponent::GetReloadMultiplier(
         FMath::Clamp(DrillTraining / 100.0f, 0.0f, 1.0f);
 
     float Multiplier = FMath::Lerp(1.15f, 0.90f, Training);
+    const AStrategyUnit* ReloadDrillUnit = Cast<AStrategyUnit>(GetOwner());
+    const bool bSquareReload = ReloadDrillUnit && ReloadDrillUnit->FormationComponent &&
+        ReloadDrillUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square;
 
     const EStrategyFireDrillMode EffectiveMode =
         NormalizeLegacyMode(DrillMode);
@@ -259,7 +274,8 @@ float UStrategyFireDrillComponent::GetReloadMultiplier(
     {
         Multiplier *= 0.92f;
     }
-    else if (EffectiveMode == EStrategyFireDrillMode::FireByRank)
+    else if (EffectiveMode == EStrategyFireDrillMode::FireByRank &&
+        !bSquareReload)
     {
         // Each pulse represents one rank. With N ranks, the next rank fires
         // after roughly 1/N of a full reload cycle, so the first rank has had

@@ -197,7 +197,21 @@ float UStrategyFireControlComponent::GetBearingFraction(const AStrategyUnit* Tar
     }
     if (Unit->FormationComponent->CurrentFormation == EStrategyFormationType::Square)
     {
-        return 1.0f;
+        int32 SquareFaces = 0;
+        const FVector SquareOffset = (Target->GetActorLocation() - Unit->GetActorLocation());
+        const float SquareYaw = SquareOffset.Rotation().Yaw;
+        if (SquareOffset.Size2D() <= GetActiveRangeCm())
+        {
+            for (int32 SquareFace = 0; SquareFace < 4; ++SquareFace)
+            {
+                if (FMath::Abs(FMath::FindDeltaAngleDegrees(Unit->GetActorRotation().Yaw + SquareFace * 90.0f, SquareYaw)) <= 45.0f + KINDA_SMALL_NUMBER)
+                { ++SquareFaces; }
+            }
+        }
+        const float SquareFraction = FMath::Clamp(SquareFaces * SquareFaceFireShare, 0.0f, 1.0f);
+        if (OutBearing) { *OutBearing = FMath::RoundToInt(Unit->CurrentStrength * SquareFraction); }
+        if (OutTotal) { *OutTotal = Unit->CurrentStrength; }
+        return SquareFraction;
     }
     const TArray<FStrategyFormationSlot> Slots = Unit->FormationComponent->GenerateSoldierSlots(FVector::ZeroVector, 0.0f, Unit->CurrentStrength);
     if (Slots.Num() == 0)
@@ -238,7 +252,18 @@ bool UStrategyFireControlComponent::IsLocationInsideFireField(FVector Location, 
     if (!Unit || RangeCm <= 0.0f) return false;
     const bool bSquare = Unit->FormationComponent &&
         Unit->FormationComponent->CurrentFormation == EStrategyFormationType::Square;
-    const float HalfAngle = FMath::Clamp(bSquare ? 45.0f : FireConeHalfAngleDegrees, 0.0f, 89.9f);
+    if (bSquare)
+    {
+        const FVector SquareFieldOffset = Location - Unit->GetActorLocation();
+        if (SquareFieldOffset.Size2D() > RangeCm) { return false; }
+        for (int32 SquareFieldFace = 0; SquareFieldFace < 4; ++SquareFieldFace)
+        {
+            if (FMath::Abs(FMath::FindDeltaAngleDegrees(Unit->GetActorRotation().Yaw + SquareFieldFace * 90.0f,
+                SquareFieldOffset.Rotation().Yaw)) <= 45.0f + KINDA_SMALL_NUMBER) { return true; }
+        }
+        return false;
+    }
+    const float HalfAngle = FMath::Clamp(FireConeHalfAngleDegrees, 0.0f, 89.9f);
     for (int32 Face = 0; Face < (bSquare ? 4 : 1); ++Face)
     {
         FVector Left, Right;

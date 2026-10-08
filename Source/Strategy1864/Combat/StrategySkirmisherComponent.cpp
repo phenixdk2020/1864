@@ -1,4 +1,5 @@
 #include "StrategySkirmisherComponent.h"
+#include "StrategyCombatComponent.h"
 
 #include "../Units/StrategyUnit.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
@@ -137,6 +138,7 @@ void UStrategySkirmisherComponent::CompleteDeploy()
             OwnerUnit->MovementExecutor &&
             OwnerUnit->MovementExecutor->HasMovementGoal();
 
+        if (!OwnerUnit->IsCombatEffective()) { return; }
         OwnerUnit->SetUnitState(
             bMoving
             ? EStrategyUnitState::Moving
@@ -155,6 +157,7 @@ void UStrategySkirmisherComponent::CompleteRecall()
     {
         OwnerUnit->Cohesion =
             FMath::Clamp(OwnerUnit->Cohesion - 2.0f, 0.0f, 100.0f);
+        if (OwnerUnit->CombatComponent) { OwnerUnit->CombatComponent->EvaluateRoutState(); }
 
         const bool bMoving =
             OwnerUnit->MovementExecutor &&

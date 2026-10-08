@@ -1,6 +1,7 @@
 #include "StrategyFormationTransitionComponent.h"
 
 #include "StrategyFormationComponent.h"
+#include "../Visual/StrategyEquipmentVisualComponent.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../Orders/StrategyOrderComponent.h"
 #include "../Units/StrategyUnit.h"
@@ -51,6 +52,15 @@ void UStrategyFormationTransitionComponent::HandleFormationChanged(
             (BaseReformSeconds + StrengthFactor * SecondsPer100Men) /
             FMath::Max(0.20f, NCOFormationFactor));
 
+    if (NewFormation == EStrategyFormationType::Square)
+    {
+        ReformRemainingSeconds = SquareReformSeconds * SquareFormTimeFactor;
+    }
+    if (OwnerUnit->EquipmentVisualComponent)
+    {
+        OwnerUnit->EquipmentVisualComponent->SetBayonetFixed(NewFormation == EStrategyFormationType::Square);
+    }
+
     if (OwnerUnit->MovementExecutor &&
         OwnerUnit->MovementExecutor->HasMovementGoal())
     {
@@ -89,8 +99,9 @@ void UStrategyFormationTransitionComponent::TickComponent(
 
 void UStrategyFormationTransitionComponent::CompleteReform()
 {
-    if (!OwnerUnit)
+    if (!OwnerUnit || !OwnerUnit->IsCombatEffective())
     {
+        SetComponentTickEnabled(false);
         return;
     }
 

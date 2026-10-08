@@ -1,4 +1,6 @@
 #include "StrategyCombatComponent.h"
+#include "../AI/StrategyFieldOfficerComponent.h"
+#include "../AI/StrategyAutonomousBattleAIComponent.h"
 
 #include "StrategyFireControlComponent.h"
 #include "StrategyFireControlTypes.h"
@@ -6,6 +8,7 @@
 #include "../Units/StrategyUnit.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
+#include "../Formations/StrategyFormationTransitionComponent.h"
 #include "StrategyConditionComponent.h"
 #include "StrategyFireDisciplineComponent.h"
 #include "StrategyStanceComponent.h"
@@ -34,6 +37,7 @@ void UStrategyCombatComponent::BeginPlay()
     Super::BeginPlay();
 
     OwnerUnit = Cast<AStrategyUnit>(GetOwner());
+    ConfigureCartridgesPerMan();
 
     const int32 Seed =
         OwnerUnit
@@ -41,6 +45,8 @@ void UStrategyCombatComponent::BeginPlay()
         : GetUniqueID();
 
     RandomStream.Initialize(Seed);
+    if (OwnerUnit && OwnerUnit->FieldOfficerComponent) { OwnerUnit->FieldOfficerComponent->SetDeterministicRandomSeed(Seed); }
+    if (OwnerUnit && OwnerUnit->AutonomousBattleAIComponent) { OwnerUnit->AutonomousBattleAIComponent->SetDeterministicRandomSeed(Seed); }
 }
 
 void UStrategyCombatComponent::TickComponent(
@@ -49,6 +55,7 @@ void UStrategyCombatComponent::TickComponent(
     FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    EvaluateRoutState();
 
     if (!OwnerUnit || !OwnerUnit->IsCombatEffective())
     {
@@ -90,6 +97,7 @@ void UStrategyCombatComponent::TickComponent(
     bOutOfAmmo = false;
 
     if (OwnerUnit->UnitState == EStrategyUnitState::Reforming ||
+        (OwnerUnit->FormationTransition && OwnerUnit->FormationTransition->IsReforming()) ||
         (OwnerUnit->FireDisciplineComponent &&
          !OwnerUnit->FireDisciplineComponent->AllowsAutomaticFire()))
     {
@@ -143,6 +151,7 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
         !OwnerUnit->FireControlComponent ||
         !OwnerUnit->FireControlComponent->CanEngageTarget(Target) ||
         OwnerUnit->UnitState == EStrategyUnitState::Reforming ||
+        (OwnerUnit->FormationTransition && OwnerUnit->FormationTransition->IsReforming()) ||
         ReloadRemainingSeconds > 0.0f ||
         AmmunitionRounds <= 0)
     {
@@ -223,10 +232,11 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
     AmmunitionRounds -= ShotCount;
     bOutOfAmmo = AmmunitionRounds <= 0;
 
-    const int32 Hits = ResolveHits(
+    int32 Hits = ResolveHits(
         ShotCount,
         DistanceCm,
         Target);
+    if (Target->CombatComponent) { Hits = Target->CombatComponent->ScaleIncomingCasualties(Hits, false); }
     TotalHitsInflicted += FMath::Max(0, Hits);
 
     if (Hits > 0)
@@ -612,6 +622,8 @@ void UStrategyCombatComponent::EvaluateRoutState()
 void UStrategyCombatComponent::SetDeterministicRandomSeed(int32 Seed)
 {
     RandomStream.Initialize(Seed);
+    if (OwnerUnit && OwnerUnit->FieldOfficerComponent) { OwnerUnit->FieldOfficerComponent->SetDeterministicRandomSeed(Seed); }
+    if (OwnerUnit && OwnerUnit->AutonomousBattleAIComponent) { OwnerUnit->AutonomousBattleAIComponent->SetDeterministicRandomSeed(Seed); }
 }
 
 
@@ -626,7 +638,26 @@ void UStrategyCombatComponent::ResupplyAmmunition(int32 Rounds)
         FMath::Clamp(
             AmmunitionRounds + Rounds,
             0,
-            FMath::Max(1, MaxAmmunitionRounds));
+            FMath::Max(0, MaxAmmunitionRounds));
 
+    bOutOfAmmo = AmmunitionRounds <= 0;
+}
+
+int32 UStrategyCombatComponent::ScaleIncomingCasualties(int32 Casualties, bool bArtillery) const
+{
+    const AStrategyUnit* CombatUnit = Cast<AStrategyUnit>(GetOwner());
+    const bool bDenseSquare = CombatUnit && CombatUnit->FormationComponent &&
+        CombatUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square;
+    return FMath::Max(0, FMath::RoundToInt(Casualties * (bDenseSquare ?
+        (bArtillery ? SquareArtilleryCasualtyMultiplier : SquareInfantryCasualtyMultiplier) : 1.0f)));
+}
+
+void UStrategyCombatComponent::ConfigureCartridgesPerMan(float CartridgesPerMan)
+{
+    const AStrategyUnit* CombatUnit = Cast<AStrategyUnit>(GetOwner());
+    if (!CombatUnit) { return; }
+    MaxAmmunitionRounds = FMath::Max(0, FMath::RoundToInt(CombatUnit->InitialStrength * FMath::Max(CartridgesCapacityPerMan, CartridgesPerMan)));
+    AmmunitionRounds = FMath::Clamp(FMath::RoundToInt(CombatUnit->CurrentStrength *
+        FMath::Max(0.0f, CartridgesPerMan)), 0, MaxAmmunitionRounds);
     bOutOfAmmo = AmmunitionRounds <= 0;
 }

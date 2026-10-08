@@ -430,6 +430,7 @@ void ACampaign1851Map::WriteBattleRulesJson(const TSharedRef<FJsonObject>& Doc) 
 	Num(Inf, TEXT("reloadFactor"), HasResearch(TEXT("breech")) ? 0.35 : 1.0);
 	Inf->SetBoolField(TEXT("proneLoading"), HasResearch(TEXT("breech")));
 	Num(Inf, TEXT("squareFormTimeFactor"), HasResearch(TEXT("square")) ? 0.7 : 1.0);
+	// Consumed per engaged square face by Strategy1864; corner targets engage two faces.
 	Num(Inf, TEXT("squareFaceFireShare"), HasResearch(TEXT("square")) ? 0.3 : 0.25);
 	Num(Inf, TEXT("concealmentFactor"), HasResearch(TEXT("skirmish")) ? 1.25 : 1.0);
 	Num(Inf, TEXT("skirmishFactor"), (HasResearch(TEXT("skirmish")) ? 1.15 : 1.0) * (Doctrine[2] == 2 ? 1.1 : 1.0));

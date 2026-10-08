@@ -13,6 +13,10 @@ class STRATEGY1864_API UStrategyFireControlComponent : public UActorComponent
     GENERATED_BODY()
 
 public:
+    UPROPERTY(EditAnywhere, Category="Strategy|Square")
+    float SquareFaceFireShare = 0.25f;
+
+public:
     UStrategyFireControlComponent();
 
 protected:

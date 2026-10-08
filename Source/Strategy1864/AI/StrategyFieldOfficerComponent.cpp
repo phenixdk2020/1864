@@ -1,4 +1,7 @@
 #include "StrategyFieldOfficerComponent.h"
+#include "../Combat/StrategyCombatComponent.h"
+#include "../Combat/StrategyCavalryChargeComponent.h"
+#include "../Formations/StrategyFormationTransitionComponent.h"
 
 #include "StrategyAITelemetryComponent.h"
 #include "StrategyDoctrineComponent.h"
@@ -29,7 +32,7 @@ void UStrategyFieldOfficerComponent::BeginPlay()
     Super::BeginPlay();
     OwnerUnit = Cast<AStrategyUnit>(GetOwner());
     // Each officer looks up at his own moment (not all on the same frame).
-    Accumulator = FMath::FRandRange(0.0f, ThinkSeconds);
+    SetDeterministicRandomSeed(OwnerUnit ? static_cast<int32>(GetTypeHash(OwnerUnit->StableUnitId)) : 1864);
 }
 
 void UStrategyFieldOfficerComponent::Decide(const FString& Task, const FString& Reason)
@@ -122,7 +125,11 @@ bool UStrategyFieldOfficerComponent::IsOpenToCharge(const AStrategyUnit* U, FStr
     const EStrategyFormationType F = U->FormationComponent ? U->FormationComponent->CurrentFormation : EStrategyFormationType::Line;
     if (F == EStrategyFormationType::Square)
     {
-        return false;   // formed square: the horse breaks on it
+        const ACavalryUnit* OfficerCavalry = Cast<ACavalryUnit>(OwnerUnit);
+        if (OfficerCavalry && OfficerCavalry->CavalryChargeComponent &&
+            OfficerCavalry->CavalryChargeComponent->IsSteadySquare(U)) { return false; }
+        OutWhy = TEXT("karréen vakler eller mangler ammunition");
+        return true;
     }
     if (U->Echelon == EStrategyEchelon::Artillery)
     {
@@ -180,6 +187,15 @@ void UStrategyFieldOfficerComponent::TickComponent(float DeltaTime, ELevelTick T
         OwnerUnit->UnitState == EStrategyUnitState::Routed || OwnerUnit->UnitState == EStrategyUnitState::Destroyed || !OwnerUnit->IsCombatEffective())
     {
         if (bCharging) { EndCharge(); }
+        if (OwnerUnit && !OwnerUnit->bOfficerAIEnabled && bArtilleryAuto)
+        {
+            if (AStrategyArtilleryBatteryUnit* OfficerBattery = Cast<AStrategyArtilleryBatteryUnit>(OwnerUnit))
+            {
+                if (OfficerBattery->ArtilleryFireMissionComponent)
+                { OfficerBattery->ArtilleryFireMissionComponent->SetAutoTargetEnabled(false); }
+            }
+            bArtilleryAuto = false;
+        }
         return;
     }
     if (OwnerUnit->Echelon != EStrategyEchelon::Company && OwnerUnit->Echelon != EStrategyEchelon::Cavalry && OwnerUnit->Echelon != EStrategyEchelon::Artillery)
@@ -191,7 +207,8 @@ void UStrategyFieldOfficerComponent::TickComponent(float DeltaTime, ELevelTick T
     {
         UpdateBayonetCharge();
     }
-    if (!bCharging && BayonetUntil > 0.0f && GetWorld()->GetTimeSeconds() > BayonetUntil && OwnerUnit->EquipmentVisualComponent)
+    if (!bCharging && BayonetUntil > 0.0f && GetWorld()->GetTimeSeconds() > BayonetUntil && OwnerUnit->EquipmentVisualComponent &&
+        (!OwnerUnit->FormationComponent || OwnerUnit->FormationComponent->CurrentFormation != EStrategyFormationType::Square))
     {
         OwnerUnit->EquipmentVisualComponent->SetBayonetFixed(false);
         BayonetUntil = 0.0f;
@@ -277,6 +294,10 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
             for (AStrategyUnit* U : Group)
             {
                 const float D = FVector::Dist2D(U->GetActorLocation(), Enemy->GetActorLocation());
+                if (const UStrategyFieldOfficerComponent* ReserveOfficer = U->FieldOfficerComponent)
+                {
+                    if (ReserveOfficer->bReserveReleased) { continue; }
+                }
                 if (D > Farthest) { Farthest = D; Reserve = U; }
             }
             Group.Remove(Reserve);
@@ -301,7 +322,7 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
         C->FlankSkill = Skill;
         // Beyond the places the leader plans for, or a captain who is poorly disciplined and does his own thing: straight in.
         const UStrategyOfficerProfileComponent* Captain = Group[i]->OfficerProfileComponent;
-        if (C->FlankK > MaxPlaces || (Captain && Captain->Discipline < 40.0f && FMath::FRand() < 0.35f))
+        if (C->FlankK > MaxPlaces || (Captain && Captain->Discipline < 40.0f && C->DecisionRandom.FRand() < 0.35f))
         {
             C->FlankRole = 0;
         }
@@ -314,6 +335,7 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
     {
         if (UStrategyFieldOfficerComponent* C = Reserve->FindComponentByClass<UStrategyFieldOfficerComponent>())
         {
+            if (C->ReserveHeldSince < 0.0f) { C->ReserveHeldSince = Now; }
             C->FlankRole = 3;
             C->FlankK = 0;
             C->FlankSkill = Skill;
@@ -378,10 +400,11 @@ FVector UStrategyFieldOfficerComponent::ApproachGoalAt(AStrategyUnit* Enemy, flo
     if (FlankRole == 3)
     {
         // The reserve stands ninety metres behind the fire base, until the base is hurt, the time is up, or the base is gone.
-        const bool bRelease = !Base || !Base->IsCombatEffective() || Base->CurrentStrength < Base->InitialStrength * 0.75f || Base->Morale < 55.0f || Now - FlankSince > 240.0f;
+        const bool bRelease = !Base || !Base->IsCombatEffective() || Base->CurrentStrength < Base->InitialStrength * 0.75f || Base->Morale < 55.0f || (ReserveHeldSince >= 0.0f && Now - ReserveHeldSince > 240.0f);
         if (bRelease)
         {
             FlankRole = 0;
+            bReserveReleased = true;
             OutNote = TEXT("reserven sættes ind");
             return Target + (Own - Target).GetSafeNormal2D() * Radius;
         }
@@ -428,6 +451,13 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
     if (OwnerUnit->CurrentStrength < OwnerUnit->InitialStrength * FMath::Lerp(BreakShare + 0.12f, BreakShare - 0.10f, Nerve) || OwnerUnit->Morale < FMath::Lerp(30.0f, 16.0f, Nerve))
     {
         FallBack(FString::Printf(TEXT("Svære tab: %d af %d mand, moral %.0f"), OwnerUnit->CurrentStrength, OwnerUnit->InitialStrength, OwnerUnit->Morale), 25000.0f);
+        return;
+    }
+    const FStrategyOrder InfantryPlayerOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
+    if (InfantryPlayerOrder.Authority == EStrategyOrderAuthority::DirectPlayer &&
+        !OwnerUnit->OrderComponent->IsPhysicallyExecuting() && InfantryPlayerOrder.IsValidOrder())
+    {
+        Decide(TEXT("Holder stillingen"), TEXT("Spillerens ordre er afsluttet; holder og skyder"));
         return;
     }
     if (bCharging || PlayerOrderUnderWay())
@@ -547,7 +577,8 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
     {
         return;
     }
-    if (PlayerOrderUnderWay() || !Enemy)
+    if (PlayerOrderUnderWay() || !Enemy ||
+        (Order.Authority == EStrategyOrderAuthority::DirectPlayer && Order.IsValidOrder() && !OwnerUnit->OrderComponent->IsPhysicallyExecuting()))
     {
         return;
     }
@@ -667,6 +698,14 @@ void UStrategyFieldOfficerComponent::UpdateBayonetCharge()
     const FStrategyOrder Order = OwnerUnit->OrderComponent->GetCurrentOrder();
     if (!IsValid(Target) || !Target->IsCombatEffective() || Order.Type != EStrategyOrderType::Charge)
     {
+        if (Order.Type == EStrategyOrderType::Charge && OwnerUnit->IsCombatEffective())
+        {
+            FStrategyOrder GoneTargetHold;
+            GoneTargetHold.Type = EStrategyOrderType::Hold;
+            GoneTargetHold.TargetLocation = OwnerUnit->GetActorLocation();
+            GoneTargetHold.Authority = EStrategyOrderAuthority::OfficerAI;
+            OwnerUnit->OrderComponent->SetOrder(GoneTargetHold);
+        }
         EndCharge();
         return;
     }
@@ -695,8 +734,8 @@ void UStrategyFieldOfficerComponent::ResolveShock(AStrategyUnit* Enemy)
         return W;
     };
     const float Ratio = FMath::Clamp(Weight(OwnerUnit) / Weight(Enemy), 0.4f, 2.5f);
-    const int32 EnemyLoss = FMath::RoundToInt(OwnerUnit->CurrentStrength * FMath::FRandRange(0.05f, 0.10f) * Ratio);
-    const int32 OwnLoss = FMath::RoundToInt(Enemy->CurrentStrength * FMath::FRandRange(0.03f, 0.07f) / Ratio);
+    const int32 EnemyLoss = FMath::RoundToInt(OwnerUnit->CurrentStrength * DecisionRandom.FRandRange(0.05f, 0.10f) * Ratio);
+    const int32 OwnLoss = FMath::RoundToInt(Enemy->CurrentStrength * DecisionRandom.FRandRange(0.03f, 0.07f) / Ratio);
     Enemy->ApplyStrengthLoss(EnemyLoss);
     OwnerUnit->ApplyStrengthLoss(OwnLoss);
     Enemy->Morale = FMath::Clamp(Enemy->Morale - 20.0f * Ratio, 0.0f, 100.0f);
@@ -705,8 +744,8 @@ void UStrategyFieldOfficerComponent::ResolveShock(AStrategyUnit* Enemy)
     if (bWon)
     {
         // The enemy breaks and runs.
-        Enemy->SetUnitState(EStrategyUnitState::Routed);
-        if (Enemy->OrderComponent)
+        if (Enemy->CurrentStrength > 0) { Enemy->SetUnitState(EStrategyUnitState::Routed); }
+        if (Enemy->OrderComponent && Enemy->CurrentStrength > 0)
         {
             const FVector Away = (Enemy->GetActorLocation() - OwnerUnit->GetActorLocation()).GetSafeNormal2D();
             FStrategyOrder Flee;
@@ -729,10 +768,22 @@ void UStrategyFieldOfficerComponent::ResolveShock(AStrategyUnit* Enemy)
     Halt.FacingYaw = (Enemy->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
     Halt.bHasFacing = true;
     Halt.Authority = EStrategyOrderAuthority::OfficerAI;
-    OwnerUnit->OrderComponent->SetOrder(Halt);
+    if (Enemy->CombatComponent) { Enemy->CombatComponent->EvaluateRoutState(); }
+    if (OwnerUnit->CombatComponent) { OwnerUnit->CombatComponent->EvaluateRoutState(); }
+    if (!bWon || !Enemy->IsCombatEffective())
+    {
+        if (OwnerUnit->IsCombatEffective()) { OwnerUnit->OrderComponent->SetOrder(Halt); }
+    }
+    else { OwnerUnit->OrderComponent->CompleteExecution(); }
     EndCharge();
     Decide(bWon ? TEXT("Bajonetangrebet lykkedes") : TEXT("Bajonetangrebet slået tilbage"),
         FString::Printf(TEXT("%s mistede %d, vi %d"), *Enemy->DisplayName.ToString(), EnemyLoss, OwnLoss));
     UE_LOG(LogTemp, Display, TEXT("PROJECT1864-BAYONET: %s -> %s ratio %.2f enemy -%d own -%d %s"), *OwnerUnit->DisplayName.ToString(), *Enemy->DisplayName.ToString(),
         Ratio, EnemyLoss, OwnLoss, bWon ? TEXT("won") : TEXT("repulsed"));
+}
+
+void UStrategyFieldOfficerComponent::SetDeterministicRandomSeed(int32 Seed)
+{
+    DecisionRandom.Initialize(Seed ^ 0x1864F1);
+    Accumulator = DecisionRandom.FRandRange(0.0f, ThinkSeconds);
 }

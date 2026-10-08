@@ -12,6 +12,9 @@ UCLASS(ClassGroup=(Strategy1864), meta=(BlueprintSpawnableComponent))
 class STRATEGY1864_API UStrategyMovementExecutorComponent : public UActorComponent
 {
     GENERATED_BODY()
+public:
+    UPROPERTY(EditAnywhere, Category="Strategy|Square")
+    float SquareMoveSpeedMultiplier = 0.08f;
 
 public:
     UStrategyMovementExecutorComponent();
