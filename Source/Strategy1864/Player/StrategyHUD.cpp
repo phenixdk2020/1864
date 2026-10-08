@@ -947,7 +947,7 @@ void AStrategyHUD::DrawStatBar(const FString& Label, const FString& Value, float
 
 bool AStrategyHUD::HandleScroll(const FVector2D& Point, float Delta)
 {
-    if (!SubordinateRect.IsValid || !SubordinateRect.IsInside(Point)) return false;
+    if (!SubordinateRect.bIsValid || !SubordinateRect.IsInside(Point)) return false;
     SubordinateOffset = FMath::Clamp(SubordinateOffset + (Delta > 0.f ? -1 : 1), 0, SubordinateMaxOffset);
     return true;
 }
@@ -1148,7 +1148,7 @@ bool AStrategyHUD::IsOverPanel(const FVector2D& P) const
 bool AStrategyHUD::HandleClick(const FVector2D& P)
 {
     AStrategyPlayerController* PC = Cast<AStrategyPlayerController>(GetOwningPlayerController());
-    if (SubordinateMaxOffset > 0 && SubordinateRect.IsValid && SubordinateRect.IsInside(P) && P.X >= SubordinateRect.Max.X - 8.f)
+    if (SubordinateMaxOffset > 0 && SubordinateRect.bIsValid && SubordinateRect.IsInside(P) && P.X >= SubordinateRect.Max.X - 8.f)
     {
         const float ScrollFraction = FMath::Clamp((P.Y - SubordinateRect.Min.Y) / SubordinateRect.GetSize().Y, 0.f, 1.f);
         SubordinateOffset = FMath::RoundToInt(ScrollFraction * SubordinateMaxOffset);
