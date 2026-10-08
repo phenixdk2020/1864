@@ -1292,7 +1292,7 @@ void SCampaign1851Overlay::PaintArmy(const FGeometry& Geometry, FSlateWindowElem
 		int32 Before = 0;
 		for (int32 j = 0; j < k; ++j)
 		{
-			Before += FVector2D::Distance(Corps[j].Km, C.Km) < 3.0 ? 1 : 0;
+			Before += Corps[j].SeenDay >= 0.0 && FVector2D::Distance(Corps[j].bSeen ? Corps[j].Km : Corps[j].SeenKm, bNow ? C.Km : C.SeenKm) < 3.0 ? 1 : 0;
 		}
 		P += FVector2D(60.f + Before * 60.f, 0.f);
 		const FVector2D EBox(50.f, 32.f);

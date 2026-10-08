@@ -36,3 +36,8 @@ Et korps ses, hvis det er inden for synsvidde af en dansk enhed eller skanse. Sy
 - **Over vand:** byer over vand, som flåden spærrer for, springes over, så længe flåden behersker farvandet.
 
 Gemning: `intel|korps|x|y|dag|anslåede mand|startstyrke` i War-linjerne.
+
+## Audit 2026-10-08
+- I 1825 afrundes direkte observationer til 10 mand og bymeldinger til 100; i 1851 fortsat til 100 og 1.000. Synsvidder, usikkerhed og leveringstider er uændrede; stationer og felttelegraf følger de eksisterende anlægs- og forskningsregler.
+- War gemmer desuden `intel-runtime|korpsindeks|id|set nu|melding x|melding y|meldingsdag|ankomstdag|meldte mand|hvile indtil|næste overvejelse|venten noteret|både klar dag|spærrede byindeks` samt `intel-clock|sidste krigsdag`. Ældre saves uden disse linjer accepteres; meldinger undervejs kan ikke genskabes fra dem.
+- Startstyrken gendannes som gemt, også efter forstærkning. Kortets forskydning af overlappende fjendemærker bruger kun kendte positioner.
