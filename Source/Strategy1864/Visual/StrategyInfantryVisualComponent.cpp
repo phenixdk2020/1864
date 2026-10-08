@@ -768,6 +768,7 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
             bCrowdDirty = true;
         }
         SoldierComponents.RemoveAt(i);
+        if (SoldierSettle.IsValidIndex(i)) { SoldierSettle.RemoveAt(i); }
         if (SoldierClips.IsValidIndex(i)) { SoldierClips.RemoveAt(i); }
         if (SoldierSlots.IsValidIndex(i)) { SoldierSlots.RemoveAt(i); }
         if (WeaponComponents.IsValidIndex(i))
@@ -1021,6 +1022,9 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
     const int32 RenderedCount =
         SoldierComponents.Num();
 
+    VisualPath.SlotBounds = FBox(ForceInit);
+    for (const FStrategyFormationSlot& VisualSlot : FullSlots) { VisualPath.SlotBounds += VisualSlot.WorldLocation; }
+
     for (int32 VisualIndex = 0;
          VisualIndex < RenderedCount;
          ++VisualIndex)
@@ -1054,11 +1058,15 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
         const FStrategyFormationSlot& Slot =
             FullSlots[FullIndex];
 
-        if (SoldierSettle.Num() != RenderedCount) { SoldierSettle.SetNumZeroed(RenderedCount); }
+        if (SoldierSettle.Num() != RenderedCount) { SoldierSettle.SetNum(RenderedCount); }
         FSettle& Settle = SoldierSettle[VisualIndex];
-        if (!Settle.bPlaced || FVector::Dist2D(Soldier->GetRelativeLocation(), Slot.WorldLocation) > 4000.0f)
+        Settle.Slot = Slot.WorldLocation;
+        Settle.SlotYaw = Slot.FacingYaw;
+        Settle.Goal = Slot.WorldLocation;
+        Settle.Yaw = Slot.FacingYaw + SoldierMeshYawOffset;
+        if (!Settle.bPlaced)
         {
-            // The first placing (or a long way off, as at a deployment): at once.
+            // Only newly created figures are placed immediately; existing men always walk.
             Soldier->SetRelativeLocation(Slot.WorldLocation);
             Soldier->SetRelativeRotation(FRotator(0.0f, Slot.FacingYaw + SoldierMeshYawOffset, 0.0f));
             Settle.bPlaced = true;
@@ -1126,12 +1134,34 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
     // The men run to their places in a new formation (out into line, in to the column) at a jog, turning the way they run, and take
     // the company's pose when they are there.
     const float RunCmPerSecond = 420.0f;
+    const FTransform VisualUnit = OwnerCompany->GetActorTransform();
+    const bool bVisualColumn = OwnerCompany->FormationComponent &&
+        (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
+         OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn);
+    if (!VisualPath.bInitialized) { VisualPath.Reset(VisualUnit); }
+    VisualPath.Advance(VisualUnit, DeltaTime, bVisualColumn, RunCmPerSecond);
+    const bool bActorMoved = !VisualUnit.Equals(VisualPath.PreviousUnit, 0.001f);
+    const bool bVisualTravel = VisualPath.bMovingVisuals || bActorMoved;
+    UAnimSequence* Walk = bVisualTravel ? WalkStandingAsset.LoadSynchronous() : nullptr;
     bool bAny = false;
     UAnimSequence* Run = RunStandingAsset.LoadSynchronous();
     for (int32 i = 0; i < SoldierComponents.Num() && i < SoldierSettle.Num(); ++i)
     {
         FSettle& Settle = SoldierSettle[i];
         USkeletalMeshComponent* Soldier = SoldierComponents[i];
+        if (Soldier && Settle.bPlaced && (bActorMoved || bVisualTravel || Settle.bActive))
+        {
+            // Undo inherited actor rotation before walking towards the new visual slot.
+            const FVector PreviousWorld = VisualPath.PreviousUnit.TransformPosition(Soldier->GetRelativeLocation());
+            Soldier->SetRelativeLocation(VisualUnit.InverseTransformPosition(PreviousWorld));
+            FRotator VisualRotation = Soldier->GetRelativeRotation();
+            VisualRotation.Yaw += FMath::FindDeltaAngleDegrees(VisualUnit.Rotator().Yaw, VisualPath.PreviousUnit.Rotator().Yaw);
+            Soldier->SetRelativeRotation(VisualRotation);
+            float GoalYaw = 0.f;
+            Settle.Goal = VisualUnit.InverseTransformPosition(VisualPath.Goal(Settle.Slot, bVisualColumn, GoalYaw));
+            Settle.Yaw = GoalYaw - VisualUnit.Rotator().Yaw + Settle.SlotYaw + SoldierMeshYawOffset;
+            Settle.bActive = Settle.bActive || bVisualTravel || FVector::Dist2D(Soldier->GetRelativeLocation(), Settle.Goal) > 1.f;
+        }
         if (!Settle.bActive || !Soldier)
         {
             continue;
@@ -1140,11 +1170,14 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         FVector Delta = Settle.Goal - Here;
         Delta.Z = 0.0f;
         const float Distance = Delta.Size();
-        if (Distance < 12.0f)
+        if (Distance < 1.0f)
         {
             Soldier->SetRelativeLocation(FVector(Settle.Goal.X, Settle.Goal.Y, Here.Z));
-            Soldier->SetRelativeRotation(FRotator(0.0f, Settle.Yaw, 0.0f));
-            Settle.bActive = false;
+            FRotator ArrivedRotation = Soldier->GetRelativeRotation();
+            ArrivedRotation.Yaw = FMath::FixedTurn(ArrivedRotation.Yaw, Settle.Yaw, 120.f * DeltaTime);
+            Soldier->SetRelativeRotation(ArrivedRotation);
+            Settle.bActive = FMath::Abs(FMath::FindDeltaAngleDegrees(ArrivedRotation.Yaw, Settle.Yaw)) > 0.1f;
+            bAny |= Settle.bActive;
             bCrowdDirty = true;
             continue;
         }
@@ -1153,16 +1186,28 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         Soldier->SetRelativeLocation(Here + Step);
         // He faces the way he runs while he is far from his place, and turns to the front as he comes in.
         const float RunYaw = Delta.Rotation().Yaw + SoldierMeshYawOffset;
-        const float Yaw = Distance > 150.0f ? RunYaw : Settle.Yaw;
+        const float Yaw = bVisualTravel || Distance > 150.0f ? RunYaw : Settle.Yaw;
         FRotator Rot = Soldier->GetRelativeRotation();
-        Rot.Yaw = FMath::FixedTurn(Rot.Yaw, Yaw, 540.0f * DeltaTime);
+        Rot.Yaw = FMath::FixedTurn(Rot.Yaw, Yaw, 120.0f * DeltaTime);
         Soldier->SetRelativeRotation(Rot);
-        if (Run && SoldierClips.IsValidIndex(i) && SoldierClips[i].Clip.Get() != Run)
+        UAnimSequence* TravelClip = bVisualTravel && Walk ? Walk : Run;
+        if (TravelClip && SoldierClips.IsValidIndex(i) && SoldierClips[i].Clip.Get() != TravelClip)
         {
             Soldier->bPauseAnims = false;
-            Soldier->PlayAnimation(Run, true);
+            Soldier->PlayAnimation(TravelClip, true);
             Soldier->SetPlayRate(FMath::FRandRange(0.95f, 1.1f));
-            RecordClip(Soldier, Run, true, 0.0f, 1.0f);
+            RecordClip(Soldier, TravelClip, true, 0.0f, 1.0f);
+        }
+        if (bVisualTravel && TravelClip && SoldierClips.IsValidIndex(i))
+        {
+            const float VisualRate = FMath::Clamp(Step.Size2D() / FMath::Max(0.001f, DeltaTime) / 160.f, 0.15f, 2.6f);
+            const FPlayedClip PreviousClip = SoldierClips[i];
+            const float VisualNow = GetWorld()->GetTimeSeconds();
+            Soldier->SetPlayRate(VisualRate);
+            // Preserve animation phase when changing rate (also for distant VAT figures).
+            SoldierClips[i].Start = VisualNow - (VisualNow - PreviousClip.Start) * PreviousClip.Rate / VisualRate;
+            SoldierClips[i].Rate = VisualRate;
+            bCrowdDataDirty = true;
         }
         bCrowdDirty = true;
     }
@@ -1171,6 +1216,7 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         // Everybody is in place: back to the company's own animation.
         RefreshAnimation(true);
     }
+    VisualPath.PreviousUnit = VisualUnit;
     bWasSettling = bAny;
 }
 
@@ -1483,6 +1529,8 @@ UAnimSequence* UStrategyInfantryVisualComponent::ResolveAnimation(
 
 void UStrategyInfantryVisualComponent::DestroyVisualComponents()
 {
+    VisualPath.bInitialized = false;
+    VisualPath.Trail.Reset();
     for (UStaticMeshComponent* Weapon :
          WeaponComponents)
     {

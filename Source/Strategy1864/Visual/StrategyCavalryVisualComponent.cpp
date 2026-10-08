@@ -177,21 +177,27 @@ void UStrategyCavalryVisualComponent::Layout()
          OwnerCavalry->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn ||
          OwnerCavalry->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn);
     const int32 N = Horsemen.Num();
-    const int32 Ranks = bColumn ? FMath::Max(1, FMath::DivideAndRoundUp(N, 4)) : (N > 12 ? 2 : 1);   // a column of four abreast
-    const int32 Files = FMath::Max(1, FMath::DivideAndRoundUp(N, Ranks));
+    const int32 VisualColumnWidth = OwnerCavalry->FormationComponent &&
+        OwnerCavalry->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn ? 2 : 4;
+    const int32 Ranks = bColumn ? FMath::Max(1, FMath::DivideAndRoundUp(N, VisualColumnWidth)) : (N > 12 ? 2 : 1);
+    const int32 Files = bColumn ? VisualColumnWidth : FMath::Max(1, FMath::DivideAndRoundUp(N, Ranks));
+    VisualPath.SlotBounds = FBox(ForceInit);
     for (int32 i = 0; i < N; ++i)
     {
         const int32 Rank = i / Files, File = i % Files;
-        // The last rank may be short: its horsemen are centred on the column, not pushed to one side.
-        const int32 InRank = Rank == Ranks - 1 ? FMath::Max(1, N - (Ranks - 1) * Files) : Files;
+        // A short column rank keeps the same files as its leaders.
+        const int32 InRank = !bColumn && Rank == Ranks - 1 ? FMath::Max(1, N - (Ranks - 1) * Files) : Files;
         const float Y = (File - (InRank - 1) * 0.5f) * FileSpacingCm;
         const float X = -(Rank - (Ranks - 1) * 0.5f) * RankSpacingCm;
         // A column of four abreast stays straight (a hair of looseness only); a line may be a little ragged.
-        const float JitterX = bColumn ? 6.f : 25.f, JitterY = bColumn ? 3.f : 12.f;
+        const float JitterX = bColumn ? 0.f : 25.f, JitterY = bColumn ? 0.f : 12.f;
         Horsemen[i].Slot = FVector(X + FMath::FRandRange(-JitterX, JitterX), Y + FMath::FRandRange(-JitterY, JitterY), 0.f);
-        if (Horsemen[i].Shown.IsZero())
+        VisualPath.SlotBounds += Horsemen[i].Slot;
+        if (!Horsemen[i].bPlaced)
         {
             Horsemen[i].Shown = Horsemen[i].Slot;
+            Horsemen[i].FacingYaw = OwnerCavalry->GetActorRotation().Yaw;
+            Horsemen[i].bPlaced = true;
         }
     }
 }
@@ -246,11 +252,15 @@ void UStrategyCavalryVisualComponent::UpdatePace(float DeltaTime)
     const bool bCharge = OwnerCavalry->ChargeComponent && OwnerCavalry->ChargeComponent->IsChargeActive();
     // The gaits: walk ~1.6 m/s, trot ~4, gallop ~7 and more. Strides per second and the rise of the body.
     const float Gait = FMath::Clamp(SpeedCmS / 700.f, 0.f, 1.3f);
-    const float Strides = SpeedCmS < 20.f ? 0.f : FMath::Lerp(1.6f, 2.3f, FMath::Min(Gait, 1.f));
-    const float Rise = SpeedCmS < 20.f ? 0.f : FMath::Lerp(3.f, 13.f, FMath::Min(Gait, 1.f));
     const float Pitch = SpeedCmS < 20.f ? 0.f : FMath::Lerp(1.f, 5.f, FMath::Min(Gait, 1.f));
     const float Now = GetWorld()->GetTimeSeconds();
     const FTransform Unit = OwnerCavalry->GetActorTransform();
+    const bool bVisualColumn = OwnerCavalry->FormationComponent &&
+        (OwnerCavalry->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
+         OwnerCavalry->FormationComponent->CurrentFormation == EStrategyFormationType::CavalryColumn ||
+         OwnerCavalry->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn);
+    if (!VisualPath.bInitialized) { VisualPath.Reset(Unit); }
+    VisualPath.Advance(Unit, DeltaTime, bVisualColumn, 700.f);
     const float UnitZ = Here.Z;
     FigureLocalCentroid = FVector::ZeroVector;
     CentroidFigureCount = 0;
@@ -260,21 +270,33 @@ void UStrategyCavalryVisualComponent::UpdatePace(float DeltaTime)
         {
             continue;
         }
-        H.Phase = FMath::Fmod(H.Phase + Strides * DeltaTime, 1.f);
-        H.Shown = FMath::VInterpTo(H.Shown, H.Slot, DeltaTime, 1.5f);
+        const FVector PreviousWorld = VisualPath.PreviousUnit.TransformPosition(H.Shown);
+        float VisualGoalYaw = 0.f;
+        const FVector VisualGoal = VisualPath.Goal(H.Slot, bVisualColumn, VisualGoalYaw);
+        const FVector VisualWorld = FMath::VInterpConstantTo(PreviousWorld, VisualGoal, DeltaTime, FMath::Max(700.f, SpeedCmS));
+        const FVector VisualStep = VisualWorld - PreviousWorld;
+        const float VisualYaw = VisualStep.SizeSquared2D() > 1.f ? VisualStep.Rotation().Yaw : VisualGoalYaw;
+        H.FacingYaw = FMath::FixedTurn(H.FacingYaw, VisualYaw, 120.f * DeltaTime);
+        const float RelativeFacing = H.FacingYaw - Unit.Rotator().Yaw;
+        H.Shown = Unit.InverseTransformPosition(VisualWorld);
+        const float FigureSpeed = VisualStep.Size2D() / FMath::Max(0.001f, DeltaTime);
+        const float FigureGait = FMath::Clamp(FigureSpeed / 700.f, 0.f, 1.3f);
+        const float FigureStrides = FigureSpeed < 20.f ? 0.f : FMath::Lerp(1.6f, 2.3f, FMath::Min(FigureGait, 1.f));
+        const float FigureRise = FigureSpeed < 20.f ? 0.f : FMath::Lerp(3.f, 13.f, FMath::Min(FigureGait, 1.f));
+        H.Phase = FMath::Fmod(H.Phase + FigureStrides * DeltaTime, 1.f);
         const float Wave = FMath::Sin(H.Phase * 2.f * PI);
         // Each on its own ground: the field is not flat under a squadron.
         const FVector World = Unit.TransformPosition(H.Shown);
         const float Ground = UStrategyTerrainQueryLibrary::GetEffectiveGroundZ(OwnerCavalry, World) - UnitZ;
-        const FVector Local(H.Shown.X, H.Shown.Y, Ground + HorseLift + Rise * (0.5f + 0.5f * Wave));
+        const FVector Local(H.Shown.X, H.Shown.Y, Ground + HorseLift + FigureRise * (0.5f + 0.5f * Wave));
         H.Horse->SetRelativeLocation(Local);
-        H.Horse->SetRelativeRotation(FRotator(Pitch * Wave, HorseYaw, 0.f));
+        H.Horse->SetRelativeRotation(FRotator(Pitch * Wave, HorseYaw + RelativeFacing, 0.f));
         if (H.Rider)
         {
             // In the saddle, rising a little behind the horse's motion; leaning forward at the gallop.
             const float RiderWave = FMath::Sin((H.Phase - 0.12f) * 2.f * PI);
-            H.Rider->SetRelativeLocation(FVector(H.Shown.X - 10.f, H.Shown.Y, Ground + SaddleHeightCm - RiderSeatCm + Rise * (0.55f + 0.45f * RiderWave)));
-            H.Rider->SetRelativeRotation(FRotator(-6.f * FMath::Min(Gait, 1.f), -90.f, 0.f));
+            H.Rider->SetRelativeLocation(FVector(H.Shown.X, H.Shown.Y, Ground + SaddleHeightCm - RiderSeatCm + FigureRise * (0.55f + 0.45f * RiderWave)) + FRotator(0.f, RelativeFacing, 0.f).RotateVector(FVector(-10.f, 0.f, 0.f)));
+            H.Rider->SetRelativeRotation(FRotator(-6.f * FMath::Min(Gait, 1.f), -90.f + RelativeFacing, 0.f));
         }
         FigureLocalCentroid += H.Rider ? H.Rider->GetRelativeLocation() : Local;
         ++CentroidFigureCount;
@@ -292,5 +314,6 @@ void UStrategyCavalryVisualComponent::UpdatePace(float DeltaTime)
             }
         }
     }
+    VisualPath.PreviousUnit = Unit;
     if (CentroidFigureCount > 0) { FigureLocalCentroid /= CentroidFigureCount; }
 }
