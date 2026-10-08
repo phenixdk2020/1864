@@ -46,3 +46,7 @@ Status pr. v00.00.50: alle 20 opgaver er lavet. Detaljerne står i de nævnte do
 - Testslag: Start-Test-1 (kompagni mod kompagni) og Start-Test-2 (bataljon med reserve mod kompagni).
 - Ikke prøvet endnu: højreklik-kommando med retningspil, skift af scenarie i menuen, dragonernes afsidning, de to testslag fra ende til anden, "LG 1"-etiketten der sidder for langt til venstre, danske reserver der ankommer.
 - Åbne ønsker: fjern en overordnet stab direkte i delingsbilledet; rigtige 1825-data (hær, officerer, byer, nationer); flere civile forskningsemner (post, dampskibe) med reel effekt.
+
+## Testslag (midlertidigt)
+- Knapperne "TEST 1 MOD 1" og "TEST 4 MOD 1" i startmenuen, med et slagmarksbillede som baggrund. Fjernes igen, når testene er færdige.
+- Derefter større testslag: to bataljoner under regiment-HQ, brigade og division ovenpå, flere fjendtlige kompagnier (flankering, reserver, ordonnanser) og forstærkninger dag 2 og 3.
