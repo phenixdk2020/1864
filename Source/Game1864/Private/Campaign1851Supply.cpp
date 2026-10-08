@@ -465,13 +465,14 @@ TSharedRef<FJsonObject> ACampaign1851Map::BattleOrganisationJson(int32 Regiment)
 	// 120, dragoons 140 riders); a battery with its guns. Only the men with the colours (presentMen) fight.
 	const FCampaign1851Regiment& R = Regiments[Regiment];
 	TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
-	const bool bHussars = R.Arm == ECampaign1851Arm::Cavalry && R.Name.Contains(TEXT("husar"));
+	const FString& CustomIdentity = R.OriginalName.IsEmpty() ? R.Name : R.OriginalName;
+	const bool bHussars = R.Arm == ECampaign1851Arm::Cavalry && CustomIdentity.Contains(TEXT("husar"));
 	const TCHAR* Type = R.Arm == ECampaign1851Arm::Guard ? TEXT("guard_battalion") : R.Arm == ECampaign1851Arm::Jager ? TEXT("jager_battalion")
 		: R.Arm == ECampaign1851Arm::Cavalry ? (bHussars ? TEXT("hussar_regiment") : TEXT("dragoon_regiment"))
 		: R.Arm == ECampaign1851Arm::Artillery ? TEXT("foot_battery") : R.Arm == ECampaign1851Arm::HorseArtillery ? TEXT("horse_battery") : TEXT("infantry_battalion");
-	if (ActiveScenario().Id == TEXT("1825") && R.Arm == ECampaign1851Arm::Cavalry && !R.Name.Contains(TEXT("Dragon")) && !bHussars)
+	if (ActiveScenario().Id == TEXT("1825") && R.Arm == ECampaign1851Arm::Cavalry && !CustomIdentity.Contains(TEXT("Dragon")) && !bHussars)
 	{
-		Type = R.Name.Contains(TEXT("Lansener")) ? TEXT("lancer_regiment") : TEXT("cuirassier_regiment");
+		Type = CustomIdentity.Contains(TEXT("Lansener")) ? TEXT("lancer_regiment") : TEXT("cuirassier_regiment");
 	}
 	O->SetStringField(TEXT("type"), Type);
 	O->SetStringField(TEXT("symbol"), R.Arm == ECampaign1851Arm::Cavalry ? TEXT("II/CAV") : R.Guns > 0 ? TEXT("I/ART") : TEXT("II"));
@@ -550,9 +551,22 @@ void ACampaign1851Map::ExportUnits() const
 		O->SetStringField(TEXT("id"), R.Id);
 		O->SetStringField(TEXT("name"), R.Name);
 		O->SetStringField(TEXT("arm"), Campaign1851Army::ArmName(R.Arm));
+		O->SetStringField(TEXT("weapon"), UnitWeaponName(R));
+		O->SetNumberField(TEXT("weaponLevel"), UnitWeaponLevel(R));
+		TSharedRef<FJsonObject> CustomUniform = MakeShared<FJsonObject>();
+		const TCHAR* CustomKeys[] = { TEXT("coat"), TEXT("trousers"), TEXT("headgear") };
+		for (int32 CustomPiece = 0; CustomPiece < 3; ++CustomPiece)
+		{
+			// Only explicit overrides: untouched units keep the existing battle preset.
+			if (R.UniformPalette[CustomPiece] < 0) { continue; }
+			const FLinearColor CustomColor = UnitUniformColor(R, CustomPiece);
+			TArray<TSharedPtr<FJsonValue>> CustomChannels;
+			for (float CustomChannel : { CustomColor.R, CustomColor.G, CustomColor.B, CustomColor.A }) { CustomChannels.Add(MakeShared<FJsonValueNumber>(CustomChannel)); }
+			CustomUniform->SetArrayField(CustomKeys[CustomPiece], CustomChannels);
+		}
+		O->SetObjectField(TEXT("uniformColors"), CustomUniform);
 		if (ActiveScenario().Id == TEXT("1825"))
 		{
-			O->SetStringField(TEXT("weapon"), ArmyWeaponText(R.Arm));
 			O->SetStringField(TEXT("uniform"), ArmyUniformText(R.Arm));
 		}
 		O->SetNumberField(TEXT("lat"), LatLon.X);
@@ -573,6 +587,7 @@ void ACampaign1851Map::ExportUnits() const
 		O->SetNumberField(TEXT("roundsPerGun"), R.Guns > 0 ? R.Ammo * Campaign1851Supply::RoundsPerGun : 0.0);
 		const Campaign1851Army::FBattleFactors B = ArmyBattleFactors(R);
 		TSharedRef<FJsonObject> Bf = MakeShared<FJsonObject>();
+		Bf->SetNumberField(TEXT("weaponRange"), B.WeaponRange);
 		Bf->SetNumberField(TEXT("reloadTime"), B.ReloadTime);
 		Bf->SetNumberField(TEXT("accuracy"), B.Accuracy);
 		Bf->SetNumberField(TEXT("deploySpeed"), B.DeploySpeed);

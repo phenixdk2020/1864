@@ -124,6 +124,13 @@ USTRUCT()
 struct FCampaign1851RegimentSave
 {
 	GENERATED_BODY()
+	/** v29: per-unit names, palette and paid weapon conversion. */
+	UPROPERTY() FString CustomName;
+	UPROPERTY() FString OriginalName;
+	UPROPERTY() TArray<int32> UniformPalette;
+	UPROPERTY() int32 WeaponLevel = -1;
+	UPROPERTY() int32 PendingWeaponLevel = -1;
+	UPROPERTY() float WeaponConversionDays = 0.f;
 
 	UPROPERTY() FString Id;
 	/** The town it stands in, or the town the current stretch started from. */
@@ -242,7 +249,7 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 
 public:
 	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands. 10: + troop trains on the map. 11: + field formations. */
-	static constexpr int32 CurrentVersion = 28;
+	static constexpr int32 CurrentVersion = 29;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	/** The scenario it was played in (an index into ACampaign1851Map::Scenarios; saves from before the scenarios are 1851 = 1). */

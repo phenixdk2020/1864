@@ -13,6 +13,7 @@
 #include "Fonts/FontMeasure.h"
 #include "Framework/Application/SlateApplication.h"
 #include "GameFramework/PlayerController.h"
+#include "InputCoreTypes.h"
 #include "Misc/Paths.h"
 #include "Rendering/DrawElements.h"
 #include "Styling/CoreStyle.h"
@@ -2058,6 +2059,80 @@ void SCampaign1851Overlay::PaintMinisterCard(const FGeometry& Geometry, FSlateWi
 	PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 190.f, Pos.Y + Size.Y - 40.f), FVector2D(168.f, 28.f), TEXT("UDSKIFT MINISTER"), EButton::MinisterDismiss, Portfolio);
 }
 
+void SCampaign1851Overlay::BeginUnitRename(int32 RegimentIndex)
+{
+	CloseUnitCustomisation();
+	if (!Map.IsValid() || !Map->GetRegiments().IsValidIndex(RegimentIndex)) { return; }
+	CustomUnitIndex = RegimentIndex;
+	UnitNameDraft = Map->GetRegiments()[RegimentIndex].Name;
+	bEditingUnitName = bReplaceUnitName = true;
+	SetVisibility(EVisibility::Visible);
+	FSlateApplication::Get().SetKeyboardFocus(SharedThis(this), EFocusCause::SetDirectly);
+}
+
+void SCampaign1851Overlay::OpenUnitUniform(int32 RegimentIndex)
+{
+	CloseUnitCustomisation();
+	if (!Map.IsValid() || !Map->GetRegiments().IsValidIndex(RegimentIndex)) { return; }
+	CustomUnitIndex = RegimentIndex;
+	bEditingUnitUniform = true;
+}
+
+void SCampaign1851Overlay::ChooseUnitUniform(int32 Swatch)
+{
+	if (Map.IsValid() && bEditingUnitUniform) { Map->SetUnitUniform(CustomUnitIndex, Swatch / 13, Swatch % 13 - 1); }
+}
+
+void SCampaign1851Overlay::CloseUnitCustomisation(bool bAccept)
+{
+	if (bAccept && bEditingUnitName && Map.IsValid()) { Map->RenameUnit(CustomUnitIndex, UnitNameDraft); }
+	if (bEditingUnitName)
+	{
+		SetVisibility(EVisibility::HitTestInvisible);
+		FSlateApplication::Get().SetAllUserFocusToGameViewport();
+	}
+	bEditingUnitName = bEditingUnitUniform = false;
+	CustomUnitIndex = INDEX_NONE;
+}
+
+FReply SCampaign1851Overlay::OnKeyChar(const FGeometry& Geometry, const FCharacterEvent& Event)
+{
+	if (!bEditingUnitName) { return FReply::Unhandled(); }
+	const TCHAR CustomCharacter = Event.GetCharacter();
+	if (CustomCharacter >= 32 && CustomCharacter != 127)
+	{
+		if (bReplaceUnitName) { UnitNameDraft.Empty(); bReplaceUnitName = false; }
+		if (UnitNameDraft.Len() < 80) { UnitNameDraft.AppendChar(CustomCharacter); }
+	}
+	return FReply::Handled();
+}
+
+FReply SCampaign1851Overlay::OnMouseButtonDown(const FGeometry& Geometry, const FPointerEvent& Event)
+{
+	if (!bEditingUnitName) { return FReply::Unhandled(); }
+	int32 CustomModule = 0;
+	const EButton CustomAction = HitButton(Geometry.AbsoluteToLocal(Event.GetScreenSpacePosition()) * PaintScale, &CustomModule);
+	if (Event.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		if (CustomAction == EButton::UnitCustomClose) { CloseUnitCustomisation(CustomModule == 1); }
+		if (CustomAction == EButton::UnitCard) { ToggleUnitCard(); }
+	}
+	return FReply::Handled();
+}
+
+FReply SCampaign1851Overlay::OnKeyDown(const FGeometry& Geometry, const FKeyEvent& Event)
+{
+	if (!bEditingUnitName) { return FReply::Unhandled(); }
+	if (Event.GetKey() == EKeys::Enter) { CloseUnitCustomisation(true); }
+	else if (Event.GetKey() == EKeys::Escape) { CloseUnitCustomisation(); }
+	else if (Event.GetKey() == EKeys::BackSpace)
+	{
+		if (bReplaceUnitName) { UnitNameDraft.Empty(); bReplaceUnitName = false; }
+		else { UnitNameDraft = UnitNameDraft.Left(FMath::Max(0, UnitNameDraft.Len() - 1)); }
+	}
+	return FReply::Handled();
+}
+
 void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft, int32 RegimentIndex) const
 {
 	const FCampaign1851Regiment& R = Map->GetRegiments()[RegimentIndex];
@@ -2065,7 +2140,7 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 	const int32 Parts = Map->SubUnitCount(RegimentIndex);
 	const int32 Co = Parts > 1 && UnitCardCompany >= 0 && UnitCardCompany < Parts ? UnitCardCompany : INDEX_NONE;
 	const float ChipsH = Parts > 1 ? 26.f : 0.f;
-	const FVector2D Size(470.f, 640.f + ChipsH);
+	const FVector2D Size(470.f, 740.f + ChipsH);
 	const FVector2D Pos(BottomLeft.X, FMath::Max(130.f, BottomLeft.Y - Size.Y));
 	// In the front: an opaque box over everything under it, which also takes the clicks.
 	Buttons.Add({ Pos, Pos + Size, EButton::Block, 0 });
@@ -2078,6 +2153,45 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 	PaintTextFit(Geometry, Out, Layer + 2, Co != INDEX_NONE ? FString::Printf(TEXT("%s  ·  %s"), *R.Name, Campaign1851Army::ArmName(R.Arm))
 		: FString::Printf(TEXT("%s  ·  %s%s"), Campaign1851Army::ArmName(R.Arm), Campaign1851Army::ExperienceName(R.Experience), Parts > 1 ? TEXT("  ·  gennemsnit for enheden") : TEXT("")),
 		Pos + FVector2D(22.f, 78.f), Serif(12, EFace::Italic), Gold, Size.X - 44.f);
+	if ((bEditingUnitName || bEditingUnitUniform) && CustomUnitIndex == RegimentIndex)
+	{
+		PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(22.f, 118.f), FVector2D(160.f, 26.f), TEXT("TILBAGE"), EButton::UnitCustomClose);
+		if (bEditingUnitName)
+		{
+			PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(192.f, 118.f), FVector2D(160.f, 26.f), TEXT("GEM NAVN"), EButton::UnitCustomClose, 1);
+			PaintText(Geometry, Out, Layer + 3, TEXT("Nyt navn (højst 80 tegn)"), Pos + FVector2D(22.f, 170.f), Serif(14), Gold);
+			FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(420.f, 42.f), FSlateLayoutTransform(Pos + FVector2D(18.f, 188.f))), FCoreStyle::Get().GetBrush("WhiteBrush"), ESlateDrawEffect::None, FLinearColor(0.015f, 0.025f, 0.04f));
+			PaintTextFit(Geometry, Out, Layer + 3, UnitNameDraft + TEXT("|"), Pos + FVector2D(22.f, 205.f), Serif(18), bReplaceUnitName ? Gold : Ink, 420.f);
+			PaintTextFit(Geometry, Out, Layer + 3, TEXT("Skriv for at erstatte navnet. Enter gemmer; Esc annullerer."), Pos + FVector2D(22.f, 245.f), Serif(11), Ink, 420.f);
+		}
+		else
+		{
+			const TCHAR* CustomPieces[] = { TEXT("Jakke"), TEXT("Bukser"), TEXT("Hovedbeklædning") };
+			for (int32 CustomPiece = 0; CustomPiece < 3; ++CustomPiece)
+			{
+				const float CustomY = Pos.Y + 180.f + CustomPiece * 65.f;
+				PaintText(Geometry, Out, Layer + 3, CustomPieces[CustomPiece], FVector2D(Pos.X + 22.f, CustomY), Serif(13), Gold);
+				for (int32 CustomSwatch = 0; CustomSwatch < 13; ++CustomSwatch)
+				{
+					const FVector2D CustomAt(Pos.X + 22.f + CustomSwatch * 32.f, CustomY + 12.f);
+					PaintButton(Geometry, Out, Layer + 3, CustomAt, FVector2D(28.f, 28.f), CustomSwatch == 0 ? TEXT("D") : TEXT(""), EButton::UnitUniformSwatch, CustomPiece * 13 + CustomSwatch, R.UniformPalette[CustomPiece] == CustomSwatch - 1);
+					if (CustomSwatch > 0) { FSlateDrawElement::MakeBox(Out, Layer + 4, Geometry.ToPaintGeometry(FVector2D(18.f, 18.f), FSlateLayoutTransform(CustomAt + FVector2D(5.f, 5.f))), FCoreStyle::Get().GetBrush("WhiteBrush"), ESlateDrawEffect::None, ACampaign1851Map::UnitPaletteColor(CustomSwatch - 1)); }
+				}
+			}
+			// Flat silhouette: hat, jacket and two trouser legs, using the same palette as export.
+			const FVector2D CustomPreview = Pos + FVector2D(215.f, 395.f);
+			auto CustomShape = [&](FVector2D Offset, FVector2D ShapeSize, int32 Piece)
+			{
+				FSlateDrawElement::MakeBox(Out, Layer + 3, Geometry.ToPaintGeometry(ShapeSize, FSlateLayoutTransform(CustomPreview + Offset)), FCoreStyle::Get().GetBrush("WhiteBrush"), ESlateDrawEffect::None, Map->UnitUniformColor(R, Piece));
+			};
+			CustomShape(FVector2D(0.f, 0.f), FVector2D(40.f, 18.f), 2);
+			CustomShape(FVector2D(-10.f, 25.f), FVector2D(60.f, 70.f), 0);
+			CustomShape(FVector2D(0.f, 100.f), FVector2D(17.f, 65.f), 1);
+			CustomShape(FVector2D(23.f, 100.f), FVector2D(17.f, 65.f), 1);
+			PaintTextFit(Geometry, Out, Layer + 3, TEXT("D = nationsfarve. Valg gemmes straks. Modellen bestemmer snittet."), Pos + FVector2D(22.f, 600.f), Serif(11), Ink, 420.f);
+		}
+		return;
+	}
 	// The unit's companies (squadrons): the card of one of them, or the average of the unit.
 	if (Parts > 1)
 	{
@@ -2088,7 +2202,7 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 		}
 	}
 	// The soldier in his uniform, and the colours.
-	const bool bHussar = R.Arm == ECampaign1851Arm::Cavalry && R.Name.Contains(TEXT("usar"));
+	const bool bHussar = R.Arm == ECampaign1851Arm::Cavalry && (R.OriginalName.IsEmpty() ? R.Name : R.OriginalName).Contains(TEXT("usar"));
 	const int32 Arm = bHussar ? 6 : FMath::Clamp(int32(R.Arm), 0, 5);
 	const FVector2D Picture(Pos.X + 22.f, Pos.Y + 96.f + ChipsH);
 	if (Map->ActiveScenario().Id == TEXT("1825"))
@@ -2201,12 +2315,22 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 	const int32 First = FMath::Max(0, R.Service.Num() - 8);
 	for (int32 e = R.Service.Num() - 1; e >= First; --e)
 	{
+		if (Y > Pos.Y + Size.Y - 115.f) { break; }
 		const FCampaign1851ServiceEntry& E = R.Service[e];
 		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s  ·  %s  ·  %s%s  ·  faldne %d, sårede %d, fjender %d"),
 			*ACampaign1851Map::FormatDate(ACampaign1851Map::StartDate() + FTimespan::FromDays(E.Day), true), *E.Place, Results[FMath::Min<int32>(E.Result, 3)],
 			E.bFrom3D ? TEXT(" (3D)") : TEXT(""), E.Killed, E.Wounded, E.EnemyKilled), FVector2D(X, Y), Serif(11), Ink, Size.X - 44.f);
 		Y += 19.f;
 	}
+	bool CustomCanUpgrade = false;
+	const FString CustomUpgradeText = Map->UnitUpgradeDescription(RegimentIndex, &CustomCanUpgrade);
+	const FVector2D CustomFooter = Pos + FVector2D(22.f, Size.Y - 90.f);
+	PaintTextFit(Geometry, Out, Layer + 3, TEXT("Våben: ") + Map->UnitWeaponName(R), CustomFooter, Serif(12), Ink, 420.f);
+	PaintButton(Geometry, Out, Layer + 3, CustomFooter + FVector2D(0.f, 14.f), FVector2D(125.f, 26.f), TEXT("OMDØB"), EButton::UnitRename, RegimentIndex);
+	PaintButton(Geometry, Out, Layer + 3, CustomFooter + FVector2D(135.f, 14.f), FVector2D(125.f, 26.f), TEXT("UNIFORM"), EButton::UnitUniform, RegimentIndex);
+	PaintButton(Geometry, Out, Layer + 3, CustomFooter + FVector2D(270.f, 14.f), FVector2D(150.f, 26.f), TEXT("OPGRADÉR"), EButton::UnitUpgrade, RegimentIndex, false, !CustomCanUpgrade);
+	PaintTextFit(Geometry, Out, Layer + 3, CustomUpgradeText, CustomFooter + FVector2D(0.f, 58.f), Serif(10), Gold, 420.f);
+	AddTip(CustomFooter, FVector2D(420.f, 75.f), CustomUpgradeText);
 	if (R.Service.Num() == 0)
 	{
 		PaintText(Geometry, Out, Layer + 2, TEXT("Ingen slag endnu i dette felttog"), FVector2D(X, Y), Serif(11, EFace::Italic), MutedInk, 0.f, false);
@@ -3270,7 +3394,7 @@ void SCampaign1851Overlay::PaintNavy(const FGeometry& Geometry, FSlateWindowElem
 	const double Today = (Map->GetDate() - ACampaign1851Map::StartDate()).GetTotalDays();
 	for (const FCampaign1851Ship& S : Ships)
 	{
-		if (Y > Pos.Y + Size.Y - 40.f)
+		if (Y > Pos.Y + Size.Y - 120.f)
 		{
 			PaintText(Geometry, Out, Layer + 1, TEXT("..."), FVector2D(X, Y), Serif(12), MutedInk, 0.f, false);
 			break;

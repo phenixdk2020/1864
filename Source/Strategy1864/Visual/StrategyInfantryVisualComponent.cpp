@@ -25,6 +25,7 @@
 #include "StrategyCrowdModel.h"
 #include "../Combat/StrategyFireDrillComponent.h"
 #include "StrategyBattleBlast.h"
+#include "StrategyUniformAppearanceComponent.h"
 
 UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
 {
@@ -939,6 +940,7 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
         Soldier->bVisibleInRayTracing = false;
         Soldier->SetupAttachment(OwnerCompany->SceneRoot);
         Soldier->RegisterComponent();
+        if (OwnerCompany->UniformAppearanceComponent) { OwnerCompany->UniformAppearanceComponent->ApplyAppearanceToMesh(Soldier); }
 
         UStaticMeshComponent* Weapon =
             NewObject<UStaticMeshComponent>(
@@ -1568,6 +1570,11 @@ void UStrategyInfantryVisualComponent::RecordClip(USkeletalMeshComponent* Soldie
 
 bool UStrategyInfantryVisualComponent::EnsureCrowdModel()
 {
+    if (OwnerCompany && OwnerCompany->UniformAppearanceComponent)
+    {
+        const FStrategyUniformOverrides& CustomOverrides = OwnerCompany->UniformAppearanceComponent->Overrides;
+        if (CustomOverrides.bOverrideCoat || CustomOverrides.bOverrideTrousers || CustomOverrides.bOverrideHeadgearDetail) { return false; }
+    }
     if (CrowdModel)
     {
         return true;

@@ -74,7 +74,7 @@ bool ACampaign1851Map::UpgradeToHorseBattery(int32 RegimentIndex, FString* OutWh
 	R.MaxMen = FMath::Max(R.MaxMen, 180);
 	R.Arm = ECampaign1851Arm::HorseArtillery;
 	R.PaceKmPerDay = Campaign1851Army::MarchKmPerDay(R.Arm);
-	R.Name = R.Name.Replace(TEXT("Batteri"), TEXT("Ridende Batteri"));
+	if (R.CustomName.IsEmpty()) { R.Name = R.Name.Replace(TEXT("Batteri"), TEXT("Ridende Batteri")); }
 	// The gunners must learn to ride with the guns: the drill falls for a while.
 	R.Skills[int32(ECampaign1851Skill::Drill)] = FMath::Max(30.f, R.Skills[int32(ECampaign1851Skill::Drill)] - 15.f);
 	AddTransaction(-HorseBatteryCost, FString::Printf(TEXT("%s gøres ridende"), *R.Name));

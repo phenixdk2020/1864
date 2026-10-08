@@ -809,7 +809,7 @@ int32 UStrategyArtilleryFireMissionComponent::ResolveCasualties(
         FMath::Clamp(DistanceCm / MaxRange, 0.0f, 1.0f);
 
     float HitChance =
-        GetBaseGunHitChance(AmmoType) *
+        GetBaseGunHitChance(AmmoType) * WeaponAccuracyFactor *
         FMath::Lerp(1.0f, 0.45f, RangeFraction);
 
     if (Target->StanceComponent)
@@ -1016,7 +1016,7 @@ bool UStrategyArtilleryFireMissionComponent::FireAtLocation(
         }
 
         float HitChance =
-            GetBaseGunHitChance(AmmoType) *
+            GetBaseGunHitChance(AmmoType) * WeaponAccuracyFactor *
             FMath::Lerp(1.0f, 0.45f, RangeFraction);
 
         if (RandomStream.FRand() <= HitChance)

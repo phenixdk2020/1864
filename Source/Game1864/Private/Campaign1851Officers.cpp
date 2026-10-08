@@ -725,6 +725,7 @@ bool ACampaign1851Map::TransferCompanyMen(int32 FromReg, int32 From, int32 ToReg
 	}
 	FCampaign1851Regiment& F = Regiments[FromReg];
 	FCampaign1851Regiment& T = Regiments[ToReg];
+	if (FromReg != ToReg && !CompatibleUnitWeapons(F, T)) { return Fail(TEXT("Enhederne skal have samme våben og afsluttet ombygning")); }
 	if (F.Arm != T.Arm || (F.Captains.Num() > 0) != (T.Captains.Num() > 0))
 	{
 		return Fail(TEXT("Mændene kan kun flyttes mellem enheder af samme slags"));
@@ -978,6 +979,7 @@ bool ACampaign1851Map::TransferSectionGuns(int32 FromReg, int32 From, int32 ToRe
 		|| (FromReg == ToReg && From == To)) { return Fail(TEXT("Ingen sektioner")); }
 	FCampaign1851Regiment& F = Regiments[FromReg];
 	FCampaign1851Regiment& T = Regiments[ToReg];
+	if (FromReg != ToReg && !CompatibleUnitWeapons(F, T)) { return Fail(TEXT("Enhederne skal have samme våben og afsluttet ombygning")); }
 	if (F.Arm != ECampaign1851Arm::Artillery || T.Arm != ECampaign1851Arm::Artillery) { return Fail(TEXT("Kun mellem batterier")); }
 	if (IsInBattle(FromReg) || IsInBattle(ToReg) || F.IsMarching() || T.IsMarching()
 		|| (FromReg != ToReg && !((F.Town != INDEX_NONE && F.Town == T.Town) || FVector2D::Distance(F.Km, T.Km) < 2.0)))

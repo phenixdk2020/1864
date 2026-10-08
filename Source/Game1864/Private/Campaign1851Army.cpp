@@ -370,6 +370,7 @@ bool ACampaign1851Map::LoadArmy()
 		FCampaign1851Regiment R;
 		R.Id = O->GetStringField(TEXT("id"));
 		R.Name = O->GetStringField(TEXT("name"));
+		R.OriginalName = R.Name;
 		R.Nation = Nation;
 		R.Arm = Campaign1851Army::ParseArm(O->GetStringField(TEXT("arm")));
 		R.Home = FindCity(O->GetStringField(TEXT("home")));
@@ -519,15 +520,24 @@ FString ACampaign1851Map::ArmyUniformText(ECampaign1851Arm Arm) const
 Campaign1851Army::FBattleFactors ACampaign1851Map::ArmyBattleFactors(const FCampaign1851Regiment& R) const
 {
 	Campaign1851Army::FBattleFactors F = Campaign1851Army::BattleFactors(R);
-	if (R.Arm == ECampaign1851Arm::Infantry || R.Arm == ECampaign1851Arm::Guard || R.Arm == ECampaign1851Arm::Jager)
+	const int32 CustomWeapon = UnitWeaponLevel(R);
+	if (R.Arm == ECampaign1851Arm::Artillery || R.Arm == ECampaign1851Arm::HorseArtillery)
 	{
-		// A researched breechloader replaces the flintlock; do not multiply its bonus by the obsolete weapon.
-		if (!HasResearch(TEXT("breech")))
-		{
-			F.ReloadTime *= float(ArmyEquipmentNumber(TEXT("infantryReload"), 1.0));
-			F.Accuracy *= float(ArmyEquipmentNumber(TEXT("infantryAccuracy"), 1.0));
-		}
+		F.WeaponRange = CustomWeapon == 1 ? 1.4f : 1.f;
+		F.Accuracy *= CustomWeapon == 1 ? 1.3f : 1.f;
 	}
+	else
+	{
+		// Gameplay estimates relative to the battle's percussion musket, not verified ballistic data.
+		static const float CustomReload[] = { 1.2f, 1.f, 1.05f, 0.35f };
+		static const float CustomRanges[] = { 1.f, 1.f, 2.5f, 3.f };
+		F.WeaponRange = CustomRanges[CustomWeapon];
+		static const float CustomAccuracy[] = { 0.85f, 1.f, 1.35f, 1.45f };
+		F.ReloadTime *= CustomReload[CustomWeapon];
+		F.Accuracy *= CustomAccuracy[CustomWeapon];
+	}
+	if (R.WeaponConversionDays > 0.f) { F.ReloadTime *= 2.f; F.Accuracy *= 0.5f; }
+
 	return F;
 }
 
@@ -1552,6 +1562,16 @@ void ACampaign1851Map::AdvanceArmy(float DeltaDays, float DeltaSeconds)
 	{
 		// The chief's hand: drill in garrison, morale towards what he can inspire, cohesion at rest.
 		FCampaign1851Regiment& R = Regiments[i];
+		if (R.PendingWeaponLevel >= 0 && R.WeaponConversionDays > 0.f && !R.IsMarching() && !IsInBattle(i))
+		{
+			R.WeaponConversionDays = FMath::Max(0.f, R.WeaponConversionDays - DeltaDays);
+			if (R.WeaponConversionDays <= 0.f)
+			{
+				R.WeaponLevel = R.PendingWeaponLevel;
+				R.PendingWeaponLevel = -1;
+				News.Add(R.Name + TEXT(" har afsluttet våbenombygningen"));
+			}
+		}
 		const FCampaign1851Officer* Chief = Officers.IsValidIndex(R.Chief) ? &Officers[R.Chief] : nullptr;
 		const float Lead = Chief ? Chief->Stat(ECampaign1851OfficerStat::Leadership) : 3.f;
 		const float Insp = Chief ? Chief->Stat(ECampaign1851OfficerStat::Inspiration) : 3.f;
@@ -2450,6 +2470,12 @@ TArray<FCampaign1851RegimentSave> ACampaign1851Map::SaveArmy() const
 	for (const FCampaign1851Regiment& R : Regiments)
 	{
 		FCampaign1851RegimentSave& S = Out.AddDefaulted_GetRef();
+		S.CustomName = R.CustomName;
+		S.OriginalName = R.OriginalName;
+		S.UniformPalette = TArray<int32>(R.UniformPalette, 3);
+		S.WeaponLevel = R.WeaponLevel;
+		S.PendingWeaponLevel = R.PendingWeaponLevel;
+		S.WeaponConversionDays = R.WeaponConversionDays;
 		S.Id = R.Id;
 		S.Men = R.Men;
 		S.bRaised = R.bRaised;
@@ -2534,6 +2560,22 @@ int32 ACampaign1851Map::RestoreArmy(const TArray<FCampaign1851RegimentSave>& Sav
 			continue;
 		}
 		FCampaign1851Regiment& R = Regiments[i];
+		if (!S.OriginalName.IsEmpty()) { R.OriginalName = S.OriginalName; }
+		R.CustomName = S.CustomName.Left(80).TrimStartAndEnd();
+		if (!R.CustomName.IsEmpty()) { R.Name = R.CustomName; }
+		for (int32 CustomPiece = 0; CustomPiece < 3; ++CustomPiece)
+		{
+			R.UniformPalette[CustomPiece] = S.UniformPalette.IsValidIndex(CustomPiece) ? FMath::Clamp(S.UniformPalette[CustomPiece], -1, 11) : -1;
+		}
+		const int32 CustomMaxWeapon = (R.Arm == ECampaign1851Arm::Artillery || R.Arm == ECampaign1851Arm::HorseArtillery) ? 1 : 3;
+		R.WeaponLevel = FMath::Clamp(S.WeaponLevel, -1, CustomMaxWeapon);
+		R.PendingWeaponLevel = FMath::Clamp(S.PendingWeaponLevel, -1, CustomMaxWeapon);
+		R.WeaponConversionDays = R.PendingWeaponLevel >= 0 ? FMath::Clamp(S.WeaponConversionDays, 0.f, 30.f) : 0.f;
+		if (R.PendingWeaponLevel >= 0 && R.WeaponConversionDays <= 0.f)
+		{
+			R.WeaponLevel = R.PendingWeaponLevel;
+			R.PendingWeaponLevel = -1;
+		}
 		// What a split or a move of companies changed (saves before this keep the start's figures).
 		if (S.MaxMen > 0) { R.MaxMen = S.MaxMen; }
 		if (S.Horses >= 0) { R.Horses = S.Horses; }

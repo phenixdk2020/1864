@@ -1158,18 +1158,58 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     };
 
     // The rules on a Danish company: the regiment's own training (reload, accuracy, morale, cohesion), the
-    // research (reload factor, the fire methods it has drilled to 60), the doctrine and the AI defaults.
+    // converted weapons, the fire methods it has drilled to 60, the doctrine and the AI defaults.
+    auto ApplyCampaignAppearance = [&](AStrategyUnit* CustomUnit, const TSharedPtr<FJsonObject>& CustomData)
+    {
+        if (!CustomUnit || !CustomUnit->UniformAppearanceComponent) { return; }
+        const TSharedPtr<FJsonObject>* CustomUniform = nullptr;
+        if (!CustomData->TryGetObjectField(TEXT("uniformColors"), CustomUniform)) { return; }
+        FStrategyUniformOverrides CustomOverrides = CustomUnit->UniformAppearanceComponent->Overrides;
+        auto CustomReadColor = [&](const TCHAR* CustomKey, FLinearColor& CustomColor, bool& bCustomOverride)
+        {
+            const TArray<TSharedPtr<FJsonValue>>* CustomChannels = nullptr;
+            if (!(*CustomUniform)->TryGetArrayField(CustomKey, CustomChannels) || CustomChannels->Num() != 4) { return; }
+            CustomColor = FLinearColor(float((*CustomChannels)[0]->AsNumber()), float((*CustomChannels)[1]->AsNumber()),
+                float((*CustomChannels)[2]->AsNumber()), float((*CustomChannels)[3]->AsNumber()));
+            bCustomOverride = true;
+        };
+        CustomReadColor(TEXT("coat"), CustomOverrides.Coat, CustomOverrides.bOverrideCoat);
+        CustomReadColor(TEXT("trousers"), CustomOverrides.Trousers, CustomOverrides.bOverrideTrousers);
+        CustomReadColor(TEXT("headgear"), CustomOverrides.HeadgearDetail, CustomOverrides.bOverrideHeadgearDetail);
+        if (CustomOverrides.bOverrideCoat || CustomOverrides.bOverrideTrousers || CustomOverrides.bOverrideHeadgearDetail)
+        {
+            CustomUnit->UniformAppearanceComponent->BasePreset.bLockHistoricalPalette = false;
+            CustomUnit->UniformAppearanceComponent->SetOverrides(CustomOverrides);
+        }
+    };
     auto ApplyDanish = [&](AStrategyCompanyUnit* Company, const TSharedPtr<FJsonObject>& U)
     {
-        double Reload = 1.0, Accuracy = 1.0, Morale = -1.0, Cohesion = -1.0;
+        double Reload = 1.0, Accuracy = 1.0, Morale = -1.0, Cohesion = -1.0, CustomRange = 1.0;
         const TSharedPtr<FJsonObject>* Factors = nullptr;
         if (U->TryGetObjectField(TEXT("battleFactors"), Factors))
         {
+            (*Factors)->TryGetNumberField(TEXT("weaponRange"), CustomRange);
             (*Factors)->TryGetNumberField(TEXT("reloadTime"), Reload);
             (*Factors)->TryGetNumberField(TEXT("accuracy"), Accuracy);
             (*Factors)->TryGetNumberField(TEXT("morale"), Morale);
             (*Factors)->TryGetNumberField(TEXT("cohesion"), Cohesion);
         }
+        ApplyCampaignAppearance(Company, U);
+        Company->MaximumFireRangeCm *= float(CustomRange);
+        if (Company->FireControlComponent)
+        {
+            Company->FireControlComponent->CloseRangeCm *= float(CustomRange);
+            Company->FireControlComponent->MediumRangeCm *= float(CustomRange);
+            Company->FireControlComponent->LongRangeCm *= float(CustomRange);
+        }
+        double CustomWeaponLevel = -1.0;
+        U->TryGetNumberField(TEXT("weaponLevel"), CustomWeaponLevel);
+        if (Company->EquipmentVisualComponent && CustomWeaponLevel >= 0.0)
+        {
+            static const TCHAR* CustomWeaponIds[] = { TEXT("FLINTLOCK"), TEXT("PERCUSSION"), TEXT("MINIE"), TEXT("BREECHLOADER") };
+            Company->EquipmentVisualComponent->PrimaryWeaponId = FName(CustomWeaponIds[FMath::Clamp(int32(CustomWeaponLevel), 0, 3)]);
+        }
+        if (CustomWeaponLevel == 3.0 && Company->StanceComponent) { Company->StanceComponent->ProneReloadMultiplier = 1.f; }
         if (Company->CombatComponent)
         {
             Company->CombatComponent->ReloadSeconds *= float(Reload * ReloadRule);
@@ -1229,7 +1269,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             }
             ++Number;
             AStrategyCompanyUnit* Company = SpawnCompany(FName(*FString::Printf(TEXT("DK-%s-C%d"), *Id, c + 1)),
-                FString::Printf(TEXT("%s %s"), *Id, *Sub->GetStringField(TEXT("name")).Left(3)), c + 1,
+                FString::Printf(TEXT("%s %s"), *U->GetStringField(TEXT("name")), *Sub->GetStringField(TEXT("name"))), c + 1,
                 Danish(0.0f, Y + (c - 1.5f) * FieldSpacing), Major, static_cast<uint8>(EStrategySide::Denmark));
             if (Company)
             {
@@ -1266,6 +1306,27 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         if (ACavalryUnit* Cav = SpawnCavalry(FName(*FString::Printf(TEXT("DK-%s"), *Id)), U->GetStringField(TEXT("name")), Danish(-6000.0f, Side), Army))
         {
             Face(Cav, false);
+            ApplyCampaignAppearance(Cav, U);
+            const TSharedPtr<FJsonObject>* CustomFactors = nullptr;
+            if (U->TryGetObjectField(TEXT("battleFactors"), CustomFactors))
+            {
+                double CustomReload = 1.0, CustomAccuracy = 1.0, CustomRange = 1.0;
+                (*CustomFactors)->TryGetNumberField(TEXT("reloadTime"), CustomReload);
+                (*CustomFactors)->TryGetNumberField(TEXT("accuracy"), CustomAccuracy);
+                (*CustomFactors)->TryGetNumberField(TEXT("weaponRange"), CustomRange);
+                if (Cav->CombatComponent)
+                {
+                    Cav->CombatComponent->ReloadSeconds *= float(CustomReload);
+                    Cav->CombatComponent->BaseHitChance *= float(CustomAccuracy);
+                }
+                Cav->MaximumFireRangeCm *= float(CustomRange);
+                if (Cav->FireControlComponent)
+                {
+                    Cav->FireControlComponent->CloseRangeCm *= float(CustomRange);
+                    Cav->FireControlComponent->MediumRangeCm *= float(CustomRange);
+                    Cav->FireControlComponent->LongRangeCm *= float(CustomRange);
+                }
+            }
             if (Cav->DragoonComponent && U->GetObjectField(TEXT("battle"))->GetStringField(TEXT("type")).Contains(TEXT("dragoon")))
             {
                 Cav->DragoonComponent->Role = EStrategyCavalryRole::Dragoon;   // dragoons can dismount to fight on foot
@@ -1284,6 +1345,21 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             Danish(-14000.0f, (g - (Guns.Num() - 1) * 0.5f) * 14000.0f), Army))
         {
             Face(Battery, false);
+            ApplyCampaignAppearance(Battery, U);
+            const TSharedPtr<FJsonObject>* CustomFactors = nullptr;
+            if (U->TryGetObjectField(TEXT("battleFactors"), CustomFactors))
+            {
+                double CustomReload = 1.0, CustomAccuracy = 1.0, CustomRange = 1.0;
+                (*CustomFactors)->TryGetNumberField(TEXT("reloadTime"), CustomReload);
+                (*CustomFactors)->TryGetNumberField(TEXT("accuracy"), CustomAccuracy);
+                (*CustomFactors)->TryGetNumberField(TEXT("weaponRange"), CustomRange);
+                Battery->GunProfile.ReloadSeconds *= float(CustomReload);
+                Battery->GunProfile.MaximumRangeCm *= float(CustomRange);
+                if (Battery->ArtilleryFireMissionComponent) { Battery->ArtilleryFireMissionComponent->WeaponAccuracyFactor = float(CustomAccuracy); }
+            }
+            const int32 CustomGuns = FMath::Max(0, int32(U->GetNumberField(TEXT("guns"))));
+            Battery->InitialStrength = Battery->CurrentStrength = FMath::Max(0, int32(U->GetNumberField(TEXT("presentMen"))));
+            Battery->GunCount = CustomGuns;
             ConfigureRuntimeQALabel(Battery);
             CampaignUnitOf.Add(Battery, Id);
         }

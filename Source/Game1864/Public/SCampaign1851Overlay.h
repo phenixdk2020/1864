@@ -25,6 +25,19 @@ public:
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
+	virtual bool SupportsKeyboardFocus() const override { return true; }
+	virtual FReply OnKeyChar(const FGeometry& Geometry, const FCharacterEvent& Event) override;
+	virtual FReply OnKeyDown(const FGeometry& Geometry, const FKeyEvent& Event) override;
+	virtual FReply OnMouseButtonDown(const FGeometry& Geometry, const FPointerEvent& Event) override;
+	void BeginUnitRename(int32 RegimentIndex);
+	void OpenUnitUniform(int32 RegimentIndex);
+	void CloseUnitCustomisation(bool bAccept = false);
+	void ChooseUnitUniform(int32 Swatch);
+	int32 CustomUnitIndex = INDEX_NONE;
+	bool bEditingUnitName = false;
+	bool bEditingUnitUniform = false;
+	bool bReplaceUnitName = false;
+	FString UnitNameDraft;
 
 	virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D(1920.f, 1080.f); }
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& Geometry, const FSlateRect& Culling,
@@ -34,7 +47,7 @@ public:
 	void SetSelectedCity(int32 Index) { SelectedCity = Index; }
 	int32 GetSelectedCity() const { return SelectedCity; }
 	/** Regiments selected (a stack, a column or single ones); they take the info panel. */
-	void SetSelectedRegiments(const TArray<int32>& In) { SelectedRegiments = In; if (In.Num() == 0) { Picker = EPicker::None; InspectedOfficer = INDEX_NONE; } }
+	void SetSelectedRegiments(const TArray<int32>& In) { if (In != SelectedRegiments) { CloseUnitCustomisation(); } SelectedRegiments = In; if (In.Num() == 0) { Picker = EPicker::None; InspectedOfficer = INDEX_NONE; } }
 	const TArray<int32>& GetSelectedRegiments() const { return SelectedRegiments; }
 	/** Amt to show when no town is selected (0 = none). */
 	void SetSelectedAmt(int32 Id) { SelectedAmt = Id; }
@@ -47,7 +60,7 @@ public:
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationInsertHQ, FormationChief, FormationDissolve, FormationDeputy, FormationStaff, FormationChiefRemove,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
-		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitSize, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit, Block, MinisterInfo, TestBattle, EqualizeUnit, TransferAdj, TransferYes, TransferNo, TransferWhole, TransferGun, Ransom, PoolFold, UnitCardPart, Scenario, UnitDeployEarly, RaisingPage, ResearchTab };
+		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitSize, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit, Block, MinisterInfo, TestBattle, EqualizeUnit, TransferAdj, TransferYes, TransferNo, TransferWhole, TransferGun, Ransom, PoolFold, UnitCardPart, Scenario, UnitDeployEarly, RaisingPage, ResearchTab, UnitRename, UnitUniform, UnitUniformSwatch, UnitUpgrade, UnitCustomClose };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -106,7 +119,7 @@ public:
 	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB, CloseOrder, CloseFortPanel, CloseFort };
 	/** The big windows opened from the menu bar under the calendar (one at a time). */
 	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council, Supply, Foreign, Research, Navy, Gazette, End, Battlefield, Materiel, Nations, ArmyStatus };
-	void OpenWindow(EWindow In) { if (In == EWindow::Chart && Window != EWindow::Chart) { OOBFilter.Reset(); OOBFocus = INDEX_NONE; OOBBuilding = INDEX_NONE; } Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
+	void OpenWindow(EWindow In) { CloseUnitCustomisation(); if (In == EWindow::Chart && Window != EWindow::Chart) { OOBFilter.Reset(); OOBFocus = INDEX_NONE; OOBBuilding = INDEX_NONE; } Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
 	EWindow GetWindow() const { return Window; }
 
 	/** A question before a step that costs or cannot be undone (mobilisation, ...): the title, what it does, and
@@ -140,7 +153,7 @@ public:
 	void ScrollBuildings(int32 Delta) { BuildingScroll = FMath::Clamp(BuildingScroll + Delta, 0, FMath::Max(0, BuildingRowsTotal - BuildingRowsShown)); }
 	void ToggleBuildingInfo(int32 Index) { BuildingInfo = BuildingInfo == Index ? INDEX_NONE : Index; }
 	/** The unit card beside the unit panel: the soldier in his uniform, the colours, the service record. */
-	void ToggleUnitCard() { bUnitCard = !bUnitCard; }
+	void ToggleUnitCard() { CloseUnitCustomisation(); bUnitCard = !bUnitCard; }
 	/** The order of battle for one unit only (its companies; split it there), or the whole army. */
 	/** The units the order-of-battle window shows (from KAMPORDEN on a selection); empty: all of them. */
 	/** Back one step: from the two halves to the filtered list, from that to every unit. */

@@ -137,6 +137,9 @@ void UStrategyUniformAppearanceComponent::ApplyColorsToMesh(
             continue;
         }
 
+        MID->SetScalarParameterValue(TEXT("OverrideCoat"), Overrides.bOverrideCoat && !BasePreset.bLockHistoricalPalette ? 1.f : 0.f);
+        MID->SetScalarParameterValue(TEXT("OverrideTrousers"), Overrides.bOverrideTrousers && !BasePreset.bLockHistoricalPalette ? 1.f : 0.f);
+        MID->SetScalarParameterValue(TEXT("OverrideHeadgear"), Overrides.bOverrideHeadgearDetail && !BasePreset.bLockHistoricalPalette ? 1.f : 0.f);
         MID->SetVectorParameterValue(CoatParameter, Colors.Coat);
         MID->SetVectorParameterValue(TrousersParameter, Colors.Trousers);
         MID->SetVectorParameterValue(FacingsParameter, Colors.Facings);
@@ -147,6 +150,11 @@ void UStrategyUniformAppearanceComponent::ApplyColorsToMesh(
         MID->SetVectorParameterValue(AccentParameter, Colors.Accent);
         MID->SetVectorParameterValue(MetalParameter, Colors.Metal);
     }
+}
+
+void UStrategyUniformAppearanceComponent::ApplyAppearanceToMesh(USkeletalMeshComponent* CustomMesh)
+{
+    if (ShouldTargetMesh(CustomMesh)) { ApplyColorsToMesh(CustomMesh, GetResolvedColors()); }
 }
 
 void UStrategyUniformAppearanceComponent::ApplyAppearance()
