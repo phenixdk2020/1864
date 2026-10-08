@@ -2520,12 +2520,10 @@ TArray<FCampaign1851RegimentSave> ACampaign1851Map::SaveArmy() const
 		S.SectionMaxHorses = R.SectionMaxHorses;
 		S.SectionHorses = R.SectionHorses;
 		S.SectionGuns = R.SectionGuns;
-		if (R.bRaised)
-		{
-			S.Name = R.Name;
-			S.Arm = uint8(R.Arm);
-			S.Home = Cities.IsValidIndex(R.Home) ? Cities[R.Home].Name : FString();
-		}
+		// Every regiment carries its name, arm and home, so that a save can rebuild the roster even if the scenario's data change.
+		S.Name = R.Name;
+		S.Arm = uint8(R.Arm);
+		S.Home = Cities.IsValidIndex(R.Home) ? Cities[R.Home].Name : FString();
 		S.Morale = R.Morale;
 		S.Pace = R.PaceKmPerDay;
 		S.Group = R.Group;
@@ -2573,9 +2571,11 @@ int32 ACampaign1851Map::RestoreArmy(const TArray<FCampaign1851RegimentSave>& Sav
 	{
 		const FCampaign1851RegimentSave& S = Saves[k];
 		int32 i = FindRegiment(S.Id);
-		if (i == INDEX_NONE && (S.bRaised || bLegacy1825Army) && FindCity(S.Home) != INDEX_NONE)
+		// An old save did not keep the home of the regiments of the starting army: the town it stood in is the best guess.
+		const int32 HomeTown = FindCity(S.Home) != INDEX_NONE ? FindCity(S.Home) : FindCity(S.Town);
+		if (i == INDEX_NONE && (S.bRaised || bLegacy1825Army) && HomeTown != INDEX_NONE)
 		{
-			i = AddRaisedRegiment(S.Id, S.Name, ECampaign1851Arm(S.Arm), FindCity(S.Home), S.MaxMen);
+			i = AddRaisedRegiment(S.Id, S.Name, ECampaign1851Arm(S.Arm), HomeTown, S.MaxMen);
 			if (i != INDEX_NONE)
 			{
 				Regiments[i].bDetached = S.bDetached;
