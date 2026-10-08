@@ -1400,6 +1400,16 @@ Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i
 ### 2026-10-08 – Backlog opdateret
 Backlog.md har fået et afsnit med det, der er bygget i oktober (scenarier, delt forskning, kamporden, slagets nye systemer), og en liste over det, der endnu ikke er afprøvet i et rigtigt slag.
 
+### 2026-10-08 - Audit af sygdom og lazaretter (1825 og 1851)
+
+- Læst `Docs/Health1851.md`, sygdom, slagtab, forsyningsgemning, fredens fangeudveksling, enhedsdeling og sundhedsvisningen. Ingen AGENTS.md fundet.
+- `RestoreSupply` nulstiller nu syge og begge fangetal før indlæsning: manglende linjer (nul syge eller ældre gemninger) arver ikke længere den aktuelle kampagnes tal. Negative gemte sundhedstal afvises som nul; formatet er uændret.
+- Et lazaret under nedrivning giver ikke længere bedre behandling; enhedskortet bruger samme regel og forklarer dødelighed, hospitalsforskning og hjemsendelse ud over etaten på dansk.
+- Slagtab ignorerer ugyldige enhedsindeks og begrænses til 0..enhedens mand; negative tab kan ikke give ekstra mænd eller reducere syge/fanger. `SplitLosses` afviser også ugyldige indeks og ikke-positive tab. De normale tabsandele er uændrede.
+- Kolerafaktoren gælder kun Københavns garnison, som designet beskriver, og fortsat kun juni-september 1853. I 1825 skalerer sygdom allerede med tilstedeværende mænd; grundrater, forskning og 1851-balancen er bevaret. Ingen jernbanekrav i sundhedssystemet.
+- Uafklaret: Lazarettet følger fortsat `Home`, også når enheden er i felten; om behandling skal følge opholdsbyen eller kræve transport, kræver en designbeslutning. Lazarettets 200 senge og sygestuens 60 senge i bygningsdata er ikke modelleret som kapacitet/behandling; en kapacitetsmodel og historiske 1825-priser bør afklares før balancen ændres. Daglig behandling afhænger af den fælles dagsopdatering; lange tidsspring og genindlæsning samme dag er ikke runtime-verificeret.
+- Kontrol: statisk gennemgang af save/restore og UI, beregningskontrol af tabsandele samt `git diff --check`. Ingen build eller kørsel af spillet efter brugerens instruktion.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

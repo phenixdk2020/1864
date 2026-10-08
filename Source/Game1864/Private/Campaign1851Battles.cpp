@@ -383,8 +383,12 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 	int32 DanishLosses = 0, Prisoners = 0;
 	for (const TPair<int32, int32>& L : O.UnitLosses)
 	{
+		if (!Regiments.IsValidIndex(L.Key))
+		{
+			continue;
+		}
 		FCampaign1851Regiment& R = Regiments[L.Key];
-		const int32 Lost = FMath::Min(L.Value, R.Men);
+		const int32 Lost = FMath::Clamp(L.Value, 0, R.Men);
 		R.Men -= Lost;
 		const int32 PrisonersBefore = Prisoners, SickBefore = R.Sick;
 		SplitLosses(L.Key, Lost, !O.bDanishWin && !O.bDraw, Prisoners);

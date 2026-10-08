@@ -374,6 +374,13 @@ TArray<FString> ACampaign1851Map::SaveSupply() const
 void ACampaign1851Map::RestoreSupply(const TArray<FString>& Lines)
 {
 	Depots.Reset();
+	// Zero values are omitted from saves; absent health records must not survive a load.
+	DanesCaptured = 0;
+	EnemyCaptured = 0;
+	for (FCampaign1851Regiment& R : Regiments)
+	{
+		R.Sick = 0;
+	}
 	for (const FString& Line : Lines)
 	{
 		TArray<FString> P;
@@ -395,7 +402,7 @@ void ACampaign1851Map::RestoreSupply(const TArray<FString>& Lines)
 		}
 		else if (P.Num() == 3 && P[0] == TEXT("sick") && FindRegiment(P[1]) != INDEX_NONE)
 		{
-			Regiments[FindRegiment(P[1])].Sick = FCString::Atoi(*P[2]);
+			Regiments[FindRegiment(P[1])].Sick = FMath::Max(0, FCString::Atoi(*P[2]));
 		}
 		else if (P.Num() == 9 && P[0] == TEXT("wartotals"))
 		{
@@ -410,8 +417,8 @@ void ACampaign1851Map::RestoreSupply(const TArray<FString>& Lines)
 		}
 		else if (P.Num() == 3 && P[0] == TEXT("prisoners"))
 		{
-			DanesCaptured = FCString::Atoi(*P[1]);
-			EnemyCaptured = FCString::Atoi(*P[2]);
+			DanesCaptured = FMath::Max(0, FCString::Atoi(*P[1]));
+			EnemyCaptured = FMath::Max(0, FCString::Atoi(*P[2]));
 		}
 		else if (P.Num() == 5 && P[0] == TEXT("fort") && FortIndex(FCString::Atoi(*P[1])) != INDEX_NONE)
 		{

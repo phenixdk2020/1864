@@ -27,7 +27,7 @@ void ACampaign1851Map::DailyHealth()
 		float Rate = bGarrison ? 0.0002f : 0.001f;
 		Rate *= !bGarrison && bWet ? 2.f : 1.f;
 		Rate *= R.Food <= 0.f ? 2.f : 1.f;
-		Rate *= bCholera && Cities.IsValidIndex(R.Town) && R.Town == Copenhagen ? 10.f : 1.f;
+		Rate *= bCholera && bGarrison && R.Town == Copenhagen ? 10.f : 1.f;
 		const int32 Sick = FMath::Min(R.Men, Round(R.PresentMen() * Rate));
 		R.Men -= Sick;
 		R.Sick += Sick;
@@ -36,7 +36,7 @@ void ACampaign1851Map::DailyHealth()
 		if (R.Sick > 0)
 		{
 			const ACampaign1851ConstructionSite* Lazaret = FindBuilding(R.Home, TEXT("Field_Hospital"));
-			const bool bCare = bSanitation || (Lazaret && Lazaret->IsModuleDone(0));
+			const bool bCare = bSanitation || (Lazaret && !Lazaret->IsDemolishing() && Lazaret->IsModuleDone(0));
 			const int32 Back = FMath::Min(R.Sick, Round(R.Sick * (bCare ? 0.05f : 0.03f) * (HasResearch(TEXT("hospitals")) ? 1.4f : 1.f)));
 			const int32 Dead = FMath::Min(R.Sick - Back, Round(R.Sick * (bCare ? 0.002f : 0.004f)));
 			R.Sick -= Back + Dead;
@@ -67,6 +67,10 @@ int32 ACampaign1851Map::SickTotal() const
 
 void ACampaign1851Map::SplitLosses(int32 RegimentIndex, int32 Lost, bool bDefeat, int32& OutPrisoners)
 {
+	if (!Regiments.IsValidIndex(RegimentIndex) || Lost <= 0)
+	{
+		return;
+	}
 	// Of those lost: killed a fifth to a quarter, wounded (to the lazaret) a third or more, the rest taken.
 	FCampaign1851Regiment& R = Regiments[RegimentIndex];
 	const float WoundedShare = bDefeat ? 0.35f : 0.5f;
