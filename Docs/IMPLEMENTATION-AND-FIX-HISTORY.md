@@ -1666,6 +1666,9 @@ Codex' tre opgaver er merget: bevægelse (skydekegle skjult i kolonne og under f
 - Direkte flytteordrer fra spilleren bevarer mål og ruter for hele udvalget uden tilfældig målforskydning ved levering. Ordonnans og læsetid bevares. Ingen nye autonome angreb er tilføjet.
 - Validering: statisk gennemgang og git diff --check. Ingen build, spilstart eller commit; visuel afprøvning udestår.
 
+### 2026-10-08 – Flag og stab følger formationen, mere naturlig gang, x10
+Codex' to opgaver er merget: flaget følger de tegnede mænd (ikke den simulerede enhed), staben holder sig bag formationen og går uden om kompagnierne, og mændene har personlig variation i tempo, start og skridtfase med glidende drejninger; en kort bevægelse udføres i formation, en længere går straks i kolonne. Slaget har fået en x10-hastighed. Uret i slaget følger hastigheden (målt med -Strategy1864DebugClock: 3, 6 og 30 slagsekunder pr. sekund ved x½, x1 og x5).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
