@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "StrategyVisualFormationPath.h"
 #include "StrategyCavalryVisualComponent.generated.h"
 
 class ACavalryUnit;
@@ -52,6 +53,8 @@ private:
         TObjectPtr<UStaticMeshComponent> Sabre;
         FVector Slot = FVector::ZeroVector;     // local to the unit
         FVector Shown = FVector::ZeroVector;    // local, eased towards the slot
+        float FacingYaw = 0.f;
+        bool bPlaced = false;
         float Phase = 0.0f;
         float NextDust = 0.0f;
     };
@@ -79,6 +82,7 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> SeatClip;
     UPROPERTY() TObjectPtr<UAnimSequence> FallClip;
 
+    FStrategyVisualFormationPath VisualPath;
     TArray<FHorseman> Horsemen;
     TArray<FFallen> Fallen;
     FVector LastLocation = FVector::ZeroVector;

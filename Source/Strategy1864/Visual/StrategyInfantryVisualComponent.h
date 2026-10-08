@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "StrategyVisualFormationPath.h"
 #include "StrategyInfantryVisualComponent.generated.h"
 
 class AStrategyCompanyUnit;
@@ -277,11 +278,14 @@ private:
     struct FSettle
     {
         FVector Goal = FVector::ZeroVector;
+        FVector Slot = FVector::ZeroVector;
+        float SlotYaw = 0.f;
         float Yaw = 0.0f;
         bool bPlaced = false;     // has been put in his first place
         bool bActive = false;     // is on his way to Goal
         float SwitchAt = -1.0f;   // when he takes up the pending clip (stance change), -1: none
     };
+    FStrategyVisualFormationPath VisualPath;
     TArray<FSettle> SoldierSettle;       // parallel to SoldierComponents
     UPROPERTY(Transient)
     TObjectPtr<UAnimSequence> PendingSequence;
