@@ -459,9 +459,10 @@ FString ACampaign1851Map::UnitUpgradeDescription(int32 RegimentIndex, bool* OutC
 	const double CustomPrice = CustomGun ? 400.0 : CustomNext == 3 ? 18.0 : CustomNext == 2 ? 12.0 : 6.0;
 	const double CustomCost = CustomCount * (CustomGun ? 40.0 : 1.0) + FMath::Max(0, CustomCount - CustomStock) * CustomPrice;
 	const bool CustomFree = !CustomRegiment.IsMarching() && !IsInBattle(RegimentIndex) && !CustomRegiment.bTraining && CustomCount > 0;
-	if (OutCan) { *OutCan = CustomFree && HasResearch(CustomTopic) && Treasury >= CustomCost; }
+	const bool CustomImportAllowed = CustomCount <= CustomStock || CanImport();
+	if (OutCan) { *OutCan = CustomFree && CustomImportAllowed && HasResearch(CustomTopic) && Treasury >= CustomCost; }
 	return FString::Printf(TEXT("%d %s fra lager (resten købes), %.0f rd.; %d dage. Kræver %s%s%s"), FMath::Min(CustomCount, CustomStock), CustomGun ? TEXT("kanoner") : TEXT("geværer"), CustomCost, CustomGun ? 14 : 10, CustomRequirement,
-		HasResearch(CustomTopic) ? TEXT(" (udforsket)") : TEXT(" (mangler)"), !CustomFree ? TEXT("; enheden skal stå stille uden kamp/uddannelse") : Treasury < CustomCost ? TEXT("; ikke råd") : TEXT(""));
+		HasResearch(CustomTopic) ? TEXT(" (udforsket)") : TEXT(" (mangler)"), !CustomFree ? TEXT("; enheden skal stå stille uden kamp/uddannelse") : !CustomImportAllowed ? TEXT("; ingen import af manglende våben") : Treasury < CustomCost ? TEXT("; ikke råd") : TEXT(""));
 }
 
 bool ACampaign1851Map::UpgradeUnitWeapon(int32 RegimentIndex)

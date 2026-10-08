@@ -61,6 +61,7 @@ struct FStrategyVisualFormationPath
             const float Length = SlotBounds.IsValid ? SlotBounds.GetSize().X + 1000.f : 1000.f;
             if (Trail.IsEmpty())
             {
+                TrailDistance = 0.f; // A new column starts a new distance coordinate.
                 Trail.Add({Lead - FRotator(0.f, Facing, 0.f).Vector() * Length, Facing, -Length});
                 Trail.Add({Lead, Facing, 0.f});
             }

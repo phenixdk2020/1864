@@ -116,7 +116,7 @@ void UStrategyHQVisualComponent::TickComponent(float DeltaTime, ELevelTick TickT
         Build();
     }
     // The grey block is not drawn: the staff is the horsemen.
-    if (OwnerHQ->QAPlaceholderMesh && OwnerHQ->QAPlaceholderMesh->IsVisible())
+    if (Pivot && OwnerHQ->QAPlaceholderMesh && OwnerHQ->QAPlaceholderMesh->IsVisible())
     {
         OwnerHQ->QAPlaceholderMesh->SetVisibility(false);
     }

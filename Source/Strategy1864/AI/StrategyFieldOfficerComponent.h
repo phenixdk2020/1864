@@ -96,6 +96,7 @@ private:
     float ReserveHeldSince = -1.0f;
     bool bReserveReleased = false;
     float Accumulator = 0.0f;
+    float NextOfficerDebugLogTime = 0.0f;
     int32 FlankRole = 0;          // 0 none, 1 fire base, 2 flank
     int32 FlankK = 0;             // how many places from the base
     float FlankSign = 0.0f;       // -1 / +1: which side of the base

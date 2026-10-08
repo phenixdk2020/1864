@@ -1323,6 +1323,11 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         }
         if (UStrategyFireDrillComponent* Drill = Company->FireDrillComponent)
         {
+            if (CustomWeaponLevel >= 0.0)
+            {
+                Drill->SetLoadingMethod(CustomWeaponLevel == 3.0
+                    ? EStrategyLoadingMethod::BreechLoader : EStrategyLoadingMethod::MuzzleLoader);
+            }
             // The highest fire method the regiment has drilled to 60 (front rank fire is always there).
             double Two = 0.0, ByRank = 0.0, Volley = 0.0, Free = 0.0;
             const TSharedPtr<FJsonObject>* Drills = nullptr;
