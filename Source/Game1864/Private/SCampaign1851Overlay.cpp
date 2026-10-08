@@ -5687,7 +5687,7 @@ void SCampaign1851Overlay::PaintCalendar(const FGeometry& Geometry, FSlateWindow
 	// Season above, the day's weather below it.
 	const FSlateFontInfo SeasonFont = Serif(11, EFace::Italic);
 	const FString Season = Map->GetSeasonName();
-	const FString Weather = FString::Printf(TEXT("%s %.0f°"), Campaign1851Weather::Name(Map->GetWeather()), Map->GetTemperature());
+	const FString Weather = FString::Printf(TEXT("%s %.0f°%s"), Campaign1851Weather::Name(Map->GetWeather()), Map->GetTemperature(), Map->IsIceWinter() ? TEXT(" · isvinter") : TEXT(""));
 	const float SeasonW = FMath::Max(Measure(Season, SeasonFont).X, Measure(Weather, SeasonFont).X);
 	// Margins with room to spare: the italic text measures a little short.
 	const float Room = X - 24.f - TextX - SeasonW * 1.1f - 14.f;

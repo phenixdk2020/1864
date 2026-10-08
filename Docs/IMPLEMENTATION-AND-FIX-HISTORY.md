@@ -1400,6 +1400,15 @@ Tillige: flere flankepladser pr. side får hvert sit omvejspunkt. Kontrolleret i
 ### 2026-10-08 – Backlog opdateret
 Backlog.md har fået et afsnit med det, der er bygget i oktober (scenarier, delt forskning, kamporden, slagets nye systemer), og en liste over det, der endnu ikke er afprøvet i et rigtigt slag.
 
+### 2026-10-08 - Audit af vejr og føre (1825 og 1851)
+
+- Vejrcachen bruger nu dag, seed og startår; nyt spil og indlæsning på samme dag kan ikke beholde den gamle verdens vejr, temperatur eller is.
+- Ismeldinger sammenligner dagens og gårsdagens beregnede isforhold. Den ugemte `bIceNoted` er fjernet; seed, scenarie og kampagnedag er tilstrækkelige til gendannelse.
+- Kalenderen viser isvinter. Stormmeldingen beskriver færgernes eksisterende fartfaktor 0,25. Fil-lokale klimakonstanter har vejrspecifikke navne af hensyn til unity builds.
+- Klima, isgrænser, marchfart og trænets faktor er uændrede i begge scenarier. 1825 bruger sit eget startår; vejrsystemet tilføjer hverken tog eller krig.
+- Kontrol: statisk gennemgang af design, save/load, kalender, march, træn, fjendens vandpassager og slagbestilling; diff- og kildekontrol. Spillet er hverken bygget eller kørt.
+- Uafklaret: lokal istykkelse/tøbrud, temperaturens små spring ved månedsskift, historisk klimakalibrering og kalenderens faktiske layout. Disse balanceændringer er ikke foretaget for at bevare 1851-reglerne.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

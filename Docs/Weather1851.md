@@ -1,6 +1,6 @@
 # Vejr og føre (backlog 4)
 
-Dagens vejr beregnes fra kampagnens seed. Derfor skal intet gemmes: samme seed giver samme vejr.
+Dagens vejr beregnes fra kampagnens seed. Derfor skal selve vejret ikke gemmes: samme seed, scenarie/startdato og kampagnedag giver samme vejr. Seed, scenarie og kampagnedag gemmes allerede. Cachen bruger alle tre, og ismeldinger beregnes fra dagens og gårsdagens isforhold.
 
 ## Temperaturen
 Temperaturen er summen af:
@@ -38,3 +38,9 @@ Reglerne prøves i denne rækkefølge:
 ## Hvor vejret ses
 - **Kalenderen:** årstid, vejr og temperatur.
 - **Slag-anmodningen:** felterne `weather`, `temperatureC` og `ice`.
+
+## Audit 2026-10-08
+- Kalenderen viser også `isvinter`, så faren kan ses efter indlæsning uden en ny ismelding.
+- Stormmeldingen beskriver færgernes nedsatte fart (0,25), ikke et fuldstændigt stop.
+- 1825 bruger samme klima- og føreregler som 1851; startåret indgår i vinterens hårdhed. Vejret opretter ingen jernbaner eller fjender. Alle eksisterende vejr- og farttal er bevaret.
+- Uafklaret: otte kolde dage på fjorten kan stadig give bærende is efter flere milde dage; modellen har ingen lokal istykkelse. Månedernes temperaturinterpolation har små spring ved månedsskift. Historisk klimakalibrering og visuel kontrol af kalenderen mangler.
