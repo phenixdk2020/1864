@@ -1,6 +1,7 @@
 #include "StrategyFormationPolicyComponent.h"
 
 #include "StrategyFormationComponent.h"
+#include "../Combat/StrategyThreatReactionComponent.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../Orders/StrategyOrderComponent.h"
 #include "../Units/StrategyUnit.h"
@@ -138,6 +139,8 @@ float UStrategyFormationPolicyComponent::DeployDistanceCm(const AStrategyUnit* E
 
 void UStrategyFormationPolicyComponent::Deploy()
 {
+    if (OwnerUnit && OwnerUnit->ThreatReactionComponent &&
+        OwnerUnit->ThreatReactionComponent->ReactToCavalryThreat()) return;
     bMarching = false;
     if (!OwnerUnit || !OwnerUnit->FormationComponent)
     {
@@ -154,6 +157,8 @@ void UStrategyFormationPolicyComponent::Deploy()
 
 void UStrategyFormationPolicyComponent::ApplyInitialMovementFormation(const FStrategyOrder& Order)
 {
+    if (OwnerUnit && OwnerUnit->ThreatReactionComponent &&
+        OwnerUnit->ThreatReactionComponent->ReactToCavalryThreat()) return;
     if (!MarchesInColumn())
     {
         return;
@@ -193,6 +198,8 @@ void UStrategyFormationPolicyComponent::ApplyInitialMovementFormation(const FStr
 
 void UStrategyFormationPolicyComponent::EvaluateEarlyDeployment()
 {
+    if (OwnerUnit && OwnerUnit->ThreatReactionComponent &&
+        OwnerUnit->ThreatReactionComponent->ReactToCavalryThreat()) return;
     if (!bMarching || !MarchesInColumn() || !IsColumn(OwnerUnit->FormationComponent->CurrentFormation))
     {
         return;

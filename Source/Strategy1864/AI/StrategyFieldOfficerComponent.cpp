@@ -229,7 +229,11 @@ void UStrategyFieldOfficerComponent::TickComponent(float DeltaTime, ELevelTick T
     if (!bCharging && BayonetUntil > 0.0f && GetWorld()->GetTimeSeconds() > BayonetUntil && OwnerUnit->EquipmentVisualComponent &&
         (!OwnerUnit->FormationComponent || OwnerUnit->FormationComponent->CurrentFormation != EStrategyFormationType::Square))
     {
-        OwnerUnit->EquipmentVisualComponent->SetBayonetFixed(false);
+        if (!OwnerUnit->FormationComponent ||
+            OwnerUnit->FormationComponent->CurrentFormation != EStrategyFormationType::Square)
+        {
+            OwnerUnit->EquipmentVisualComponent->SetBayonetFixed(false);
+        }
         BayonetUntil = 0.0f;
     }
     // A good officer looks more often; one under stress less clearly.

@@ -1579,6 +1579,14 @@ Codex' tre opgaver er merget og bygget: skov i synslinjen (se Docs-afsnittet om 
 
 ### 2026-10-08 – Kampregler og robusthed merget, kolonne og drejning rettet, HQ som ryttere, adfærdsdokument
 Kampregelpakken (karré med fire skydezoner og bajonetter, rytterangreb efter styrke/retning/formation, ammunition fra kampagnen, rout-tjek, seedet tilfældighed, reservens tidsudløsning, artilleriets AUTO) og robusthedspakken (ugyldige resultatfiler, JSON-felter, karréens bredde, terrænhøjde og cache, HQ-følge, seedede officerer) er merget fra Codex. Fire kompileringsfejl rettet. To regressioner fundet og rettet: (1) "ANGRIB HER" blev regnet som afsluttet fra første sekund, så kompagnierne holdt; nu er den afsluttet, når enheden er inden for 60 m af målet (IsFinishedPlayerOrder). (2) HQ-følge via ordrekanalen erstattede stabens egen spillerordre; lagt tilbage til direkte bevægelse. Marchkolonnen er nu fire i bredden for fodfolk og rytteri: tegningen sprang over hver anden mand og viste kun to af fire spor; nu springes hele rækker over. Drejehastigheden er sat fra 120 til 36 grader i sekundet for fodfolk (rytteri 80). HQ tegnes som to eller tre ryttere (UStrategyHQVisualComponent) i stedet for en firkant. Nyt dokument: Docs/Enhedsadfaerd1864.md.
+### 2026-10-08 - Retningsbestemt kavaleritrussel
+
+- Synligt, kampdygtigt kavaleri udløser firkant ved faktisk lukkehastighed på mindst 7 m/s. Varsling: hastighed gange 25 sekunder, højst 350 m. Alle tærskler kan justeres i headeren.
+- Kun nærmeste kompagni langs fremrykningsretningen reagerer. Afgrænset korridor og stabil identitet ved afstandslighed; ingen nye tilfældighedskilder. Langsomt, standset og bortvendt kavaleri ignoreres.
+- Marchpolitikken kontrollerer truslen inden deployering, så kolonne kan gå direkte til firkant. Spillernes eksplicitte formationsvalg bruger en forkortet nødgrænse (65 %).
+- Formationens bajonethåndtering får første prioritet; trusselskomponenten har fallback. Officerens bajonettimer afmonterer ikke bajonetter i firkant. Efter 8 sekunder uden trussel genetableres tidligere formation; formationsovergangen beholder reformeringstilstanden.
+- MovementExecutor eksponerer faktisk forskydningshastighed og nulstiller ved pause, stop og afslutning, da SetActorLocation ikke giver normal pawn-velocity.
+- Validering: statisk gennemgang, syv geometriske kontrolscenarier og git diff --check. Ingen build, spilstart eller commit.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
