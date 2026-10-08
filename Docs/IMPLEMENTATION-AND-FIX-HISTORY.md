@@ -1414,6 +1414,15 @@ Forskningsvinduet bruger nu hele bredden. En gren, hvis emner står side om side
 - Statskassen viser ledig kredit og månedlig rentebetaling. Rammen bruger fortsat tre års aktuelle skatter, udførselstold og udenlandsindtægter, så den mindre befolkning i 1825 indgår automatisk. Gyldige låns renteberegning, beløb og 1851-balancering er bevaret.
 - Usikkert: historiske 1825-tal for Øresundstold, handel, startreserve og passende lånestørrelser er ikke dokumenteret; de eksisterende estimater er beholdt. Afdrag reducerer den samlede gæld forholdsmæssigt til gennemsnitsrenten; enkelte lån kan ikke indfries separat. Visuel plads til den nye kreditlinje skal kontrolleres i spillet.
 - Kontrol: statisk gennemgang af månedsbetaling, budget, ministerhandlinger og save/restore, numeriske kanttilfælde samt `git diff --check`. Spillet er hverken bygget eller startet.
+### 2026-10-08 - Audit af sygdom og lazaretter (1825 og 1851)
+
+- Læst `Docs/Health1851.md`, sygdom, slagtab, forsyningsgemning, fredens fangeudveksling, enhedsdeling og sundhedsvisningen. Ingen AGENTS.md fundet.
+- `RestoreSupply` nulstiller nu syge og begge fangetal før indlæsning: manglende linjer (nul syge eller ældre gemninger) arver ikke længere den aktuelle kampagnes tal. Negative gemte sundhedstal afvises som nul; formatet er uændret.
+- Et lazaret under nedrivning giver ikke længere bedre behandling; enhedskortet bruger samme regel og forklarer dødelighed, hospitalsforskning og hjemsendelse ud over etaten på dansk.
+- Slagtab ignorerer ugyldige enhedsindeks og begrænses til 0..enhedens mand; negative tab kan ikke give ekstra mænd eller reducere syge/fanger. `SplitLosses` afviser også ugyldige indeks og ikke-positive tab. De normale tabsandele er uændrede.
+- Kolerafaktoren gælder kun Københavns garnison, som designet beskriver, og fortsat kun juni-september 1853. I 1825 skalerer sygdom allerede med tilstedeværende mænd; grundrater, forskning og 1851-balancen er bevaret. Ingen jernbanekrav i sundhedssystemet.
+- Uafklaret: Lazarettet følger fortsat `Home`, også når enheden er i felten; om behandling skal følge opholdsbyen eller kræve transport, kræver en designbeslutning. Lazarettets 200 senge og sygestuens 60 senge i bygningsdata er ikke modelleret som kapacitet/behandling; en kapacitetsmodel og historiske 1825-priser bør afklares før balancen ændres. Daglig behandling afhænger af den fælles dagsopdatering; lange tidsspring og genindlæsning samme dag er ikke runtime-verificeret.
+- Kontrol: statisk gennemgang af save/restore og UI, beregningskontrol af tabsandele samt `git diff --check`. Ingen build eller kørsel af spillet efter brugerens instruktion.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

@@ -2128,11 +2128,12 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 	};
 	if (Co == INDEX_NONE)
 	{
-		const bool bCare = Map->HasResearch(TEXT("sanitation")) || (Map->FindBuilding(R.Home, TEXT("Field_Hospital")) && Map->FindBuilding(R.Home, TEXT("Field_Hospital"))->IsModuleDone(0));
+		const ACampaign1851ConstructionSite* Lazaret = Map->FindBuilding(R.Home, TEXT("Field_Hospital"));
+		const bool bCare = Map->HasResearch(TEXT("sanitation")) || (Lazaret && !Lazaret->IsDemolishing() && Lazaret->IsModuleDone(0));
 		const float Rate = (bCare ? 0.05f : 0.03f) * (Map->HasResearch(TEXT("hospitals")) ? 1.4f : 1.f);
 		const int32 Half = FMath::RoundToInt(FMath::Loge(2.f) / Rate);
 		Line(TEXT("Sårede og syge"), R.Sick > 0 ? FString::Printf(TEXT("%d på lazaret  ·  halvdelen tilbage om ca. %d dage%s"), R.Sick, Half, bCare ? TEXT(" (lazaret)") : TEXT(""))
-			: FString(TEXT("ingen")), TEXT("De sårede og syge vender tilbage til deres egen enhed (med erfaringen) efterhånden: 5 % om dagen med lazaret eller sanitetsvæsen, ellers 3 %"));
+			: FString(TEXT("ingen")), TEXT("Syge er ikke med i mandskabstallet. Dagligt vender 5 % tilbage med færdigt lazaret i hjemgarnisonen eller sanitetsvæsen, ellers 3 %; henholdsvis 0,2 % og 0,4 % dør. Militærhospitaler øger tilbagekomsten med 40 %. Mænd ud over etaten hjemsendes."));
 	}
 	// The chief: the battalion's, or the captain of the company shown.
 	const int32 ChiefIndex = Co != INDEX_NONE && R.Captains.IsValidIndex(Co) ? R.Captains[Co] : (Co != INDEX_NONE ? INDEX_NONE : R.Chief);
