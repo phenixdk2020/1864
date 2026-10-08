@@ -1471,6 +1471,14 @@ Forskningsvinduet bruger nu hele bredden. En gren, hvis emner står side om side
 ### 2026-10-08 – Codex-arbejde samlet og bygget
 Tolv Codex-opgaver (hver i sin worktree) er gennemgået og merget: civile bygninger 1825, etiketposition i slaget, fjern stab i delingsbilledet, batteri-sektioner, indkaldelse og træning med tidlig indsættelse, GPU-kvalitetsvalg, kortlægning af Unity-AI (Docs/Unity-AI-Mapping.md) samt gennemgang af sygdom, politik, gæld, vejr og rekognoscering. Ét navnesammenstød rettet (Horses skyggede for et medlem i FreezeCompanyStrength). Bygget og kontrolleret med skærmbilleder af kamporden, forskning og et testslag; ikke afprøvet i fuldt spil.
 
+### 2026-10-08 — Officerer og kongelig regering i 1825
+
+- Særskilte Officers_1825.json og Ministers_1825.json med identiske kilde- og runtime-kopier; scenarie-id vælger data. 1851-data og profiler er bevaret.
+- Frantz Christopher Bülow som generalmajor, Frederik Rubeck Henrik Bülow og de Meza som kaptajner; de Meza har gemt studieorlov til 1827. Fiktive territorialkommandanter, navnelister og rolleprofiler er markeret og dokumenteret. Evner 0–100 i data konverteres til det eksisterende 1–10-system.
+- Frederik VI og gehejmestatsrådet med Kaas, Moltke, Schimmelmann, den ældre Bille og Møsting samt eksplicit fiktive rådgivere. Kongen afsættes ikke af opinionssimulationen under enevælden. Ressorter og portrætpuljer genbruges som spillets abstraktioner.
+- Indlæsning fra et andet scenarie genåbner kortet før restore og bevarer tilbagekomst fra slag. Gemmeformatet er uændret.
+- Danske kilder og antagelser i Docs/Data1825-officers.md; synkronisering via Tools/Map1851/sync_officers1825.py. Statisk JSON-, reference-, save-/restore- og diffkontrol; spillet er hverken bygget eller kørt.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

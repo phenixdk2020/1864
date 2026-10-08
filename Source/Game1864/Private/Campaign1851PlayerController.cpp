@@ -24,6 +24,9 @@ ACampaign1851PlayerController::ACampaign1851PlayerController()
 
 namespace
 {
+	// Survives an OpenLevel when a manual save needs another scenario's data.
+	FString GCampaignOfficerScenarioPendingSlot;
+	bool GCampaignOfficerScenarioPendingBattle = false;
 	FString PriceText(double Amount)
 	{
 		return FString::FormatAsNumber(FMath::RoundToInt(Amount)) + TEXT(" rd.");
@@ -382,11 +385,21 @@ void ACampaign1851PlayerController::TryInit()
 	// Back from a 3D battle: the campaign as it was left (whatever the command line says); the result is read in.
 	const FString ReturnFlag = FPaths::ProjectSavedDir() / TEXT("Battle/ReturnToCampaign.flag");
 	const bool bBackFromBattle = IFileManager::Get().FileExists(*ReturnFlag) && UGameplayStatics::DoesSaveGameExist(TEXT("Autosave"), 0);
-	if (bBackFromBattle)
+	if (!GCampaignOfficerScenarioPendingSlot.IsEmpty())
+	{
+		const FString PendingSlot = GCampaignOfficerScenarioPendingSlot;
+		GCampaignOfficerScenarioPendingSlot.Reset();
+		bResumedFromBattle = GCampaignOfficerScenarioPendingBattle;
+		GCampaignOfficerScenarioPendingBattle = false;
+		LoadFromSlot(PendingSlot);
+		if (bResumedFromBattle) { Map->PollBattleResults(); }
+	}
+	else if (bBackFromBattle)
 	{
 		IFileManager::Get().Delete(*ReturnFlag);
 		bResumedFromBattle = true;
 		LoadFromSlot(TEXT("Autosave"));
+		if (!GCampaignOfficerScenarioPendingSlot.IsEmpty()) { return; }
 		Map->PollBattleResults();
 	}
 	else if (!bTestStart && IFileManager::Get().FileExists(*(FPaths::ProjectSavedDir() / TEXT("Campaign/NewGame.flag"))))
@@ -2444,6 +2457,14 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 			Overlay->ShowToast(FString::Printf(TEXT("Intet gemt spil i %s"), *SlotLabel(Slot)));
 		}
 		return false;
+	}
+	if (Save->Scenario != ACampaign1851Map::ScenarioIndex() && Save->Scenario >= 0 && Save->Scenario < ACampaign1851Map::Scenarios().Num())
+	{
+		GCampaignOfficerScenarioPendingSlot = Slot;
+		GCampaignOfficerScenarioPendingBattle = bResumedFromBattle;
+		ACampaign1851Map::SetScenarioIndex(Save->Scenario);
+		UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851")));
+		return true; // restoration continues after the scenario's map data have loaded
 	}
 	Map->ClearProjects();
 	// v1 saves had no calendar: they start on 1 July 1851 at normal speed.
