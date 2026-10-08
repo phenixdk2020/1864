@@ -425,7 +425,7 @@ int32 ACampaign1851Map::RecruitOfficer(bool bGeneral, const TCHAR* RecruitmentRa
 	{
 		return INDEX_NONE;
 	}
-	FRandomStream Rng{ int32(FPlatformTime::Cycles()) };
+	FRandomStream Rng(int32(HashCombine(uint32(Seed), uint32(NextOfficerNumber))));
 	FCampaign1851Officer O = MakeOfficer(Rng, bGeneral, RecruitmentRank ? RecruitmentRank : bGeneral ? TEXT("Generalmajor") : TEXT("Major"));
 	O.Id = FString::Printf(TEXT("R%d"), NextOfficerNumber++);
 	O.bRecruited = true;

@@ -250,31 +250,58 @@ void ACampaign1851Map::PollBattleResults()
 		const FString Path = BattleDir() / FString::Printf(TEXT("BattleResult_%d.json"), Battles[b].Id);
 		FString Text;
 		TSharedPtr<FJsonObject> Json;
-		if (!FFileHelper::LoadFileToString(Text, *Path) || !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Json) || !Json.IsValid())
+		if (!FFileHelper::LoadFileToString(Text, *Path)) { continue; }
+		if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Json) || !Json.IsValid())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|battle|Ugyldig JSON i %s; slaget venter fortsat"), *Path);
 			continue;
 		}
 		// The 3D battle's own numbers: each unit's and fort's losses, the ammunition used, the outcome.
 		FCampaign1851BattleOutcome O;
-		const FString Outcome = Json->GetStringField(TEXT("outcome"));
+		FString BattleFormat, Outcome;
+		if (!Json->TryGetStringField(TEXT("format"), BattleFormat) || BattleFormat != TEXT("PROJECT1864-BattleResult-1") ||
+			!Json->TryGetStringField(TEXT("outcome"), Outcome) ||
+			(Outcome != TEXT("danish_victory") && Outcome != TEXT("enemy_victory") && Outcome != TEXT("draw")))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|battle|Ugyldigt format eller udfald i %s; slaget venter fortsat"), *Path);
+			continue;
+		}
 		O.bDanishWin = Outcome == TEXT("danish_victory");
 		O.bDraw = Outcome == TEXT("draw");
 		double EnemyLosses = 0.0;
 		Json->TryGetNumberField(TEXT("enemyLosses"), EnemyLosses);
+		if (!FMath::IsFinite(EnemyLosses) || EnemyLosses < 0.0 || EnemyLosses > MAX_int32)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|battle|Ugyldigt tabstal i %s; slaget venter fortsat"), *Path);
+			continue;
+		}
 		O.EnemyLosses = int32(EnemyLosses);
 		const TArray<TSharedPtr<FJsonValue>>* Units = nullptr;
 		if (Json->TryGetArrayField(TEXT("units"), Units))
 		{
 			for (const TSharedPtr<FJsonValue>& V : *Units)
 			{
-				const TSharedPtr<FJsonObject> U = V->AsObject();
-				const int32 R = FindRegiment(U->GetStringField(TEXT("id")));
+				const TSharedPtr<FJsonObject> U = V.IsValid() && V->Type == EJson::Object ? V->AsObject() : nullptr;
+				FString ResultUnitId;
+				if (!U.IsValid() || !U->TryGetStringField(TEXT("id"), ResultUnitId))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|battle|Ugyldig enhed i %s ignoreret"), *Path);
+					continue;
+				}
+				const int32 R = FindRegiment(ResultUnitId);
 				if (R != INDEX_NONE)
 				{
 					double Losses = 0.0, Ammo = 0.0, Kills = 0.0;
-					U->TryGetNumberField(TEXT("losses"), Losses);
-					U->TryGetNumberField(TEXT("ammoUsed"), Ammo);
-					U->TryGetNumberField(TEXT("kills"), Kills);
+					const bool bValidUnitNumbers =
+						(!U->HasField(TEXT("losses")) || U->TryGetNumberField(TEXT("losses"), Losses)) &&
+						(!U->HasField(TEXT("ammoUsed")) || U->TryGetNumberField(TEXT("ammoUsed"), Ammo)) &&
+						(!U->HasField(TEXT("kills")) || U->TryGetNumberField(TEXT("kills"), Kills));
+					if (!bValidUnitNumbers || !FMath::IsFinite(Losses) || !FMath::IsFinite(Ammo) || !FMath::IsFinite(Kills) ||
+						Losses < 0.0 || Losses > MAX_int32 || Kills < 0.0 || Kills > MAX_int32)
+					{
+						UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|battle|Ugyldige enhedstal i %s ignoreret"), *Path);
+						continue;
+					}
 					O.UnitLosses.Add(R, int32(Losses));
 					O.UnitKills.Add(R, int32(Kills));
 					O.UnitAmmo.Add(R, float(Ammo));
@@ -286,12 +313,19 @@ void ACampaign1851Map::PollBattleResults()
 		{
 			for (const TSharedPtr<FJsonValue>& V : *FortResults)
 			{
-				const TSharedPtr<FJsonObject> F = V->AsObject();
+				const TSharedPtr<FJsonObject> F = V.IsValid() && V->Type == EJson::Object ? V->AsObject() : nullptr;
+				double ResultFortId = 0.0;
+				if (!F.IsValid() || !F->TryGetNumberField(TEXT("id"), ResultFortId) ||
+					!FMath::IsFinite(ResultFortId) || ResultFortId < 0.0 || ResultFortId > MAX_int32 || ResultFortId != double(int32(ResultFortId)))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|battle|Ugyldigt fort i %s ignoreret"), *Path);
+					continue;
+				}
 				bool bCaptured = false;
 				F->TryGetBoolField(TEXT("captured"), bCaptured);
 				if (bCaptured)
 				{
-					O.CapturedForts.Add(int32(F->GetNumberField(TEXT("id"))));
+					O.CapturedForts.Add(int32(ResultFortId));
 				}
 			}
 		}
@@ -430,7 +464,10 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 	PoliticalShock(O.bDanishWin ? 3.f : O.bDraw ? -1.f : -3.f, O.bDanishWin ? 2.f : O.bDraw ? 0.f : -2.f);
 	for (const TPair<int32, float>& A : O.UnitAmmo)
 	{
-		Regiments[A.Key].Ammo = FMath::Max(0.f, Regiments[A.Key].Ammo - A.Value);
+		if (Regiments.IsValidIndex(A.Key) && FMath::IsFinite(A.Value))
+		{
+			Regiments[A.Key].Ammo = FMath::Clamp(Regiments[A.Key].Ammo - FMath::Clamp(A.Value, 0.f, 1.f), 0.f, 1.f);
+		}
 	}
 	// Forts: losses among their companies; the captured ones are lost with their guns.
 	for (int32 Id : B.Forts)

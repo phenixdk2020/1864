@@ -137,5 +137,8 @@ private:
     UPROPERTY()
     TObjectPtr<AStrategyUnit> OwnerUnit;
 
+    TWeakObjectPtr<AStrategyUnit> CachedNearestEnemy;
+    float NearestEnemyRefreshSeconds = 0.0f;
+
     FRandomStream RandomStream;
 };

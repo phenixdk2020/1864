@@ -27,13 +27,15 @@ public:
     bool bEnableFollow = true;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|HQ Follow")
-    float FollowSpeedCmPerSecond = 620.0f;
+    /** Negative selects the HQ level default; non-negative is an explicit override. */
+    float FollowSpeedCmPerSecond = -1.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|HQ Follow")
     float SettleToleranceCm = 150.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|HQ Follow")
-    float RearOffsetCm = 6500.0f;
+    /** Negative selects the HQ level default; zero is a valid explicit override. */
+    float RearOffsetCm = -1.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|HQ Follow")
     float LateralOffsetCm = 0.0f;
@@ -45,6 +47,8 @@ public:
     void ApplyLevelDefaults();
 
 private:
+    float FollowRetrySeconds = 0.0f;
+
     UPROPERTY()
     TObjectPtr<AStrategyHQUnit> OwnerHQ;
 };

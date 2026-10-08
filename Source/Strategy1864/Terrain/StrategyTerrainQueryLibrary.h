@@ -21,6 +21,8 @@ public:
     /** Density-weighted horizontal forest depth in metres; at most 40 midpoint samples. */
     UFUNCTION(BlueprintPure, Category="Strategy|Terrain", meta=(WorldContext="WorldContextObject"))
     static float ForestDepthAlong(const UObject* WorldContextObject, const FVector& Start, const FVector& End);
+    /** Call after changing static feature geometry or gameplay properties. */
+    static void InvalidateFeatureElevationCache(UWorld* World);
 
     UFUNCTION(BlueprintPure, Category="Strategy|Terrain", meta=(WorldContext="WorldContextObject"))
     static float GetFeatureElevationOffset(

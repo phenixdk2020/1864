@@ -1214,12 +1214,35 @@ bool AStrategyCampaignBattlefield::BuildFromFile(const FString& FileName)
         {
             for (const TSharedPtr<FJsonValue>& V : *RiverArray)
             {
+                const TSharedPtr<FJsonObject> RiverJson = V.IsValid() && V->Type == EJson::Object ? V->AsObject() : nullptr;
+                const TArray<TSharedPtr<FJsonValue>>* RiverPoints = nullptr;
+                if (!RiverJson.IsValid() || !RiverJson->TryGetArrayField(TEXT("points"), RiverPoints))
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("Ugyldigt flodelement ignoreret"));
+                    continue;
+                }
+                bool bValidRiverPoints = RiverPoints->Num() >= 4 && RiverPoints->Num() % 2 == 0;
+                for (const TSharedPtr<FJsonValue>& RiverCoordinate : *RiverPoints)
+                {
+                    double CoordinateValue = 0.0;
+                    if (!RiverCoordinate.IsValid() || !RiverCoordinate->TryGetNumber(CoordinateValue) || !FMath::IsFinite(CoordinateValue))
+                    {
+                        bValidRiverPoints = false;
+                        break;
+                    }
+                }
+                if (!bValidRiverPoints)
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("Ugyldige flodkoordinater ignoreret"));
+                    continue;
+                }
                 double WidthM = 12.0;
-                V->AsObject()->TryGetNumberField(TEXT("widthM"), WidthM);
+                RiverJson->TryGetNumberField(TEXT("widthM"), WidthM);
+                if (!FMath::IsFinite(WidthM)) { continue; }
                 FRiver& River = Rivers.AddDefaulted_GetRef();
-                River.Points = ReadPoints(V->AsObject()->GetArrayField(TEXT("points")));
+                River.Points = ReadPoints(*RiverPoints);
                 River.WidthM = float(FMath::Clamp(WidthM, 3.0, 120.0));
-                Ribbons({ ReadPoints(V->AsObject()->GetArrayField(TEXT("points"))) }, FMath::Clamp(WidthM, 3.0, 120.0),
+                Ribbons({ River.Points }, FMath::Clamp(WidthM, 3.0, 120.0),
                     FLinearColor::FromSRGBColor(FColor(60, 86, 100)), 30.0, TEXT("Rivers"), WaterMaterial(Material));
             }
         }

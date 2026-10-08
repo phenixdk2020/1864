@@ -1566,6 +1566,16 @@ Codex' tre opgaver er merget og bygget: skov i synslinjen (se Docs-afsnittet om 
 - Battle request eksporterer battleSeed; officerens lokale random-stream seedes med battle seed og stabilt unit-id. Global FRand er fjernet fra feltofficeren, og autonom AI modtager samme seedgrundlag.
 - Afsluttede spillerordrer udløser ikke ny forfølgelse. Reservens første tilbageholdelsestid bevares gennem nye flankeplaner, og en frigivet reserve holdes ikke tilbage igen. Artilleriets automatik slås fra med officer-AI. Hold efter bajonetangreb kræver afvisning eller bortfaldet mål.
 - Validering: statisk diff-/kildekontrol og kontrol af sektor-/forsyningsgrænser. Eksisterende testflag er bevaret. Ingen Unreal-build, spilstart eller commit er udført; runtime-balance og kompilation skal efterprøves senere.
+### 2026-10-08 - Robusthedsrettelser efter kodereview
+
+- Slagresultater validerer JSON, format og kendt udfald; ugyldige filer giver en advarsel og lader slaget vente. Ugyldige enheds-/fortelementer ignoreres. Ammunition beskyttes med indekskontrol og intervallet 0-1.
+- Flodelementer og Units.json-enheder kontrolleres før objektadgang.
+- Karréens frontbredde har samme minimum som tegningen (600 cm); mandskabet fordeles ligeligt mellem siderne. Ubrugt RowCount er fjernet. Kavaleriets marchkolonne er fortsat fire mand bred.
+- Terræntrace uden træf beholder input-Z. Statiske features indekseres i rumlige celler, og præcise offsets caches pr. verden (højst 8192 punkter). BeginPlay/EndPlay invaliderer cachen; senere geometriændringer kræver InvalidateFeatureElevationCache. Profiltesten inkluderer endepunkterne.
+- Automatisk frontdrejning søger nærmeste fjende højst hvert 0,25 sekund og respekterer ordrer med fastlagt front.
+- Begge officersgeneratorer bruger kampagnens seed. Gemmeversionshistorikken er rekonstrueret til v28 ud fra feltkommentarerne; format/version er uændret.
+- HQ-følgebevægelse bruger bevægelseseksekveringen via en arvet MOVE-ordre og bevarer spillerens aktive MOVE-kontrol. Nye forsøg sker højst hver 0,25 sekund; igangværende ruter afsluttes før næste følgemål. Negative RearOffsetCm/FollowSpeedCmPerSecond vælger niveau-standard; eksplicitte ikke-negative værdier bevares.
+- Validering: statisk kodegennemgang, formationsfordeling og git diff --check. Ingen build, spilstart eller commit. Ingen reviewpunkter sprunget over; runtime-adfærd er ikke afprøvet.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

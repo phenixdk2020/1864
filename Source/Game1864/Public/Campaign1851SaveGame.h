@@ -248,7 +248,18 @@ class GAME1864_API UCampaign1851SaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
-	/** 1: projects and view. 2: + campaign date and speed. 3: + treasury and account book. 4: + town buildings. 5: + roads and railways. 6: + regiments. 7: + officers, unit qualities. 8: + marches across country. 9: + general commands. 10: + troop trains on the map. 11: + field formations. */
+	/** Version history reconstructed from the field comments (no layout change here).
+	 * 1: projects/view; 2: date/speed; 3: treasury/ledger; 4: town buildings;
+	 * 5: roads/railways; 6: regiments; 7: officers/unit qualities; 8: field marches;
+	 * 9: general commands; 10: troop trains; 11: field formations/company captains;
+	 * 12: campaign seed/deviation, populations, nations, decisions/private projects;
+	 * 13: field forts; 14: fort companies/trenches; 15: raised units/amt manpower;
+	 * 16: demolition, gun/material stores; 17: supply and split/company equipment;
+	 * 18: historical projects and wounded/captured officers; 19: supply columns;
+	 * 20: rifle/horse stocks; 21: footing/present strength; 22: war state;
+	 * 23: diplomacy/research/doctrine; 24: navy; 25: politics; 26: economy;
+	 * 27: bridges; 28: initial garrison training; 29: event files (fired and blocked events).
+	 */
 	static constexpr int32 CurrentVersion = 29;
 
 	UPROPERTY() int32 SaveVersion = CurrentVersion;

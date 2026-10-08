@@ -2157,7 +2157,7 @@ void ACampaign1851Map::BuildTestFieldArmy()
 		return int32(INDEX_NONE);
 	};
 	// New officers for the brigades and regiments (the peacetime corps has only a few in reserve).
-	FRandomStream Rng(1864);
+	FRandomStream Rng(int32(HashCombine(uint32(Seed), uint32(1864))));
 	auto Chief = [&](int32 Formation, const TCHAR* Rank)
 	{
 		int32 O = FreeOfficer();
