@@ -6,6 +6,8 @@
 #include "EngineUtils.h"
 #include "../Units/StrategyCompanyUnit.h"
 #include "../Visual/StrategyInfantryVisualComponent.h"
+#include "../Units/CavalryUnit.h"
+#include "../Visual/StrategyCavalryVisualComponent.h"
 
 namespace Strategy1864BattleQuality
 {
@@ -47,6 +49,12 @@ namespace Strategy1864BattleQuality
         const int32 Divisor = GetFigureDivisor();
         if (World)
         {
+            for (TActorIterator<ACavalryUnit> CavalryIt(World); CavalryIt; ++CavalryIt)
+            {
+                if (IsValid(*CavalryIt))
+                    if (UStrategyCavalryVisualComponent* CavalryVisual = CavalryIt->FindComponentByClass<UStrategyCavalryVisualComponent>())
+                        CavalryVisual->MenPerHorseman = Divisor;
+            }
             for (TActorIterator<AStrategyCompanyUnit> It(World); It; ++It)
             {
                 if (IsValid(*It) && It->InfantryVisualComponent) { It->InfantryVisualComponent->SetVisualScaleDivisor(Divisor); }
