@@ -160,6 +160,10 @@ void AStrategyHUD::DrawButton(float X, float Y, float W, float H, const FString&
 void AStrategyHUD::DrawHUD()
 {
     Super::DrawHUD();
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864NoHud")))
+    {
+        return;   // clean screenshots (the start menu's background)
+    }
     if (FigureDivisor < 0)
     {
         FigureDivisor = Strategy1864BattleQuality::GetFigureDivisor();

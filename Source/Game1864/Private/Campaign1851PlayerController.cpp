@@ -903,6 +903,15 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	if (Overlay.IsValid() && Overlay->IsStartMenu())
 	{
 		Map->SetSpeed(0);
+		// -CampaignMenuShot: saves a screenshot of the start menu after a few seconds and quits (QA).
+		static bool bMenuShot = false;
+		if (!bMenuShot && FParse::Param(FCommandLine::Get(), TEXT("CampaignMenuShot")) && GetWorld()->GetRealTimeSeconds() > 10.f)
+		{
+			bMenuShot = true;
+			FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("Screenshots/menu_shot.png"), true, false);
+			FTimerHandle Quit;
+			GetWorldTimerManager().SetTimer(Quit, []() { FPlatformMisc::RequestExit(false); }, 3.f, false);
+		}
 		float StartX = 0.f, StartY = 0.f;
 		if (GetMousePosition(StartX, StartY) && WasInputKeyJustPressed(EKeys::LeftMouseButton))
 		{
@@ -913,6 +922,14 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			if (Button == EButton::NewGameNation) { Map->NewGameNation = StartRow == 1 ? TEXT("SE") : TEXT("DK"); Button = EButton::Block; }
 			if (Button == EButton::Deviation) { Map->NewGameDeviation = StartRow / 100.f; Button = EButton::Block; }
 			if (Button == EButton::StartLoad) { Overlay->ShowStartLoad(true); Button = EButton::Block; }
+			if (Button == EButton::StartTest)
+			{
+				// Temporary test battles: the flags the Start-Test-*.bat files give (1 or 4 Danish companies against one Swedish).
+				FCommandLine::Append(TEXT(" -Strategy1864Skirmish=1 -Strategy1864SkirmishSwedes -Strategy1864EnemyDefends -Strategy1864SkirmishAttack -Strategy1864FieldLOD=2"));
+				FCommandLine::Append(StartRow >= 4 ? TEXT(" -Strategy1864SkirmishDanes=4 -Strategy1864HoldReserve") : TEXT(" -Strategy1864SkirmishDanes=1"));
+				UGameplayStatics::OpenLevel(this, FName(TEXT("Strategy1864_Skirmish")));
+				Button = EButton::Block;
+			}
 			if (Button == EButton::CloseMenu) { Overlay->ShowStartLoad(false); Button = EButton::Block; }
 			if (Button == EButton::LoadSlot && SaveSlots().IsValidIndex(StartRow))
 			{

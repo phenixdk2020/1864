@@ -9,6 +9,7 @@
 #include "Campaign1851Camera.h"
 #include "Campaign1851Map.h"
 #include "Engine/Texture2D.h"
+#include "ImageUtils.h"
 #include "Fonts/CompositeFont.h"
 #include "Fonts/FontMeasure.h"
 #include "Framework/Application/SlateApplication.h"
@@ -5720,10 +5721,41 @@ void SCampaign1851Overlay::PaintMenu(const FGeometry& Geometry, FSlateWindowElem
 {
 	const FVector2D Screen = Geometry.GetLocalSize();
 	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
-	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Screen, FSlateLayoutTransform(FVector2D::ZeroVector)), White, ESlateDrawEffect::None, FLinearColor(0.f, 0.f, 0.f, 0.45f));
+	if (bStartMenu)
+	{
+		// A battlefield behind the start menu (a screenshot of the 3D battle kept in Data/Campaign1851/MenuBackground.jpg).
+		static FSlateBrush Backdrop;
+		static bool bTried = false;
+		if (!bTried)
+		{
+			bTried = true;
+			const FString File = FPaths::ProjectDir() / TEXT("Data/Campaign1851/MenuBackground.jpg");
+			if (FPaths::FileExists(File))
+			{
+				if (UTexture2D* Tex = FImageUtils::ImportFileAsTexture2D(File))
+				{
+					Tex->AddToRoot();
+					Backdrop.SetResourceObject(Tex);
+					Backdrop.ImageSize = FVector2D(float(Tex->GetSizeX()), float(Tex->GetSizeY()));
+					Backdrop.DrawAs = ESlateBrushDrawType::Image;
+				}
+			}
+		}
+		if (Backdrop.GetResourceObject() && Backdrop.ImageSize.X > 1.f)
+		{
+			const float Fill = FMath::Max(Screen.X / Backdrop.ImageSize.X, Screen.Y / Backdrop.ImageSize.Y);
+			const FVector2D Drawn = Backdrop.ImageSize * Fill;
+			FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Drawn, FSlateLayoutTransform((Screen - Drawn) * 0.5f)), &Backdrop, ESlateDrawEffect::None, FLinearColor::White);
+		}
+	}
+	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Screen, FSlateLayoutTransform(FVector2D::ZeroVector)), White, ESlateDrawEffect::None, FLinearColor(0.f, 0.f, 0.f, bStartMenu ? 0.30f : 0.45f));
 
 	if (bStartMenu && !bStartLoad)
 	{
+		// Temporary: straight into a test battle (one Swedish company against one or four Danish).
+		PaintText(Geometry, Out, Layer + 3, TEXT("Midlertidigt: testslag"), FVector2D(24.f, Screen.Y - 92.f), Serif(12, EFace::Italic), Gold, 0.f, false);
+		PaintButton(Geometry, Out, Layer + 3, FVector2D(24.f, Screen.Y - 70.f), FVector2D(210.f, 34.f), TEXT("TEST 1 MOD 1"), EButton::StartTest, 1);
+		PaintButton(Geometry, Out, Layer + 3, FVector2D(246.f, Screen.Y - 70.f), FVector2D(210.f, 34.f), TEXT("TEST 4 MOD 1"), EButton::StartTest, 4);
 		const FVector2D StartSize(820.f, 570.f);
 		const FVector2D StartPos = (Screen - StartSize) * 0.5f;
 		PaintPanel(Geometry, Out, Layer + 1, StartPos, StartSize);

@@ -1523,6 +1523,9 @@ Codex' tre 1825-delopgaver (hær og våben, officerer og ministre, nationer/byer
 - Scenarieskift genindlæser fortsat Campaign1851; NewGame.flag medfører land og afvigelse. Indlæsning fra et andet scenarie fortsætter via det eksisterende pending-slot-flow uden at EndPlay overskriver Autosave. Retur fra taktiske slag bevarer sit eksisterende indlæsningsflow.
 - Kontrol: statisk gennemgang og git diff --check. Spillet er ikke bygget eller startet; ændringerne er ikke committet.
 
+### 2026-10-08 – Startmenu (Codex) med midlertidige testslag, rytterkolonne
+Startmenuen (scenarie, land, afvigelse, NYT SPIL, INDLÆS SPIL, AFSLUT; spilmenuen under Esc er reduceret) er merget fra Codex. Oven på den: baggrund (Data/Campaign1851/MenuBackground.jpg, et HUD-frit billede fra 3D-slaget) og to midlertidige knapper, TEST 1 MOD 1 og TEST 4 MOD 1, som starter testbanen med samme flag som Start-Test-1/2 (de fjernes igen). Nye testflag: -Strategy1864NoHud (HUD skjult til rene skærmbilleder) og -CampaignMenuShot (skærmbillede af startmenuen). Rytteriet: kolonnen er tre i bredden, men fik tilfældig forskydning (25 cm langs, 12 cm på tværs) og et sidste led langt til siden; nu næsten ingen forskydning i kolonne og et kort sidste led midtstilles. Ikke set på skærmbillede.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -171,7 +171,7 @@ void UStrategyCavalryVisualComponent::Fall(int32 Index)
 
 void UStrategyCavalryVisualComponent::Layout()
 {
-    // Ranks of horsemen side by side, knee to knee in line, two abreast in column.
+    // Ranks of horsemen side by side, knee to knee in line, three abreast in column.
     const bool bColumn = OwnerCavalry->FormationComponent &&
         (OwnerCavalry->FormationComponent->CurrentFormation == EStrategyFormationType::CavalryColumn ||
          OwnerCavalry->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn ||
@@ -182,9 +182,13 @@ void UStrategyCavalryVisualComponent::Layout()
     for (int32 i = 0; i < N; ++i)
     {
         const int32 Rank = i / Files, File = i % Files;
-        const float Y = (File - (Files - 1) * 0.5f) * FileSpacingCm;
+        // The last rank may be short: its horsemen are centred on the column, not pushed to one side.
+        const int32 InRank = Rank == Ranks - 1 ? FMath::Max(1, N - (Ranks - 1) * Files) : Files;
+        const float Y = (File - (InRank - 1) * 0.5f) * FileSpacingCm;
         const float X = -(Rank - (Ranks - 1) * 0.5f) * RankSpacingCm;
-        Horsemen[i].Slot = FVector(X + FMath::FRandRange(-25.f, 25.f), Y + FMath::FRandRange(-12.f, 12.f), 0.f);
+        // A column of three abreast stays straight (a hair of looseness only); a line may be a little ragged.
+        const float JitterX = bColumn ? 6.f : 25.f, JitterY = bColumn ? 3.f : 12.f;
+        Horsemen[i].Slot = FVector(X + FMath::FRandRange(-JitterX, JitterX), Y + FMath::FRandRange(-JitterY, JitterY), 0.f);
         if (Horsemen[i].Shown.IsZero())
         {
             Horsemen[i].Shown = Horsemen[i].Slot;
