@@ -34,3 +34,4 @@ Status pr. v00.00.50: alle 20 opgaver er lavet. Detaljerne står i de nævnte do
 - Sverige-Norge med eget kort, og andre landes kort (Preussen, Østrig).
 - Søtransport af regimenter mellem havne.
 - Jernbanemobilisering koblet til køreplaner på kortet.
+- Gennemgå de civile bygningers tal (afgifter, arbejdspladser og skat, told og eksport; `FCampaign1851CivilEffect`) for 1825-scenariet, hvor byerne er mindre og der ingen jernbaner er.
