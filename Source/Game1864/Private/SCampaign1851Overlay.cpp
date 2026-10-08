@@ -3004,9 +3004,9 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 	const float LeftW = bDoc ? 0.f : Size.X - 80.f;
 	PaintText(Geometry, Out, Layer + 1, TEXT("F O R S K N I N G"), FVector2D(X, Y), Serif(11), Gold, 0.f, false);
 	// Two tracks: the military research (the War Ministry) and the civil (the Interior Ministry); a project at a time in each.
-	PaintButton(Geometry, Out, Layer + 3, FVector2D(X + 170.f, Y - 8.f), FVector2D(150.f, 24.f), TEXT("MILITÆR"), EButton::ResearchTab, 0, ResearchTab == 0);
-	PaintButton(Geometry, Out, Layer + 3, FVector2D(X + 326.f, Y - 8.f), FVector2D(150.f, 24.f), TEXT("CIVIL"), EButton::ResearchTab, 1, ResearchTab == 1);
-	PaintButton(Geometry, Out, Layer + 3, FVector2D(X + 482.f, Y - 8.f), FVector2D(150.f, 24.f), TEXT("DOKTRINER"), EButton::ResearchTab, 2, bDoc);
+	PaintButton(Geometry, Out, Layer + 3, FVector2D(X + 170.f, Y - 14.f), FVector2D(150.f, 24.f), TEXT("MILITÆR"), EButton::ResearchTab, 0, ResearchTab == 0);
+	PaintButton(Geometry, Out, Layer + 3, FVector2D(X + 326.f, Y - 14.f), FVector2D(150.f, 24.f), TEXT("CIVIL"), EButton::ResearchTab, 1, ResearchTab == 1);
+	PaintButton(Geometry, Out, Layer + 3, FVector2D(X + 482.f, Y - 14.f), FVector2D(150.f, 24.f), TEXT("DOKTRINER"), EButton::ResearchTab, 2, bDoc);
 	Y += 24.f;
 	// Columns by branch, rows by year (1852 at the top), a box per topic; click a box to start it.
 	const TArray<FCampaign1851ResearchTopic>& Topics = Campaign1851Research::Topics();
@@ -3022,8 +3022,14 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 	auto ColumnOf = [&TabColumns](int32 Branch) { return FMath::Max(0, TabColumns.IndexOfByKey(Branch)); };
 	auto InTab = [&](int32 Topic) { return !bDoc && Campaign1851Research::IsCivil(Topic) == bResearchCivil; };
 	if (bDoc) { TabColumns.Reset(); }
+	// The level shown: a prerequisite in the other tab (the telegraph for the railway mobilisation) does not push a topic down.
+	TFunction<int32(int32)> DisplayTier = [&](int32 Topic) -> int32
+	{
+		const int32 Need = Topics[Topic].Needs ? Campaign1851Research::FindTopic(Topics[Topic].Needs) : INDEX_NONE;
+		return Topics.IsValidIndex(Need) && InTab(Need) ? DisplayTier(Need) + 1 : 0;
+	};
 	// A branch whose topics stand side by side on a level (the infantry) gets a column as wide as its widest level, so the boxes stay large.
-	TArray<float> ColX, ColWid;
+	TArray<float> ColX, ColWid, ColMost;
 	{
 		TArray<float> Weight;
 		float Sum = 0.f;
@@ -3036,11 +3042,12 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 				int32 Same = 0;
 				for (int32 u = 0; u < Topics.Num(); ++u)
 				{
-					if (Topics[u].Branch == TabColumns[ci] && InTab(u) && Campaign1851Research::Tier(u) == Campaign1851Research::Tier(t)) { ++Same; }
+					if (Topics[u].Branch == TabColumns[ci] && InTab(u) && DisplayTier(u) == DisplayTier(t)) { ++Same; }
 				}
 				Most = FMath::Max(Most, Same);
 			}
 			Weight.Add(float(Most));
+			ColMost.Add(float(Most));
 			Sum += float(Most);
 		}
 		float At = X + YearW;
@@ -3055,7 +3062,7 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 	int32 Years = 1;   // the number of levels
 	for (int32 t = 0; t < Topics.Num(); ++t)
 	{
-		Years = FMath::Max(Years, Campaign1851Research::Tier(t) + 1);
+		if (InTab(t)) { Years = FMath::Max(Years, DisplayTier(t) + 1); }
 	}
 	const float RowH = FMath::Min(120.f, (Pos.Y + Size.Y - 30.f - Top) / Years);
 	const FVector2D Box(0.f, RowH - 14.f);   // the height of a box (the width is the column's)
@@ -3071,37 +3078,45 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		PaintText(Geometry, Out, Layer + 1, Campaign1851Research::Roman(r), FVector2D(X + 8.f, RY + Box.Y * 0.5f), Serif(16), Gold, 0.f, false);
 		DrawLines(Geometry, Out, Layer, { FVector2D(X + YearW - 6.f, RY - 7.f), FVector2D(X + LeftW, RY - 7.f) }, Gold.CopyWithNewOpacity(0.12f), 1.f);
 	}
-	// Topics on the same level of a branch share its column side by side.
+	// Topics on the same level of a branch stand side by side in the column's slots; a lone topic stands in the slot of what it needs.
 	auto Share = [&](const FCampaign1851ResearchTopic& T, int32& OutIndex)
 	{
-		const int32 Tier = Campaign1851Research::Tier(Campaign1851Research::FindTopic(T.Id));
+		const int32 Self = Campaign1851Research::FindTopic(T.Id);
+		const int32 Tier = DisplayTier(Self);
 		int32 Count = 0;
 		OutIndex = 0;
 		for (int32 u = 0; u < Topics.Num(); ++u)
 		{
-			if (Topics[u].Branch == T.Branch && Campaign1851Research::Tier(u) == Tier && InTab(u))
+			if (Topics[u].Branch == T.Branch && DisplayTier(u) == Tier && InTab(u))
 			{
-				if (FCString::Strcmp(Topics[u].Id, T.Id) == 0)
-				{
-					OutIndex = Count;
-				}
+				if (u == Self) { OutIndex = Count; }
 				++Count;
 			}
+		}
+		const int32 Need = T.Needs ? Campaign1851Research::FindTopic(T.Needs) : INDEX_NONE;
+		if (Count == 1 && Topics.IsValidIndex(Need) && InTab(Need) && Topics[Need].Branch == T.Branch)
+		{
+			int32 Slot = 0;
+			for (int32 u = 0; u < Need; ++u)
+			{
+				if (Topics[u].Branch == T.Branch && DisplayTier(u) == DisplayTier(Need) && InTab(u)) { ++Slot; }
+			}
+			OutIndex = Slot;
 		}
 		return FMath::Max(1, Count);
 	};
 	auto TopicBoxSize = [&](const FCampaign1851ResearchTopic& T)
 	{
-		int32 Index = 0;
-		const int32 Count = Share(T, Index);
-		return FVector2D((ColWid[ColumnOf(T.Branch)] - 22.f - 6.f * (Count - 1)) / Count, Box.Y);
+		const int32 Column = ColumnOf(T.Branch);
+		const float Most = ColMost.IsValidIndex(Column) ? ColMost[Column] : 1.f;
+		return FVector2D((ColWid[Column] - 22.f - 6.f * (Most - 1.f)) / Most, Box.Y);
 	};
 	auto BoxPos = [&](const FCampaign1851ResearchTopic& T)
 	{
 		int32 Index = 0;
 		Share(T, Index);
 		const float W = TopicBoxSize(T).X;
-		return FVector2D(ColX[ColumnOf(T.Branch)] + 11.f + Index * (W + 6.f), Top + Campaign1851Research::Tier(Campaign1851Research::FindTopic(T.Id)) * RowH);
+		return FVector2D(ColX[ColumnOf(T.Branch)] + 11.f + Index * (W + 6.f), Top + DisplayTier(Campaign1851Research::FindTopic(T.Id)) * RowH);
 	};
 	// The lines first, under the boxes.
 	for (const FCampaign1851ResearchTopic& T : Topics)
@@ -3157,7 +3172,7 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		DrawLines(Geometry, Out, Layer + 7, { BP, BP + FVector2D(BoxSize.X, 0.f), BP + BoxSize, BP + FVector2D(0.f, BoxSize.Y), BP }, Gold, 1.5f);
 		PaintBranchSymbol(Geometry, Out, Layer + 8, T.Branch, BP + FVector2D(46.f, 50.f), 26.f);
 		PaintText(Geometry, Out, Layer + 8, T.Name, BP + FVector2D(90.f, 40.f), Serif(20), Ink, 0.f, false);
-		PaintText(Geometry, Out, Layer + 8, FString::Printf(TEXT("%s  ·  niveau %s"), Campaign1851Research::BranchName(T.Branch), Campaign1851Research::Roman(Campaign1851Research::Tier(ResearchPick))),
+		PaintText(Geometry, Out, Layer + 8, FString::Printf(TEXT("%s  ·  niveau %s"), Campaign1851Research::BranchName(T.Branch), Campaign1851Research::Roman(DisplayTier(ResearchPick))),
 			BP + FVector2D(90.f, 66.f), Serif(12, EFace::Italic), Gold, 0.f, false);
 		float TY = BP.Y + 104.f;
 		// The effect, wrapped.
