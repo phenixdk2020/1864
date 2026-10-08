@@ -1,0 +1,143 @@
+[
+  {
+    "id": "london",
+    "navn": "London-protokollen: stormagterne garanterer helstaten",
+    "vindue": {
+      "aar": 1852,
+      "maaned": 5
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "forhold.GB >= 45 og ikke mobiliseret",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": -10
+    },
+    "udeblivelse": {
+      "spaending": 3,
+      "kasse": -2500
+    },
+    "avis": "London-protokollen: stormagterne garanterer helstaten",
+    "log": "London-protokollen: stormagterne garanterer helstaten"
+  },
+  {
+    "id": "helstat",
+    "navn": "Helstatsforfatningen vedtages; Holsten og Lauenborg protesterer",
+    "vindue": {
+      "aar": 1855,
+      "maaned": 10
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "opinion.helstat >= 40",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": 5
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500
+    },
+    "avis": "Helstatsforfatningen vedtages; Holsten og Lauenborg protesterer",
+    "log": "Helstatsforfatningen vedtages; Holsten og Lauenborg protesterer"
+  },
+  {
+    "id": "suspension",
+    "navn": "Helstatsforfatningen ophæves for Holsten og Lauenborg efter krav fra Forbundet",
+    "vindue": {
+      "aar": 1858,
+      "maaned": 11
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "forhold.PR < 50",
+    "blokeringer": "garant.GB",
+    "effekter": {
+      "spaending": 8
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500
+    },
+    "avis": "Helstatsforfatningen ophæves for Holsten og Lauenborg efter krav fra Forbundet",
+    "log": "Helstatsforfatningen ophæves for Holsten og Lauenborg efter krav fra Forbundet"
+  },
+  {
+    "id": "marts",
+    "navn": "Martskundgørelsen: Holsten får særstilling, Slesvig knyttes tættere til kongeriget",
+    "vindue": {
+      "aar": 1863,
+      "maaned": 3
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "opinion.ejder >= 35",
+    "blokeringer": "maegling",
+    "effekter": {
+      "spaending": 12
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500
+    },
+    "avis": "Martskundgørelsen: Holsten får særstilling, Slesvig knyttes tættere til kongeriget",
+    "log": "Martskundgørelsen: Holsten får særstilling, Slesvig knyttes tættere til kongeriget"
+  },
+  {
+    "id": "november",
+    "navn": "Novemberforfatningen: fælles forfatning for Danmark og Slesvig",
+    "vindue": {
+      "aar": 1863,
+      "maaned": 11
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "opinion.helstat < 40 og spaending >= 45",
+    "blokeringer": "maegling",
+    "effekter": {
+      "spaending": 22
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500
+    },
+    "avis": "Novemberforfatningen: fælles forfatning for Danmark og Slesvig",
+    "log": "Novemberforfatningen: fælles forfatning for Danmark og Slesvig"
+  },
+  {
+    "id": "execution",
+    "navn": "Forbundseksekutionen: saksiske og hannoveranske tropper rykker ind i Holsten",
+    "vindue": {
+      "aar": 1863,
+      "maaned": 12
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "spaending >= 60 og forhold.PR < 30",
+    "blokeringer": "maegling",
+    "effekter": {
+      "spaending": 12,
+      "forbundskorps": 1
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500
+    },
+    "avis": "Forbundseksekutionen: saksiske og hannoveranske tropper rykker ind i Holsten",
+    "log": "Forbundseksekutionen: saksiske og hannoveranske tropper rykker ind i Holsten"
+  },
+  {
+    "id": "ultimatum",
+    "navn": "Preussen og Østrig stiller ultimatum: Novemberforfatningen skal ophæves på 48 timer",
+    "vindue": {
+      "aar": 1864,
+      "maaned": 1
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "spaending >= 70 og ikke maegling",
+    "blokeringer": "garant.GB og garant.RU",
+    "effekter": {
+      "spaending": 15
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500
+    },
+    "avis": "Preussen og Østrig stiller ultimatum: Novemberforfatningen skal ophæves på 48 timer",
+    "log": "Preussen og Østrig stiller ultimatum: Novemberforfatningen skal ophæves på 48 timer"
+  }
+]
