@@ -50,7 +50,7 @@ namespace Campaign1851Nations
 
 	const FCampaign1851CivilEffect* CivilEffect(const FString& Key)
 	{
-		// Estimates for play: growth in percentage points a year, income in rigsdaler a year.
+		// 1851 estimates for play: growth in percentage points a year, income in rigsdaler a year.
 		static const TMap<FString, FCampaign1851CivilEffect> Effects = {
 			//                            urban rural fees  private jobs trade
 			{ TEXT("Schoolhouse"),      { 0.15f, 0.05f,    0, false,   6,    0 } },
@@ -67,7 +67,22 @@ namespace Campaign1851Nations
 			{ TEXT("Textile_Mill"),     { 0.60f, 0.05f,  600, true,  200, 1800 } },
 			{ TEXT("Inn"),              { 0.10f, 0.05f,  100, true,    8,  100 } },
 		};
-		return Effects.Find(Key);
+		// Smaller establishments in 1825: jobs and fees follow the 80% population baseline.
+		// Trade is lower still before the railway network; these are balance estimates, not census data.
+		// Keep both tables immutable so switching scenarios also updates the economy and building cards.
+		static const TMap<FString, FCampaign1851CivilEffect> Effects1825 = []()
+		{
+			TMap<FString, FCampaign1851CivilEffect> Scaled = Effects;
+			for (TPair<FString, FCampaign1851CivilEffect>& Pair : Scaled)
+			{
+				FCampaign1851CivilEffect& E = Pair.Value;
+				E.IncomeRd = FMath::RoundToInt(E.IncomeRd * 0.80f);
+				E.Jobs = FMath::RoundToInt(E.Jobs * 0.80f);
+				E.TradeRd = FMath::RoundToInt(E.TradeRd * 0.60f);
+			}
+			return Scaled;
+		}();
+		return ACampaign1851Map::ActiveScenario().Year == 1825 ? Effects1825.Find(Key) : Effects.Find(Key);
 	}
 }
 
