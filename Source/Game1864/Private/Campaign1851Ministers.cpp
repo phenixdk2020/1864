@@ -8,12 +8,19 @@
 
 namespace
 {
-	struct FMinisterName { const TCHAR* Name; ECampaign1851Current Line; };
+	struct FCampaignPoliticsMinisterName { const TCHAR* Name; ECampaign1851Current Line; };
 	// Names from the period where they fit the office (several are the game's choice), by portfolio.
-	const TArray<FMinisterName>& Pool(ECampaign1851Portfolio P)
+	const TArray<FCampaignPoliticsMinisterName>& CampaignPoliticsMinisterPool(ECampaign1851Portfolio P, bool bEarly)
 	{
 		using C = ECampaign1851Current;
-		static const TArray<FMinisterName> Pools[int32(ECampaign1851Portfolio::Count)] = {
+		// Fictional advisers until constitutional ministries exist; no later politicians in 1825.
+		static const TArray<FCampaignPoliticsMinisterName> Early = {
+			{ TEXT("Helstatsrådgiver"), C::Helstat }, { TEXT("Helstatsembedsmand"), C::Helstat },
+			{ TEXT("Slesvigrådgiver"), C::Ejder }, { TEXT("Slesvigembedsmand"), C::Ejder },
+			{ TEXT("Nordisk rådgiver"), C::Scandinavian }
+		};
+		if (bEarly) { return Early; }
+		static const TArray<FCampaignPoliticsMinisterName> Pools[int32(ECampaign1851Portfolio::Count)] = {
 			{ { TEXT("F.F. Tillisch"), C::Helstat }, { TEXT("C.E. Rotwitt"), C::Helstat }, { TEXT("A.F. Krieger"), C::Ejder }, { TEXT("Orla Lehmann"), C::Ejder }, { TEXT("Carl Ploug"), C::Scandinavian } },
 			{ { TEXT("A.S. Ørsted"), C::Helstat }, { TEXT("C.A. Fonnesbech"), C::Helstat }, { TEXT("J.A. Hansen"), C::Ejder }, { TEXT("C.F. Tietgen"), C::Ejder }, { TEXT("J.F. Schouw"), C::Scandinavian } },
 			{ { TEXT("C.F. Hansen"), C::Helstat }, { TEXT("W. Lüttichau"), C::Helstat }, { TEXT("J.J.G. Hansen"), C::Ejder }, { TEXT("C.C. Lundbye"), C::Ejder }, { TEXT("M.R. Raasløff"), C::Scandinavian } },
@@ -26,7 +33,7 @@ namespace
 		return Pools[FMath::Clamp(int32(P), 0, int32(ECampaign1851Portfolio::Count) - 1)];
 	}
 
-	uint8 Quality(uint32 SeedValue, const TCHAR* Name, uint32 Which)
+	uint8 CampaignPoliticsMinisterQuality(uint32 SeedValue, const TCHAR* Name, uint32 Which)
 	{
 		// Two dice: most ministers are middling.
 		FRandomStream Rng(int32(HashCombine(HashCombine(SeedValue, GetTypeHash(FString(Name))), Which)));
@@ -36,7 +43,7 @@ namespace
 
 FCampaign1851Minister ACampaign1851Map::MakeMinister(ECampaign1851Portfolio P, ECampaign1851Current Line, const FString& Avoid) const
 {
-	const TArray<FMinisterName>& Names = Pool(P);
+	const TArray<FCampaignPoliticsMinisterName>& Names = CampaignPoliticsMinisterPool(P, ActiveScenario().Year < 1850 && GetDate().GetYear() < 1848);
 	TArray<int32> Fit;
 	for (int32 i = 0; i < Names.Num(); ++i)
 	{
@@ -56,13 +63,13 @@ FCampaign1851Minister ACampaign1851Map::MakeMinister(ECampaign1851Portfolio P, E
 		}
 	}
 	FRandomStream Rng(int32(HashCombine(uint32(Seed), uint32(FMath::FloorToInt(CampaignDays)) * 7u + uint32(P))));
-	const FMinisterName& N = Names[Fit[Rng.RandHelper(Fit.Num())]];
+	const FCampaignPoliticsMinisterName& N = Names[Fit[Rng.RandHelper(Fit.Num())]];
 	FCampaign1851Minister M;
 	M.Name = N.Name;
 	M.Line = N.Line;
-	M.Skill = Quality(uint32(Seed), N.Name, 1);
-	M.Thrift = Quality(uint32(Seed), N.Name, 2);
-	M.Caution = Quality(uint32(Seed), N.Name, 3);
+	M.Skill = CampaignPoliticsMinisterQuality(uint32(Seed), N.Name, 1);
+	M.Thrift = CampaignPoliticsMinisterQuality(uint32(Seed), N.Name, 2);
+	M.Caution = CampaignPoliticsMinisterQuality(uint32(Seed), N.Name, 3);
 	M.Since = CampaignDays;
 	return M;
 }
@@ -82,7 +89,8 @@ void ACampaign1851Map::AppointCabinet(ECampaign1851Current Line)
 TArray<FCampaign1851Minister> ACampaign1851Map::MinisterCandidates(ECampaign1851Portfolio P) const
 {
 	TArray<FCampaign1851Minister> Out;
-	for (const FMinisterName& N : Pool(P))
+	if (int32(P) < 0 || int32(P) >= int32(ECampaign1851Portfolio::Count)) { return Out; }
+	for (const FCampaignPoliticsMinisterName& N : CampaignPoliticsMinisterPool(P, ActiveScenario().Year < 1850 && GetDate().GetYear() < 1848))
 	{
 		if (Ministers[int32(P)].Name == N.Name)
 		{
@@ -91,9 +99,9 @@ TArray<FCampaign1851Minister> ACampaign1851Map::MinisterCandidates(ECampaign1851
 		FCampaign1851Minister M;
 		M.Name = N.Name;
 		M.Line = N.Line;
-		M.Skill = Quality(uint32(Seed), N.Name, 1);
-		M.Thrift = Quality(uint32(Seed), N.Name, 2);
-		M.Caution = Quality(uint32(Seed), N.Name, 3);
+		M.Skill = CampaignPoliticsMinisterQuality(uint32(Seed), N.Name, 1);
+		M.Thrift = CampaignPoliticsMinisterQuality(uint32(Seed), N.Name, 2);
+		M.Caution = CampaignPoliticsMinisterQuality(uint32(Seed), N.Name, 3);
 		M.Since = CampaignDays;
 		Out.Add(M);
 	}
@@ -220,7 +228,10 @@ TArray<FCampaign1851Decision> ACampaign1851Map::MinisterOptions(ECampaign1851Por
 			Add(ECampaign1851DecisionKind::Blockade, 0, 0, 0.0, 50.f, TEXT("Hæv blokaden"), bAtWar ? FString(TEXT("fjenden er overlegen til søs")) : FString(TEXT("freden er sluttet")));
 		}
 		// Ships while the enemy's navy grows (keep a margin of half again his strength, in war his and Austria's).
-		const float Want = FMath::Max(40.f, (bAtWar ? EnemySeaStrength() : 4.f + 1.2f * float(CampaignDays / 365.0) + 22.f) * 1.5f);
+		const float PeaceThreat = ActiveScenario().Year < 1850
+			? 4.f + 1.2f * FMath::Max(0.f, float((GetDate() - FDateTime(1851, 7, 1)).GetTotalDays() / 365.0))
+			: 4.f + 1.2f * float(CampaignDays / 365.0) + 22.f;
+		const float Want = FMath::Max(ActiveScenario().Year < 1850 && !bAtWar ? 6.f : 40.f, (bAtWar ? EnemySeaStrength() : PeaceThreat) * 1.5f);
 		if (DanishSeaStrength() < Want)
 		{
 			int32 Best = INDEX_NONE;
@@ -269,13 +280,14 @@ TArray<FCampaign1851Decision> ACampaign1851Map::MinisterOptions(ECampaign1851Por
 		for (int32 r = 0; r < int32(ECampaign1851Raw::Count); ++r)
 		{
 			const ECampaign1851Raw R = ECampaign1851Raw(r);
-			const float Need = R == ECampaign1851Raw::Cloth || R == ECampaign1851Raw::Leather ? 1600.f : R == ECampaign1851Raw::Powder ? 200.f : 3.f * FMath::Max(0.f, Used[r] - Made[r]);
+			const float Need = R == ECampaign1851Raw::Cloth || R == ECampaign1851Raw::Leather ? 1600.f * (ActiveScenario().Year < 1850 ? ActiveScenario().ArmyFactor : 1.f) : R == ECampaign1851Raw::Powder ? 200.f : 3.f * FMath::Max(0.f, Used[r] - Made[r]);
 			const float Short = Need - RawStock[r];
-			if (Short > 0.5f && RawPrice(R) * Short <= Budget)
+			const int32 Amount = FMath::CeilToInt(Short);
+			if (Short > 0.5f && RawPrice(R) * Amount <= Budget)
 			{
 				const Campaign1851Resources::FRawInfo& I = Campaign1851Resources::Info(R);
-				Add(ECampaign1851DecisionKind::BuyRaw, r, FMath::CeilToInt(Short), RawPrice(R) * Short, 8.f + Short / FMath::Max(Need, 1.f) * 10.f,
-					FString::Printf(TEXT("Køb %d %s %s"), FMath::CeilToInt(Short), I.Unit, I.Name), FString::Printf(TEXT("lager %.0f, ønsket %.0f"), RawStock[r], Need));
+				Add(ECampaign1851DecisionKind::BuyRaw, r, Amount, RawPrice(R) * Amount, 8.f + Short / FMath::Max(Need, 1.f) * 10.f,
+					FString::Printf(TEXT("Køb %d %s %s"), Amount, I.Unit, I.Name), FString::Printf(TEXT("lager %.0f, ønsket %.0f"), RawStock[r], Need));
 			}
 		}
 	}
@@ -370,8 +382,8 @@ void ACampaign1851Map::RestoreMinister(const TArray<FString>& P)
 	FCampaign1851Minister& M = Ministers[p];
 	M.Name = P[2];
 	M.Line = ECampaign1851Current(FMath::Clamp(FCString::Atoi(*P[3]), 0, 2));
-	M.Skill = uint8(FCString::Atoi(*P[4]));
-	M.Thrift = uint8(FCString::Atoi(*P[5]));
-	M.Caution = uint8(FCString::Atoi(*P[6]));
+	M.Skill = uint8(FMath::Clamp(FCString::Atoi(*P[4]), 1, 10));
+	M.Thrift = uint8(FMath::Clamp(FCString::Atoi(*P[5]), 1, 10));
+	M.Caution = uint8(FMath::Clamp(FCString::Atoi(*P[6]), 1, 10));
 	M.Since = FCString::Atod(*P[7]);
 }
