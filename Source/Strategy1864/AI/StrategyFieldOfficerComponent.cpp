@@ -250,6 +250,19 @@ void UStrategyFieldOfficerComponent::TickComponent(float DeltaTime, ELevelTick T
     Accumulator = 0.0f;
     float Distance = 0.0f;
     AStrategyUnit* Enemy = NearestEnemy(Distance, 150000.0f);
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugOfficer")))
+    {
+        static TMap<const UStrategyFieldOfficerComponent*, float> NextLog;
+        float& Next = NextLog.FindOrAdd(this);
+        const float Time = GetWorld()->GetTimeSeconds();
+        if (Time >= Next)
+        {
+            Next = Time + 4.0f;
+            const FStrategyOrder Cur = OwnerUnit->OrderComponent->GetCurrentOrder();
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OFFICER: %s order=%d auth=%d executing=%d enemy=%s %.0f m flankRole=%d"), *OwnerUnit->DisplayName.ToString(),
+                int32(Cur.Type), int32(Cur.Authority), OwnerUnit->OrderComponent->IsPhysicallyExecuting() ? 1 : 0, Enemy ? *Enemy->DisplayName.ToString() : TEXT("-"), Distance / 100.0f, FlankRole);
+        }
+    }
     switch (OwnerUnit->Echelon)
     {
     case EStrategyEchelon::Company: ThinkInfantry(Enemy, Distance); break;

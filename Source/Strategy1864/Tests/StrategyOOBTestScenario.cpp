@@ -450,7 +450,9 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
         Attack.TargetLocation = Middle;
         Attack.FacingYaw = 0.0f;
         Attack.bHasFacing = true;
-        Attack.Authority = EStrategyOrderAuthority::DirectPlayer;
+        // The major's own order: his captains lead the attack (advance to fire distance, fire base, flanks, reserve). A player order
+        // would be carried out as a straight march to the target, after which the companies hold and fire.
+        Attack.Authority = EStrategyOrderAuthority::OfficerAI;
         Major->OrderComponent->SetOrder(Attack);
     }
     // The camera behind the Danish line (as the campaign's battles).

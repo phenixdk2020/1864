@@ -1588,6 +1588,9 @@ Kampregelpakken (karré med fire skydezoner og bajonetter, rytterangreb efter st
 - MovementExecutor eksponerer faktisk forskydningshastighed og nulstiller ved pause, stop og afslutning, da SetActorLocation ikke giver normal pawn-velocity.
 - Validering: statisk gennemgang, syv geometriske kontrolscenarier og git diff --check. Ingen build, spilstart eller commit.
 
+### 2026-10-08 – Rytteritrussel merget; testslagets angreb ledes af officererne
+Codex' opgave om rytteritruslen (tidligere udløsning efter lukningsfart, bajonetter, kun det truede kompagni danner karré) er merget. Diagnose af at kompagnierne ikke flankerede i testslagene: med spillerautoritet udføres ANGRIB HER som en fysisk march til målet, og efter en afsluttet spillerordre holder enheden og skyder (ingen ny jagt, jf. gennemgangen C-17); flankering, ildbase og reserve kører kun, når officererne leder angrebet. Testslagenes bataljonschef giver derfor angrebsordren med officerens autoritet (-Strategy1864SkirmishAttack). Nyt testflag: -Strategy1864DebugOfficer logger hvert kompagnis ordre, fjende og flankerolle hvert fjerde sekund.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
