@@ -86,7 +86,7 @@ void UStrategyMovementExecutorComponent::HandleOrderChanged(const FStrategyOrder
          NewOrder.Type == EStrategyOrderType::Withdraw ||
          NewOrder.Type == EStrategyOrderType::Assemble);
 
-    if (bCommandParentMission)
+    if (bCommandParentMission && NewOrder.Waypoints.IsEmpty())
     {
         StopMovement();
         OwnerUnit->SetUnitState(EStrategyUnitState::Ready);
@@ -155,7 +155,7 @@ void UStrategyMovementExecutorComponent::BeginMovementForOrder(const FStrategyOr
     bPreserveRoutedState =
         OwnerUnit && OwnerUnit->UnitState == EStrategyUnitState::Routed;
 
-    MovementGoal = Order.TargetLocation;
+    MovementGoal = Order.ActiveDestination();
     ActiveRoutePlan = FStrategyRoutePlan();
     RoutePoints.Reset();
     RoutePointIndex = 0;
@@ -198,7 +198,7 @@ void UStrategyMovementExecutorComponent::BeginMovementForOrder(const FStrategyOr
     }
 
     GoalFacingYaw = Order.FacingYaw;
-    bApplyGoalFacing = Order.bHasFacing;
+    bApplyGoalFacing = Order.bHasFacing && Order.NextWaypointIndex >= Order.Waypoints.Num() - 1;
     bKeepFacingMove = Order.bKeepFacing && Order.bHasFacing;
     ExecutingOrderSerial = Order.OrderSerial;
     bHasMovementGoal = true;
@@ -326,6 +326,10 @@ void UStrategyMovementExecutorComponent::TickComponent(
         return;
     }
 
+    while (RoutePointIndex < RoutePoints.Num() - 1 &&
+           FVector::Dist2D(CurrentLocation, RoutePoints[RoutePointIndex]) <= FMath::Max(ArrivalToleranceCm, 100.0f))
+        ++RoutePointIndex;
+
     const FVector ActiveWaypoint = RoutePoints[RoutePointIndex];
     const FVector WaypointDelta = ActiveWaypoint - CurrentLocation;
     const FVector FlatDelta(WaypointDelta.X, WaypointDelta.Y, 0.0f);
@@ -346,6 +350,18 @@ void UStrategyMovementExecutorComponent::TickComponent(
 
         OwnerUnit->SetActorLocation(
             FVector(MovementGoal.X, MovementGoal.Y, CurrentLocation.Z));
+
+        if (CurrentOrder.Waypoints.IsValidIndex(CurrentOrder.NextWaypointIndex))
+        {
+            OwnerUnit->OrderComponent->AdvanceWaypoint();
+            const FStrategyOrder NextRouteOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
+            if (NextRouteOrder.Waypoints.IsValidIndex(NextRouteOrder.NextWaypointIndex))
+            {
+                BeginMovementForOrder(NextRouteOrder);
+                TickComponent(DeltaTime, TickType, ThisTickFunction);
+                return;
+            }
+        }
 
         if (bApplyGoalFacing)
         {
@@ -530,6 +546,12 @@ void UStrategyMovementExecutorComponent::TickComponent(
 
 void UStrategyMovementExecutorComponent::FinishMovement()
 {
+    if (OwnerUnit && OwnerUnit->OrderComponent)
+    {
+        const FStrategyOrder FinishedRoute = OwnerUnit->OrderComponent->GetCurrentOrder();
+        if (FinishedRoute.WaypointRouteId.IsValid() && FinishedRoute.Waypoints.IsEmpty() && FinishedRoute.NextWaypointIndex == 0)
+            OwnerUnit->OrderComponent->AdvanceWaypoint();
+    }
     ExecutedVelocity = FVector::ZeroVector;
     bHasMovementGoal = false;
     SetComponentTickEnabled(false);
@@ -698,7 +720,7 @@ bool UStrategyMovementExecutorComponent::TryRetargetDuringBridge(
     const FStrategyRoutePlan TailPlan =
         OwnerUnit->RoutePlanner->BuildRoutePlan(
             PreservedBridgeExit,
-            Order.TargetLocation);
+            Order.ActiveDestination());
 
     if (!TailPlan.bValid)
     {
@@ -725,9 +747,9 @@ bool UStrategyMovementExecutorComponent::TryRetargetDuringBridge(
     ActiveRoutePlan.bUsesBridge = true;
     ActiveRoutePlan.bValid = true;
 
-    MovementGoal = Order.TargetLocation;
+    MovementGoal = Order.ActiveDestination();
     GoalFacingYaw = Order.FacingYaw;
-    bApplyGoalFacing = Order.bHasFacing;
+    bApplyGoalFacing = Order.bHasFacing && Order.NextWaypointIndex >= Order.Waypoints.Num() - 1;
     bKeepFacingMove = Order.bKeepFacing && Order.bHasFacing;
     ExecutingOrderSerial = Order.OrderSerial;
     bTurningToGoalFacing = false;

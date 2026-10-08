@@ -487,7 +487,8 @@ bool AStrategyPlayerController::IssueOrderToSelection(
     const FVector& TargetLocation,
     float FacingYaw,
     bool bHasFacing,
-    float SpreadCm)
+    float SpreadCm,
+    bool bAppendWaypoint)
 {
     if (OrderType == EStrategyOrderType::None)
     {
@@ -525,6 +526,32 @@ bool AStrategyPlayerController::IssueOrderToSelection(
         Order.FacingYaw = FacingYaw;
         Order.bHasFacing = bHasFacing;
         Order.Authority = EStrategyOrderAuthority::DirectPlayer;
+        Order.GroupRouteOffset = Order.TargetLocation - TargetLocation;
+        Order.WaypointRouteId = FGuid::NewGuid();
+        if (bAppendWaypoint && OrderType == EStrategyOrderType::Move)
+        {
+            FStrategyOrder PreviousRoute = Unit->OrderComponent->GetLatestRequestedOrder();
+            for (const FCourier& PendingRoute : Couriers)
+                if (PendingRoute.Unit.Get() == Unit) PreviousRoute = PendingRoute.Order;
+            const bool bCanExtend = PreviousRoute.Type == EStrategyOrderType::Move ||
+                PreviousRoute.Type == EStrategyOrderType::Advance || PreviousRoute.Type == EStrategyOrderType::AttackHere;
+            if (bCanExtend)
+            {
+                Order = PreviousRoute;
+                if (Order.Waypoints.IsEmpty())
+                {
+                    if (!Order.WaypointRouteId.IsValid()) Order.WaypointRouteId = FGuid::NewGuid();
+                    Order.Waypoints.Add(PreviousRoute.TargetLocation);
+                    if (!Unit->OrderComponent->IsPhysicallyExecuting() && PreviousRoute.OrderSerial != 0) Order.NextWaypointIndex = 1;
+                }
+                Order.TargetLocation = TargetLocation + Order.GroupRouteOffset;
+            }
+            else Order.WaypointRouteId = FGuid::NewGuid();
+            Order.Waypoints.Add(Order.TargetLocation);
+            Order.OrderSerial = 0;
+            Order.Authority = EStrategyOrderAuthority::DirectPlayer;
+            if (bHasFacing) { Order.FacingYaw = FacingYaw; Order.bHasFacing = true; }
+        }
 
         // Far from the army's staff the order goes by a rider (within the staff's own circle it is called out).
         const float Distance = FVector::Dist2D(Staff, Unit->GetActorLocation());
@@ -992,6 +1019,7 @@ void AStrategyPlayerController::DeliverOrder(AStrategyUnit* Unit, FStrategyOrder
         const float Off = Distance * (0.05f + 0.15f * (1.0f - Skill));
         const float Angle = FMath::FRand() * 2.0f * PI;
         Order.TargetLocation += FVector(FMath::Cos(Angle), FMath::Sin(Angle), 0.0f) * Off;
+        if (!Order.Waypoints.IsEmpty()) Order.Waypoints.Last() = Order.TargetLocation;
         Remark = FString::Printf(TEXT("%s har forstået ordren løst: stedet ligger ca. %.0f m fra det ønskede"), *Unit->DisplayName.ToString(), Off / 100.0f);
     }
     float ExtraDelay = 0.0f;
@@ -1011,6 +1039,7 @@ void AStrategyPlayerController::DeliverOrder(AStrategyUnit* Unit, FStrategyOrder
         }
         if (Enemy > 1.6f * FMath::Max(1, Unit->CurrentStrength))
         {
+            Order.Waypoints.Reset();
             Order.Type = EStrategyOrderType::DefendHere;
             Order.TargetLocation = Unit->GetActorLocation();
             Remark = FString::Printf(TEXT("%s tøver: fjenden er for stærk (%.0f mand mod hans %d), han holder sin stilling i stedet"), *Unit->DisplayName.ToString(), Enemy, Unit->CurrentStrength);
@@ -1050,6 +1079,7 @@ void AStrategyPlayerController::TickRightMouse()
         {
             bRmbCommand = true;
             bRmbDragged = false;
+            bRmbAppendWaypoint = IsInputKeyDown(EKeys::LeftAlt) || IsInputKeyDown(EKeys::RightAlt);
             RmbStart = Ground;
             RmbStartScreen = FVector2D(MouseX, MouseY);
         }
@@ -1078,7 +1108,19 @@ void AStrategyPlayerController::TickRightMouse()
     if (WasInputKeyJustReleased(EKeys::RightMouseButton) || !IsInputKeyDown(EKeys::RightMouseButton))
     {
         bRmbCommand = false;
-        IssueOrderToSelection(EStrategyOrderType::Move, RmbStart, bArrow ? Delta.Rotation().Yaw : 0.0f, bArrow, 7200.0f);
+        IssueOrderToSelection(EStrategyOrderType::Move, RmbStart, bArrow ? Delta.Rotation().Yaw : 0.0f, bArrow, 7200.0f, bRmbAppendWaypoint);
         bRmbDragged = false;
     }
+}
+
+FStrategyOrder AStrategyPlayerController::GetRequestedRoute(const AStrategyUnit* RouteUnit) const
+{
+    if (!RouteUnit || !RouteUnit->OrderComponent) return FStrategyOrder();
+    FStrategyOrder RequestedRoute = RouteUnit->OrderComponent->GetLatestRequestedOrder();
+    for (const FCourier& RequestedCourier : Couriers)
+        if (RequestedCourier.Unit.Get() == RouteUnit) RequestedRoute = RequestedCourier.Order;
+    const FStrategyOrder ExecutingRoute = RouteUnit->OrderComponent->GetCurrentOrder();
+    if (RequestedRoute.WaypointRouteId.IsValid() && RequestedRoute.WaypointRouteId == ExecutingRoute.WaypointRouteId)
+        RequestedRoute.NextWaypointIndex = FMath::Max(RequestedRoute.NextWaypointIndex, ExecutingRoute.NextWaypointIndex);
+    return RequestedRoute;
 }

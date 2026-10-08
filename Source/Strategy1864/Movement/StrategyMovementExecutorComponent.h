@@ -69,6 +69,14 @@ public:
     UFUNCTION(BlueprintPure, Category="Strategy|Movement")
     TArray<FVector> GetRoutePoints() const { return RoutePoints; }
 
+    TArray<FVector> GetRemainingRoutePoints() const
+    {
+        TArray<FVector> Remaining;
+        for (int32 RouteDrawIndex = RoutePointIndex; RouteDrawIndex < RoutePoints.Num(); ++RouteDrawIndex)
+            Remaining.Add(RoutePoints[RouteDrawIndex]);
+        return Remaining;
+    }
+
     // Actual displacement velocity: APawn::GetVelocity does not track SetActorLocation.
     FVector GetExecutedVelocity() const { return ExecutedVelocity; }
 

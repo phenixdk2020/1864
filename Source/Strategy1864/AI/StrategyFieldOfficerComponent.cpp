@@ -34,6 +34,7 @@ namespace
         {
             return false;
         }
+        if (!Order.Waypoints.IsEmpty() && Order.NextWaypointIndex < Order.Waypoints.Num()) return false;
         if (Order.Type == EStrategyOrderType::AttackHere)
         {
             return FVector::Dist2D(Owner->GetActorLocation(), Order.TargetLocation) <= 6000.0f;

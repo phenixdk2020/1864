@@ -2,6 +2,7 @@
 
 #include "../Command/StrategyCommandComponent.h"
 #include "StrategyOrderComponent.h"
+#include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../Units/StrategyUnit.h"
 
 UStrategyParentExecutionComponent::UStrategyParentExecutionComponent()
@@ -64,6 +65,8 @@ void UStrategyParentExecutionComponent::TickComponent(
     }
 
     EvaluationAccumulator = 0.0f;
+
+    if (!OwnerUnit->OrderComponent->GetCurrentOrder().Waypoints.IsEmpty() && OwnerUnit->MovementExecutor && OwnerUnit->MovementExecutor->HasMovementGoal()) return;
 
     if (HasExecutingSubordinates())
     {
