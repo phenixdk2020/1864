@@ -9,7 +9,7 @@
 #include "Misc/Paths.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
-#include "Misc/LexFromString.h"
+#include "Misc/DefaultValueHelper.h"
 
 namespace CampaignEventMVP
 {
@@ -33,8 +33,8 @@ namespace CampaignEventMVP
 			bool Truth = Value != 0.f;
 			if (Ok && Tokens.Num() == 3)
 			{
-				double Limit = 0;
-				Ok = LexTryParseString(Limit, *Tokens[2]) && FMath::IsFinite(Limit);
+				float Limit = 0.f;
+				Ok = FDefaultValueHelper::ParseFloat(Tokens[2], Limit) && FMath::IsFinite(Limit);
 				const FString& Op = Tokens[1];
 				if (Op == TEXT("<")) Truth = Value < Limit;
 				else if (Op == TEXT("<=")) Truth = Value <= Limit;
@@ -147,7 +147,7 @@ void ACampaign1851Map::ResetWar()
 				for (const auto& EventPair : (*EventEffectObject)->Values)
 				{
 					double EventAmount = 0; float EventExisting = 0;
-					const FString& EventK = EventPair.Key;
+					const FString EventK(EventPair.Key.ToView());   // the JSON map's key is a shared string in 5.8
 					double EventCap = EventK == TEXT("spaending") ? 25 : EventK == TEXT("stemning") ? 10 : EventK == TEXT("kasse") ? 50000 : EventK == TEXT("gaeldrente") ? 100 : EventK == TEXT("forbundskorps") ? 1 : EventK.StartsWith(TEXT("forhold.")) ? 15 : EventK.StartsWith(TEXT("forskning.")) ? 1 : -1;
 					if (EventCap < 0 || !EventPair.Value->TryGetNumber(EventAmount) || !FMath::IsFinite(EventAmount) || FMath::Abs(EventAmount) > EventCap
 						|| ((EventK.StartsWith(TEXT("forhold.")) || EventK.StartsWith(TEXT("forskning."))) && !EventFact(EventK, EventExisting))
@@ -377,11 +377,6 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 	if (FMath::FloorToInt(CampaignDays) != LastWarDay)
 	{
 		LastWarDay = FMath::FloorToInt(CampaignDays);
-	if (!Lines.Contains(TEXT("events-format|29")))
-	{
-		for (const FPlannedEvent& Event : EventPlan)
-			if (Event.Day < CampaignDays) EventsBlocked.AddUnique(Event.Id);
-	}
 		DailyWar();
 		DailyWeather();
 		DailyHealth();
@@ -613,6 +608,12 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 	// Definitions come from scenario data; resolved outcomes come from the save.
 	ResetWar();
 	LastWarDay = FMath::FloorToInt(CampaignDays);
+	// A save from before the event files: the events already past are taken as resolved.
+	if (!Lines.Contains(TEXT("events-format|29")))
+	{
+		for (const FPlannedEvent& Event : EventPlan)
+			if (Event.Day < CampaignDays) EventsBlocked.AddUnique(Event.Id);
+	}
 	for (const FString& Line : Lines)
 	{
 		TArray<FString> P;

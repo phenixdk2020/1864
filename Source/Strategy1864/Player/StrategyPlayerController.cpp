@@ -34,8 +34,9 @@ void AStrategyPlayerController::SetupInputComponent()
     Super::SetupInputComponent();
 
     check(InputComponent);
-    InputComponent->BindAction(TEXT("Select"), IE_Pressed, this, &AStrategyPlayerController::SelectionPressed);
-    InputComponent->BindAction(TEXT("Select"), IE_Released, this, &AStrategyPlayerController::SelectionReleased);
+    // Clicks work while paused too (the pause button on the screen is itself a click).
+    InputComponent->BindAction(TEXT("Select"), IE_Pressed, this, &AStrategyPlayerController::SelectionPressed).bExecuteWhenPaused = true;
+    InputComponent->BindAction(TEXT("Select"), IE_Released, this, &AStrategyPlayerController::SelectionReleased).bExecuteWhenPaused = true;
 
     FInputActionBinding& PauseBinding =
         InputComponent->BindAction(
@@ -624,7 +625,7 @@ void AStrategyPlayerController::TogglePauseSimulation()
 
 void AStrategyPlayerController::SetSimulationSpeed(float NewSpeed)
 {
-    SimulationSpeed = FMath::Clamp(NewSpeed, 1.0f, 3.0f);
+    SimulationSpeed = FMath::Clamp(NewSpeed, 1.0f, 5.0f);
     UGameplayStatics::SetGlobalTimeDilation(this, SimulationSpeed);
 
     if (UGameplayStatics::IsGamePaused(this))

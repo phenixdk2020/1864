@@ -1554,6 +1554,9 @@ Startmenuen (scenarie, land, afvigelse, NYT SPIL, INDLÆS SPIL, AFSLUT; spilmenu
 - Gemmeformat hævet til v29: navn, originalnavn, palette, våbentrin, ventende våbentrin og resterende dage. Delte enheder arver tilpasning/ombygning; sammenlægning og overførsel mellem enheder kræver samme våben og afsluttet ombygning. Alle fem nye controllerklik er selvstændige if-blokke med EButton::Block; navnefeltet blokerer kortets tastaturgenveje.
 - Validering: statisk kontrol af forskningsindekser, gemmefelter, klikblokering, C++-delimitere og Python-syntaks samt git diff --check. Ingen build, editorstart, spiltest eller commit. Midlertidige redigeringsscripts er fjernet fra arbejdstræet.
 
+### 2026-10-08 – Skov, begivenheder og enhedstilpasning merget; tidsknapper i slaget; kort bag startmenuen
+Codex' tre opgaver er merget og bygget: skov i synslinjen (se Docs-afsnittet om skov i historikken), data-drevne begivenheder (Events*.json, EventFact, Docs/Events.md) og navn, uniform og våbenopgradering (Docs/UnitCustomisation.md; hattestil er ikke understøttet af hatmodellerne endnu). Tre kompileringsfejl i begivenhedskoden rettet (Misc/LexFromString.h findes ikke i 5.8, migreringskode stod i AdvanceWar og hører til RestoreWar, JSON-nøglen er en delt streng i 5.8). Slaget har fået knapper til PAUSE/FORTSÆT og x1, x2, x3, x5 øverst ved pointlinjen; klik virker under pause, og hastighedsloftet er x5. Startmenuens baggrund er det levende Danmarkskort; slagmarksbilledet er fjernet. Kontrolleret med skærmbilleder af slaget og menuen.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -9,6 +9,7 @@
 #include "Misc/ConfigCacheIni.h"
 
 #include "StrategyPlayerController.h"
+#include "Kismet/GameplayStatics.h"
 #include "../AI/StrategyDoctrineComponent.h"
 #include "../Combat/StrategyFireControlComponent.h"
 #include "../Combat/StrategyFireDrillComponent.h"
@@ -247,6 +248,19 @@ void AStrategyHUD::DrawHUD()
         const bool bObjectives = It->GetObjectives().Num() > 0;
         const float BW = bObjectives ? 700.0f : 420.0f, BX = (Canvas->ClipX - BW) * 0.5f;
         DrawPanel(BX, 6.0f, BW, 30.0f);
+        // Time: pause and the speeds (keys: pause, 1-3), always within reach on the battlefield.
+        {
+            const AStrategyPlayerController* TimePC = Cast<AStrategyPlayerController>(GetOwningPlayerController());
+            const bool bPaused = UGameplayStatics::IsGamePaused(this);
+            const float Speed = TimePC ? TimePC->SimulationSpeed : 1.0f;
+            const float TX = BX + BW + 10.0f;
+            DrawButton(TX, 8.0f, 74.0f, 26.0f, bPaused ? TEXT("FORTSÆT") : TEXT("PAUSE"), EAction::TimeControl, 0, bPaused);
+            const int32 Speeds[] = { 1, 2, 3, 5 };
+            for (int32 i = 0; i < 4; ++i)
+            {
+                DrawButton(TX + 82.0f + i * 42.0f, 8.0f, 38.0f, 26.0f, *FString::Printf(TEXT("x%d"), Speeds[i]), EAction::TimeControl, Speeds[i], !bPaused && FMath::IsNearlyEqual(Speed, float(Speeds[i])));
+            }
+        }
         Text(FString::Printf(TEXT("DANSKE  %d / %d   ·   FJENDEN  %d / %d"), DN, DS, EN, ES), BX + 14.0f, 13.0f, Gold);
         if (bObjectives)
         {
@@ -950,6 +964,13 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 BattleQualityPreset = B.Value;
                 FigureDivisor = B.Value == 0 ? 5 : B.Value == 1 ? 2 : 1;
                 Strategy1864BattleQuality::ApplyPreset(GetWorld(), B.Value, true);
+                break;
+            case EAction::TimeControl:
+                if (AStrategyPlayerController* TimePC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
+                {
+                    if (B.Value == 0) { TimePC->TogglePauseSimulation(); }
+                    else { TimePC->SetSimulationSpeed(float(B.Value)); }
+                }
                 break;
             case EAction::FigureScale:
                 BattleQualityPreset = -1;
