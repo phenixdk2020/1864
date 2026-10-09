@@ -1737,6 +1737,10 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Codex: angrebsdestination ved den valgte skudafstand, march annulleres ved indgående ild, ny knap AFBRYD (kamptilbagetrækning).
 - `Docs/Kamp-AI-Design-v2.0.md` lagt ind som designgrundlag (afstemning med det byggede er sat i gang).
 
+### 2026-10-09 – Kamporden ud fra stedet
+- Kamporden fra en enhed viser kun garnisonen og felthæren på det sted (by), hvor enheden står: garnison til venstre (skjult hvis ingen), træ til højre (kun hvis en hær er der), altid feltet "Træk herover". Åbnes forfra for hver enhed. "HELE HÆREN" viser alt. En enhed på march viser sit eget træ.
+- Testet i 1825: København viser kun Københavns garnison (jyske enheder ikke med).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

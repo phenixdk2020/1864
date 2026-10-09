@@ -1076,7 +1076,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 					else if (Key == TEXT("officer")) { Overlay->InspectOfficer(FCString::Atoi(*Value)); }
 					else if (Key == TEXT("select")) { Overlay->SetSelectedRegiments({ FCString::Atoi(*Value) }); }
 					else if (Key == TEXT("focus")) { Overlay->FocusOOB(FCString::Atoi(*Value)); Overlay->OpenWindow(W::Chart); }
-					else if (Key == TEXT("kamporden")) { Overlay->OpenWindow(W::Chart); Overlay->FilterOOB(Overlay->GetSelectedRegiments()); }
+					else if (Key == TEXT("kamporden")) { Overlay->OpenWindow(W::Chart); const TArray<int32>& KSel = Overlay->GetSelectedRegiments(); const int32 KTown = KSel.Num() > 0 && Map->GetRegiments().IsValidIndex(KSel[0]) ? Map->GetRegiments()[KSel[0]].Town : INDEX_NONE; if (KTown != INDEX_NONE) { Overlay->SetOOBPlace(KTown); } else { Overlay->FilterOOB(KSel); } }
 					else if (Key == TEXT("selectmany")) { TArray<FString> Parts; Value.ParseIntoArray(Parts, TEXT("+")); TArray<int32> Sel; for (const FString& P : Parts) { Sel.Add(FCString::Atoi(*P)); } Overlay->SetSelectedRegiments(Sel); }
 					else if (Key == TEXT("genfield")) { TArray<FString> P; Value.ParseIntoArray(P, TEXT("+")); if (P.Num() >= 2) { Map->GenerateBattlefield(Map->KmAtWorld(Map->Project(FCString::Atod(*P[0]), FCString::Atod(*P[1]))), 8.f, TEXT("Test")); } }
 					else if (Key == TEXT("split")) { Map->SplitRegiment(FCString::Atoi(*Value)); }
@@ -2193,7 +2193,11 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		else if (Button == SCampaign1851Overlay::EButton::OpenOOB)
 		{
 			// The big order-of-battle window with only the selected units (splitting is done in there).
-			Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart);   // the same view as 'Hele hæren'
+			// The garrison and the army where the chosen unit stands (a unit on the march: just its own tree); never the previous view.
+			Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart);
+			const TArray<int32>& OOBChosen = Overlay->GetSelectedRegiments();
+			const int32 OOBTown = OOBChosen.Num() > 0 && Map->GetRegiments().IsValidIndex(OOBChosen[0]) ? Map->GetRegiments()[OOBChosen[0]].Town : INDEX_NONE;
+			if (OOBTown != INDEX_NONE) { Overlay->SetOOBPlace(OOBTown); } else { Overlay->FilterOOB(OOBChosen); }
 		}
 		else if (Button == SCampaign1851Overlay::EButton::Engage)
 		{

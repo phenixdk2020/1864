@@ -4220,7 +4220,13 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 	// ---------------------------------------------------------------- left: the units in garrison, to drag in
 	const float PoolW = 260.f;
 	const int32 GarrisonKey = TreeKey(ETreeKind::Garrisons, 0);
-	PaintButton(Geometry, Out, Layer + 2, Pos, FVector2D(PoolW, 26.f), [&]() -> const TCHAR*
+	bool bGarrisonHere = true;
+	if (OOBPlace != INDEX_NONE)
+	{
+		bGarrisonHere = false;
+		for (const FCampaign1851Regiment& R : Regs) { bGarrisonHere |= R.Formation == 0 && R.Town == OOBPlace; }
+	}
+	if (bGarrisonHere) PaintButton(Geometry, Out, Layer + 2, Pos, FVector2D(PoolW, 26.f), [&]() -> const TCHAR*
 	{
 		// The garrison's list (when the chosen units stand in garrison), or the unit being split (when it is out in the field).
 		bool bAllHome = true;
@@ -4280,6 +4286,10 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 			for (int32 i = 0; i < Regs.Num(); ++i)
 			{
 				if (OOBFilter.Num() > 0 && !OOBFilter.Contains(i))
+				{
+					continue;
+				}
+				if (OOBPlace != INDEX_NONE && Regs[i].Town != OOBPlace)
 				{
 					continue;
 				}
@@ -4431,8 +4441,10 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 	// With chosen units (the filter) only the armies that hold them are shown: units in garrison give an empty chart.
 	auto HoldsFiltered = [&](int32 ArmyId, bool bLegacy) -> bool
 	{
-		if (OOBFilter.Num() == 0) { return true; }
-		for (int32 u : OOBFilter)
+		if (OOBFilter.Num() == 0 && OOBPlace == INDEX_NONE) { return true; }
+		TArray<int32> Probe = OOBFilter;
+		if (OOBPlace != INDEX_NONE) { for (int32 i = 0; i < Regs.Num(); ++i) { if (Regs[i].Town == OOBPlace) { Probe.Add(i); } } }
+		for (int32 u : Probe)
 		{
 			if (!Regs.IsValidIndex(u) || Regs[u].Formation == 0) { continue; }
 			int32 Top = Regs[u].Formation;
