@@ -1172,6 +1172,21 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
         SubordinateOffset = FMath::RoundToInt(ScrollFraction * SubordinateMaxOffset);
         return true;
     }
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugClicks")))
+    {
+        int32 Hit = INDEX_NONE;
+        for (int32 i = Buttons.Num() - 1; i >= 0 && Hit == INDEX_NONE; --i) { if (Buttons[i].Box.IsInside(P)) { Hit = i; } }
+        static bool bDumped = false;
+        if (!bDumped)
+        {
+            bDumped = true;
+            for (const FButton& Dump : Buttons)
+            {
+                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-HUD: button action=%d value=%d box=%.0f,%.0f-%.0f,%.0f"), int32(Dump.Action), Dump.Value, Dump.Box.Min.X, Dump.Box.Min.Y, Dump.Box.Max.X, Dump.Box.Max.Y);
+            }
+        }
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-HUD: click %.0f,%.0f buttons=%d hit=%d action=%d"), P.X, P.Y, Buttons.Num(), Hit, Hit != INDEX_NONE ? int32(Buttons[Hit].Action) : -1);
+    }
     // The last button drawn lies on top.
     for (int32 i = Buttons.Num() - 1; i >= 0; --i)
     {
