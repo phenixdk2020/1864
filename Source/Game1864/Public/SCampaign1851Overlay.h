@@ -190,6 +190,15 @@ public:
 	TSet<int32> PoolOpen;
 	int32 GetOOBBuilding() const { return OOBBuilding; }
 	void FilterOOB(const TArray<int32>& Units) { OOBFilter = Units; OOBFocus = INDEX_NONE; }
+	/** Show a newly created army, including a company detached from a filtered garrison unit. */
+	void RevealOOBArmy(int32 ArmyId, const TArray<int32>& Units)
+	{
+		FilterOOB(Units);
+		OOBBuilding = INDEX_NONE;
+		Collapsed.Remove(TreeKey(ETreeKind::Formation, ArmyId));
+		ChartScroll = 0.f;
+		ChartScrollY = 0.f;
+	}
 	void FocusOOB(int32 RegimentIndex) { OOBFocus = RegimentIndex; TreeScroll = 0; }
 
 	/** A tooltip over a part of the screen (paint coordinates); the buttons get theirs from ButtonTip. */

@@ -800,7 +800,7 @@ TArray<FCampaign1851Decision> ACampaign1851Map::DecisionOptions(int32 NationInde
 		int32 Ordered = 0;
 		Ordered += TrainOrders.Num();
 		const int32 Need = FMath::CeilToInt(Regiments.Num() / 4.f);
-		if (GetTroopTrains() + Ordered < Need && TroopTrainCost <= Budget && TroopTrainCost <= Spendable)
+		if (HasResearch(TEXT("railway")) && GetTroopTrains() + Ordered < Need && TroopTrainCost <= Budget && TroopTrainCost <= Spendable)
 		{
 			FCampaign1851Decision D;
 			D.Kind = ECampaign1851DecisionKind::TroopTrain;
