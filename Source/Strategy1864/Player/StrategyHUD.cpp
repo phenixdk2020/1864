@@ -340,6 +340,8 @@ void AStrategyHUD::DrawHUD()
         DrawCommandPanel(Selected.Num() > 0 && IsValid(Selected[0]) ? Selected[0] : nullptr);
     }
 
+    DrawUnitHover();
+
     if (!bSelectionBoxActive)
     {
         return;
@@ -1396,6 +1398,43 @@ void AStrategyHUD::AddNotice(const FString& Text)
 {
     Notices.Add(TPair<FString, float>(Text, GetWorld() ? GetWorld()->GetTimeSeconds() + 9.0f : 9.0f));
     if (Notices.Num() > 5) { Notices.RemoveAt(0); }
+}
+
+// Mouse over a unit: its name, the men left out of the men it started with, and its morale.
+void AStrategyHUD::DrawUnitHover()
+{
+    APlayerController* PC = GetOwningPlayerController();
+    if (!PC || !Canvas) { return; }
+    float MX = 0.f, MY = 0.f;
+    if (!PC->GetMousePosition(MX, MY)) { return; }
+    const FVector2D Mouse(MX, MY);
+    for (const FBox2D& Panel : Panels)
+    {
+        if (Panel.IsInside(Mouse)) { return; }
+    }
+    const AStrategyUnit* Best = nullptr;
+    float BestDist = 70.f;
+    for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+    {
+        const AStrategyUnit* Unit = *It;
+        if (!IsValid(Unit) || Unit->InitialStrength <= 0 || IsCommandHQ(Unit)) { continue; }
+        FVector2D Screen;
+        if (!PC->ProjectWorldLocationToScreen(Unit->GetActorLocation() + FVector(0.f, 0.f, 150.f), Screen)) { continue; }
+        const float Dist = FVector2D::Distance(Screen, Mouse);
+        if (Dist < BestDist) { BestDist = Dist; Best = Unit; }
+    }
+    if (!Best) { return; }
+    const int32 Start = Best->InitialStrength, Now = Best->CurrentStrength;
+    const FString Name = Best->DisplayName.ToString();
+    const FString Line1 = FString::Printf(TEXT("%s%s"), *Name, Best->Side == EStrategySide::Denmark ? TEXT("") : TEXT("  (fjende)"));
+    const FString Line2 = FString::Printf(TEXT("Mand: %d af %d  (tab %d)"), Now, Start, Start - Now);
+    const FString Line3 = FString::Printf(TEXT("Moral %.0f"), Best->Morale);
+    const float W = 230.f, H = 66.f;
+    const float X = FMath::Min(MX + 18.f, Canvas->ClipX - W - 6.f), Y = FMath::Min(MY + 18.f, Canvas->ClipY - H - 6.f);
+    DrawRect(FLinearColor(0.02f, 0.03f, 0.05f, 0.92f), X, Y, W, H);
+    Text(Line1, X + 8.f, Y + 6.f, Gold);
+    Text(Line2, X + 8.f, Y + 24.f, Ink);
+    Text(Line3, X + 8.f, Y + 42.f, Muted);
 }
 
 void AStrategyHUD::DrawNotices()

@@ -1813,7 +1813,7 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 	{
 		TrainsNeeded += Campaign1851Army::TrainsNeeded(*R);
 	}
-	Line(TEXT("Med tog"), FString::Printf(TEXT("fylder %d tog  ·  ledige %d af %d"), TrainsNeeded, Map->FreeTroopTrains(), Map->GetTroopTrains()));
+	if (Map->GetTroopTrains() > 0) Line(TEXT("Med tog"), FString::Printf(TEXT("fylder %d tog  ·  ledige %d af %d"), TrainsNeeded, Map->FreeTroopTrains(), Map->GetTroopTrains()));
 	{
 		// Supply of the first unit (the least supplied, if several).
 		const FCampaign1851Regiment* Low = Sel[0];
@@ -5795,7 +5795,7 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 	else if (Window == EWindow::Trains)
 	{
 		const int32 Free = Map->FreeTroopTrains(), All = Map->GetTroopTrains();
-		Title(TEXT("Troppetog"), FString::Printf(TEXT("%d tog  ·  %d ledige  ·  et tog tager en bataljon (800 mand), 250 heste eller et batteri"), All, Free));
+		Title(TEXT("Troppetog"), All == 0 ? FString(TEXT("Ingen tog endnu  ·  jernbaneanlæg skal først forskes, så kan tog bestilles")) : FString::Printf(TEXT("%d tog  ·  %d ledige  ·  et tog tager en bataljon (800 mand), 250 heste eller et batteri"), All, Free));
 		float Y = Pos.Y + 112.f;
 		auto Line = [&](const FString& A, const FString& B)
 		{

@@ -84,6 +84,7 @@ private:
     int32 FigureDivisor = -1;
     int32 BattleQualityPreset = -1;
     void DrawNotices();
+    void DrawUnitHover();
     TArray<TPair<FString, float>> Notices;
     void DrawSettings();
     /** The fire cone of a unit on the ground (as the QA design): from the formation's front corners, the

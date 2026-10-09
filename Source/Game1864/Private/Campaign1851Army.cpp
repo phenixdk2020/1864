@@ -1372,6 +1372,11 @@ void ACampaign1851Map::ResetTroopTrains()
 	TroopTrainList.Reset();
 	TrainOrders.Reset();
 	NextTrainId = 1;
+	if (ActiveScenario().Year < 1850)
+	{
+		UpdateTroopTrainPieces();   // 1825: no railway yet, the troops march (trains come with the research)
+		return;
+	}
 	for (const TCHAR* Station : { TEXT("København"), TEXT("København"), TEXT("Altona"), TEXT("Altona") })
 	{
 		FCampaign1851TroopTrain T;

@@ -2193,8 +2193,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		else if (Button == SCampaign1851Overlay::EButton::OpenOOB)
 		{
 			// The big order-of-battle window with only the selected units (splitting is done in there).
-			Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart);
-			Overlay->FilterOOB(Overlay->GetSelectedRegiments());
+			Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart);   // the same view as 'Hele hæren'
 		}
 		else if (Button == SCampaign1851Overlay::EButton::Engage)
 		{

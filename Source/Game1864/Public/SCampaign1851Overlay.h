@@ -132,7 +132,7 @@ public:
 	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB, CloseOrder, CloseFortPanel, CloseFort };
 	/** The big windows opened from the menu bar under the calendar (one at a time). */
 	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council, Supply, Foreign, Research, Navy, Gazette, End, Battlefield, Materiel, Nations, ArmyStatus };
-	void OpenWindow(EWindow In) { CloseUnitCustomisation(); if (In == EWindow::Chart && Window != EWindow::Chart) { OOBFilter.Reset(); OOBFocus = INDEX_NONE; OOBBuilding = INDEX_NONE; } Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
+	void OpenWindow(EWindow In) { bStackListOpen = false; CloseUnitCustomisation(); if (In == EWindow::Chart && Window != EWindow::Chart) { OOBFilter.Reset(); OOBFocus = INDEX_NONE; OOBBuilding = INDEX_NONE; } Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
 	EWindow GetWindow() const { return Window; }
 
 	/** A question before a step that costs or cannot be undone (mobilisation, ...): the title, what it does, and

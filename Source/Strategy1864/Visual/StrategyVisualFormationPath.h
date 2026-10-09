@@ -18,6 +18,8 @@ struct FStrategyVisualFormationPath
     bool bInitialized = false;
     bool bTurning = false;
     bool bMovingVisuals = false;
+    FVector HeadPos = FVector::ZeroVector; // column head: a vehicle with a turn rate, so corners are rounded
+    float HeadYaw = 0.f;
 
     static void SmoothPosition(FVector& Position, FVector& Velocity, const FVector& Target,
                                float Dt, float Frequency)
@@ -87,8 +89,30 @@ struct FStrategyVisualFormationPath
         if (bColumn)
         {
             const float Front = SlotBounds.IsValid ? SlotBounds.Max.X : 0.f;
-            const FVector Lead = Center + FRotator(0.f, Facing, 0.f).RotateVector(FVector(Front, 0.f, 0.f));
             const float Length = SlotBounds.IsValid ? SlotBounds.GetSize().X + 1000.f : 1000.f;
+            const FVector HeadTarget = Unit.GetLocation() + FRotator(0.f, Unit.Rotator().Yaw, 0.f).RotateVector(FVector(Front, 0.f, 0.f));
+            if (Trail.IsEmpty())
+            {
+                HeadPos = HeadTarget;
+                HeadYaw = Unit.Rotator().Yaw;
+            }
+            // The head walks towards its place with a limited turn rate (about 3 m turning radius), so the column
+            // bends round a corner instead of folding at it.
+            {
+                const FVector To = HeadTarget - HeadPos;
+                const float Dist = To.Size2D();
+                if (Dist > 30.f)
+                {
+                    const float Want = To.Rotation().Yaw;
+                    const float MaxTurn = 50.f * Dt;
+                    HeadYaw = FRotator::NormalizeAxis(HeadYaw + FMath::Clamp(FMath::FindDeltaAngleDegrees(HeadYaw, Want), -MaxTurn, MaxTurn));
+                }
+                const float Speed = FMath::Min(Dist * 4.f, FMath::Max(WalkSpeed * 2.f, 300.f));
+                HeadPos += FRotator(0.f, HeadYaw, 0.f).Vector() * (Speed * Dt);
+                HeadPos.Z = HeadTarget.Z;
+            }
+            Facing = HeadYaw;
+            const FVector Lead = HeadPos;
             if (Trail.IsEmpty())
             {
                 TrailDistance = 0.f; // A new column starts a new distance coordinate.

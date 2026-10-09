@@ -1718,6 +1718,12 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - `Docs/Siege-Test.md` dokumenterer præcis testkommando, forventet log og åbne spørgsmål om 120 dage, ophævelse, forsyning og garnisonstab. Backlog står fortsat som ikke afprøvet.
 - Kontrolleret statisk og med `git diff --check`; ingen build, spilstart eller commit.
 
+### 2026-10-09 – Kolonnehjørner, mouse-over, Kamporden, tog i 1825
+- Kolonnens spids (`FStrategyVisualFormationPath`) kører nu som et køretøj med drejehastighed ca. 50°/s, så en kolonne bøjer rundt om hjørner i stedet for at folde.
+- Slaget: mouse-over på en enhed viser navn, mand nu af start (tab) og moral (`AStrategyHUD::DrawUnitHover`).
+- Kampagnen: Kamporden åbner som hele hærens træ (ikke den filtrerede visning); enhedslisten lukkes når et vindue åbnes.
+- Kampagnen: 1825 starter uden tog (de kommer med jernbaneforskning); tog-fanen siger det.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
