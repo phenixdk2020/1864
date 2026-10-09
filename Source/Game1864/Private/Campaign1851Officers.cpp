@@ -265,7 +265,7 @@ bool ACampaign1851Map::PromoteOfficer(int32 Officer)
 
 bool ACampaign1851Map::OrderTroopTrain(int32 Station)
 {
-	if (Treasury < TroopTrainCost)
+	if (!HasResearch(TEXT("railway")) || Treasury < TroopTrainCost)
 	{
 		return false;
 	}

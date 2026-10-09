@@ -3186,6 +3186,7 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 			if (OOBSourceIndex == INDEX_NONE || Map->GetFormations()[OOBSourceIndex].Echelon == ECampaign1851Echelon::Army) { Overlay->ShowToast(TEXT("En felthær kan ikke ligge under en anden felthær")); return; }
 			const int32 OOBArmy = Map->CreateFormation(ECampaign1851Echelon::Army, 0);
 			Map->MoveFormation(SourceId, OOBArmy);
+			Overlay->RevealOOBArmy(OOBArmy, Map->FormationRegiments(OOBArmy));
 			Overlay->ShowToast(TEXT("Ny felthær med den trukne formation direkte under sig"));
 			return;
 		}
@@ -3199,7 +3200,7 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		if (OOBUnits.Num() == 0) { Overlay->ShowToast(TEXT("Træk en enhed eller et kompagni herover")); return; }
 		const int32 OOBArmy = Map->CreateFormation(ECampaign1851Echelon::Army, 0);
 		for (int32 OOBUnit : OOBUnits) { Map->MoveRegimentToFormation(OOBUnit, OOBArmy); }
-		Overlay->SetOOBBuilding(INDEX_NONE);
+		Overlay->RevealOOBArmy(OOBArmy, OOBUnits);
 		Overlay->ShowToast(FString::Printf(TEXT("Ny felthær med %d enheder direkte under sig"), OOBUnits.Num()));
 		return;
 	}

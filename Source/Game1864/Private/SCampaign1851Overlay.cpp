@@ -5807,7 +5807,8 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 	else if (Window == EWindow::Trains)
 	{
 		const int32 Free = Map->FreeTroopTrains(), All = Map->GetTroopTrains();
-		Title(TEXT("Troppetog"), All == 0 ? FString(TEXT("Ingen tog endnu  ·  jernbaneanlæg skal først forskes, så kan tog bestilles")) : FString::Printf(TEXT("%d tog  ·  %d ledige  ·  et tog tager en bataljon (800 mand), 250 heste eller et batteri"), All, Free));
+		const bool bTrainResearch = Map->HasResearch(TEXT("railway"));
+		Title(TEXT("Troppetog"), All == 0 ? FString(bTrainResearch ? TEXT("Ingen tog endnu  ·  tog kan bestilles fra England") : TEXT("Ingen tog endnu  ·  jernbaneanlæg skal først forskes, så kan tog bestilles")) : FString::Printf(TEXT("%d tog  ·  %d ledige  ·  et tog tager en bataljon (800 mand), 250 heste eller et batteri"), All, Free));
 		float Y = Pos.Y + 112.f;
 		auto Line = [&](const FString& A, const FString& B)
 		{
@@ -5822,7 +5823,13 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 		const TArray<FCampaign1851City>& Towns = Map->GetCities();
 		TArray<bool> Shown;
 		Shown.Init(false, List.Num());
-		const bool bCanOrder = Map->GetTreasury() >= ACampaign1851Map::TroopTrainCost;
+		const bool bCanOrder = bTrainResearch && Map->GetTreasury() >= ACampaign1851Map::TroopTrainCost;
+		if (Nets.Num() == 0)
+		{
+			PaintButton(Geometry, Out, Layer + 3, FVector2D(Pos.X + 24.f, Y), FVector2D(460.f, 28.f),
+				bTrainResearch ? FString::Printf(TEXT("BESTIL FRA ENGLAND  (%s rd.)"), *Thousands(ACampaign1851Map::TroopTrainCost)) : FString(TEXT("Jernbaneanlæg skal forskes først")), EButton::TrainOrder, INDEX_NONE, false, !bCanOrder);
+			Y += 40.f;
+		}
 		for (int32 n = 0; n < Nets.Num() && Y < Pos.Y + Size.Y - 200.f; ++n)
 		{
 			const ACampaign1851Map::FRailNet& Net = Nets[n];
@@ -5840,7 +5847,7 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 			PaintText(Geometry, Out, Layer + 3, FString::Printf(TEXT("%d tog  ·  %d ledige  ·  %d stationer  ·  nye tog landes i %s"), Count, FreeHere, Net.Stations.Num(), *Towns[Net.Depot].Name),
 				FVector2D(Pos.X + 300.f, Y), Serif(11, EFace::Italic), MutedInk, 0.f, false);
 			PaintButton(Geometry, Out, Layer + 3, FVector2D(Pos.X + Size.X - 330.f, Y - 12.f), FVector2D(300.f, 24.f),
-				FString::Printf(TEXT("BESTIL TIL DENNE BANE  (%s rd.)"), *Thousands(ACampaign1851Map::TroopTrainCost)), EButton::TrainOrder, Net.Depot, false, !bCanOrder);
+				bTrainResearch ? FString::Printf(TEXT("BESTIL TIL DENNE BANE  (%s rd.)"), *Thousands(ACampaign1851Map::TroopTrainCost)) : FString(TEXT("Jernbaneanlæg skal forskes først")), EButton::TrainOrder, Net.Depot, false, !bCanOrder);
 			Y += 28.f;
 			for (int32 t = 0; t < List.Num(); ++t)
 			{

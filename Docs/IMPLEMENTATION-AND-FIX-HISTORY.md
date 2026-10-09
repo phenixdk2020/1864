@@ -1755,6 +1755,11 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - OnCasualtyVisualEvent reducerer infanteriets figurantal efter styrke/figurdivisor. Overlevendes pladser bevares; salvetab tager figurer nær skytteren, artilleritab bruger eksisterende nedslagsregistrering. Dødsanimation falder tilbage til eksisterende liggende pose.
 - Højst 150 samtidige faldne i slagets verden. Efter 60 spilsekunder fader de ud over fem sekunder med et gennemsigtigt silhuetmateriale og slettes sammen med våbnet; crowd-figuren skjules under fade.
 - Statisk UE 5.8-headerkontrol og git diff --check. Ingen build, spilstart eller commit. Animationer, fade og blandede valg mangler afprøvning i spillet.
+### 2026-10-09 — Forskningskrav til troppetog og synlig ny felthær
+
+- Togbestilling kræver nu `railway`-forskning eller scenarieår mindst 1850 via `HasResearch`, både i kortfunktionen, AI-beslutninger og togknapper. Låste knapper forklarer forskningskravet; uden åbne baner kan bestilling åbnes efter forskning med standardlevering til København.
+- Kamporden fokuserer efter slip på »Træk herover« på den nye hærs enheder og nulstiller chart-scroll. Dette retter skjulte hære ved udskillelse fra filtrerede garnisonsenheder.
+- Gemmeformat/version 30 er uændret; eksisterende togordrer og afsluttet forskning gendannes fortsat. Statisk gennemgang og begrænsninger er dokumenteret i `Docs/Review-2026-10-09.md`. Ingen build, spilstart eller commit.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
