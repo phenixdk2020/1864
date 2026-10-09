@@ -72,6 +72,14 @@ void UStrategyMovementExecutorComponent::HandleOrderChanged(const FStrategyOrder
         return;
     }
 
+    if (NewOrder.Type == EStrategyOrderType::Disengage && !NewOrder.bDisengageStep)
+    {
+        StopMovement();
+        OwnerUnit->SetUnitState(EStrategyUnitState::Ready);
+        OwnerUnit->OrderComponent->BeginExecution();
+        return;
+    }
+
     if (NewOrder.Type == EStrategyOrderType::Hold)
     {
         StopMovement();
@@ -249,28 +257,17 @@ void UStrategyMovementExecutorComponent::TickComponent(
         OwnerUnit->CombatComponent && OwnerUnit->FireControlComponent &&
         (!OwnerUnit->FireDisciplineComponent || OwnerUnit->FireDisciplineComponent->AllowsAutomaticFire()) ?
         OwnerUnit->CombatComponent->FindBestTarget(false) : nullptr;
+    // A designated enemy has an exact stand-off goal, including backing out when already too close.
+    if (MovementFireTarget && CurrentOrder.AttackTarget.Get() == MovementFireTarget &&
+        !bHoldingForFire && FVector::Dist2D(OwnerUnit->GetActorLocation(), CurrentOrder.TargetLocation) > ArrivalToleranceCm)
+        MovementFireTarget = nullptr;
     if (MovementFireTarget)
     {
         const EStrategyFormationType FireBattleFormation = OwnerUnit->FormationPolicy ?
             OwnerUnit->FormationPolicy->GetDestinationFormation() : EStrategyFormationType::Line;
         if (!bHoldingForFire)
         {
-            FStrategyOrder FireHoldOrder;
-            FireHoldOrder.Type = EStrategyOrderType::Hold;
-            FireHoldOrder.TargetLocation = OwnerUnit->GetActorLocation();
-            FireHoldOrder.Authority = OwnerUnit->bPlayerControllable ?
-                EStrategyOrderAuthority::DirectPlayer : CurrentOrder.Authority;
-            FireHoldOrder.bKeepFacing = CurrentOrder.bKeepFacing;
-            FireHoldOrder.bHasFacing = CurrentOrder.bKeepFacing;
-            FireHoldOrder.FacingYaw = OwnerUnit->GetActorRotation().Yaw;
-            // A fresh standing order drops every waypoint and prevents resuming the old march.
-            // The order notification stops movement and deploys the saved battle formation.
-            if (AStrategyPlayerController* FireRouteController = Cast<AStrategyPlayerController>(GetWorld()->GetFirstPlayerController()))
-                FireRouteController->CancelRequestedWaypointRoute(OwnerUnit, CurrentOrder.WaypointRouteId);
-            OwnerUnit->OrderComponent->SetOrder(FireHoldOrder);
-            ExecutingOrderSerial = OwnerUnit->OrderComponent->GetCurrentOrder().OrderSerial;
-            bHoldingForFire = true;
-            SetComponentTickEnabled(true); // Continue turning to fire, with no movement goal.
+            HaltForFire();
         }
         if (OwnerUnit->FormationComponent &&
             (OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
@@ -290,7 +287,7 @@ void UStrategyMovementExecutorComponent::TickComponent(
     }
     if (bHoldingForFire)
     {
-        StopMovement(); // The standing hold remains even when the target leaves range.
+        // Keep scanning while stationary, also when an incoming volley came from beyond our chosen range.
         return;
     }
 
@@ -682,6 +679,7 @@ bool UStrategyMovementExecutorComponent::IsMovementOrder(EStrategyOrderType Type
         case EStrategyOrderType::AttackHere:
         case EStrategyOrderType::DefendHere:
         case EStrategyOrderType::Advance:
+        case EStrategyOrderType::Disengage:
         case EStrategyOrderType::Withdraw:
         case EStrategyOrderType::Assemble:
         case EStrategyOrderType::ScoutHere:
@@ -867,4 +865,23 @@ void UStrategyMovementExecutorComponent::ReleaseBridgeSlot()
 
     bBridgeSlotAcquired = false;
     bWaitingForBridge = false;
+}
+
+void UStrategyMovementExecutorComponent::HaltForFire()
+{
+    if (!OwnerUnit || !OwnerUnit->OrderComponent) return;
+    const FStrategyOrder FireOldOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
+    if (AStrategyPlayerController* FireRouteController = Cast<AStrategyPlayerController>(GetWorld()->GetFirstPlayerController()))
+        FireRouteController->CancelRequestedWaypointRoute(OwnerUnit, FireOldOrder.WaypointRouteId);
+    FStrategyOrder FireHoldOrder;
+    FireHoldOrder.Type = EStrategyOrderType::Hold;
+    FireHoldOrder.TargetLocation = OwnerUnit->GetActorLocation();
+    FireHoldOrder.Authority = OwnerUnit->bPlayerControllable ? EStrategyOrderAuthority::DirectPlayer : FireOldOrder.Authority;
+    FireHoldOrder.bKeepFacing = FireOldOrder.bKeepFacing && FireOldOrder.Type != EStrategyOrderType::Move;
+    FireHoldOrder.bHasFacing = FireHoldOrder.bKeepFacing;
+    FireHoldOrder.FacingYaw = OwnerUnit->GetActorRotation().Yaw;
+    if (!OwnerUnit->OrderComponent->SetOrder(FireHoldOrder)) return;
+    ExecutingOrderSerial = OwnerUnit->OrderComponent->GetCurrentOrder().OrderSerial;
+    bHoldingForFire = true;
+    SetComponentTickEnabled(true); // Turn toward a legal fire target without a movement goal.
 }

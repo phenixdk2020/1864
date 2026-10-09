@@ -58,6 +58,8 @@ public:
     UFUNCTION(BlueprintPure, Category="Strategy|Movement")
     bool IsTemporarilyPaused() const { return PauseRemainingSeconds > 0.0f || bHoldingForFire; }
 
+    void HaltForFire();
+
     bool IsHoldingForFire() const { return bHoldingForFire; }
 
     UFUNCTION(BlueprintPure, Category="Strategy|Movement")

@@ -1,6 +1,6 @@
 # Testflag og launchere
 
-Status 2026-10-08. Oversigten er kontrolleret mod `FParse::Param`/`FParse::Value` i `Source/Game1864` og `Source/Strategy1864`, inklusive ryttervisningens `Flag`-hjælper. Dette er dokumentation, ikke tilladelse til at starte spillet.
+Status 2026-10-09. Oversigten er kontrolleret mod `FParse::Param`/`FParse::Value` i `Source/Game1864` og `Source/Strategy1864`, inklusive ryttervisningens `Flag`-hjælper. Dette er dokumentation, ikke tilladelse til at starte spillet.
 
 Eksemplerne er argumenter, som kan tilføjes en relevant launcher (alle videresender `%*`). ID'er og indeks skal findes i det valgte scenarie/testslag; eksempler viser syntaks, ikke garanteret succes. Sæt hele argumentet i dobbelte anførselstegn ved semikolon/komma. Flag uden værdi aktiveres ved tilstedeværelse; `=0` er ikke en generel deaktivering.
 
@@ -77,6 +77,7 @@ Kortvalg og scenarie er afgørende: duel-, Skirmish- og kampagneslag har forskel
 | Flag | Virkning | Eksempelargument |
 |---|---|---|
 | `Strategy1864DebugOfficer` | Logger officerens ordre/fjende/flankerolle og spredt orden. | `-Strategy1864DebugOfficer` |
+| `Strategy1864DebugDisengage` | Logger AFBRYD-start, faktiske 9 m-bagtrin, udmarch og afslutning med enheds-id, afstand og seneste salvetid. Starter ikke et slag. | `-Strategy1864DebugDisengage` |
 | `Strategy1864HoldReserve` | Tilskynder bataljonschefen til reserve (kræver gruppestørrelse/aktiv AI). | `-Strategy1864HoldReserve` |
 | `Strategy1864Grass` | 0 udelader græs ved kampagneslagmarkens opbygning. | `-Strategy1864Grass=0` |
 | `Strategy1864FieldLOD` | Mænd pr. figur; mindst 1; tilsidesætter gemt figurskala ved start. | `-Strategy1864FieldLOD=5` |

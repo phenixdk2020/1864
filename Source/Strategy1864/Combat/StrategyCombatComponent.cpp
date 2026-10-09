@@ -545,6 +545,7 @@ void UStrategyCombatComponent::NotifyIncomingVolley(int32 Hits, bool bLongRangeF
         return;
     }
 
+    CancelMarchUnderFire();
     if (OwnerUnit->FieldOfficerComponent) OwnerUnit->FieldOfficerComponent->NotifyIncomingFire(bLongRangeFire);
 
     const float StressReactionMultiplier =
@@ -587,6 +588,10 @@ void UStrategyCombatComponent::NotifyIncomingVolley(int32 Hits, bool bLongRangeF
     {
         return;
     }
+
+    const EStrategyOrderType IncomingOrderType = OwnerUnit->OrderComponent ?
+        OwnerUnit->OrderComponent->GetCurrentOrder().Type : EStrategyOrderType::None;
+    if (IncomingOrderType == EStrategyOrderType::Withdraw || IncomingOrderType == EStrategyOrderType::Disengage) return;
 
     if (OwnerUnit->MovementExecutor &&
         OwnerUnit->MovementExecutor->HasMovementGoal())
@@ -680,4 +685,11 @@ void UStrategyCombatComponent::ConfigureCartridgesPerMan(float CartridgesPerMan)
     AmmunitionRounds = FMath::Clamp(FMath::RoundToInt(CombatUnit->CurrentStrength *
         FMath::Max(0.0f, CartridgesPerMan)), 0, MaxAmmunitionRounds);
     bOutOfAmmo = AmmunitionRounds <= 0;
+}
+
+void UStrategyCombatComponent::CancelMarchUnderFire()
+{
+    if (!OwnerUnit || !OwnerUnit->IsCombatEffective() || !OwnerUnit->OrderComponent || !OwnerUnit->MovementExecutor) return;
+    if (OwnerUnit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Move)
+        OwnerUnit->MovementExecutor->HaltForFire();
 }

@@ -1,6 +1,8 @@
 #include "StrategyOrderComponent.h"
 #include "../Units/StrategyUnit.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
+#include "../Combat/StrategyFireControlComponent.h"
+#include "EngineUtils.h"
 
 UStrategyOrderComponent::UStrategyOrderComponent()
 {
@@ -64,6 +66,7 @@ bool UStrategyOrderComponent::SetOrder(const FStrategyOrder& NewOrder)
     if (RouteOrder.WaypointRouteId.IsValid() && RouteOrder.WaypointRouteId == CurrentOrder.WaypointRouteId)
         RouteOrder.NextWaypointIndex = FMath::Max(RouteOrder.NextWaypointIndex, CurrentOrder.NextWaypointIndex);
     if (RouteOrder.Type == EStrategyOrderType::Hold) RouteOrder.Waypoints.Reset();
+    ResolveAttackDestination(RouteOrder);
     CurrentOrder = RouteOrder;
     CurrentOrder.OrderSerial = NextOrderSerial++;
     SetExecutionState(EStrategyOrderExecutionState::Pending);
@@ -86,6 +89,7 @@ bool UStrategyOrderComponent::QueueDelayedOrder(
     }
 
     DelayedOrder = NewOrder;
+    ResolveAttackDestination(DelayedOrder);
     DelayedOrderRemainingSeconds = DelaySeconds;
     bHasDelayedOrder = true;
     SetComponentTickEnabled(true);
@@ -202,4 +206,41 @@ EStrategyCommandVisualState UStrategyOrderComponent::GetCommandVisualState() con
 
     // Green is reserved for explicit toggle/state controls, not completed movement.
     return EStrategyCommandVisualState::Red;
+}
+
+void UStrategyOrderComponent::ResolveAttackDestination(FStrategyOrder& AttackOrder) const
+{
+    // MOVE is deliberately exact; CHARGE remains a contact/bayonet order.
+    if (AttackOrder.Type != EStrategyOrderType::AttackHere && AttackOrder.Type != EStrategyOrderType::Advance) return;
+    const AStrategyUnit* AttackUnit = Cast<AStrategyUnit>(GetOwner());
+    if (!AttackUnit || !AttackUnit->FireControlComponent || !GetWorld()) return;
+    const float AttackRange = AttackUnit->FireControlComponent->GetActiveRangeCm();
+    if (AttackRange <= 300.0f) return; // HOLD FIRE has no chosen firing destination.
+    AStrategyUnit* AttackEnemy = AttackOrder.AttackTarget.Get();
+    if (!IsValid(AttackEnemy) || !AttackEnemy->IsCombatEffective() || AttackEnemy->Side == AttackUnit->Side)
+    {
+        AttackEnemy = nullptr;
+        float AttackNearDistance = 6000.0f; // A point within 60 m identifies the intended enemy.
+        for (TActorIterator<AStrategyUnit> AttackIt(GetWorld()); AttackIt; ++AttackIt)
+        {
+            AStrategyUnit* AttackCandidate = *AttackIt;
+            if (!AttackCandidate->IsCombatEffective() || AttackCandidate->Side == AttackUnit->Side ||
+                AttackCandidate->Side == EStrategySide::Neutral || AttackCandidate->Echelon == EStrategyEchelon::Headquarters ||
+                AttackCandidate->Echelon == EStrategyEchelon::Supply) continue;
+            const float AttackDistance = FVector::Dist2D(AttackCandidate->GetActorLocation(), AttackOrder.TargetLocation);
+            if (AttackDistance < AttackNearDistance) { AttackNearDistance = AttackDistance; AttackEnemy = AttackCandidate; }
+        }
+    }
+    if (!AttackEnemy) return;
+    AttackOrder.AttackTarget = AttackEnemy;
+    const FVector AttackFoe = AttackEnemy->GetActorLocation();
+    FVector AttackBack = (AttackUnit->GetActorLocation() - AttackFoe).GetSafeNormal2D();
+    if (AttackBack.IsNearlyZero()) AttackBack = -AttackUnit->GetActorForwardVector();
+    AttackOrder.TargetLocation = AttackFoe + AttackBack * (AttackRange - 300.0f);
+    AttackOrder.TargetLocation.Z = AttackUnit->GetActorLocation().Z;
+    AttackOrder.FacingYaw = (-AttackBack).Rotation().Yaw;
+    AttackOrder.bHasFacing = true;
+    if (FVector::Dist2D(AttackUnit->GetActorLocation(), AttackFoe) < AttackRange - 300.f)
+        AttackOrder.bKeepFacing = true; // Already too close: back out facing the enemy.
+    if (!AttackOrder.Waypoints.IsEmpty()) AttackOrder.Waypoints.Last() = AttackOrder.TargetLocation;
 }

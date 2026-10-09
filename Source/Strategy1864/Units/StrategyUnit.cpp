@@ -353,6 +353,7 @@ int32 AStrategyUnit::ApplyStrengthLoss(int32 RequestedLoss)
 
     const int32 AppliedLoss = FMath::Min(RequestedLoss, CurrentStrength);
     CurrentStrength -= AppliedLoss;
+    if (CombatComponent) CombatComponent->CancelMarchUnderFire();
 
     if (CurrentStrength <= 0)
     {

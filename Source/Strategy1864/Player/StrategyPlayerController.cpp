@@ -536,6 +536,7 @@ bool AStrategyPlayerController::IssueOrderToSelection(
         {
             continue;
         }
+        if (OrderType == EStrategyOrderType::Disengage && Unit->Echelon != EStrategyEchelon::Company) continue;
 
         FStrategyOrder Order;
         Order.Type = OrderType;
@@ -555,6 +556,7 @@ bool AStrategyPlayerController::IssueOrderToSelection(
             if (bCanExtend)
             {
                 Order = PreviousRoute;
+            Order.AttackTarget.Reset(); // The appended endpoint may name another enemy.
                 if (Order.Waypoints.IsEmpty())
                 {
                     if (!Order.WaypointRouteId.IsValid()) Order.WaypointRouteId = FGuid::NewGuid();
@@ -569,6 +571,16 @@ bool AStrategyPlayerController::IssueOrderToSelection(
             Order.Authority = EStrategyOrderAuthority::DirectPlayer;
             if (bHasFacing) { Order.FacingYaw = FacingYaw; Order.bHasFacing = true; }
         }
+
+        if (Order.Type == EStrategyOrderType::Disengage)
+        {
+            Order.TargetLocation = Unit->GetActorLocation();
+            Order.Waypoints.Reset();
+            Order.bKeepFacing = true;
+            Order.bHasFacing = true;
+            Order.FacingYaw = Unit->GetActorRotation().Yaw;
+        }
+        Unit->OrderComponent->ResolveAttackDestination(Order);
 
         // Far from the army's staff the order goes by a rider (within the staff's own circle it is called out).
         const float Distance = FVector::Dist2D(Staff, Unit->GetActorLocation());
@@ -1030,6 +1042,7 @@ void AStrategyPlayerController::DeliverOrder(AStrategyUnit* Unit, FStrategyOrder
     const float Reaction = 2.0f + 12.0f * (1.0f - Efficiency);
     FString Remark;
     if (!(Order.Authority == EStrategyOrderAuthority::DirectPlayer && Order.Type == EStrategyOrderType::Move) &&
+        !Order.AttackTarget.IsValid() && Order.Type != EStrategyOrderType::Disengage &&
         !Order.TargetLocation.IsNearlyZero() && FMath::FRand() < FMath::Clamp(0.45f * (1.0f - Stability) - 0.05f, 0.0f, 0.35f))
     {
         const FVector Here = Unit->GetActorLocation();

@@ -1,6 +1,6 @@
 # Enhedernes opførsel i slaget: hvornår reagerer de, og hvordan bruger AI'en dem
 
-Status: **kode- og teststatus, 2026-10-08.** Dokumentet beskriver reglerne i `Source/Strategy1864`; [findes] betyder implementeret, ikke nødvendigvis bygget eller afprøvet. Se teststatus nederst.
+Status: **kode- og teststatus, 2026-10-09.** Dokumentet beskriver reglerne i `Source/Strategy1864`; [findes] betyder implementeret, ikke nødvendigvis bygget eller afprøvet. Se teststatus nederst.
 Hvert punkt er markeret: **[findes]**, **[delvist]** eller **[mangler]**. Tallene er startværdier, der kan justeres i spillet.
 
 Reglen for alt nedenfor: **en reaktion har en udløser, en handling og en afslutning.** En enhed gør noget, fordi noget bestemt er sket, og den holder op igen, når det ikke gælder mere. Spillerens ordre vinder over officerens egne valg, men officeren bestemmer, *hvordan* ordren udføres.
@@ -41,13 +41,17 @@ Reglen for alt nedenfor: **en reaktion har en udløser, en handling og en afslut
 | **Tilbagetrækning** | Tab over grænsen eller moral under 16–30 (efter officerens ro) | Trækker sig ud af ilden for at samle sig | Samlet, eller ny ordre |
 | **Reserve** | Chef med 4+ kompagnier, forsigtig og besindig | Holder et kompagni 90 m bag ildbasen | Basen er såret, moral under 55, eller 240 sek. efter [mangler: tidsudløsning rettet i kode, afprøves] |
 
-**Stop og skyd annullerer marchen [findes i kode; ikke afprøvet]:** Når en fremryknings- eller angrebsordre standses for at skyde på en fjende inden for den valgte fire-politik og rækkevidde, erstattes ordren af hold på stedet. Alle vejpunkter samt destinationsboks og rutelinje fjernes straks, også vejpunktsudvidelser på vej med ordonnans. Enheden skyder, mens et gyldigt mål er på skudhold, og genoptager ikke marchen, når målet forsvinder. En ren **FLYT**-ordre er march uden ild og annulleres ikke af fjender.
+**Stop og skyd annullerer marchen [findes i kode; ikke afprøvet]:** Når en fremryknings- eller angrebsordre standses for at skyde på en fjende inden for den valgte fire-politik og rækkevidde, erstattes ordren af hold på stedet. Alle vejpunkter samt destinationsboks og rutelinje fjernes straks, også vejpunktsudvidelser på vej med ordonnans. Enheden skyder, mens et gyldigt mål er på skudhold, og genoptager ikke marchen, når målet forsvinder. En ren **FLYT**-ordre bevarer det præcise mål, også på en fjendtlig position, men annulleres nu ved indgående salve (også uden tab) eller registrerede tab. Ordren erstattes af HOLD; alle vejpunkter, ventende udvidelser med ordonnans, destinationsboks og rutelinje fjernes. Enheden vender fronten og besvarer ilden efter den valgte fire-politik; HOLD ILD tillader stadig ikke skydning. **TILBAGE** og **AFBRYD** fortsætter under ild uden den almindelige ildpause.
+
+**Angrebsmål på skudafstand [findes i kode; ikke afprøvet, 2026-10-09]:** ANGRIB HER og RYK FREM mod en fjende eller et punkt inden for 60 m af en kampdygtig fjendtlig enhed får målpunktet på linjen fra enheden til fjenden: aktiv skudafstand minus 3 m. Samme mål og frontretning bruges af bevægelsen, destinationsboksen og officerens afslutningskontrol. Målet beregnes før ordonnanslevering og ved modtagelse; enheden bakker ud med fronten mod fjenden, hvis den allerede står for tæt. FLYT og CHARGE bevarer deres mål. HOLD ILD har ingen aktiv skudafstand og forkorter derfor ikke målet.
+
+**AFBRYD — kæmpende tilbagetrækning [findes i kode; ikke afprøvet, 2026-10-09]:** Knappen i ORDRER-panelet giver kompagnier en eksplicit ordre. Enheden vender fronten, afgiver ild efter fire-politik og salvemetode, går 9 m tilbage med fronten mod fjenden, standser og skyder igen. Et nyt skridt kræver en faktisk ny salve og et mål på skudhold; genladning og formering respekteres. Figuren følger den eksisterende glidende formationssti og beholder fronten under baglæns gang, også i crowd-visning. Når ildudvekslingen er ophørt (uden for valgt eller fjendtlig aktiv rækkevidde, eller uden ammunition), går enheden videre baglæns ud af egen lange rækkevidde uden flere salvecykler. Når ingen kampdygtig fjende er inden for LONG, erstattes ordren af HOLD. En ny leveret ordre afløser den; flugt/ødelæggelse afslutter den. Status er **AFBRYDER** i tag og enhedspanel. Virker også med officer-AI slået fra. 9 m og 0,5 sekunders minimumspause er justerbare kodeestimater, ikke historiske målinger.
 
 **Destinationsboksen** viser kampformationen ved målet, også under march i kolonne: linjens bredde beregnes af antal mand, normal afstand og rækker; rytteri viser kavalerilinje. Karré vises kun, når enheden allerede står i og beholder karré. Boksen følger ordrens frontretning og har frontpil og enhedens navn; den stiplede rute går gennem vejpunkterne til boksen.
 
 ### 2.2 Marchen i detaljer [delvist]
 
-1. **Ren FLYT:** ingen ild under marchordren, heller ikke under korte pauser. Resterende rute over 120 m går i kolonne, 4 i bredden, hvis fjenden ikke allerede er nær. Til og med 120 m bevares kampformationen; vejpunkter tæller med i rutelængden.
+1. **Ren FLYT:** ingen ild under marchordren; indgående ild/tab afløser den med HOLD og tillader derefter svarild efter fire-politikken. Resterende rute over 120 m går i kolonne, 4 i bredden, hvis fjenden ikke allerede er nær. Til og med 120 m bevares kampformationen; vejpunkter tæller med i rutelængden.
 2. **Fjende i syne inden for rækkevidde + 35 m:** kolonnen opløses, kompagniet går i linje og går **det sidste stykke i formation**.
 3. **Under 25 m fra målet:** samme, så det ankommer i orden.
 4. **Defilé** (bro, smal vej): 2 i bredden; enheden forlader selv defilé, når den er igennem.
@@ -137,7 +141,7 @@ Auto-målvalg skal **nulstilles**, når officer-AI'en slås fra (kendt fejl, ret
 ### 7.1 Angreb med flere kompagnier [findes]
 
 1. Chefen deler gruppen: **ét kompagni er ildbase** (midten), **to flankerer** (hver sin side).
-2. Ildbasen rykker til skudafstand og holder og skyder. Stop for ild efter fire-politik og rækkevidde annullerer fremryknings-/angrebsordren og alle vejpunkter; destinationsboks og rute forsvinder. Enheden bliver stående, også når fjenden forlader skudhold, indtil spilleren giver en ny ordre. Ren FLYT fortsætter uden at standse for ild.
+2. Ildbasen rykker til skudafstand og holder og skyder. Stop for ild efter fire-politik og rækkevidde annullerer fremryknings-/angrebsordren og alle vejpunkter; destinationsboks og rute forsvinder. Enheden bliver stående, også når fjenden forlader skudhold, indtil spilleren giver en ny ordre. Ren FLYT standser ikke alene ved synet af en fjende, men annulleres ved indgående salve eller tab; TILBAGE og AFBRYD fortsætter.
 3. Flankerne **går udenom ildlinjen** (ikke gennem egen ild) og **ind fra siden**, med vinkel 45° og 90° efter chefens taktik.
 4. Gode chefer sender flankerne **videre ud**; dårlige holder dem tæt på og rykker frem på linje.
 5. **Sidetrin** bruges, når en flytning er under 90 m med fjenden tæt foran.

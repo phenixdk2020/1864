@@ -1724,6 +1724,13 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Kampagnen: Kamporden åbner som hele hærens træ (ikke den filtrerede visning); enhedslisten lukkes når et vindue åbnes.
 - Kampagnen: 1825 starter uden tog (de kommer med jernbaneforskning); tog-fanen siger det.
 
+### 2026-10-09 — Skudafstand ved angreb, marchstop under ild og AFBRYD
+
+- ANGRIB HER/RYK FREM mod fjende eller nært punkt bruger aktiv ildrækkevidde minus 3 m som fælles destination for ordre, bevægelse og HUD. FLYT/CHARGE ændres ikke; allerede for tæt placerede enheder bakker til målet. Beregning før ordonnanslevering og igen ved modtagelse; angrebsmål forskydes ikke tilfældigt af officersfortolkning.
+- Indgående salver eller tab afløser ren march med HOLD og rydder rute/vejpunkter samt udvidelser på vej med ordonnans. Svarild følger fire-politik. TILBAGE/AFBRYD fortsætter uden ildpause.
+- Ny kompagniknap AFBRYD og ordre Disengage: faktisk salve → 9 m bagtrin med fronten mod fjenden → pause/ny salve. Udmarch efter ildudvekslingen; HOLD når ingen fjende er inden for LONG. Nye ordrer og flugt afløser forløbet. Status AFBRYDER, glidende formationsvisualisering med bevaret front og flaget -Strategy1864DebugDisengage.
+- Dokumenteret i Enhedsadfaerd1864.md og TestFlags.md. Statisk kilde-/diffkontrol og API-kontrol mod UE 5.8-headere; ingen build, editor, spiltest eller commit. Runtime-kontrol af afstand, salvecyklus, baglæns figurer og ordreafløsning udestår.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

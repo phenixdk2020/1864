@@ -87,6 +87,7 @@ namespace
             case EStrategyOrderType::DefendHere: return TEXT("FORSVAR");
             case EStrategyOrderType::Hold: return TEXT("HOLD");
             case EStrategyOrderType::Advance: return TEXT("RYK FREM");
+            case EStrategyOrderType::Disengage: return TEXT("AFBRYDER");
             case EStrategyOrderType::Withdraw: return TEXT("TILBAGE");
             case EStrategyOrderType::Assemble: return TEXT("SAML");
             case EStrategyOrderType::ScoutHere: return TEXT("SPEJD");
@@ -715,7 +716,8 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
             const bool bTagAdvance = Unit->OrderComponent &&
                 (Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Advance ||
                  Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::AttackHere);
-            const TCHAR* TagStatus = bTagReforming ? TEXT("FORMERER") : bTagFiring ? TEXT("SKYDER") :
+            const bool bTagDisengage = Unit->OrderComponent && Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Disengage;
+            const TCHAR* TagStatus = bTagDisengage ? TEXT("AFBRYDER") : bTagReforming ? TEXT("FORMERER") : bTagFiring ? TEXT("SKYDER") :
                 bTagMoving ? (bTagAdvance ? TEXT("RYKKER FREM") : TEXT("MARCHERER")) : TEXT("HOLDER");
             const FLinearColor TagColour = bTagReforming ? FLinearColor(1.f, 0.8f, 0.1f) :
                 bTagFiring ? FLinearColor(1.f, 0.15f, 0.1f) : bTagMoving ? FLinearColor(0.2f, 0.5f, 1.f) : FLinearColor(0.6f, 0.6f, 0.6f);
@@ -1044,6 +1046,9 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         const FLinearColor* HudColour = OrderIndex == 0 ? &ExecutingBlue : OrderIndex == 2 ? &ActiveGreen : &OrderRed;
         DrawButton(HudX[2] + (OrderIndex % 2) * (HudOrderW + 5.f), HudY + 43.f + (OrderIndex / 2) * 44.f, HudOrderW, 38.f, HudOrders[OrderIndex], HudActions[OrderIndex], int32(HudTypes[OrderIndex]), HudCurrent == HudTypes[OrderIndex], Unit, HudColour);
     }
+    if (!HudHQ && Cast<AStrategyCompanyUnit>(Unit))
+        DrawButton(HudX[2], HudY + 132.f, HudW[2], 30.f, TEXT("AFBRYD"), EAction::Disengage, 0, HudCurrent == EStrategyOrderType::Disengage, Unit, &OrderRed);
+    if (!HudHQ) Text(BaseOrderLabel(Unit), HudX[2], HudY + 185.f, Muted, 0.72f);
     if (HudHQ)
     {
         const TCHAR* HudExtra[] = {TEXT("ANGRIB"), TEXT("FORSVAR"), TEXT("SAML")};
@@ -1309,6 +1314,13 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 break;
             case EAction::Charge:
                 if (PC) { PC->BeginOrderPlacement(EStrategyOrderType::Charge); }
+                break;
+            case EAction::Disengage:
+                if (PC)
+                {
+                    PC->CancelOrderPlacement();
+                    PC->IssueOrderToSelection(EStrategyOrderType::Disengage, FVector::ZeroVector, 0.f, false);
+                }
                 break;
             case EAction::Stop:
                 if (PC) { PC->IssueHoldToSelection(); }
