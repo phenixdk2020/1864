@@ -76,6 +76,7 @@ Kortvalg og scenarie er afgørende: duel-, Skirmish- og kampagneslag har forskel
 
 | Flag | Virkning | Eksempelargument |
 |---|---|---|
+| `Strategy1864DebugDecisions` | Logger officer-/reaktionsvurderinger, inputs, årsager og afviste alternativer med PROJECT1864-DECISION; også gentagne evalueringer. Ingen taktisk effekt. | `-Strategy1864DebugDecisions` |
 | `Strategy1864DebugOfficer` | Logger officerens ordre/fjende/flankerolle og spredt orden. | `-Strategy1864DebugOfficer` |
 | `Strategy1864DebugDisengage` | Logger AFBRYD-start, faktiske 9 m-bagtrin, udmarch og afslutning med enheds-id, afstand og seneste salvetid. Starter ikke et slag. | `-Strategy1864DebugDisengage` |
 | `Strategy1864HoldReserve` | Tilskynder bataljonschefen til reserve (kræver gruppestørrelse/aktiv AI). | `-Strategy1864HoldReserve` |

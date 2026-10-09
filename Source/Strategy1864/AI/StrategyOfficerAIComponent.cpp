@@ -5,6 +5,7 @@
 #include "../Units/StrategyUnit.h"
 #include "StrategyCommandDelayComponent.h"
 #include "StrategyAITelemetryComponent.h"
+#include "StrategyDecisionLog.h"
 
 UStrategyOfficerAIComponent::UStrategyOfficerAIComponent()
 {
@@ -97,6 +98,10 @@ void UStrategyOfficerAIComponent::EvaluateInheritedMission()
     }
 
     const FStrategyOrder ParentOrder = Parent->OrderComponent->GetCurrentOrder();
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("Ordrearv"), TEXT("Vurder overordnet mission"), TEXT("Autoritet, serial og separat slot-ejer afgør arv"),
+        FString::Printf(TEXT("parent=%s parentType=%d parentSerial=%d lastInheritedSerial=%d canAccept=%d"),
+            *Parent->StableUnitId.ToString(), int32(ParentOrder.Type), ParentOrder.OrderSerial, LastInheritedParentOrderSerial, CanAcceptInheritedMission()),
+        TEXT("arv afvises ved ugyldig/uændret ordre eller lokal autoritet; ATTACK/DEFEND overlades til formationsplanlægger"));
     if (!ParentOrder.IsValidOrder() ||
         ParentOrder.OrderSerial == LastInheritedParentOrderSerial ||
         !CanAcceptInheritedMission())
@@ -135,6 +140,10 @@ void UStrategyOfficerAIComponent::EvaluateInheritedMission()
                     Delay));
         }
     }
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("Ordrearv"),
+        LastInheritedParentOrderSerial == ParentOrder.OrderSerial ? TEXT("Mission køet") : TEXT("Bevar ordre"),
+        LastInheritedParentOrderSerial == ParentOrder.OrderSerial ? TEXT("Overordnet mission accepteret med forsinkelse") : TEXT("Ordreautoritet afviste køning"),
+        FString::Printf(TEXT("delay=%.2f parentSerial=%d"), Delay, ParentOrder.OrderSerial), TEXT("øjeblikkelig udførelse: bruger beregnet latency; anden mission: ikke valgt"));
 }
 
 bool UStrategyOfficerAIComponent::CanAcceptInheritedMission() const

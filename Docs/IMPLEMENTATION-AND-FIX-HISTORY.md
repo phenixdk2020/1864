@@ -1731,6 +1731,15 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Ny kompagniknap AFBRYD og ordre Disengage: faktisk salve → 9 m bagtrin med fronten mod fjenden → pause/ny salve. Udmarch efter ildudvekslingen; HOLD når ingen fjende er inden for LONG. Nye ordrer og flugt afløser forløbet. Status AFBRYDER, glidende formationsvisualisering med bevaret front og flaget -Strategy1864DebugDisengage.
 - Dokumenteret i Enhedsadfaerd1864.md og TestFlags.md. Statisk kilde-/diffkontrol og API-kontrol mod UE 5.8-headere; ingen build, editor, spiltest eller commit. Runtime-kontrol af afstand, salvecyklus, baglæns figurer og ordreafløsning udestår.
 
+### 2026-10-09 – Kamp-AI v2.0: afstemning, beslutningslog og bevaret mission ved ildreaktion
+
+- Tilføjet `Docs/Kamp-AI-Afstemning.md`: tabeller for designafsnit 1–29 med C++-fil-/funktionsankre, T1–T10-status og eksisterende startargumenter/delprøver samt prioriterede fase 2-skiver med størrelse, risiko og egnethed til Codex-implementation.
+- `-Strategy1864DebugDecisions` giver opt-in `PROJECT1864-DECISION`-log i feltofficer, ordrearv, kavaleritrussel og stop-og-ild: årsag, inputs, vinder, afvisninger, ordre/autoritet og enhedstilstand. Gentagne evalueringer logges. Ingen nye taktiske scores eller tilfældige træk; log-inputs formateres kun med flaget aktivt. Flaget er tilføjet i `Docs/TestFlags.md`.
+- Verificeret missionstab i `MovementExecutor::HaltForFire`: tidligere permanent HOLD, annullerede waypoint-ruter og ingen resume. Reaktionen gemmer nu en transient `SuspendedMission`, bevarer den autoritative ordre/serial/autoritet/rute og genoptager dens fysiske udførelse efter 10 s ro (justerbart balanceestimat). Ny ordre/clear/stop invaliderer suspensionen; delayed order, indgående ild, ildmål, carré, reformering og ikke-kampdygtig enhed blokerer resume. Spillerens almindeligt afsluttede ordre forbliver afsluttet.
+- Carré og automatisk dækning bevarer allerede ordren; eksplicit AFBRYD er selv missionen. Disse veje er ikke omskrevet. Generel mission/reaktionsarbitrering, kontakt-confidence, rapporttransport og node-uafhængig Auto ligger stadig i afstemningens prioriterede arbejde.
+- `Docs/Enhedsadfaerd1864.md` er rettet fra permanent stop-og-ild-annullering til suspendering/genoptagelse. Ingen kampagne-/1851-data eller saveformat er ændret.
+- Kun statisk kontrol: UE 5.8-headerkontrol af nye includes/API, kilde-/funktionshenvisninger, ordre-/rute-/autoritetsspor og diff/whitespace. Ingen build, spil/editor, skærmbilledtest eller commit. Runtime-regression er beskrevet, ikke kørt.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

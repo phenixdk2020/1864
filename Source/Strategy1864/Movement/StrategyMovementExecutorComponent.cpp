@@ -1,5 +1,6 @@
 #include "StrategyMovementExecutorComponent.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
+#include "../AI/StrategyDecisionLog.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "../Formations/StrategyFormationPolicyComponent.h"
 #include "../Combat/StrategyCombatComponent.h"
@@ -52,6 +53,8 @@ void UStrategyMovementExecutorComponent::BeginPlay()
 
 void UStrategyMovementExecutorComponent::HandleOrderChanged(const FStrategyOrder& NewOrder)
 {
+    SuspendedMission = FStrategyOrder();
+    FireReactionQuietSeconds = 0.0f;
     if (!OwnerUnit || !OwnerUnit->OrderComponent)
     {
         return;
@@ -242,6 +245,11 @@ void UStrategyMovementExecutorComponent::TickComponent(
     }
 
     if (OwnerUnit->FieldOfficerComponent && OwnerUnit->FieldOfficerComponent->IsStandingUpFromFireCover()) return;
+    if (bHoldingForFire && !OwnerUnit->IsCombatEffective())
+    {
+        StopMovement();
+        return;
+    }
     const FStrategyOrder CurrentOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
     if (CurrentOrder.OrderSerial != ExecutingOrderSerial ||
         (!IsMovementOrder(CurrentOrder.Type) && !(bHoldingForFire && CurrentOrder.Type == EStrategyOrderType::Hold)))
@@ -250,7 +258,7 @@ void UStrategyMovementExecutorComponent::TickComponent(
         return;
     }
 
-    // March orders never stop for fire; an advance/attack ends at first engagement.
+    // MOVE reacts only to incoming fire; advance/attack also stop at a legal target.
     const bool bFireMission = bHoldingForFire || CurrentOrder.Type == EStrategyOrderType::Advance ||
         CurrentOrder.Type == EStrategyOrderType::AttackHere;
     AStrategyUnit* MovementFireTarget = bFireMission && OwnerUnit->IsA<AStrategyCompanyUnit>() &&
@@ -263,6 +271,7 @@ void UStrategyMovementExecutorComponent::TickComponent(
         MovementFireTarget = nullptr;
     if (MovementFireTarget)
     {
+        FireReactionQuietSeconds = 0.0f;
         const EStrategyFormationType FireBattleFormation = OwnerUnit->FormationPolicy ?
             OwnerUnit->FormationPolicy->GetDestinationFormation() : EStrategyFormationType::Line;
         if (!bHoldingForFire)
@@ -276,7 +285,7 @@ void UStrategyMovementExecutorComponent::TickComponent(
             OwnerUnit->FormationComponent->SetFormation(FireBattleFormation);
         if (!OwnerUnit->FormationTransition || !OwnerUnit->FormationTransition->IsReforming())
             OwnerUnit->SetUnitState(EStrategyUnitState::Ready);
-        if (!CurrentOrder.bKeepFacing)
+        if (!CurrentOrder.bKeepFacing || CurrentOrder.Type == EStrategyOrderType::Move)
         {
             const float FireFacingYaw = (MovementFireTarget->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
             FRotator FireRotation = OwnerUnit->GetActorRotation();
@@ -287,7 +296,27 @@ void UStrategyMovementExecutorComponent::TickComponent(
     }
     if (bHoldingForFire)
     {
-        // Keep scanning while stationary, also when an incoming volley came from beyond our chosen range.
+        const bool bFireReactionBlocked = OwnerUnit->CombatComponent && OwnerUnit->CombatComponent->UnderFireRemainingSeconds > 0.f;
+        FireReactionQuietSeconds = bFireReactionBlocked ? 0.f : FireReactionQuietSeconds + DeltaTime;
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Stop-og-ild"), TEXT("Vurder genoptagelse"), TEXT("Missionen må kun genoptages efter ro og uden en højere igangværende reaktion/ny ordre"),
+            FString::Printf(TEXT("quietSeconds=%.2f releaseSeconds=%.2f suspendedSerial=%d incomingFire=%d delayedOrder=%d reforming=%d square=%d"),
+                FireReactionQuietSeconds, FireReactionReleaseSeconds, SuspendedMission.OrderSerial, bFireReactionBlocked,
+                OwnerUnit->OrderComponent->HasDelayedOrder(), OwnerUnit->FormationTransition && OwnerUnit->FormationTransition->IsReforming(),
+                OwnerUnit->FormationComponent && OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square),
+            TEXT("resume afvises ved serial-mismatch, utilstrækkelig ro, ventende ordre, reformering eller carré"));
+        if (SuspendedMission.IsValidOrder() && SuspendedMission.OrderSerial == CurrentOrder.OrderSerial &&
+            FireReactionQuietSeconds >= FMath::Max(0.f, FireReactionReleaseSeconds) &&
+            !OwnerUnit->OrderComponent->HasDelayedOrder() &&
+            (!OwnerUnit->FormationTransition || !OwnerUnit->FormationTransition->IsReforming()) &&
+            (!OwnerUnit->FormationComponent || OwnerUnit->FormationComponent->CurrentFormation != EStrategyFormationType::Square))
+        {
+            STRATEGY1864_DECISION(OwnerUnit, TEXT("Stop-og-ild"), TEXT("Genoptag mission"), TEXT("Ingen ildkontakt eller indgående ild i release-perioden"),
+                FString::Printf(TEXT("quietSeconds=%.2f suspendedSerial=%d waypoint=%d"), FireReactionQuietSeconds, SuspendedMission.OrderSerial, SuspendedMission.NextWaypointIndex),
+                TEXT("fortsat pause: release-hysterese opfyldt"));
+            SuspendedMission = FStrategyOrder();
+            FireReactionQuietSeconds = 0.f;
+            BeginMovementForOrder(CurrentOrder); // Same serial, authority and remaining waypoint route.
+        }
         return;
     }
 
@@ -611,6 +640,8 @@ void UStrategyMovementExecutorComponent::FinishMovement()
 
 void UStrategyMovementExecutorComponent::StopMovement()
 {
+    SuspendedMission = FStrategyOrder();
+    FireReactionQuietSeconds = 0.f;
     bHoldingForFire = false;
     ExecutedVelocity = FVector::ZeroVector;
     if (bCavalryDefileActive)
@@ -871,17 +902,18 @@ void UStrategyMovementExecutorComponent::HaltForFire()
 {
     if (!OwnerUnit || !OwnerUnit->OrderComponent) return;
     const FStrategyOrder FireOldOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
-    if (AStrategyPlayerController* FireRouteController = Cast<AStrategyPlayerController>(GetWorld()->GetFirstPlayerController()))
-        FireRouteController->CancelRequestedWaypointRoute(OwnerUnit, FireOldOrder.WaypointRouteId);
-    FStrategyOrder FireHoldOrder;
-    FireHoldOrder.Type = EStrategyOrderType::Hold;
-    FireHoldOrder.TargetLocation = OwnerUnit->GetActorLocation();
-    FireHoldOrder.Authority = OwnerUnit->bPlayerControllable ? EStrategyOrderAuthority::DirectPlayer : FireOldOrder.Authority;
-    FireHoldOrder.bKeepFacing = FireOldOrder.bKeepFacing && FireOldOrder.Type != EStrategyOrderType::Move;
-    FireHoldOrder.bHasFacing = FireHoldOrder.bKeepFacing;
-    FireHoldOrder.FacingYaw = OwnerUnit->GetActorRotation().Yaw;
-    if (!OwnerUnit->OrderComponent->SetOrder(FireHoldOrder)) return;
-    ExecutingOrderSerial = OwnerUnit->OrderComponent->GetCurrentOrder().OrderSerial;
+    if (!IsMovementOrder(FireOldOrder.Type) || !OwnerUnit->IsCombatEffective()) return;
+    FireReactionQuietSeconds = 0.f;
+    if (bHoldingForFire) return;
+    StopMovement();
+    SuspendedMission = FireOldOrder;
+    ExecutingOrderSerial = FireOldOrder.OrderSerial;
     bHoldingForFire = true;
+    if (!OwnerUnit->FormationTransition || !OwnerUnit->FormationTransition->IsReforming())
+        OwnerUnit->SetUnitState(EStrategyUnitState::Ready);
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("Stop-og-ild"), TEXT("Suspender udførelse"), TEXT("Lokal ildreaktion bevarer mission, autoritet og waypoint-rute"),
+        FString::Printf(TEXT("suspendedType=%d suspendedSerial=%d waypoint=%d releaseSeconds=%.2f"),
+            int32(FireOldOrder.Type), FireOldOrder.OrderSerial, FireOldOrder.NextWaypointIndex, FireReactionReleaseSeconds),
+        TEXT("permanent HOLD og annullering af rute: afvist; fortsat march: afvist under ildreaktionen"));
     SetComponentTickEnabled(true); // Turn toward a legal fire target without a movement goal.
 }

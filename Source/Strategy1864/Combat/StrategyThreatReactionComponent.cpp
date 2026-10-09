@@ -1,5 +1,6 @@
 #include "StrategyThreatReactionComponent.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
+#include "../AI/StrategyDecisionLog.h"
 
 #include "StrategyVisibilityComponent.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
@@ -44,6 +45,14 @@ void UStrategyThreatReactionComponent::TickComponent(
     EvaluationAccumulator = 0.0f;
 
     AStrategyUnit* Threat = FindVisibleEnemyCavalry();
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("Kavalerireaktion"), Threat ? TEXT("Carré") : (bRespondingToCavalry ? TEXT("Afvent/opløs carré") : TEXT("Mission")),
+        Threat ? TEXT("Synligt rytteri nærmer sig den valgte enhed inden for varslingstiden") : TEXT("Ingen kvalificeret synlig kavaleritrussel"),
+        FString::Printf(TEXT("threat=%s responding=%d noThreatSeconds=%.2f releaseSeconds=%.2f warningMaxCm=%.1f formationSeconds=%.1f playerFormation=%d"),
+            Threat ? *Threat->StableUnitId.ToString() : TEXT("-"), bRespondingToCavalry, NoThreatSeconds,
+            SquareReleaseDelaySeconds, CavalryThreatDistanceCm, SquareFormationTimeSeconds, bHasPlayerFormationOrder),
+        Threat ? TEXT("opløs carré/fortsæt normal formation: afvist mens truslen er aktiv") :
+            (bRespondingToCavalry && NoThreatSeconds + EvaluationDelta < SquareReleaseDelaySeconds ?
+                TEXT("øjeblikkelig opløsning: afvist af release-hysterese; ny carré: ingen kvalificeret trussel") : TEXT("ny carré: ingen kvalificeret trussel")));
     if (Threat)
     {
         NoThreatSeconds = 0.0f;
@@ -79,7 +88,12 @@ AStrategyUnit* UStrategyThreatReactionComponent::FindVisibleEnemyCavalry() const
             ? CavalryThreat->MovementExecutor->GetExecutedVelocity()
             : CavalryThreat->GetVelocity();
         const float ThreatSpeed = ThreatVelocity.Size2D();
-        if (ThreatSpeed < FMath::Max(1.0f, MinimumCavalryClosingSpeedCmPerSecond)) continue;
+        if (ThreatSpeed < FMath::Max(1.0f, MinimumCavalryClosingSpeedCmPerSecond))
+        {
+            STRATEGY1864_DECISION(OwnerUnit, TEXT("Kavalerikandidat"), TEXT("Afvis"), TEXT("For lav fart"),
+                FString::Printf(TEXT("candidate=%s speed=%.1f minSpeed=%.1f"), *CavalryThreat->StableUnitId.ToString(), ThreatSpeed, MinimumCavalryClosingSpeedCmPerSecond), TEXT("FORM_CARRE"));
+            continue;
+        }
         const FVector ApproachDirection = ThreatVelocity.GetSafeNormal2D();
 
         // Select one living company on the approach ray, independently of which
@@ -109,10 +123,22 @@ AStrategyUnit* UStrategyThreatReactionComponent::FindVisibleEnemyCavalry() const
                 ApproachedCompany = ApproachCompany;
             }
         }
-        if (ApproachedCompany != OwnerUnit) continue;
+        if (ApproachedCompany != OwnerUnit)
+        {
+            STRATEGY1864_DECISION(OwnerUnit, TEXT("Kavalerikandidat"), TEXT("Afvis"), TEXT("Angrebskorridoren peger på et andet kompagni eller intet kompagni"),
+                FString::Printf(TEXT("candidate=%s selected=%s speed=%.1f minDot=%.2f corridorHalfWidthCm=%.1f"),
+                    *CavalryThreat->StableUnitId.ToString(), ApproachedCompany ? *ApproachedCompany->StableUnitId.ToString() : TEXT("-"),
+                    ThreatSpeed, MinimumApproachDot, ApproachCorridorHalfWidthCm), TEXT("FORM_CARRE for denne enhed"));
+            continue;
+        }
         const FVector ToCompany = OwnerUnit->GetActorLocation() - CavalryThreat->GetActorLocation();
         const float ClosingSpeed = FVector::DotProduct(ThreatVelocity, ToCompany.GetSafeNormal2D());
-        if (ClosingSpeed < FMath::Max(1.0f, MinimumCavalryClosingSpeedCmPerSecond)) continue;
+        if (ClosingSpeed < FMath::Max(1.0f, MinimumCavalryClosingSpeedCmPerSecond))
+        {
+            STRATEGY1864_DECISION(OwnerUnit, TEXT("Kavalerikandidat"), TEXT("Afvis"), TEXT("For lav lukningsfart"),
+                FString::Printf(TEXT("candidate=%s closingSpeed=%.1f minSpeed=%.1f"), *CavalryThreat->StableUnitId.ToString(), ClosingSpeed, MinimumCavalryClosingSpeedCmPerSecond), TEXT("FORM_CARRE"));
+            continue;
+        }
         const float WarningDistance = FMath::Min(FMath::Max(0.0f, CavalryThreatDistanceCm),
             ClosingSpeed * FMath::Max(0.0f, SquareFormationTimeSeconds));
         // Explicit formation orders use a shorter emergency override distance.
@@ -121,7 +147,15 @@ AStrategyUnit* UStrategyThreatReactionComponent::FindVisibleEnemyCavalry() const
                 ? FMath::Clamp(PlayerOrderThreatDistanceScale, 0.0f, 1.0f) : 1.0f);
         const float ThreatDistance = ToCompany.Size2D();
         if (ThreatDistance > EffectiveDistance || ThreatDistance >= BestDistanceCm ||
-            !OwnerUnit->VisibilityComponent->CanDetectTarget(CavalryThreat, EffectiveDistance)) continue;
+            !OwnerUnit->VisibilityComponent->CanDetectTarget(CavalryThreat, EffectiveDistance))
+        {
+            STRATEGY1864_DECISION(OwnerUnit, TEXT("Kavalerikandidat"), TEXT("Afvis"),
+                ThreatDistance > EffectiveDistance ? TEXT("Uden for varsling") :
+                    (ThreatDistance >= BestDistanceCm ? TEXT("En nærmere trussel er valgt") : TEXT("Ikke synlig")),
+                FString::Printf(TEXT("candidate=%s distanceCm=%.1f warningCm=%.1f closingSpeed=%.1f"),
+                    *CavalryThreat->StableUnitId.ToString(), ThreatDistance, EffectiveDistance, ClosingSpeed), TEXT("FORM_CARRE fra denne kandidat"));
+            continue;
+        }
         BestDistanceCm = ThreatDistance;
         BestThreat = CavalryThreat;
     }
@@ -133,6 +167,8 @@ bool UStrategyThreatReactionComponent::ReactToCavalryThreat()
     if (!OwnerUnit || OwnerUnit->Echelon != EStrategyEchelon::Company || !OwnerUnit->IsCombatEffective()) return false;
     if (FindVisibleEnemyCavalry())
     {
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Kavalerireaktion"), TEXT("Carré"), TEXT("Nødreaktion før automatisk udfoldning"),
+            FString::Printf(TEXT("responding=%d"), bRespondingToCavalry), TEXT("automatisk kolonne/linje: kavalerireaktion har forrang"));
         NoThreatSeconds = 0.0f;
         EnterSquare();
     }
@@ -160,7 +196,12 @@ void UStrategyThreatReactionComponent::EnterSquare()
     }
 
     // An already ordered square belongs to the player/policy, not this reaction.
-    if (!bRespondingToCavalry && PreThreatFormation == EStrategyFormationType::Square) return;
+    if (!bRespondingToCavalry && PreThreatFormation == EStrategyFormationType::Square)
+    {
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Kavalerireaktion"), TEXT("Bevar beordret carré"), TEXT("Formation tilhører spiller/policy, ikke denne reaktion"),
+            TEXT("preThreatFormation=Square responding=0"), TEXT("gem/opløs reaktionsformation: ikke reaktionens ejerskab"));
+        return;
+    }
     bRespondingToCavalry = true;
 
     if (OwnerUnit->FormationComponent->CurrentFormation != EStrategyFormationType::Square)
@@ -208,6 +249,9 @@ void UStrategyThreatReactionComponent::TryLeaveSquare(float DeltaTime)
     }
     bOwnsSquareBayonets = false;
     bRespondingToCavalry = false;
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("Kavalerireaktion"), TEXT("Genopret tidligere formation"), TEXT("Kavaleritrussel væk længe nok; formationsovergang ejer reformeringen"),
+        FString::Printf(TEXT("noThreatSeconds=%.2f releaseSeconds=%.2f restoredFormation=%d"), NoThreatSeconds, SquareReleaseDelaySeconds, int32(PreThreatFormation)),
+        TEXT("fortsat reaktions-carré: release opfyldt; ny mission: den eksisterende ordre bevares"));
     NoThreatSeconds = 0.0f;
 
     // FormationTransition owns the return transition and its Reforming state.
