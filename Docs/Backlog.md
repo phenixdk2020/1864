@@ -66,3 +66,7 @@ Overskriften omfatter også implementerede/mergede ændringer; merge alene er ik
 ## Kamp-AI design v2.0 (2026-10-09)
 
 Designgrundlaget for kamp-AI'en ligger i `Docs/Kamp-AI-Design-v2.0.md` (ordre med latency og betingelser, kontakter med alder og tillid, mission/reaktion med SuspendedMission, combat slots og lanes, ildfelter, artilleribeskyttelse, kavaleri, epoke- og udstyrsprofiler som data, Auto-toggle pr. kommandonode, ydelsesbudget, debug og acceptscenarier T1-T10). Rækkefølge: fase 1 kontrakter, fase 2 vertikal skive (1 mod 1, bataljon, debug, T1-T3 og T7, auto-toggle), playtest, derefter artilleri, kavaleri og morter, til sidst brigade/division og betingede ordrer. Afstemning med det byggede (Enhedsadfaerd1864.md) mangler.
+
+## After action report (ønske 2026-10-09, senere)
+
+Efter hvert slag (3D og kampagne) en rapport pr. side, enhed og samlet: døde, sårede (og hvor mange der kommer tilbage via lazaret), fanger, erobret udstyr (kanoner, våben, heste, vogne, faner), tabt udstyr, ammunition brugt, moral- og cohesion-forløb, officerstab, tid i kamp. Tallene føres tilbage til kampagnens hær (mænd, udstyr, lazaret, krigsfanger). Kræver tabsregnskab pr. enhed i slaget (i dag kun CurrentStrength/InitialStrength) og en rapportskærm ved AFSLUT SLAGET.
