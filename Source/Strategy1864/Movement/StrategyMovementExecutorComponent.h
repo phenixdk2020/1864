@@ -62,6 +62,13 @@ public:
 
     bool IsHoldingForFire() const { return bHoldingForFire; }
 
+    // Only the stop-and-fire reaction suspends execution here. The authoritative
+    // order stays in OrderComponent; new orders replace it normally.
+    FStrategyOrder GetSuspendedMission() const { return SuspendedMission; }
+
+    UPROPERTY(EditAnywhere, Category="Strategy|Movement")
+    float FireReactionReleaseSeconds = 10.0f;
+
     UFUNCTION(BlueprintPure, Category="Strategy|Movement")
     bool HasMovementGoal() const { return bHasMovementGoal; }
 
@@ -83,6 +90,9 @@ public:
     FVector GetExecutedVelocity() const { return ExecutedVelocity; }
 
 private:
+    UPROPERTY(Transient)
+    FStrategyOrder SuspendedMission;
+    float FireReactionQuietSeconds = 0.0f;
     bool bHoldingForFire = false;
     FVector ExecutedVelocity = FVector::ZeroVector;
     UFUNCTION()

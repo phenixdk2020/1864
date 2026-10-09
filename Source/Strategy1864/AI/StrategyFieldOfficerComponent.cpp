@@ -5,6 +5,7 @@
 #include "../Formations/StrategyFormationTransitionComponent.h"
 
 #include "StrategyAITelemetryComponent.h"
+#include "StrategyDecisionLog.h"
 #include "StrategyDoctrineComponent.h"
 #include "StrategyOfficerProfileComponent.h"
 #include "../Artillery/StrategyArtilleryBatteryUnit.h"
@@ -58,6 +59,13 @@ void UStrategyFieldOfficerComponent::BeginPlay()
 
 void UStrategyFieldOfficerComponent::Decide(const FString& Task, const FString& Reason)
 {
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("Feltofficer"), Task, Reason,
+        FString::Printf(TEXT("offensive=%d playerOrderActive=%d charging=%d fireCover=%d standingUp=%d flankRole=%d rangeCm=%.1f"),
+            IsOffensive(), PlayerOrderUnderWay(), bCharging, bTakingFireCover, IsStandingUpFromFireCover(), FlankRole,
+            OwnerUnit && OwnerUnit->FireControlComponent ? OwnerUnit->FireControlComponent->GetActiveRangeCm() : 0.f),
+        FString::Printf(TEXT("nyt selvvalgt angreb=%s; fri omtaskning=%s; øvrige grene=ikke valgt efter den angivne prioriterede årsag"),
+            IsOffensive() ? TEXT("kræver fortsat mål/afstand/moral/cooldown") : TEXT("afvist: ingen offensiv ordre"),
+            PlayerOrderUnderWay() ? TEXT("afvist: aktiv spillerordre") : TEXT("afhænger af ordreautoritet")));
     if (OwnerUnit && OwnerUnit->AITelemetryComponent)
     {
         OwnerUnit->AITelemetryComponent->SetDecision(Task, Reason);
@@ -148,7 +156,13 @@ bool UStrategyFieldOfficerComponent::IsOpenToCharge(const AStrategyUnit* U, FStr
     {
         const ACavalryUnit* OfficerCavalry = Cast<ACavalryUnit>(OwnerUnit);
         if (OfficerCavalry && OfficerCavalry->ChargeComponent &&
-            OfficerCavalry->ChargeComponent->IsSteadySquare(U)) { return false; }
+            OfficerCavalry->ChargeComponent->IsSteadySquare(U))
+        {
+            STRATEGY1864_DECISION(OwnerUnit, TEXT("Charge-kandidat"), TEXT("Afvis charge"), TEXT("Fast carré"),
+                FString::Printf(TEXT("target=%s morale=%.2f cohesion=%.2f"), *U->StableUnitId.ToString(), U->Morale, U->Cohesion),
+                TEXT("CHARGE mod denne carré"));
+            return false;
+        }
         OutWhy = TEXT("karréen vakler eller mangler ammunition");
         return true;
     }
@@ -180,6 +194,10 @@ bool UStrategyFieldOfficerComponent::IsOpenToCharge(const AStrategyUnit* U, FStr
         OutWhy = TEXT("fjenden vakler");
         return true;
     }
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("Charge-kandidat"), TEXT("Afvis charge"), TEXT("Ingen eksisterende åbningsregel opfyldt"),
+        FString::Printf(TEXT("target=%s formation=%d echelon=%d morale=%.2f cohesion=%.2f offensive=%d"),
+            *U->StableUnitId.ToString(), int32(F), int32(U->Echelon), U->Morale, U->Cohesion, IsOffensive()),
+        TEXT("CHARGE kræver sårbar formation, vaklen, flugt, artilleri eller tilladt offensiv kavaleriregel"));
     return false;
 }
 
@@ -188,6 +206,9 @@ bool UStrategyFieldOfficerComponent::FallBack(const FString& Why, float Distance
     const float Now = GetWorld()->GetTimeSeconds();
     if (Now - LastFallBackTime < 45.0f || !OwnerUnit->OrderComponent)
     {
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Feltofficer"), TEXT("Bevar ordre"), TEXT("Tilbagetrækning kan ikke udstedes endnu"),
+            FString::Printf(TEXT("fallbackAge=%.2f cooldown=45 orderComponent=%d"), Now - LastFallBackTime, OwnerUnit->OrderComponent != nullptr),
+            TEXT("WITHDRAW: cooldown eller manglende ordrekomponent"));
         return false;
     }
     float EnemyDistance = 0.0f;
@@ -206,6 +227,8 @@ bool UStrategyFieldOfficerComponent::FallBack(const FString& Why, float Distance
         Decide(TEXT("Trækker sig tilbage"), Why);
         return true;
     }
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("Feltofficer"), TEXT("Bevar ordre"), TEXT("Tilbagetrækning afvist af ordreautoritet"),
+        FString::Printf(TEXT("distanceCm=%.1f requestedAuthority=%d"), DistanceCm, int32(Order.Authority)), TEXT("WITHDRAW: SetOrder returnerede false"));
     return false;
 }
 
@@ -263,6 +286,13 @@ bool UStrategyFieldOfficerComponent::UpdateAutomaticLooseOrderUnderFire()
          (CoverOrder.Type == EStrategyOrderType::AttackHere && FVector::Dist2D(OwnerUnit->GetActorLocation(), CoverOrder.TargetLocation) > 6000.0f));
     const bool bCoverExcluded = !OwnerUnit->bOfficerAIEnabled || !OwnerUnit->IsCombatEffective() || bCharging ||
         OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square || bCoverMoving || bCoverEnemyClose || bCoverAttackUnderWay;
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("Ilddækning"), bCoverExcluded ? TEXT("Afvis dækning") : TEXT("Vurder/bevar dækning"), TEXT("Eksisterende lokale dækningstærskler"),
+        FString::Printf(TEXT("ai=%d effective=%d charging=%d square=%d moving=%d enemyClose=%d attackActive=%d incomingAge=%.2f longRangeAge=%.2f releaseSeconds=%.2f"),
+            OwnerUnit->bOfficerAIEnabled, OwnerUnit->IsCombatEffective(), bCharging,
+            OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square,
+            bCoverMoving, bCoverEnemyClose, bCoverAttackUnderWay, CoverNow - LastIncomingFireTime,
+            CoverNow - LastLongRangeFireTime, FireCoverReleaseSeconds),
+        bCoverExcluded ? TEXT("prone/spread: afvist af viste udelukkelsesgrunde") : TEXT("øjeblikkelig dækning: kræver kvalitet, stående stance og forsinkelse"));
     if (bTakingFireCover && (bCoverExcluded || CoverNow - LastIncomingFireTime >= FireCoverReleaseSeconds ||
         OwnerUnit->StanceComponent->Stance != EStrategyStance::Prone)) LeaveAutomaticFireCover();
     if (IsStandingUpFromFireCover())
@@ -282,9 +312,18 @@ bool UStrategyFieldOfficerComponent::UpdateAutomaticLooseOrderUnderFire()
     }
     const UStrategyOfficerProfileComponent* CoverProfile = OwnerUnit->OfficerProfileComponent;
     const float CoverQuality = CoverProfile ? FMath::Min(CoverProfile->Initiative, CoverProfile->Composure) * CoverProfile->Impairment : 0.0f;
-    if (CoverQuality < 40.0f || OwnerUnit->StanceComponent->Stance != EStrategyStance::Standing) return false;
+    if (CoverQuality < 40.0f || OwnerUnit->StanceComponent->Stance != EStrategyStance::Standing)
+    {
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Ilddækning"), TEXT("Bevar stance"), TEXT("Kvalitet eller stance afviser automatisk dækning"),
+            FString::Printf(TEXT("quality=%.2f minQuality=40 stance=%d"), CoverQuality, int32(OwnerUnit->StanceComponent->Stance)), TEXT("prone/spread"));
+        return false;
+    }
     if (FireCoverSince < 0.0f) FireCoverSince = CoverNow;
     const float CoverDelay = CoverQuality > 60.0f ? GoodFireCoverDelaySeconds : MiddlingFireCoverDelaySeconds;
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("Ilddækning"), CoverNow - FireCoverSince < FMath::Max(0.f, CoverDelay) ? TEXT("Vent") : TEXT("Prøv dækning"),
+        TEXT("Officerkvalitet bestemmer ventetiden"),
+        FString::Printf(TEXT("quality=%.2f age=%.2f delay=%.2f"), CoverQuality, CoverNow - FireCoverSince, CoverDelay),
+        TEXT("øjeblikkelig dækning før delay: afvist; ny mission: ikke en dækningsreaktion"));
     if (CoverNow - FireCoverSince < FMath::Max(0.0f, CoverDelay)) return false;
     if (!OwnerUnit->StanceComponent->SetStance(EStrategyStance::Prone)) return false;
     FireCoverPreviousLateralSpacing = OwnerUnit->FormationComponent->SoldierLateralSpacingCm;
@@ -351,6 +390,7 @@ void UStrategyFieldOfficerComponent::TickComponent(float DeltaTime, ELevelTick T
     Accumulator = 0.0f;
     float Distance = 0.0f;
     AStrategyUnit* Enemy = NearestEnemy(Distance, 150000.0f);
+    const FStrategyOrder DecisionBeforeOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
     if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugOfficer")))
     {
         float& Next = NextOfficerDebugLogTime;
@@ -369,6 +409,13 @@ void UStrategyFieldOfficerComponent::TickComponent(float DeltaTime, ELevelTick T
     case EStrategyEchelon::Cavalry: ThinkCavalry(Enemy, Distance); break;
     default: ThinkArtillery(Enemy, Distance); break;
     }
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("Feltofficer-vurdering"),
+        OwnerUnit->OrderComponent->GetCurrentOrder().OrderSerial == DecisionBeforeOrder.OrderSerial ? TEXT("Bevar ordre") : TEXT("Ny ordre accepteret"),
+        TEXT("Vurdering afsluttet; valgte handlinger og afvisningsgrunde står i samme enheds foregående beslutningslinjer"),
+        FString::Printf(TEXT("enemy=%s distanceCm=%.1f beforeType=%d beforeSerial=%d charging=%d playerActive=%d holdingForFire=%d"),
+            Enemy ? *Enemy->StableUnitId.ToString() : TEXT("-"), Distance, int32(DecisionBeforeOrder.Type), DecisionBeforeOrder.OrderSerial,
+            bCharging, PlayerOrderUnderWay(), OwnerUnit->MovementExecutor && OwnerUnit->MovementExecutor->IsHoldingForFire()),
+        TEXT("mission uden ny accepteret ordre: ikke erstattet; alternativer uden for den besøgte gren: ikke evalueret"));
 }
 
 void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
@@ -415,6 +462,8 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
             }
         }
         UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FLANK: the leader of %s (grasp %.2f) has no plan: the companies go straight in"), *OwnerUnit->DisplayName.ToString(), Skill);
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Flankeplan"), TEXT("Lige frem"), TEXT("Lederens taktiske vurdering under tærsklen"),
+            FString::Printf(TEXT("skill=%.2f threshold=0.35 companies=%d"), Skill, Group.Num()), TEXT("flanker/reserve: skill-gate afviser planen"));
         return;
     }
     const int32 MaxPlaces = Skill < 0.55f ? 1 : 9;
@@ -466,6 +515,10 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
         C->FlankUntil = Now + 90.0f;
         C->FlankEnemy = Enemy;
         C->FlankBase = Group[Base];
+        STRATEGY1864_DECISION(Group[i], TEXT("Flankeplan"), TEXT("Tildel rolle"), TEXT("Lateral placering og eksisterende leder-/disciplinregel"),
+            FString::Printf(TEXT("role=%d skill=%.2f place=%d maxPlaces=%d captainDiscipline=%.2f base=%s"),
+                C->FlankRole, Skill, C->FlankK, MaxPlaces, Captain ? Captain->Discipline : -1.f, *Group[Base]->StableUnitId.ToString()),
+            TEXT("andre roller: midterkompagni er ildbase; flankeregel begrænses af maxPlaces og disciplinudfald; ingen ekstra RNG i loggen"));
     }
     if (Reserve)
     {
@@ -539,6 +592,11 @@ FVector UStrategyFieldOfficerComponent::ApproachGoalAt(AStrategyUnit* Enemy, flo
         const bool bRelease = !Base || !Base->IsCombatEffective() || Base->CurrentStrength < Base->InitialStrength * 0.75f || Base->Morale < 55.0f || (ReserveHeldSince >= 0.0f && Now - ReserveHeldSince > 240.0f);
         if (bRelease)
         {
+            STRATEGY1864_DECISION(OwnerUnit, TEXT("Reserve"), TEXT("Sæt reserve ind"), TEXT("Ildbase tabt/svækket eller holdtid udløbet"),
+                FString::Printf(TEXT("basePresent=%d baseEffective=%d baseStrength=%d baseInitial=%d baseMorale=%.2f reserveAge=%.2f"),
+                    Base != nullptr, Base && Base->IsCombatEffective(), Base ? Base->CurrentStrength : 0, Base ? Base->InitialStrength : 0,
+                    Base ? Base->Morale : 0.f, ReserveHeldSince < 0.f ? -1.f : Now - ReserveHeldSince),
+                TEXT("fortsat reserve: base mangler/ikke kampdygtig, styrke<75%, moral<55 eller holdtid>240s"));
             FlankRole = 0;
             bReserveReleased = true;
             OutNote = TEXT("reserven sættes ind");
@@ -598,6 +656,10 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
     if (bCharging || PlayerOrderUnderWay() ||
         (OwnerUnit->MovementExecutor && OwnerUnit->MovementExecutor->IsHoldingForFire()))
     {
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Feltofficer"), TEXT("Fortsæt udførelse/reaktion"), TEXT("Aktivt angreb, spillerordre eller stop-og-ild har forrang"),
+            FString::Printf(TEXT("charging=%d playerOrderActive=%d holdingForFire=%d enemyDistanceCm=%.1f"), bCharging, PlayerOrderUnderWay(),
+                OwnerUnit->MovementExecutor && OwnerUnit->MovementExecutor->IsHoldingForFire(), Distance),
+            TEXT("nyt charge/fremrykning/frontskifte: springes over før lokal omtaskning"));
         return;
     }
     if (!Enemy)
@@ -610,6 +672,13 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
     const float Now = GetWorld()->GetTimeSeconds();
     // The bayonet: the enemy wavers within ninety metres, the men are steady, the officer is willing.
     const float ChargeReach = FMath::Lerp(6000.0f, 11000.0f, Aggression() / 100.0f);
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("Infanterivurdering"), TEXT("Vurder charge eller mission"), TEXT("Eksisterende tærskler; ingen utility-score"),
+        FString::Printf(TEXT("enemy=%s distanceCm=%.1f rangeCm=%.1f chargeReachCm=%.1f wavering=%d enemyMorale=%.2f enemyCohesion=%.2f enemyStrength=%d/%d nerve=%.2f aggression=%.2f chargeCooldownAge=%.2f"),
+            *Enemy->StableUnitId.ToString(), Distance, Range, ChargeReach, IsWavering(Enemy), Enemy->Morale, Enemy->Cohesion,
+            Enemy->CurrentStrength, Enemy->InitialStrength, Nerve, Aggression(), Now - LastChargeTime),
+        FString::Printf(TEXT("charge: noOffensiveOrder=%d tooFar=%d steadyEnemy=%d lowMorale=%d cooldown=%d cavalryTarget=%d"),
+            !IsOffensive(), Distance >= ChargeReach, !IsWavering(Enemy), OwnerUnit->Morale <= 50.f,
+            Now - LastChargeTime <= 30.f, Enemy->Echelon == EStrategyEchelon::Cavalry));
     if (IsOffensive() && Distance < ChargeReach && IsWavering(Enemy) && OwnerUnit->Morale > 50.0f &&
         Now - LastChargeTime > 30.0f && Enemy->Echelon != EStrategyEchelon::Cavalry)
     {
@@ -619,6 +688,8 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
     // The enemy's own companies are led to their range by his battle AI; the Danish captain closes himself.
     if (bEnemySide)
     {
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Feltofficer"), TEXT("Overlad fremrykning til autonom AI"), TEXT("Fjendens normale fremrykning har en anden ejer"),
+            FString::Printf(TEXT("side=%d distanceCm=%.1f"), int32(OwnerUnit->Side), Distance), TEXT("dansk lokal fremrykning/frontskifte: afvist for denne side"));
         return;
     }
     // Horse close by: the company stands in its formation (the square against cavalry) and does not walk at it.
@@ -671,6 +742,9 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
                 UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FLANK: %s goes to %.0f,%.0f (%s), enemy at %.0f,%.0f"), *OwnerUnit->DisplayName.ToString(), Goal.X, Goal.Y, *ApproachNote, Foe.X, Foe.Y);
                 Decide(TEXT("Rykker frem"), FString::Printf(TEXT("%s er %.0f m borte; vi skyder på %.0f m%s%s"), *Enemy->DisplayName.ToString(), Distance / 100.0f, Range / 100.0f, ApproachNote.IsEmpty() ? TEXT("") : TEXT(" · "), *ApproachNote));
             }
+            else
+                STRATEGY1864_DECISION(OwnerUnit, TEXT("Feltofficer"), TEXT("Bevar ordre"), TEXT("Fremrykning afvist af ordreautoritet"),
+                    FString::Printf(TEXT("goal=%s distanceCm=%.1f rangeCm=%.1f"), *Goal.ToCompactString(), Distance, Range), TEXT("ADVANCE: SetOrder returnerede false"));
             return;
         }
     }
@@ -693,6 +767,9 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
             {
                 Decide(TEXT("Svinger fronten"), FString::Printf(TEXT("%s kommer fra siden (%.0f°)"), *Enemy->DisplayName.ToString(), Off));
             }
+            else
+                STRATEGY1864_DECISION(OwnerUnit, TEXT("Feltofficer"), TEXT("Bevar ordre"), TEXT("Frontskifte afvist af ordreautoritet"),
+                    FString::Printf(TEXT("offDegrees=%.1f targetYaw=%.1f"), Off, ToEnemy), TEXT("HOLD/frontskifte: SetOrder returnerede false"));
             return;
         }
         Decide(Distance <= Range ? TEXT("Skyder") : TEXT("Holder stillingen"),
@@ -711,11 +788,16 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
     const FStrategyOrder Order = OwnerUnit->OrderComponent->GetCurrentOrder();
     if (Order.Type == EStrategyOrderType::Charge && OwnerUnit->OrderComponent->IsPhysicallyExecuting())
     {
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Rytterofficer"), TEXT("Fortsæt charge"), TEXT("Aktivt charge har forrang"),
+            FString::Printf(TEXT("distanceCm=%.1f"), Distance), TEXT("nyt mål/withdraw/vent: ikke valgt under aktivt charge"));
         return;
     }
     if (PlayerOrderUnderWay() || !Enemy ||
         IsFinishedPlayerOrder(OwnerUnit, Order))
     {
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Rytterofficer"), TEXT("Bevar ordre"), TEXT("Spillerordre eller manglende mål begrænser omtaskning"),
+            FString::Printf(TEXT("playerActive=%d enemy=%d playerFinished=%d"), PlayerOrderUnderWay(), Enemy != nullptr, IsFinishedPlayerOrder(OwnerUnit, Order)),
+            TEXT("lokalt charge/afstandshold: springes over af den viste gate"));
         return;
     }
     const float Now = GetWorld()->GetTimeSeconds();
@@ -740,6 +822,10 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
             Why = W;
         }
     }
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("Ryttervurdering"), TEXT("Vurder charge/afstandshold"), TEXT("Eksisterende charge-betingelser"),
+        FString::Printf(TEXT("target=%s offensive=%d morale=%.1f chargeAge=%.2f cavalryComponent=%d distanceCm=%.1f"),
+            Target ? *Target->StableUnitId.ToString() : TEXT("-"), IsOffensive(), OwnerUnit->Morale, Now - LastChargeTime, Cavalry != nullptr, Distance),
+        TEXT("CHARGE afvises uden åbent mål, offensiv ordre, moral>55, cooldown>45 og CavalryUnit; ellers prøves ordreautoritet"));
     if (Target && IsOffensive() && Order.Type != EStrategyOrderType::None &&
         OwnerUnit->Morale > 55.0f && Now - LastChargeTime > 45.0f && Cavalry)
     {
@@ -754,6 +840,9 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
             LastChargeTime = Now;
             Decide(TEXT("Chok!"), FString::Printf(TEXT("%s: %s (%.0f m)"), *Target->DisplayName.ToString(), *Why, Best / 100.0f));
         }
+        else
+            STRATEGY1864_DECISION(OwnerUnit, TEXT("Rytterofficer"), TEXT("Bevar ordre"), TEXT("Charge afvist af ordreautoritet"),
+                FString::Printf(TEXT("target=%s distanceCm=%.1f"), *Target->StableUnitId.ToString(), Best), TEXT("CHARGE: SetOrder returnerede false"));
         return;
     }
     // Formed infantry close by: out of its fire (a squadron cannot stand against a line or a square).
@@ -782,6 +871,9 @@ void UStrategyFieldOfficerComponent::ThinkArtillery(AStrategyUnit* Enemy, float 
     {
         Decide(Distance < 40000.0f ? TEXT("Kardæsk!") : TEXT("Skyder"), FString::Printf(TEXT("%s %.0f m borte"), *Enemy->DisplayName.ToString(), Distance / 100.0f));
     }
+    else
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Batteriofficer"), TEXT("Afvent automatisk målvalg"), TEXT("Ingen fjende i officerens søgning"),
+            FString::Printf(TEXT("autoTarget=%d distanceLimitCm=150000"), bArtilleryAuto), TEXT("officerens ild/kardæsk-melding: intet mål"));
 }
 
 void UStrategyFieldOfficerComponent::StartCharge(AStrategyUnit* Target, const FString& Why)
@@ -798,6 +890,8 @@ void UStrategyFieldOfficerComponent::StartCharge(AStrategyUnit* Target, const FS
     Charge.Authority = EStrategyOrderAuthority::OfficerAI;
     if (!OwnerUnit->OrderComponent->SetOrder(Charge))
     {
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Feltofficer"), TEXT("Bevar ordre"), TEXT("Bajonetangreb afvist af ordreautoritet"),
+            FString::Printf(TEXT("target=%s"), *Target->StableUnitId.ToString()), TEXT("CHARGE: SetOrder returnerede false"));
         return;
     }
     ChargeTarget = Target;
