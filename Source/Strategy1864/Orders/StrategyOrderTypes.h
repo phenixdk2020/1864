@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "StrategyOrderTypes.generated.h"
 
+class AStrategyUnit;
+
 UENUM(BlueprintType)
 enum class EStrategyOrderType : uint8
 {
@@ -16,7 +18,8 @@ enum class EStrategyOrderType : uint8
     Assemble    UMETA(DisplayName = "Saml"),
     ScoutHere   UMETA(DisplayName = "Spejd her"),
     Charge      UMETA(DisplayName = "Charge"),
-    ArtilleryFireMission UMETA(DisplayName = "Artillery fire mission")
+    ArtilleryFireMission UMETA(DisplayName = "Artillery fire mission"),
+    Disengage UMETA(DisplayName = "Afbryd")
 };
 
 UENUM(BlueprintType)
@@ -88,6 +91,14 @@ struct FStrategyOrder
     UPROPERTY()
     FVector GroupRouteOffset = FVector::ZeroVector;
 
+    /** Enemy reference keeps the requested fire-range destination consistent through delivery. */
+    UPROPERTY()
+    TWeakObjectPtr<AStrategyUnit> AttackTarget;
+
+    /** Internal phase of a fighting withdrawal; false means halt and fire. */
+    UPROPERTY()
+    bool bDisengageStep = false;
+
     FVector ActiveDestination() const
     {
         return Waypoints.IsValidIndex(NextWaypointIndex) ? Waypoints[NextWaypointIndex] : TargetLocation;
@@ -97,7 +108,7 @@ struct FStrategyOrder
     {
         return Type == EStrategyOrderType::DefendHere ||
                Type == EStrategyOrderType::Hold ||
-               Type == EStrategyOrderType::ArtilleryFireMission;
+               Type == EStrategyOrderType::ArtilleryFireMission || Type == EStrategyOrderType::Disengage;
     }
 
     bool IsValidOrder() const

@@ -124,6 +124,7 @@ public:
     float SquareInfantryCasualtyMultiplier = 1.2f;
     UPROPERTY(EditAnywhere, Category="Strategy|Square")
     float SquareArtilleryCasualtyMultiplier = 1.5f;
+    void CancelMarchUnderFire();
     void EvaluateRoutState();
     int32 ScaleIncomingCasualties(int32 Casualties, bool bArtillery) const;
     void ConfigureCartridgesPerMan(float CartridgesPerMan = 60.0f);

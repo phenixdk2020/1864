@@ -57,6 +57,11 @@ public:
     bool FlankPlan(AStrategyUnit* Enemy, float Radius, FVector& OutGoal, FString& OutNote, bool& bOutMustMove);
 
 private:
+    bool UpdateDisengage(float DeltaTime);
+    int32 DisengageSerial = 0;
+    float DisengageVolleyBaseline = -1000000.0f;
+    float DisengageSettleSeconds = 0.0f;
+    bool bDisengageWasMoving = false;
     bool UpdateAutomaticLooseOrderUnderFire();
     bool bTakingFireCover = false;
     float FireCoverSince = -1.0f;

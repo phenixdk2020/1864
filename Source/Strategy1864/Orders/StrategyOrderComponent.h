@@ -67,6 +67,7 @@ public:
     EStrategyCommandVisualState GetCommandVisualState() const;
 
     FStrategyOrder GetLatestRequestedOrder() const { return bHasDelayedOrder ? DelayedOrder : CurrentOrder; }
+    void ResolveAttackDestination(FStrategyOrder& AttackOrder) const;
     void AdvanceWaypoint() { ++CurrentOrder.NextWaypointIndex; }
 
 private:

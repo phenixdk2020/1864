@@ -1,5 +1,6 @@
 #include "StrategyInfantryVisualComponent.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
+#include "../Orders/StrategyOrderComponent.h"
 #include "../Formations/StrategyFormationTransitionComponent.h"
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
 
@@ -1383,7 +1384,9 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         Soldier->SetRelativeLocation(VisualUnit.InverseTransformPosition(FigureWorld));
         // He faces the way he runs while he is far from his place, and turns to the front as he comes in.
         const float RunYaw = VisualUnit.InverseTransformVectorNoScale(Settle.WorldVelocity).Rotation().Yaw + SoldierMeshYawOffset;
-        const float Yaw = bVisualTravel || Distance > 150.0f ? RunYaw : Settle.Yaw;
+        const bool bFigureBackstep = OwnerCompany->OrderComponent &&
+            OwnerCompany->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Disengage;
+        const float Yaw = bFigureBackstep ? Settle.Yaw : (bVisualTravel || Distance > 150.0f ? RunYaw : Settle.Yaw);
         FRotator Rot = Soldier->GetRelativeRotation();
         const float FigureTurn = FMath::FindDeltaAngleDegrees(Rot.Yaw, Yaw);
         Rot.Roll = FMath::FInterpTo(Rot.Roll, FMath::Clamp(FigureTurn * 0.08f, -4.f, 4.f), DeltaTime, 8.f);

@@ -301,6 +301,7 @@ bool UStrategyFieldOfficerComponent::UpdateAutomaticLooseOrderUnderFire()
 void UStrategyFieldOfficerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    if (UpdateDisengage(DeltaTime)) return;
     if (UpdateAutomaticLooseOrderUnderFire()) return;
     if (!OwnerUnit || !OwnerUnit->bOfficerAIEnabled || !OwnerUnit->OrderComponent ||
         OwnerUnit->UnitState == EStrategyUnitState::Routed || OwnerUnit->UnitState == EStrategyUnitState::Destroyed || !OwnerUnit->IsCombatEffective())
@@ -922,4 +923,104 @@ void UStrategyFieldOfficerComponent::SetDeterministicRandomSeed(int32 Seed)
 {
     DecisionRandom.Initialize(Seed ^ 0x1864F1);
     Accumulator = DecisionRandom.FRandRange(0.0f, ThinkSeconds);
+}
+
+// Explicit player behaviour works even when discretionary officer AI is disabled.
+bool UStrategyFieldOfficerComponent::UpdateDisengage(float DeltaTime)
+{
+    if (!OwnerUnit || !OwnerUnit->OrderComponent) return false;
+    FStrategyOrder DisengageOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
+    if (DisengageOrder.Type != EStrategyOrderType::Disengage)
+    {
+        DisengageSerial = 0;
+        bDisengageWasMoving = false;
+        return false;
+    }
+    if (!OwnerUnit->IsCombatEffective())
+    {
+        const EStrategyUnitState DisengageEndState = OwnerUnit->UnitState;
+        OwnerUnit->OrderComponent->ClearOrder();
+        OwnerUnit->SetUnitState(DisengageEndState); // Clearing an order must not revive destroyed/disabled units.
+        DisengageSerial = 0;
+        return true;
+    }
+    if (!OwnerUnit->CombatComponent || !OwnerUnit->FireControlComponent || !OwnerUnit->MovementExecutor) return true;
+    const bool bDisengageDebug = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugDisengage"));
+    if (DisengageSerial != DisengageOrder.OrderSerial)
+    {
+        if (bCharging) EndCharge();
+        if (OwnerUnit->FormationComponent &&
+            (OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
+             OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn))
+            OwnerUnit->FormationComponent->SetFormation(EStrategyFormationType::Line);
+        DisengageSerial = DisengageOrder.OrderSerial;
+        DisengageVolleyBaseline = OwnerUnit->CombatComponent->LastFiredTimeSeconds;
+        DisengageSettleSeconds = 0.5f;
+        bDisengageWasMoving = false;
+        if (bDisengageDebug)
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DISENGAGE: %s start serial=%d"), *OwnerUnit->StableUnitId.ToString(), DisengageSerial);
+    }
+    float DisengageDistance = 0.f;
+    AStrategyUnit* DisengageEnemy = NearestEnemy(DisengageDistance, OwnerUnit->FireControlComponent->LongRangeCm);
+    if (!DisengageEnemy)
+    {
+        if (bDisengageDebug)
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DISENGAGE: %s end: no enemy within LONG"), *OwnerUnit->StableUnitId.ToString());
+        FStrategyOrder DisengageHold;
+        DisengageHold.Type = EStrategyOrderType::Hold;
+        DisengageHold.TargetLocation = OwnerUnit->GetActorLocation();
+        DisengageHold.Authority = DisengageOrder.Authority;
+        OwnerUnit->OrderComponent->SetOrder(DisengageHold);
+        Decide(TEXT("Holder stillingen"), TEXT("Afbryd afsluttet: ingen fjende inden for lang rækkevidde"));
+        return true;
+    }
+    Decide(TEXT("AFBRYDER"), TEXT("Ild og korte skridt tilbage med fronten mod fjenden"));
+    if (OwnerUnit->MovementExecutor->HasMovementGoal())
+    {
+        bDisengageWasMoving = true;
+        return true;
+    }
+    if (bDisengageWasMoving)
+    {
+        bDisengageWasMoving = false;
+        DisengageVolleyBaseline = OwnerUnit->CombatComponent->LastFiredTimeSeconds;
+        DisengageSettleSeconds = 0.5f;
+    }
+    const float DisengageFacing = (DisengageEnemy->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
+    FRotator DisengageRotation = OwnerUnit->GetActorRotation();
+    DisengageRotation.Yaw = FMath::FixedTurn(DisengageRotation.Yaw, DisengageFacing,
+        OwnerUnit->MovementExecutor->TurnSpeedDegreesPerSecond * DeltaTime);
+    OwnerUnit->SetActorRotation(DisengageRotation);
+    DisengageSettleSeconds = FMath::Max(0.f, DisengageSettleSeconds - DeltaTime);
+    const float DisengageActiveRange = OwnerUnit->FireControlComponent->GetActiveRangeCm();
+    const float DisengageEnemyRange = DisengageEnemy->FireControlComponent ?
+        DisengageEnemy->FireControlComponent->GetActiveRangeCm() : OwnerUnit->FireControlComponent->LongRangeCm;
+    // Beyond the fire exchange, leave in a continuous backwards march; no fictitious volley cycles.
+    const bool bDisengageExit = OwnerUnit->CombatComponent->IsOutOfAmmo() ||
+        DisengageDistance > DisengageActiveRange ||
+        (DisengageEnemyRange > 0.f && DisengageDistance > DisengageEnemyRange);
+    if (DisengageSettleSeconds > 0.f ||
+        (OwnerUnit->FormationTransition && OwnerUnit->FormationTransition->IsReforming())) return true;
+    if (!bDisengageExit && (OwnerUnit->CombatComponent->LastFiredTimeSeconds <= DisengageVolleyBaseline ||
+        !OwnerUnit->FireControlComponent->CanEngageTarget(DisengageEnemy, false))) return true;
+    FVector DisengageBack = (OwnerUnit->GetActorLocation() - DisengageEnemy->GetActorLocation()).GetSafeNormal2D();
+    if (DisengageBack.IsNearlyZero()) DisengageBack = -OwnerUnit->GetActorForwardVector();
+    const float DisengageStepCm = bDisengageExit ?
+        FMath::Max(900.f, OwnerUnit->FireControlComponent->LongRangeCm - DisengageDistance + 900.f) : 900.f;
+    DisengageOrder.TargetLocation = OwnerUnit->GetActorLocation() + DisengageBack * DisengageStepCm;
+    DisengageOrder.FacingYaw = DisengageFacing;
+    DisengageOrder.bHasFacing = true;
+    DisengageOrder.bKeepFacing = true;
+    DisengageOrder.bDisengageStep = true;
+    DisengageOrder.Waypoints.Reset();
+    if (OwnerUnit->OrderComponent->SetOrder(DisengageOrder))
+    {
+        DisengageSerial = OwnerUnit->OrderComponent->GetCurrentOrder().OrderSerial;
+        bDisengageWasMoving = true;
+        if (bDisengageDebug)
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DISENGAGE: %s %s distance=%.1fm step=%.1fm volley=%.2f"),
+                *OwnerUnit->StableUnitId.ToString(), bDisengageExit ? TEXT("exit march") : TEXT("backstep"),
+                DisengageDistance / 100.f, DisengageStepCm / 100.f, OwnerUnit->CombatComponent->LastFiredTimeSeconds);
+    }
+    return true;
 }
