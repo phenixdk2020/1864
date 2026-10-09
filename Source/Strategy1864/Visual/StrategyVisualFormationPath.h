@@ -82,7 +82,10 @@ struct FStrategyVisualFormationPath
         const float Remaining = FMath::FindDeltaAngleDegrees(Facing, Unit.Rotator().Yaw);
         bTurning = FMath::Abs(Remaining) > 0.01f;
         const float Radius = SlotBounds.IsValid ? SlotBounds.GetSize().Size2D() : 1.f;
-        const float TurnRate = FMath::Min(36.f, FMath::RadiansToDegrees(WalkSpeed / FMath::Max(1.f, Radius)));
+        // The wheel: the outer end of the line steps out at a brisk walk (about 4 m/s at most), so the line turns
+        // as a line, not as a bent snake. Half the line's length is the radius.
+        const float OuterSpeed = FMath::Max(WalkSpeed * 2.f, 400.f);
+        const float TurnRate = FMath::Clamp(FMath::RadiansToDegrees(OuterSpeed / FMath::Max(1.f, Radius * 0.5f)), 5.f, 36.f);
         const float NewFacing = SmoothFacing(Facing, FacingVelocity, Unit.Rotator().Yaw, Dt, TurnRate);
         Facing = NewFacing;
         bMovingVisuals = bTurning || FMath::Abs(FacingVelocity) > 0.01f || CenterVelocity.SizeSquared() > 0.01f || !Center.Equals(Unit.GetLocation(), 0.1f);

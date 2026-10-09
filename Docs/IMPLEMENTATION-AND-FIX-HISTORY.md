@@ -1761,6 +1761,10 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Kamporden fokuserer efter slip på »Træk herover« på den nye hærs enheder og nulstiller chart-scroll. Dette retter skjulte hære ved udskillelse fra filtrerede garnisonsenheder.
 - Gemmeformat/version 30 er uændret; eksisterende togordrer og afsluttet forskning gendannes fortsat. Statisk gennemgang og begrænsninger er dokumenteret i `Docs/Review-2026-10-09.md`. Ingen build, spilstart eller commit.
 
+### 2026-10-09 – Linjen drejer som en linje (ingen slange)
+- Årsag: den tegnede fronts drejehastighed var gangfart delt med hele linjens længde (ca. 1,5 grader i sekundet), så mændene løb fra hinanden og linjen blev en L/S. Nu er hastigheden sat ud fra den ydre mands skridt (min 400 cm/s, 5-36 grader i sekundet), og mændene må løbe mens linjen drejer. Testet: rette linjer i skærmbilleder under angreb.
+- Merget fra Codex: beslutningslog og afstemning mod Kamp-AI-designet (`Docs/Kamp-AI-Afstemning.md`), HUD-knapper på hele udvalget, hover for stabe, faldne mænd, tog kræver jernbaneforskning (`Docs/Review-2026-10-09.md`).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

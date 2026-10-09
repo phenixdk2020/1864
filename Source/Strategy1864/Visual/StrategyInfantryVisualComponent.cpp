@@ -1468,7 +1468,7 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         const bool bSlotReforming = OwnerCompany->FormationTransition && OwnerCompany->FormationTransition->IsReforming();
         // Carry the slot at unit speed; personal pace only affects closing a slot error.
         const float FigureSpeed = ActualMarchSpeed +
-            (bSlotReforming ? RunCmPerSecond : 160.f) * Settle.Pace;
+            ((bSlotReforming || VisualPath.bTurning) ? RunCmPerSecond : 160.f) * Settle.Pace;
         FVector FigureWorld = VisualUnit.TransformPosition(Here);
         const FVector FigureBefore = FigureWorld;
         const FVector FigureTarget = VisualUnit.TransformPosition(Settle.Goal);
