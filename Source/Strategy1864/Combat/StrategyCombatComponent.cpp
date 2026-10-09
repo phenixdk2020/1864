@@ -289,6 +289,7 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
         }
         else
         {
+            Target->CasualtySourceLocation = OwnerUnit->GetActorLocation();
             Target->ApplyStrengthLoss(Hits);
         }
     }

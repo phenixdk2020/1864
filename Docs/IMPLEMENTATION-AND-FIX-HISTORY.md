@@ -1737,6 +1737,14 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Codex: angrebsdestination ved den valgte skudafstand, march annulleres ved indgående ild, ny knap AFBRYD (kamptilbagetrækning).
 - `Docs/Kamp-AI-Design-v2.0.md` lagt ind som designgrundlag (afstemning med det byggede er sat i gang).
 
+### 2026-10-09 — Gruppekommandoer, HQ-tooltip og faldne infanterister
+
+- AI, doktrin, salvemetode, ildpolitik og formation virker på alle valgte enheder, der understøtter handlingen. HQ springes over ved ildpolitik/formation. Ordrer, charge, stilling og stop bruger allerede hele valget. Markeringen følger fortsat første enhed; ENHED viser antal VALGTE.
+- HQ-tooltip summerer nuværende og oprindelig styrke gennem underlagte enheder.
+- OnCasualtyVisualEvent reducerer infanteriets figurantal efter styrke/figurdivisor. Overlevendes pladser bevares; salvetab tager figurer nær skytteren, artilleritab bruger eksisterende nedslagsregistrering. Dødsanimation falder tilbage til eksisterende liggende pose.
+- Højst 150 samtidige faldne i slagets verden. Efter 60 spilsekunder fader de ud over fem sekunder med et gennemsigtigt silhuetmateriale og slettes sammen med våbnet; crowd-figuren skjules under fade.
+- Statisk UE 5.8-headerkontrol og git diff --check. Ingen build, spilstart eller commit. Animationer, fade og blandede valg mangler afprøvning i spillet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

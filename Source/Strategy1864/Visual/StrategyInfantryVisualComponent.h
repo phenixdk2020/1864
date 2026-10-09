@@ -218,6 +218,12 @@ public:
 
 private:
     UFUNCTION()
+    void HandleCasualtyVisualEvent(int32 AppliedLoss, FVector SourceLocation);
+    void UpdateCorpses();
+    TArray<float> CorpseBirthTimes;
+    TArray<bool> CorpseFading;
+
+    UFUNCTION()
     void HandleVolleyVisualEvent(
         FVector Origin,
         FVector Direction,

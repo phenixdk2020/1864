@@ -367,6 +367,7 @@ int32 AStrategyUnit::ApplyStrengthLoss(int32 RequestedLoss)
     OnCasualtyVisualEvent.Broadcast(
         AppliedLoss,
         GetActorLocation());
+    CasualtySourceLocation = FVector::ZeroVector;
 
     return AppliedLoss;
 }
