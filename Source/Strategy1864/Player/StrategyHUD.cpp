@@ -124,6 +124,15 @@ namespace
         return Men;
     }
 
+    int32 InitialMenUnder(const AStrategyUnit* Unit, int32 Guard = 0)
+    {
+        const TArray<AStrategyUnit*> InitialSubs = Subordinates(Unit);
+        if (InitialSubs.IsEmpty() || Guard > 12) return Unit->InitialStrength;
+        int32 InitialMen = 0;
+        for (const AStrategyUnit* InitialSub : InitialSubs) InitialMen += InitialMenUnder(InitialSub, Guard + 1);
+        return InitialMen;
+    }
+
     TArray<AStrategyUnit*> Subordinates(const AStrategyUnit* Unit)
     {
         TArray<AStrategyUnit*> Out;
@@ -1038,6 +1047,11 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         bCommandStyle = false;
         return;
     }
+    if (const AStrategyPlayerController* SelectionPC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
+    {
+        const int32 SelectionCount = SelectionPC->GetSelectedUnits().Num();
+        if (SelectionCount > 1) Text(FString::Printf(TEXT("%d VALGTE"), SelectionCount), HudX[0] + HudW[0] - 70.f, HudY + 17.f, Gold, 0.65f);
+    }
     const bool HudHQ = IsCommandHQ(Unit);
     const FString HudRank = Unit->OfficerProfileComponent && !Unit->OfficerProfileComponent->OfficerRank.IsEmpty()
         ? Unit->OfficerProfileComponent->OfficerRank.ToUpper()
@@ -1062,6 +1076,15 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         DrawStatBar(TEXT("MORAL"), FString::Printf(TEXT("%.0f"), Unit->Morale), Unit->Morale / 100.f, HudX[0] + ColW + 10.f, HudY + 112.f, ColW);
         DrawStatBar(TEXT("SAMHOLD"), FString::Printf(TEXT("%.0f"), Unit->Cohesion), Unit->Cohesion / 100.f, HudX[0] + 2.f * (ColW + 10.f), HudY + 112.f, ColW);
     }
+    const AStrategyPlayerController* HudSelectionPC = Cast<AStrategyPlayerController>(GetOwningPlayerController());
+    const TArray<AStrategyUnit*> HudSelected = HudSelectionPC ? HudSelectionPC->GetSelectedUnits() : TArray<AStrategyUnit*>();
+    auto HudSupports = [&](auto Predicate)
+    {
+        for (AStrategyUnit* HudSelectedUnit : HudSelected)
+            if (IsValid(HudSelectedUnit) && Predicate(HudSelectedUnit)) return true;
+        return false;
+    };
+    const bool HudFormationEnabled = HudSupports([](AStrategyUnit* HudCandidate) { return !IsCommandHQ(HudCandidate) && HudCandidate->FormationComponent; });
     auto HudPills = [&](int32 Panel, float RowY, const TCHAR* const* Labels, int32 Count, EAction Action, int32 Active, bool Enabled = true)
     {
         const float PillW = (HudW[Panel] - (Count - 1) * 4.f) / Count;
@@ -1073,18 +1096,18 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     HudPills(1, 57.f, HudAI, 2, EAction::AIToggle, Unit->bOfficerAIEnabled ? 0 : 1);
     Text(TEXT("DOKTRIN"), HudX[1], HudY + 84.f, Muted, 0.7f);
     const TCHAR* HudDoctrine[] = {TEXT("DEF"), TEXT("BAL"), TEXT("OFF")};
-    HudPills(1, 99.f, HudDoctrine, 3, EAction::Doctrine, Unit->DoctrineComponent ? int32(Unit->DoctrineComponent->Doctrine) : -1, Unit->DoctrineComponent != nullptr);
+    HudPills(1, 99.f, HudDoctrine, 3, EAction::Doctrine, Unit->DoctrineComponent ? int32(Unit->DoctrineComponent->Doctrine) : -1, HudSupports([](AStrategyUnit* HudCandidate) { return HudCandidate->DoctrineComponent != nullptr; }));
     Text(TEXT("SKYDNING"), HudX[1], HudY + 126.f, Muted, 0.7f);
     const TCHAR* HudFire[] = {TEXT("HOLD"), TEXT("CLOSE"), TEXT("MED"), TEXT("LONG")};
-    HudPills(1, 141.f, HudFire, 4, EAction::FirePolicy, Unit->FireControlComponent ? int32(Unit->FireControlComponent->FirePolicy) : -1, !HudHQ && Unit->FireControlComponent);
+    HudPills(1, 141.f, HudFire, 4, EAction::FirePolicy, !HudHQ && Unit->FireControlComponent ? int32(Unit->FireControlComponent->FirePolicy) : -1, HudSupports([](AStrategyUnit* HudCandidate) { return !IsCommandHQ(HudCandidate) && HudCandidate->FireControlComponent; }));
     Text(TEXT("SALVEMETODE"), HudX[1], HudY + 168.f, Muted, 0.7f);
     const TCHAR* HudDrills[] = {TEXT("1.GLD"), TEXT("2.GLD"), TEXT("GELED"), TEXT("SALVE"), TEXT("FRI")};
     const EStrategyFireDrillMode HudModes[] = {EStrategyFireDrillMode::FrontRank, EStrategyFireDrillMode::TwoRankFire, EStrategyFireDrillMode::FireByRank, EStrategyFireDrillMode::Volley, EStrategyFireDrillMode::Independent};
     for (int32 DrillIndex = 0; DrillIndex < 5; ++DrillIndex)
     {
-        const bool HudUnlocked = Cast<AStrategyCompanyUnit>(Unit) && Unit->FireDrillComponent && Unit->FireDrillComponent->IsDrillModeUnlocked(HudModes[DrillIndex]);
+        const bool HudUnlocked = HudSupports([&](AStrategyUnit* HudCandidate) { return HudCandidate->FireDrillComponent && HudCandidate->FireDrillComponent->IsDrillModeUnlocked(HudModes[DrillIndex]); });
         const float HudPillW = (HudW[1] - 16.f) / 5.f;
-        DrawButton(HudX[1] + DrillIndex * (HudPillW + 4.f), HudY + 183.f, HudPillW, 23.f, HudDrills[DrillIndex], HudUnlocked ? EAction::FireDrill : EAction::None, int32(HudModes[DrillIndex]), HudUnlocked && Unit->FireDrillComponent->DrillMode == HudModes[DrillIndex], Unit);
+        DrawButton(HudX[1] + DrillIndex * (HudPillW + 4.f), HudY + 183.f, HudPillW, 23.f, HudDrills[DrillIndex], HudUnlocked ? EAction::FireDrill : EAction::None, int32(HudModes[DrillIndex]), HudUnlocked && Unit->FireDrillComponent && Unit->FireDrillComponent->DrillMode == HudModes[DrillIndex], Unit);
     }
     const EStrategyOrderType HudCurrent = Unit->OrderComponent ? Unit->OrderComponent->GetCurrentOrder().Type : EStrategyOrderType::None;
     const float HudOrderW = (HudW[2] - 5.f) / 2.f;
@@ -1117,7 +1140,7 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     for (int32 FormIndex = 0; FormIndex < HudFormCount; ++FormIndex)
     {
         const float HudFW = (HudW[3] - (HudFormCount - 1) * 4.f) / HudFormCount;
-        DrawButton(HudX[3] + FormIndex * (HudFW + 4.f), HudY + 43.f, HudFW, 23.f, HudFormation[FormIndex], !HudHQ && Unit->FormationComponent ? EAction::Formation : EAction::None, int32(HudFormTypes[FormIndex]), !HudHQ && Unit->FormationComponent && Unit->FormationComponent->CurrentFormation == HudFormTypes[FormIndex], Unit);
+        DrawButton(HudX[3] + FormIndex * (HudFW + 4.f), HudY + 43.f, HudFW, 23.f, HudFormation[FormIndex], HudFormationEnabled ? EAction::Formation : EAction::None, int32(HudFormTypes[FormIndex]), !HudHQ && Unit->FormationComponent && Unit->FormationComponent->CurrentFormation == HudFormTypes[FormIndex], Unit);
     }
     Text(TEXT("STILLING"), HudX[3], HudY + 78.f, Muted, 0.7f);
     const TCHAR* HudStances[] = {TEXT("STA"), TEXT("KNAE"), TEXT("LIG")};
@@ -1265,181 +1288,191 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
             continue;
         }
         AStrategyUnit* Unit = B.Unit.Get();
-        switch (B.Action)
+        const bool bSelectionAction = B.Action == EAction::AIToggle || B.Action == EAction::Doctrine ||
+            B.Action == EAction::FireDrill || B.Action == EAction::FirePolicy || B.Action == EAction::Formation;
+        TArray<AStrategyUnit*> ActionUnits;
+        if (bSelectionAction && PC) ActionUnits = PC->GetSelectedUnits();
+        else ActionUnits.Add(Unit);
+        for (AStrategyUnit* ActionUnit : ActionUnits)
         {
-            case EAction::Minimap:
-                if (PC)
-                {
-                    // The camera to the clicked point (world +X up the map, +Y right).
-                    const FVector2D C = MinimapRect.GetCenter();
-                    const float Scale = (2.0f * MinimapHalfWidth) / MinimapRect.GetSize().X;
-                    const FVector World(MinimapCentre.X - (P.Y - C.Y) * Scale, MinimapCentre.Y + (P.X - C.X) * Scale, 0.0f);
-                    if (AStrategyCameraPawn* Camera = Cast<AStrategyCameraPawn>(PC->GetPawn()))
-                    {
-                        Camera->FocusOnWorldLocation(World);
-                    }
-                }
-                break;
-            case EAction::SettingsToggle:
-                bSettingsOpen = !bSettingsOpen;
-                break;
-            case EAction::BattleQuality:
-                BattleQualityPreset = B.Value;   // the graphics preset; the number of figures is its own setting
-                Strategy1864BattleQuality::ApplyPreset(GetWorld(), B.Value, true);
-                break;
-            case EAction::Shadows:
-                Strategy1864BattleQuality::SetShadowsOn(GetWorld(), B.Value != 0, true);
-                break;
-            case EAction::TimeControl:
-                if (AStrategyPlayerController* TimePC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
-                {
-                    if (B.Value == 0) { TimePC->TogglePauseSimulation(); }
-                    else { TimePC->SetSimulationSpeed(B.Value < 0 ? 0.5f : float(B.Value)); }
-                }
-                break;
-            case EAction::FigureScale:
-                FigureDivisor = B.Value;
-                Strategy1864BattleQuality::SetFigureDivisor(B.Value);
-                for (TActorIterator<AStrategyCompanyUnit> It(GetWorld()); It; ++It)
-                {
-                    if (IsValid(*It) && It->InfantryVisualComponent) { It->InfantryVisualComponent->SetVisualScaleDivisor(B.Value); }
-                }
-                break;
-            case EAction::Couriers:
-                AStrategyPlayerController::SetCouriersOn(B.Value == 1);
-                break;
-            case EAction::EnemyRange:
-                SetShowEnemyRange(!ShowEnemyRange());
-                break;
-            case EAction::EnemyFire:
-                for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
-                {
-                    It->SetEnemyFiring(B.Value == 1);
-                    break;
-                }
-                break;
-            case EAction::EnemyPosture:
-                for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
-                {
-                    It->SetEnemyAttacking(B.Value == 1);
-                    break;
-                }
-                break;
-            case EAction::CameraSpeed:
+            if (bSelectionAction && !IsValid(ActionUnit)) continue;
+            Unit = ActionUnit;
+            switch (B.Action)
             {
-                static const float Steps[] = { 1.0f, 2.0f, 3.0f, 5.0f, 8.0f, 10.0f, 15.0f, 20.0f };
-                AStrategyCameraPawn::SetKeySpeedFactor(Steps[FMath::Clamp(B.Value, 0, int32(UE_ARRAY_COUNT(Steps)) - 1)]);
-                break;
-            }
-            case EAction::FinishBattle:
-                {
-                    bool bCampaignBattle = false;
-                    for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+                case EAction::Minimap:
+                    if (PC)
                     {
-                        bCampaignBattle = It->IsCampaignBattle();
-                        if (bCampaignBattle) { It->FinishCampaignBattle(); }
-                        break;
-                    }
-                    if (!bCampaignBattle)
-                    {
-                        // A test battle (from the start menu or a launcher): the way back is the campaign's start menu.
-                        UGameplayStatics::SetGamePaused(this, false);
-                        UGameplayStatics::SetGlobalTimeDilation(this, 1.0f);
-                        UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851")));
-                    }
-                }
-                break;
-            case EAction::OOBToggle:
-                bOOBOpen = !bOOBOpen;
-                break;
-            case EAction::Pontoon:
-                for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
-                {
-                    It->OrderPontoonBridge(Unit);
-                    break;
-                }
-                break;
-            case EAction::FireDrill:
-                if (Unit && Unit->FireDrillComponent)
-                {
-                    Unit->FireDrillComponent->SetDrillMode(EStrategyFireDrillMode(B.Value));   // refused while not drilled
-                }
-                break;
-            case EAction::OOBFold:
-                if (Unit)
-                {
-                    if (Folded.Contains(Unit)) { Folded.Remove(Unit); } else { Folded.Add(Unit); }
-                }
-                break;
-            case EAction::OOBRow:
-                if (Unit && PC)
-                {
-                    // A double click puts the camera on it.
-                    const double Now = FPlatformTime::Seconds();
-                    const bool bDouble = LastClickedUnit.Get() == Unit && Now - LastClickTime < 0.4;
-                    PC->SelectUnitFromOOB(Unit, bDouble);
-                    LastClickedUnit = Unit;
-                    LastClickTime = Now;
-                }
-                break;
-            case EAction::AIToggle:
-                if (Unit) { Unit->bOfficerAIEnabled = B.Value == 0; }
-                break;
-            case EAction::Doctrine:
-                if (Unit && Unit->DoctrineComponent) { Unit->DoctrineComponent->Doctrine = EStrategyDoctrine(B.Value); }
-                break;
-            case EAction::Order:
-                if (PC) { PC->BeginOrderPlacement(EStrategyOrderType(B.Value)); }
-                break;
-            case EAction::Charge:
-                if (PC) { PC->BeginOrderPlacement(EStrategyOrderType::Charge); }
-                break;
-            case EAction::Disengage:
-                if (PC)
-                {
-                    PC->CancelOrderPlacement();
-                    PC->IssueOrderToSelection(EStrategyOrderType::Disengage, FVector::ZeroVector, 0.f, false);
-                }
-                break;
-            case EAction::Stop:
-                if (PC) { PC->IssueHoldToSelection(); }
-                break;
-            case EAction::Stance:
-                if (PC)
-                {
-                    for (AStrategyUnit* Selected : PC->GetSelectedUnits())
-                    {
-                        if (IsValid(Selected) && Selected->StanceComponent) { Selected->StanceComponent->SetStance(EStrategyStance(B.Value)); }
-                    }
-                }
-                break;
-            case EAction::Dismount:
-                if (PC)
-                {
-                    for (AStrategyUnit* Selected : PC->GetSelectedUnits())
-                    {
-                        if (ACavalryUnit* Horse = Cast<ACavalryUnit>(Selected))
+                        // The camera to the clicked point (world +X up the map, +Y right).
+                        const FVector2D C = MinimapRect.GetCenter();
+                        const float Scale = (2.0f * MinimapHalfWidth) / MinimapRect.GetSize().X;
+                        const FVector World(MinimapCentre.X - (P.Y - C.Y) * Scale, MinimapCentre.Y + (P.X - C.X) * Scale, 0.0f);
+                        if (AStrategyCameraPawn* Camera = Cast<AStrategyCameraPawn>(PC->GetPawn()))
                         {
-                            if (Horse->DragoonComponent) { if (B.Value == 1) { Horse->DragoonComponent->DismountAtCurrentPosition(); } else { Horse->DragoonComponent->RequestRemount(); } }
+                            Camera->FocusOnWorldLocation(World);
                         }
                     }
-                }
-                break;
-            case EAction::FirePolicy:
-                if (Unit && Unit->FireControlComponent) { Unit->FireControlComponent->SetFirePolicy(EStrategyFirePolicy(B.Value)); }
-                break;
-            case EAction::Formation:
-                if (Unit && Unit->FormationComponent)
-                {
-                    if (Unit->ThreatReactionComponent)
+                    break;
+                case EAction::SettingsToggle:
+                    bSettingsOpen = !bSettingsOpen;
+                    break;
+                case EAction::BattleQuality:
+                    BattleQualityPreset = B.Value;   // the graphics preset; the number of figures is its own setting
+                    Strategy1864BattleQuality::ApplyPreset(GetWorld(), B.Value, true);
+                    break;
+                case EAction::Shadows:
+                    Strategy1864BattleQuality::SetShadowsOn(GetWorld(), B.Value != 0, true);
+                    break;
+                case EAction::TimeControl:
+                    if (AStrategyPlayerController* TimePC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
                     {
-                        Unit->ThreatReactionComponent->NotifyPlayerFormationOrder(EStrategyFormationType(B.Value));
+                        if (B.Value == 0) { TimePC->TogglePauseSimulation(); }
+                        else { TimePC->SetSimulationSpeed(B.Value < 0 ? 0.5f : float(B.Value)); }
                     }
-                    Unit->FormationComponent->SetFormation(EStrategyFormationType(B.Value));
+                    break;
+                case EAction::FigureScale:
+                    FigureDivisor = B.Value;
+                    Strategy1864BattleQuality::SetFigureDivisor(B.Value);
+                    for (TActorIterator<AStrategyCompanyUnit> It(GetWorld()); It; ++It)
+                    {
+                        if (IsValid(*It) && It->InfantryVisualComponent) { It->InfantryVisualComponent->SetVisualScaleDivisor(B.Value); }
+                    }
+                    break;
+                case EAction::Couriers:
+                    AStrategyPlayerController::SetCouriersOn(B.Value == 1);
+                    break;
+                case EAction::EnemyRange:
+                    SetShowEnemyRange(!ShowEnemyRange());
+                    break;
+                case EAction::EnemyFire:
+                    for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+                    {
+                        It->SetEnemyFiring(B.Value == 1);
+                        break;
+                    }
+                    break;
+                case EAction::EnemyPosture:
+                    for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+                    {
+                        It->SetEnemyAttacking(B.Value == 1);
+                        break;
+                    }
+                    break;
+                case EAction::CameraSpeed:
+                {
+                    static const float Steps[] = { 1.0f, 2.0f, 3.0f, 5.0f, 8.0f, 10.0f, 15.0f, 20.0f };
+                    AStrategyCameraPawn::SetKeySpeedFactor(Steps[FMath::Clamp(B.Value, 0, int32(UE_ARRAY_COUNT(Steps)) - 1)]);
+                    break;
                 }
-                break;
-            default:
-                break;
+                case EAction::FinishBattle:
+                    {
+                        bool bCampaignBattle = false;
+                        for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+                        {
+                            bCampaignBattle = It->IsCampaignBattle();
+                            if (bCampaignBattle) { It->FinishCampaignBattle(); }
+                            break;
+                        }
+                        if (!bCampaignBattle)
+                        {
+                            // A test battle (from the start menu or a launcher): the way back is the campaign's start menu.
+                            UGameplayStatics::SetGamePaused(this, false);
+                            UGameplayStatics::SetGlobalTimeDilation(this, 1.0f);
+                            UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851")));
+                        }
+                    }
+                    break;
+                case EAction::OOBToggle:
+                    bOOBOpen = !bOOBOpen;
+                    break;
+                case EAction::Pontoon:
+                    for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
+                    {
+                        It->OrderPontoonBridge(Unit);
+                        break;
+                    }
+                    break;
+                case EAction::FireDrill:
+                    if (Unit && Unit->FireDrillComponent)
+                    {
+                        Unit->FireDrillComponent->SetDrillMode(EStrategyFireDrillMode(B.Value));   // refused while not drilled
+                    }
+                    break;
+                case EAction::OOBFold:
+                    if (Unit)
+                    {
+                        if (Folded.Contains(Unit)) { Folded.Remove(Unit); } else { Folded.Add(Unit); }
+                    }
+                    break;
+                case EAction::OOBRow:
+                    if (Unit && PC)
+                    {
+                        // A double click puts the camera on it.
+                        const double Now = FPlatformTime::Seconds();
+                        const bool bDouble = LastClickedUnit.Get() == Unit && Now - LastClickTime < 0.4;
+                        PC->SelectUnitFromOOB(Unit, bDouble);
+                        LastClickedUnit = Unit;
+                        LastClickTime = Now;
+                    }
+                    break;
+                case EAction::AIToggle:
+                    if (Unit) { Unit->bOfficerAIEnabled = B.Value == 0; }
+                    break;
+                case EAction::Doctrine:
+                    if (Unit && Unit->DoctrineComponent) { Unit->DoctrineComponent->Doctrine = EStrategyDoctrine(B.Value); }
+                    break;
+                case EAction::Order:
+                    if (PC) { PC->BeginOrderPlacement(EStrategyOrderType(B.Value)); }
+                    break;
+                case EAction::Charge:
+                    if (PC) { PC->BeginOrderPlacement(EStrategyOrderType::Charge); }
+                    break;
+                case EAction::Disengage:
+                    if (PC)
+                    {
+                        PC->CancelOrderPlacement();
+                        PC->IssueOrderToSelection(EStrategyOrderType::Disengage, FVector::ZeroVector, 0.f, false);
+                    }
+                    break;
+                case EAction::Stop:
+                    if (PC) { PC->IssueHoldToSelection(); }
+                    break;
+                case EAction::Stance:
+                    if (PC)
+                    {
+                        for (AStrategyUnit* Selected : PC->GetSelectedUnits())
+                        {
+                            if (IsValid(Selected) && Selected->StanceComponent) { Selected->StanceComponent->SetStance(EStrategyStance(B.Value)); }
+                        }
+                    }
+                    break;
+                case EAction::Dismount:
+                    if (PC)
+                    {
+                        for (AStrategyUnit* Selected : PC->GetSelectedUnits())
+                        {
+                            if (ACavalryUnit* Horse = Cast<ACavalryUnit>(Selected))
+                            {
+                                if (Horse->DragoonComponent) { if (B.Value == 1) { Horse->DragoonComponent->DismountAtCurrentPosition(); } else { Horse->DragoonComponent->RequestRemount(); } }
+                            }
+                        }
+                    }
+                    break;
+                case EAction::FirePolicy:
+                    if (Unit && !IsCommandHQ(Unit) && Unit->FireControlComponent) { Unit->FireControlComponent->SetFirePolicy(EStrategyFirePolicy(B.Value)); }
+                    break;
+                case EAction::Formation:
+                    if (Unit && !IsCommandHQ(Unit) && Unit->FormationComponent)
+                    {
+                        if (Unit->ThreatReactionComponent)
+                        {
+                            Unit->ThreatReactionComponent->NotifyPlayerFormationOrder(EStrategyFormationType(B.Value));
+                        }
+                        Unit->FormationComponent->SetFormation(EStrategyFormationType(B.Value));
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
         return true;
     }
@@ -1508,14 +1541,14 @@ void AStrategyHUD::DrawUnitHover()
     for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
     {
         const AStrategyUnit* Unit = *It;
-        if (!IsValid(Unit) || Unit->InitialStrength <= 0 || IsCommandHQ(Unit)) { continue; }
+        if (!IsValid(Unit) || (!IsCommandHQ(Unit) && Unit->InitialStrength <= 0)) { continue; }
         FVector2D Screen;
         if (!PC->ProjectWorldLocationToScreen(Unit->GetActorLocation() + FVector(0.f, 0.f, 150.f), Screen)) { continue; }
         const float Dist = FVector2D::Distance(Screen, Mouse);
         if (Dist < BestDist) { BestDist = Dist; Best = Unit; }
     }
     if (!Best) { return; }
-    const int32 Start = Best->InitialStrength, Now = Best->CurrentStrength;
+    const int32 Start = InitialMenUnder(Best), Now = MenUnder(Best);
     const FString Name = Best->DisplayName.ToString();
     const FString Line1 = FString::Printf(TEXT("%s%s"), *Name, Best->Side == EStrategySide::Denmark ? TEXT("") : TEXT("  (fjende)"));
     const FString Line2 = FString::Printf(TEXT("Mand: %d af %d  (tab %d)"), Now, Start, Start - Now);

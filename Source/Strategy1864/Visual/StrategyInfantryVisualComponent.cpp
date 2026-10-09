@@ -18,6 +18,7 @@
 #include "StrategyHumanAnimationStateComponent.h"
 #include "StrategyMuzzleSmokePuff.h"
 #include "Engine/World.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "EngineUtils.h"
 #include "Animation/AnimSingleNodeInstance.h"
 #include "../Formations/StrategyFormationComponent.h"
@@ -123,6 +124,7 @@ void UStrategyInfantryVisualComponent::BeginPlay()
 
     OwnerCompany = Cast<AStrategyCompanyUnit>(GetOwner());
     VisualAnimationTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+    if (OwnerCompany) OwnerCompany->OnCasualtyVisualEvent.AddDynamic(this, &UStrategyInfantryVisualComponent::HandleCasualtyVisualEvent);
 
     if (OwnerCompany &&
         OwnerCompany->CombatComponent)
@@ -154,6 +156,19 @@ void UStrategyInfantryVisualComponent::EndPlay(
             &UStrategyInfantryVisualComponent::HandleVolleyVisualEvent);
     }
 
+    if (OwnerCompany) OwnerCompany->OnCasualtyVisualEvent.RemoveDynamic(this, &UStrategyInfantryVisualComponent::HandleCasualtyVisualEvent);
+    for (USkeletalMeshComponent* EndCorpse : CorpseComponents)
+    {
+        if (!EndCorpse) continue;
+        TArray<USceneComponent*> EndChildren;
+        EndCorpse->GetChildrenComponents(true, EndChildren);
+        for (USceneComponent* EndChild : EndChildren) EndChild->DestroyComponent();
+        EndCorpse->DestroyComponent();
+    }
+    CorpseComponents.Reset();
+    CorpseClips.Reset();
+    CorpseBirthTimes.Reset();
+    CorpseFading.Reset();
     DestroyVisualComponents();
 
     Super::EndPlay(EndPlayReason);
@@ -168,6 +183,8 @@ void UStrategyInfantryVisualComponent::TickComponent(
         DeltaTime,
         TickType,
         ThisTickFunction);
+
+    UpdateCorpses();
 
     if (!bEnabled ||
         !OwnerCompany ||
@@ -742,6 +759,67 @@ void UStrategyInfantryVisualComponent::MarchDust(float Now)
     AStrategyBattleBlast::Spawn(GetWorld(), EStrategyBlastKind::FootstepDust, DustGround + FVector(0.f, 0.f, 8.f), Fwd);
 }
 
+void UStrategyInfantryVisualComponent::HandleCasualtyVisualEvent(int32 AppliedLoss, FVector SourceLocation)
+{
+    if (!bEnabled || !OwnerCompany || AppliedLoss <= 0) return;
+    // Compare total represented strength, so fractional losses accumulate across the figure divisor.
+    const bool bDirectedFire = !OwnerCompany->CasualtySourceLocation.IsNearlyZero();
+    if (bDirectedFire) SourceLocation = OwnerCompany->CasualtySourceLocation;
+    const int32 FiguresLost = FMath::Max(0, SoldierComponents.Num() - PendingKillCount - GetDesiredVisualCount());
+    FStrategyImpactRegistry::FImpact CasualtyImpact;
+    const float CasualtyNow = GetWorld()->GetTimeSeconds();
+    if (!bDirectedFire && FStrategyImpactRegistry::Find(GetWorld(), OwnerCompany->GetActorLocation(), 6500.f, CasualtyNow, CasualtyImpact))
+        QueueKills(FiguresLost);
+    else
+        KillSoldiers(FiguresLost, &SourceLocation);
+    CachedStrength = OwnerCompany->CurrentStrength;
+    UpdateFormationBounds();
+}
+
+void UStrategyInfantryVisualComponent::UpdateCorpses()
+{
+    if (CorpseComponents.IsEmpty() || !GetWorld()) return;
+    const float CorpseNow = GetWorld()->GetTimeSeconds();
+    for (int32 CorpseIndex = CorpseComponents.Num() - 1; CorpseIndex >= 0; --CorpseIndex)
+    {
+        USkeletalMeshComponent* FallenMesh = CorpseComponents[CorpseIndex];
+        const float CorpseAge = CorpseNow - CorpseBirthTimes[CorpseIndex];
+        if (CorpseAge >= 65.f)
+        {
+            TArray<USceneComponent*> FallenChildren;
+            FallenMesh->GetChildrenComponents(true, FallenChildren);
+            for (USceneComponent* FallenChild : FallenChildren) FallenChild->DestroyComponent();
+            FallenMesh->DestroyComponent();
+            CorpseComponents.RemoveAt(CorpseIndex);
+            CorpseClips.RemoveAt(CorpseIndex);
+            CorpseBirthTimes.RemoveAt(CorpseIndex);
+            CorpseFading.RemoveAt(CorpseIndex);
+            bCrowdDirty = true;
+        }
+        else if (CorpseAge >= 60.f)
+        {
+            // A real translucent fade also works when the original uniform material is opaque.
+            if (!CorpseFading[CorpseIndex])
+            {
+                CorpseFading[CorpseIndex] = true;
+                RestoreClip(FallenMesh, CorpseClips[CorpseIndex], VisualAnimationTime);
+                FallenMesh->bPauseAnims = true;
+                UMaterialInterface* FadeBase = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/EngineDebugMaterials/M_SimpleTranslucent.M_SimpleTranslucent"));
+                for (int32 FadeSlot = 0; FadeSlot < FallenMesh->GetNumMaterials(); ++FadeSlot)
+                    if (FadeBase) FallenMesh->SetMaterial(FadeSlot, UMaterialInstanceDynamic::Create(FadeBase, this, TEXT("FadeCorpse")));
+                TArray<USceneComponent*> FallenChildren;
+                FallenMesh->GetChildrenComponents(true, FallenChildren);
+                for (USceneComponent* FallenChild : FallenChildren) FallenChild->SetVisibility(false);
+            }
+            FallenMesh->SetVisibility(true);
+            for (int32 FadeSlot = 0; FadeSlot < FallenMesh->GetNumMaterials(); ++FadeSlot)
+                if (UMaterialInstanceDynamic* FadeMaterial = Cast<UMaterialInstanceDynamic>(FallenMesh->GetMaterial(FadeSlot)))
+                    FadeMaterial->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.22f, 0.25f, 0.28f, 1.f - (CorpseAge - 60.f) / 5.f));
+            bCrowdDirty = true;
+        }
+    }
+}
+
 void UStrategyInfantryVisualComponent::QueueKills(int32 Count)
 {
     UWorld* World = GetWorld();
@@ -790,7 +868,7 @@ void UStrategyInfantryVisualComponent::ProcessPendingKills()
 
 void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* Near, const FVector* ConeOrigin)
 {
-    // The hit: random men of the company fall where they stand and stay there (not with the company).
+    // Remove only the chosen figures; all surviving figure identities and slots remain intact.
     const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
     const bool bMoving = OwnerCompany && OwnerCompany->HumanAnimationStateComponent &&
         (OwnerCompany->HumanAnimationStateComponent->CurrentAction == EStrategyHumanAnimationAction::Walk ||
@@ -814,16 +892,22 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
                 if (Cos > 0.981f) { Inside.Add(c); }
                 if (1.0f - Cos < BestOff) { BestOff = 1.0f - Cos; Nearest = c; }
             }
-            i = Inside.Num() > 0 ? Inside[FMath::RandRange(0, Inside.Num() - 1)] : Nearest;
+            i = Nearest;
+            float ConeNearestDistance = TNumericLimits<float>::Max();
+            for (int32 ConeCandidate : Inside)
+            {
+                const float ConeDistance = FVector::DistSquared2D(SoldierComponents[ConeCandidate]->GetComponentLocation(), *ConeOrigin);
+                if (ConeDistance < ConeNearestDistance) { ConeNearestDistance = ConeDistance; i = ConeCandidate; }
+            }
         }
         else if (Near)
         {
-            // A shot: the men nearest where it struck (a little scattered).
+            // A shot: nearest the fire source or registered impact; no random reshuffle.
             float Best = TNumericLimits<float>::Max();
             for (int32 c = 0; c < SoldierComponents.Num(); ++c)
             {
                 if (!SoldierComponents[c]) { continue; }
-                const float D = FVector::Dist2D(SoldierComponents[c]->GetComponentLocation(), *Near) + FMath::FRandRange(0.0f, 250.0f);
+                const float D = FVector::Dist2D(SoldierComponents[c]->GetComponentLocation(), *Near);
                 if (D < Best) { Best = D; i = c; }
             }
         }
@@ -838,14 +922,25 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
             const float Rate = FMath::FRandRange(0.9f, 1.1f);
             Soldier->SetPlayRate(Rate);
             Soldier->bPauseAnims = false;
-            Soldier->PlayAnimation(Death.LoadSynchronous(), false);
-            CorpseComponents.Add(Soldier);
+            UAnimSequence* FallenAnimation = Death.LoadSynchronous();
+            if (!FallenAnimation) FallenAnimation = IdleProneAsset.LoadSynchronous();
+            Soldier->PlayAnimation(FallenAnimation, false);
+            int32 BattleBodyCount = 0;
+            for (TActorIterator<AStrategyCompanyUnit> BodyIt(GetWorld()); BodyIt; ++BodyIt)
+                if (BodyIt->InfantryVisualComponent) BattleBodyCount += BodyIt->InfantryVisualComponent->GetCorpseCount();
+            const bool bKeepBody = bLeaveCorpses && BattleBodyCount < 150;
+            if (bKeepBody) { CorpseComponents.Add(Soldier); CorpseBirthTimes.Add(Now); CorpseFading.Add(false); }
+            else
+            {
+                if (WeaponComponents.IsValidIndex(i) && WeaponComponents[i]) WeaponComponents[i]->DestroyComponent();
+                Soldier->DestroyComponent();
+            }
             FPlayedClip Fallen;
-            Fallen.Clip = Death.LoadSynchronous();
+            Fallen.Clip = FallenAnimation;
             Fallen.Start = VisualAnimationTime;
             Fallen.Rate = Rate;
             Fallen.bLoop = false;
-            CorpseClips.Add(Fallen);
+            if (bKeepBody) CorpseClips.Add(Fallen);
             bCrowdDirty = true;
         }
         SoldierComponents.RemoveAt(i);
@@ -2126,7 +2221,11 @@ void UStrategyInfantryVisualComponent::RebuildCrowdInstances()
     TArray<FTransform> Fallen;
     for (const USkeletalMeshComponent* Corpse : CorpseComponents)
     {
-        Fallen.Add(Corpse ? Corpse->GetComponentTransform() : FTransform::Identity);
+        FTransform FallenTransform = Corpse ? Corpse->GetComponentTransform() : FTransform::Identity;
+        const int32 FallenIndex = Fallen.Num();
+        if (CorpseBirthTimes.IsValidIndex(FallenIndex) && GetWorld()->GetTimeSeconds() - CorpseBirthTimes[FallenIndex] >= 60.f)
+            FallenTransform.SetScale3D(FVector::ZeroVector);
+        Fallen.Add(FallenTransform);
     }
     if (CrowdFallen->GetInstanceCount() != Fallen.Num())
     {

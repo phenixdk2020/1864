@@ -341,6 +341,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Strategy|Combat")
     int32 ApplyStrengthLoss(int32 RequestedLoss);
 
+    /** Transient fire-source context; the casualty delegate still reports the unit location. */
+    FVector CasualtySourceLocation = FVector::ZeroVector;
+
     UFUNCTION(BlueprintCallable, Category="Strategy|Identity")
     void RefreshDebugLabel();
 

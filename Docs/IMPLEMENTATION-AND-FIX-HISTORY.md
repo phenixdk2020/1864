@@ -1748,6 +1748,13 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Carré og automatisk dækning bevarer allerede ordren; eksplicit AFBRYD er selv missionen. Disse veje er ikke omskrevet. Generel mission/reaktionsarbitrering, kontakt-confidence, rapporttransport og node-uafhængig Auto ligger stadig i afstemningens prioriterede arbejde.
 - `Docs/Enhedsadfaerd1864.md` er rettet fra permanent stop-og-ild-annullering til suspendering/genoptagelse. Ingen kampagne-/1851-data eller saveformat er ændret.
 - Kun statisk kontrol: UE 5.8-headerkontrol af nye includes/API, kilde-/funktionshenvisninger, ordre-/rute-/autoritetsspor og diff/whitespace. Ingen build, spil/editor, skærmbilledtest eller commit. Runtime-regression er beskrevet, ikke kørt.
+### 2026-10-09 — Gruppekommandoer, HQ-tooltip og faldne infanterister
+
+- AI, doktrin, salvemetode, ildpolitik og formation virker på alle valgte enheder, der understøtter handlingen. HQ springes over ved ildpolitik/formation. Ordrer, charge, stilling og stop bruger allerede hele valget. Markeringen følger fortsat første enhed; ENHED viser antal VALGTE.
+- HQ-tooltip summerer nuværende og oprindelig styrke gennem underlagte enheder.
+- OnCasualtyVisualEvent reducerer infanteriets figurantal efter styrke/figurdivisor. Overlevendes pladser bevares; salvetab tager figurer nær skytteren, artilleritab bruger eksisterende nedslagsregistrering. Dødsanimation falder tilbage til eksisterende liggende pose.
+- Højst 150 samtidige faldne i slagets verden. Efter 60 spilsekunder fader de ud over fem sekunder med et gennemsigtigt silhuetmateriale og slettes sammen med våbnet; crowd-figuren skjules under fade.
+- Statisk UE 5.8-headerkontrol og git diff --check. Ingen build, spilstart eller commit. Animationer, fade og blandede valg mangler afprøvning i spillet.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
