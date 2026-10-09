@@ -174,12 +174,21 @@ void AStrategyHUD::DrawButton(float X, float Y, float W, float H, const FString&
 {
     if (bCommandStyle)
     {
-        DrawRounded(X, Y, W, H, bActive ? ActiveGreen : Colour ? *Colour : FLinearColor(0.035f, 0.055f, 0.085f, 1.f));
+        // Pills: dark with a grey outline; the chosen one outlined and softly filled in green; coloured buttons tinted by their colour.
+        const FLinearColor Bright(0.30f, 0.88f, 0.50f, 1.f);
+        if (bActive && !Colour) { DrawRounded(X, Y, W, H, FLinearColor(0.04f, 0.24f, 0.13f, 1.f), &Bright); }
+        else if (Colour)
+        {
+            const FLinearColor Tint(Colour->R * 0.38f, Colour->G * 0.38f, Colour->B * 0.38f, 1.f);
+            const FLinearColor Edge(FMath::Min(1.f, Colour->R * 1.5f + 0.1f), FMath::Min(1.f, Colour->G * 1.5f + 0.1f), FMath::Min(1.f, Colour->B * 1.5f + 0.1f), 0.95f);
+            DrawRounded(X, Y, W, H, bActive ? FLinearColor(Colour->R * 0.6f, Colour->G * 0.6f, Colour->B * 0.6f, 1.f) : Tint, &Edge, H > 30.f ? 9.f : -1.f);
+        }
+        else { DrawRounded(X, Y, W, H, FLinearColor(0.030f, 0.045f, 0.070f, 1.f)); }
     }
     else { DrawRect(Colour ? *Colour : bActive ? ActiveGreen : OrderRed, X, Y, W, H); }
     float TW = 0.0f, TH = 0.0f;
     GetTextSize(Label, TW, TH, nullptr, 1.0f);
-    const float ButtonScale = bCommandStyle ? FMath::Min(0.85f, (W - 8.f) / FMath::Max(1.f, TW)) : 1.f;
+    const float ButtonScale = bCommandStyle ? FMath::Min(0.95f, (W - 8.f) / FMath::Max(1.f, TW)) : 1.f;
     Text(Label, X + (W - TW * ButtonScale) * 0.5f, Y + (H - TH * ButtonScale) * 0.5f, bCommandStyle && Action == EAction::None ? Muted : Ink, ButtonScale);
     FButton B;
     B.Box = FBox2D(FVector2D(X, Y), FVector2D(X + W, Y + H));
@@ -931,11 +940,11 @@ float AStrategyHUD::CommandHeight() const
     return 226.f;
 }
 
-void AStrategyHUD::DrawRounded(float X, float Y, float W, float H, const FLinearColor& Fill)
+void AStrategyHUD::DrawRounded(float X, float Y, float W, float H, const FLinearColor& Fill, const FLinearColor* BorderOverride, float RadiusOverride)
 {
-    // Scanline rounded rectangles need no textures or additional fonts.
-    const float Radius = FMath::Min(7.f, H * 0.5f);
-    const FLinearColor Border = Fill.Equals(ActiveGreen) ? FLinearColor(0.3f, 0.85f, 0.48f, 1.f) : FLinearColor(0.19f, 0.24f, 0.30f, 0.8f);
+    // Scanline rounded rectangles need no textures or additional fonts. Short ones are pills (radius = half the height).
+    const float Radius = FMath::Min(RadiusOverride >= 0.f ? RadiusOverride : (H <= 40.f ? H * 0.5f : 14.f), H * 0.5f);
+    const FLinearColor Border = BorderOverride ? *BorderOverride : FLinearColor(0.20f, 0.26f, 0.33f, 0.85f);
     for (float Row = 0.f; Row < H; Row += 1.f)
     {
         const float Edge = FMath::Min(Row, H - 1.f - Row);
@@ -945,24 +954,50 @@ void AStrategyHUD::DrawRounded(float X, float Y, float W, float H, const FLinear
     }
 }
 
-void AStrategyHUD::DrawHeading(const FString& Label, float X, float Y, float W)
+void AStrategyHUD::DrawHeading(const FString& Label, float X, float Y, float W, int32 Icon)
 {
-    DrawLine(X, Y + 3.f, X + 10.f, Y + 13.f, Muted, 1.f);
-    DrawLine(X + 10.f, Y + 3.f, X, Y + 13.f, Muted, 1.f);
+    const FLinearColor Light(0.78f, 0.84f, 0.92f, 1.f);
+    const float CX = X + 8.f, CY = Y + 9.f;
+    switch (Icon)
+    {
+        case 0:   // hatch: three slanted strokes
+            for (int32 k = 0; k < 3; ++k) DrawLine(X + 1.f + k * 5.f, CY + 7.f, X + 8.f + k * 5.f, CY - 7.f, Light, 1.5f);
+            break;
+        case 1:   // crosshair
+            DrawLine(CX - 8.f, CY, CX + 8.f, CY, Light, 1.2f); DrawLine(CX, CY - 8.f, CX, CY + 8.f, Light, 1.2f);
+            DrawLine(CX - 5.f, CY - 5.f, CX + 5.f, CY - 5.f, Light, 1.f); DrawLine(CX + 5.f, CY - 5.f, CX + 5.f, CY + 5.f, Light, 1.f);
+            DrawLine(CX + 5.f, CY + 5.f, CX - 5.f, CY + 5.f, Light, 1.f); DrawLine(CX - 5.f, CY + 5.f, CX - 5.f, CY - 5.f, Light, 1.f);
+            break;
+        case 2:   // double chevron
+            for (int32 k = 0; k < 2; ++k) { DrawLine(X + k * 7.f, CY - 7.f, X + 7.f + k * 7.f, CY, Light, 1.8f); DrawLine(X + 7.f + k * 7.f, CY, X + k * 7.f, CY + 7.f, Light, 1.8f); }
+            break;
+        case 3:   // three dots in a triangle
+            DrawRect(Light, CX - 2.f, CY - 8.f, 5.f, 5.f); DrawRect(Light, CX - 8.f, CY + 2.f, 5.f, 5.f); DrawRect(Light, CX + 4.f, CY + 2.f, 5.f, 5.f);
+            break;
+        default:  // layers
+            for (int32 k = 0; k < 3; ++k)
+            {
+                const float LY = CY - 6.f + k * 6.f;
+                DrawLine(X, LY, X + 8.f, LY - 4.f, Light, 1.3f); DrawLine(X + 8.f, LY - 4.f, X + 16.f, LY, Light, 1.3f);
+                DrawLine(X + 16.f, LY, X + 8.f, LY + 4.f, Light, 1.3f); DrawLine(X + 8.f, LY + 4.f, X, LY, Light, 1.3f);
+            }
+            break;
+    }
     float TW = 0.f, TH = 0.f;
     GetTextSize(Label, TW, TH);
-    Text(Label, X + 17.f, Y, Muted, FMath::Min(0.82f, (W - 17.f) / FMath::Max(TW, 1.f)));
+    Text(Label, X + 26.f, Y + 1.f, Light, FMath::Min(1.0f, (W - 26.f) / FMath::Max(TW, 1.f)));
 }
 
 void AStrategyHUD::DrawStatBar(const FString& Label, const FString& Value, float Fraction, float X, float Y, float W)
 {
+    // A column: the small caption, the figure in large type, a thin rounded bar under it.
     Text(Label, X, Y, Muted, 0.72f);
-    float TW = 0.f, TH = 0.f;
-    GetTextSize(Value, TW, TH, nullptr, 0.8f);
-    Text(Value, X + W - TW, Y, Ink, 0.8f);
+    Text(Value, X, Y + 13.f, Ink, 1.25f);
     const float Level = FMath::Clamp(Fraction, 0.f, 1.f);
-    DrawRect(RowColour, X, Y + 17.f, W, 3.f);
-    DrawRect(Level < 0.3f ? FLinearColor(0.85f, 0.18f, 0.16f) : Level < 0.6f ? Gold : ActiveGreen, X, Y + 17.f, W * Level, 3.f);
+    const FLinearColor Track(0.10f, 0.13f, 0.17f, 1.f);
+    const FLinearColor Colour = Level < 0.3f ? FLinearColor(0.88f, 0.20f, 0.18f) : Level < 0.6f ? FLinearColor(0.92f, 0.74f, 0.20f) : FLinearColor(0.20f, 0.85f, 0.42f);
+    DrawRounded(X, Y + 38.f, W, 7.f, Track, &Track, 3.5f);
+    if (Level > 0.02f) { DrawRounded(X, Y + 38.f, FMath::Max(7.f, W * Level), 7.f, Colour, &Colour, 3.5f); }
 }
 
 bool AStrategyHUD::HandleScroll(const FVector2D& Point, float Delta)
@@ -980,12 +1015,18 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     float HudX[5], HudW[5], HudCursor = 8.f;
     const TCHAR* HudTitles[] = {TEXT("E N H E D"), TEXT("LEDELSE & ILD"), TEXT("O R D R E R"), TEXT("FORMATION"), TEXT("UNDERLAGTE")};
     Panels.Add(FBox2D(FVector2D(0.f, HudY), FVector2D(Canvas->ClipX, Canvas->ClipY)));
+    {
+        // One dark rounded bar behind the five panels.
+        const FLinearColor BarFill(0.014f, 0.026f, 0.044f, 0.97f), BarEdge(0.16f, 0.22f, 0.30f, 0.9f);
+        DrawRounded(2.f, HudY + 2.f, Canvas->ClipX - 4.f, CommandHeight() - 4.f, BarFill, &BarEdge, 14.f);
+    }
     for (int32 PanelIndex = 0; PanelIndex < 5; ++PanelIndex)
     {
         HudW[PanelIndex] = FMath::Max(1.f, (Canvas->ClipX - 48.f) * HudWeights[PanelIndex] / 108.f);
         HudX[PanelIndex] = HudCursor + 10.f;
-        DrawRounded(HudCursor, HudY + 4.f, HudW[PanelIndex], CommandHeight() - 12.f, FLinearColor(0.012f, 0.023f, 0.042f, 0.96f));
-        DrawHeading(HudTitles[PanelIndex], HudX[PanelIndex], HudY + 14.f, HudW[PanelIndex] - 20.f);
+        if (PanelIndex > 0) { DrawLine(HudCursor - 4.f, HudY + 14.f, HudCursor - 4.f, HudY + CommandHeight() - 16.f, FLinearColor(0.16f, 0.21f, 0.28f, 0.8f), 1.f); }
+        DrawHeading(HudTitles[PanelIndex], HudX[PanelIndex], HudY + 14.f, HudW[PanelIndex] - 20.f, PanelIndex);
+        DrawLine(HudX[PanelIndex], HudY + 34.f, HudX[PanelIndex] + HudW[PanelIndex] - 20.f, HudY + 34.f, FLinearColor(0.14f, 0.19f, 0.26f, 0.8f), 1.f);
         HudCursor += HudW[PanelIndex] + 8.f;
         HudW[PanelIndex] -= 20.f;
     }
@@ -1002,16 +1043,25 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         ? Unit->OfficerProfileComponent->OfficerRank.ToUpper()
         : Unit->Echelon == EStrategyEchelon::Battalion ? TEXT("MAJOR") : Unit->Echelon == EStrategyEchelon::Regiment ? TEXT("OBERSTL\u00d8JTNANT")
         : Unit->Echelon == EStrategyEchelon::Cavalry ? TEXT("RITMESTER") : HudHQ ? TEXT("CHEF") : TEXT("KAPTAJN");
-    DrawRounded(HudX[0], HudY + 42.f, 30.f, 30.f, RowColour);
-    Text(EchelonMark(Unit), HudX[0] + 8.f, HudY + 50.f, Ink, 0.8f);
     float HudTW = 0.f, HudTH = 0.f;
-    GetTextSize(Unit->DisplayName.ToString(), HudTW, HudTH);
-    Text(Unit->DisplayName.ToString(), HudX[0] + 38.f, HudY + 43.f, Ink, FMath::Min(1.25f, (HudW[0] - 38.f) / FMath::Max(1.f, HudTW)));
-    Text(HudRank, HudX[0], HudY + 79.f, Muted, 0.72f);
-    Text(HudHQ ? TEXT("STABSKOMMANDO") : Unit->Echelon == EStrategyEchelon::Artillery ? TEXT("BATTERIKOMMANDO") : Unit->Echelon == EStrategyEchelon::Cavalry ? TEXT("KAVALERIKOMMANDO") : TEXT("KOMPAGNIKOMMANDO"), HudX[0], HudY + 96.f, Muted, 0.66f);
-    DrawStatBar(TEXT("STYRKE"), FString::Printf(TEXT("%d/%d"), Unit->CurrentStrength, Unit->InitialStrength), float(Unit->CurrentStrength) / FMath::Max(1, Unit->InitialStrength), HudX[0], HudY + 121.f, HudW[0]);
-    DrawStatBar(TEXT("MORAL"), FString::Printf(TEXT("%.0f"), Unit->Morale), Unit->Morale / 100.f, HudX[0], HudY + 150.f, HudW[0]);
-    DrawStatBar(TEXT("SAMHOLD"), FString::Printf(TEXT("%.0f"), Unit->Cohesion), Unit->Cohesion / 100.f, HudX[0], HudY + 179.f, HudW[0]);
+    {
+        // The unit: a tile with its mark, the name in large type, the rank and post in spaced capitals, then the three figures.
+        const FLinearColor TileFill(0.02f, 0.04f, 0.07f, 1.f), TileEdge(0.22f, 0.30f, 0.40f, 1.f);
+        DrawRounded(HudX[0], HudY + 42.f, 44.f, 44.f, TileFill, &TileEdge, 8.f);
+        DrawRect(FLinearColor(0.35f, 0.65f, 1.f, 1.f), HudX[0] + 18.f, HudY + 50.f, 8.f, 28.f);
+        auto Spaced = [](const FString& In) { FString Out; for (int32 k = 0; k < In.Len(); ++k) { Out.AppendChar(In[k]); Out.AppendChar(TCHAR(' ')); } return Out; };
+        GetTextSize(Unit->DisplayName.ToString(), HudTW, HudTH);
+        Text(Unit->DisplayName.ToString(), HudX[0] + 54.f, HudY + 42.f, Ink, FMath::Min(1.5f, (HudW[0] - 54.f) / FMath::Max(1.f, HudTW)));
+        Text(Spaced(HudRank), HudX[0] + 54.f, HudY + 64.f, Muted, 0.72f);
+        const FString HudPost = HudHQ ? TEXT("STABSKOMMANDO") : Unit->Echelon == EStrategyEchelon::Artillery ? TEXT("BATTERIKOMMANDO") : Unit->Echelon == EStrategyEchelon::Cavalry ? TEXT("KAVALERIKOMMANDO") : TEXT("KOMPAGNIKOMMANDO");
+        GetTextSize(Spaced(HudPost), HudTW, HudTH);
+        Text(Spaced(HudPost), HudX[0] + 54.f, HudY + 79.f, Muted, FMath::Min(0.66f, (HudW[0] - 54.f) / FMath::Max(1.f, HudTW)));
+        DrawLine(HudX[0], HudY + 98.f, HudX[0] + HudW[0], HudY + 98.f, FLinearColor(0.14f, 0.19f, 0.26f, 0.8f), 1.f);
+        const float ColW = (HudW[0] - 20.f) / 3.f;
+        DrawStatBar(TEXT("STYRKE"), FString::Printf(TEXT("%d/%d"), Unit->CurrentStrength, Unit->InitialStrength), float(Unit->CurrentStrength) / FMath::Max(1, Unit->InitialStrength), HudX[0], HudY + 112.f, ColW);
+        DrawStatBar(TEXT("MORAL"), FString::Printf(TEXT("%.0f"), Unit->Morale), Unit->Morale / 100.f, HudX[0] + ColW + 10.f, HudY + 112.f, ColW);
+        DrawStatBar(TEXT("SAMHOLD"), FString::Printf(TEXT("%.0f"), Unit->Cohesion), Unit->Cohesion / 100.f, HudX[0] + 2.f * (ColW + 10.f), HudY + 112.f, ColW);
+    }
     auto HudPills = [&](int32 Panel, float RowY, const TCHAR* const* Labels, int32 Count, EAction Action, int32 Active, bool Enabled = true)
     {
         const float PillW = (HudW[Panel] - (Count - 1) * 4.f) / Count;
@@ -1092,15 +1142,29 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     {
         const UStrategyFireControlComponent* HudFC = Unit->FireControlComponent;
         const float HudRanges[] = {HudFC->CloseRangeCm, HudFC->MediumRangeCm, HudFC->LongRangeCm};
-        DrawLine(HudX[3] + 12.f, HudY + 158.f, HudX[3] + HudW[3] - 12.f, HudY + 158.f, Muted, 1.f);
+        // A horizontal range track with the three bands; the chosen one is a yellow pill. The cone half angle stands to the right.
+        const float TrackW = (HudW[3] - 24.f) * 0.62f, TrackX = HudX[3] + 12.f, TrackY = HudY + 156.f;
+        const FLinearColor TrackCol(0.12f, 0.16f, 0.21f, 1.f);
+        DrawRounded(TrackX, TrackY, TrackW, 8.f, TrackCol, &TrackCol, 4.f);
         for (int32 RangeIndex = 0; RangeIndex < 3; ++RangeIndex)
         {
-            const float HudRX = HudX[3] + 12.f + RangeIndex * (HudW[3] - 24.f) / 2.f;
+            const float HudRX = TrackX + RangeIndex * TrackW / 2.f;
             const bool HudChosen = int32(HudFC->FirePolicy) == RangeIndex + 1;
-            DrawRect(HudChosen ? Gold : Muted, HudRX - 2.f, HudY + 154.f, 4.f, 8.f);
-            Text(FString::Printf(TEXT("%.0f m"), HudRanges[RangeIndex] / 100.f), HudRX - 12.f, HudY + 165.f, HudChosen ? Gold : Muted, 0.66f);
+            if (HudChosen)
+            {
+                const FLinearColor Yellow(0.95f, 0.78f, 0.22f, 1.f);
+                DrawRounded(FMath::Clamp(HudRX - 16.f, TrackX, TrackX + TrackW - 32.f), TrackY, 32.f, 8.f, Yellow, &Yellow, 4.f);
+            }
+            const FString RangeText = FString::Printf(TEXT("%.0f m"), HudRanges[RangeIndex] / 100.f);
+            float RTW = 0.f, RTH = 0.f;
+            GetTextSize(RangeText, RTW, RTH, nullptr, 0.72f);
+            Text(RangeText, FMath::Clamp(HudRX - RTW * 0.5f, TrackX - 6.f, TrackX + TrackW - RTW + 6.f), TrackY + 14.f, HudChosen ? Gold : Muted, 0.72f);
         }
-        Text(FString::Printf(TEXT("KEGLE +-%.0f"), HudFC->FireConeHalfAngleDegrees), HudX[3], HudY + 191.f, Muted, 0.72f);
+        const float ConeX = TrackX + TrackW + 16.f;
+        DrawLine(ConeX, HudY + 160.f, ConeX + 14.f, HudY + 152.f, Muted, 1.2f);
+        DrawLine(ConeX, HudY + 160.f, ConeX + 14.f, HudY + 168.f, Muted, 1.2f);
+        DrawLine(ConeX + 14.f, HudY + 152.f, ConeX + 14.f, HudY + 168.f, Muted, 1.2f);
+        Text(FString::Printf(TEXT("KEGLE \u00b1%.0f\u00b0"), HudFC->FireConeHalfAngleDegrees), ConeX + 22.f, HudY + 153.f, Muted, 0.72f);
     }
     if (HudHQ && Unit->bOfficerAIEnabled && Unit->AITelemetryComponent && !Unit->AITelemetryComponent->CurrentTask.IsEmpty())
     {

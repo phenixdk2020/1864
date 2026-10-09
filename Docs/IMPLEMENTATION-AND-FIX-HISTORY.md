@@ -1731,6 +1731,12 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Ny kompagniknap AFBRYD og ordre Disengage: faktisk salve → 9 m bagtrin med fronten mod fjenden → pause/ny salve. Udmarch efter ildudvekslingen; HOLD når ingen fjende er inden for LONG. Nye ordrer og flugt afløser forløbet. Status AFBRYDER, glidende formationsvisualisering med bevaret front og flaget -Strategy1864DebugDisengage.
 - Dokumenteret i Enhedsadfaerd1864.md og TestFlags.md. Statisk kilde-/diffkontrol og API-kontrol mod UE 5.8-headere; ingen build, editor, spiltest eller commit. Runtime-kontrol af afstand, salvecyklus, baglæns figurer og ordreafløsning udestår.
 
+### 2026-10-09 – Ny HUD i mockup-stil, AFBRYD, ordrer annulleres under ild, Kamp-AI design
+- Bundpanelet i slaget er tegnet om efter designbilledet: én rund mørk bjælke, pille-knapper (valgt = grøn kontur), ikoner i overskrifterne, STYRKE/MORAL/SAMHOLD som tre kolonner med bjælker, skudafstand som vandret spor med KEGLE ±35°.
+- `-Strategy1864DebugClicks` logger HUD-klik og knapper (`PROJECT1864-HUD`).
+- Codex: angrebsdestination ved den valgte skudafstand, march annulleres ved indgående ild, ny knap AFBRYD (kamptilbagetrækning).
+- `Docs/Kamp-AI-Design-v2.0.md` lagt ind som designgrundlag (afstemning med det byggede er sat i gang).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

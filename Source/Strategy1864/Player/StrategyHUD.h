@@ -70,8 +70,8 @@ private:
     void DrawOOB();
     void DrawOOBRow(AStrategyUnit* Unit, int32 Depth, float& Y, int32 Guard);
     float CommandHeight() const;
-    void DrawRounded(float X, float Y, float W, float H, const FLinearColor& Fill);
-    void DrawHeading(const FString& Label, float X, float Y, float W);
+    void DrawRounded(float X, float Y, float W, float H, const FLinearColor& Fill, const FLinearColor* Border = nullptr, float Radius = -1.f);
+    void DrawHeading(const FString& Label, float X, float Y, float W, int32 Icon = 0);
     void DrawStatBar(const FString& Label, const FString& Value, float Fraction, float X, float Y, float W);
     bool bCommandStyle = false;
     FBox2D SubordinateRect = FBox2D(ForceInit);
