@@ -2,8 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "../Combat/StrategyBattleLedger.h"
 #include "StrategyOOBTestScenario.generated.h"
 
+class FJsonObject;
 class AStrategyCompanyUnit;
 class AStrategyHQUnit;
 class AStrategyUnit;
@@ -249,6 +251,12 @@ public:
      *  when the battle came from the campaign, goes back to the campaign map. */
     UFUNCTION(BlueprintCallable, Category="Strategy|Campaign")
     void FinishCampaignBattle();
+    void FinalizeAfterActionReport();
+    const TArray<FString>& GetReportRows() const { return ReportRows; }
+    const FString& GetReportSummary() const { return ReportSummary; }
+    bool HasAfterActionReport() const { return bReportFinalized; }
+    FStrategyBattleLedger ReportDanes, ReportEnemy;
+
 
 private:
     /** Builds the campaign's battlefield and its units (BattleRequest, Units.json, Battlefield_*.json). */
@@ -266,6 +274,12 @@ private:
     bool bPioneerBridges = false;
     bool bSkirmish = false;
     FString BattleOutcome;
+    bool bReportFinalized = false;
+    TArray<FString> ReportRows;
+    FString ReportSummary, ReportText, ReportCampaignDate;
+    TSharedPtr<FJsonObject> ReportLedgerJson;
+    void TickBattleLedger(float DeltaSeconds);
+
     bool bDanishVictory = false;
     /** -Strategy1864Shots=sec:unit:distance,...: the view goes to the unit and a screenshot is saved (QA of the look). */
     void TickShots();

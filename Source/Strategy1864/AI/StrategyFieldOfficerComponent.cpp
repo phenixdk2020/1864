@@ -1068,8 +1068,9 @@ void UStrategyFieldOfficerComponent::ResolveShock(AStrategyUnit* Enemy)
     const int32 EnemyLoss = FMath::RoundToInt(OwnerUnit->CurrentStrength * DecisionRandom.FRandRange(0.05f, 0.10f) * Ratio);
     const int32 OwnLoss = FMath::RoundToInt(Enemy->CurrentStrength * DecisionRandom.FRandRange(0.03f, 0.07f) / Ratio);
     if (UStrategyBattleAudio* MeleeAudio = UStrategyBattleAudio::Find(this)) MeleeAudio->Clash(Enemy->GetActorLocation());
-    Enemy->ApplyStrengthLoss(EnemyLoss);
-    OwnerUnit->ApplyStrengthLoss(OwnLoss);
+    if (Enemy->UnitState == EStrategyUnitState::Routed) { Enemy->CaptureBattlePrisoners(OwnerUnit); }
+    Enemy->ApplyStrengthLossWithCause(EnemyLoss, TEXT("Melee"), OwnerUnit);
+    OwnerUnit->ApplyStrengthLossWithCause(OwnLoss, TEXT("Melee"), Enemy);
     Enemy->Morale = FMath::Clamp(Enemy->Morale - 20.0f * Ratio, 0.0f, 100.0f);
     Enemy->Cohesion = FMath::Clamp(Enemy->Cohesion - 25.0f * Ratio, 0.0f, 100.0f);
     const bool bWon = Ratio > 1.15f || Enemy->Morale < 30.0f;

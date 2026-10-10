@@ -1,4 +1,11 @@
 #include "StrategyUnit.h"
+#include "Engine/World.h"
+#include "../Artillery/StrategyArtilleryBatteryUnit.h"
+#include "../AI/StrategyOfficerProfileComponent.h"
+#include "../Artillery/StrategyArtilleryAmmunitionComponent.h"
+#include "../Artillery/StrategyMortarBatteryUnit.h"
+#include "../Artillery/StrategyMortarFireComponent.h"
+#include "../Logistics/StrategySupplyWagonUnit.h"
 #include "../Visual/StrategyCavalryVisualComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
@@ -27,7 +34,6 @@
 #include "../UI/StrategyPresentationSnapshotComponent.h"
 #include "../Movement/StrategyLocalDeconflictionComponent.h"
 #include "../Orders/StrategyMissionAnchorComponent.h"
-#include "../AI/StrategyOfficerProfileComponent.h"
 #include "../AI/StrategyCommandDelayComponent.h"
 #include "../Combat/StrategyConditionComponent.h"
 #include "../Combat/StrategyContactComponent.h"
@@ -346,13 +352,39 @@ void AStrategyUnit::RefreshQAPlaceholderVisual()
 
 int32 AStrategyUnit::ApplyStrengthLoss(int32 RequestedLoss)
 {
-    if (RequestedLoss <= 0 || CurrentStrength <= 0)
+    return ApplyStrengthLossWithCause(RequestedLoss, TEXT("Unknown"));
+}
+
+int32 AStrategyUnit::ApplyStrengthLossWithCause(int32 RequestedLoss, FName Cause, AStrategyUnit* Inflictor)
+{
+    if (BattleLedger.bFrozen || RequestedLoss <= 0 || CurrentStrength <= 0)
     {
         return 0;
     }
 
+    const TWeakObjectPtr<AStrategyUnit> ReportPreviousInflictor = BattleInflictor;
+    BattleInflictor = Inflictor;
     const int32 AppliedLoss = FMath::Min(RequestedLoss, CurrentStrength);
-    CurrentStrength -= AppliedLoss;
+    if (AStrategyArtilleryBatteryUnit* ReportBattery = Cast<AStrategyArtilleryBatteryUnit>(this))
+    {
+        const FName ReportPreviousCause = BattleCasualtyCause;
+        BattleCasualtyCause = Cause;
+        ReportBattery->ApplyBatteryDamage(AppliedLoss, 0, 0, 0);
+        BattleCasualtyCause = ReportPreviousCause;
+    }
+    else if (AStrategySupplyWagonUnit* ReportWagon = Cast<AStrategySupplyWagonUnit>(this))
+    {
+        const FName ReportPreviousCause = BattleCasualtyCause;
+        BattleCasualtyCause = Cause;
+        ReportWagon->ApplySupplyDamage(AppliedLoss, 0, 0.f, 0.f);
+        BattleCasualtyCause = ReportPreviousCause;
+    }
+    else
+    {
+        RecordBattleLoss(AppliedLoss, Cause);
+        CurrentStrength -= AppliedLoss;
+    }
+    BattleInflictor = ReportPreviousInflictor;
     if (CombatComponent) CombatComponent->CancelMarchUnderFire();
 
     if (CurrentStrength <= 0)
@@ -379,6 +411,10 @@ void AStrategyUnit::SetUnitState(EStrategyUnitState NewState)
         return;
     }
 
+    if (NewState == EStrategyUnitState::Destroyed || NewState == EStrategyUnitState::Abandoned)
+    {
+        RecordEquipmentAbandonment();
+    }
     UnitState = NewState;
     OnUnitStateChanged(UnitState);
 }
@@ -489,4 +525,141 @@ FString AStrategyUnit::GetNATOEchelonSymbol() const
         default:
             return TEXT("HQ");
     }
+}
+
+// After-action ledger: initialized after scenario setup, before the first casualty or shot.
+
+void AStrategyUnit::EnsureBattleLedger()
+{
+    if (BattleLedger.bInitialized) { return; }
+    BattleLedger.bInitialized = true;
+    BattleLedger.OriginalSide = static_cast<uint8>(Side);
+    BattleLedger.Name = DisplayName.ToString();
+    BattleLedger.StartMen = FMath::Max(0, CurrentStrength);
+    BattleLedger.StartMorale = Morale;
+    BattleLedger.StartAmmo = CombatComponent ? CombatComponent->AmmunitionRounds : 0;
+    if (const AStrategyArtilleryBatteryUnit* ReportBattery = Cast<AStrategyArtilleryBatteryUnit>(this))
+    {
+        BattleLedger.StartAmmo = ReportBattery->ArtilleryAmmunitionComponent ? ReportBattery->ArtilleryAmmunitionComponent->GetTotalRounds() : 0;
+    }
+    if (const AStrategyMortarBatteryUnit* ReportMortar = Cast<AStrategyMortarBatteryUnit>(this))
+    {
+        BattleLedger.StartAmmo = ReportMortar->MortarFireComponent ? ReportMortar->MortarFireComponent->AmmunitionBombs : 0;
+    }
+}
+
+void AStrategyUnit::RecordBattleLoss(int32 AppliedLoss, FName Cause)
+{
+    EnsureBattleLedger();
+    if (BattleLedger.bFrozen || AppliedLoss <= 0) { return; }
+    AppliedLoss = FMath::Min(AppliedLoss, FMath::Max(0, BattleLedger.StartMen - BattleLedger.Killed - BattleLedger.Wounded - BattleLedger.Prisoners));
+    if (AppliedLoss <= 0) { return; }
+    // Game estimate: campaign SplitLosses has 50% wounded and 25% prisoners; among hit men, two thirds survive.
+    // Accumulated rounding prevents small volleys from making every casualty fatal.
+    const int32 ReportTotal = BattleLedger.Killed + BattleLedger.Wounded + AppliedLoss;
+    const int32 ReportWoundedBefore = BattleLedger.Wounded;
+    BattleLedger.Wounded = (ReportTotal * 2) / 3;
+    if (WorkingPartyComponent) { WorkingPartyComponent->AddWoundedForCollection(BattleLedger.Wounded - ReportWoundedBefore); }
+    if (GetWorld()) { BattleLedger.CombatUntil = GetWorld()->GetTimeSeconds() + 10.f; }
+    const int32 ReportKilledBefore = BattleLedger.Killed;
+    BattleLedger.Killed = ReportTotal - BattleLedger.Wounded;
+    if (AStrategyUnit* ReportAttacker = BattleInflictor.Get())
+    {
+        ReportAttacker->EnsureBattleLedger();
+        if (!ReportAttacker->BattleLedger.bFrozen && ReportAttacker->BattleLedger.OriginalSide != BattleLedger.OriginalSide)
+        {
+            ReportAttacker->BattleLedger.EnemyKilled += BattleLedger.Killed - ReportKilledBefore;
+        }
+    }
+    BattleLedger.LossByCause.FindOrAdd(Cause) += AppliedLoss;
+    if (Echelon == EStrategyEchelon::Company || Echelon == EStrategyEchelon::Cavalry)
+    {
+        // Casualty weapons remain on the field; only recovered enemy weapons become booty.
+        BattleLedger.Lost.SmallArms += AppliedLoss;
+        BattleLedger.Abandoned.SmallArms += AppliedLoss;
+        if (Echelon == EStrategyEchelon::Cavalry) { BattleLedger.Lost.Horses += AppliedLoss; } // One mount per lost rider: game estimate.
+    }
+}
+
+void AStrategyUnit::RecordBattleVolley(int32 Rounds)
+{
+    EnsureBattleLedger();
+    if (BattleLedger.bFrozen || Rounds <= 0) { return; }
+    BattleLedger.AmmoFired += Rounds;
+    if (GetWorld()) { BattleLedger.CombatUntil = GetWorld()->GetTimeSeconds() + 10.f; }
+    BattleLedger.LastVolleyRounds = Rounds;
+    ++BattleLedger.Volleys;
+    BattleLedger.VolleyRounds.Add(Rounds);
+}
+
+FStrategyReportEquipment AStrategyUnit::RemainingReportEquipment() const
+{
+    FStrategyReportEquipment ReportKit;
+    if (const AStrategyArtilleryBatteryUnit* ReportBattery = Cast<AStrategyArtilleryBatteryUnit>(this))
+    {
+        ReportKit.Guns = FMath::Max(0, ReportBattery->GunCount - ReportBattery->DestroyedGunCount); // Disabled guns can be repaired after capture.
+        ReportKit.Horses = ReportBattery->HorseStrength;
+        if (const AStrategyMortarBatteryUnit* ReportMortar = Cast<AStrategyMortarBatteryUnit>(this))
+        {
+            ReportKit.Guns = 0;
+            ReportKit.Mortars = FMath::Max(0, ReportMortar->MortarPieceCount - ReportMortar->DestroyedGunCount);
+        }
+    }
+    else if (const AStrategySupplyWagonUnit* ReportWagon = Cast<AStrategySupplyWagonUnit>(this))
+    {
+        ReportKit.Wagons = ReportWagon->WagonCondition > 0.f ? 1 : 0;
+        ReportKit.Horses = ReportWagon->HorseStrength;
+    }
+    else if (Echelon == EStrategyEchelon::Company || Echelon == EStrategyEchelon::Cavalry)
+    {
+        ReportKit.SmallArms = FMath::Max(0, CurrentStrength);
+        ReportKit.Horses = Echelon == EStrategyEchelon::Cavalry ? FMath::Max(0, CurrentStrength) : 0;
+        ReportKit.Colours = 1; // Abstract company/squadron colour; game estimate.
+    }
+    return ReportKit;
+}
+
+void AStrategyUnit::RecordEquipmentAbandonment()
+{
+    EnsureBattleLedger();
+    if (BattleLedger.bFrozen || BattleLedger.bEquipmentAbandoned) { return; }
+    BattleLedger.bEquipmentAbandoned = true;
+    const FStrategyReportEquipment ReportRemaining = RemainingReportEquipment();
+    BattleLedger.Abandoned.Add(ReportRemaining);
+    BattleLedger.Lost.Add(ReportRemaining);
+}
+
+void AStrategyUnit::RecordEquipmentCapture(AStrategyUnit* Captor)
+{
+    if (!Captor || Captor->Side == Side) { return; }
+    RecordEquipmentAbandonment();
+    Captor->EnsureBattleLedger();
+    if (BattleLedger.bFrozen || Captor->BattleLedger.bFrozen) { return; }
+    Captor->BattleLedger.Captured.Add(BattleLedger.Abandoned);
+    BattleLedger.Abandoned = FStrategyReportEquipment(); // Each abandoned item can only be awarded once.
+}
+
+void AStrategyUnit::CaptureBattlePrisoners(AStrategyUnit* Captor)
+{
+    EnsureBattleLedger();
+    if (!Captor || Captor->Side == Side || !Captor->IsCombatEffective() || BattleLedger.bFrozen || CurrentStrength <= 0 || UnitState != EStrategyUnitState::Routed) { return; }
+    const int32 ReportCapturedMen = FMath::Min(CurrentStrength, FMath::Max(0, BattleLedger.StartMen - BattleLedger.Killed - BattleLedger.Wounded - BattleLedger.Prisoners));
+    BattleLedger.Prisoners += ReportCapturedMen;
+    if (OfficerProfileComponent && OfficerProfileComponent->Fate < 2)
+    {
+        OfficerProfileComponent->Fate = 2;
+        OfficerProfileComponent->Impairment = .4f;
+    }
+    BattleLedger.LossByCause.FindOrAdd(TEXT("Overrun")) += ReportCapturedMen;
+    RecordEquipmentCapture(Captor);
+    CurrentStrength = 0;
+    if (AStrategyArtilleryBatteryUnit* ReportBattery = Cast<AStrategyArtilleryBatteryUnit>(this))
+    {
+        ReportBattery->CrewStrength = 0;
+        ReportBattery->DriverStrength = 0;
+    }
+    if (MovementExecutor) { MovementExecutor->StopMovement(); }
+    if (OrderComponent) { OrderComponent->ClearOrder(); }
+    SetUnitState(EStrategyUnitState::Destroyed);
+    RefreshDebugLabel();
 }

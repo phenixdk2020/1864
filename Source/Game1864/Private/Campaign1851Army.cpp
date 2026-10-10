@@ -2643,7 +2643,7 @@ TArray<FCampaign1851RegimentSave> ACampaign1851Map::SaveArmy() const
 		S.FireDrills = TArray<float>(R.FireDrills, 4);
 		for (const FCampaign1851ServiceEntry& E : R.Service)
 		{
-			S.Service.Add(FString::Printf(TEXT("%.2f|%s|%d|%d|%d|%d|%d|%d"), E.Day, *E.Place, E.Result, E.Killed, E.Wounded, E.Captured, E.EnemyKilled, E.bFrom3D ? 1 : 0));
+			S.Service.Add(FString::Printf(TEXT("%.2f|%s|%d|%d|%d|%d|%d|%d|%d|%s|%s|%d"), E.Day, *E.Place, E.Result, E.Killed, E.Wounded, E.Captured, E.EnemyKilled, E.bFrom3D ? 1 : 0, E.StartMen, *E.Date, *E.Equipment, E.bHeldField ? 1 : 0));
 		}
 		S.Cohesion = R.Cohesion;
 		// Where it is (town, or a point), and where it is going: a march is planned again from here on loading.
@@ -2765,6 +2765,10 @@ int32 ACampaign1851Map::RestoreArmy(const TArray<FCampaign1851RegimentSave>& Sav
 				E.Captured = FCString::Atoi(*P[5]);
 				E.EnemyKilled = FCString::Atoi(*P[6]);
 				E.bFrom3D = P[7] == TEXT("1");
+				if (P.Num() >= 12)
+				{
+					E.StartMen = FCString::Atoi(*P[8]); E.Date = P[9]; E.Equipment = P[10]; E.bHeldField = P[11] == TEXT("1");
+				}
 				R.Service.Add(E);
 				R.TotalKilled += E.Killed;
 				R.TotalWounded += E.Wounded;

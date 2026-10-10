@@ -74,6 +74,7 @@ void UStrategyArtilleryDamageComponent::ApplyIncomingHits(
         }
     }
 
+    OwnerBattery->BattleCasualtyCause = IncomingBattleCause;
     OwnerBattery->ApplyBatteryDamage(
         PersonnelLoss,
         HorseLoss,

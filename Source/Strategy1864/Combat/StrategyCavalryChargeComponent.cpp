@@ -270,12 +270,13 @@ void UStrategyCavalryChargeComponent::ResolveImpact(AStrategyUnit* Target)
     const float ImpactRatio = FMath::Clamp(AttackingPower / DefendingPower, 0.2f, 3.0f);
     const int32 ImpactLoss = FMath::RoundToInt(AttackingPower * ImpactLossPerRider * DirectionShock * FormationShock * ImpactRatio);
     if (UStrategyBattleAudio* ImpactAudio = UStrategyBattleAudio::Find(this)) ImpactAudio->Clash(Target->GetActorLocation());
-    Target->ApplyStrengthLoss(ImpactLoss);
+    if (Target->UnitState == EStrategyUnitState::Routed) { Target->CaptureBattlePrisoners(OwnerCavalry); }
+    Target->ApplyStrengthLossWithCause(ImpactLoss, TEXT("CavalryCharge"), OwnerCavalry);
     const float ImpactShare = float(ImpactLoss) / FMath::Max(1, Target->InitialStrength);
     Target->Morale = FMath::Max(0.0f, Target->Morale - ImpactMoraleShock * ImpactShare * DirectionShock);
     Target->Cohesion = FMath::Max(0.0f, Target->Cohesion - ImpactCohesionShock * ImpactShare * FormationShock);
     const int32 CavalryLoss = FMath::RoundToInt(DefendingPower * ImpactLossPerRider / FMath::Max(1.0f, DirectionShock * FormationShock * ImpactRatio));
-    OwnerCavalry->ApplyStrengthLoss(CavalryLoss);
+    OwnerCavalry->ApplyStrengthLossWithCause(CavalryLoss, TEXT("CavalryCharge"), Target);
     OwnerCavalry->Morale = FMath::Max(0.0f, OwnerCavalry->Morale - ImpactMoraleShock * float(CavalryLoss) / FMath::Max(1, OwnerCavalry->InitialStrength));
     OwnerCavalry->Cohesion = FMath::Max(0.0f, OwnerCavalry->Cohesion - ImpactCohesionShock * float(CavalryLoss) / FMath::Max(1, OwnerCavalry->InitialStrength));
     if (ImpactFormation == EStrategyFormationType::Square && Target->IsCombatEffective() && Target->FormationComponent &&

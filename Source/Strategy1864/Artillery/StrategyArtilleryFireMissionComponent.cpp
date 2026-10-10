@@ -674,8 +674,13 @@ bool UStrategyArtilleryFireMissionComponent::FireAt(
                 AmmoType == EStrategyArtilleryAmmoType::Shell ||
                 AmmoType == EStrategyArtilleryAmmoType::Shrapnel;
 
-            TargetBattery->ArtilleryDamageComponent
-                ->ApplyIncomingHits(Casualties, bExplosive);
+            TargetBattery->ArtilleryDamageComponent->IncomingBattleCause = TEXT("Artillery");
+            {
+                const TWeakObjectPtr<AStrategyUnit> ReportPreviousAttacker = TargetBattery->BattleInflictor;
+                TargetBattery->BattleInflictor = OwnerBattery.Get();
+                TargetBattery->ArtilleryDamageComponent->ApplyIncomingHits(Casualties, bExplosive);
+                TargetBattery->BattleInflictor = ReportPreviousAttacker;
+            }
         }
     }
     else if (AStrategySupplyWagonUnit* SupplyTarget =
@@ -683,7 +688,11 @@ bool UStrategyArtilleryFireMissionComponent::FireAt(
     {
         if (Casualties > 0)
         {
-            SupplyTarget->ApplySupplyDamage(
+            SupplyTarget->BattleCasualtyCause = TEXT("Artillery");
+            {
+                const TWeakObjectPtr<AStrategyUnit> ReportPreviousAttacker = SupplyTarget->BattleInflictor;
+                SupplyTarget->BattleInflictor = OwnerBattery.Get();
+                SupplyTarget->ApplySupplyDamage(
                 FMath::Max(0, FMath::RoundToInt(Casualties * 0.35f)),
                 FMath::Max(0, FMath::RoundToInt(Casualties * 0.30f)),
                 static_cast<float>(Casualties) * 3.0f,
@@ -691,11 +700,13 @@ bool UStrategyArtilleryFireMissionComponent::FireAt(
                     static_cast<float>(Casualties) * 0.006f,
                     0.0f,
                     0.35f));
+                SupplyTarget->BattleInflictor = ReportPreviousAttacker;
+            }
         }
     }
     else if (Casualties > 0)
     {
-        Target->ApplyStrengthLoss(Casualties);
+        Target->ApplyStrengthLossWithCause(Casualties, TEXT("Artillery"), OwnerBattery);
     }
 
     if (Target->CombatComponent)
@@ -1070,14 +1081,23 @@ bool UStrategyArtilleryFireMissionComponent::FireAtLocation(
                     AmmoType == EStrategyArtilleryAmmoType::Shell ||
                     AmmoType == EStrategyArtilleryAmmoType::Shrapnel;
 
-                TargetBattery->ArtilleryDamageComponent
-                    ->ApplyIncomingHits(Casualties, bExplosive);
+                TargetBattery->ArtilleryDamageComponent->IncomingBattleCause = TEXT("Artillery");
+                {
+                    const TWeakObjectPtr<AStrategyUnit> ReportPreviousAttacker = TargetBattery->BattleInflictor;
+                    TargetBattery->BattleInflictor = OwnerBattery.Get();
+                    TargetBattery->ArtilleryDamageComponent->ApplyIncomingHits(Casualties, bExplosive);
+                    TargetBattery->BattleInflictor = ReportPreviousAttacker;
+                }
             }
         }
         else if (AStrategySupplyWagonUnit* SupplyTarget =
             Cast<AStrategySupplyWagonUnit>(Target))
         {
-            SupplyTarget->ApplySupplyDamage(
+            SupplyTarget->BattleCasualtyCause = TEXT("Artillery");
+            {
+                const TWeakObjectPtr<AStrategyUnit> ReportPreviousAttacker = SupplyTarget->BattleInflictor;
+                SupplyTarget->BattleInflictor = OwnerBattery.Get();
+                SupplyTarget->ApplySupplyDamage(
                 FMath::Max(0, FMath::RoundToInt(Casualties * 0.35f)),
                 FMath::Max(0, FMath::RoundToInt(Casualties * 0.30f)),
                 static_cast<float>(Casualties) * 3.0f,
@@ -1085,10 +1105,12 @@ bool UStrategyArtilleryFireMissionComponent::FireAtLocation(
                     static_cast<float>(Casualties) * 0.006f,
                     0.0f,
                     0.35f));
+                SupplyTarget->BattleInflictor = ReportPreviousAttacker;
+            }
         }
         else
         {
-            Target->ApplyStrengthLoss(Casualties);
+            Target->ApplyStrengthLossWithCause(Casualties, TEXT("Artillery"), OwnerBattery);
         }
 
         if (Target->CombatComponent)

@@ -175,6 +175,10 @@ bool ACampaign1851Map::LoadNations()
 
 void ACampaign1851Map::ResetWorld(int32 InSeed, float InDeviation)
 {
+    LastAfterActionReport.Reset();
+    PrisonersByNation.Reset();
+    bAfterActionReportOpen = false;
+    AfterActionReportPage = 0;
 	Seed = InSeed;
 	Deviation = FMath::Clamp(InDeviation, 0.f, 0.5f);
 	Decisions.Reset();

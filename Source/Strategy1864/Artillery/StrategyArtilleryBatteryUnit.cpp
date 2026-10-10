@@ -1,4 +1,5 @@
 #include "StrategyArtilleryBatteryUnit.h"
+#include "StrategyMortarBatteryUnit.h"
 #include "../Visual/StrategyArtilleryVisualComponent.h"
 
 #include "StrategyArtilleryDeploymentComponent.h"
@@ -193,6 +194,7 @@ bool AStrategyArtilleryBatteryUnit::AbandonBattery()
         return false;
     }
 
+    RecordEquipmentAbandonment();
     PersonnelEvacuatedOnAbandon =
         FMath::Max(0, CrewStrength + DriverStrength);
 
@@ -229,9 +231,30 @@ void AStrategyArtilleryBatteryUnit::ApplyBatteryDamage(
     int32 GunDisabled,
     int32 GunDestroyed)
 {
+    if (BattleLedger.bFrozen) { return; }
     const int32 AppliedPersonnel =
         FMath::Clamp(PersonnelLoss, 0, CrewStrength + DriverStrength);
 
+    RecordBattleLoss(AppliedPersonnel, BattleCasualtyCause);
+    if (!BattleLedger.bFrozen)
+    {
+        const int32 ReportLostHorses = FMath::Clamp(HorseLoss, 0, HorseStrength);
+        const int32 ReportLostPieces = FMath::Clamp(GunDestroyed, 0, GunCount - DestroyedGunCount);
+        const bool bReportMortar = Cast<AStrategyMortarBatteryUnit>(this) != nullptr;
+        if (BattleLedger.bEquipmentAbandoned)
+        {
+            // Already charged as abandoned: further damage reduces salvage, not losses a second time.
+            BattleLedger.Abandoned.Horses = FMath::Max(0, BattleLedger.Abandoned.Horses - ReportLostHorses);
+            int32& ReportSalvagePieces = bReportMortar ? BattleLedger.Abandoned.Mortars : BattleLedger.Abandoned.Guns;
+            ReportSalvagePieces = FMath::Max(0, ReportSalvagePieces - ReportLostPieces);
+        }
+        else
+        {
+            BattleLedger.Lost.Horses += ReportLostHorses;
+            if (bReportMortar) { BattleLedger.Lost.Mortars += ReportLostPieces; }
+            else { BattleLedger.Lost.Guns += ReportLostPieces; }
+        }
+    }
     int32 RemainingPersonnelLoss = AppliedPersonnel;
 
     const int32 CrewLoss = FMath::Min(CrewStrength, RemainingPersonnelLoss);
@@ -260,6 +283,7 @@ void AStrategyArtilleryBatteryUnit::ApplyBatteryDamage(
             0,
             MaxDisabled);
 
+    if (AStrategyMortarBatteryUnit* ReportMortar = Cast<AStrategyMortarBatteryUnit>(this)) { ReportMortar->MortarCrewStrength = CrewStrength; }
     CurrentStrength =
         FMath::Max(0, CrewStrength + DriverStrength);
 

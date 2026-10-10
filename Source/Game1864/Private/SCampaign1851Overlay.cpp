@@ -238,6 +238,57 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 		PaintText(Geometry, Out, Layer + 43, BusyText, BoxAt + FVector2D(BoxSize.X * 0.5f, 34.f), Serif(20), Ink, 0.5f);
 	};
 	if (bStartMenu) { PaintMenu(Geometry, Out, Layer); PaintToast(Geometry, Out, Layer + 10); PaintBusy(); return Layer + 50; }
+    if (!Map->LastAfterActionReport.IsEmpty())
+    {
+        if (Map->bAfterActionReportOpen)
+        {
+            const FVector2D ReportScreen = Geometry.GetLocalSize();
+            const FVector2D ReportPos(30.f, 70.f), ReportSize(ReportScreen.X - 60.f, ReportScreen.Y - 100.f);
+            PaintPanel(Geometry, Out, Layer + 20, ReportPos, ReportSize);
+            Buttons.Add({ FVector2D::ZeroVector, ReportScreen, EButton::Block, 0 }); // Modal background: all clicks are consumed.
+            PaintText(Geometry, Out, Layer + 23, TEXT("RAPPORT EFTER SLAGET"), ReportPos + FVector2D(20.f, 28.f), Serif(20), Ink);
+            TArray<FString> ReportLines;
+            Map->LastAfterActionReport.ParseIntoArrayLines(ReportLines, false);
+            const int32 ReportHeader = ReportLines.IndexOfByPredicate([](const FString& ReportLine) { return ReportLine.StartsWith(TEXT("Enhed\t")); });
+            TArray<FString> ReportRows;
+            for (int32 ReportLine = ReportHeader + 1; ReportHeader != INDEX_NONE && ReportLine < ReportLines.Num() && ReportLines[ReportLine].Contains(TEXT("\t")); ++ReportLine)
+            {
+                ReportRows.Add(ReportLines[ReportLine]);
+            }
+            if (ReportLines.Num() > 0) { PaintTextFit(Geometry, Out, Layer + 23, ReportLines[0], ReportPos + FVector2D(20.f, 63.f), Serif(13), Ink, ReportSize.X - 40.f); }
+            PaintText(Geometry, Out, Layer + 23, TEXT("K=kanoner  M=mortérer  G=geværer  H=heste  V=vogne  F=faner · Sårede vender tilbage fra lazaret over uger"), ReportPos + FVector2D(20.f, 90.f), Serif(12), Ink);
+            const int32 ReportOfficerLine = ReportLines.IndexOfByPredicate([](const FString& ReportLine) { return ReportLine.StartsWith(TEXT("Officerer —")); });
+            if (ReportOfficerLine != INDEX_NONE) { PaintTextFit(Geometry, Out, Layer + 23, ReportLines[ReportOfficerLine], ReportPos + FVector2D(20.f, 116.f), Serif(12), Ink, ReportSize.X - 40.f); }
+            const float ReportWidths[] = { .20f, .07f, .055f, .055f, .055f, .155f, .155f, .065f, .095f, .095f };
+            const float ReportUsable = ReportSize.X - 40.f;
+            auto PaintReportRow = [&](const FString& ReportLine, float ReportY, bool bReportHeader)
+            {
+                TArray<FString> ReportCells;
+                ReportLine.ParseIntoArray(ReportCells, TEXT("\t"), false);
+                float ReportX = ReportPos.X + 20.f;
+                for (int32 ReportCol = 0; ReportCol < 10 && ReportCol < ReportCells.Num(); ++ReportCol)
+                {
+                    PaintTextFit(Geometry, Out, Layer + 23, ReportCells[ReportCol], FVector2D(ReportX, ReportY), Serif(bReportHeader ? 13 : 12), Ink, ReportUsable * ReportWidths[ReportCol] - 8.f);
+                    ReportX += ReportUsable * ReportWidths[ReportCol];
+                }
+            };
+            if (ReportHeader != INDEX_NONE) { PaintReportRow(ReportLines[ReportHeader], ReportPos.Y + 145.f, true); }
+            const int32 ReportPerPage = FMath::Max(1, FMath::FloorToInt((ReportSize.Y - 240.f) / 28.f));
+            const int32 ReportLastPage = FMath::Max(0, (ReportRows.Num() - 1) / ReportPerPage);
+            Map->AfterActionReportPage = FMath::Clamp(Map->AfterActionReportPage, 0, ReportLastPage);
+            for (int32 ReportRow = 0; ReportRow < ReportPerPage && Map->AfterActionReportPage * ReportPerPage + ReportRow < ReportRows.Num(); ++ReportRow)
+            {
+                PaintReportRow(ReportRows[Map->AfterActionReportPage * ReportPerPage + ReportRow], ReportPos.Y + 177.f + ReportRow * 28.f, false);
+            }
+            const float ReportBottom = ReportPos.Y + ReportSize.Y - 45.f;
+            PaintButton(Geometry, Out, Layer + 24, FVector2D(ReportPos.X + 20.f, ReportBottom), FVector2D(110.f, 30.f), TEXT("FORRIGE"), EButton::AfterActionPage, -1);
+            PaintButton(Geometry, Out, Layer + 24, FVector2D(ReportPos.X + 140.f, ReportBottom), FVector2D(110.f, 30.f), TEXT("NÆSTE"), EButton::AfterActionPage, 1);
+            PaintText(Geometry, Out, Layer + 24, FString::Printf(TEXT("Side %d / %d"), Map->AfterActionReportPage + 1, ReportLastPage + 1), FVector2D(ReportPos.X + 270.f, ReportBottom + 15.f), Serif(12), Ink);
+            PaintButton(Geometry, Out, Layer + 24, FVector2D(ReportPos.X + ReportSize.X - 130.f, ReportBottom), FVector2D(110.f, 30.f), TEXT("LUK"), EButton::AfterActionToggle);
+            return Layer + 30;
+        }
+        PaintButton(Geometry, Out, Layer + 20, FVector2D(Geometry.GetLocalSize().X - 180.f, 76.f), FVector2D(150.f, 30.f), TEXT("VIS RAPPORT"), EButton::AfterActionToggle);
+    }
 	if (Map->IsBattleView())
 	{
 		// On the battlefield model: no map signs; its name, and the way back.
@@ -2488,9 +2539,10 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 	{
 		if (Y > Pos.Y + Size.Y - 115.f) { break; }
 		const FCampaign1851ServiceEntry& E = R.Service[e];
-		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s  ·  %s  ·  %s%s  ·  faldne %d, sårede %d, fjender %d"),
-			*ACampaign1851Map::FormatDate(ACampaign1851Map::StartDate() + FTimespan::FromDays(E.Day), true), *E.Place, Results[FMath::Min<int32>(E.Result, 3)],
-			E.bFrom3D ? TEXT(" (3D)") : TEXT(""), E.Killed, E.Wounded, E.EnemyKilled), FVector2D(X, Y), Serif(11), Ink, Size.X - 44.f);
+		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s · %s · %s%s · start %d, faldne %d, sårede %d, fangne %d, fjender %d"),
+			*(E.Date.IsEmpty() ? ACampaign1851Map::FormatDate(ACampaign1851Map::StartDate() + FTimespan::FromDays(E.Day), true) : E.Date), *E.Place, Results[FMath::Min<int32>(E.Result, 3)],
+			E.bFrom3D ? TEXT(" (3D)") : TEXT(""), E.StartMen, E.Killed, E.Wounded, E.Captured, E.EnemyKilled), FVector2D(X, Y), Serif(11), Ink, Size.X - 44.f);
+		AddTip(FVector2D(X, Y - 12.f), FVector2D(Size.X - 44.f, 19.f), (E.bHeldField ? FString(TEXT("Holdt feltet. ")) : FString(TEXT("Trak sig tilbage. "))) + E.Equipment);
 		Y += 19.f;
 	}
 	bool CustomCanUpgrade = false;
@@ -5395,6 +5447,13 @@ void SCampaign1851Overlay::PaintOfficerCard(const FGeometry& Geometry, FSlateWin
 	PaintText(Geometry, Out, Layer + 2, TEXT("Erfaring"), FVector2D(TX, Y), Serif(12, EFace::Italic), Gold, 0.f, false);
 	PaintBar(Geometry, Out, Layer + 2, FVector2D(TX + 66.f, Y - 3.f), TW - 130.f, O.Experience / 100.f);
 	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("%.0f %s"), O.Experience, *FString::ChrN(Campaign1851Army::Stars(O.Experience), TEXT('*'))), FVector2D(TX + TW, Y), Serif(12), Ink, 1.f, false);
+	if (O.Career.Num() > 0)
+	{
+		PaintTextFit(Geometry, Out, Layer + 2, O.Career.Last(), FVector2D(TX, Y + 24.f), Serif(10), Ink, TW);
+		FString ReportCareerText;
+		for (const FString& ReportCareerEntry : O.Career) { ReportCareerText += ReportCareerEntry + TEXT("\n"); }
+		AddTip(FVector2D(TX, Y + 10.f), FVector2D(TW, 34.f), ReportCareerText);
+	}
 	Y = Picture.Y + PortraitH + 22.f;
 	DrawLines(Geometry, Out, Layer + 2, { FVector2D(Pos.X + 22.f, Y - 10.f), FVector2D(Pos.X + Size.X - 22.f, Y - 10.f) }, Gold.CopyWithNewOpacity(0.35f), 1.f);
 	for (int32 s = 0; s < CardStats; ++s)

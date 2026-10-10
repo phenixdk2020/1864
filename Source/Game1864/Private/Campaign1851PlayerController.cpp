@@ -1431,6 +1431,16 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Overlay->CloseTransfer();
 			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
+        if (Button == SCampaign1851Overlay::EButton::AfterActionToggle)
+        {
+            Map->bAfterActionReportOpen = !Map->bAfterActionReportOpen;
+            Button = SCampaign1851Overlay::EButton::Block;
+        }
+        if (Button == SCampaign1851Overlay::EButton::AfterActionPage)
+        {
+            Map->AfterActionReportPage = FMath::Max(0, Map->AfterActionReportPage + Module);
+            Button = SCampaign1851Overlay::EButton::Block;
+        }
 		if (Button == SCampaign1851Overlay::EButton::Ransom)
 		{
 			FString Why;
@@ -2650,6 +2660,8 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Forts = Map->SaveForts();
 	Save->AmtManpower = Map->GetAmtManpower();
 	Save->GunStock = Map->GetGunStock();
+    Save->LastAfterActionReport = Map->LastAfterActionReport;
+    Save->PrisonersByNation = Map->PrisonersByNation;
 	Save->Supply = Map->SaveSupply();
 	Save->SupplyColumns = Map->SaveSupplyColumns();
 	Save->Rifles = Map->GetRifles();
@@ -2771,6 +2783,9 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	{
 		Map->SetAmtManpower(Save->AmtManpower);
 	}
+    Map->LastAfterActionReport = Save->SaveVersion >= 32 ? Save->LastAfterActionReport : FString();
+    Map->PrisonersByNation = Save->SaveVersion >= 32 ? Save->PrisonersByNation : TMap<FString, int32>();
+    Map->bAfterActionReportOpen = false;
 	Map->SetGunStock(Save->SaveVersion >= 16 ? Save->GunStock : 0);
 	Map->ResetSupply();
 	if (Save->SaveVersion >= 17)

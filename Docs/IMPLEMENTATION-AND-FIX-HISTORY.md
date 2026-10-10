@@ -1831,6 +1831,14 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 
 ### 2026-10-10 – 41 nye bygningsbilleder (B21-B61)
 - B21-B61 fra Overførsler/Bygninger_1851_B21-B61_41_PNG_768px beskåret, skaleret til 512 og importeret under `T_Bld_<Nøgle>` (alle 53 CSV-bygninger har nu eget billede, ingen deler). Originalerne i `Reference/Campaign1851/Buildings/Strategy1864_Original_B21_B61`. Se `Docs/Manglende-Billeder.md`.
+### 2026-10-10 — Rapport efter slaget, tjenestehistorik og officerskarriere
+
+- Gennemgået og færdiggjort den delvise implementering: hændelsesbaseret tabsregnskab for faldne, sårede, fanger, udstyr, ammunition, tid i kamp og største moraltab. Stabe tæller ikke underordnede mænd igen; uindtrådte reserver udelades.
+- Rapport pr. side og enhed med VIS RAPPORT/LUK, sider, dansk sammenfatning, tekstfil i Saved/Reports og PROJECT1864-REPORT-log. Kort eksplicit rapporttest og debugflag dokumenteret i AfterAction.md og TestFlags.md.
+- Præcise 3D-tab føres til kampagnens mænd, lazaret, fanger og udstyr. Våben/heste/kanoner på lager betaler ikke igen for allerede udleveret materiel. Ammunitionsforbrug anvendes som andel af startbeholdningen.
+- Ved AFSLUT SLAGET skrives startstyrke, dato, sted, tab, udstyr og holdt felt/tilbagetrækning i tjenestehistorikken med løbende totaler. Officerernes deltagelse, sår, fangenskab og udmærkelser registreres i Campaign1851Career.cpp og vises på officerskortet. Officerer kan aldrig dø i slag.
+- Gemmeversion 32 bevarer rapport, fangepuljer, udvidede tjenesteposter og karrierer; gamle tjenesteposter og gemninger læses stadig. Automatisk afgørelse får en særskilt rapport med spilestimater og umålte felter markeret.
+- Statisk gennemgang, UE 5.8-headerkontrol og diff-kontrol. Ingen build, spil/editorstart eller commit; runtime-verifikation afventer.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

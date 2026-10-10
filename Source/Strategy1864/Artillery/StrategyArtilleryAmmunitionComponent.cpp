@@ -1,4 +1,5 @@
 #include "StrategyArtilleryAmmunitionComponent.h"
+#include "../Units/StrategyUnit.h"
 
 UStrategyArtilleryAmmunitionComponent::UStrategyArtilleryAmmunitionComponent()
 {
@@ -79,6 +80,7 @@ int32 UStrategyArtilleryAmmunitionComponent::ConsumeSelectedRounds(
     }
 
     const int32 Consumed = FMath::Min(Requested, FMath::Max(0, *Store));
+    if (AStrategyUnit* ReportUnit = Cast<AStrategyUnit>(GetOwner())) { ReportUnit->RecordBattleVolley(Consumed); }
     *Store -= Consumed;
     return Consumed;
 }

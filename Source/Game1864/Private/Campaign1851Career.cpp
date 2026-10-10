@@ -3,6 +3,7 @@
 // the staff college has been founded). A vacant post is left for the War Ministry (or the player) to fill.
 
 #include "Campaign1851Map.h"
+#include "Dom/JsonObject.h"
 
 void ACampaign1851Map::VacateOfficer(int32 Officer)
 {
@@ -85,4 +86,26 @@ void ACampaign1851Map::YearlyOfficers()
 		News.Add(N);
 	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|officers|year %d|retired %d|died %d|new %d|total %d"), Year, Retired, Died, Class, Officers.Num());
+}
+
+void ACampaign1851Map::RecordBattleOfficerCareers(const TArray<TSharedPtr<FJsonValue>>& Participants, const FString& Place)
+{
+    TSet<FString> ReportSeenOfficers;
+    for (const TSharedPtr<FJsonValue>& ReportValue : Participants)
+    {
+        const TSharedPtr<FJsonObject> ReportOfficer = ReportValue.IsValid() && ReportValue->Type == EJson::Object ? ReportValue->AsObject() : nullptr;
+        FString ReportId, ReportFate;
+        if (!ReportOfficer.IsValid() || !ReportOfficer->TryGetStringField(TEXT("id"), ReportId) || ReportSeenOfficers.Contains(ReportId)) { continue; }
+        const int32 ReportIndex = Officers.IndexOfByPredicate([&ReportId](const FCampaign1851Officer& ReportCandidate) { return ReportCandidate.Id == ReportId; });
+        if (ReportIndex == INDEX_NONE) { continue; }
+        ReportSeenOfficers.Add(ReportId);
+        ReportOfficer->TryGetStringField(TEXT("fate"), ReportFate);
+        bool bReportDistinction = false;
+        ReportOfficer->TryGetBoolField(TEXT("distinction"), bReportDistinction);
+        Officers[ReportIndex].Career.Add(FString::Printf(TEXT("%s — %s: deltog%s%s%s"),
+            *GetDate().ToString(TEXT("%d.%m.%Y")), *Place,
+            ReportFate == TEXT("wounded") ? TEXT("; såret") : TEXT(""),
+            ReportFate == TEXT("captured") ? TEXT("; taget til fange") : TEXT(""),
+            bReportDistinction ? TEXT("; udmærkelse for indsats i kamp") : TEXT("")));
+    }
 }

@@ -20,6 +20,7 @@ protected:
 public:
     UFUNCTION(BlueprintCallable, Category="Strategy|Artillery")
     void ApplyIncomingHits(int32 Hits, bool bExplosive);
+    FName IncomingBattleCause = TEXT("InfantryFire");
 
     UFUNCTION(BlueprintCallable, Category="Strategy|Artillery")
     void SetDeterministicRandomSeed(int32 Seed)

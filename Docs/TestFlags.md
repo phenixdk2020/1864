@@ -168,3 +168,9 @@ Knapperne tilføjer flag til den eksisterende kommandolinje og åbner Strategy18
 - `-Strategy1864DebugAudio`: `PROJECT1864-AUDIO`-log med clip, afstand og volumen.
 
 Se [Audio.md](Audio.md) for WAV-generering, editorimport, HUD-indstillinger og manuel kontrol. Flagene giver ikke tilladelse til at starte spil eller editor.
+
+## Rapport efter slaget (2026-10-10)
+
+- `-Strategy1864DebugReport`: logger hele den færdige rapport med PROJECT1864-REPORT.
+- `-Strategy1864TestReport`: kort skirmish med syntetiske tab, såret officer og fanger efter 15 simulerede sekunder; vælger selv lille skirmish, hvis en kampagneanmodning ikke har forrang.
+- Se `Docs/AfterAction.md` for forventninger og kampagnekontrol. Flagene giver ikke tilladelse til at starte spil/editor.

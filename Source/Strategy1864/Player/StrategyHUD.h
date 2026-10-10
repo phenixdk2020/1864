@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
@@ -56,7 +56,7 @@ public:
 private:
     enum class EAction : uint8
     {
-        None, Minimap, FinishBattle, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, Disengage, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount, FigureScale, BattleQuality, TimeControl, Shadows, BuildFieldworks, SkirmishScreen, Spread, AudioVolume, AudioMute
+        None, Minimap, FinishBattle, ReportToggle, ReportPage, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, Disengage, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount, FigureScale, BattleQuality, TimeControl, Shadows, BuildFieldworks, SkirmishScreen, Spread, AudioVolume, AudioMute
     };
 
     struct FButton
@@ -67,6 +67,9 @@ private:
         TWeakObjectPtr<AStrategyUnit> Unit;
     };
 
+    bool bReportOpen = false, bReportSeen = false;
+    int32 ReportPage = 0;
+    void DrawAfterActionReport();
     void DrawOOB();
     void DrawOOBRow(AStrategyUnit* Unit, int32 Depth, float& Y, int32 Guard);
     float CommandHeight() const;

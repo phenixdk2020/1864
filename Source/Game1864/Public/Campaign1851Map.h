@@ -131,6 +131,11 @@ struct FCampaign1851Battle
 	bool bWaiting = false;   // sent to the 3D battle; waiting for its result file
 };
 
+struct FCampaign1851ReportEquipment
+{
+    int32 Mortars = 0, Guns = 0, Rifles = 0, Horses = 0, Wagons = 0, Colours = 0;
+};
+
 /** What a battle cost and decided (from the 3D battle, the automatic resolution, or a retreat). */
 struct FCampaign1851BattleOutcome
 {
@@ -144,6 +149,15 @@ struct FCampaign1851BattleOutcome
 	TMap<int32, float> FortLossShare;
 	TArray<int32> CapturedForts;
 	int32 EnemyLosses = 0;
+    bool bExactReport = false;
+    TMap<int32, FIntVector> UnitCasualties; // killed, wounded, prisoners
+    TMap<int32, FCampaign1851ReportEquipment> UnitEquipmentLost, UnitEquipmentCaptured;
+    TMap<int32, int32> UnitStartMen;
+    TMap<int32, bool> UnitHeldField;
+    TMap<int32, float> UnitMoraleLoss;
+    FIntVector EnemyCasualties = FIntVector::ZeroValue;
+    FCampaign1851ReportEquipment ReportCaptured, ReportLost, ReportEnemyLost;
+    FString ReportText;
 };
 
 /** Data-driven monthly event; no executable script or event dependencies. */
@@ -1016,6 +1030,13 @@ public:
 	int32 CorpsIndexOf(const FCampaign1851Battle& B) const;
 	/** Reads result files of battles sent to 3D. */
 	void PollBattleResults();
+    void RecordBattleOfficerCareers(const TArray<TSharedPtr<FJsonValue>>& Participants, const FString& Place);
+    FString LastAfterActionReport;
+    bool bAfterActionReportOpen = false;
+    int32 AfterActionReportPage = 0;
+    /** Soldiers held by each nation; officers retain their existing ransom/exchange path. */
+    TMap<FString, int32> PrisonersByNation;
+
 	/** True if an amt's seat is held by the enemy (its taxes are lost). */
 	bool IsAmtOccupied(const FCampaign1851Amt& A) const;
 	/** Danish soldiers needed at an occupied town (within 3 km, two days, no enemy corps within 10 km) to free it. */

@@ -248,6 +248,7 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
     }
 
     LastFiredTimeSeconds = GetWorld()->GetTimeSeconds();
+    OwnerUnit->RecordBattleVolley(ShotCount);
     AmmunitionRounds -= ShotCount;
     bOutOfAmmo = AmmunitionRounds <= 0;
 
@@ -265,9 +266,15 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
         {
             if (BatteryTarget->ArtilleryDamageComponent)
             {
-                BatteryTarget->ArtilleryDamageComponent->ApplyIncomingHits(
+                BatteryTarget->ArtilleryDamageComponent->IncomingBattleCause = TEXT("InfantryFire");
+                {
+                    const TWeakObjectPtr<AStrategyUnit> ReportPreviousAttacker = BatteryTarget->BattleInflictor;
+                    BatteryTarget->BattleInflictor = OwnerUnit.Get();
+                    BatteryTarget->ArtilleryDamageComponent->ApplyIncomingHits(
                     Hits,
                     false);
+                    BatteryTarget->BattleInflictor = ReportPreviousAttacker;
+                }
             }
         }
         else if (AStrategySupplyWagonUnit* SupplyTarget =
@@ -279,7 +286,11 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
             const int32 HorseLoss =
                 FMath::Max(0, FMath::RoundToInt(Hits * 0.35f));
 
-            SupplyTarget->ApplySupplyDamage(
+            SupplyTarget->BattleCasualtyCause = TEXT("InfantryFire");
+            {
+                const TWeakObjectPtr<AStrategyUnit> ReportPreviousAttacker = SupplyTarget->BattleInflictor;
+                SupplyTarget->BattleInflictor = OwnerUnit.Get();
+                SupplyTarget->ApplySupplyDamage(
                 DriverLoss,
                 HorseLoss,
                 static_cast<float>(Hits) * 1.5f,
@@ -287,11 +298,13 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
                     static_cast<float>(Hits) * 0.0025f,
                     0.0f,
                     0.12f));
+                SupplyTarget->BattleInflictor = ReportPreviousAttacker;
+            }
         }
         else
         {
             Target->CasualtySourceLocation = OwnerUnit->GetActorLocation();
-            Target->ApplyStrengthLoss(Hits);
+            Target->ApplyStrengthLossWithCause(Hits, TEXT("InfantryFire"), OwnerUnit);
         }
     }
 

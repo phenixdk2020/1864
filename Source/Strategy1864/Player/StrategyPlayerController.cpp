@@ -1,6 +1,7 @@
 #include "StrategyPlayerController.h"
 
 #include "StrategyHUD.h"
+#include "../Tests/StrategyOOBTestScenario.h"
 #include "StrategyBattlePerformance.h"
 #include "StrategyCameraPawn.h"
 #include "StrategyGameMode.h"
@@ -677,12 +678,20 @@ void AStrategyPlayerController::SelectUnitFromOOB(
 
 void AStrategyPlayerController::TogglePauseSimulation()
 {
+    for (TActorIterator<AStrategyOOBTestScenario> ReportScenario(GetWorld()); ReportScenario; ++ReportScenario)
+    {
+        if (ReportScenario->HasAfterActionReport()) { return; }
+    }
     const bool bNewPaused = !UGameplayStatics::IsGamePaused(this);
     UGameplayStatics::SetGamePaused(this, bNewPaused);
 }
 
 void AStrategyPlayerController::SetSimulationSpeed(float NewSpeed)
 {
+    for (TActorIterator<AStrategyOOBTestScenario> ReportScenario(GetWorld()); ReportScenario; ++ReportScenario)
+    {
+        if (ReportScenario->HasAfterActionReport()) { return; }
+    }
     SimulationSpeed = FMath::Clamp(NewSpeed, 0.5f, 10.0f);
     UGameplayStatics::SetGlobalTimeDilation(this, SimulationSpeed);
 

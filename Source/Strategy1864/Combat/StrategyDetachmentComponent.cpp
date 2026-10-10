@@ -121,7 +121,7 @@ int32 UStrategyDetachmentComponent::ApplyDetachmentLoss(
 
     const int32 Applied = FMath::Min(RequestedLoss, Record->CurrentStrength);
     Record->CurrentStrength -= Applied;
-    OwnerUnit->ApplyStrengthLoss(Applied);
+    OwnerUnit->ApplyStrengthLossWithCause(Applied, TEXT("Detachment"));
 
     if (Record->CurrentStrength <= 0)
     {
@@ -143,6 +143,7 @@ int32 UStrategyDetachmentComponent::ConsumeDetachmentAmmo(
     }
 
     const int32 Consumed = FMath::Min(RequestedRounds, Record->RemainingAmmoRounds);
+    if (OwnerUnit) { OwnerUnit->RecordBattleVolley(Consumed); }
     Record->RemainingAmmoRounds -= Consumed;
     return Consumed;
 }

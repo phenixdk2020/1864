@@ -201,6 +201,7 @@ void UStrategyArtilleryCaptureComponent::CompleteCapture(
         return;
     }
 
+    OwnerBattery->RecordEquipmentCapture(Captor);
     OwnerBattery->Side = Captor->Side;
     OwnerBattery->bPlayerControllable =
         Captor->Side == EStrategySide::Denmark ||

@@ -1,4 +1,4 @@
-﻿#include "StrategyHUD.h"
+#include "StrategyHUD.h"
 #include "../Audio/StrategyBattleAudio.h"
 #include "StrategyBattlePerformance.h"
 #include "Camera/PlayerCameraManager.h"
@@ -271,6 +271,18 @@ void AStrategyHUD::DrawHUD()
     }
     Buttons.Reset();
     Panels.Reset();
+    if (bReportOpen) { SubordinateMaxOffset = 0; }
+    for (TActorIterator<AStrategyOOBTestScenario> ReportScenario(GetWorld()); ReportScenario; ++ReportScenario)
+    {
+        if (!ReportScenario->HasAfterActionReport()) { bReportSeen = false; bReportOpen = false; ReportPage = 0; }
+        if (ReportScenario->HasAfterActionReport())
+        {
+            if (!bReportSeen) { bReportSeen = true; bReportOpen = true; }
+            if (bReportOpen) { DrawAfterActionReport(); return; }
+            DrawButton(Canvas->ClipX - 460.f, 88.f, 150.f, 30.f, TEXT("VIS RAPPORT"), EAction::ReportToggle, 0, false);
+        }
+        break;
+    }
 
     if (bDrawQABuildMarker)
     {
@@ -1149,6 +1161,7 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     {
         Text(TEXT("Ingen enhed valgt"), HudX[0], HudY + 58.f, Ink, 0.9f);
         bCommandStyle = false;
+        Panels.Add(FBox2D(FVector2D::ZeroVector, FVector2D(Canvas->ClipX, Canvas->ClipY)));
         return;
     }
     if (const AStrategyPlayerController* SelectionPC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
@@ -1509,15 +1522,29 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                     AStrategyCameraPawn::SetKeySpeedFactor(Steps[FMath::Clamp(B.Value, 0, int32(UE_ARRAY_COUNT(Steps)) - 1)]);
                     break;
                 }
+                case EAction::ReportToggle:
+                    bReportOpen = !bReportOpen;
+                    break;
+                case EAction::ReportPage:
+                    ReportPage = FMath::Max(0, ReportPage + B.Value);
+                    break;
                 case EAction::FinishBattle:
                     {
-                        bool bCampaignBattle = false;
+                        bool bCampaignBattle = false, bReviewReportFirst = false;
                         for (TActorIterator<AStrategyOOBTestScenario> It(GetWorld()); It; ++It)
                         {
                             bCampaignBattle = It->IsCampaignBattle();
+                            if (!It->HasAfterActionReport())
+                            {
+                                It->FinalizeAfterActionReport();
+                                bReviewReportFirst = true;
+                                bReportSeen = bReportOpen = true;
+                                break;
+                            }
                             if (bCampaignBattle) { It->FinishCampaignBattle(); }
                             break;
                         }
+                        if (bReviewReportFirst) { break; }
                         if (!bCampaignBattle)
                         {
                             // A test battle (from the start menu or a launcher): the way back is the campaign's start menu.
@@ -1742,5 +1769,60 @@ void AStrategyHUD::DrawNotices()
             DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.6f), Screen.X - TW * 0.5f - 5.0f, Screen.Y, TW + 10.0f, TH + 6.0f);
             DrawText(Label, FLinearColor(1.0f, 0.88f, 0.45f), Screen.X - TW * 0.5f, Screen.Y + 3.0f, nullptr, 0.9f, false);
         }
+    }
+}
+
+void AStrategyHUD::DrawAfterActionReport()
+{
+    for (TActorIterator<AStrategyOOBTestScenario> ReportScenario(GetWorld()); ReportScenario; ++ReportScenario)
+    {
+        bCommandStyle = false;
+        Panels.Add(FBox2D(FVector2D::ZeroVector, FVector2D(Canvas->ClipX, Canvas->ClipY)));
+        const float ReportX = 30.f, ReportY = 100.f, ReportW = Canvas->ClipX - 60.f;
+        DrawPanel(ReportX, ReportY, ReportW, Canvas->ClipY - 130.f);
+        Text(TEXT("RAPPORT EFTER SLAGET"), ReportX + 20.f, ReportY + 16.f, Ink, 1.3f);
+        Text(ReportScenario->GetBattleOutcome().IsEmpty() ? FString(TEXT("SLAGET AFSLUTTET")) : ReportScenario->GetBattleOutcome(), ReportX + 20.f, ReportY + 45.f, Gold);
+        Text(ReportScenario->GetReportSummary(), ReportX + 20.f, ReportY + 72.f, Ink);
+        Text(TEXT("K=kanoner  M=mortérer  G=geværer  H=heste  V=vogne  F=faner · Sårede til lazaret (prognose 88–96% tilbage)"), ReportX + 20.f, ReportY + 96.f, Ink);
+        Text(FString::Printf(TEXT("Officerer (sårede/fangne): danske %d/%d · fjendtlige %d/%d"),
+            ReportScenario->ReportDanes.OfficersWounded, ReportScenario->ReportDanes.OfficersCaptured,
+            ReportScenario->ReportEnemy.OfficersWounded, ReportScenario->ReportEnemy.OfficersCaptured), ReportX + 20.f, ReportY + 120.f, Ink);
+        const float ReportWidths[] = { .20f, .07f, .055f, .055f, .055f, .155f, .155f, .065f, .095f, .095f };
+        const TCHAR* ReportHeadings[] = { TEXT("Enhed"), TEXT("Mand ved start"), TEXT("Faldne"), TEXT("Sårede"), TEXT("Fanger"), TEXT("Erobret udstyr"), TEXT("Tabt udstyr"), TEXT("Skud"), TEXT("Kamp sek."), TEXT("Moraltab") };
+        const float ReportUsable = ReportW - 40.f;
+        auto ReportFitText = [&](const FString& ReportCell, float ReportCellX, float ReportCellY, float ReportCellWidth)
+        {
+            float ReportMeasuredWidth = 0.f, ReportMeasuredHeight = 0.f;
+            GetTextSize(ReportCell, ReportMeasuredWidth, ReportMeasuredHeight);
+            Text(ReportCell, ReportCellX, ReportCellY, Ink, FMath::Min(1.f, ReportCellWidth / FMath::Max(1.f, ReportMeasuredWidth)));
+        };
+        float ReportColumnX = ReportX + 20.f;
+        for (int32 ReportColumn = 0; ReportColumn < 10; ++ReportColumn)
+        {
+            ReportFitText(ReportHeadings[ReportColumn], ReportColumnX, ReportY + 150.f, ReportUsable * ReportWidths[ReportColumn] - 8.f);
+            ReportColumnX += ReportUsable * ReportWidths[ReportColumn];
+        }
+        const int32 ReportPerPage = FMath::Max(1, FMath::FloorToInt((Canvas->ClipY - ReportY - 275.f) / 28.f));
+        const TArray<FString>& ReportLines = ReportScenario->GetReportRows();
+        const int32 ReportLastPage = FMath::Max(0, (ReportLines.Num() - 1) / ReportPerPage);
+        ReportPage = FMath::Clamp(ReportPage, 0, ReportLastPage);
+        for (int32 ReportRow = 0; ReportRow < ReportPerPage && ReportPage * ReportPerPage + ReportRow < ReportLines.Num(); ++ReportRow)
+        {
+            TArray<FString> ReportCells;
+            ReportLines[ReportPage * ReportPerPage + ReportRow].ParseIntoArray(ReportCells, TEXT("\t"), false);
+            ReportColumnX = ReportX + 20.f;
+            for (int32 ReportColumn = 0; ReportColumn < ReportCells.Num() && ReportColumn < 10; ++ReportColumn)
+            {
+                ReportFitText(ReportCells[ReportColumn], ReportColumnX, ReportY + 182.f + ReportRow * 28.f, ReportUsable * ReportWidths[ReportColumn] - 8.f);
+                ReportColumnX += ReportUsable * ReportWidths[ReportColumn];
+            }
+        }
+        const float ReportFooter = Canvas->ClipY - 78.f;
+        DrawButton(ReportX + 20.f, ReportFooter, 100.f, 30.f, TEXT("FORRIGE"), EAction::ReportPage, -1, false);
+        DrawButton(ReportX + 130.f, ReportFooter, 100.f, 30.f, TEXT("NÆSTE"), EAction::ReportPage, 1, false);
+        Text(FString::Printf(TEXT("Side %d / %d"), ReportPage + 1, ReportLastPage + 1), ReportX + 245.f, ReportFooter + 8.f, Ink);
+        DrawButton(ReportX + ReportW - 420.f, ReportFooter, 100.f, 30.f, TEXT("LUK"), EAction::ReportToggle, 0, false);
+        DrawButton(ReportX + ReportW - 310.f, ReportFooter, 290.f, 30.f, ReportScenario->IsCampaignBattle() ? TEXT("AFSLUT SLAGET") : TEXT("FORLAD SLAGET"), EAction::FinishBattle, 0, false);
+        break;
     }
 }
