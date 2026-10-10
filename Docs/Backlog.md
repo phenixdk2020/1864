@@ -97,3 +97,7 @@ Se `Docs/Erfaring.md` (beskrivelse af nuværende regler og forslag). Kort: enhed
 - [x] Københavns to broer samlet ved krydsningen med 200 m afstand og forskudte labels.
 - [x] Klikbart indkaldelsespreview med ressourcer, officerer, færdigheder, uddannelse, budget og kasernekapacitet; klik udenfor lukker.
 - [ ] Visuel kontrol af de fire ændringer i spillet ved forskellige zoomniveauer og vinduesstørrelser (ikke startet som del af opgaven).
+
+## Naboerne inddeles i amter som Danmark (2026-10-10)
+
+Alle nabolande skal have samme inddeling som Danmark: amter/distrikter med grænser på ejergrid, befolkning, rekrutter, skat og byer. Rækkefølge: 1) syd (Mecklenburg-Schwerin, Preussen/Pommern; Codex-opgaven "south" er i gang: Aemter, Regierungsbezirke, Kreise), 2) Hannover, Oldenburg, Hamborg, Luebeck, Bremen, 3) Sverige (laen: Malmoehus, Kristianstad, Blekinge, Halland, Goeteborg og Bohus, Aelvsborg, Skaraborg, Vaermland m.fl.) og Norge (amter: Smaalenene, Akershus, Hedemarken m.fl.), 4) Preussen/Østrig videre ned (Brandenburg, Schlesien), Rusland/England kun som abstrakt model. Samme datastruktur som Danmarks amter (amter_1825.json / amter1851.json) så alt (manpower, skat, forsyning) virker ens.
