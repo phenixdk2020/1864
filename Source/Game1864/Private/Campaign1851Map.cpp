@@ -1959,6 +1959,7 @@ void ACampaign1851Map::CloseMonth()
 	}
 	MonthlyBuildingMaterials();
 	MonthlyManpower();
+	MonthlyNeighbourDistricts();
 	MonthlySalvage();
 	MonthlySupply();
 	PrivateInvestment();

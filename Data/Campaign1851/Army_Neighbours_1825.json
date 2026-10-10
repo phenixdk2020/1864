@@ -10,7 +10,8 @@
       "garrison": true,
       "men": 600,
       "mobilisedMen": 600,
-      "guns": 0
+      "guns": 0,
+      "district": "HH-city"
     },
     {
       "id": "garrison-Lübeck",
@@ -20,7 +21,8 @@
       "garrison": true,
       "men": 400,
       "mobilisedMen": 400,
-      "guns": 0
+      "guns": 0,
+      "district": "LUB-city"
     },
     {
       "id": "garrison-Malmø",
@@ -30,7 +32,8 @@
       "garrison": true,
       "men": 400,
       "mobilisedMen": 400,
-      "guns": 8
+      "guns": 8,
+      "district": ""
     },
     {
       "id": "garrison-Helsingborg",
@@ -40,7 +43,8 @@
       "garrison": true,
       "men": 150,
       "mobilisedMen": 150,
-      "guns": 0
+      "guns": 0,
+      "district": ""
     },
     {
       "id": "garrison-Landskrona",
@@ -50,7 +54,8 @@
       "garrison": true,
       "men": 400,
       "mobilisedMen": 400,
-      "guns": 12
+      "guns": 12,
+      "district": ""
     },
     {
       "id": "garrison-Lund",
@@ -60,7 +65,8 @@
       "garrison": true,
       "men": 100,
       "mobilisedMen": 100,
-      "guns": 0
+      "guns": 0,
+      "district": ""
     },
     {
       "id": "garrison-Ystad",
@@ -70,7 +76,8 @@
       "garrison": true,
       "men": 150,
       "mobilisedMen": 150,
-      "guns": 0
+      "guns": 0,
+      "district": ""
     },
     {
       "id": "garrison-Trelleborg",
@@ -80,7 +87,8 @@
       "garrison": true,
       "men": 50,
       "mobilisedMen": 50,
-      "guns": 0
+      "guns": 0,
+      "district": ""
     },
     {
       "id": "garrison-Kristianstad",
@@ -90,7 +98,8 @@
       "garrison": true,
       "men": 650,
       "mobilisedMen": 650,
-      "guns": 12
+      "guns": 12,
+      "district": ""
     },
     {
       "id": "garrison-Karlskrona",
@@ -100,7 +109,8 @@
       "garrison": true,
       "men": 1200,
       "mobilisedMen": 1200,
-      "guns": 36
+      "guns": 36,
+      "district": ""
     },
     {
       "id": "garrison-Halmstad",
@@ -110,7 +120,8 @@
       "garrison": true,
       "men": 150,
       "mobilisedMen": 150,
-      "guns": 0
+      "guns": 0,
+      "district": ""
     },
     {
       "id": "garrison-Göteborg",
@@ -120,7 +131,8 @@
       "garrison": true,
       "men": 700,
       "mobilisedMen": 700,
-      "guns": 20
+      "guns": 20,
+      "district": ""
     },
     {
       "id": "garrison-Rostock",
@@ -130,7 +142,8 @@
       "garrison": true,
       "men": 250,
       "mobilisedMen": 250,
-      "guns": 0
+      "guns": 0,
+      "district": "MEC-rostock"
     },
     {
       "id": "garrison-Wismar",
@@ -140,7 +153,8 @@
       "garrison": true,
       "men": 150,
       "mobilisedMen": 150,
-      "guns": 0
+      "guns": 0,
+      "district": "MEC-wismar"
     },
     {
       "id": "garrison-Schwerin",
@@ -150,7 +164,8 @@
       "garrison": true,
       "men": 700,
       "mobilisedMen": 700,
-      "guns": 8
+      "guns": 8,
+      "district": "MEC-schwerin"
     },
     {
       "id": "garrison-Stralsund",
@@ -160,7 +175,24 @@
       "garrison": true,
       "men": 1000,
       "mobilisedMen": 1000,
-      "guns": 24
+      "guns": 24,
+      "district": "PR-stralsund",
+      "status": "estimated",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "companies": [
+        {
+          "name": "Fæstningsinfanteri",
+          "men": 808
+        }
+      ],
+      "batteries": [
+        {
+          "name": "Fæstningsartilleri",
+          "men": 192,
+          "guns": 24
+        }
+      ]
     },
     {
       "id": "garrison-Stettin",
@@ -170,7 +202,24 @@
       "garrison": true,
       "men": 2000,
       "mobilisedMen": 2000,
-      "guns": 48
+      "guns": 48,
+      "district": "PR-randow",
+      "status": "estimated",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "companies": [
+        {
+          "name": "Fæstningsinfanteri",
+          "men": 1616
+        }
+      ],
+      "batteries": [
+        {
+          "name": "Fæstningsartilleri",
+          "men": 384,
+          "guns": 48
+        }
+      ]
     },
     {
       "id": "garrison-Bremen",
@@ -180,7 +229,8 @@
       "garrison": true,
       "men": 500,
       "mobilisedMen": 500,
-      "guns": 0
+      "guns": 0,
+      "district": ""
     },
     {
       "id": "garrison-Varberg",
@@ -190,7 +240,8 @@
       "garrison": true,
       "men": 100,
       "mobilisedMen": 100,
-      "guns": 4
+      "guns": 4,
+      "district": ""
     },
     {
       "id": "garrison-Greifswald",
@@ -200,7 +251,8 @@
       "garrison": true,
       "men": 400,
       "mobilisedMen": 400,
-      "guns": 0
+      "guns": 0,
+      "district": "PR-greifswald"
     },
     {
       "id": "garrison-Bergen på Rügen",
@@ -210,7 +262,8 @@
       "garrison": true,
       "men": 100,
       "mobilisedMen": 100,
-      "guns": 0
+      "guns": 0,
+      "district": "PR-ruegen"
     },
     {
       "id": "garrison-Stade",
@@ -220,7 +273,24 @@
       "garrison": true,
       "men": 500,
       "mobilisedMen": 500,
-      "guns": 12
+      "guns": 12,
+      "district": "HAN-stade",
+      "status": "estimated",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "companies": [
+        {
+          "name": "Fæstningsinfanteri",
+          "men": 404
+        }
+      ],
+      "batteries": [
+        {
+          "name": "Fæstningsartilleri",
+          "men": 96,
+          "guns": 12
+        }
+      ]
     },
     {
       "id": "garrison-Harburg",
@@ -230,7 +300,8 @@
       "garrison": true,
       "men": 300,
       "mobilisedMen": 300,
-      "guns": 0
+      "guns": 0,
+      "district": "HAN-lueneburg"
     },
     {
       "id": "garrison-Oldenburg",
@@ -240,7 +311,694 @@
       "garrison": true,
       "men": 600,
       "mobilisedMen": 600,
-      "guns": 6
+      "guns": 6,
+      "district": ""
+    },
+    {
+      "id": "garrison-Güstrow",
+      "name": "Garnison i Güstrow",
+      "nation": "MEC",
+      "town": "Güstrow",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-guestrow"
+    },
+    {
+      "id": "garrison-Parchim",
+      "name": "Garnison i Parchim",
+      "nation": "MEC",
+      "town": "Parchim",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-parchim"
+    },
+    {
+      "id": "garrison-Ludwigslust",
+      "name": "Garnison i Ludwigslust",
+      "nation": "MEC",
+      "town": "Ludwigslust",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-ludwigslust"
+    },
+    {
+      "id": "garrison-Waren",
+      "name": "Garnison i Waren",
+      "nation": "MEC",
+      "town": "Waren",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-waren"
+    },
+    {
+      "id": "garrison-Neustrelitz",
+      "name": "Garnison i Neustrelitz",
+      "nation": "MST",
+      "town": "Neustrelitz",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MST-stargard"
+    },
+    {
+      "id": "garrison-Neubrandenburg",
+      "name": "Garnison i Neubrandenburg",
+      "nation": "MST",
+      "town": "Neubrandenburg",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MST-stargard"
+    },
+    {
+      "id": "garrison-Boizenburg",
+      "name": "Garnison i Boizenburg",
+      "nation": "MEC",
+      "town": "Boizenburg",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-boizenburg"
+    },
+    {
+      "id": "garrison-Hagenow",
+      "name": "Garnison i Hagenow",
+      "nation": "MEC",
+      "town": "Hagenow",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-hagenow"
+    },
+    {
+      "id": "garrison-Grabow",
+      "name": "Garnison i Grabow",
+      "nation": "MEC",
+      "town": "Grabow",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-ludwigslust"
+    },
+    {
+      "id": "garrison-Bützow",
+      "name": "Garnison i Bützow",
+      "nation": "MEC",
+      "town": "Bützow",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-buetzow"
+    },
+    {
+      "id": "garrison-Schwaan",
+      "name": "Garnison i Schwaan",
+      "nation": "MEC",
+      "town": "Schwaan",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-rostock"
+    },
+    {
+      "id": "garrison-Bad Kleinen",
+      "name": "Garnison i Bad Kleinen",
+      "nation": "MEC",
+      "town": "Bad Kleinen",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-schwerin"
+    },
+    {
+      "id": "garrison-Blankenberg",
+      "name": "Garnison i Blankenberg",
+      "nation": "MEC",
+      "town": "Blankenberg",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-schwerin"
+    },
+    {
+      "id": "garrison-Sternberg",
+      "name": "Garnison i Sternberg",
+      "nation": "MEC",
+      "town": "Sternberg",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-schwerin"
+    },
+    {
+      "id": "garrison-Crivitz",
+      "name": "Garnison i Crivitz",
+      "nation": "MEC",
+      "town": "Crivitz",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-schwerin"
+    },
+    {
+      "id": "garrison-Neukloster",
+      "name": "Garnison i Neukloster",
+      "nation": "MEC",
+      "town": "Neukloster",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-wismar"
+    },
+    {
+      "id": "garrison-Gadebusch",
+      "name": "Garnison i Gadebusch",
+      "nation": "MEC",
+      "town": "Gadebusch",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-gadebusch"
+    },
+    {
+      "id": "garrison-Grevesmühlen",
+      "name": "Garnison i Grevesmühlen",
+      "nation": "MEC",
+      "town": "Grevesmühlen",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-grevesmuehlen"
+    },
+    {
+      "id": "garrison-Rehna",
+      "name": "Garnison i Rehna",
+      "nation": "MEC",
+      "town": "Rehna",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-gadebusch"
+    },
+    {
+      "id": "garrison-Doberan",
+      "name": "Garnison i Doberan",
+      "nation": "MEC",
+      "town": "Doberan",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-rostock"
+    },
+    {
+      "id": "garrison-Warnemünde",
+      "name": "Garnison i Warnemünde",
+      "nation": "MEC",
+      "town": "Warnemünde",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-rostock"
+    },
+    {
+      "id": "garrison-Ribnitz",
+      "name": "Garnison i Ribnitz",
+      "nation": "MEC",
+      "town": "Ribnitz",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-ribnitz"
+    },
+    {
+      "id": "garrison-Marlow",
+      "name": "Garnison i Marlow",
+      "nation": "MEC",
+      "town": "Marlow",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-ribnitz"
+    },
+    {
+      "id": "garrison-Tessin",
+      "name": "Garnison i Tessin",
+      "nation": "MEC",
+      "town": "Tessin",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-ribnitz"
+    },
+    {
+      "id": "garrison-Teterow",
+      "name": "Garnison i Teterow",
+      "nation": "MEC",
+      "town": "Teterow",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-guestrow"
+    },
+    {
+      "id": "garrison-Malchin",
+      "name": "Garnison i Malchin",
+      "nation": "MEC",
+      "town": "Malchin",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-stavenhagen"
+    },
+    {
+      "id": "garrison-Stavenhagen",
+      "name": "Garnison i Stavenhagen",
+      "nation": "MEC",
+      "town": "Stavenhagen",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-stavenhagen"
+    },
+    {
+      "id": "garrison-Röbel",
+      "name": "Garnison i Röbel",
+      "nation": "MEC",
+      "town": "Röbel",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-roebel"
+    },
+    {
+      "id": "garrison-Plau",
+      "name": "Garnison i Plau",
+      "nation": "MEC",
+      "town": "Plau",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-plau"
+    },
+    {
+      "id": "garrison-Lübz",
+      "name": "Garnison i Lübz",
+      "nation": "MEC",
+      "town": "Lübz",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MEC-parchim"
+    },
+    {
+      "id": "garrison-Dömitz",
+      "name": "Garnison i Dömitz",
+      "nation": "MEC",
+      "town": "Dömitz",
+      "garrison": true,
+      "men": 250,
+      "mobilisedMen": 250,
+      "guns": 8,
+      "district": "MEC-ludwigslust",
+      "status": "estimated",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "companies": [
+        {
+          "name": "Fæstningsinfanteri",
+          "men": 186
+        }
+      ],
+      "batteries": [
+        {
+          "name": "Fæstningsartilleri",
+          "men": 64,
+          "guns": 8
+        }
+      ]
+    },
+    {
+      "id": "garrison-Friedland",
+      "name": "Garnison i Friedland",
+      "nation": "MST",
+      "town": "Friedland",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "MST-stargard"
+    },
+    {
+      "id": "garrison-Anklam",
+      "name": "Garnison i Anklam",
+      "nation": "PR",
+      "town": "Anklam",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-anklam"
+    },
+    {
+      "id": "garrison-Swinemünde",
+      "name": "Garnison i Swinemünde",
+      "nation": "PR",
+      "town": "Swinemünde",
+      "garrison": true,
+      "men": 500,
+      "mobilisedMen": 500,
+      "guns": 24,
+      "district": "PR-usedom",
+      "status": "estimated",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "companies": [
+        {
+          "name": "Fæstningsinfanteri",
+          "men": 308
+        }
+      ],
+      "batteries": [
+        {
+          "name": "Fæstningsartilleri",
+          "men": 192,
+          "guns": 24
+        }
+      ]
+    },
+    {
+      "id": "garrison-Stargard",
+      "name": "Garnison i Stargard",
+      "nation": "PR",
+      "town": "Stargard",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-saatzig"
+    },
+    {
+      "id": "garrison-Pasewalk",
+      "name": "Garnison i Pasewalk",
+      "nation": "PR",
+      "town": "Pasewalk",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-ueckermuende"
+    },
+    {
+      "id": "garrison-Demmin",
+      "name": "Garnison i Demmin",
+      "nation": "PR",
+      "town": "Demmin",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-demmin"
+    },
+    {
+      "id": "garrison-Ueckermünde",
+      "name": "Garnison i Ueckermünde",
+      "nation": "PR",
+      "town": "Ueckermünde",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-ueckermuende"
+    },
+    {
+      "id": "garrison-Wolgast",
+      "name": "Garnison i Wolgast",
+      "nation": "PR",
+      "town": "Wolgast",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-greifswald"
+    },
+    {
+      "id": "garrison-Barth",
+      "name": "Garnison i Barth",
+      "nation": "PR",
+      "town": "Barth",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-franzburg"
+    },
+    {
+      "id": "garrison-Grimmen",
+      "name": "Garnison i Grimmen",
+      "nation": "PR",
+      "town": "Grimmen",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-franzburg"
+    },
+    {
+      "id": "garrison-Tribsees",
+      "name": "Garnison i Tribsees",
+      "nation": "PR",
+      "town": "Tribsees",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-franzburg"
+    },
+    {
+      "id": "garrison-Franzburg",
+      "name": "Garnison i Franzburg",
+      "nation": "PR",
+      "town": "Franzburg",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-franzburg"
+    },
+    {
+      "id": "garrison-Putbus",
+      "name": "Garnison i Putbus",
+      "nation": "PR",
+      "town": "Putbus",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-ruegen"
+    },
+    {
+      "id": "garrison-Garz på Rügen",
+      "name": "Garnison i Garz på Rügen",
+      "nation": "PR",
+      "town": "Garz på Rügen",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-ruegen"
+    },
+    {
+      "id": "garrison-Sassnitz",
+      "name": "Garnison i Sassnitz",
+      "nation": "PR",
+      "town": "Sassnitz",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-ruegen"
+    },
+    {
+      "id": "garrison-Gartz",
+      "name": "Garnison i Gartz",
+      "nation": "PR",
+      "town": "Gartz",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-randow"
+    },
+    {
+      "id": "garrison-Prenzlau",
+      "name": "Garnison i Prenzlau",
+      "nation": "PR",
+      "town": "Prenzlau",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-prenzlau"
+    },
+    {
+      "id": "garrison-Schwedt",
+      "name": "Garnison i Schwedt",
+      "nation": "PR",
+      "town": "Schwedt",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-angermuende"
+    },
+    {
+      "id": "garrison-Bergedorf",
+      "name": "Garnison i Bergedorf",
+      "nation": "HH",
+      "town": "Bergedorf",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "HH-city"
+    },
+    {
+      "id": "garrison-Lüneburg",
+      "name": "Garnison i Lüneburg",
+      "nation": "HAN",
+      "town": "Lüneburg",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "HAN-lueneburg"
+    },
+    {
+      "id": "garrison-Bleckede",
+      "name": "Garnison i Bleckede",
+      "nation": "HAN",
+      "town": "Bleckede",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "HAN-lueneburg"
+    },
+    {
+      "id": "garrison-Kolberg",
+      "name": "Garnison i Kolberg",
+      "nation": "PR",
+      "town": "Kolberg",
+      "garrison": true,
+      "men": 1200,
+      "mobilisedMen": 1200,
+      "guns": 36,
+      "district": "PR-kolberg",
+      "status": "estimated",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "companies": [
+        {
+          "name": "Fæstningsinfanteri",
+          "men": 912
+        }
+      ],
+      "batteries": [
+        {
+          "name": "Fæstningsartilleri",
+          "men": 288,
+          "guns": 36
+        }
+      ]
+    },
+    {
+      "id": "garrison-Angermünde",
+      "name": "Garnison i Angermünde",
+      "nation": "PR",
+      "town": "Angermünde",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-angermuende"
+    },
+    {
+      "id": "garrison-Passow",
+      "name": "Garnison i Passow",
+      "nation": "PR",
+      "town": "Passow",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-angermuende"
+    },
+    {
+      "id": "garrison-Tantow",
+      "name": "Garnison i Tantow",
+      "nation": "PR",
+      "town": "Tantow",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": "PR-angermuende"
+    },
+    {
+      "id": "garrison-Lauenburg",
+      "name": "Garnison i Lauenburg",
+      "nation": "DK",
+      "town": "Lauenburg",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": ""
+    },
+    {
+      "id": "garrison-Büchen",
+      "name": "Garnison i Büchen",
+      "nation": "DK",
+      "town": "Büchen",
+      "garrison": true,
+      "men": 0,
+      "mobilisedMen": 0,
+      "guns": 0,
+      "district": ""
     },
     {
       "id": "SE-south",
@@ -258,7 +1016,8 @@
       },
       "guns": 48,
       "men": 2500,
-      "mobilisedMen": 35000
+      "mobilisedMen": 35000,
+      "legacyAggregate": false
     },
     {
       "id": "PR-pomerania",
@@ -275,8 +1034,9 @@
         "1851": 24000
       },
       "guns": 60,
-      "men": 5000,
-      "mobilisedMen": 18000
+      "men": 0,
+      "mobilisedMen": 0,
+      "legacyAggregate": true
     },
     {
       "id": "MEC-field",
@@ -293,8 +1053,9 @@
         "1851": 3000
       },
       "guns": 8,
-      "men": 800,
-      "mobilisedMen": 2200
+      "men": 0,
+      "mobilisedMen": 0,
+      "legacyAggregate": true
     },
     {
       "id": "HAN-elbe",
@@ -312,7 +1073,8 @@
       },
       "guns": 12,
       "men": 1200,
-      "mobilisedMen": 4000
+      "mobilisedMen": 4000,
+      "legacyAggregate": false
     },
     {
       "id": "OLD-field",
@@ -330,7 +1092,632 @@
       },
       "guns": 4,
       "men": 300,
-      "mobilisedMen": 1000
+      "mobilisedMen": 1000,
+      "legacyAggregate": false
+    },
+    {
+      "id": "PR-IR2",
+      "name": "Infanterie-Regiment Nr. 2",
+      "nation": "PR",
+      "corps": "PR-pomerania",
+      "division": "3. Division",
+      "arm": "infantry",
+      "town": "Stettin",
+      "district": "PR-randow",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "men": 1400,
+      "mobilisedMen": 3000,
+      "guns": 0,
+      "status": "estimated",
+      "companies": [
+        {
+          "name": "1. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "2. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "3. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "4. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "5. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "6. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "7. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "8. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "9. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "10. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "11. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "12. Kompanie",
+          "men": 250
+        }
+      ],
+      "garrison": false
+    },
+    {
+      "id": "PR-IR9",
+      "name": "Infanterie-Regiment Nr. 9",
+      "nation": "PR",
+      "corps": "PR-pomerania",
+      "division": "3. Division",
+      "arm": "infantry",
+      "town": "Stargard",
+      "district": "PR-saatzig",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "men": 1400,
+      "mobilisedMen": 3000,
+      "guns": 0,
+      "status": "estimated",
+      "companies": [
+        {
+          "name": "1. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "2. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "3. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "4. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "5. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "6. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "7. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "8. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "9. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "10. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "11. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "12. Kompanie",
+          "men": 250
+        }
+      ],
+      "garrison": false
+    },
+    {
+      "id": "PR-IR14",
+      "name": "Infanterie-Regiment Nr. 14",
+      "nation": "PR",
+      "corps": "PR-pomerania",
+      "division": "4. Division",
+      "arm": "infantry",
+      "town": "Stralsund",
+      "district": "PR-stralsund",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "men": 1400,
+      "mobilisedMen": 3000,
+      "guns": 0,
+      "status": "estimated",
+      "companies": [
+        {
+          "name": "1. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "2. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "3. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "4. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "5. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "6. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "7. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "8. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "9. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "10. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "11. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "12. Kompanie",
+          "men": 250
+        }
+      ],
+      "garrison": false
+    },
+    {
+      "id": "PR-IR21",
+      "name": "Infanterie-Regiment Nr. 21",
+      "nation": "PR",
+      "corps": "PR-pomerania",
+      "division": "4. Division",
+      "arm": "infantry",
+      "town": "Stettin",
+      "district": "PR-randow",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "men": 1400,
+      "mobilisedMen": 3000,
+      "guns": 0,
+      "status": "estimated",
+      "companies": [
+        {
+          "name": "1. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "2. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "3. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "4. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "5. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "6. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "7. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "8. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "9. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "10. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "11. Kompanie",
+          "men": 250
+        },
+        {
+          "name": "12. Kompanie",
+          "men": 250
+        }
+      ],
+      "garrison": false
+    },
+    {
+      "id": "PR-JG2",
+      "name": "2. Jäger-Abteilung",
+      "nation": "PR",
+      "corps": "PR-pomerania",
+      "division": "Korpsjægere",
+      "arm": "infantry",
+      "town": "Greifswald",
+      "district": "PR-greifswald",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "men": 400,
+      "mobilisedMen": 600,
+      "guns": 0,
+      "status": "estimated",
+      "companies": [
+        {
+          "name": "1. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "2. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "3. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "4. Kompanie",
+          "men": 150
+        }
+      ],
+      "garrison": false
+    },
+    {
+      "id": "PR-KR2",
+      "name": "Kürassier-Regiment Königin (Pommersches) Nr. 2",
+      "nation": "PR",
+      "corps": "PR-pomerania",
+      "division": "Korpskavallerie",
+      "arm": "cavalry",
+      "town": "Pasewalk",
+      "district": "PR-ueckermuende",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "men": 400,
+      "mobilisedMen": 600,
+      "guns": 0,
+      "status": "estimated",
+      "squadrons": [
+        {
+          "name": "1. Eskadron",
+          "men": 150
+        },
+        {
+          "name": "2. Eskadron",
+          "men": 150
+        },
+        {
+          "name": "3. Eskadron",
+          "men": 150
+        },
+        {
+          "name": "4. Eskadron",
+          "men": 150
+        }
+      ],
+      "garrison": false
+    },
+    {
+      "id": "PR-ART2",
+      "name": "2. Artillerie-Brigade (feltdetachement)",
+      "nation": "PR",
+      "corps": "PR-pomerania",
+      "division": "Korpsartilleri",
+      "arm": "artillery",
+      "town": "Stettin",
+      "district": "PR-randow",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "men": 600,
+      "mobilisedMen": 1200,
+      "guns": 48,
+      "status": "estimated",
+      "batteries": [
+        {
+          "name": "1. Batterie",
+          "men": 200,
+          "guns": 8
+        },
+        {
+          "name": "2. Batterie",
+          "men": 200,
+          "guns": 8
+        },
+        {
+          "name": "3. Batterie",
+          "men": 200,
+          "guns": 8
+        },
+        {
+          "name": "4. Batterie",
+          "men": 200,
+          "guns": 8
+        },
+        {
+          "name": "5. Batterie",
+          "men": 200,
+          "guns": 8
+        },
+        {
+          "name": "6. Batterie",
+          "men": 200,
+          "guns": 8
+        }
+      ],
+      "garrison": false
+    },
+    {
+      "id": "PR-LW",
+      "name": "Pommerske Landwehr-bataljoner (samlet skøn)",
+      "nation": "PR",
+      "corps": "PR-pomerania",
+      "division": "Landwehr",
+      "arm": "infantry",
+      "town": "Greifswald",
+      "district": "PR-greifswald",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "men": 0,
+      "mobilisedMen": 3600,
+      "guns": 0,
+      "status": "estimated",
+      "companies": [
+        {
+          "name": "1. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "2. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "3. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "4. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "5. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "6. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "7. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "8. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "9. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "10. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "11. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "12. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "13. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "14. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "15. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "16. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "17. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "18. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "19. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "20. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "21. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "22. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "23. Kompanie",
+          "men": 150
+        },
+        {
+          "name": "24. Kompanie",
+          "men": 150
+        }
+      ],
+      "garrison": false
+    },
+    {
+      "id": "MEC-INF",
+      "name": "Großherzoglich Mecklenburgisches Infanterie-Kontingent",
+      "nation": "MEC",
+      "corps": "MEC-field",
+      "division": "",
+      "arm": "infantry",
+      "town": "Schwerin",
+      "district": "MEC-schwerin",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "men": 1200,
+      "mobilisedMen": 2400,
+      "guns": 0,
+      "status": "estimated",
+      "companies": [
+        {
+          "name": "1. Kompanie",
+          "men": 200
+        },
+        {
+          "name": "2. Kompanie",
+          "men": 200
+        },
+        {
+          "name": "3. Kompanie",
+          "men": 200
+        },
+        {
+          "name": "4. Kompanie",
+          "men": 200
+        },
+        {
+          "name": "5. Kompanie",
+          "men": 200
+        },
+        {
+          "name": "6. Kompanie",
+          "men": 200
+        },
+        {
+          "name": "7. Kompanie",
+          "men": 200
+        },
+        {
+          "name": "8. Kompanie",
+          "men": 200
+        },
+        {
+          "name": "9. Kompanie",
+          "men": 200
+        },
+        {
+          "name": "10. Kompanie",
+          "men": 200
+        },
+        {
+          "name": "11. Kompanie",
+          "men": 200
+        },
+        {
+          "name": "12. Kompanie",
+          "men": 200
+        }
+      ],
+      "garrison": false
+    },
+    {
+      "id": "MEC-DR",
+      "name": "Mecklenburgisches Chevauleger-Kontingent",
+      "nation": "MEC",
+      "corps": "MEC-field",
+      "division": "",
+      "arm": "cavalry",
+      "town": "Ludwigslust",
+      "district": "MEC-ludwigslust",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "men": 300,
+      "mobilisedMen": 450,
+      "guns": 0,
+      "status": "estimated",
+      "squadrons": [
+        {
+          "name": "1. Eskadron",
+          "men": 150
+        },
+        {
+          "name": "2. Eskadron",
+          "men": 150
+        },
+        {
+          "name": "3. Eskadron",
+          "men": 150
+        }
+      ],
+      "garrison": false
+    },
+    {
+      "id": "MEC-ART",
+      "name": "Mecklenburgische Feldbatterie",
+      "nation": "MEC",
+      "corps": "MEC-field",
+      "division": "",
+      "arm": "artillery",
+      "town": "Schwerin",
+      "district": "MEC-schwerin",
+      "chief": "",
+      "chiefStatus": "unknown",
+      "men": 120,
+      "mobilisedMen": 150,
+      "guns": 6,
+      "status": "estimated",
+      "batteries": [
+        {
+          "name": "1. Batterie",
+          "men": 150,
+          "guns": 6
+        }
+      ],
+      "garrison": false
     }
   ]
 }

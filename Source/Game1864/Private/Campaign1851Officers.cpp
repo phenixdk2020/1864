@@ -1012,6 +1012,11 @@ const TCHAR* ACampaign1851Map::FormationPostRank(int32 Formation, int32 Post) co
 	{
 		return Post == 0 ? TEXT("Generalmajor") : Post == 1 ? TEXT("Oberst") : TEXT("Major");
 	}
+	if (OOBEchelon == ECampaign1851Echelon::Detachment && Post == 0)
+	{
+		const TArray<int32> OOBMembers = FormationRegiments(Formation);
+		return OOBMembers.IsEmpty() ? TEXT("Major") : ChiefRank(Regiments[OOBMembers[0]].Arm);
+	}
 	if (OOBEchelon == ECampaign1851Echelon::Brigade) { return Post == 0 ? TEXT("Oberst") : Post == 1 ? TEXT("Oberstløjtnant") : TEXT("Kaptajn"); }
 	return Post == 0 ? TEXT("Oberstløjtnant") : Post == 1 ? TEXT("Major") : TEXT("Kaptajn");
 }

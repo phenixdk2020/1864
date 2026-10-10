@@ -1232,6 +1232,13 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
 
     // One contiguous slot per figure; never sample a sparse full-strength layout.
     // Pending casualties remain visible until impact, then ProcessPendingKills rebuilds.
+    if (!bScaleOnlyRebuild)
+    {
+        bArrivalReform = false;
+        bArrivalFrontReached = false;
+        bFormationPlanPending = false;
+        for (FSettle& ReformCancelled : SoldierSettle) ReformCancelled.ReformDeadline = -1.f;
+    }
     const int32 RenderedCount = SoldierComponents.Num();
     TArray<FStrategyFormationSlot> DrawnSlots =
         OwnerCompany->FormationComponent->GenerateSoldierSlots(
@@ -1335,6 +1342,13 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
             Soldier->SetRelativeRotation(FRotator(0.0f, Slot.FacingYaw + SoldierMeshYawOffset, 0.0f));
             Settle.bPlaced = true;
             Settle.bActive = false;
+            if (bArrivalReform)
+            {
+                Settle.ReformTarget = ArrivalFormationOrigin + FRotator(0.f, ArrivalFacing, 0.f).RotateVector(Settle.Slot);
+                Settle.ReformDeadline = VisualAnimationTime + FMath::Max(1.f, FormationChangeDeadlineSeconds);
+                Settle.bActive = true;
+                bFormationPlanPending = true;
+            }
         }
         else
         {
@@ -1349,6 +1363,14 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
         }
         SoldierSlots[VisualIndex] = Slot.SlotIndex >= 0 ? Slot.SlotIndex : VisualIndex;
     }
+    if (!bScaleOnlyRebuild && VisualPath.bInitialized &&
+        OwnerCompany->FormationComponent->CurrentFormation != EStrategyFormationType::Square &&
+        !(OwnerCompany->StanceComponent && OwnerCompany->StanceComponent->Stance == EStrategyStance::Prone) &&
+        !(DrawnScreen && (DrawnScreen->State == EStrategySkirmisherState::Deploying || DrawnScreen->IsDeployed())))
+    {
+        bArrivalReform = false;
+        PlanOrderlyReform(false, FTransform(FRotator(0.f, VisualPath.Facing, 0.f), VisualPath.Center));
+    }
     bCrowdDirty = true;
 }
 
@@ -1356,6 +1378,14 @@ bool UStrategyInfantryVisualComponent::GetDrawnFireFront(FVector& OutLeft, FVect
 {
     FBox DrawnFrontBounds(ForceInit);
     if (!OwnerCompany || !GetFormationLocalBounds(DrawnFrontBounds)) return false;
+    if (bArrivalReform)
+    {
+        FTransform ArrivalDrawnFrame;
+        if (!GetDrawnFormation(ArrivalDrawnFrame, DrawnFrontBounds)) return false;
+        OutLeft = ArrivalDrawnFrame.TransformPosition(FVector(DrawnFrontBounds.Max.X, DrawnFrontBounds.Min.Y, 0.f));
+        OutRight = ArrivalDrawnFrame.TransformPosition(FVector(DrawnFrontBounds.Max.X, DrawnFrontBounds.Max.Y, 0.f));
+        return true;
+    }
     DrawnFrontBounds = DrawnFrontBounds.ExpandBy(15.0f);
     const FTransform DrawnUnitTransform = OwnerCompany->GetActorTransform();
     OutLeft = DrawnUnitTransform.TransformPosition(FVector(DrawnFrontBounds.Max.X, DrawnFrontBounds.Min.Y, 0.0f));
@@ -1455,8 +1485,198 @@ void UStrategyInfantryVisualComponent::UpdateFormationBounds()
     if (CentroidFigureCount > 0) { FigureLocalCentroid /= CentroidFigureCount; }
 }
 
+void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, const FTransform& ReformFrame)
+{
+    // Once per change, never a per-frame assignment/path search. Preserve figure identity and clips.
+    if (bDestination) ArrivalFormationOrigin = ReformFrame.GetLocation();
+    TArray<int32> ReformMen;
+    TArray<FVector> ReformSlots;
+    TArray<FVector> ReformStarts;
+    TArray<float> ReformSlotYaws;
+    TArray<FVector> ReformEndpoints;
+    TArray<int32> ReformSlotIds;
+    ReformStarts.SetNum(SoldierSettle.Num());
+    for (int32 ReformIndex = 0; ReformIndex < SoldierSettle.Num(); ++ReformIndex)
+    {
+        if (!SoldierComponents.IsValidIndex(ReformIndex) || !SoldierComponents[ReformIndex]) continue;
+        ReformMen.Add(ReformIndex);
+        ReformSlots.Add(SoldierSettle[ReformIndex].Slot);
+        ReformStarts[ReformIndex] = VisualPath.PreviousUnit.TransformPosition(SoldierComponents[ReformIndex]->GetRelativeLocation());
+        ReformSlotYaws.Add(SoldierSettle[ReformIndex].SlotYaw);
+        ReformEndpoints.Add(ReformFrame.TransformPosition(SoldierSettle[ReformIndex].Slot));
+        ReformSlotIds.Add(SoldierSlots[ReformIndex]);
+    }
+    const bool bReformColumn = OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
+        OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn;
+    const FTransform ReformSourceFrame(FRotator(0.f, VisualPath.Facing, 0.f), VisualPath.Center);
+    const float ReformFileSpacing = FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierLateralSpacingCm);
+    const float ReformRankSpacing = FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierRankSpacingCm);
+    // Depart by files (left wing first, front rank first); deploy from the column head.
+    ReformMen.Sort([&](int32 ReformA, int32 ReformB)
+    {
+        const FVector ReformLocalA = ReformSourceFrame.InverseTransformPosition(ReformStarts[ReformA]);
+        const FVector ReformLocalB = ReformSourceFrame.InverseTransformPosition(ReformStarts[ReformB]);
+        // Ignore small residual personal offsets when identifying the old file/rank.
+        const int32 ReformFileA = FMath::RoundToInt32(ReformLocalA.Y / ReformFileSpacing);
+        const int32 ReformFileB = FMath::RoundToInt32(ReformLocalB.Y / ReformFileSpacing);
+        const int32 ReformRankA = FMath::RoundToInt32(-ReformLocalA.X / ReformRankSpacing);
+        const int32 ReformRankB = FMath::RoundToInt32(-ReformLocalB.X / ReformRankSpacing);
+        if (bReformColumn && !bDestination)
+        {
+            if (ReformFileA != ReformFileB) return ReformFileA < ReformFileB;
+            if (ReformRankA != ReformRankB) return ReformRankA < ReformRankB;
+        }
+        else
+        {
+            if (ReformRankA != ReformRankB) return ReformRankA < ReformRankB;
+            if (ReformFileA != ReformFileB) return ReformFileA < ReformFileB;
+        }
+        return ReformA < ReformB;
+    });
+    TArray<int32> ReformTargets;
+    for (int32 ReformIndex = 0; ReformIndex < ReformSlots.Num(); ++ReformIndex) ReformTargets.Add(ReformIndex);
+    ReformTargets.Sort([&](int32 ReformA, int32 ReformB)
+    {
+        const FVector& ReformAOffset = ReformSlots[ReformA];
+        const FVector& ReformBOffset = ReformSlots[ReformB];
+        if (bReformColumn && !bDestination)
+            return ReformAOffset.X != ReformBOffset.X ? ReformAOffset.X > ReformBOffset.X : ReformAOffset.Y < ReformBOffset.Y;
+        return ReformAOffset.Y != ReformBOffset.Y ? ReformAOffset.Y < ReformBOffset.Y : ReformAOffset.X > ReformBOffset.X;
+    });
+    // Uncross straight segments by exchanging endpoints. Every exchange strictly shortens total travel.
+    // Collinear paths also exchange when the shorter pairing removes overtaking.
+    FormationCrossingsAvoided = 0;
+    bool bReformExchanged = true;
+    while (bReformExchanged)
+    {
+        bReformExchanged = false;
+        for (int32 ReformA = 0; ReformA < ReformMen.Num(); ++ReformA)
+        for (int32 ReformB = ReformA + 1; ReformB < ReformMen.Num(); ++ReformB)
+        {
+            const FVector ReformStartA = ReformStarts[ReformMen[ReformA]];
+            const FVector ReformStartB = ReformStarts[ReformMen[ReformB]];
+            const FVector ReformEndA = ReformEndpoints[ReformTargets[ReformA]];
+            const FVector ReformEndB = ReformEndpoints[ReformTargets[ReformB]];
+            const auto ReformSide = [](const FVector& ReformP, const FVector& ReformQ, const FVector& ReformR)
+            { return (ReformQ.X - ReformP.X) * (ReformR.Y - ReformP.Y) - (ReformQ.Y - ReformP.Y) * (ReformR.X - ReformP.X); };
+            const bool bReformIntersects = ReformSide(ReformStartA, ReformEndA, ReformStartB) * ReformSide(ReformStartA, ReformEndA, ReformEndB) <= 0. &&
+                ReformSide(ReformStartB, ReformEndB, ReformStartA) * ReformSide(ReformStartB, ReformEndB, ReformEndA) <= 0.;
+            const double ReformOldLength = FVector::Dist2D(ReformStartA, ReformEndA) + FVector::Dist2D(ReformStartB, ReformEndB);
+            const double ReformNewLength = FVector::Dist2D(ReformStartA, ReformEndB) + FVector::Dist2D(ReformStartB, ReformEndA);
+            if (bReformIntersects && ReformNewLength + 0.01 < ReformOldLength)
+            {
+                ReformTargets.Swap(ReformA, ReformB);
+                ++FormationCrossingsAvoided;
+                bReformExchanged = true;
+            }
+        }
+    }
+    // Arrival includes the remaining march; do not force every long path to finish simultaneously at seven seconds.
+    float ReformBudget = FMath::Max(1.f, FormationChangeDeadlineSeconds);
+    if (bDestination)
+    {
+        for (int32 ReformOrder = 0; ReformOrder < ReformMen.Num(); ++ReformOrder)
+            ReformBudget = FMath::Max(ReformBudget, float(FVector::Dist2D(ReformStarts[ReformMen[ReformOrder]],
+                ReformEndpoints[ReformTargets[ReformOrder]])) / 160.f + FormationChangeDeadlineSeconds);
+    }
+    FormationPlanStarted = VisualAnimationTime;
+    FormationLongestPath = 0.f;
+    bFormationPlanPending = !ReformMen.IsEmpty();
+    for (int32 ReformOrder = 0; ReformOrder < ReformMen.Num(); ++ReformOrder)
+    {
+        const int32 ReformMan = ReformMen[ReformOrder];
+        FSettle& ReformSettle = SoldierSettle[ReformMan];
+        ReformSettle.Slot = ReformSlots[ReformTargets[ReformOrder]];
+        SoldierSlots[ReformMan] = ReformSlotIds[ReformTargets[ReformOrder]];
+        ReformSettle.SlotYaw = ReformSlotYaws[ReformTargets[ReformOrder]];
+        ReformSettle.ReformTarget = ReformFrame.TransformPosition(ReformSettle.Slot);
+        const FVector ReformStart = ReformStarts[ReformMan];
+        FormationLongestPath = FMath::Max(FormationLongestPath, float(FVector::Dist2D(ReformStart, ReformSettle.ReformTarget)));
+        const int32 ReformOldColumnWidth = CachedFormationValue == uint8(EStrategyFormationType::DefileColumn) ?
+            2 : OwnerCompany->FormationComponent->ColumnWidth;
+        const int32 ReformWaveWidth = FMath::Max(1, bReformColumn ? OwnerCompany->FormationComponent->RankCount : ReformOldColumnWidth);
+        ReformSettle.StartDelay = FMath::Min((ReformOrder / ReformWaveWidth) * 0.12f + (ReformOrder % ReformWaveWidth) * 0.04f, FormationChangeDeadlineSeconds * 0.65f);
+        ReformSettle.StartRemaining = bDestination ? 0.f : ReformSettle.StartDelay;
+        ReformSettle.HaltRemaining = 0.f;
+        ReformSettle.ReformDeadline = VisualAnimationTime + ReformBudget;
+        ReformSettle.WorldVelocity = FVector::ZeroVector;
+        ReformSettle.bActive = true;
+    }
+}
+
+void UStrategyInfantryVisualComponent::KeepReformSpacing(float DeltaTime)
+{
+    // Small local presentation correction, not navigation/collision in the simulation.
+    // Spatial buckets bound neighbour work; no all-pairs search or terrain trace in the frame loop.
+    const float ReformClearance = FMath::Min(60.f, FMath::Min(
+        OwnerCompany->FormationComponent->SoldierLateralSpacingCm,
+        OwnerCompany->FormationComponent->SoldierRankSpacingCm) * 0.8f);
+    if (ReformClearance <= 0.f) return;
+    const FTransform ReformUnit = OwnerCompany->GetActorTransform();
+    FormationStepPositions.SetNum(SoldierComponents.Num());
+    FormationSpacingNext.SetNum(SoldierComponents.Num());
+    for (int32 ReformMan = 0; ReformMan < SoldierComponents.Num(); ++ReformMan)
+        if (SoldierComponents[ReformMan])
+            FormationStepPositions[ReformMan] = ReformUnit.TransformPosition(SoldierComponents[ReformMan]->GetRelativeLocation());
+    for (int32 ReformPass = 0; ReformPass < 4; ++ReformPass)
+    {
+        FormationSpacingGrid.Reset();
+        for (int32 ReformMan = 0; ReformMan < SoldierComponents.Num(); ++ReformMan)
+        {
+            if (!SoldierComponents[ReformMan]) continue;
+            const FVector& ReformPosition = FormationStepPositions[ReformMan];
+            int32& ReformCellHead = FormationSpacingGrid.FindOrAdd(FIntPoint(FMath::FloorToInt32(ReformPosition.X / ReformClearance),
+                FMath::FloorToInt32(ReformPosition.Y / ReformClearance)), INDEX_NONE);
+            FormationSpacingNext[ReformMan] = ReformCellHead;
+            ReformCellHead = ReformMan;
+        }
+        for (int32 ReformMan = 0; ReformMan < SoldierComponents.Num(); ++ReformMan)
+        {
+            if (!SoldierComponents[ReformMan]) continue;
+            const FVector ReformPosition = FormationStepPositions[ReformMan];
+            const FIntPoint ReformCell(FMath::FloorToInt32(ReformPosition.X / ReformClearance), FMath::FloorToInt32(ReformPosition.Y / ReformClearance));
+            for (int32 ReformCellX = -1; ReformCellX <= 1; ++ReformCellX)
+            for (int32 ReformCellY = -1; ReformCellY <= 1; ++ReformCellY)
+            {
+                const int32* ReformNeighbours = FormationSpacingGrid.Find(FIntPoint(ReformCell.X + ReformCellX, ReformCell.Y + ReformCellY));
+                if (!ReformNeighbours) continue;
+                for (int32 ReformOther = *ReformNeighbours; ReformOther != INDEX_NONE; ReformOther = FormationSpacingNext[ReformOther])
+                {
+                    if (ReformOther <= ReformMan) continue;
+                    FVector ReformAway = FormationStepPositions[ReformMan] - FormationStepPositions[ReformOther];
+                    ReformAway.Z = 0.f;
+                    const float ReformDistance = ReformAway.Size2D();
+                    if (ReformDistance >= ReformClearance) continue;
+                    const bool bReformMoveA = SoldierSettle[ReformMan].bActive && SoldierSettle[ReformMan].StartRemaining <= 0.f &&
+                        FVector::Dist2D(FormationStepPositions[ReformMan], ReformUnit.TransformPosition(SoldierSettle[ReformMan].Goal)) > 0.1f;
+                    const bool bReformMoveB = SoldierSettle[ReformOther].bActive && SoldierSettle[ReformOther].StartRemaining <= 0.f &&
+                        FVector::Dist2D(FormationStepPositions[ReformOther], ReformUnit.TransformPosition(SoldierSettle[ReformOther].Goal)) > 0.1f;
+                    if (!bReformMoveA && !bReformMoveB) continue; // Halted men and waiting files hold their ground.
+                    if (ReformDistance <= 0.01f)
+                    {
+                        ReformAway = FormationStepStarts[ReformMan] - FormationStepStarts[ReformOther];
+                        ReformAway.Z = 0.f;
+                        if (ReformAway.IsNearlyZero()) ReformAway = FVector(0.f, 1.f, 0.f);
+                    }
+                    const FVector ReformCorrection = ReformAway.GetSafeNormal() * (ReformClearance - ReformDistance);
+                    const float ReformShareA = bReformMoveA ? (bReformMoveB ? 0.5f : 1.f) : 0.f;
+                    FormationStepPositions[ReformMan] += ReformCorrection * ReformShareA;
+                    FormationStepPositions[ReformOther] -= ReformCorrection * (1.f - ReformShareA);
+                }
+            }
+        }
+    }
+    for (int32 ReformMan = 0; ReformMan < SoldierComponents.Num(); ++ReformMan)
+    {
+        if (!SoldierComponents[ReformMan]) continue;
+        SoldierComponents[ReformMan]->SetRelativeLocation(ReformUnit.InverseTransformPosition(FormationStepPositions[ReformMan]));
+        SoldierSettle[ReformMan].WorldVelocity = (FormationStepPositions[ReformMan] - FormationStepStarts[ReformMan]) / FMath::Max(0.001f, DeltaTime);
+    }
+}
+
 void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
 {
+    if (DeltaTime <= 0.f) return;
     // The men run to their places in a new formation (out into line, in to the column) at a jog, turning the way they run, and take
     // the company's pose when they are there.
     const float RunCmPerSecond = 420.0f;
@@ -1467,20 +1687,83 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
     if (!VisualPath.bInitialized) { VisualPath.Reset(VisualUnit); }
     const float ActualMarchSpeed = OwnerCompany->MovementExecutor ? OwnerCompany->MovementExecutor->GetExecutedVelocity().Size2D() : 0.f;
     const float VisualWalkSpeed = FMath::Max(160.f, ActualMarchSpeed);
-    VisualPath.Advance(VisualUnit, DeltaTime, bVisualColumn, VisualWalkSpeed);
+    const FStrategyOrder ArrivalOrder = OwnerCompany->OrderComponent ? OwnerCompany->OrderComponent->GetCurrentOrder() : FStrategyOrder();
+    if (bArrivalReform && (ArrivalOrder.OrderSerial != ArrivalOrderSerial ||
+        !ArrivalOrder.TargetLocation.Equals(ArrivalDestination, 1.f) ||
+        FMath::Abs(FMath::FindDeltaAngleDegrees(ArrivalFacing, ArrivalOrder.FacingYaw)) > 0.1f ||
+        (OwnerCompany->MovementExecutor && OwnerCompany->MovementExecutor->IsTemporarilyPaused())))
+    {
+        bArrivalReform = false;
+        bArrivalFrontReached = false;
+        bFormationPlanPending = false;
+        VisualPath.Center = VisualUnit.GetLocation();
+        VisualPath.CenterVelocity = FVector::ZeroVector;
+        for (FSettle& ArrivalCancelled : SoldierSettle) ArrivalCancelled.ReformDeadline = -1.f;
+    }
+    const bool bArrivalFinalLeg = OwnerCompany->MovementExecutor && !OwnerCompany->MovementExecutor->IsTemporarilyPaused() &&
+        OwnerCompany->MovementExecutor->HasMovementGoal() &&
+        OwnerCompany->OrderComponent && OwnerCompany->OrderComponent->IsPhysicallyExecuting() &&
+        ArrivalOrder.NextWaypointIndex >= ArrivalOrder.Waypoints.Num() - 1 &&
+        OwnerCompany->MovementExecutor->GetMovementGoal().Equals(ArrivalOrder.TargetLocation, 1.f);
+    const bool bArrivalScreen = OwnerCompany->SkirmisherComponent &&
+        (OwnerCompany->SkirmisherComponent->State == EStrategySkirmisherState::Deploying || OwnerCompany->SkirmisherComponent->IsDeployed());
+    if (!bArrivalReform && !bVisualColumn && !bArrivalScreen && !(OwnerCompany->StanceComponent && OwnerCompany->StanceComponent->Stance == EStrategyStance::Prone) && bArrivalFinalLeg &&
+        ArrivalOrder.bHasFacing && !ArrivalOrder.bKeepFacing &&
+        FVector::Dist2D(VisualPath.Center, ArrivalOrder.TargetLocation) <= 2500.f &&
+        FMath::Abs(FMath::FindDeltaAngleDegrees(VisualPath.Facing, ArrivalOrder.FacingYaw)) >= 20.f &&
+        OwnerCompany->FormationComponent->CurrentFormation != EStrategyFormationType::Square)
+    {
+        bArrivalReform = true;
+        bArrivalFrontReached = false;
+        ArrivalOrderSerial = ArrivalOrder.OrderSerial;
+        ArrivalDestination = ArrivalOrder.TargetLocation;
+        ArrivalFacing = ArrivalOrder.FacingYaw;
+        ArrivalTravelSpeed = VisualWalkSpeed;
+        const float ArrivalHalfDepth = VisualPath.SlotBounds.IsValid ? VisualPath.SlotBounds.GetSize().X * 0.5f : 0.f;
+        // The destination preview is centred on the order goal; generated infantry slots are front-anchored.
+        const FVector ArrivalSlotOrigin = ArrivalDestination + FRotator(0.f, ArrivalFacing, 0.f).Vector() * ArrivalHalfDepth;
+        PlanOrderlyReform(true, FTransform(FRotator(0.f, ArrivalFacing, 0.f), ArrivalSlotOrigin));
+    }
+    if (!bArrivalReform) VisualPath.Advance(VisualUnit, DeltaTime, bVisualColumn, VisualWalkSpeed);
+    else
+    {
+        // Drawn bounds/flag/HQ keep reading the living figure transforms in the final-facing frame.
+        VisualPath.Facing = ArrivalFacing;
+        VisualPath.bMovingVisuals = false;
+        VisualPath.bTurning = false;
+    }
     const bool bActorMoved = !VisualUnit.Equals(VisualPath.PreviousUnit, 0.001f);
-    const bool bVisualTravel = VisualPath.bMovingVisuals || bActorMoved;
+    const bool bVisualTravel = !bArrivalReform && (VisualPath.bMovingVisuals || bActorMoved);
     const bool bSpreadCrawling = OwnerCompany->StanceComponent && OwnerCompany->StanceComponent->Stance == EStrategyStance::Prone;
     UAnimSequence* Walk = (bSpreadCrawling ? CrawlProneAsset : WalkStandingAsset).Get();
+    if (bFormationPlanPending)
+    {
+        FormationStepStarts.SetNum(SoldierComponents.Num());
+        for (int32 ReformMan = 0; ReformMan < SoldierComponents.Num(); ++ReformMan)
+            if (SoldierComponents[ReformMan])
+                FormationStepStarts[ReformMan] = VisualPath.PreviousUnit.TransformPosition(SoldierComponents[ReformMan]->GetRelativeLocation());
+    }
     bool bAny = false;
+    float ArrivalLiveFrontX = 0.f;
+    bool bArrivalHasLiveFront = false;
+    if (bArrivalReform)
+    {
+        for (int32 ArrivalMan = 0; ArrivalMan < SoldierSettle.Num(); ++ArrivalMan)
+        {
+            if (!SoldierComponents.IsValidIndex(ArrivalMan) || !SoldierComponents[ArrivalMan]) continue;
+            ArrivalLiveFrontX = bArrivalHasLiveFront ? FMath::Max(ArrivalLiveFrontX, float(SoldierSettle[ArrivalMan].Slot.X)) :
+                float(SoldierSettle[ArrivalMan].Slot.X);
+            bArrivalHasLiveFront = true;
+        }
+    }
     UAnimSequence* Run = bSpreadCrawling ? Walk : RunStandingAsset.Get();
     bool bSettleIdleLoop = true;
-    UAnimSequence* SettleIdle = ResolveAnimation(bSettleIdleLoop);
+    UAnimSequence* SettleIdle = bArrivalReform ? IdleStandingAsset.Get() : ResolveAnimation(bSettleIdleLoop);
     for (int32 i = 0; i < SoldierComponents.Num() && i < SoldierSettle.Num(); ++i)
     {
         FSettle& Settle = SoldierSettle[i];
-        if (bVisualTravel && !bWasVisualTravel) Settle.StartRemaining = Settle.StartDelay;
-        if (!bVisualTravel && bWasVisualTravel) Settle.HaltRemaining = Settle.StartDelay;
+        if (bVisualTravel && !bWasVisualTravel && Settle.ReformDeadline < 0.f) Settle.StartRemaining = 0.f;
+        if (!bVisualTravel && bWasVisualTravel) Settle.HaltRemaining = 0.f;
         USkeletalMeshComponent* Soldier = SoldierComponents[i];
         if (Soldier && Settle.bPlaced && (bActorMoved || bVisualTravel || Settle.bActive))
         {
@@ -1497,7 +1780,9 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             FVector SpecialPathSlot = Settle.Slot;
             // Screen men walk ahead independently; the column's head remains at its original trail coordinate.
             if (bColumnScreen && !bScreenFigure && VisualPath.Trail.Num() >= 2) SpecialPathSlot.X += VisualPath.SlotBounds.Max.X;
-            Settle.Goal = VisualUnit.InverseTransformPosition(VisualPath.Goal(SpecialPathSlot, bVisualColumn && !bScreenFigure, GoalYaw));
+            Settle.Goal = VisualUnit.InverseTransformPosition(bArrivalReform ? Settle.ReformTarget :
+                VisualPath.Goal(SpecialPathSlot, bVisualColumn && !bScreenFigure, GoalYaw));
+            if (bArrivalReform) GoalYaw = ArrivalFacing;
             Settle.Yaw = GoalYaw - VisualUnit.Rotator().Yaw + Settle.SlotYaw + SoldierMeshYawOffset;
             Settle.bActive = Settle.bActive || bVisualTravel || FVector::Dist2D(Soldier->GetRelativeLocation(), Settle.Goal) > 1.f;
         }
@@ -1519,8 +1804,13 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         FVector Here = Soldier->GetRelativeLocation();
         FVector Delta = Settle.Goal - Here;
         const float Distance = Delta.Size();
-        if (Distance < 0.1f && Settle.WorldVelocity.Size() < 1.f && !bVisualTravel)
+        if (Settle.ReformDeadline >= 0.f && Distance <= 0.1f)
+            Settle.ReformDeadline = -1.f;
+        if (Distance <= 0.1f && !bVisualTravel)
         {
+            Settle.ReformDeadline = -1.f;
+            if (bArrivalReform && bArrivalHasLiveFront && Settle.Slot.X >= ArrivalLiveFrontX - 1.f)
+                bArrivalFrontReached = true;
             Settle.WorldVelocity = FVector::ZeroVector;
             FRotator ArrivedRotation = Soldier->GetRelativeRotation();
             ArrivedRotation.Yaw = FStrategyVisualFormationPath::SmoothFacing(ArrivedRotation.Yaw, Settle.YawVelocity, Settle.Yaw, DeltaTime, 120.f);
@@ -1546,7 +1836,7 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         bAny = true;
         const bool bSlotReforming = OwnerCompany->FormationTransition && OwnerCompany->FormationTransition->IsReforming();
         // Carry the slot at unit speed; personal pace only affects closing a slot error.
-        const float FigureSpeed = ActualMarchSpeed +
+        const float FigureSpeed = (bArrivalReform ? 0.f : ActualMarchSpeed) +
             ((bSlotReforming || VisualPath.bTurning) ? RunCmPerSecond : 160.f) * Settle.Pace;
         const float SpecialFigureSpeed = bSpreadCrawling ? FMath::Min(FigureSpeed, VisualWalkSpeed * 0.40f) : FigureSpeed;
         FVector FigureWorld = VisualUnit.TransformPosition(Here);
@@ -1554,21 +1844,34 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         const FVector FigureTarget = VisualUnit.TransformPosition(Settle.Goal);
         // Integrate presentation velocity every frame, with braking near the slot.
         // Substeps affect no orders, simulation positions, collision or game clocks.
-        FStrategyVisualFormationPath::SmoothTravel(FigureWorld, Settle.WorldVelocity, FigureTarget, DeltaTime, SpecialFigureSpeed);
+        if (!bSpreadCrawling && (Settle.ReformDeadline >= 0.f || bArrivalReform))
+        {
+            const float ReformTimeLeft = FMath::Max(DeltaTime, Settle.ReformDeadline - VisualAnimationTime);
+            const float ReformBaseSpeed = bArrivalReform ? FMath::Max(160.f, ArrivalTravelSpeed * Settle.Pace) : ActualMarchSpeed + RunCmPerSecond * Settle.Pace;
+            const float ReformEase = Distance < 10.f ? 120.f * Distance / 10.f :
+                (Distance < 30.f ? FMath::Max(120.f, ReformBaseSpeed * Distance / 30.f) : ReformBaseSpeed);
+            const float ReformSpeed = FMath::Max(ReformEase, Distance / FMath::Max(0.001f, ReformTimeLeft));
+            const float ReformStep = FMath::Min(Distance, ReformSpeed * DeltaTime);
+            FigureWorld += (FigureTarget - FigureWorld).GetSafeNormal() * ReformStep;
+            Settle.WorldVelocity = ReformStep >= Distance ? FVector::ZeroVector :
+                (FigureWorld - FigureBefore) / FMath::Max(0.001f, DeltaTime);
+        }
+        else FStrategyVisualFormationPath::SmoothTravel(FigureWorld, Settle.WorldVelocity, FigureTarget, DeltaTime, SpecialFigureSpeed);
         const FVector Step = FigureWorld - FigureBefore;
         Soldier->SetRelativeLocation(VisualUnit.InverseTransformPosition(FigureWorld));
         // He faces the way he runs while he is far from his place, and turns to the front as he comes in.
         const float RunYaw = VisualUnit.InverseTransformVectorNoScale(Settle.WorldVelocity).Rotation().Yaw + SoldierMeshYawOffset;
         const bool bFigureBackstep = OwnerCompany->OrderComponent &&
             OwnerCompany->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Disengage;
-        const float Yaw = bFigureBackstep ? Settle.Yaw : (bVisualTravel || Distance > 150.0f ? RunYaw : Settle.Yaw);
+        const float Yaw = bFigureBackstep || Step.Size() >= Distance - 0.1f ? Settle.Yaw :
+            (bVisualTravel || Distance > (bArrivalReform ? 0.1f : 30.f) ? RunYaw : Settle.Yaw);
         FRotator Rot = Soldier->GetRelativeRotation();
         const float FigureTurn = FMath::FindDeltaAngleDegrees(Rot.Yaw, Yaw);
         Rot.Roll = FMath::FInterpTo(Rot.Roll, FMath::Clamp(FigureTurn * 0.08f, -4.f, 4.f), DeltaTime, 8.f);
         Rot.Yaw = FStrategyVisualFormationPath::SmoothFacing(Rot.Yaw, Settle.YawVelocity, Yaw, DeltaTime, 120.f);
         Soldier->SetRelativeRotation(Rot);
         Soldier->bPauseAnims = false;
-        UAnimSequence* TravelClip = !bSlotReforming && Walk ? Walk : Run;
+        UAnimSequence* TravelClip = (!bSlotReforming || bArrivalReform) && Walk ? Walk : Run;
         if (TravelClip && SoldierClips.IsValidIndex(i) && (SoldierClips[i].Clip.Get() != TravelClip))
         {
             Soldier->bPauseAnims = false;
@@ -1590,6 +1893,20 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             bCrowdDataDirty = true;
         }
         bCrowdDirty = true;
+    }
+    if (bFormationPlanPending && !bSpreadCrawling) KeepReformSpacing(DeltaTime);
+    bool bReformStillWalking = false;
+    if (bFormationPlanPending)
+        for (const FSettle& ReformSettle : SoldierSettle)
+            bReformStillWalking |= ReformSettle.ReformDeadline >= 0.f ||
+                (!bVisualTravel && ReformSettle.bActive);
+    if (bFormationPlanPending && !bReformStillWalking)
+    {
+        if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugFormation")))
+            UE_LOG(LogTemp, Display, TEXT("Strategy1864DebugFormation %s complete-seconds=%.3f longest-path-cm=%.1f crossing-pairs-avoided=%d arrival=%d"),
+                *OwnerCompany->StableUnitId.ToString(), VisualAnimationTime - FormationPlanStarted,
+                FormationLongestPath, FormationCrossingsAvoided, bArrivalReform ? 1 : 0);
+        bFormationPlanPending = false;
     }
     VisualPath.PreviousUnit = VisualUnit;
     bWasSettling = bAny;
@@ -1910,6 +2227,13 @@ void UStrategyInfantryVisualComponent::DestroyVisualComponents()
 {
     VisualPath.bInitialized = false;
     VisualPath.Trail.Reset();
+    bArrivalReform = false;
+    bArrivalFrontReached = false;
+    bFormationPlanPending = false;
+    FormationSpacingGrid.Reset();
+    FormationStepStarts.Reset();
+    FormationStepPositions.Reset();
+    FormationSpacingNext.Reset();
     bSmoothSampled = false;
     SmoothMaxCenter = 0.f;
     for (int32 SmoothResetIndex = 0; SmoothResetIndex < 5; ++SmoothResetIndex)

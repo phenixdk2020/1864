@@ -242,6 +242,8 @@ void ACampaign1851Map::EnemyReinforcements()
 	for (FCampaign1851EnemyCorps& C : EnemyCorps)
 	{
 		// A blockade with the sea held halves the drafts (the Baltic ports closed).
+		if (C.Men <= 0 || C.bEngaged) { continue; }
+		const FCampaign1851NeighbourArmy* SouthSource = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& A) { return A.CorpsId == C.Id; });
 		if (const FCampaign1851NeighbourArmy* NeighbourSource = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& A) { return A.CorpsId == C.Id; }))
 		{
 			if (NeighbourSource->bGarrison) { continue; }
@@ -250,11 +252,21 @@ void ACampaign1851Map::EnemyReinforcements()
 				&& !PlanMarch(C.Town, C.Km, NeighbourSource->Town, TownKm(NeighbourSource->Town), 16.f, ECampaign1851RouteMode::RoadsOnly, NeighbourSupplyLegs, nullptr, C.Nation)) { continue; }
 		}
 		const int32 Draft = (C.Nation == TEXT("PR") ? 3000 : 1500) / (bBlockade && HasSeaControl() ? 2 : 1);
-		const int32 Add = FMath::Min(Draft, FMath::Max(0, C.StartMen * 3 / 2 - C.Men));
+		const int32 SouthTarget = SouthSource && !SouthSource->District.IsEmpty() ? SouthSource->MobilisedMen : C.StartMen * 3 / 2;
+		int32 Add = FMath::Min(Draft, FMath::Max(0, SouthTarget - C.Men));
+		if (SouthSource && !SouthSource->District.IsEmpty())
+		{
+			if (SouthSource->FoodDays <= 0.f) { continue; }
+			Add = TakeNeighbourRecruits(*SouthSource, FMath::Min(Add, FMath::CeilToInt(SouthTarget * Campaign1851Army::ReplacementShare)));
+		}
 		if (Add > 0)
 		{
 			C.Men += Add;
-			C.Guns += Add / 400;
+			if (SouthSource && !SouthSource->District.IsEmpty())
+			{
+				C.Guns = FMath::Min(SouthSource->Guns, FMath::RoundToInt(SouthSource->Guns * C.Men / float(FMath::Max(1, SouthTarget))));
+			}
+			else { C.Guns += Add / 400; }
 			C.bWaitingNoted = false;
 			C.RestUntil = 0.0;
 			News.Add(FString::Printf(TEXT("Efterretning: %s forstærkes med ca. %s mand"), *C.Name, *FString::FromInt(Add)));

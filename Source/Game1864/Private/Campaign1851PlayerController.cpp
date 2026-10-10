@@ -1375,6 +1375,16 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	{
 		int32 Module = INDEX_NONE;
 		SCampaign1851Overlay::EButton Button = Overlay.IsValid() ? Overlay->HitButton(Mouse, &Module) : SCampaign1851Overlay::EButton::None;
+		if (Button == SCampaign1851Overlay::EButton::TreeRow)
+		{
+			const auto OOBPressKind = SCampaign1851Overlay::TreeKind(Module);
+			const int32 OOBPressUnit = OOBPressKind == SCampaign1851Overlay::ETreeKind::Company ? SCampaign1851Overlay::TreeId(Module) / 10 : SCampaign1851Overlay::TreeId(Module);
+			if ((OOBPressKind == SCampaign1851Overlay::ETreeKind::Regiment || OOBPressKind == SCampaign1851Overlay::ETreeKind::Company)
+				&& Map->GetRegiments().IsValidIndex(OOBPressUnit) && Map->GetRegiments()[OOBPressUnit].Formation == 0 && !Overlay->CanTakeOOBGarrisonUnit(OOBPressUnit))
+			{
+				Button = SCampaign1851Overlay::EButton::Block;
+			}
+		}
 		if (Overlay.IsValid() && Button == SCampaign1851Overlay::EButton::RaisePreview)
 		{
 			Overlay->bRaisePreview = true;
@@ -3274,13 +3284,59 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 	const int32 SourceId = SCampaign1851Overlay::TreeId(Source), TargetId = SCampaign1851Overlay::TreeId(Target);
 	const K TargetKind = SCampaign1851Overlay::TreeKind(Target);
 	const K OOBSourceKind = SCampaign1851Overlay::TreeKind(Source);
+	TArray<int32> OOBSourceUnits;
+	if (OOBSourceKind == K::Regiment) { OOBSourceUnits = Overlay->GetSelectedRegiments().Contains(SourceId) ? Overlay->GetSelectedRegiments() : TArray<int32> { SourceId }; }
+	else if (OOBSourceKind == K::Company) { OOBSourceUnits.Add(SourceId / 10); }
+	else if (OOBSourceKind == K::Formation) { OOBSourceUnits = Map->FormationRegiments(SourceId); }
+	else if (OOBSourceKind == K::Command)
+	{
+		for (int32 OOBUnit = 0; OOBUnit < Map->GetRegiments().Num(); ++OOBUnit)
+		{
+			if (Map->GetRegiments()[OOBUnit].Command == SourceId && Map->GetRegiments()[OOBUnit].Formation == 0) { OOBSourceUnits.Add(OOBUnit); }
+		}
+	}
+	for (int32 OOBUnit : OOBSourceUnits)
+	{
+		if (!Map->GetRegiments().IsValidIndex(OOBUnit)) { return; }
+		const FCampaign1851Regiment& OOBReg = Map->GetRegiments()[OOBUnit];
+		if (OOBReg.Formation == 0 && !Overlay->CanTakeOOBGarrisonUnit(OOBUnit))
+		{
+			const FString OOBTownName = Map->GetCities().IsValidIndex(OOBReg.Town) ? Map->GetCities()[OOBReg.Town].Name : FString(TEXT("enhedens by"));
+			Overlay->ShowToast(FString::Printf(TEXT("Du skal staa i %s for at tage enheder ud"), *OOBTownName));
+			return;
+		}
+	}
+	const bool bOOBReturnTarget = TargetKind == K::Garrisons || TargetKind == K::Command || TargetKind == K::ArmGroup
+		|| (TargetKind == K::Regiment && Map->GetRegiments().IsValidIndex(TargetId) && Map->GetRegiments()[TargetId].Formation == 0)
+		|| (TargetKind == K::Company && Map->GetRegiments().IsValidIndex(TargetId / 10) && Map->GetRegiments()[TargetId / 10].Formation == 0);
+	if (bOOBReturnTarget)
+	{
+		const int32 OOBTown = TargetKind == K::Garrisons ? TargetId - 1 : TargetKind == K::Regiment ? Map->GetRegiments()[TargetId].Town
+			: TargetKind == K::Company ? Map->GetRegiments()[TargetId / 10].Town : Overlay->GetOOBContextTown();
+		for (int32 OOBUnit : OOBSourceUnits)
+		{
+			const FCampaign1851Regiment& OOBReg = Map->GetRegiments()[OOBUnit];
+			if (OOBTown == INDEX_NONE || OOBReg.IsMarching() || OOBReg.Town != OOBTown
+				|| (OOBTown != Overlay->GetOOBContextTown() && OOBTown != OOBReg.Home))
+			{
+				Overlay->ShowToast(TEXT("Enheder kan kun returneres til garnisonen i byen, hvor de står")); return;
+			}
+		}
+		TArray<int32> OOBDestinations;
+		FString OOBWhy;
+		if (!Map->PlanGarrisonReturn(OOBSourceUnits, OOBDestinations, &OOBWhy)) { Overlay->ShowToast(OOBWhy); return; }
+		for (int32 OOBDestination : OOBDestinations)
+		{
+			if (OOBDestination != OOBTown) { Overlay->ShowToast(TEXT("Garnisonen i denne by har ikke plads; enhederne bliver stående")); return; }
+		}
+	}
 	auto OOBDetachPart = [&](int32 OOBPartKey, FString& OOBWhy) -> int32
 	{
 		const int32 OOBUnit = OOBPartKey / 10;
 		if (Map->GetRegiments().IsValidIndex(OOBUnit) && OOBPartKey % 10 < Map->SubUnitCount(OOBUnit) && Map->SubUnitCount(OOBUnit) == 1) { return OOBUnit; }
 		return Map->SplitOffCompany(OOBUnit, OOBPartKey % 10, &OOBWhy);
 	};
-	// The permanent right target always starts an independent army, without intermediate HQs.
+	// The permanent right target starts an independent army with its unit HQ chain.
 	if (TargetKind == K::NewFormation && TargetId == 99999)
 	{
 		TArray<int32> OOBUnits;
@@ -3305,6 +3361,7 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 			if (OOBSourceIndex == INDEX_NONE || Map->GetFormations()[OOBSourceIndex].Echelon == ECampaign1851Echelon::Army) { Overlay->ShowToast(TEXT("En felthær kan ikke ligge under en anden felthær")); return; }
 			const int32 OOBArmy = Map->CreateFormation(ECampaign1851Echelon::Army, 0);
 			Map->MoveFormation(SourceId, OOBArmy);
+			Map->PruneEmptyFormations();
 			Overlay->RevealOOBArmy(OOBArmy, Map->FormationRegiments(OOBArmy));
 			Overlay->ShowToast(TEXT("Ny felthær med den trukne formation direkte under sig"));
 			return;
@@ -3317,10 +3374,9 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 			}
 		}
 		if (OOBUnits.Num() == 0) { Overlay->ShowToast(TEXT("Træk en enhed eller et kompagni herover")); return; }
-		const int32 OOBArmy = Map->CreateFormation(ECampaign1851Echelon::Army, 0);
-		for (int32 OOBUnit : OOBUnits) { Map->MoveRegimentToFormation(OOBUnit, OOBArmy); }
+		const int32 OOBArmy = Map->CreateArmyWithUnitHQs(OOBUnits);
 		Overlay->RevealOOBArmy(OOBArmy, OOBUnits);
-		Overlay->ShowToast(FString::Printf(TEXT("Ny felthær med %d enheder direkte under sig"), OOBUnits.Num()));
+		Overlay->ShowToast(FString::Printf(TEXT("Ny felthær med bataljonsstab og %d enheder"), OOBUnits.Num()));
 		return;
 	}
 	if (TargetKind == K::Garrisons && OOBSourceKind == K::Regiment && Map->GetRegiments().IsValidIndex(SourceId))

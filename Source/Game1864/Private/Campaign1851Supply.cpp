@@ -78,6 +78,14 @@ FCampaign1851DepotCapacity ACampaign1851Map::DepotCapacity(int32 CityIndex) cons
 		C.Food += Cities[CityIndex].NeighbourGarrison * 30.f;
 		C.Fodder += Cities[CityIndex].NeighbourGarrison * 10.f;
 		C.Ammo += Cities[CityIndex].NeighbourGuns + 5.f;
+		for (const FCampaign1851NeighbourArmy& SouthArmy : NeighbourArmyAtStart)
+		{
+			if (SouthArmy.Town != CityIndex || SouthArmy.bGarrison || SouthArmy.District.IsEmpty()) { continue; }
+			// Dedicated field magazines, separate from fortress personnel; period estimates.
+			C.Food += SouthArmy.MobilisedMen * 30.f;
+			C.Fodder += (SouthArmy.Arm == TEXT("cavalry") ? SouthArmy.MobilisedMen : SouthArmy.Guns * 6) * 30.f;
+			C.Ammo += SouthArmy.MobilisedMen / 760.f * 2.f;
+		}
 	}
 	if (const ACampaign1851ConstructionSite* Garrison = FindProject(CityIndex))
 	{

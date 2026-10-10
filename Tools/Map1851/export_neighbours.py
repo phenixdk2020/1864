@@ -12,6 +12,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 from scipy import ndimage
+from export_south import enrich, scenario_districts, scenario_oob
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -25,7 +26,7 @@ def project(lon, lat):
 
 def export(out, natural_earth=None):
     base = json.loads((out / 'Denmark1851_Map.json').read_text(encoding='utf-8-sig'))
-    source = json.loads((HERE / 'neighbours.json').read_text(encoding='utf-8'))
+    source = enrich(json.loads((HERE / 'neighbours.json').read_text(encoding='utf-8')))
     extent = base['extentKm']
     x0, x1, y0, y1 = (extent[k] for k in ('xMin', 'xMax', 'yMin', 'yMax'))
     w, h = 768, round(768 * (y1-y0)/(x1-x0))
@@ -81,6 +82,26 @@ def export(out, natural_earth=None):
     assert not np.any(land & (grid == 0)), 'Land mangler ejer'
     grid.tofile(out / 'Neighbours_Owners.bin')
 
+    # District geometry is an explicit nearest-seat estimate, clipped to nation ownership.
+    # It must never create Danish districts or change the northern layer.
+    district_grid = np.zeros((h, w), dtype='<u2')
+    yy, xx = np.indices((h, w))
+    for nation in {d['nation'] for d in source['south']['districts']}:
+        candidates = [(i+1, d) for i,d in enumerate(source['south']['districts']) if d['nation']==nation]
+        distance = np.full((h,w), np.inf)
+        for number, district in candidates:
+            px, py = pixel(district['lon'],district['lat'])
+            squared = (xx-px)**2 + (yy-py)**2
+            selected = (grid==ids[nation]) & (squared<distance)
+            district_grid[selected] = number
+            distance[selected] = squared[selected]
+    district_ids = {d['id']:i+1 for i,d in enumerate(source['south']['districts'])}
+    for city in source['cities']:
+        if city.get('district'):
+            cx, cy = cell(city['lon'],city['lat'])
+            district_grid[cy,cx] = district_ids[city['district']]
+    district_grid.tofile(out / 'South_Districts.bin')
+
     all_cities = {c['name']: c for c in base['cities']+base['foreignCities']+source['cities']}
     links = []
     # Grid A*: land-only, bounded to this small raster. Ferries must be explicit.
@@ -128,6 +149,8 @@ def export(out, natural_earth=None):
             assert c['owner'] in nations
             cities.append(dict(c, pop=c['population'][str(year)], railway=year>=c.get('railwayYear',9999)))
         scenario_links = [dict(link) for link in links]
+        for link in scenario_links:
+            link['chaussee'] = any(year>=r['opened'] and {link['a'],link['b']}=={r['a'],r['b']} for r in source['south']['chaussees'])
         railways = []
         for rail in source['railways']:
             if year < int(rail['opened'][:4]):
@@ -139,17 +162,31 @@ def export(out, natural_earth=None):
                 link['rail'] = link['km']
                 points.extend(path if not points else path[1:])
             railways.append(dict(rail, towns=rail['via'], stations=rail['via'], km=points))
+        districts = scenario_districts(source,year,cities)
         data = dict(scenario=str(year),note=source['note'],cities=cities,links=scenario_links,
                     nations=source['nations'],territories=source['territories'],
                     ownerGrid=dict(file='Neighbours_Owners.bin',width=w,height=h,ids=ids,coastSource=coast_source),
-                    outside=source['outside'],railways=railways)
+                    outside=source['outside'],railways=railways,districts=districts,
+                    districtGrid=dict(file='South_Districts.bin',width=w,height=h,ids=district_ids,status='estimated'))
         (out / f'cities_neighbours_{year}.json').write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
         armies = []
         for c in cities:
-            armies.append(dict(id='garrison-'+c['name'],name='Garnison i '+c['name'],nation=c['owner'],town=c['name'],garrison=True,men=c['garrison'],mobilisedMen=c['garrison'],guns=c['guns']))
+            garrison = dict(id='garrison-'+c['name'],name='Garnison i '+c['name'],nation=c['owner'],town=c['name'],garrison=True,men=c['garrison'],mobilisedMen=c['garrison'],guns=c['guns'],district=c.get('district',''))
+            if c.get('district') and c['fortress']:
+                gunmen = min(c['garrison']//2, c['guns']*8)
+                garrison.update(status='estimated',chief='',chiefStatus='unknown',
+                                companies=[dict(name='Fæstningsinfanteri',men=c['garrison']-gunmen)],
+                                batteries=[dict(name='Fæstningsartilleri',men=gunmen,guns=c['guns'])])
+            armies.append(garrison)
         for army in source['armies']:
-            armies.append(dict(army,men=army['peaceMen'][str(year)],mobilisedMen=army['warMen'][str(year)]))
+            # Keep old aggregate IDs as migration anchors, without double-counting the regiments.
+            detailed = army['id'] in ('PR-pomerania','MEC-field')
+            armies.append(dict(army,men=0 if detailed else army['peaceMen'][str(year)],mobilisedMen=0 if detailed else army['warMen'][str(year)],legacyAggregate=detailed))
+        for unit in scenario_oob(source,year):
+            armies.append(dict(unit,garrison=False))
         (out / f'Army_Neighbours_{year}.json').write_text(json.dumps(dict(scenario=str(year),note=source['note'],armies=armies),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        economy = dict(scenario=str(year),note=source['south']['note'],currency='rd. sølv, sammenlignelig spilregneenhed; ikke historisk valutakurs',districts=districts)
+        (out / f'Economy_South_{year}.json').write_text(json.dumps(economy,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(f'CAMPAIGN-1851|neighbours|{len(cities)} byer|{len(links)} ruter|grid={w}x{h}|{coast_source}')
 
 

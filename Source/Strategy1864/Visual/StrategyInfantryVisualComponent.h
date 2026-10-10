@@ -68,6 +68,10 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
     bool bRifleBarrelAlongNegativeX = false;
 
+    /** Visual reform budget including the orderly departure wave. */
+    UPROPERTY(EditAnywhere, Category="Strategy|Visual|Infantry", meta=(ClampMin="1.0"))
+    float FormationChangeDeadlineSeconds = 7.f;
+
     // Each soldier hit falls with a death animation and stays lying where he fell.
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
     bool bLeaveCorpses = true;
@@ -186,6 +190,10 @@ public:
 
     UFUNCTION(BlueprintPure, Category="Strategy|Visual|Infantry")
     bool IsCrowdMode() const { return bCrowdMode; }
+
+    /** Presentation completion: the last living figure has halted (independent of simulation arrival). */
+    bool IsVisualFormationComplete() const { return !bEnabled || !bFormationPlanPending; }
+    bool HasVisualArrivalFrontReached() const { return bArrivalReform && bArrivalFrontReached; }
 
     UFUNCTION(BlueprintCallable, Category="Strategy|Visual|Infantry")
     void SetEnabled(bool bNewEnabled);
@@ -318,9 +326,11 @@ private:
         FVector Goal = FVector::ZeroVector;
         FVector Slot = FVector::ZeroVector;
         FVector WorldVelocity = FVector::ZeroVector;
-        float Pace = FMath::FRandRange(0.94f, 1.06f);
+        float Pace = FMath::FRandRange(0.95f, 1.05f);
         float WalkPhase = FMath::FRand();
-        float StartDelay = FMath::FRandRange(0.f, 0.5f);
+        float StartDelay = 0.f;
+        float ReformDeadline = -1.f;
+        FVector ReformTarget = FVector::ZeroVector;
         float StartRemaining = 0.f;
         float HaltRemaining = 0.f;
         float SlotYaw = 0.f;
@@ -343,6 +353,23 @@ private:
     bool bWasSettling = false;
     bool bWasVisualTravel = false;
     void UpdateSettling(float DeltaTime);
+    void PlanOrderlyReform(bool bDestination, const FTransform& ReformFrame);
+    void KeepReformSpacing(float DeltaTime);
+    TArray<FVector> FormationStepStarts;
+    TArray<FVector> FormationStepPositions;
+    TMap<FIntPoint, int32> FormationSpacingGrid;
+    TArray<int32> FormationSpacingNext;
+    bool bArrivalReform = false;
+    bool bArrivalFrontReached = false;
+    int32 ArrivalOrderSerial = INDEX_NONE;
+    FVector ArrivalDestination = FVector::ZeroVector;
+    FVector ArrivalFormationOrigin = FVector::ZeroVector;
+    float ArrivalTravelSpeed = 160.f;
+    float ArrivalFacing = 0.f;
+    float FormationPlanStarted = -1.f;
+    float FormationLongestPath = 0.f;
+    int32 FormationCrossingsAvoided = 0;
+    bool bFormationPlanPending = false;
     void ApplyPendingStance(float Now);
     void DebugSmooth();
     double SmoothLogAt = 0.0;

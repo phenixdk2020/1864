@@ -20,6 +20,11 @@ void ACampaign1851Map::ResetManpower()
 {
 	// After the war of 1848-50 every amt has men who have served; the rest of the fit men are the ceiling.
 	AmtManpower.Reset();
+	for (FCampaign1851NeighbourDistrict& SouthDistrict : NeighbourDistricts)
+	{
+		SouthDistrict.Reserve = SouthDistrict.Population * SouthDistrict.StartShare;
+		SouthDistrict.Treasury = 3.0 * (SouthDistrict.Urban * SouthDistrict.UrbanTax + FMath::Max(0, SouthDistrict.Population - SouthDistrict.Urban) * SouthDistrict.RuralTax);
+	}
 	for (const FCampaign1851Amt& A : Amter)
 	{
 		AmtManpower.Add(float(A.Population) * Campaign1851Army::ManpowerStartShare);

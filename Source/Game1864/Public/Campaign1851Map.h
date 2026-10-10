@@ -432,6 +432,7 @@ struct FCampaign1851City
 	bool bNeighbourFortress = false;
 	int32 NeighbourGarrison = 0;
 	int32 NeighbourGuns = 0;
+	FString NeighbourDistrict;
 	double Lat = 0.0;
 	double Lon = 0.0;
 	int32 Population = 0;
@@ -482,13 +483,30 @@ struct FCampaign1851Label
 	FVector World = FVector::ZeroVector;
 };
 
-/** Partial foreign map presence; economic bOnMap remains reserved for Denmark. */
+/** Foreign districts use the Danish yearly-class model, without charging Danish accounts. */
+struct FCampaign1851NeighbourDistrict
+{
+	FString Id, Name, Nation, Region;
+	int32 Population = 0, Urban = 0;
+	int32 Seat = INDEX_NONE;
+	float Reserve = 0.f;
+	float StartShare = Campaign1851Army::ManpowerStartShare;
+	float ClassShare = Campaign1851Army::YearlyClassShare;
+	float CapShare = Campaign1851Army::ManpowerCapShare;
+	double UrbanTax = 0.36, RuralTax = 0.16;
+	double Treasury = 0.0;
+};
+
+/** Foreign regiments retain stable identities; battle/march state belongs to EnemyCorps. */
 struct FCampaign1851NeighbourArmy
 {
 	FString Id, Name, Nation;
 	int32 Town = INDEX_NONE;
 	int32 Men = 0, MobilisedMen = 0, Guns = 0;
 	bool bGarrison = false;
+	FString District, Arm, ParentCorps, Chief;
+	TArray<FString> Subunits;
+	float FoodDays = Campaign1851Supply::FoodCarried, FodderDays = Campaign1851Supply::FodderCarried;
 	/** Once transferred, EnemyCorps owns losses, routes, intelligence and battle state. */
 	int32 CorpsId = 0;
 };
@@ -1035,6 +1053,10 @@ public:
 	bool IsNeighbourHostile(const FString& NationId) const;
 	bool CanEnterLine(const FString& MovingNation, const TArray<FVector2D>& Line) const;
 	FString NeighbourTownInfo(int32 Town) const;
+	FString NeighbourDistrictInfo(int32 Town) const;
+	FString NeighbourRegimentInfo(int32 Town) const;
+	int32 TakeNeighbourRecruits(const FCampaign1851NeighbourArmy& Army, int32 Wanted);
+	float NeighbourMarchPace(int32 CorpsId) const;
 	bool NeighbourDetailsKnown(int32 Town) const;
 	void SetNeighbourPoliticalView(bool bPolitical);
 	TArray<FString> SaveNeighbours() const;
@@ -1375,7 +1397,7 @@ public:
 	bool CanAssignFormationPost(int32 Officer, int32 Formation, int32 Post) const;
 	/** Dissolves a formation: its units and sub-formations go up a level. */
 	void DissolveFormation(int32 Id);
-	/** A field army with no units and no sub-formations left is taken away (its box disappears from the order of battle). */
+	/** Empty HQ branches and field armies are removed from the order of battle. */
 	void PruneEmptyFormations();
 	/** A formation and all under it dissolved, its units back in garrison; returns the number of units. */
 	int32 ReturnFormationToGarrison(int32 Id);
@@ -1385,6 +1407,8 @@ public:
 	bool MoveFormation(int32 Id, int32 NewParent);
 	/** Puts a regiment in a formation (0 = back to its garrison). */
 	bool MoveRegimentToFormation(int32 Regiment, int32 Formation);
+	/** New OOB army with battalion staffs and an optional shared regimental HQ. */
+	int32 CreateArmyWithUnitHQs(const TArray<int32>& Units);
 	bool ReturnRegimentsToGarrison(const TArray<int32>& Units, FString* OutReason = nullptr);
 	/**
 	 * A general command's garrison units into the field army at once: under the army a division (the foot in
@@ -1522,7 +1546,12 @@ private:
 	void BuildNeighbourMeshes();
 	void ResetNeighbourArmies();
 	void AdvanceNeighbourArmies();
+	void MonthlyNeighbourDistricts();
+	void DailyNeighbourSupply();
 	TArray<FCampaign1851NeighbourArmy> NeighbourArmyAtStart, NeighbourArmies;
+	TArray<FCampaign1851NeighbourDistrict> NeighbourDistricts;
+	TArray<uint16> NeighbourDistrictGrid;
+	double NeighbourNextMobilisationDay = -1.0; // derived daily scheduler, not campaign state
 	TArray<uint8> NeighbourOwners;
 	TMap<uint8, FString> NeighbourOwnerIds;
 	TMap<FString, FLinearColor> NeighbourColours;

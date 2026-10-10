@@ -388,6 +388,7 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		DailySieges();
 		LogSiegeTest(TEXT("døgn"));
 		DailyBridges();
+		DailyNeighbourSupply();
 		EnemyReinforcements();
 	}
 	AdvanceNeighbourArmies();
@@ -478,7 +479,7 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 			}
 			const int32 Goal = C.Objectives[0];
 			TArray<FCampaign1851Leg> Legs;
-			if (C.Town == Goal || !PlanMarch(C.Town, C.Km, Goal, TownKm(Goal), 16.f, ECampaign1851RouteMode::RoadsOnly, Legs, nullptr, C.Nation))
+			if (C.Town == Goal || !PlanMarch(C.Town, C.Km, Goal, TownKm(Goal), NeighbourMarchPace(C.Id), ECampaign1851RouteMode::RoadsOnly, Legs, nullptr, C.Nation))
 			{
 				C.Objectives.RemoveAt(0);
 				continue;

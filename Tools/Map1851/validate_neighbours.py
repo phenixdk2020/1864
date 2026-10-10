@@ -21,6 +21,13 @@ for year in (1825,1851):
     assert len(nation_ids)==len(set(nation_ids)), 'Dublerede nationer'
     assert cities['scenario']==armies['scenario']==str(year)
     rows = cities['cities']
+    source = json.loads((ROOT/'Tools/Map1851/neighbours.json').read_text(encoding='utf-8'))
+    # Stable legacy city prefix, no changes to northern towns or armies.
+    assert [c['name'] for c in rows[:len(source['cities'])]] == [c['name'] for c in source['cities']]
+    for original in source['cities']:
+        if original['owner'] != 'SE': continue
+        actual = next(c for c in rows if c['name']==original['name'])
+        assert all(actual[k]==v for k,v in original.items())
     names = [c['name'] for c in rows]
     assert len(names)==len(set(names))
     grid = cities['ownerGrid']
@@ -52,10 +59,84 @@ for year in (1825,1851):
     for army in armies['armies']:
         assert army['nation'] in nation_ids and army['town'] in names
         assert 0<=army['men']<=army['mobilisedMen']
+    for original in source['armies']:
+        if original['nation']!='SE': continue
+        actual = next(a for a in armies['armies'] if a['id']==original['id'])
+        assert actual['men']==original['peaceMen'][str(year)] and actual['mobilisedMen']==original['warMen'][str(year)]
+    southern = json.loads((ROOT/'Tools/Map1851/south.json').read_text(encoding='utf-8'))
+    assert 40 <= len(southern['cities']) <= 60
+    districts = cities['districts']
+    economy = read(f'Economy_South_{year}.json')
+    assert economy['scenario']==str(year) and economy['districts']==districts
+    dids = [d['id'] for d in districts]
+    assert len(dids)==len(set(dids))
+    district_grid = cities['districtGrid']
+    import numpy as np
+    raster = np.frombuffer((DATA/district_grid['file']).read_bytes(),dtype='<u2')
+    assert len(raster)==len(raw) and set(raster)<={0,*district_grid['ids'].values()}
+    for district in districts:
+        assert district['nation'] in nation_ids and district['seat'] in names
+        assert district['status']=='estimated' and district['boundaryStatus'].startswith('estimated')
+        assert district['urban']==sum(c['pop'] for c in rows if c.get('district')==district['id'])
+        assert district['population']>=district['urban']>0
+        assert district['rural']==district['population']-district['urban']
+        assert district['reserve']==round(district['population']*district['reserveShare'])
+        assert district['yearlyClass']==round(district['population']*district['yearlyClassShare'])
+        assert 0<=district['reserveShare']<=district['capShare'] and 0<district['yearlyClassShare']<district['capShare']
+        assert district['taxAnnual']==round(district['urban']*district['urbanTax']+district['rural']*district['ruralTax'])
+        selected = raster==district_grid['ids'][district['id']]
+        assert selected.any(), district['id']
+        assert all(owner==grid['ids'][district['nation']] for owner in np.frombuffer(raw,dtype='u1')[selected])
+    assert not any(raster[i] for i,owner in enumerate(raw) if owner in (0,grid['ids']['DK'],grid['ids']['SE']))
+    for town in rows:
+        if not town.get('district'): continue
+        assert town['district'] in dids
+        assert town['owner']==next(d['nation'] for d in districts if d['id']==town['district'])
+        # District centre must agree with the card, including coastal raster corrections.
+        from export_neighbours import project
+        x,y=project(town['lon'],town['lat'])
+        ix=int((x-extent['xMin'])/(extent['xMax']-extent['xMin'])*grid['width'])
+        iy=int((extent['yMax']-y)/(extent['yMax']-extent['yMin'])*grid['height'])
+        assert raster[iy*grid['width']+ix]==district_grid['ids'][town['district']], town['name']
+    for army in armies['armies']:
+        if not army.get('corps'): continue
+        assert army['district'] in dids and army['status']=='estimated'
+        assert army['nation']==next(d['nation'] for d in districts if d['id']==army['district'])
+        subunits = army[{'infantry':'companies','cavalry':'squadrons','artillery':'batteries'}[army['arm']]]
+        assert sum(u['men'] for u in subunits)==army['mobilisedMen']
+        assert sum(u.get('guns',0) for u in subunits)==army['guns']
+        assert army['chief'] or army['chiefStatus']=='unknown'
+    for army in armies['armies']:
+        if army['garrison'] and army.get('companies'):
+            assert sum(u['men'] for u in army['companies']+army['batteries'])==army['men']
+            assert sum(u['guns'] for u in army['batteries'])==army['guns']
+    for parent in ('PR-pomerania','MEC-field'):
+        anchor=next(a for a in armies['armies'] if a['id']==parent)
+        assert anchor['men']==anchor['mobilisedMen']==0 and anchor['legacyAggregate']
+        expected = (18000 if year==1825 else 24000) if parent=='PR-pomerania' else 3000
+        assert sum(a['mobilisedMen'] for a in armies['armies'] if a.get('corps')==parent)==expected
+        units=[a for a in armies['armies'] if a.get('corps')==parent]
+        local=[d for d in districts if d['nation']==units[0]['nation']]
+        needed=sum(a['mobilisedMen']-a['men'] for a in units)
+        assert needed<=sum(d['reserve'] for d in local)
+        assert needed*10<=sum(d['treasuryStart'] for d in local)
+    # All southern towns must have a path into the road network at the Danish border.
+    neighbours={n:set() for n in all_names}
+    for link in cities['links']:
+        neighbours[link['a']].add(link['b']); neighbours[link['b']].add(link['a'])
+    reached, pending=set(),['Ratzeburg']
+    while pending:
+        n=pending.pop()
+        if n in reached: continue
+        reached.add(n); pending.extend(neighbours[n]-reached)
+    assert all(c['name'] in reached for c in southern['cities'])
+    for railway in cities['railways']:
+        assert int(railway['opened'][:4])<=year
+        assert all(n in all_names for n in railway['via'])
     assert sum(a['garrison'] for a in armies['armies'])==len(rows)
     if year==1825:
         assert not cities['railways'] and not any(c['railway'] for c in rows)
         assert not any('rail' in link for link in cities['links'])
     print(f'CAMPAIGN-1851|neighbours|valideret|{year}|{len(rows)} byer|{len(cities["links"])} ruter|{len(ids)} hære')
-for script in ('export_neighbours.py','validate_neighbours.py'):
+for script in ('export_neighbours.py','validate_neighbours.py','export_south.py','south_seed.py'):
     ast.parse((ROOT/'Tools/Map1851'/script).read_text(encoding='utf-8'))

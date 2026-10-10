@@ -172,6 +172,8 @@ public:
 	void SetOOBPlace(int32 Town);
 	void SetOOBContext(const TArray<int32>& Units);
 	bool IsOOBUnitAtContext(int32 Unit) const;
+	int32 GetOOBContextTown() const { return OOBPlace; }
+	bool CanTakeOOBGarrisonUnit(int32 Unit) const;
 	/** Explicit HELE HÆREN action; never called by a drop. */
 	void ClearOOBView() { OOBPlace = INDEX_NONE; OOBContextArmy = INDEX_NONE; OOBContextAmt = 0; OOBRelatedArmies.Reset(); OOBKnownGarrisonTowns.Reset(); OOBFilter.Reset(); OOBFocus = INDEX_NONE; OOBBuilding = INDEX_NONE; TreeScroll = 0; ChartScroll = ChartScrollY = 0.f; }
 	const TArray<int32>& GetOOBFilter() const { return OOBFilter; }

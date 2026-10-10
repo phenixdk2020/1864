@@ -1,0 +1,3798 @@
+{
+  "note": "Befolkninger, distriktsgrænser, økonomi og kamporden er markerede skøn. Ritterschaft er en overlejret grundherrschaft, ikke ét sammenhængende amt. Ingen verificeret rangliste eller opdigtede chefer.",
+  "nation": {
+    "id": "MST",
+    "name": "Mecklenburg-Strelitz",
+    "colour": [
+      156,
+      123,
+      166
+    ],
+    "lat": 53.4,
+    "lon": 13.1
+  },
+  "territories": [
+    {
+      "name": "Herrschaft Stargard (Strelitz; grænseskøn)",
+      "owner": "MST",
+      "polygon": [
+        [
+          12.88,
+          53.22
+        ],
+        [
+          13.33,
+          53.2
+        ],
+        [
+          13.58,
+          53.42
+        ],
+        [
+          13.56,
+          53.72
+        ],
+        [
+          13.29,
+          53.76
+        ],
+        [
+          12.89,
+          53.6
+        ]
+      ]
+    }
+  ],
+  "cities": [
+    {
+      "name": "Güstrow",
+      "lon": 12.176,
+      "lat": 53.797,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 8000,
+        "1851": 10000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1850,
+      "district": "MEC-guestrow"
+    },
+    {
+      "name": "Parchim",
+      "lon": 11.849,
+      "lat": 53.426,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 5000,
+        "1851": 6500
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1880,
+      "district": "MEC-parchim"
+    },
+    {
+      "name": "Ludwigslust",
+      "lon": 11.497,
+      "lat": 53.329,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 4000,
+        "1851": 5500
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1846,
+      "district": "MEC-ludwigslust"
+    },
+    {
+      "name": "Waren",
+      "lon": 12.685,
+      "lat": 53.52,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 4000,
+        "1851": 5500
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1885,
+      "district": "MEC-waren"
+    },
+    {
+      "name": "Neustrelitz",
+      "lon": 13.063,
+      "lat": 53.362,
+      "owner": "MST",
+      "region": "Mecklenburg-Strelitz",
+      "population": {
+        "1825": 5000,
+        "1851": 7500
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1877,
+      "district": "MST-stargard"
+    },
+    {
+      "name": "Neubrandenburg",
+      "lon": 13.261,
+      "lat": 53.557,
+      "owner": "MST",
+      "region": "Mecklenburg-Strelitz",
+      "population": {
+        "1825": 5000,
+        "1851": 7000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1864,
+      "district": "MST-stargard"
+    },
+    {
+      "name": "Boizenburg",
+      "lon": 10.723,
+      "lat": 53.377,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 3000,
+        "1851": 4000
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1846,
+      "district": "MEC-boizenburg"
+    },
+    {
+      "name": "Hagenow",
+      "lon": 11.193,
+      "lat": 53.431,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 3000,
+        "1851": 4000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1846,
+      "district": "MEC-hagenow"
+    },
+    {
+      "name": "Grabow",
+      "lon": 11.566,
+      "lat": 53.279,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 2500,
+        "1851": 3500
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1846,
+      "district": "MEC-ludwigslust"
+    },
+    {
+      "name": "Bützow",
+      "lon": 11.982,
+      "lat": 53.848,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 3000,
+        "1851": 4500
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1850,
+      "district": "MEC-buetzow"
+    },
+    {
+      "name": "Schwaan",
+      "lon": 12.106,
+      "lat": 53.94,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 1600,
+        "1851": 2400
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1850,
+      "district": "MEC-rostock"
+    },
+    {
+      "name": "Bad Kleinen",
+      "lon": 11.472,
+      "lat": 53.772,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 300,
+        "1851": 500
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1848,
+      "district": "MEC-schwerin"
+    },
+    {
+      "name": "Blankenberg",
+      "lon": 11.714,
+      "lat": 53.772,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 300,
+        "1851": 450
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1850,
+      "district": "MEC-schwerin"
+    },
+    {
+      "name": "Sternberg",
+      "lon": 11.825,
+      "lat": 53.713,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 2200,
+        "1851": 3000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1887,
+      "district": "MEC-schwerin"
+    },
+    {
+      "name": "Crivitz",
+      "lon": 11.648,
+      "lat": 53.575,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 1600,
+        "1851": 2400
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1898,
+      "district": "MEC-schwerin"
+    },
+    {
+      "name": "Neukloster",
+      "lon": 11.685,
+      "lat": 53.866,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 1300,
+        "1851": 1900
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1887,
+      "district": "MEC-wismar"
+    },
+    {
+      "name": "Gadebusch",
+      "lon": 11.116,
+      "lat": 53.701,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 2000,
+        "1851": 2700
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1897,
+      "district": "MEC-gadebusch"
+    },
+    {
+      "name": "Grevesmühlen",
+      "lon": 11.183,
+      "lat": 53.862,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 2300,
+        "1851": 3300
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1870,
+      "district": "MEC-grevesmuehlen"
+    },
+    {
+      "name": "Rehna",
+      "lon": 11.049,
+      "lat": 53.78,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 1600,
+        "1851": 2200
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1897,
+      "district": "MEC-gadebusch"
+    },
+    {
+      "name": "Doberan",
+      "lon": 11.9,
+      "lat": 54.106,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 1800,
+        "1851": 2500
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1883,
+      "district": "MEC-rostock"
+    },
+    {
+      "name": "Warnemünde",
+      "lon": 12.086,
+      "lat": 54.176,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 1800,
+        "1851": 2300
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1886,
+      "district": "MEC-rostock"
+    },
+    {
+      "name": "Ribnitz",
+      "lon": 12.432,
+      "lat": 54.243,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 2200,
+        "1851": 3000
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1889,
+      "district": "MEC-ribnitz"
+    },
+    {
+      "name": "Marlow",
+      "lon": 12.571,
+      "lat": 54.154,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 1400,
+        "1851": 2000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 9999,
+      "district": "MEC-ribnitz"
+    },
+    {
+      "name": "Tessin",
+      "lon": 12.466,
+      "lat": 54.027,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 1800,
+        "1851": 2600
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1895,
+      "district": "MEC-ribnitz"
+    },
+    {
+      "name": "Teterow",
+      "lon": 12.575,
+      "lat": 53.775,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 3200,
+        "1851": 4300
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1864,
+      "district": "MEC-guestrow"
+    },
+    {
+      "name": "Malchin",
+      "lon": 12.764,
+      "lat": 53.739,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 3800,
+        "1851": 5200
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1864,
+      "district": "MEC-stavenhagen"
+    },
+    {
+      "name": "Stavenhagen",
+      "lon": 12.906,
+      "lat": 53.697,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 2000,
+        "1851": 3000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1864,
+      "district": "MEC-stavenhagen"
+    },
+    {
+      "name": "Röbel",
+      "lon": 12.604,
+      "lat": 53.377,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 2600,
+        "1851": 3400
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1899,
+      "district": "MEC-roebel"
+    },
+    {
+      "name": "Plau",
+      "lon": 12.262,
+      "lat": 53.458,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 2400,
+        "1851": 3200
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1882,
+      "district": "MEC-plau"
+    },
+    {
+      "name": "Lübz",
+      "lon": 12.029,
+      "lat": 53.463,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 2200,
+        "1851": 3000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1885,
+      "district": "MEC-parchim"
+    },
+    {
+      "name": "Dömitz",
+      "lon": 11.254,
+      "lat": 53.138,
+      "owner": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "population": {
+        "1825": 1300,
+        "1851": 1900
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": true,
+      "garrison": 250,
+      "guns": 8,
+      "railwayYear": 1873,
+      "district": "MEC-ludwigslust",
+      "fortName": "Dömitz fæstning"
+    },
+    {
+      "name": "Friedland",
+      "lon": 13.554,
+      "lat": 53.669,
+      "owner": "MST",
+      "region": "Mecklenburg-Strelitz",
+      "population": {
+        "1825": 4000,
+        "1851": 5000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1884,
+      "district": "MST-stargard"
+    },
+    {
+      "name": "Anklam",
+      "lon": 13.69,
+      "lat": 53.856,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 6000,
+        "1851": 9500
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1863,
+      "district": "PR-anklam"
+    },
+    {
+      "name": "Swinemünde",
+      "lon": 14.251,
+      "lat": 53.91,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 3500,
+        "1851": 6500
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": true,
+      "garrison": 500,
+      "guns": 24,
+      "railwayYear": 1876,
+      "district": "PR-usedom",
+      "fortName": "Swinemünde fæstning"
+    },
+    {
+      "name": "Stargard",
+      "lon": 15.041,
+      "lat": 53.337,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 8500,
+        "1851": 14000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1846,
+      "district": "PR-saatzig"
+    },
+    {
+      "name": "Pasewalk",
+      "lon": 13.99,
+      "lat": 53.506,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 4000,
+        "1851": 6000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1863,
+      "district": "PR-ueckermuende"
+    },
+    {
+      "name": "Demmin",
+      "lon": 13.041,
+      "lat": 53.908,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 5000,
+        "1851": 7500
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1877,
+      "district": "PR-demmin"
+    },
+    {
+      "name": "Ueckermünde",
+      "lon": 14.045,
+      "lat": 53.737,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 2800,
+        "1851": 4500
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1884,
+      "district": "PR-ueckermuende"
+    },
+    {
+      "name": "Wolgast",
+      "lon": 13.774,
+      "lat": 54.053,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 5000,
+        "1851": 6500
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1863,
+      "district": "PR-greifswald"
+    },
+    {
+      "name": "Barth",
+      "lon": 12.727,
+      "lat": 54.365,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 4000,
+        "1851": 5500
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1888,
+      "district": "PR-franzburg"
+    },
+    {
+      "name": "Grimmen",
+      "lon": 13.041,
+      "lat": 54.112,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 3000,
+        "1851": 4000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1877,
+      "district": "PR-franzburg"
+    },
+    {
+      "name": "Tribsees",
+      "lon": 12.757,
+      "lat": 54.095,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 2200,
+        "1851": 3000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1895,
+      "district": "PR-franzburg"
+    },
+    {
+      "name": "Franzburg",
+      "lon": 12.884,
+      "lat": 54.185,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 1400,
+        "1851": 1800
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1895,
+      "district": "PR-franzburg"
+    },
+    {
+      "name": "Putbus",
+      "lon": 13.471,
+      "lat": 54.355,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 800,
+        "1851": 1500
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1889,
+      "district": "PR-ruegen"
+    },
+    {
+      "name": "Garz på Rügen",
+      "lon": 13.351,
+      "lat": 54.317,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 1500,
+        "1851": 2000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1895,
+      "district": "PR-ruegen"
+    },
+    {
+      "name": "Sassnitz",
+      "lon": 13.644,
+      "lat": 54.516,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 300,
+        "1851": 500
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1891,
+      "district": "PR-ruegen"
+    },
+    {
+      "name": "Gartz",
+      "lon": 14.387,
+      "lat": 53.207,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 3000,
+        "1851": 4200
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1913,
+      "district": "PR-randow"
+    },
+    {
+      "name": "Prenzlau",
+      "lon": 13.86,
+      "lat": 53.316,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 8000,
+        "1851": 12000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1863,
+      "district": "PR-prenzlau"
+    },
+    {
+      "name": "Schwedt",
+      "lon": 14.284,
+      "lat": 53.06,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 5500,
+        "1851": 8500
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1873,
+      "district": "PR-angermuende"
+    },
+    {
+      "name": "Bergedorf",
+      "lon": 10.211,
+      "lat": 53.488,
+      "owner": "HH",
+      "region": "Hamborg",
+      "population": {
+        "1825": 2300,
+        "1851": 3500
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1842,
+      "district": "HH-city"
+    },
+    {
+      "name": "Lüneburg",
+      "lon": 10.407,
+      "lat": 53.25,
+      "owner": "HAN",
+      "region": "Hannover",
+      "population": {
+        "1825": 10000,
+        "1851": 13000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1847,
+      "district": "HAN-lueneburg"
+    },
+    {
+      "name": "Bleckede",
+      "lon": 10.735,
+      "lat": 53.287,
+      "owner": "HAN",
+      "region": "Hannover",
+      "population": {
+        "1825": 1400,
+        "1851": 2200
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1895,
+      "district": "HAN-lueneburg"
+    },
+    {
+      "name": "Kolberg",
+      "lon": 15.576,
+      "lat": 54.176,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 7000,
+        "1851": 11000
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": true,
+      "garrison": 1200,
+      "guns": 36,
+      "railwayYear": 1859,
+      "district": "PR-kolberg",
+      "fortName": "Kolberg fæstning"
+    },
+    {
+      "name": "Angermünde",
+      "lon": 13.998,
+      "lat": 53.014,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 3000,
+        "1851": 5000
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1843,
+      "district": "PR-angermuende"
+    },
+    {
+      "name": "Passow",
+      "lon": 14.116,
+      "lat": 53.143,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 500,
+        "1851": 800
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1843,
+      "district": "PR-angermuende"
+    },
+    {
+      "name": "Tantow",
+      "lon": 14.348,
+      "lat": 53.271,
+      "owner": "PR",
+      "region": "Pommern / Brandenburg",
+      "population": {
+        "1825": 400,
+        "1851": 700
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1843,
+      "district": "PR-angermuende"
+    },
+    {
+      "name": "Lauenburg",
+      "lon": 10.555,
+      "lat": 53.373,
+      "owner": "DK",
+      "region": "Lauenburg",
+      "population": {
+        "1825": 3500,
+        "1851": 4500
+      },
+      "populationStatus": "estimated",
+      "harbour": true,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1853
+    },
+    {
+      "name": "Büchen",
+      "lon": 10.616,
+      "lat": 53.481,
+      "owner": "DK",
+      "region": "Lauenburg",
+      "population": {
+        "1825": 400,
+        "1851": 600
+      },
+      "populationStatus": "estimated",
+      "harbour": false,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railwayYear": 1846
+    }
+  ],
+  "districts": [
+    {
+      "id": "MEC-schwerin",
+      "name": "Domanialamt Schwerin",
+      "seat": "Schwerin",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 11.413,
+      "lat": 53.629,
+      "population": {
+        "1825": 43000,
+        "1851": 53000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Schwerin",
+        "Crivitz",
+        "Sternberg",
+        "Bad Kleinen",
+        "Blankenberg"
+      ]
+    },
+    {
+      "id": "MEC-hagenow",
+      "name": "Domanialamt Hagenow",
+      "seat": "Hagenow",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 11.193,
+      "lat": 53.431,
+      "population": {
+        "1825": 25000,
+        "1851": 32000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Hagenow"
+      ]
+    },
+    {
+      "id": "MEC-boizenburg",
+      "name": "Domanialamt Boizenburg",
+      "seat": "Boizenburg",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 10.723,
+      "lat": 53.377,
+      "population": {
+        "1825": 25000,
+        "1851": 30000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Boizenburg"
+      ]
+    },
+    {
+      "id": "MEC-gadebusch",
+      "name": "Domanialamt Gadebusch",
+      "seat": "Gadebusch",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 11.116,
+      "lat": 53.701,
+      "population": {
+        "1825": 28000,
+        "1851": 34000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Gadebusch",
+        "Rehna"
+      ]
+    },
+    {
+      "id": "MEC-grevesmuehlen",
+      "name": "Domanialamt Grevesmühlen",
+      "seat": "Grevesmühlen",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 11.183,
+      "lat": 53.862,
+      "population": {
+        "1825": 27000,
+        "1851": 32000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Grevesmühlen"
+      ]
+    },
+    {
+      "id": "MEC-wismar",
+      "name": "Wismar og Domanialamt Mecklenburg",
+      "seat": "Wismar",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 11.464,
+      "lat": 53.891,
+      "population": {
+        "1825": 27000,
+        "1851": 32000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Wismar",
+        "Neukloster"
+      ]
+    },
+    {
+      "id": "MEC-rostock",
+      "name": "Rostock og Domanialamt Doberan",
+      "seat": "Rostock",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 12.1,
+      "lat": 54.092,
+      "population": {
+        "1825": 44000,
+        "1851": 53000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Rostock",
+        "Doberan",
+        "Warnemünde",
+        "Schwaan"
+      ]
+    },
+    {
+      "id": "MEC-ribnitz",
+      "name": "Domanialamt Ribnitz",
+      "seat": "Ribnitz",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 12.432,
+      "lat": 54.243,
+      "population": {
+        "1825": 21000,
+        "1851": 27000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Ribnitz",
+        "Marlow",
+        "Tessin"
+      ]
+    },
+    {
+      "id": "MEC-buetzow",
+      "name": "Domanialamt Bützow",
+      "seat": "Bützow",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 11.982,
+      "lat": 53.848,
+      "population": {
+        "1825": 22000,
+        "1851": 28000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Bützow"
+      ]
+    },
+    {
+      "id": "MEC-guestrow",
+      "name": "Domanialamt Güstrow",
+      "seat": "Güstrow",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 12.176,
+      "lat": 53.797,
+      "population": {
+        "1825": 32000,
+        "1851": 39000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Güstrow",
+        "Teterow"
+      ]
+    },
+    {
+      "id": "MEC-stavenhagen",
+      "name": "Domanialamt Stavenhagen",
+      "seat": "Stavenhagen",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 12.906,
+      "lat": 53.697,
+      "population": {
+        "1825": 28000,
+        "1851": 34000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Stavenhagen",
+        "Malchin"
+      ]
+    },
+    {
+      "id": "MEC-waren",
+      "name": "Domanialamt Waren",
+      "seat": "Waren",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 12.685,
+      "lat": 53.52,
+      "population": {
+        "1825": 26000,
+        "1851": 32000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Waren"
+      ]
+    },
+    {
+      "id": "MEC-roebel",
+      "name": "Domanialamt Röbel",
+      "seat": "Röbel",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 12.604,
+      "lat": 53.377,
+      "population": {
+        "1825": 22000,
+        "1851": 27000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Röbel"
+      ]
+    },
+    {
+      "id": "MEC-plau",
+      "name": "Domanialamt Plau",
+      "seat": "Plau",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 12.262,
+      "lat": 53.458,
+      "population": {
+        "1825": 24000,
+        "1851": 30000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Plau"
+      ]
+    },
+    {
+      "id": "MEC-parchim",
+      "name": "Parchim og Domanialamt Lübz",
+      "seat": "Parchim",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 11.849,
+      "lat": 53.426,
+      "population": {
+        "1825": 31000,
+        "1851": 39000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Parchim",
+        "Lübz"
+      ]
+    },
+    {
+      "id": "MEC-ludwigslust",
+      "name": "Domanialamt Ludwigslust / Grabow",
+      "seat": "Ludwigslust",
+      "nation": "MEC",
+      "region": "Mecklenburg-Schwerin",
+      "lon": 11.497,
+      "lat": 53.329,
+      "population": {
+        "1825": 27000,
+        "1851": 33000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0.4,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Ludwigslust",
+        "Grabow",
+        "Dömitz"
+      ]
+    },
+    {
+      "id": "MST-stargard",
+      "name": "Herrschaft Stargard (Strelitz)",
+      "seat": "Neustrelitz",
+      "nation": "MST",
+      "region": "Mecklenburg-Strelitz",
+      "lon": 13.063,
+      "lat": 53.362,
+      "population": {
+        "1825": 62000,
+        "1851": 80000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Neustrelitz",
+        "Neubrandenburg",
+        "Friedland"
+      ]
+    },
+    {
+      "id": "PR-stralsund",
+      "name": "Stadtkreis Stralsund",
+      "seat": "Stralsund",
+      "nation": "PR",
+      "region": "Regierungsbezirk Stralsund",
+      "lon": 13.089,
+      "lat": 54.309,
+      "population": {
+        "1825": 16000,
+        "1851": 20000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.03,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Stralsund"
+      ]
+    },
+    {
+      "id": "PR-franzburg",
+      "name": "Kreis Franzburg",
+      "seat": "Franzburg",
+      "nation": "PR",
+      "region": "Regierungsbezirk Stralsund",
+      "lon": 12.884,
+      "lat": 54.185,
+      "population": {
+        "1825": 40000,
+        "1851": 49000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.03,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Franzburg",
+        "Barth",
+        "Grimmen",
+        "Tribsees"
+      ]
+    },
+    {
+      "id": "PR-greifswald",
+      "name": "Kreis Greifswald",
+      "seat": "Greifswald",
+      "nation": "PR",
+      "region": "Regierungsbezirk Stralsund",
+      "lon": 13.382,
+      "lat": 54.096,
+      "population": {
+        "1825": 49000,
+        "1851": 64000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.03,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Greifswald",
+        "Wolgast"
+      ]
+    },
+    {
+      "id": "PR-ruegen",
+      "name": "Kreis Rügen",
+      "seat": "Bergen på Rügen",
+      "nation": "PR",
+      "region": "Regierungsbezirk Stralsund",
+      "lon": 13.432,
+      "lat": 54.419,
+      "population": {
+        "1825": 32000,
+        "1851": 40000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.03,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Bergen på Rügen",
+        "Putbus",
+        "Garz på Rügen",
+        "Sassnitz"
+      ]
+    },
+    {
+      "id": "PR-demmin",
+      "name": "Kreis Demmin",
+      "seat": "Demmin",
+      "nation": "PR",
+      "region": "Regierungsbezirk Stettin",
+      "lon": 13.041,
+      "lat": 53.908,
+      "population": {
+        "1825": 38000,
+        "1851": 50000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.03,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Demmin"
+      ]
+    },
+    {
+      "id": "PR-anklam",
+      "name": "Kreis Anklam",
+      "seat": "Anklam",
+      "nation": "PR",
+      "region": "Regierungsbezirk Stettin",
+      "lon": 13.69,
+      "lat": 53.856,
+      "population": {
+        "1825": 30000,
+        "1851": 39000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.03,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Anklam"
+      ]
+    },
+    {
+      "id": "PR-usedom",
+      "name": "Kreis Usedom-Wollin",
+      "seat": "Swinemünde",
+      "nation": "PR",
+      "region": "Regierungsbezirk Stettin",
+      "lon": 14.251,
+      "lat": 53.91,
+      "population": {
+        "1825": 34000,
+        "1851": 47000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.03,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Swinemünde"
+      ]
+    },
+    {
+      "id": "PR-ueckermuende",
+      "name": "Kreis Ueckermünde",
+      "seat": "Ueckermünde",
+      "nation": "PR",
+      "region": "Regierungsbezirk Stettin",
+      "lon": 14.045,
+      "lat": 53.737,
+      "population": {
+        "1825": 30000,
+        "1851": 42000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.03,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Ueckermünde",
+        "Pasewalk"
+      ]
+    },
+    {
+      "id": "PR-randow",
+      "name": "Kreis Randow (med Stettin)",
+      "seat": "Stettin",
+      "nation": "PR",
+      "region": "Regierungsbezirk Stettin",
+      "lon": 14.553,
+      "lat": 53.428,
+      "population": {
+        "1825": 74000,
+        "1851": 105000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.03,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Stettin",
+        "Gartz"
+      ]
+    },
+    {
+      "id": "PR-saatzig",
+      "name": "Kreis Saatzig (kortudsnit)",
+      "seat": "Stargard",
+      "nation": "PR",
+      "region": "Regierungsbezirk Stettin",
+      "lon": 15.041,
+      "lat": 53.337,
+      "population": {
+        "1825": 28000,
+        "1851": 39000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.03,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Stargard"
+      ]
+    },
+    {
+      "id": "PR-prenzlau",
+      "name": "Kreis Prenzlau (kortudsnit)",
+      "seat": "Prenzlau",
+      "nation": "PR",
+      "region": "Regierungsbezirk Potsdam",
+      "lon": 13.86,
+      "lat": 53.316,
+      "population": {
+        "1825": 44000,
+        "1851": 60000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.03,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Prenzlau"
+      ]
+    },
+    {
+      "id": "PR-angermuende",
+      "name": "Kreis Angermünde (kortudsnit)",
+      "seat": "Angermünde",
+      "nation": "PR",
+      "region": "Regierungsbezirk Potsdam",
+      "lon": 13.998,
+      "lat": 53.014,
+      "population": {
+        "1825": 32000,
+        "1851": 44000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.03,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Schwedt",
+        "Angermünde",
+        "Passow",
+        "Tantow"
+      ]
+    },
+    {
+      "id": "PR-kolberg",
+      "name": "Kreis Fürstenthum (kortudsnit ved Kolberg)",
+      "seat": "Kolberg",
+      "nation": "PR",
+      "region": "Regierungsbezirk Köslin",
+      "lon": 15.576,
+      "lat": 54.176,
+      "population": {
+        "1825": 55000,
+        "1851": 70000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.03,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Kolberg"
+      ]
+    },
+    {
+      "id": "HH-city",
+      "name": "Hamborg og Bergedorf",
+      "seat": "Hamborg",
+      "nation": "HH",
+      "region": "Hamborg",
+      "lon": 9.993,
+      "lat": 53.551,
+      "population": {
+        "1825": 115000,
+        "1851": 138000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Hamborg",
+        "Bergedorf"
+      ]
+    },
+    {
+      "id": "LUB-city",
+      "name": "Lübeck",
+      "seat": "Lübeck",
+      "nation": "LUB",
+      "region": "Lübeck",
+      "lon": 10.686,
+      "lat": 53.866,
+      "population": {
+        "1825": 28000,
+        "1851": 32000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Lübeck"
+      ]
+    },
+    {
+      "id": "HAN-lueneburg",
+      "name": "Landdrostei Lüneburg (kortudsnit)",
+      "seat": "Lüneburg",
+      "nation": "HAN",
+      "region": "Hannover",
+      "lon": 10.407,
+      "lat": 53.25,
+      "population": {
+        "1825": 55000,
+        "1851": 70000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Lüneburg",
+        "Harburg",
+        "Bleckede"
+      ]
+    },
+    {
+      "id": "HAN-stade",
+      "name": "Landdrostei Stade (kortudsnit)",
+      "seat": "Stade",
+      "nation": "HAN",
+      "region": "Hannover",
+      "lon": 9.477,
+      "lat": 53.6,
+      "population": {
+        "1825": 45000,
+        "1851": 56000
+      },
+      "status": "estimated",
+      "boundaryStatus": "estimated-nearest-seat-clipped-by-owner",
+      "ritterschaftShare": 0,
+      "reserveShare": 0.02,
+      "yearlyClassShare": 0.009,
+      "capShare": 0.09,
+      "ruralTax": 0.16,
+      "urbanTax": 0.36,
+      "grainPerHead": 0.38,
+      "cattlePerHead": 0.24,
+      "towns": [
+        "Stade"
+      ]
+    }
+  ],
+  "townOverrides": {
+    "Schwerin": {
+      "district": "MEC-schwerin",
+      "populationStatus": "estimated"
+    },
+    "Wismar": {
+      "district": "MEC-wismar",
+      "populationStatus": "estimated"
+    },
+    "Rostock": {
+      "district": "MEC-rostock",
+      "populationStatus": "estimated"
+    },
+    "Stralsund": {
+      "district": "PR-stralsund",
+      "populationStatus": "estimated"
+    },
+    "Greifswald": {
+      "district": "PR-greifswald",
+      "populationStatus": "estimated"
+    },
+    "Bergen på Rügen": {
+      "district": "PR-ruegen",
+      "populationStatus": "estimated"
+    },
+    "Stettin": {
+      "district": "PR-randow",
+      "populationStatus": "estimated"
+    },
+    "Hamborg": {
+      "district": "HH-city",
+      "populationStatus": "estimated"
+    },
+    "Lübeck": {
+      "district": "LUB-city",
+      "populationStatus": "estimated"
+    },
+    "Harburg": {
+      "district": "HAN-lueneburg",
+      "populationStatus": "estimated"
+    },
+    "Stade": {
+      "district": "HAN-stade",
+      "populationStatus": "estimated"
+    }
+  },
+  "roads": [
+    [
+      "Lübeck",
+      "Grevesmühlen"
+    ],
+    [
+      "Grevesmühlen",
+      "Wismar"
+    ],
+    [
+      "Wismar",
+      "Neukloster"
+    ],
+    [
+      "Neukloster",
+      "Rostock"
+    ],
+    [
+      "Rostock",
+      "Ribnitz"
+    ],
+    [
+      "Ribnitz",
+      "Barth"
+    ],
+    [
+      "Barth",
+      "Stralsund"
+    ],
+    [
+      "Lübeck",
+      "Rehna"
+    ],
+    [
+      "Rehna",
+      "Gadebusch"
+    ],
+    [
+      "Gadebusch",
+      "Schwerin"
+    ],
+    [
+      "Schwerin",
+      "Crivitz"
+    ],
+    [
+      "Crivitz",
+      "Parchim"
+    ],
+    [
+      "Parchim",
+      "Lübz"
+    ],
+    [
+      "Lübz",
+      "Plau"
+    ],
+    [
+      "Plau",
+      "Waren"
+    ],
+    [
+      "Waren",
+      "Neubrandenburg"
+    ],
+    [
+      "Neubrandenburg",
+      "Friedland"
+    ],
+    [
+      "Friedland",
+      "Anklam"
+    ],
+    [
+      "Anklam",
+      "Ueckermünde"
+    ],
+    [
+      "Ueckermünde",
+      "Stettin"
+    ],
+    [
+      "Hamborg",
+      "Bergedorf"
+    ],
+    [
+      "Bergedorf",
+      "Boizenburg"
+    ],
+    [
+      "Boizenburg",
+      "Hagenow"
+    ],
+    [
+      "Hagenow",
+      "Ludwigslust"
+    ],
+    [
+      "Ludwigslust",
+      "Grabow"
+    ],
+    [
+      "Grabow",
+      "Dömitz"
+    ],
+    [
+      "Schwerin",
+      "Bad Kleinen"
+    ],
+    [
+      "Bad Kleinen",
+      "Blankenberg"
+    ],
+    [
+      "Blankenberg",
+      "Bützow"
+    ],
+    [
+      "Bützow",
+      "Schwaan"
+    ],
+    [
+      "Schwaan",
+      "Rostock"
+    ],
+    [
+      "Rostock",
+      "Warnemünde"
+    ],
+    [
+      "Bützow",
+      "Güstrow"
+    ],
+    [
+      "Güstrow",
+      "Teterow"
+    ],
+    [
+      "Teterow",
+      "Malchin"
+    ],
+    [
+      "Malchin",
+      "Stavenhagen"
+    ],
+    [
+      "Stavenhagen",
+      "Neubrandenburg"
+    ],
+    [
+      "Schwerin",
+      "Hagenow"
+    ],
+    [
+      "Bad Kleinen",
+      "Wismar"
+    ],
+    [
+      "Güstrow",
+      "Sternberg"
+    ],
+    [
+      "Sternberg",
+      "Crivitz"
+    ],
+    [
+      "Rostock",
+      "Doberan"
+    ],
+    [
+      "Doberan",
+      "Wismar"
+    ],
+    [
+      "Rostock",
+      "Tessin"
+    ],
+    [
+      "Tessin",
+      "Marlow"
+    ],
+    [
+      "Marlow",
+      "Ribnitz"
+    ],
+    [
+      "Ludwigslust",
+      "Parchim"
+    ],
+    [
+      "Waren",
+      "Röbel"
+    ],
+    [
+      "Röbel",
+      "Neustrelitz"
+    ],
+    [
+      "Neustrelitz",
+      "Neubrandenburg"
+    ],
+    [
+      "Stralsund",
+      "Grimmen"
+    ],
+    [
+      "Grimmen",
+      "Demmin"
+    ],
+    [
+      "Demmin",
+      "Neubrandenburg"
+    ],
+    [
+      "Stralsund",
+      "Franzburg"
+    ],
+    [
+      "Franzburg",
+      "Tribsees"
+    ],
+    [
+      "Tribsees",
+      "Demmin"
+    ],
+    [
+      "Greifswald",
+      "Anklam"
+    ],
+    [
+      "Anklam",
+      "Pasewalk"
+    ],
+    [
+      "Pasewalk",
+      "Prenzlau"
+    ],
+    [
+      "Prenzlau",
+      "Schwedt"
+    ],
+    [
+      "Schwedt",
+      "Gartz"
+    ],
+    [
+      "Gartz",
+      "Stettin"
+    ],
+    [
+      "Stettin",
+      "Stargard"
+    ],
+    [
+      "Stargard",
+      "Kolberg"
+    ],
+    [
+      "Angermünde",
+      "Passow"
+    ],
+    [
+      "Passow",
+      "Tantow"
+    ],
+    [
+      "Tantow",
+      "Stettin"
+    ],
+    [
+      "Angermünde",
+      "Schwedt"
+    ],
+    [
+      "Prenzlau",
+      "Angermünde"
+    ],
+    [
+      "Greifswald",
+      "Wolgast"
+    ],
+    [
+      "Bergen på Rügen",
+      "Putbus"
+    ],
+    [
+      "Putbus",
+      "Garz på Rügen"
+    ],
+    [
+      "Bergen på Rügen",
+      "Sassnitz"
+    ],
+    [
+      "Harburg",
+      "Lüneburg"
+    ],
+    [
+      "Lüneburg",
+      "Bleckede"
+    ],
+    [
+      "Ratzeburg",
+      "Gadebusch"
+    ],
+    [
+      "Ratzeburg",
+      "Lauenburg"
+    ],
+    [
+      "Lauenburg",
+      "Boizenburg"
+    ],
+    [
+      "Bergedorf",
+      "Lauenburg"
+    ],
+    [
+      "Bleckede",
+      "Boizenburg",
+      "Elben"
+    ],
+    [
+      "Wolgast",
+      "Swinemünde",
+      "Peenestrom / Usedom"
+    ],
+    [
+      "Bergedorf",
+      "Büchen"
+    ],
+    [
+      "Büchen",
+      "Boizenburg"
+    ],
+    [
+      "Ratzeburg",
+      "Büchen"
+    ],
+    [
+      "Büchen",
+      "Lauenburg"
+    ]
+  ],
+  "railways": [
+    {
+      "name": "Berlin–Hamborg (kortudsnit)",
+      "via": [
+        "Hamborg",
+        "Bergedorf",
+        "Büchen",
+        "Boizenburg",
+        "Hagenow",
+        "Ludwigslust",
+        "Grabow"
+      ],
+      "opened": "1846-12-15"
+    },
+    {
+      "name": "Hagenow–Schwerin",
+      "via": [
+        "Hagenow",
+        "Schwerin"
+      ],
+      "opened": "1847-05-01"
+    },
+    {
+      "name": "Schwerin–Wismar",
+      "via": [
+        "Schwerin",
+        "Bad Kleinen",
+        "Wismar"
+      ],
+      "opened": "1848-07-12"
+    },
+    {
+      "name": "Kleinen–Rostock",
+      "via": [
+        "Bad Kleinen",
+        "Blankenberg",
+        "Bützow",
+        "Schwaan",
+        "Rostock"
+      ],
+      "opened": "1850-05-13"
+    },
+    {
+      "name": "Bützow–Güstrow",
+      "via": [
+        "Bützow",
+        "Güstrow"
+      ],
+      "opened": "1850-05-13"
+    },
+    {
+      "name": "Stettin–Stargard",
+      "via": [
+        "Stettin",
+        "Stargard"
+      ],
+      "opened": "1846-05-01"
+    },
+    {
+      "name": "Berlin–Stettin (kortudsnit)",
+      "via": [
+        "Angermünde",
+        "Passow",
+        "Tantow",
+        "Stettin"
+      ],
+      "opened": "1843-08-15"
+    },
+    {
+      "name": "Harburg–Lüneburg",
+      "via": [
+        "Harburg",
+        "Lüneburg"
+      ],
+      "opened": "1847-05-01"
+    },
+    {
+      "name": "Lübeck–Büchen",
+      "via": [
+        "Lübeck",
+        "Ratzeburg",
+        "Büchen"
+      ],
+      "opened": "1851-10-15"
+    },
+    {
+      "name": "Büchen–Lauenburg",
+      "via": [
+        "Büchen",
+        "Lauenburg"
+      ],
+      "opened": "1853-07-01"
+    }
+  ],
+  "ordersOfBattle": {
+    "1825": [
+      {
+        "id": "PR-IR2",
+        "name": "Infanterie-Regiment Nr. 2",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "3. Division",
+        "arm": "infantry",
+        "town": "Stettin",
+        "district": "PR-randow",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 1400,
+        "mobilisedMen": 3000,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "5. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "6. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "7. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "8. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "9. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "10. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "11. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "12. Kompanie",
+            "men": 250
+          }
+        ]
+      },
+      {
+        "id": "PR-IR9",
+        "name": "Infanterie-Regiment Nr. 9",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "3. Division",
+        "arm": "infantry",
+        "town": "Stargard",
+        "district": "PR-saatzig",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 1400,
+        "mobilisedMen": 3000,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "5. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "6. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "7. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "8. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "9. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "10. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "11. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "12. Kompanie",
+            "men": 250
+          }
+        ]
+      },
+      {
+        "id": "PR-IR14",
+        "name": "Infanterie-Regiment Nr. 14",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "4. Division",
+        "arm": "infantry",
+        "town": "Stralsund",
+        "district": "PR-stralsund",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 1400,
+        "mobilisedMen": 3000,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "5. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "6. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "7. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "8. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "9. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "10. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "11. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "12. Kompanie",
+            "men": 250
+          }
+        ]
+      },
+      {
+        "id": "PR-IR21",
+        "name": "Infanterie-Regiment Nr. 21",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "4. Division",
+        "arm": "infantry",
+        "town": "Stettin",
+        "district": "PR-randow",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 1400,
+        "mobilisedMen": 3000,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "5. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "6. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "7. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "8. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "9. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "10. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "11. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "12. Kompanie",
+            "men": 250
+          }
+        ]
+      },
+      {
+        "id": "PR-JG2",
+        "name": "2. Jäger-Abteilung",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "Korpsjægere",
+        "arm": "infantry",
+        "town": "Greifswald",
+        "district": "PR-greifswald",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 400,
+        "mobilisedMen": 600,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 150
+          }
+        ]
+      },
+      {
+        "id": "PR-KR2",
+        "name": "Kürassier-Regiment Königin (Pommersches) Nr. 2",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "Korpskavallerie",
+        "arm": "cavalry",
+        "town": "Pasewalk",
+        "district": "PR-ueckermuende",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 400,
+        "mobilisedMen": 600,
+        "guns": 0,
+        "status": "estimated",
+        "squadrons": [
+          {
+            "name": "1. Eskadron",
+            "men": 150
+          },
+          {
+            "name": "2. Eskadron",
+            "men": 150
+          },
+          {
+            "name": "3. Eskadron",
+            "men": 150
+          },
+          {
+            "name": "4. Eskadron",
+            "men": 150
+          }
+        ]
+      },
+      {
+        "id": "PR-ART2",
+        "name": "2. Artillerie-Brigade (feltdetachement)",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "Korpsartilleri",
+        "arm": "artillery",
+        "town": "Stettin",
+        "district": "PR-randow",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 600,
+        "mobilisedMen": 1200,
+        "guns": 48,
+        "status": "estimated",
+        "batteries": [
+          {
+            "name": "1. Batterie",
+            "men": 200,
+            "guns": 8
+          },
+          {
+            "name": "2. Batterie",
+            "men": 200,
+            "guns": 8
+          },
+          {
+            "name": "3. Batterie",
+            "men": 200,
+            "guns": 8
+          },
+          {
+            "name": "4. Batterie",
+            "men": 200,
+            "guns": 8
+          },
+          {
+            "name": "5. Batterie",
+            "men": 200,
+            "guns": 8
+          },
+          {
+            "name": "6. Batterie",
+            "men": 200,
+            "guns": 8
+          }
+        ]
+      },
+      {
+        "id": "PR-LW",
+        "name": "Pommerske Landwehr-bataljoner (samlet skøn)",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "Landwehr",
+        "arm": "infantry",
+        "town": "Greifswald",
+        "district": "PR-greifswald",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 0,
+        "mobilisedMen": 3600,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "5. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "6. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "7. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "8. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "9. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "10. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "11. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "12. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "13. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "14. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "15. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "16. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "17. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "18. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "19. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "20. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "21. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "22. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "23. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "24. Kompanie",
+            "men": 150
+          }
+        ]
+      },
+      {
+        "id": "MEC-INF",
+        "name": "Großherzoglich Mecklenburgisches Infanterie-Kontingent",
+        "nation": "MEC",
+        "corps": "MEC-field",
+        "division": "",
+        "arm": "infantry",
+        "town": "Schwerin",
+        "district": "MEC-schwerin",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 1200,
+        "mobilisedMen": 2400,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 200
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 200
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 200
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 200
+          },
+          {
+            "name": "5. Kompanie",
+            "men": 200
+          },
+          {
+            "name": "6. Kompanie",
+            "men": 200
+          },
+          {
+            "name": "7. Kompanie",
+            "men": 200
+          },
+          {
+            "name": "8. Kompanie",
+            "men": 200
+          },
+          {
+            "name": "9. Kompanie",
+            "men": 200
+          },
+          {
+            "name": "10. Kompanie",
+            "men": 200
+          },
+          {
+            "name": "11. Kompanie",
+            "men": 200
+          },
+          {
+            "name": "12. Kompanie",
+            "men": 200
+          }
+        ]
+      },
+      {
+        "id": "MEC-DR",
+        "name": "Mecklenburgisches Chevauleger-Kontingent",
+        "nation": "MEC",
+        "corps": "MEC-field",
+        "division": "",
+        "arm": "cavalry",
+        "town": "Ludwigslust",
+        "district": "MEC-ludwigslust",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 300,
+        "mobilisedMen": 450,
+        "guns": 0,
+        "status": "estimated",
+        "squadrons": [
+          {
+            "name": "1. Eskadron",
+            "men": 150
+          },
+          {
+            "name": "2. Eskadron",
+            "men": 150
+          },
+          {
+            "name": "3. Eskadron",
+            "men": 150
+          }
+        ]
+      },
+      {
+        "id": "MEC-ART",
+        "name": "Mecklenburgische Feldbatterie",
+        "nation": "MEC",
+        "corps": "MEC-field",
+        "division": "",
+        "arm": "artillery",
+        "town": "Schwerin",
+        "district": "MEC-schwerin",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 120,
+        "mobilisedMen": 150,
+        "guns": 6,
+        "status": "estimated",
+        "batteries": [
+          {
+            "name": "1. Batterie",
+            "men": 150,
+            "guns": 6
+          }
+        ]
+      }
+    ],
+    "1851": [
+      {
+        "id": "PR-IR2",
+        "name": "Infanterie-Regiment Nr. 2",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "3. Division",
+        "arm": "infantry",
+        "town": "Stettin",
+        "district": "PR-randow",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 1600,
+        "mobilisedMen": 3000,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "5. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "6. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "7. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "8. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "9. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "10. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "11. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "12. Kompanie",
+            "men": 250
+          }
+        ]
+      },
+      {
+        "id": "PR-IR9",
+        "name": "Infanterie-Regiment Nr. 9",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "3. Division",
+        "arm": "infantry",
+        "town": "Stargard",
+        "district": "PR-saatzig",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 1600,
+        "mobilisedMen": 3000,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "5. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "6. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "7. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "8. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "9. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "10. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "11. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "12. Kompanie",
+            "men": 250
+          }
+        ]
+      },
+      {
+        "id": "PR-IR14",
+        "name": "Infanterie-Regiment Nr. 14",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "4. Division",
+        "arm": "infantry",
+        "town": "Stralsund",
+        "district": "PR-stralsund",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 1600,
+        "mobilisedMen": 3000,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "5. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "6. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "7. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "8. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "9. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "10. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "11. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "12. Kompanie",
+            "men": 250
+          }
+        ]
+      },
+      {
+        "id": "PR-IR21",
+        "name": "Infanterie-Regiment Nr. 21",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "4. Division",
+        "arm": "infantry",
+        "town": "Stettin",
+        "district": "PR-randow",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 1600,
+        "mobilisedMen": 3000,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "5. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "6. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "7. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "8. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "9. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "10. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "11. Kompanie",
+            "men": 250
+          },
+          {
+            "name": "12. Kompanie",
+            "men": 250
+          }
+        ]
+      },
+      {
+        "id": "PR-JG2",
+        "name": "2. Jäger-Bataillon",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "Korpsjægere",
+        "arm": "infantry",
+        "town": "Greifswald",
+        "district": "PR-greifswald",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 400,
+        "mobilisedMen": 600,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 150
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 150
+          }
+        ]
+      },
+      {
+        "id": "PR-KR2",
+        "name": "Kürassier-Regiment Königin (Pommersches) Nr. 2",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "Korpskavallerie",
+        "arm": "cavalry",
+        "town": "Pasewalk",
+        "district": "PR-ueckermuende",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 400,
+        "mobilisedMen": 600,
+        "guns": 0,
+        "status": "estimated",
+        "squadrons": [
+          {
+            "name": "1. Eskadron",
+            "men": 150
+          },
+          {
+            "name": "2. Eskadron",
+            "men": 150
+          },
+          {
+            "name": "3. Eskadron",
+            "men": 150
+          },
+          {
+            "name": "4. Eskadron",
+            "men": 150
+          }
+        ]
+      },
+      {
+        "id": "PR-ART2",
+        "name": "2. Artillerie-Brigade (feltdetachement)",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "Korpsartilleri",
+        "arm": "artillery",
+        "town": "Stettin",
+        "district": "PR-randow",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 600,
+        "mobilisedMen": 1200,
+        "guns": 48,
+        "status": "estimated",
+        "batteries": [
+          {
+            "name": "1. Batterie",
+            "men": 200,
+            "guns": 8
+          },
+          {
+            "name": "2. Batterie",
+            "men": 200,
+            "guns": 8
+          },
+          {
+            "name": "3. Batterie",
+            "men": 200,
+            "guns": 8
+          },
+          {
+            "name": "4. Batterie",
+            "men": 200,
+            "guns": 8
+          },
+          {
+            "name": "5. Batterie",
+            "men": 200,
+            "guns": 8
+          },
+          {
+            "name": "6. Batterie",
+            "men": 200,
+            "guns": 8
+          }
+        ]
+      },
+      {
+        "id": "PR-LW",
+        "name": "Pommerske Landwehr-bataljoner (samlet skøn)",
+        "nation": "PR",
+        "corps": "PR-pomerania",
+        "division": "Landwehr",
+        "arm": "infantry",
+        "town": "Greifswald",
+        "district": "PR-greifswald",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 0,
+        "mobilisedMen": 9600,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "5. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "6. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "7. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "8. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "9. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "10. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "11. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "12. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "13. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "14. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "15. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "16. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "17. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "18. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "19. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "20. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "21. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "22. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "23. Kompanie",
+            "men": 400
+          },
+          {
+            "name": "24. Kompanie",
+            "men": 400
+          }
+        ]
+      },
+      {
+        "id": "MEC-INF",
+        "name": "Großherzoglich Mecklenburgisches Infanterie-Kontingent",
+        "nation": "MEC",
+        "corps": "MEC-field",
+        "division": "",
+        "arm": "infantry",
+        "town": "Schwerin",
+        "district": "MEC-schwerin",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 1200,
+        "mobilisedMen": 2250,
+        "guns": 0,
+        "status": "estimated",
+        "companies": [
+          {
+            "name": "1. Kompanie",
+            "men": 188
+          },
+          {
+            "name": "2. Kompanie",
+            "men": 188
+          },
+          {
+            "name": "3. Kompanie",
+            "men": 188
+          },
+          {
+            "name": "4. Kompanie",
+            "men": 188
+          },
+          {
+            "name": "5. Kompanie",
+            "men": 188
+          },
+          {
+            "name": "6. Kompanie",
+            "men": 188
+          },
+          {
+            "name": "7. Kompanie",
+            "men": 187
+          },
+          {
+            "name": "8. Kompanie",
+            "men": 187
+          },
+          {
+            "name": "9. Kompanie",
+            "men": 187
+          },
+          {
+            "name": "10. Kompanie",
+            "men": 187
+          },
+          {
+            "name": "11. Kompanie",
+            "men": 187
+          },
+          {
+            "name": "12. Kompanie",
+            "men": 187
+          }
+        ]
+      },
+      {
+        "id": "MEC-DR",
+        "name": "Mecklenburgisches Dragoner-Kontingent",
+        "nation": "MEC",
+        "corps": "MEC-field",
+        "division": "",
+        "arm": "cavalry",
+        "town": "Ludwigslust",
+        "district": "MEC-ludwigslust",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 300,
+        "mobilisedMen": 600,
+        "guns": 0,
+        "status": "estimated",
+        "squadrons": [
+          {
+            "name": "1. Eskadron",
+            "men": 150
+          },
+          {
+            "name": "2. Eskadron",
+            "men": 150
+          },
+          {
+            "name": "3. Eskadron",
+            "men": 150
+          },
+          {
+            "name": "4. Eskadron",
+            "men": 150
+          }
+        ]
+      },
+      {
+        "id": "MEC-ART",
+        "name": "Mecklenburgische Feldbatterie",
+        "nation": "MEC",
+        "corps": "MEC-field",
+        "division": "",
+        "arm": "artillery",
+        "town": "Schwerin",
+        "district": "MEC-schwerin",
+        "chief": "",
+        "chiefStatus": "unknown",
+        "men": 120,
+        "mobilisedMen": 150,
+        "guns": 6,
+        "status": "estimated",
+        "batteries": [
+          {
+            "name": "1. Batterie",
+            "men": 150,
+            "guns": 6
+          }
+        ]
+      }
+    ]
+  },
+  "chaussees": [
+    {
+      "a": "Lauenburg",
+      "b": "Boizenburg",
+      "opened": 1829
+    },
+    {
+      "a": "Boizenburg",
+      "b": "Hagenow",
+      "opened": 1829
+    },
+    {
+      "a": "Hagenow",
+      "b": "Ludwigslust",
+      "opened": 1829
+    }
+  ],
+  "outside": [
+    {
+      "name": "Köslin",
+      "owner": "PR",
+      "lon": 16.172,
+      "lat": 54.194,
+      "population": {
+        "1825": 5500,
+        "1851": 8500
+      },
+      "district": "Kreis Köslin",
+      "region": "Regierungsbezirk Köslin",
+      "status": "estimated"
+    }
+  ],
+  "references1864": {
+    "note": "Reference, ikke et scenarie eller uundgåelig offensiv. Ekspeditioner må ikke dobbelttælle II. korps. Mecklenburg følger ikke automatisk Preussen.",
+    "commands": [
+      "Gardekorps (Prinz August von Württemberg)",
+      "III. Armeekorps (Prinz Friedrich Karl)",
+      "Østrigsk VI. korps (Ludwig von Gablenz)"
+    ]
+  },
+  "sources": [
+    {
+      "url": "https://metropolregion.hamburg.de/natur-und-kultur-erleben/industriekultur-am-wasser/routen/schwerin/hauptbahnhof-eisenbahndirektion-11958",
+      "scope": "Hagenow 1847, Wismar 1848, Rostock/Güstrow 1850, Lübeck 1870; ikke befolkningstal"
+    },
+    {
+      "url": "https://onlinesammlung.museumsstiftung.de/detail/collection/0f3442a3-8efa-48eb-be81-352e39fa89ef",
+      "scope": "Berlin–Stettin åbnet 15. august 1843"
+    },
+    {
+      "url": "https://www.ortschroniken-mv.de/index.php/Geschichte_Stadt_und_Amt_Boizenburg/Elbe_in_Daten_bis_1918",
+      "scope": "Hamborg–Berlin chaussé 1826–1829; bane 1846"
+    },
+    {
+      "url": "https://www.geschichte-s-h.de/wp-content/uploads/2017/11/Mitteilungen93.pdf",
+      "scope": "Lübeck–Büchen 1851, Büchen–Lauenburg 1853; andre oversigter blander disse åbninger sammen"
+    },
+    {
+      "url": "https://kpbc.umk.pl/Content/236544/PDF/Gromadzenie_POPC_018_01.pdf",
+      "scope": "Historisk garnisonsoversigt: Greifswalds 2. jægere fra 1821/1848, Pasewalks Königin-kürassierer; ikke komplet 1825/1851-kamporden"
+    },
+    {
+      "url": "https://sbc.org.pl/en/dlibra/publication/389394/kurzgefa-te-stamm-und-rangliste-aller-regimenter-der-koniglich-preu-ischen-armee-von-deren-stiftung-an-bis-ende",
+      "scope": "Katalog til primære ranglister. Årgangenes fulde korps-/chefsoplysninger er endnu ikke transskriberet."
+    }
+  ]
+}

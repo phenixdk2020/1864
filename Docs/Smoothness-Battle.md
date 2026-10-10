@@ -1,5 +1,25 @@
 # Jævn bevægelse i 3D-slaget
 
+## 2026-10-10: Ordnet omformering og individuel ankomst
+
+Fodfolkets tegnelag fordeler eksisterende mænd til nye pladser én gang ved omformering: linjen forlades fra venstre fløj, fil for fil med forreste mand først; kolonnen deployerer fra hovedet. Sorteringen følges af endpoint-bytninger, der forkorter krydsende ruter. Figuridentitet, VAT-plads og animationsfase bevares; `SoldierSlots` følger den nye plads, så rækkeild fortsat bruger korrekt rang. Slots fra `StrategyFormationComponent` og simulationens formationer er uændrede.
+
+Startbølgen er 0,12 s pr. fil/kolonnerække og 0,04 s mellem mændene i bølgen. Bølgen begrænses til 65 % af den justerbare `FormationChangeDeadlineSeconds` (standard 7 s). Personlig fart ligger i 0,95–1,05. Indhentningen bruger mindst løbefart eller restafstand/resttid; nedbremsning sker kun inden for 30 cm, med mindst 120 cm/s til de sidste 10 cm. Derefter dæmpes farten, mens deadline stadig gælder. Bevægelsestrinnet begrænses til restafstanden, så manden ikke overskyder sin plads. En lokal rumlig hash med fire afstandspassager giver små sidekorrektioner mellem nærliggende mænd under omformering; ventende filer og standsede mænd flyttes ikke. Der er ingen terrænsøgning eller global parvis kollisionskontrol pr. frame. Tætte klynger og faktisk kropsbredde skal stadig kontrolleres visuelt.
+
+På sidste rutestykke inden for 25 m bruger en stående linje individuel ankomst, når destinationsfronten afviger mindst 20°. Hver mand går mod sin faste verdensplads i destinationsboksen og standser og vender sig dér. Marchfarten gemmes ved overgangen, så de bageste ikke sænkes, når actorens march afsluttes. Ankomstbudgettet omfatter den resterende gangtid (længste rute / 160 cm/s) plus omformeringsbudgettet; ankomst over 25 m presses derfor ikke ind i syv sekunder. Små slutvinkler og den øvrige formationsmarch bruger fortsat `FStrategyVisualFormationPath`. Karré, liggende/spredt orden, udskilte skytter og bevægelse med bevaret front beholder deres særlige regler.
+
+`HasVisualArrivalFrontReached()` skelner den første standsede mand ved fronten fra `IsVisualFormationComplete()`, der først bliver sand efter den sidste mands stop og slutdrejning. HUD viser **ANKOMMET / FORMERER** imellem de to og skjuler keglen under den visuelle omformering. Simulationens actor, ordrer, ankomsttolerance og reformeringstimer er uændrede. Flag og HQ læser fortsat de faktisk tegnede mænd; ankomstens tegnede front bruger boksens slutretning frem for actorens igangværende slutdrejning. Ved ny ordre, ændret mål eller bevægelsespause frigives de faste ankomstmål. Tab og ændret figurtæthed omfordeler ikke overlevende.
+
+`-Strategy1864DebugFormation` skriver én afslutningslinje pr. visuel omformering/ankomst:
+
+```text
+Strategy1864DebugFormation <enheds-id> complete-seconds=... longest-path-cm=... crossing-pairs-avoided=... arrival=0|1
+```
+
+Tiden er simulerede sekunder på tegnelagets animationsklokke. Rutens længde er verdenscentimeter ved planlægningen; tælleren er antal krydsningsfjernende endpoint-bytninger (samme par kan behandles igen). Fortsat march tæller ikke som en uafsluttet omformering, når mændene har indhentet de nye pladser. Afbrudte planer giver ingen afslutningslinje.
+
+Statisk UE 5.8-headerkontrol og `git diff --check` er udført. Numeriske modeller kontrollerer deadline, fartgulv og enkeltvis ankomst; de kompilerer eller afprøver ikke C++/VAT. Afprøv senere linje↔kolonne, 19°/20°/90°/180°-ankomst, pause, nye ordrer, waypoint-ruter, tab, figurtæthed og x10. Ingen build, spil/editorstart eller commit.
+
 ## 2026-10-10: VAT på alle afstande
 
 Fodfolk, kavaleriets ryttere, stab og ordonnanser bruger gemte VAT-modeller som normal tegnevej. Det globale nærbudget er 24 levende skeletfigurer, valgt efter individuel kameraafstand (18 m ind, 20 m ud). `-Strategy1864CrowdNearest=N` ændrer budgettet. Transform og `FPlayedClip` bevares ved skift. Nærposen evalueres ud fra samme `VisualAnimationTime`, inden VAT-instansen skjules; skeletfiguren har ingen uafhængig animationstick. Farver, fase, play rate, pause og tidsdilation føres gennem instansdata.
@@ -30,7 +50,7 @@ De autoritative simulationspositioner, ankomstregler og ordrer er bevaret. Bevæ
 - Kolonnens sti blev allerede opdateret hver frame. Ved genindtræden i kolonne nulstilles nu også afstandskoordinaten; tidligere kunne gamle afstande blive kombineret med en ny sti.
 - Styrkeændringer og forsinkede tab genberegnede alle pladser. De overlevende bevarer nu plads, animationsfase og personlig tilstand. Huller bevares indtil en rigtig formationsændring. Kolonnens frontreference krymper ikke ved tab. Ændret figurtæthed bevarer tilbageværende figurer; nye figurer får ledige pladser. Ved egentligt formationsskift går figurerne til deres nye målpladser.
 
-`RefreshIntervalSeconds` begrænser ikke denne visuelle tick; den var allerede hver frame. `SoldierSettle` har fortsat individuelle startforsinkelser, hvorefter figuren accelererer.
+`RefreshIntervalSeconds` begrænser ikke denne visuelle tick; den var allerede hver frame. `SoldierSettle` bruger nu den ordnede startbølge og deadline beskrevet ovenfor ved almindelig linje-/kolonneomformering.
 
 ## Animation, crowd og LOD
 

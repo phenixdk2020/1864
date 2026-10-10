@@ -1869,6 +1869,27 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Prognosen viser de eksisterende grunduddannelsesregler: programmet ændrer varigheden, alle færdigheder starter på 35 og ender på 60; hvile afslutter ikke uddannelsen. Officersløn og kasernedrift er særskilte budgetposter. Panelets tilstand er rent UI og kræver ingen ændring af saveformat.
 - Kontrol: statisk gennemgang og UE 5.8-headerkontrol; ingen build, spilstart eller commit. Visuel afprøvning i spillet afventer brugerens tilladelse.
 
+### 2026-10-10 — Kamporden: lokal garnisonsadgang og automatisk HQ-kæde
+
+- Andre garnisoner i amtet vises skrivebeskyttet med grå tekst og byspecifik tooltip. Controlleren blokerer også valg/drag fra garnisoner uden for kontekstbyen.
+- Garnisonsmål har byspecifikke nøgler. Retur validerer opholdsby, march og kapacitetsplan før mutation; alternativ by/fort afvises med toast.
+- Nye træer fra Træk herover får bataljonsstabe på eksisterende Detachment-niveau og enhedens chef. Flere bataljoner af samme regiment får fælles Regiment-HQ; eksisterende bataljonsstabe bevares. Højere HQ-knapper er bevaret, og tomme HQ'er/hære fjernes ved udtræk/retur.
+- Kamporden-Regler.md er opdateret. Statisk gennemlæsning og Unreal 5.8-headerkontrol; ingen build, spilstart eller commit. Gemmeformat og scenariedata er uændrede.
+### 2026-10-10 — Fodfolk: ordnet omformering, tidsbegrænset indhentning og individuel ankomst
+
+- `StrategyInfantryVisualComponent`: pladser fordeles fra fløj/kolonnehoved med krydsningsfjernende bytninger; ordnede startbølger (0,12 s og 0,04 s), personlig fart 0,95–1,05 og lokale afstandskorrektioner. Identiteter, animationsfaser og rækkeildens slot-id bevares.
+- Justerbar visuel deadline på 7 s ved omformering; fart vælges efter løbefart og restafstand/resttid, med nedbremsning kun de sidste 30 cm og mindst 120 cm/s til de sidste 10 cm. Ankomst omfatter resterende marchtid plus samme budget, så mændene ikke tvinges til samtidig ankomst.
+- Sidste rutestykke og mindst 20° ændret slutfront: hver mand går til sin verdensplads i destinationsboksen, standser og vender sig individuelt. Farten bevares, når simulationen standser. Frontankomst og sidste mands færdiggørelse har separate visuelle flag; HUD følger dem og skjuler keglen under formering. Flag, HQ og kegle læser fortsat den tegnede formation. Actor-/ordreautoritet og simulationsankomst er bevaret; særlige formationer/skytteudskillelse bevarer deres tidligere regler.
+- `-Strategy1864DebugFormation` logger afslutningstid, længste planlagte rute og antal endpoint-bytninger. `Docs/Smoothness-Battle.md` beskriver parametre, afbrydelse og kontrolpunkter.
+- Kontrol: nye API-kald gennemgået mod UE 5.8-headerne; numeriske formationsforløb samt 960 deadline-/fartgulvskombinationer (30–144 FPS, x0,5–x10) og `git diff --check`. Ingen build, spil/editorstart eller commit. Visuel kontrol af afstandskorrektioner, crowd og framebudget udestår.
+### 2026-10-10 — Sydlige nabodistrikter, byer og regimenter
+
+- Tilføjet 58 byer/landsbyer og 34 scenariespecifikke spildistrikter med markerede befolknings-, grænse-, skatte- og produktionsskøn. Mecklenburg-Strelitz er særskilt; Köslin forbliver uden for udsnittet. Dansk Lauenburg/Büchen bruger Ratzeburgs eksisterende amt. Svenske data, tidligere nationer og gamle byindeks bevares.
+- Sydlig generator, distriktsgrid, 113 vejforbindelser og periodens banenettet; Rostock-linjen går nu via Kleinen/Bützow/Schwaan. 1825 har ingen baner. Lübeck–Büchen åbner først oktober 1851; Büchen–Lauenburg er fremtidig 1853-metadata.
+- Foreløbig pommersk/mecklenburgsk kamporden med kompagnier, eskadroner og batterier. Regimenter mobiliseres via EnemyCorps med lokale reserver/midler, vejafhængige forstærkninger og våbenartsbestemt marchtempo. Egne magasiner leverer begrænsede rationer/foder; mangel standser march og giver skønnet attrition. Udenlandske bykort viser distrikt, reserve, skat og opklaret garnison/regimenter. Ingen udvidelse af controllerens klik-kæde.
+- Save-version 34 gemmer distriktsreserver/kasser og båret proviant i Neighbours; eksisterende War/Supply gemmer korps og magasiner. v33-aggregater bevares med undertrykte nye underregimenter for at undgå dobbelte hære ved load.
+- Generator-/scenarie-/grid-/netværks-/OOB-validering, kontrol mod Git HEAD af nordlige data og nationsrækker, statisk C++-gennemgang og UE 5.8-headerkontrol. Docs/Naboer.md dokumenterer kilder, skøn og resterende paritet: historiske grænser/fuld OOB/1864-regimenter, allieret krigs-AI og fuld udenlandsk økonomi/forsyning udestår. Ingen build, spil/editorstart, skærmbilledtests eller commit.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

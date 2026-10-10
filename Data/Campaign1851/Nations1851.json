@@ -585,6 +585,34 @@
       "canAlly": false,
       "canGuarantee": false,
       "status": "Befolkning og fredsstyrke: afrundede periode-skøn; relation og finansdata: spilskøn"
+    },
+    {
+      "id": "MST",
+      "name": "Mecklenburg-Strelitz",
+      "onMap": false,
+      "controller": "ai",
+      "population": 80000,
+      "armyMen": 700,
+      "railKm": 0,
+      "growth": 0.7,
+      "taxPerHead": 0.12,
+      "relation": 10,
+      "tradeValue": 300,
+      "weights": [
+        1,
+        1,
+        1,
+        0.2,
+        0.8,
+        1,
+        1,
+        1
+      ],
+      "caution": 0.7,
+      "reserve": 10000,
+      "group": "tysk",
+      "status": "estimated",
+      "note": "Selvstændig stat; Herrschaft Stargard i kortudsnittet. Ratzeburg-landdelen er endnu ikke detaljeret."
     }
   ]
 }

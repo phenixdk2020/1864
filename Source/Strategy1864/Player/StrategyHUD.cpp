@@ -710,7 +710,7 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
 
     struct FRange { float Cm; const TCHAR* Name; };
     const FRange Ranges[] = { { Fire->CloseRangeCm, TEXT("CLOSE") }, { Fire->MediumRangeCm, TEXT("MEDIUM") }, { Fire->LongRangeCm, TEXT("LONG") } };
-    if (!bTagMounted && Fire->IsBattleFormationReady())
+    if (!bTagMounted && Fire->IsBattleFormationReady() && (!ConeVisual || ConeVisual->IsVisualFormationComplete()))
     {
         // The chosen band filled (front to the chosen range), translucent; the enemy's cone only in outline (its fill
         // would lie over our own line).
@@ -785,7 +785,8 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
             if (Unit->FieldOfficerComponent && Unit->FieldOfficerComponent->IsTakingFireCover()) Info += TEXT(" | ligger ned / spredt orden");
             else if (Unit->FieldOfficerComponent && Unit->FieldOfficerComponent->IsStandingUpFromFireCover()) Info += TEXT(" | rejser sig");
             const bool bTagReforming = Unit->UnitState == EStrategyUnitState::Reforming ||
-                (Unit->FormationTransition && Unit->FormationTransition->IsReforming());
+                (Unit->FormationTransition && Unit->FormationTransition->IsReforming()) ||
+                (ConeVisual && !ConeVisual->IsVisualFormationComplete());
             const bool bTagMoving = Unit->MovementExecutor && !Unit->MovementExecutor->GetExecutedVelocity().IsNearlyZero();
             const bool bTagFiring = Fire->IsBattleFormationReady() && Unit->CombatComponent &&
                 Unit->CombatComponent->AmmunitionRounds > 0 && Unit->CombatComponent->FindBestTarget() &&
@@ -795,7 +796,10 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
                 (Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Advance ||
                  Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::AttackHere);
             const bool bTagDisengage = Unit->OrderComponent && Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Disengage;
-            const TCHAR* TagStatus = bTagDisengage ? TEXT("AFBRYDER") : bTagReforming ? TEXT("FORMERER") : bTagFiring ? TEXT("SKYDER") :
+            const bool bTagArrivalFront = ConeVisual && ConeVisual->HasVisualArrivalFrontReached();
+            const TCHAR* TagStatus = bTagDisengage ? TEXT("AFBRYDER") : bTagArrivalFront ?
+                (ConeVisual->IsVisualFormationComplete() ? (bTagFiring ? TEXT("SKYDER") : TEXT("ANKOMMET")) : TEXT("ANKOMMET / FORMERER")) :
+                bTagReforming ? TEXT("FORMERER") : bTagFiring ? TEXT("SKYDER") :
                 bTagMoving ? (bTagAdvance ? TEXT("RYKKER FREM") : TEXT("MARCHERER")) : TEXT("HOLDER");
             const FLinearColor TagColour = bTagReforming ? FLinearColor(1.f, 0.8f, 0.1f) :
                 bTagFiring ? FLinearColor(1.f, 0.15f, 0.1f) : bTagMoving ? FLinearColor(0.2f, 0.5f, 1.f) : FLinearColor(0.6f, 0.6f, 0.6f);

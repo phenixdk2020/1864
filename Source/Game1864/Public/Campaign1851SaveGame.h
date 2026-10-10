@@ -264,8 +264,9 @@ public:
 	 * 31: civil research project id and elapsed months in Research.
 	 * 32: after-action reports, prisoner holders, extended service entries and officer careers.
 	 * 33: neighbour mobilisation identities; old saves initialise peaceful neighbour armies.
+	 * 34: southern district reserves/treasuries in Neighbours; regiment corps remain in War.
 	 */
-	static constexpr int32 CurrentVersion = 33;
+	static constexpr int32 CurrentVersion = 34;
 
     // v32: exact report, prisoner pools, extended service entries and officer careers; old saves default to empty.
     UPROPERTY() FString LastAfterActionReport;
@@ -331,7 +332,7 @@ public:
 	UPROPERTY() uint8 Footing = 0;
 	/** War and peace (v22; v29 adds blocked events and event-format migration). */
 	UPROPERTY() TArray<FString> War;
-	/** v32: stable neighbour army id to saved enemy corps id; casualties remain in War. */
+	/** v33: stable neighbour army id -> corps id; v34 adds southern reserves, cash and carried supply. Casualties remain in War. */
 	UPROPERTY() TArray<FString> Neighbours;
 	/** Foreign affairs (v23): relations, treaties, the Sound Dues, ceded towns. */
 	UPROPERTY() TArray<FString> Diplomacy;
