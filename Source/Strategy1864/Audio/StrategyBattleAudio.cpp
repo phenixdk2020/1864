@@ -70,7 +70,6 @@ void UStrategyBattleAudio::BeginPlay()
     Concurrency = NewObject<USoundConcurrency>(this);
     Concurrency->Concurrency.MaxCount = VoiceBudget;
     Concurrency->Concurrency.ResolutionRule = EMaxConcurrentResolutionRule::StopQuietest;
-    Concurrency->Concurrency.VolumeScale = 0.95f;
     Concurrency->Concurrency.VolumeScaleMode = EConcurrencyVolumeScaleMode::Distance;
 }
 

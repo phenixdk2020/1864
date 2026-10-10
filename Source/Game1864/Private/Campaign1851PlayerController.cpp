@@ -1438,6 +1438,13 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Overlay->ShowToast(Why);
 			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
+		if (Button == SCampaign1851Overlay::EButton::OOBUnitChief)
+		{
+			// The "+" on a unit's box in the army chart: appoint or change its chief (the picker works on the chosen unit).
+			Overlay->SetSelectedRegiments({ Module });
+			Overlay->OpenPicker(SCampaign1851Overlay::EPicker::Chief);
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
 		if (Button == SCampaign1851Overlay::EButton::StackList)
 		{
 			Overlay->ToggleStackList();
@@ -1672,12 +1679,6 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			}
 			Overlay->CloseTrainingMenu();
 			Overlay->ShowToast(FString::Printf(TEXT("Øvelser: %s"), Campaign1851Army::ProgramName(ECampaign1851Program(Module))));
-		}
-		else if (Button == SCampaign1851Overlay::EButton::OOBUnitChief)
-		{
-			// The "+" on a unit's box in the army chart: appoint or change its chief (the picker works on the chosen unit).
-			Overlay->SetSelectedRegiments({ Module });
-			Overlay->OpenPicker(SCampaign1851Overlay::EPicker::Chief);
 		}
 		else if (Button == SCampaign1851Overlay::EButton::OfficerChange || Button == SCampaign1851Overlay::EButton::GeneralChange)
 		{
