@@ -1860,6 +1860,14 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Hærtræerne begrænses til enheder ved kontekstbyen eller åbningsenhedens eget hærtræ. Ny-hær-boksen og eksisterende officer-/HQ-knapper bevares. Drag ud viser den nye lokale hær uden at ændre kontekst.
 - Flere valgte regimenter ved samme by kan returneres med en fælles kapacitetsplan. Tomme hære opløses, også med tomme under-HQ'er. Ingen nye grene er føjet til controllerens lange klik-kæde.
 - Otte gennemlæste kodeforløb er dokumenteret i `Docs/Kamporden-Regler.md`. Berørte container-, pointer-, matematik- og Slate-signaturer er kontrolleret mod UE 5.8-headerne. Ingen ændring af scenariedata eller gemmeformat; nye kontekstfelter er kun vinduestilstand. Ingen build, spil/editorstart eller commit; visuel spiltest udestår.
+### 2026-10-10 — Fire rettelser på kampagnekortet og i indkaldelsen
+
+- Kortvisningsknapperne NORMAL/FORSYNING/KONTROL flyttet fra den ikke længere kaldte Bornholm-tegning til en fast bjælke under signaturforklaringen med aktiv markering. Kontrolvisningens besættelseslabels flyttet til den aktive korttegning, inklusive Bornholm.
+- Skanser har nu skærmvendte T_Bld_Star_Fort-markører uafhængigt af scenografiens zoomgrænse, klikvalg, navn ved nær zoom og tooltip med garnison/reserve/kanoner. Eksisterende 3D-skanser bevares. Star_Fort-bybygninger får samme ikon/navn med byens garnison i tooltip; de har ingen særskilt registreret kanonbesætning.
+- Knippelsbro placeres parallelt med Langebro ved samme forenklede kortkrydsning, 200 m fra hinanden (præsentationsestimat, ikke historisk geografisk placering). Kun disse to broer ændres; IDs og gemte brotilstande bevares. BRO-labels forskydes med forbindelseslinjer væk fra bymidten.
+- Klik på billede/navn i indkaldelsen åbner et talpanel med mandskab, officerer, udstyr har/kræver, program/varighed, seks 0–100-færdighedsbjælker ved start og afslutning, forventet moral/samhørighed/erfaring, sold/drift og valgt kasernes belægning/kapacitet samt våbenartens rolle. Klik udenfor lukker og konsumeres. Kasernens eksisterende pladsblokering bevares; nye klikhandlere er selvstændige blokke før kæden.
+- Prognosen viser de eksisterende grunduddannelsesregler: programmet ændrer varigheden, alle færdigheder starter på 35 og ender på 60; hvile afslutter ikke uddannelsen. Officersløn og kasernedrift er særskilte budgetposter. Panelets tilstand er rent UI og kræver ingen ændring af saveformat.
+- Kontrol: statisk gennemgang og UE 5.8-headerkontrol; ingen build, spilstart eller commit. Visuel afprøvning i spillet afventer brugerens tilladelse.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

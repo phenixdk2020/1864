@@ -60,7 +60,7 @@ public:
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationInsertHQ, FormationChief, FormationDissolve, FormationDeputy, FormationStaff, FormationChiefRemove,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
-		AfterActionToggle, AfterActionPage, FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitSize, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit, Block, MinisterInfo, TestBattle, EqualizeUnit, TransferAdj, TransferYes, TransferNo, TransferWhole, TransferGun, Ransom, PoolFold, UnitCardPart, StartMenu, StartLoad, StartTest, ScrollBarV, ScrollBarH, StackList, Scenario, UnitDeployEarly, RaisingPage, UnitRename, UnitUniform, UnitUniformSwatch, UnitUpgrade, UnitCustomClose, ResearchTab, ResearchScroll, GarrisonSelect, GarrisonOOB, GarrisonReturn, GarrisonPage };
+		AfterActionToggle, AfterActionPage, FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitSize, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit, Block, MinisterInfo, TestBattle, EqualizeUnit, TransferAdj, TransferYes, TransferNo, TransferWhole, TransferGun, Ransom, PoolFold, UnitCardPart, StartMenu, StartLoad, StartTest, ScrollBarV, ScrollBarH, StackList, Scenario, UnitDeployEarly, RaisingPage, UnitRename, UnitUniform, UnitUniformSwatch, UnitUpgrade, UnitCustomClose, ResearchTab, ResearchScroll, GarrisonSelect, GarrisonOOB, GarrisonReturn, GarrisonPage, RaisePreview, RaisePreviewClose };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -132,7 +132,7 @@ public:
 	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB, CloseOrder, CloseFortPanel, CloseFort };
 	/** The big windows opened from the menu bar under the calendar (one at a time). */
 	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council, Supply, Foreign, Research, Navy, Gazette, End, Battlefield, Materiel, Nations, ArmyStatus };
-	void OpenWindow(EWindow In) { bStackListOpen = false; CloseUnitCustomisation(); if (In == EWindow::Chart && Window != EWindow::Chart) { ClearOOBView(); } Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
+	void OpenWindow(EWindow In) { bRaisePreview = false; bStackListOpen = false; CloseUnitCustomisation(); if (In == EWindow::Chart && Window != EWindow::Chart) { ClearOOBView(); } Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
 	EWindow GetWindow() const { return Window; }
 
 	/** A question before a step that costs or cannot be undone (mobilisation, ...): the title, what it does, and
@@ -370,6 +370,7 @@ private:
 public:
 	/** The new unit being prepared in the MATERIEL window. */
 	int32 RaiseSize = 2;
+	bool bRaisePreview = false; // Transient UI state, never part of a save.
 	int32 RaiseType = 0, RaiseTownPick = 0, RaiseCommand = 0, RaiseProgram = 1;
 private:
 	void PaintBridge(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer) const;

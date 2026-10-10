@@ -88,3 +88,12 @@ En officer kan ikke dø i slaget. Han kan blive såret (ude af tjeneste til han 
 ## Erfaring: hvordan den optjenes og bruges (2026-10-10, til gennemgang)
 
 Se `Docs/Erfaring.md` (beskrivelse af nuværende regler og forslag). Kort: enhedens erfaring stiger i træning (op til 40), på march (0,02 pr. dag op til 70) og ved slag (+5, flat); officerens stiger 0,05 pr. dag på march, 0,01 ellers og +6 ved sejr/+3 ved nederlag. I 3D-slaget bruges enhedens erfaring til nøjagtighed/moral-chok (±15-20 pct), officerens til stress-reaktion og beslutningsstabilitet. Mangler: erfaring pr. våbenfærdighed ved brug, pris for nederlag, bonus for veteraner i kampagnen, officerens erfaring påvirker enhedens bonus, udmærkelser.
+
+
+### Udført 2026-10-10 — Kort og indkaldelse
+
+- [x] Permanent kortvisningsbjælke med aktiv markering, uafhængig af Bornholm-inset; kontroltags tilbage på kortet.
+- [x] Skansebillboards med Star_Fort-ikon, nærzoomnavn og garnison/kanoner-tooltip på tværs af kortvisninger.
+- [x] Københavns to broer samlet ved krydsningen med 200 m afstand og forskudte labels.
+- [x] Klikbart indkaldelsespreview med ressourcer, officerer, færdigheder, uddannelse, budget og kasernekapacitet; klik udenfor lukker.
+- [ ] Visuel kontrol af de fire ændringer i spillet ved forskellige zoomniveauer og vinduesstørrelser (ikke startet som del af opgaven).
