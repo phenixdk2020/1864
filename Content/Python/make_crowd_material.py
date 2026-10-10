@@ -143,7 +143,7 @@ diffuse = node(unreal.MaterialExpressionTextureSampleParameter2D, x=-400, parame
                texture=unreal.load_asset('/Game/Battle/Textures/T_Ground_Dirt_D'))
 # Per-instance colours are evaluated in the vertex stage, then interpolated for the pixel shader.
 mask = node(unreal.MaterialExpressionVertexColor)
-colour_inputs = [('Base', diffuse, 'RGB'), ('Mask', mask, 'RGB')]
+colour_inputs = [('Base', diffuse, 'RGB'), ('Mask', mask, '')]
 for part, offset, switch in [('CoatColor', 4, 13), ('TrouserColor', 7, 14), ('HeadgearColor', 10, 15)]:
     channels = [node(unreal.MaterialExpressionPerInstanceCustomData, data_index=i)
                 for i in [offset, offset + 1, offset + 2, switch]]

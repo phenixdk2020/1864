@@ -12,7 +12,7 @@ def prepare(mesh_path):
     mesh = unreal.load_asset(mesh_path)
     if not isinstance(mesh, unreal.SkeletalMesh):
         raise RuntimeError("Soldatermesh mangler: " + mesh_path)
-    bounds = mesh.get_editor_property('imported_bounds')
+    bounds = mesh.get_bounds()
     low = bounds.origin.z - bounds.box_extent.z
     height = max(1.0, 2.0 * bounds.box_extent.z)
     mel = unreal.MaterialEditingLibrary
@@ -32,6 +32,9 @@ def prepare(mesh_path):
         if diffuse is None:
             raise RuntimeError("Ingen basefarve i uniformmaterialet: " + material.get_path_name())
         local = mel.create_material_expression(material, unreal.MaterialExpressionPreSkinnedPosition, -600, 300)
+        # PreSkinnedPosition exists only in the vertex stage: carry it to the pixel shader through an interpolator.
+        local_interp = mel.create_material_expression(material, unreal.MaterialExpressionVertexInterpolator, -450, 300)
+        mel.connect_material_expressions(local, '', local_interp, '')
         recolour = mel.create_material_expression(material, unreal.MaterialExpressionCustom, 100, 0)
         recolour.set_editor_property('description', 'Campaign unit uniform colours')
         recolour.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT3)
@@ -51,7 +54,7 @@ float3 result = lerp(Base, Coat * detail, coatMask * CoatOn);
 result = lerp(result, Trousers * detail, trouserMask * TrousersOn);
 return lerp(result, Hat * detail, hatMask * HatOn);
 ''')
-        sources = [('Base', diffuse, diffuse_output), ('Local', local, '')]
+        sources = [('Base', diffuse, diffuse_output), ('Local', local_interp, '')]
         for key, parameter, colour in [
                 ('Coat', 'CoatColor', unreal.LinearColor(0.1, 0.15, 0.25, 1)),
                 ('Trousers', 'TrouserColor', unreal.LinearColor(0.2, 0.2, 0.2, 1)),
