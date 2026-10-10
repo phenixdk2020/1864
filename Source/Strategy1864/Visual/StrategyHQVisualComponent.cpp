@@ -4,6 +4,7 @@
 #include "../Units/StrategyHQUnit.h"
 #include "../AI/StrategyHQFollowComponent.h"
 #include "Animation/AnimSequence.h"
+#include "StrategyCrowdModel.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -155,6 +156,7 @@ void UStrategyHQVisualComponent::TickComponent(float DeltaTime, ELevelTick TickT
         {
             R.Rider->SetRelativeLocation(R.Offset + FVector(-10.0f, 0.0f, SaddleHeightCm - 48.0f + Rise));
             R.Rider->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+            UStrategyCrowdSubsystem::DrawAuxiliary(R.Rider, RiderModel, SeatClip, 0.05f);
         }
     }
 }

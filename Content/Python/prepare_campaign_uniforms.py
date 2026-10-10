@@ -1,6 +1,6 @@
 """Tilføj kampagnens farveparametre til infanteriets teksturerede materialer.
 
-Køres manuelt i Unreal Editors Python-konsol, når asset-ændringer er ønsket.
+Køres manuelt i Unreal Editors Python-konsol eller via bagescriptet.
 Scriptet starter ikke editoren og køres ikke af kampagnen eller byggeprocessen.
 Uændrede uniformer beholder deres oprindelige tekstur. Snit/hovedbeklædning er
 en del af de importerede meshes; de har ingen udskiftelige hatmodeller.
@@ -19,20 +19,19 @@ def prepare(mesh_path):
     materials = []
     for slot in mesh.get_editor_property('materials'):
         material = slot.get_editor_property('material_interface')
-        if isinstance(material, unreal.MaterialInstance):
+        while isinstance(material, unreal.MaterialInstance):
             material = material.get_editor_property('parent')
         if isinstance(material, unreal.Material) and material not in materials:
             materials.append(material)
     for material in materials:
         if 'OverrideCoat' in [str(name) for name in mel.get_scalar_parameter_names(material)]:
             continue
-        # These documented graph accessors require an active material editor.
-        unreal.get_editor_subsystem(unreal.AssetEditorSubsystem).open_editor_for_assets([material])
+        # UE 5.8 implementation reads GetExpressionInputForProperty directly (also in commandlets).
         diffuse = mel.get_material_property_input_node(material, unreal.MaterialProperty.MP_BASE_COLOR)
         diffuse_output = mel.get_material_property_input_node_output_name(material, unreal.MaterialProperty.MP_BASE_COLOR)
         if diffuse is None:
             raise RuntimeError("Ingen basefarve i uniformmaterialet: " + material.get_path_name())
-        local = mel.create_material_expression(material, unreal.MaterialExpressionPreSkinnedLocalPosition, -600, 300)
+        local = mel.create_material_expression(material, unreal.MaterialExpressionPreSkinnedPosition, -600, 300)
         recolour = mel.create_material_expression(material, unreal.MaterialExpressionCustom, 100, 0)
         recolour.set_editor_property('description', 'Campaign unit uniform colours')
         recolour.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT3)
@@ -83,8 +82,9 @@ return lerp(result, Hat * detail, hatMask * HatOn);
         unreal.log('Kampagneuniform forberedt: ' + material.get_path_name())
 
 
-for path in [
+if __name__ == '__main__':
+    for path in [
         '/Game/Units/Danish/Infantry1864/Mesh/SK_DK_Infantry_1864',
         '/Game/Units/Danish/Jager1864/Mesh/SK_DK_Jager_1864',
         '/Game/Units/Danish/Livgarden1864/Mesh/SK_DK_Livgarden_1864']:
-    prepare(path)
+        prepare(path)

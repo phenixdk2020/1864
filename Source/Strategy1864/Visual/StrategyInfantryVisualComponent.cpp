@@ -37,6 +37,7 @@
 #include "StrategyBattleBlast.h"
 #include "StrategyUniformAppearanceComponent.h"
 #include "HAL/PlatformTime.h"
+#include "CoreGlobals.h"
 #include "Misc/App.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -280,12 +281,10 @@ void UStrategyInfantryVisualComponent::TickComponent(
     ApplyPendingStance(GetWorld()->GetTimeSeconds());
     MarchDust(GetWorld()->GetTimeSeconds());
     RefreshAnimation(false);
+    UpdateStanceTransitions();
     UpdatePersonalActions();
     UpdateCrowdMode();
-    if (!bCrowdMode)
-    {
-        AlignWeapons();
-    }
+    AlignWeapons();
     UpdateFormationBounds();
     DebugSmooth();
     if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864AnimationAudit")))
@@ -422,7 +421,13 @@ void UStrategyInfantryVisualComponent::RefreshVisuals()
         return;
     }
 
-    if (Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Warmup"))) EnsureCrowdModel();
+    int32 CrowdCommandEnabled = 1;
+    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Crowd="), CrowdCommandEnabled);
+    if (CrowdFarCm > 0.f && CrowdCommandEnabled != 0)
+    {
+        EnsureCrowdModel();
+        if (CrowdModel && !bCrowdMode) EnterCrowdMode();
+    }
     EnsureVisualCount(GetDesiredVisualCount());
     RebuildFormation();
     RefreshWeaponMeshes();
@@ -587,9 +592,9 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
     UAnimSequence* Load = (Stance == EStrategyStance::Prone ? ReloadProneAsset :
         Stance == EStrategyStance::Kneeling ? ReloadKneelingAsset : ReloadStandingAsset).Get();
     UAnimSequence* Rise = Stance == EStrategyStance::Kneeling ? RiseFromLoadAsset.Get() : nullptr;
-    UAnimSequence* Ready = ReadyAsset.Get();
-    UAnimSequence* AimHold = AimHoldAsset.Get();
-    UAnimSequence* Raise = RaiseToAimAsset.Get();
+    UAnimSequence* Ready = (Stance == EStrategyStance::Prone ? IdleProneAsset : Stance == EStrategyStance::Kneeling ? IdleKneelingAsset : ReadyAsset).Get();
+    UAnimSequence* AimHold = (Stance == EStrategyStance::Prone ? IdleProneAsset : Stance == EStrategyStance::Kneeling ? AimKneelingAsset : AimHoldAsset).Get();
+    UAnimSequence* Raise = Stance == EStrategyStance::Standing ? RaiseToAimAsset.Get() : nullptr;
     const float RiseLength = Rise ? Rise->GetPlayLength() : 0.0f;
     for (int32 i = 0; i < SoldierComponents.Num(); ++i)
     {
@@ -598,6 +603,7 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
         {
             continue;
         }
+        if (SoldierSettle.IsValidIndex(i) && SoldierSettle[i].StanceEnd > VisualAnimationTime) continue;
         uint8& Phase = SoldierFirePhase[i];
         // Out of the firing line (marching, in column): the company's animation; a pending shot is dropped.
         if (!bLine && Phase >= PhaseLoad)
@@ -699,8 +705,8 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
                 }
                 break;
             case PhaseAim:
-                if (Now >= SoldierBusyUntil[i] && AimHold && Soldier->GetAnimationMode() == EAnimationMode::AnimationSingleNode &&
-                    Soldier->GetSingleNodeInstance() && Soldier->GetSingleNodeInstance()->GetAnimationAsset() != AimHold)
+                if (Now >= SoldierBusyUntil[i] && AimHold &&
+                    (!SoldierClips.IsValidIndex(i) || SoldierClips[i].Clip.Get() != AimHold))
                 {
                     PlayOnSoldier(Soldier, AimHold, true, true);
                 }
@@ -733,6 +739,19 @@ void UStrategyInfantryVisualComponent::SpawnMuzzleSmoke(const USkeletalMeshCompo
         const float Tip = bRifleBarrelAlongNegativeX ? Box.Min.X : Box.Max.X;
         Muzzle = Weapon->GetComponentTransform().TransformPosition(FVector(Tip, 0.0f, 0.0f));
         Forward = Weapon->GetForwardVector() * (bRifleBarrelAlongNegativeX ? -1.0f : 1.0f);
+    }
+    if (bCrowdMode && CrowdModel && SoldierClips.IsValidIndex(Index) && CurrentRifleMesh())
+    {
+        const FPlayedClip& CrowdShotClip = SoldierClips[Index];
+        const float CrowdShotPosition = CrowdShotClip.Rate > 0.f ? FMath::Max(0.f, (VisualAnimationTime - CrowdShotClip.Start) * CrowdShotClip.Rate) : CrowdShotClip.HeldPosition;
+        FTransform CrowdRiflePose;
+        if (CrowdModel->RiflePose(CrowdShotClip.Clip.Get(), CrowdShotPosition, CrowdShotClip.bLoop, CrowdRiflePose))
+        {
+            const FTransform CrowdRifleWorld = CrowdRiflePose * Soldier->GetComponentTransform();
+            const FBox CrowdRifleBox = CurrentRifleMesh()->GetBoundingBox();
+            Muzzle = CrowdRifleWorld.TransformPosition(FVector(bRifleBarrelAlongNegativeX ? CrowdRifleBox.Min.X : CrowdRifleBox.Max.X, 0.f, 0.f));
+            Forward = CrowdRifleWorld.GetRotation().GetForwardVector() * (bRifleBarrelAlongNegativeX ? -1.f : 1.f);
+        }
     }
     FActorSpawnParameters Params;
     Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -814,6 +833,7 @@ void UStrategyInfantryVisualComponent::UpdateCorpses()
         else if (CorpseAge >= 60.f)
         {
             // A real translucent fade also works when the original uniform material is opaque.
+            if (bCrowdMode) { bCrowdDirty = true; continue; }
             if (!CorpseFading[CorpseIndex])
             {
                 CorpseFading[CorpseIndex] = true;
@@ -940,10 +960,7 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
             UAnimSequence* FallenAnimation = Death.Get();
             if (!FallenAnimation) FallenAnimation = IdleProneAsset.Get();
             Soldier->PlayAnimation(FallenAnimation, false);
-            int32 BattleBodyCount = 0;
-            for (const TWeakObjectPtr<AStrategyUnit>& BattleBodyEntry : Strategy1864Performance::VisualUnits(GetWorld()))
-                if (const AStrategyCompanyUnit* BattleBodyCompany = Cast<AStrategyCompanyUnit>(BattleBodyEntry.Get()))
-                    if (BattleBodyCompany->InfantryVisualComponent) BattleBodyCount += BattleBodyCompany->InfantryVisualComponent->GetCorpseCount();
+            const int32 BattleBodyCount = UStrategyCrowdSubsystem::CountFallen(GetWorld());
             const bool bKeepBody = bLeaveCorpses && BattleBodyCount < 150;
             if (bKeepBody) { CorpseComponents.Add(Soldier); CorpseBirthTimes.Add(Now); CorpseFading.Add(false); }
             else
@@ -957,6 +974,16 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
             Fallen.Rate = Rate;
             Fallen.bLoop = false;
             if (bKeepBody) CorpseClips.Add(Fallen);
+            if (CrowdNearFigures.Remove(Soldier))
+                if (UStrategyCrowdSubsystem* CrowdDeathSub = GetWorld()->GetSubsystem<UStrategyCrowdSubsystem>())
+                    CrowdDeathSub->NearGeometryCount = FMath::Max(0, CrowdDeathSub->NearGeometryCount - 1);
+            if (bCrowdMode && bKeepBody)
+            {
+                Soldier->SetVisibility(false, true);
+                Soldier->SetComponentTickEnabled(false);
+                Soldier->SetSkeletalMeshAsset(nullptr);
+                if (WeaponComponents.IsValidIndex(i) && WeaponComponents[i]) WeaponComponents[i]->DestroyComponent();
+            }
             bCrowdDirty = true;
         }
         SoldierComponents.RemoveAt(i);
@@ -983,7 +1010,7 @@ void UStrategyInfantryVisualComponent::AlignWeapons()
     {
         USkeletalMeshComponent* Soldier = SoldierComponents[i];
         UStaticMeshComponent* Weapon = WeaponComponents[i];
-        if (!Soldier || !Weapon || !Weapon->GetStaticMesh())
+        if (!Soldier || !Weapon || !Weapon->GetStaticMesh() || (bCrowdMode && !Soldier->IsVisible()))
         {
             continue;
         }
@@ -1024,6 +1051,12 @@ bool UStrategyInfantryVisualComponent::EnsureAssetsLoaded()
     LoadedRifleBayonetMesh = RifleBayonetMeshAsset.LoadSynchronous();
     LoadedBattleFadeMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/EngineDebugMaterials/M_SimpleTranslucent.M_SimpleTranslucent"));
     const TSoftObjectPtr<UAnimSequence>* BattleAnimationAssets[] = { &IdleStandingAsset, &WalkStandingAsset, &RunStandingAsset, &AimStandingAsset, &FireStandingAsset, &ReloadStandingAsset, &IdleKneelingAsset, &AimKneelingAsset, &FireKneelingAsset, &ReloadKneelingAsset, &IdleProneAsset, &CrawlProneAsset, &FireProneAsset, &ReloadProneAsset, &BayonetChargeAsset, &BayonetThrustAsset, &DeathAsset, &DeathAsset2, &DeathAsset3, &RaiseToAimAsset, &LoadAsset, &RiseFromLoadAsset, &ReadyAsset, &AimHoldAsset, &DeathWalkingAsset };
+    CrowdStanceClips.Reset();
+    for (const TCHAR* CrowdStanceName : { TEXT("A_Rifle_Stand_To_Kneel"), TEXT("A_Rifle_Kneel_To_Stand"), TEXT("A_Rifle_Kneel_To_Prone"), TEXT("A_Rifle_Prone_To_Kneel") })
+    {
+        const FString CrowdStancePath = FString(TEXT("/Game/Units/Danish/Livgarden1864/Animations/")) + CrowdStanceName + TEXT(".") + CrowdStanceName;
+        CrowdStanceClips.Add(LoadObject<UAnimSequence>(nullptr, *CrowdStancePath));
+    }
     LoadedBattleAnimations.Reset();
     for (const auto* BattleAnimationAsset : BattleAnimationAssets)
         if (UAnimSequence* BattleAnimation = BattleAnimationAsset->LoadSynchronous()) LoadedBattleAnimations.Add(BattleAnimation);
@@ -1137,7 +1170,7 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
             break;
         }
 
-        Soldier->SetSkeletalMeshAsset(LoadedSoldierMesh);
+        if (!bCrowdMode) Soldier->SetSkeletalMeshAsset(LoadedSoldierMesh);
         Soldier->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Soldier->SetGenerateOverlapEvents(false);
         Soldier->SetCastShadow(true);
@@ -1150,11 +1183,7 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
         Soldier->AddTickPrerequisiteComponent(this);
         if (OwnerCompany->UniformAppearanceComponent) { OwnerCompany->UniformAppearanceComponent->ApplyAppearanceToMesh(Soldier); }
 
-        UStaticMeshComponent* Weapon =
-            NewObject<UStaticMeshComponent>(
-                OwnerCompany,
-                NAME_None,
-                RF_Transient);
+        UStaticMeshComponent* Weapon = bCrowdMode ? nullptr : NewObject<UStaticMeshComponent>(OwnerCompany, NAME_None, RF_Transient);
 
         if (Weapon)
         {
@@ -1600,7 +1629,7 @@ void UStrategyInfantryVisualComponent::ApplyPendingStance(float Now)
         Soldier->SetPosition(Position, false);
         Soldier->SetPlayRate(Rate);
         RecordClip(Soldier, PendingSequence, bPendingLoop, Position, bPendingHold ? 0.0f : Rate);
-        if (bPendingHold)
+        if (bPendingHold && Soldier->GetSkeletalMeshAsset())
         {
             Soldier->TickAnimation(0.0f, false);
             Soldier->RefreshBoneTransforms();
@@ -1668,7 +1697,7 @@ void UStrategyInfantryVisualComponent::RefreshAnimation(
     for (int32 Index = 0; Index < SoldierComponents.Num(); ++Index)
     {
         USkeletalMeshComponent* Soldier = SoldierComponents[Index];
-        if (!Soldier || (bAnimationUnchanged && SoldierClips.IsValidIndex(Index) && SoldierClips[Index].Clip.IsValid()) ||
+        if (!Soldier || (SoldierSettle.IsValidIndex(Index) && SoldierSettle[Index].StanceEnd > VisualAnimationTime) || (bAnimationUnchanged && SoldierClips.IsValidIndex(Index) && SoldierClips[Index].Clip.IsValid()) ||
             (SoldierFirePhase.IsValidIndex(Index) && SoldierFirePhase[Index] != 0) || (SoldierSettle.IsValidIndex(Index) && SoldierSettle[Index].bActive))
         {
             continue;
@@ -1683,7 +1712,7 @@ void UStrategyInfantryVisualComponent::RefreshAnimation(
         Soldier->SetPosition(Position, false);
         Soldier->SetPlayRate(Rate);
         RecordClip(Soldier, Sequence, bLooping, Position, bHoldPose ? 0.0f : Rate);
-        if (bHoldPose)
+        if (bHoldPose && Soldier->GetSkeletalMeshAsset())
         {
             Soldier->TickAnimation(0.0f, false);
             Soldier->RefreshBoneTransforms();
@@ -1725,9 +1754,11 @@ void UStrategyInfantryVisualComponent::RefreshWeaponMeshes()
     }
     // The far men's model carries the rifle: another model for the bayonet.
     CrowdModel = nullptr;
-    if (bCrowdMode && EnsureCrowdModel())
+    bCrowdFailed = false;
+    if (bCrowdMode)
     {
-        bCrowdDirty = true;
+        if (EnsureCrowdModel()) bCrowdDirty = true;
+        else LeaveCrowdMode();
     }
 }
 
@@ -1914,13 +1945,22 @@ void UStrategyInfantryVisualComponent::DestroyVisualComponents()
         CrowdFallen->DestroyComponent();
         CrowdFallen = nullptr;
     }
-    for (USkeletalMeshComponent* Corpse : CorpseComponents)
+    for (int32 CrowdCorpseIndex = 0; CrowdCorpseIndex < CorpseComponents.Num(); ++CrowdCorpseIndex)
     {
+        USkeletalMeshComponent* Corpse = CorpseComponents[CrowdCorpseIndex];
         if (Corpse && bCrowdMode)
         {
+            Corpse->SetSkeletalMeshAsset(LoadedSoldierMesh);
+            if (CorpseClips.IsValidIndex(CrowdCorpseIndex)) RestoreClip(Corpse, CorpseClips[CrowdCorpseIndex], VisualAnimationTime);
+            CreateWeaponComponent(Corpse);
             Corpse->SetVisibility(true, true);
         }
     }
+    CrowdLivingIds.Reset();
+    CrowdFallenIds.Reset();
+    CrowdFreeLivingIds.Reset();
+    CrowdFreeFallenIds.Reset();
+    CrowdNearFigures.Reset();
     CrowdModel = nullptr;
     bCrowdMode = false;
     bResumeCrowdPosesNextTick = false;
@@ -1975,12 +2015,14 @@ void UStrategyInfantryVisualComponent::RecordClip(USkeletalMeshComponent* Soldie
     const float PlayedLength = Clip ? Clip->GetPlayLength() : 0.f;
     Played.HeldPosition = bLoop && PlayedLength > 0.f ? FMath::Fmod(FMath::Max(0.f, Position), PlayedLength) : Position;
     Played.Start = Rate > 0.0f ? Now - Position / Rate : Now;
-    if (bCrowdMode && !bCrowdDirty && CrowdLiving && CrowdModel && Index < CrowdLiving->GetInstanceCount())
+    const int32* CrowdStableId = CrowdLivingIds.Find(Soldier);
+    if (bCrowdMode && !bCrowdDirty && CrowdLiving && CrowdModel && CrowdStableId)
     {
         float Data[UStrategyCrowdModel::CustomDataFloats];
         if (MakeCrowdClipData(Played, Data))
         {
-            CrowdLiving->SetCustomData(Index, TArrayView<const float>(Data, UStrategyCrowdModel::CustomDataFloats), false);
+            Data[16] = SoldierSettle.IsValidIndex(Index) ? 1.f - SoldierSettle[Index].NearBlend : 1.f;
+            CrowdLiving->SetCustomData(*CrowdStableId, TArrayView<const float>(Data, UStrategyCrowdModel::CustomDataFloats), false);
             bCrowdDataDirty = true;
         }
     }
@@ -1988,11 +2030,6 @@ void UStrategyInfantryVisualComponent::RecordClip(USkeletalMeshComponent* Soldie
 
 bool UStrategyInfantryVisualComponent::EnsureCrowdModel()
 {
-    if (OwnerCompany && OwnerCompany->UniformAppearanceComponent)
-    {
-        const FStrategyUniformOverrides& CustomOverrides = OwnerCompany->UniformAppearanceComponent->Overrides;
-        if (CustomOverrides.bOverrideCoat || CustomOverrides.bOverrideTrousers || CustomOverrides.bOverrideHeadgearDetail) { return false; }
-    }
     if (CrowdModel)
     {
         return true;
@@ -2018,6 +2055,7 @@ bool UStrategyInfantryVisualComponent::EnsureCrowdModel()
             }
         }
     }
+    for (UAnimSequence* CrowdStanceClip : CrowdStanceClips) if (CrowdStanceClip) Clips.AddUnique(CrowdStanceClip);
     FStrategyCrowdRifleGrip Grip;
     Grip.RightHand = RightHandBoneName;
     Grip.LeftHand = bAlignRifleBetweenHands ? LeftHandBoneName : NAME_None;
@@ -2040,6 +2078,8 @@ bool UStrategyInfantryVisualComponent::EnsureCrowdModel()
         if (Crowd)
         {
             Crowd->SetStaticMesh(CrowdModel->GetMesh());
+            for (int32 CrowdMaterialIndex = 0; CrowdMaterialIndex < CrowdModel->GetNumMaterials(); ++CrowdMaterialIndex)
+                Crowd->SetMaterial(CrowdMaterialIndex, CrowdModel->GetMaterial(CrowdMaterialIndex));
         }
     }
     return true;
@@ -2064,17 +2104,8 @@ void UStrategyInfantryVisualComponent::UpdateCrowdMode()
         }
         return Value;
     }();
-    float Far = CrowdFarCm, Near = CrowdNearCm;
-    if (Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Figures")))
-    {
-        if (const IConsoleVariable* BattleNearVar = IConsoleManager::Get().FindConsoleVariable(TEXT("Strategy1864.Perf.NearCm")))
-        { Far = FMath::Max(0.f, BattleNearVar->GetFloat()); Near = Far * 0.8f; }
-    }
-    if (CommandFar >= 0.0f)
-    {
-        Far = CommandFar;
-        Near = CommandFar * 0.8f;
-    }
+    float Far = CrowdFarCm;
+    if (CommandFar >= 0.0f) { Far = CommandFar; CrowdFarCm = Far; }
     if (Far <= 0.0f || bCrowdFailed)
     {
         if (bCrowdMode)
@@ -2089,22 +2120,17 @@ void UStrategyInfantryVisualComponent::UpdateCrowdMode()
         return;
     }
     const FVector Camera = PC->PlayerCameraManager->GetCameraLocation();
-    float Distance = FVector::Dist(Camera, OwnerCompany->GetActorLocation());
-    if (FormationLocalBounds.IsValid && OwnerCompany->SceneRoot)
-    {
-        Distance = FMath::Sqrt(FormationLocalBounds.TransformBy(OwnerCompany->SceneRoot->GetComponentTransform()).ComputeSquaredDistanceToPoint(Camera));
-    }
-    const bool bBattleNearAllowed = Strategy1864Performance::AllowNear(this);
-    if (!bCrowdMode && (Distance > Far || !bBattleNearAllowed))
-    {
-        EnterCrowdMode();
-    }
-    else if (bCrowdMode && Distance < Near && bBattleNearAllowed)
-    {
-        LeaveCrowdMode();
-    }
+    if (!bCrowdMode) EnterCrowdMode();
+    if (bCrowdMode) UpdateNearestFigures(Camera);
     if (bCrowdMode)
     {
+        float CrowdColoursNow[UStrategyCrowdModel::CustomDataFloats] = {};
+        WriteCrowdColours(CrowdColoursNow);
+        for (int32 CrowdColourIndex = 4; CrowdColourIndex < UStrategyCrowdModel::CustomDataFloats; ++CrowdColourIndex)
+        {
+            if (CrowdColoursNow[CrowdColourIndex] != CrowdLastColours[CrowdColourIndex - 4]) bCrowdDirty = true;
+            CrowdLastColours[CrowdColourIndex - 4] = CrowdColoursNow[CrowdColourIndex];
+        }
         // Rebase frozen phases against shader time every frame, including paused clips.
         if (OwnerCompany->CustomTimeDilation != 1.f) bCrowdDirty = true;
         if (SoldierClips.ContainsByPredicate([](const FPlayedClip& CrowdClip) { return CrowdClip.Rate <= 0.f && CrowdClip.HeldPosition > 0.f; })) bCrowdDirty = true;
@@ -2130,6 +2156,8 @@ void UStrategyInfantryVisualComponent::EnterCrowdMode()
     {
         UInstancedStaticMeshComponent* Crowd = NewObject<UInstancedStaticMeshComponent>(OwnerCompany, NAME_None, RF_Transient);
         Crowd->SetStaticMesh(CrowdModel->GetMesh());
+        for (int32 CrowdMaterialIndex = 0; CrowdMaterialIndex < CrowdModel->GetNumMaterials(); ++CrowdMaterialIndex)
+            Crowd->SetMaterial(CrowdMaterialIndex, CrowdModel->GetMaterial(CrowdMaterialIndex));
         Crowd->SetNumCustomDataFloats(UStrategyCrowdModel::CustomDataFloats);
         Crowd->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Crowd->SetGenerateOverlapEvents(false);
@@ -2167,7 +2195,13 @@ void UStrategyInfantryVisualComponent::EnterCrowdMode()
         {
             Soldier->SetVisibility(false, true);
             Soldier->SetComponentTickEnabled(false);
+            Soldier->SetSkeletalMeshAsset(nullptr);
         }
+    }
+    for (TObjectPtr<UStaticMeshComponent>& CrowdWeapon : WeaponComponents)
+    {
+        if (CrowdWeapon) CrowdWeapon->DestroyComponent();
+        CrowdWeapon = nullptr;
     }
     for (USkeletalMeshComponent* Corpse : CorpseComponents)
     {
@@ -2175,6 +2209,9 @@ void UStrategyInfantryVisualComponent::EnterCrowdMode()
         {
             Corpse->SetVisibility(false, true);
             Corpse->SetComponentTickEnabled(false);
+            Corpse->SetSkeletalMeshAsset(nullptr);
+            const auto CrowdCorpseChildren = Corpse->GetAttachChildren();
+            for (USceneComponent* CrowdChild : CrowdCorpseChildren) if (UStaticMeshComponent* CrowdWeapon = Cast<UStaticMeshComponent>(CrowdChild)) CrowdWeapon->DestroyComponent();
         }
     }
     CrowdLiving->SetVisibility(true);
@@ -2203,6 +2240,11 @@ void UStrategyInfantryVisualComponent::RestoreClip(USkeletalMeshComponent* Soldi
 void UStrategyInfantryVisualComponent::LeaveCrowdMode()
 {
     bCrowdMode = false;
+    CrowdNearFigures.Reset();
+    CrowdLivingIds.Reset();
+    CrowdFallenIds.Reset();
+    CrowdFreeLivingIds.Reset();
+    CrowdFreeFallenIds.Reset();
     bResumeCrowdPosesNextTick = true;
     const float Now = VisualAnimationTime;
     // Back to full animation, each man where his baked clip had got to.
@@ -2210,6 +2252,12 @@ void UStrategyInfantryVisualComponent::LeaveCrowdMode()
     {
         if (USkeletalMeshComponent* Soldier = SoldierComponents[i])
         {
+            Soldier->SetSkeletalMeshAsset(LoadedSoldierMesh);
+            if (OwnerCompany->UniformAppearanceComponent) OwnerCompany->UniformAppearanceComponent->ApplyAppearanceToMesh(Soldier);
+            EnsureWeaponComponent(i);
+            for (int32 CrowdMaterialIndex = 0; CrowdMaterialIndex < Soldier->GetNumMaterials(); ++CrowdMaterialIndex)
+                if (UMaterialInstanceDynamic* CrowdMID = Cast<UMaterialInstanceDynamic>(Soldier->GetMaterial(CrowdMaterialIndex))) CrowdMID->SetScalarParameterValue(TEXT("CrowdOpacity"), 1.f);
+            if (SoldierSettle.IsValidIndex(i)) SoldierSettle[i].NearBlend = 0.f;
             Soldier->SetVisibility(true, true);
             Soldier->SetComponentTickEnabled(true);
             if (SoldierClips.IsValidIndex(i))
@@ -2223,6 +2271,11 @@ void UStrategyInfantryVisualComponent::LeaveCrowdMode()
     {
         if (USkeletalMeshComponent* Corpse = CorpseComponents[i])
         {
+            Corpse->SetSkeletalMeshAsset(LoadedSoldierMesh);
+            CreateWeaponComponent(Corpse);
+            if (OwnerCompany->UniformAppearanceComponent) OwnerCompany->UniformAppearanceComponent->ApplyAppearanceToMesh(Corpse);
+            for (int32 CrowdMaterialIndex = 0; CrowdMaterialIndex < Corpse->GetNumMaterials(); ++CrowdMaterialIndex)
+                if (UMaterialInstanceDynamic* CrowdMID = Cast<UMaterialInstanceDynamic>(Corpse->GetMaterial(CrowdMaterialIndex))) CrowdMID->SetScalarParameterValue(TEXT("CrowdOpacity"), 1.f);
             Corpse->SetVisibility(true, true);
             Corpse->SetComponentTickEnabled(true);
             if (CorpseClips.IsValidIndex(i))
@@ -2263,47 +2316,47 @@ void UStrategyInfantryVisualComponent::RebuildCrowdInstances()
     };
     float Data[UStrategyCrowdModel::CustomDataFloats];
 
-    TArray<FTransform> BattleLocalLiving;
-    TArray<FTransform>& Living = Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Hitches")) ? CrowdLivingScratch : BattleLocalLiving;
-    Living.Reset();
-    for (const USkeletalMeshComponent* Soldier : SoldierComponents)
+    // Persistent instance slots are keyed by figure identity. Casualties leave holes, never move survivors.
+    auto CrowdSync = [&](UInstancedStaticMeshComponent* CrowdInstances,
+                         const TArray<TObjectPtr<USkeletalMeshComponent>>& CrowdFigures,
+                         const TArray<FPlayedClip>& CrowdClips,
+                         TMap<TWeakObjectPtr<USkeletalMeshComponent>, int32>& CrowdIds, TArray<int32>& CrowdFreeIds, bool bCrowdWorld)
     {
-        Living.Add(Soldier ? Soldier->GetRelativeTransform() : FTransform::Identity);
-    }
-    if (CrowdLiving->GetInstanceCount() != Living.Num())
-    {
-        CrowdLiving->ClearInstances();
-        CrowdLiving->AddInstances(Living, false, false);
-    }
-    else if (!Living.IsEmpty()) CrowdLiving->BatchUpdateInstancesTransforms(0, Living, false, false, false);
-    for (int32 i = 0; i < Living.Num(); ++i)
-    {
-        DataFor(SoldierClips.IsValidIndex(i) ? &SoldierClips[i] : nullptr, Data);
-        CrowdLiving->SetCustomData(i, TArrayView<const float>(Data, UStrategyCrowdModel::CustomDataFloats), false);
-    }
-
-    TArray<FTransform> BattleLocalFallen;
-    TArray<FTransform>& Fallen = Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Hitches")) ? CrowdFallenScratch : BattleLocalFallen;
-    Fallen.Reset();
-    for (const USkeletalMeshComponent* Corpse : CorpseComponents)
-    {
-        FTransform FallenTransform = Corpse ? Corpse->GetComponentTransform() : FTransform::Identity;
-        const int32 FallenIndex = Fallen.Num();
-        if (CorpseBirthTimes.IsValidIndex(FallenIndex) && GetWorld()->GetTimeSeconds() - CorpseBirthTimes[FallenIndex] >= 60.f)
-            FallenTransform.SetScale3D(FVector::ZeroVector);
-        Fallen.Add(FallenTransform);
-    }
-    if (CrowdFallen->GetInstanceCount() != Fallen.Num())
-    {
-        CrowdFallen->ClearInstances();
-        CrowdFallen->AddInstances(Fallen, false, true);
-    }
-    else if (!Fallen.IsEmpty()) CrowdFallen->BatchUpdateInstancesTransforms(0, Fallen, true, false, false);
-    for (int32 i = 0; i < Fallen.Num(); ++i)
-    {
-        DataFor(CorpseClips.IsValidIndex(i) ? &CorpseClips[i] : nullptr, Data);
-        CrowdFallen->SetCustomData(i, TArrayView<const float>(Data, UStrategyCrowdModel::CustomDataFloats), false);
-    }
+        TSet<TWeakObjectPtr<USkeletalMeshComponent>> CrowdPresent;
+        for (USkeletalMeshComponent* CrowdFigure : CrowdFigures) if (CrowdFigure) CrowdPresent.Add(CrowdFigure);
+        FTransform CrowdHidden = FTransform::Identity;
+        CrowdHidden.SetScale3D(FVector::ZeroVector);
+        for (auto CrowdIterator = CrowdIds.CreateIterator(); CrowdIterator; ++CrowdIterator)
+        {
+            if (!CrowdPresent.Contains(CrowdIterator.Key()))
+            {
+                CrowdInstances->UpdateInstanceTransform(CrowdIterator.Value(), CrowdHidden, bCrowdWorld, false, false);
+                CrowdFreeIds.Add(CrowdIterator.Value());
+                CrowdIterator.RemoveCurrent();
+            }
+        }
+        for (int32 CrowdFigureIndex = 0; CrowdFigureIndex < CrowdFigures.Num(); ++CrowdFigureIndex)
+        {
+            USkeletalMeshComponent* CrowdFigure = CrowdFigures[CrowdFigureIndex];
+            if (!CrowdFigure) continue;
+            CrowdPresent.Add(CrowdFigure);
+            FTransform CrowdPose = bCrowdWorld ? CrowdFigure->GetComponentTransform() : CrowdFigure->GetRelativeTransform();
+            if ((!bCrowdWorld && SoldierSettle.IsValidIndex(CrowdFigureIndex) && SoldierSettle[CrowdFigureIndex].NearBlend >= 1.f) ||
+                (bCrowdWorld && CorpseBirthTimes.IsValidIndex(CrowdFigureIndex) && GetWorld()->GetTimeSeconds() - CorpseBirthTimes[CrowdFigureIndex] >= 65.f))
+                CrowdPose.SetScale3D(FVector::ZeroVector);
+            int32* CrowdExistingId = CrowdIds.Find(CrowdFigure);
+            const int32 CrowdId = CrowdExistingId ? *CrowdExistingId : !CrowdFreeIds.IsEmpty() ? CrowdFreeIds.Pop(EAllowShrinking::No) : CrowdInstances->AddInstance(CrowdPose, bCrowdWorld);
+            if (!CrowdExistingId) CrowdIds.Add(CrowdFigure, CrowdId);
+            CrowdInstances->UpdateInstanceTransform(CrowdId, CrowdPose, bCrowdWorld, false, false);
+            DataFor(CrowdClips.IsValidIndex(CrowdFigureIndex) ? &CrowdClips[CrowdFigureIndex] : nullptr, Data);
+            WriteCrowdColours(Data);
+            Data[16] = bCrowdWorld ? (CorpseBirthTimes.IsValidIndex(CrowdFigureIndex) ? FMath::Clamp((65.f - (GetWorld()->GetTimeSeconds() - CorpseBirthTimes[CrowdFigureIndex])) / 5.f, 0.f, 1.f) : 1.f)
+                : (SoldierSettle.IsValidIndex(CrowdFigureIndex) ? 1.f - SoldierSettle[CrowdFigureIndex].NearBlend : 1.f);
+            CrowdInstances->SetCustomData(CrowdId, TArrayView<const float>(Data, UStrategyCrowdModel::CustomDataFloats), false);
+        }
+    };
+    CrowdSync(CrowdLiving, SoldierComponents, SoldierClips, CrowdLivingIds, CrowdFreeLivingIds, false);
+    CrowdSync(CrowdFallen, CorpseComponents, CorpseClips, CrowdFallenIds, CrowdFreeFallenIds, true);
     CrowdLiving->MarkRenderStateDirty();
     CrowdFallen->MarkRenderStateDirty();
     bCrowdDirty = false;
@@ -2386,5 +2439,198 @@ bool UStrategyInfantryVisualComponent::MakeCrowdClipData(const FPlayedClip& Play
     const float PlayedWorldRate = Played.Rate * FMath::Max(0.f, OwnerCompany->CustomTimeDilation);
     const float PlayedWorldNow = GetWorld()->GetTimeSeconds();
     const float PlayedWorldStart = PlayedWorldRate > 0.f ? PlayedWorldNow - PlayedPosition / PlayedWorldRate : PlayedWorldNow;
-    return CrowdModel->MakeCustomData(PlayedSequence, PlayedWorldStart, PlayedWorldRate, Played.bLoop, Out, PlayedWorldNow, PlayedPosition);
+    const bool CrowdHasClip = CrowdModel->MakeCustomData(PlayedSequence, PlayedWorldStart, PlayedWorldRate, Played.bLoop, Out, PlayedWorldNow, PlayedPosition);
+    WriteCrowdColours(Out);
+    return CrowdHasClip;
+}
+
+void UStrategyInfantryVisualComponent::WriteCrowdColours(float* Out) const
+{
+    for (int32 CrowdDataIndex = 4; CrowdDataIndex < UStrategyCrowdModel::CustomDataFloats; ++CrowdDataIndex) Out[CrowdDataIndex] = 0.f;
+    Out[16] = 1.f;
+    if (!OwnerCompany || !OwnerCompany->UniformAppearanceComponent) return;
+    const UStrategyUniformAppearanceComponent* CrowdAppearance = OwnerCompany->UniformAppearanceComponent;
+    const FStrategyUniformColors CrowdColours = CrowdAppearance->GetResolvedColors();
+    const FLinearColor CrowdParts[] = { CrowdColours.Coat, CrowdColours.Trousers, CrowdColours.HeadgearDetail };
+    for (int32 CrowdPart = 0; CrowdPart < 3; ++CrowdPart)
+    {
+        Out[4 + CrowdPart * 3] = CrowdParts[CrowdPart].R;
+        Out[5 + CrowdPart * 3] = CrowdParts[CrowdPart].G;
+        Out[6 + CrowdPart * 3] = CrowdParts[CrowdPart].B;
+    }
+    const bool CrowdPaletteAllowed = CrowdAppearance->CanOverrideHistoricalPalette();
+    Out[13] = CrowdPaletteAllowed && CrowdAppearance->Overrides.bOverrideCoat ? 1.f : 0.f;
+    Out[14] = CrowdPaletteAllowed && CrowdAppearance->Overrides.bOverrideTrousers ? 1.f : 0.f;
+    Out[15] = CrowdPaletteAllowed && CrowdAppearance->Overrides.bOverrideHeadgearDetail ? 1.f : 0.f;
+}
+
+void UStrategyInfantryVisualComponent::SelectNearestFigures(UWorld* World, const FVector& Camera, int32 CrowdBudget)
+{
+    if (!World) return;
+    UStrategyCrowdSubsystem* CrowdSub = World->GetSubsystem<UStrategyCrowdSubsystem>();
+    if (!CrowdSub) return;
+    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864CrowdNearest="), CrowdBudget);
+    if (CrowdSub->NearSelectionFrame != GFrameCounter)
+    {
+        CrowdSub->NearSelectionFrame = GFrameCounter;
+        CrowdSub->NearBudget = FMath::Max(0, CrowdBudget);
+        CrowdSub->SweepAuxiliary();
+        CrowdSub->NearFigures.Reset();
+        CrowdSub->NearGeometryCount = 0;
+        TArray<USkeletalMeshComponent*> CrowdCandidates;
+        for (const TWeakObjectPtr<AStrategyUnit>& CrowdEntry : Strategy1864Performance::VisualUnits(World))
+        {
+            const AStrategyCompanyUnit* CrowdCompany = Cast<AStrategyCompanyUnit>(CrowdEntry.Get());
+            const UStrategyInfantryVisualComponent* CrowdVisual = CrowdCompany ? CrowdCompany->InfantryVisualComponent.Get() : nullptr;
+            if (!CrowdVisual || !CrowdVisual->bEnabled) continue;
+            CrowdSub->NearGeometryCount += CrowdVisual->CrowdNearFigures.Num();
+            for (USkeletalMeshComponent* CrowdSoldier : CrowdVisual->SoldierComponents)
+            {
+                const float CrowdRadius = CrowdVisual->CrowdNearFigures.Contains(CrowdSoldier) ? CrowdVisual->CrowdFarCm : FMath::Min(CrowdVisual->CrowdNearCm, CrowdVisual->CrowdFarCm);
+                if (CrowdVisual->CrowdModel && CrowdSoldier && FVector::DistSquared(Camera, CrowdSoldier->GetComponentLocation()) < FMath::Square(CrowdRadius)) CrowdCandidates.Add(CrowdSoldier);
+            }
+        }
+        for (auto CrowdAuxIterator = CrowdSub->AuxiliaryFigures.CreateIterator(); CrowdAuxIterator; ++CrowdAuxIterator)
+        {
+            USkeletalMeshComponent* CrowdAuxFigure = CrowdAuxIterator.Key().Get();
+            if (!CrowdAuxFigure || !CrowdAuxFigure->IsRegistered()) { CrowdAuxIterator.RemoveCurrent(); continue; }
+            if (CrowdAuxIterator.Value().NearBlend > 0.f) ++CrowdSub->NearGeometryCount;
+            const float CrowdAuxRadius = CrowdAuxIterator.Value().NearBlend > 0.f ? 2000.f : 1800.f;
+            if (CrowdAuxIterator.Value().bBaked && CrowdAuxIterator.Value().bLiving && FVector::DistSquared(Camera, CrowdAuxFigure->GetComponentLocation()) < FMath::Square(CrowdAuxRadius))
+                CrowdCandidates.Add(CrowdAuxFigure);
+        }
+        CrowdCandidates.Sort([&Camera](const USkeletalMeshComponent& CrowdA, const USkeletalMeshComponent& CrowdB)
+        {
+            return FVector::DistSquared(Camera, CrowdA.GetComponentLocation()) < FVector::DistSquared(Camera, CrowdB.GetComponentLocation());
+        });
+        for (int32 CrowdIndex = 0; CrowdIndex < FMath::Min(FMath::Max(0, CrowdBudget), CrowdCandidates.Num()); ++CrowdIndex)
+            CrowdSub->NearFigures.Add(CrowdCandidates[CrowdIndex]);
+    }
+}
+
+void UStrategyInfantryVisualComponent::UpdateNearestFigures(const FVector& Camera)
+{
+    UStrategyCrowdSubsystem* CrowdSub = GetWorld()->GetSubsystem<UStrategyCrowdSubsystem>();
+    if (!CrowdSub) return;
+    SelectNearestFigures(GetWorld(), Camera, CrowdNearestCount);
+    const int32 CrowdBudget = CrowdSub->NearBudget;
+    for (int32 CrowdIndex = 0; CrowdIndex < SoldierComponents.Num(); ++CrowdIndex)
+    {
+        USkeletalMeshComponent* CrowdSoldier = SoldierComponents[CrowdIndex];
+        if (!CrowdSoldier) continue;
+        if (!SoldierSettle.IsValidIndex(CrowdIndex)) continue;
+        const bool CrowdWasNear = CrowdNearFigures.Contains(CrowdSoldier);
+        bool CrowdTargetNear = CrowdSub->NearFigures.Contains(CrowdSoldier);
+        // Demotions release their slot after fading. Delay promotions to keep the hard global N budget.
+        if (!CrowdWasNear && CrowdSub->NearGeometryCount >= FMath::Max(0, CrowdBudget)) CrowdTargetNear = false;
+        FSettle& CrowdSettle = SoldierSettle[CrowdIndex];
+        const float CrowdOldBlend = CrowdSettle.NearBlend;
+        CrowdSettle.NearBlend = FMath::FInterpConstantTo(CrowdOldBlend, CrowdTargetNear ? 1.f : 0.f, GetWorld()->GetDeltaSeconds(), 5.f);
+        const bool CrowdIsNear = CrowdTargetNear || CrowdSettle.NearBlend > 0.f;
+        if (CrowdWasNear != CrowdIsNear)
+        {
+            if (CrowdIsNear)
+            {
+                CrowdNearFigures.Add(CrowdSoldier);
+                ++CrowdSub->NearGeometryCount;
+                CrowdSoldier->SetSkeletalMeshAsset(LoadedSoldierMesh);
+                if (OwnerCompany->UniformAppearanceComponent) OwnerCompany->UniformAppearanceComponent->ApplyAppearanceToMesh(CrowdSoldier);
+                for (int32 CrowdMaterialIndex = 0; CrowdMaterialIndex < CrowdSoldier->GetNumMaterials(); ++CrowdMaterialIndex)
+                    if (!Cast<UMaterialInstanceDynamic>(CrowdSoldier->GetMaterial(CrowdMaterialIndex))) CrowdSoldier->CreateAndSetMaterialInstanceDynamic(CrowdMaterialIndex);
+                EnsureWeaponComponent(CrowdIndex);
+            }
+            else
+            {
+                CrowdNearFigures.Remove(CrowdSoldier);
+                --CrowdSub->NearGeometryCount;
+            }
+            CrowdSoldier->SetVisibility(CrowdIsNear, true);
+            bCrowdDirty = true;
+        }
+        if (CrowdOldBlend != CrowdSettle.NearBlend) bCrowdDirty = true;
+        // Both representations share the clock and complementary masked pixel coverage during 0.2s handoff.
+        if (CrowdIsNear && SoldierClips.IsValidIndex(CrowdIndex))
+        {
+            RestoreClip(CrowdSoldier, SoldierClips[CrowdIndex], VisualAnimationTime);
+            for (int32 CrowdMaterialIndex = 0; CrowdMaterialIndex < CrowdSoldier->GetNumMaterials(); ++CrowdMaterialIndex)
+                if (UMaterialInstanceDynamic* CrowdMID = Cast<UMaterialInstanceDynamic>(CrowdSoldier->GetMaterial(CrowdMaterialIndex)))
+                    CrowdMID->SetScalarParameterValue(TEXT("CrowdOpacity"), CrowdSettle.NearBlend);
+            if (WeaponComponents.IsValidIndex(CrowdIndex) && WeaponComponents[CrowdIndex])
+                for (int32 CrowdMaterialIndex = 0; CrowdMaterialIndex < WeaponComponents[CrowdIndex]->GetNumMaterials(); ++CrowdMaterialIndex)
+                    if (UMaterialInstanceDynamic* CrowdMID = Cast<UMaterialInstanceDynamic>(WeaponComponents[CrowdIndex]->GetMaterial(CrowdMaterialIndex)))
+                        CrowdMID->SetScalarParameterValue(TEXT("CrowdOpacity"), CrowdSettle.NearBlend);
+        }
+        CrowdSoldier->SetComponentTickEnabled(false);
+        if (!CrowdIsNear)
+        {
+            if (CrowdSoldier->GetSkeletalMeshAsset()) CrowdSoldier->SetSkeletalMeshAsset(nullptr);
+            if (WeaponComponents.IsValidIndex(CrowdIndex) && WeaponComponents[CrowdIndex])
+            {
+                WeaponComponents[CrowdIndex]->DestroyComponent();
+                WeaponComponents[CrowdIndex] = nullptr;
+            }
+        }
+    }
+}
+
+void UStrategyInfantryVisualComponent::EnsureWeaponComponent(int32 Index)
+{
+    if (!SoldierComponents.IsValidIndex(Index) || !WeaponComponents.IsValidIndex(Index) || WeaponComponents[Index]) return;
+    WeaponComponents[Index] = CreateWeaponComponent(SoldierComponents[Index]);
+}
+
+UStaticMeshComponent* UStrategyInfantryVisualComponent::CreateWeaponComponent(USkeletalMeshComponent* Soldier)
+{
+    if (!Soldier || !OwnerCompany) return nullptr;
+    UStaticMeshComponent* CrowdWeapon = NewObject<UStaticMeshComponent>(OwnerCompany, NAME_None, RF_Transient);
+    CrowdWeapon->SetStaticMesh(CurrentRifleMesh());
+    for (int32 CrowdMaterialIndex = 0; CrowdMaterialIndex < CrowdWeapon->GetNumMaterials(); ++CrowdMaterialIndex)
+        CrowdWeapon->CreateAndSetMaterialInstanceDynamic(CrowdMaterialIndex);
+    CrowdWeapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    CrowdWeapon->SetGenerateOverlapEvents(false);
+    CrowdWeapon->SetCastShadow(false);
+    CrowdWeapon->bVisibleInRayTracing = false;
+    CrowdWeapon->RegisterComponent();
+    CrowdWeapon->AttachToComponent(Soldier, FAttachmentTransformRules::SnapToTargetNotIncludingScale, RightHandBoneName);
+    CrowdWeapon->SetRelativeTransform(WeaponRelativeTransform);
+    return CrowdWeapon;
+}
+
+void UStrategyInfantryVisualComponent::UpdateStanceTransitions()
+{
+    if (!OwnerCompany || !OwnerCompany->StanceComponent) return;
+    const uint8 CrowdTargetStance = static_cast<uint8>(OwnerCompany->StanceComponent->Stance);
+    for (int32 CrowdFigureIndex = 0; CrowdFigureIndex < SoldierSettle.Num() && CrowdFigureIndex < SoldierComponents.Num(); ++CrowdFigureIndex)
+    {
+        FSettle& CrowdSettle = SoldierSettle[CrowdFigureIndex];
+        if (CrowdSettle.bActive || CrowdSettle.SwitchAt >= 0.f || CrowdSettle.StanceEnd > VisualAnimationTime) continue;
+        if (CrowdSettle.VisualStance == CrowdTargetStance)
+        {
+            if (CrowdSettle.StanceEnd >= 0.f)
+            {
+                CrowdSettle.StanceEnd = -1.f;
+                bool CrowdLoop = true;
+                UAnimSequence* CrowdIdle = ResolveAnimation(CrowdLoop);
+                PlayOnSoldier(SoldierComponents[CrowdFigureIndex], CrowdIdle, CrowdLoop, CrowdLoop);
+            }
+            continue;
+        }
+        // Standing=0, prone=1, kneeling=2. Standing/prone changes pass through kneeling.
+        int32 CrowdTransitionIndex = 0;
+        uint8 CrowdNextStance = 2;
+        if (CrowdSettle.VisualStance == 1) CrowdTransitionIndex = 3;
+        else if (CrowdSettle.VisualStance == 2)
+        {
+            CrowdNextStance = CrowdTargetStance;
+            CrowdTransitionIndex = CrowdTargetStance == 0 ? 1 : 2;
+        }
+        UAnimSequence* CrowdTransition = CrowdStanceClips.IsValidIndex(CrowdTransitionIndex) ? CrowdStanceClips[CrowdTransitionIndex].Get() : nullptr;
+        CrowdSettle.VisualStance = CrowdNextStance;
+        if (CrowdTransition)
+        {
+            PlayOnSoldier(SoldierComponents[CrowdFigureIndex], CrowdTransition, false, false);
+            CrowdSettle.StanceEnd = VisualAnimationTime + CrowdTransition->GetPlayLength();
+        }
+        else CrowdSettle.StanceEnd = VisualAnimationTime;
+    }
 }

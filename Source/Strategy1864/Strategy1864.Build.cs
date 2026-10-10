@@ -5,6 +5,10 @@ public class Strategy1864 : ModuleRules
     public Strategy1864(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        if (Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.Add("AssetRegistry"); // registrerer nye VAT-assets før Python gemmer dem
+        }
 
         PublicDependencyModuleNames.AddRange(
             new string[]

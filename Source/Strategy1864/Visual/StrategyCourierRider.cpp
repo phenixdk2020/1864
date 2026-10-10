@@ -5,6 +5,7 @@
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
 #include "../Units/StrategyUnit.h"
 #include "Animation/AnimSequence.h"
+#include "StrategyCrowdModel.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -161,6 +162,7 @@ void AStrategyCourierRider::Tick(float DeltaSeconds)
         const float RiderWave = FMath::Sin((Phase - 0.12f) * 2.0f * PI);
         Rider->SetRelativeLocation(FVector(-10.0f, 0.0f, SaddleHeightCm - RiderSeatCm + Gallop * 13.0f * (0.55f + 0.45f * RiderWave)));
         Rider->SetRelativeRotation(FRotator(-6.0f * Gallop, -90.0f, 0.0f));
+        UStrategyCrowdSubsystem::DrawAuxiliary(Rider, RiderModel, SeatClip, 0.05f);
     }
     const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
     if (Gallop > 0.0f && Now >= NextDust)

@@ -1,5 +1,17 @@
 # Jævn bevægelse i 3D-slaget
 
+## 2026-10-10: VAT på alle afstande
+
+Fodfolk, kavaleriets ryttere, stab og ordonnanser bruger gemte VAT-modeller som normal tegnevej. Det globale nærbudget er 24 levende skeletfigurer, valgt efter individuel kameraafstand (18 m ind, 20 m ud). `-Strategy1864CrowdNearest=N` ændrer budgettet. Transform og `FPlayedClip` bevares ved skift. Nærposen evalueres ud fra samme `VisualAnimationTime`, inden VAT-instansen skjules; skeletfiguren har ingen uafhængig animationstick. Farver, fase, play rate, pause og tidsdilation føres gennem instansdata.
+
+Levende/faldne har hver en tabel fra figuridentitet til stabil instansplads. Tab og ændret figurdivisor nulstiller ikke ISM'en; overlevende beholder deres instans-ID. Ledige pladser genbruges. Bagning sker manuelt med `Content/Python/bake_all_vat.py`, aldrig under tick. Manglende/ufuldstændige assets giver skeletfallback med `PROJECT1864-CROWD`-log.
+
+Stance-overgange bruger importerede rifle-klip, med knælende som mellemtrin mellem stående og liggende. Personlige skud afventer aktive overgange; ready/aim bevarer stance. Mundingsposition samples fra den bagte virtuelle geværbone. Dødsclip holder sin slutpose. Rytterens siddestilling samples ved 0,05 s og følger de eksisterende udjævnede sadeltransforms. Sabelplaceringen bevares, før skeletmesh frigives. Ryttertab skifter til separate faldne instanser uden at flytte overlevendes pladser og deler ligloftet med infanteriet. Heste og flag er fortsat statiske.
+
+Overgangen varer 0,2 s med komplementære pixelmasker for VAT, skeletfigur og gevær. Demoterede figurer frigiver deres skeletplads efter udtoning; nye nærfigurer venter på en ledig plads, så N-loftet bevares. VAT-lig bruger samme dækningsgrad til fade fra 60 til 65 s.
+
+Statisk kontrol er udført; ingen build, editor eller spil er startet. Maskernes visuelle kvalitet skal afprøves: VAT interpolerer 15 samples/s, skeletposen evaluerer klippet direkte, og materialer/skygger kan afvige. LOD0 og bagte normaler reducerer silhuet-/lysafvigelser. Se `Docs/Performance-Battle.md` for asset-kørsel og kontrolpunkter.
+
 Dato: 2026-10-08. Kodegennemgang af `Source/Strategy1864`; ingen Unreal-build eller afprøvning i spillet.
 
 ## Simulation til tegning

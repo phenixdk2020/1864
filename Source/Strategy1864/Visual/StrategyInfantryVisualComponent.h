@@ -21,6 +21,7 @@ class STRATEGY1864_API UStrategyInfantryVisualComponent : public UActorComponent
     GENERATED_BODY()
 
 public:
+    static void SelectNearestFigures(UWorld* World, const FVector& Camera, int32 Budget = 24);
     UStrategyInfantryVisualComponent();
 
 protected:
@@ -171,14 +172,17 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
     TSoftObjectPtr<UAnimSequence> DeathAsset3;
 
-    /** The hybrid: beyond CrowdFarCm from the camera the company's men (and its fallen) are drawn baked (one
-     *  instanced mesh, M_CrowdVAT, each man his own clip and time) instead of as animated skeletal meshes; back to
-     *  full animation inside CrowdNearCm. 0 turns it off (also -Strategy1864Crowd=0; -Strategy1864CrowdFar=<cm>). */
+    /** VAT is the default at every distance. Only the nearest CrowdNearestCount living figures inside
+     *  CrowdFarCm receive skeletal geometry. 0 disables VAT (also -Strategy1864Crowd=0). */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
-    float CrowdFarCm = 7000.0f;
+    float CrowdFarCm = 2000.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
-    float CrowdNearCm = 5500.0f;
+    float CrowdNearCm = 1800.0f;
+
+    /** Global nearest-figure budget; the first active company's setting is used for the frame. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry", meta=(ClampMin="0"))
+    int32 CrowdNearestCount = 24;
 
     UFUNCTION(BlueprintPure, Category="Strategy|Visual|Infantry")
     bool IsCrowdMode() const { return bCrowdMode; }
@@ -218,6 +222,19 @@ public:
     }
 
 private:
+    void UpdateNearestFigures(const FVector& Camera);
+    void WriteCrowdColours(float* Out) const;
+    float CrowdLastColours[13] = {};
+    TSet<TWeakObjectPtr<USkeletalMeshComponent>> CrowdNearFigures;
+    void EnsureWeaponComponent(int32 Index);
+    UStaticMeshComponent* CreateWeaponComponent(USkeletalMeshComponent* Soldier);
+    void UpdateStanceTransitions();
+    UPROPERTY(Transient)
+    TArray<TObjectPtr<UAnimSequence>> CrowdStanceClips;
+    TMap<TWeakObjectPtr<USkeletalMeshComponent>, int32> CrowdLivingIds;
+    TMap<TWeakObjectPtr<USkeletalMeshComponent>, int32> CrowdFallenIds;
+    TArray<int32> CrowdFreeLivingIds;
+    TArray<int32> CrowdFreeFallenIds;
     UFUNCTION()
     void HandleCasualtyVisualEvent(int32 AppliedLoss, FVector SourceLocation);
     void UpdateCorpses();
@@ -312,6 +329,9 @@ private:
         bool bPlaced = false;     // has been put in his first place
         bool bActive = false;     // is on his way to Goal
         float SwitchAt = -1.0f;   // when he takes up the pending clip (stance change), -1: none
+        uint8 VisualStance = 0;
+        float StanceEnd = -1.f;
+        float NearBlend = 0.f;
     };
     bool bScaleOnlyRebuild = false;
     FStrategyVisualFormationPath VisualPath;

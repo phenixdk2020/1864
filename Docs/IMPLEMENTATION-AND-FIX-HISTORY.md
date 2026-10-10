@@ -1829,6 +1829,17 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Minimal HUD-ændring: frasortering af ikke-valgte enheders fjerne/off-screen ruter. Måleplan, engine-kilder og begrænsninger i `Docs/Performance-Battle.md`, inklusive uverificeret årsag til firesekundershakket og specialuniform-fallback.
 - Statisk header-/diff-kontrol; intet build, editor/spil eller commit. gpu2-filer læst som reference; ingen gammel patch anvendt.
 
+### 2026-10-10 — VAT som normal tegnevej for alle menneskefigurer
+
+- Tilføjet `Content/Python/bake_all_vat.py` og editor-bagning af gemte modeller med fusioneret gevær/bajonet, alle fundne kompatible klip og indlejret RGBA32F-bonetekstur. Runtime indlæser færdige modeller; mangler giver skeletfallback med `PROJECT1864-CROWD`.
+- VAT på alle afstande; globalt nærbudget 24 figurer med 18/20-m-hysterese og tunable parameter. Fjerne figurobjekter bevares uden skeletmesh, våbenkomponent eller animationstick; nærfigurer deler VAT-klokkens pose/fase.
+- Tre uniformfarver og override-kontakter pr. instans; RGB-vertexmasker efter eksisterende højdebånd/hud-/remheuristik. Specialfarver tvinger ikke længere skeletvisning.
+- Stabile levende/faldne instanspladser med genbrug uden reshuffle, eksisterende loft 150 lig, dødsclip/slutpose og oprydning efter 65 s. VAT-mundinger samples fra bagt geværpose; stance-overgange og lyd-/ildhooks bevares.
+- Tilføjet 0,2-s-overgang med komplementære pixelmasker, også på nærgeværet; N-loftet holdes, mens gamle nærfigurer fader ud. VAT-lig fader mellem 60 og 65 s. Bagescriptet forbereder også næruniformernes parametre uden at åbne materialeeditorer; rettet UE 5.8-navnet `MaterialExpressionPreSkinnedPosition`.
+- Færdiggjort den delvise diff: ryttere, stab og ordonnanser bruger ubevæbnet VAT og samme globale nærbudget. Sadel-/bevægelsestransforms bevares; sabler beholder deres holdte håndplacering som statiske rekvisitter. Heste/flag var allerede statiske. Ryttertab deler 150-loftet med infanteriet, holder dødsposen og opryddes efter 65 s.
+- Sikret UV1–4 mod lightmap-overskrivning ved gemning/cook, fuld UV-præcision og bevarede normaler/tangenter (bake-version 3). Nye assets registreres før Python-gemning; genbagning nulstiller tidligere klip/materialedata. Cachede modeller kontrolleres også for senere efterspurgte klip. Shaderfejl stopper bagescriptet. Opdateret Performance-Battle, Smoothness-Battle, UnitCustomisation og packaging-mapper. Visuel accept og asset-genindlæsning kræver editorafprøvning.
+- Python AST, diff/whitespace og UE 5.8-headerkontrol. Ingen build, editor-/spilstart, asset-bagning eller commit udført.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

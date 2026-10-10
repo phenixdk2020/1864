@@ -1,3 +1,35 @@
+# VAT som standard for alle menneskefigurer — 2026-10-10
+
+Dette afsnit erstatter 40/32-m-politikken nedenfor. Gemte VAT-modeller tegner fodfolk, kavaleriets ryttere, stab og ordonnanser på alle afstande. Det globale nærbudget er 24 levende skeletfigurer, valgt efter den enkelte figurs kameraafstand: 18 m ind, 20 m ud. `CrowdNearestCount` (første vælger i framen, ellers 24) og `-Strategy1864CrowdNearest=N` ændrer budgettet; N=0 giver ren VAT. `CrowdFarCm`/`CrowdNearCm` ændrer radius/hysterese, og `-Strategy1864CrowdFar=cm` ændrer yderradius. `-Strategy1864Crowd=0` giver skeletvisning. Den ældre `Strategy1864.Perf.NearCm/NearCap` styrer ikke længere VAT-kompagniers nærbudget.
+
+VAT har fusioneret gevær/bajonet og ingen separat våbenkomponent. Fjerne figurobjekter bevares som transform-/tilstandsbeholdere, men får fjernet skeletmesh, våben og animationstick. Det er ikke en fuldstændig fjernelse af alle `USkeletalMeshComponent`-objekter. `Strategy1864BattleQuality` og dens figurdivisor/figurvalg går fortsat gennem `GetDesiredVisualCount`. Eksisterende målelog, der klassificerer hele kompagnier via `IsCrowdMode`, kan underrapportere de 24 nærfigurer. En 0,2-s-overgang bruger komplementære pixelmasker på VAT, skeletfigur og nærgevær; nye skeletfigurer venter på ledige pladser, mens tidligere nærfigurer fader ud, så N-loftet også holdes under overgangen.
+
+## Manuel asset-bagning
+
+Ingen editor er startet, og ingen uassets er produceret under arbejdet. Scriptet kræver et editor-modul med den nye `UStrategyCrowdModel::BakeAsset`-funktion. Når modulet er tilgængeligt, køres følgende manuelt fra projektmappen:
+
+```powershell
+& 'I:/Spil/Epic Games/UE_5.8/Engine/Binaries/Win64/UnrealEditor-Cmd.exe' 'R:/Onedrive/cx2/vat/Game1864.uproject' -run=pythonscript '-script=R:/Onedrive/cx2/vat/Content/Python/bake_all_vat.py' -unattended -AllowCommandletRendering
+```
+
+Scriptet opretter `M_CrowdVAT_All` og opdager fodsoldatmeshes under `/Game/Units`: infanteri, garde, jægere og eventuelle officer-/tromme-/fanebærermeshes. Den aktuelle filbestand har dansk infanteri, jægere, Livgarden og svensk infanteri; særskilte officer-/tromme-/fanebærermeshes blev ikke fundet. Hvert mesh bages med alle animationer med samme skeleton, begge fundne geværvarianter og en ubevæbnet variant. Det omfatter overgange, dødsvarianter, crawl og dying/dead, når de findes. Scriptet importerer ikke nye klip eller retargeter skeletons. Ryttere, stab og ordonnanser bruger den ubevæbnede variant af samme model. Heste og flag er allerede statiske; sabler forbliver statiske rekvisitter med den holdte håndpose. Rytterfigurer har ISM-grupper pr. ejer/model og levende/faldne, stabile pladser, farvedata og samme globale nærbudget som infanteriet.
+
+Modeller gemmes under `/Game/Battle/VAT/VAT_<mesh>_<gevær>` med indlejret statisk mesh, ukomprimeret RGBA32F-bonetekstur uden mipmaps, kliprækker og geværposer. Materialeinstanser rekonstrueres ved indlæsning; packaging inkluderer VAT- og materialemapperne. Manglende modeller, klip eller shader giver skeletfallback og `PROJECT1864-CROWD`-log. Der bages aldrig under slaget. Manglende gevær-CPU-geometri eller shaderfejl får bagningen til at fejle. Bake-version 3 bevarer UV1–4 som animationsdata med fuld præcision, slår lightmap-UV-generering fra og bevarer normaler/tangenter ved gemning/cook.
+
+## Uniform, tab og effekter
+
+Instansdata 0–3 er klip/start/frekvens; 4–6 jakke-RGB, 7–9 bukse-RGB, 10–12 hovedbeklædning-RGB, 13–15 override-kontakter og 16 pixelmaskens dækningsgrad. Farver interpoleres fra vertex- til pixeltrinnet. RGB-vertexfarver indeholder skønnede højdebånd; hud og lyse remme beskyttes med samme teksturheuristik som `prepare_campaign_uniforms.py`. Geværets masker er nul. Historisk låst palette respekteres; specialfarver tvinger ikke skeletfallback. Bagescriptet forbereder også nærfigurernes uniformparametre og tilføjer `CrowdOpacity` til soldat-/geværmaterialer. Eksisterende opacity masks bevares. UE 5.8-implementeringen af materialegraf-accessorerne læser direkte fra materialet, så ingen materialeeditor behøver åbnes.
+
+Levende og faldne har separate, stabile instanspladser. Tab flytter ikke overlevendes instans-ID, formationsplads eller fase; ledige pladser genbruges. Faldne spiller dødsclip én gang og holder slutposen; manglende dødsclip bruger prone-idle. Loftet på 150 samtidige menneskekroppe pr. slag deles mellem infanteri og ryttere; begge opryddes efter 65 s. Rytterens hest/sabel fjernes sammen med kroppen. VAT-lig fader med pixelmasken fra 60 til 65 s; infanterifallback bruger den eksisterende skelet-fade. Rytterfallback samples manuelt fra samme sæde-/dødsposition og holder slutposen indtil oprydning.
+
+Mundingsrøg bruger samme bagte geværpose som VAT-geometrien. Volley-, ild-, reload- og lydhooks bevares. Stående↔knælende og knælende↔liggende går gennem tilgængelige overgangsklip; stående↔liggende passerer knælende. Personlige skud afventer aktive overgange.
+
+## Kontrol og begrænsninger
+
+Python AST, diff/whitespace og relevante UE 5.8-headere er kontrolleret: texture source, `TC_HDR_F32`, static-mesh build, vertexfarver, instansdata, attachment, transform-blending og editor-world/asset registry. Ingen build, bagning, cook, spiltest eller GPU-måling er udført.
+
+Bagningen bruger LOD0 og fire stærkeste bone-influences for at bevare den tætte silhuet. CPU-animation reduceres, men flere GPU-vertices end den tidligere LOD3-crowd kan koste ydelse. Kontroller senere materialekompilering, serialisering/genindlæsning, normaler, uniformmasker, våbengreb, stances, pause/speed og skift gennem 18–20 m. Pixelmaskens overgang bevarer transform og animationsklokke uden brat skift; kvaliteten af dithering og forskelle mellem 15-Hz-interpoleret VAT og fuld skeletpose samt skygger/materialer er ikke visuelt verificeret.
+
 # Slagydelse – 2026-10-10
 
 Dette afsnit beskriver gpu3-ændringen og erstatter profil-/figurpolitikken i den ældre audit nedenfor. Ingen build, editor, spilstart eller GPU-måling er udført. gpu2 har ingen fungerende Git-reference på den angivne placering; det tidligere forsøg er læst direkte i GameMode, BattleQuality, BattleRenderBudget og dokumentationen. Ingen gammel patch er anvendt.
