@@ -762,7 +762,7 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
 
     // The unit's tag behind it (as the QA design): its name, its men, formation and fire policy.
     {
-        const FVector Behind = Project(OnGround(Unit->GetVisualCentroid() - Forward * 650.0f), false);   // offset from the living drawn centre
+        const FVector Behind = Project(OnGround(Unit->GetVisualCentroid() - Forward * (Unit->FormationComponent && Unit->FormationComponent->CurrentFormation == EStrategyFormationType::Line ? 330.0f : 650.0f)), false);   // close behind a line (its depth is only a few metres); further for a column/square
         if (Behind.Z > 0.0f)
         {
             const TCHAR* Formation = !Unit->FormationComponent ? TEXT("") :
@@ -1233,7 +1233,7 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     }
     if (!HudHQ && Cast<AStrategyCompanyUnit>(Unit))
         DrawButton(HudX[2], HudY + 160.f, HudW[2], 20.f, TEXT("AFBRYD"), EAction::Disengage, 0, HudCurrent == EStrategyOrderType::Disengage, Unit, &OrderRed);
-    DrawSpecialOrders(Unit, HudX[2], HudY + 184.f, HudW[2]);
+    DrawSpecialOrders(Unit, HudX[2] * HudScale, HudOriginY + (HudY + 184.f) * HudScale, HudW[2] * HudScale);   // the member draws in screen pixels
     if (!HudHQ) Text(BaseOrderLabel(Unit), HudX[2], HudY + 210.f, Muted, 0.65f);
     if (HudHQ)
     {
