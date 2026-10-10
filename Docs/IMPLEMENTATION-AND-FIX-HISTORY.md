@@ -1765,6 +1765,14 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Årsag: den tegnede fronts drejehastighed var gangfart delt med hele linjens længde (ca. 1,5 grader i sekundet), så mændene løb fra hinanden og linjen blev en L/S. Nu er hastigheden sat ud fra den ydre mands skridt (min 400 cm/s, 5-36 grader i sekundet), og mændene må løbe mens linjen drejer. Testet: rette linjer i skærmbilleder under angreb.
 - Merget fra Codex: beslutningslog og afstemning mod Kamp-AI-designet (`Docs/Kamp-AI-Afstemning.md`), HUD-knapper på hele udvalget, hover for stabe, faldne mænd, tog kræver jernbaneforskning (`Docs/Review-2026-10-09.md`).
 
+### 2026-10-09 - Slagets kommandobar tilpasset HUD-mockuppet
+
+- Tilpasset `StrategyHUD.cpp` efter `Docs/Design/HUD-mockup.png`: panelandele 18/24/16/20/22 %, markant enhedsfelt, store statistiktal, bogstavafstand i overskrifter og afrundede statistikbjælker. Maksimal styrke vises med en tynd skråstreg og afdæmpet tekst.
+- Ledelse og ild har tre inline-rækker med rødt ON, grønt OFF, doktrin, skydning og salvemetode. Valgte knapper har konturglød; ordreknapper har tegnede pile, krydsede sværd og stopkvadrat. AFBRYD er bevaret som en smal række.
+- Formation og stilling har ikoner og skillelinjer; afstandssporet har gul markering og adskilt keglevinkel. Underlagte har større tabelrækker, ordrepiller, grøn ON-kontur, fremhævet valg og fortsat rulning.
+- Barhøjde: `clamp(0.2 * ClipY, 190, 260)`. Designkoordinater og klikfelter bruger samme højdeskala `/226`. Handlinger, multivalg og debug-kliklog er bevaret; EAction-numre er uændrede.
+- Statisk kontrol mod UE 5.8-headerne for HUD-tegning, tekstmåling, FString og FBox2D. Ingen build, spilstart eller commit; visuel kontrol i spillet udestår.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

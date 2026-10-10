@@ -181,24 +181,60 @@ void AStrategyHUD::DrawPanel(float X, float Y, float W, float H)
 void AStrategyHUD::DrawButton(float X, float Y, float W, float H, const FString& Label, EAction Action, int32 Value, bool bActive,
     AStrategyUnit* Unit, const FLinearColor* Colour)
 {
-    if (bCommandStyle)
+    const float HudButtonScale = bCommandStyle ? CommandHeight() / 226.f : 1.f;
+    const bool HudOrderIcon = bCommandStyle && (Label == TEXT("RYK FREM") || Label == TEXT("TILBAGE") || Label == TEXT("CHARGE") || Label == TEXT("STOP"));
+    if (bCommandStyle && Action == EAction::OOBRow)
     {
-        // Pills: dark with a grey outline; the chosen one outlined and softly filled in green; coloured buttons tinted by their colour.
-        const FLinearColor Bright(0.30f, 0.88f, 0.50f, 1.f);
-        if (bActive && !Colour) { DrawRounded(X, Y, W, H, FLinearColor(0.04f, 0.24f, 0.13f, 1.f), &Bright); }
-        else if (Colour)
+        if (bActive) DrawRounded(X, Y, W, H, FLinearColor(0.045f, 0.12f, 0.16f, 0.9f), nullptr, 5.f * HudButtonScale);
+    }
+    else if (bCommandStyle)
+    {
+        const FLinearColor HudBright(0.25f, 0.88f, 0.50f, 1.f);
+        const FLinearColor HudEdge = Colour ? *Colour : bActive ? HudBright : FLinearColor(0.19f, 0.26f, 0.32f, 0.9f);
+        const FLinearColor HudFill = Colour ? FLinearColor(Colour->R * 0.16f, Colour->G * 0.16f, Colour->B * 0.16f, 1.f)
+            : bActive ? FLinearColor(0.025f, 0.19f, 0.10f, 1.f) : FLinearColor(0.025f, 0.041f, 0.055f, 1.f);
+        const float HudRadius = HudOrderIcon ? 10.f * HudButtonScale : H * 0.5f;
+        if (bActive)
         {
-            const FLinearColor Tint(Colour->R * 0.38f, Colour->G * 0.38f, Colour->B * 0.38f, 1.f);
-            const FLinearColor Edge(FMath::Min(1.f, Colour->R * 1.5f + 0.1f), FMath::Min(1.f, Colour->G * 1.5f + 0.1f), FMath::Min(1.f, Colour->B * 1.5f + 0.1f), 0.95f);
-            DrawRounded(X, Y, W, H, bActive ? FLinearColor(Colour->R * 0.6f, Colour->G * 0.6f, Colour->B * 0.6f, 1.f) : Tint, &Edge, H > 30.f ? 9.f : -1.f);
+            // Two translucent rings give the selected pill a restrained halo.
+            FLinearColor HudGlow = HudEdge; HudGlow.A = 0.13f;
+            DrawRounded(X - 3.f * HudButtonScale, Y - 3.f * HudButtonScale, W + 6.f * HudButtonScale, H + 6.f * HudButtonScale, HudGlow, &HudGlow, HudRadius + 3.f * HudButtonScale);
+            HudGlow.A = 0.28f;
+            DrawRounded(X - HudButtonScale, Y - HudButtonScale, W + 2.f * HudButtonScale, H + 2.f * HudButtonScale, HudGlow, &HudGlow, HudRadius + HudButtonScale);
         }
-        else { DrawRounded(X, Y, W, H, FLinearColor(0.030f, 0.045f, 0.070f, 1.f)); }
+        DrawRounded(X, Y, W, H, HudFill, &HudEdge, HudRadius);
+        DrawLine(X + HudRadius, Y + 2.f, X + W - HudRadius, Y + 2.f, FLinearColor(HudEdge.R, HudEdge.G, HudEdge.B, 0.18f), 1.f);
+        if (HudOrderIcon)
+        {
+            const float HudIX = X + 19.f * HudButtonScale, HudIY = Y + H * 0.5f;
+            const FLinearColor HudIconColour = Colour ? *Colour : Ink;
+            auto HudStroke = [&](float AX, float AY, float BX, float BY) { DrawLine(HudIX + AX * HudButtonScale, HudIY + AY * HudButtonScale, HudIX + BX * HudButtonScale, HudIY + BY * HudButtonScale, HudIconColour, 3.f * HudButtonScale); };
+            if (Label == TEXT("STOP")) DrawRect(HudIconColour, HudIX - 6.f * HudButtonScale, HudIY - 6.f * HudButtonScale, 12.f * HudButtonScale, 12.f * HudButtonScale);
+            else if (Label == TEXT("CHARGE"))
+            {
+                HudStroke(-7, -8, 7, 8); HudStroke(7, -8, -7, 8);
+                HudStroke(-8, 3, -3, 8); HudStroke(8, 3, 3, 8);
+                HudStroke(-7, -8, -2, -6); HudStroke(7, -8, 2, -6);
+            }
+            else
+            {
+                const float HudDirection = Label == TEXT("TILBAGE") ? -1.f : 1.f;
+                HudStroke(-7 * HudDirection, 0, 7 * HudDirection, 0);
+                HudStroke(1 * HudDirection, -7, 8 * HudDirection, 0);
+                HudStroke(8 * HudDirection, 0, 1 * HudDirection, 7);
+            }
+        }
     }
     else { DrawRect(Colour ? *Colour : bActive ? ActiveGreen : OrderRed, X, Y, W, H); }
     float TW = 0.0f, TH = 0.0f;
     GetTextSize(Label, TW, TH, nullptr, 1.0f);
-    const float ButtonScale = bCommandStyle ? FMath::Min(0.95f, (W - 8.f) / FMath::Max(1.f, TW)) : 1.f;
-    Text(Label, X + (W - TW * ButtonScale) * 0.5f, Y + (H - TH * ButtonScale) * 0.5f, bCommandStyle && Action == EAction::None ? Muted : Ink, ButtonScale);
+    const float HudTextInset = HudOrderIcon ? 34.f * HudButtonScale : 0.f;
+    const float ButtonScale = bCommandStyle ? FMath::Min(0.95f * HudButtonScale, (W - HudTextInset - 8.f * HudButtonScale) / FMath::Max(1.f, TW)) : 1.f;
+    const float HudTextX = X + HudTextInset + (W - HudTextInset - TW * ButtonScale) * 0.5f;
+    const float HudTextY = Y + (H - TH * ButtonScale) * 0.5f;
+    const FLinearColor HudTextColour = bCommandStyle && Action == EAction::None ? Muted : Ink;
+    Text(Label, HudTextX, HudTextY, HudTextColour, ButtonScale);
+    if (bCommandStyle) Text(Label, HudTextX + 0.35f * HudButtonScale, HudTextY, HudTextColour, ButtonScale);
     FButton B;
     B.Box = FBox2D(FVector2D(X, Y), FVector2D(X + W, Y + H));
     B.Action = Action;
@@ -946,25 +982,33 @@ void AStrategyHUD::DrawMinimap()
 
 float AStrategyHUD::CommandHeight() const
 {
-    return 226.f;
+    return Canvas ? FMath::Clamp(0.2f * Canvas->ClipY, 190.f, 260.f) : 226.f;
 }
 
 void AStrategyHUD::DrawRounded(float X, float Y, float W, float H, const FLinearColor& Fill, const FLinearColor* BorderOverride, float RadiusOverride)
 {
-    // Scanline rounded rectangles need no textures or additional fonts. Short ones are pills (radius = half the height).
-    const float Radius = FMath::Min(RadiusOverride >= 0.f ? RadiusOverride : (H <= 40.f ? H * 0.5f : 14.f), H * 0.5f);
+    // Pixel scanlines keep the contour one physical pixel wide at every viewport scale.
+    const float Radius = FMath::Min(RadiusOverride >= 0.f ? RadiusOverride : H * 0.5f, FMath::Min(W, H) * 0.5f);
     const FLinearColor Border = BorderOverride ? *BorderOverride : FLinearColor(0.20f, 0.26f, 0.33f, 0.85f);
     for (float Row = 0.f; Row < H; Row += 1.f)
     {
-        const float Edge = FMath::Min(Row, H - 1.f - Row);
+        const float Edge = FMath::Max(0.f, FMath::Min(Row + 0.5f, H - Row - 0.5f));
         const float Inset = Edge < Radius ? Radius - FMath::Sqrt(FMath::Max(0.f, Radius * Radius - FMath::Square(Radius - Edge))) : 0.f;
-        DrawRect(Border, X + Inset, Y + Row, FMath::Max(0.f, W - 2.f * Inset), 1.f);
-        if (Row > 0.f && Row < H - 1.f) DrawRect(Fill, X + Inset + 1.f, Y + Row, FMath::Max(0.f, W - 2.f * Inset - 2.f), 1.f);
+        const float HudRowHeight = FMath::Min(1.f, H - Row);
+        FLinearColor HudSoftEdge = Border; HudSoftEdge.A *= 0.35f;
+        DrawRect(HudSoftEdge, X + Inset - 0.5f, Y + Row, FMath::Max(0.f, W - 2.f * Inset + 1.f), HudRowHeight);
+        DrawRect(Border, X + Inset, Y + Row, FMath::Max(0.f, W - 2.f * Inset), HudRowHeight);
+        if (Row >= 1.f && Row < H - 1.f) DrawRect(Fill, X + Inset + 1.f, Y + Row, FMath::Max(0.f, W - 2.f * Inset - 2.f), HudRowHeight);
     }
 }
 
 void AStrategyHUD::DrawHeading(const FString& Label, float X, float Y, float W, int32 Icon)
 {
+    const float HudHeadingScale = CommandHeight() / 226.f;
+    const float HudHeadingX = X, HudHeadingY = Y;
+    X = 0.f; Y = 0.f; W /= HudHeadingScale;
+    auto DrawLine = [&](float AX, float AY, float BX, float BY, const FLinearColor& C, float T) { this->DrawLine(HudHeadingX + AX * HudHeadingScale, HudHeadingY + AY * HudHeadingScale, HudHeadingX + BX * HudHeadingScale, HudHeadingY + BY * HudHeadingScale, C, T * HudHeadingScale); };
+    auto DrawRect = [&](const FLinearColor& C, float AX, float AY, float AW, float AH) { this->DrawRect(C, HudHeadingX + AX * HudHeadingScale, HudHeadingY + AY * HudHeadingScale, AW * HudHeadingScale, AH * HudHeadingScale); };
     const FLinearColor Light(0.78f, 0.84f, 0.92f, 1.f);
     const float CX = X + 8.f, CY = Y + 9.f;
     switch (Icon)
@@ -974,14 +1018,23 @@ void AStrategyHUD::DrawHeading(const FString& Label, float X, float Y, float W, 
             break;
         case 1:   // crosshair
             DrawLine(CX - 8.f, CY, CX + 8.f, CY, Light, 1.2f); DrawLine(CX, CY - 8.f, CX, CY + 8.f, Light, 1.2f);
-            DrawLine(CX - 5.f, CY - 5.f, CX + 5.f, CY - 5.f, Light, 1.f); DrawLine(CX + 5.f, CY - 5.f, CX + 5.f, CY + 5.f, Light, 1.f);
-            DrawLine(CX + 5.f, CY + 5.f, CX - 5.f, CY + 5.f, Light, 1.f); DrawLine(CX - 5.f, CY + 5.f, CX - 5.f, CY - 5.f, Light, 1.f);
+            for (int32 HudArc = 0; HudArc < 16; ++HudArc)
+            {
+                const float HudAngleA = HudArc * 2.f * PI / 16.f, HudAngleB = (HudArc + 1) * 2.f * PI / 16.f;
+                DrawLine(CX + FMath::Cos(HudAngleA) * 6.f, CY + FMath::Sin(HudAngleA) * 6.f, CX + FMath::Cos(HudAngleB) * 6.f, CY + FMath::Sin(HudAngleB) * 6.f, Light, 1.5f);
+            }
             break;
         case 2:   // double chevron
             for (int32 k = 0; k < 2; ++k) { DrawLine(X + k * 7.f, CY - 7.f, X + 7.f + k * 7.f, CY, Light, 1.8f); DrawLine(X + 7.f + k * 7.f, CY, X + k * 7.f, CY + 7.f, Light, 1.8f); }
             break;
-        case 3:   // three dots in a triangle
-            DrawRect(Light, CX - 2.f, CY - 8.f, 5.f, 5.f); DrawRect(Light, CX - 8.f, CY + 2.f, 5.f, 5.f); DrawRect(Light, CX + 4.f, CY + 2.f, 5.f, 5.f);
+        case 3:   // people: heads above tapered shoulders
+            for (int32 HudPerson = 0; HudPerson < 3; ++HudPerson)
+            {
+                const float HudPX = CX + (HudPerson - 1) * 6.f, HudPY = CY + (HudPerson == 1 ? -5.f : 1.f);
+                DrawRect(Light, HudPX - 1.5f, HudPY - 3.f, 3.f, 3.f);
+                DrawLine(HudPX, HudPY + 2.f, HudPX - 2.f, HudPY + 6.f, Light, 2.f);
+                DrawLine(HudPX, HudPY + 2.f, HudPX + 2.f, HudPY + 6.f, Light, 2.f);
+            }
             break;
         default:  // layers
             for (int32 k = 0; k < 3; ++k)
@@ -992,21 +1045,39 @@ void AStrategyHUD::DrawHeading(const FString& Label, float X, float Y, float W, 
             }
             break;
     }
-    float TW = 0.f, TH = 0.f;
-    GetTextSize(Label, TW, TH);
-    Text(Label, X + 26.f, Y + 1.f, Light, FMath::Min(1.0f, (W - 26.f) / FMath::Max(TW, 1.f)));
+    float HudHeadingCursor = HudHeadingX + 30.f * HudHeadingScale;
+    float HudLabelW = 0.f, HudLabelH = 0.f;
+    GetTextSize(Label, HudLabelW, HudLabelH);
+    const float HudFontScale = FMath::Min(1.f, (W - 30.f) / FMath::Max(1.f, HudLabelW + Label.Len() * 1.4f)) * HudHeadingScale;
+    for (int32 HudLetter = 0; HudLetter < Label.Len(); ++HudLetter)
+    {
+        FString HudGlyph; HudGlyph.AppendChar(Label[HudLetter]);
+        Text(HudGlyph, HudHeadingCursor, HudHeadingY + HudHeadingScale, Light, HudFontScale);
+        float HudGlyphW = 0.f, HudGlyphH = 0.f;
+        GetTextSize(HudGlyph, HudGlyphW, HudGlyphH, nullptr, HudFontScale);
+        HudHeadingCursor += HudGlyphW + 1.4f * HudHeadingScale;
+    }
 }
 
 void AStrategyHUD::DrawStatBar(const FString& Label, const FString& Value, float Fraction, float X, float Y, float W)
 {
-    // A column: the small caption, the figure in large type, a thin rounded bar under it.
-    Text(Label, X, Y, Muted, 0.72f);
-    Text(Value, X, Y + 13.f, Ink, 1.25f);
+    const float HudStatScale = CommandHeight() / 226.f;
+    Text(Label, X, Y, Muted, 0.8f * HudStatScale);
+    int32 HudSlash = INDEX_NONE;
+    if (Value.FindChar(TCHAR('/'), HudSlash))
+    {
+        const FString HudCurrentValue = Value.Left(HudSlash);
+        float HudValueW = 0.f, HudValueH = 0.f;
+        Text(HudCurrentValue, X, Y + 20.f * HudStatScale, Ink, 1.5f * HudStatScale);
+        GetTextSize(HudCurrentValue, HudValueW, HudValueH, nullptr, 1.5f * HudStatScale);
+        Text(TEXT(" / ") + Value.Mid(HudSlash + 1), X + HudValueW, Y + 22.f * HudStatScale, Muted, 1.2f * HudStatScale);
+    }
+    else Text(Value, X, Y + 20.f * HudStatScale, Ink, 1.5f * HudStatScale);
     const float Level = FMath::Clamp(Fraction, 0.f, 1.f);
     const FLinearColor Track(0.10f, 0.13f, 0.17f, 1.f);
     const FLinearColor Colour = Level < 0.3f ? FLinearColor(0.88f, 0.20f, 0.18f) : Level < 0.6f ? FLinearColor(0.92f, 0.74f, 0.20f) : FLinearColor(0.20f, 0.85f, 0.42f);
-    DrawRounded(X, Y + 38.f, W, 7.f, Track, &Track, 3.5f);
-    if (Level > 0.02f) { DrawRounded(X, Y + 38.f, FMath::Max(7.f, W * Level), 7.f, Colour, &Colour, 3.5f); }
+    DrawRounded(X, Y + 46.f * HudStatScale, W, 9.f * HudStatScale, Track, &Track, 4.5f * HudStatScale);
+    if (Level > 0.02f) DrawRounded(X, Y + 46.f * HudStatScale, FMath::Max(9.f * HudStatScale, W * Level), 9.f * HudStatScale, Colour, &Colour, 4.5f * HudStatScale);
 }
 
 bool AStrategyHUD::HandleScroll(const FVector2D& Point, float Delta)
@@ -1019,21 +1090,32 @@ bool AStrategyHUD::HandleScroll(const FVector2D& Point, float Delta)
 void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
 {
     bCommandStyle = true;
-    const float HudY = Canvas->ClipY - CommandHeight();
-    const float HudWeights[] = {20.f, 26.f, 16.f, 22.f, 24.f};
+    // Work in the 226-pixel design space; drawing and button registration share this transform.
+    const float HudScale = CommandHeight() / 226.f;
+    const float HudOriginY = Canvas->ClipY - CommandHeight();
+    const float HudViewportW = Canvas->ClipX / HudScale;
+    const float HudY = 0.f;
+    auto Text = [&](const FString& T, float X, float Y, const FLinearColor& C, float S = 1.f) { this->Text(T, X * HudScale, HudOriginY + Y * HudScale, C, S * HudScale); };
+    auto DrawLine = [&](float X, float Y, float EX, float EY, const FLinearColor& C, float T) { this->DrawLine(X * HudScale, HudOriginY + Y * HudScale, EX * HudScale, HudOriginY + EY * HudScale, C, T); };
+    auto DrawRect = [&](const FLinearColor& C, float X, float Y, float W, float H) { this->DrawRect(C, X * HudScale, HudOriginY + Y * HudScale, W * HudScale, H * HudScale); };
+    auto DrawRounded = [&](float X, float Y, float W, float H, const FLinearColor& C, const FLinearColor* E = nullptr, float R = -1.f) { this->DrawRounded(X * HudScale, HudOriginY + Y * HudScale, W * HudScale, H * HudScale, C, E, R < 0.f ? H * HudScale * 0.5f : R * HudScale); };
+    auto DrawButton = [&](float X, float Y, float W, float H, const FString& T, EAction A, int32 V, bool Active, AStrategyUnit* U = nullptr, const FLinearColor* C = nullptr) { this->DrawButton(X * HudScale, HudOriginY + Y * HudScale, W * HudScale, H * HudScale, T, A, V, Active, U, C); };
+    auto DrawHeading = [&](const FString& T, float X, float Y, float W, int32 I) { this->DrawHeading(T, X * HudScale, HudOriginY + Y * HudScale, W * HudScale, I); };
+    auto DrawStatBar = [&](const FString& T, const FString& V, float F, float X, float Y, float W) { this->DrawStatBar(T, V, F, X * HudScale, HudOriginY + Y * HudScale, W * HudScale); };
+    const float HudWeights[] = {18.f, 24.f, 16.f, 20.f, 22.f};
     float HudX[5], HudW[5], HudCursor = 8.f;
-    const TCHAR* HudTitles[] = {TEXT("E N H E D"), TEXT("LEDELSE & ILD"), TEXT("O R D R E R"), TEXT("FORMATION"), TEXT("UNDERLAGTE")};
-    Panels.Add(FBox2D(FVector2D(0.f, HudY), FVector2D(Canvas->ClipX, Canvas->ClipY)));
+    const TCHAR* HudTitles[] = {TEXT("ENHED"), TEXT("LEDELSE & ILD"), TEXT("ORDRER"), TEXT("FORMATION"), TEXT("UNDERLAGTE")};
+    Panels.Add(FBox2D(FVector2D(0.f, HudOriginY), FVector2D(Canvas->ClipX, Canvas->ClipY)));
     {
         // One dark rounded bar behind the five panels.
         const FLinearColor BarFill(0.014f, 0.026f, 0.044f, 0.97f), BarEdge(0.16f, 0.22f, 0.30f, 0.9f);
-        DrawRounded(2.f, HudY + 2.f, Canvas->ClipX - 4.f, CommandHeight() - 4.f, BarFill, &BarEdge, 14.f);
+        DrawRounded(2.f, HudY + 2.f, HudViewportW - 4.f, 222.f, BarFill, &BarEdge, 14.f);
     }
     for (int32 PanelIndex = 0; PanelIndex < 5; ++PanelIndex)
     {
-        HudW[PanelIndex] = FMath::Max(1.f, (Canvas->ClipX - 48.f) * HudWeights[PanelIndex] / 108.f);
+        HudW[PanelIndex] = FMath::Max(1.f, (HudViewportW - 48.f) * HudWeights[PanelIndex] / 100.f);
         HudX[PanelIndex] = HudCursor + 10.f;
-        if (PanelIndex > 0) { DrawLine(HudCursor - 4.f, HudY + 14.f, HudCursor - 4.f, HudY + CommandHeight() - 16.f, FLinearColor(0.16f, 0.21f, 0.28f, 0.8f), 1.f); }
+        if (PanelIndex > 0) { DrawLine(HudCursor - 4.f, HudY + 14.f, HudCursor - 4.f, 210.f, FLinearColor(0.16f, 0.21f, 0.28f, 0.8f), 1.f); }
         DrawHeading(HudTitles[PanelIndex], HudX[PanelIndex], HudY + 14.f, HudW[PanelIndex] - 20.f, PanelIndex);
         DrawLine(HudX[PanelIndex], HudY + 34.f, HudX[PanelIndex] + HudW[PanelIndex] - 20.f, HudY + 34.f, FLinearColor(0.14f, 0.19f, 0.26f, 0.8f), 1.f);
         HudCursor += HudW[PanelIndex] + 8.f;
@@ -1061,20 +1143,21 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     {
         // The unit: a tile with its mark, the name in large type, the rank and post in spaced capitals, then the three figures.
         const FLinearColor TileFill(0.02f, 0.04f, 0.07f, 1.f), TileEdge(0.22f, 0.30f, 0.40f, 1.f);
-        DrawRounded(HudX[0], HudY + 42.f, 44.f, 44.f, TileFill, &TileEdge, 8.f);
-        DrawRect(FLinearColor(0.35f, 0.65f, 1.f, 1.f), HudX[0] + 18.f, HudY + 50.f, 8.f, 28.f);
+        DrawRounded(HudX[0], HudY + 42.f, 62.f, 62.f, TileFill, &TileEdge, 8.f);
+        DrawRect(FLinearColor(0.35f, 0.65f, 1.f, 1.f), HudX[0] + 27.f, HudY + 59.f, 8.f, 29.f);
         auto Spaced = [](const FString& In) { FString Out; for (int32 k = 0; k < In.Len(); ++k) { Out.AppendChar(In[k]); Out.AppendChar(TCHAR(' ')); } return Out; };
         GetTextSize(Unit->DisplayName.ToString(), HudTW, HudTH);
-        Text(Unit->DisplayName.ToString(), HudX[0] + 54.f, HudY + 42.f, Ink, FMath::Min(1.5f, (HudW[0] - 54.f) / FMath::Max(1.f, HudTW)));
-        Text(Spaced(HudRank), HudX[0] + 54.f, HudY + 64.f, Muted, 0.72f);
+        Text(Unit->DisplayName.ToString(), HudX[0] + 78.f, HudY + 42.f, Ink, FMath::Min(1.7f, (HudW[0] - 78.f) / FMath::Max(1.f, HudTW)));
+        GetTextSize(Spaced(HudRank), HudTW, HudTH);
+        Text(Spaced(HudRank), HudX[0] + 78.f, HudY + 70.f, Muted, FMath::Min(0.8f, (HudW[0] - 78.f) / FMath::Max(1.f, HudTW)));
         const FString HudPost = HudHQ ? TEXT("STABSKOMMANDO") : Unit->Echelon == EStrategyEchelon::Artillery ? TEXT("BATTERIKOMMANDO") : Unit->Echelon == EStrategyEchelon::Cavalry ? TEXT("KAVALERIKOMMANDO") : TEXT("KOMPAGNIKOMMANDO");
         GetTextSize(Spaced(HudPost), HudTW, HudTH);
-        Text(Spaced(HudPost), HudX[0] + 54.f, HudY + 79.f, Muted, FMath::Min(0.66f, (HudW[0] - 54.f) / FMath::Max(1.f, HudTW)));
-        DrawLine(HudX[0], HudY + 98.f, HudX[0] + HudW[0], HudY + 98.f, FLinearColor(0.14f, 0.19f, 0.26f, 0.8f), 1.f);
+        Text(Spaced(HudPost), HudX[0] + 78.f, HudY + 89.f, Muted, FMath::Min(0.8f, (HudW[0] - 78.f) / FMath::Max(1.f, HudTW)));
+        DrawLine(HudX[0], HudY + 119.f, HudX[0] + HudW[0], HudY + 119.f, FLinearColor(0.14f, 0.19f, 0.26f, 0.8f), 1.f);
         const float ColW = (HudW[0] - 20.f) / 3.f;
-        DrawStatBar(TEXT("STYRKE"), FString::Printf(TEXT("%d/%d"), Unit->CurrentStrength, Unit->InitialStrength), float(Unit->CurrentStrength) / FMath::Max(1, Unit->InitialStrength), HudX[0], HudY + 112.f, ColW);
-        DrawStatBar(TEXT("MORAL"), FString::Printf(TEXT("%.0f"), Unit->Morale), Unit->Morale / 100.f, HudX[0] + ColW + 10.f, HudY + 112.f, ColW);
-        DrawStatBar(TEXT("SAMHOLD"), FString::Printf(TEXT("%.0f"), Unit->Cohesion), Unit->Cohesion / 100.f, HudX[0] + 2.f * (ColW + 10.f), HudY + 112.f, ColW);
+        DrawStatBar(TEXT("STYRKE"), FString::Printf(TEXT("%d/%d"), Unit->CurrentStrength, Unit->InitialStrength), float(Unit->CurrentStrength) / FMath::Max(1, Unit->InitialStrength), HudX[0], HudY + 136.f, ColW);
+        DrawStatBar(TEXT("MORAL"), FString::Printf(TEXT("%.0f"), Unit->Morale), Unit->Morale / 100.f, HudX[0] + ColW + 10.f, HudY + 136.f, ColW);
+        DrawStatBar(TEXT("SAMHOLD"), FString::Printf(TEXT("%.0f"), Unit->Cohesion), Unit->Cohesion / 100.f, HudX[0] + 2.f * (ColW + 10.f), HudY + 136.f, ColW);
     }
     const AStrategyPlayerController* HudSelectionPC = Cast<AStrategyPlayerController>(GetOwningPlayerController());
     const TArray<AStrategyUnit*> HudSelected = HudSelectionPC ? HudSelectionPC->GetSelectedUnits() : TArray<AStrategyUnit*>();
@@ -1085,43 +1168,50 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         return false;
     };
     const bool HudFormationEnabled = HudSupports([](AStrategyUnit* HudCandidate) { return !IsCommandHQ(HudCandidate) && HudCandidate->FormationComponent; });
-    auto HudPills = [&](int32 Panel, float RowY, const TCHAR* const* Labels, int32 Count, EAction Action, int32 Active, bool Enabled = true)
+    const FLinearColor HudOnRed(0.65f, 0.24f, 0.28f, 1.f), HudOffGreen(0.22f, 0.82f, 0.46f, 1.f);
+    const float HudLeadW = HudW[1];
+    auto HudInlinePills = [&](float X, float W, float Y, const TCHAR* const* Labels, int32 Count, EAction Action, int32 Active, bool Enabled)
     {
-        const float PillW = (HudW[Panel] - (Count - 1) * 4.f) / Count;
-        for (int32 PillIndex = 0; PillIndex < Count; ++PillIndex)
-            DrawButton(HudX[Panel] + PillIndex * (PillW + 4.f), HudY + RowY, PillW, 23.f, Labels[PillIndex], Enabled ? Action : EAction::None, PillIndex, Active == PillIndex && Enabled, Unit);
+        const float HudPillWidth = (W - (Count - 1) * 4.f) / Count;
+        for (int32 HudPillIndex = 0; HudPillIndex < Count; ++HudPillIndex)
+            DrawButton(X + HudPillIndex * (HudPillWidth + 4.f), Y, HudPillWidth, 35.f, Labels[HudPillIndex], Enabled ? Action : EAction::None, HudPillIndex, Enabled && Active == HudPillIndex, Unit);
     };
-    Text(TEXT("AI"), HudX[1], HudY + 42.f, Muted, 0.7f);
-    const TCHAR* HudAI[] = {TEXT("ON"), TEXT("OFF")};
-    HudPills(1, 57.f, HudAI, 2, EAction::AIToggle, Unit->bOfficerAIEnabled ? 0 : 1);
-    Text(TEXT("DOKTRIN"), HudX[1], HudY + 84.f, Muted, 0.7f);
+    Text(TEXT("AI"), HudX[1], 61.f, Muted, 0.8f);
+    const float HudAIW = HudLeadW * 0.12f;
+    DrawButton(HudX[1] + HudLeadW * 0.16f, 49.f, HudAIW, 35.f, TEXT("ON"), EAction::AIToggle, 0, Unit->bOfficerAIEnabled, Unit, &HudOnRed);
+    DrawButton(HudX[1] + HudLeadW * 0.29f, 49.f, HudAIW, 35.f, TEXT("OFF"), EAction::AIToggle, 1, !Unit->bOfficerAIEnabled, Unit, &HudOffGreen);
+    DrawLine(HudX[1] + HudLeadW * 0.44f, 49.f, HudX[1] + HudLeadW * 0.44f, 84.f, RowColour, 1.f);
+    Text(TEXT("DOKTRIN"), HudX[1] + HudLeadW * 0.47f, 61.f, Muted, 0.8f);
     const TCHAR* HudDoctrine[] = {TEXT("DEF"), TEXT("BAL"), TEXT("OFF")};
-    HudPills(1, 99.f, HudDoctrine, 3, EAction::Doctrine, Unit->DoctrineComponent ? int32(Unit->DoctrineComponent->Doctrine) : -1, HudSupports([](AStrategyUnit* HudCandidate) { return HudCandidate->DoctrineComponent != nullptr; }));
-    Text(TEXT("SKYDNING"), HudX[1], HudY + 126.f, Muted, 0.7f);
+    HudInlinePills(HudX[1] + HudLeadW * 0.64f, HudLeadW * 0.36f, 49.f, HudDoctrine, 3, EAction::Doctrine, Unit->DoctrineComponent ? int32(Unit->DoctrineComponent->Doctrine) : -1, HudSupports([](AStrategyUnit* HudCandidate) { return HudCandidate->DoctrineComponent != nullptr; }));
+    DrawLine(HudX[1], 96.f, HudX[1] + HudLeadW, 96.f, RowColour, 1.f);
+    Text(TEXT("SKYDNING"), HudX[1], 119.f, Muted, 0.8f);
     const TCHAR* HudFire[] = {TEXT("HOLD"), TEXT("CLOSE"), TEXT("MED"), TEXT("LONG")};
-    HudPills(1, 141.f, HudFire, 4, EAction::FirePolicy, !HudHQ && Unit->FireControlComponent ? int32(Unit->FireControlComponent->FirePolicy) : -1, HudSupports([](AStrategyUnit* HudCandidate) { return !IsCommandHQ(HudCandidate) && HudCandidate->FireControlComponent; }));
-    Text(TEXT("SALVEMETODE"), HudX[1], HudY + 168.f, Muted, 0.7f);
+    HudInlinePills(HudX[1] + HudLeadW * 0.23f, HudLeadW * 0.77f, 107.f, HudFire, 4, EAction::FirePolicy, !HudHQ && Unit->FireControlComponent ? int32(Unit->FireControlComponent->FirePolicy) : -1, HudSupports([](AStrategyUnit* HudCandidate) { return !IsCommandHQ(HudCandidate) && HudCandidate->FireControlComponent; }));
+    DrawLine(HudX[1], 154.f, HudX[1] + HudLeadW, 154.f, RowColour, 1.f);
+    Text(TEXT("SALVEMETODE"), HudX[1], 177.f, Muted, 0.8f);
     const TCHAR* HudDrills[] = {TEXT("1.GLD"), TEXT("2.GLD"), TEXT("GELED"), TEXT("SALVE"), TEXT("FRI")};
     const EStrategyFireDrillMode HudModes[] = {EStrategyFireDrillMode::FrontRank, EStrategyFireDrillMode::TwoRankFire, EStrategyFireDrillMode::FireByRank, EStrategyFireDrillMode::Volley, EStrategyFireDrillMode::Independent};
     for (int32 DrillIndex = 0; DrillIndex < 5; ++DrillIndex)
     {
         const bool HudUnlocked = HudSupports([&](AStrategyUnit* HudCandidate) { return HudCandidate->FireDrillComponent && HudCandidate->FireDrillComponent->IsDrillModeUnlocked(HudModes[DrillIndex]); });
-        const float HudPillW = (HudW[1] - 16.f) / 5.f;
-        DrawButton(HudX[1] + DrillIndex * (HudPillW + 4.f), HudY + 183.f, HudPillW, 23.f, HudDrills[DrillIndex], HudUnlocked ? EAction::FireDrill : EAction::None, int32(HudModes[DrillIndex]), HudUnlocked && Unit->FireDrillComponent && Unit->FireDrillComponent->DrillMode == HudModes[DrillIndex], Unit);
+        const float HudPillW = (HudLeadW * 0.77f - 16.f) / 5.f;
+        DrawButton(HudX[1] + HudLeadW * 0.23f + DrillIndex * (HudPillW + 4.f), 165.f, HudPillW, 35.f, HudDrills[DrillIndex], HudUnlocked ? EAction::FireDrill : EAction::None, int32(HudModes[DrillIndex]), HudUnlocked && Unit->FireDrillComponent && Unit->FireDrillComponent->DrillMode == HudModes[DrillIndex], Unit);
     }
     const EStrategyOrderType HudCurrent = Unit->OrderComponent ? Unit->OrderComponent->GetCurrentOrder().Type : EStrategyOrderType::None;
     const float HudOrderW = (HudW[2] - 5.f) / 2.f;
-    const TCHAR* HudOrders[] = {TEXT("> RYK FREM"), TEXT("< TILBAGE"), TEXT("X CHARGE"), TEXT("[] STOP")};
+    const TCHAR* HudOrders[] = {TEXT("RYK FREM"), TEXT("TILBAGE"), TEXT("CHARGE"), TEXT("STOP")};
     const EAction HudActions[] = {EAction::Order, EAction::Order, EAction::Charge, EAction::Stop};
     const EStrategyOrderType HudTypes[] = {EStrategyOrderType::Advance, EStrategyOrderType::Withdraw, EStrategyOrderType::Charge, EStrategyOrderType::Hold};
     for (int32 OrderIndex = 0; OrderIndex < 4; ++OrderIndex)
     {
-        const FLinearColor* HudColour = OrderIndex == 0 ? &ExecutingBlue : OrderIndex == 2 ? &ActiveGreen : &OrderRed;
-        DrawButton(HudX[2] + (OrderIndex % 2) * (HudOrderW + 5.f), HudY + 43.f + (OrderIndex / 2) * 44.f, HudOrderW, 38.f, HudOrders[OrderIndex], HudActions[OrderIndex], int32(HudTypes[OrderIndex]), HudCurrent == HudTypes[OrderIndex], Unit, HudColour);
+        const FLinearColor HudOrderBlue(0.40f, 0.69f, 0.88f), HudOrderGreen(0.34f, 0.78f, 0.57f), HudOrderRed(0.85f, 0.39f, 0.43f);
+        const FLinearColor* HudColour = OrderIndex == 0 ? &HudOrderBlue : OrderIndex == 2 ? &HudOrderGreen : &HudOrderRed;
+        DrawButton(HudX[2] + (OrderIndex % 2) * (HudOrderW + 5.f), HudY + 49.f + (OrderIndex / 2) * (HudHQ ? 44.f : 70.f), HudOrderW, HudHQ ? 38.f : 58.f, HudOrders[OrderIndex], HudActions[OrderIndex], int32(HudTypes[OrderIndex]), HudCurrent == HudTypes[OrderIndex], Unit, HudColour);
     }
     if (!HudHQ && Cast<AStrategyCompanyUnit>(Unit))
-        DrawButton(HudX[2], HudY + 132.f, HudW[2], 30.f, TEXT("AFBRYD"), EAction::Disengage, 0, HudCurrent == EStrategyOrderType::Disengage, Unit, &OrderRed);
-    if (!HudHQ) Text(BaseOrderLabel(Unit), HudX[2], HudY + 185.f, Muted, 0.72f);
+        DrawButton(HudX[2], HudY + 184.f, HudW[2], 22.f, TEXT("AFBRYD"), EAction::Disengage, 0, HudCurrent == EStrategyOrderType::Disengage, Unit, &OrderRed);
+    if (!HudHQ) Text(BaseOrderLabel(Unit), HudX[2], HudY + 210.f, Muted, 0.65f);
     if (HudHQ)
     {
         const TCHAR* HudExtra[] = {TEXT("ANGRIB"), TEXT("FORSVAR"), TEXT("SAML")};
@@ -1134,39 +1224,61 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
             break;
         }
     }
-    const TCHAR* HudFormation[] = {TEXT("LINJE"), TEXT("KOLONNE"), TEXT("KARRE")};
+    const FLinearColor HudRowIcon(0.60f, 0.74f, 0.84f, 1.f);
+    for (int32 HudPerson = 0; HudPerson < 3; ++HudPerson)
+    {
+        const float HudPX = HudX[3] + 5.f + HudPerson * 7.f;
+        DrawRounded(HudPX, 52.f, 4.f, 4.f, HudRowIcon, &HudRowIcon, 2.f);
+        DrawLine(HudPX + 2.f, 59.f, HudPX - 1.f, 65.f, HudRowIcon, 2.f);
+        DrawLine(HudPX + 2.f, 59.f, HudPX + 5.f, 65.f, HudRowIcon, 2.f);
+    }
+    DrawLine(HudX[3], 88.f, HudX[3] + HudW[3], 88.f, RowColour, 1.f);
+    DrawLine(HudX[3], 142.f, HudX[3] + HudW[3], 142.f, RowColour, 1.f);
+    DrawRounded(HudX[3] + 8.f, 102.f, 4.f, 4.f, HudRowIcon, &HudRowIcon, 2.f);
+    DrawLine(HudX[3] + 10.f, 109.f, HudX[3] + 7.f, 118.f, HudRowIcon, 2.f);
+    DrawLine(HudX[3] + 7.f, 118.f, HudX[3] + 16.f, 118.f, HudRowIcon, 2.f);
+    DrawLine(HudX[3] + 16.f, 118.f, HudX[3] + 16.f, 111.f, HudRowIcon, 2.f);
+    const TCHAR* HudFormation[] = {TEXT("LINJE"), TEXT("KOLONNE"), TEXT("KARR\u00c9")};
     const EStrategyFormationType HudFormTypes[] = {EStrategyFormationType::Line, EStrategyFormationType::MarchColumn, EStrategyFormationType::Square};
     const int32 HudFormCount = Cast<ACavalryUnit>(Unit) ? 2 : 3;
     for (int32 FormIndex = 0; FormIndex < HudFormCount; ++FormIndex)
     {
-        const float HudFW = (HudW[3] - (HudFormCount - 1) * 4.f) / HudFormCount;
-        DrawButton(HudX[3] + FormIndex * (HudFW + 4.f), HudY + 43.f, HudFW, 23.f, HudFormation[FormIndex], HudFormationEnabled ? EAction::Formation : EAction::None, int32(HudFormTypes[FormIndex]), !HudHQ && Unit->FormationComponent && Unit->FormationComponent->CurrentFormation == HudFormTypes[FormIndex], Unit);
+        const float HudFW = (HudW[3] - 30.f - (HudFormCount - 1) * 4.f) / HudFormCount;
+        DrawButton(HudX[3] + 30.f + FormIndex * (HudFW + 4.f), HudY + 43.f, HudFW, 35.f, HudFormation[FormIndex], HudFormationEnabled ? EAction::Formation : EAction::None, int32(HudFormTypes[FormIndex]), !HudHQ && Unit->FormationComponent && Unit->FormationComponent->CurrentFormation == HudFormTypes[FormIndex], Unit);
     }
-    Text(TEXT("STILLING"), HudX[3], HudY + 78.f, Muted, 0.7f);
-    const TCHAR* HudStances[] = {TEXT("STA"), TEXT("KNAE"), TEXT("LIG")};
+    Text(TEXT("STILLING"), HudX[3] + 28.f, HudY + 108.f, Muted, 0.8f);
+    const TCHAR* HudStances[] = {TEXT("ST\u00c5"), TEXT("KN\u00c6"), TEXT("LIG")};
     const EStrategyStance HudStanceTypes[] = {EStrategyStance::Standing, EStrategyStance::Kneeling, EStrategyStance::Prone};
-    for (int32 StanceIndex = 0; StanceIndex < 3; ++StanceIndex)
+    const ACavalryUnit* HudStanceHorse = Cast<ACavalryUnit>(Unit);
+    const bool HudDismountRow = HudStanceHorse && HudStanceHorse->DragoonComponent && HudStanceHorse->DragoonComponent->Role == EStrategyCavalryRole::Dragoon;
+    for (int32 StanceIndex = 0; StanceIndex < (HudDismountRow ? 0 : 3); ++StanceIndex)
     {
-        const float HudSW = (HudW[3] - 8.f) / 3.f;
+        const float HudSW = (HudW[3] - 86.f) / 3.f;
         const bool HudCanStance = Cast<AStrategyCompanyUnit>(Unit) && Unit->StanceComponent;
-        DrawButton(HudX[3] + StanceIndex * (HudSW + 4.f), HudY + 94.f, HudSW, 23.f, HudStances[StanceIndex], HudCanStance ? EAction::Stance : EAction::None, int32(HudStanceTypes[StanceIndex]), HudCanStance && Unit->StanceComponent->Stance == HudStanceTypes[StanceIndex], Unit);
+        DrawButton(HudX[3] + 78.f + StanceIndex * (HudSW + 4.f), HudY + 96.f, HudSW, 35.f, HudStances[StanceIndex], HudCanStance ? EAction::Stance : EAction::None, int32(HudStanceTypes[StanceIndex]), HudCanStance && Unit->StanceComponent->Stance == HudStanceTypes[StanceIndex], Unit);
     }
     if (const ACavalryUnit* HudHorse = Cast<ACavalryUnit>(Unit))
     {
         if (HudHorse->DragoonComponent && HudHorse->DragoonComponent->Role == EStrategyCavalryRole::Dragoon)
         {
             const bool HudFoot = HudHorse->DragoonComponent->MountedState != EStrategyMountedState::Mounted;
-            DrawButton(HudX[3], HudY + 94.f, (HudW[3] - 4.f) / 2.f, 23.f, TEXT("SIT AF"), EAction::Dismount, 1, HudFoot, Unit);
-            DrawButton(HudX[3] + (HudW[3] + 4.f) / 2.f, HudY + 94.f, (HudW[3] - 4.f) / 2.f, 23.f, TEXT("STIG P\u00c5"), EAction::Dismount, 0, !HudFoot, Unit);
+            DrawButton(HudX[3] + 78.f, HudY + 96.f, (HudW[3] - 82.f) / 2.f, 35.f, TEXT("SIT AF"), EAction::Dismount, 1, HudFoot, Unit);
+            DrawButton(HudX[3] + 78.f + (HudW[3] - 74.f) / 2.f, HudY + 96.f, (HudW[3] - 82.f) / 2.f, 35.f, TEXT("STIG P\u00c5"), EAction::Dismount, 0, !HudFoot, Unit);
         }
     }
-    Text(TEXT("SKUDAFSTAND"), HudX[3], HudY + 130.f, Muted, 0.7f);
+    if (!HudHQ)
+    {
+        DrawLine(HudX[3] + 2.f, 161.f, HudX[3] + 18.f, 161.f, HudRowIcon, 1.5f);
+        DrawLine(HudX[3] + 10.f, 153.f, HudX[3] + 10.f, 169.f, HudRowIcon, 1.5f);
+        DrawRounded(HudX[3] + 5.f, 156.f, 10.f, 10.f, FLinearColor(0.014f, 0.026f, 0.044f), &HudRowIcon, 5.f);
+        Text(TEXT("SKUDAFSTAND"), HudX[3] + 28.f, HudY + 157.f, Muted, 0.8f);
+    }
     if (!HudHQ && Unit->FireControlComponent)
     {
         const UStrategyFireControlComponent* HudFC = Unit->FireControlComponent;
         const float HudRanges[] = {HudFC->CloseRangeCm, HudFC->MediumRangeCm, HudFC->LongRangeCm};
         // A horizontal range track with the three bands; the chosen one is a yellow pill. The cone half angle stands to the right.
-        const float TrackW = (HudW[3] - 24.f) * 0.62f, TrackX = HudX[3] + 12.f, TrackY = HudY + 156.f;
+        const float TrackW = (HudW[3] - 24.f) * 0.48f, TrackX = HudX[3] + 12.f, TrackY = HudY + 180.f;
         const FLinearColor TrackCol(0.12f, 0.16f, 0.21f, 1.f);
         DrawRounded(TrackX, TrackY, TrackW, 8.f, TrackCol, &TrackCol, 4.f);
         for (int32 RangeIndex = 0; RangeIndex < 3; ++RangeIndex)
@@ -1183,45 +1295,48 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
             GetTextSize(RangeText, RTW, RTH, nullptr, 0.72f);
             Text(RangeText, FMath::Clamp(HudRX - RTW * 0.5f, TrackX - 6.f, TrackX + TrackW - RTW + 6.f), TrackY + 14.f, HudChosen ? Gold : Muted, 0.72f);
         }
-        const float ConeX = TrackX + TrackW + 16.f;
-        DrawLine(ConeX, HudY + 160.f, ConeX + 14.f, HudY + 152.f, Muted, 1.2f);
-        DrawLine(ConeX, HudY + 160.f, ConeX + 14.f, HudY + 168.f, Muted, 1.2f);
-        DrawLine(ConeX + 14.f, HudY + 152.f, ConeX + 14.f, HudY + 168.f, Muted, 1.2f);
-        Text(FString::Printf(TEXT("KEGLE \u00b1%.0f\u00b0"), HudFC->FireConeHalfAngleDegrees), ConeX + 22.f, HudY + 153.f, Muted, 0.72f);
+        const float ConeX = TrackX + TrackW + 34.f;
+        DrawLine(ConeX - 16.f, 158.f, ConeX - 16.f, 207.f, Muted, 1.f);
+        DrawLine(ConeX, HudY + 185.f, ConeX + 14.f, HudY + 177.f, Muted, 1.2f);
+        DrawLine(ConeX, HudY + 185.f, ConeX + 14.f, HudY + 193.f, Muted, 1.2f);
+        DrawLine(ConeX + 14.f, HudY + 177.f, ConeX + 14.f, HudY + 193.f, Muted, 1.2f);
+        Text(FString::Printf(TEXT("KEGLE \u00b1%.0f\u00b0"), HudFC->FireConeHalfAngleDegrees), ConeX + 22.f, HudY + 178.f, Muted, 0.72f);
     }
     if (HudHQ && Unit->bOfficerAIEnabled && Unit->AITelemetryComponent && !Unit->AITelemetryComponent->CurrentTask.IsEmpty())
     {
-        Text(TEXT("OFFICEREN"), HudX[3], HudY + 132.f, Muted, 0.7f);
+        Text(TEXT("OFFICEREN"), HudX[3], HudY + 147.f, Muted, 0.8f);
         const FString HudTask = Unit->AITelemetryComponent->CurrentTask;
         GetTextSize(HudTask, HudTW, HudTH);
-        Text(HudTask, HudX[3], HudY + 148.f, Ink, FMath::Min(0.72f, HudW[3] / FMath::Max(1.f, HudTW)));
+        Text(HudTask, HudX[3], HudY + 161.f, Ink, FMath::Min(0.72f, HudW[3] / FMath::Max(1.f, HudTW)));
         const FString HudReason = Unit->AITelemetryComponent->ReasonCode;
         GetTextSize(HudReason, HudTW, HudTH);
-        Text(HudReason, HudX[3], HudY + 164.f, Muted, FMath::Min(0.66f, HudW[3] / FMath::Max(1.f, HudTW)));
+        Text(HudReason, HudX[3], HudY + 175.f, Muted, FMath::Min(0.66f, HudW[3] / FMath::Max(1.f, HudTW)));
     }
     const TArray<AStrategyUnit*> HudSubs = Subordinates(Unit);
     const float HudTableW = HudW[4] - 9.f;
     const float HudColumns[] = {0.f, 0.40f, 0.54f, 0.79f, 0.90f};
     const TCHAR* HudColumnNames[] = {TEXT("ENHED"), TEXT("M\u00c6ND"), TEXT("ORDRE"), TEXT("AI"), TEXT("TILK")};
-    for (int32 ColumnIndex = 0; ColumnIndex < 5; ++ColumnIndex) Text(HudColumnNames[ColumnIndex], HudX[4] + HudColumns[ColumnIndex] * HudTableW, HudY + 43.f, Muted, 0.62f);
-    const int32 HudVisible = 5;
+    for (int32 ColumnIndex = 0; ColumnIndex < 5; ++ColumnIndex) Text(HudColumnNames[ColumnIndex], HudX[4] + HudColumns[ColumnIndex] * HudTableW, HudY + 48.f, Muted, 0.8f);
+    const int32 HudVisible = 4;
+    const float HudTableRowH = HudSubs.Num() <= 2 ? 50.f : 35.f;
     SubordinateMaxOffset = FMath::Max(0, HudSubs.Num() - HudVisible);
     SubordinateOffset = FMath::Clamp(SubordinateOffset, 0, SubordinateMaxOffset);
-    SubordinateRect = FBox2D(FVector2D(HudX[4], HudY + 62.f), FVector2D(HudX[4] + HudW[4], HudY + 207.f));
+    SubordinateRect = FBox2D(FVector2D(HudX[4] * HudScale, HudOriginY + 62.f * HudScale), FVector2D((HudX[4] + HudW[4]) * HudScale, HudOriginY + 207.f * HudScale));
     for (int32 SubIndex = SubordinateOffset; SubIndex < FMath::Min(HudSubs.Num(), SubordinateOffset + HudVisible); ++SubIndex)
     {
         AStrategyUnit* HudSub = HudSubs[SubIndex];
-        const float HudRowY = HudY + 64.f + (SubIndex - SubordinateOffset) * 28.f;
-        DrawButton(HudX[4], HudRowY, HudTableW, 25.f, TEXT(""), EAction::OOBRow, 0, false, HudSub);
+        const float HudRowY = HudY + 64.f + (SubIndex - SubordinateOffset) * HudTableRowH;
+        DrawButton(HudX[4], HudRowY, HudTableW, HudTableRowH - 3.f, TEXT(""), EAction::OOBRow, 0, HudSelected.Contains(HudSub), HudSub);
+        DrawLine(HudX[4], HudRowY + HudTableRowH - 2.f, HudX[4] + HudTableW, HudRowY + HudTableRowH - 2.f, RowColour, 1.f);
         const bool HudAttached = HudSub->CommandComponent && HudSub->CommandComponent->CurrentCommandParent != HudSub->CommandComponent->OrganicParent;
         const FString HudCells[] = {HudSub->DisplayName.ToString(), FString::FromInt(MenUnder(HudSub)), BaseOrderLabel(HudSub).IsEmpty() ? FString(TEXT("-")) : BaseOrderLabel(HudSub), HudSub->bOfficerAIEnabled ? TEXT("ON") : TEXT("OFF"), HudAttached ? TEXT("ATT") : TEXT("-")};
         for (int32 CellIndex = 0; CellIndex < 5; ++CellIndex)
         {
             const float HudCellX = HudX[4] + HudColumns[CellIndex] * HudTableW;
             const float HudCellW = ((CellIndex == 4 ? 1.f : HudColumns[CellIndex + 1]) - HudColumns[CellIndex]) * HudTableW - 3.f;
-            if (CellIndex == 2 || CellIndex == 3) DrawRounded(HudCellX, HudRowY + 3.f, HudCellW, 19.f, CellIndex == 3 && HudSub->bOfficerAIEnabled ? ActiveGreen : RowColour);
+            if (CellIndex == 2 || CellIndex == 3) DrawRounded(HudCellX, HudRowY + (HudTableRowH - 26.f) * 0.5f, HudCellW, 26.f, FLinearColor(0.035f, 0.09f, 0.08f), CellIndex == 3 && HudSub->bOfficerAIEnabled ? &HudOffGreen : nullptr, 7.f);
             GetTextSize(HudCells[CellIndex], HudTW, HudTH);
-            Text(HudCells[CellIndex], HudCellX + 2.f, HudRowY + 6.f, Ink, FMath::Min(0.72f, (HudCellW - 4.f) / FMath::Max(1.f, HudTW)));
+            Text(HudCells[CellIndex], HudCellX + 2.f, HudRowY + (HudTableRowH - HudTH * FMath::Min(0.95f, (HudCellW - 4.f) / FMath::Max(1.f, HudTW))) * 0.5f, Ink, FMath::Min(0.95f, (HudCellW - 4.f) / FMath::Max(1.f, HudTW)));
         }
     }
     if (HudSubs.IsEmpty()) Text(TEXT("Ingen underlagte"), HudX[4], HudY + 73.f, Muted, 0.8f);
