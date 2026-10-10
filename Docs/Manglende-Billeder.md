@@ -1,81 +1,84 @@
-# Manglende bygningsbilleder - komplet liste (2026-10-10)
+# Bygningsbilleder - hvad mangler (kun bygninger) - 2026-10-10
 
-Master-listen er `Data/Campaign1851/Buildings1851.csv` (53 bygninger). Stil og format som de 20 leverede billeder: én bygning, rød mursten, skifertag, skråt fra oven, gennemsigtig baggrund, 768 x 768 PNG, bygningen fylder lærredet. Navngiv fx `B21_Navn.png`.
+Kilde: `Data/Campaign1851/Buildings1851.csv` (53 bygninger) og de 20 leverede billeder. Mål: **hver bygning har sit eget billede, ingen deler.**
 
-Status i dag: **10 har eget nyt billede**, **7 deler et billede med en anden bygning** (skal have eget), **36 har intet nyt billede** (gammelt eller slet ingen).
+Format: én bygning, rød mursten, skifertag, skråt fra oven, gennemsigtig baggrund, **768 x 768 PNG**, bygningen fylder lærredet, lille jordflade med detaljer. Navngiv `B21_Navn.png` og så videre, så kobler jeg dem.
 
-## 1. Har eget nyt billede (færdige)
+Status: 12 har eget billede, 5 deler billede (skal have eget), 19 har kun et gammelt billede, 17 har slet ikke noget.
+
+## 1. Deler billede i dag - lav et eget (5)
+
+| Bygning | Nøgle | Bruger nu | Motiv til det nye |
+|---|---|---|---|
+| Stalde | Garrison_Stables | B04 Stald (deles med Stald) | Lang kasernestald med mange bokse og ridehestene udenfor |
+| Depot og magasin | Garrison_Depot | B12 Magasin (deles med Kornmagasin) | Lav depotbygning med portrum, vogne og tønder (militært) |
+| Sygestue | Garrison_Infirmary | B18 Lazaret (deles med Lazaret) | Lille sygestue i ét plan med sygekøjer synlige gennem vinduerne |
+| Sygehus | Hospital | B18 Lazaret (deles med Lazaret) | Større sygehus med flere fløje og have (uden rødt kors) |
+| Havnepakhus | Harbor_Warehouse | B12 Magasin (deles med Kornmagasin) | Havnepakhus ved kajen med kran, tønder og kasser (ikke som kornmagasinet) |
+
+## 2. Har kun et gammelt billede - lav et nyt i samme stil (19)
+
+| Bygning | Nøgle | Motiv |
+|---|---|---|
+| Remontedepot | Remount_Depot | Stald og indhegning med militærheste, sadler |
+| Arsenal | Arsenal | Stor hal med våbenrum, kanonløb og kugler foran, vagt |
+| KanonstÃ¸beri | Cannon_Foundry | Støberi med høj skorsten, smeltedigler, kanonløb og forme |
+| GevÃ¦rvÃ¦rksted | Rifle_Workshop | Langt værksted med borde, geværer på stativ, skorsten |
+| Ammunitionsfabrik | Ammunition_Works | Lav fabrik med patronkasser, tønder, ammunitionsvogn |
+| Krudtmagasin | Powder_Magazine | Lille tykmuret murstensbygning med buet tag, jordvold, lynafleder, vagt |
+| Kystbatteri | Coastal_Battery | Jordværk mod havet med 3-4 kanoner, kuglestabler, flag |
+| Skanse / fÃ¦stningsvÃ¦rk | Star_Fort | Stjerneformet jordskanse med grave og volde, kanoner, flag |
+| Posthus | Post_Office | Postgård med postvogn, postbud, posthorn-skilt |
+| Skole | Schoolhouse | Skolebygning med klokke på taget, skolegård |
+| FyrtÃ¥rn | Lighthouse | Fyrtårn på klippe eller jordhøj med fyrmesterbolig |
+| TeglvÃ¦rk | Brickworks | Teglovn og tørrelade, teglstensstabler, vogne |
+| SavvÃ¦rk | Sawmill | Åben savehal med stammer, brædder, vandhjul |
+| MaskinvÃ¦rksted | Machine_Workshop | Værksted med drivremme, svinghjul, dampmaskine, skorsten |
+| KlÃ¦defabrik | Textile_Mill | Stor fabrik med mange vinduer, skorsten, uldballer |
+| Bryggeri og brÃ¦nderi | Brewery | Bryggeri med skorsten, tønder, kobberkedler, vogn |
+| KÃ¸bmandsgÃ¥rd | Merchant_House | Købmandshus med sidelænge, sække, tønder, skilt |
+| Stutteri | Stud_Farm | Stalde med fold og heste og føl, hegn |
+| Kro | Inn | Landevejskro med skilt, vogn og heste foran |
+
+## 3. Har slet intet billede (17)
+
+| Bygning | Nøgle | Motiv |
+|---|---|---|
+| Mobiliseringsdepot | Mobilization_Center | Stor central bygning med eksercerplads, indkaldelsesplakater, vognlæs af udrustning |
+| Officersskole | Officer_School | Statelig skolebygning med eksercerplads, kadetter |
+| KrudtvÃ¦rk | Gunpowder_Works | Krudtmølle med små adskilte bygninger, tønder, vandløb, jordvolde |
+| Tinghus / domhus | Courthouse | Tinghus med trappe, retsskilt, arrestbygning |
+| GodsbanegÃ¥rd | Freight_Depot | Godsbanegård med pakhus, godsvogne, kran, spor |
+| Banevogterhus | Railway_Gatehouse | Lille banevogterhus ved overskæring med bom og lygte |
+| Stenbro | Stone_Bridge | Stenbro med buer over å, vejbelægning |
+| SkibsvÃ¦rft | Shipyard | Skibsværft med skrog på beddinger, tømmer, kran |
+| Marinestation | Admiralty_Office | Marinestation med flag, anker og kanoner ved havn |
+| Vognfabrik | Wagon_Works | Vognfabrik med halvfærdige vogne, hjul, tømmer |
+| Sadelmageri | Saddlery | Sadelmageri med sadler og seletøj |
+| Garveri | Tannery | Garveri med huder på stativer, kar, skur |
+| Kulmine | Coal_Mine | Kulmine med skakttårn, tipvogne, kulbunker |
+| HerregÃ¥rd | Estate_Mansion | Stor herregård med to fløje, kvist, allé, park |
+| ProprietÃ¦rgÃ¥rd | Manor_House | Proprietærgård, firlænget i rød mursten med stråtag |
+| Husmandssted | Cottage | Lille stråtækt husmandssted med have og stakit |
+| BondegÃ¥rd (firlÃ¦nget) | Farmhouse | Bondegård, firlænget, stråtag, gårdsplads med brønd |
+
+## 4. Færdige, hver med eget billede (12)
 
 | Bygning | Nøgle | Billede |
 |---|---|---|
 | Infanterikaserne | Garrison_Barracks | B02 Kaserne |
+| Lazaret | Field_Hospital | B18 Lazaret |
 | RÃ¥dhus | Town_Hall | B17 Rådhus |
 | Telegrafstation | Telegraph_Office | B01 Telegraphstation |
 | Jernbanestation | Railway_Station | B13 Jernbanestation |
 | Toldbod / havnekontor | Harbor_Building | B20 Toldbod |
+| Kornmagasin | Grain_Warehouse | B12 Magasin |
 | Kirke | Church | B16 Kirke |
 | Lade | Barn | B05 Lade |
 | Smedje | Blacksmith | B08 Smedje |
 | Stald | Stable | B04 Stald |
 | VindmÃ¸lle | Windmill | B15 Mølle |
 
-## 2. Deler billede med en anden bygning - skal have sit eget
+## 5. Billeder du har lavet uden bygning
 
-| Bygning | Nøgle | Bruger nu | Deles med |
-|---|---|---|---|
-| Stalde | Garrison_Stables | B04 Stald | Stald |
-| Depot og magasin | Garrison_Depot | B12 Magasin | Kornmagasin, Havnepakhus |
-| Sygestue | Garrison_Infirmary | B18 Lazaret | Sygehus, Lazaret |
-| Lazaret | Field_Hospital | B18 Lazaret | Sygehus, Sygestue |
-| Sygehus | Hospital | B18 Lazaret | Lazaret, Sygestue |
-| Havnepakhus | Harbor_Warehouse | B12 Magasin | Kornmagasin, Depot og magasin |
-| Kornmagasin | Grain_Warehouse | B12 Magasin | Havnepakhus, Depot og magasin |
-
-## 3. Mangler billede (gammelt billede eller ingen)
-
-| Bygning | Nøgle | Kategori | Forslag til motiv |
-|---|---|---|---|
-| Mobiliseringsdepot | Mobilization_Center | MilitÃ¦r | Stor central bygning med eksercerplads, indkaldelsesplakater, vognlæs af udrustning (evt. B03 Kommandobygning) |
-| Remontedepot | Remount_Depot | MilitÃ¦r | Stald og indhegning med militærheste, sadler |
-| Officersskole | Officer_School | MilitÃ¦r | Statelig skolebygning med eksercerplads, kadetter (evt. B09 Officerbolig) |
-| Arsenal | Arsenal | MilitÃ¦r | Stor hal med våbenrum, kanonløb og kugler foran, vagt |
-| KanonstÃ¸beri | Cannon_Foundry | MilitÃ¦r | Støberi med høj skorsten, smeltedigler, kanonløb og forme |
-| GevÃ¦rvÃ¦rksted | Rifle_Workshop | MilitÃ¦r | Langt værksted med borde, geværer på stativ, skorsten |
-| Ammunitionsfabrik | Ammunition_Works | MilitÃ¦r | Lav fabrik med patronkasser, tønder, ammunitionsvogn |
-| KrudtvÃ¦rk | Gunpowder_Works | MilitÃ¦r | Krudtmølle med små adskilte bygninger, tønder, vandløb, jordvolde |
-| Krudtmagasin | Powder_Magazine | MilitÃ¦r | Lille tykmuret murstensbygning med buet tag, jordvold, lynafleder, vagt |
-| Kystbatteri | Coastal_Battery | MilitÃ¦r | Jordværk mod havet med 3-4 kanoner, kuglestabler, flag |
-| Skanse / fÃ¦stningsvÃ¦rk | Star_Fort | MilitÃ¦r | Stjerneformet jordskanse med grave og volde, kanoner, flag |
-| Tinghus / domhus | Courthouse | Civil | Tinghus med trappe, retsskilt, arrestbygning |
-| Posthus | Post_Office | Civil | Postgård med postvogn, postbud, posthorn-skilt |
-| Skole | Schoolhouse | Civil | Skolebygning med klokke på taget, skolegård |
-| GodsbanegÃ¥rd | Freight_Depot | Infrastruktur | Godsbanegård med pakhus, godsvogne, kran, spor |
-| Banevogterhus | Railway_Gatehouse | Infrastruktur | Lille banevogterhus ved overskæring med bom og lygte (evt. B11 Portnerbolig) |
-| Stenbro | Stone_Bridge | Infrastruktur | Stenbro med buer over å, vejbelægning |
-| FyrtÃ¥rn | Lighthouse | Havn | Fyrtårn på klippe/jordhøj med fyrmesterbolig |
-| SkibsvÃ¦rft | Shipyard | Havn | Skibsværft med skrog på beddinger, tømmer, kran |
-| Marinestation | Admiralty_Office | Havn | Marinestation/admiralitetsbygning ved havn med flag, anker, kanoner |
-| TeglvÃ¦rk | Brickworks | Industri | Teglovn og tørrelade, teglstensstabler, vogne |
-| SavvÃ¦rk | Sawmill | Industri | Åben savehal med stammer, brædder, vandhjul |
-| MaskinvÃ¦rksted | Machine_Workshop | Industri | Værksted med drivremme, svinghjul, dampmaskine, skorsten |
-| Vognfabrik | Wagon_Works | Industri | Vognfabrik med halvfærdige vogne, hjul, tømmer |
-| Sadelmageri | Saddlery | Industri | Sadelmageri med sadler og seletøj, hylder |
-| Garveri | Tannery | Industri | Garveri med huder på stativer, kar, skur |
-| KlÃ¦defabrik | Textile_Mill | Industri | Stor fabrik med mange vinduer, skorsten, uldballer |
-| Bryggeri og brÃ¦nderi | Brewery | Industri | Bryggeri med skorsten, tønder, kobberkedler, vogn |
-| Kulmine | Coal_Mine | Industri | Kulmine med skakttårn, tipvogne, kulbunker |
-| KÃ¸bmandsgÃ¥rd | Merchant_House | Handel | Købmandshus med sidelænge, sække, tønder, skilt (evt. B19 Markedshal) |
-| Stutteri | Stud_Farm | Landbrug | Stalde med fold og heste/føl, hegn |
-| HerregÃ¥rd | Estate_Mansion | Bolig | Stor herregård med to fløje, kvist, allé, park |
-| ProprietÃ¦rgÃ¥rd | Manor_House | Bolig | Proprietærgård, firlænget gård i rød mursten med stråtag |
-| Husmandssted | Cottage | Land | Lille stråtækt husmandssted med have og stakit |
-| BondegÃ¥rd (firlÃ¦nget) | Farmhouse | Land | Bondegård, firlænget, stråtag, gårdsplads med brønd |
-| Kro | Inn | Land | Landevejskro med skilt, vogn og heste foran |
-
-## 4. Billeder du har lavet, som ikke hører til en bygning endnu
-
-B03 Kommandobygning, B06 Infanteribygning, B07 Kanonbygning, B09 Officerbolig, B10 Mandskabsbolig, B11 Portnerbolig, B14 Vandmølle, B19 Markedshal. Forslag (jeg kobler dem, når du siger til): B03 til Mobiliseringsdepot, B09 til Officersskole, B11 til Banevogterhus, B19 til Købmandsgård, B06/B10 som kasernemoduler (Garnison), B07 som kanonhus (Arsenal-modul), B14 til en ny Vandmølle-bygning.
-
-## 5. Andet
-
-Uniformbilleder til 1825 (se Docs/Backlog.md) og billeder til bygninger, der kommer med de nye forskningsemner (Docs/Research-Tree.md, når Codex er færdig).
+B03 Kommandobygning, B06 Infanteribygning, B07 Kanonbygning, B09 Officerbolig, B10 Mandskabsbolig, B11 Portnerbolig, B14 Vandmølle (findes i spillet, ikke i CSV), B19 Markedshal. Forslag, så ingen deler: B03 til Mobiliseringsdepot, B09 til Officersskole, B11 til Banevogterhus, B19 til Købmandsgård, B06 og B10 som kasernemoduler, B07 som kanonhus (Arsenal-modul). Bygninger der får et af disse flytter fra afsnit 2 og 3 til afsnit 4.
