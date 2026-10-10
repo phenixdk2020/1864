@@ -157,14 +157,15 @@ void ACampaign1851Map::DetectBridges()
 		B.State = EBridgeState::Intact;
 		AddBridge(B, true);
 	}
-	// Presentation estimate for the simplified map: two parallel crossings 200 m apart.
-	// Keep their IDs, state and links, including compatibility with existing bridge saves.
+	// The two Copenhagen crossings stood too close together on the simplified map: Langebro (south) and Knippelsbro
+	// (north, towards the harbour) are kept about 0.7 km apart along the water, same IDs, state and links.
 	FCampaign1851Bridge* CopenhagenLong = Bridges.FindByPredicate([](const FCampaign1851Bridge& CopenhagenBridge) { return CopenhagenBridge.Name == TEXT("Langebro"); });
 	FCampaign1851Bridge* CopenhagenKnip = Bridges.FindByPredicate([](const FCampaign1851Bridge& CopenhagenBridge) { return CopenhagenBridge.Name == TEXT("Knippelsbro"); });
 	if (CopenhagenLong && CopenhagenKnip)
 	{
 		const FVector2D CopenhagenDirection = (CopenhagenLong->EndB - CopenhagenLong->EndA).GetSafeNormal();
-		const FVector2D CopenhagenOffset(-CopenhagenDirection.Y * 0.2, CopenhagenDirection.X * 0.2);
+		FVector2D CopenhagenOffset(-CopenhagenDirection.Y * 0.7, CopenhagenDirection.X * 0.7);
+		if (CopenhagenOffset.Y > 0.0) { CopenhagenOffset = -CopenhagenOffset; }   // world Y is south: Knippelsbro lies north of Langebro
 		CopenhagenKnip->EndA = CopenhagenLong->EndA + CopenhagenOffset;
 		CopenhagenKnip->EndB = CopenhagenLong->EndB + CopenhagenOffset;
 		CopenhagenKnip->Km = CopenhagenLong->Km + CopenhagenOffset;
