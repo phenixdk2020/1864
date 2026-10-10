@@ -1,4 +1,5 @@
 #include "StrategyGameMode.h"
+#include "../Audio/StrategyBattleAudio.h"
 
 #include "StrategyCameraPawn.h"
 #include "StrategyHUD.h"
@@ -13,6 +14,7 @@
 
 AStrategyGameMode::AStrategyGameMode()
 {
+    BattleAudio = CreateDefaultSubobject<UStrategyBattleAudio>(TEXT("BattleAudio"));
     DefaultPawnClass = AStrategyCameraPawn::StaticClass();
     PlayerControllerClass = AStrategyPlayerController::StaticClass();
     HUDClass = AStrategyHUD::StaticClass();

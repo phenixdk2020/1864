@@ -56,7 +56,7 @@ public:
 private:
     enum class EAction : uint8
     {
-        None, Minimap, FinishBattle, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, Disengage, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount, FigureScale, BattleQuality, TimeControl, Shadows, BuildFieldworks, SkirmishScreen, Spread
+        None, Minimap, FinishBattle, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, Disengage, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount, FigureScale, BattleQuality, TimeControl, Shadows, BuildFieldworks, SkirmishScreen, Spread, AudioVolume, AudioMute
     };
 
     struct FButton

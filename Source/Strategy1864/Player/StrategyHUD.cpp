@@ -1,4 +1,5 @@
 ﻿#include "StrategyHUD.h"
+#include "../Audio/StrategyBattleAudio.h"
 #include "../AI/StrategyOfficerProfileComponent.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
@@ -822,7 +823,7 @@ void AStrategyHUD::DrawSettings()
         return;
     }
     // A small window under the button: the camera's speed on the keys.
-    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 380.0f;
+    const float X = 342.0f, Y = 32.0f, W = 420.0f, H = 450.0f;
     DrawPanel(X, Y, W, H);
     Text(TEXT("INDSTILLINGER"), X + 12.0f, Y + 8.0f, Gold);
     const float Factor = AStrategyCameraPawn::GetKeySpeedFactor();
@@ -867,6 +868,16 @@ void AStrategyHUD::DrawSettings()
         const bool bShadows = Strategy1864BattleQuality::GetShadowsOn();
         DrawButton(X + 180.0f, Y + 338.0f, 72.0f, 24.0f, TEXT("TIL"), EAction::Shadows, 1, bShadows, nullptr, bShadows ? nullptr : &ButtonDark);
         DrawButton(X + 256.0f, Y + 338.0f, 72.0f, 24.0f, TEXT("FRA"), EAction::Shadows, 0, !bShadows, nullptr, !bShadows ? nullptr : &ButtonDark);
+    }
+    if (UStrategyBattleAudio* SettingsAudio = UStrategyBattleAudio::Find(this))
+    {
+        Text(TEXT("Lydstyrke"), X + 12.f, Y + 378.f, Ink);
+        DrawButton(X + 180.f, Y + 374.f, 30.f, 24.f, TEXT("-"), EAction::AudioVolume, -1, false, nullptr, &ButtonDark);
+        Text(FString::Printf(TEXT("%.0f %%"), SettingsAudio->GetMasterVolume() * 100.f), X + 220.f, Y + 378.f, Gold);
+        DrawButton(X + 296.f, Y + 374.f, 30.f, 24.f, TEXT("+"), EAction::AudioVolume, 1, false, nullptr, &ButtonDark);
+        Text(TEXT("Slaglyd"), X + 12.f, Y + 414.f, Ink);
+        DrawButton(X + 180.f, Y + 410.f, 146.f, 24.f, SettingsAudio->IsMuted() ? TEXT("LYDLØS") : TEXT("TIL"),
+            EAction::AudioMute, 0, !SettingsAudio->IsMuted(), nullptr, &ButtonDark);
     }
     const int32 Divisors[] = { 1, 2, 5 };
     for (int32 i = 0; i < 3; ++i)
@@ -1429,6 +1440,14 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                             Camera->FocusOnWorldLocation(World);
                         }
                     }
+                    break;
+                case EAction::AudioVolume:
+                    if (UStrategyBattleAudio* SettingsAudio = UStrategyBattleAudio::Find(this))
+                        SettingsAudio->SetSettings(SettingsAudio->GetMasterVolume() + B.Value * 0.1f, SettingsAudio->IsMuted());
+                    break;
+                case EAction::AudioMute:
+                    if (UStrategyBattleAudio* SettingsAudio = UStrategyBattleAudio::Find(this))
+                        SettingsAudio->SetSettings(SettingsAudio->GetMasterVolume(), !SettingsAudio->IsMuted());
                     break;
                 case EAction::SettingsToggle:
                     bSettingsOpen = !bSettingsOpen;

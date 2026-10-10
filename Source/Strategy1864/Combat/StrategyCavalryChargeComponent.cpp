@@ -1,4 +1,5 @@
 #include "StrategyCavalryChargeComponent.h"
+#include "../Audio/StrategyBattleAudio.h"
 #include "StrategyCombatComponent.h"
 #include "EngineUtils.h"
 
@@ -65,6 +66,8 @@ void UStrategyCavalryChargeComponent::BeginCharge()
         PreviousMoveSpeed = OwnerCavalry->MovementExecutor->MoveSpeedCmPerSecond;
     }
 
+    if (!bChargeActive)
+        if (UStrategyBattleAudio* ChargeAudio = UStrategyBattleAudio::Find(this)) ChargeAudio->Charge(OwnerCavalry, true);
     bChargeActive = true;
     bLastChargeRepulsed = false;
     ChargeMomentum = 0.0f;
@@ -206,6 +209,7 @@ AStrategyUnit* UStrategyCavalryChargeComponent::DetectEnemyContact(
 
 void UStrategyCavalryChargeComponent::EndCharge()
 {
+    if (UStrategyBattleAudio* ChargeAudio = UStrategyBattleAudio::Find(this)) ChargeAudio->Charge(OwnerCavalry, false);
     if (OwnerCavalry && OwnerCavalry->MovementExecutor)
     {
         OwnerCavalry->MovementExecutor->MoveSpeedCmPerSecond =
@@ -265,6 +269,7 @@ void UStrategyCavalryChargeComponent::ResolveImpact(AStrategyUnit* Target)
         FMath::Max(0.1f, Target->Morale / 100.0f) * FMath::Max(0.1f, Target->Cohesion / 100.0f));
     const float ImpactRatio = FMath::Clamp(AttackingPower / DefendingPower, 0.2f, 3.0f);
     const int32 ImpactLoss = FMath::RoundToInt(AttackingPower * ImpactLossPerRider * DirectionShock * FormationShock * ImpactRatio);
+    if (UStrategyBattleAudio* ImpactAudio = UStrategyBattleAudio::Find(this)) ImpactAudio->Clash(Target->GetActorLocation());
     Target->ApplyStrengthLoss(ImpactLoss);
     const float ImpactShare = float(ImpactLoss) / FMath::Max(1, Target->InitialStrength);
     Target->Morale = FMath::Max(0.0f, Target->Morale - ImpactMoraleShock * ImpactShare * DirectionShock);
