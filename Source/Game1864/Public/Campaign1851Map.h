@@ -1385,6 +1385,7 @@ public:
 	bool MoveFormation(int32 Id, int32 NewParent);
 	/** Puts a regiment in a formation (0 = back to its garrison). */
 	bool MoveRegimentToFormation(int32 Regiment, int32 Formation);
+	bool ReturnRegimentsToGarrison(const TArray<int32>& Units, FString* OutReason = nullptr);
 	/**
 	 * A general command's garrison units into the field army at once: under the army a division (the foot in
 	 * brigades of four, cavalry and batteries under the division, the command's general at its head), under a
