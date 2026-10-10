@@ -1,4 +1,5 @@
 #include "StrategyArtilleryFireMissionComponent.h"
+#include "../Audio/StrategyBattleAudio.h"
 
 #include "StrategyArtilleryBatteryUnit.h"
 #include "StrategyArtilleryDeploymentComponent.h"
@@ -738,6 +739,8 @@ bool UStrategyArtilleryFireMissionComponent::FireAt(
             100.0f);
 
     if (OwnerBattery->CombatComponent) OwnerBattery->CombatComponent->LastFiredTimeSeconds = GetWorld()->GetTimeSeconds();
+    if (UStrategyBattleAudio* BatteryAudio = UStrategyBattleAudio::Find(this))
+        BatteryAudio->Artillery(OwnerBattery->GetActorLocation(), Consumed);
     OnArtilleryShotResolved.Broadcast(
         Target,
         AmmoType,
@@ -1127,6 +1130,8 @@ bool UStrategyArtilleryFireMissionComponent::FireAtLocation(
             100.0f);
 
     if (OwnerBattery->CombatComponent) OwnerBattery->CombatComponent->LastFiredTimeSeconds = GetWorld()->GetTimeSeconds();
+    if (UStrategyBattleAudio* BatteryAudio = UStrategyBattleAudio::Find(this))
+        BatteryAudio->Artillery(OwnerBattery->GetActorLocation(), Consumed);
     OnArtilleryShotResolved.Broadcast(
         nullptr,
         AmmoType,

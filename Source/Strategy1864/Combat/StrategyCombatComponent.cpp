@@ -1,4 +1,5 @@
 #include "StrategyCombatComponent.h"
+#include "../Audio/StrategyBattleAudio.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
 #include "../AI/StrategyAutonomousBattleAIComponent.h"
 
@@ -377,6 +378,9 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
                 (RightDot >= 0.0f ? HalfExtent : -HalfExtent);
         }
     }
+
+    if (UStrategyBattleAudio* VolleyAudio = UStrategyBattleAudio::Find(this))
+        VolleyAudio->Volley(VisualOrigin, ShotCount, bUsesRifleAudio);
 
     OnVolleyVisualEvent.Broadcast(
         VisualOrigin,

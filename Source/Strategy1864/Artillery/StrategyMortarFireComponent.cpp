@@ -1,4 +1,5 @@
 #include "StrategyMortarFireComponent.h"
+#include "../Audio/StrategyBattleAudio.h"
 #include "../Combat/StrategyStanceComponent.h"
 #include "../Combat/StrategyCombatComponent.h"
 #include "StrategyMortarDeploymentComponent.h"
@@ -100,6 +101,8 @@ bool UStrategyMortarFireComponent::FireOneBomb()
         return false;
     }
 
+    if (UStrategyBattleAudio* MortarAudio = UStrategyBattleAudio::Find(this))
+        MortarAudio->Artillery(OwnerUnit->GetActorLocation(), 1, true);
     --AmmunitionBombs;
     ReloadRemainingSeconds = FMath::Max(0.5f, ReloadSeconds);
 

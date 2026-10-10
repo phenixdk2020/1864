@@ -157,3 +157,10 @@ Eksempel i PowerShell: `& .\Start-Test-3-Rytteri.bat -Strategy1864DebugOfficer "
 - **TEST RYTTERI:** samme opsætning som Test-3; husarerne får en fremrykningsordre, mens danske kompagnier afventer spilleren. Charge er observeret i log, men rytteri mod karré er ikke testet til ende.
 
 Knapperne tilføjer flag til den eksisterende kommandolinje og åbner Strategy1864_Skirmish. Baggrunden er det levende Danmarkskort. Knapperne skal fjernes efter testperioden; større regiment-/brigade-/divisionstests er stadig et senere punkt.
+
+## Slaglyd
+
+- `-Strategy1864NoSound`: deaktiverer slaglyd og lydindlæsning.
+- `-Strategy1864DebugAudio`: `PROJECT1864-AUDIO`-log med clip, afstand og volumen.
+
+Se [Audio.md](Audio.md) for WAV-generering, editorimport, HUD-indstillinger og manuel kontrol. Flagene giver ikke tilladelse til at starte spil eller editor.

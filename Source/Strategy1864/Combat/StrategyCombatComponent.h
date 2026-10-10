@@ -43,6 +43,10 @@ public:
         ELevelTick TickType,
         FActorComponentTickFunction* ThisTickFunction) override;
 
+    /** Kun lydpræsentation: vælg riffelknald for små riffelsalver. */
+    UPROPERTY(EditAnywhere, Category="Strategy|Audio")
+    bool bUsesRifleAudio = false;
+
     UPROPERTY(BlueprintAssignable, Category="Strategy|Combat")
     FStrategyVolleyResolved OnVolleyResolved;
 

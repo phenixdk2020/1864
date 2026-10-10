@@ -1791,6 +1791,14 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - De 20 nye bygningsbilleder fra Overførsler/Strategy1864_Buildings_All_20 (768x768, gennemsigtig baggrund) er beskåret, skaleret til 512 og lagt i `Reference/Campaign1851/Buildings` under de eksisterende T_Bld_-navne (kaserne, stald, lade, smedje, magasin, jernbanestation, vandmølle, mølle, kirke, rådhus, lazaret, told, telegraf) og importeret via `Tools/Campaign/import_building_cards.py`. Originalerne ligger i `Strategy1864_Original_20`. Nye uden kobling endnu: kommandobygning, infanteribygning, kanonbygning, officersbolig, mandskabsbolig, portnerbolig, markedshal.
 - Bygningslisten bruger stadig gamle billeder for bygninger uden nyt billede (fx geværværksted, kanonstøberi, savværk).
 
+### 2026-10-10 — Syntetisk slaglyd
+
+- Tilføjet offline-generator med numpy/pure-Python-fallback og 17 normaliserede WAV-filer samt SoundWave-importscript.
+- Tilføjet lydkomponent på game mode med preload via bløde stier, runtime-attenuation, fælles 24-stemmers concurrency, fast forsinkelseskø, lydhastighed og regionsbaseret fjern rumlen.
+- Koblet lyd på infanterisalver, begge artilleriforløb, morter, bajonetchok og kavalericharge. Separat lyd-RNG bevarer gameplay.
+- HUD-volumen/mute gemmes med slagindstillingerne; NoSound/DebugAudio og cooking af lydmappen dokumenteret i Audio.md og TestFlags.md.
+- WAV-validering og statisk kontrol udført; UE 5.8-headerne kontrolleret. Ingen build, spilstart, editorimport eller commit.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

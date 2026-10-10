@@ -1,4 +1,5 @@
 #include "StrategyFieldOfficerComponent.h"
+#include "../Audio/StrategyBattleAudio.h"
 #include "../Combat/StrategyCombatComponent.h"
 #include "../Combat/StrategyContactComponent.h"
 #include "../Combat/StrategyStanceComponent.h"
@@ -1041,6 +1042,7 @@ void UStrategyFieldOfficerComponent::ResolveShock(AStrategyUnit* Enemy)
     const float Ratio = FMath::Clamp(Weight(OwnerUnit) / FMath::Max(1.0f, Weight(Enemy)), 0.4f, 2.5f);
     const int32 EnemyLoss = FMath::RoundToInt(OwnerUnit->CurrentStrength * DecisionRandom.FRandRange(0.05f, 0.10f) * Ratio);
     const int32 OwnLoss = FMath::RoundToInt(Enemy->CurrentStrength * DecisionRandom.FRandRange(0.03f, 0.07f) / Ratio);
+    if (UStrategyBattleAudio* MeleeAudio = UStrategyBattleAudio::Find(this)) MeleeAudio->Clash(Enemy->GetActorLocation());
     Enemy->ApplyStrengthLoss(EnemyLoss);
     OwnerUnit->ApplyStrengthLoss(OwnLoss);
     Enemy->Morale = FMath::Clamp(Enemy->Morale - 20.0f * Ratio, 0.0f, 100.0f);

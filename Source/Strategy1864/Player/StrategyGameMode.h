@@ -6,6 +6,7 @@
 
 class AStrategyOOBTestScenario;
 class UStrategyScenarioStateComponent;
+class UStrategyBattleAudio;
 
 UCLASS()
 class STRATEGY1864_API AStrategyGameMode : public AGameModeBase
@@ -27,6 +28,9 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Scenario")
     TObjectPtr<UStrategyScenarioStateComponent> ScenarioStateComponent;
+
+    UPROPERTY(VisibleAnywhere, Category="Strategy|Audio")
+    TObjectPtr<UStrategyBattleAudio> BattleAudio;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Test")
     TObjectPtr<AStrategyOOBTestScenario> SpawnedQAScenario;
