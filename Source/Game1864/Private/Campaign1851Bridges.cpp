@@ -157,6 +157,19 @@ void ACampaign1851Map::DetectBridges()
 		B.State = EBridgeState::Intact;
 		AddBridge(B, true);
 	}
+	// Presentation estimate for the simplified map: two parallel crossings 200 m apart.
+	// Keep their IDs, state and links, including compatibility with existing bridge saves.
+	FCampaign1851Bridge* CopenhagenLong = Bridges.FindByPredicate([](const FCampaign1851Bridge& CopenhagenBridge) { return CopenhagenBridge.Name == TEXT("Langebro"); });
+	FCampaign1851Bridge* CopenhagenKnip = Bridges.FindByPredicate([](const FCampaign1851Bridge& CopenhagenBridge) { return CopenhagenBridge.Name == TEXT("Knippelsbro"); });
+	if (CopenhagenLong && CopenhagenKnip)
+	{
+		const FVector2D CopenhagenDirection = (CopenhagenLong->EndB - CopenhagenLong->EndA).GetSafeNormal();
+		const FVector2D CopenhagenOffset(-CopenhagenDirection.Y * 0.2, CopenhagenDirection.X * 0.2);
+		CopenhagenKnip->EndA = CopenhagenLong->EndA + CopenhagenOffset;
+		CopenhagenKnip->EndB = CopenhagenLong->EndB + CopenhagenOffset;
+		CopenhagenKnip->Km = CopenhagenLong->Km + CopenhagenOffset;
+		CopenhagenKnip->LengthM = CopenhagenLong->LengthM;
+	}
 	// Over the rivers and the canal (Campaign1851Hydro.cpp): where a road between two towns crosses one.
 	// After the others, so the bridges of older saves keep their numbers. The Elbe had no bridge in 1851.
 	auto Hit = [](const FVector2D& A, const FVector2D& B, const FVector2D& C, const FVector2D& D, FVector2D& Out)

@@ -1374,6 +1374,16 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	{
 		int32 Module = INDEX_NONE;
 		SCampaign1851Overlay::EButton Button = Overlay.IsValid() ? Overlay->HitButton(Mouse, &Module) : SCampaign1851Overlay::EButton::None;
+		if (Overlay.IsValid() && Button == SCampaign1851Overlay::EButton::RaisePreview)
+		{
+			Overlay->bRaisePreview = true;
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
+		if (Overlay.IsValid() && Button == SCampaign1851Overlay::EButton::RaisePreviewClose)
+		{
+			Overlay->bRaisePreview = false;
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
 		// The confirmation dialog: JA carries out the step asked about, NEJ drops it.
 		bool bConfirmed = false;
 		if (Button == SCampaign1851Overlay::EButton::ConfirmYes)
