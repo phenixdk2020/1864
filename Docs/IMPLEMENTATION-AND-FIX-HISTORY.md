@@ -1772,6 +1772,13 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Feltofficerens nærmeste-fjendevalg, rytterens nye charge-kandidater og kavaleritruslens position/hastighed kommer nu fra aktuelle lokale kontakter. Eksisterende autoritet, AI-toggle og kavalerikorridor-/varsling-/formationsregler er bevaret. Kontaktkadencen kan give op til 0,35 s observationsforsinkelse. Vedvarende charge/flankering og synlige kandidaters tilstand læses stadig på aktører.
 - Kontaktinputs logges via eksisterende `-Strategy1864DebugDecisions`. Afstemning, resterende punkt 2–7 og manuel kontaktregression er opdateret i `Docs/Kamp-AI-Afstemning.md`; logflagets dokumentation er opdateret i `Docs/TestFlags.md`. Ingen nye acceptflag eller påståede PASS-resultater.
 - UE 5.8-headerkontrol, gennemlæsning af diff og whitespace-kontrol. Ingen build, editor-/spilstart, runtime-test eller commit. Ingen ændring i kampagnens saveformat eller scenariedata.
+### 2026-10-09 - Slagets kommandobar tilpasset HUD-mockuppet
+
+- Tilpasset `StrategyHUD.cpp` efter `Docs/Design/HUD-mockup.png`: panelandele 18/24/16/20/22 %, markant enhedsfelt, store statistiktal, bogstavafstand i overskrifter og afrundede statistikbjælker. Maksimal styrke vises med en tynd skråstreg og afdæmpet tekst.
+- Ledelse og ild har tre inline-rækker med rødt ON, grønt OFF, doktrin, skydning og salvemetode. Valgte knapper har konturglød; ordreknapper har tegnede pile, krydsede sværd og stopkvadrat. AFBRYD er bevaret som en smal række.
+- Formation og stilling har ikoner og skillelinjer; afstandssporet har gul markering og adskilt keglevinkel. Underlagte har større tabelrækker, ordrepiller, grøn ON-kontur, fremhævet valg og fortsat rulning.
+- Barhøjde: `clamp(0.2 * ClipY, 190, 260)`. Designkoordinater og klikfelter bruger samme højdeskala `/226`. Handlinger, multivalg og debug-kliklog er bevaret; EAction-numre er uændrede.
+- Statisk kontrol mod UE 5.8-headerne for HUD-tegning, tekstmåling, FString og FBox2D. Ingen build, spilstart eller commit; visuel kontrol i spillet udestår.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
