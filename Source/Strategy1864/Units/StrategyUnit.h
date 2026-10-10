@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "../UI/StrategySemanticZoomTypes.h"
+#include "../Combat/StrategyBattleLedger.h"
 #include "StrategyUnit.generated.h"
 
 class USceneComponent;
@@ -340,6 +341,18 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Strategy|Combat")
     int32 ApplyStrengthLoss(int32 RequestedLoss);
+
+    FStrategyBattleLedger BattleLedger;
+    FName BattleCasualtyCause = TEXT("Unknown");
+    TWeakObjectPtr<AStrategyUnit> BattleInflictor;
+    void EnsureBattleLedger();
+    void RecordBattleLoss(int32 AppliedLoss, FName Cause);
+    int32 ApplyStrengthLossWithCause(int32 RequestedLoss, FName Cause, AStrategyUnit* Inflictor = nullptr);
+    void RecordBattleVolley(int32 Rounds);
+    void CaptureBattlePrisoners(AStrategyUnit* Captor);
+    void RecordEquipmentAbandonment();
+    void RecordEquipmentCapture(AStrategyUnit* Captor);
+    FStrategyReportEquipment RemainingReportEquipment() const;
 
     /** Transient fire-source context; the casualty delegate still reports the unit location. */
     FVector CasualtySourceLocation = FVector::ZeroVector;

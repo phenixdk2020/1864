@@ -516,6 +516,7 @@ TArray<FCampaign1851OfficerSave> ACampaign1851Map::SaveOfficers() const
 		S.Command = Commands.IsValidIndex(O.Command) ? Commands[O.Command].Id : FString();
 		S.CaptainOf = Regiments.IsValidIndex(O.CaptainOf) ? Regiments[O.CaptainOf].Id : FString();
 		S.Company = O.Company;
+		S.Career = O.Career;
 		S.Away = O.Away;
 		S.AwayUntil = O.Away != 0 ? O.AwayUntil.ToIso8601() : FString();
 	}
@@ -554,6 +555,7 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 			O.Stats[s] = S.Stats[s];
 		}
 		O.Experience = S.Experience;
+		O.Career = S.Career;
 		O.Away = S.Away;
 		if (S.Away != 0) { FDateTime::ParseIso8601(*S.AwayUntil, O.AwayUntil); }
 		const int32 Index = Officers.Add(O);
@@ -886,7 +888,9 @@ void ACampaign1851Map::ApplyOfficerCasualties(const TArray<TSharedPtr<FJsonValue
 			continue;
 		}
 		const FString Id = J->GetStringField(TEXT("id"));
-		const bool bCaptured = J->GetStringField(TEXT("fate")) == TEXT("captured");
+		const FString ReportOfficerFate = J->GetStringField(TEXT("fate"));
+		if (ReportOfficerFate != TEXT("wounded") && ReportOfficerFate != TEXT("captured")) { continue; }
+		const bool bCaptured = ReportOfficerFate == TEXT("captured");
 		const int32 Officer = Officers.IndexOfByPredicate([&Id](const FCampaign1851Officer& O) { return O.Id == Id; });
 		if (Officer == INDEX_NONE)
 		{

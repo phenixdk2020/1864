@@ -1829,6 +1829,15 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Minimal HUD-ændring: frasortering af ikke-valgte enheders fjerne/off-screen ruter. Måleplan, engine-kilder og begrænsninger i `Docs/Performance-Battle.md`, inklusive uverificeret årsag til firesekundershakket og specialuniform-fallback.
 - Statisk header-/diff-kontrol; intet build, editor/spil eller commit. gpu2-filer læst som reference; ingen gammel patch anvendt.
 
+### 2026-10-10 — Rapport efter slaget, tjenestehistorik og officerskarriere
+
+- Gennemgået og færdiggjort den delvise implementering: hændelsesbaseret tabsregnskab for faldne, sårede, fanger, udstyr, ammunition, tid i kamp og største moraltab. Stabe tæller ikke underordnede mænd igen; uindtrådte reserver udelades.
+- Rapport pr. side og enhed med VIS RAPPORT/LUK, sider, dansk sammenfatning, tekstfil i Saved/Reports og PROJECT1864-REPORT-log. Kort eksplicit rapporttest og debugflag dokumenteret i AfterAction.md og TestFlags.md.
+- Præcise 3D-tab føres til kampagnens mænd, lazaret, fanger og udstyr. Våben/heste/kanoner på lager betaler ikke igen for allerede udleveret materiel. Ammunitionsforbrug anvendes som andel af startbeholdningen.
+- Ved AFSLUT SLAGET skrives startstyrke, dato, sted, tab, udstyr og holdt felt/tilbagetrækning i tjenestehistorikken med løbende totaler. Officerernes deltagelse, sår, fangenskab og udmærkelser registreres i Campaign1851Career.cpp og vises på officerskortet. Officerer kan aldrig dø i slag.
+- Gemmeversion 32 bevarer rapport, fangepuljer, udvidede tjenesteposter og karrierer; gamle tjenesteposter og gemninger læses stadig. Automatisk afgørelse får en særskilt rapport med spilestimater og umålte felter markeret.
+- Statisk gennemgang, UE 5.8-headerkontrol og diff-kontrol. Ingen build, spil/editorstart eller commit; runtime-verifikation afventer.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

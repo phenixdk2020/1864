@@ -209,7 +209,7 @@ bool ACampaign1851Map::FightBattleIn3D(int32 BattleId)
 		}
 		Near.Sort([](const TPair<float, int32>& A, const TPair<float, int32>& C) { return A.Key < C.Key; });
 		TArray<TSharedPtr<FJsonValue>> Reserve;
-		for (int32 k = 0; k < Near.Num() && k < 3; ++k) { Reserve.Add(MakeShared<FJsonValueString>(Regiments[Near[k].Value].Id)); }
+		for (int32 k = 0; k < Near.Num() && k < 3; ++k) { Reserve.Add(MakeShared<FJsonValueString>(Regiments[Near[k].Value].Id)); B->Regiments.AddUnique(Near[k].Value); }
 		Doc->SetArrayField(TEXT("reserveUnitIds"), Reserve);
 	}
 	Doc->SetArrayField(TEXT("fortIds"), FortIds);
@@ -267,6 +267,12 @@ void ACampaign1851Map::PollBattleResults()
 			UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|battle|Ugyldigt format eller udfald i %s; slaget venter fortsat"), *Path);
 			continue;
 		}
+        int32 ReportBattleId = 0;
+        if (!Json->TryGetNumberField(TEXT("battleId"), ReportBattleId) || ReportBattleId != Battles[b].Id)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("PROJECT1864-REPORT: forkert slag-id i %s; slaget venter fortsat"), *Path);
+            continue;
+        }
 		O.bDanishWin = Outcome == TEXT("danish_victory");
 		O.bDraw = Outcome == TEXT("draw");
 		double EnemyLosses = 0.0;
@@ -330,7 +336,87 @@ void ACampaign1851Map::PollBattleResults()
 				}
 			}
 		}
+        int32 ReportVersion = 0;
+        if (Json->HasField(TEXT("reportVersion")))
+        {
+            bool bValidReport = Json->TryGetNumberField(TEXT("reportVersion"), ReportVersion) && ReportVersion == 1;
+            auto ReportCount = [&bValidReport](const TSharedPtr<FJsonObject>& ReportObject, const TCHAR* ReportKey, int32& ReportInto)
+            {
+                double ReportValue = 0.0;
+                if (!ReportObject.IsValid() || !ReportObject->TryGetNumberField(ReportKey, ReportValue) || !FMath::IsFinite(ReportValue) ||
+                    ReportValue < 0.0 || ReportValue > 10000000.0 || ReportValue != FMath::FloorToDouble(ReportValue))
+                {
+                    bValidReport = false;
+                    return;
+                }
+                ReportInto = int32(ReportValue);
+            };
+            auto ReportKit = [&bValidReport, &ReportCount](const TSharedPtr<FJsonObject>& ReportObject, const TCHAR* ReportKey, FCampaign1851ReportEquipment& ReportInto)
+            {
+                const TSharedPtr<FJsonObject>* ReportEquipmentObject = nullptr;
+                if (!ReportObject.IsValid() || !ReportObject->TryGetObjectField(ReportKey, ReportEquipmentObject)) { bValidReport = false; return; }
+                ReportCount(*ReportEquipmentObject, TEXT("mortars"), ReportInto.Mortars);
+                ReportCount(*ReportEquipmentObject, TEXT("guns"), ReportInto.Guns);
+                ReportCount(*ReportEquipmentObject, TEXT("rifles"), ReportInto.Rifles);
+                ReportCount(*ReportEquipmentObject, TEXT("horses"), ReportInto.Horses);
+                ReportCount(*ReportEquipmentObject, TEXT("wagons"), ReportInto.Wagons);
+                ReportCount(*ReportEquipmentObject, TEXT("colours"), ReportInto.Colours);
+            };
+            ReportCount(Json, TEXT("enemyKilled"), O.EnemyCasualties.X);
+            ReportCount(Json, TEXT("enemyWounded"), O.EnemyCasualties.Y);
+            ReportCount(Json, TEXT("enemyPrisoners"), O.EnemyCasualties.Z);
+            ReportKit(Json, TEXT("capturedEquipment"), O.ReportCaptured);
+            ReportKit(Json, TEXT("lostEquipment"), O.ReportLost);
+            ReportKit(Json, TEXT("enemyLostEquipment"), O.ReportEnemyLost);
+            bValidReport = Json->TryGetStringField(TEXT("reportText"), O.ReportText) && bValidReport;
+            bValidReport = bValidReport && O.EnemyCasualties.X + O.EnemyCasualties.Y + O.EnemyCasualties.Z == O.EnemyLosses;
+            TSet<int32> ReportSeenRegiments;
+            if (!Units) { bValidReport = false; }
+            else for (const TSharedPtr<FJsonValue>& ReportValue : *Units)
+            {
+                const TSharedPtr<FJsonObject> ReportUnit = ReportValue.IsValid() && ReportValue->Type == EJson::Object ? ReportValue->AsObject() : nullptr;
+                FString ReportId;
+                if (!ReportUnit.IsValid() || !ReportUnit->TryGetStringField(TEXT("id"), ReportId)) { bValidReport = false; continue; }
+                const int32 ReportRegiment = FindRegiment(ReportId);
+                if (ReportRegiment == INDEX_NONE || !Battles[b].Regiments.Contains(ReportRegiment) || ReportSeenRegiments.Contains(ReportRegiment)) { bValidReport = false; continue; }
+                ReportSeenRegiments.Add(ReportRegiment);
+                FIntVector ReportCasualties = FIntVector::ZeroValue;
+                FCampaign1851ReportEquipment ReportUnitLost, ReportUnitCaptured;
+                int32 ReportStartMen = 0;
+                ReportCount(ReportUnit, TEXT("startMen"), ReportStartMen);
+                double ReportMoraleLoss = 0.0;
+                if (!ReportUnit->TryGetNumberField(TEXT("highestMoraleLoss"), ReportMoraleLoss) || !FMath::IsFinite(ReportMoraleLoss) || ReportMoraleLoss < 0.0 || ReportMoraleLoss > 100.0) { bValidReport = false; }
+                ReportCount(ReportUnit, TEXT("killed"), ReportCasualties.X);
+                ReportCount(ReportUnit, TEXT("wounded"), ReportCasualties.Y);
+                ReportCount(ReportUnit, TEXT("prisoners"), ReportCasualties.Z);
+                ReportKit(ReportUnit, TEXT("lostEquipment"), ReportUnitLost);
+                ReportKit(ReportUnit, TEXT("capturedEquipment"), ReportUnitCaptured);
+                const int32 ReportSum = ReportCasualties.X + ReportCasualties.Y + ReportCasualties.Z;
+                if (!O.UnitLosses.Contains(ReportRegiment) || O.UnitLosses.FindRef(ReportRegiment) != ReportSum || ReportSum > Regiments[ReportRegiment].PresentMen() || !O.UnitAmmo.Contains(ReportRegiment) || O.UnitAmmo.FindRef(ReportRegiment) < 0.f || O.UnitAmmo.FindRef(ReportRegiment) > 1.f) { bValidReport = false; }
+                O.UnitCasualties.Add(ReportRegiment, ReportCasualties);
+                if (ReportStartMen < ReportSum || ReportStartMen > Regiments[ReportRegiment].PresentMen()) { bValidReport = false; }
+                bool bReportHeldField = false;
+                if (!ReportUnit->TryGetBoolField(TEXT("heldField"), bReportHeldField)) { bValidReport = false; }
+                O.UnitHeldField.Add(ReportRegiment, bReportHeldField);
+                O.UnitStartMen.Add(ReportRegiment, ReportStartMen);
+                O.UnitMoraleLoss.Add(ReportRegiment, float(ReportMoraleLoss));
+                O.UnitEquipmentCaptured.Add(ReportRegiment, ReportUnitCaptured);
+                O.UnitEquipmentLost.Add(ReportRegiment, ReportUnitLost);
+            }
+            bValidReport = bValidReport && ReportSeenRegiments.Num() == O.UnitLosses.Num();
+            if (!bValidReport)
+            {
+                UE_LOG(LogTemp, Warning, TEXT("PROJECT1864-REPORT: ugyldig rapport i %s; slaget venter fortsat"), *Path);
+                continue;
+            }
+            O.bExactReport = true;
+        }
 		O.bFromBattle3D = true;
+        const TArray<TSharedPtr<FJsonValue>>* ReportParticipants = nullptr;
+        if (Json->TryGetArrayField(TEXT("officerParticipants"), ReportParticipants))
+        {
+            RecordBattleOfficerCareers(*ReportParticipants, Cities.IsValidIndex(Battles[b].Town) ? Cities[Battles[b].Town].Name : FString(TEXT("Ukendt slagmark")));
+        }
 		ApplyBattle(b, O);
 		{
 			const TArray<TSharedPtr<FJsonValue>>* OurOfficers = nullptr;
@@ -408,6 +494,10 @@ void ACampaign1851Map::RetreatFromBattle(int32 BattleId)
 	// No battle: the Danes fall back north, the forts are given up with their guns.
 	FCampaign1851BattleOutcome O;
 	O.bRetreat = true;
+	for (int32 ReportRegiment : Battles[b].Regiments)
+	{
+		if (Regiments.IsValidIndex(ReportRegiment)) { O.UnitLosses.Add(ReportRegiment, 0); }
+	}
 	for (int32 Id : Battles[b].Forts)
 	{
 		O.CapturedForts.Add(Id);
@@ -420,7 +510,32 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 	FCampaign1851Battle B = Battles[BattleIndex];
 	Battles.RemoveAt(BattleIndex);
 	const int32 Ci = CorpsIndexOf(B);
+    const FString ReportOpposingNation = Ci != INDEX_NONE ? EnemyCorps[Ci].Nation : FString(TEXT("Enemy"));
 	const FString Place = Cities.IsValidIndex(B.Town) ? Cities[B.Town].Name : FString(TEXT("?"));
+    if (!O.bFromBattle3D)
+    {
+        TArray<TSharedPtr<FJsonValue>> ReportAutomaticOfficers;
+        for (const FCampaign1851Officer& ReportOfficer : Officers)
+        {
+            bool bReportParticipated = B.Regiments.Contains(ReportOfficer.Regiment) || B.Regiments.Contains(ReportOfficer.CaptainOf);
+            for (int32 ReportRegiment : B.Regiments)
+            {
+                if (Regiments.IsValidIndex(ReportRegiment) && ((ReportOfficer.Command != INDEX_NONE && Regiments[ReportRegiment].Command == ReportOfficer.Command) ||
+                    (ReportOfficer.Formation != 0 && Regiments[ReportRegiment].Formation == ReportOfficer.Formation) ||
+                    (ReportOfficer.StaffOf != 0 && Regiments[ReportRegiment].Formation == ReportOfficer.StaffOf))) { bReportParticipated = true; }
+            }
+            if (!bReportParticipated || ReportOfficer.Away != 0) { continue; }
+            TSharedRef<FJsonObject> ReportOfficerJson = MakeShared<FJsonObject>();
+            ReportOfficerJson->SetStringField(TEXT("id"), ReportOfficer.Id);
+            ReportOfficerJson->SetStringField(TEXT("fate"), TEXT("well"));
+            ReportAutomaticOfficers.Add(MakeShared<FJsonValueObject>(ReportOfficerJson));
+        }
+        RecordBattleOfficerCareers(ReportAutomaticOfficers, Place);
+    }
+    const int32 ReportEnemyKilledBefore = EnemyKilled, ReportEnemyWoundedBefore = EnemyWounded, ReportEnemyCapturedBefore = EnemyCaptured;
+    const int32 ReportRiflesBefore = CapturedRifles, ReportGunsBefore = CapturedGuns, ReportHorsesBefore = CapturedHorses, ReportWagonsBefore = CapturedWagons, ReportColoursBefore = CapturedColours;
+    int32 ReportStartTotal = 0, ReportKilledTotal = 0, ReportWoundedTotal = 0, ReportCapturedTotal = 0;
+    FString ReportAutomaticRows;
 	int32 DanishLosses = 0, Prisoners = 0;
 	for (const TPair<int32, int32>& L : O.UnitLosses)
 	{
@@ -430,12 +545,38 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 		}
 		FCampaign1851Regiment& R = Regiments[L.Key];
 		const int32 Lost = FMath::Clamp(L.Value, 0, R.Men);
+		const int32 ReportStartMen = R.PresentMen();
 		R.Men -= Lost;
 		const int32 PrisonersBefore = Prisoners, SickBefore = R.Sick;
-		SplitLosses(L.Key, Lost, !O.bDanishWin && !O.bDraw, Prisoners);
+        if (O.bExactReport)
+        {
+            const FIntVector ReportCasualties = O.UnitCasualties.FindRef(L.Key);
+            R.Sick += ReportCasualties.Y;
+            Prisoners += ReportCasualties.Z;
+            DanesCaptured += ReportCasualties.Z;
+            const FCampaign1851ReportEquipment ReportKit = O.UnitEquipmentLost.FindRef(L.Key);
+            const int32 ReportGunsBefore = R.Guns, ReportHorsesBefore = R.Horses;
+            R.Mortars = FMath::Max(0, R.Mortars - ReportKit.Mortars);
+            R.Guns = FMath::Max(0, R.Guns - ReportKit.Guns);
+            R.Horses = FMath::Max(0, R.Horses - ReportKit.Horses);
+            R.Wagons = FMath::Max(0, R.Wagons - ReportKit.Wagons);
+            for (float& ReportSection : R.SectionGuns) { ReportSection *= ReportGunsBefore > 0 ? float(R.Guns) / ReportGunsBefore : 0.f; }
+            for (float& ReportSection : R.SectionHorses) { ReportSection *= ReportHorsesBefore > 0 ? float(R.Horses) / ReportHorsesBefore : 0.f; }
+        }
+        else { SplitLosses(L.Key, Lost, !O.bDanishWin && !O.bDraw, Prisoners); }
 		// The service record: fallen, wounded, taken, and what it did to the enemy.
 		FCampaign1851ServiceEntry Entry;
 		Entry.Day = CampaignDays;
+		Entry.Date = GetDate().ToString(TEXT("%d.%m.%Y"));
+		Entry.StartMen = O.bExactReport ? O.UnitStartMen.FindRef(L.Key) : ReportStartMen;
+		Entry.bHeldField = O.bExactReport ? O.UnitHeldField.FindRef(L.Key) : O.bDanishWin || O.bDraw;
+        if (O.bExactReport)
+        {
+            const FCampaign1851ReportEquipment ReportLostKit = O.UnitEquipmentLost.FindRef(L.Key), ReportTakenKit = O.UnitEquipmentCaptured.FindRef(L.Key);
+            Entry.Equipment = FString::Printf(TEXT("Erobret K%d M%d G%d H%d V%d F%d; tabt K%d M%d G%d H%d V%d F%d"),
+                ReportTakenKit.Guns, ReportTakenKit.Mortars, ReportTakenKit.Rifles, ReportTakenKit.Horses, ReportTakenKit.Wagons, ReportTakenKit.Colours,
+                ReportLostKit.Guns, ReportLostKit.Mortars, ReportLostKit.Rifles, ReportLostKit.Horses, ReportLostKit.Wagons, ReportLostKit.Colours);
+        }
 		Entry.Place = Place;
 		Entry.Result = O.bRetreat ? 3 : O.bDanishWin ? 2 : O.bDraw ? 1 : 0;
 		Entry.Wounded = Regiments[L.Key].Sick - SickBefore;
@@ -444,13 +585,20 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 		Entry.EnemyKilled = O.UnitKills.FindRef(L.Key);
 		Entry.bFrom3D = O.bFromBattle3D;
 		FCampaign1851Regiment& Rec = Regiments[L.Key];
+        if (!O.bExactReport)
+        {
+            Entry.Equipment = TEXT("Udstyrstab ikke særskilt målt ved automatisk afgørelse");
+            ReportStartTotal += Entry.StartMen; ReportKilledTotal += Entry.Killed; ReportWoundedTotal += Entry.Wounded; ReportCapturedTotal += Entry.Captured;
+            ReportAutomaticRows += FString::Printf(TEXT("%s\t%d\t%d\t%d\t%d\t—\t—\t%.0f%%\t—\t—\n"),
+                *R.Name, Entry.StartMen, Entry.Killed, Entry.Wounded, Entry.Captured, O.UnitAmmo.FindRef(L.Key) * 100.f);
+        }
 		Rec.Service.Add(Entry);
 		Rec.TotalKilled += Entry.Killed;
 		Rec.TotalWounded += Entry.Wounded;
 		Rec.TotalCaptured += Entry.Captured;
 		Rec.TotalEnemyKilled += Entry.EnemyKilled;
 		DanishLosses += Lost;
-		R.Morale = FMath::Clamp(R.Morale + (O.bDanishWin ? 0.05f : O.bDraw ? -0.05f : -0.15f), 0.05f, 1.f);
+		R.Morale = FMath::Clamp(R.Morale + (O.bExactReport ? -O.UnitMoraleLoss.FindRef(L.Key) / 100.f : (O.bDanishWin ? 0.05f : O.bDraw ? -0.05f : -0.15f)), 0.05f, 1.f);
 		R.Cohesion = FMath::Max(10.f, R.Cohesion - (O.bDanishWin ? 5.f : 20.f));
 		R.Experience = FMath::Min(100.f, R.Experience + 5.f);
 		for (const int32 o : { R.Chief, R.General })
@@ -461,13 +609,34 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 			}
 		}
 	}
+    if (O.bExactReport)
+    {
+        // Deployed guns/horses were removed from their regiments above; spare stocks must not pay twice.
+        Rifles += O.ReportCaptured.Rifles; // Deployed weapons do not come out of the spare stock twice.
+        MortarStock += O.ReportCaptured.Mortars;
+        GunStock += O.ReportCaptured.Guns;
+        Horses += O.ReportCaptured.Horses;
+        WagonStock += O.ReportCaptured.Wagons;
+        CapturedRifles += O.ReportCaptured.Rifles;
+        CapturedGuns += O.ReportCaptured.Guns;
+        CapturedHorses += O.ReportCaptured.Horses;
+        CapturedWagons += O.ReportCaptured.Wagons;
+        CapturedColours += O.ReportCaptured.Colours;
+        const FString ReportEnemyNation = Ci != INDEX_NONE ? EnemyCorps[Ci].Nation : FString(TEXT("Enemy"));
+        PrisonersByNation.FindOrAdd(PlayerNation) += O.EnemyCasualties.Z;
+        PrisonersByNation.FindOrAdd(ReportEnemyNation) += Prisoners;
+        LastAfterActionReport = O.ReportText;
+        bAfterActionReportOpen = true;
+        AfterActionReportPage = 0;
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-REPORT: kampagnen har anvendt rapporten fra slag %d"), B.Id);
+    }
 	// The country follows the war: victories cheer, defeats are blamed on the Eider policy.
 	PoliticalShock(O.bDanishWin ? 3.f : O.bDraw ? -1.f : -3.f, O.bDanishWin ? 2.f : O.bDraw ? 0.f : -2.f);
 	for (const TPair<int32, float>& A : O.UnitAmmo)
 	{
 		if (Regiments.IsValidIndex(A.Key) && FMath::IsFinite(A.Value))
 		{
-			Regiments[A.Key].Ammo = FMath::Clamp(Regiments[A.Key].Ammo - FMath::Clamp(A.Value, 0.f, 1.f), 0.f, 1.f);
+			Regiments[A.Key].Ammo = FMath::Clamp(O.bExactReport ? Regiments[A.Key].Ammo * (1.f - FMath::Clamp(A.Value, 0.f, 1.f)) : Regiments[A.Key].Ammo - FMath::Clamp(A.Value, 0.f, 1.f), 0.f, 1.f);
 		}
 	}
 	// Forts: losses among their companies; the captured ones are lost with their guns.
@@ -504,19 +673,20 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 	{
 		FCampaign1851EnemyCorps& C = EnemyCorps[Ci];
 		C.Men = FMath::Max(0, C.Men - O.EnemyLosses);
+        if (O.bExactReport) { C.Guns = FMath::Max(0, C.Guns - O.ReportEnemyLost.Guns); }
 		C.bSieging = false;
 		C.SiegeTown = INDEX_NONE;
 		EnemyWarLosses += O.EnemyLosses;
-		const int32 Taken = FMath::RoundToInt(O.EnemyLosses * (O.bDanishWin ? 0.2f : 0.05f));
+		const int32 Taken = O.bExactReport ? O.EnemyCasualties.Z : FMath::RoundToInt(O.EnemyLosses * (O.bDanishWin ? 0.2f : 0.05f));
 		EnemyCaptured += Taken;
 		EnemyCapturedTotal += Taken;
 		// Of the rest about one in four fell, the others were wounded (the losses of 1848-50 and 1864).
 		const int32 Hit = FMath::Max(0, O.EnemyLosses - Taken);
-		const int32 Fell = FMath::RoundToInt(Hit * 0.27f);
+		const int32 Fell = O.bExactReport ? O.EnemyCasualties.X : FMath::RoundToInt(Hit * 0.27f);
 		EnemyKilled += Fell;
 		EnemyWounded += Hit - Fell;
 		// The side holding the field gathers what the other left on it: rifles, guns, horses, wagons, colours.
-		if (O.bDanishWin || O.bDraw)
+		if (!O.bExactReport && (O.bDanishWin || O.bDraw))
 		{
 			const float Field = O.bDanishWin ? 1.f : 0.15f;
 			const int32 Rifles_ = FMath::RoundToInt(O.EnemyLosses * 0.6f * Field);
@@ -598,6 +768,28 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 	D.Reasons = FString::Printf(TEXT("danske tab %d  ·  fjendens tab %d"), DanishLosses, O.EnemyLosses);
 	D.bDone = true;
 	AddDecision(D);
+    if (!O.bExactReport)
+    {
+        const int32 ReportEnemyFell = EnemyKilled - ReportEnemyKilledBefore, ReportEnemyHurt = EnemyWounded - ReportEnemyWoundedBefore, ReportEnemyTaken = EnemyCaptured - ReportEnemyCapturedBefore;
+        LastAfterActionReport = FString::Printf(TEXT("Slaget ved %s, %s: %s. Danske tab: %d faldne, %d sårede, %d fanger; fjenden: %d faldne, %d sårede, %d fanger.\n"),
+            *Place, *GetDate().ToString(TEXT("%d.%m.%Y")), Result, ReportKilledTotal, ReportWoundedTotal, ReportCapturedTotal, ReportEnemyFell, ReportEnemyHurt, ReportEnemyTaken);
+        LastAfterActionReport += TEXT("Enhed\tMand ved start\tFaldne\tSårede\tFanger\tErobret udstyr\tTabt udstyr\tAmmo brugt\tKamp sek.\tMoraltab\n");
+        LastAfterActionReport += FString::Printf(TEXT("DANSKE — TOTAL\t%d\t%d\t%d\t%d\t%dK 0M %dG %dH %dV %dF\t—\t—\t—\t—\n"),
+            ReportStartTotal, ReportKilledTotal, ReportWoundedTotal, ReportCapturedTotal, CapturedGuns - ReportGunsBefore, CapturedRifles - ReportRiflesBefore,
+            CapturedHorses - ReportHorsesBefore, CapturedWagons - ReportWagonsBefore, CapturedColours - ReportColoursBefore);
+        LastAfterActionReport += ReportAutomaticRows;
+        LastAfterActionReport += FString::Printf(TEXT("FJENDEN — TOTAL\t—\t%d\t%d\t%d\t—\t—\t—\t—\t—\n"), ReportEnemyFell, ReportEnemyHurt, ReportEnemyTaken);
+        LastAfterActionReport += TEXT("Automatisk afgørelse: tab er spilestimater; skud, tid og udstyrstab er ikke målt. Sårede overgår til lazaret.\n");
+        bAfterActionReportOpen = true; AfterActionReportPage = 0;
+        const FString ReportDirectory = FPaths::ProjectSavedDir() / TEXT("Reports");
+        IFileManager::Get().MakeDirectory(*ReportDirectory, true);
+        const FString ReportFile = ReportDirectory / (TEXT("battle_") + FDateTime::UtcNow().ToString(TEXT("%Y%m%d_%H%M%S_%s")) + FString::Printf(TEXT("_%d.txt"), B.Id));
+        if (!FFileHelper::SaveStringToFile(LastAfterActionReport, *ReportFile, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))
+        { UE_LOG(LogTemp, Warning, TEXT("PROJECT1864-REPORT: kunne ikke skrive %s"), *ReportFile); }
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-REPORT: automatisk rapport fra slag %d ved %s"), B.Id, *Place);
+        PrisonersByNation.FindOrAdd(PlayerNation) += ReportEnemyTaken;
+        PrisonersByNation.FindOrAdd(ReportOpposingNation) += Prisoners;
+    }
 	LogSiegeTest(Result);
 	ExportUnits();
 	ExportForts();

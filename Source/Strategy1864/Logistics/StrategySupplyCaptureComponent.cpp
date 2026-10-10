@@ -138,6 +138,7 @@ void UStrategySupplyCaptureComponent::CompleteCapture(
         return;
     }
 
+    OwnerWagon->RecordEquipmentCapture(Captor);
     OwnerWagon->Side = Captor->Side;
     OwnerWagon->OwnershipState =
         EStrategySupplyOwnershipState::Captured;

@@ -91,6 +91,8 @@ struct FCampaign1851Officer
 	/** Out of service after a battle: 1 wounded (back when recovered), 2 prisoner of the enemy (back when exchanged), 3 study leave. */
 	uint8 Away = 0;
 	FDateTime AwayUntil;
+	/** Dated participation, wounds, captivity and distinctions, appended when a battle is accepted. */
+	TArray<FString> Career;
 	bool IsFree() const { return Away == 0 && Regiment == INDEX_NONE && Command == INDEX_NONE && Formation == 0 && CaptainOf == INDEX_NONE && StaffOf == 0; }
 
 	int32 Stat(ECampaign1851OfficerStat S) const { return Stats[int32(S)]; }
@@ -223,6 +225,9 @@ struct FCampaign1851ServiceEntry
 	int32 Captured = 0;      // taken prisoner
 	int32 EnemyKilled = 0;   // enemy men put out of the fight
 	bool bFrom3D = false;
+	int32 StartMen = 0;
+	FString Date, Equipment;
+	bool bHeldField = false;
 };
 
 struct FCampaign1851Regiment

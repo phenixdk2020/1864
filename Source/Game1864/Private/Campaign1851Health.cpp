@@ -98,6 +98,7 @@ void ACampaign1851Map::ExchangePrisoners()
 		}
 	}
 	News.Add(FString::Printf(TEXT("Fangeudveksling: %s danske vender hjem, %s fjendtlige frigives"), *FString::FromInt(DanesCaptured), *FString::FromInt(EnemyCaptured)));
+	PrisonersByNation.Reset();
 	DanesCaptured = 0;
 	EnemyCaptured = 0;
 }

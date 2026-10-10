@@ -2,6 +2,7 @@
 #include "../Player/StrategyBattleQuality.h"
 
 #include "Misc/CommandLine.h"
+#include "Misc/DateTime.h"
 #include "Misc/PackageName.h"
 #include "../Campaign/StrategyCampaignBattlefield.h"
 #include "../Visual/StrategyColourFlag.h"
@@ -264,7 +265,7 @@ void AStrategyOOBTestScenario::BeginPlay()
 
     // The small test battle: map *Skirmish* or -Strategy1864Skirmish=<enemy companies>.
     {
-        int32 SkirmishEnemies = MapName.Contains(TEXT("Skirmish")) ? 2 : 0;
+        int32 SkirmishEnemies = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864TestReport")) ? 1 : MapName.Contains(TEXT("Skirmish")) ? 2 : 0;
         FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Skirmish="), SkirmishEnemies);
         if (SkirmishEnemies > 0)
         {
@@ -901,7 +902,7 @@ void AStrategyOOBTestScenario::TickOfficers()
     {
         AStrategyUnit* Unit = *It;
         UStrategyOfficerProfileComponent* P = IsValid(Unit) ? Unit->OfficerProfileComponent : nullptr;
-        if (!P || P->OfficerId.IsEmpty() || P->Fate == 2 || Unit->Side == EStrategySide::Neutral || IsDormant(Unit))
+        if (!P || P->OfficerId.IsEmpty() || P->Fate >= 2 || Unit->Side == EStrategySide::Neutral || IsDormant(Unit))
         {
             continue;
         }
@@ -918,12 +919,12 @@ void AStrategyOOBTestScenario::TickOfficers()
         {
             P->Fate = 1;
             P->Impairment = 0.6f;
-            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OFFICER: %s wounded (%s)"), *Who, *Unit->DisplayName.ToString());
-            if (Hud) { Hud->AddNotice(bDane ? FString::Printf(TEXT("%s er såret"), *Who) : FString::Printf(TEXT("Fjendens %s er såret"), *Who)); }
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OFFICER: %s %s (%s)"), *Who, TEXT("såret"), *Unit->DisplayName.ToString());
+            if (Hud) { Hud->AddNotice(FString::Printf(TEXT("%s%s er %s"), bDane ? TEXT("") : TEXT("Fjendens "), *Who, TEXT("såret"))); }
         }
         // Taken: when the unit breaks (or is destroyed) with the enemy close.
         const bool bBroken = Unit->UnitState == EStrategyUnitState::Routed || Unit->UnitState == EStrategyUnitState::Destroyed;
-        if (bBroken && P->Fate != 2)
+        if (bBroken && P->Fate < 2)
         {
             W.bBroke = true;
             bool bEnemyNear = false;
@@ -1069,6 +1070,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             {
                 for (const TSharedPtr<FJsonValue>& V : *ReserveList) { ReserveIds.Add(V->AsString()); }
             }
+            Request->TryGetStringField(TEXT("date"), ReportCampaignDate);
             FString DateText;
             FDateTime BattleDate;
             if (AtmosphereActor && Request->TryGetStringField(TEXT("date"), DateText) && FDateTime::ParseIso8601(*DateText, BattleDate))
@@ -1477,6 +1479,11 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             }
             const int32 CustomGuns = FMath::Max(0, int32(U->GetNumberField(TEXT("guns"))));
             Battery->InitialStrength = Battery->CurrentStrength = FMath::Max(0, int32(U->GetNumberField(TEXT("presentMen"))));
+            Battery->CrewStrength = FMath::RoundToInt(Battery->CurrentStrength * .8f);
+            Battery->DriverStrength = Battery->CurrentStrength - Battery->CrewStrength;
+            double ReportCampaignHorses = Battery->HorseStrength;
+            U->TryGetNumberField(TEXT("horses"), ReportCampaignHorses);
+            Battery->HorseStrength = FMath::Max(0, int32(ReportCampaignHorses));
             Battery->GunCount = CustomGuns;
             ConfigureRuntimeQALabel(Battery);
             CampaignUnitOf.Add(Battery, Id);
@@ -1648,32 +1655,32 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
 
 void AStrategyOOBTestScenario::FinishCampaignBattle()
 {
+    FinalizeAfterActionReport();
     if (!bCampaignBattle)
     {
         return;
     }
     // Losses per campaign unit, the enemy's, and the outcome by the share each side has left.
-    TMap<FString, int32> Losses, Kills;
+    TMap<FString, int32> Losses;
     int32 DanesStart = 0, DanesNow = 0, EnemyStart = 0, EnemyNow = 0;
     for (const TPair<TWeakObjectPtr<AStrategyUnit>, FString>& It : CampaignUnitOf)
     {
         const AStrategyUnit* Unit = It.Key.Get();
-        if (!Unit || IsDormant(Unit) || Unit->Echelon == EStrategyEchelon::Battalion || Unit->Echelon == EStrategyEchelon::Division)
+        if (!Unit || IsDormant(Unit) || Unit->Echelon == EStrategyEchelon::Battalion || Unit->Echelon == EStrategyEchelon::Regiment || Unit->Echelon == EStrategyEchelon::Brigade || Unit->Echelon == EStrategyEchelon::Division || Unit->Echelon == EStrategyEchelon::Headquarters)
         {
             continue;
         }
-        const int32 Lost = FMath::Max(0, Unit->InitialStrength - FMath::Max(0, Unit->CurrentStrength));
+        const int32 Lost = Unit->BattleLedger.Killed + Unit->BattleLedger.Wounded + Unit->BattleLedger.Prisoners;
         if (It.Value.IsEmpty())
         {
-            EnemyStart += Unit->InitialStrength;
-            EnemyNow += FMath::Max(0, Unit->CurrentStrength);
+            EnemyStart += Unit->BattleLedger.StartMen;
+            EnemyNow += FMath::Max(0, Unit->BattleLedger.StartMen - Lost);
         }
         else
         {
             Losses.FindOrAdd(It.Value) += Lost;
-            Kills.FindOrAdd(It.Value) += Unit->CombatComponent ? Unit->CombatComponent->TotalHitsInflicted : 0;
-            DanesStart += Unit->InitialStrength;
-            DanesNow += FMath::Max(0, Unit->CurrentStrength);
+            DanesStart += Unit->BattleLedger.StartMen;
+            DanesNow += FMath::Max(0, Unit->BattleLedger.StartMen - Lost);
         }
     }
     const float DanesLeft = DanesStart > 0 ? float(DanesNow) / DanesStart : 0.0f;
@@ -1688,14 +1695,51 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
     Doc->SetStringField(TEXT("format"), TEXT("PROJECT1864-BattleResult-1"));
     Doc->SetNumberField(TEXT("battleId"), CampaignBattleId);
     Doc->SetStringField(TEXT("outcome"), Outcome);
-    Doc->SetNumberField(TEXT("enemyLosses"), EnemyStart - EnemyNow);
+    Doc->SetNumberField(TEXT("enemyLosses"), ReportEnemy.Killed + ReportEnemy.Wounded + ReportEnemy.Prisoners);
+    Doc->SetNumberField(TEXT("reportVersion"), 1);
+    Doc->SetStringField(TEXT("reportText"), ReportText);
+    if (ReportLedgerJson.IsValid()) { Doc->SetObjectField(TEXT("ledger"), ReportLedgerJson); }
+    Doc->SetNumberField(TEXT("enemyKilled"), ReportEnemy.Killed);
+    Doc->SetNumberField(TEXT("enemyWounded"), ReportEnemy.Wounded);
+    Doc->SetNumberField(TEXT("enemyPrisoners"), ReportEnemy.Prisoners);
+    auto ReportEquipmentJson = [](const FStrategyReportEquipment& ReportKit)
+    {
+        TSharedRef<FJsonObject> ReportObject = MakeShared<FJsonObject>();
+        ReportObject->SetNumberField(TEXT("mortars"), ReportKit.Mortars);
+        ReportObject->SetNumberField(TEXT("guns"), ReportKit.Guns);
+        ReportObject->SetNumberField(TEXT("rifles"), ReportKit.SmallArms);
+        ReportObject->SetNumberField(TEXT("horses"), ReportKit.Horses);
+        ReportObject->SetNumberField(TEXT("wagons"), ReportKit.Wagons);
+        ReportObject->SetNumberField(TEXT("colours"), ReportKit.Colours);
+        return ReportObject;
+    };
+    Doc->SetObjectField(TEXT("capturedEquipment"), ReportEquipmentJson(ReportDanes.Captured));
+    Doc->SetObjectField(TEXT("lostEquipment"), ReportEquipmentJson(ReportDanes.Lost));
+    Doc->SetObjectField(TEXT("enemyLostEquipment"), ReportEquipmentJson(ReportEnemy.Lost));
+    TMap<FString, FStrategyBattleLedger> ReportRegiments;
+    TSet<FString> ReportHeldRegiments;
+    for (const TPair<TWeakObjectPtr<AStrategyUnit>, FString>& ReportPair : CampaignUnitOf)
+    {
+        const AStrategyUnit* ReportUnit = ReportPair.Key.Get();
+        if (ReportUnit && !IsDormant(ReportUnit) && !ReportPair.Value.IsEmpty() && ReportUnit->Echelon != EStrategyEchelon::Battalion && ReportUnit->Echelon != EStrategyEchelon::Regiment && ReportUnit->Echelon != EStrategyEchelon::Brigade && ReportUnit->Echelon != EStrategyEchelon::Division && ReportUnit->Echelon != EStrategyEchelon::Headquarters)
+        {
+            if ((Outcome == TEXT("danish_victory") || Outcome == TEXT("draw")) && !ReportUnit->bOutOfPlay && ReportUnit->IsCombatEffective() && ReportUnit->UnitState != EStrategyUnitState::Routed) { ReportHeldRegiments.Add(ReportPair.Value); }
+            ReportRegiments.FindOrAdd(ReportPair.Value).Add(ReportUnit->BattleLedger);
+            ReportRegiments.FindOrAdd(ReportPair.Value).StartAmmo += ReportUnit->BattleLedger.StartAmmo;
+        }
+        else if (ReportUnit && !IsDormant(ReportUnit) && !ReportPair.Value.IsEmpty())
+        {
+            ReportRegiments.FindOrAdd(ReportPair.Value).Captured.Add(ReportUnit->BattleLedger.Captured);
+            ReportRegiments.FindOrAdd(ReportPair.Value).Lost.Add(ReportUnit->BattleLedger.Lost);
+        }
+    }
     {
         // The officers the battle has taken from their posts: ours (wounded, prisoners) and the enemy's.
-        TArray<TSharedPtr<FJsonValue>> Ours, Theirs;
+        TArray<TSharedPtr<FJsonValue>> Ours, Theirs, ReportParticipants;
         for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
         {
             const UStrategyOfficerProfileComponent* P = IsValid(*It) ? It->OfficerProfileComponent : nullptr;
-            if (!P || P->OfficerId.IsEmpty() || P->Fate == 0)
+            if (!P || P->OfficerId.IsEmpty() || IsDormant(*It))
             {
                 continue;
             }
@@ -1703,9 +1747,14 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
             O->SetStringField(TEXT("id"), P->OfficerId);
             O->SetStringField(TEXT("name"), P->OfficerName);
             O->SetStringField(TEXT("rank"), P->OfficerRank);
-            O->SetStringField(TEXT("fate"), P->Fate == 2 ? TEXT("captured") : TEXT("wounded"));
-            (It->Side == EStrategySide::Denmark ? Ours : Theirs).Add(MakeShared<FJsonValueObject>(O));
+            O->SetStringField(TEXT("fate"), P->Fate == 2 ? TEXT("captured") : P->Fate == 1 ? TEXT("wounded") : TEXT("well"));
+            // Game estimate: distinction requires an effective officer to inflict deaths or recover trophies.
+            O->SetBoolField(TEXT("distinction"), P->Fate != 2 && (It->BattleLedger.EnemyKilled >= 10 || It->BattleLedger.Captured.Guns + It->BattleLedger.Captured.Mortars + It->BattleLedger.Captured.Colours > 0));
+            if (It->BattleLedger.OriginalSide == uint8(EStrategySide::Denmark) || It->BattleLedger.OriginalSide == uint8(EStrategySide::Allied)) { ReportParticipants.Add(MakeShared<FJsonValueObject>(O)); }
+            if (P->Fate == 0) { continue; }
+            ((It->BattleLedger.OriginalSide == uint8(EStrategySide::Denmark) || It->BattleLedger.OriginalSide == uint8(EStrategySide::Allied)) ? Ours : Theirs).Add(MakeShared<FJsonValueObject>(O));
         }
+        Doc->SetArrayField(TEXT("officerParticipants"), ReportParticipants);
         Doc->SetArrayField(TEXT("officers"), Ours);
         Doc->SetArrayField(TEXT("enemyOfficers"), Theirs);
     }
@@ -1716,8 +1765,18 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
     {
         TSharedRef<FJsonObject> O = MakeShared<FJsonObject>();
         O->SetStringField(TEXT("id"), L.Key);
-        O->SetNumberField(TEXT("losses"), L.Value);
-        O->SetNumberField(TEXT("kills"), Kills.FindRef(L.Key));
+        O->SetNumberField(TEXT("kills"), ReportRegiments.FindRef(L.Key).EnemyKilled);
+        const FStrategyBattleLedger& ReportUnitLedger = ReportRegiments.FindOrAdd(L.Key);
+        O->SetNumberField(TEXT("losses"), ReportUnitLedger.Killed + ReportUnitLedger.Wounded + ReportUnitLedger.Prisoners);
+        O->SetBoolField(TEXT("heldField"), ReportHeldRegiments.Contains(L.Key));
+        O->SetNumberField(TEXT("startMen"), ReportUnitLedger.StartMen);
+        O->SetNumberField(TEXT("highestMoraleLoss"), ReportUnitLedger.HighestMoraleLoss);
+        O->SetNumberField(TEXT("killed"), ReportUnitLedger.Killed);
+        O->SetNumberField(TEXT("wounded"), ReportUnitLedger.Wounded);
+        O->SetNumberField(TEXT("prisoners"), ReportUnitLedger.Prisoners);
+        O->SetNumberField(TEXT("ammoUsed"), ReportUnitLedger.StartAmmo > 0 ? FMath::Clamp(double(ReportUnitLedger.AmmoFired) / ReportUnitLedger.StartAmmo, 0.0, 1.0) : 0.0);
+        O->SetObjectField(TEXT("lostEquipment"), ReportEquipmentJson(ReportUnitLedger.Lost));
+        O->SetObjectField(TEXT("capturedEquipment"), ReportEquipmentJson(ReportUnitLedger.Captured));
         UnitList.Add(MakeShared<FJsonValueObject>(O));
     }
     Doc->SetArrayField(TEXT("units"), UnitList);
@@ -1725,10 +1784,17 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
     FJsonSerializer::Serialize(Doc, TJsonWriterFactory<>::Create(&Text));
     const FString Dir = FPaths::ProjectSavedDir() / TEXT("Battle");
     const int32 Id = FMath::Max(1, CampaignBattleId);
-    FFileHelper::SaveStringToFile(Text, *(Dir / FString::Printf(TEXT("BattleResult_%d.json"), Id)), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
+    IFileManager::Get().MakeDirectory(*Dir, true);
+    if (!FFileHelper::SaveStringToFile(Text, *(Dir / FString::Printf(TEXT("BattleResult_%d.json"), Id)), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("PROJECT1864-REPORT: resultatfilen kunne ikke skrives; bliver i slaget"));
+        return;
+    }
     UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FIELD: result %s (Danes %d of %d left, enemy %d of %d) -> BattleResult_%d.json"), *Outcome, DanesNow, DanesStart, EnemyNow, EnemyStart, Id);
     if (bReturnToCampaign)
     {
+        UGameplayStatics::SetGamePaused(this, false);
+        UGameplayStatics::SetGlobalTimeDilation(this, 1.f);
         // The campaign loads its autosave when it finds this (whatever its command line says).
         FFileHelper::SaveStringToFile(FString::FromInt(Id), *(Dir / TEXT("ReturnToCampaign.flag")));
         UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851")));
@@ -1758,6 +1824,40 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     TickShots();
+    TickBattleLedger(DeltaSeconds);
+    if (!BattleOutcome.IsEmpty()) { FinalizeAfterActionReport(); }
+    if (bSkirmish && !bReportFinalized && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864TestReport")) && GetWorld()->GetTimeSeconds() >= 15.f)
+    {
+        BattleOutcome = TEXT("UAFGJORT — kort rapporttest afsluttet");
+        // Deliberate fixture, only in this explicit report test: casualties and an overrun.
+        AStrategyUnit* ReportTestDane = nullptr;
+        AStrategyUnit* ReportTestEnemy = nullptr;
+        for (TActorIterator<AStrategyUnit> ReportTestIt(GetWorld()); ReportTestIt; ++ReportTestIt)
+        {
+            if (ReportTestIt->Echelon != EStrategyEchelon::Company) { continue; }
+            if (ReportTestIt->Side == EStrategySide::Denmark && !ReportTestDane) { ReportTestDane = *ReportTestIt; }
+            else if (ReportTestIt->Side != EStrategySide::Neutral && ReportTestIt->Side != EStrategySide::Denmark && !ReportTestEnemy) { ReportTestEnemy = *ReportTestIt; }
+        }
+        if (ReportTestDane) { ReportTestDane->ApplyStrengthLossWithCause(6, TEXT("ReportTest")); if (ReportTestDane->OfficerProfileComponent) { ReportTestDane->OfficerProfileComponent->Fate = 1; } }
+        if (ReportTestEnemy)
+        {
+            ReportTestEnemy->ApplyStrengthLossWithCause(8, TEXT("ReportTest"));
+            ReportTestEnemy->SetUnitState(EStrategyUnitState::Routed);
+            ReportTestEnemy->CaptureBattlePrisoners(ReportTestDane);
+            if (ReportTestEnemy->OfficerProfileComponent) { ReportTestEnemy->OfficerProfileComponent->Fate = 2; }
+        }
+        FinalizeAfterActionReport();
+    }
+    if (bReportFinalized)
+    {
+        float ReportAutoFinish = 0.f;
+        if (bCampaignBattle && !bCampaignFinished && FParse::Value(FCommandLine::Get(), TEXT("Strategy1864AutoFinish="), ReportAutoFinish) && ReportAutoFinish > 0.f)
+        {
+            bCampaignFinished = true;
+            FinishCampaignBattle();
+        }
+        return;
+    }
     // The enemy holds fire (a test): kept so, also for units the AI or a new order would set to fire again.
     EnemyFireTimer -= DeltaSeconds;
     if (!bEnemyFiring && EnemyFireTimer <= 0.0f)
@@ -1799,6 +1899,7 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
     {
         BattleScoreTimer = 0.5f;
         UpdateBattleOutcome();
+        if (!BattleOutcome.IsEmpty()) { FinalizeAfterActionReport(); }
     }
 
     // The pioneers' bridges: laid when their time is up (over the broad river nearest the ordering staff).
@@ -1824,7 +1925,7 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
     {
         float AutoFinish = 0.0f;
         if (FParse::Value(FCommandLine::Get(), TEXT("Strategy1864AutoFinish="), AutoFinish) && AutoFinish > 0.0f &&
-            GetWorld()->GetTimeSeconds() > AutoFinish && !bCampaignFinished)
+            (bReportFinalized || GetWorld()->GetTimeSeconds() > AutoFinish) && !bCampaignFinished)
         {
             bCampaignFinished = true;
             FinishCampaignBattle();
@@ -2752,6 +2853,13 @@ void AStrategyOOBTestScenario::BuildTestOOB()
 
 void AStrategyOOBTestScenario::ClearSpawnedUnits()
 {
+    bReportFinalized = false;
+    ReportRows.Reset();
+    ReportSummary.Reset();
+    ReportText.Reset();
+    ReportLedgerJson.Reset();
+    ReportDanes = FStrategyBattleLedger();
+    ReportEnemy = FStrategyBattleLedger();
     for (AStrategyUnit* Unit : SpawnedUnitObjects)
     {
         if (IsValid(Unit))
@@ -3135,8 +3243,9 @@ AStrategyMortarBatteryUnit* AStrategyOOBTestScenario::SpawnMortarBattery(
     Mortar->DisplayName = FText::FromString(Name);
     Mortar->Side = EStrategySide::Denmark;
     Mortar->bPlayerControllable = true;
-    Mortar->MortarPieceCount = 4;
-    Mortar->MortarCrewStrength = 32;
+    Mortar->GunCount = Mortar->MortarPieceCount = 4;
+    Mortar->CrewStrength = Mortar->MortarCrewStrength = 32;
+    Mortar->DriverStrength = 8;
     Mortar->InitialStrength = 40;
     Mortar->CurrentStrength = 40;
 
@@ -4366,4 +4475,206 @@ bool AStrategyOOBTestScenario::RunRegressionChecklist(
     }
 
     return OutFailures.Num() == 0;
+}
+
+void AStrategyOOBTestScenario::TickBattleLedger(float DeltaSeconds)
+{
+    if (bReportFinalized || !GetWorld()) { return; }
+    for (TActorIterator<AStrategyUnit> ReportIt(GetWorld()); ReportIt; ++ReportIt)
+    {
+        AStrategyUnit* ReportUnit = *ReportIt;
+        if (!IsValid(ReportUnit) || IsDormant(ReportUnit)) { continue; }
+        ReportUnit->EnsureBattleLedger();
+        FStrategyBattleLedger& ReportLedger = ReportUnit->BattleLedger;
+        ReportLedger.HighestMoraleLoss = FMath::Max(ReportLedger.HighestMoraleLoss, ReportLedger.StartMorale - ReportUnit->Morale);
+        if (!ReportUnit->bOutOfPlay && (ReportUnit->UnitState == EStrategyUnitState::Engaged || ReportUnit->UnitState == EStrategyUnitState::UnderFire || GetWorld()->GetTimeSeconds() < ReportLedger.CombatUntil))
+        {
+            ReportLedger.CombatSeconds += DeltaSeconds;
+        }
+        // Infantry trophies are recovered at contact; guns and wagons use their capture components.
+        if (ReportLedger.bEquipmentAbandoned && ReportLedger.Abandoned.SmallArms + ReportLedger.Abandoned.Horses + ReportLedger.Abandoned.Colours > 0 && ReportUnit->UnitState == EStrategyUnitState::Destroyed &&
+            (ReportUnit->Echelon == EStrategyEchelon::Company || ReportUnit->Echelon == EStrategyEchelon::Cavalry))
+        {
+            for (TActorIterator<AStrategyUnit> ReportRecovery(GetWorld()); ReportRecovery; ++ReportRecovery)
+            {
+                if (ReportRecovery->Side != ReportUnit->Side && ReportRecovery->Side != EStrategySide::Neutral && ReportRecovery->IsCombatEffective() &&
+                    FVector::Dist2D(ReportRecovery->GetActorLocation(), ReportUnit->GetActorLocation()) < 350.f)
+                {
+                    ReportUnit->RecordEquipmentCapture(*ReportRecovery);
+                    break;
+                }
+            }
+        }
+        // A broken unit is overrun only at physical contact, not merely because it routed.
+        if (ReportUnit->UnitState == EStrategyUnitState::Routed && !ReportUnit->bOutOfPlay)
+        {
+            for (TActorIterator<AStrategyUnit> ReportCaptor(GetWorld()); ReportCaptor; ++ReportCaptor)
+            {
+                if (ReportCaptor->Side != ReportUnit->Side && ReportCaptor->Side != EStrategySide::Neutral && ReportCaptor->IsCombatEffective() &&
+                    ReportCaptor->Echelon != EStrategyEchelon::Headquarters && ReportCaptor->Echelon != EStrategyEchelon::Supply &&
+                    FVector::Dist2D(ReportCaptor->GetActorLocation(), ReportUnit->GetActorLocation()) < 350.f)
+                {
+                    ReportUnit->CaptureBattlePrisoners(*ReportCaptor);
+                    if (ReportUnit->OfficerProfileComponent && ReportUnit->OfficerProfileComponent->Fate < 2) { ReportUnit->OfficerProfileComponent->Fate = 2; }
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void AStrategyOOBTestScenario::FinalizeAfterActionReport()
+{
+    if (bReportFinalized || !GetWorld()) { return; }
+    if (BattleOutcome.IsEmpty())
+    {
+        int32 ReportDanishPoints = 0, ReportEnemyPoints = 0;
+        GetObjectivePoints(ReportDanishPoints, ReportEnemyPoints);
+        int32 ReportDanishStart = 0, ReportEnemyStart = 0, ReportDanishLeft = 0, ReportEnemyLeft = 0;
+        for (TActorIterator<AStrategyUnit> ReportDecision(GetWorld()); ReportDecision; ++ReportDecision)
+        {
+            if (IsDormant(*ReportDecision) || ReportDecision->Side == EStrategySide::Neutral ||
+                ReportDecision->Echelon == EStrategyEchelon::Battalion || ReportDecision->Echelon == EStrategyEchelon::Regiment ||
+                ReportDecision->Echelon == EStrategyEchelon::Brigade || ReportDecision->Echelon == EStrategyEchelon::Division || ReportDecision->Echelon == EStrategyEchelon::Headquarters) { continue; }
+            ReportDecision->EnsureBattleLedger();
+            const FStrategyBattleLedger& ReportDecisionLedger = ReportDecision->BattleLedger;
+            const bool bReportOwnSide = ReportDecisionLedger.OriginalSide == uint8(EStrategySide::Denmark) || ReportDecisionLedger.OriginalSide == uint8(EStrategySide::Allied);
+            (bReportOwnSide ? ReportDanishStart : ReportEnemyStart) += ReportDecisionLedger.StartMen;
+            (bReportOwnSide ? ReportDanishLeft : ReportEnemyLeft) += ReportDecisionLedger.StartMen - ReportDecisionLedger.Killed - ReportDecisionLedger.Wounded - ReportDecisionLedger.Prisoners;
+        }
+        const float ReportDanishShare = ReportDanishStart > 0 ? float(ReportDanishLeft) / ReportDanishStart : 0.f;
+        const float ReportEnemyShare = ReportEnemyStart > 0 ? float(ReportEnemyLeft) / ReportEnemyStart : 0.f;
+        bDanishVictory = ReportDanishPoints >= ReportEnemyPoints + 100 || (ReportEnemyPoints < ReportDanishPoints + 100 && ReportDanishShare > ReportEnemyShare + .05f);
+        const bool bReportEnemyWin = !bDanishVictory && (ReportEnemyPoints >= ReportDanishPoints + 100 || ReportEnemyShare > ReportDanishShare + .05f);
+        BattleOutcome = bDanishVictory ? TEXT("DANSK SEJR") : bReportEnemyWin ? TEXT("NEDERLAG") : TEXT("UAFGJORT");
+    }
+    bReportFinalized = true;
+    // Pause the simulation at the outcome; HUD and report navigation still draw while paused.
+    UGameplayStatics::SetGamePaused(this, true);
+    ReportRows.Reset();
+    ReportLedgerJson = MakeShared<FJsonObject>();
+    TArray<TSharedPtr<FJsonValue>> ReportJsonUnits;
+    auto ReportJsonRow = [](const FStrategyBattleLedger& ReportLedger)
+    {
+        TSharedRef<FJsonObject> ReportJson = MakeShared<FJsonObject>();
+        ReportJson->SetStringField(TEXT("name"), ReportLedger.Name);
+        ReportJson->SetNumberField(TEXT("side"), ReportLedger.OriginalSide);
+        ReportJson->SetNumberField(TEXT("startMen"), ReportLedger.StartMen);
+        ReportJson->SetNumberField(TEXT("killed"), ReportLedger.Killed);
+        ReportJson->SetNumberField(TEXT("wounded"), ReportLedger.Wounded);
+        ReportJson->SetNumberField(TEXT("lazaretEligible"), ReportLedger.Wounded);
+        ReportJson->SetNumberField(TEXT("expectedLazaretReturnMin"), FMath::RoundToInt(ReportLedger.Wounded * .88f));
+        ReportJson->SetNumberField(TEXT("expectedLazaretReturnMax"), FMath::RoundToInt(ReportLedger.Wounded * .96f));
+        ReportJson->SetNumberField(TEXT("prisoners"), ReportLedger.Prisoners);
+        ReportJson->SetNumberField(TEXT("ammoFired"), ReportLedger.AmmoFired);
+        ReportJson->SetNumberField(TEXT("volleys"), ReportLedger.Volleys);
+        ReportJson->SetNumberField(TEXT("combatSeconds"), ReportLedger.CombatSeconds);
+        ReportJson->SetNumberField(TEXT("highestMoraleLoss"), ReportLedger.HighestMoraleLoss);
+        ReportJson->SetNumberField(TEXT("officersWounded"), ReportLedger.OfficersWounded);
+        ReportJson->SetNumberField(TEXT("officersCaptured"), ReportLedger.OfficersCaptured);
+        auto ReportKitJson = [](const FStrategyReportEquipment& ReportKit)
+        {
+            TSharedRef<FJsonObject> ReportKitObject = MakeShared<FJsonObject>();
+            ReportKitObject->SetNumberField(TEXT("mortars"), ReportKit.Mortars);
+            ReportKitObject->SetNumberField(TEXT("guns"), ReportKit.Guns);
+            ReportKitObject->SetNumberField(TEXT("rifles"), ReportKit.SmallArms);
+            ReportKitObject->SetNumberField(TEXT("horses"), ReportKit.Horses);
+            ReportKitObject->SetNumberField(TEXT("wagons"), ReportKit.Wagons);
+            ReportKitObject->SetNumberField(TEXT("colours"), ReportKit.Colours);
+            return ReportKitObject;
+        };
+        ReportJson->SetObjectField(TEXT("capturedEquipment"), ReportKitJson(ReportLedger.Captured));
+        ReportJson->SetObjectField(TEXT("lostEquipment"), ReportKitJson(ReportLedger.Lost));
+        TSharedRef<FJsonObject> ReportCauses = MakeShared<FJsonObject>();
+        for (const TPair<FName, int32>& ReportCause : ReportLedger.LossByCause) { ReportCauses->SetNumberField(ReportCause.Key.ToString(), ReportCause.Value); }
+        ReportJson->SetObjectField(TEXT("lossByCause"), ReportCauses);
+        TArray<TSharedPtr<FJsonValue>> ReportVolleyRounds;
+        for (int32 ReportRounds : ReportLedger.VolleyRounds) { ReportVolleyRounds.Add(MakeShared<FJsonValueNumber>(ReportRounds)); }
+        ReportJson->SetArrayField(TEXT("roundsPerVolley"), ReportVolleyRounds);
+        return ReportJson;
+    };
+    TArray<FString> ReportDanishRows, ReportEnemyRows, ReportDetails;
+    for (TActorIterator<AStrategyUnit> ReportIt(GetWorld()); ReportIt; ++ReportIt)
+    {
+        AStrategyUnit* ReportUnit = *ReportIt;
+        if (!IsValid(ReportUnit) || IsDormant(ReportUnit)) { continue; }
+        ReportUnit->EnsureBattleLedger();
+        FStrategyBattleLedger& ReportLedger = ReportUnit->BattleLedger;
+        ReportLedger.bFrozen = true;
+        const UStrategyOfficerProfileComponent* ReportOfficer = ReportUnit->OfficerProfileComponent;
+        ReportLedger.OfficersWounded = ReportOfficer && ReportOfficer->Fate == 1 ? 1 : 0;
+        ReportLedger.OfficersCaptured = ReportOfficer && ReportOfficer->Fate == 2 ? 1 : 0;
+        const bool bReportDanish = ReportLedger.OriginalSide == uint8(EStrategySide::Denmark) || ReportLedger.OriginalSide == uint8(EStrategySide::Allied);
+        if (ReportLedger.OriginalSide == uint8(EStrategySide::Neutral)) { continue; }
+        TSharedRef<FJsonObject> ReportUnitJson = ReportJsonRow(ReportLedger);
+        ReportUnitJson->SetStringField(TEXT("id"), ReportUnit->StableUnitId.ToString());
+        ReportUnitJson->SetStringField(TEXT("campaignId"), CampaignUnitOf.FindRef(ReportUnit));
+        ReportJsonUnits.Add(MakeShared<FJsonValueObject>(ReportUnitJson));
+        // Staff strengths are organizational aggregates, not additional soldiers.
+        if (ReportUnit->Echelon == EStrategyEchelon::Battalion || ReportUnit->Echelon == EStrategyEchelon::Regiment || ReportUnit->Echelon == EStrategyEchelon::Brigade ||
+            ReportUnit->Echelon == EStrategyEchelon::Division || ReportUnit->Echelon == EStrategyEchelon::Headquarters)
+        {
+            FStrategyBattleLedger& ReportSide = bReportDanish ? ReportDanes : ReportEnemy;
+            ReportSide.Captured.Add(ReportLedger.Captured);
+            ReportSide.Lost.Add(ReportLedger.Lost);
+            ReportSide.OfficersWounded += ReportLedger.OfficersWounded;
+            ReportSide.OfficersCaptured += ReportLedger.OfficersCaptured;
+            continue;
+        }
+        (bReportDanish ? ReportDanes : ReportEnemy).Add(ReportLedger);
+        (bReportDanish ? ReportDanishRows : ReportEnemyRows).Add(ReportLedger.Row(ReportLedger.Name));
+        ReportDetails.Add(FString::Printf(TEXT("%s: kamp %.1f sek.; største moraltab %.1f; salver %d; sidste salve %d skud; officerer sårede/fangne %d/%d"),
+            *ReportLedger.Name, ReportLedger.CombatSeconds, ReportLedger.HighestMoraleLoss, ReportLedger.Volleys, ReportLedger.LastVolleyRounds,
+            ReportLedger.OfficersWounded, ReportLedger.OfficersCaptured));
+        ReportDetails.Add(ReportLedger.Name + TEXT(": ") + ((bReportDanish ? bDanishVictory || BattleOutcome.StartsWith(TEXT("UAFGJORT")) : !bDanishVictory) && !ReportUnit->bOutOfPlay && ReportUnit->IsCombatEffective() && ReportUnit->UnitState != EStrategyUnitState::Routed ? FString(TEXT("holdt feltet")) : FString(TEXT("trak sig tilbage eller blev sat ud af kampen"))));
+        FString ReportVolleyText;
+        for (int32 ReportRounds : ReportLedger.VolleyRounds) { ReportVolleyText += (ReportVolleyText.IsEmpty() ? TEXT("") : TEXT(", ")) + FString::FromInt(ReportRounds); }
+        if (!ReportVolleyText.IsEmpty()) { ReportDetails.Add(TEXT("  Skud pr. salve: ") + ReportVolleyText); }
+        for (const TPair<FName, int32>& ReportCause : ReportLedger.LossByCause)
+        {
+            const FString ReportCauseName = ReportCause.Key == TEXT("InfantryFire") ? TEXT("Infanteriild") : ReportCause.Key == TEXT("Artillery") ? TEXT("Artilleriild")
+                : ReportCause.Key == TEXT("Mortar") ? TEXT("Mortérild") : ReportCause.Key == TEXT("CavalryCharge") ? TEXT("Rytterangreb")
+                : ReportCause.Key == TEXT("Melee") ? TEXT("Nærkamp") : ReportCause.Key == TEXT("Overrun") ? TEXT("Overløbet")
+                : ReportCause.Key == TEXT("Detachment") ? TEXT("Detachement") : ReportCause.Key == TEXT("ReportTest") ? TEXT("Rapporttest") : TEXT("Øvrige tab");
+            ReportDetails.Add(FString::Printf(TEXT("  %s: %d"), *ReportCauseName, ReportCause.Value));
+        }
+    }
+    ReportSummary = FString::Printf(TEXT("Danske tab: %d faldne, %d sårede, %d fanger; fjendens tab: %d faldne, %d sårede, %d fanger."),
+        ReportDanes.Killed, ReportDanes.Wounded, ReportDanes.Prisoners, ReportEnemy.Killed, ReportEnemy.Wounded, ReportEnemy.Prisoners);
+    ReportSummary = (CampaignField ? FString::Printf(TEXT("%s · %s. "), *CampaignField->Place, *ReportCampaignDate.Left(10)) : FString(TEXT("Testslag. "))) + ReportSummary;
+    ReportDanes.Name = TEXT("DANSKE — TOTAL");
+    ReportDanes.OriginalSide = uint8(EStrategySide::Denmark);
+    ReportEnemy.Name = TEXT("FJENDEN — TOTAL");
+    ReportEnemy.OriginalSide = uint8(EStrategySide::Enemy);
+    ReportLedgerJson->SetArrayField(TEXT("units"), ReportJsonUnits);
+    ReportLedgerJson->SetObjectField(TEXT("danishTotals"), ReportJsonRow(ReportDanes));
+    ReportLedgerJson->SetObjectField(TEXT("enemyTotals"), ReportJsonRow(ReportEnemy));
+    ReportDetails.Add(FString::Printf(TEXT("Officerer — danske sårede/fangne %d/%d; fjendtlige %d/%d. Til lazaret: %d danske og %d fjendtlige sårede."),
+        ReportDanes.OfficersWounded, ReportDanes.OfficersCaptured, ReportEnemy.OfficersWounded, ReportEnemy.OfficersCaptured,
+        ReportDanes.Wounded, ReportEnemy.Wounded));
+    ReportRows.Add(ReportDanes.Row(TEXT("DANSKE — TOTAL")));
+    ReportRows.Append(ReportDanishRows);
+    ReportRows.Add(ReportEnemy.Row(TEXT("FJENDEN — TOTAL")));
+    ReportRows.Append(ReportEnemyRows);
+    ReportText = ReportSummary + TEXT("\nEnhed\tMand ved start\tFaldne\tSårede\tFanger\tErobret udstyr\tTabt udstyr\tSkud\tKamp sek.\tMoraltab\n");
+    for (const FString& ReportRow : ReportRows) { ReportText += ReportRow + TEXT("\n"); }
+    ReportText += TEXT("Udfald: ") + (BattleOutcome.IsEmpty() ? FString(TEXT("slaget afsluttet af spilleren")) : BattleOutcome) + TEXT("\n");
+    ReportText += TEXT("K=kanoner, M=mortérer, G=geværer, H=heste, V=vogne, F=faner. Sårede overgår til lazaret; tilbagevenden afhænger af pleje.\n");
+    ReportText += FString::Printf(TEXT("Forventet tilbage fra lazaret: ca. %d–%d danske og %d–%d fjendtlige (88–96%% ved uændret pleje; prognose, ikke et fast udfald).\n"),
+        FMath::RoundToInt(ReportDanes.Wounded * .88f), FMath::RoundToInt(ReportDanes.Wounded * .96f), FMath::RoundToInt(ReportEnemy.Wounded * .88f), FMath::RoundToInt(ReportEnemy.Wounded * .96f));
+    for (const FString& ReportDetail : ReportDetails) { ReportText += ReportDetail + TEXT("\n"); }
+    const FString ReportDir = FPaths::ProjectSavedDir() / TEXT("Reports");
+    IFileManager::Get().MakeDirectory(*ReportDir, true);
+    const FString ReportPath = ReportDir / (TEXT("battle_") + FDateTime::UtcNow().ToString(TEXT("%Y%m%d_%H%M%S_%s")) + TEXT(".txt"));
+    if (!FFileHelper::SaveStringToFile(ReportText, *ReportPath, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("PROJECT1864-REPORT: kunne ikke skrive %s"), *ReportPath);
+    }
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-REPORT: %s (%s)"), *ReportSummary, *ReportPath);
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugReport")))
+    {
+        TArray<FString> ReportLogLines;
+        ReportText.ParseIntoArrayLines(ReportLogLines);
+        for (const FString& ReportLogLine : ReportLogLines) { UE_LOG(LogTemp, Display, TEXT("PROJECT1864-REPORT: %s"), *ReportLogLine); }
+    }
 }

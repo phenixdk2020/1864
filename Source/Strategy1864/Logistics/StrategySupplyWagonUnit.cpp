@@ -104,6 +104,14 @@ void AStrategySupplyWagonUnit::ApplySupplyDamage(
     float WagonDamage,
     float CargoLossFraction)
 {
+    if (BattleLedger.bFrozen) { return; }
+    const bool bReportWagonWasIntact = WagonCondition > 0.f;
+    RecordBattleLoss(FMath::Clamp(DriverLoss, 0, DriverStrength), BattleCasualtyCause);
+    if (BattleLedger.bEquipmentAbandoned)
+    {
+        BattleLedger.Abandoned.Horses = FMath::Max(0, BattleLedger.Abandoned.Horses - FMath::Clamp(HorseLoss, 0, HorseStrength));
+    }
+    else { BattleLedger.Lost.Horses += FMath::Clamp(HorseLoss, 0, HorseStrength); }
     DriverStrength =
         FMath::Max(
             0,
@@ -129,6 +137,11 @@ void AStrategySupplyWagonUnit::ApplySupplyDamage(
 
     if (WagonCondition <= 0.0f)
     {
+        if (bReportWagonWasIntact)
+        {
+            if (BattleLedger.bEquipmentAbandoned) { BattleLedger.Abandoned.Wagons = 0; }
+            else { ++BattleLedger.Lost.Wagons; }
+        }
         OwnershipState = EStrategySupplyOwnershipState::Destroyed;
         SetUnitState(EStrategyUnitState::Destroyed);
 

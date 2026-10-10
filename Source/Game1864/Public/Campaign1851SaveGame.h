@@ -235,6 +235,7 @@ struct FCampaign1851OfficerSave
 	/** v18: wounded (1) or a prisoner (2), and until when (ISO date). */
 	UPROPERTY() uint8 Away = 0;
 	UPROPERTY() FString AwayUntil;
+	UPROPERTY() TArray<FString> Career;
 };
 
 /**
@@ -261,9 +262,13 @@ public:
 	 * 27: bridges; 28: initial garrison training; 29: event files (fired and blocked events);
 	 * 30: the player's settings (graphics, figures, shadows, couriers, camera speed, ...).
 	 * 31: civil research project id and elapsed months in Research.
+	 * 32: after-action reports, prisoner holders, extended service entries and officer careers.
 	 */
-	static constexpr int32 CurrentVersion = 31;
+	static constexpr int32 CurrentVersion = 32;
 
+    // v32: exact report, prisoner pools, extended service entries and officer careers; old saves default to empty.
+    UPROPERTY() FString LastAfterActionReport;
+    UPROPERTY() TMap<FString, int32> PrisonersByNation;
 	UPROPERTY() int32 SaveVersion = CurrentVersion;
 	/** The player's settings at the time of the save (the battle's settings section of GameUserSettings: graphics preset, figure scale, shadows,
 	 *  couriers, enemy range, camera speed, ...). They come back when the game is loaded. */

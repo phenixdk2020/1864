@@ -103,6 +103,7 @@ bool UStrategyMortarFireComponent::FireOneBomb()
 
     if (UStrategyBattleAudio* MortarAudio = UStrategyBattleAudio::Find(this))
         MortarAudio->Artillery(OwnerUnit->GetActorLocation(), 1, true);
+    OwnerUnit->RecordBattleVolley(1);
     --AmmunitionBombs;
     ReloadRemainingSeconds = FMath::Max(0.5f, ReloadSeconds);
 
@@ -141,7 +142,7 @@ bool UStrategyMortarFireComponent::FireOneBomb()
     if (Lost > 0 && IsValid(UnitTarget))
     {
         if (UnitTarget->CombatComponent) { Lost = UnitTarget->CombatComponent->ScaleIncomingCasualties(Lost, true); }
-        UnitTarget->ApplyStrengthLoss(Lost);
+        UnitTarget->ApplyStrengthLossWithCause(Lost, TEXT("Mortar"), OwnerUnit);
     }
     if (IsValid(UnitTarget) && !IsValid(PositionTarget) && UnitTarget->CombatComponent)
     {
