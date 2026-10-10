@@ -72,6 +72,10 @@ Eksemplerne er argumenter, som kan tilføjes en relevant launcher (alle viderese
 
 ## Slag
 
+Opdatering 2026-10-10: `Strategy1864DebugDecisions` viser også den fælles missionspause (lag `ReactionAI`), carré-cooldownens klarstatus og afvist automatisk SPRED under cooldown. Ingen nye T1/T2/T3-acceptflag er implementeret endnu.
+
+Manuel regression til senere godkendt kørsel: giv FLYT med flere vejpunkter i ryttertesten og kontroller, at automatisk carré stopper bevægelsen, bevarer ordre/serial/rute og først genoptager efter 20 s uden trussel, færdig reformering og den fælles pauses 10 s ro. Gentag med ny HOLD/FLYT, formationsordre og AI OFF under pausen; den gamle ordre må ikke genopstå. Kontroller også stop-og-ild efterfulgt af automatisk SPRED, mindst 15 s mellem normale automatiske formationsskift, manuel SPRED/SAML, AFBRYD, BYG og rout. Akut carré må omgå cooldown; manuel carré beholder sin eksisterende marchregel. Dette er en testprocedure, ikke et bestået resultat.
+
 Kortvalg og scenarie er afgørende: duel-, Skirmish- og kampagneslag har forskellige opsætninger. Et indlæst kampagneslag returnerer før den lille testopsætning. URL-valgene `?Battle=N` og `?Field=fil` anvendes også og markerer retur til kampagnen; de er ikke FParse-flag. Tider nedenfor er simulationstid, medmindre andet er angivet; pause/hastighed påvirker dem.
 
 | Flag | Virkning | Eksempelargument |

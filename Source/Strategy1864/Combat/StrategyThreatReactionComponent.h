@@ -54,7 +54,14 @@ public:
     float EvaluationIntervalSeconds = 0.25f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Threat")
-    float SquareReleaseDelaySeconds = 8.0f;
+    float SquareReleaseDelaySeconds = 20.0f;
+
+    // Balance estimate shared by automatic square/cover formation changes.
+    UPROPERTY(EditAnywhere, Category="Strategy|Threat", meta=(ClampMin="10.0", ClampMax="20.0"))
+    float ReactionFormationCooldownSeconds = 15.0f;
+
+    bool CanChangeReactionFormation() const;
+    void NotifyReactionFormationChanged();
 
     UFUNCTION(BlueprintPure, Category="Strategy|Threat")
     bool IsRespondingToCavalry() const { return bRespondingToCavalry; }
@@ -69,6 +76,7 @@ private:
 
     float EvaluationAccumulator = 0.0f;
     float NoThreatSeconds = 0.0f;
+    double LastReactionFormationChangeTime = -1000000.0;
     bool bRespondingToCavalry = false;
     bool bHasPlayerFormationOrder = false;
     bool bOwnsSquareBayonets = false;

@@ -5,6 +5,7 @@
 #include "../Formations/StrategyFormationPolicyComponent.h"
 #include "../Combat/StrategyCombatComponent.h"
 #include "../Combat/StrategyFireControlComponent.h"
+#include "../Combat/StrategyThreatReactionComponent.h"
 #include "../Combat/StrategyFireDisciplineComponent.h"
 #include "../Formations/StrategyFormationTransitionComponent.h"
 #include "../Units/StrategyCompanyUnit.h"
@@ -264,10 +265,23 @@ void UStrategyMovementExecutorComponent::TickComponent(
         return;
     }
 
+    // Higher local reactions halt execution before stop-and-fire can turn the
+    // front or deploy a column. Manual squares retain their existing movement.
+    const bool bReactionSquare = OwnerUnit->ThreatReactionComponent &&
+        OwnerUnit->ThreatReactionComponent->IsRespondingToCavalry();
+    const bool bReactionCover = OwnerUnit->FieldOfficerComponent &&
+        OwnerUnit->FieldOfficerComponent->IsTakingFireCover();
+    if (bReactionSquare || bReactionCover)
+    {
+        SuspendMissionForReaction();
+        FireReactionQuietSeconds = 0.0f;
+        return;
+    }
+
     // MOVE reacts only to incoming fire; advance/attack also stop at a legal target.
     const bool bFireMission = bHoldingForFire || CurrentOrder.Type == EStrategyOrderType::Advance ||
         CurrentOrder.Type == EStrategyOrderType::AttackHere;
-    AStrategyUnit* MovementFireTarget = bFireMission && OwnerUnit->IsA<AStrategyCompanyUnit>() &&
+    AStrategyUnit* MovementFireTarget = OwnerUnit->bOfficerAIEnabled && bFireMission && OwnerUnit->IsA<AStrategyCompanyUnit>() &&
         OwnerUnit->CombatComponent && OwnerUnit->FireControlComponent &&
         (!OwnerUnit->FireDisciplineComponent || OwnerUnit->FireDisciplineComponent->AllowsAutomaticFire()) ?
         OwnerUnit->CombatComponent->FindBestTarget(false) : nullptr;
@@ -302,7 +316,8 @@ void UStrategyMovementExecutorComponent::TickComponent(
     }
     if (bHoldingForFire)
     {
-        const bool bFireReactionBlocked = OwnerUnit->CombatComponent && OwnerUnit->CombatComponent->UnderFireRemainingSeconds > 0.f;
+        const bool bFireReactionBlocked = OwnerUnit->bOfficerAIEnabled && OwnerUnit->CombatComponent &&
+            OwnerUnit->CombatComponent->UnderFireRemainingSeconds > 0.f;
         FireReactionQuietSeconds = bFireReactionBlocked ? 0.f : FireReactionQuietSeconds + DeltaTime;
         STRATEGY1864_DECISION(OwnerUnit, TEXT("Stop-og-ild"), TEXT("Vurder genoptagelse"), TEXT("Missionen må kun genoptages efter ro og uden en højere igangværende reaktion/ny ordre"),
             FString::Printf(TEXT("quietSeconds=%.2f releaseSeconds=%.2f suspendedSerial=%d incomingFire=%d delayedOrder=%d reforming=%d square=%d"),
@@ -908,9 +923,17 @@ void UStrategyMovementExecutorComponent::ReleaseBridgeSlot()
 
 void UStrategyMovementExecutorComponent::HaltForFire()
 {
+    if (!OwnerUnit || !OwnerUnit->bOfficerAIEnabled) return;
+    SuspendMissionForReaction();
+}
+
+void UStrategyMovementExecutorComponent::SuspendMissionForReaction()
+{
     if (!OwnerUnit || !OwnerUnit->OrderComponent) return;
     const FStrategyOrder FireOldOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
     if (!IsMovementOrder(FireOldOrder.Type) || !OwnerUnit->IsCombatEffective()) return;
+    // A completed march must not be restarted by a later reaction at its goal.
+    if (!bHasMovementGoal && !bHoldingForFire) return;
     FireReactionQuietSeconds = 0.f;
     if (bHoldingForFire) return;
     StopMovement();
@@ -919,7 +942,7 @@ void UStrategyMovementExecutorComponent::HaltForFire()
     bHoldingForFire = true;
     if (!OwnerUnit->FormationTransition || !OwnerUnit->FormationTransition->IsReforming())
         OwnerUnit->SetUnitState(EStrategyUnitState::Ready);
-    STRATEGY1864_DECISION(OwnerUnit, TEXT("Stop-og-ild"), TEXT("Suspender udførelse"), TEXT("Lokal ildreaktion bevarer mission, autoritet og waypoint-rute"),
+    STRATEGY1864_DECISION(OwnerUnit, TEXT("ReactionAI"), TEXT("Suspender udførelse"), TEXT("Lokal reaktion bevarer mission, autoritet og waypoint-rute"),
         FString::Printf(TEXT("suspendedType=%d suspendedSerial=%d waypoint=%d releaseSeconds=%.2f"),
             int32(FireOldOrder.Type), FireOldOrder.OrderSerial, FireOldOrder.NextWaypointIndex, FireReactionReleaseSeconds),
         TEXT("permanent HOLD og annullering af rute: afvist; fortsat march: afvist under ildreaktionen"));

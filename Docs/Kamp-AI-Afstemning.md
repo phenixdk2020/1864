@@ -243,6 +243,25 @@ Opgavens punkt **1** er implementeret som en udvidelse af det eksisterende `FStr
 
 Manuel regression til senere godkendt kørsel: brug eksisterende ét-mod-ét-/rytterfixture med `-Strategy1864DebugDecisions`. Kontaktloggen skal vise OwnEyes, confidence=1 og radius=0 ved observation. Ved tab af syn skal position/heading/LastSeenTime forblive uændrede, alder og radius vokse, og confidence falde (omkring 0,5 efter 60 s med standardtal). Efter mere end 120 s uden syn skal recorden forsvinde. Gensyn skal nulstille alder/radius. Skjulte kontakter må ikke blive nye officer-/rytterkandidater eller udløse carré; kontroller også AI OFF, stop-og-ild med ny HOLD, AFBRYD og uændrede kavalerigates. Dette er en procedure, **ikke en bestået test**.
 
-**Næste kørsel, i opgavens rækkefølge:** (2) fælles ReactionAI/SuspendedMission inklusive fallback og nye spillerordrer, med release-hysterese/formation-cooldown; (3) lagdelt data-arbiter og beslutningslog; (4) FireBlocked; (5) lokale Conditions/ThenOrder; (6) era-/equipmentprofiler og relativ afstand; (7) reproducerbare T1–T3-flag og PROJECT1864-ACCEPT. Ingen af punkt 2–7 er tilføjet i denne kørsel. Den eksisterende stop-og-ild-suspension er fortsat den eneste implementerede SuspendedMission; carré-release er fortsat 8 s.
+**Status for kørslen 2026-10-09:** punkt 2–7 var ikke tilføjet. Status for fortsættelsen står nedenfor.
 
 Statisk kontrol af nye API/includes mod UE 5.8: `Engine/World.h`, `GameFramework/Actor.h`, `UObject/WeakObjectPtrTemplates.h`, `Containers/Array.h`, `Math/Vector.h` og `Math/UnrealMathUtility.h`; lokale komponentmetoder og hele diffen er gennemgået. Ingen build, editor/spil, runtime-test eller commit. Kontaktfelterne er transient slagtilstand; kampagne-save og 1825/1851-data er ikke ændret.
+
+## Fase 2-kørsel 2026-10-10: fælles udførelsespause, punkt 2 delvist
+
+`MovementExecutor::SuspendMissionForReaction` er nu fælles for stop-og-ild, automatisk carré og automatisk dækning. Den gemmer kun en aktiv bevægelsesmission; en færdig march genstartes ikke. Den autoritative ordre bevares med serial, autoritet og resterende vejpunkter. Ny leveret ordre, clear og stop invaliderer fortsat snapshot. Carré/dækning kontrolleres før ildmålet i movement-tick, så en højere reaktion ikke drejer fronten eller udfolder en kolonne. Automatisk carré står stille under truslen; manuelt beordret carré har fortsat sin eksisterende bevægelsesregel.
+
+Carré-release er nu **20 s** uden kvalificeret trussel. Automatiske carré-/dækningsformationsskift deler **15 s** cooldown, klemt til 10–20 s. Carré-indgang ved akut kavaleritrussel omgår cooldown; normal release og genindgang i automatisk dækning gør ikke. Spillerens SPRED/SAML og formationsordrer samt akut ophør af uegnet dækning omgår cooldown. En ny eksplicit formationsordre overtager carré-ejerskabet, så den gamle reaktion ikke senere genopretter en anden formation eller fjerner spillerens bajonetter. Bajonetcharge afbrydes ikke af ny automatisk carré.
+
+AI OFF starter hverken automatisk carré eller stop-og-ild. En allerede ejet reaktions-carré afsluttes via release/formationsovergang. Efter carré/dækning anvendes den fælles udførelsespauses 10 s ro før marchgenoptagelse, og eksisterende gates for reformering, ventende ordre, byggeri, carré og kampdygtighed gælder stadig. Carré kan derfor vente længere end de 20 s, før marchen genoptages. Dækningens eksisterende gate mod march og aktive offensive ordrer er bevaret; den suspenderer ikke en ny march af egen drift, men deler snapshot for en march, der allerede er stoppet for ild.
+
+**Restliste i opgavens rækkefølge:**
+
+1. Punkt 2 er **delvist**, ikke DONE: automatisk fallback/disengage og FireBlocked mangler fælles reaktions-ejerskab, suspension og resume. `FallBack` skriver stadig Withdraw, mens eksplicit AFBRYD fortsat er sin egen mission. Fuld mission/reaktions-blackboard, ventende ny ordre og fælles formations-cooldown for alle reaktionstyper mangler.
+2. Punkt 3: afsnit 22-arbiter med data-vægte og samlet log af vindere/afvisninger. Eksisterende grenlog er bevaret; det nye cooldown-afslag logges gennem StrategyDecisionLog.
+3. Punkt 4: FireBlocked på ildkeglen, ildstop eller nyt ildpunkt uden at opløse carré/afbryde nærkamp.
+4. Punkt 5: Conditions[]/ThenOrder med modtagerens lokale kontakter.
+5. Punkt 6: FEraProfile/FEquipmentProfile og relativ afstand i trusselstermen.
+6. Punkt 7: reproducerbare T1/T2/T3-fixtures og PROJECT1864-ACCEPT PASS/FAIL. Der er ingen nye acceptflag i denne ændring.
+
+Statisk kontrol: UE 5.8 `Engine/World.h`, `Components/ActorComponent.h` og `Math/UnrealMathUtility.h`; lokale deklarationer, ordre-/stop-/resume-veje og hele diffen gennemgået. Ingen build, spil/editor, runtime-test eller commit. De nye tider er balanceestimater, og Blueprint-overrides kan stadig tilsidesætte carré-release.

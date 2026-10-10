@@ -13,6 +13,7 @@
 #include "../Artillery/StrategyArtilleryBatteryUnit.h"
 #include "../Artillery/StrategyArtilleryFireMissionComponent.h"
 #include "../Combat/StrategyFireControlComponent.h"
+#include "../Combat/StrategyThreatReactionComponent.h"
 #include "../Command/StrategyCommandComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
@@ -258,6 +259,7 @@ void UStrategyFieldOfficerComponent::LeaveAutomaticFireCover()
     FireCoverSince = -1.0f;
     LastLongRangeFireTime = -1000000.0f;
     if (!bTakingFireCover || !OwnerUnit) return;
+    const bool bWasAutomaticCover = !bManualFireCover;
     bTakingFireCover = false;
     bManualFireCover = false;
     FireCoverStandUpUntil = GetWorld() ? GetWorld()->GetTimeSeconds() + FMath::Max(0.0f, FireCoverStandUpSeconds) : -1.0f;
@@ -268,6 +270,8 @@ void UStrategyFieldOfficerComponent::LeaveAutomaticFireCover()
         OwnerUnit->FormationComponent->SoldierRankSpacingCm = FireCoverPreviousRankSpacing;
         OwnerUnit->FormationComponent->RankCount = FireCoverPreviousRanks;
         OwnerUnit->FormationComponent->SetFormation(FireCoverPreviousFormation);
+        if (bWasAutomaticCover && OwnerUnit->ThreatReactionComponent)
+            OwnerUnit->ThreatReactionComponent->NotifyReactionFormationChanged();
     }
     if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugSpread")))
         UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SPREAD: %s SAML riseSeconds=%.1f"), *OwnerUnit->StableUnitId.ToString(), FireCoverStandUpSeconds);
@@ -308,6 +312,14 @@ bool UStrategyFieldOfficerComponent::EnterFireCover(bool bManual)
         bManualFireCover |= bManual;
         return true;
     }
+    if (!bManual && OwnerUnit->ThreatReactionComponent &&
+        !OwnerUnit->ThreatReactionComponent->CanChangeReactionFormation())
+    {
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Ilddækning"), TEXT("Vent"), TEXT("Formationens reaktions-cooldown"),
+            FString::Printf(TEXT("cooldownSeconds=%.2f"), OwnerUnit->ThreatReactionComponent->ReactionFormationCooldownSeconds),
+            TEXT("automatisk SPRED: afvist indtil cooldown er opfyldt"));
+        return false;
+    }
     if (!OwnerUnit->StanceComponent->SetStance(EStrategyStance::Prone)) return false;
     UStrategyFormationComponent* SpreadFormation = OwnerUnit->FormationComponent;
     FireCoverPreviousLateralSpacing = SpreadFormation->SoldierLateralSpacingCm;
@@ -320,6 +332,11 @@ bool UStrategyFieldOfficerComponent::EnterFireCover(bool bManual)
     SpreadFormation->RankCount = 1;
     bTakingFireCover = true;
     bManualFireCover = bManual;
+    if (!bManual)
+    {
+        if (OwnerUnit->ThreatReactionComponent) OwnerUnit->ThreatReactionComponent->NotifyReactionFormationChanged();
+        if (OwnerUnit->MovementExecutor) OwnerUnit->MovementExecutor->SuspendMissionForReaction();
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugSpread")))
         UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SPREAD: %s SPRED manual=%d spacing=%.1f ranks=1"),
             *OwnerUnit->StableUnitId.ToString(), bManual, SpreadFormation->SoldierLateralSpacingCm);
@@ -364,7 +381,10 @@ bool UStrategyFieldOfficerComponent::UpdateAutomaticLooseOrderUnderFire()
             bCoverMoving, bCoverEnemyClose, bCoverAttackUnderWay, CoverNow - LastIncomingFireTime,
             CoverNow - LastLongRangeFireTime, FireCoverReleaseSeconds),
         bCoverExcluded ? TEXT("prone/spread: afvist af viste udelukkelsesgrunde") : TEXT("øjeblikkelig dækning: kræver kvalitet, stående stance og forsinkelse"));
-    if (bTakingFireCover && (bCoverExcluded || CoverNow - LastIncomingFireTime >= FireCoverReleaseSeconds ||
+    const bool bCoverCanRelease = !OwnerUnit->ThreatReactionComponent ||
+        OwnerUnit->ThreatReactionComponent->CanChangeReactionFormation();
+    if (bTakingFireCover && (bCoverExcluded ||
+        (CoverNow - LastIncomingFireTime >= FireCoverReleaseSeconds && bCoverCanRelease) ||
         OwnerUnit->StanceComponent->Stance != EStrategyStance::Prone)) LeaveAutomaticFireCover();
     if (IsStandingUpFromFireCover())
     {
@@ -431,6 +451,11 @@ void UStrategyFieldOfficerComponent::TickComponent(float DeltaTime, ELevelTick T
     }
     if (OwnerUnit->Echelon != EStrategyEchelon::Company && OwnerUnit->Echelon != EStrategyEchelon::Cavalry && OwnerUnit->Echelon != EStrategyEchelon::Artillery)
     {
+        return;
+    }
+    if (OwnerUnit->ThreatReactionComponent && OwnerUnit->ThreatReactionComponent->IsRespondingToCavalry())
+    {
+        Decide(TEXT("Holder reaktions-carré"), TEXT("Kavalerireaktionen ejer formationen; missionen er bevaret"));
         return;
     }
     // The charge is watched every frame (the shock comes when the lines meet).

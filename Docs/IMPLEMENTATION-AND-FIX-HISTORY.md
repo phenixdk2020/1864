@@ -1790,6 +1790,12 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 ### 2026-10-10 – Nye bygningsbilleder (20 stk.)
 - De 20 nye bygningsbilleder fra Overførsler/Strategy1864_Buildings_All_20 (768x768, gennemsigtig baggrund) er beskåret, skaleret til 512 og lagt i `Reference/Campaign1851/Buildings` under de eksisterende T_Bld_-navne (kaserne, stald, lade, smedje, magasin, jernbanestation, vandmølle, mølle, kirke, rådhus, lazaret, told, telegraf) og importeret via `Tools/Campaign/import_building_cards.py`. Originalerne ligger i `Strategy1864_Original_20`. Nye uden kobling endnu: kommandobygning, infanteribygning, kanonbygning, officersbolig, mandskabsbolig, portnerbolig, markedshal.
 - Bygningslisten bruger stadig gamle billeder for bygninger uden nyt billede (fx geværværksted, kanonstøberi, savværk).
+### 2026-10-10 — Kamp-AI fase 2, delvis fælles missionspause
+
+- Stop-og-ild, automatisk carré og automatisk dækning deler nu `SuspendMissionForReaction`; aktiv march/rute bevares, mens automatisk carré står stille. Ny ordre/clear/stop invaliderer snapshot, og færdige marchordrer genstartes ikke.
+- Carré har 20 s release-hysterese. Carré/dækning deler 15 s formations-cooldown (10–20 s); akut carré og spillerstyring kan omgå den. AI OFF starter ikke nye automatiske carré-/ildstopreaktioner. Spillerens formationsordre overtager carré-ejerskabet; ny carré afbryder ikke bajonetcharge.
+- Afstemning og TestFlags beskriver leverance, statiske kontroller og endnu ikke udført regression. Punkt 2 er kun delvist: fallback/disengage/FireBlocked og samlet reaktionstilstand mangler. Punkt 3–7 er ikke implementeret; præcis restliste i `Kamp-AI-Afstemning.md`.
+- UE 5.8-headerkontrol og diff-review udført; ingen build, spil/editor, runtime-test eller commit.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
