@@ -252,6 +252,9 @@ public:
 	bool IsMenuOpen() const { return bMenuOpen; }
 	/** A short message at the top of the screen (fades after a few seconds). */
 	void ShowToast(const FString& Text) { Toast = Text; ToastTime = FPlatformTime::Seconds(); }
+	/** A click that starts something slow (new game, load, quit) says so at once, before the work freezes the frame. */
+	void ShowBusy(const FString& Text) { BusyText = Text; }
+	bool IsBusy() const { return !BusyText.IsEmpty(); }
 	/** The panel button under a viewport pixel (as from APlayerController::GetMousePosition). */
 	EButton HitButton(const FVector2D& ViewportPixel, int32* OutModule = nullptr) const;
 
@@ -473,6 +476,7 @@ private:
 	bool bConfirmOpen = false;
 	int32 BuildingScroll = 0;
 	bool bUnitCard = false;
+	FString BusyText;
 	int32 OOBFocus = INDEX_NONE;
 	TArray<int32> OOBFilter;
 	int32 OOBPlace = INDEX_NONE;   // Kamporden for one town: its garrison and the army standing there

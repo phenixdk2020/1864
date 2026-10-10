@@ -977,23 +977,42 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			if (Button == EButton::CloseMenu) { Overlay->ShowStartLoad(false); Button = EButton::Block; }
 			if (Button == EButton::LoadSlot && SaveSlots().IsValidIndex(StartRow))
 			{
-				if (LoadFromSlot(SaveSlots()[StartRow])) { Overlay->CloseMenu(); }
+				Overlay->ShowBusy(TEXT("Indlæser spil ..."));
+				const int32 LoadRow = StartRow;
+				FTimerHandle LoadHandle;
+				GetWorldTimerManager().SetTimer(LoadHandle, FTimerDelegate::CreateWeakLambda(this, [this, LoadRow]()
+				{
+					if (SaveSlots().IsValidIndex(LoadRow) && LoadFromSlot(SaveSlots()[LoadRow])) { Overlay->CloseMenu(); }
+					Overlay->ShowBusy(FString());
+				}), 0.25f, false);
 				Button = EButton::Block;
 			}
 			if (Button == EButton::NewGame)
 			{
-				const int32 StartScenario = Overlay->GetMenuScenario();
-				if (StartScenario != ACampaign1851Map::ScenarioIndex())
+				// Say so at once; the work itself starts a moment later, after the screen has shown it.
+				Overlay->ShowBusy(TEXT("Starter nyt spil ..."));
+				FTimerHandle StartHandle;
+				GetWorldTimerManager().SetTimer(StartHandle, FTimerDelegate::CreateWeakLambda(this, [this]()
 				{
-					IFileManager::Get().MakeDirectory(*(FPaths::ProjectSavedDir() / TEXT("Campaign")), true);
-					if (FFileHelper::SaveStringToFile(Map->NewGameNation + TEXT("|") + FString::SanitizeFloat(Map->NewGameDeviation), *(FPaths::ProjectSavedDir() / TEXT("Campaign/NewGame.flag"))))
-					{ ACampaign1851Map::SetScenarioIndex(StartScenario); UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851"))); }
-					else { Overlay->ShowToast(TEXT("Kunne ikke starte det valgte scenarie")); }
-				}
-				else { CampaignNewGame(); }
+					const int32 StartScenario = Overlay->GetMenuScenario();
+					if (StartScenario != ACampaign1851Map::ScenarioIndex())
+					{
+						IFileManager::Get().MakeDirectory(*(FPaths::ProjectSavedDir() / TEXT("Campaign")), true);
+						if (FFileHelper::SaveStringToFile(Map->NewGameNation + TEXT("|") + FString::SanitizeFloat(Map->NewGameDeviation), *(FPaths::ProjectSavedDir() / TEXT("Campaign/NewGame.flag"))))
+						{ ACampaign1851Map::SetScenarioIndex(StartScenario); UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851"))); }
+						else { Overlay->ShowBusy(FString()); Overlay->ShowToast(TEXT("Kunne ikke starte det valgte scenarie")); }
+					}
+					else { CampaignNewGame(); Overlay->ShowBusy(FString()); }
+				}), 0.25f, false);
 				Button = EButton::Block;
 			}
-			if (Button == EButton::ExitGame) { UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false); Button = EButton::Block; }
+			if (Button == EButton::ExitGame)
+			{
+				Overlay->ShowBusy(TEXT("Afslutter ..."));
+				FTimerHandle QuitHandle;
+				GetWorldTimerManager().SetTimer(QuitHandle, FTimerDelegate::CreateWeakLambda(this, [this]() { UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false); }), 0.25f, false);
+				Button = EButton::Block;
+			}
 		}
 		return;
 	}

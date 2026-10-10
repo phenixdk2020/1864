@@ -228,7 +228,16 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	Buttons.Reset();
 	Tips.Reset();
 	PaintScale = Geometry.Scale;
-	if (bStartMenu) { PaintMenu(Geometry, Out, Layer); PaintToast(Geometry, Out, Layer + 10); return Layer + 20; }
+	auto PaintBusy = [&]()
+	{
+		if (BusyText.IsEmpty()) { return; }
+		const FVector2D Screen = Geometry.GetLocalSize();
+		FSlateDrawElement::MakeBox(Out, Layer + 40, Geometry.ToPaintGeometry(Screen, FSlateLayoutTransform(FVector2D::ZeroVector)), FCoreStyle::Get().GetBrush("WhiteBrush"), ESlateDrawEffect::None, FLinearColor(0.f, 0.f, 0.f, 0.55f));
+		const FVector2D BoxSize(520.f, 90.f), BoxAt((Screen - BoxSize) * 0.5f);
+		PaintPanel(Geometry, Out, Layer + 41, BoxAt, BoxSize);
+		PaintText(Geometry, Out, Layer + 43, BusyText, BoxAt + FVector2D(BoxSize.X * 0.5f, 34.f), Serif(20), Ink, 0.5f);
+	};
+	if (bStartMenu) { PaintMenu(Geometry, Out, Layer); PaintToast(Geometry, Out, Layer + 10); PaintBusy(); return Layer + 50; }
 	if (Map->IsBattleView())
 	{
 		// On the battlefield model: no map signs; its name, and the way back.
@@ -336,7 +345,8 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	PaintText(Geometry, Out, Layer, TEXT("Klik: by eller regiment  ·  Højreklik: march  ·  Hjul: zoom  ·  Træk/WASD: panorer  ·  Q/E: drej  ·  Mellemrum: pause  ·  1-5: fart  ·  M: menu  ·  F5/F9"),
 		FVector2D(Size.X * 0.5f, Size.Y - 42.f), Serif(12), MutedInk, 0.5f);
 	PaintText(Geometry, Out, Layer, TEXT("v00.00.55 SLAGMARK I 3D, LANDE, BUDGETTER — UNREAL"), FVector2D(Size.X * 0.5f, Size.Y - 20.f), Serif(9), MutedInk.CopyWithNewOpacity(0.5f), 0.5f);
-	return Layer + 16;
+	PaintBusy();
+	return Layer + 50;
 }
 
 int32 SCampaign1851Overlay::PaintLabels(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, float D) const
@@ -2268,9 +2278,11 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 		else
 		{
 			const TCHAR* CustomPieces[] = { TEXT("Jakke"), TEXT("Bukser"), TEXT("Hovedbeklædning") };
-			for (int32 CustomPiece = 0; CustomPiece < 3; ++CustomPiece)
+			const int32 CustomRowPiece[] = { 2, 0, 1 };   // top to bottom: headgear, jacket, trousers
+			for (int32 CustomRow = 0; CustomRow < 3; ++CustomRow)
 			{
-				const float CustomY = Pos.Y + 180.f + CustomPiece * 65.f;
+				const int32 CustomPiece = CustomRowPiece[CustomRow];
+				const float CustomY = Pos.Y + 180.f + CustomRow * 65.f;
 				PaintText(Geometry, Out, Layer + 3, CustomPieces[CustomPiece], FVector2D(Pos.X + 22.f, CustomY), Serif(13), Gold);
 				for (int32 CustomSwatch = 0; CustomSwatch < 13; ++CustomSwatch)
 				{
@@ -4272,11 +4284,7 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 				PaintText(Geometry, Out, Layer + 3, R.Arm == ECampaign1851Arm::Artillery ? FString::Printf(TEXT("%d m · %d k · %d h"), Map->SubUnitMen(u, k), Map->SectionResource(u, k, 0), Map->SectionResource(u, k, 1)) : Map->CompanyCapacity(u) > 0 ? FString::Printf(TEXT("%d/%d"), Map->SubUnitMen(u, k), Map->CompanyCapacity(u)) : FString::FromInt(Map->SubUnitMen(u, k)), FVector2D(Pos.X + PoolW - 6.f, Y), Serif(10), Ink, 1.f, false);
 				Y += 22.f;
 			}
-			if (Parts > 1)
-			{
-				PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 14.f, Y - 9.f), FVector2D(PoolW - 14.f, 20.f), R.Captains.Num() > 0 ? TEXT("Udjævn kompagnierne") : R.Arm == ECampaign1851Arm::Artillery ? TEXT("Udjævn mandskabet") : TEXT("Udjævn eskadronerne"), EButton::EqualizeUnit, u);
-				Y += 24.f;
-			}
+			// (The old "equalise" button is gone: move men between companies or squadrons by dragging one onto the other.)
 			Y += 10.f;
 		}
 		if (!Set.IsEmpty()) PaintTextFit(Geometry, Out, Layer + 3, TEXT("Træk til højre: ny felthær uden ekstra HQ. Træk hen på en anden halvdel: flyt. Træk et kompagni, en eskadron eller en batterisektion hen på en anden (også i en anden enhed, der står samme sted): vælg hvor mange mand der flyttes. Det sidste samler halvdelene. Batterier: m = mand, k = kanoner, h = heste."), FVector2D(Pos.X, Y + 6.f), Serif(10, EFace::Italic), MutedInk, PoolW);

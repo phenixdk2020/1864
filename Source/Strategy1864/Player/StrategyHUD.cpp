@@ -68,6 +68,8 @@ namespace
 
     bool IsCommandHQ(const AStrategyUnit* Unit)
     {
+        // Any unit with subordinates is a headquarters (the staff does not fire, so no fire cone).
+        if (Unit->CommandComponent && Unit->CommandComponent->CurrentSubordinates.Num() > 0) { return true; }
         return Unit->Echelon == EStrategyEchelon::Division || Unit->Echelon == EStrategyEchelon::Brigade ||
             Unit->Echelon == EStrategyEchelon::Regiment || Unit->Echelon == EStrategyEchelon::Battalion ||
             Unit->Echelon == EStrategyEchelon::Headquarters;
