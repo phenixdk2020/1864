@@ -1370,6 +1370,29 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Overlay->RaisingPageIndex += Module;
 			Button = SCampaign1851Overlay::EButton::Block;
 		}
+		if (Button == SCampaign1851Overlay::EButton::GarrisonPage)
+		{
+			Overlay->TurnGarrisonPage(Module);
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
+		if (Button == SCampaign1851Overlay::EButton::GarrisonSelect)
+		{
+			if (Map->GetRegiments().IsValidIndex(Module)) { SelectRegiments({ Module }); }
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
+		if (Button == SCampaign1851Overlay::EButton::GarrisonOOB)
+		{
+			Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart);
+			Overlay->SetOOBPlace(Module);
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
+		if (Button == SCampaign1851Overlay::EButton::GarrisonReturn)
+		{
+			FString GarrisonReturnWhy;
+			if (!Map->CanReturnToGarrison(Module, &GarrisonReturnWhy)) { Overlay->ShowToast(GarrisonReturnWhy); }
+			else { Map->MoveRegimentToFormation(Module, 0); }
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
 		if (Button == SCampaign1851Overlay::EButton::TransferAdj)
 		{
 			const int32 Cur = Overlay->GetTransferCount();
@@ -2108,6 +2131,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 		else if (Button == SCampaign1851Overlay::EButton::UnitTown)
 		{
+			if (Map->RaiseTowns().Num() == 0) { Overlay->ShowToast(TEXT("Ingen by med kaserne: billet kan indkvartere, men nye enheder kræver en færdig kaserne")); }
 			Overlay->RaiseTownPick += Module;
 		}
 		else if (Button == SCampaign1851Overlay::EButton::UnitCommand)
@@ -3390,7 +3414,8 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		// A whole formation back to the garrisons: its units go home to their commands, it is dissolved.
 		const FString Name = Overlay->TreeKeyText(Source);
 		const int32 Units = Map->ReturnFormationToGarrison(SourceId);
-		Overlay->ShowToast(FString::Printf(TEXT("%s opløst: %d enheder tilbage i garnison"), *Name, Units));
+		Overlay->ShowToast(Units > 0 ? FString::Printf(TEXT("%s opløst: %d enheder tilbage i garnison"), *Name, Units)
+			: TEXT("Formationen kan ikke vende tilbage: en enhed marcherer, er i kamp eller mangler garnisonsplads i samme amt"));
 		return;
 	}
 	else if (SCampaign1851Overlay::TreeKind(Source) == K::Formation && Into != 0)

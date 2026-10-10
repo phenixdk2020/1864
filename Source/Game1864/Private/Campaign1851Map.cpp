@@ -1311,7 +1311,7 @@ ACampaign1851ConstructionSite* ACampaign1851Map::StartProject(int32 CityIndex, b
 		return Existing;
 	}
 	const TArray<FCampaign1851SiteModule>& Garrison = ACampaign1851ConstructionSite::GarrisonModules();
-	if (!Cities.IsValidIndex(CityIndex) || !Cities[CityIndex].bHasPlot || (bCharge && !CanAfford(Garrison[0].Cost())))
+	if (!Cities.IsValidIndex(CityIndex) || !Cities[CityIndex].bHasPlot || (bCharge && (!BarracksBlockReason(CityIndex).IsEmpty() || !CanAfford(Garrison[0].Cost()))))
 	{
 		return nullptr;
 	}
@@ -1854,7 +1854,7 @@ double ACampaign1851Map::GetMonthlyUpkeep() const
 	{
 		Total += Site && !Site->IsPrivate() && !Site->IsHistoric() ? Site->GetYearlyUpkeep() / 12.0 : 0.0;
 	}
-	return Total + (NetworkUpkeepPerYear() + FortUpkeepPerYear()) / 12.0;
+	return Total + (NetworkUpkeepPerYear() + FortUpkeepPerYear()) / 12.0 + BilletUpkeepPerMonth();
 }
 
 void ACampaign1851Map::AddTransaction(double Amount, const FString& Text)

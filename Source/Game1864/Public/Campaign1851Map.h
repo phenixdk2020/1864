@@ -1313,6 +1313,14 @@ public:
 	bool CanInsertFormationHQ(int32 Parent, ECampaign1851Echelon Echelon) const;
 	int32 InsertFormationHQ(int32 Parent, ECampaign1851Echelon Echelon);
 	bool CanReturnToGarrison(int32 Regiment, FString* OutReason = nullptr) const;
+	/** Afledt fra indbyggertal, færdig kaserne og det aktive scenaries starthær; ingen ny gemmetilstand. */
+	int32 GarrisonCapacity(int32 Town) const;
+	int32 GarrisonMen(int32 Town) const;
+	bool IsBilleted(const FCampaign1851Regiment& GarrisonUnit) const;
+	double BilletUpkeepPerMonth() const;
+	FString BarracksBlockReason(int32 Town) const;
+	/** Planlægger alle destinationer med fælles kapacitetsreservation før nogen enhed ændres. */
+	bool PlanGarrisonReturn(const TArray<int32>& GarrisonUnits, TArray<int32>& GarrisonTowns, FString* OutReason = nullptr) const;
 	const TCHAR* FormationPostRank(int32 Formation, int32 Post) const;
 	bool CanAssignFormationPost(int32 Officer, int32 Formation, int32 Post) const;
 	/** Dissolves a formation: its units and sub-formations go up a level. */

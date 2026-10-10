@@ -1804,6 +1804,13 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Gemmeversion 31: civil projektfremdrift gemmes nu i Research-tekstfeltet. Gamle id’er, indeks og doktrinvalg bevares; gamle gemninger læses stadig.
 - Korrigeret åbning i 1825-forløbet for jernbane (1844), Landbohøjskole (1858), felttelegraf (1854) og bagladere (1860); eksisterende 1851-startkundskab og åbning bevares. Nye emner følger år i begge scenarier.
 - Hele træet, balanceestimater, historiske holdepunkter, effektkoblinger og kontrolbegrænsninger dokumenteret i `Docs/Research-Tree.md`. UE 5.8-headerkontrol og statisk validering; ingen build, spilstart eller commit.
+### 2026-10-10 — Garnisonsoversigt, kasernekrav og billet
+
+- GARNISON er altid aktiv på indenlandske bykort. Enhedslisten viser mandtal, våbenart, moral og forsyning, ledig kapacitet, enhedsvalg, byens Kamporden og tilbagevendingsmulighed; lange lister har sider.
+- KASERNE er en særskilt sektion med forklaring ved manglende byggegrund eller for få indbyggere. Minimum 2.500 indbyggere er datadrevet i bygningstabellen og håndhæves ved nyt byggeri, uden at afvise gamle gemte projekter.
+- Billet giver indbyggere/40 pladser, højst 1.000 mand, langsommere moralgenopretning, mindre forråd og dyrere underhold. Billet tillader ikke rekruttering; scenariets eksisterende kasernebyer bevares ud fra starthæren.
+- Tilbagevenden kan bruge byer med plads i samme amt. Hele formationer får fælles kapacitetskontrol før ændring; destination og kortposition opdateres, mens Home bevares. Den eksisterende fortmulighed bevares.
+- Regler og fund dokumenteret i `Docs/Garrison.md`. Ingen ny gemmetilstand eller versionsændring. CSV/generator, beregnede panelhøjder, diff og Unreal 5.8-signaturer kontrolleret statisk. Ingen build, spilstart eller commit.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

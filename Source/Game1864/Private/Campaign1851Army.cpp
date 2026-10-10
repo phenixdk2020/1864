@@ -1643,7 +1643,8 @@ void ACampaign1851Map::AdvanceArmy(float DeltaDays, float DeltaSeconds)
 		}
 		// Well-trained soldiers trust themselves: up to +10 % on what the chief can inspire.
 		const float MoraleTarget = 0.7f + 0.025f * Insp + 0.1f * (R.MeanSkill() - 50.f) / 50.f;
-		R.Morale += (MoraleTarget - R.Morale) * FMath::Min(1.f, DeltaDays * 0.01f * (0.5f + Lead / 10.f));
+		const float GarrisonRecovery = IsBilleted(R) && R.Morale < MoraleTarget ? 0.95f : 1.f;
+		R.Morale += (MoraleTarget - R.Morale) * FMath::Min(1.f, DeltaDays * 0.01f * (0.5f + Lead / 10.f) * GarrisonRecovery);
 		for (int32 o : { R.Chief, R.General })
 		{
 			if (Officers.IsValidIndex(o))
@@ -1903,37 +1904,123 @@ int32 ACampaign1851Map::InsertFormationHQ(int32 Parent, ECampaign1851Echelon Ech
 	return OOBNewHQ;
 }
 
+FString ACampaign1851Map::BarracksBlockReason(int32 Town) const
+{
+	if (!Cities.IsValidIndex(Town) || Cities[Town].bForeign) { return TEXT("Byen tilhører ikke spilleren"); }
+	const FCampaign1851City& GarrisonCity = Cities[Town];
+	if (!GarrisonCity.Occupier.IsEmpty()) { return TEXT("Byen er besat"); }
+	if (!GarrisonCity.bHasPlot)
+	{
+		return FString::Printf(TEXT("Ingen byggegrund ved %s: kysten eller terrænet levner ingen jævn, fri plads"), *GarrisonCity.Name);
+	}
+	const int32 GarrisonMinimum = ACampaign1851ConstructionSite::GarrisonModules()[0].MinPopulation;
+	if (GarrisonCity.Population < GarrisonMinimum)
+	{
+		return FString::Printf(TEXT("Kræver over %d.%03d indb."), GarrisonMinimum / 1000, GarrisonMinimum % 1000);
+	}
+	return FString();
+}
+
+int32 ACampaign1851Map::GarrisonCapacity(int32 Town) const
+{
+	if (!Cities.IsValidIndex(Town) || Cities[Town].bForeign || !Cities[Town].Occupier.IsEmpty()) { return 0; }
+	if (!RaiseTownOk(Town)) { return FMath::Clamp(Cities[Town].Population / 40, 0, 1000); }
+	// Scenario barracks retain room for their original establishment. New barracks house 800 men.
+	int32 GarrisonHistoricalMen = 0;
+	for (const FCampaign1851Regiment& GarrisonUnit : ArmyAtStart)
+	{
+		if (GarrisonUnit.Home == Town) { GarrisonHistoricalMen += GarrisonUnit.MaxMen; }
+	}
+	return FMath::Max(800, GarrisonHistoricalMen);
+}
+
+int32 ACampaign1851Map::GarrisonMen(int32 Town) const
+{
+	int32 GarrisonTotal = 0;
+	for (const FCampaign1851Regiment& GarrisonUnit : Regiments)
+	{
+		if (GarrisonUnit.Town == Town && !GarrisonUnit.IsMarching()) { GarrisonTotal += GarrisonUnit.Men; }
+	}
+	return GarrisonTotal;
+}
+
+bool ACampaign1851Map::IsBilleted(const FCampaign1851Regiment& GarrisonUnit) const
+{
+	return !GarrisonUnit.IsMarching() && GarrisonCapacity(GarrisonUnit.Town) > 0 && !RaiseTownOk(GarrisonUnit.Town);
+}
+
+double ACampaign1851Map::BilletUpkeepPerMonth() const
+{
+	// Regular garrison rations are paid by the standing army budget. Only the billet surcharge is booked here.
+	double GarrisonExtra = 0.0;
+	for (const FCampaign1851Regiment& GarrisonUnit : Regiments)
+	{
+		if (IsBilleted(GarrisonUnit))
+		{
+			GarrisonExtra += 0.15 * 30.0 * (GarrisonUnit.PresentMen() * Campaign1851Supply::PurchasePricePerRation
+				+ GarrisonUnit.Horses * Campaign1851Supply::FodderPrice);
+		}
+	}
+	return GarrisonExtra;
+}
+
+bool ACampaign1851Map::PlanGarrisonReturn(const TArray<int32>& GarrisonUnits, TArray<int32>& GarrisonTowns, FString* OutReason) const
+{
+	GarrisonTowns.Reset();
+	TArray<int32> GarrisonUsed;
+	for (int32 GarrisonTown = 0; GarrisonTown < Cities.Num(); ++GarrisonTown) { GarrisonUsed.Add(GarrisonMen(GarrisonTown)); }
+	for (int32 GarrisonIndex : GarrisonUnits)
+	{
+		if (!Regiments.IsValidIndex(GarrisonIndex)) { if (OutReason) { *OutReason = TEXT("Enheden findes ikke længere"); } return false; }
+		const FCampaign1851Regiment& GarrisonUnit = Regiments[GarrisonIndex];
+		if (GarrisonUnit.IsMarching() || IsInBattle(GarrisonIndex))
+		{
+			if (OutReason) { *OutReason = TEXT("Enheden marcherer eller er i kamp; stands den først"); }
+			return false;
+		}
+		if (Cities.IsValidIndex(GarrisonUnit.Town)) { GarrisonUsed[GarrisonUnit.Town] -= GarrisonUnit.Men; }
+	}
+	for (int32 GarrisonIndex : GarrisonUnits)
+	{
+		const FCampaign1851Regiment& GarrisonUnit = Regiments[GarrisonIndex];
+		const int32 GarrisonAmt = AmtAtWorld(WorldAtKm(GarrisonUnit.Km));
+		int32 GarrisonBest = INDEX_NONE;
+		double GarrisonDistance = TNumericLimits<double>::Max();
+		for (int32 GarrisonTown = 0; GarrisonTown < Cities.Num(); ++GarrisonTown)
+		{
+			const double GarrisonKm = FVector2D::Distance(GarrisonUnit.Km, TownKm(GarrisonTown));
+			if (GarrisonCapacity(GarrisonTown) < GarrisonUsed[GarrisonTown] + GarrisonUnit.Men
+				|| GarrisonCapacity(GarrisonTown) <= 0
+				|| !(GarrisonTown == GarrisonUnit.Town || (GarrisonAmt != 0 && Cities[GarrisonTown].AmtId == GarrisonAmt)
+					|| GarrisonKm <= TownRadiusKm(Cities[GarrisonTown].Population))) { continue; }
+			// Prefer the current town, then Home, then the nearest town with room.
+			const double GarrisonScore = GarrisonTown == GarrisonUnit.Town ? -2.0 : GarrisonTown == GarrisonUnit.Home ? -1.0 : GarrisonKm;
+			if (GarrisonScore < GarrisonDistance) { GarrisonDistance = GarrisonScore; GarrisonBest = GarrisonTown; }
+		}
+		if (GarrisonBest == INDEX_NONE)
+		{
+			bool GarrisonAtFort = false;
+			for (const FCampaign1851Fort& GarrisonFort : Forts)
+			{
+				GarrisonAtFort |= GarrisonFort.bBuilt && ((GarrisonAmt != 0 && AmtAtWorld(WorldAtKm(GarrisonFort.Km)) == GarrisonAmt)
+					|| FVector2D::Distance(GarrisonUnit.Km, GarrisonFort.Km) <= 1.0);
+			}
+			if (!GarrisonAtFort)
+			{
+				if (OutReason) { *OutReason = FString::Printf(TEXT("%s: ingen garnisonsby med plads i samme amt eller ved enheden, og intet fort"), *GarrisonUnit.Name); }
+				return false;
+			}
+		}
+		else { GarrisonUsed[GarrisonBest] += GarrisonUnit.Men; }
+		GarrisonTowns.Add(GarrisonBest);
+	}
+	return true;
+}
+
 bool ACampaign1851Map::CanReturnToGarrison(int32 Regiment, FString* OutReason) const
 {
-	if (!Regiments.IsValidIndex(Regiment))
-	{
-		if (OutReason) { *OutReason = TEXT("Enheden findes ikke længere"); }
-		return false;
-	}
-	const FCampaign1851Regiment& OOBUnit = Regiments[Regiment];
-	if (OOBUnit.IsMarching())
-	{
-		if (OutReason) { *OutReason = TEXT("Enheden marcherer; stands den ved en garnisonsby eller et fort først"); }
-		return false;
-	}
-	const int32 OOBAmt = AmtAtWorld(WorldAtKm(OOBUnit.Km));
-	for (int32 OOBCityIndex = 0; OOBCityIndex < Cities.Num(); ++OOBCityIndex)
-	{
-		const FCampaign1851City& OOBCity = Cities[OOBCityIndex];
-		if (OOBCity.bForeign || !OOBCity.Occupier.IsEmpty()) { continue; }
-		const ACampaign1851ConstructionSite* OOBGarrisonSite = FindProject(OOBCityIndex);
-		bool OOBHasGarrison = OOBGarrisonSite && OOBGarrisonSite->IsBarracksDone();
-		for (const FCampaign1851Regiment& OOBHomeUnit : Regiments) { OOBHasGarrison |= OOBHomeUnit.Home == OOBCityIndex; }
-		if (OOBHasGarrison && ((OOBAmt != 0 && OOBCity.AmtId == OOBAmt)
-			|| FVector2D::Distance(OOBUnit.Km, TownKm(OOBCityIndex)) <= TownRadiusKm(OOBCity.Population))) { return true; }
-	}
-	for (const FCampaign1851Fort& OOBFort : Forts)
-	{
-		if (OOBFort.bBuilt && ((OOBAmt != 0 && AmtAtWorld(WorldAtKm(OOBFort.Km)) == OOBAmt)
-			|| FVector2D::Distance(OOBUnit.Km, OOBFort.Km) <= 1.0)) { return true; }
-	}
-	if (OutReason) { *OutReason = FString::Printf(TEXT("%s står ikke i samme provins som en garnisonsby eller et fort og er heller ikke inden for garnisonsbyen"), *OOBUnit.Name); }
-	return false;
+	TArray<int32> GarrisonDestinations;
+	return PlanGarrisonReturn({ Regiment }, GarrisonDestinations, OutReason);
 }
 
 int32 ACampaign1851Map::FormFromCommand(int32 Command, int32 Parent)
@@ -2083,10 +2170,18 @@ int32 ACampaign1851Map::ReturnFormationToGarrison(int32 Id)
 		return 0;
 	}
 	const TArray<int32> Units = FormationRegiments(Id);
-	for (int32 OOBUnit : Units) { if (!CanReturnToGarrison(OOBUnit)) { return 0; } }
-	for (int32 i : Units)
+	TArray<int32> GarrisonDestinations;
+	if (!PlanGarrisonReturn(Units, GarrisonDestinations)) { return 0; }
+	for (int32 GarrisonSlot = 0; GarrisonSlot < Units.Num(); ++GarrisonSlot)
 	{
-		Regiments[i].Formation = 0;
+		const int32 GarrisonIndex = Units[GarrisonSlot];
+		Regiments[GarrisonIndex].Formation = 0;
+		Regiments[GarrisonIndex].Town = GarrisonDestinations[GarrisonSlot];
+		if (GarrisonDestinations[GarrisonSlot] != INDEX_NONE)
+		{
+			PlaceInTown(GarrisonIndex);
+			UpdateRegimentPiece(GarrisonIndex);
+		}
 	}
 	// It and everything under it.
 	TArray<int32> Ids;
@@ -2110,7 +2205,17 @@ bool ACampaign1851Map::MoveRegimentToFormation(int32 Regiment, int32 Formation)
 	{
 		return false;
 	}
-	if (Formation == 0 && !CanReturnToGarrison(Regiment)) { return false; }
+	if (Formation == 0)
+	{
+		TArray<int32> GarrisonDestinations;
+		if (!PlanGarrisonReturn({ Regiment }, GarrisonDestinations)) { return false; }
+		Regiments[Regiment].Town = GarrisonDestinations[0];
+		if (GarrisonDestinations[0] != INDEX_NONE)
+		{
+			PlaceInTown(Regiment);
+			UpdateRegimentPiece(Regiment);
+		}
+	}
 	Regiments[Regiment].Formation = Formation;
 	return true;
 }

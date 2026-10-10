@@ -170,11 +170,11 @@ void ACampaign1851Map::AdvanceSupply(float DeltaDays)
 		FCampaign1851Regiment& R = Regiments[i];
 		const bool bFodder = NeedsFodder(R.Arm);
 		// In garrison (a town of the monarchy, halted) the army's regular budget feeds it: full.
-		const bool bGarrison = !R.IsMarching() && Cities.IsValidIndex(R.Town) && !Cities[R.Town].bForeign;
+		const bool bGarrison = !R.IsMarching() && Cities.IsValidIndex(R.Town) && !Cities[R.Town].bForeign && Cities[R.Town].Occupier.IsEmpty();
 		if (bGarrison)
 		{
-			R.Food = FoodCap();
-			R.Fodder = FodderCarried;
+			R.Food = FoodCap() / (IsBilleted(R) ? 1.15f : 1.f);
+			R.Fodder = FodderCarried / (IsBilleted(R) ? 1.15f : 1.f);
 			// Ammunition only where a depot or arsenal holds it (the garrison's own store).
 			FCampaign1851DepotStock* Own = Depots.Find(R.Town);
 			if (Own && R.Ammo < 1.f && Own->Ammo > 0.f)

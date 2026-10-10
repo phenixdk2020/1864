@@ -44,7 +44,7 @@ public:
 		FSlateWindowElementList& Out, int32 Layer, const FWidgetStyle& Style, bool bParentEnabled) const override;
 
 	/** City to show in the info panel; -1 hides it. */
-	void SetSelectedCity(int32 Index) { SelectedCity = Index; }
+	void SetSelectedCity(int32 Index) { if (SelectedCity != Index) { GarrisonPageIndex = 0; } SelectedCity = Index; }
 	int32 GetSelectedCity() const { return SelectedCity; }
 	/** Regiments selected (a stack, a column or single ones); they take the info panel. */
 	void SetSelectedRegiments(const TArray<int32>& In) { if (In != SelectedRegiments) { CloseUnitCustomisation(); StackScroll = 0; } SelectedRegiments = In; if (In.Num() == 0) { Picker = EPicker::None; InspectedOfficer = INDEX_NONE; } }
@@ -60,7 +60,7 @@ public:
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationInsertHQ, FormationChief, FormationDissolve, FormationDeputy, FormationStaff, FormationChiefRemove,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,
-		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitSize, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit, Block, MinisterInfo, TestBattle, EqualizeUnit, TransferAdj, TransferYes, TransferNo, TransferWhole, TransferGun, Ransom, PoolFold, UnitCardPart, StartMenu, StartLoad, StartTest, ScrollBarV, ScrollBarH, StackList, Scenario, UnitDeployEarly, RaisingPage, UnitRename, UnitUniform, UnitUniformSwatch, UnitUpgrade, UnitCustomClose, ResearchTab, ResearchScroll };
+		FortTool, FortChoose, FortSelect, FortGuns, FortDefence, FortTurn, FortShow, FortTrenches, FortPickCompany, FortAddCompany, FortReturn, RaiseBattalion, Demolish, SupplySend, SupplyBuy, SupplyMap, Footing, BattleFight3D, BattleAuto, BattleRetreat, Diplomacy, MakePeace, ResearchStart, DoctrineSet, ShipOrder, Blockade, Loan, OpenGazette, GazetteTab, NewGameNation, NationWeight, DelegateAll, MinisterDismiss, MinisterAppoint, MinisterPickClose, BridgeSelect, BridgeDo, OpenMateriel, RawBuy, KitBuy, ResearchPick, ForeignTab, UnitSize, UnitType, UnitTown, UnitCommand, UnitProgram, UnitRaise, OpenBattlefield, BattlefieldSize, BattlefieldHere, BattlefieldAtBattle, ConfirmYes, ConfirmNo, BuildingInfo, BuildingScroll, UnitCard, HorseBattery, SplitUnit, OOBFocusClear, MapView, Engage, MergeUnit, Block, MinisterInfo, TestBattle, EqualizeUnit, TransferAdj, TransferYes, TransferNo, TransferWhole, TransferGun, Ransom, PoolFold, UnitCardPart, StartMenu, StartLoad, StartTest, ScrollBarV, ScrollBarH, StackList, Scenario, UnitDeployEarly, RaisingPage, UnitRename, UnitUniform, UnitUniformSwatch, UnitUpgrade, UnitCustomClose, ResearchTab, ResearchScroll, GarrisonSelect, GarrisonOOB, GarrisonReturn, GarrisonPage };
 	/** Kinds of rows in the order-of-battle tree; a row's key is Kind * 100000 + Id. */
 	enum class ETreeKind : uint8 { None, Formation, Regiment, Command, FieldArmy, Garrisons, ArmGroup, Company, NewFormation };
 	static int32 TreeKey(ETreeKind Kind, int32 Id) { return int32(Kind) * 100000 + Id; }
@@ -215,6 +215,7 @@ public:
 	/** The town card's side panel: 0 none, 1 garrison, 2 buildings, 3 roads and railways. */
 	void SetTownTab(int32 Tab) { TownTab = Tab; }
 	int32 GetTownTab() const { return TownTab; }
+	void TurnGarrisonPage(int32 Delta) { GarrisonPageIndex += Delta; }
 	/** How the next march order goes (the three buttons in the army panel). */
 	void SetRouteMode(ECampaign1851RouteMode In) { RouteMode = In; }
 	ECampaign1851RouteMode GetRouteMode() const { return RouteMode; }
@@ -502,6 +503,7 @@ private:
 	FVector2D DragPos = FVector2D::ZeroVector;
 	FOrderDialog OrderDialog;
 	int32 TownTab = 0;
+	mutable int32 GarrisonPageIndex = 0;
 	EWindow Window = EWindow::None;
 	int32 SortColumn = 0;
 	bool bSortDesc = false;
