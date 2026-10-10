@@ -8,6 +8,7 @@
 #include "../Player/StrategyBattleQuality.h"
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
 #include "Animation/AnimSequence.h"
+#include "StrategyCrowdModel.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
@@ -66,9 +67,16 @@ void UStrategyCavalryVisualComponent::EndPlay(const EEndPlayReason::Type Reason)
     for (FHorseman& H : Horsemen)
     {
         if (H.Horse) { H.Horse->DestroyComponent(); }
-        if (H.Rider) { H.Rider->DestroyComponent(); }
+        if (H.Rider) { UStrategyCrowdSubsystem::RemoveAuxiliary(H.Rider); H.Rider->DestroyComponent(); }
         if (H.Sabre) { H.Sabre->DestroyComponent(); }
     }
+    for (FFallen& CrowdFallen : Fallen)
+    {
+        if (CrowdFallen.Rider) { UStrategyCrowdSubsystem::RemoveAuxiliary(CrowdFallen.Rider); CrowdFallen.Rider->DestroyComponent(); }
+        if (CrowdFallen.Horse) CrowdFallen.Horse->DestroyComponent();
+        if (CrowdFallen.Sabre) CrowdFallen.Sabre->DestroyComponent();
+    }
+    Fallen.Reset();
     Horsemen.Reset();
     CentroidFigureCount = 0;
     bReady = false;
@@ -171,6 +179,14 @@ void UStrategyCavalryVisualComponent::Fall(int32 Index)
             F.Rider->PlayAnimation(FallClip, false);
         }
     }
+    if (UStrategyCrowdSubsystem::CountFallen(GetWorld()) >= 150)
+    {
+        if (F.Rider) { UStrategyCrowdSubsystem::RemoveAuxiliary(F.Rider); F.Rider->DestroyComponent(); }
+        if (F.Horse) F.Horse->DestroyComponent();
+        if (F.Sabre) F.Sabre->DestroyComponent();
+        return;
+    }
+    if (F.Rider) UStrategyCrowdSubsystem::DrawAuxiliary(F.Rider, RiderModel, FallClip ? FallClip.Get() : SeatClip.Get(), 0.f, false);
     Fallen.Add(F);
 }
 
@@ -252,17 +268,27 @@ void UStrategyCavalryVisualComponent::TickComponent(float DeltaTime, ELevelTick 
     UpdatePace(DeltaTime);
 
     // The fallen: the horse rolls onto its side, then lies still.
-    for (FFallen& F : Fallen)
+    for (int32 CrowdFallenIndex = Fallen.Num() - 1; CrowdFallenIndex >= 0; --CrowdFallenIndex)
     {
-        if (F.Age > 1.0f || !F.Horse)
+        FFallen& F = Fallen[CrowdFallenIndex];
+        F.Age += DeltaTime;
+        if (F.Age >= 65.f)
         {
+            if (F.Rider) { UStrategyCrowdSubsystem::RemoveAuxiliary(F.Rider); F.Rider->DestroyComponent(); }
+            if (F.Horse) F.Horse->DestroyComponent();
+            if (F.Sabre) F.Sabre->DestroyComponent();
+            Fallen.RemoveAt(CrowdFallenIndex);
             continue;
         }
-        F.Age += DeltaTime;
-        const float T = FMath::Clamp(F.Age / 0.7f, 0.f, 1.f);
-        const float Ease = T * T * (3.f - 2.f * T);
-        F.Horse->SetWorldRotation(F.From + FRotator(0.f, 0.f, 82.f * F.Side * Ease));
-        if (F.Sabre) { F.Sabre->SetVisibility(false); }
+        if (F.Horse)
+        {
+            const float T = FMath::Clamp(F.Age / 0.7f, 0.f, 1.f);
+            const float Ease = T * T * (3.f - 2.f * T);
+            F.Horse->SetWorldRotation(F.From + FRotator(0.f, 0.f, 82.f * F.Side * Ease));
+        }
+        if (F.Rider) UStrategyCrowdSubsystem::DrawAuxiliary(F.Rider, RiderModel, FallClip ? FallClip.Get() : SeatClip.Get(),
+            F.Age, false, FMath::Clamp((65.f - F.Age) / 5.f, 0.f, 1.f));
+        if (F.Sabre) F.Sabre->SetVisibility(false);
     }
 }
 
@@ -330,6 +356,14 @@ void UStrategyCavalryVisualComponent::UpdatePace(float DeltaTime)
             const float RiderWave = FMath::Sin((H.Phase - 0.12f) * 2.f * PI);
             H.Rider->SetRelativeLocation(FVector(H.Shown.X, H.Shown.Y, Ground + SaddleHeightCm - RiderSeatCm + FigureRise * (0.55f + 0.45f * RiderWave)) + FRotator(0.f, RelativeFacing, 0.f).RotateVector(FVector(-10.f, 0.f, 0.f)));
             H.Rider->SetRelativeRotation(FRotator(-6.f * FMath::Min(Gait, 1.f), -90.f + RelativeFacing, 0.f));
+            // Keep the sabre's held hand pose before releasing skeletal geometry. It remains a static prop.
+            if (H.Sabre && H.Sabre->GetAttachSocketName() != NAME_None)
+            {
+                H.Rider->TickAnimation(0.f, false);
+                H.Rider->RefreshBoneTransforms();
+                H.Sabre->AttachToComponent(H.Rider, FAttachmentTransformRules::KeepWorldTransform);
+            }
+            UStrategyCrowdSubsystem::DrawAuxiliary(H.Rider, RiderModel, SeatClip, 0.05f);
         }
         FigureLocalCentroid += H.Rider ? H.Rider->GetRelativeLocation() : Local;
         ++CentroidFigureCount;

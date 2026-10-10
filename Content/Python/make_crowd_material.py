@@ -1,7 +1,7 @@
-# The far soldiers' material and LODs (PROJECT 1864, the hybrid of baked and full animation; see
+# Alle fodsoldaters VAT-materiale (PROJECT 1864, the hybrid of baked and full animation; see
 # Source/Strategy1864/Visual/StrategyCrowdModel.h):
-#  - the soldier meshes get four LODs (LOD3, about 2,500 vertices, is what the crowd model bakes);
-#  - M_CrowdVAT skins in the vertex shader from the bone texture (three texels a bone, a row a frame): bone indices
+#  - modellen bager LOD0 med RGB vertexfarvemasker; eksisterende soldaterassets bevarer deres LODs;
+#  - M_CrowdVAT_All skins in the vertex shader from the bone texture (three texels a bone, a row a frame): bone indices
 #    in UV1-2, weights in UV3-4, the clip in the instance's custom data (first row, frames, start time, frame rate;
 #    a negative rate plays once and holds), two frames blended.
 # Run: UnrealEditor-Cmd Game1864.uproject -run=pythonscript -script=<this file>
@@ -11,19 +11,58 @@ mel = unreal.MaterialEditingLibrary
 tools = unreal.AssetToolsHelpers.get_asset_tools()
 MAT = '/Game/Battle/Materials'
 
-sub = unreal.get_editor_subsystem(unreal.SkeletalMeshEditorSubsystem)
-for p in ['/Game/Units/Danish/Livgarden1864/Mesh/SK_DK_Livgarden_1864', '/Game/Units/Danish/Infantry1864/Mesh/SK_DK_Infantry_1864',
-          '/Game/Units/Danish/Jager1864/Mesh/SK_DK_Jager_1864', '/Game/Units/Swedish/Infantry1864/Mesh/SK_SE_Infantry_1864']:
-    m = unreal.load_asset(p)
-    if m and sub.get_lod_count(m) < 4:
-        sub.regenerate_lod(m, 4, False, False)
-        unreal.EditorAssetLibrary.save_loaded_asset(m)
-    if m:
-        unreal.log('CROWD-MAT lods %s %s' % (p.split('/')[-1], [sub.get_num_verts(m, i) for i in range(sub.get_lod_count(m))]))
 
-m = unreal.load_asset(MAT + '/M_CrowdVAT')
+def configure_crowd_fade(material, vat=False):
+    """Complementary pixel coverage avoids a hard handoff and double drawing.
+
+    Original infantry materials are opaque; leave other blend modes for explicit authoring.
+    """
+    if not vat and 'CrowdOpacity' in [str(n) for n in mel.get_scalar_parameter_names(material)]:
+        return
+    if material.get_editor_property('blend_mode') not in [unreal.BlendMode.BLEND_OPAQUE, unreal.BlendMode.BLEND_MASKED]:
+        raise RuntimeError('PROJECT1864-CROWD: unsupported near material blend: ' + material.get_path_name())
+    previous_mask = mel.get_material_property_input_node(material, unreal.MaterialProperty.MP_OPACITY_MASK)
+    previous_output = mel.get_material_property_input_node_output_name(material, unreal.MaterialProperty.MP_OPACITY_MASK)
+    def fade_node(cls, **properties):
+        result = mel.create_material_expression(material, cls, -500, 1800)
+        for key, value in properties.items():
+            result.set_editor_property(key, value)
+        return result
+    if vat:
+        alpha = fade_node(unreal.MaterialExpressionPerInstanceCustomData, data_index=16)
+        vertex_alpha = fade_node(unreal.MaterialExpressionVertexInterpolator)
+        mel.connect_material_expressions(alpha, '', vertex_alpha, '')
+        alpha = vertex_alpha
+    else:
+        alpha = fade_node(unreal.MaterialExpressionScalarParameter, parameter_name='CrowdOpacity', default_value=1.0)
+    coverage = fade_node(unreal.MaterialExpressionCustom)
+    coverage.set_editor_property('description', 'Complementary VAT/skeletal coverage')
+    coverage.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT1)
+    threshold = '1.0 - step(noise, 1.0 - Alpha)' if vat else 'step(noise, Alpha)'
+    coverage.set_editor_property('code', '''
+if (Alpha <= 0.0) return 0.0;
+if (Alpha >= 1.0) return 1.0;
+float noise = frac(sin(dot(floor(Parameters.SvPosition.xy), float2(12.9898, 78.233))) * 43758.5453);
+return ''' + threshold + ';')
+    coverage_input = unreal.CustomInput()
+    coverage_input.set_editor_property('input_name', 'Alpha')
+    coverage.set_editor_property('inputs', [coverage_input])
+    mel.connect_material_expressions(alpha, '', coverage, 'Alpha')
+    material.set_editor_property('blend_mode', unreal.BlendMode.BLEND_MASKED)
+    if previous_mask is not None:
+        combined_mask = fade_node(unreal.MaterialExpressionMultiply)
+        mel.connect_material_expressions(previous_mask, previous_output, combined_mask, 'A')
+        mel.connect_material_expressions(coverage, '', combined_mask, 'B')
+        coverage = combined_mask
+    mel.connect_material_property(coverage, '', unreal.MaterialProperty.MP_OPACITY_MASK)
+    errors = mel.recompile_material(material)
+    if errors:
+        raise RuntimeError("PROJECT1864-CROWD: shaderfejl: " + "\n".join(errors))
+    unreal.EditorAssetLibrary.save_loaded_asset(material)
+
+m = unreal.load_asset(MAT + '/M_CrowdVAT_All')
 if not m:
-    m = tools.create_asset('M_CrowdVAT', MAT, unreal.Material, unreal.MaterialFactoryNew())
+    m = tools.create_asset('M_CrowdVAT_All', MAT, unreal.Material, unreal.MaterialFactoryNew())
 mel.delete_all_material_expressions(m)
 y = [0]
 
@@ -82,15 +121,70 @@ to_world = node(unreal.MaterialExpressionTransform, x=-400,
                 transform_type=unreal.MaterialVectorCoordTransform.TRANSFORM_WORLD)
 mel.connect_material_expressions(custom, '', to_world, '')
 mel.connect_material_property(to_world, '', unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
+normal = node(unreal.MaterialExpressionPreSkinnedNormal)
+skin_normal = node(unreal.MaterialExpressionCustom)
+skin_normal.set_editor_property('code', code.replace('float4(Pos, 1.0)', 'float4(Pos, 0.0)').replace('return lerp(s0, s1, a) - Pos;', 'return normalize(lerp(s0, s1, a));'))
+skin_normal.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT3)
+skin_normal.set_editor_property('description', 'CrowdSkinNormal')
+skin_normal.set_editor_property('inputs', inputs)
+for n, src in zip(names, [normal] + uv + data + [time, bones]):
+    mel.connect_material_expressions(src, '', skin_normal, n)
+normal_world = node(unreal.MaterialExpressionTransform,
+                    transform_source_type=unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_LOCAL,
+                    transform_type=unreal.MaterialVectorCoordTransform.TRANSFORM_WORLD)
+mel.connect_material_expressions(skin_normal, '', normal_world, '')
+normal_interpolator = node(unreal.MaterialExpressionVertexInterpolator)
+mel.connect_material_expressions(normal_world, '', normal_interpolator, '')
+m.set_editor_property('tangent_space_normal', False)
+mel.connect_material_property(normal_interpolator, '', unreal.MaterialProperty.MP_NORMAL)
+
 
 diffuse = node(unreal.MaterialExpressionTextureSampleParameter2D, x=-400, parameter_name='Diffuse',
                texture=unreal.load_asset('/Game/Battle/Textures/T_Ground_Dirt_D'))
-mel.connect_material_property(diffuse, 'RGB', unreal.MaterialProperty.MP_BASE_COLOR)
+# Per-instance colours are evaluated in the vertex stage, then interpolated for the pixel shader.
+mask = node(unreal.MaterialExpressionVertexColor)
+colour_inputs = [('Base', diffuse, 'RGB'), ('Mask', mask, 'RGB')]
+for part, offset, switch in [('CoatColor', 4, 13), ('TrouserColor', 7, 14), ('HeadgearColor', 10, 15)]:
+    channels = [node(unreal.MaterialExpressionPerInstanceCustomData, data_index=i)
+                for i in [offset, offset + 1, offset + 2, switch]]
+    packed = channels[0]
+    for channel in channels[1:]:
+        append = node(unreal.MaterialExpressionAppendVector)
+        mel.connect_material_expressions(packed, '', append, 'A')
+        mel.connect_material_expressions(channel, '', append, 'B')
+        packed = append
+    interpolator = node(unreal.MaterialExpressionVertexInterpolator)
+    mel.connect_material_expressions(packed, '', interpolator, '')
+    colour_inputs.append((part, interpolator, ''))
+recolour = node(unreal.MaterialExpressionCustom)
+recolour.set_editor_property('description', 'Per-instance uniform colours; RGB garment vertex masks')
+recolour.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT3)
+recolour.set_editor_property('code', """
+float skin = step(Base.b * 1.3, Base.r) * step(Base.g * 1.12, Base.r)
+           * step(Base.b * 1.05, Base.g) * step(0.12, Base.r);
+float belt = step(0.68, min(Base.r, min(Base.g, Base.b)));
+float detail = 0.65 + 0.35 * saturate(dot(Base, float3(.2126,.7152,.0722)));
+float3 result = lerp(Base, CoatColor.rgb * detail, Mask.r * (1-skin) * (1-belt) * CoatColor.a);
+result = lerp(result, TrouserColor.rgb * detail, Mask.g * (1-skin) * TrouserColor.a);
+return lerp(result, HeadgearColor.rgb * detail, Mask.b * (1-skin) * HeadgearColor.a);
+""")
+recolour_inputs = []
+for key, _, _ in colour_inputs:
+    ci = unreal.CustomInput()
+    ci.set_editor_property('input_name', key)
+    recolour_inputs.append(ci)
+recolour.set_editor_property('inputs', recolour_inputs)
+for key, source, output in colour_inputs:
+    mel.connect_material_expressions(source, output, recolour, key)
+mel.connect_material_property(recolour, '', unreal.MaterialProperty.MP_BASE_COLOR)
 rough = node(unreal.MaterialExpressionConstant, x=-400, r=0.8)
 mel.connect_material_property(rough, '', unreal.MaterialProperty.MP_ROUGHNESS)
 spec = node(unreal.MaterialExpressionConstant, x=-400, r=0.3)
 mel.connect_material_property(spec, '', unreal.MaterialProperty.MP_SPECULAR)
 mel.set_material_usage(m, unreal.MaterialUsage.MATUSAGE_INSTANCED_STATIC_MESHES)
-mel.recompile_material(m)
+configure_crowd_fade(m, vat=True)
+errors = mel.recompile_material(m)
+if errors:
+    raise RuntimeError("PROJECT1864-CROWD: shaderfejl: " + "\n".join(errors))
 unreal.EditorAssetLibrary.save_loaded_asset(m)
-unreal.log('CROWD-MAT DONE')
+unreal.log('PROJECT1864-CROWD: uniformmateriale gemt')

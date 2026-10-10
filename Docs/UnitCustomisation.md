@@ -29,17 +29,21 @@ på de teksturerede infanterimodeller skal
 `Content/Python/prepare_campaign_uniforms.py` køres i Unreal Editors
 Python-konsol. Scriptet tilføjer parametrene `CoatColor`, `TrouserColor`,
 `HeadgearColor` og tre `Override…`-kontakter til de eksisterende
-materialgrafer. Det åbner materialeeditorerne og gemmer de berørte assets.
+materialgrafer. Det gemmer de berørte assets uden at åbne materialeeditorer.
 Det starter ingen editor på egen hånd. API-referencen er
 [Epic MaterialEditingLibrary](https://dev.epicgames.com/documentation/en-us/unreal-engine/python-api/class/MaterialEditingLibrary).
 
 Garmentmaskerne anvender skønnede højdebånd i modellens uskinnede lokale
 koordinater og bevarer hud, støvler og lyse remme efter teksturens farver.
 Maskerne kræver visuel kontrol på infanteri, jægere og garde; ved behov bør
-de erstattes med malede teksturmasker. Farvetilpasset infanteri bruger
-skeletfigurer også på afstand, fordi den eksisterende VAT-crowdshader ikke
-har disse masker. Det kan koste mere renderingstid ved mange tilpassede
-enheder. Rytteri og artilleri modtager samme farvetilstand; synlig
+de erstattes med malede teksturmasker. Farvetilpasset infanteri bruger nu også VAT, når modellerne og
+`M_CrowdVAT_All` er bagt med `Content/Python/bake_all_vat.py`. Instansdata
+indeholder de tre RGB-farver og override-kontakter; det fusionerede gevær
+får ikke uniformfarver. Bagescriptet forbereder også nærfigurernes
+uniformmaterialer og overgangsmasker. Manglende VAT-assets giver skeletfallback med
+`PROJECT1864-CROWD`-log. Masker/overgange er ikke visuelt verificeret.
+Ryttere/stab/ordonnanser bruger samme VAT-farvedata og n?rmaterialer.
+Artilleri modtager samme farvetilstand; synlig
 farvning afhænger af, at deres besætnings-/soldatermeshes og materialer
 understøtter parametrene.
 
