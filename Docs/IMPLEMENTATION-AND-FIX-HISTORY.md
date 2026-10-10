@@ -1787,6 +1787,16 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - SPRED og automatisk fjernildsdækning bruger samme tilstand: 3x afstand, én række, Prone, kravlevisning, max 40 % fart, træf 0,60 for håndvåben og 0,45 for målrettet/områdeartilleri og mortérer. SAML gendanner formation/afstande; leveret march rejser først med eksisterende 3 sekunders forsinkelse. Manuel SPRED bevares også uden officer-AI.
 - Dokumenteret i `Docs/Enhedsadfaerd1864.md`; `-Strategy1864DebugSpread` logger gruppeklik og SPRED/SAML. Statisk diff-, include- og API-kontrol mod UE 5.8-headere. Ikke bygget, ikke startet, ikke spiltestet; ingen commit.
 
+### 2026-10-10 – Omskiftelig GPU-/frame-time-politik for 3D-slag
+
+- Sekundvis `-Strategy1864DebugGpu` med UE 5.8-verificerede RenderTimer-/RHI-symboler og atomiske rendertrådssamples uden GPU-wait.
+- LAV uden Lumen GI/refleksioner/SSR; MIDDEL med billigere Lumen/skygger; HOEJ beholder Epic-grupper. Egne `Strategy1864.Perf.*`-omskiftere og logning til A/B.
+- VAT ved 40/32 m og nærbudget 400 infanterifigurer. Eksisterende fusioneret VAT-rifle/bajonet, animationsfase-/poseoverførsel og skyggefri rifler/fjerne figurer bevares.
+- Vegetationsculling: græs 60–120 m, buske 250 m, træer 800 m, hegn 300 m; færre visuelle instanser ved LAV, gameplay-skovdata uændret.
+- Samlet visuel røg-/blast-cap 60, unlit ved LAV/MIDDEL, distancefade og preloaded assets. Animationer/fademateriale preloads; VAT bages ved oprettelse for begge rifle-varianter; visuelle scans/scratch-buffere caches, skylight-recapture throttles, ordonnans-assets indlæses før kommandospawn.
+- Minimal HUD-ændring: frasortering af ikke-valgte enheders fjerne/off-screen ruter. Måleplan, engine-kilder og begrænsninger i `Docs/Performance-Battle.md`, inklusive uverificeret årsag til firesekundershakket og specialuniform-fallback.
+- Statisk header-/diff-kontrol; intet build, editor/spil eller commit. gpu2-filer læst som reference; ingen gammel patch anvendt.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

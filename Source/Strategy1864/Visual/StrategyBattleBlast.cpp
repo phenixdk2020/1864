@@ -1,4 +1,7 @@
 #include "StrategyBattleBlast.h"
+#include "../Player/StrategyBattlePerformance.h"
+#include "../Player/StrategyBattleQuality.h"
+#include "UObject/ConstructorHelpers.h"
 
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
 #include "Components/PointLightComponent.h"
@@ -17,36 +20,6 @@ namespace
     const FLinearColor BlastBlackSmoke(0.10f, 0.09f, 0.085f);
     const FLinearColor BlastFire(6.0f, 2.6f, 0.6f);
 
-    UStaticMesh* SphereMesh()
-    {
-        static TWeakObjectPtr<UStaticMesh> Cached;
-        if (!Cached.IsValid())
-        {
-            Cached = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere"));
-        }
-        return Cached.Get();
-    }
-
-    UStaticMesh* DiscMesh()
-    {
-        static TWeakObjectPtr<UStaticMesh> Cached;
-        if (!Cached.IsValid())
-        {
-            Cached = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
-        }
-        return Cached.Get();
-    }
-
-    UMaterialInterface* TranslucentMaterial()
-    {
-        static TWeakObjectPtr<UMaterialInterface> Cached;
-        if (!Cached.IsValid())
-        {
-            Cached = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/EngineDebugMaterials/M_SimpleTranslucent.M_SimpleTranslucent"));
-        }
-        return Cached.Get();
-    }
-
     FVector RandomCone(const FVector& Axis, float HalfAngleDeg)
     {
         return FMath::VRandCone(Axis.GetSafeNormal(), FMath::DegreesToRadians(HalfAngleDeg));
@@ -55,6 +28,15 @@ namespace
 
 AStrategyBattleBlast::AStrategyBattleBlast()
 {
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> BattleSphereAsset(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> BattleDiscAsset(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> BattleLitAsset(TEXT("/Engine/EngineDebugMaterials/M_SimpleTranslucent.M_SimpleTranslucent"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> BattleUnlitAsset(TEXT("/Engine/EngineDebugMaterials/M_SimpleUnlitTranslucent.M_SimpleUnlitTranslucent"));
+    BattleBlastSphere = BattleSphereAsset.Object;
+    BattleBlastDisc = BattleDiscAsset.Object;
+    BattleBlastLit = BattleLitAsset.Object;
+    BattleBlastUnlit = BattleUnlitAsset.Object;
+    Pieces.Reserve(32); Meshes.Reserve(32);
     PrimaryActorTick.bCanEverTick = true;
     Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
     SetRootComponent(Root);
@@ -63,7 +45,7 @@ AStrategyBattleBlast::AStrategyBattleBlast()
 
 AStrategyBattleBlast* AStrategyBattleBlast::Spawn(UWorld* World, EStrategyBlastKind Kind, const FVector& Location, const FVector& Direction, float Scale, float RangeCm)
 {
-    if (!World || World->IsNetMode(NM_DedicatedServer))
+    if (!World || World->IsNetMode(NM_DedicatedServer) || !Strategy1864Performance::CanSpawnEffect(World))
     {
         return nullptr;
     }
@@ -72,6 +54,7 @@ AStrategyBattleBlast* AStrategyBattleBlast::Spawn(UWorld* World, EStrategyBlastK
     AStrategyBattleBlast* Blast = World->SpawnActor<AStrategyBattleBlast>(AStrategyBattleBlast::StaticClass(), Location, FRotator::ZeroRotator, Params);
     if (Blast)
     {
+        if (!Strategy1864Performance::AdmitEffect(Blast)) { Blast->Destroy(); return nullptr; }
         Blast->Build(Kind, Direction.IsNearlyZero() ? FVector::ForwardVector : Direction.GetSafeNormal(), FMath::Max(0.1f, Scale), RangeCm);
     }
     return Blast;
@@ -130,7 +113,7 @@ void AStrategyBattleBlast::AddFlash(float Intensity, float RadiusCm, float Secon
 
 void AStrategyBattleBlast::AddPiece(const FPiece& In)
 {
-    UStaticMesh* Mesh = In.bFlat ? DiscMesh() : SphereMesh();
+    UStaticMesh* Mesh = In.bFlat ? BattleBlastDisc.Get() : BattleBlastSphere.Get();
     if (!Mesh)
     {
         return;
@@ -141,6 +124,7 @@ void AStrategyBattleBlast::AddPiece(const FPiece& In)
     C->SetStaticMesh(Mesh);
     C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     C->SetCastShadow(false);
+    C->SetCullDistance(30000.f);
     C->bVisibleInRayTracing = false;
     C->SetRelativeLocation(P.Position);
     const float PieceInitialDiameter = P.StartDiameter / 100.f;
@@ -148,7 +132,7 @@ void AStrategyBattleBlast::AddPiece(const FPiece& In)
         FVector(PieceInitialDiameter, PieceInitialDiameter, PieceInitialDiameter * 0.85f));
     C->SetVisibility(P.Delay <= 0.0f);
     C->RegisterComponent();
-    if (UMaterialInterface* Base = TranslucentMaterial())
+    if (UMaterialInterface* Base = Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Effects")) && Strategy1864BattleQuality::GetPreset() < 2 && BattleBlastUnlit ? BattleBlastUnlit.Get() : BattleBlastLit.Get())
     {
         P.Material = UMaterialInstanceDynamic::Create(Base, this);
         P.Material->SetVectorParameterValue(TEXT("Color"), FLinearColor(P.Colour.R, P.Colour.G, P.Colour.B, P.Opacity));
@@ -288,6 +272,7 @@ void AStrategyBattleBlast::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
     Age += DeltaTime;
+    const float BattleEffectDistanceFade = Strategy1864Performance::EffectFade(this);
     if (Flash)
     {
         const float T = FlashSeconds > 0.f ? Age / FlashSeconds : 1.f;
@@ -356,7 +341,7 @@ void AStrategyBattleBlast::Tick(float DeltaTime)
         if (P.Material)
         {
             const float Fade = P.bFlat ? FMath::Clamp(P.Life / 8.f, 0.f, 1.f) : P.bGravity ? FMath::Clamp(P.Life / 0.4f, 0.f, 1.f) : FMath::Pow(1.f - T, 1.5f);
-            P.Material->SetVectorParameterValue(TEXT("Color"), FLinearColor(P.Colour.R, P.Colour.G, P.Colour.B, P.Opacity * Fade));
+            P.Material->SetVectorParameterValue(TEXT("Color"), FLinearColor(P.Colour.R, P.Colour.G, P.Colour.B, P.Opacity * Fade * BattleEffectDistanceFade));
         }
     }
     if (!bAny)

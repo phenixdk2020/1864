@@ -5,6 +5,8 @@
 #include "StrategyMuzzleSmokePuff.generated.h"
 
 class UStaticMeshComponent;
+class UStaticMesh;
+class UMaterialInterface;
 class UMaterialInstanceDynamic;
 
 /**
@@ -40,6 +42,9 @@ public:
     float StartOpacity = 0.55f;
 
 private:
+    UPROPERTY() TObjectPtr<UStaticMesh> BattleSmokeSphere;
+    UPROPERTY() TObjectPtr<UMaterialInterface> BattleSmokeLit;
+    UPROPERTY() TObjectPtr<UMaterialInterface> BattleSmokeUnlit;
     UPROPERTY()
     TObjectPtr<USceneComponent> Root;
 

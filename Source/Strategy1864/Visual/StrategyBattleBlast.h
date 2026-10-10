@@ -5,6 +5,8 @@
 #include "StrategyBattleBlast.generated.h"
 
 class UStaticMeshComponent;
+class UStaticMesh;
+class UMaterialInterface;
 class UMaterialInstanceDynamic;
 class UPointLightComponent;
 
@@ -40,6 +42,10 @@ public:
     virtual void Tick(float DeltaTime) override;
 
 private:
+    UPROPERTY() TObjectPtr<UStaticMesh> BattleBlastSphere;
+    UPROPERTY() TObjectPtr<UStaticMesh> BattleBlastDisc;
+    UPROPERTY() TObjectPtr<UMaterialInterface> BattleBlastLit;
+    UPROPERTY() TObjectPtr<UMaterialInterface> BattleBlastUnlit;
     struct FPiece
     {
         TObjectPtr<UStaticMeshComponent> Mesh;

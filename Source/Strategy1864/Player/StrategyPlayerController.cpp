@@ -1,6 +1,7 @@
 #include "StrategyPlayerController.h"
 
 #include "StrategyHUD.h"
+#include "StrategyBattlePerformance.h"
 #include "StrategyCameraPawn.h"
 #include "StrategyGameMode.h"
 #include "EngineUtils.h"
@@ -101,6 +102,7 @@ void AStrategyPlayerController::SetupInputComponent()
 
 void AStrategyPlayerController::PlayerTick(float DeltaTime)
 {
+    Strategy1864Performance::Tick(this, DeltaTime);
     // -Strategy1864Select=<unit id>: selects that unit a few seconds into the battle (QA of the HUD).
     {
         static bool bAutoSelected = false;

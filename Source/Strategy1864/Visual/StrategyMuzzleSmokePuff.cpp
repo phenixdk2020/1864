@@ -1,4 +1,5 @@
 #include "StrategyMuzzleSmokePuff.h"
+#include "../Player/StrategyBattlePerformance.h"
 #include "../Player/StrategyBattleQuality.h"
 
 #include "Components/StaticMeshComponent.h"
@@ -14,6 +15,12 @@ namespace
 
 AStrategyMuzzleSmokePuff::AStrategyMuzzleSmokePuff()
 {
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> BattleSphereAsset(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> BattleLitAsset(TEXT("/Engine/EngineDebugMaterials/M_SimpleTranslucent.M_SimpleTranslucent"));
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> BattleUnlitAsset(TEXT("/Engine/EngineDebugMaterials/M_SimpleUnlitTranslucent.M_SimpleUnlitTranslucent"));
+    BattleSmokeSphere = BattleSphereAsset.Object;
+    BattleSmokeLit = BattleLitAsset.Object;
+    BattleSmokeUnlit = BattleUnlitAsset.Object;
     PrimaryActorTick.bCanEverTick = true;
     Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
     SetRootComponent(Root);
@@ -22,9 +29,11 @@ AStrategyMuzzleSmokePuff::AStrategyMuzzleSmokePuff()
 void AStrategyMuzzleSmokePuff::BeginPlay()
 {
     Super::BeginPlay();
+    if (!Strategy1864Performance::AdmitEffect(this)) { Destroy(); return; }
+    Balls.Reserve(SmokeBalls); Materials.Reserve(SmokeBalls); Offsets.Reserve(SmokeBalls);
     // Engine content only: the basic sphere and the simple translucent material (its "Color" alpha is the opacity).
-    UStaticMesh* Sphere = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere"));
-    UMaterialInterface* Translucent = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/EngineDebugMaterials/M_SimpleTranslucent.M_SimpleTranslucent"));
+    UStaticMesh* Sphere = BattleSmokeSphere;
+    UMaterialInterface* Translucent = Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Effects")) && Strategy1864BattleQuality::GetPreset() < 2 && BattleSmokeUnlit ? BattleSmokeUnlit.Get() : BattleSmokeLit.Get();
     if (!Sphere)
     {
         Destroy();
@@ -67,7 +76,7 @@ void AStrategyMuzzleSmokePuff::Tick(float DeltaTime)
     const float Push = FMath::Exp(-2.5f * Age);
     AddActorWorldOffset(FVector(Drift.X * (0.25f + Push), Drift.Y * (0.25f + Push), Drift.Z) * DeltaTime);
     const float Diameter = FMath::Lerp(StartDiameterCm, EndDiameterCm, FMath::Sqrt(T));
-    const float Opacity = StartOpacity * FMath::Pow(1.0f - T, 1.6f);
+    const float Opacity = Strategy1864Performance::EffectFade(this) * StartOpacity * FMath::Pow(1.0f - T, 1.6f);
     for (int32 b = 0; b < Balls.Num(); ++b)
     {
         if (!Balls[b])

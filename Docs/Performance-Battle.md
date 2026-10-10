@@ -1,3 +1,78 @@
+# Slagydelse – 2026-10-10
+
+Dette afsnit beskriver gpu3-ændringen og erstatter profil-/figurpolitikken i den ældre audit nedenfor. Ingen build, editor, spilstart eller GPU-måling er udført. gpu2 har ingen fungerende Git-reference på den angivne placering; det tidligere forsøg er læst direkte i GameMode, BattleQuality, BattleRenderBudget og dokumentationen. Ingen gammel patch er anvendt.
+
+## Før og efter
+
+| Område | Før i gpu3 | Efter, forventning uden målt resultat |
+|---|---|---|
+| Måling | Ingen dedikeret GPU-log | `-Strategy1864DebugGpu`: en linje pr. virkelig sekund med frame/game/draw/gpu, figurer, draw calls, primitives og værste frame i intervallet |
+| LAV/MIDDEL | UE medium/high-grupper | LAV uden Lumen GI/refleksioner og SSR; MIDDEL med billigere Lumen og skygger |
+| HOEJ | Epic, 100 % opløsning | Samme renderer-grupper og lit-røg; figur-/effektbudgetter og culling gælder også her |
+| Infanteri | Skeletal til 70 m, retur ved 55 m | VAT ved 40 m, retur ved 32 m; 400 budgetterede skeletal infanterifigurer inkl. faldne, fordelt mellem hele kompagnier |
+| Rifler/skygger | Allerede skyggefri rifler/VAT | Bevares. VAT-modellens rifle/bajonet er allerede fusioneret i samme mesh; håndjusterede nær-riflekomponenter bevares inden for budgettet |
+| Vegetation | Træer uden cull, buske op til 2.500 m | Træer 800 m, buske 250 m, hegn 300 m; græs fade-start 60 m, slut 120 m; LAV 45 % græstæthed og halvt antal træ-/buskinstanser |
+| Røg/blasts | Ubegrænset antal, synkrone spawn-loads | Fælles loft 60 actors, afvisning før normal spawn, unlit-materiale i LAV/MIDDEL og afstandsfade 200–300 m |
+| Hak | Animation-load-kald under tick, lazy VAT-bagning, hyppig skylight-capture | Animationer/fademateriale preloads og holdes stærkt; begge rifle-varianter bages ved oprettelse; røg-/ordonnans-assets i CDO; skylight højst hvert 10. virkelige sekund |
+| Visuelle scans/buffere | Actor-scans og nye VAT-transform-arrays | Svage enhedsreferencer opdateres hver 0,5 s; aktuelle positioner/status kontrolleres ved brug; VAT-scratch-arrays genbruges |
+| HUD | Alle aktive ruter forarbejdes | Ikke-valgte enheders ruter springes over ved off-screen anchor eller >1.500 m; valgte ruter og eksisterende objective-culling bevares |
+
+Kameradistance måles i centimeter; infanteriet bruger som før formationens bounds. Nærbudgettet prioriterer nærmeste kompagnier med en lille bonus til eksisterende skeletal-visning og opdateres hver 0,5 s. Overskydende kompagnier bliver VAT, uden at mænd fjernes. Clips, fase, formationstransforms og pauseposer overføres ved skift, med en frames posehold ved tilbagevenden. Ingen ny materialecrossfade er tilføjet; visuel accept kræver en senere test. Eksisterende specialuniformer/manglende VAT-assets beholder skeletal-fallback og kan overskride budgettet. Kavaleri tælles i målingen, men indgår ikke i infanteriets animationsbudget.
+
+HISM fade-start virker som materialefade, hvis materialet bruger `PerInstanceFadeAmount`; slutafstanden culler stadig. Streamet græs er fortsat ISM og skyggefrit. Vegetationsprofilen gælder ved oprettelse, ikke en regenerering ved profilklik midt i slaget. Gameplayets skov-/terrændata, sigt/røg, skader, ordrer, enhedstal, tidsstyring og kampagnedata er ikke ændret. Ved effektloftet kan visuelle pust/støv/kratermærker udelades; gameplayets SmokeField og ImpactRegistry er separate.
+
+## Omskiftere og logning
+
+Egne CVars registreres i C++ med defaults i `Config/DefaultEngine.ini`. `PROJECT1864-PERF` logger værdier ved start og ændringer (kontrolleret hver 0,5 s), profilens effektive renderer-CVars og HISM-antal/cull. Brug konsollen eller `-ExecCmds="Strategy1864.Perf.Figures 0,..."` til A/B.
+
+| CVar med præfiks `Strategy1864.Perf.` | Default | Virkning |
+|---|---|---|
+| `Renderer` | 1 | 0 deaktiverer egne renderer-overrides; anvend profil igen |
+| `Figures` | 1 | 0 bruger oprindelige property-afstande uden nærbudget |
+| `NearCm` / `NearCap` | 4000 / 400 | Afstand/budget; cap 0 er ubegrænset |
+| `Vegetation` | 1 | 0 giver oprindelige cull-/tæthedsindstillinger; genskab slagmarken |
+| `Effects` / `EffectCap` | 1 / 60 | 0 slår loft/materialevalg/fade fra; cap 0 er ubegrænset; materialevalg ved spawn |
+| `Warmup` | 1 | 0 lader VAT bage ved første brug; ændres før figurernes oprettelse |
+| `Hitches` | 1 | 0 deaktiverer visuel scan-cache, VAT-buffer-genbrug og skylight-throttle |
+| `SkyCaptureSeconds` | 10 | Minimum mellem skylight-captures; første capture sker under Apply |
+| `Markers` | 1 | 0 gendanner behandling af alle ikke-valgte ruter |
+
+`-Strategy1864Crowd=0` deaktiverer VAT og omgår nærbudgettet. Eksisterende `-Strategy1864CrowdFar=<cm>` har forrang for afstand. `Figures=0` bruger de eksisterende 7000/5500-property-defaults. Figurdivisoren er fortsat spillerens separate valg. Smoke-asset-preload og animationernes stærke referencer er permanent load-sikkerhed; de visuelle sparepolitikker kan slås fra enkeltvis.
+
+## Kontrollerede UE 5.8-symboler
+
+Alle nedenstående engine-CVars er runtime-variable med `ECVF_Scalability | ECVF_RenderThreadSafe`, uden ReadOnly/Cheat. De sættes med `ECVF_SetByScalability`; højere konsol-/kommandolinje-/ini-prioritet respekteres og effektiv værdi logges. `SetQualityLevels(Quality, true)` er verificeret i `Engine/Public/Scalability.h` og genanvender grupperne ved HOEJ eller deaktivering af overrides.
+
+| CVar | LAV | MIDDEL | HOEJ (UE Epic) | Registrering under Engine/Source/Runtime |
+|---|---:|---:|---:|---|
+| `r.Lumen.DiffuseIndirect.Allow` | 0 | 1 | 1 | Renderer/Private/Lumen/LumenDiffuseIndirect.cpp |
+| `r.Lumen.Reflections.Allow` | 0 | 1 | 1 | Renderer/Private/Lumen/LumenReflections.cpp |
+| `r.SSR.Quality` | 0 | 2 | 3 | Renderer/Private/ScreenSpaceRayTracing.cpp |
+| `r.Lumen.ScreenProbeGather.DownsampleFactor` | 32 | 32 | 16 | Renderer/Private/Lumen/LumenScreenProbeGather.cpp |
+| `r.Lumen.Reflections.DownsampleFactor` | 2 | 2 | 1 | Renderer/Private/Lumen/LumenReflections.cpp |
+| `r.Shadow.MaxResolution` | 512 | 1024 | 2048 | Core/Private/HAL/ConsoleManager.cpp |
+| `r.Shadow.CSM.MaxCascades` | 1 | 4 | 10 | Renderer/Private/SceneRendering.cpp |
+| `r.Shadow.Virtual.ResolutionLodBiasDirectional` | 1 | 0 | -1,5 | Renderer/Private/VirtualShadowMaps/VirtualShadowMapClipmap.cpp |
+| `r.Shadow.Virtual.ResolutionLodBiasDirectionalMoving` | 1 | 0 | -1,5 | Samme |
+
+HOEJ-værdier kommer fra `Engine/Config/BaseScalability.ini`; øvrige grupper følger UE medium/high/epic ved 70/85/100 %. CSM/max-resolution gælder traditionelle shadow maps; VSM får egne bias-overrides. Lumen-Allow kan kun aktivere en metode, projektet understøtter. Projektets DynamicGlobalIlluminationMethod, ReflectionMethod, VSM-aktivering, Substrate, distance fields og ray tracing er bevaret; shader-/projektindstillinger ændres ikke ved hvert profilklik. Renderer-CVars er procesglobale og kan fortsætte efter map-travel, som den eksisterende scalability-politik.
+
+Målingen bruger `GGameThreadTime`/`GRenderThreadTime` fra `RenderCore/Public/RenderTimer.h`, `RHIGetGPUFrameCycles(uint32=0)` fra `RHI/Public/DynamicRHI.h` og GPU-indexerede `GNumDrawCallsRHI`/`GNumPrimitivesDrawnRHI` fra `RHI/Public/RHIStats.h`. RHI tilføjes som module dependency. GPU/draw/counters læses på rendertråden og deles atomisk uden flush/wait. De er seneste samples, ikke nødvendigvis samme frame som game/frame. `tris` er RHI's primitiveantal, ikke garanteret kun trekanter. GPU=0 kan være utilgængelig timing. Frame/worst bruger virkelig tid uafhængigt af pause/speed. Figurer inkluderer infanteri/ryttere og faldne, også VAT, ikke kun synlige primitives. Loggen er sekundvis sample plus intervalmaksimum, ikke p95/p99 af alle frames.
+
+Nye komponent-/objektkald er kontrolleret i 5.8-headerne for IConsoleManager, RenderingThread, ConstructorHelpers, UObjectGlobals, WeakObjectPtrTemplates, InstancedStaticMeshComponent, PrimitiveComponent, PlayerController, PlayerCameraManager og SkyLightComponent. Engine-asseten `M_SimpleUnlitTranslucent.uasset` findes med MSM_Unlit, Color og Opacity; HOEJ beholder M_SimpleTranslucent.
+
+## Før/efter-måleplan og usikkerhed
+
+1. Samme build, opløsning, hardware, preset, figurdivisor, enhedstal, kamera og slagtilstand. Baseline: spareomskiftere fra før start/feltgenerering. Optimeret: defaults. Brug DebugGpu i begge runs. Dette dokument giver ikke tilladelse til at starte spillet.
+2. Sammenlign første 15 s særskilt fra 60 s opvarmet tomgang, march, salver, artilleri og et længere slag med faldne. Gå begge veje gennem 32–40 m og mellem kompagnier nær budgetgrænsen. Kontroller fase, placering, rifler/bajonetter, specialuniform-fallback og pause/speed. Sammenlign GPU-ms, draw calls, primitives og worst frame, ikke blot GPU-procent/fps.
+3. Brug senere stat unit, stat gpu og ProfileGPU til at isolere Lumen, VSM/shadow depths, translucency, vegetation og skylight. Hold fps-cap ens; en separat uncapped sammenligning kan vise skjulte gevinster. Test LAV → MIDDEL → HOEJ → MIDDEL og Renderer=0 efter LAV.
+4. Firesekundershakket er ikke reproduceret her. Første-volley-loads, lazy VAT-bagning og hyppig skylight-capture er konkrete fundne kilder; rettelserne beviser ikke, at netop dette hak er væk. VAT-bagning er flyttet til oprettelsen og kan forlænge indlæsning; den er ikke asynkron. Shaders/PSO, terrængenerering og GPU-resource-upload kan stadig give opstartsspids.
+5. Artilleri-/kavaleri-/HQ-/flag-loads ligger fortsat i initialization/setup, ikke normal frame-update. Gameplayets AI-/kontakt-/kamp-scans er ikke tidsudtyndet, da det ændrer reaktionstid. Øvrige HUD-scans er bevaret for at holde diffen lille. Skylight-refleksion kan være op til intervallet forsinket ved hurtig spiltid; direkte sol/fog/eksponering opdateres som før.
+
+Statisk validering: ny kode og diff gennemlæst, relevante engine-header-/CVar-definitioner kontrolleret, git diff --check. Ingen kompilering, visuel accepttest, målt forbedring eller commit er påstået.
+
+---
+
 # GPU-ydelse i 3D-slag – 2026-10-08
 
 Audit af `Source/Strategy1864`, konfigurationen og de kodegenererede omgivelser for `Strategy1864_Skirmish` og kampagnens rigtige slag. Spillet er hverken bygget eller startet. Ingen GPU-tider er målt; 90 % belastning ved en 60 fps-grænse identificerer ikke i sig selv flaskehalsen. Budgettet er 16,67 ms pr. frame.
