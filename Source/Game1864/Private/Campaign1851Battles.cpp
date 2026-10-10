@@ -564,13 +564,13 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
             Prisoners += ReportCasualties.Z;
             DanesCaptured += ReportCasualties.Z;
             const FCampaign1851ReportEquipment ReportKit = O.UnitEquipmentLost.FindRef(L.Key);
-            const int32 ReportGunsBefore = R.Guns, ReportHorsesBefore = R.Horses;
+            const int32 ReportUnitGunsBefore = R.Guns, ReportUnitHorsesBefore = R.Horses;
             R.Mortars = FMath::Max(0, R.Mortars - ReportKit.Mortars);
             R.Guns = FMath::Max(0, R.Guns - ReportKit.Guns);
             R.Horses = FMath::Max(0, R.Horses - ReportKit.Horses);
             R.Wagons = FMath::Max(0, R.Wagons - ReportKit.Wagons);
-            for (float& ReportSection : R.SectionGuns) { ReportSection *= ReportGunsBefore > 0 ? float(R.Guns) / ReportGunsBefore : 0.f; }
-            for (float& ReportSection : R.SectionHorses) { ReportSection *= ReportHorsesBefore > 0 ? float(R.Horses) / ReportHorsesBefore : 0.f; }
+            for (float& ReportSection : R.SectionGuns) { ReportSection *= ReportUnitGunsBefore > 0 ? float(R.Guns) / ReportUnitGunsBefore : 0.f; }
+            for (float& ReportSection : R.SectionHorses) { ReportSection *= ReportUnitHorsesBefore > 0 ? float(R.Horses) / ReportUnitHorsesBefore : 0.f; }
         }
         else { SplitLosses(L.Key, Lost, !O.bDanishWin && !O.bDraw, Prisoners); }
 		// The service record: fallen, wounded, taken, and what it did to the enemy.
@@ -632,7 +632,7 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
         CapturedWagons += O.ReportCaptured.Wagons;
         CapturedColours += O.ReportCaptured.Colours;
         const FString ReportEnemyNation = Ci != INDEX_NONE ? EnemyCorps[Ci].Nation : FString(TEXT("Enemy"));
-        PrisonersByNation.FindOrAdd(PlayerNation) += O.EnemyCasualties.Z;
+        PrisonersByNation.FindOrAdd(Nations.IsValidIndex(PlayerNation) ? Nations[PlayerNation].Id : FString(TEXT("DK"))) += O.EnemyCasualties.Z;
         PrisonersByNation.FindOrAdd(ReportEnemyNation) += Prisoners;
         LastAfterActionReport = O.ReportText;
         bAfterActionReportOpen = true;
@@ -796,7 +796,7 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
         if (!FFileHelper::SaveStringToFile(LastAfterActionReport, *ReportFile, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))
         { UE_LOG(LogTemp, Warning, TEXT("PROJECT1864-REPORT: kunne ikke skrive %s"), *ReportFile); }
         UE_LOG(LogTemp, Display, TEXT("PROJECT1864-REPORT: automatisk rapport fra slag %d ved %s"), B.Id, *Place);
-        PrisonersByNation.FindOrAdd(PlayerNation) += ReportEnemyTaken;
+        PrisonersByNation.FindOrAdd(Nations.IsValidIndex(PlayerNation) ? Nations[PlayerNation].Id : FString(TEXT("DK"))) += ReportEnemyTaken;
         PrisonersByNation.FindOrAdd(ReportOpposingNation) += Prisoners;
     }
 	LogSiegeTest(Result);
