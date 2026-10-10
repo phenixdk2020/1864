@@ -72,6 +72,13 @@ FCampaign1851DepotCapacity ACampaign1851Map::DepotCapacity(int32 CityIndex) cons
 			}
 		}
 	}
+	if (Cities.IsValidIndex(CityIndex) && Cities[CityIndex].bForeign && !Cities[CityIndex].NationId.IsEmpty())
+	{
+		// Local magazine estimates; same stock/save system, access depends on the treaty.
+		C.Food += Cities[CityIndex].NeighbourGarrison * 30.f;
+		C.Fodder += Cities[CityIndex].NeighbourGarrison * 10.f;
+		C.Ammo += Cities[CityIndex].NeighbourGuns + 5.f;
+	}
 	if (const ACampaign1851ConstructionSite* Garrison = FindProject(CityIndex))
 	{
 		if (!Garrison->IsDemolishing() && Garrison->NumModules() > 2 && Garrison->IsModuleDone(2))
@@ -112,6 +119,9 @@ int32 ACampaign1851Map::DepotFor(const FVector2D& Km) const
 	double BestKm = Campaign1851Supply::DepotReachKm;
 	for (const TPair<int32, FCampaign1851DepotStock>& D : Depots)
 	{
+		const FCampaign1851City& NeighbourDepotCity = Cities[D.Key];
+		if (NeighbourDepotCity.bForeign && !NeighbourDepotCity.NationId.IsEmpty() && (IsNeighbourHostile(NeighbourDepotCity.NationId) || !CanEnterNation(TEXT("DK"), NeighbourDepotCity.NationId))) { continue; }
+		if (!CanEnterLine(TEXT("DK"), { TownKm(D.Key), Km })) { continue; }
 		const double Dist = FVector2D::Distance(TownKm(D.Key), Km);
 		if (Dist <= BestKm && (D.Value.Food > 1.f || D.Value.Fodder > 1.f || D.Value.Ammo > 0.01f))
 		{
@@ -283,6 +293,7 @@ double ACampaign1851Map::StockingCostPerMonth() const
 	double Total = 0.0;
 	for (int32 c = 0; c < Cities.Num(); ++c)
 	{
+		if (Cities[c].bForeign) { continue; }
 		const FCampaign1851DepotCapacity Cap = DepotCapacity(c);
 		if (Cap.Food + Cap.Fodder + Cap.Ammo <= 0.f)
 		{
@@ -315,6 +326,7 @@ void ACampaign1851Map::MonthlySupply()
 	double Cost = 0.0;
 	for (int32 c = 0; c < Cities.Num(); ++c)
 	{
+		if (Cities[c].bForeign) { continue; } // foreign magazines never charge the Danish treasury
 		const FCampaign1851DepotCapacity Cap = DepotCapacity(c);
 		if (Cap.Food + Cap.Fodder + Cap.Ammo <= 0.f)
 		{
@@ -694,6 +706,8 @@ bool ACampaign1851Map::SendSupplyColumn(bool bFort, int32 Target, FString* OutRe
 	for (const TPair<int32, FCampaign1851DepotStock>& D : Depots)
 	{
 		const double Dist = FVector2D::Distance(TownKm(D.Key), To);
+		const FCampaign1851City& NeighbourColumnDepot = Cities[D.Key];
+		if (NeighbourColumnDepot.bForeign && (NeighbourColumnDepot.NationId.IsEmpty() || IsNeighbourHostile(NeighbourColumnDepot.NationId) || !CanEnterNation(TEXT("DK"), NeighbourColumnDepot.NationId))) { continue; }
 		if (D.Value.Food > 1000.f && Dist < BestKm)
 		{
 			BestKm = Dist;

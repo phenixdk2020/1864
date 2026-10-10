@@ -1,5 +1,7 @@
 # Backlog: status for de 20 opgaver (campaign-kortet)
 
+Nabokort, 2026-10-10: minimal scenarie-/kortintegration er implementeret. Se `Naboer.md` for status og resterende arbejde: build/spiltest efter anmodning, v31/v32-save-rundtur, kildeverifikation, hydrografi/vegetation, taktiske nabofæstninger og omplanlægning ved ændret passage. Generelt nationskrigssystem og fuld udenlandsk økonomi er fortsat ikke implementeret.
+
 Status pr. 2026-10-08: de oprindelige 20 opgaver blev registreret som lavet i v00.00.50. Det betyder implementering, ikke fuld afprøvning; Sverige-Norge har fortsat kun forberedelse, og søtransport mangler. Detaljerne står i de nævnte dokumenter.
 
 | # | Opgave | Dokument |

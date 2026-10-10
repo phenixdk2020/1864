@@ -17,12 +17,12 @@ STYLE = ("painted game illustration, three-quarter isometric view from the front
          "single object isolated on a plain white background, no text, no people")
 NEG = "photo, text, watermark, people, soldiers, multiple wagons, cropped, blurry, modern, low quality, deformed wheels"
 JOBS = [
-    ("wagon_ammunition_a", "a Danish 1850s military ammunition wagon (caisson), dark green painted wooden box with iron fittings, two large spoked wheels and a limber, drawn by two brown horses in harness, " + STYLE, 101),
-    ("wagon_ammunition_b", "a Danish 1850s four-wheeled ammunition wagon with a closed wooden powder box painted dark blue-green, spare wheel on the side, two horses in harness, " + STYLE, 102),
-    ("wagon_supply_a", "a Danish 1850s army supply wagon, a four-wheeled farm-style wagon with a canvas cover stretched over wooden hoops, sacks and barrels visible at the rear, two draught horses in harness, " + STYLE, 103),
-    ("wagon_supply_b", "a Danish 1850s open army provision wagon loaded with grain sacks and barrels, wooden sides painted red-brown, four wheels, two horses in harness, " + STYLE, 104),
-    ("wagon_field_forge", "a Danish 1850s army field forge wagon with a small forge and bellows, tools hanging at the side, two horses in harness, " + STYLE, 105),
-    ("wagon_ambulance", "a Danish 1850s army ambulance wagon, covered four-wheeled wagon with a red cross-free white canvas cover, stretcher poles visible at the rear, two horses in harness, " + STYLE, 106),
+    ("wagon2_ammunition", "a Danish 1850s army wagon with a flat open wooden bed, four spoked wheels, wooden crates stacked at the rear of the bed painted dark green with iron corners (ammunition boxes), the front of the bed empty and flat, shafts for two horses, " + STYLE, 201),
+    ("wagon2_food", "a Danish 1850s army wagon with a flat open wooden bed, four spoked wheels, wooden provision crates, grain sacks and two barrels stacked at the rear of the bed (food supplies), the front of the bed empty and flat, shafts for two horses, " + STYLE, 202),
+    ("wagon2_mixed", "a Danish 1850s army supply wagon with a flat open wooden bed and four spoked wheels, with dark green ammunition crates and brown food crates and a barrel stacked at the rear, rope tied over the load, a driver seat at the front, shafts for two horses, " + STYLE, 203),
+    ("wagon2_ammunition_b", "a Danish 1850s four-wheeled army wagon, long flat wooden platform with low side rails, a stack of closed dark green ammunition crates at the back, painted red wheels, no cover, " + STYLE, 204),
+    ("wagon2_food_b", "a Danish 1850s four-wheeled army wagon, long flat wooden platform with low side rails, sacks, barrels and crates of food stacked at the back, no cover, painted red wheels, " + STYLE, 205),
+    ("wagon2_with_horses", "a Danish 1850s army supply wagon with a flat open wooden bed and crates stacked at the rear, drawn by two brown horses in harness, " + STYLE, 206),
 ]
 
 

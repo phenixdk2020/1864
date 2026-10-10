@@ -281,6 +281,7 @@ FString ACampaign1851Map::LinkBlockReason(int32 Link, ECampaign1851LinkWork Work
 		return TEXT("-");
 	}
 	const FCampaign1851Link& L = Links[Link];
+	if (Cities[L.A].bForeign || Cities[L.B].bForeign) { return TEXT("Udenlandsk vej: ingen danske anlægsordrer"); }
 	if (L.Work != ECampaign1851LinkWork::None)
 	{
 		return FString::Printf(TEXT("%s under anlæg"), Campaign1851Network::WorkName(L.Work));

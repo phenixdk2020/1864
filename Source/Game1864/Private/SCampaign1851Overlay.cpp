@@ -421,6 +421,7 @@ int32 SCampaign1851Overlay::PaintLabels(const FGeometry& Geometry, FSlateWindowE
 		if (L.Kind == TEXT("sea")) { I.Text = Spaced(L.Text); I.Font = Serif(18, EFace::Italic); I.Colour = SeaInk; I.Priority = 900000; }
 		else if (L.Kind == TEXT("strait")) { if (D >= 400.f) continue; I.Text = L.Text; I.Font = Serif(11, EFace::Italic); I.Colour = SeaInk; I.Priority = 500; }
 		else if (L.Kind == TEXT("land")) { if (D <= 45.f) continue; I.Text = Spaced(L.Text); I.Font = Serif(20, EFace::Italic); I.Colour = FLinearColor::FromSRGBColor(FColor(245, 237, 204, 200)); I.Priority = 700000; }
+		else if (L.Kind == TEXT("foreign")) { if (D <= 45.f) continue; I.Text = Spaced(L.Text); I.Font = Serif(16, EFace::Italic); I.Colour = Gold; I.Priority = 650000; }
 		else if (L.Kind == TEXT("duchy")) { I.Text = Spaced(L.Text.ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"))); I.Font = Serif(13); I.Colour = Gold; I.Priority = 800000; }
 		else if (L.Kind == TEXT("river")) { if (D >= 160.f) continue; I.Text = L.Text; I.Font = Serif(10, EFace::Italic); I.Colour = SeaInk; I.Priority = 450; }
 		else if (L.Kind == TEXT("amt")) { if (D <= 30.f || D >= 330.f) continue; I.Text = Spaced(L.Text.ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å"))); I.Font = Serif(10); I.Colour = FLinearColor::FromSRGBColor(FColor(232, 214, 160, 190)); I.Priority = 600; }
@@ -440,7 +441,7 @@ int32 SCampaign1851Overlay::PaintLabels(const FGeometry& Geometry, FSlateWindowE
 		if (C.bForeign)
 		{
 			if (D >= 380.f) continue;
-			I.Text = C.Name; I.Font = Serif(11, EFace::Italic); I.Colour = MutedInk; I.AlignX = 1.f; I.Offset = FVector2D(-8.f, 0.f); I.Priority = 100 + C.Population / 1000;
+			I.Text = C.Name + (C.bNeighbourFortress ? TEXT(" (fæstning)") : TEXT("")); I.Font = Serif(11, EFace::Italic); I.Colour = MutedInk; I.AlignX = 1.f; I.Offset = FVector2D(-8.f, 0.f); I.Priority = 100 + C.Population / 1000;
 		}
 		else
 		{
@@ -716,7 +717,7 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	const FCampaign1851DepotCapacity DepotRoom = Map->DepotCapacity(SelectedCity);
 	const bool bDepotLine = !C.bForeign && DepotRoom.Food + DepotRoom.Fodder + DepotRoom.Ammo > 0.f;
 	const bool bMaterialsLine = !C.bForeign && Map->GetMaterialsIn(SelectedCity) >= 1.0;
-	const FVector2D Size(440.f, C.bForeign ? 150.f : 226.f + (bDepotLine ? 20.f : 0.f) + (bMaterialsLine ? 20.f : 0.f));
+	const FVector2D Size(440.f, C.bForeign ? 184.f : 226.f + (bDepotLine ? 20.f : 0.f) + (bMaterialsLine ? 20.f : 0.f));
 	const ACampaign1851ConstructionSite* Site = C.bHasPlot ? Map->FindProject(SelectedCity) : nullptr;
 	const int32 ModuleRows = Site && Site->IsBarracksDone() ? Site->NumModules() - 1 : 0;
 	const float RowHeight = 54.f;
@@ -741,13 +742,20 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	PaintText(Geometry, Out, Layer + 2, C.Name, Pos + FVector2D(22.f, 32.f), Serif(24), Ink, 0.f);
 	PaintText(Geometry, Out, Layer + 2, C.bForeign ? TEXT("Udenlandsk by") : C.bCapital ? TEXT("Hovedstad") : TEXT("Købstad"), Pos + FVector2D(22.f, 64.f), Serif(14, EFace::Italic), Gold, 0.f, false);
 	const FCampaign1851Amt* Amt = Map->FindAmt(C.AmtId);
-	PaintText(Geometry, Out, Layer + 2, C.bForeign ? TEXT("Uden for monarkiet") : Amt ? FString::Printf(TEXT("%s  ·  %s"), *Amt->Name, *ACampaign1851Map::RegionName(Amt->Region)) : RegionName(C.Region),
+	const FCampaign1851Nation* NeighbourInfoNation = Map->GetNations().FindByPredicate([&](const FCampaign1851Nation& N) { return N.Id == C.NationId; });
+	PaintText(Geometry, Out, Layer + 2, C.bForeign ? FString::Printf(TEXT("%s  ·  %s%s"), NeighbourInfoNation ? *NeighbourInfoNation->Name : *C.NationId, *C.Region, C.bHarbour ? TEXT("  ·  havn") : TEXT("")) : Amt ? FString::Printf(TEXT("%s  ·  %s"), *Amt->Name, *ACampaign1851Map::RegionName(Amt->Region)) : RegionName(C.Region),
 		Pos + FVector2D(22.f, 92.f), Serif(13), Ink, 0.f, false);
 	if (!C.Occupier.IsEmpty())
 	{
 		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("BESAT af %s"), C.Occupier == TEXT("AT") ? TEXT("Østrig") : TEXT("Preussen")), Pos + FVector2D(Size.X - 30.f, 62.f), Serif(13), FLinearColor(0.95f, 0.4f, 0.35f), 1.f, false);
 	}
-	PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("ca. %s indbyggere (%d)  ·  vækst %.1f %%/år"), *Thousands(C.Population), Map->GetDate().GetYear(), Map->UrbanGrowthRate(SelectedCity)), Pos + FVector2D(22.f, 120.f), Serif(13), Ink, 0.f, false);
+	PaintText(Geometry, Out, Layer + 2, C.bForeign && !C.NationId.IsEmpty()
+		? FString::Printf(TEXT("ca. %s indbyggere (%d, periodeskøn)"), *Thousands(C.Population), Map->ActiveScenario().Year)
+		: FString::Printf(TEXT("ca. %s indbyggere (%d)  ·  vækst %.1f %%/år"), *Thousands(C.Population), Map->GetDate().GetYear(), Map->UrbanGrowthRate(SelectedCity)), Pos + FVector2D(22.f, 120.f), Serif(13), Ink, 0.f, false);
+	if (C.bForeign)
+	{
+		PaintTextFit(Geometry, Out, Layer + 2, Map->NeighbourTownInfo(SelectedCity), Pos + FVector2D(22.f, 148.f), Serif(11), Ink, Size.X - 44.f);
+	}
 	if (!C.bForeign)
 	{
 		const int32 AmtIndex = Map->AmtIndexOfTown(SelectedCity);
@@ -1468,6 +1476,16 @@ void SCampaign1851Overlay::PaintArmy(const FGeometry& Geometry, FSlateWindowElem
 		}
 	}
 
+	// Foreign armies in peace: strength is visible only to nearby scouts.
+	for (const FCampaign1851NeighbourArmy& NeighbourMapArmy : Map->GetNeighbourArmies())
+	{
+		if (NeighbourMapArmy.bGarrison || NeighbourMapArmy.CorpsId || !Map->NeighbourDetailsKnown(NeighbourMapArmy.Town)) { continue; }
+		FVector2D NeighbourMapPoint;
+		if (ToLocal(Geometry, Map->GetCities()[NeighbourMapArmy.Town].World, NeighbourMapPoint))
+		{
+			PaintText(Geometry, Out, Layer + 6, FString::Printf(TEXT("%s: ca. %d mand"), *NeighbourMapArmy.Name, FMath::RoundToInt(NeighbourMapArmy.Men / 100.f) * 100), NeighbourMapPoint + FVector2D(0, 22), Serif(10), Map->NeighbourColour(NeighbourMapArmy.Nation), 0.5f);
+		}
+	}
 	// The enemy: red counters with the corps' strength (at every zoom), as far as it is known: where it was
 	// last seen or reported, faded when the sighting is old.
 	const TArray<FCampaign1851EnemyCorps>& Corps = Map->GetEnemyCorps();
@@ -1519,6 +1537,7 @@ void SCampaign1851Overlay::PaintArmy(const FGeometry& Geometry, FSlateWindowElem
 		for (int32 c = 0; c < Cities.Num(); ++c)
 		{
 			const FCampaign1851DepotStock S = Map->DepotStock(c);
+			if (Cities[c].bForeign && (!Map->NeighbourDetailsKnown(c) || Map->IsNeighbourHostile(Cities[c].NationId) || !Map->CanEnterNation(TEXT("DK"), Cities[c].NationId))) { continue; }
 			if (S.Food + S.Fodder + S.Ammo <= 1.f)
 			{
 				continue;
@@ -2850,6 +2869,7 @@ void SCampaign1851Overlay::PaintSupply(const FGeometry& Geometry, FSlateWindowEl
 	int32 Shown = 0;
 	for (int32 c = 0; c < Cities.Num() && Shown < 14; ++c)
 	{
+		if (Cities[c].bForeign && (!Map->NeighbourDetailsKnown(c) || Map->IsNeighbourHostile(Cities[c].NationId) || !Map->CanEnterNation(TEXT("DK"), Cities[c].NationId))) { continue; }
 		const FCampaign1851DepotCapacity Cap = Map->DepotCapacity(c);
 		const double Materials = Map->GetMaterialsIn(c);
 		if (Cap.Food + Cap.Fodder + Cap.Ammo <= 0.f && Materials < 1.0)

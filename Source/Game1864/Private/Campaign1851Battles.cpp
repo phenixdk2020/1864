@@ -145,6 +145,15 @@ void ACampaign1851Map::BattleStrengths(const FCampaign1851Battle& B, float& OutD
 	}
 	const int32 Ci = CorpsIndexOf(B);
 	OutEnemy = Ci != INDEX_NONE ? EnemyCorps[Ci].Men * EnemyQuality(EnemyCorps[Ci].Nation, ActiveScenario().Id == TEXT("1825") ? GetDate().GetYear() : 1864) + EnemyCorps[Ci].Guns * GunWorth : 0.f;
+	if (Ci != INDEX_NONE)
+	{
+		const FCampaign1851NeighbourArmy* NeighbourDefender = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& A) { return A.CorpsId == EnemyCorps[Ci].Id && A.bGarrison; });
+		if (NeighbourDefender && Cities.IsValidIndex(NeighbourDefender->Town) && Cities[NeighbourDefender->Town].bNeighbourFortress
+			&& FVector2D::Distance(EnemyCorps[Ci].Km, TownKm(NeighbourDefender->Town)) < 5.0)
+		{
+			OutEnemy *= 1.3f; // estimated protection of a neighbouring permanent fortress
+		}
+	}
 }
 
 float ACampaign1851Map::BattleOdds(const FCampaign1851Battle& B) const
