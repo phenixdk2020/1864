@@ -608,7 +608,8 @@ bool ACampaign1851Map::IsDryLine(const FVector2D& A, const FVector2D& B) const
 	int32 Wet = 0;
 	for (int32 s = 0; s <= Steps; ++s)
 	{
-		Wet += IsMonarchyLand(FMath::Lerp(A, B, double(s) / Steps)) ? 0 : 1;
+		const FVector2D NeighbourDryPoint = FMath::Lerp(A, B, double(s) / Steps);
+		Wet += (IsMonarchyLand(NeighbourDryPoint) || (!TerritoryNation(NeighbourDryPoint).IsEmpty() && !IsSea(NeighbourDryPoint))) ? 0 : 1;
 	}
 	return Wet * 0.1 <= 0.3;
 }
@@ -654,7 +655,7 @@ FString ACampaign1851Map::DescribePlace(int32 CityIndex, const FVector2D& Km) co
 	return Best == INDEX_NONE ? FString(TEXT("i terrænet")) : FString::Printf(TEXT("terrænet %.0f km fra %s"), BestKm, *Cities[Best].Name);
 }
 
-void ACampaign1851Map::TravelTimes(int32 From, float Pace, bool bRail, TArray<float>& OutDays, TArray<FCampaign1851Leg>& OutVia) const
+void ACampaign1851Map::TravelTimes(int32 From, float Pace, bool bRail, TArray<float>& OutDays, TArray<FCampaign1851Leg>& OutVia, const FString& MovingNation) const
 {
 	// Dijkstra over the towns; a leg's cost is its time. Boarding a train costs a day of loading.
 	auto LegFor = [&](int32 Link, int32 At, bool bArrivedByRail)
@@ -701,7 +702,7 @@ void ACampaign1851Map::TravelTimes(int32 From, float Pace, bool bRail, TArray<fl
 		const bool bByRail = At != From && OutVia[At].bRail;
 		for (int32 Link = 0; Link < Links.Num(); ++Link)
 		{
-			if ((Links[Link].A != At && Links[Link].B != At) || Links[Link].bBlocked)
+			if ((Links[Link].A != At && Links[Link].B != At) || Links[Link].bBlocked || !CanEnterLine(MovingNation, Links[Link].Km))
 			{
 				continue;
 			}
@@ -737,7 +738,7 @@ bool ACampaign1851Map::FindRoute(int32 From, int32 To, float Pace, TArray<FCampa
 }
 
 bool ACampaign1851Map::PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 ToTown, const FVector2D& ToKm, float Pace, ECampaign1851RouteMode Mode,
-	TArray<FCampaign1851Leg>& OutLegs, FString* OutReason) const
+	TArray<FCampaign1851Leg>& OutLegs, FString* OutReason, const FString& MovingNation) const
 {
 	OutLegs.Reset();
 	const FVector2D StartKm = Cities.IsValidIndex(FromTown) ? TownKm(FromTown) : FromKm;
@@ -759,7 +760,7 @@ bool ACampaign1851Map::PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 
 		if (OutReason) { *OutReason = TEXT("Den er der allerede"); }
 		return false;
 	}
-	const bool bDirectDry = IsDryLine(StartKm, EndKm);
+	const bool bDirectDry = IsDryLine(StartKm, EndKm) && CanEnterLine(MovingNation, { StartKm, EndKm });
 	if (Mode == ECampaign1851RouteMode::Direct)
 	{
 		if (!bDirectDry)
@@ -785,7 +786,7 @@ bool ACampaign1851Map::PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 
 		TArray<TPair<double, int32>> Near;
 		for (int32 c = 0; c < Cities.Num(); ++c)
 		{
-			if (!Cities[c].bForeign && !Cities[c].bBornholm && FVector2D::Distance(StartKm, TownKm(c)) < 40.0)
+			if (!Cities[c].bBornholm && CanEnterNation(MovingNation, Cities[c].NationId.IsEmpty() ? FString(TEXT("DK")) : Cities[c].NationId) && FVector2D::Distance(StartKm, TownKm(c)) < 40.0)
 			{
 				Near.Add({ FVector2D::Distance(StartKm, TownKm(c)), c });
 			}
@@ -793,7 +794,7 @@ bool ACampaign1851Map::PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 
 		Near.Sort([](const TPair<double, int32>& A, const TPair<double, int32>& B) { return A.Key < B.Key; });
 		for (int32 n = 0; n < Near.Num() && Entries.Num() < 4; ++n)
 		{
-			if (IsDryLine(StartKm, TownKm(Near[n].Value)))
+			if (IsDryLine(StartKm, TownKm(Near[n].Value)) && CanEnterLine(MovingNation, { StartKm, TownKm(Near[n].Value) }))
 			{
 				Entries.Add({ Near[n].Value, float(Near[n].Key) / FieldPace });
 			}
@@ -822,7 +823,7 @@ bool ACampaign1851Map::PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 
 	{
 		TArray<float> Days;
 		TArray<FCampaign1851Leg> Via;
-		TravelTimes(E.Town, Pace, bRail, Days, Via);
+		TravelTimes(E.Town, Pace, bRail, Days, Via, MovingNation);
 		// Candidates, cheapest first; the (slower) dry-land test only for those that could win.
 		TArray<FPlan> Candidates;
 		if (Cities.IsValidIndex(ToTown))
@@ -855,7 +856,7 @@ bool ACampaign1851Map::PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 
 			for (int32 k = 0; k < Links.Num(); ++k)
 			{
 				const FCampaign1851Link& L = Links[k];
-				if (L.HasFerry() || L.bBlocked)
+				if (L.HasFerry() || L.bBlocked || !CanEnterLine(MovingNation, L.Km))
 				{
 					continue;
 				}
@@ -896,7 +897,7 @@ bool ACampaign1851Map::PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 
 			{
 				break;
 			}
-			if (Cities.IsValidIndex(ToTown) || IsDryLine(P.LeaveKm, EndKm))
+			if (Cities.IsValidIndex(ToTown) || (IsDryLine(P.LeaveKm, EndKm) && CanEnterLine(MovingNation, { P.LeaveKm, EndKm })))
 			{
 				Best = P;
 				BestDays = Days;
@@ -1161,12 +1162,12 @@ FCampaign1851MarchPlan ACampaign1851Map::PlanColumn(const TArray<int32>& Column,
 	{
 		return Plan;
 	}
-	if (Cities.IsValidIndex(CityIndex) && Cities[CityIndex].bForeign)
+	if (Cities.IsValidIndex(CityIndex) && Cities[CityIndex].bForeign && !CanEnterNation(TEXT("DK"), Cities[CityIndex].NationId))
 	{
 		Plan.Note = TEXT("Hæren går ikke over grænsen i fredstid");
 		return Plan;
 	}
-	if (!Cities.IsValidIndex(CityIndex) && !IsMonarchyLand(TargetKm))
+	if (!Cities.IsValidIndex(CityIndex) && !CanEnterNation(TEXT("DK"), TerritoryNation(TargetKm)))
 	{
 		Plan.Note = TEXT("Kun på monarkiets land");
 		return Plan;

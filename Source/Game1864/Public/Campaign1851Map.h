@@ -411,6 +411,13 @@ struct FCampaign1851NationFigures
 struct FCampaign1851City
 {
 	FString Name;
+	/** Scenario geography; never confused with wartime Occupier. Empty in old map data. */
+	FString NationId;
+	FString NeighbourFortName;
+	bool bHarbour = false;
+	bool bNeighbourFortress = false;
+	int32 NeighbourGarrison = 0;
+	int32 NeighbourGuns = 0;
 	double Lat = 0.0;
 	double Lon = 0.0;
 	int32 Population = 0;
@@ -459,6 +466,17 @@ struct FCampaign1851Label
 	double Lon = 0.0;
 	FString Kind;   // sea, strait, land, duchy, foreign
 	FVector World = FVector::ZeroVector;
+};
+
+/** Partial foreign map presence; economic bOnMap remains reserved for Denmark. */
+struct FCampaign1851NeighbourArmy
+{
+	FString Id, Name, Nation;
+	int32 Town = INDEX_NONE;
+	int32 Men = 0, MobilisedMen = 0, Guns = 0;
+	bool bGarrison = false;
+	/** Once transferred, EnemyCorps owns losses, routes, intelligence and battle state. */
+	int32 CorpsId = 0;
 };
 
 /**
@@ -996,6 +1014,17 @@ public:
 	float GetTension() const { return Tension; }
 	bool IsAtWar() const { return bAtWar; }
 	const TArray<FCampaign1851EnemyCorps>& GetEnemyCorps() const { return EnemyCorps; }
+	const TArray<FCampaign1851NeighbourArmy>& GetNeighbourArmies() const { return NeighbourArmies; }
+	FString TerritoryNation(const FVector2D& Km) const;
+	FLinearColor NeighbourColour(const FString& NationId) const;
+	bool CanEnterNation(const FString& MovingNation, const FString& LandNation) const;
+	bool IsNeighbourHostile(const FString& NationId) const;
+	bool CanEnterLine(const FString& MovingNation, const TArray<FVector2D>& Line) const;
+	FString NeighbourTownInfo(int32 Town) const;
+	bool NeighbourDetailsKnown(int32 Town) const;
+	void SetNeighbourPoliticalView(bool bPolitical);
+	TArray<FString> SaveNeighbours() const;
+	void RestoreNeighbours(const TArray<FString>& Lines);
 	const TArray<FPlannedEvent>& GetEventPlan() const { return EventPlan; }
 	void ResetWar();
 	bool EventFact(const FString& Key, float& Out) const;
@@ -1218,7 +1247,7 @@ public:
 	/** Regiments standing in a town. */
 	TArray<int32> RegimentsIn(int32 CityIndex) const;
 	/** Fastest times (days) from a town to every town, and the leg that reaches each (Dijkstra over the links). */
-	void TravelTimes(int32 From, float Pace, bool bRail, TArray<float>& OutDays, TArray<FCampaign1851Leg>& OutVia) const;
+	void TravelTimes(int32 From, float Pace, bool bRail, TArray<float>& OutDays, TArray<FCampaign1851Leg>& OutVia, const FString& MovingNation = TEXT("DK")) const;
 	/** Fastest way between two towns now for a column of this road pace (km/day), by road, chaussée, ferry and (bRail) railway. */
 	bool FindRoute(int32 From, int32 To, float Pace, TArray<FCampaign1851Leg>& OutLegs, bool bRail = true) const;
 	/**
@@ -1226,7 +1255,7 @@ public:
 	 * fields to the nearest town and then by road (and rail) to the town nearest the goal.
 	 */
 	bool PlanMarch(int32 FromTown, const FVector2D& FromKm, int32 ToTown, const FVector2D& ToKm, float Pace, ECampaign1851RouteMode Mode,
-		TArray<FCampaign1851Leg>& OutLegs, FString* OutReason = nullptr) const;
+		TArray<FCampaign1851Leg>& OutLegs, FString* OutReason = nullptr, const FString& MovingNation = TEXT("DK")) const;
 	/** Sends regiments as one column to a town (CityIndex) or a point in the field (TargetKm, CityIndex = INDEX_NONE). */
 	bool OrderMarchTo(const TArray<int32>& Column, int32 CityIndex, const FVector2D& TargetKm, ECampaign1851RouteMode Mode, FString* OutReason = nullptr);
 	FVector2D TownKm(int32 CityIndex) const;
@@ -1467,6 +1496,16 @@ private:
 	void BuildHydroMeshes();
 	/** The monarchy's land border as a red band (Campaign1851Hydro.cpp). */
 	void BuildBorderMeshes();
+	bool LoadNeighbours(FJsonObject& MapJson);
+	void BuildNeighbourMeshes();
+	void ResetNeighbourArmies();
+	void AdvanceNeighbourArmies();
+	TArray<FCampaign1851NeighbourArmy> NeighbourArmyAtStart, NeighbourArmies;
+	TArray<uint8> NeighbourOwners;
+	TMap<uint8, FString> NeighbourOwnerIds;
+	TMap<FString, FLinearColor> NeighbourColours;
+	int32 NeighbourOwnerW = 0, NeighbourOwnerH = 0;
+	UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> NeighbourTerritoryMeshes;
 	void UpdateHydroVisibility(float CameraDistanceKm);
 	void BuildBattleView();
 	bool bBattleView = false;

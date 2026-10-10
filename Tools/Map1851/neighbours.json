@@ -1,0 +1,71 @@
+{
+  "note": "Befolkning 1825/1851/1864, garnisoner, feltstyrker og historiske grænsepolylinjer er afrundede periode-/spilskøn, ikke verificerede folketællinger. 1864-tal er reference, ikke et tredje scenarie. SE's 40.000 mobiliserbare mand er unionens sydlige krigsteater, ikke en fredsgarnison i Skåne. Moderne Natural Earth bruges kun til landmaske. Wismar er mecklenburgsk efter Sveriges afståelse i 1803; Pommern/Rügen er preussisk fra 1815. Se Docs/Naboer.md.",
+  "nations": [
+    {"id":"DK","name":"Danmark","colour":[173,65,61],"lat":56.1,"lon":9.3},
+    {"id":"SE","name":"Sverige-Norge","colour":[179,158,69],"lat":56.95,"lon":14.0},
+    {"id":"PR","name":"Preussen","colour":[93,117,150],"lat":53.65,"lon":14.3},
+    {"id":"MEC","name":"Mecklenburg","colour":[140,112,155],"lat":53.65,"lon":12.0},
+    {"id":"HAN","name":"Hannover","colour":[165,132,85],"lat":53.22,"lon":9.25},
+    {"id":"OLD","name":"Oldenburg","colour":[125,157,105],"lat":53.42,"lon":8.2},
+    {"id":"HH","name":"Hamborg","colour":[190,102,111],"lat":53.56,"lon":10.05},
+    {"id":"LUB","name":"Lübeck","colour":[137,174,164],"lat":53.89,"lon":10.73},
+    {"id":"BRE","name":"Bremen","colour":[178,157,141],"lat":53.1,"lon":8.85}
+  ],
+  "territories": [
+    {"name":"Hannover","owner":"HAN","polygon":[[7,52],[16.5,52],[16.5,55.1],[7,55.1]]},
+    {"name":"Oldenburg","owner":"OLD","polygon":[[7.6,52.9],[8.58,52.9],[8.58,53.25],[8.5,53.5],[8.3,53.72],[7.6,53.8]]},
+    {"name":"Mecklenburg","owner":"MEC","polygon":[[10.73,53.37],[11.35,53.15],[12.15,53.19],[12.62,53.1],[13.35,53.2],[13.6,53.55],[13.25,53.85],[12.74,54.16],[12.48,54.46],[10.72,54.05]]},
+    {"name":"Pommern og Brandenburg","owner":"PR","polygon":[[11.7,52],[16.5,52],[16.5,55],[12.45,55],[12.45,54.48],[12.73,54.15],[13.24,53.85],[13.59,53.55],[13.35,53.2],[12.62,53.1],[12.15,53.19],[11.7,53.17]]},
+    {"name":"Skåne, Halland, Blekinge og Bohuslän","owner":"SE","polygon":[[10.5,55.1],[16.5,55.1],[16.5,59],[10.5,59]]},
+    {"name":"Hamborg (omtrentligt kerneområde)","owner":"HH","polygon":[[9.94,53.5],[10.16,53.5],[10.22,53.61],[10.12,53.7],[9.96,53.62]]},
+    {"name":"Lübeck (omtrentligt kerneområde)","owner":"LUB","polygon":[[10.6,53.76],[10.78,53.77],[10.93,53.95],[10.86,54.01],[10.72,53.97],[10.6,53.91]]},
+    {"name":"Bremen (omtrentligt kerneområde)","owner":"BRE","polygon":[[8.69,53.03],[8.89,53.01],[9.02,53.08],[8.93,53.18],[8.74,53.15]]}
+  ],
+  "cities": [
+    {"name":"Hamborg","lat":53.551,"lon":9.993,"owner":"HH","region":"Hamborg","population":{"1825":110000,"1851":132000,"1864":180000},"harbour":true,"fortress":false,"garrison":600,"guns":0,"railwayYear":1842},
+    {"name":"Lübeck","lat":53.866,"lon":10.686,"owner":"LUB","region":"Lübeck","population":{"1825":24000,"1851":26000,"1864":32000},"harbour":true,"fortress":false,"garrison":400,"guns":0,"railwayYear":1851},
+    {"name":"Malmø","lat":55.605,"lon":13.004,"owner":"SE","region":"Skåne","population":{"1825":7000,"1851":13000,"1864":20000},"harbour":true,"fortress":true,"fortName":"Malmøhus","garrison":400,"guns":8,"railwayYear":1856},
+    {"name":"Helsingborg","lat":56.046,"lon":12.694,"owner":"SE","region":"Skåne","population":{"1825":2500,"1851":4500,"1864":6500},"harbour":true,"fortress":false,"garrison":150,"guns":0,"railwayYear":1865},
+    {"name":"Landskrona","lat":55.87,"lon":12.83,"owner":"SE","region":"Skåne","population":{"1825":3200,"1851":4000,"1864":6500},"harbour":true,"fortress":true,"fortName":"Landskrona citadel","garrison":400,"guns":12,"railwayYear":1865},
+    {"name":"Lund","lat":55.704,"lon":13.191,"owner":"SE","region":"Skåne","population":{"1825":4500,"1851":7000,"1864":10000},"harbour":false,"fortress":false,"garrison":100,"guns":0,"railwayYear":1856},
+    {"name":"Ystad","lat":55.429,"lon":13.82,"owner":"SE","region":"Skåne","population":{"1825":3500,"1851":4500,"1864":6500},"harbour":true,"fortress":false,"garrison":150,"guns":0,"railwayYear":1874},
+    {"name":"Trelleborg","lat":55.376,"lon":13.157,"owner":"SE","region":"Skåne","population":{"1825":1000,"1851":1500,"1864":2300},"harbour":true,"fortress":false,"garrison":50,"guns":0,"railwayYear":1875},
+    {"name":"Kristianstad","lat":56.029,"lon":14.157,"owner":"SE","region":"Skåne","population":{"1825":4500,"1851":5500,"1864":7500},"harbour":false,"fortress":true,"fortName":"Kristianstads volde","garrison":650,"guns":12,"railwayYear":1865},
+    {"name":"Karlskrona","lat":56.161,"lon":15.586,"owner":"SE","region":"Blekinge","population":{"1825":11000,"1851":12000,"1864":17000},"harbour":true,"fortress":true,"fortName":"Kungsholmen og Drottningskär","garrison":1200,"guns":36,"railwayYear":1874},
+    {"name":"Halmstad","lat":56.674,"lon":12.857,"owner":"SE","region":"Halland","population":{"1825":2300,"1851":3500,"1864":5000},"harbour":true,"fortress":false,"garrison":150,"guns":0,"railwayYear":1877},
+    {"name":"Göteborg","lat":57.707,"lon":11.967,"owner":"SE","region":"Göteborg/Bohuslän","population":{"1825":19000,"1851":26000,"1864":43000},"harbour":true,"fortress":true,"fortName":"Nya Älvsborg","garrison":700,"guns":20,"railwayYear":1856},
+    {"name":"Rostock","lat":54.092,"lon":12.1,"owner":"MEC","region":"Mecklenburg-Schwerin","population":{"1825":19000,"1851":21000,"1864":27000},"harbour":true,"fortress":false,"garrison":250,"guns":0,"railwayYear":1850},
+    {"name":"Wismar","lat":53.891,"lon":11.464,"owner":"MEC","region":"Mecklenburg-Schwerin","population":{"1825":9000,"1851":10000,"1864":13000},"harbour":true,"fortress":false,"garrison":150,"guns":0,"railwayYear":1848},
+    {"name":"Schwerin","lat":53.629,"lon":11.413,"owner":"MEC","region":"Mecklenburg-Schwerin","population":{"1825":12000,"1851":18000,"1864":23000},"harbour":false,"fortress":false,"garrison":700,"guns":8,"railwayYear":1847},
+    {"name":"Stralsund","lat":54.309,"lon":13.089,"owner":"PR","region":"Pommern","population":{"1825":16000,"1851":20000,"1864":24000},"harbour":true,"fortress":true,"fortName":"Stralsunds fæstning","garrison":1000,"guns":24,"railwayYear":1863},
+    {"name":"Stettin","lat":53.428,"lon":14.553,"owner":"PR","region":"Pommern","population":{"1825":26000,"1851":48000,"1864":68000},"harbour":true,"fortress":true,"fortName":"Stettins fæstning","garrison":2000,"guns":48,"railwayYear":1843},
+    {"name":"Bremen","lat":53.079,"lon":8.802,"owner":"BRE","region":"Bremen","population":{"1825":40000,"1851":58000,"1864":73000},"harbour":true,"fortress":false,"garrison":500,"guns":0,"railwayYear":1847},
+    {"name":"Varberg","lat":57.105,"lon":12.25,"owner":"SE","region":"Halland","population":{"1825":1600,"1851":2000,"1864":2800},"harbour":true,"fortress":true,"fortName":"Varbergs fæstning (depot/fængsel)","garrison":100,"guns":4,"railwayYear":1880},
+    {"name":"Greifswald","lat":54.096,"lon":13.382,"owner":"PR","region":"Pommern","population":{"1825":8000,"1851":12500,"1864":16500},"harbour":true,"fortress":false,"garrison":400,"guns":0,"railwayYear":1863},
+    {"name":"Bergen på Rügen","lat":54.419,"lon":13.432,"owner":"PR","region":"Rügen","population":{"1825":2500,"1851":3500,"1864":4000},"harbour":false,"fortress":false,"garrison":100,"guns":0,"railwayYear":1883},
+    {"name":"Stade","lat":53.6,"lon":9.477,"owner":"HAN","region":"Hannover","population":{"1825":6000,"1851":7500,"1864":9500},"harbour":true,"fortress":true,"fortName":"Stades fæstning","garrison":500,"guns":12,"railwayYear":1881},
+    {"name":"Harburg","lat":53.46,"lon":9.983,"owner":"HAN","region":"Hannover","population":{"1825":4500,"1851":6000,"1864":12000},"harbour":true,"fortress":false,"garrison":300,"guns":0,"railwayYear":1847},
+    {"name":"Oldenburg","lat":53.143,"lon":8.214,"owner":"OLD","region":"Oldenburg","population":{"1825":6500,"1851":10000,"1864":13000},"harbour":false,"fortress":false,"garrison":600,"guns":6,"railwayYear":1867}
+  ],
+  "roads": [
+    ["Malmø","Lund"],["Malmø","Trelleborg"],["Trelleborg","Ystad"],["Malmø","Landskrona"],["Landskrona","Helsingborg"],["Helsingborg","Halmstad"],["Halmstad","Varberg"],["Varberg","Göteborg"],["Lund","Kristianstad"],["Ystad","Kristianstad"],["Kristianstad","Karlskrona"],
+    ["Lübeck","Wismar"],["Wismar","Rostock"],["Wismar","Schwerin"],["Schwerin","Rostock"],["Rostock","Stralsund"],["Stralsund","Greifswald"],["Greifswald","Stettin"],["Stralsund","Bergen på Rügen","Strelasund"],
+    ["Hamborg","Lübeck"],["Altona","Hamborg"],["Ratzeburg","Lübeck"],["Ratzeburg","Schwerin"],["Hamborg","Harburg","Elben"],["Harburg","Stade"],["Harburg","Bremen"],["Bremen","Oldenburg"],["Helsingør","Helsingborg","Øresund"]
+  ],
+  "railways": [
+    {"name":"Schwerin–Wismar","via":["Schwerin","Wismar"],"opened":"1848-07-12"},
+    {"name":"Schwerin–Rostock (via Bad Kleinen, skønnet linje)","via":["Schwerin","Wismar","Rostock"],"opened":"1850-05-13"}
+  ],
+  "armies": [
+    {"id":"SE-south","name":"Svensk sydlig felthær","nation":"SE","town":"Kristianstad","garrison":false,"peaceMen":{"1825":2500,"1851":3000},"warMen":{"1825":35000,"1851":40000},"guns":48},
+    {"id":"PR-pomerania","name":"Preussisk pommersk korps","nation":"PR","town":"Stettin","garrison":false,"peaceMen":{"1825":5000,"1851":6500},"warMen":{"1825":18000,"1851":24000},"guns":60},
+    {"id":"MEC-field","name":"Mecklenburgsk brigade","nation":"MEC","town":"Schwerin","garrison":false,"peaceMen":{"1825":800,"1851":1000},"warMen":{"1825":2200,"1851":3000},"guns":8},
+    {"id":"HAN-elbe","name":"Hannoveransk Elbebrigade","nation":"HAN","town":"Harburg","garrison":false,"peaceMen":{"1825":1200,"1851":1500},"warMen":{"1825":4000,"1851":5000},"guns":12},
+    {"id":"OLD-field","name":"Oldenburgsk bataljon","nation":"OLD","town":"Oldenburg","garrison":false,"peaceMen":{"1825":300,"1851":400},"warMen":{"1825":1000,"1851":1500},"guns":4}
+  ],
+  "outside": [
+    {"name":"Kristiania/Oslo","owner":"NO","crown":"SE","lat":59.913,"lon":10.752},
+    {"name":"Fredrikshald/Fredriksten","owner":"NO","crown":"SE","lat":59.12,"lon":11.39},
+    {"name":"Karlsborg","owner":"SE","lat":58.537,"lon":14.51}
+  ]
+}

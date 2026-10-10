@@ -320,6 +320,7 @@ bool ACampaign1851Map::MakePeace(int32 Offer, FString* OutReason)
 	bAtWar = false;
 	ExchangePrisoners();
 	EnemyCorps.Reset();
+	ResetNeighbourArmies();
 	Battles.Reset();
 	Tension = 30.f;
 	PeaceTalksDay = -1.0;

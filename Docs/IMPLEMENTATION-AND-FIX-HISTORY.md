@@ -1829,6 +1829,10 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Minimal HUD-ændring: frasortering af ikke-valgte enheders fjerne/off-screen ruter. Måleplan, engine-kilder og begrænsninger i `Docs/Performance-Battle.md`, inklusive uverificeret årsag til firesekundershakket og specialuniform-fallback.
 - Statisk header-/diff-kontrol; intet build, editor/spil eller commit. gpu2-filer læst som reference; ingen gammel patch anvendt.
 
+### 2026-10-10 — Danmarks naboer på kampagnekortet
+
+Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet 24 scenariebyer, 28 forbindelser, nationale farver/grænser/etiketter, skrivebeskyttede bykort, opklaringsbegrænsede garnisoner og fem felthære fra Army_Neighbours_<år>.json. Passage indgår i ruteplanlægning; garnisoner holder byen; eksisterende korps-AI og forsyningssystem genbruges. Nabofæstninger har markør og automatisk forsvarsbonus; nabodepoter belaster ikke dansk genopfyldning. Generator, statisk datavalidering og CampaignNeighbourShot-flag tilføjet. Save-version 32 gemmer mobiliseringsidentiteter med bagudkompatible standarder og bevarede gamle indeks. UE 5.8-headere kontrolleret, ingen build/spilstart/commit. Data er markerede skøn; afprøvning, kildeverifikation og modelbegrænsninger står i Docs/Naboer.md.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

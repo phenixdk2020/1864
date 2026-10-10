@@ -1,5 +1,7 @@
 # Testflag og launchere
 
+Nabokort: `-CampaignNeighbourShot=PR` starter et nyt pauset scenarie, fokuserer første naboby, åbner informationskort/kontrolvisning og gemmer `Saved/Screenshots/neighbour_PR.png`. Bynationer: SE, PR, MEC, HAN, OLD, HH, LUB, BRE. Kombinér med `-CampaignScenario=1825` eller `1851`. Log: `CAMPAIGN-1851|neighbours|`. Implementeret, men ikke kørt; flaget giver ikke tilladelse til spilstart. Se `Naboer.md`.
+
 Status 2026-10-09. Oversigten er kontrolleret mod `FParse::Param`/`FParse::Value` i `Source/Game1864` og `Source/Strategy1864`, inklusive ryttervisningens `Flag`-hjælper. Dette er dokumentation, ikke tilladelse til at starte spillet.
 
 Eksemplerne er argumenter, som kan tilføjes en relevant launcher (alle videresender `%*`). ID'er og indeks skal findes i det valgte scenarie/testslag; eksempler viser syntaks, ikke garanteret succes. Sæt hele argumentet i dobbelte anførselstegn ved semikolon/komma. Flag uden værdi aktiveres ved tilstedeværelse; `=0` er ikke en generel deaktivering.

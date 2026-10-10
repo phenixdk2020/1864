@@ -131,6 +131,9 @@ private:
 	TSharedPtr<SCampaign1851Overlay> Overlay;
 	FVector2D LastMouse = FVector2D::ZeroVector;
 	bool bInitialised = false;
+	/** Explicit neighbour screenshot flag, once per controller and after one rendered frame. */
+	float NeighbourShotAt = -1.f;
+	bool bNeighbourShotDone = false;
 
 	/** Onto the battlefield model (and back to the map view it came from). */
 	void SetBattleView(bool bEnter);

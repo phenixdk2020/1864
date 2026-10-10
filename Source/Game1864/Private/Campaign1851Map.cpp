@@ -116,6 +116,7 @@ void ACampaign1851Map::BeginPlay()
 	LoadHydro();
 	BuildHydroMeshes();
 	BuildBorderMeshes();
+	BuildNeighbourMeshes();
 	if (bFeatures)
 	{
 		BuildScenery();
@@ -246,6 +247,7 @@ bool ACampaign1851Map::LoadData()
 	};
 	ReadCities(Json->GetArrayField(TEXT("cities")), false);
 	ReadCities(Json->GetArrayField(TEXT("foreignCities")), true);
+	LoadNeighbours(*Json);
 
 	const TArray<TSharedPtr<FJsonValue>>* RoadArray = nullptr;
 	if (Json->TryGetArrayField(TEXT("roads"), RoadArray))
@@ -647,6 +649,13 @@ bool ACampaign1851Map::IsMonarchyLand(const FVector2D& Km) const
 	if (Uv.X < 0.0 || Uv.X >= 1.0 || Uv.Y < 0.0 || Uv.Y >= 1.0)
 	{
 		return false;
+	}
+	if (NeighbourOwners.Num() > 0)
+	{
+		const int32 NeighbourLandX = FMath::Clamp(int32(Uv.X * NeighbourOwnerW), 0, NeighbourOwnerW - 1);
+		const int32 NeighbourLandY = FMath::Clamp(int32((1.0 - Uv.Y) * NeighbourOwnerH), 0, NeighbourOwnerH - 1);
+		const FString* NeighbourLandId = NeighbourOwnerIds.Find(NeighbourOwners[NeighbourLandY * NeighbourOwnerW + NeighbourLandX]);
+		if (NeighbourLandId && *NeighbourLandId != TEXT("DK")) { return false; }
 	}
 	const int32 X = int32(Uv.X * FeaturesW), Y = int32((1.0 - Uv.Y) * FeaturesH);  // row 0 = north
 	return Features[FMath::Clamp(Y, 0, FeaturesH - 1) * FeaturesW + FMath::Clamp(X, 0, FeaturesW - 1)].R > 127;

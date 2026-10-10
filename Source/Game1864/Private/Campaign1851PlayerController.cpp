@@ -412,7 +412,9 @@ void ACampaign1851PlayerController::TryInit()
 	bool bSiegeTestNewCampaign = false;
 	FString SiegeTestRequest;
 	const bool bSiegeTestStart = FParse::Value(FCommandLine::Get(), TEXT("CampaignTestSiege="), SiegeTestRequest, false);
-	const bool bTestStart = FParse::Value(FCommandLine::Get(), TEXT("CampaignBuild="), BuildCity, false) || bSiegeTestStart;
+	FString NeighbourStartNation;
+	const bool bNeighbourTestStart = FParse::Value(FCommandLine::Get(), TEXT("CampaignNeighbourShot="), NeighbourStartNation, false);
+	const bool bTestStart = bNeighbourTestStart || FParse::Value(FCommandLine::Get(), TEXT("CampaignBuild="), BuildCity, false) || bSiegeTestStart;
 	// Back from a 3D battle: the campaign as it was left (whatever the command line says); the result is read in.
 	const FString ReturnFlag = FPaths::ProjectSavedDir() / TEXT("Battle/ReturnToCampaign.flag");
 	const bool bBackFromBattle = IFileManager::Get().FileExists(*ReturnFlag) && UGameplayStatics::DoesSaveGameExist(TEXT("Autosave"), 0);
@@ -454,7 +456,8 @@ void ACampaign1851PlayerController::TryInit()
 	if (bTestStart && (!bSiegeTestStart || !bCampaignStarted))
 	{
 		bCampaignStarted = true;
-		if (bSiegeTestStart) { CampaignNewGame(); bSiegeTestNewCampaign = true; }
+		if (bNeighbourTestStart) { CampaignNewGame(); Overlay->CloseMenu(); }
+		else if (bSiegeTestStart) { CampaignNewGame(); bSiegeTestNewCampaign = true; }
 		else { CampaignBuild(BuildCity); }
 	}
 	// Test starts: -CampaignSpeed=0..3, -CampaignDate=1852-01-20 (e.g. to see the winter).
@@ -1051,6 +1054,39 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / FString::Printf(TEXT("Screenshots/timed_shot_%d.png"), NextShot), true, false);
 			++NextShot;
 		}
+	}
+	if (!bNeighbourShotDone && Map.IsValid() && Map->IsReady() && Overlay.IsValid() && Camera && GetWorld()->GetRealTimeSeconds() >= 4.f)
+	{
+		FString NeighbourShotNation;
+		if (FParse::Value(FCommandLine::Get(), TEXT("CampaignNeighbourShot="), NeighbourShotNation, false))
+		{
+			if (NeighbourShotAt < 0.f)
+			{
+				const int32 NeighbourShotTown = Map->GetCities().IndexOfByPredicate([&](const FCampaign1851City& C) { return C.bForeign && C.NationId == NeighbourShotNation; });
+				if (NeighbourShotTown == INDEX_NONE)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|neighbours|shot|ingen by for %s"), *NeighbourShotNation);
+					bNeighbourShotDone = true;
+				}
+				else
+				{
+					Map->SetSpeed(0);
+					Camera->SetView(Map->GetCities()[NeighbourShotTown].World, 180.f, Camera->GetYaw());
+					Overlay->SetSelectedCity(NeighbourShotTown);
+					Overlay->SetMapView(2);
+					Map->SetNeighbourPoliticalView(true);
+					NeighbourShotAt = GetWorld()->GetRealTimeSeconds() + 1.5f;
+				}
+			}
+			else if (GetWorld()->GetRealTimeSeconds() >= NeighbourShotAt)
+			{
+				const FString NeighbourShotFile = FPaths::ProjectSavedDir() / TEXT("Screenshots") / (TEXT("neighbour_") + NeighbourShotNation + TEXT(".png"));
+				FScreenshotRequest::RequestScreenshot(NeighbourShotFile, true, false);
+				UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|neighbours|shot|%s"), *NeighbourShotFile);
+				bNeighbourShotDone = true;
+			}
+		}
+		else { bNeighbourShotDone = true; }
 	}
 	// -CampaignUiShots=sec:cmd;cmd,sec:cmd,...: opens the windows and cards by itself and saves a screenshot of each step
 	// (QA of the screens). cmd: window=army|officers|budget|towns|council|foreign|..., minister=N, officer=N, select=N (unit),
@@ -2265,6 +2301,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		else if (Button == SCampaign1851Overlay::EButton::MapView)
 		{
 			Overlay->SetMapView(Module);
+			Map->SetNeighbourPoliticalView(Module == 2);
 		}
 		else if (Button == SCampaign1851Overlay::EButton::OOBFocusClear)
 		{
@@ -2656,6 +2693,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->HorseStock = Map->GetHorseStock();
 	Save->Footing = uint8(Map->GetFooting());
 	Save->War = Map->SaveWar();
+	Save->Neighbours = Map->SaveNeighbours();
 	Save->Diplomacy = Map->SaveDiplomacy();
 	Save->Research = Map->SaveResearch();
 	Save->Navy = Map->SaveNavy();
@@ -2796,6 +2834,7 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	{
 		Map->RestoreWar(Save->War);
 	}
+	Map->RestoreNeighbours(Save->SaveVersion >= 32 ? Save->Neighbours : TArray<FString>());
 	if (Save->SaveVersion >= 23)
 	{
 		Map->RestoreDiplomacy(Save->Diplomacy);

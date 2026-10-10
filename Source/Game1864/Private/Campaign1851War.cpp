@@ -109,6 +109,7 @@ void ACampaign1851Map::ResetWar()
 	EventsFired.Reset();
 	EventsBlocked.Reset();
 	EnemyCorps.Reset();
+	ResetNeighbourArmies();
 	Battles.Reset();
 	for (FCampaign1851City& C : Cities)
 	{
@@ -389,6 +390,7 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		DailyBridges();
 		EnemyReinforcements();
 	}
+	AdvanceNeighbourArmies();
 	UpdateIntel();
 	if (Battles.ContainsByPredicate([](const FCampaign1851Battle& B) { return B.bWaiting; }) && FPlatformTime::Seconds() - LastBattlePoll > 1.0)
 	{
@@ -461,6 +463,8 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		{
 			continue;
 		}
+		const bool bNeighbourHolding = NeighbourArmies.ContainsByPredicate([&](const FCampaign1851NeighbourArmy& A) { return A.CorpsId == C.Id && A.bGarrison; });
+		if (bNeighbourHolding) { continue; } // local garrisons fight contact, but never march away
 		if (C.Route.Num() == 0)
 		{
 			// The enemy chooses its next objective by what it believes of the Danish defence.
@@ -474,7 +478,7 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 			}
 			const int32 Goal = C.Objectives[0];
 			TArray<FCampaign1851Leg> Legs;
-			if (C.Town == Goal || !PlanMarch(C.Town, C.Km, Goal, TownKm(Goal), 16.f, ECampaign1851RouteMode::RoadsOnly, Legs))
+			if (C.Town == Goal || !PlanMarch(C.Town, C.Km, Goal, TownKm(Goal), 16.f, ECampaign1851RouteMode::RoadsOnly, Legs, nullptr, C.Nation))
 			{
 				C.Objectives.RemoveAt(0);
 				continue;

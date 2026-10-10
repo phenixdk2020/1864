@@ -1,0 +1,336 @@
+{
+  "scenario": "1825",
+  "note": "Befolkning 1825/1851/1864, garnisoner, feltstyrker og historiske grænsepolylinjer er afrundede periode-/spilskøn, ikke verificerede folketællinger. 1864-tal er reference, ikke et tredje scenarie. SE's 40.000 mobiliserbare mand er unionens sydlige krigsteater, ikke en fredsgarnison i Skåne. Moderne Natural Earth bruges kun til landmaske. Wismar er mecklenburgsk efter Sveriges afståelse i 1803; Pommern/Rügen er preussisk fra 1815. Se Docs/Naboer.md.",
+  "armies": [
+    {
+      "id": "garrison-Hamborg",
+      "name": "Garnison i Hamborg",
+      "nation": "HH",
+      "town": "Hamborg",
+      "garrison": true,
+      "men": 600,
+      "mobilisedMen": 600,
+      "guns": 0
+    },
+    {
+      "id": "garrison-Lübeck",
+      "name": "Garnison i Lübeck",
+      "nation": "LUB",
+      "town": "Lübeck",
+      "garrison": true,
+      "men": 400,
+      "mobilisedMen": 400,
+      "guns": 0
+    },
+    {
+      "id": "garrison-Malmø",
+      "name": "Garnison i Malmø",
+      "nation": "SE",
+      "town": "Malmø",
+      "garrison": true,
+      "men": 400,
+      "mobilisedMen": 400,
+      "guns": 8
+    },
+    {
+      "id": "garrison-Helsingborg",
+      "name": "Garnison i Helsingborg",
+      "nation": "SE",
+      "town": "Helsingborg",
+      "garrison": true,
+      "men": 150,
+      "mobilisedMen": 150,
+      "guns": 0
+    },
+    {
+      "id": "garrison-Landskrona",
+      "name": "Garnison i Landskrona",
+      "nation": "SE",
+      "town": "Landskrona",
+      "garrison": true,
+      "men": 400,
+      "mobilisedMen": 400,
+      "guns": 12
+    },
+    {
+      "id": "garrison-Lund",
+      "name": "Garnison i Lund",
+      "nation": "SE",
+      "town": "Lund",
+      "garrison": true,
+      "men": 100,
+      "mobilisedMen": 100,
+      "guns": 0
+    },
+    {
+      "id": "garrison-Ystad",
+      "name": "Garnison i Ystad",
+      "nation": "SE",
+      "town": "Ystad",
+      "garrison": true,
+      "men": 150,
+      "mobilisedMen": 150,
+      "guns": 0
+    },
+    {
+      "id": "garrison-Trelleborg",
+      "name": "Garnison i Trelleborg",
+      "nation": "SE",
+      "town": "Trelleborg",
+      "garrison": true,
+      "men": 50,
+      "mobilisedMen": 50,
+      "guns": 0
+    },
+    {
+      "id": "garrison-Kristianstad",
+      "name": "Garnison i Kristianstad",
+      "nation": "SE",
+      "town": "Kristianstad",
+      "garrison": true,
+      "men": 650,
+      "mobilisedMen": 650,
+      "guns": 12
+    },
+    {
+      "id": "garrison-Karlskrona",
+      "name": "Garnison i Karlskrona",
+      "nation": "SE",
+      "town": "Karlskrona",
+      "garrison": true,
+      "men": 1200,
+      "mobilisedMen": 1200,
+      "guns": 36
+    },
+    {
+      "id": "garrison-Halmstad",
+      "name": "Garnison i Halmstad",
+      "nation": "SE",
+      "town": "Halmstad",
+      "garrison": true,
+      "men": 150,
+      "mobilisedMen": 150,
+      "guns": 0
+    },
+    {
+      "id": "garrison-Göteborg",
+      "name": "Garnison i Göteborg",
+      "nation": "SE",
+      "town": "Göteborg",
+      "garrison": true,
+      "men": 700,
+      "mobilisedMen": 700,
+      "guns": 20
+    },
+    {
+      "id": "garrison-Rostock",
+      "name": "Garnison i Rostock",
+      "nation": "MEC",
+      "town": "Rostock",
+      "garrison": true,
+      "men": 250,
+      "mobilisedMen": 250,
+      "guns": 0
+    },
+    {
+      "id": "garrison-Wismar",
+      "name": "Garnison i Wismar",
+      "nation": "MEC",
+      "town": "Wismar",
+      "garrison": true,
+      "men": 150,
+      "mobilisedMen": 150,
+      "guns": 0
+    },
+    {
+      "id": "garrison-Schwerin",
+      "name": "Garnison i Schwerin",
+      "nation": "MEC",
+      "town": "Schwerin",
+      "garrison": true,
+      "men": 700,
+      "mobilisedMen": 700,
+      "guns": 8
+    },
+    {
+      "id": "garrison-Stralsund",
+      "name": "Garnison i Stralsund",
+      "nation": "PR",
+      "town": "Stralsund",
+      "garrison": true,
+      "men": 1000,
+      "mobilisedMen": 1000,
+      "guns": 24
+    },
+    {
+      "id": "garrison-Stettin",
+      "name": "Garnison i Stettin",
+      "nation": "PR",
+      "town": "Stettin",
+      "garrison": true,
+      "men": 2000,
+      "mobilisedMen": 2000,
+      "guns": 48
+    },
+    {
+      "id": "garrison-Bremen",
+      "name": "Garnison i Bremen",
+      "nation": "BRE",
+      "town": "Bremen",
+      "garrison": true,
+      "men": 500,
+      "mobilisedMen": 500,
+      "guns": 0
+    },
+    {
+      "id": "garrison-Varberg",
+      "name": "Garnison i Varberg",
+      "nation": "SE",
+      "town": "Varberg",
+      "garrison": true,
+      "men": 100,
+      "mobilisedMen": 100,
+      "guns": 4
+    },
+    {
+      "id": "garrison-Greifswald",
+      "name": "Garnison i Greifswald",
+      "nation": "PR",
+      "town": "Greifswald",
+      "garrison": true,
+      "men": 400,
+      "mobilisedMen": 400,
+      "guns": 0
+    },
+    {
+      "id": "garrison-Bergen på Rügen",
+      "name": "Garnison i Bergen på Rügen",
+      "nation": "PR",
+      "town": "Bergen på Rügen",
+      "garrison": true,
+      "men": 100,
+      "mobilisedMen": 100,
+      "guns": 0
+    },
+    {
+      "id": "garrison-Stade",
+      "name": "Garnison i Stade",
+      "nation": "HAN",
+      "town": "Stade",
+      "garrison": true,
+      "men": 500,
+      "mobilisedMen": 500,
+      "guns": 12
+    },
+    {
+      "id": "garrison-Harburg",
+      "name": "Garnison i Harburg",
+      "nation": "HAN",
+      "town": "Harburg",
+      "garrison": true,
+      "men": 300,
+      "mobilisedMen": 300,
+      "guns": 0
+    },
+    {
+      "id": "garrison-Oldenburg",
+      "name": "Garnison i Oldenburg",
+      "nation": "OLD",
+      "town": "Oldenburg",
+      "garrison": true,
+      "men": 600,
+      "mobilisedMen": 600,
+      "guns": 6
+    },
+    {
+      "id": "SE-south",
+      "name": "Svensk sydlig felthær",
+      "nation": "SE",
+      "town": "Kristianstad",
+      "garrison": false,
+      "peaceMen": {
+        "1825": 2500,
+        "1851": 3000
+      },
+      "warMen": {
+        "1825": 35000,
+        "1851": 40000
+      },
+      "guns": 48,
+      "men": 2500,
+      "mobilisedMen": 35000
+    },
+    {
+      "id": "PR-pomerania",
+      "name": "Preussisk pommersk korps",
+      "nation": "PR",
+      "town": "Stettin",
+      "garrison": false,
+      "peaceMen": {
+        "1825": 5000,
+        "1851": 6500
+      },
+      "warMen": {
+        "1825": 18000,
+        "1851": 24000
+      },
+      "guns": 60,
+      "men": 5000,
+      "mobilisedMen": 18000
+    },
+    {
+      "id": "MEC-field",
+      "name": "Mecklenburgsk brigade",
+      "nation": "MEC",
+      "town": "Schwerin",
+      "garrison": false,
+      "peaceMen": {
+        "1825": 800,
+        "1851": 1000
+      },
+      "warMen": {
+        "1825": 2200,
+        "1851": 3000
+      },
+      "guns": 8,
+      "men": 800,
+      "mobilisedMen": 2200
+    },
+    {
+      "id": "HAN-elbe",
+      "name": "Hannoveransk Elbebrigade",
+      "nation": "HAN",
+      "town": "Harburg",
+      "garrison": false,
+      "peaceMen": {
+        "1825": 1200,
+        "1851": 1500
+      },
+      "warMen": {
+        "1825": 4000,
+        "1851": 5000
+      },
+      "guns": 12,
+      "men": 1200,
+      "mobilisedMen": 4000
+    },
+    {
+      "id": "OLD-field",
+      "name": "Oldenburgsk bataljon",
+      "nation": "OLD",
+      "town": "Oldenburg",
+      "garrison": false,
+      "peaceMen": {
+        "1825": 300,
+        "1851": 400
+      },
+      "warMen": {
+        "1825": 1000,
+        "1851": 1500
+      },
+      "guns": 4,
+      "men": 300,
+      "mobilisedMen": 1000
+    }
+  ]
+}

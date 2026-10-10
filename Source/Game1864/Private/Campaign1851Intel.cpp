@@ -242,6 +242,13 @@ void ACampaign1851Map::EnemyReinforcements()
 	for (FCampaign1851EnemyCorps& C : EnemyCorps)
 	{
 		// A blockade with the sea held halves the drafts (the Baltic ports closed).
+		if (const FCampaign1851NeighbourArmy* NeighbourSource = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& A) { return A.CorpsId == C.Id; }))
+		{
+			if (NeighbourSource->bGarrison) { continue; }
+			TArray<FCampaign1851Leg> NeighbourSupplyLegs;
+			if (FVector2D::Distance(C.Km, TownKm(NeighbourSource->Town)) > 8.0
+				&& !PlanMarch(C.Town, C.Km, NeighbourSource->Town, TownKm(NeighbourSource->Town), 16.f, ECampaign1851RouteMode::RoadsOnly, NeighbourSupplyLegs, nullptr, C.Nation)) { continue; }
+		}
 		const int32 Draft = (C.Nation == TEXT("PR") ? 3000 : 1500) / (bBlockade && HasSeaControl() ? 2 : 1);
 		const int32 Add = FMath::Min(Draft, FMath::Max(0, C.StartMen * 3 / 2 - C.Men));
 		if (Add > 0)
