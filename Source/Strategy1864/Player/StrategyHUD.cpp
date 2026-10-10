@@ -775,7 +775,7 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
                 bTagMoving ? (bTagAdvance ? TEXT("RYKKER FREM") : TEXT("MARCHERER")) : TEXT("HOLDER");
             const FLinearColor TagColour = bTagReforming ? FLinearColor(1.f, 0.8f, 0.1f) :
                 bTagFiring ? FLinearColor(1.f, 0.15f, 0.1f) : bTagMoving ? FLinearColor(0.2f, 0.5f, 1.f) : FLinearColor(0.6f, 0.6f, 0.6f);
-            Info = FString(TagStatus) + TEXT(" | ") + Info;
+            Info = (SpecialOrderTag(Unit).IsEmpty() ? FString(TagStatus) : SpecialOrderTag(Unit)) + TEXT(" | ") + Info;
             float NW = 0.0f, NH = 0.0f, IW = 0.0f, IH = 0.0f;
             GetTextSize(Name, NW, NH, nullptr, 1.15f);
             GetTextSize(Info, IW, IH, nullptr, 1.0f);
@@ -1207,10 +1207,11 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     {
         const FLinearColor HudOrderBlue(0.40f, 0.69f, 0.88f), HudOrderGreen(0.34f, 0.78f, 0.57f), HudOrderRed(0.85f, 0.39f, 0.43f);
         const FLinearColor* HudColour = OrderIndex == 0 ? &HudOrderBlue : OrderIndex == 2 ? &HudOrderGreen : &HudOrderRed;
-        DrawButton(HudX[2] + (OrderIndex % 2) * (HudOrderW + 5.f), HudY + 49.f + (OrderIndex / 2) * (HudHQ ? 44.f : 70.f), HudOrderW, HudHQ ? 38.f : 58.f, HudOrders[OrderIndex], HudActions[OrderIndex], int32(HudTypes[OrderIndex]), HudCurrent == HudTypes[OrderIndex], Unit, HudColour);
+        DrawButton(HudX[2] + (OrderIndex % 2) * (HudOrderW + 5.f), HudY + 49.f + (OrderIndex / 2) * (HudHQ ? 44.f : 56.f), HudOrderW, HudHQ ? 38.f : 50.f, HudOrders[OrderIndex], HudActions[OrderIndex], int32(HudTypes[OrderIndex]), HudCurrent == HudTypes[OrderIndex], Unit, HudColour);
     }
     if (!HudHQ && Cast<AStrategyCompanyUnit>(Unit))
-        DrawButton(HudX[2], HudY + 184.f, HudW[2], 22.f, TEXT("AFBRYD"), EAction::Disengage, 0, HudCurrent == EStrategyOrderType::Disengage, Unit, &OrderRed);
+        DrawButton(HudX[2], HudY + 160.f, HudW[2], 20.f, TEXT("AFBRYD"), EAction::Disengage, 0, HudCurrent == EStrategyOrderType::Disengage, Unit, &OrderRed);
+    DrawSpecialOrders(Unit, HudX[2], HudY + 184.f, HudW[2]);
     if (!HudHQ) Text(BaseOrderLabel(Unit), HudX[2], HudY + 210.f, Muted, 0.65f);
     if (HudHQ)
     {
@@ -1547,6 +1548,11 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                         PC->CancelOrderPlacement();
                         PC->IssueOrderToSelection(EStrategyOrderType::Disengage, FVector::ZeroVector, 0.f, false);
                     }
+                    break;
+                case EAction::BuildFieldworks:
+                case EAction::SkirmishScreen:
+                case EAction::Spread:
+                    HandleSpecialOrder(B.Action, B.Value != 0);
                     break;
                 case EAction::Stop:
                     if (PC) { PC->IssueHoldToSelection(); }

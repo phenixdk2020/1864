@@ -2,6 +2,7 @@
 #include "../Combat/StrategyCombatComponent.h"
 #include "../Combat/StrategyContactComponent.h"
 #include "../Combat/StrategyStanceComponent.h"
+#include "../Combat/StrategyFieldworksComponent.h"
 #include "../Combat/StrategyCavalryChargeComponent.h"
 #include "../Formations/StrategyFormationTransitionComponent.h"
 
@@ -258,22 +259,89 @@ void UStrategyFieldOfficerComponent::LeaveAutomaticFireCover()
     LastLongRangeFireTime = -1000000.0f;
     if (!bTakingFireCover || !OwnerUnit) return;
     bTakingFireCover = false;
+    bManualFireCover = false;
     FireCoverStandUpUntil = GetWorld() ? GetWorld()->GetTimeSeconds() + FMath::Max(0.0f, FireCoverStandUpSeconds) : -1.0f;
     if (OwnerUnit->StanceComponent) OwnerUnit->StanceComponent->Stance = EStrategyStance::Standing;
     if (OwnerUnit->FormationComponent)
     {
         OwnerUnit->FormationComponent->SoldierLateralSpacingCm = FireCoverPreviousLateralSpacing;
         OwnerUnit->FormationComponent->SoldierRankSpacingCm = FireCoverPreviousRankSpacing;
+        OwnerUnit->FormationComponent->RankCount = FireCoverPreviousRanks;
+        OwnerUnit->FormationComponent->SetFormation(FireCoverPreviousFormation);
     }
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugSpread")))
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SPREAD: %s SAML riseSeconds=%.1f"), *OwnerUnit->StableUnitId.ToString(), FireCoverStandUpSeconds);
     Decide(TEXT("Rejser sig"), TEXT("Tilbage til den tidligere formationsafstand"));
     if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugOfficer")))
         UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OFFICER: %s rejser sig fra spredt orden"), *OwnerUnit->StableUnitId.ToString());
+}
+
+bool UStrategyFieldOfficerComponent::SetManualSpread(bool bEnable)
+{
+    if (!bEnable)
+    {
+        LeaveAutomaticFireCover();
+        return true;
+    }
+    if (!OwnerUnit || OwnerUnit->Echelon != EStrategyEchelon::Company || !OwnerUnit->IsCombatEffective() ||
+        !OwnerUnit->StanceComponent || !OwnerUnit->FormationComponent || bCharging || IsStandingUpFromFireCover() ||
+        OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square) return false;
+    if (!bTakingFireCover && OwnerUnit->OrderComponent)
+    {
+        FStrategyOrder SpreadHoldOrder;
+        SpreadHoldOrder.Type = EStrategyOrderType::Hold;
+        SpreadHoldOrder.TargetLocation = OwnerUnit->GetActorLocation();
+        SpreadHoldOrder.Authority = EStrategyOrderAuthority::DirectPlayer;
+        if (!OwnerUnit->OrderComponent->SetOrder(SpreadHoldOrder)) return false;
+    }
+    return EnterFireCover(true);
+}
+
+bool UStrategyFieldOfficerComponent::EnterFireCover(bool bManual)
+{
+    if (!OwnerUnit || OwnerUnit->Echelon != EStrategyEchelon::Company || !OwnerUnit->IsCombatEffective() ||
+        !OwnerUnit->StanceComponent || !OwnerUnit->FormationComponent || bCharging || IsStandingUpFromFireCover() ||
+        OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square ||
+        (OwnerUnit->MovementExecutor && OwnerUnit->MovementExecutor->HasMovementGoal())) return false;
+    if (bTakingFireCover)
+    {
+        bManualFireCover |= bManual;
+        return true;
+    }
+    if (!OwnerUnit->StanceComponent->SetStance(EStrategyStance::Prone)) return false;
+    UStrategyFormationComponent* SpreadFormation = OwnerUnit->FormationComponent;
+    FireCoverPreviousLateralSpacing = SpreadFormation->SoldierLateralSpacingCm;
+    FireCoverPreviousRankSpacing = SpreadFormation->SoldierRankSpacingCm;
+    FireCoverPreviousRanks = SpreadFormation->RankCount;
+    FireCoverPreviousFormation = SpreadFormation->CurrentFormation;
+    SpreadFormation->SetFormation(EStrategyFormationType::Line);
+    SpreadFormation->SoldierLateralSpacingCm *= 3.0f;
+    SpreadFormation->SoldierRankSpacingCm *= 3.0f;
+    SpreadFormation->RankCount = 1;
+    bTakingFireCover = true;
+    bManualFireCover = bManual;
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugSpread")))
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SPREAD: %s SPRED manual=%d spacing=%.1f ranks=1"),
+            *OwnerUnit->StableUnitId.ToString(), bManual, SpreadFormation->SoldierLateralSpacingCm);
+    return true;
 }
 
 bool UStrategyFieldOfficerComponent::UpdateAutomaticLooseOrderUnderFire()
 {
     if (!OwnerUnit || !GetWorld() || OwnerUnit->Echelon != EStrategyEchelon::Company || !OwnerUnit->StanceComponent || !OwnerUnit->FormationComponent) return false;
     const float CoverNow = GetWorld()->GetTimeSeconds();
+    if (bManualFireCover)
+    {
+        if (!OwnerUnit->IsCombatEffective() || bCharging ||
+            OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square ||
+            OwnerUnit->StanceComponent->Stance != EStrategyStance::Prone ||
+            (OwnerUnit->MovementExecutor && OwnerUnit->MovementExecutor->HasMovementGoal())) LeaveAutomaticFireCover();
+        else
+        {
+            Decide(TEXT("SPRED"), TEXT("Spillerens spredte orden; SAML eller ny marchordre afslutter"));
+            return true;
+        }
+    }
     // Most companies are not exposed: avoid a world-wide enemy scan every frame for them.
     if (!bTakingFireCover && !IsStandingUpFromFireCover() && CoverNow - LastLongRangeFireTime >= FireCoverReleaseSeconds)
     {
@@ -328,12 +396,7 @@ bool UStrategyFieldOfficerComponent::UpdateAutomaticLooseOrderUnderFire()
         FString::Printf(TEXT("quality=%.2f age=%.2f delay=%.2f"), CoverQuality, CoverNow - FireCoverSince, CoverDelay),
         TEXT("øjeblikkelig dækning før delay: afvist; ny mission: ikke en dækningsreaktion"));
     if (CoverNow - FireCoverSince < FMath::Max(0.0f, CoverDelay)) return false;
-    if (!OwnerUnit->StanceComponent->SetStance(EStrategyStance::Prone)) return false;
-    FireCoverPreviousLateralSpacing = OwnerUnit->FormationComponent->SoldierLateralSpacingCm;
-    FireCoverPreviousRankSpacing = OwnerUnit->FormationComponent->SoldierRankSpacingCm;
-    OwnerUnit->FormationComponent->SoldierLateralSpacingCm *= 2.0f;
-    OwnerUnit->FormationComponent->SoldierRankSpacingCm *= 2.0f;
-    bTakingFireCover = true;
+    if (!EnterFireCover(false)) return false;
     Decide(TEXT("ligger ned / spredt orden"), TEXT("Officeren søger dækning mod fjernild"));
     if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugOfficer")))
         UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OFFICER: %s ligger ned / spredt orden quality=%.0f delay=%.1f"), *OwnerUnit->StableUnitId.ToString(), CoverQuality, CoverDelay);
@@ -343,6 +406,12 @@ bool UStrategyFieldOfficerComponent::UpdateAutomaticLooseOrderUnderFire()
 void UStrategyFieldOfficerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    if (OwnerUnit && OwnerUnit->FieldworksComponent && OwnerUnit->FieldworksComponent->bBuilding && OwnerUnit->IsCombatEffective())
+    {
+        Decide(TEXT("BYGGER"), TEXT("Holder stedet mens feltværket bygges"));
+        return;
+    }
+    if (bManualFireCover && UpdateAutomaticLooseOrderUnderFire()) return;
     if (UpdateDisengage(DeltaTime)) return;
     if (UpdateAutomaticLooseOrderUnderFire()) return;
     if (!OwnerUnit || !OwnerUnit->bOfficerAIEnabled || !OwnerUnit->OrderComponent ||

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "../Formations/StrategyFormationTypes.h"
 #include "StrategyFieldOfficerComponent.generated.h"
 
 class AStrategyUnit;
@@ -40,6 +41,8 @@ public:
     bool IsStandingUpFromFireCover() const;
     void NotifyIncomingFire(bool bLongRange);
     void LeaveAutomaticFireCover();
+    /** Manual SPRED uses the same cover state as the automatic distant-fire reaction. */
+    bool SetManualSpread(bool bEnable);
 
     // Balance estimates: good officers react in 3 s, middling in 8 s, poor never.
     UPROPERTY(EditAnywhere, Category="Strategy|Officer|FireCover")
@@ -63,7 +66,11 @@ private:
     float DisengageSettleSeconds = 0.0f;
     bool bDisengageWasMoving = false;
     bool UpdateAutomaticLooseOrderUnderFire();
+    bool EnterFireCover(bool bManual);
     bool bTakingFireCover = false;
+    bool bManualFireCover = false;
+    int32 FireCoverPreviousRanks = 3;
+    EStrategyFormationType FireCoverPreviousFormation = EStrategyFormationType::Line;
     float FireCoverSince = -1.0f;
     float LastIncomingFireTime = -1000000.0f;
     float LastLongRangeFireTime = -1000000.0f;

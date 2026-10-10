@@ -12,6 +12,8 @@
 #include "../Combat/StrategyCombatComponent.h"
 #include "../Combat/StrategyFireControlComponent.h"
 #include "../Combat/StrategyStanceComponent.h"
+#include "../Combat/StrategySkirmisherComponent.h"
+#include "../AI/StrategyFieldOfficerComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "../Units/StrategyCompanyUnit.h"
 #include "StrategyEquipmentVisualComponent.h"
@@ -239,13 +241,19 @@ void UStrategyInfantryVisualComponent::TickComponent(
 
     const float CoverVisualLateralSpacing = OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->SoldierLateralSpacingCm : 0.0f;
     const float CoverVisualRankSpacing = OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->SoldierRankSpacingCm : 0.0f;
+    const int32 SpecialVisualRanks = OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->RankCount : 0;
+    const UStrategySkirmisherComponent* SpecialVisualScreen = OwnerCompany->SkirmisherComponent;
+    const int32 SpecialScreenStrength = SpecialVisualScreen &&
+        (SpecialVisualScreen->State == EStrategySkirmisherState::Deploying || SpecialVisualScreen->IsDeployed()) ? SpecialVisualScreen->DetachedStrength : 0;
     if (CachedFormationValue != CurrentFormationValue || CachedCoverLateralSpacing != CoverVisualLateralSpacing ||
-        CachedCoverRankSpacing != CoverVisualRankSpacing)
+        CachedCoverRankSpacing != CoverVisualRankSpacing || CachedSpecialRanks != SpecialVisualRanks || CachedScreenStrength != SpecialScreenStrength)
     {
         RebuildFormation();
         CachedFormationValue = CurrentFormationValue;
         CachedCoverLateralSpacing = CoverVisualLateralSpacing;
         CachedCoverRankSpacing = CoverVisualRankSpacing;
+        CachedSpecialRanks = SpecialVisualRanks;
+        CachedScreenStrength = SpecialScreenStrength;
     }
 
     const bool bBayonetFixed =
@@ -1186,6 +1194,27 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
         OwnerCompany->FormationComponent->GenerateSoldierSlots(
             FVector::ZeroVector, 0.0f, RenderedCount);
 
+    const UStrategySkirmisherComponent* DrawnScreen = OwnerCompany->SkirmisherComponent;
+    if (DrawnScreen && (DrawnScreen->State == EStrategySkirmisherState::Deploying || DrawnScreen->IsDeployed()) &&
+        OwnerCompany->FormationComponent->CurrentFormation != EStrategyFormationType::Square && RenderedCount > 1)
+    {
+        const int32 DrawnScreenCount = FMath::Clamp(FMath::RoundToInt(float(RenderedCount) *
+            DrawnScreen->DetachedStrength / FMath::Max(1, OwnerCompany->CurrentStrength)), 1, RenderedCount - 1);
+        DrawnSlots = OwnerCompany->FormationComponent->GenerateSoldierSlots(FVector::ZeroVector, 0.f, RenderedCount - DrawnScreenCount);
+        const float DrawnScreenSpacing = OwnerCompany->FormationComponent->SoldierLateralSpacingCm *
+            (OwnerCompany->FieldOfficerComponent && OwnerCompany->FieldOfficerComponent->IsTakingFireCover() ? 1.f : 3.f);
+        // Stable scatter: one loose rank ahead of the main body, without frame-to-frame randomness.
+        for (int32 ScreenFigure = 0; ScreenFigure < DrawnScreenCount; ++ScreenFigure)
+        {
+            FStrategyFormationSlot ScreenSlot;
+            ScreenSlot.WorldLocation = FVector(DrawnScreen->ScreenDistanceCm + ((ScreenFigure * 7) % 5 - 2) * 90.f,
+                (ScreenFigure - (DrawnScreenCount - 1) * 0.5f) * DrawnScreenSpacing, 0.f);
+            ScreenSlot.FacingYaw = 0.f;
+            ScreenSlot.SlotIndex = DrawnSlots.Num();
+            DrawnSlots.Add(ScreenSlot);
+        }
+    }
+
     // The simulated square has a 3 m minimum half-extent. At reduced quality,
     // keep ordinary figure spacing even for a tiny square instead of retaining that floor.
     if (VisualScaleDivisor > 1 && OwnerCompany->FormationComponent->UsesSquareVisualOwnership())
@@ -1398,9 +1427,10 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
     VisualPath.Advance(VisualUnit, DeltaTime, bVisualColumn, VisualWalkSpeed);
     const bool bActorMoved = !VisualUnit.Equals(VisualPath.PreviousUnit, 0.001f);
     const bool bVisualTravel = VisualPath.bMovingVisuals || bActorMoved;
-    UAnimSequence* Walk = WalkStandingAsset.LoadSynchronous();
+    const bool bSpreadCrawling = OwnerCompany->StanceComponent && OwnerCompany->StanceComponent->Stance == EStrategyStance::Prone;
+    UAnimSequence* Walk = (bSpreadCrawling ? CrawlProneAsset : WalkStandingAsset).LoadSynchronous();
     bool bAny = false;
-    UAnimSequence* Run = RunStandingAsset.LoadSynchronous();
+    UAnimSequence* Run = bSpreadCrawling ? Walk : RunStandingAsset.LoadSynchronous();
     bool bSettleIdleLoop = true;
     UAnimSequence* SettleIdle = ResolveAnimation(bSettleIdleLoop);
     for (int32 i = 0; i < SoldierComponents.Num() && i < SoldierSettle.Num(); ++i)
@@ -1418,7 +1448,13 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             VisualRotation.Yaw += FMath::FindDeltaAngleDegrees(VisualUnit.Rotator().Yaw, VisualPath.PreviousUnit.Rotator().Yaw);
             Soldier->SetRelativeRotation(VisualRotation);
             float GoalYaw = 0.f;
-            Settle.Goal = VisualUnit.InverseTransformPosition(VisualPath.Goal(Settle.Slot, bVisualColumn, GoalYaw));
+            const bool bColumnScreen = bVisualColumn && OwnerCompany->SkirmisherComponent &&
+                (OwnerCompany->SkirmisherComponent->State == EStrategySkirmisherState::Deploying || OwnerCompany->SkirmisherComponent->IsDeployed());
+            const bool bScreenFigure = bColumnScreen && Settle.Slot.X > 0.f;
+            FVector SpecialPathSlot = Settle.Slot;
+            // Screen men walk ahead independently; the column's head remains at its original trail coordinate.
+            if (bColumnScreen && !bScreenFigure && VisualPath.Trail.Num() >= 2) SpecialPathSlot.X += VisualPath.SlotBounds.Max.X;
+            Settle.Goal = VisualUnit.InverseTransformPosition(VisualPath.Goal(SpecialPathSlot, bVisualColumn && !bScreenFigure, GoalYaw));
             Settle.Yaw = GoalYaw - VisualUnit.Rotator().Yaw + Settle.SlotYaw + SoldierMeshYawOffset;
             Settle.bActive = Settle.bActive || bVisualTravel || FVector::Dist2D(Soldier->GetRelativeLocation(), Settle.Goal) > 1.f;
         }
@@ -1469,12 +1505,13 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         // Carry the slot at unit speed; personal pace only affects closing a slot error.
         const float FigureSpeed = ActualMarchSpeed +
             ((bSlotReforming || VisualPath.bTurning) ? RunCmPerSecond : 160.f) * Settle.Pace;
+        const float SpecialFigureSpeed = bSpreadCrawling ? FMath::Min(FigureSpeed, VisualWalkSpeed * 0.40f) : FigureSpeed;
         FVector FigureWorld = VisualUnit.TransformPosition(Here);
         const FVector FigureBefore = FigureWorld;
         const FVector FigureTarget = VisualUnit.TransformPosition(Settle.Goal);
         // Integrate presentation velocity every frame, with braking near the slot.
         // Substeps affect no orders, simulation positions, collision or game clocks.
-        FStrategyVisualFormationPath::SmoothTravel(FigureWorld, Settle.WorldVelocity, FigureTarget, DeltaTime, FigureSpeed);
+        FStrategyVisualFormationPath::SmoothTravel(FigureWorld, Settle.WorldVelocity, FigureTarget, DeltaTime, SpecialFigureSpeed);
         const FVector Step = FigureWorld - FigureBefore;
         Soldier->SetRelativeLocation(VisualUnit.InverseTransformPosition(FigureWorld));
         // He faces the way he runs while he is far from his place, and turns to the front as he comes in.

@@ -1,4 +1,5 @@
 #include "StrategyAutonomousBattleAIComponent.h"
+#include "../Combat/StrategyFieldworksComponent.h"
 
 #include "../Combat/StrategyContactComponent.h"
 #include "../Combat/StrategyFireControlComponent.h"
@@ -49,6 +50,7 @@ void UStrategyAutonomousBattleAIComponent::TickComponent(
         return;
     }
 
+    if (OwnerUnit->FieldworksComponent && OwnerUnit->FieldworksComponent->bBuilding) return;
     if (OwnerUnit->FieldOfficerComponent &&
         (OwnerUnit->FieldOfficerComponent->IsTakingFireCover() || OwnerUnit->FieldOfficerComponent->IsStandingUpFromFireCover())) return;
 

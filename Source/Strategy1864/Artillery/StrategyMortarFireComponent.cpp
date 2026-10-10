@@ -122,7 +122,7 @@ bool UStrategyMortarFireComponent::FireOneBomb()
         const float RangeFactor =
             FMath::Clamp(1.0f - (Distance / FMath::Max(1.0f, MaxRangeCm)) * 0.35f, 0.45f, 1.0f);
 
-        const float MortarStanceMultiplier = UnitTarget->StanceComponent ? UnitTarget->StanceComponent->GetIncomingHitMultiplier() : 1.0f;
+        const float MortarStanceMultiplier = UnitTarget->StanceComponent ? UnitTarget->StanceComponent->GetIncomingArtilleryHitMultiplier() : 1.0f;
         if (RandomStream.FRand() < InfantryHitChancePerBomb * RangeFactor * MortarStanceMultiplier)
         {
             Lost = RandomStream.RandRange(1, 4);

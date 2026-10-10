@@ -329,7 +329,8 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
         ReloadMultiplier *
         ((OwnerUnit->FieldOfficerComponent && OwnerUnit->FieldOfficerComponent->IsTakingFireCover())
             ? 2.0f : StanceReloadMultiplier * FireDrillReloadMultiplier) *
-        NCOReloadMultiplier;
+        NCOReloadMultiplier *
+        (OwnerUnit->SkirmisherComponent && OwnerUnit->SkirmisherComponent->IsDeployed() ? 1.25f : 1.0f);
     OnVolleyResolved.Broadcast(Target, ShotCount, Hits);
 
     FVector FireDirection =

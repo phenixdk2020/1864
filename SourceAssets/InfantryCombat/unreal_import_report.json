@@ -1,0 +1,49 @@
+{
+  "skeleton": "/Game/Units/Human/Skeletons/SK_Human_1864.SK_Human_1864",
+  "meshes": {
+    "Livgarden": "/Game/Units/Danish/Livgarden1864/Mesh/SK_DK_Livgarden_1864.SK_DK_Livgarden_1864",
+    "Swedish": "/Game/Units/Swedish/Infantry1864/Mesh/SK_SE_Infantry_1864.SK_SE_Infantry_1864"
+  },
+  "clips": [
+    {
+      "name": "A_Combat_Idle",
+      "asset": "/Game/Units/Human/CombatAnimations/A_Combat_Idle.A_Combat_Idle",
+      "seconds": 5.933333396911621
+    },
+    {
+      "name": "A_Combat_Walk",
+      "asset": "/Game/Units/Human/CombatAnimations/A_Combat_Walk.A_Combat_Walk",
+      "seconds": 1.3666666746139526
+    },
+    {
+      "name": "A_Combat_Aim",
+      "asset": "/Game/Units/Human/CombatAnimations/A_Combat_Aim.A_Combat_Aim",
+      "seconds": 3.0999999046325684
+    },
+    {
+      "name": "A_Combat_Fire",
+      "asset": "/Game/Units/Human/CombatAnimations/A_Combat_Fire.A_Combat_Fire",
+      "seconds": 1.1666666269302368
+    },
+    {
+      "name": "A_Combat_DeathFront",
+      "asset": "/Game/Units/Human/CombatAnimations/A_Combat_DeathFront.A_Combat_DeathFront",
+      "seconds": 3.433333396911621
+    },
+    {
+      "name": "A_Combat_DeathHeadshot",
+      "asset": "/Game/Units/Human/CombatAnimations/A_Combat_DeathHeadshot.A_Combat_DeathHeadshot",
+      "seconds": 2.8333332538604736
+    },
+    {
+      "name": "A_Combat_DeathBack",
+      "asset": "/Game/Units/Human/CombatAnimations/A_Combat_DeathBack.A_Combat_DeathBack",
+      "seconds": 2.200000047683716
+    },
+    {
+      "name": "A_Combat_ReloadStanding",
+      "asset": "/Game/Units/Human/CombatAnimations/A_Combat_ReloadStanding.A_Combat_ReloadStanding",
+      "seconds": 6.866666793823242
+    }
+  ]
+}

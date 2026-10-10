@@ -1,0 +1,70 @@
+{
+  "source": "R:\\Onedrive\\Dokumenter\\Unreal Projects\\Strategy1864\\Unreal\\SourceAssets\\Danish\\Livgarden1864\\Animations",
+  "clips": [
+    {
+      "name": "Idle",
+      "file": "A_Combat_Idle.fbx",
+      "frames": 179,
+      "fps": 30,
+      "duration": 5.933333333333334,
+      "bones": 41
+    },
+    {
+      "name": "Walk",
+      "file": "A_Combat_Walk.fbx",
+      "frames": 42,
+      "fps": 30,
+      "duration": 1.3666666666666667,
+      "bones": 41
+    },
+    {
+      "name": "Aim",
+      "file": "A_Combat_Aim.fbx",
+      "frames": 94,
+      "fps": 30,
+      "duration": 3.1,
+      "bones": 41
+    },
+    {
+      "name": "Fire",
+      "file": "A_Combat_Fire.fbx",
+      "frames": 36,
+      "fps": 30,
+      "duration": 1.1666666666666667,
+      "bones": 41
+    },
+    {
+      "name": "DeathFront",
+      "file": "A_Combat_DeathFront.fbx",
+      "frames": 104,
+      "fps": 30,
+      "duration": 3.433333333333333,
+      "bones": 41
+    },
+    {
+      "name": "DeathHeadshot",
+      "file": "A_Combat_DeathHeadshot.fbx",
+      "frames": 86,
+      "fps": 30,
+      "duration": 2.8333333333333335,
+      "bones": 41
+    },
+    {
+      "name": "DeathBack",
+      "file": "A_Combat_DeathBack.fbx",
+      "frames": 67,
+      "fps": 30,
+      "duration": 2.2,
+      "bones": 41
+    },
+    {
+      "name": "ReloadStanding",
+      "file": "A_Combat_ReloadStanding.fbx",
+      "frames": 207,
+      "fps": 30,
+      "duration": 6.866666666666666,
+      "bones": 41
+    }
+  ],
+  "reload": "Upper-body motion from Reload sitting with standing Rifle Idle pelvis/legs; authored derivative, not new motion capture."
+}
