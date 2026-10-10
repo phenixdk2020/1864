@@ -2,7 +2,7 @@
 
 Dato: **2026-10-09**. Grundlag: `Kamp-AI-Design-v2.0.md`, C++ i denne arbejdskopi, `Enhedsadfaerd1864.md`, `Unity-AI-Mapping.md` og `TestFlags.md`. Ingen build, editorstart eller kamptest er udført. **Bygget** betyder implementeret og tilsluttet i C++; det betyder ikke bestået accepttest. Blueprints/banernes overrides er ikke runtimeverificeret. Filhenvisninger nedenfor er relative til `Source/Strategy1864/`; funktionsnavne er søgeankre.
 
-Den eksisterende kode er en brugbar prototype med langt flere specialenheder end fase 2 kræver. Den er ikke endnu designets samlede MissionAI/ReactionAI med lokal informationskontrakt. De vigtigste huller er feltofficerens direkte verdensopslag, manglende kontakt-confidence/rapportkilde, generel missions-/reaktionsarbitrering, lanes med bredde og en Auto-overgang uden kaskade.
+Den eksisterende kode er en brugbar prototype med langt flere specialenheder end fase 2 kræver. Den er ikke endnu designets samlede MissionAI/ReactionAI med lokal informationskontrakt. Feltofficerens nærmeste fjende og rytterens nye charge-kandidater vælges nu fra lokale kontakter med confidence, alder og kilde. De vigtigste resterende huller er skjulte data i længerevarende flankering/charge, rapporttransport, generel missions-/reaktionsarbitrering, lanes med bredde og en Auto-overgang uden kaskade.
 
 ## Afstemning af afsnit 1–29
 
@@ -10,7 +10,7 @@ Den eksisterende kode er en brugbar prototype med langt flere specialenheder end
 
 | Status | Bygget og evidens | Forskel til designet |
 |---|---|---|
-| Delvist bygget | `AI/StrategyFieldOfficerComponent.cpp`: `IsOffensive`, `ThinkInfantry`, `StartCharge`; `Orders/StrategyOrderComponent.cpp`: `CanReplaceCurrentOrder`. Offensiv ordre kræves til almindeligt charge/fremrykning; spillerautoritet beskyttes. | `NearestEnemy` læser alle relevante verdensaktører uden kontakt/LOS. `FallBack` kan erstatte en AI-mission. Ingen generel regel om, at kun bataljon og opefter skriver missioner. |
+| Delvist bygget | `AI/StrategyFieldOfficerComponent.cpp`: `IsOffensive`, `ThinkInfantry`, `StartCharge`, `NearestEnemy`; `Orders/StrategyOrderComponent.cpp`: `CanReplaceCurrentOrder`. Offensiv ordre kræves til almindeligt charge/fremrykning; spillerautoritet beskyttes. Nærmeste fjende vælges fra aktuelle kontakter. | `FallBack` kan erstatte en AI-mission. Vedvarende flankering/charge læser stadig aktører. Ingen generel regel om, at kun bataljon og opefter skriver missioner. |
 
 ### 2. Epoke-profiler
 
@@ -34,7 +34,7 @@ Den eksisterende kode er en brugbar prototype med langt flere specialenheder end
 
 | Status | Bygget og evidens | Forskel til designet |
 |---|---|---|
-| Delvist bygget | `Combat/StrategyContactComponent.h`: `FStrategyContactRecord`; `.cpp`: `RefreshContacts`, `GetKnownContacts`, `GetLastKnownContact`. Position, synlighed og `SecondsSinceSeen` findes; scanning 0,35 s, glemsel 120 s. `Combat/StrategyVisibilityComponent.cpp`: `CanDetectTarget`. | Ingen confidence, heading, kilde, usikkerhedsområde eller rapporttransport opad. `FieldOfficer::NearestEnemy` omgår kontakter. `Artillery/StrategyMortarFireComponent.cpp`: `FireOneBomb` følger `UnitTarget` direkte uden frisk spotterrapport. |
+| Delvist bygget | `Combat/StrategyContactComponent.h`: `FStrategyContactRecord` er enhedens lokale kontakt-blackboard med `LastKnownPosition`, `Heading`, `ObservedVelocity`, `LastSeenTime`, `Confidence`, `Source` og `UncertaintyRadiusCm`. `RefreshContacts` opdaterer kun observationer efter `CanDetectTarget`; scanning 0,35 s, lineær confidence-decay og glemsel 120 s. `FieldOfficer::NearestEnemy`, `ThinkCavalry` og `ThreatReaction::FindVisibleEnemyCavalry` bruger aktuelle kontakter; afstand/hastighed kommer fra snapshots. | Report/HQ er kildetyper, men ingen rapporttransport opad. Ingen samlet company-blackboard for mission/reaktion. Vedvarende flankering/charge og synlige kandidaters tilstand læses fortsat på aktøren. `Artillery/StrategyMortarFireComponent.cpp`: `FireOneBomb` følger `UnitTarget` direkte uden frisk spotterrapport. |
 
 ### 6. Ordreobjekt, latency og betingelser
 
@@ -64,7 +64,7 @@ Den eksisterende kode er en brugbar prototype med langt flere specialenheder end
 
 | Status | Bygget og evidens | Forskel til designet |
 |---|---|---|
-| Delvist bygget | `Combat/StrategyThreatReactionComponent.cpp`: `FindVisibleEnemyCavalry` bruger fart, lukningsretning, korridor, synlighed og tid til formering. `AI/StrategyFieldOfficerComponent.cpp`: `IsWavering`, `ThinkInfantry`. | Ingen normaliseret `ThreatScore`, responskurver/vægtdata, confidence- og aldersfaktor eller ensartet artilleri-/flanketrussel. Kavaleri-confidence i `StrategyCavalryChargeComponent` er kampkraft fra moral/cohesion, ikke kontakt-confidence. |
+| Delvist bygget | `Combat/StrategyThreatReactionComponent.cpp`: `FindVisibleEnemyCavalry` bruger aktuelle kontakter med snapshot-position/-hastighed, lukningsretning, korridor og tid til formering. `AI/StrategyFieldOfficerComponent.cpp`: `IsWavering`, `ThinkInfantry`. | Confidence er endnu kun et positivt kontaktgate; ingen normaliseret `ThreatScore`, responskurver/vægtdata, gradueret confidence-/aldersfaktor eller ensartet artilleri-/flanketrussel. Kavaleri-confidence i `StrategyCavalryChargeComponent` er kampkraft fra moral/cohesion, ikke kontakt-confidence. |
 
 ### 11. Infanteri og countercharge
 
@@ -184,7 +184,7 @@ Den eksisterende kode er en brugbar prototype med langt flere specialenheder end
 
 `Enhedsadfaerd1864.md` beskriver flere eksisterende balancevalg korrekt: kvalitetsstyret liggende/spredt orden, retningsbestemt kavalerivarsling og AFBRYD som spillerordre. Dets hidtidige permanente annullering ved stop-og-ild var faktisk implementeret i `HaltForFire`, men strider mod design v2.0's suspendering/genoptagelse. Den regel er rettet og dokumentet opdateret i denne ændring. Den afsluttede, almindelige spillerordre bliver fortsat ikke til en selvvalgt offensiv mission.
 
-`Unity-AI-Mapping.md` er en sammenligning af prototyper og ikke en v2.0-acceptspecifikation. Dets konstatering af to lokale AI-veje og feltofficerens verdensopslag gælder stadig. Den autonome komponent bruger current contact og mission constraints; feltofficeren gør ikke konsekvent. Den generelle parent→reaction→resume-stack mangler stadig; kun stop-og-ild-hullet er nu lukket. Kortlægningens gamle `R:/Onedrive/cx/mapai`-links er ikke evidens for denne arbejdskopi; brug fil-/funktionsankrene ovenfor.
+`Unity-AI-Mapping.md` er en sammenligning af prototyper og ikke en v2.0-acceptspecifikation. To lokale AI-veje findes stadig. Den autonome komponent bruger current contact og mission constraints; feltofficerens nærmeste-fjende-/ryttervalg bruger nu lokale kontakter, men vedvarende flankering/charge læser fortsat aktører. Den generelle parent→reaction→resume-stack mangler stadig; kun stop-og-ild-hullet er lukket. Kortlægningens gamle `R:/Onedrive/cx/mapai`-links er ikke evidens for denne arbejdskopi; brug fil-/funktionsankrene ovenfor.
 
 ## T1–T10: hvad kan testes nu?
 
@@ -214,7 +214,7 @@ Størrelser er grove implementerings-/reviewestimater, ikke tilsagn: XS <½ dag,
 | P0.1 | Opt-in beslutningslog i eksisterende officer/trussel; log også afvisninger og inputs. Leveret her. | S | Lav; store logmængder med flag | Ja. Ingen nye taktiske valg. |
 | P0.2 | Bevar mission/rute ved stop-og-ild, genoptag kun samme ordre efter ro; ny ordre/rout invaliderer. Leveret her; manuel regression ovenfor mangler. | S | Lav–middel; ordretick, formation og waypoint-levering mødes her | Ja for denne afgrænsede fejl; ingen generel reaction-stack i samme patch. |
 | P0.3 | Ét-mod-ét-fixture med fast start/mål og injicerbar kontakt/tab af kontakt, ny ordre under reaktion samt log-assertions. Definér forventning for march, Advance og AttackHere først. | S–M | Lav | Ja efter aftalte kriterier; byg ikke et nyt generisk testframework. |
-| P0.4 | Udvid `FStrategyContactRecord` med confidence, heading og kilde; egen observation opdaterer dem, alder nedskriver dem. Først én lokal forbruger i ét-mod-ét, der vælger ud fra snapshot. | M | Middel; undgå stadig at læse fjendens skjulte morale/position | Ja når decay/identifikation og record-kontrakt er godkendt. Fuld HQ-rapporttransport er næste separate skridt. |
+| P0.4 | **Leveret 2026-10-09:** kontaktfelter, decay/usikkerhed og snapshot-input i nærmeste-fjende-/ryttervalg og kavalerireaktion. Manuel kontaktregression nedenfor mangler. | M | Middel; vedvarende flankering/charge og tilstandsvurdering mangler fuld snapshot-kontrakt | Lokal skive implementeret. Fuld HQ-rapporttransport er næste separate skridt. |
 | P0.5 | Lås lille mission/reaktionskontrakt for kompagni: missionens ejer, reaktionsprioritet, suspendering, ny ordre under reaktion og release. Saml kun move/hold/attack + stop/cover/carré i første skive. | M–L | Høj; flere samtidige skriveejere | Nej som selvstændig arkitekturopgave. Codex kan implementere en aftalt handler ad gangen og validere autoriteten. |
 | P0.6 | Carré-skive: behold mission, stå under trussel, reform/20 s release og resume; kendt kontakt, tids-til-kollision og ét hårdt brogate. T1 med 200 m-fixture. | M | Middel–høj; formation og movement tick | Ja efter kontrakten i P0.5; ikke samtidig retune alle kavaleriregler. |
 | P1.1 | Fælles ordrestatistik i ét-mod-ét: issuer/issued/arrive/status, vis én ordre under vejs og lever med eksisterende latency. Invalider ved tabt ordonnans; efterfølgerens forsinkelse separat. | M | Middel; direkte/inherited/courier-veje | Ja i to små patches efter aftalt leveringskontrakt. Ikke fuldt latency-refaktor alene. |
@@ -234,3 +234,15 @@ Stop efter fase 2 og godkendte T1–T3/T7/T9-regressioner. Fuld epokeprofil, bet
 - Suspensionen er transient slagtilstand. Der er ingen nye kampagne-savefelter eller scenarieændringer. 1851-data er uberørt.
 
 Statisk validering: nye include-/API-brug er kontrolleret mod UE 5.8-headerne `Runtime/Core/Public/Misc/CommandLine.h`, `Misc/Parse.h`, `Logging/LogMacros.h` samt `Runtime/Engine/Classes/Engine/World.h`. Diff/whitespace, lokale funktionshenvisninger og order/route/authority-kæden er gennemgået. Det erstatter ikke C++-kompilering eller runtime-regression. Ingen commit.
+
+## Fase 2-kørsel 2026-10-09: lokal kontaktskive
+
+Opgavens punkt **1** er implementeret som en udvidelse af det eksisterende `FStrategyContactRecord`, ikke en parallel kontaktliste. `Contacts` i hver `UStrategyContactComponent` er det lokale kontakt-blackboard. Den gamle `LastKnownLocation` bevares og opdateres sammen med `LastKnownPosition` af hensyn til eksisterende C++/Blueprint-forbrugere. Egen observation nulstiller alder/usikkerhed og sætter confidence=1 og Source=OwnEyes. Uden observation falder confidence lineært til 0 over `ForgetAfterSeconds` (default 120 s); usikkerhed vokser med 1200 cm/s, et justerbart balanceestimat. Position, retning, hastighed og observationstid forbliver frosne. Report/HQ er kontraktværdier; der opfindes ingen rapporter eller fælles HQ-viden.
+
+`NearestEnemy`, rytterens nye charge-kandidatvalg og kavaleritruslens fjendeinput bruger lokale aktuelle observationer og snapshot-afstand/-hastighed. Aktørreferencen er svag og valideres inden brug. Der er ingen fallback til verdensopslag, hvis kontaktkomponenten mangler. Kavaleriets eksisterende fart-/retning-/korridor-/varsling-/spillerformationsregler er bevaret; den venlige angrebskorridor bruger fortsat egne kompagnier fra verden. Kadencen giver op til én kontaktscanning (default 0,35 s) ekstra observationstid. Synlige kandidaters formation/moral læses fortsat på aktøren, og vedvarende flankering/charge er ikke fuldt omlagt. Derfor er ingen-skjult-viden-kontrakten endnu ikke komplet.
+
+Manuel regression til senere godkendt kørsel: brug eksisterende ét-mod-ét-/rytterfixture med `-Strategy1864DebugDecisions`. Kontaktloggen skal vise OwnEyes, confidence=1 og radius=0 ved observation. Ved tab af syn skal position/heading/LastSeenTime forblive uændrede, alder og radius vokse, og confidence falde (omkring 0,5 efter 60 s med standardtal). Efter mere end 120 s uden syn skal recorden forsvinde. Gensyn skal nulstille alder/radius. Skjulte kontakter må ikke blive nye officer-/rytterkandidater eller udløse carré; kontroller også AI OFF, stop-og-ild med ny HOLD, AFBRYD og uændrede kavalerigates. Dette er en procedure, **ikke en bestået test**.
+
+**Næste kørsel, i opgavens rækkefølge:** (2) fælles ReactionAI/SuspendedMission inklusive fallback og nye spillerordrer, med release-hysterese/formation-cooldown; (3) lagdelt data-arbiter og beslutningslog; (4) FireBlocked; (5) lokale Conditions/ThenOrder; (6) era-/equipmentprofiler og relativ afstand; (7) reproducerbare T1–T3-flag og PROJECT1864-ACCEPT. Ingen af punkt 2–7 er tilføjet i denne kørsel. Den eksisterende stop-og-ild-suspension er fortsat den eneste implementerede SuspendedMission; carré-release er fortsat 8 s.
+
+Statisk kontrol af nye API/includes mod UE 5.8: `Engine/World.h`, `GameFramework/Actor.h`, `UObject/WeakObjectPtrTemplates.h`, `Containers/Array.h`, `Math/Vector.h` og `Math/UnrealMathUtility.h`; lokale komponentmetoder og hele diffen er gennemgået. Ingen build, editor/spil, runtime-test eller commit. Kontaktfelterne er transient slagtilstand; kampagne-save og 1825/1851-data er ikke ændret.

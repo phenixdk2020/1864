@@ -1765,6 +1765,14 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Årsag: den tegnede fronts drejehastighed var gangfart delt med hele linjens længde (ca. 1,5 grader i sekundet), så mændene løb fra hinanden og linjen blev en L/S. Nu er hastigheden sat ud fra den ydre mands skridt (min 400 cm/s, 5-36 grader i sekundet), og mændene må løbe mens linjen drejer. Testet: rette linjer i skærmbilleder under angreb.
 - Merget fra Codex: beslutningslog og afstemning mod Kamp-AI-designet (`Docs/Kamp-AI-Afstemning.md`), HUD-knapper på hele udvalget, hover for stabe, faldne mænd, tog kræver jernbaneforskning (`Docs/Review-2026-10-09.md`).
 
+### 2026-10-09 – Kamp-AI fase 2: lokale kontakter og snapshot-input
+
+- Udvidet enhedens eksisterende `FStrategyContactRecord` med LastKnownPosition, Heading, observeret hastighed, LastSeenTime, Confidence, OwnEyes/Report/HQ-kilde, usikkerhedsradius og svag aktørreference. LastKnownLocation bevares for eksisterende forbrugere.
+- Observationer kommer fra eksisterende visibility/terræn/skyttekæde-gates. Mistet syn fryser observationsdata; confidence falder lineært over 120 s, radius vokser med justerbare 1200 cm/s, og gamle kontakter glemmes. Tallene er balanceestimater. Report/HQ-transport er ikke implementeret.
+- Feltofficerens nærmeste-fjendevalg, rytterens nye charge-kandidater og kavaleritruslens position/hastighed kommer nu fra aktuelle lokale kontakter. Eksisterende autoritet, AI-toggle og kavalerikorridor-/varsling-/formationsregler er bevaret. Kontaktkadencen kan give op til 0,35 s observationsforsinkelse. Vedvarende charge/flankering og synlige kandidaters tilstand læses stadig på aktører.
+- Kontaktinputs logges via eksisterende `-Strategy1864DebugDecisions`. Afstemning, resterende punkt 2–7 og manuel kontaktregression er opdateret i `Docs/Kamp-AI-Afstemning.md`; logflagets dokumentation er opdateret i `Docs/TestFlags.md`. Ingen nye acceptflag eller påståede PASS-resultater.
+- UE 5.8-headerkontrol, gennemlæsning af diff og whitespace-kontrol. Ingen build, editor-/spilstart, runtime-test eller commit. Ingen ændring i kampagnens saveformat eller scenariedata.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
