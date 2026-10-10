@@ -1796,6 +1796,14 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Carré har 20 s release-hysterese. Carré/dækning deler 15 s formations-cooldown (10–20 s); akut carré og spillerstyring kan omgå den. AI OFF starter ikke nye automatiske carré-/ildstopreaktioner. Spillerens formationsordre overtager carré-ejerskabet; ny carré afbryder ikke bajonetcharge.
 - Afstemning og TestFlags beskriver leverance, statiske kontroller og endnu ikke udført regression. Punkt 2 er kun delvist: fallback/disengage/FireBlocked og samlet reaktionstilstand mangler. Punkt 3–7 er ikke implementeret; præcis restliste i `Kamp-AI-Afstemning.md`.
 - UE 5.8-headerkontrol og diff-review udført; ingen build, spil/editor, runtime-test eller commit.
+### 2026-10-10 — Udvidet civilt forskningstræ og formationsdoktriner
+
+- Tilføjet 30 civile emner i Samfærdsel, Næringsliv og den nye gren Samfund og oplysning med år, pris, varighed og forudsætninger på niveau I–IV. Effekter koblet til skat, materielproduktion, heste, proviant, indkaldelse og sygdom/tilbagekomst.
+- Tilføjet remonte og kolonneeksercits; eksisterende våben-, felttelegraf-, hospitals-, kædelinje- og karréemner genbruges. Karréforsvar og angrebskolonne er nye taktiske doktrinvalg med forskningskrav og reelle kamp-/tabs-/AI-effekter.
+- Civilt vindue: tre brede kolonner, musehjul/OP/NED, synlige kort og niveauangivelse. Statiske geometrikontroller ved 1600×900 og 1920×1080 samt alle rulningspositioner; ingen spiltest.
+- Gemmeversion 31: civil projektfremdrift gemmes nu i Research-tekstfeltet. Gamle id’er, indeks og doktrinvalg bevares; gamle gemninger læses stadig.
+- Korrigeret åbning i 1825-forløbet for jernbane (1844), Landbohøjskole (1858), felttelegraf (1854) og bagladere (1860); eksisterende 1851-startkundskab og åbning bevares. Nye emner følger år i begge scenarier.
+- Hele træet, balanceestimater, historiske holdepunkter, effektkoblinger og kontrolbegrænsninger dokumenteret i `Docs/Research-Tree.md`. UE 5.8-headerkontrol og statisk validering; ingen build, spilstart eller commit.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
