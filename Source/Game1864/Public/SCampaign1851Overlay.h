@@ -56,7 +56,7 @@ public:
 	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury, BuildTown, ShowSite, BuildLink, ShowLink,
 		Regiment, RegimentPiece, RegimentRow, ArmyHome, ArmyHalt, OfficerChange, GeneralChange, OfficerPick, OfficerRecruit, PickerClose, TrainingProgram, OfficerInfo, OfficerCardClose, ProgramPick, RouteMode, ArmyCancel, TownTab,
 		MainMenu, WindowClose, TableSort, TableRow, TablePage, OfficerFilter, OfficerDismiss, ClosePanel, ExitGame,
-		OfficerPromote, OpenOOB, OOBCommand, CommandGeneralChange, TrainOrder, TrainMove, MinistryBudget, BattleViewEnter, BattleViewLeave,
+		OfficerPromote, OpenOOB, OOBCommand, OOBUnitChief, CommandGeneralChange, TrainOrder, TrainMove, MinistryBudget, BattleViewEnter, BattleViewLeave,
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationInsertHQ, FormationChief, FormationDissolve, FormationDeputy, FormationStaff, FormationChiefRemove,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,

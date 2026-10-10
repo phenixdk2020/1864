@@ -4221,6 +4221,11 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 	const float PoolW = 260.f;
 	const int32 GarrisonKey = TreeKey(ETreeKind::Garrisons, 0);
 	bool bGarrisonHere = true;
+	if (OOBFilter.Num() > 0)
+	{
+		bGarrisonHere = false;
+		for (int32 u : OOBFilter) { bGarrisonHere |= Regs.IsValidIndex(u) && Regs[u].Formation == 0; }
+	}
 	if (OOBPlace != INDEX_NONE)
 	{
 		bGarrisonHere = false;
@@ -4238,8 +4243,9 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 		// The chosen units (wherever they stand: in garrison or out in the field), unfolded with their companies or squadrons:
 		// drag one to the right to make it a unit of its own, or onto another half to move it there.
 		TArray<int32> Set;
-		for (int32 u : OOBFilter) { if (Regs.IsValidIndex(u) && u != OOBBuilding) { Set.AddUnique(u); } }
-		for (int32 u : TArray<int32>(Set)) { for (int32 i = 0; i < Regs.Num(); ++i) { if (i != OOBBuilding && Map->IsSplitPair(u, i)) { Set.AddUnique(i); } } }
+		// Only the units still in garrison are listed here; once dragged into an army they leave the list.
+		for (int32 u : OOBFilter) { if (Regs.IsValidIndex(u) && u != OOBBuilding && Regs[u].Formation == 0) { Set.AddUnique(u); } }
+		for (int32 u : TArray<int32>(Set)) { for (int32 i = 0; i < Regs.Num(); ++i) { if (i != OOBBuilding && Regs[i].Formation == 0 && Map->IsSplitPair(u, i)) { Set.AddUnique(i); } } }
 		float Y = Pos.Y + 44.f;
 		for (int32 u : Set)
 		{
@@ -4273,7 +4279,7 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 			}
 			Y += 10.f;
 		}
-		PaintTextFit(Geometry, Out, Layer + 3, TEXT("Træk til højre: ny felthær uden ekstra HQ. Træk hen på en anden halvdel: flyt. Træk et kompagni, en eskadron eller en batterisektion hen på en anden (også i en anden enhed, der står samme sted): vælg hvor mange mand der flyttes. Det sidste samler halvdelene. Batterier: m = mand, k = kanoner, h = heste."), FVector2D(Pos.X, Y + 6.f), Serif(10, EFace::Italic), MutedInk, PoolW);
+		if (!Set.IsEmpty()) PaintTextFit(Geometry, Out, Layer + 3, TEXT("Træk til højre: ny felthær uden ekstra HQ. Træk hen på en anden halvdel: flyt. Træk et kompagni, en eskadron eller en batterisektion hen på en anden (også i en anden enhed, der står samme sted): vælg hvor mange mand der flyttes. Det sidste samler halvdelene. Batterier: m = mand, k = kanoner, h = heste."), FVector2D(Pos.X, Y + 6.f), Serif(10, EFace::Italic), MutedInk, PoolW);
 	}
 	else
 	{
@@ -4320,7 +4326,7 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 				}
 				const int32 Key = TreeKey(ETreeKind::Regiment, i);
 				const bool bSel = SelectedRegiments.Contains(i);
-				PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 8.f, Y - 8.f), FVector2D(PoolW - 8.f, 16.f), FString(), EButton::TreeRow, Key, bSel);
+				PaintButton(Geometry, Out, Layer + 2, FVector2D(Pos.X + 8.f, Y - 8.f), FVector2D(PoolW - 8.f, 16.f), FString(), EButton::TreeRow, Key, bSel || (bDragging && DragKey == Key));
 				FSlateDrawElement::MakeBox(Out, Layer + 3, Geometry.ToPaintGeometry(FVector2D(8.f, 12.f), FSlateLayoutTransform(FVector2D(Pos.X + 11.f, Y - 6.f))), White, ESlateDrawEffect::None,
 					ArmColours[ArmSlot(Regs[i])].CopyWithNewOpacity(1.f) * 1.6f);
 				PaintTextFit(Geometry, Out, Layer + 3, FString::Printf(TEXT("%s [%s]"), *Regs[i].Name, Campaign1851Army::ArmMark(Regs[i].Arm)), FVector2D(Pos.X + 24.f, Y), Serif(10), bSel ? Dark : Ink, PoolW - 80.f);
@@ -4508,7 +4514,7 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 	auto Box = [&](const FVector2D& Min, const FVector2D& BoxSize, int32 Key, int32 Style, const TArray<FString>& Lines, bool bSelected, int32 Arm = -1)
 	{
 		const bool bTarget = bDragging && Key != 0 && HoverKey == Key && Key != DragKey;
-		const bool bLit = bSelected || bTarget;
+		const bool bLit = bSelected || bTarget || (bDragging && Key != 0 && DragKey == Key);   // the one being dragged stays lit
 		const FLinearColor Fill = bLit ? Gold.CopyWithNewOpacity(0.9f)
 			: Arm >= 0 ? (Style == 2 ? (ArmColours[Arm] * 0.75f).CopyWithNewOpacity(0.94f) : ArmColours[Arm])
 			: Style == 0 ? FLinearColor::FromSRGBColor(FColor(46, 34, 20, 245))
@@ -4603,11 +4609,13 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 		// Explicit HQ insertion: lower formations and direct units move under the new staff.
 		const ECampaign1851Echelon OOBLevels[] = { ECampaign1851Echelon::Regiment, ECampaign1851Echelon::Brigade, ECampaign1851Echelon::Division };
 		const TCHAR* OOBLabels[] = { TEXT("OPRET REGIMENT-HQ"), TEXT("OPRET BRIGADE-HQ"), TEXT("OPRET DIVISIONS-HQ") };
-		for (int32 OOBLevel = 0; OOBLevel < 3; ++OOBLevel)
+		// Top to bottom the staffs run from the highest (division) to the lowest (regiment), like the chart itself.
+		int32 OOBShown = 0;
+		for (int32 OOBLevel = 2; OOBLevel >= 0; --OOBLevel)
 		{
 			if (Node.bOpen && Map->CanInsertFormationHQ(Node.Id, OOBLevels[OOBLevel]))
 			{
-				const FVector2D OOBButtonMin = Min + FVector2D(0.f, HQH + 4.f + OOBLevel * 19.f);
+				const FVector2D OOBButtonMin = Min + FVector2D(0.f, HQH + 4.f + OOBShown++ * 19.f);
 				if (Visible(OOBButtonMin, OOBButtonMin + FVector2D(BoxW, 17.f)))
 				{
 					PaintButton(Geometry, Out, Layer + 6, OOBButtonMin, FVector2D(BoxW, 17.f), OOBLabels[OOBLevel], EButton::FormationInsertHQ, Node.Id * 10 + int32(OOBLevels[OOBLevel]));
@@ -4641,6 +4649,10 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 			Box(FVector2D(X, RowTop), FVector2D(BoxW, UnitH), TreeKey(OOBSingleCompany ? ETreeKind::Company : ETreeKind::Regiment, OOBSingleCompany ? i * 10 : i), 1, { OOBUnitTitle,
 				OOBSingleCompany ? TEXT("Kompagnichef") : Campaign1851Army::UnitRole(R.Arm), OOBSingleCompany ? OfficerText(Senior) : Officers.IsValidIndex(R.Chief) ? OfficerText(R.Chief) : FString::Printf(TEXT("fungerende: %s"), *OfficerText(Senior)),
 				FString::Printf(TEXT("NK: %s"), *OfficerText(Senior)), FString::Printf(TEXT("%d/%d mand"), R.Men, R.MaxMen) }, SelectedRegiments.Contains(i), ArmSlot(R));
+			if (!OOBSingleCompany && Visible(FVector2D(X, RowTop), FVector2D(X + BoxW, RowTop + UnitH)))
+			{
+				PaintButton(Geometry, Out, Layer + 6, FVector2D(X + BoxW - 19.f, RowTop + 3.f), FVector2D(16.f, 14.f), TEXT("+"), EButton::OOBUnitChief, i);
+			}
 			// Its companies, stacked under it.
 			float Y = RowTop + UnitH + 10.f;
 			const float Spine = X + 8.f;
@@ -4671,6 +4683,10 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 					Campaign1851Army::UnitRole(R.Arm), OfficerText(R.Chief), R.Mortars > 0 ? FString::Printf(TEXT("%d mand  ·  %d morterer"), R.Men, R.Mortars)
 					: R.Guns > 0 ? FString::Printf(TEXT("%d mand  ·  %d kanoner"), R.Men, R.Guns) : FString::Printf(TEXT("%d/%d mand  ·  %d heste"), R.Men, R.MaxMen, R.Horses) },
 					SelectedRegiments.Contains(Node.Support[s]), ArmSlot(R));
+				if (!OOBSinglePart && Visible(FVector2D(X, Y), FVector2D(X + BoxW, Y + UnitH)))
+				{
+					PaintButton(Geometry, Out, Layer + 6, FVector2D(X + BoxW - 19.f, Y + 3.f), FVector2D(16.f, 14.f), TEXT("+"), EButton::OOBUnitChief, Node.Support[s]);
+				}
 				Y += UnitH + 10.f;
 				for (int32 OOBPart = 0; OOBPart < (OOBSinglePart ? 0 : Map->SubUnitCount(Node.Support[s])); ++OOBPart)
 				{

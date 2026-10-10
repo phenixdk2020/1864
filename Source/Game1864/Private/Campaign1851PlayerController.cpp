@@ -1626,6 +1626,12 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Overlay->CloseTrainingMenu();
 			Overlay->ShowToast(FString::Printf(TEXT("Øvelser: %s"), Campaign1851Army::ProgramName(ECampaign1851Program(Module))));
 		}
+		else if (Button == SCampaign1851Overlay::EButton::OOBUnitChief)
+		{
+			// The "+" on a unit's box in the army chart: appoint or change its chief (the picker works on the chosen unit).
+			Overlay->SetSelectedRegiments({ Module });
+			Overlay->OpenPicker(SCampaign1851Overlay::EPicker::Chief);
+		}
 		else if (Button == SCampaign1851Overlay::EButton::OfficerChange || Button == SCampaign1851Overlay::EButton::GeneralChange)
 		{
 			const SCampaign1851Overlay::EPicker Want = Button == SCampaign1851Overlay::EButton::GeneralChange ? SCampaign1851Overlay::EPicker::General : SCampaign1851Overlay::EPicker::Chief;
