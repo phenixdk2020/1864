@@ -48,6 +48,40 @@ namespace Campaign1851Research
 			// Append rather than insert: active projects in older saves are stored by index.
 			{ TEXT("percussion"), TEXT("Perkussionslås"), TEXT("Åbner betalt ombygning af flintlåsvåben på enhedskortet"), 1830, 900.0, 8, nullptr, 3 },
 			{ TEXT("minie"), TEXT("Minié-riffel"), TEXT("Åbner betalt ombygning til riflede håndvåben med længere rækkevidde"), 1849, 2000.0, 12, TEXT("percussion"), 3 },
+			// Append only: preserve legacy project indices and all existing string ids.
+			// Civil years: earliest plausible Danish adoption; costs, duration and bonuses are balance estimates.
+			{ TEXT("steamships"), TEXT("Dampskibsfart"), TEXT("Byernes skat +2 %; indkaldelse +5 %"), 1825, 900.0, 12, nullptr, 2 },
+			{ TEXT("ports"), TEXT("Havneudvidelser"), TEXT("Byernes skat +3 %"), 1830, 1200.0, 14, TEXT("steamships"), 2 },
+			{ TEXT("lighthouses"), TEXT("Fyrtårne og sømærker"), TEXT("Byernes skat +2 %"), 1835, 700.0, 10, TEXT("ports"), 2 },
+			{ TEXT("ferries"), TEXT("Faste færgeruter"), TEXT("Indkaldelse +8 %"), 1840, 900.0, 12, TEXT("lighthouses"), 2 },
+			{ TEXT("postage"), TEXT("Postvæsen og frimærker"), TEXT("Byernes skat +2 %; indkaldelse +5 %"), 1851, 700.0, 8, TEXT("roads"), 2 },
+			{ TEXT("civiltelegraph"), TEXT("Civil telegraf"), TEXT("Byernes skat +2 %; indkaldelse +8 %"), 1854, 1500.0, 12, TEXT("postage"), 2 },
+			{ TEXT("railoperation"), TEXT("Jernbanedrift"), TEXT("Byernes skat +3 %; indkaldelse +10 %"), 1847, 1800.0, 18, TEXT("railway"), 2 },
+			{ TEXT("livestock"), TEXT("Staldfodring og kvægavl"), TEXT("Landets skat +3 %; stutterier og remontedepoter +10 % heste"), 1825, 600.0, 10, nullptr, 7 },
+			{ TEXT("dairy"), TEXT("Herregårdsmejerier"), TEXT("Landets skat +4 %"), 1840, 1000.0, 12, TEXT("livestock"), 7 },
+			{ TEXT("crops"), TEXT("Kartofler og kornsædskifte"), TEXT("Landets skat +3 %"), 1825, 500.0, 8, nullptr, 7 },
+			{ TEXT("forestry"), TEXT("Ordnet skovbrug"), TEXT("Landets skat +2 %; værkernes materielproduktion +5 %"), 1825, 700.0, 12, TEXT("crops"), 7 },
+			{ TEXT("fishing"), TEXT("Fiskeri og salteri"), TEXT("Byernes skat +2 %; båret proviant +1 dag"), 1830, 600.0, 10, TEXT("crops"), 7 },
+			{ TEXT("machines"), TEXT("Håndværk og maskinfabrikker"), TEXT("Geværværksteder, støberier og vognværker +10 % produktion"), 1843, 1500.0, 16, TEXT("steam"), 7 },
+			{ TEXT("ironfoundry"), TEXT("Jernstøberi"), TEXT("Værkernes materielproduktion +8 %"), 1840, 1100.0, 12, TEXT("smithy"), 7 },
+			{ TEXT("textiles"), TEXT("Mekaniske spinderier"), TEXT("Byernes skat +3 %"), 1845, 1200.0, 14, TEXT("ironfoundry"), 7 },
+			{ TEXT("beettrials"), TEXT("Forsøgsdyrkning af sukkerroer"), TEXT("Landets skat +1 %; forsøg, ikke en dansk sukkerindustri"), 1860, 700.0, 12, TEXT("dairy"), 7 },
+			{ TEXT("breweries"), TEXT("Bryggerier og maltning"), TEXT("Byernes skat +3 %"), 1847, 1000.0, 12, TEXT("credit"), 7 },
+			{ TEXT("tradefreedom"), TEXT("Næringsfrihed"), TEXT("Byernes skat +4 %; administrativ reform uden tvunget politisk begivenhed"), 1857, 1200.0, 12, TEXT("textiles"), 7 },
+			{ TEXT("customs"), TEXT("Toldreform"), TEXT("Byernes skat +3 % (netto af ændrede toldsatser)"), 1863, 1300.0, 12, TEXT("savings"), 7 },
+			{ TEXT("savings"), TEXT("Bankvæsen, sparekasser og forsikring"), TEXT("Byernes skat +2 %"), 1825, 600.0, 10, nullptr, 7 },
+			{ TEXT("schools"), TEXT("Almueskoler"), TEXT("Indkaldelse +5 % gennem læsekyndighed og registre"), 1825, 500.0, 12, nullptr, 8 },
+			{ TEXT("civilhospitals"), TEXT("Hospitaler og lazaretter"), TEXT("Syge soldater vender 10 % hurtigere tilbage"), 1830, 900.0, 12, nullptr, 8 },
+			{ TEXT("folkhighschool"), TEXT("Folkehøjskolen"), TEXT("Landets skat +2 %; folkeoplysning og landbrugsviden"), 1844, 800.0, 12, TEXT("schools"), 8 },
+			{ TEXT("statistics"), TEXT("Statistik og folketælling"), TEXT("Landets og byernes skat +2 %; indkaldelse +5 %"), 1834, 600.0, 8, TEXT("schools"), 8 },
+			{ TEXT("assemblies"), TEXT("Stænderforsamlinger"), TEXT("Landets skat +2 %; lokal økonomisk administration"), 1834, 800.0, 10, TEXT("statistics"), 8 },
+			{ TEXT("constitution"), TEXT("Grundlov og Rigsdag"), TEXT("Byernes skat +3 %; administrativ kapacitet, ændrer ikke automatisk styreform"), 1849, 1400.0, 18, TEXT("assemblies"), 8 },
+			{ TEXT("justice"), TEXT("Retsvæsen og handelsret"), TEXT("Byernes skat +2 %"), 1830, 700.0, 10, nullptr, 8 },
+			{ TEXT("tradeschools"), TEXT("Håndværkerskoler"), TEXT("Værkernes materielproduktion +8 %"), 1843, 900.0, 12, TEXT("justice"), 8 },
+			{ TEXT("choleraprevention"), TEXT("Koleraforebyggelse"), TEXT("Sygdomstilfælde −10 %; koleraens ekstra smitte halveres"), 1853, 1000.0, 12, TEXT("civilhospitals"), 8 },
+			{ TEXT("firebrigades"), TEXT("Organiseret brandvæsen"), TEXT("Byernes skat +2 % gennem sikrere handel og værksteder"), 1830, 700.0, 10, TEXT("justice"), 8 },
+			{ TEXT("remount"), TEXT("Remonte og hestepleje"), TEXT("Stutterier og remontedepoter +20 % heste"), 1830, 800.0, 10, TEXT("recon"), 5 },
+			{ TEXT("column"), TEXT("Kolonneeksercits"), TEXT("Kampværdi +2 % ved bajonetdoktrin eller angrebskolonne; kolonnen er en eksisterende formation"), 1825, 600.0, 8, nullptr, 3 },
 		};
 		static const TArray<FCampaign1851ResearchTopic> Army1825Topics = [&]()
 		{
@@ -76,7 +110,7 @@ namespace Campaign1851Research
 			return false;
 		}
 		const FString Id = List[Topic].Id;
-		return List[Topic].Branch == 7 || Id == TEXT("railway") || Id == TEXT("telegraph") || Id == TEXT("roads");
+		return List[Topic].Branch >= 7 || (List[Topic].Branch == 2 && Id != TEXT("railmob") && Id != TEXT("pontoon"));
 	}
 
 	int32 FindTopic(const FString& Id)
@@ -84,7 +118,7 @@ namespace Campaign1851Research
 		return Topics().IndexOfByPredicate([&Id](const FCampaign1851ResearchTopic& T) { return Id == T.Id; });
 	}
 
-	int32 DoctrineChoices(int32 Level) { return Level == 2 ? 3 : 2; }
+	int32 DoctrineChoices(int32 Level) { return Level == 2 ? 5 : 2; }
 
 	int32 Tier(int32 Topic)
 	{
@@ -105,7 +139,7 @@ namespace Campaign1851Research
 
 	const TCHAR* BranchName(int32 Branch)
 	{
-		static const TCHAR* Names[Branches] = { TEXT("Sanitet og forsyning"), TEXT("Befæstning"), TEXT("Samfærdsel"), TEXT("Infanteriet"), TEXT("Artilleriet"), TEXT("Kavaleriet"), TEXT("Kommando"), TEXT("Næringsliv") };
+		static const TCHAR* Names[Branches] = { TEXT("Sanitet og forsyning"), TEXT("Befæstning"), TEXT("Samfærdsel"), TEXT("Infanteriet"), TEXT("Artilleriet"), TEXT("Kavaleriet"), TEXT("Kommando"), TEXT("Næringsliv"), TEXT("Samfund og oplysning") };
 		return Branch >= 0 && Branch < Branches ? Names[Branch] : TEXT("");
 	}
 
@@ -116,24 +150,26 @@ namespace Campaign1851Research
 
 	const TCHAR* DoctrineName(int32 Level, int32 Choice)
 	{
-		static const TCHAR* Names[3][3] = {
+		static const TCHAR* Names[3][5] = {
 			{ TEXT("Fæstningen"), TEXT("Felthæren"), TEXT("") },
 			{ TEXT("Koncentration"), TEXT("Forsvar i dybden"), TEXT("") },
-			{ TEXT("Ildkamp"), TEXT("Bajonetangreb"), TEXT("Spredt orden") } };
-		return Level >= 0 && Level < 3 && Choice >= 0 && Choice < 3 ? Names[Level][Choice] : TEXT("");
+			{ TEXT("Ildkamp"), TEXT("Bajonetangreb"), TEXT("Spredt orden"), TEXT("Karréforsvar"), TEXT("Angrebskolonne") } };
+		return Level >= 0 && Level < 3 && Choice >= 0 && Choice < DoctrineChoices(Level) ? Names[Level][Choice] : TEXT("");
 	}
 
 	const TCHAR* DoctrineEffect(int32 Level, int32 Choice)
 	{
-		static const TCHAR* Effects[3][3] = {
+		static const TCHAR* Effects[3][5] = {
 			{ TEXT("Dannevirke og skanserne bærer forsvaret: dækning +10 %-point, men felthæren uden skanser −5 %"),
 			  TEXT("En bevægelig felthær: +5 % i slag uden skanser"), TEXT("") },
 			{ TEXT("Samle hæren til det afgørende slag: +8 % med 3 enheder eller flere, ellers −5 %"),
 			  TEXT("Kæmpe og vige: tab −20 %, men −3 % i kampkraft"), TEXT("") },
 			{ TEXT("Skyd bag dækning: +10 % i slag ved skanser"),
 			  TEXT("Den danske tradition fra 1848-50: +10 % mod Østrig og Forbundet, −15 % mod Preussens tændnålsgevær"),
-			  TEXT("Kædelinjer og terrænudnyttelse: tab −15 % og +3 %") } };
-		return Level >= 0 && Level < 3 && Choice >= 0 && Choice < 3 ? Effects[Level][Choice] : TEXT("");
+			  TEXT("Kædelinjer og terrænudnyttelse: tab −15 % og +3 %"),
+			  TEXT("Samlet karréforsvar: kampværdi +2 %, tab −5 %. Kræver karré-eksercits"),
+			  TEXT("Angreb i kolonne: kampværdi +5 % uden skanser, −5 % ved skanser. Kræver kolonneeksercits") } };
+		return Level >= 0 && Level < 3 && Choice >= 0 && Choice < DoctrineChoices(Level) ? Effects[Level][Choice] : TEXT("");
 	}
 }
 
@@ -166,17 +202,20 @@ bool ACampaign1851Map::HasResearch(const TCHAR* Id) const
 int32 ACampaign1851Map::ResearchOpenYear(int32 Topic) const
 {
 	// From a start in 1825 each subject opens in its own time (the early ones soon, the rifled guns not before the 1850s); from
-	// 1851 they are all open.
+	// 1851 legacy topics stay open; appended topics honour their own opening years.
 	const TArray<FCampaign1851ResearchTopic>& List = Campaign1851Research::Topics();
-	if (ActiveScenario().Year >= 1850 || !List.IsValidIndex(Topic))
+	if (!List.IsValidIndex(Topic))
 	{
 		return 0;
 	}
+	// The first 31 entries are the legacy tree; append new topics after them.
+	if (Topic >= 31) { return List[Topic].Year; }
+	if (ActiveScenario().Year >= 1850) { return 0; }
 	static const struct { const TCHAR* Id; int32 Year; } Years[] = {
 		{ TEXT("landreform"), 1828 }, { TEXT("roads"), 1830 }, { TEXT("square"), 1826 }, { TEXT("recon"), 1826 }, { TEXT("smithy"), 1826 }, { TEXT("tworank"), 1826 }, { TEXT("marl"), 1828 }, { TEXT("firebyrank"), 1828 },
-		{ TEXT("fortress"), 1830 }, { TEXT("staff"), 1830 }, { TEXT("skirmish"), 1830 }, { TEXT("shock"), 1830 }, { TEXT("pontoon"), 1830 }, { TEXT("agrischool"), 1830 },
-		{ TEXT("steam"), 1830 }, { TEXT("credit"), 1830 }, { TEXT("volley"), 1830 }, { TEXT("conserves"), 1835 }, { TEXT("carbine"), 1835 }, { TEXT("railway"), 1835 },
-		{ TEXT("sanitation"), 1840 }, { TEXT("casemates"), 1840 }, { TEXT("independent"), 1840 }, { TEXT("breech"), 1841 }, { TEXT("telegraph"), 1844 },
+		{ TEXT("fortress"), 1830 }, { TEXT("staff"), 1830 }, { TEXT("skirmish"), 1830 }, { TEXT("shock"), 1830 }, { TEXT("pontoon"), 1830 }, { TEXT("agrischool"), 1858 },
+		{ TEXT("steam"), 1830 }, { TEXT("credit"), 1830 }, { TEXT("volley"), 1830 }, { TEXT("conserves"), 1835 }, { TEXT("carbine"), 1835 }, { TEXT("railway"), 1844 },
+		{ TEXT("sanitation"), 1840 }, { TEXT("casemates"), 1840 }, { TEXT("independent"), 1840 }, { TEXT("breech"), 1860 }, { TEXT("telegraph"), 1854 },
 		{ TEXT("percussion"), 1830 }, { TEXT("minie"), 1849 }, { TEXT("hospitals"), 1845 }, { TEXT("genstaff"), 1845 }, { TEXT("railmob"), 1850 }, { TEXT("riflegun"), 1855 },
 	};
 	for (const auto& Y : Years)
@@ -299,6 +338,11 @@ bool ACampaign1851Map::SetDoctrine(int32 Level, int32 Choice, FString* OutReason
 	{
 		return false;
 	}
+	if (Level == 2 && ((Choice == 3 && !HasResearch(TEXT("square"))) || (Choice == 4 && !HasResearch(TEXT("column")))))
+	{
+		if (OutReason) { *OutReason = TEXT("kræver formationens eksercits først"); }
+		return false;
+	}
 	if (IsDoctrineChanging())
 	{
 		if (OutReason) { *OutReason = TEXT("hæren er stadig ved at omstille sig"); }
@@ -344,9 +388,17 @@ float ACampaign1851Map::DanishQualityFactor(const FCampaign1851Battle& B) const
 	{
 		F *= Enemy == TEXT("PR") && (ActiveScenario().Id != TEXT("1825") || GetDate().GetYear() >= 1841) ? 0.85f : 1.1f;
 	}
-	else
+	else if (Doctrine[2] == 2)
 	{
 		F *= 1.03f;
+	}
+	else if (Doctrine[2] == 3)
+	{
+		F *= 1.02f;
+	}
+	else
+	{
+		F *= bForts ? 0.95f : 1.05f;
 	}
 	F *= HasResearch(TEXT("staff")) ? 1.05f : 1.f;
 	F *= HasResearch(TEXT("square")) ? 1.02f : 1.f;
@@ -354,13 +406,14 @@ float ACampaign1851Map::DanishQualityFactor(const FCampaign1851Battle& B) const
 	const bool bCavalry = B.Regiments.ContainsByPredicate([this](int32 i) { return Regiments.IsValidIndex(i) && Regiments[i].Arm == ECampaign1851Arm::Cavalry; });
 	F *= bCavalry && HasResearch(TEXT("carbine")) ? 1.02f : 1.f;
 	F *= bCavalry && HasResearch(TEXT("shock")) ? 1.03f : 1.f;
+	F *= HasResearch(TEXT("column")) && (Doctrine[2] == 1 || Doctrine[2] == 4) ? 1.02f : 1.f;
 	F *= IsDoctrineChanging() ? 0.9f : 1.f;
 	return F;
 }
 
 float ACampaign1851Map::DanishLossFactor() const
 {
-	return (HasResearch(TEXT("sanitation")) ? 0.8f : 1.f) * (Doctrine[1] == 1 ? 0.8f : 1.f) * (Doctrine[2] == 2 ? 0.85f : 1.f) * (HasResearch(TEXT("skirmish")) ? 0.9f : 1.f);
+	return (HasResearch(TEXT("sanitation")) ? 0.8f : 1.f) * (Doctrine[1] == 1 ? 0.8f : 1.f) * (Doctrine[2] == 2 ? 0.85f : Doctrine[2] == 3 ? 0.95f : 1.f) * (HasResearch(TEXT("skirmish")) ? 0.9f : 1.f);
 }
 
 float ACampaign1851Map::FortCoverBonus() const
@@ -380,12 +433,16 @@ float ACampaign1851Map::InfantryFactor() const
 
 float ACampaign1851Map::FoodCap() const
 {
-	return float(ArmyEquipmentNumber(TEXT("foodDays"), Campaign1851Supply::FoodCarried)) + (HasResearch(TEXT("conserves")) ? 2.f : 0.f);
+	return float(ArmyEquipmentNumber(TEXT("foodDays"), Campaign1851Supply::FoodCarried)) + (HasResearch(TEXT("conserves")) ? 2.f : 0.f) + (HasResearch(TEXT("fishing")) ? 1.f : 0.f);
 }
 
 float ACampaign1851Map::CallInFactor() const
 {
-	return (HasResearch(TEXT("telegraph")) ? 1.25f : 1.f) * (HasResearch(TEXT("railmob")) ? 1.25f : 1.f) * CallInMoodFactor();
+	return (HasResearch(TEXT("telegraph")) ? 1.25f : 1.f) * (HasResearch(TEXT("railmob")) ? 1.25f : 1.f) * CallInMoodFactor()
+		* (1.f + (HasResearch(TEXT("steamships")) ? 0.05f : 0.f) + (HasResearch(TEXT("ferries")) ? 0.08f : 0.f)
+		+ (HasResearch(TEXT("postage")) ? 0.05f : 0.f) + (HasResearch(TEXT("civiltelegraph")) ? 0.08f : 0.f)
+		+ (HasResearch(TEXT("railoperation")) ? 0.10f : 0.f) + (HasResearch(TEXT("schools")) ? 0.05f : 0.f)
+		+ (HasResearch(TEXT("statistics")) ? 0.05f : 0.f));
 }
 
 double ACampaign1851Map::PontoonCost() const
@@ -400,17 +457,48 @@ float ACampaign1851Map::PontoonDays() const
 
 double ACampaign1851Map::RuralTaxFactor() const
 {
-	return 1.0 + (HasResearch(TEXT("marl")) ? 0.08 : 0.0) + (HasResearch(TEXT("agrischool")) ? 0.07 : 0.0) + (HasResearch(TEXT("landreform")) ? 0.06 : 0.0);
+	return 1.0
+		+ (HasResearch(TEXT("marl")) ? 0.08 : 0.0)
+		+ (HasResearch(TEXT("agrischool")) ? 0.07 : 0.0)
+		+ (HasResearch(TEXT("landreform")) ? 0.06 : 0.0)
+		+ (HasResearch(TEXT("livestock")) ? 0.03 : 0.0)
+		+ (HasResearch(TEXT("dairy")) ? 0.04 : 0.0)
+		+ (HasResearch(TEXT("crops")) ? 0.03 : 0.0)
+		+ (HasResearch(TEXT("forestry")) ? 0.02 : 0.0)
+		+ (HasResearch(TEXT("beettrials")) ? 0.01 : 0.0)
+		+ (HasResearch(TEXT("folkhighschool")) ? 0.02 : 0.0)
+		+ (HasResearch(TEXT("statistics")) ? 0.02 : 0.0)
+		+ (HasResearch(TEXT("assemblies")) ? 0.02 : 0.0);
 }
 
 double ACampaign1851Map::UrbanTaxFactor() const
 {
-	return 1.0 + (HasResearch(TEXT("steam")) ? 0.05 : 0.0) + (HasResearch(TEXT("credit")) ? 0.05 : 0.0);
+	return 1.0
+		+ (HasResearch(TEXT("steam")) ? 0.05 : 0.0)
+		+ (HasResearch(TEXT("credit")) ? 0.05 : 0.0)
+		+ (HasResearch(TEXT("steamships")) ? 0.02 : 0.0)
+		+ (HasResearch(TEXT("ports")) ? 0.03 : 0.0)
+		+ (HasResearch(TEXT("lighthouses")) ? 0.02 : 0.0)
+		+ (HasResearch(TEXT("postage")) ? 0.02 : 0.0)
+		+ (HasResearch(TEXT("civiltelegraph")) ? 0.02 : 0.0)
+		+ (HasResearch(TEXT("railoperation")) ? 0.03 : 0.0)
+		+ (HasResearch(TEXT("fishing")) ? 0.02 : 0.0)
+		+ (HasResearch(TEXT("textiles")) ? 0.03 : 0.0)
+		+ (HasResearch(TEXT("breweries")) ? 0.03 : 0.0)
+		+ (HasResearch(TEXT("tradefreedom")) ? 0.04 : 0.0)
+		+ (HasResearch(TEXT("customs")) ? 0.03 : 0.0)
+		+ (HasResearch(TEXT("savings")) ? 0.02 : 0.0)
+		+ (HasResearch(TEXT("statistics")) ? 0.02 : 0.0)
+		+ (HasResearch(TEXT("constitution")) ? 0.03 : 0.0)
+		+ (HasResearch(TEXT("justice")) ? 0.02 : 0.0)
+		+ (HasResearch(TEXT("firebrigades")) ? 0.02 : 0.0);
 }
 
 float ACampaign1851Map::WorksOutputFactor() const
 {
-	return (HasResearch(TEXT("smithy")) ? 1.15f : 1.f) * (HasResearch(TEXT("steam")) ? 1.25f : 1.f);
+	return (HasResearch(TEXT("smithy")) ? 1.15f : 1.f) * (HasResearch(TEXT("steam")) ? 1.25f : 1.f)
+		* (1.f + (HasResearch(TEXT("forestry")) ? 0.05f : 0.f) + (HasResearch(TEXT("machines")) ? 0.10f : 0.f)
+		+ (HasResearch(TEXT("ironfoundry")) ? 0.08f : 0.f) + (HasResearch(TEXT("tradeschools")) ? 0.08f : 0.f));
 }
 
 float ACampaign1851Map::CommandReachFactor() const
@@ -472,9 +560,9 @@ void ACampaign1851Map::WriteBattleRulesJson(const TSharedRef<FJsonObject>& Doc) 
 	Doc->SetObjectField(TEXT("battleRules"), Rules);
 	// The doctrine as the battle AI's defaults: the higher HQs' DEF/BAL/OFF, the companies' fire policy.
 	TSharedRef<FJsonObject> Ai = MakeShared<FJsonObject>();
-	Ai->SetStringField(TEXT("higherDoctrine"), Doctrine[1] == 1 ? TEXT("DEF") : Doctrine[2] == 1 ? TEXT("OFF") : TEXT("BAL"));
-	Ai->SetStringField(TEXT("firePolicy"), Doctrine[2] == 0 ? TEXT("LONG") : Doctrine[2] == 1 ? TEXT("CLOSE") : TEXT("MED"));
-	Ai->SetBoolField(TEXT("chargeAtWill"), Doctrine[2] == 1);
+	Ai->SetStringField(TEXT("higherDoctrine"), Doctrine[1] == 1 ? TEXT("DEF") : (Doctrine[2] == 1 || Doctrine[2] == 4) ? TEXT("OFF") : TEXT("BAL"));
+	Ai->SetStringField(TEXT("firePolicy"), Doctrine[2] == 0 ? TEXT("LONG") : (Doctrine[2] == 1 || Doctrine[2] == 4) ? TEXT("CLOSE") : TEXT("MED"));
+	Ai->SetBoolField(TEXT("chargeAtWill"), Doctrine[2] == 1 || Doctrine[2] == 4);
 	Ai->SetBoolField(TEXT("openOrder"), Doctrine[2] == 2);
 	Ai->SetBoolField(TEXT("holdForts"), Doctrine[0] == 0);
 	Doc->SetObjectField(TEXT("aiDefaults"), Ai);
@@ -506,6 +594,7 @@ TArray<FString> ACampaign1851Map::SaveResearch() const
 	TArray<FString> Out;
 	Out.Add(FString::Printf(TEXT("state|%s|%d|%d|%d|%d|%.2f"), Campaign1851Research::Topics().IsValidIndex(Researching) ? Campaign1851Research::Topics()[Researching].Id : TEXT(""),
 		ResearchMonths, Doctrine[0], Doctrine[1], Doctrine[2], DoctrineSettledDay));
+	Out.Add(FString::Printf(TEXT("civil|%s|%d"), Campaign1851Research::Topics().IsValidIndex(ResearchingCivil) ? Campaign1851Research::Topics()[ResearchingCivil].Id : TEXT(""), ResearchMonthsCivil));
 	for (const FString& Id : Researched)
 	{
 		Out.Add(TEXT("done|") + Id);
@@ -529,6 +618,11 @@ void ACampaign1851Map::RestoreResearch(const TArray<FString>& Lines)
 				Doctrine[l] = FMath::Clamp(FCString::Atoi(*P[3 + l]), 0, Campaign1851Research::DoctrineChoices(l) - 1);
 			}
 			DoctrineSettledDay = FCString::Atod(*P[6]);
+		}
+		else if (P.Num() == 3 && P[0] == TEXT("civil"))
+		{
+			ResearchingCivil = Campaign1851Research::FindTopic(P[1]);
+			ResearchMonthsCivil = FMath::Max(0, FCString::Atoi(*P[2]));
 		}
 		else if (P.Num() == 2 && P[0] == TEXT("done") && Campaign1851Research::FindTopic(P[1]) != INDEX_NONE)
 		{

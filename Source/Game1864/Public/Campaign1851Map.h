@@ -386,7 +386,7 @@ namespace Campaign1851Research
 	bool IsCivil(int32 Topic);
 	const TArray<FCampaign1851ResearchTopic>& Topics();
 	int32 FindTopic(const FString& Id);
-	constexpr int32 Branches = 8;
+	constexpr int32 Branches = 9;
 	/** The level in the research tree (0 = I). */
 	int32 Tier(int32 Topic);
 	const TCHAR* Roman(int32 Tier);

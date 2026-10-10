@@ -27,7 +27,8 @@ void ACampaign1851Map::DailyHealth()
 		float Rate = bGarrison ? 0.0002f : 0.001f;
 		Rate *= !bGarrison && bWet ? 2.f : 1.f;
 		Rate *= R.Food <= 0.f ? 2.f : 1.f;
-		Rate *= bCholera && bGarrison && R.Town == Copenhagen ? 10.f : 1.f;
+		Rate *= HasResearch(TEXT("choleraprevention")) ? 0.9f : 1.f;
+		Rate *= bCholera && bGarrison && R.Town == Copenhagen ? (HasResearch(TEXT("choleraprevention")) ? 5.5f : 10.f) : 1.f;
 		const int32 Sick = FMath::Min(R.Men, Round(R.PresentMen() * Rate));
 		R.Men -= Sick;
 		R.Sick += Sick;
@@ -37,7 +38,7 @@ void ACampaign1851Map::DailyHealth()
 		{
 			const ACampaign1851ConstructionSite* Lazaret = FindBuilding(R.Home, TEXT("Field_Hospital"));
 			const bool bCare = bSanitation || (Lazaret && !Lazaret->IsDemolishing() && Lazaret->IsModuleDone(0));
-			const int32 Back = FMath::Min(R.Sick, Round(R.Sick * (bCare ? 0.05f : 0.03f) * (HasResearch(TEXT("hospitals")) ? 1.4f : 1.f)));
+			const int32 Back = FMath::Min(R.Sick, Round(R.Sick * (bCare ? 0.05f : 0.03f) * (HasResearch(TEXT("hospitals")) ? 1.4f : 1.f) * (HasResearch(TEXT("civilhospitals")) ? 1.1f : 1.f)));
 			const int32 Dead = FMath::Min(R.Sick - Back, Round(R.Sick * (bCare ? 0.002f : 0.004f)));
 			R.Sick -= Back + Dead;
 			R.Men = FMath::Min(R.MaxMen, R.Men + Back);   // beyond the establishment: discharged

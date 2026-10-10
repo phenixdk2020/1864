@@ -2373,10 +2373,10 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 	{
 		const ACampaign1851ConstructionSite* Lazaret = Map->FindBuilding(R.Home, TEXT("Field_Hospital"));
 		const bool bCare = Map->HasResearch(TEXT("sanitation")) || (Lazaret && !Lazaret->IsDemolishing() && Lazaret->IsModuleDone(0));
-		const float Rate = (bCare ? 0.05f : 0.03f) * (Map->HasResearch(TEXT("hospitals")) ? 1.4f : 1.f);
+		const float Rate = (bCare ? 0.05f : 0.03f) * (Map->HasResearch(TEXT("hospitals")) ? 1.4f : 1.f) * (Map->HasResearch(TEXT("civilhospitals")) ? 1.1f : 1.f);
 		const int32 Half = FMath::RoundToInt(FMath::Loge(2.f) / Rate);
 		Line(TEXT("Sårede og syge"), R.Sick > 0 ? FString::Printf(TEXT("%d på lazaret  ·  halvdelen tilbage om ca. %d dage%s"), R.Sick, Half, bCare ? TEXT(" (lazaret)") : TEXT(""))
-			: FString(TEXT("ingen")), TEXT("Syge er ikke med i mandskabstallet. Dagligt vender 5 % tilbage med færdigt lazaret i hjemgarnisonen eller sanitetsvæsen, ellers 3 %; henholdsvis 0,2 % og 0,4 % dør. Militærhospitaler øger tilbagekomsten med 40 %. Mænd ud over etaten hjemsendes."));
+			: FString(TEXT("ingen")), TEXT("Syge er ikke med i mandskabstallet. Dagligt vender 5 % tilbage med færdigt lazaret i hjemgarnisonen eller sanitetsvæsen, ellers 3 %; henholdsvis 0,2 % og 0,4 % dør. Militærhospitaler øger tilbagekomsten med 40 %, civile hospitaler yderligere 10 %. Mænd ud over etaten hjemsendes."));
 	}
 	// The chief: the battalion's, or the captain of the company shown.
 	const int32 ChiefIndex = Co != INDEX_NONE && R.Captains.IsValidIndex(Co) ? R.Captains[Co] : (Co != INDEX_NONE ? INDEX_NONE : R.Chief);
@@ -3203,6 +3203,10 @@ void SCampaign1851Overlay::PaintBranchSymbol(const FGeometry& Geometry, FSlateWi
 		L({ FVector2D(-0.6f, -0.9f), FVector2D(0.7f, -0.6f), FVector2D(-0.6f, -0.25f) }, FLinearColor(0.85f, 0.15f, 0.12f), 3.f);
 		L({ FVector2D(-0.6f, -0.9f), FVector2D(-0.6f, -0.25f) }, FLinearColor(0.85f, 0.15f, 0.12f), 3.f);
 		break;
+	case 8:
+		L({ FVector2D(-0.9f, -0.6f), FVector2D(0.f, -0.4f), FVector2D(0.9f, -0.6f), FVector2D(0.9f, 0.6f), FVector2D(0.f, 0.8f), FVector2D(-0.9f, 0.6f), FVector2D(-0.9f, -0.6f) }, Mark, 2.f);
+		L({ FVector2D(0.f, -0.4f), FVector2D(0.f, 0.8f) }, Gold, 2.f);
+		break;
 	case 7:   // the trades: a sheaf of corn, bound in the middle
 		for (int32 k = -2; k <= 2; ++k)
 		{
@@ -3278,6 +3282,7 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 				}
 				Most = FMath::Max(Most, Same);
 			}
+			if (bResearchCivil) { Most = 1; } // Civil topics stack vertically in three equally wide branches.
 			Weight.Add(float(Most));
 			ColMost.Add(float(Most));
 			Sum += float(Most);
@@ -3296,7 +3301,33 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 	{
 		if (InTab(t)) { Years = FMath::Max(Years, DisplayTier(t) + 1); }
 	}
-	const float RowH = FMath::Min(120.f, (Pos.Y + Size.Y - 30.f - Top) / Years);
+	TArray<int32> CivilTierStart;
+	int32 CivilRows = 0;
+	for (int32 CivilTier = 0; CivilTier < Years; ++CivilTier)
+	{
+		int32 CivilMost = 1;
+		for (int32 CivilBranch : TabColumns)
+		{
+			int32 CivilCount = 0;
+			for (int32 CivilTopic = 0; CivilTopic < Topics.Num(); ++CivilTopic)
+			{
+				if (InTab(CivilTopic) && Topics[CivilTopic].Branch == CivilBranch && DisplayTier(CivilTopic) == CivilTier) { ++CivilCount; }
+			}
+			CivilMost = FMath::Max(CivilMost, CivilCount);
+		}
+		CivilTierStart.Add(CivilRows);
+		CivilRows += CivilMost;
+	}
+	const int32 CivilVisibleRows = FMath::Max(1, FMath::FloorToInt((Size.Y - 252.f) / 82.f));
+	if (bResearchCivil)
+	{
+		ResearchScrollMax = FMath::Max(0, CivilRows - CivilVisibleRows);
+		ResearchScrollRow = FMath::Clamp(ResearchScrollRow, 0, ResearchScrollMax);
+		PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 260.f, 92.f), FVector2D(100.f, 24.f), TEXT("OP"), EButton::ResearchScroll, -1, false, ResearchScrollRow == 0);
+		PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X - 150.f, 92.f), FVector2D(100.f, 24.f), TEXT("NED"), EButton::ResearchScroll, 1, false, ResearchScrollRow == ResearchScrollMax);
+		PaintTextFit(Geometry, Out, Layer + 1, TEXT("Rul med musehjulet · niveau I–IV · klik for effekt og forudsætning"), Pos + FVector2D(24.f, Size.Y - 22.f), Serif(11), Gold, LeftW);
+	}
+	const float RowH = bResearchCivil ? 82.f : FMath::Min(120.f, (Pos.Y + Size.Y - 30.f - Top) / Years);
 	const FVector2D Box(0.f, RowH - 14.f);   // the height of a box (the width is the column's)
 	for (int32 ci = 0; ci < TabColumns.Num(); ++ci)
 	{
@@ -3306,7 +3337,8 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 	}
 	for (int32 r = 0; r < (bDoc ? 0 : Years); ++r)
 	{
-		const float RY = Top + r * RowH;
+		const float RY = Top + (bResearchCivil ? CivilTierStart[r] - ResearchScrollRow : r) * RowH;
+		if (bResearchCivil && (RY < Top || RY + Box.Y > Top + CivilVisibleRows * RowH)) { continue; }
 		PaintText(Geometry, Out, Layer + 1, Campaign1851Research::Roman(r), FVector2D(X + 8.f, RY + Box.Y * 0.5f), Serif(16), Gold, 0.f, false);
 		DrawLines(Geometry, Out, Layer, { FVector2D(X + YearW - 6.f, RY - 7.f), FVector2D(X + LeftW, RY - 7.f) }, Gold.CopyWithNewOpacity(0.12f), 1.f);
 	}
@@ -3326,7 +3358,7 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 			}
 		}
 		const int32 Need = T.Needs ? Campaign1851Research::FindTopic(T.Needs) : INDEX_NONE;
-		if (Count == 1 && Topics.IsValidIndex(Need) && InTab(Need) && Topics[Need].Branch == T.Branch)
+		if (!bResearchCivil && Count == 1 && Topics.IsValidIndex(Need) && InTab(Need) && Topics[Need].Branch == T.Branch)
 		{
 			int32 Slot = 0;
 			for (int32 u = 0; u < Need; ++u)
@@ -3348,6 +3380,11 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		int32 Index = 0;
 		Share(T, Index);
 		const float W = TopicBoxSize(T).X;
+		if (bResearchCivil)
+		{
+			const int32 CivilTier = DisplayTier(Campaign1851Research::FindTopic(T.Id));
+			return FVector2D(ColX[ColumnOf(T.Branch)] + 11.f, Top + (CivilTierStart[CivilTier] + Index - ResearchScrollRow) * RowH);
+		}
 		return FVector2D(ColX[ColumnOf(T.Branch)] + 11.f + Index * (W + 6.f), Top + DisplayTier(Campaign1851Research::FindTopic(T.Id)) * RowH);
 	};
 	// The lines first, under the boxes.
@@ -3358,6 +3395,7 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		{
 			const FVector2D From = BoxPos(Topics[Need]) + FVector2D(TopicBoxSize(Topics[Need]).X * 0.5f, Box.Y);
 			const FVector2D To = BoxPos(T) + FVector2D(TopicBoxSize(T).X * 0.5f, 0.f);
+			if (bResearchCivil && (From.Y < Top || To.Y + Box.Y > Top + CivilVisibleRows * RowH)) { continue; }
 			const float MidY = To.Y - 7.f;
 			const FLinearColor C = Map->HasResearch(Topics[Need].Id) ? Gold : MutedInk.CopyWithNewOpacity(0.6f);
 			DrawLines(Geometry, Out, Layer + 1, { From, FVector2D(From.X, MidY), FVector2D(To.X, MidY), To }, C, 2.f);
@@ -3376,9 +3414,10 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		const bool bBusy = Map->GetResearching(bResearchCivil) == t;
 		const FVector2D P = BoxPos(T);
 		const FVector2D TopicBox = TopicBoxSize(T);
+		if (bResearchCivil && (P.Y < Top || P.Y + TopicBox.Y > Top + CivilVisibleRows * RowH)) { continue; }
 		PaintButton(Geometry, Out, Layer + 2, P, TopicBox, FString(), EButton::ResearchPick, t, bDone || ResearchPick == t);
 		const FLinearColor Main = bDone ? Dark : Why.IsEmpty() || bBusy ? Ink : MutedInk;
-		PaintTextFit(Geometry, Out, Layer + 4, T.Name, P + FVector2D(8.f, 13.f), Serif(12), Main, TopicBox.X - 16.f);
+		PaintTextFit(Geometry, Out, Layer + 4, bResearchCivil ? FString::Printf(TEXT("%s · %s"), Campaign1851Research::Roman(DisplayTier(t)), T.Name) : FString(T.Name), P + FVector2D(8.f, 13.f), Serif(12), Main, TopicBox.X - 16.f);
 		const FString State = bDone ? FString(TEXT("færdig"))
 			: bBusy ? FString::Printf(TEXT("i gang  ·  %d af %d md."), Map->GetResearchMonths(bResearchCivil), T.Months)
 			: Why.IsEmpty() ? FString::Printf(TEXT("%d md.  ·  %s rd./md."), T.Months, *Thousands(int32(T.CostPerMonth)))
@@ -3394,16 +3433,17 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		}
 	}
 	// The topic clicked: what it does, what it costs, and START.
-	if (Topics.IsValidIndex(ResearchPick))
+	if (Topics.IsValidIndex(ResearchPick) && InTab(ResearchPick))
 	{
 		const FCampaign1851ResearchTopic& T = Topics[ResearchPick];
 		const FString Why = Map->ResearchBlockReason(ResearchPick);
 		const FVector2D BoxSize(560.f, 280.f);
 		const FVector2D BP(X + (LeftW - BoxSize.X) * 0.5f, Pos.Y + Size.Y - BoxSize.Y - 40.f);
 		PaintPanel(Geometry, Out, Layer + 6, BP, BoxSize);
+		Buttons.Add({ BP, BP + BoxSize, EButton::Block, 0 });
 		DrawLines(Geometry, Out, Layer + 7, { BP, BP + FVector2D(BoxSize.X, 0.f), BP + BoxSize, BP + FVector2D(0.f, BoxSize.Y), BP }, Gold, 1.5f);
 		PaintBranchSymbol(Geometry, Out, Layer + 8, T.Branch, BP + FVector2D(46.f, 50.f), 26.f);
-		PaintText(Geometry, Out, Layer + 8, T.Name, BP + FVector2D(90.f, 40.f), Serif(20), Ink, 0.f, false);
+		PaintTextFit(Geometry, Out, Layer + 8, T.Name, BP + FVector2D(90.f, 40.f), Serif(20), Ink, BoxSize.X - 114.f);
 		PaintText(Geometry, Out, Layer + 8, FString::Printf(TEXT("%s  ·  niveau %s"), Campaign1851Research::BranchName(T.Branch), Campaign1851Research::Roman(DisplayTier(ResearchPick))),
 			BP + FVector2D(90.f, 66.f), Serif(12, EFace::Italic), Gold, 0.f, false);
 		float TY = BP.Y + 104.f;
@@ -3464,7 +3504,8 @@ void SCampaign1851Overlay::PaintResearch(const FGeometry& Geometry, FSlateWindow
 		for (int32 c = 0; c < Choices; ++c)
 		{
 			PaintButton(Geometry, Out, Layer + 1, FVector2D(RX + c * (BW + 8.f), RY), FVector2D(BW, 26.f), FString(Campaign1851Research::DoctrineName(l, c)).ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å")),
-				EButton::DoctrineSet, l * 10 + c, Map->GetDoctrine(l) == c, Map->IsDoctrineChanging() && Map->GetDoctrine(l) != c);
+				EButton::DoctrineSet, l * 10 + c, Map->GetDoctrine(l) == c, (Map->IsDoctrineChanging() && Map->GetDoctrine(l) != c)
+				|| (l == 2 && ((c == 3 && !Map->HasResearch(TEXT("square"))) || (c == 4 && !Map->HasResearch(TEXT("column"))))));
 		}
 		RY += 34.f;
 		PaintTextFit(Geometry, Out, Layer + 1, Campaign1851Research::DoctrineEffect(l, Map->GetDoctrine(l)), FVector2D(RX, RY + 4.f), Serif(10, EFace::Italic), MutedInk, RW);
@@ -5615,7 +5656,7 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
 	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Screen, FSlateLayoutTransform(FVector2D::ZeroVector)), White, ESlateDrawEffect::None, FLinearColor(0.f, 0.f, 0.f, 0.35f));
 	// The order-of-battle chart gets nearly the whole screen; the other windows a fixed size.
-	const bool bBig = Window == EWindow::Chart || Window == EWindow::Materiel;
+	const bool bBig = Window == EWindow::Chart || Window == EWindow::Materiel || Window == EWindow::Research;
 	const FVector2D Size(FMath::Min(bBig ? 1860.f : 1460.f, Screen.X - (bBig ? 40.f : 80.f)), FMath::Min(bBig ? 930.f : 820.f, Screen.Y - (bBig ? 140.f : 200.f)));
 	const FVector2D Pos((Screen.X - Size.X) * 0.5f, 132.f);
 	if (Window == EWindow::Chart)

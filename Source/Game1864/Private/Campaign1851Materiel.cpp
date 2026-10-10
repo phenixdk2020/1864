@@ -40,7 +40,7 @@ void ACampaign1851Map::MonthlyMateriel()
 			const Campaign1851Materiel::FMateriel P = Campaign1851Materiel::Production(Site->GetKind());
 			Made.Rifles += FMath::RoundToInt(P.Rifles * Share);
 			Made.Guns += FMath::FloorToInt(P.Guns * Share + 0.5f);
-			Made.Horses += P.Horses;
+			Made.Horses += FMath::RoundToInt(P.Horses * (1.f + (HasResearch(TEXT("livestock")) ? 0.10f : 0.f) + (HasResearch(TEXT("remount")) ? 0.20f : 0.f)));
 		}
 	}
 	for (const ACampaign1851ConstructionSite* Site : Projects)
