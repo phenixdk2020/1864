@@ -7,6 +7,7 @@
 
 class AStrategyCompanyUnit;
 class UAnimSequence;
+class UMaterialInterface;
 class UInstancedStaticMeshComponent;
 class UStrategyCrowdModel;
 class USkeletalMesh;
@@ -264,6 +265,12 @@ private:
     TObjectPtr<USkeletalMesh> LoadedSoldierMesh;
 
     UPROPERTY(Transient)
+    TArray<TObjectPtr<UAnimSequence>> LoadedBattleAnimations;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UMaterialInterface> LoadedBattleFadeMaterial;
+
+    UPROPERTY(Transient)
     TObjectPtr<UStaticMesh> LoadedRifleMesh;
 
     UPROPERTY(Transient)
@@ -374,6 +381,8 @@ private:
     TObjectPtr<UStrategyCrowdModel> CrowdModel;
 
     bool bResumeCrowdPosesNextTick = false;
+    TArray<FTransform> CrowdLivingScratch;
+    TArray<FTransform> CrowdFallenScratch;
     bool bCrowdMode = false;
     bool bCrowdDirty = false;       // the instances to rebuild (men added, fallen, moved in the formation)
     bool bCrowdDataDirty = false;   // a man's clip changed

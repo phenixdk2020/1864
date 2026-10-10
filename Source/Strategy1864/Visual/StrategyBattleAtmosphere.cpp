@@ -1,4 +1,6 @@
 #include "StrategyBattleAtmosphere.h"
+#include "../Player/StrategyBattlePerformance.h"
+#include "HAL/IConsoleManager.h"
 
 #include "Components/DirectionalLightComponent.h"
 #include "Components/ExponentialHeightFogComponent.h"
@@ -24,6 +26,7 @@ AStrategyBattleAtmosphere::AStrategyBattleAtmosphere()
 
 void AStrategyBattleAtmosphere::Apply()
 {
+    NextBattleSkyCapture = FPlatformTime::Seconds() + 10.0;
     UWorld* World = GetWorld();
     if (!World)
     {
@@ -150,7 +153,13 @@ void AStrategyBattleAtmosphere::UpdateForHour(float Hour)
         if (USkyLightComponent* Sky = SkyActorPtr->GetLightComponent())
         {
             Sky->SetIntensity(FMath::Lerp(0.35f, 2.2f, Day));
-            Sky->RecaptureSky();
+            const double BattleSkyNow = FPlatformTime::Seconds();
+            if (!Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Hitches")) || BattleSkyNow >= NextBattleSkyCapture)
+            {
+                Sky->RecaptureSky();
+                const IConsoleVariable* BattleSkyInterval = IConsoleManager::Get().FindConsoleVariable(TEXT("Strategy1864.Perf.SkyCaptureSeconds"));
+                NextBattleSkyCapture = BattleSkyNow + (BattleSkyInterval ? FMath::Max(0.f, BattleSkyInterval->GetFloat()) : 10.f);
+            }
         }
     }
     Fog->SetFogInscatteringColor(FMath::Lerp(FLinearColor(0.03f, 0.04f, 0.08f), FLinearColor(0.42f, 0.50f, 0.62f), Day));

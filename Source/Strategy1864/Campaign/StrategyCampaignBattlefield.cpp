@@ -1,4 +1,6 @@
 #include "StrategyCampaignBattlefield.h"
+#include "../Player/StrategyBattlePerformance.h"
+#include "../Player/StrategyBattleQuality.h"
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
 
 #include "Campaign1851Scenery.h"
@@ -475,15 +477,32 @@ UInstancedStaticMeshComponent* AStrategyCampaignBattlefield::AddInstanced(UStati
     C->SetupAttachment(Root);
     C->SetStaticMesh(Mesh);
     C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    if (Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Vegetation")))
+    {
+        const FString BattlePartName(Name);
+        if (BattlePartName.Contains(TEXT("Trees"))) CullCm = 80000.f;
+        else if (BattlePartName.Contains(TEXT("Bushes"))) CullCm = 25000.f;
+        else if (BattlePartName.Contains(TEXT("Fences"))) CullCm = 30000.f;
+    }
     C->SetCastShadow(bShadows);
     C->bVisibleInRayTracing = false;
     C->bAffectDistanceFieldLighting = bShadows;
     if (CullCm > 0.0f)
     {
-        C->SetCullDistances(0, int32(CullCm));
+        C->SetCullDistances(Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Vegetation")) ? int32(CullCm * 0.8f) : 0, int32(CullCm));
     }
     C->RegisterComponent();
-    C->AddInstances(Instances, false, false);
+    const bool bBattleThinFoliage = Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Vegetation")) &&
+        Strategy1864BattleQuality::GetPreset() == 0 && (FString(Name).Contains(TEXT("Trees")) || FString(Name).Contains(TEXT("Bushes")));
+    if (bBattleThinFoliage)
+    {
+        TArray<FTransform> BattleSparseFoliage;
+        BattleSparseFoliage.Reserve((Instances.Num() + 1) / 2);
+        for (int32 BattleFoliageIndex = 0; BattleFoliageIndex < Instances.Num(); BattleFoliageIndex += 2) BattleSparseFoliage.Add(Instances[BattleFoliageIndex]);
+        C->AddInstances(BattleSparseFoliage, false, false);
+    }
+    else C->AddInstances(Instances, false, false);
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-PERF: foliage %s instances=%d cull=%.0f cm lowDensity=%d shadows=%d"), Name, C->GetInstanceCount(), CullCm, bBattleThinFoliage, bShadows);
     Parts.Add(C);
     return C;
 }
@@ -601,7 +620,7 @@ void AStrategyCampaignBattlefield::BuildGrassTile(const FIntPoint& Tile, TArray<
     Instances.SetNum(Kinds);
     const double SizeM = SizeCm / 100.0;
     const double TileM = GrassTileCm / 100.0;
-    const int32 Count = FMath::RoundToInt(TileM * TileM * GrassPerSquareMetre);
+    const int32 Count = FMath::RoundToInt(TileM * TileM * GrassPerSquareMetre * ((Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Vegetation")) && Strategy1864BattleQuality::GetPreset() == 0) ? 0.45f : 1.f));
     const uint32 Seed = HashCombine(GetTypeHash(Tile.X * 7919), GetTypeHash(Tile.Y));
     const FVector Actor = GetActorLocation();
     for (int32 k = 0; k < Count; ++k)
@@ -656,7 +675,7 @@ void AStrategyCampaignBattlefield::BuildGrassTile(const FIntPoint& Tile, TArray<
             C->SetCastShadow(false);
             C->bVisibleInRayTracing = false;
             C->bAffectDistanceFieldLighting = false;
-            C->SetCullDistances(0, int32(GrassRadiusCm));
+            C->SetCullDistances(Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Vegetation")) ? 6000 : 0, Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Vegetation")) ? 12000 : int32(GrassRadiusCm));
             C->ComponentTags.Add(FName(*FString::FromInt(Kind)));
             C->RegisterComponent();
             Index = GrassPool.Add(C);

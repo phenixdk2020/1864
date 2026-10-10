@@ -52,6 +52,7 @@ private:
     TWeakObjectPtr<ADirectionalLight> SunActor;
     TWeakObjectPtr<ASkyLight> SkyActor;
     float LastHour = -100.0f;
+    double NextBattleSkyCapture = 0.0;
 
     UPROPERTY()
     TObjectPtr<UExponentialHeightFogComponent> Fog;

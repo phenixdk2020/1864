@@ -1,4 +1,5 @@
 #include "StrategyCourierRider.h"
+#include "UObject/ConstructorHelpers.h"
 
 #include "StrategyBattleBlast.h"
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
@@ -20,6 +21,12 @@ namespace
 
 AStrategyCourierRider::AStrategyCourierRider()
 {
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> BattleCourierHorse(CourierHorsePath);
+    static ConstructorHelpers::FObjectFinder<USkeletalMesh> BattleCourierRider(CourierRiderPath);
+    static ConstructorHelpers::FObjectFinder<UAnimSequence> BattleCourierSeat(CourierSeatPath);
+    HorseModel = BattleCourierHorse.Object;
+    RiderModel = BattleCourierRider.Object;
+    SeatClip = BattleCourierSeat.Object;
     PrimaryActorTick.bCanEverTick = true;
     USceneComponent* Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
     SetRootComponent(Root);
@@ -27,9 +34,6 @@ AStrategyCourierRider::AStrategyCourierRider()
 
 bool AStrategyCourierRider::LoadAssets()
 {
-    HorseModel = LoadObject<UStaticMesh>(nullptr, CourierHorsePath);
-    RiderModel = LoadObject<USkeletalMesh>(nullptr, CourierRiderPath);
-    SeatClip = LoadObject<UAnimSequence>(nullptr, CourierSeatPath);
     if (!HorseModel)
     {
         return false;

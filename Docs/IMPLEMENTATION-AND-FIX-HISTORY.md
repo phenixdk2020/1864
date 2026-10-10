@@ -1819,6 +1819,15 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Koblet lyd på infanterisalver, begge artilleriforløb, morter, bajonetchok og kavalericharge. Separat lyd-RNG bevarer gameplay.
 - HUD-volumen/mute gemmes med slagindstillingerne; NoSound/DebugAudio og cooking af lydmappen dokumenteret i Audio.md og TestFlags.md.
 - WAV-validering og statisk kontrol udført; UE 5.8-headerne kontrolleret. Ingen build, spilstart, editorimport eller commit.
+### 2026-10-10 – Omskiftelig GPU-/frame-time-politik for 3D-slag
+
+- Sekundvis `-Strategy1864DebugGpu` med UE 5.8-verificerede RenderTimer-/RHI-symboler og atomiske rendertrådssamples uden GPU-wait.
+- LAV uden Lumen GI/refleksioner/SSR; MIDDEL med billigere Lumen/skygger; HOEJ beholder Epic-grupper. Egne `Strategy1864.Perf.*`-omskiftere og logning til A/B.
+- VAT ved 40/32 m og nærbudget 400 infanterifigurer. Eksisterende fusioneret VAT-rifle/bajonet, animationsfase-/poseoverførsel og skyggefri rifler/fjerne figurer bevares.
+- Vegetationsculling: græs 60–120 m, buske 250 m, træer 800 m, hegn 300 m; færre visuelle instanser ved LAV, gameplay-skovdata uændret.
+- Samlet visuel røg-/blast-cap 60, unlit ved LAV/MIDDEL, distancefade og preloaded assets. Animationer/fademateriale preloads; VAT bages ved oprettelse for begge rifle-varianter; visuelle scans/scratch-buffere caches, skylight-recapture throttles, ordonnans-assets indlæses før kommandospawn.
+- Minimal HUD-ændring: frasortering af ikke-valgte enheders fjerne/off-screen ruter. Måleplan, engine-kilder og begrænsninger i `Docs/Performance-Battle.md`, inklusive uverificeret årsag til firesekundershakket og specialuniform-fallback.
+- Statisk header-/diff-kontrol; intet build, editor/spil eller commit. gpu2-filer læst som reference; ingen gammel patch anvendt.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

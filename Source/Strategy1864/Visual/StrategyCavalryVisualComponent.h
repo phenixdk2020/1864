@@ -44,6 +44,7 @@ public:
 
     /** Cached centroid of the living horsemen, in unit-local space. */
     bool GetFigureLocalCentroid(FVector& OutCentroid) const;
+    int32 GetRenderedHorsemanCount() const { return Horsemen.Num() + Fallen.Num(); }
 
 private:
     struct FHorseman

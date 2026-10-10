@@ -1,4 +1,6 @@
 #include "StrategyInfantryVisualComponent.h"
+#include "../Player/StrategyBattlePerformance.h"
+#include "HAL/IConsoleManager.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../Orders/StrategyOrderComponent.h"
 #include "../Formations/StrategyFormationTransitionComponent.h"
@@ -21,6 +23,7 @@
 #include "StrategyMuzzleSmokePuff.h"
 #include "Engine/World.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
 #include "EngineUtils.h"
 #include "Animation/AnimSingleNodeInstance.h"
 #include "../Formations/StrategyFormationComponent.h"
@@ -125,6 +128,7 @@ void UStrategyInfantryVisualComponent::BeginPlay()
     Super::BeginPlay();
 
     OwnerCompany = Cast<AStrategyCompanyUnit>(GetOwner());
+    Strategy1864Performance::RegisterFigures(this);
     VisualAnimationTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
     if (OwnerCompany) OwnerCompany->OnCasualtyVisualEvent.AddDynamic(this, &UStrategyInfantryVisualComponent::HandleCasualtyVisualEvent);
 
@@ -418,6 +422,7 @@ void UStrategyInfantryVisualComponent::RefreshVisuals()
         return;
     }
 
+    if (Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Warmup"))) EnsureCrowdModel();
     EnsureVisualCount(GetDesiredVisualCount());
     RebuildFormation();
     RefreshWeaponMeshes();
@@ -526,10 +531,11 @@ bool UStrategyInfantryVisualComponent::IsEnemyInRange() const
     {
         return false;
     }
-    for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+    for (const TWeakObjectPtr<AStrategyUnit>& BattleEnemyEntry : Strategy1864Performance::VisualUnits(GetWorld()))
     {
-        if (IsValid(*It) && It->Side != OwnerCompany->Side && It->Side != EStrategySide::Neutral && It->IsCombatEffective() &&
-            Fire->CanEngageTarget(*It))
+        AStrategyUnit* BattleEnemy = BattleEnemyEntry.Get();
+        if (IsValid(BattleEnemy) && BattleEnemy->Side != OwnerCompany->Side && BattleEnemy->Side != EStrategySide::Neutral && BattleEnemy->IsCombatEffective() &&
+            Fire->CanEngageTarget(BattleEnemy))
         {
             return true;
         }
@@ -553,10 +559,11 @@ bool UStrategyInfantryVisualComponent::IsInFiringLine() const
     }
     // An enemy within the long range ahead: stand ready.
     const UStrategyFireControlComponent* Fire = OwnerCompany->FireControlComponent;
-    for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+    for (const TWeakObjectPtr<AStrategyUnit>& BattleEnemyEntry : Strategy1864Performance::VisualUnits(GetWorld()))
     {
-        if (IsValid(*It) && It->Side != OwnerCompany->Side && It->Side != EStrategySide::Neutral && It->IsCombatEffective() &&
-            Fire->IsLocationInsideFireField(It->GetActorLocation(), Fire->LongRangeCm * 1.3f))
+        AStrategyUnit* BattleEnemy = BattleEnemyEntry.Get();
+        if (IsValid(BattleEnemy) && BattleEnemy->Side != OwnerCompany->Side && BattleEnemy->Side != EStrategySide::Neutral && BattleEnemy->IsCombatEffective() &&
+            Fire->IsLocationInsideFireField(BattleEnemy->GetActorLocation(), Fire->LongRangeCm * 1.3f))
         {
             return true;
         }
@@ -578,11 +585,11 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
     // The company's loading time (the combat core's reload: every man reloads together after a volley).
     const float ReloadLeft = OwnerCompany && OwnerCompany->CombatComponent ? OwnerCompany->CombatComponent->ReloadRemainingSeconds : 0.0f;
     UAnimSequence* Load = (Stance == EStrategyStance::Prone ? ReloadProneAsset :
-        Stance == EStrategyStance::Kneeling ? ReloadKneelingAsset : ReloadStandingAsset).LoadSynchronous();
-    UAnimSequence* Rise = Stance == EStrategyStance::Kneeling ? RiseFromLoadAsset.LoadSynchronous() : nullptr;
-    UAnimSequence* Ready = ReadyAsset.LoadSynchronous();
-    UAnimSequence* AimHold = AimHoldAsset.LoadSynchronous();
-    UAnimSequence* Raise = RaiseToAimAsset.LoadSynchronous();
+        Stance == EStrategyStance::Kneeling ? ReloadKneelingAsset : ReloadStandingAsset).Get();
+    UAnimSequence* Rise = Stance == EStrategyStance::Kneeling ? RiseFromLoadAsset.Get() : nullptr;
+    UAnimSequence* Ready = ReadyAsset.Get();
+    UAnimSequence* AimHold = AimHoldAsset.Get();
+    UAnimSequence* Raise = RaiseToAimAsset.Get();
     const float RiseLength = Rise ? Rise->GetPlayLength() : 0.0f;
     for (int32 i = 0; i < SoldierComponents.Num(); ++i)
     {
@@ -629,7 +636,7 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
             case PhaseRaise:
                 if (Now >= SoldierBusyUntil[i])
                 {
-                    UAnimSequence* Fire = (Stance == EStrategyStance::Prone ? FireProneAsset : Stance == EStrategyStance::Kneeling ? FireKneelingAsset : FireStandingAsset).LoadSynchronous();
+                    UAnimSequence* Fire = (Stance == EStrategyStance::Prone ? FireProneAsset : Stance == EStrategyStance::Kneeling ? FireKneelingAsset : FireStandingAsset).Get();
                     PlayOnSoldier(Soldier, Fire, false, false);
                     Phase = PhaseFire;
                     SoldierBusyUntil[i] = Now + (Fire ? Fire->GetPlayLength() : 0.6f);
@@ -712,7 +719,7 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
 void UStrategyInfantryVisualComponent::SpawnMuzzleSmoke(const USkeletalMeshComponent* Soldier, int32 Index)
 {
     UWorld* World = GetWorld();
-    if (!bMuzzleSmoke || !World || !Soldier)
+    if (!bMuzzleSmoke || !World || !Soldier || !Strategy1864Performance::CanSpawnEffect(World))
     {
         return;
     }
@@ -812,7 +819,7 @@ void UStrategyInfantryVisualComponent::UpdateCorpses()
                 CorpseFading[CorpseIndex] = true;
                 RestoreClip(FallenMesh, CorpseClips[CorpseIndex], VisualAnimationTime);
                 FallenMesh->bPauseAnims = true;
-                UMaterialInterface* FadeBase = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/EngineDebugMaterials/M_SimpleTranslucent.M_SimpleTranslucent"));
+                UMaterialInterface* FadeBase = LoadedBattleFadeMaterial;
                 for (int32 FadeSlot = 0; FadeSlot < FallenMesh->GetNumMaterials(); ++FadeSlot)
                     if (FadeBase) FallenMesh->SetMaterial(FadeSlot, UMaterialInstanceDynamic::Create(FadeBase, this, TEXT("FadeCorpse")));
                 TArray<USceneComponent*> FallenChildren;
@@ -930,12 +937,13 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
             const float Rate = FMath::FRandRange(0.9f, 1.1f);
             Soldier->SetPlayRate(Rate);
             Soldier->bPauseAnims = false;
-            UAnimSequence* FallenAnimation = Death.LoadSynchronous();
-            if (!FallenAnimation) FallenAnimation = IdleProneAsset.LoadSynchronous();
+            UAnimSequence* FallenAnimation = Death.Get();
+            if (!FallenAnimation) FallenAnimation = IdleProneAsset.Get();
             Soldier->PlayAnimation(FallenAnimation, false);
             int32 BattleBodyCount = 0;
-            for (TActorIterator<AStrategyCompanyUnit> BodyIt(GetWorld()); BodyIt; ++BodyIt)
-                if (BodyIt->InfantryVisualComponent) BattleBodyCount += BodyIt->InfantryVisualComponent->GetCorpseCount();
+            for (const TWeakObjectPtr<AStrategyUnit>& BattleBodyEntry : Strategy1864Performance::VisualUnits(GetWorld()))
+                if (const AStrategyCompanyUnit* BattleBodyCompany = Cast<AStrategyCompanyUnit>(BattleBodyEntry.Get()))
+                    if (BattleBodyCompany->InfantryVisualComponent) BattleBodyCount += BattleBodyCompany->InfantryVisualComponent->GetCorpseCount();
             const bool bKeepBody = bLeaveCorpses && BattleBodyCount < 150;
             if (bKeepBody) { CorpseComponents.Add(Soldier); CorpseBirthTimes.Add(Now); CorpseFading.Add(false); }
             else
@@ -1014,6 +1022,12 @@ bool UStrategyInfantryVisualComponent::EnsureAssetsLoaded()
     LoadedSoldierMesh = SoldierMeshAsset.LoadSynchronous();
     LoadedRifleMesh = RifleMeshAsset.LoadSynchronous();
     LoadedRifleBayonetMesh = RifleBayonetMeshAsset.LoadSynchronous();
+    LoadedBattleFadeMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/EngineDebugMaterials/M_SimpleTranslucent.M_SimpleTranslucent"));
+    const TSoftObjectPtr<UAnimSequence>* BattleAnimationAssets[] = { &IdleStandingAsset, &WalkStandingAsset, &RunStandingAsset, &AimStandingAsset, &FireStandingAsset, &ReloadStandingAsset, &IdleKneelingAsset, &AimKneelingAsset, &FireKneelingAsset, &ReloadKneelingAsset, &IdleProneAsset, &CrawlProneAsset, &FireProneAsset, &ReloadProneAsset, &BayonetChargeAsset, &BayonetThrustAsset, &DeathAsset, &DeathAsset2, &DeathAsset3, &RaiseToAimAsset, &LoadAsset, &RiseFromLoadAsset, &ReadyAsset, &AimHoldAsset, &DeathWalkingAsset };
+    LoadedBattleAnimations.Reset();
+    for (const auto* BattleAnimationAsset : BattleAnimationAssets)
+        if (UAnimSequence* BattleAnimation = BattleAnimationAsset->LoadSynchronous()) LoadedBattleAnimations.Add(BattleAnimation);
+
 
     if (!LoadedSoldierMesh)
     {
@@ -1428,9 +1442,9 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
     const bool bActorMoved = !VisualUnit.Equals(VisualPath.PreviousUnit, 0.001f);
     const bool bVisualTravel = VisualPath.bMovingVisuals || bActorMoved;
     const bool bSpreadCrawling = OwnerCompany->StanceComponent && OwnerCompany->StanceComponent->Stance == EStrategyStance::Prone;
-    UAnimSequence* Walk = (bSpreadCrawling ? CrawlProneAsset : WalkStandingAsset).LoadSynchronous();
+    UAnimSequence* Walk = (bSpreadCrawling ? CrawlProneAsset : WalkStandingAsset).Get();
     bool bAny = false;
-    UAnimSequence* Run = bSpreadCrawling ? Walk : RunStandingAsset.LoadSynchronous();
+    UAnimSequence* Run = bSpreadCrawling ? Walk : RunStandingAsset.Get();
     bool bSettleIdleLoop = true;
     UAnimSequence* SettleIdle = ResolveAnimation(bSettleIdleLoop);
     for (int32 i = 0; i < SoldierComponents.Num() && i < SoldierSettle.Num(); ++i)
@@ -1724,7 +1738,7 @@ UAnimSequence* UStrategyInfantryVisualComponent::ResolveAnimation(
 
     if (!OwnerCompany)
     {
-        return IdleStandingAsset.LoadSynchronous();
+        return IdleStandingAsset.Get();
     }
 
     const EStrategyStance CurrentStance =
@@ -1744,7 +1758,7 @@ UAnimSequence* UStrategyInfantryVisualComponent::ResolveAnimation(
         const uint32 Variant = GetTypeHash(OwnerCompany->StableUnitId) % 3u;
         const TSoftObjectPtr<UAnimSequence>& Chosen =
             Variant == 0 ? DeathAsset : (Variant == 1 ? DeathAsset2 : DeathAsset3);
-        return Chosen.LoadSynchronous();
+        return Chosen.Get();
     }
 
     if (Action ==
@@ -1755,16 +1769,16 @@ UAnimSequence* UStrategyInfantryVisualComponent::ResolveAnimation(
         if (CurrentStance == EStrategyStance::Prone &&
             !FireProneAsset.IsNull())
         {
-            return FireProneAsset.LoadSynchronous();
+            return FireProneAsset.Get();
         }
 
         if (CurrentStance == EStrategyStance::Kneeling &&
             !FireKneelingAsset.IsNull())
         {
-            return FireKneelingAsset.LoadSynchronous();
+            return FireKneelingAsset.Get();
         }
 
-        return FireStandingAsset.LoadSynchronous();
+        return FireStandingAsset.Get();
     }
 
     if (OwnerCompany->CombatComponent &&
@@ -1775,33 +1789,33 @@ UAnimSequence* UStrategyInfantryVisualComponent::ResolveAnimation(
         if (CurrentStance == EStrategyStance::Prone &&
             !ReloadProneAsset.IsNull())
         {
-            return ReloadProneAsset.LoadSynchronous();
+            return ReloadProneAsset.Get();
         }
 
         if (CurrentStance == EStrategyStance::Kneeling &&
             !ReloadKneelingAsset.IsNull())
         {
-            return ReloadKneelingAsset.LoadSynchronous();
+            return ReloadKneelingAsset.Get();
         }
 
         if (!ReloadStandingAsset.IsNull())
         {
-            return ReloadStandingAsset.LoadSynchronous();
+            return ReloadStandingAsset.Get();
         }
 
-        return AimStandingAsset.LoadSynchronous();
+        return AimStandingAsset.Get();
     }
 
     if (Action ==
         EStrategyHumanAnimationAction::BayonetCharge)
     {
-        return BayonetChargeAsset.LoadSynchronous();
+        return BayonetChargeAsset.Get();
     }
 
     if (Action ==
         EStrategyHumanAnimationAction::BayonetReady)
     {
-        return AimStandingAsset.LoadSynchronous();
+        return AimStandingAsset.Get();
     }
 
     if (Action ==
@@ -1809,7 +1823,7 @@ UAnimSequence* UStrategyInfantryVisualComponent::ResolveAnimation(
         Action ==
         EStrategyHumanAnimationAction::RoutedRun)
     {
-        return RunStandingAsset.LoadSynchronous();
+        return RunStandingAsset.Get();
     }
 
     if (Action ==
@@ -1818,10 +1832,10 @@ UAnimSequence* UStrategyInfantryVisualComponent::ResolveAnimation(
         if (CurrentStance == EStrategyStance::Prone &&
             !CrawlProneAsset.IsNull())
         {
-            return CrawlProneAsset.LoadSynchronous();
+            return CrawlProneAsset.Get();
         }
 
-        return WalkStandingAsset.LoadSynchronous();
+        return WalkStandingAsset.Get();
     }
 
     if (Action ==
@@ -1830,16 +1844,16 @@ UAnimSequence* UStrategyInfantryVisualComponent::ResolveAnimation(
         if (CurrentStance == EStrategyStance::Prone &&
             !IdleProneAsset.IsNull())
         {
-            return IdleProneAsset.LoadSynchronous();
+            return IdleProneAsset.Get();
         }
 
         if (CurrentStance == EStrategyStance::Kneeling &&
             !AimKneelingAsset.IsNull())
         {
-            return AimKneelingAsset.LoadSynchronous();
+            return AimKneelingAsset.Get();
         }
 
-        return AimStandingAsset.LoadSynchronous();
+        return AimStandingAsset.Get();
     }
 
     if (Action ==
@@ -1847,7 +1861,7 @@ UAnimSequence* UStrategyInfantryVisualComponent::ResolveAnimation(
         CurrentStance ==
         EStrategyStance::Prone)
     {
-        return IdleProneAsset.LoadSynchronous();
+        return IdleProneAsset.Get();
     }
 
     if (Action ==
@@ -1855,10 +1869,10 @@ UAnimSequence* UStrategyInfantryVisualComponent::ResolveAnimation(
         CurrentStance ==
         EStrategyStance::Kneeling)
     {
-        return IdleKneelingAsset.LoadSynchronous();
+        return IdleKneelingAsset.Get();
     }
 
-    return IdleStandingAsset.LoadSynchronous();
+    return IdleStandingAsset.Get();
 }
 
 void UStrategyInfantryVisualComponent::DestroyVisualComponents()
@@ -1998,7 +2012,7 @@ bool UStrategyInfantryVisualComponent::EnsureCrowdModel()
     {
         if (!Asset->IsNull())
         {
-            if (UAnimSequence* Clip = Asset->LoadSynchronous())
+            if (UAnimSequence* Clip = Asset->Get())
             {
                 Clips.Add(Clip);
             }
@@ -2011,6 +2025,11 @@ bool UStrategyInfantryVisualComponent::EnsureCrowdModel()
     Grip.GripFraction = RifleGripFraction;
     Grip.bBarrelAlongNegativeX = bRifleBarrelAlongNegativeX;
     CrowdModel = UStrategyCrowdModel::Find(GetWorld(), LoadedSoldierMesh, CurrentRifleMesh(), Clips, Grip);
+    if (Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Warmup")))
+    {
+        UStaticMesh* BattleOtherRifle = CurrentRifleMesh() == LoadedRifleMesh.Get() ? LoadedRifleBayonetMesh.Get() : LoadedRifleMesh.Get();
+        if (BattleOtherRifle) UStrategyCrowdModel::Find(GetWorld(), LoadedSoldierMesh, BattleOtherRifle, Clips, Grip);
+    }
     if (!CrowdModel)
     {
         bCrowdFailed = true;
@@ -2046,6 +2065,11 @@ void UStrategyInfantryVisualComponent::UpdateCrowdMode()
         return Value;
     }();
     float Far = CrowdFarCm, Near = CrowdNearCm;
+    if (Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Figures")))
+    {
+        if (const IConsoleVariable* BattleNearVar = IConsoleManager::Get().FindConsoleVariable(TEXT("Strategy1864.Perf.NearCm")))
+        { Far = FMath::Max(0.f, BattleNearVar->GetFloat()); Near = Far * 0.8f; }
+    }
     if (CommandFar >= 0.0f)
     {
         Far = CommandFar;
@@ -2070,11 +2094,12 @@ void UStrategyInfantryVisualComponent::UpdateCrowdMode()
     {
         Distance = FMath::Sqrt(FormationLocalBounds.TransformBy(OwnerCompany->SceneRoot->GetComponentTransform()).ComputeSquaredDistanceToPoint(Camera));
     }
-    if (!bCrowdMode && Distance > Far)
+    const bool bBattleNearAllowed = Strategy1864Performance::AllowNear(this);
+    if (!bCrowdMode && (Distance > Far || !bBattleNearAllowed))
     {
         EnterCrowdMode();
     }
-    else if (bCrowdMode && Distance < Near)
+    else if (bCrowdMode && Distance < Near && bBattleNearAllowed)
     {
         LeaveCrowdMode();
     }
@@ -2238,7 +2263,9 @@ void UStrategyInfantryVisualComponent::RebuildCrowdInstances()
     };
     float Data[UStrategyCrowdModel::CustomDataFloats];
 
-    TArray<FTransform> Living;
+    TArray<FTransform> BattleLocalLiving;
+    TArray<FTransform>& Living = Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Hitches")) ? CrowdLivingScratch : BattleLocalLiving;
+    Living.Reset();
     for (const USkeletalMeshComponent* Soldier : SoldierComponents)
     {
         Living.Add(Soldier ? Soldier->GetRelativeTransform() : FTransform::Identity);
@@ -2255,7 +2282,9 @@ void UStrategyInfantryVisualComponent::RebuildCrowdInstances()
         CrowdLiving->SetCustomData(i, TArrayView<const float>(Data, UStrategyCrowdModel::CustomDataFloats), false);
     }
 
-    TArray<FTransform> Fallen;
+    TArray<FTransform> BattleLocalFallen;
+    TArray<FTransform>& Fallen = Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Hitches")) ? CrowdFallenScratch : BattleLocalFallen;
+    Fallen.Reset();
     for (const USkeletalMeshComponent* Corpse : CorpseComponents)
     {
         FTransform FallenTransform = Corpse ? Corpse->GetComponentTransform() : FTransform::Identity;
@@ -2286,9 +2315,11 @@ void UStrategyInfantryVisualComponent::DebugSmooth()
     static const bool bSmoothDebug = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugSmooth"));
     if (!bSmoothDebug || !GetWorld()) return;
     // First enabled company in this world; no static actor pointer survives PIE/world changes.
-    for (TActorIterator<AStrategyCompanyUnit> SmoothCompanyIt(GetWorld()); SmoothCompanyIt; ++SmoothCompanyIt)
+    for (const TWeakObjectPtr<AStrategyUnit>& BattleSmoothEntry : Strategy1864Performance::VisualUnits(GetWorld()))
     {
-        UStrategyInfantryVisualComponent* SmoothVisual = SmoothCompanyIt->FindComponentByClass<UStrategyInfantryVisualComponent>();
+        const AStrategyCompanyUnit* BattleSmoothCompany = Cast<AStrategyCompanyUnit>(BattleSmoothEntry.Get());
+        if (!BattleSmoothCompany) continue;
+        UStrategyInfantryVisualComponent* SmoothVisual = BattleSmoothCompany->FindComponentByClass<UStrategyInfantryVisualComponent>();
         if (SmoothVisual && SmoothVisual->bEnabled)
         {
             if (SmoothVisual != this) return;

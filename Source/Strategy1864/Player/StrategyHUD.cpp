@@ -1,5 +1,7 @@
 ﻿#include "StrategyHUD.h"
 #include "../Audio/StrategyBattleAudio.h"
+#include "StrategyBattlePerformance.h"
+#include "Camera/PlayerCameraManager.h"
 #include "../AI/StrategyOfficerProfileComponent.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
@@ -549,6 +551,13 @@ void AStrategyHUD::DashedPolyline(const TArray<FVector>& WorldPoints, const FLin
 void AStrategyHUD::DrawMovementRoute(const AStrategyUnit* Unit, bool bSelected)
 {
     if (!Unit || !Unit->OrderComponent) return;
+    if (!bSelected && Strategy1864Performance::Enabled(TEXT("Strategy1864.Perf.Markers")))
+    {
+        const APlayerController* BattleMarkerPC = GetOwningPlayerController();
+        if (BattleMarkerPC && BattleMarkerPC->PlayerCameraManager && FVector::DistSquared(Unit->GetActorLocation(), BattleMarkerPC->PlayerCameraManager->GetCameraLocation()) > FMath::Square(150000.f)) return;
+        const FVector BattleMarkerScreen = Project(Unit->GetActorLocation());
+        if (BattleMarkerScreen.Z <= 0.f || BattleMarkerScreen.X < -100.f || BattleMarkerScreen.X > Canvas->ClipX + 100.f || BattleMarkerScreen.Y < -100.f || BattleMarkerScreen.Y > Canvas->ClipY + 100.f) return;
+    }
     const AStrategyPlayerController* RoutePC = Cast<AStrategyPlayerController>(GetOwningPlayerController());
     const FStrategyOrder RouteOrder = RoutePC ? RoutePC->GetRequestedRoute(Unit) : Unit->OrderComponent->GetCurrentOrder();
     const FStrategyOrder ExecutingRoute = Unit->OrderComponent->GetCurrentOrder();
