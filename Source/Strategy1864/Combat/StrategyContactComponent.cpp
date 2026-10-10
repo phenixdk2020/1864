@@ -4,6 +4,9 @@
 #include "../Units/StrategyUnit.h"
 #include "StrategySkirmisherComponent.h"
 #include "../Terrain/StrategyTerrainAwarenessComponent.h"
+#include "../Movement/StrategyMovementExecutorComponent.h"
+#include "../AI/StrategyDecisionLog.h"
+#include "Engine/World.h"
 #include "EngineUtils.h"
 
 UStrategyContactComponent::UStrategyContactComponent()
@@ -42,10 +45,14 @@ void UStrategyContactComponent::TickComponent(
 
 void UStrategyContactComponent::RefreshContacts(float ElapsedSeconds)
 {
+    const float ContactNow = GetWorld() ? static_cast<float>(GetWorld()->GetTimeSeconds()) : 0.0f;
     for (FStrategyContactRecord& Contact : Contacts)
     {
         Contact.bCurrentlyVisible = false;
         Contact.SecondsSinceSeen += ElapsedSeconds;
+        Contact.Confidence = FMath::Clamp(1.0f - Contact.SecondsSinceSeen /
+            FMath::Max(0.01f, ForgetAfterSeconds), 0.0f, 1.0f);
+        Contact.UncertaintyRadiusCm = Contact.SecondsSinceSeen * FMath::Max(0.0f, UncertaintyGrowthCmPerSecond);
     }
 
     for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
@@ -84,31 +91,47 @@ void UStrategyContactComponent::RefreshContacts(float ElapsedSeconds)
             Contacts.FindByPredicate(
                 [Candidate](const FStrategyContactRecord& Contact)
                 {
-                    return Contact.StableUnitId == Candidate->StableUnitId;
+                    return Candidate->StableUnitId.IsNone()
+                        ? Contact.ObservedUnit.Get() == Candidate
+                        : Contact.StableUnitId == Candidate->StableUnitId;
                 });
 
         if (!Existing)
         {
             FStrategyContactRecord NewContact;
             NewContact.StableUnitId = Candidate->StableUnitId;
-            NewContact.LastKnownLocation = Candidate->GetActorLocation();
-            NewContact.SecondsSinceSeen = 0.0f;
-            NewContact.bCurrentlyVisible = true;
-            Contacts.Add(NewContact);
+            const int32 ContactIndex = Contacts.Add(NewContact);
+            Existing = &Contacts[ContactIndex];
         }
-        else
-        {
-            Existing->LastKnownLocation = Candidate->GetActorLocation();
-            Existing->SecondsSinceSeen = 0.0f;
-            Existing->bCurrentlyVisible = true;
-        }
+        Existing->ObservedUnit = Candidate;
+        Existing->LastKnownPosition = Candidate->GetActorLocation();
+        Existing->LastKnownLocation = Existing->LastKnownPosition;
+        Existing->ObservedVelocity = Candidate->MovementExecutor
+            ? Candidate->MovementExecutor->GetExecutedVelocity() : Candidate->GetVelocity();
+        Existing->Heading = Candidate->GetActorForwardVector().GetSafeNormal2D();
+        Existing->LastSeenTime = ContactNow;
+        Existing->SecondsSinceSeen = 0.0f;
+        Existing->Confidence = 1.0f;
+        Existing->UncertaintyRadiusCm = 0.0f;
+        Existing->Source = EStrategyContactSource::OwnEyes;
+        Existing->bCurrentlyVisible = true;
     }
 
     Contacts.RemoveAll(
         [this](const FStrategyContactRecord& Contact)
         {
-            return Contact.SecondsSinceSeen > ForgetAfterSeconds;
+            return Contact.SecondsSinceSeen > FMath::Max(0.0f, ForgetAfterSeconds);
         });
+
+    for (const FStrategyContactRecord& Contact : Contacts)
+    {
+        STRATEGY1864_DECISION(OwnerUnit, TEXT("Kontakt"), Contact.bCurrentlyVisible ? TEXT("Observation") : TEXT("Hukommelse"),
+            TEXT("Lokalt synsbillede; mistet kontakt ældes uden at følge aktøren"),
+            FString::Printf(TEXT("contact=%s age=%.2f lastSeen=%.2f confidence=%.3f uncertaintyCm=%.1f position=%s heading=%s source=%d"),
+                *Contact.StableUnitId.ToString(), Contact.SecondsSinceSeen, Contact.LastSeenTime, Contact.Confidence,
+                Contact.UncertaintyRadiusCm, *Contact.LastKnownPosition.ToCompactString(), *Contact.Heading.ToCompactString(), int32(Contact.Source)),
+            TEXT("skjult aktørposition: ikke opdateret; rapport/HQ: transport endnu ikke implementeret"));
+    }
 }
 
 bool UStrategyContactComponent::HasCurrentContact(
@@ -123,10 +146,10 @@ bool UStrategyContactComponent::HasCurrentContact(
         Contacts.FindByPredicate(
             [Target](const FStrategyContactRecord& Contact)
             {
-                return Contact.StableUnitId == Target->StableUnitId;
+                return Contact.ObservedUnit.Get() == Target;
             });
 
-    return Found && Found->bCurrentlyVisible;
+    return Found && Found->bCurrentlyVisible && Found->Confidence > 0.0f;
 }
 
 bool UStrategyContactComponent::GetLastKnownContact(

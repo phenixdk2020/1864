@@ -2,6 +2,7 @@
 #include "../AI/StrategyFieldOfficerComponent.h"
 #include "../AI/StrategyDecisionLog.h"
 
+#include "StrategyContactComponent.h"
 #include "StrategyVisibilityComponent.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../Visual/StrategyEquipmentVisualComponent.h"
@@ -68,25 +69,24 @@ void UStrategyThreatReactionComponent::TickComponent(
 
 AStrategyUnit* UStrategyThreatReactionComponent::FindVisibleEnemyCavalry() const
 {
-    if (!OwnerUnit || !OwnerUnit->VisibilityComponent || !GetWorld())
+    if (!OwnerUnit || !OwnerUnit->ContactComponent || !OwnerUnit->VisibilityComponent || !GetWorld())
     {
         return nullptr;
     }
 
     AStrategyUnit* BestThreat = nullptr;
     float BestDistanceCm = TNumericLimits<float>::Max();
-    for (TActorIterator<AStrategyUnit> ThreatIt(GetWorld()); ThreatIt; ++ThreatIt)
+    for (const FStrategyContactRecord& CavalryContact : OwnerUnit->ContactComponent->GetKnownContacts())
     {
-        AStrategyUnit* CavalryThreat = *ThreatIt;
+        if (!CavalryContact.bCurrentlyVisible || CavalryContact.Confidence <= 0.0f) continue;
+        AStrategyUnit* CavalryThreat = CavalryContact.ObservedUnit.Get();
         if (!IsValid(CavalryThreat) || CavalryThreat->Echelon != EStrategyEchelon::Cavalry ||
             !CavalryThreat->IsCombatEffective() || CavalryThreat->Side == EStrategySide::Neutral ||
             CavalryThreat->Side == OwnerUnit->Side)
         {
             continue;
         }
-        const FVector ThreatVelocity = CavalryThreat->MovementExecutor
-            ? CavalryThreat->MovementExecutor->GetExecutedVelocity()
-            : CavalryThreat->GetVelocity();
+        const FVector ThreatVelocity = CavalryContact.ObservedVelocity;
         const float ThreatSpeed = ThreatVelocity.Size2D();
         if (ThreatSpeed < FMath::Max(1.0f, MinimumCavalryClosingSpeedCmPerSecond))
         {
@@ -105,7 +105,7 @@ AStrategyUnit* UStrategyThreatReactionComponent::FindVisibleEnemyCavalry() const
             AStrategyUnit* ApproachCompany = *CompanyIt;
             if (!IsValid(ApproachCompany) || ApproachCompany->Echelon != EStrategyEchelon::Company ||
                 ApproachCompany->Side != OwnerUnit->Side || !ApproachCompany->IsCombatEffective()) continue;
-            FVector ApproachOffset = ApproachCompany->GetActorLocation() - CavalryThreat->GetActorLocation();
+            FVector ApproachOffset = ApproachCompany->GetActorLocation() - CavalryContact.LastKnownPosition;
             ApproachOffset.Z = 0.0f;
             const float AlongCm = FVector::DotProduct(ApproachOffset, ApproachDirection);
             const float ApproachDot = FVector::DotProduct(ApproachOffset.GetSafeNormal2D(), ApproachDirection);
@@ -131,7 +131,7 @@ AStrategyUnit* UStrategyThreatReactionComponent::FindVisibleEnemyCavalry() const
                     ThreatSpeed, MinimumApproachDot, ApproachCorridorHalfWidthCm), TEXT("FORM_CARRE for denne enhed"));
             continue;
         }
-        const FVector ToCompany = OwnerUnit->GetActorLocation() - CavalryThreat->GetActorLocation();
+        const FVector ToCompany = OwnerUnit->GetActorLocation() - CavalryContact.LastKnownPosition;
         const float ClosingSpeed = FVector::DotProduct(ThreatVelocity, ToCompany.GetSafeNormal2D());
         if (ClosingSpeed < FMath::Max(1.0f, MinimumCavalryClosingSpeedCmPerSecond))
         {
@@ -146,6 +146,7 @@ AStrategyUnit* UStrategyThreatReactionComponent::FindVisibleEnemyCavalry() const
             (bHasPlayerFormationOrder
                 ? FMath::Clamp(PlayerOrderThreatDistanceScale, 0.0f, 1.0f) : 1.0f);
         const float ThreatDistance = ToCompany.Size2D();
+        // Keep the existing short-range forest/smoke visibility gate after contact selection.
         if (ThreatDistance > EffectiveDistance || ThreatDistance >= BestDistanceCm ||
             !OwnerUnit->VisibilityComponent->CanDetectTarget(CavalryThreat, EffectiveDistance))
         {

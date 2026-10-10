@@ -1,5 +1,6 @@
 #include "StrategyFieldOfficerComponent.h"
 #include "../Combat/StrategyCombatComponent.h"
+#include "../Combat/StrategyContactComponent.h"
 #include "../Combat/StrategyStanceComponent.h"
 #include "../Combat/StrategyCavalryChargeComponent.h"
 #include "../Formations/StrategyFormationTransitionComponent.h"
@@ -115,9 +116,11 @@ AStrategyUnit* UStrategyFieldOfficerComponent::NearestEnemy(float& OutDistance, 
 {
     OutDistance = MaxCm;
     AStrategyUnit* Best = nullptr;
-    for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+    if (!OwnerUnit || !OwnerUnit->ContactComponent) return nullptr;
+    for (const FStrategyContactRecord& OfficerContact : OwnerUnit->ContactComponent->GetKnownContacts())
     {
-        AStrategyUnit* U = *It;
+        if (!OfficerContact.bCurrentlyVisible || OfficerContact.Confidence <= 0.0f) continue;
+        AStrategyUnit* U = OfficerContact.ObservedUnit.Get();
         if (!IsValid(U) || U == OwnerUnit || U->Side == EStrategySide::Neutral || U->Side == OwnerUnit->Side || !U->IsCombatEffective() ||
             U->Echelon == EStrategyEchelon::Headquarters || U->Echelon == EStrategyEchelon::Supply || U->Echelon == EStrategyEchelon::Battalion ||
             U->Echelon == EStrategyEchelon::Regiment || U->Echelon == EStrategyEchelon::Brigade || U->Echelon == EStrategyEchelon::Division ||
@@ -125,7 +128,7 @@ AStrategyUnit* UStrategyFieldOfficerComponent::NearestEnemy(float& OutDistance, 
         {
             continue;
         }
-        const float D = FVector::Dist2D(U->GetActorLocation(), OwnerUnit->GetActorLocation());
+        const float D = FVector::Dist2D(OfficerContact.LastKnownPosition, OwnerUnit->GetActorLocation());
         if (D < OutDistance)
         {
             OutDistance = D;
@@ -805,16 +808,18 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
     AStrategyUnit* Target = nullptr;
     FString Why;
     float Best = FMath::Lerp(40000.0f, 70000.0f, Aggression() / 100.0f);
-    for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+    if (!OwnerUnit->ContactComponent) return;
+    for (const FStrategyContactRecord& ChargeContact : OwnerUnit->ContactComponent->GetKnownContacts())
     {
-        AStrategyUnit* U = *It;
+        if (!ChargeContact.bCurrentlyVisible || ChargeContact.Confidence <= 0.0f) continue;
+        AStrategyUnit* U = ChargeContact.ObservedUnit.Get();
         FString W;
         if (!IsValid(U) || U->Side == OwnerUnit->Side || U->Side == EStrategySide::Neutral || !U->IsCombatEffective() ||
             (U->Echelon != EStrategyEchelon::Company && U->Echelon != EStrategyEchelon::Artillery && U->Echelon != EStrategyEchelon::Cavalry))
         {
             continue;
         }
-        const float D = FVector::Dist2D(U->GetActorLocation(), OwnerUnit->GetActorLocation());
+        const float D = FVector::Dist2D(ChargeContact.LastKnownPosition, OwnerUnit->GetActorLocation());
         if (D < Best && IsOpenToCharge(U, W))
         {
             Best = D;
