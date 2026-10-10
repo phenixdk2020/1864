@@ -349,7 +349,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 	}
 	if (Window == EWindow::None && BuildingCardAnchor.X >= 0.f && ACampaign1851ConstructionSite::TownBuildings().IsValidIndex(BuildingInfo))
 	{
-		PaintBuildingCard(Geometry, Out, Layer + 34, BuildingCardAnchor, BuildingInfo);
+		PaintBuildingCard(Geometry, Out, Layer + 90, BuildingCardAnchor, BuildingInfo);   // above the army markers and labels (they were showing through)
 	}
 	if (bUnitCard && Window == EWindow::None && SelectedRegiments.Num() == 1 && Map->GetRegiments().IsValidIndex(SelectedRegiments[0]) && UnitCardAnchor.X >= 0.f)
 	{
@@ -358,7 +358,7 @@ int32 SCampaign1851Overlay::OnPaint(const FPaintArgs& Args, const FGeometry& Geo
 		{
 			Anchor.X = FMath::Max(Anchor.X, TreeMax.X + 10.f);
 		}
-		PaintUnitCard(Geometry, Out, Layer + 34, Anchor, SelectedRegiments[0]);
+		PaintUnitCard(Geometry, Out, Layer + 90, Anchor, SelectedRegiments[0]);   // above the army markers and labels (they were showing through)
 	}
 	if (bLedgerOpen)
 	{

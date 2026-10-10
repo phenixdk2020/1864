@@ -1161,8 +1161,7 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     {
         Text(TEXT("Ingen enhed valgt"), HudX[0], HudY + 58.f, Ink, 0.9f);
         bCommandStyle = false;
-        Panels.Add(FBox2D(FVector2D::ZeroVector, FVector2D(Canvas->ClipX, Canvas->ClipY)));
-        return;
+        return;   // the bar's own rectangle is already registered above; the rest of the screen must stay clickable
     }
     if (const AStrategyPlayerController* SelectionPC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
     {
