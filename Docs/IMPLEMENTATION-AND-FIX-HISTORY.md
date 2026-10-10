@@ -1787,6 +1787,13 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - SPRED og automatisk fjernildsdækning bruger samme tilstand: 3x afstand, én række, Prone, kravlevisning, max 40 % fart, træf 0,60 for håndvåben og 0,45 for målrettet/områdeartilleri og mortérer. SAML gendanner formation/afstande; leveret march rejser først med eksisterende 3 sekunders forsinkelse. Manuel SPRED bevares også uden officer-AI.
 - Dokumenteret i `Docs/Enhedsadfaerd1864.md`; `-Strategy1864DebugSpread` logger gruppeklik og SPRED/SAML. Statisk diff-, include- og API-kontrol mod UE 5.8-headere. Ikke bygget, ikke startet, ikke spiltestet; ingen commit.
 
+### 2026-10-10 — Kamp-AI fase 2, delvis fælles missionspause
+
+- Stop-og-ild, automatisk carré og automatisk dækning deler nu `SuspendMissionForReaction`; aktiv march/rute bevares, mens automatisk carré står stille. Ny ordre/clear/stop invaliderer snapshot, og færdige marchordrer genstartes ikke.
+- Carré har 20 s release-hysterese. Carré/dækning deler 15 s formations-cooldown (10–20 s); akut carré og spillerstyring kan omgå den. AI OFF starter ikke nye automatiske carré-/ildstopreaktioner. Spillerens formationsordre overtager carré-ejerskabet; ny carré afbryder ikke bajonetcharge.
+- Afstemning og TestFlags beskriver leverance, statiske kontroller og endnu ikke udført regression. Punkt 2 er kun delvist: fallback/disengage/FireBlocked og samlet reaktionstilstand mangler. Punkt 3–7 er ikke implementeret; præcis restliste i `Kamp-AI-Afstemning.md`.
+- UE 5.8-headerkontrol og diff-review udført; ingen build, spil/editor, runtime-test eller commit.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

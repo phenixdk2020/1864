@@ -60,10 +60,13 @@ public:
 
     void HaltForFire();
 
+    // Shared execution pause; never writes a replacement order.
+    void SuspendMissionForReaction();
+
     bool IsHoldingForFire() const { return bHoldingForFire; }
 
-    // Only the stop-and-fire reaction suspends execution here. The authoritative
-    // order stays in OrderComponent; new orders replace it normally.
+    // Stop-and-fire, automatic square and cover share this snapshot. The
+    // authoritative order stays in OrderComponent; any new order invalidates it.
     FStrategyOrder GetSuspendedMission() const { return SuspendedMission; }
 
     UPROPERTY(EditAnywhere, Category="Strategy|Movement")

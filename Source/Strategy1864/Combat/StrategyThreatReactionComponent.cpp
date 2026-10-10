@@ -9,6 +9,7 @@
 #include "../Formations/StrategyFormationComponent.h"
 #include "../Units/StrategyUnit.h"
 #include "EngineUtils.h"
+#include "Engine/World.h"
 
 UStrategyThreatReactionComponent::UStrategyThreatReactionComponent()
 {
@@ -45,12 +46,21 @@ void UStrategyThreatReactionComponent::TickComponent(
     const float EvaluationDelta = EvaluationAccumulator;
     EvaluationAccumulator = 0.0f;
 
+    // AI OFF cannot start an automatic reaction. An owned square is released
+    // through the same hysteresis/formation transition instead of being stranded.
+    if (!OwnerUnit->bOfficerAIEnabled)
+    {
+        if (bRespondingToCavalry) TryLeaveSquare(EvaluationDelta);
+        return;
+    }
+
     AStrategyUnit* Threat = FindVisibleEnemyCavalry();
     STRATEGY1864_DECISION(OwnerUnit, TEXT("Kavalerireaktion"), Threat ? TEXT("Carré") : (bRespondingToCavalry ? TEXT("Afvent/opløs carré") : TEXT("Mission")),
         Threat ? TEXT("Synligt rytteri nærmer sig den valgte enhed inden for varslingstiden") : TEXT("Ingen kvalificeret synlig kavaleritrussel"),
-        FString::Printf(TEXT("threat=%s responding=%d noThreatSeconds=%.2f releaseSeconds=%.2f warningMaxCm=%.1f formationSeconds=%.1f playerFormation=%d"),
+        FString::Printf(TEXT("threat=%s responding=%d noThreatSeconds=%.2f releaseSeconds=%.2f warningMaxCm=%.1f formationSeconds=%.1f playerFormation=%d formationCooldownReady=%d"),
             Threat ? *Threat->StableUnitId.ToString() : TEXT("-"), bRespondingToCavalry, NoThreatSeconds,
-            SquareReleaseDelaySeconds, CavalryThreatDistanceCm, SquareFormationTimeSeconds, bHasPlayerFormationOrder),
+            SquareReleaseDelaySeconds, CavalryThreatDistanceCm, SquareFormationTimeSeconds, bHasPlayerFormationOrder,
+            CanChangeReactionFormation()),
         Threat ? TEXT("opløs carré/fortsæt normal formation: afvist mens truslen er aktiv") :
             (bRespondingToCavalry && NoThreatSeconds + EvaluationDelta < SquareReleaseDelaySeconds ?
                 TEXT("øjeblikkelig opløsning: afvist af release-hysterese; ny carré: ingen kvalificeret trussel") : TEXT("ny carré: ingen kvalificeret trussel")));
@@ -166,6 +176,7 @@ AStrategyUnit* UStrategyThreatReactionComponent::FindVisibleEnemyCavalry() const
 bool UStrategyThreatReactionComponent::ReactToCavalryThreat()
 {
     if (!OwnerUnit || OwnerUnit->Echelon != EStrategyEchelon::Company || !OwnerUnit->IsCombatEffective()) return false;
+    if (!OwnerUnit->bOfficerAIEnabled) return bRespondingToCavalry;
     if (FindVisibleEnemyCavalry())
     {
         STRATEGY1864_DECISION(OwnerUnit, TEXT("Kavalerireaktion"), TEXT("Carré"), TEXT("Nødreaktion før automatisk udfoldning"),
@@ -179,7 +190,23 @@ bool UStrategyThreatReactionComponent::ReactToCavalryThreat()
 void UStrategyThreatReactionComponent::NotifyPlayerFormationOrder(EStrategyFormationType RequestedFormation)
 {
     bHasPlayerFormationOrder = true;
-    if (bRespondingToCavalry) PreThreatFormation = RequestedFormation;
+    // The requested formation now belongs to the player. Never restore the
+    // pre-reaction formation or remove the player's bayonets on a later release.
+    bRespondingToCavalry = false;
+    bOwnsSquareBayonets = false;
+    NoThreatSeconds = 0.0f;
+    PreThreatFormation = RequestedFormation;
+}
+
+bool UStrategyThreatReactionComponent::CanChangeReactionFormation() const
+{
+    return GetWorld() && GetWorld()->GetTimeSeconds() - LastReactionFormationChangeTime >=
+        FMath::Clamp(ReactionFormationCooldownSeconds, 10.0f, 20.0f);
+}
+
+void UStrategyThreatReactionComponent::NotifyReactionFormationChanged()
+{
+    if (GetWorld()) LastReactionFormationChangeTime = GetWorld()->GetTimeSeconds();
 }
 
 void UStrategyThreatReactionComponent::EnterSquare()
@@ -188,6 +215,9 @@ void UStrategyThreatReactionComponent::EnterSquare()
     {
         return;
     }
+
+    // A local formation reaction must not interrupt committed bayonet melee.
+    if (OwnerUnit->FieldOfficerComponent && OwnerUnit->FieldOfficerComponent->IsCharging()) return;
 
     if (OwnerUnit->FieldOfficerComponent) OwnerUnit->FieldOfficerComponent->LeaveAutomaticFireCover();
 
@@ -204,12 +234,16 @@ void UStrategyThreatReactionComponent::EnterSquare()
         return;
     }
     bRespondingToCavalry = true;
+    if (OwnerUnit->MovementExecutor) OwnerUnit->MovementExecutor->SuspendMissionForReaction();
 
     if (OwnerUnit->FormationComponent->CurrentFormation != EStrategyFormationType::Square)
     {
         const bool bBayonetsAlreadyFixed = OwnerUnit->EquipmentVisualComponent &&
             OwnerUnit->EquipmentVisualComponent->bBayonetFixed;
         OwnerUnit->FormationComponent->SetFormation(EStrategyFormationType::Square);
+        // Emergency cavalry defence may enter immediately; release and cover
+        // re-entry still obey the shared cooldown.
+        NotifyReactionFormationChanged();
         OwnerUnit->SetUnitState(EStrategyUnitState::Reforming);
         // Formation code gets first ownership; fallback only when it did not fix them.
         if (OwnerUnit->EquipmentVisualComponent &&
@@ -232,7 +266,8 @@ void UStrategyThreatReactionComponent::TryLeaveSquare(float DeltaTime)
     }
 
     NoThreatSeconds += DeltaTime;
-    if (NoThreatSeconds < SquareReleaseDelaySeconds)
+    if (NoThreatSeconds < SquareReleaseDelaySeconds || !CanChangeReactionFormation() ||
+        (OwnerUnit->FieldOfficerComponent && OwnerUnit->FieldOfficerComponent->IsCharging()))
     {
         return;
     }
@@ -240,6 +275,7 @@ void UStrategyThreatReactionComponent::TryLeaveSquare(float DeltaTime)
     if (OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square)
     {
         OwnerUnit->FormationComponent->SetFormation(PreThreatFormation);
+        NotifyReactionFormationChanged();
     }
 
     if (bOwnsSquareBayonets && OwnerUnit->EquipmentVisualComponent &&
