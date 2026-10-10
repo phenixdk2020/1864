@@ -1829,6 +1829,9 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Minimal HUD-ændring: frasortering af ikke-valgte enheders fjerne/off-screen ruter. Måleplan, engine-kilder og begrænsninger i `Docs/Performance-Battle.md`, inklusive uverificeret årsag til firesekundershakket og specialuniform-fallback.
 - Statisk header-/diff-kontrol; intet build, editor/spil eller commit. gpu2-filer læst som reference; ingen gammel patch anvendt.
 
+### 2026-10-10 – 41 nye bygningsbilleder (B21-B61)
+- B21-B61 fra Overførsler/Bygninger_1851_B21-B61_41_PNG_768px beskåret, skaleret til 512 og importeret under `T_Bld_<Nøgle>` (alle 53 CSV-bygninger har nu eget billede, ingen deler). Originalerne i `Reference/Campaign1851/Buildings/Strategy1864_Original_B21_B61`. Se `Docs/Manglende-Billeder.md`.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
