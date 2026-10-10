@@ -74,3 +74,15 @@ Efter hvert slag (3D og kampagne) en rapport pr. side, enhed og samlet: døde, s
 ## Uniformbilleder i 1825 (2026-10-10)
 
 Indkaldelsesvinduet (Indkald en ny enhed) og enhedskortet viser nu 1851-uniformbillederne også i 1825 (de var skjult i 1825 og viste kun en streg-figur). Billederne er fra 1851 og passer ikke historisk til 1825 (glatløbet musket, andre uniformer): se på det, og lav eller skaf 1825-billeder (linje, jæger, dragon, artilleri, rytteri) pr. våben.
+
+## After action report skriver historik (2026-10-10)
+
+Rapporten (se ovenfor) skal også opdatere enhedens tjenestehistorik (`FCampaign1851Regiment` service record: slag, sted, dato, mand ved start, faldne, sårede, fanger, erobret og tabt udstyr, holdt feltet eller trak sig, ammunition) og totalerne (TotalKilled, TotalWounded, TotalCaptured, TotalEnemyKilled), og hver officers karriere (`Campaign1851Career.cpp`: deltaget i slaget, såret, fanget, udmærkelse). Rapporten føres ind i historikken ved AFSLUT SLAGET, ikke kun vist.
+
+## Beslutning: officerer dør ikke i kamp (2026-10-10)
+
+En officer kan ikke dø i slaget. Han kan blive såret (ude af tjeneste til han er rask) eller fanget (tilbage ved udveksling), men ikke falde. Derfor skal vi ikke bruge tusindvis af officerportrætter endnu; de 96 + 25 ministre er nok. Rapportens "officerer faldet" udgår (kun såret og fanget). Tages op igen, hvis vi senere vil have officersdød og et stort portrætbibliotek.
+
+## Erfaring: hvordan den optjenes og bruges (2026-10-10, til gennemgang)
+
+Se `Docs/Erfaring.md` (beskrivelse af nuværende regler og forslag). Kort: enhedens erfaring stiger i træning (op til 40), på march (0,02 pr. dag op til 70) og ved slag (+5, flat); officerens stiger 0,05 pr. dag på march, 0,01 ellers og +6 ved sejr/+3 ved nederlag. I 3D-slaget bruges enhedens erfaring til nøjagtighed/moral-chok (±15-20 pct), officerens til stress-reaktion og beslutningsstabilitet. Mangler: erfaring pr. våbenfærdighed ved brug, pris for nederlag, bonus for veteraner i kampagnen, officerens erfaring påvirker enhedens bonus, udmærkelser.
