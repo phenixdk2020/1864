@@ -1131,7 +1131,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 					else if (Key == TEXT("officer")) { Overlay->InspectOfficer(FCString::Atoi(*Value)); }
 					else if (Key == TEXT("select")) { Overlay->SetSelectedRegiments({ FCString::Atoi(*Value) }); }
 					else if (Key == TEXT("focus")) { Overlay->FocusOOB(FCString::Atoi(*Value)); Overlay->OpenWindow(W::Chart); }
-					else if (Key == TEXT("kamporden")) { Overlay->OpenWindow(W::Chart); const TArray<int32>& KSel = Overlay->GetSelectedRegiments(); const int32 KTown = KSel.Num() > 0 && Map->GetRegiments().IsValidIndex(KSel[0]) ? Map->GetRegiments()[KSel[0]].Town : INDEX_NONE; if (KTown != INDEX_NONE) { Overlay->SetOOBPlace(KTown); } else { Overlay->FilterOOB(KSel); } }
+					else if (Key == TEXT("kamporden")) { Overlay->OpenWindow(W::Chart); Overlay->SetOOBContext(Overlay->GetSelectedRegiments()); }
 					else if (Key == TEXT("selectmany")) { TArray<FString> Parts; Value.ParseIntoArray(Parts, TEXT("+")); TArray<int32> Sel; for (const FString& P : Parts) { Sel.Add(FCString::Atoi(*P)); } Overlay->SetSelectedRegiments(Sel); }
 					else if (Key == TEXT("genfield")) { TArray<FString> P; Value.ParseIntoArray(P, TEXT("+")); if (P.Num() >= 2) { Map->GenerateBattlefield(Map->KmAtWorld(Map->Project(FCString::Atod(*P[0]), FCString::Atod(*P[1]))), 8.f, TEXT("Test")); } }
 					else if (Key == TEXT("split")) { Map->SplitRegiment(FCString::Atoi(*Value)); }
@@ -1292,6 +1292,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			if (bTreeDragging)
 			{
 				TreeDrop(TreePressKey, Under == SCampaign1851Overlay::EButton::TreeRow ? Hover : INDEX_NONE);
+				Map->PruneEmptyFormations();
 			}
 			else
 			{
@@ -1610,8 +1611,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			if (Joined != INDEX_NONE)
 			{
 				SelectRegiments({ Joined });
-				Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart);
-				Overlay->FilterOOB({ Joined });
+				if (Overlay->GetWindow() != SCampaign1851Overlay::EWindow::Chart) { Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart); Overlay->SetOOBContext({ Joined }); }
 				Overlay->SetOOBBuilding(INDEX_NONE);
 				Overlay->ShowToast(FString::Printf(TEXT("%s er samlet igen"), *Map->GetRegiments()[Joined].Name));
 				SaveToSlot(TEXT("Autosave"), true);
@@ -2293,12 +2293,10 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		}
 		else if (Button == SCampaign1851Overlay::EButton::OpenOOB)
 		{
-			// The big order-of-battle window with only the selected units (splitting is done in there).
+			// Capture the opening location; later selection and drops leave it intact.
 			// The garrison and the army where the chosen unit stands (a unit on the march: just its own tree); never the previous view.
 			Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart);
-			const TArray<int32>& OOBChosen = Overlay->GetSelectedRegiments();
-			const int32 OOBTown = OOBChosen.Num() > 0 && Map->GetRegiments().IsValidIndex(OOBChosen[0]) ? Map->GetRegiments()[OOBChosen[0]].Town : INDEX_NONE;
-			if (OOBTown != INDEX_NONE) { Overlay->SetOOBPlace(OOBTown); } else { Overlay->FilterOOB(OOBChosen); }
+			Overlay->SetOOBContext(Overlay->GetSelectedRegiments());
 		}
 		else if (Button == SCampaign1851Overlay::EButton::Engage)
 		{
@@ -2332,11 +2330,9 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 				if (New != INDEX_NONE)
 				{
 					// Both halves side by side in the big order of battle, to move companies between.
-					Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart);
-					TArray<int32> Both = Overlay->GetOOBFilter();
-					Both.AddUnique(Module);
-					Both.AddUnique(New);
-					Overlay->FilterOOB(Both);
+					if (Overlay->GetWindow() != SCampaign1851Overlay::EWindow::Chart) { Overlay->OpenWindow(SCampaign1851Overlay::EWindow::Chart); Overlay->SetOOBContext({ Module }); }
+					Overlay->PoolOpen.Add(Module);
+					Overlay->PoolOpen.Add(New);
 				}
 			}
 		}
@@ -3287,7 +3283,11 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		}
 		else if (OOBSourceKind == K::Regiment && Map->GetRegiments().IsValidIndex(SourceId))
 		{
-			OOBUnits = Overlay->GetSelectedRegiments().Contains(SourceId) ? Overlay->GetSelectedRegiments() : TArray<int32> { SourceId };
+			const TArray<int32> OOBChosen = Overlay->GetSelectedRegiments().Contains(SourceId) ? Overlay->GetSelectedRegiments() : TArray<int32> { SourceId };
+			for (int32 OOBUnit : OOBChosen)
+			{
+				if (Map->GetRegiments().IsValidIndex(OOBUnit) && (OOBUnit == SourceId || Overlay->IsOOBUnitAtContext(OOBUnit)) && Map->GetRegiments()[OOBUnit].Town == Map->GetRegiments()[SourceId].Town) { OOBUnits.Add(OOBUnit); }
+			}
 		}
 		else if (OOBSourceKind == K::Formation)
 		{
@@ -3311,6 +3311,19 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		for (int32 OOBUnit : OOBUnits) { Map->MoveRegimentToFormation(OOBUnit, OOBArmy); }
 		Overlay->RevealOOBArmy(OOBArmy, OOBUnits);
 		Overlay->ShowToast(FString::Printf(TEXT("Ny felthær med %d enheder direkte under sig"), OOBUnits.Num()));
+		return;
+	}
+	if (TargetKind == K::Garrisons && OOBSourceKind == K::Regiment && Map->GetRegiments().IsValidIndex(SourceId))
+	{
+		TArray<int32> OOBReturning;
+		const TArray<int32> OOBChosen = Overlay->GetSelectedRegiments().Contains(SourceId) ? Overlay->GetSelectedRegiments() : TArray<int32> { SourceId };
+		for (int32 OOBUnit : OOBChosen)
+		{
+			if (Map->GetRegiments().IsValidIndex(OOBUnit) && (OOBUnit == SourceId || Overlay->IsOOBUnitAtContext(OOBUnit)) && Map->GetRegiments()[OOBUnit].Town == Map->GetRegiments()[SourceId].Town) { OOBReturning.Add(OOBUnit); }
+		}
+		FString OOBWhy;
+		const bool OOBReturned = !OOBReturning.IsEmpty() && Map->ReturnRegimentsToGarrison(OOBReturning, &OOBWhy);
+		Overlay->ShowToast(OOBReturned ? TEXT("Enhederne er tilbage i garnison") : OOBWhy);
 		return;
 	}
 	// Validate all units before changing anything, including a company's source before splitting.
@@ -3345,7 +3358,6 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 			const int32 Joined = Map->MergeRegiments(Keep, Absorb, &Why);
 			if (Joined != INDEX_NONE)
 			{
-				Overlay->FilterOOB({ Joined });
 				Overlay->SetOOBBuilding(INDEX_NONE);
 				SelectRegiments({ Joined });
 				Overlay->ShowToast(FString::Printf(TEXT("%s er samlet igen"), *Map->GetRegiments()[Joined].Name));

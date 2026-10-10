@@ -1853,6 +1853,14 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Sikret UV1–4 mod lightmap-overskrivning ved gemning/cook, fuld UV-præcision og bevarede normaler/tangenter (bake-version 3). Nye assets registreres før Python-gemning; genbagning nulstiller tidligere klip/materialedata. Cachede modeller kontrolleres også for senere efterspurgte klip. Shaderfejl stopper bagescriptet. Opdateret Performance-Battle, Smoothness-Battle, UnitCustomisation og packaging-mapper. Visuel accept og asset-genindlæsning kræver editorafprøvning.
 - Python AST, diff/whitespace og UE 5.8-headerkontrol. Ingen build, editor-/spilstart, asset-bagning eller commit udført.
 
+### 2026-10-10 — Kamporden beholder sit åbningssted
+
+- Kamporden har nu en fast by- eller hærkontekst med amt fra åbningen. Drag, opdeling og samling skifter ikke til udvalgsfilter eller hele hæren; HELE HÆREN er et udtrykkeligt visningsskift.
+- Garnisonslisten grupperes efter faktisk `Town`, med kontekstbyen først og særskilte overskrifter for garnisonsbyerne i amtet. Kaserne-/billetkapacitet bevarer tomme overskrifter og hint. +/- og særskilt træk af underenheder bevares; lange garnisonslister kan rulles og deres klikfelter klippes til panelet.
+- Hærtræerne begrænses til enheder ved kontekstbyen eller åbningsenhedens eget hærtræ. Ny-hær-boksen og eksisterende officer-/HQ-knapper bevares. Drag ud viser den nye lokale hær uden at ændre kontekst.
+- Flere valgte regimenter ved samme by kan returneres med en fælles kapacitetsplan. Tomme hære opløses, også med tomme under-HQ'er. Ingen nye grene er føjet til controllerens lange klik-kæde.
+- Otte gennemlæste kodeforløb er dokumenteret i `Docs/Kamporden-Regler.md`. Berørte container-, pointer-, matematik- og Slate-signaturer er kontrolleret mod UE 5.8-headerne. Ingen ændring af scenariedata eller gemmeformat; nye kontekstfelter er kun vinduestilstand. Ingen build, spil/editorstart eller commit; visuel spiltest udestår.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

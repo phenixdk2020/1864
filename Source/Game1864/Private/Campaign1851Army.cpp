@@ -2111,29 +2111,19 @@ void ACampaign1851Map::DissolveFormation(int32 Id)
 
 void ACampaign1851Map::PruneEmptyFormations()
 {
-	for (int32 Guard = 0; Guard < 16; ++Guard)
+	// Empty HQ children must not keep an otherwise empty army alive.
+	TArray<int32> OOBEmptyTrees;
+	for (const FCampaign1851Formation& OOBForm : Formations)
 	{
-		int32 EmptyId = 0;
-		for (const FCampaign1851Formation& F : Formations)
+		if (OOBForm.Echelon == ECampaign1851Echelon::Army && OOBForm.Parent == 0 && FormationRegiments(OOBForm.Id).IsEmpty())
 		{
-			if (F.Echelon != ECampaign1851Echelon::Army || F.Parent != 0)
+			for (const FCampaign1851Formation& OOBChild : Formations)
 			{
-				continue;
-			}
-			const bool bHasUnit = Regiments.ContainsByPredicate([&F](const FCampaign1851Regiment& R) { return R.Formation == F.Id; });
-			const bool bHasChild = Formations.ContainsByPredicate([&F](const FCampaign1851Formation& K) { return K.Parent == F.Id; });
-			if (!bHasUnit && !bHasChild)
-			{
-				EmptyId = F.Id;
-				break;
+				if (IsInside(OOBChild.Id, OOBForm.Id)) { OOBEmptyTrees.AddUnique(OOBChild.Id); }
 			}
 		}
-		if (EmptyId == 0)
-		{
-			return;
-		}
-		DissolveFormation(EmptyId);
 	}
+	for (int32 OOBEmptyId : OOBEmptyTrees) { DissolveFormation(OOBEmptyId); }
 }
 
 bool ACampaign1851Map::IsInside(int32 Id, int32 Ancestor) const
@@ -2200,23 +2190,28 @@ int32 ACampaign1851Map::ReturnFormationToGarrison(int32 Id)
 	return Units.Num();
 }
 
+bool ACampaign1851Map::ReturnRegimentsToGarrison(const TArray<int32>& Units, FString* OutReason)
+{
+	TArray<int32> OOBDestinations;
+	if (!PlanGarrisonReturn(Units, OOBDestinations, OutReason)) { return false; }
+	for (int32 OOBSlot = 0; OOBSlot < Units.Num(); ++OOBSlot)
+	{
+		const int32 OOBUnit = Units[OOBSlot];
+		Regiments[OOBUnit].Formation = 0;
+		Regiments[OOBUnit].Town = OOBDestinations[OOBSlot];
+		if (OOBDestinations[OOBSlot] != INDEX_NONE) { PlaceInTown(OOBUnit); UpdateRegimentPiece(OOBUnit); }
+	}
+	PruneEmptyFormations();
+	return true;
+}
+
 bool ACampaign1851Map::MoveRegimentToFormation(int32 Regiment, int32 Formation)
 {
 	if (!Regiments.IsValidIndex(Regiment) || (Formation != 0 && FormationIndex(Formation) == INDEX_NONE))
 	{
 		return false;
 	}
-	if (Formation == 0)
-	{
-		TArray<int32> GarrisonDestinations;
-		if (!PlanGarrisonReturn({ Regiment }, GarrisonDestinations)) { return false; }
-		Regiments[Regiment].Town = GarrisonDestinations[0];
-		if (GarrisonDestinations[0] != INDEX_NONE)
-		{
-			PlaceInTown(Regiment);
-			UpdateRegimentPiece(Regiment);
-		}
-	}
+	if (Formation == 0) { return ReturnRegimentsToGarrison({ Regiment }); }
 	Regiments[Regiment].Formation = Formation;
 	return true;
 }

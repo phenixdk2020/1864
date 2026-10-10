@@ -132,7 +132,7 @@ public:
 	enum : int32 { CloseTownTab = 1, CloseTraining, ClosePicker, CloseOfficerCard, CloseWindow, CloseSelection, CloseLedger, CloseOOB, CloseOrder, CloseFortPanel, CloseFort };
 	/** The big windows opened from the menu bar under the calendar (one at a time). */
 	enum class EWindow : uint8 { None, Army, Officers, Budget, Towns, Trains, Chart, Council, Supply, Foreign, Research, Navy, Gazette, End, Battlefield, Materiel, Nations, ArmyStatus };
-	void OpenWindow(EWindow In) { bStackListOpen = false; CloseUnitCustomisation(); if (In == EWindow::Chart && Window != EWindow::Chart) { OOBPlace = INDEX_NONE; OOBFilter.Reset(); OOBFocus = INDEX_NONE; OOBBuilding = INDEX_NONE; } Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
+	void OpenWindow(EWindow In) { bStackListOpen = false; CloseUnitCustomisation(); if (In == EWindow::Chart && Window != EWindow::Chart) { ClearOOBView(); } Window = In; SortColumn = 0; bSortDesc = false; Page = 0; if (In != EWindow::Officers) { InspectedOfficer = INDEX_NONE; } }
 	EWindow GetWindow() const { return Window; }
 
 	/** A question before a step that costs or cannot be undone (mobilisation, ...): the title, what it does, and
@@ -168,11 +168,12 @@ public:
 	/** The unit card beside the unit panel: the soldier in his uniform, the colours, the service record. */
 	void ToggleUnitCard() { CloseUnitCustomisation(); bUnitCard = !bUnitCard; }
 	/** The order of battle for one unit only (its companies; split it there), or the whole army. */
-	/** The units the order-of-battle window shows (from KAMPORDEN on a selection); empty: all of them. */
-	/** Back one step: from the two halves to the filtered list, from that to every unit. */
-	/** Kamporden from a unit: the garrison and the field army at that town only (INDEX_NONE: everything or the chosen units). */
-	void SetOOBPlace(int32 Town) { OOBFilter.Reset(); OOBFocus = INDEX_NONE; OOBBuilding = INDEX_NONE; OOBPlace = Town; TreeScroll = 0; }
-	void ClearOOBView() { OOBPlace = INDEX_NONE; OOBBuilding = INDEX_NONE; if (OOBFocus != INDEX_NONE) { const int32 Was = OOBFocus; OOBFocus = INDEX_NONE; if (OOBFilter.Num() > 0 && !OOBFilter.Contains(Was)) { OOBFilter.Add(Was); } } else { OOBFilter.Reset(); } TreeScroll = 0; }
+	/** UI context is captured on opening; selection and dragging never replace it. */
+	void SetOOBPlace(int32 Town);
+	void SetOOBContext(const TArray<int32>& Units);
+	bool IsOOBUnitAtContext(int32 Unit) const;
+	/** Explicit HELE HÆREN action; never called by a drop. */
+	void ClearOOBView() { OOBPlace = INDEX_NONE; OOBContextArmy = INDEX_NONE; OOBContextAmt = 0; OOBRelatedArmies.Reset(); OOBKnownGarrisonTowns.Reset(); OOBFilter.Reset(); OOBFocus = INDEX_NONE; OOBBuilding = INDEX_NONE; TreeScroll = 0; ChartScroll = ChartScrollY = 0.f; }
 	const TArray<int32>& GetOOBFilter() const { return OOBFilter; }
 	/** The new unit being built in the middle of the window (companies dragged there stay there); INDEX_NONE if none. */
 	void SetOOBBuilding(int32 Unit) { OOBBuilding = Unit; }
@@ -194,11 +195,12 @@ public:
 	void TogglePoolOpen(int32 Unit) { if (PoolOpen.Contains(Unit)) { PoolOpen.Remove(Unit); } else { PoolOpen.Add(Unit); } }
 	TSet<int32> PoolOpen;
 	int32 GetOOBBuilding() const { return OOBBuilding; }
-	void FilterOOB(const TArray<int32>& Units) { OOBFilter = Units; OOBFocus = INDEX_NONE; }
-	/** Show a newly created army, including a company detached from a filtered garrison unit. */
-	void RevealOOBArmy(int32 ArmyId, const TArray<int32>& Units)
+	void FilterOOB(const TArray<int32>& Units) { if (OOBPlace == INDEX_NONE && OOBContextArmy == INDEX_NONE) { OOBFilter = Units; } OOBFocus = INDEX_NONE; }
+	/** Reveal a newly created tree without replacing the opening context. */
+	void RevealOOBArmy(int32 ArmyId, const TArray<int32>& /*Units*/)
 	{
-		FilterOOB(Units);
+		// Reveal the result within the existing context; do not switch to selection mode.
+		if (OOBContextArmy != INDEX_NONE) { OOBRelatedArmies.AddUnique(ArmyId); }
 		OOBBuilding = INDEX_NONE;
 		Collapsed.Remove(TreeKey(ETreeKind::Formation, ArmyId));
 		ChartScroll = 0.f;
@@ -430,6 +432,8 @@ private:
 	int32 PickerPost = 0;
 	TSet<int32> Collapsed;
 	mutable int32 TreeScroll = 0;
+	mutable float OOBPoolContentH = 0.f;
+	mutable FVector2D OOBPoolMin = FVector2D::ZeroVector, OOBPoolMax = FVector2D::ZeroVector;
 	mutable float ChartScroll = 0.f;
 	bool bFortTool = false;
 	bool bSupplyMap = false;
@@ -483,7 +487,11 @@ private:
 	FString BusyText;
 	int32 OOBFocus = INDEX_NONE;
 	TArray<int32> OOBFilter;
-	int32 OOBPlace = INDEX_NONE;   // Kamporden for one town: its garrison and the army standing there
+	int32 OOBPlace = INDEX_NONE;   // Fixed town context (UI only, not campaign save data).
+	int32 OOBContextArmy = INDEX_NONE;    // Fixed root for a unit opened on the march/in the field.
+	int32 OOBContextAmt = 0;       // Captured location for nearby garrison headings.
+	TArray<int32> OOBRelatedArmies; // New independent trees created within an army context.
+	mutable TArray<int32> OOBKnownGarrisonTowns; // Keep observed garrison headings when their last unit leaves.
 	int32 OOBBuilding = INDEX_NONE;
 	TArray<TSharedPtr<FSlateBrush>> UniformBrushes;   // a soldier per arm (ECampaign1851Arm)
 	TSharedPtr<FSlateBrush> FlagBrush;
