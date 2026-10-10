@@ -325,8 +325,8 @@ int32 ACampaign1851Map::TakeNeighbourRecruits(const FCampaign1851NeighbourArmy& 
 			TArray<FCampaign1851Leg> SouthDraftRoute;
 			if (SouthDistrict.Seat != Army.Town && !PlanMarch(SouthDistrict.Seat, TownKm(SouthDistrict.Seat), Army.Town, TownKm(Army.Town),
 				Campaign1851Supply::ColumnKmPerDay, ECampaign1851RouteMode::RoadsOnly, SouthDraftRoute, nullptr, Army.Nation)) { continue; }
-			const int32 SouthDraft = FMath::Min3(Wanted - SouthTaken, FMath::FloorToInt(SouthDistrict.Reserve),
-				FMath::FloorToInt(SouthDistrict.Treasury / Campaign1851Army::ReplacementCostPerMan));
+			const int32 SouthDraft = FMath::Min(FMath::Min(int32(Wanted - SouthTaken), int32(FMath::FloorToInt(SouthDistrict.Reserve))),
+				int32(FMath::FloorToInt(SouthDistrict.Treasury / Campaign1851Army::ReplacementCostPerMan)));
 			if (SouthDraft <= 0) { continue; }
 			SouthDistrict.Reserve -= SouthDraft;
 			SouthDistrict.Treasury -= SouthDraft * Campaign1851Army::ReplacementCostPerMan;
