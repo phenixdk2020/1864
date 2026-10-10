@@ -739,7 +739,7 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
                 bTagMoving ? (bTagAdvance ? TEXT("RYKKER FREM") : TEXT("MARCHERER")) : TEXT("HOLDER");
             const FLinearColor TagColour = bTagReforming ? FLinearColor(1.f, 0.8f, 0.1f) :
                 bTagFiring ? FLinearColor(1.f, 0.15f, 0.1f) : bTagMoving ? FLinearColor(0.2f, 0.5f, 1.f) : FLinearColor(0.6f, 0.6f, 0.6f);
-            Info = FString(TagStatus) + TEXT(" | ") + Info;
+            Info = (SpecialOrderTag(Unit).IsEmpty() ? FString(TagStatus) : SpecialOrderTag(Unit)) + TEXT(" | ") + Info;
             float NW = 0.0f, NH = 0.0f, IW = 0.0f, IH = 0.0f;
             GetTextSize(Name, NW, NH, nullptr, 1.15f);
             GetTextSize(Info, IW, IH, nullptr, 1.0f);
@@ -1121,6 +1121,7 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     }
     if (!HudHQ && Cast<AStrategyCompanyUnit>(Unit))
         DrawButton(HudX[2], HudY + 132.f, HudW[2], 30.f, TEXT("AFBRYD"), EAction::Disengage, 0, HudCurrent == EStrategyOrderType::Disengage, Unit, &OrderRed);
+    DrawSpecialOrders(Unit, HudX[2], HudY + 165.f, HudW[2]);
     if (!HudHQ) Text(BaseOrderLabel(Unit), HudX[2], HudY + 185.f, Muted, 0.72f);
     if (HudHQ)
     {
@@ -1432,6 +1433,11 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                         PC->CancelOrderPlacement();
                         PC->IssueOrderToSelection(EStrategyOrderType::Disengage, FVector::ZeroVector, 0.f, false);
                     }
+                    break;
+                case EAction::BuildFieldworks:
+                case EAction::SkirmishScreen:
+                case EAction::Spread:
+                    HandleSpecialOrder(B.Action, B.Value != 0);
                     break;
                 case EAction::Stop:
                     if (PC) { PC->IssueHoldToSelection(); }

@@ -33,7 +33,7 @@ public:
     float KneelingIncomingHitMultiplier = 0.82f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Stance")
-    float ProneMovementMultiplier = 0.35f;
+    float ProneMovementMultiplier = 0.40f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Stance")
     float ProneReloadMultiplier = 1.15f;
@@ -52,4 +52,7 @@ public:
 
     UFUNCTION(BlueprintPure, Category="Strategy|Stance")
     float GetIncomingHitMultiplier() const;
+
+    /** Balance estimate: prone loose order is hit at 0.45 by guns/bombs, versus 0.60 by small arms. */
+    float GetIncomingArtilleryHitMultiplier() const;
 };

@@ -1765,6 +1765,14 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - Årsag: den tegnede fronts drejehastighed var gangfart delt med hele linjens længde (ca. 1,5 grader i sekundet), så mændene løb fra hinanden og linjen blev en L/S. Nu er hastigheden sat ud fra den ydre mands skridt (min 400 cm/s, 5-36 grader i sekundet), og mændene må løbe mens linjen drejer. Testet: rette linjer i skærmbilleder under angreb.
 - Merget fra Codex: beslutningslog og afstemning mod Kamp-AI-designet (`Docs/Kamp-AI-Afstemning.md`), HUD-knapper på hele udvalget, hover for stabe, faldne mænd, tog kræver jernbaneforskning (`Docs/Review-2026-10-09.md`).
 
+### 2026-10-09 — BYG, SKYTTEKAEDE og SPRED/SAML i slagets HUD
+
+- Ny `StrategyHUDSpecialOrders.cpp` med `AStrategyHUD::DrawSpecialOrders`, gruppehandlinger og specialordre-tag. `DrawCommandPanel` har kun én ny kaldelinje; EAction-værdier er tilføjet sidst i enum. Tynd knaprække under AFBRYD, med BYGGER/procent og SPRED/REJSER SIG i tagget.
+- BYG genbruger eksisterende 30 sekunders feltværksbygning og retningsbestemt stillingsbeskyttelse. Værnet placeres foran kompagniet; leveret bevægelsesordre annullerer og forlader stillingen. Ny bygning efter flytning er mulig. Officerens egne flyttevalg og genoptagelse af suspenderet march venter under bygning.
+- SKYTTEKAEDE toggler den eksisterende skærm på alle valgte kompagnier. Visningen får stabil scatter foran hovedstyrken i linje og kolonne gennem eksisterende glidende slots; deployeret skærm skyder langsommere. Karré hjemkalder skærmen.
+- SPRED og automatisk fjernildsdækning bruger samme tilstand: 3x afstand, én række, Prone, kravlevisning, max 40 % fart, træf 0,60 for håndvåben og 0,45 for målrettet/områdeartilleri og mortérer. SAML gendanner formation/afstande; leveret march rejser først med eksisterende 3 sekunders forsinkelse. Manuel SPRED bevares også uden officer-AI.
+- Dokumenteret i `Docs/Enhedsadfaerd1864.md`; `-Strategy1864DebugSpread` logger gruppeklik og SPRED/SAML. Statisk diff-, include- og API-kontrol mod UE 5.8-headere. Ikke bygget, ikke startet, ikke spiltestet; ingen commit.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -19,6 +19,7 @@
 #include "../Units/CavalryUnit.h"
 #include "../Combat/StrategyConditionComponent.h"
 #include "../Combat/StrategyStanceComponent.h"
+#include "../Combat/StrategyFieldworksComponent.h"
 #include "../AI/StrategyNCOComponent.h"
 #include "../Artillery/StrategyMortarBatteryUnit.h"
 #include "../Artillery/StrategyMortarDeploymentComponent.h"
@@ -119,6 +120,11 @@ void UStrategyMovementExecutorComponent::HandleOrderChanged(const FStrategyOrder
 
 void UStrategyMovementExecutorComponent::BeginMovementForOrder(const FStrategyOrder& Order)
 {
+    if (OwnerUnit)
+    {
+        if (OwnerUnit->FieldOfficerComponent) OwnerUnit->FieldOfficerComponent->LeaveAutomaticFireCover();
+        if (OwnerUnit->FieldworksComponent) OwnerUnit->FieldworksComponent->CancelFieldworks();
+    }
     bHoldingForFire = false;
     ReleaseBridgeSlot();
 
@@ -307,6 +313,8 @@ void UStrategyMovementExecutorComponent::TickComponent(
         if (SuspendedMission.IsValidOrder() && SuspendedMission.OrderSerial == CurrentOrder.OrderSerial &&
             FireReactionQuietSeconds >= FMath::Max(0.f, FireReactionReleaseSeconds) &&
             !OwnerUnit->OrderComponent->HasDelayedOrder() &&
+            (!OwnerUnit->FieldOfficerComponent || !OwnerUnit->FieldOfficerComponent->IsTakingFireCover()) &&
+            (!OwnerUnit->FieldworksComponent || !OwnerUnit->FieldworksComponent->bBuilding) &&
             (!OwnerUnit->FormationTransition || !OwnerUnit->FormationTransition->IsReforming()) &&
             (!OwnerUnit->FormationComponent || OwnerUnit->FormationComponent->CurrentFormation != EStrategyFormationType::Square))
         {

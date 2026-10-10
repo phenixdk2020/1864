@@ -2,6 +2,7 @@
 
 #include "../Engineering/StrategyDefensivePosition.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
+#include "../AI/StrategyFieldOfficerComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "../Units/StrategyUnit.h"
 #include "../Engineering/StrategyPositionOccupancyComponent.h"
@@ -26,16 +27,16 @@ bool UStrategyFieldworksComponent::BeginHastyFieldworks()
         OwnerUnit->Echelon != EStrategyEchelon::Company ||
         OwnerUnit->UnitState == EStrategyUnitState::Routed ||
         OwnerUnit->UnitState == EStrategyUnitState::Destroyed ||
+        (OwnerUnit->FieldOfficerComponent && OwnerUnit->FieldOfficerComponent->IsCharging()) ||
         (OwnerUnit->MovementExecutor &&
          OwnerUnit->MovementExecutor->HasMovementGoal()))
     {
         return false;
     }
 
-    if (HasCompletedFieldworks())
-    {
-        return true;
-    }
+    if (bBuilding) return true;
+    if (HasCompletedFieldworks() && OwnerUnit->PositionOccupancyComponent &&
+        OwnerUnit->PositionOccupancyComponent->OccupyPosition(CompletedPosition)) return true;
 
     const float Multiplier =
         bEngineerUnit
@@ -45,6 +46,7 @@ bool UStrategyFieldworksComponent::BeginHastyFieldworks()
     BuildRemainingSeconds =
         FMath::Max(0.5f, BuildSeconds * Multiplier);
 
+    ActiveBuildSeconds = BuildRemainingSeconds;
     bBuilding = true;
     SetComponentTickEnabled(true);
     return true;
@@ -104,7 +106,7 @@ void UStrategyFieldworksComponent::CompleteFieldworks()
     CompletedPosition =
         GetWorld()->SpawnActor<AStrategyDefensivePosition>(
             AStrategyDefensivePosition::StaticClass(),
-            OwnerUnit->GetActorLocation(),
+            OwnerUnit->GetActorLocation() + OwnerUnit->GetActorForwardVector() * 400.0f,
             OwnerUnit->GetActorRotation());
 
     if (CompletedPosition)

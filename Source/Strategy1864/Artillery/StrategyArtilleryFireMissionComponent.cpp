@@ -817,7 +817,7 @@ int32 UStrategyArtilleryFireMissionComponent::ResolveCasualties(
 
     if (Target->StanceComponent)
     {
-        HitChance *= Target->StanceComponent->GetIncomingHitMultiplier();
+        HitChance *= Target->StanceComponent->GetIncomingArtilleryHitMultiplier();
     }
 
     if (Target->DirectionalCoverComponent)
@@ -1023,7 +1023,7 @@ bool UStrategyArtilleryFireMissionComponent::FireAtLocation(
             FMath::Lerp(1.0f, 0.45f, RangeFraction);
 
         CasualtiesByTarget.FindOrAdd(BestTarget); // Include misses in the single incoming-fire notification per salvo.
-        if (BestTarget->StanceComponent) HitChance *= BestTarget->StanceComponent->GetIncomingHitMultiplier();
+        if (BestTarget->StanceComponent) HitChance *= BestTarget->StanceComponent->GetIncomingArtilleryHitMultiplier();
         if (RandomStream.FRand() <= HitChance)
         {
             const FIntPoint Range = GetCasualtyRange(AmmoType);

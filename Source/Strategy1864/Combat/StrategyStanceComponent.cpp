@@ -34,7 +34,7 @@ float UStrategyStanceComponent::GetMovementMultiplier() const
 {
     if (Stance == EStrategyStance::Prone)
     {
-        return FMath::Max(0.05f, ProneMovementMultiplier);
+        return FMath::Clamp(ProneMovementMultiplier, 0.05f, 0.40f);
     }
     if (Stance == EStrategyStance::Kneeling)
     {
@@ -70,4 +70,11 @@ float UStrategyStanceComponent::GetIncomingHitMultiplier() const
         return FMath::Clamp(KneelingIncomingHitMultiplier, 0.05f, 1.0f);
     }
     return 1.0f;
+}
+
+float UStrategyStanceComponent::GetIncomingArtilleryHitMultiplier() const
+{
+    const AStrategyUnit* SpreadArtilleryTarget = Cast<AStrategyUnit>(GetOwner());
+    return Stance == EStrategyStance::Prone && SpreadArtilleryTarget && SpreadArtilleryTarget->FieldOfficerComponent &&
+        SpreadArtilleryTarget->FieldOfficerComponent->IsTakingFireCover() ? 0.45f : GetIncomingHitMultiplier();
 }

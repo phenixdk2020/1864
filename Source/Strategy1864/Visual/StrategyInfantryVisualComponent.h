@@ -340,6 +340,8 @@ private:
     uint8 CachedFormationValue = 255;
     float CachedCoverLateralSpacing = -1.0f;
     float CachedCoverRankSpacing = -1.0f;
+    int32 CachedSpecialRanks = -1;
+    int32 CachedScreenStrength = -1;
     bool bCachedBayonetFixed = false;
     bool bLastAnimationLooping = false;
     bool bLastHoldingPose = false;

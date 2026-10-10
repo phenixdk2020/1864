@@ -56,7 +56,7 @@ public:
 private:
     enum class EAction : uint8
     {
-        None, Minimap, FinishBattle, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, Disengage, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount, FigureScale, BattleQuality, TimeControl, Shadows
+        None, Minimap, FinishBattle, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, Disengage, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount, FigureScale, BattleQuality, TimeControl, Shadows, BuildFieldworks, SkirmishScreen, Spread
     };
 
     struct FButton
@@ -79,6 +79,9 @@ private:
     int32 SubordinateOffset = 0;
     int32 SubordinateMaxOffset = 0;
     void DrawCommandPanel(AStrategyUnit* Unit);
+    void DrawSpecialOrders(AStrategyUnit* Unit, float X, float Y, float W);
+    void HandleSpecialOrder(EAction Action, bool bEnable);
+    FString SpecialOrderTag(const AStrategyUnit* Unit) const;
     void DrawMinimap();
     void DrawObjectiveMarkers();
     int32 FigureDivisor = -1;

@@ -2,6 +2,9 @@
 #include "StrategyCombatComponent.h"
 
 #include "../Units/StrategyUnit.h"
+#include "../Formations/StrategyFormationComponent.h"
+#include "../Formations/StrategyFormationTransitionComponent.h"
+#include "../AI/StrategyFieldOfficerComponent.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 
 UStrategySkirmisherComponent::UStrategySkirmisherComponent()
@@ -25,6 +28,8 @@ bool UStrategySkirmisherComponent::DeploySkirmishers(
         OwnerUnit->CurrentStrength < 20 ||
         OwnerUnit->UnitState == EStrategyUnitState::Routed ||
         OwnerUnit->UnitState == EStrategyUnitState::Destroyed ||
+        (OwnerUnit->FormationComponent && OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square) ||
+        (OwnerUnit->FieldOfficerComponent && OwnerUnit->FieldOfficerComponent->IsCharging()) ||
         State != EStrategySkirmisherState::Attached)
     {
         return false;
@@ -97,6 +102,10 @@ void UStrategySkirmisherComponent::TickComponent(
         return;
     }
 
+    if (State != EStrategySkirmisherState::Attached && State != EStrategySkirmisherState::Recalling &&
+        OwnerUnit->FormationComponent && OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square)
+        RecallSkirmishers();
+
     if (State == EStrategySkirmisherState::Deployed)
     {
         UpdateScreenAnchor();
@@ -163,10 +172,11 @@ void UStrategySkirmisherComponent::CompleteRecall()
             OwnerUnit->MovementExecutor &&
             OwnerUnit->MovementExecutor->HasMovementGoal();
 
-        OwnerUnit->SetUnitState(
-            bMoving
-            ? EStrategyUnitState::Moving
-            : EStrategyUnitState::Ready);
+        if (OwnerUnit->IsCombatEffective() && (!OwnerUnit->FormationTransition || !OwnerUnit->FormationTransition->IsReforming()))
+            OwnerUnit->SetUnitState(
+                bMoving
+                ? EStrategyUnitState::Moving
+                : EStrategyUnitState::Ready);
     }
 
     SetComponentTickEnabled(false);

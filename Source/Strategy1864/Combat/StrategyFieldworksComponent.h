@@ -58,8 +58,14 @@ public:
         return CompletedPosition;
     }
 
+    float GetBuildProgress() const
+    {
+        return bBuilding ? FMath::Clamp(1.0f - BuildRemainingSeconds / FMath::Max(0.5f, ActiveBuildSeconds), 0.0f, 1.0f) : 0.0f;
+    }
+
 private:
     void CompleteFieldworks();
+    float ActiveBuildSeconds = 0.0f;
 
     UPROPERTY()
     TObjectPtr<AStrategyUnit> OwnerUnit;
