@@ -40,6 +40,27 @@ def assign(mesh, material):
 
 
 
+def import_static(name, dest, asset):
+    target = dest + '/' + asset
+    if not unreal.EditorAssetLibrary.does_asset_exist(target):
+        options = unreal.FbxImportUI()
+        for k, v in [('import_as_skeletal', False), ('import_mesh', True), ('import_animations', False), ('import_materials', False),
+                     ('import_textures', False), ('automated_import_should_detect_type', False),
+                     ('mesh_type_to_import', unreal.FBXImportType.FBXIT_STATIC_MESH)]:
+            options.set_editor_property(k, v)
+        options.static_mesh_import_data.set_editor_property('combine_meshes', True)
+        task = unreal.AssetImportTask()
+        for k, v in [('filename', os.path.join(source, name + '.fbx')), ('destination_path', dest), ('destination_name', asset),
+                     ('automated', True), ('save', True), ('options', options), ('factory', unreal.FbxFactory())]:
+            task.set_editor_property(k, v)
+        tools.import_asset_tasks([task])
+    mesh = unreal.load_asset(target)
+    assert isinstance(mesh, unreal.StaticMesh), name + ': static mesh missing'
+    assign(mesh, texture_material(name, dest, False))
+    box = mesh.get_bounding_box()
+    unreal.log('UNITS-IMPORT PASS static %s size %s' % (target, str(box.max - box.min)))
+    unreal.EditorAssetLibrary.save_directory(dest, only_if_is_dirty=False, recursive=True)
+
 for name, asset in [('Wagon_Supply', 'SM_Wagon_Supply'), ('Wagon_Empty', 'SM_Wagon_Empty'), ('Wagon_Mortar', 'SM_Wagon_Mortar')]:
     try:
         import_static(name, '/Game/Units/Items', asset)
