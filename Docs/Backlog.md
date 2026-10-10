@@ -101,3 +101,16 @@ Se `Docs/Erfaring.md` (beskrivelse af nuværende regler og forslag). Kort: enhed
 ## Naboerne inddeles i amter som Danmark (2026-10-10)
 
 Alle nabolande skal have samme inddeling som Danmark: amter/distrikter med grænser på ejergrid, befolkning, rekrutter, skat og byer. Rækkefølge: 1) syd (Mecklenburg-Schwerin, Preussen/Pommern; Codex-opgaven "south" er i gang: Aemter, Regierungsbezirke, Kreise), 2) Hannover, Oldenburg, Hamborg, Luebeck, Bremen, 3) Sverige (laen: Malmoehus, Kristianstad, Blekinge, Halland, Goeteborg og Bohus, Aelvsborg, Skaraborg, Vaermland m.fl.) og Norge (amter: Smaalenene, Akershus, Hedemarken m.fl.), 4) Preussen/Østrig videre ned (Brandenburg, Schlesien), Rusland/England kun som abstrakt model. Samme datastruktur som Danmarks amter (amter_1825.json / amter1851.json) så alt (manpower, skat, forsyning) virker ens.
+
+## Gammel liste gennemgået (2026-10-10)
+
+| # | Punkt | Status |
+|---|---|---|
+| 2 | Slagmarkens grafik 100 gange bedre | Ikke taget som egen opgave. Der er lavet: græs, træer, skygger, røg, bagte figurer (under rettelse). Mangler: terrænteksturer, vand, bygninger i slag, vejr/lys, effekter. |
+| 3 | Campaign map endnu bedre grafik | Delvist (3D-huse, broer, byer, nye bygningsbilleder). Mangler en samlet grafikrunde. |
+| 4 | Se slag, sårede, dræbte, dræbte fjender pr. kompagni (kort og OOB) | Enhedskortet viser slag, faldne, sårede, fanget og de seneste slag. Mangler: dræbte fjender (TotalEnemyKilled vises ikke), og samme tal i Kamporden-boksene. |
+| 5 | Erfaring, leder, stats, ildmetoder | Enhedskortet har erfaring, leder, seks færdigheder og øvelser; ildmetoder trænes efter forskning. Mangler: erfaring pr. kampsituation (Docs/Erfaring.md). |
+| 6 | Fane og uniform som billede af en soldat i de rigtige farver | Uniformbillede findes (1851-billeder) og farvevalg gemmes; 3D-farver virker først når de bagte figurer er rettet. Mangler: fanen på kortet og soldaten i valgte farver i kortet; 1825-billeder. |
+| 7 | Sårede og hvornår de kommer tilbage | Gjort: enhedskortet viser antal på lazaret og hvornår halvdelen er tilbage. Mangler: erfaring bevares for de sårede (puljeregel). |
+| 8 | Opgradér batteri til ridende batteri | Ikke lavet: opgradering findes til riflet kanon, ikke fodbatteri til ridende batteri (heste, mandskab på heste, pris, uddannelsestid). |
+| 9 | Forskning: landbrug, smede m.fl. mere effektive | Gjort: civil forskning udvidet (landboreformer, mergling, smede og redskaber, kvæg, dampmaskiner med mere). |
