@@ -3871,7 +3871,7 @@ void SCampaign1851Overlay::PaintMateriel(const FGeometry& Geometry, FSlateWindow
 	const int32 PictureArms[] = { 0, 2, 3, 4, 5, 4 };
 	const int32 PictureArm = PictureArms[FMath::Clamp(RaiseType, 0, 5)];
 	const FVector2D Picture(RX, RY);
-	if (Map->ActiveScenario().Id != TEXT("1825") && UniformBrushes.IsValidIndex(PictureArm) && UniformBrushes[PictureArm]->GetResourceObject())
+	if (UniformBrushes.IsValidIndex(PictureArm) && UniformBrushes[PictureArm]->GetResourceObject())
 	{
 		FSlateDrawElement::MakeBox(Out, Layer + 1, Geometry.ToPaintGeometry(FVector2D(68.f, 102.f), FSlateLayoutTransform(Picture)), UniformBrushes[PictureArm].Get(), ESlateDrawEffect::None, FLinearColor::White);
 	}

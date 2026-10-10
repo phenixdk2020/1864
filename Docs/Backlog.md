@@ -70,3 +70,7 @@ Designgrundlaget for kamp-AI'en ligger i `Docs/Kamp-AI-Design-v2.0.md` (ordre me
 ## After action report (ønske 2026-10-09, senere)
 
 Efter hvert slag (3D og kampagne) en rapport pr. side, enhed og samlet: døde, sårede (og hvor mange der kommer tilbage via lazaret), fanger, erobret udstyr (kanoner, våben, heste, vogne, faner), tabt udstyr, ammunition brugt, moral- og cohesion-forløb, officerstab, tid i kamp. Tallene føres tilbage til kampagnens hær (mænd, udstyr, lazaret, krigsfanger). Kræver tabsregnskab pr. enhed i slaget (i dag kun CurrentStrength/InitialStrength) og en rapportskærm ved AFSLUT SLAGET.
+
+## Uniformbilleder i 1825 (2026-10-10)
+
+Indkaldelsesvinduet (Indkald en ny enhed) og enhedskortet viser nu 1851-uniformbillederne også i 1825 (de var skjult i 1825 og viste kun en streg-figur). Billederne er fra 1851 og passer ikke historisk til 1825 (glatløbet musket, andre uniformer): se på det, og lav eller skaf 1825-billeder (linje, jæger, dragon, artilleri, rytteri) pr. våben.
