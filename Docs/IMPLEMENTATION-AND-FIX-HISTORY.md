@@ -1787,6 +1787,14 @@ UCampaign1851SaveGame (version 30) har fået Settings: hele indstillingssektione
 - SPRED og automatisk fjernildsdækning bruger samme tilstand: 3x afstand, én række, Prone, kravlevisning, max 40 % fart, træf 0,60 for håndvåben og 0,45 for målrettet/områdeartilleri og mortérer. SAML gendanner formation/afstande; leveret march rejser først med eksisterende 3 sekunders forsinkelse. Manuel SPRED bevares også uden officer-AI.
 - Dokumenteret i `Docs/Enhedsadfaerd1864.md`; `-Strategy1864DebugSpread` logger gruppeklik og SPRED/SAML. Statisk diff-, include- og API-kontrol mod UE 5.8-headere. Ikke bygget, ikke startet, ikke spiltestet; ingen commit.
 
+### 2026-10-10 — Garnisonsoversigt, kasernekrav og billet
+
+- GARNISON er altid aktiv på indenlandske bykort. Enhedslisten viser mandtal, våbenart, moral og forsyning, ledig kapacitet, enhedsvalg, byens Kamporden og tilbagevendingsmulighed; lange lister har sider.
+- KASERNE er en særskilt sektion med forklaring ved manglende byggegrund eller for få indbyggere. Minimum 2.500 indbyggere er datadrevet i bygningstabellen og håndhæves ved nyt byggeri, uden at afvise gamle gemte projekter.
+- Billet giver indbyggere/40 pladser, højst 1.000 mand, langsommere moralgenopretning, mindre forråd og dyrere underhold. Billet tillader ikke rekruttering; scenariets eksisterende kasernebyer bevares ud fra starthæren.
+- Tilbagevenden kan bruge byer med plads i samme amt. Hele formationer får fælles kapacitetskontrol før ændring; destination og kortposition opdateres, mens Home bevares. Den eksisterende fortmulighed bevares.
+- Regler og fund dokumenteret i `Docs/Garrison.md`. Ingen ny gemmetilstand eller versionsændring. CSV/generator, beregnede panelhøjder, diff og Unreal 5.8-signaturer kontrolleret statisk. Ingen build, spilstart eller commit.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

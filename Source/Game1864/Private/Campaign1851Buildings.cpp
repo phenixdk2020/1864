@@ -68,6 +68,8 @@ namespace Campaign1851Buildings
 			D.CostRd = FCString::Atoi(*F[CCost]);
 			D.Days = FCString::Atoi(*F[CDays]);
 			D.UpkeepRdPerYear = FCString::Atoi(*F[CUpkeep]);
+			const int32 GarrisonMinPopColumn = Col(TEXT("min_population"));
+			D.MinPopulation = F.IsValidIndex(GarrisonMinPopColumn) ? FCString::Atoi(*F[GarrisonMinPopColumn]) : 0;
 			D.Requires = F[CReq];
 			D.Provides = F[CProv];
 			D.Image = F[CImg];

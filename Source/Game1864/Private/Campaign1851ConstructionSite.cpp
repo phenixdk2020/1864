@@ -75,6 +75,8 @@ const TArray<FCampaign1851SiteModule>& ACampaign1851ConstructionSite::GarrisonMo
 		TArray<FCampaign1851SiteModule> L;
 		FCampaign1851SiteModule& Barracks = L.Add_GetRef(Module(TEXT("Garrison_Barracks"), TEXT("Infanterikaserne"), ESitePiece::Barracks,
 			Campaign1851Scenery::BarracksLength, Campaign1851Scenery::BarracksWidth, Campaign1851Scenery::BarracksEave, Campaign1851Scenery::BarracksTop, TEXT("T_Barracks_Infantry")));
+		const FCampaign1851BuildingDef* GarrisonBarracksData = Campaign1851Buildings::Find(Barracks.Key);
+		Barracks.MinPopulation = GarrisonBarracksData ? GarrisonBarracksData->MinPopulation : 2500;
 		Barracks.bFlag = true;
 		Barracks.FlagPos = FVector2D(0.0, 12.4);
 		FCampaign1851SiteModule& Stables = L.Add_GetRef(Module(TEXT("Garrison_Stables"), TEXT("Stalde"), ESitePiece::Stables, 12.f, 4.4f, 3.2f, 6.4f, TEXT("T_Module_Stables")));

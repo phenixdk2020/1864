@@ -100,7 +100,7 @@ double ACampaign1851Map::RaisedUpkeepPerMonth() const
 	double Total = 0.0;
 	for (const FCampaign1851Regiment& R : Regiments)
 	{
-		Total += R.bRaised && !R.Id.StartsWith(TEXT("SE")) ? Campaign1851Army::RaisedUpkeepPerMonth * R.MaxMen / double(Campaign1851Resources::Type(R.RaisingType).Men) : 0.0;   // Sweden-Norway pays its own; a split unit is no new unit
+		Total += R.bRaised && !R.Id.StartsWith(TEXT("SE")) ? Campaign1851Army::RaisedUpkeepPerMonth * R.MaxMen / double(Campaign1851Resources::Type(R.RaisingType).Men) * (IsBilleted(R) ? 1.15 : 1.0) : 0.0;   // Sweden-Norway pays its own; a split unit is no new unit
 	}
 	return Total;
 }
@@ -116,6 +116,8 @@ FString ACampaign1851Map::RaiseBlockReason(int32 CityIndex) const
 	{
 		return TEXT("kræver en færdig kaserne");
 	}
+	if (!Cities[CityIndex].Occupier.IsEmpty()) { return TEXT("byen er besat"); }
+	if (GarrisonMen(CityIndex) + Campaign1851Army::RaiseMen > GarrisonCapacity(CityIndex)) { return TEXT("kasernen har ikke plads til den nye bataljon"); }
 	const int32 AmtIndex = AmtIndexOfTown(CityIndex);
 	if (!AmtManpower.IsValidIndex(AmtIndex) || AmtManpower[AmtIndex] < Campaign1851Army::RaiseMen)
 	{

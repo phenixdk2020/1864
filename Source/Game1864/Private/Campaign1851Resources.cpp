@@ -156,9 +156,9 @@ bool ACampaign1851Map::BuyKit(bool bMortars, int32 Count, FString* OutReason)
 
 bool ACampaign1851Map::RaiseTownOk(int32 Town) const
 {
-	// A finished barracks, or one of the garrisons of 1851 (a unit has its home there).
+	// Finished barracks or a scenario garrison; raised units must never create a barracks by setting Home.
 	const ACampaign1851ConstructionSite* Site = FindProject(Town);
-	return (Site && Site->IsBarracksDone()) || Regiments.ContainsByPredicate([Town](const FCampaign1851Regiment& R) { return R.Home == Town; });
+	return (Site && Site->IsBarracksDone()) || ArmyAtStart.ContainsByPredicate([Town](const FCampaign1851Regiment& R) { return R.Home == Town; });
 }
 
 TArray<int32> ACampaign1851Map::RaiseTowns() const
@@ -166,7 +166,7 @@ TArray<int32> ACampaign1851Map::RaiseTowns() const
 	TArray<int32> Out;
 	for (int32 c = 0; c < Cities.Num(); ++c)
 	{
-		if (!Cities[c].bForeign && RaiseTownOk(c))
+		if (!Cities[c].bForeign && Cities[c].Occupier.IsEmpty() && RaiseTownOk(c))
 		{
 			Out.Add(c);
 		}
@@ -263,12 +263,14 @@ FString ACampaign1851Map::UnitBlockReason(int32 Type, int32 Town, int32 Size) co
 	const Campaign1851Resources::FUnitType T = Campaign1851Resources::SizedType(Type, Size);
 	if (!Cities.IsValidIndex(Town) || Cities[Town].bForeign)
 	{
-		return TEXT("vælg en garnisonsby");
+		return TEXT("ingen by med kaserne: rekruttering kræver kaserne, ikke billet");
 	}
 	if (!RaiseTownOk(Town))
 	{
-		return TEXT("byen har ingen færdig kaserne");
+		return TEXT("byen har ingen færdig kaserne; billet kan ikke rekruttere");
 	}
+	if (!Cities[Town].Occupier.IsEmpty()) { return TEXT("byen er besat"); }
+	if (GarrisonMen(Town) + T.Men > GarrisonCapacity(Town)) { return TEXT("kasernen har ikke plads til den nye enhed"); }
 	const int32 AmtIndex = AmtIndexOfTown(Town);
 	if (!AmtManpower.IsValidIndex(AmtIndex) || AmtManpower[AmtIndex] < T.Men)
 	{

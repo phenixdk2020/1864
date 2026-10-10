@@ -17,6 +17,7 @@ struct FCampaign1851BuildingDef
 	int32 CostRd = 0;
 	int32 Days = 0;
 	int32 UpkeepRdPerYear = 0;
+	int32 MinPopulation = 0; // Derived requirement from the building table; not saved.
 	FString Requires;
 	FString Provides;
 	FString Image;

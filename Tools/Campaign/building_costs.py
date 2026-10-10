@@ -190,6 +190,7 @@ def compute(row):
         "timber_loads": timber, "stone_loads": stone, "iron_centner": iron,
         "special_rd": special, "special": special_note, "upkeep_rd_year": upkeep,
         "requires": requires, "provides": provides, "image": image,
+        "min_population": 2500 if key == "Garrison_Barracks" else 0,
     }
 
 

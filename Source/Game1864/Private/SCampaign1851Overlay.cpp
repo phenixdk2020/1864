@@ -659,7 +659,21 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 	const ACampaign1851ConstructionSite* Site = C.bHasPlot ? Map->FindProject(SelectedCity) : nullptr;
 	const int32 ModuleRows = Site && Site->IsBarracksDone() ? Site->NumModules() - 1 : 0;
 	const float RowHeight = 54.f;
-	const float CardHeight = 150.f + (ModuleRows > 0 ? 34.f + ModuleRows * RowHeight + 10.f : 0.f);
+	const FString GarrisonBuildWhy = Map->BarracksBlockReason(SelectedCity);
+	const bool GarrisonCanBuild = GarrisonBuildWhy.IsEmpty();
+	TArray<int32> GarrisonRoster;
+	for (int32 GarrisonIndex = 0; GarrisonIndex < Map->GetRegiments().Num(); ++GarrisonIndex)
+	{
+		const FCampaign1851Regiment& GarrisonUnit = Map->GetRegiments()[GarrisonIndex];
+		if (GarrisonUnit.Town == SelectedCity && !GarrisonUnit.IsMarching() && GarrisonUnit.Men > 0) { GarrisonRoster.Add(GarrisonIndex); }
+	}
+	const float GarrisonBuildHeight = GarrisonCanBuild ? 184.f + ModuleRows * RowHeight + 10.f : 90.f;
+	const int32 GarrisonRowsPerPage = FMath::Clamp(int32((Geometry.GetLocalSize().Y - 56.f - GarrisonBuildHeight - 164.f) / 64.f), 1, 4);
+	const int32 GarrisonPageCount = FMath::Max(1, (GarrisonRoster.Num() + GarrisonRowsPerPage - 1) / GarrisonRowsPerPage);
+	GarrisonPageIndex = FMath::Clamp(GarrisonPageIndex, 0, GarrisonPageCount - 1);
+	const int32 GarrisonVisibleRows = FMath::Min(GarrisonRowsPerPage, GarrisonRoster.Num() - GarrisonPageIndex * GarrisonRowsPerPage);
+	const float GarrisonRosterHeight = 164.f + GarrisonVisibleRows * 64.f;
+	const float CardHeight = GarrisonRosterHeight + GarrisonBuildHeight;
 	const FVector2D Pos(28.f, Geometry.GetLocalSize().Y - 190.f - Size.Y);
 	PaintPanel(Geometry, Out, Layer, Pos, Size);
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseSelection);
@@ -697,25 +711,69 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 		const float TabW = (Size.X - 44.f - 16.f) / 3.f;
 		for (int32 t = 0; t < 3; ++t)
 		{
-			const bool bEnabled = t != 0 || C.bHasPlot;
-			PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(22.f + t * (TabW + 8.f), Size.Y - 44.f), FVector2D(TabW, 28.f), Tabs[t], EButton::TownTab, t + 1, TownTab == t + 1, !bEnabled);
+			PaintButton(Geometry, Out, Layer + 2, Pos + FVector2D(22.f + t * (TabW + 8.f), Size.Y - 44.f), FVector2D(TabW, 28.f), Tabs[t], EButton::TownTab, t + 1, TownTab == t + 1);
 		}
 	}
-	if (!C.bHasPlot || TownTab != 1)
+	if (TownTab != 1 || C.bForeign)
 	{
 		return;
 	}
 
-	// Garrison (design manual 20.16.5-7): the barracks card, then the modules around the parade ground.
-	const FVector2D Card(28.f + 440.f + 10.f, Geometry.GetLocalSize().Y - 190.f - CardHeight);
+	// Town garrison and billet roster; the barracks and its modules are a separate section below.
+	const FVector2D Card(28.f + 440.f + 10.f, FMath::Max(28.f, Geometry.GetLocalSize().Y - 28.f - CardHeight));
 	PaintPanel(Geometry, Out, Layer, Card, FVector2D(Size.X, CardHeight));
 	PaintCloseX(Geometry, Out, Layer + 3, Card + FVector2D(Size.X, 0.f), CloseTownTab);
 	PaintText(Geometry, Out, Layer + 2, TEXT("G A R N I S O N"), Card + FVector2D(22.f, 22.f), Serif(11), Gold, 0.f, false);
+	const int32 GarrisonCapacity = Map->GarrisonCapacity(SelectedCity);
+	const int32 GarrisonMen = Map->GarrisonMen(SelectedCity);
+	const bool GarrisonBillet = !Map->RaiseTownOk(SelectedCity);
+	PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s: %s / %s mand  ·  plads til %s"),
+		GarrisonBillet ? TEXT("Billet i byens huse") : TEXT("Kasernegarnison"), *Thousands(GarrisonMen), *Thousands(GarrisonCapacity),
+		*Thousands(FMath::Max(0, GarrisonCapacity - GarrisonMen))), Card + FVector2D(22.f, 46.f), Serif(12), Ink, Size.X - 44.f);
+	PaintTextFit(Geometry, Out, Layer + 2, GarrisonBillet ? TEXT("Billet: moralgenopretning −5 %, underhold +15 %, mindre forråd") : TEXT("Kaserne: normal moralgenopretning og forsyning"),
+		Card + FVector2D(22.f, 66.f), Serif(11, EFace::Italic), MutedInk, Size.X - 44.f);
+	PaintButton(Geometry, Out, Layer + 2, Card + FVector2D(22.f, 82.f), FVector2D(210.f, 26.f), TEXT("KAMPORDEN FOR BYEN"), EButton::GarrisonOOB, SelectedCity);
+	PaintTextFit(Geometry, Out, Layer + 2, GarrisonRoster.Num() == 0 ? TEXT("Ingen enheder stationeret her") : TEXT("Stationerede enheder (også formationer i byen)"),
+		Card + FVector2D(22.f, 126.f), Serif(11), Gold, Size.X - 44.f);
+	for (int32 GarrisonRow = 0; GarrisonRow < GarrisonVisibleRows; ++GarrisonRow)
+	{
+		const int32 GarrisonIndex = GarrisonRoster[GarrisonPageIndex * GarrisonRowsPerPage + GarrisonRow];
+		const FCampaign1851Regiment& GarrisonUnit = Map->GetRegiments()[GarrisonIndex];
+		const FVector2D GarrisonRowPos = Card + FVector2D(22.f, 140.f + GarrisonRow * 64.f);
+		PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("%s · %d mand · %s · moral %.0f %%"), *GarrisonUnit.Name,
+			GarrisonUnit.Men, Campaign1851Army::ArmName(GarrisonUnit.Arm), GarrisonUnit.Morale * 100.f), GarrisonRowPos, Serif(11), Ink, Size.X - 44.f);
+		PaintTextFit(Geometry, Out, Layer + 2, Campaign1851Supply::Describe(GarrisonUnit), GarrisonRowPos + FVector2D(0.f, 18.f), Serif(10), MutedInk, Size.X - 44.f);
+		PaintButton(Geometry, Out, Layer + 2, GarrisonRowPos + FVector2D(0.f, 28.f), FVector2D(72.f, 23.f), TEXT("VÆLG"), EButton::GarrisonSelect, GarrisonIndex);
+		FString GarrisonReturnWhy;
+		const bool GarrisonCanReturn = GarrisonUnit.Formation != 0 && Map->CanReturnToGarrison(GarrisonIndex, &GarrisonReturnWhy);
+		PaintButton(Geometry, Out, Layer + 2, GarrisonRowPos + FVector2D(80.f, 28.f), FVector2D(174.f, 23.f),
+			GarrisonUnit.Formation == 0 ? TEXT("I GARNISON") : TEXT("TILBAGE I GARNISON"), EButton::GarrisonReturn, GarrisonIndex, false, !GarrisonCanReturn);
+		if (!GarrisonReturnWhy.IsEmpty()) { Tips.Add({ GarrisonRowPos + FVector2D(80.f, 28.f), GarrisonRowPos + FVector2D(254.f, 51.f), GarrisonReturnWhy }); }
+	}
+	if (GarrisonPageCount > 1)
+	{
+		const FVector2D GarrisonPagePos = Card + FVector2D(22.f, GarrisonRosterHeight - 24.f);
+		PaintButton(Geometry, Out, Layer + 2, GarrisonPagePos, FVector2D(60.f, 22.f), TEXT("FORRIGE"), EButton::GarrisonPage, -1, false, GarrisonPageIndex == 0);
+		PaintButton(Geometry, Out, Layer + 2, GarrisonPagePos + FVector2D(68.f, 0.f), FVector2D(60.f, 22.f), TEXT("NÆSTE"), EButton::GarrisonPage, 1, false, GarrisonPageIndex + 1 == GarrisonPageCount);
+		PaintText(Geometry, Out, Layer + 2, FString::Printf(TEXT("Side %d / %d"), GarrisonPageIndex + 1, GarrisonPageCount), GarrisonPagePos + FVector2D(140.f, 11.f), Serif(10), MutedInk, 0.f, false);
+	}
+	const FVector2D GarrisonBuildCard = Card + FVector2D(0.f, GarrisonRosterHeight);
+	PaintText(Geometry, Out, Layer + 2, TEXT("K A S E R N E"), GarrisonBuildCard + FVector2D(22.f, 22.f), Serif(11), Gold, 0.f, false);
+	if (!GarrisonCanBuild)
+	{
+		if (!C.bHasPlot)
+		{
+			PaintTextFit(Geometry, Out, Layer + 2, FString::Printf(TEXT("Ingen byggegrund ved %s:"), *C.Name), GarrisonBuildCard + FVector2D(22.f, 44.f), Serif(12), Ink, Size.X - 44.f);
+			PaintTextFit(Geometry, Out, Layer + 2, TEXT("kysten eller terrænet levner ingen jævn, fri plads"), GarrisonBuildCard + FVector2D(22.f, 64.f), Serif(12), Ink, Size.X - 44.f);
+		}
+		else { PaintTextFit(Geometry, Out, Layer + 2, GarrisonBuildWhy, GarrisonBuildCard + FVector2D(22.f, 48.f), Serif(12), Ink, Size.X - 44.f); }
+		return;
+	}
 	if (ModuleBrushes.IsValidIndex(0) && ModuleBrushes[0]->GetResourceObject())
 	{
-		FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(100.f, 100.f), FSlateLayoutTransform(Card + FVector2D(18.f, 36.f))), ModuleBrushes[0].Get());
+		FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(100.f, 100.f), FSlateLayoutTransform(GarrisonBuildCard + FVector2D(18.f, 36.f))), ModuleBrushes[0].Get());
 	}
-	const FVector2D Text = Card + FVector2D(134.f, 0.f);
+	const FVector2D Text = GarrisonBuildCard + FVector2D(134.f, 0.f);
 	const FCampaign1851SiteModule& Barracks = ACampaign1851ConstructionSite::GarrisonModules()[0];
 	PaintText(Geometry, Out, Layer + 2, Barracks.Name, Text + FVector2D(0.f, 50.f), Serif(16), Ink, 0.f, false);
 	if (!Site)
@@ -761,7 +819,7 @@ void SCampaign1851Overlay::PaintInfo(const FGeometry& Geometry, FSlateWindowElem
 
 	for (int32 m = 1; m <= ModuleRows; ++m)
 	{
-		const FVector2D Row = Card + FVector2D(0.f, 184.f + (m - 1) * RowHeight);
+		const FVector2D Row = GarrisonBuildCard + FVector2D(0.f, 184.f + (m - 1) * RowHeight);
 		TArray<FVector2D> Rule = { Row + FVector2D(18.f, -2.f), Row + FVector2D(Size.X - 18.f, -2.f) };
 		FSlateDrawElement::MakeLines(Out, Layer + 2, Geometry.ToPaintGeometry(), Rule, ESlateDrawEffect::None, Gold.CopyWithNewOpacity(0.3f), true, 1.f);
 		if (ModuleBrushes.IsValidIndex(m) && ModuleBrushes[m]->GetResourceObject())
@@ -3916,7 +3974,7 @@ void SCampaign1851Overlay::PaintMateriel(const FGeometry& Geometry, FSlateWindow
 		RY += 36.f;
 	};
 	Chooser(TEXT("Størrelse"), FString::Printf(TEXT("%s | %d mand | %d heste | %d skyts"), *Campaign1851Resources::RaiseSizeName(RaiseType, RaiseSize), Preview.Men, Preview.Horses, Preview.Guns + Preview.Mortars), EButton::UnitSize);
-	Chooser(TEXT("Garnison"), Town != INDEX_NONE ? Map->GetCities()[Town].Name : FString(TEXT("ingen by med kaserne")), EButton::UnitTown);
+	Chooser(TEXT("Garnison"), Town != INDEX_NONE ? Map->GetCities()[Town].Name : FString(TEXT("ingen by med kaserne – billet kan ikke rekruttere")), EButton::UnitTown);
 	Chooser(TEXT("Hører under"), Command != INDEX_NONE ? Commands[Command].Name : FString(TEXT("-")), EButton::UnitCommand);
 	Chooser(TEXT("Øvelser"), Campaign1851Army::ProgramName(ECampaign1851Program(FMath::Clamp(RaiseProgram, 0, int32(ECampaign1851Program::Count) - 1))), EButton::UnitProgram);
 	RY += 8.f;
