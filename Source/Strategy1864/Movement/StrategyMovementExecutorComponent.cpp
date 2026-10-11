@@ -287,8 +287,8 @@ void UStrategyMovementExecutorComponent::TickComponent(
         OwnerUnit->CombatComponent->FindBestTarget(false) : nullptr;
     // A designated enemy has an exact stand-off goal, including backing out when already too close.
     if (MovementFireTarget && CurrentOrder.AttackTarget.Get() == MovementFireTarget &&
-        !bHoldingForFire && FVector::Dist2D(OwnerUnit->GetActorLocation(), CurrentOrder.TargetLocation) > ArrivalToleranceCm)
-        MovementFireTarget = nullptr;
+        !bHoldingForFire && FVector::Dist2D(OwnerUnit->GetActorLocation(), CurrentOrder.TargetLocation) > FMath::Max(ArrivalToleranceCm, 1200.0f))
+        MovementFireTarget = nullptr;   // (within 12 m of the stand-off point it may halt and fire: no crawl over the last metres before the first volley)
     if (MovementFireTarget)
     {
         FireReactionQuietSeconds = 0.0f;

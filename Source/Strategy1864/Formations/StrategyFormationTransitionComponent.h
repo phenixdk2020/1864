@@ -25,14 +25,14 @@ public:
         FActorComponentTickFunction* ThisTickFunction) override;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Formation")
-    float BaseReformSeconds = 3.0f;
+    float BaseReformSeconds = 2.0f;
     UPROPERTY(EditAnywhere, Category="Strategy|Square")
     float SquareReformSeconds = 25.0f;
     UPROPERTY(EditAnywhere, Category="Strategy|Square")
     float SquareFormTimeFactor = 1.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Formation")
-    float SecondsPer100Men = 1.0f;
+    float SecondsPer100Men = 0.6f;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Formation")
     float ReformRemainingSeconds = 0.0f;

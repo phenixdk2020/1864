@@ -1657,10 +1657,12 @@ void UStrategyInfantryVisualComponent::KeepReformSpacing(float DeltaTime)
                     ReformAway.Z = 0.f;
                     const float ReformDistance = ReformAway.Size2D();
                     if (ReformDistance >= ReformClearance) continue;
+                    // A man within 1.2 m of his own place is no longer pushed (otherwise two close slots keep pushing each other and
+                    // the men walk on the spot for ever); only men still on their way give way.
                     const bool bReformMoveA = SoldierSettle[ReformMan].bActive && SoldierSettle[ReformMan].StartRemaining <= 0.f &&
-                        FVector::Dist2D(FormationStepPositions[ReformMan], ReformUnit.TransformPosition(SoldierSettle[ReformMan].Goal)) > 0.1f;
+                        FVector::Dist2D(FormationStepPositions[ReformMan], ReformUnit.TransformPosition(SoldierSettle[ReformMan].Goal)) > 120.f;
                     const bool bReformMoveB = SoldierSettle[ReformOther].bActive && SoldierSettle[ReformOther].StartRemaining <= 0.f &&
-                        FVector::Dist2D(FormationStepPositions[ReformOther], ReformUnit.TransformPosition(SoldierSettle[ReformOther].Goal)) > 0.1f;
+                        FVector::Dist2D(FormationStepPositions[ReformOther], ReformUnit.TransformPosition(SoldierSettle[ReformOther].Goal)) > 120.f;
                     if (!bReformMoveA && !bReformMoveB) continue; // Halted men and waiting files hold their ground.
                     if (ReformDistance <= 0.01f)
                     {

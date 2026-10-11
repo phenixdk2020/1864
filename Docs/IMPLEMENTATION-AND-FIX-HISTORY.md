@@ -1902,6 +1902,12 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Rettelse (`PlanOrderlyReform` og fartsformlen i `UpdateSettling`): alle mænd starter samtidig og går i en ret linje til sin plads med konstant fart, så alle ankommer samtidig; tiden sættes af den længste vej ved højst ca. 3,8 m/s (2,5-7 s). Formen undervejs er blandingen af den gamle og den nye formation. Destinationsankomst (en efter en i forkanten) er uændret.
 - Ikke set i spillet endnu (automatisk test fejlede: vinduets klikpositioner stemte ikke). Se med `-Strategy1864DebugFormation`.
 
+### 2026-10-11 – Første skud hurtigere, flere tab, mænd der ikke fandt plads
+- Tid til første skud: deployering startes 60 m før skudafstand (var 35 m), omformningstid 2 s + 0,6 s pr. 100 mand (var 3 s + 1 s), og en enhed med udpeget fjende må standse og skyde 12 m fra standsepunktet (var 0,5 m: sidste meter blev kravlet).
+- Tab: grundtræfchance 0,15 (var 0,035), tæt hold x2,4 og mellem x1,6.
+- Mænd der gik på stedet: `KeepReformSpacing` skubbede stadig mænd, der var tæt på deres plads, så to nærtliggende pladser blev ved med at skubbe hinanden og ReformDeadline aldrig blev ryddet. Nu skubbes kun mænd, der er mere end 1,2 m fra deres plads.
+- Set i Unity-koden (`PrototypeCompanyRenderer09L2.cs`): kompagniet er stift (mændene tegnes på faste pladser i kompagniets ramme, formationsskift lægger pladserne om), derfor ingen hop og ingen efternølere. Se afsnit i svar til spilleren; Unreal har per-mand-bevægelse og et udglattet tegnet centrum.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
