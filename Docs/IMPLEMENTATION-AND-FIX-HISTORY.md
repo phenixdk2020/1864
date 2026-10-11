@@ -1923,6 +1923,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 
 - Enhedsrækkerne i Kamporden (garnison-/enhedslisten) viser nu "fjender ude N" (TotalEnemyKilled), når enheden har sat fjender ud af kampen. Enhedskortet viste det allerede. Mangler: tal pr. kompagni og i selve træ-boksene.
 
+### 2026-10-11 - Mouse-over med mænd tilbage (125/180)
+
+- 3D-slag: enheds-tooltip viser nu "Mand: 125/180 (tab 55)" i stedet for "125 af 180".
+- Kampagnekortet: hærmarkører har nu mouse-over "Navn: 125/180 mand" (`ButtonTip`, EButton::RegimentPiece; nominel styrke = MaxMen).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -1732,7 +1732,7 @@ void AStrategyHUD::DrawUnitHover()
     const int32 Start = InitialMenUnder(Best), Now = MenUnder(Best);
     const FString Name = Best->DisplayName.ToString();
     const FString Line1 = FString::Printf(TEXT("%s%s"), *Name, Best->Side == EStrategySide::Denmark ? TEXT("") : TEXT("  (fjende)"));
-    const FString Line2 = FString::Printf(TEXT("Mand: %d af %d  (tab %d)"), Now, Start, Start - Now);
+    const FString Line2 = FString::Printf(TEXT("Mand: %d/%d  (tab %d)"), Now, Start, Start - Now);
     const FString Line3 = FString::Printf(TEXT("Moral %.0f"), Best->Morale);
     const float W = 230.f, H = 66.f;
     const float X = FMath::Min(MX + 18.f, Canvas->ClipX - W - 6.f), Y = FMath::Min(MY + 18.f, Canvas->ClipY - H - 6.f);

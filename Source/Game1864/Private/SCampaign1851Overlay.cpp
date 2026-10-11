@@ -955,6 +955,13 @@ FString SCampaign1851Overlay::ButtonTip(EButton Action, int32 Module) const
 {
 	switch (Action)
 	{
+	case EButton::RegimentPiece:
+		if (Map.IsValid() && Map->GetRegiments().IsValidIndex(Module))
+		{
+			const FCampaign1851Regiment& R = Map->GetRegiments()[Module];
+			return FString::Printf(TEXT("%s: %d/%d mand"), *R.Name, R.Men, FMath::Max(R.Men, R.MaxMen));
+		}
+		return FString();
 	case EButton::Menu: return TEXT("Spilmenuen: gem, indlæs, nyt spil og afslut (M)");
 	case EButton::FortTool: return TEXT("Skanser: byg og bemand feltbefæstninger på kortet");
 	case EButton::OpenGazette: return TEXT("Avisen: nyheder, statistik, grafer og opslagsværket");
