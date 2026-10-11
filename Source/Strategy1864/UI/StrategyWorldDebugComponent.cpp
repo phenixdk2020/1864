@@ -5,6 +5,7 @@
 #include "../Formations/StrategyFormationComponent.h"
 #include "../Orders/StrategyOrderComponent.h"
 #include "../Units/StrategyUnit.h"
+#include "../Visual/StrategyInfantryVisualComponent.h"
 #include "DrawDebugHelpers.h"
 
 UStrategyWorldDebugComponent::UStrategyWorldDebugComponent()
@@ -45,7 +46,30 @@ void UStrategyWorldDebugComponent::DrawUnitRecursive(
     DrawMissionForUnit(Unit);
     DrawRouteForUnit(Unit);
 
-    if (Unit->FormationComponent &&
+    // The selection frame follows the DRAWN formation (the men as they stand), not a small square at the flag.
+    bool bDrewFormationFrame = false;
+    if (const UStrategyInfantryVisualComponent* DrawnVisual = Unit->FindComponentByClass<UStrategyInfantryVisualComponent>())
+    {
+        FTransform DrawnFrame;
+        FBox DrawnBounds(ForceInit);
+        if (DrawnVisual->GetDrawnFormation(DrawnFrame, DrawnBounds))
+        {
+            const float Lift = 25.0f;
+            const FVector2D Min(DrawnBounds.Min.X, DrawnBounds.Min.Y), Max(DrawnBounds.Max.X, DrawnBounds.Max.Y);
+            const FVector Corners[4] = {
+                DrawnFrame.TransformPosition(FVector(Max.X, Max.Y, 0.f)), DrawnFrame.TransformPosition(FVector(Max.X, Min.Y, 0.f)),
+                DrawnFrame.TransformPosition(FVector(Min.X, Min.Y, 0.f)), DrawnFrame.TransformPosition(FVector(Min.X, Max.Y, 0.f)) };
+            for (int32 Edge = 0; Edge < 4; ++Edge)
+            {
+                FVector From = Corners[Edge], To = Corners[(Edge + 1) % 4];
+                From.Z = To.Z = Unit->GetActorLocation().Z + Lift;
+                DrawDebugLine(GetWorld(), From, To, FColor(255, 220, 80), false, 0.0f, 0, 3.0f);
+            }
+            bDrewFormationFrame = true;
+        }
+    }
+
+    if (!bDrewFormationFrame && Unit->FormationComponent &&
         Unit->FormationComponent->UsesSquareVisualOwnership())
     {
         const float HalfExtent =

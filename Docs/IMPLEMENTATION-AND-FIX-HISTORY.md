@@ -1908,6 +1908,12 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Mænd der gik på stedet: `KeepReformSpacing` skubbede stadig mænd, der var tæt på deres plads, så to nærtliggende pladser blev ved med at skubbe hinanden og ReformDeadline aldrig blev ryddet. Nu skubbes kun mænd, der er mere end 1,2 m fra deres plads.
 - Set i Unity-koden (`PrototypeCompanyRenderer09L2.cs`): kompagniet er stift (mændene tegnes på faste pladser i kompagniets ramme, formationsskift lægger pladserne om), derfor ingen hop og ingen efternølere. Se afsnit i svar til spilleren; Unreal har per-mand-bevægelse og et udglattet tegnet centrum.
 
+### 2026-10-11 - Stiv kompagni-ramme, gul ramme om hele formationen, rolig udfoldning
+
+- Kompagniet bevæger sig nu som en stiv krop (som i Unity-prototypen): hver mand står i sin plads i enhedens ramme (`bRigidCompany`, `-Strategy1864Rigid=0` slår det fra).
+- Den gule markeringsramme følger den tegnede formation (hele linjen), ikke en lille firkant.
+- Kolonne→linje under march: udfoldningen starter ved fjendens long range + 95 m (før 60 m), tager 5-18 s og mændene bevæger sig højst 3 m/s, så ingen sprinter/hopper; derefter går kompagniet frem i linje til den valgte skudafstand.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

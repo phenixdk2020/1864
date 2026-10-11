@@ -1587,7 +1587,7 @@ void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, cons
         float ReformLongest = 0.f;
         for (int32 ReformOrder = 0; ReformOrder < ReformMen.Num(); ++ReformOrder)
             ReformLongest = FMath::Max(ReformLongest, float(FVector::Dist2D(ReformStarts[ReformMen[ReformOrder]], ReformFrame.TransformPosition(ReformSlots[ReformTargets[ReformOrder]]))));
-        ReformBudget = FMath::Clamp(ReformLongest / 380.f, 2.5f, FMath::Max(2.5f, FormationChangeDeadlineSeconds));
+        ReformBudget = FMath::Clamp(ReformLongest / 250.f, 5.f, 18.f);
     }
     FormationPlanStarted = VisualAnimationTime;
     FormationLongestPath = 0.f;
@@ -1736,7 +1736,11 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         const FVector ArrivalSlotOrigin = ArrivalDestination + FRotator(0.f, ArrivalFacing, 0.f).Vector() * ArrivalHalfDepth;
         PlanOrderlyReform(true, FTransform(FRotator(0.f, ArrivalFacing, 0.f), ArrivalSlotOrigin));
     }
-    if (!bArrivalReform) VisualPath.Advance(VisualUnit, DeltaTime, bVisualColumn, VisualWalkSpeed);
+    {
+        int32 RigidSetting = 1;
+        if (FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Rigid="), RigidSetting)) bRigidCompany = RigidSetting != 0;
+    }
+    if (!bArrivalReform) VisualPath.Advance(VisualUnit, DeltaTime, bVisualColumn, VisualWalkSpeed, bRigidCompany);
     else
     {
         // Drawn bounds/flag/HQ keep reading the living figure transforms in the final-facing frame.
@@ -1864,11 +1868,17 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
                 (Distance < 30.f ? FMath::Max(120.f, ReformBaseSpeed * Distance / 30.f) : ReformBaseSpeed);
             // Not at a destination: the constant speed of the linear morph (Distance / time left), so that everybody arrives together.
             const float ReformSpeed = bArrivalReform ? FMath::Max(ReformEase, Distance / FMath::Max(0.001f, ReformTimeLeft))
-                : FMath::Min(Distance / FMath::Max(0.001f, ReformTimeLeft), RunCmPerSecond * 1.6f);
+                : FMath::Min(Distance / FMath::Max(0.001f, ReformTimeLeft), 300.f);
             const float ReformStep = FMath::Min(Distance, ReformSpeed * DeltaTime);
             FigureWorld += (FigureTarget - FigureWorld).GetSafeNormal() * ReformStep;
             Settle.WorldVelocity = ReformStep >= Distance ? FVector::ZeroVector :
                 (FigureWorld - FigureBefore) / FMath::Max(0.001f, DeltaTime);
+        }
+        else if (bRigidCompany && !bFormationPlanPending && !bSpreadCrawling)
+        {
+            // Rigid company: the man stands exactly in his slot of the unit's frame (the slot moves and turns with the unit).
+            Settle.WorldVelocity = DeltaTime > 0.f ? (FigureTarget - FigureWorld) / DeltaTime : FVector::ZeroVector;
+            FigureWorld = FigureTarget;
         }
         else FStrategyVisualFormationPath::SmoothTravel(FigureWorld, Settle.WorldVelocity, FigureTarget, DeltaTime, SpecialFigureSpeed);
         const FVector Step = FigureWorld - FigureBefore;
@@ -1877,7 +1887,7 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         const float RunYaw = VisualUnit.InverseTransformVectorNoScale(Settle.WorldVelocity).Rotation().Yaw + SoldierMeshYawOffset;
         const bool bFigureBackstep = OwnerCompany->OrderComponent &&
             OwnerCompany->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Disengage;
-        const float Yaw = bFigureBackstep || Step.Size() >= Distance - 0.1f ? Settle.Yaw :
+        const float Yaw = bFigureBackstep || Step.Size() >= Distance - 0.1f || (bRigidCompany && !bFormationPlanPending) ? Settle.Yaw :
             (bVisualTravel || Distance > (bArrivalReform ? 0.1f : 30.f) ? RunYaw : Settle.Yaw);
         FRotator Rot = Soldier->GetRelativeRotation();
         const float FigureTurn = FMath::FindDeltaAngleDegrees(Rot.Yaw, Yaw);

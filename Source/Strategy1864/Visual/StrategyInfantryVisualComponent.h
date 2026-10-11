@@ -344,6 +344,7 @@ private:
         float NearBlend = 0.f;
     };
     bool bScaleOnlyRebuild = false;
+    bool bRigidCompany = true;   // -Strategy1864Rigid=0 returns to the per-man chase with the spring-smoothed centre
     FStrategyVisualFormationPath VisualPath;
     TArray<FSettle> SoldierSettle;       // parallel to SoldierComponents
     UPROPERTY(Transient)

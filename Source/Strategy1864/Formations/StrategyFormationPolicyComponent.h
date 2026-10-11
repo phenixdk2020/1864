@@ -29,7 +29,7 @@ public:
     float LongMoveColumnThresholdCm = 12000.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Formation")
-    float DeploySafetyBufferCm = 6000.0f;
+    float DeploySafetyBufferCm = 9500.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Formation")
     float ThreatScanIntervalSeconds = 0.25f;

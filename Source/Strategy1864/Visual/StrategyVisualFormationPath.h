@@ -73,9 +73,23 @@ struct FStrategyVisualFormationPath
         bInitialized = true;
     }
 
-    void Advance(const FTransform& Unit, float Dt, bool bColumn, float WalkSpeed)
+    void Advance(const FTransform& Unit, float Dt, bool bColumn, float WalkSpeed, bool bRigid = false)
     {
         if (!bInitialized) { Reset(Unit); }
+        if (bRigid)
+        {
+            // As in the Unity prototype: the company is one rigid body. The drawn centre and facing ARE the unit's (no spring, no
+            // turn-rate lag, no trail), so the men keep their places in the unit's own frame and nothing can wander or hop.
+            bMovingVisuals = !Unit.Equals(PreviousUnit, 0.001f);
+            bTurning = false;
+            Center = Unit.GetLocation();
+            CenterVelocity = FVector::ZeroVector;
+            Facing = Unit.Rotator().Yaw;
+            FacingVelocity = 0.f;
+            Trail.Reset();
+            TrailDistance = 0.f;
+            return;
+        }
         // Exact critically damped presentation spring: never inherit an actor snap.
         // Velocity survives starts, stops, route corners and speed changes.
         SmoothPosition(Center, CenterVelocity, Unit.GetLocation(), Dt, 24.f);
