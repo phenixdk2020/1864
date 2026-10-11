@@ -1919,6 +1919,10 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Åbne jernbaner giver nu passager- og fragtindtægt (`RailwayIncomePerYear`, Campaign1851Network.cpp): passagerer efter befolkningen i linjens byer og linjelængde, fragt efter længde og befolkning. Statens egne linjer giver alt, koncessionslinjer 15 %. Vises i budgettet og bogføres månedligt ("Jernbaner: passagerer og fragt").
 - Mangler: nedsat indtægt ved troppetransport eller afbrudt station/bro, og balance.
 
+### 2026-10-11 - Fjender ude i Kamporden
+
+- Enhedsrækkerne i Kamporden (garnison-/enhedslisten) viser nu "fjender ude N" (TotalEnemyKilled), når enheden har sat fjender ud af kampen. Enhedskortet viste det allerede. Mangler: tal pr. kompagni og i selve træ-boksene.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

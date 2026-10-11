@@ -4646,7 +4646,7 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 				OOBPoolButton(bOOBLocal, Layer + 2, FVector2D(Pos.X + 8.f, Y - 8.f), FVector2D(PoolW - 8.f, 16.f), FString(), bOOBLocal ? EButton::TreeRow : EButton::Block, Key, bSel || (bOOBLocal && bDragging && (DragKey == Key || HoverKey == Key)));
 				FSlateDrawElement::MakeBox(Out, Layer + 3, Geometry.ToPaintGeometry(FVector2D(8.f, 12.f), FSlateLayoutTransform(FVector2D(Pos.X + 11.f, Y - 6.f))), White, ESlateDrawEffect::None,
 					bOOBLocal ? ArmColours[ArmSlot(Regs[i])].CopyWithNewOpacity(1.f) * 1.6f : OOBReadOnlyInk);
-				PaintTextFit(Geometry, Out, Layer + 3, FString::Printf(TEXT("%s [%s]"), *Regs[i].Name, Campaign1851Army::ArmMark(Regs[i].Arm)), FVector2D(Pos.X + 24.f, Y), Serif(10, bOOBLocal ? EFace::Regular : EFace::Italic), !bOOBLocal ? OOBReadOnlyInk : bSel ? Dark : Ink, PoolW - 80.f);
+				PaintTextFit(Geometry, Out, Layer + 3, FString::Printf(TEXT("%s [%s]%s"), *Regs[i].Name, Campaign1851Army::ArmMark(Regs[i].Arm), Regs[i].TotalEnemyKilled > 0 ? *FString::Printf(TEXT("  ·  fjender ude %d"), Regs[i].TotalEnemyKilled) : TEXT("")), FVector2D(Pos.X + 24.f, Y), Serif(10, bOOBLocal ? EFace::Regular : EFace::Italic), !bOOBLocal ? OOBReadOnlyInk : bSel ? Dark : Ink, PoolW - 80.f);
 				PaintText(Geometry, Out, Layer + 3, FString::FromInt(Regs[i].Men), FVector2D(Pos.X + PoolW - 6.f, Y), Serif(10, bOOBLocal ? EFace::Regular : EFace::Italic), !bOOBLocal ? OOBReadOnlyInk : bSel ? Dark : MutedInk, 1.f, false);
 				// A small fold-out to see its companies (squadrons).
 				const bool bOpenUnit = PoolOpen.Contains(i);
