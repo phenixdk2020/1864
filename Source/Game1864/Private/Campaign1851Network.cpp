@@ -385,6 +385,23 @@ double ACampaign1851Map::NetworkUpkeepPerYear() const
 	return Total;
 }
 
+double ACampaign1851Map::RailwayIncomePerYear() const
+{
+	const FDateTime Now = GetDate();
+	double Total = 0.0;
+	for (int32 r = 0; r < Railways.Num(); ++r)
+	{
+		const FCampaign1851Railway& Line = Railways[r];
+		if (!Line.IsOpen(Now)) { continue; }
+		double People = 0.0;
+		for (const int32 Town : Line.Towns) { if (Cities.IsValidIndex(Town)) { People += Cities[Town].Population; } }
+		const double Passengers = People * 0.03 * FMath::Clamp(Line.LengthKm / 40.0, 0.5, 4.0);
+		const double Freight = Line.LengthKm * 60.0 + People * 0.01;
+		Total += (Passengers + Freight) * (r >= HistoricRailways ? 1.0 : 0.15);
+	}
+	return Total;
+}
+
 // ------------------------------------------------------------------ projects
 
 bool ACampaign1851Map::StartLinkWork(int32 Link, ECampaign1851LinkWork Work, bool bCharge, FString* OutReason)

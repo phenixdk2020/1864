@@ -1914,6 +1914,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Den gule markeringsramme følger den tegnede formation (hele linjen), ikke en lille firkant.
 - Kolonne→linje under march: udfoldningen starter ved fjendens long range + 95 m (før 60 m), tager 5-18 s og mændene bevæger sig højst 3 m/s, så ingen sprinter/hopper; derefter går kompagniet frem i linje til den valgte skudafstand.
 
+### 2026-10-11 - Jernbaneindkomst
+
+- Åbne jernbaner giver nu passager- og fragtindtægt (`RailwayIncomePerYear`, Campaign1851Network.cpp): passagerer efter befolkningen i linjens byer og linjelængde, fragt efter længde og befolkning. Statens egne linjer giver alt, koncessionslinjer 15 %. Vises i budgettet og bogføres månedligt ("Jernbaner: passagerer og fragt").
+- Mangler: nedsat indtægt ved troppetransport eller afbrudt station/bro, og balance.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

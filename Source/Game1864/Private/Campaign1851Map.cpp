@@ -1846,6 +1846,7 @@ TArray<FCampaign1851BudgetLine> ACampaign1851Map::MonthlyBudget() const
 	{
 		Lines.Add({ TEXT("De indkaldtes løn og underhold"), -MobilisedPayPerMonth() });
 	}
+	if (RailwayIncomePerYear() > 0.5) { Lines.Add({ TEXT("Jernbaner: passagerer og fragt"), RailwayIncomePerYear() / 12.0 }); }
 	Lines.Add({ TEXT("Told på udførsel (korn, kvæg, smør)"), ExportDutyPerYear() / 12.0 });
 	Lines.Add({ TEXT("Øresundstold og handelstraktater"), ForeignIncomePerYear() / 12.0 });
 	Lines.Add({ TEXT("Flåden"), -NavyUpkeepPerYear() / 12.0 });
@@ -1941,6 +1942,7 @@ void ACampaign1851Map::CloseMonth()
 	if (CivilTradePerYear() > 0.5) { AddTransaction(CivilTradePerYear() / 12.0, TEXT("Told og eksport")); }
 	if (CivilJobTaxPerYear() > 0.5) { AddTransaction(CivilJobTaxPerYear() / 12.0, TEXT("Skat af arbejdspladser")); }
 	if (CivilFeesPerYear() > 0.5) { AddTransaction(CivilFeesPerYear() / 12.0, TEXT("Afgifter, post og gebyrer")); }
+	if (RailwayIncomePerYear() > 0.5) { AddTransaction(RailwayIncomePerYear() / 12.0, TEXT("Jernbaner: passagerer og fragt")); }
 	// The world moves on: towns grow, investors build, the ministries (and the other nations) decide.
 	GrowMonth();
 	MonthlyMateriel();

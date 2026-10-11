@@ -1670,6 +1670,8 @@ private:
 	void ClearSceneryAlong(const TArray<FVector2D>& Line, float RadiusKm);
 	UStaticMeshComponent* MakeRibbon(const TArray<TArray<FVector2D>>& Lines, float WidthKm, const FLinearColor& Colour, const TCHAR* Name, float Lift);
 	double NetworkUpkeepPerYear() const;
+	/** Passenger and freight revenue of the open railways (the state keeps all of its own lines, a share of the concession lines). */
+	double RailwayIncomePerYear() const;
 	TArray<FCampaign1851Link> Links;
 	TArray<FCampaign1851Railway> Railways;
 	int32 HistoricRailways = 0;   // Railways[0..HistoricRailways) come from the map data
