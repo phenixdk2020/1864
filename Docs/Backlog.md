@@ -114,3 +114,6 @@ Alle nabolande skal have samme inddeling som Danmark: amter/distrikter med græn
 | 7 | Sårede og hvornår de kommer tilbage | Gjort: enhedskortet viser antal på lazaret og hvornår halvdelen er tilbage. Mangler: erfaring bevares for de sårede (puljeregel). |
 | 8 | Opgradér batteri til ridende batteri | Ikke lavet: opgradering findes til riflet kanon, ikke fodbatteri til ridende batteri (heste, mandskab på heste, pris, uddannelsestid). |
 | 9 | Forskning: landbrug, smede m.fl. mere effektive | Gjort: civil forskning udvidet (landboreformer, mergling, smede og redskaber, kvæg, dampmaskiner med mere). |
+
+## Jernbane som indkomst (2026-10-11)
+- Tog og togstrækninger bidrager endnu ikke til økonomien. Forslag: passagerindtægt (efter byernes befolkning og linjelængde), fragtindtægt (varer fra overskuds- til underskudsbyer), drift/vedligehold som udgift, og nedsat indtægt når linjen bruges til tropper eller er afbrudt (station/bro). Kode: Campaign1851Network.cpp, Campaign1851Army.cpp (ResetTroopTrains), økonomi i Campaign1851Resources.cpp.
