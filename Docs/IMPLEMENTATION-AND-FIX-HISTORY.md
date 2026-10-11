@@ -1890,6 +1890,13 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Save-version 34 gemmer distriktsreserver/kasser og båret proviant i Neighbours; eksisterende War/Supply gemmer korps og magasiner. v33-aggregater bevares med undertrykte nye underregimenter for at undgå dobbelte hære ved load.
 - Generator-/scenarie-/grid-/netværks-/OOB-validering, kontrol mod Git HEAD af nordlige data og nationsrækker, statisk C++-gennemgang og UE 5.8-headerkontrol. Docs/Naboer.md dokumenterer kilder, skøn og resterende paritet: historiske grænser/fuld OOB/1864-regimenter, allieret krigs-AI og fuld udenlandsk økonomi/forsyning udestår. Ingen build, spil/editorstart, skærmbilledtests eller commit.
 
+### 2026-10-11 — Kamporden: bataljonschef uden ekstra stab og grå garnisoner
+
+- Fjernet automatisk Detachment/Bataljonsstab og fælles Regiment-HQ ved nye hære. Hele bataljoner beholder chef og kompagnier direkte under Army; udskilte fodfolksenheder vises som guldfarvede bataljonschef-bokse med ubesat chefplads, plusknap og deres kompagnier nedenunder.
+- Andre byers garnisoner har grå fyld, kant, våbenartsmarkører, kursiv tekst og foldknapper samt grå byoverskrifter. Lokal garnison beholder guld og adgangsreglerne er bevaret.
+- Højere HQ-knapper og oprydning af tomme HQ'er/hære er bevaret; controllerens else-if-kæde er ikke udvidet. Kamporden-Regler.md er opdateret. Saveformat og scenariedata er uændrede; tidligere gemte Detachment-formationer konverteres ikke automatisk.
+- Statisk kodegennemgang, Unreal 5.8-headerkontrol og git diff --check. Ingen build, spil/editorstart eller commit; visuel kontrol i spillet udestår.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

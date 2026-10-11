@@ -1407,8 +1407,8 @@ public:
 	bool MoveFormation(int32 Id, int32 NewParent);
 	/** Puts a regiment in a formation (0 = back to its garrison). */
 	bool MoveRegimentToFormation(int32 Regiment, int32 Formation);
-	/** New OOB army with battalion staffs and an optional shared regimental HQ. */
-	int32 CreateArmyWithUnitHQs(const TArray<int32>& Units);
+	/** New OOB army with units directly below it, preserving their own chief slots. */
+	int32 CreateArmyWithUnits(const TArray<int32>& Units);
 	bool ReturnRegimentsToGarrison(const TArray<int32>& Units, FString* OutReason = nullptr);
 	/**
 	 * A general command's garrison units into the field army at once: under the army a division (the foot in

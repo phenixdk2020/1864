@@ -2215,51 +2215,13 @@ bool ACampaign1851Map::ReturnRegimentsToGarrison(const TArray<int32>& Units, FSt
 	return true;
 }
 
-int32 ACampaign1851Map::CreateArmyWithUnitHQs(const TArray<int32>& Units)
+int32 ACampaign1851Map::CreateArmyWithUnits(const TArray<int32>& Units)
 {
 	if (Units.IsEmpty()) { return 0; }
 	for (int32 OOBUnit : Units) { if (!Regiments.IsValidIndex(OOBUnit)) { return 0; } }
-	// Scenario identity survives player renaming. Only explicitly named battalions share a regiment.
-	auto OOBRegimentName = [&](int32 OOBUnit) -> FString
-	{
-		for (int32 OOBAt = Regiments[OOBUnit].Formation, OOBGuard = 0; OOBAt != 0 && OOBGuard < 64; ++OOBGuard)
-		{
-			const int32 OOBIndex = FormationIndex(OOBAt);
-			if (OOBIndex == INDEX_NONE) { break; }
-			if (Formations[OOBIndex].Echelon == ECampaign1851Echelon::Regiment) { return Formations[OOBIndex].Name; }
-			OOBAt = Formations[OOBIndex].Parent;
-		}
-		const FString& OOBOriginal = Regiments[OOBUnit].OriginalName;
-		const int32 OOBComma = OOBOriginal.Find(TEXT(", "));
-		return OOBComma != INDEX_NONE && OOBOriginal.Contains(TEXT("bataljon")) ? OOBOriginal.Left(OOBComma) : FString();
-	};
-	const FString OOBSharedName = OOBRegimentName(Units[0]);
-	bool bOOBSharedRegiment = Units.Num() > 1 && !OOBSharedName.IsEmpty();
-	for (int32 OOBUnit : Units) { bOOBSharedRegiment &= OOBRegimentName(OOBUnit) == OOBSharedName; }
 	const int32 OOBArmy = CreateFormation(ECampaign1851Echelon::Army, 0);
-	int32 OOBParent = OOBArmy;
-	if (bOOBSharedRegiment)
-	{
-		OOBParent = CreateFormation(ECampaign1851Echelon::Regiment, OOBArmy);
-		Formations[FormationIndex(OOBParent)].Name = OOBSharedName;
-	}
-	for (int32 OOBUnit : Units)
-	{
-		const int32 OOBExistingHQ = Regiments[OOBUnit].Formation;
-		const int32 OOBExistingIndex = FormationIndex(OOBExistingHQ);
-		if (OOBExistingIndex != INDEX_NONE && Formations[OOBExistingIndex].Echelon == ECampaign1851Echelon::Detachment
-			&& FormationRegiments(OOBExistingHQ).Num() == 1)
-		{
-			MoveFormation(OOBExistingHQ, OOBParent);
-			continue;
-		}
-		// Detachment is the existing lowest staff level; Regiment/Brigade/Division can be inserted above it.
-		const int32 OOBHQ = CreateFormation(ECampaign1851Echelon::Detachment, OOBParent);
-		Formations[FormationIndex(OOBHQ)].Name = Regiments[OOBUnit].Name + TEXT(" HQ");
-		const int32 OOBChief = Regiments[OOBUnit].Chief;
-		MoveRegimentToFormation(OOBUnit, OOBHQ);
-		if (Officers.IsValidIndex(OOBChief)) { AssignFormationCommander(OOBChief, OOBHQ); }
-	}
+	// The unit itself owns the battalion chief slot and its companies; no extra staff is inserted.
+	for (int32 OOBUnit : Units) { MoveRegimentToFormation(OOBUnit, OOBArmy); }
 	PruneEmptyFormations();
 	return OOBArmy;
 }

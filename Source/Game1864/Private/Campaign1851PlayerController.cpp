@@ -3336,7 +3336,7 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 		if (Map->GetRegiments().IsValidIndex(OOBUnit) && OOBPartKey % 10 < Map->SubUnitCount(OOBUnit) && Map->SubUnitCount(OOBUnit) == 1) { return OOBUnit; }
 		return Map->SplitOffCompany(OOBUnit, OOBPartKey % 10, &OOBWhy);
 	};
-	// The permanent right target starts an independent army with its unit HQ chain.
+	// The permanent right target starts an independent army with its units directly below it.
 	if (TargetKind == K::NewFormation && TargetId == 99999)
 	{
 		TArray<int32> OOBUnits;
@@ -3374,9 +3374,9 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 			}
 		}
 		if (OOBUnits.Num() == 0) { Overlay->ShowToast(TEXT("Træk en enhed eller et kompagni herover")); return; }
-		const int32 OOBArmy = Map->CreateArmyWithUnitHQs(OOBUnits);
+		const int32 OOBArmy = Map->CreateArmyWithUnits(OOBUnits);
 		Overlay->RevealOOBArmy(OOBArmy, OOBUnits);
-		Overlay->ShowToast(FString::Printf(TEXT("Ny felthær med bataljonsstab og %d enheder"), OOBUnits.Num()));
+		Overlay->ShowToast(FString::Printf(TEXT("Ny felthær med %d enheder"), OOBUnits.Num()));
 		return;
 	}
 	if (TargetKind == K::Garrisons && OOBSourceKind == K::Regiment && Map->GetRegiments().IsValidIndex(SourceId))
