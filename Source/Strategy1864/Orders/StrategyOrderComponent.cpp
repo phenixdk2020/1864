@@ -226,7 +226,7 @@ void UStrategyOrderComponent::ResolveAttackDestination(FStrategyOrder& AttackOrd
     if (!IsValid(AttackEnemy) || !AttackEnemy->IsCombatEffective() || AttackEnemy->Side == AttackUnit->Side)
     {
         AttackEnemy = nullptr;
-        float AttackNearDistance = 6000.0f; // A point within 60 m identifies the intended enemy.
+        float AttackNearDistance = 9500.0f; // A point within about 95 m of an enemy company's centre (its line is up to ~90 m wide) identifies the intended enemy.
         for (TActorIterator<AStrategyUnit> AttackIt(GetWorld()); AttackIt; ++AttackIt)
         {
             AStrategyUnit* AttackCandidate = *AttackIt;

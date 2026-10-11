@@ -482,8 +482,13 @@ int32 UStrategyCombatComponent::ResolveHits(
     const float ActiveRangeCm =
         FMath::Max(1.0f, OwnerUnit->FireControlComponent->GetActiveRangeCm());
 
+    // Close fire is deadly: inside the close band (about 40 m) the hit chance is more than doubled, inside the medium band 1.6x.
+    // (Linear fall-off with distance as before, then the band bonus.)
+    const float CloseBand = OwnerUnit->FireControlComponent->CloseRangeCm;
+    const float MediumBand = OwnerUnit->FireControlComponent->MediumRangeCm;
+    const float RangeBonus = DistanceCm <= CloseBand ? 2.4f : DistanceCm <= MediumBand ? 1.6f : 1.0f;
     const float RangeFactor =
-        FMath::Clamp(1.0f - (DistanceCm / ActiveRangeCm) * 0.55f, 0.25f, 1.0f);
+        FMath::Clamp(1.0f - (DistanceCm / ActiveRangeCm) * 0.55f, 0.25f, 1.0f) * RangeBonus;
 
     const float ConditionMultiplier =
         OwnerUnit->ConditionComponent
