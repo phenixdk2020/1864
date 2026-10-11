@@ -1579,6 +1579,16 @@ void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, cons
             ReformBudget = FMath::Max(ReformBudget, float(FVector::Dist2D(ReformStarts[ReformMen[ReformOrder]],
                 ReformEndpoints[ReformTargets[ReformOrder]])) / 160.f + FormationChangeDeadlineSeconds);
     }
+    // A linear morph: everybody starts at once and walks a straight line to his place at a constant speed, so that all arrive
+    // together. The shape in between is the mix of the old and the new formation (no stream of late starters running past the
+    // others, no S-curve); the time is set by the longest path at a brisk walk (about 3.8 m/s at most).
+    if (!bDestination)
+    {
+        float ReformLongest = 0.f;
+        for (int32 ReformOrder = 0; ReformOrder < ReformMen.Num(); ++ReformOrder)
+            ReformLongest = FMath::Max(ReformLongest, float(FVector::Dist2D(ReformStarts[ReformMen[ReformOrder]], ReformFrame.TransformPosition(ReformSlots[ReformTargets[ReformOrder]]))));
+        ReformBudget = FMath::Clamp(ReformLongest / 380.f, 2.5f, FMath::Max(2.5f, FormationChangeDeadlineSeconds));
+    }
     FormationPlanStarted = VisualAnimationTime;
     FormationLongestPath = 0.f;
     bFormationPlanPending = !ReformMen.IsEmpty();
@@ -1595,8 +1605,8 @@ void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, cons
         const int32 ReformOldColumnWidth = CachedFormationValue == uint8(EStrategyFormationType::DefileColumn) ?
             2 : OwnerCompany->FormationComponent->ColumnWidth;
         const int32 ReformWaveWidth = FMath::Max(1, bReformColumn ? OwnerCompany->FormationComponent->RankCount : ReformOldColumnWidth);
-        ReformSettle.StartDelay = FMath::Min((ReformOrder / ReformWaveWidth) * 0.12f + (ReformOrder % ReformWaveWidth) * 0.04f, FormationChangeDeadlineSeconds * 0.65f);
-        ReformSettle.StartRemaining = bDestination ? 0.f : ReformSettle.StartDelay;
+        ReformSettle.StartDelay = bDestination ? FMath::Min((ReformOrder / ReformWaveWidth) * 0.12f + (ReformOrder % ReformWaveWidth) * 0.04f, FormationChangeDeadlineSeconds * 0.65f) : 0.f;
+        ReformSettle.StartRemaining = bDestination ? 0.f : 0.f;
         ReformSettle.HaltRemaining = 0.f;
         ReformSettle.ReformDeadline = VisualAnimationTime + ReformBudget;
         ReformSettle.WorldVelocity = FVector::ZeroVector;
@@ -1850,7 +1860,9 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             const float ReformBaseSpeed = bArrivalReform ? FMath::Max(160.f, ArrivalTravelSpeed * Settle.Pace) : ActualMarchSpeed + RunCmPerSecond * Settle.Pace;
             const float ReformEase = Distance < 10.f ? 120.f * Distance / 10.f :
                 (Distance < 30.f ? FMath::Max(120.f, ReformBaseSpeed * Distance / 30.f) : ReformBaseSpeed);
-            const float ReformSpeed = FMath::Max(ReformEase, Distance / FMath::Max(0.001f, ReformTimeLeft));
+            // Not at a destination: the constant speed of the linear morph (Distance / time left), so that everybody arrives together.
+            const float ReformSpeed = bArrivalReform ? FMath::Max(ReformEase, Distance / FMath::Max(0.001f, ReformTimeLeft))
+                : FMath::Min(Distance / FMath::Max(0.001f, ReformTimeLeft), RunCmPerSecond * 1.6f);
             const float ReformStep = FMath::Min(Distance, ReformSpeed * DeltaTime);
             FigureWorld += (FigureTarget - FigureWorld).GetSafeNormal() * ReformStep;
             Settle.WorldVelocity = ReformStep >= Distance ? FVector::ZeroVector :

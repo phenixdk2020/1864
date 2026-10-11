@@ -1897,6 +1897,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Højere HQ-knapper og oprydning af tomme HQ'er/hære er bevaret; controllerens else-if-kæde er ikke udvidet. Kamporden-Regler.md er opdateret. Saveformat og scenariedata er uændrede; tidligere gemte Detachment-formationer konverteres ikke automatisk.
 - Statisk kodegennemgang, Unreal 5.8-headerkontrol og git diff --check. Ingen build, spil/editorstart eller commit; visuel kontrol i spillet udestår.
 
+### 2026-10-11 – Formationsskift som lineær morf (ingen S-formet strøm)
+- Fejl set i video billede for billede: ved kolonne til linje brød de bageste mænd ud og løb langs kolonnens side som en S-formet strøm, fordi starttiderne var trappet (op til 4,5 s) og efternølerne blev tvunget til at løbe for at nå 7 s-fristen.
+- Rettelse (`PlanOrderlyReform` og fartsformlen i `UpdateSettling`): alle mænd starter samtidig og går i en ret linje til sin plads med konstant fart, så alle ankommer samtidig; tiden sættes af den længste vej ved højst ca. 3,8 m/s (2,5-7 s). Formen undervejs er blandingen af den gamle og den nye formation. Destinationsankomst (en efter en i forkanten) er uændret.
+- Ikke set i spillet endnu (automatisk test fejlede: vinduets klikpositioner stemte ikke). Se med `-Strategy1864DebugFormation`.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
