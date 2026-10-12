@@ -1939,6 +1939,13 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - v2: skiftet sker i enhedens egen ramme. Hver mand glider i en ret linje (smoothstep) fra sin gamle til sin nye plads (`ReformStartLocal/ReformDuration`), så hele kompagniet morpher som én krop under march. Pladserne tildeles monotont i sideretningen (venstre mod højre, forreste først), så ingen stier krydser. Mændene vender fronten og bruger gangbevægelsen under skiftet. Unity byttede slots øjeblikkeligt; her er det en jævn glidning.
 - Test: skirmish-kørsel, linjen dannes som ét ordnet sving; `-Strategy1864Rigid=0` giver den gamle opførsel.
 
+### 2026-10-12 - Tab, faldne, tempo ved skift, samling i kolonne
+
+- Tab: træfsandsynlighed 0,15 -> 0,28; den, der falder, vælges tilfældigt i hele kompagniet (før den nærmeste ved skudkilden, dvs. altid de forreste i midten).
+- De faldne bliver liggende hele slaget (før forsvandt de efter 65 s); loftet på 150 synlige lig gælder stadig.
+- Formationsskift: de sidste mænd går dobbelt så hurtigt (budget længste sti/500 cm/s, 3-9 s); kolonne dannes på 3-6 s og marchen venter, til kolonnen er samlet (bEnterMarchWhileWalking = false).
+- Angrebsdestination: genkendelsesradius omkring fjenden 95 m -> 160 m, så boksen sættes ved skudafstand også ved klik langt ude på en bred linje. Ikke fuldt klarlagt hvorfor boksen lå oven på fjenden hos brugeren; mangler verifikation.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

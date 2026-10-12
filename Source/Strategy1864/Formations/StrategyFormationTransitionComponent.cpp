@@ -68,8 +68,10 @@ void UStrategyFormationTransitionComponent::HandleFormationChanged(
         (NewFormation == EStrategyFormationType::Line || NewFormation == EStrategyFormationType::CavalryLine);
     const bool bDeployWhileWalking = bColumnToLine && OwnerUnit->CombatComponent &&
         !OwnerUnit->CombatComponent->FindBestTarget(false);
-    const bool bEnterMarchWhileWalking = NewFormation == EStrategyFormationType::MarchColumn ||
-        NewFormation == EStrategyFormationType::CavalryColumn;
+    // The men gather in column first, then the march begins (the visual morph into column takes up to six seconds).
+    const bool bEnterMarchWhileWalking = false;
+    if (NewFormation == EStrategyFormationType::MarchColumn || NewFormation == EStrategyFormationType::CavalryColumn)
+        ReformRemainingSeconds = FMath::Max(ReformRemainingSeconds, 6.0f);
     if (!bEnterMarchWhileWalking && !bDeployWhileWalking && OwnerUnit->MovementExecutor &&
         OwnerUnit->MovementExecutor->HasMovementGoal())
     {

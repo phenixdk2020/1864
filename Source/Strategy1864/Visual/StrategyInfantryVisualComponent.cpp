@@ -810,6 +810,9 @@ void UStrategyInfantryVisualComponent::HandleCasualtyVisualEvent(int32 AppliedLo
     UpdateFormationBounds();
 }
 
+// The fallen stay on the field for the whole battle (the figure budget caps how many bodies are kept).
+static constexpr float kCorpseLifeSeconds = 100000.f;
+
 void UStrategyInfantryVisualComponent::UpdateCorpses()
 {
     if (CorpseComponents.IsEmpty() || !GetWorld()) return;
@@ -818,7 +821,7 @@ void UStrategyInfantryVisualComponent::UpdateCorpses()
     {
         USkeletalMeshComponent* FallenMesh = CorpseComponents[CorpseIndex];
         const float CorpseAge = CorpseNow - CorpseBirthTimes[CorpseIndex];
-        if (CorpseAge >= 65.f)
+        if (CorpseAge >= kCorpseLifeSeconds)
         {
             TArray<USceneComponent*> FallenChildren;
             FallenMesh->GetChildrenComponents(true, FallenChildren);
@@ -830,7 +833,7 @@ void UStrategyInfantryVisualComponent::UpdateCorpses()
             CorpseFading.RemoveAt(CorpseIndex);
             bCrowdDirty = true;
         }
-        else if (CorpseAge >= 60.f)
+        else if (CorpseAge >= kCorpseLifeSeconds - 5.f)
         {
             // A real translucent fade also works when the original uniform material is opaque.
             if (bCrowdMode) { bCrowdDirty = true; continue; }
@@ -849,7 +852,7 @@ void UStrategyInfantryVisualComponent::UpdateCorpses()
             FallenMesh->SetVisibility(true);
             for (int32 FadeSlot = 0; FadeSlot < FallenMesh->GetNumMaterials(); ++FadeSlot)
                 if (UMaterialInstanceDynamic* FadeMaterial = Cast<UMaterialInstanceDynamic>(FallenMesh->GetMaterial(FadeSlot)))
-                    FadeMaterial->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.22f, 0.25f, 0.28f, 1.f - (CorpseAge - 60.f) / 5.f));
+                    FadeMaterial->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.22f, 0.25f, 0.28f, 1.f - (CorpseAge - (kCorpseLifeSeconds - 5.f)) / 5.f));
             bCrowdDirty = true;
         }
     }
@@ -935,17 +938,7 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
                 if (ConeDistance < ConeNearestDistance) { ConeNearestDistance = ConeDistance; i = ConeCandidate; }
             }
         }
-        else if (Near)
-        {
-            // A shot: nearest the fire source or registered impact; no random reshuffle.
-            float Best = TNumericLimits<float>::Max();
-            for (int32 c = 0; c < SoldierComponents.Num(); ++c)
-            {
-                if (!SoldierComponents[c]) { continue; }
-                const float D = FVector::Dist2D(SoldierComponents[c]->GetComponentLocation(), *Near);
-                if (D < Best) { Best = D; i = c; }
-            }
-        }
+        // A shot: the man who falls is random across the whole company (not always the front men in the middle).
         USkeletalMeshComponent* Soldier = SoldierComponents[i];
         if (Soldier)
         {
@@ -1589,7 +1582,8 @@ void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, cons
         float ReformLongest = 0.f;
         for (int32 ReformOrder = 0; ReformOrder < ReformMen.Num(); ++ReformOrder)
             ReformLongest = FMath::Max(ReformLongest, float(FVector::Dist2D(ReformStarts[ReformMen[ReformOrder]], ReformFrame.TransformPosition(ReformSlots[ReformTargets[ReformOrder]]))));
-        ReformBudget = FMath::Clamp(ReformLongest / 250.f, 5.f, 18.f);
+        // Twice as brisk as before: the last men to take their place walk at about 5 m/s; forming a column is quicker still (the march waits for it).
+        ReformBudget = FMath::Clamp(ReformLongest / 500.f, 3.f, bReformColumn ? 6.f : 9.f);
     }
     FormationPlanStarted = VisualAnimationTime;
     FormationLongestPath = 0.f;
@@ -1884,7 +1878,7 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
                 (Distance < 30.f ? FMath::Max(120.f, ReformBaseSpeed * Distance / 30.f) : ReformBaseSpeed);
             // Not at a destination: the constant speed of the linear morph (Distance / time left), so that everybody arrives together.
             const float ReformSpeed = bArrivalReform ? FMath::Max(ReformEase, Distance / FMath::Max(0.001f, ReformTimeLeft))
-                : FMath::Min(Distance / FMath::Max(0.001f, ReformTimeLeft), 300.f);
+                : FMath::Min(Distance / FMath::Max(0.001f, ReformTimeLeft), 700.f);
             const float ReformStep = FMath::Min(Distance, ReformSpeed * DeltaTime);
             FigureWorld += (FigureTarget - FigureWorld).GetSafeNormal() * ReformStep;
             Settle.WorldVelocity = ReformStep >= Distance ? FVector::ZeroVector :
@@ -2706,7 +2700,7 @@ void UStrategyInfantryVisualComponent::RebuildCrowdInstances()
             CrowdPresent.Add(CrowdFigure);
             FTransform CrowdPose = bCrowdWorld ? CrowdFigure->GetComponentTransform() : CrowdFigure->GetRelativeTransform();
             if ((!bCrowdWorld && SoldierSettle.IsValidIndex(CrowdFigureIndex) && SoldierSettle[CrowdFigureIndex].NearBlend >= 1.f) ||
-                (bCrowdWorld && CorpseBirthTimes.IsValidIndex(CrowdFigureIndex) && GetWorld()->GetTimeSeconds() - CorpseBirthTimes[CrowdFigureIndex] >= 65.f))
+                (bCrowdWorld && CorpseBirthTimes.IsValidIndex(CrowdFigureIndex) && GetWorld()->GetTimeSeconds() - CorpseBirthTimes[CrowdFigureIndex] >= kCorpseLifeSeconds))
                 CrowdPose.SetScale3D(FVector::ZeroVector);
             int32* CrowdExistingId = CrowdIds.Find(CrowdFigure);
             const int32 CrowdId = CrowdExistingId ? *CrowdExistingId : !CrowdFreeIds.IsEmpty() ? CrowdFreeIds.Pop(EAllowShrinking::No) : CrowdInstances->AddInstance(CrowdPose, bCrowdWorld);
@@ -2714,7 +2708,7 @@ void UStrategyInfantryVisualComponent::RebuildCrowdInstances()
             CrowdInstances->UpdateInstanceTransform(CrowdId, CrowdPose, bCrowdWorld, false, false);
             DataFor(CrowdClips.IsValidIndex(CrowdFigureIndex) ? &CrowdClips[CrowdFigureIndex] : nullptr, Data);
             WriteCrowdColours(Data);
-            Data[16] = bCrowdWorld ? (CorpseBirthTimes.IsValidIndex(CrowdFigureIndex) ? FMath::Clamp((65.f - (GetWorld()->GetTimeSeconds() - CorpseBirthTimes[CrowdFigureIndex])) / 5.f, 0.f, 1.f) : 1.f)
+            Data[16] = bCrowdWorld ? (CorpseBirthTimes.IsValidIndex(CrowdFigureIndex) ? FMath::Clamp((kCorpseLifeSeconds - (GetWorld()->GetTimeSeconds() - CorpseBirthTimes[CrowdFigureIndex])) / 5.f, 0.f, 1.f) : 1.f)
                 : (SoldierSettle.IsValidIndex(CrowdFigureIndex) ? 1.f - SoldierSettle[CrowdFigureIndex].NearBlend : 1.f);
             CrowdInstances->SetCustomData(CrowdId, TArrayView<const float>(Data, UStrategyCrowdModel::CustomDataFloats), false);
         }

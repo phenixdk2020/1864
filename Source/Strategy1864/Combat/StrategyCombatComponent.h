@@ -72,7 +72,7 @@ public:
     float ReloadSeconds = 18.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Combat")
-    float BaseHitChance = 0.15f;
+    float BaseHitChance = 0.28f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Combat")
     int32 MaxShotsPerVolley = 190;
