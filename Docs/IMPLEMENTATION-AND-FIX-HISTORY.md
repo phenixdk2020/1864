@@ -1928,6 +1928,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - 3D-slag: enheds-tooltip viser nu "Mand: 125/180 (tab 55)" i stedet for "125 af 180".
 - Kampagnekortet: hærmarkører har nu mouse-over "Navn: 125/180 mand" (`ButtonTip`, EButton::RegimentPiece; nominel styrke = MaxMen).
 
+### 2026-10-12 - Enhedskort og HQ for enkeltstående kompagni
+
+- Enhedskortet viser uniformbilledet også i 1825 (1851-billedet; teksten om 1825-uniformen står i tooltip). Fanen beholder bredden, højden er 20 % lavere (105x67).
+- Kamporden: et enkeltstående kompagni/eskadron/sektion (nyt træ) hænger nu under en egen HQ-boks ("ubesat", indtil der er en chef) med kompagniet under sig. Enheder, der allerede har et HQ (bataljon, regiment, brigade, division), får ikke et ekstra.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

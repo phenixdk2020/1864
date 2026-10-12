@@ -2515,10 +2515,12 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 	const FVector2D Picture(Pos.X + 22.f, Pos.Y + 96.f + ChipsH);
 	if (Map->ActiveScenario().Id == TEXT("1825"))
 	{
-		PaintText(Geometry, Out, Layer + 2, TEXT("UNIFORM 1825"), Picture + FVector2D(75.f, 65.f), Serif(12), Gold, 0.5f, false);
-		PaintTextFit(Geometry, Out, Layer + 2, Map->ArmyUniformText(R.Arm), Picture + FVector2D(0.f, 100.f), Serif(10), Ink, 150.f);
-		PaintTextFit(Geometry, Out, Layer + 2, Map->ArmyWeaponText(R.Arm), Picture + FVector2D(0.f, 135.f), Serif(10), Ink, 150.f);
-		AddTip(Picture, FVector2D(150.f, 225.f), Map->ArmyUniformText(R.Arm) + TEXT(". ") + Map->ArmyWeaponText(R.Arm));
+		// The picture is the 1851 one (no 1825 pictures yet); the tip says what the 1825 soldier wore.
+		if (UniformBrushes.IsValidIndex(Arm) && UniformBrushes[Arm]->GetResourceObject())
+		{
+			FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(150.f, 225.f), FSlateLayoutTransform(Picture)), UniformBrushes[Arm].Get());
+		}
+		AddTip(Picture, FVector2D(150.f, 225.f), TEXT("Billedet er 1851-uniformen. 1825: ") + Map->ArmyUniformText(R.Arm) + TEXT(". ") + Map->ArmyWeaponText(R.Arm));
 	}
 	else if (UniformBrushes.IsValidIndex(Arm) && UniformBrushes[Arm]->GetResourceObject())
 	{
@@ -2530,8 +2532,8 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 	}
 	if (FlagBrush.IsValid() && FlagBrush->GetResourceObject())
 	{
-		FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(105.f, 84.f), FSlateLayoutTransform(Picture + FVector2D(170.f, 0.f))), FlagBrush.Get());   // the flag stretched a quarter wider
-		PaintText(Geometry, Out, Layer + 2, TEXT("Fanen"), Picture + FVector2D(222.f, 94.f), Serif(10, EFace::Italic), MutedInk, 0.5f, false);
+		FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(105.f, 67.f), FSlateLayoutTransform(Picture + FVector2D(170.f, 0.f))), FlagBrush.Get());   // full width, 20 % lower
+		PaintText(Geometry, Out, Layer + 2, TEXT("Fanen"), Picture + FVector2D(222.f, 77.f), Serif(10, EFace::Italic), MutedInk, 0.5f, false);
 	}
 	// The figures beside the picture.
 	float Y = Picture.Y + 114.f;
@@ -5032,7 +5034,21 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 				{
 					Line(FVector2D(X + BoxW * 0.5f, Y - 10.f), FVector2D(X + BoxW * 0.5f, Y));
 				}
-				Box(FVector2D(X, Y), FVector2D(BoxW, UnitH), TreeKey(OOBSinglePart ? ETreeKind::Company : ETreeKind::Regiment, OOBSinglePart ? Node.Support[s] * 10 : Node.Support[s]), 1, { FString::Printf(TEXT("%s [%s]"), *R.Name, Campaign1851Army::ArmMark(R.Arm)),
+				if (OOBSinglePart)
+				{
+					// A lone company (squadron, battery) still hangs under a headquarters box: empty until a chief is assigned.
+					Box(FVector2D(X, Y), FVector2D(BoxW, UnitH), TreeKey(ETreeKind::Regiment, Node.Support[s]), 1, { FString::Printf(TEXT("%s [%s]"), *R.Name, Campaign1851Army::ArmMark(R.Arm)),
+						Campaign1851Army::UnitRole(R.Arm), Officers.IsValidIndex(R.Chief) ? OfficerText(R.Chief) : FString(TEXT("ubesat")) }, SelectedRegiments.Contains(Node.Support[s]), ArmSlot(R));
+					Line(FVector2D(X + 8.f, Y + UnitH), FVector2D(X + 8.f, Y + UnitH + 10.f + CompH * 0.5f));
+					Line(FVector2D(X + 8.f, Y + UnitH + 10.f + CompH * 0.5f), FVector2D(X + 16.f, Y + UnitH + 10.f + CompH * 0.5f));
+					Y += UnitH + 10.f;
+					Box(FVector2D(X + 16.f, Y), FVector2D(BoxW - 16.f, CompH), TreeKey(ETreeKind::Company, Node.Support[s] * 10), 2,
+						{ R.Arm == ECampaign1851Arm::Artillery ? FString(TEXT("1. Sektion")) : R.Arm == ECampaign1851Arm::Cavalry ? FString(TEXT("1. Eskadron")) : FString(TEXT("1. Kompagni")),
+						FString::Printf(TEXT("%d mand"), R.Men) }, false, ArmSlot(R));
+					Y += CompH + 10.f;
+					continue;
+				}
+				Box(FVector2D(X, Y), FVector2D(BoxW, UnitH), TreeKey(OOBSinglePart ? ETreeKind::Company : ETreeKind::Regiment,OOBSinglePart ? Node.Support[s] * 10 : Node.Support[s]), 1, { FString::Printf(TEXT("%s [%s]"), *R.Name, Campaign1851Army::ArmMark(R.Arm)),
 					Campaign1851Army::UnitRole(R.Arm), OfficerText(R.Chief), R.Mortars > 0 ? FString::Printf(TEXT("%d mand  ·  %d morterer"), R.Men, R.Mortars)
 					: R.Guns > 0 ? FString::Printf(TEXT("%d mand  ·  %d kanoner"), R.Men, R.Guns) : FString::Printf(TEXT("%d/%d mand  ·  %d heste"), R.Men, R.MaxMen, R.Horses) },
 					SelectedRegiments.Contains(Node.Support[s]), ArmSlot(R));
