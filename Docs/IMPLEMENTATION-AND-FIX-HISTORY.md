@@ -1952,6 +1952,21 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Nye knapper DREJ -15° / DREJ +15° (formationspanelet, kun kompagnier): drejer de valgte kompagnier på stedet (Move til egen position med ny front). `AStrategyPlayerController::TurnSelection`.
 - Efter AFBRYD samler mændene sig: når Disengage-ordren slutter planlægges en ordnet omplacering (PlanOrderlyReform) til deres pladser.
 - Ikke testet i spillet: knapper (screenshot viser ikke HUD), højreklik på fjende, samling efter AFBRYD.
+### 2026-10-11 — All-VAT: ens nærmateriale og afstandsopdelt GPU-geometri
+
+- Gennemgået `vat_dark_figures.png`, materiale, bake-kode og instansdata. Farveindeks matcher; nærfeltet var stadig skeletal med egne materialer/skygger, mens alle VAT-figurer brugte LOD0. Direkte mørkningsårsag er ikke visuelt verificeret.
+- Default er VAT også tæt på med egen albedo og skinnede normaler; gammel skeletal-overgang er opt-in (`Strategy1864CrowdSkeletalNear`). Albedo vælges eksplicit/sRGB, jord-default er erstattet med soldattekstur, og farveblanding kræver mask + aktivt override. Skeletal promotion nulstiller source-materialslots.
+- Fire ISM-bånd for levende/faldne: LOD0 under 15 m kun til globalt nærmeste N, LOD1 til 60 m, LOD2 til 120 m, derefter LOD3. Bake inspicerer/genererer skeletal LODs før bone-UV-kodning og afviser manglende albedo/LOD/materiallayout. BakeVersion 4 kræver genbagning; ingen assets er bagt her.
+- To knogler over 30 m og én række for looping klip over 60 m giver op til 75 % færre BoneTex-loads pr. position/normal. Reducerede LODs sparer geometri (fx 50/75/87,5 % ved 50/25/12,5 %-LOD). Default uden nær-skeletal fjerner individuel skeletal-animation. VAT-skygger bevares under 25 m via LOD0 og et ekstra LOD1-par; fjern-VAT var allerede uden skygger. Instanscull ved 1 km sparer rendering, ikke gameplay.
+- DebugGpu får `PROJECT1864-CROWD`-båndtal/skyggekastere. `Docs/Performance-Battle.md` beskriver forventede besparelser, kompromiser, genbagning og acceptplan; ingen målte gevinster påstås.
+- Genoptaget partial diff: valideret deklarationer/definitioner og båndenes oprydning; rettet hjælpefigurernes forældede nærvalg før båndtildeling, afvisning af null-LOD, entydigere albedo-fallback samt reducerede vertex-/trekantantal for hvert LOD. Bake-log viser kropsgeometri, DebugGpu viser også faldne pr. bånd.
+- Rettet konkret shaderfejl i partial diff: Vertex Color-standardudgangen er RGB i UE 5.8, men maskekontrollen læste alpha. RGB + A forbindes nu eksplicit som RGBA. Bånd 4 deler LOD1-geometri og holder skyggegrænsen adskilt fra LOD-/to-knoglegrænser; kvalitetssporingen bruger særskilte værdier. Bake respekterer kilde-LOD'ets materialer via `LODMaterialMap`.
+- Statisk kontrol mod UE 5.8-headerne, Python-syntaks og diff. Ingen build, spil/editorstart eller commit.
+
+### 2026-10-12 - Drejeknapper for kavaleri og kanoner; VAT-reparation (Codex) flettet
+
+- DREJ -15°/+15° vises nu også for eskadroner og batterier (ikke kun kompagnier).
+- Codex' "vat2" (mørke bagte figurer, LOD-bånd, skyggegrænse 25 m, to knogler over 30 m, culling, båndlog) er flettet ind via patch og bygger. VAT-assets skal genbages, før det virker; visuelt resultat og GPU-gevinst er ikke målt.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

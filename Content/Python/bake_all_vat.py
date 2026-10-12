@@ -42,7 +42,20 @@ def bake_all():
             if isinstance(material, unreal.Material) and material.get_path_name() not in prepared_materials:
                 material_script['configure_crowd_fade'](material)
                 prepared_materials.add(material.get_path_name())
+    skeletal_editor = unreal.get_editor_subsystem(unreal.SkeletalMeshEditorSubsystem)
     for mesh in meshes:
+        count = skeletal_editor.get_lod_count(mesh)
+        unreal.log('PROJECT1864-CROWD: %s source LODs=%d' % (mesh.get_name(), count))
+        if count < 4:
+            # Reduce skeletal geometry BEFORE encoding bone indices in static-mesh UVs.
+            # Static reduction would interpolate discrete indices and corrupt animation.
+            if not skeletal_editor.regenerate_lod(mesh, 4, False, False):
+                raise RuntimeError('PROJECT1864-CROWD: LOD reduction failed: ' + mesh.get_path_name())
+        skeletal_editor.set_allow_cpu_access(mesh, True)
+        counts = [skeletal_editor.get_num_verts(mesh, i) for i in range(4)]
+        if any(n <= 0 for n in counts) or any(counts[i] >= counts[i - 1] for i in range(1, 4)):
+            raise RuntimeError('PROJECT1864-CROWD: invalid/non-reduced LODs: %s %s' % (mesh.get_name(), counts))
+        unreal.log('PROJECT1864-CROWD: %s LOD vertices=%s' % (mesh.get_name(), counts))
         uniform_script['prepare'](mesh.get_path_name())
         # Near figures need the complementary mask too, otherwise even phase-correct swaps can pop.
         for slot in mesh.get_editor_property('materials'):

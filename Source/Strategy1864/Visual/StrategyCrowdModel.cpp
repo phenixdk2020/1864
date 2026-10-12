@@ -13,6 +13,7 @@
 #include "Misc/Parse.h"
 #include "CoreGlobals.h"
 #include "Engine/SkeletalMesh.h"
+#include "Engine/SkinnedAssetCommon.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
@@ -30,25 +31,32 @@
 
 namespace
 {
-    // Full silhouette for near VAT figures; no runtime mesh construction.
-    constexpr int32 CrowdLOD = 0; // near figures need the full silhouette
     const TCHAR* CrowdMaterialPath = TEXT("/Game/Battle/Materials/M_CrowdVAT_All.M_CrowdVAT_All");
 
     UTexture* FirstTexture(const UMaterialInterface* Material)
     {
+        // Never infer albedo from GetUsedTextures order (normal/mask textures can come first).
+        if (!Material) return nullptr;
+        for (const TCHAR* CrowdParameter : { TEXT("Diffuse"), TEXT("BaseColor"), TEXT("BaseColorTexture"), TEXT("Albedo"), TEXT("Texture") })
+        {
+            UTexture* CrowdTexture = nullptr;
+            if (Material->GetTextureParameterValue(FMaterialParameterInfo(CrowdParameter), CrowdTexture) && CrowdTexture)
+                return CrowdTexture;
+        }
         TArray<UTexture*> Textures;
-        if (Material)
+        Material->GetUsedTextures(Textures);
+        UTexture* CrowdOnlyAlbedo = nullptr;
+        int32 CrowdAlbedoCount = 0;
+        for (UTexture* CrowdTexture : Textures)
         {
-            Material->GetUsedTextures(Textures);
+            const UTexture2D* Crowd2D = Cast<UTexture2D>(CrowdTexture);
+            if (!Crowd2D || !Crowd2D->SRGB) continue;
+            CrowdOnlyAlbedo = CrowdTexture;
+            ++CrowdAlbedoCount;
+            if (CrowdTexture->GetName().Contains(TEXT("Diffuse")) || CrowdTexture->GetName().EndsWith(TEXT("_D")))
+                return CrowdTexture;
         }
-        for (UTexture* T : Textures)
-        {
-            if (T)
-            {
-                return T;
-            }
-        }
-        return nullptr;
+        return CrowdAlbedoCount == 1 ? CrowdOnlyAlbedo : nullptr;
     }
 
     /** A skinning matrix as three texels: the columns of the 4x4 (row vectors: p' = (p,1) . column). */
@@ -81,7 +89,8 @@ void UStrategyCrowdModel::BindMaterials()
     {
         UMaterialInstanceDynamic* CrowdMID = UMaterialInstanceDynamic::Create(CrowdParent, this);
         CrowdMID->SetTextureParameterValue(TEXT("BoneTex"), BoneTexture);
-        if (DiffuseTextures[CrowdSlot]) CrowdMID->SetTextureParameterValue(TEXT("Diffuse"), DiffuseTextures[CrowdSlot]);
+        if (!DiffuseTextures[CrowdSlot]) { Materials.Reset(); return; }
+        CrowdMID->SetTextureParameterValue(TEXT("Diffuse"), DiffuseTextures[CrowdSlot]);
         Materials.Add(CrowdMID);
     }
 }
@@ -101,11 +110,41 @@ UStrategyCrowdModel* UStrategyCrowdModel::BakeAsset(UWorld* World, USkeletalMesh
     CrowdGrip.RightHand = TEXT("RightHand");
     CrowdGrip.LeftHand = TEXT("LeftHand");
     CrowdGrip.HandTransform = FTransform(FQuat(FRotator(-8.f, 90.f, 0.f)) * FQuat(FVector::XAxisVector, UE_PI) * FQuat(FVector::YAxisVector, UE_PI), FVector(-4.f, 0.f, 10.f));
-    if (!CrowdAsset->Bake(World, Soldier, Rifle, Animations, CrowdGrip)) return nullptr;
+    CrowdAsset->LODMeshes.Reset();
+    TArray<TObjectPtr<UTexture>> CrowdFirstTextures;
+    uint32 CrowdPreviousTriangles = MAX_uint32;
+    const FSkeletalMeshRenderData* CrowdSourceData = Soldier->GetResourceForRendering();
+    if (!CrowdSourceData || CrowdSourceData->LODRenderData.Num() < 4) return nullptr;
+    for (int32 CrowdBakeLOD = 0; CrowdBakeLOD < 4; ++CrowdBakeLOD)
+    {
+        const FSkeletalMeshLODRenderData& CrowdSourceLOD = CrowdSourceData->LODRenderData[CrowdBakeLOD];
+        uint32 CrowdTriangles = 0;
+        for (const FSkelMeshRenderSection& CrowdSection : CrowdSourceLOD.RenderSections) CrowdTriangles += CrowdSection.NumTriangles;
+        if (CrowdTriangles == 0 || CrowdTriangles >= CrowdPreviousTriangles)
+        {
+            UE_LOG(LogTemp, Error, TEXT("PROJECT1864-CROWD: %s LOD%d has %u triangles; missing reduction, bake rejected"),
+                *Soldier->GetName(), CrowdBakeLOD, CrowdTriangles);
+            return nullptr;
+        }
+        CrowdPreviousTriangles = CrowdTriangles;
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-CROWD: bake %s LOD%d vertices=%u body-triangles=%u"),
+            *Soldier->GetName(), CrowdBakeLOD, CrowdSourceLOD.GetNumVertices(), CrowdTriangles);
+        if (!CrowdAsset->Bake(World, Soldier, Rifle, Animations, CrowdGrip, CrowdBakeLOD)) return nullptr;
+        if (CrowdBakeLOD == 0) CrowdFirstTextures = CrowdAsset->DiffuseTextures;
+        else if (CrowdFirstTextures != CrowdAsset->DiffuseTextures)
+        {
+            UE_LOG(LogTemp, Error, TEXT("PROJECT1864-CROWD: source LOD material layout differs; bake rejected"));
+            return nullptr;
+        }
+        CrowdAsset->LODMeshes.Add(CrowdAsset->Mesh);
+        for (FStaticMaterial& CrowdSlot : CrowdAsset->Mesh->GetStaticMaterials())
+            CrowdSlot.MaterialInterface = LoadObject<UMaterialInterface>(nullptr, CrowdMaterialPath);
+    }
+    CrowdAsset->Mesh = CrowdAsset->LODMeshes[0];
     // Subobjects travel in the model's package; no transient MID may enter the saved mesh.
     for (FStaticMaterial& CrowdSlot : CrowdAsset->Mesh->GetStaticMaterials())
         CrowdSlot.MaterialInterface = LoadObject<UMaterialInterface>(nullptr, CrowdMaterialPath);
-    CrowdAsset->BakeVersion = 3;
+    CrowdAsset->BakeVersion = 4;
     CrowdPackage->MarkPackageDirty();
     if (bCrowdNewAsset) FAssetRegistryModule::AssetCreated(CrowdAsset);
     return CrowdAsset;
@@ -143,7 +182,7 @@ UStrategyCrowdModel* UStrategyCrowdModel::Find(UWorld* World, USkeletalMesh* Sol
         return nullptr;
     }
     UStrategyCrowdModel* Model = LoadObject<UStrategyCrowdModel>(nullptr, *AssetPath(Soldier, Rifle));
-    if (!Model || Model->BakeVersion != 3 || !Model->Mesh || !Model->BoneTexture ||
+    if (!Model || Model->BakeVersion != 4 || Model->LODMeshes.Num() != 4 || Model->LODMeshes.ContainsByPredicate([](const TObjectPtr<UStaticMesh>& CrowdLODMesh) { return !CrowdLODMesh; }) || !Model->Mesh || !Model->BoneTexture ||
         Clips.ContainsByPredicate([Model](UAnimSequence* CrowdClip) { return CrowdClip && !Model->Clips.Contains(CrowdClip); }))
     {
         Sub->Failed.Add(Key);
@@ -277,16 +316,28 @@ bool UStrategyCrowdSubsystem::DrawAuxiliary(USkeletalMeshComponent* Figure, USke
                 CrowdMID->SetScalarParameterValue(TEXT("CrowdOpacity"), 1.f);
         return false;
     }
-    const FString CrowdGroupKey = Figure->GetOwner()->GetPathName() + TEXT("|") + CrowdModel->GetPathName() + (bLiving ? TEXT("|living") : TEXT("|fallen"));
+    // Select this frame's nearest set before assigning a band (avoid one-frame stale LOD0).
+    if (APlayerController* CrowdSelectionPC = CrowdWorld->GetFirstPlayerController())
+        if (CrowdSelectionPC->PlayerCameraManager)
+            UStrategyInfantryVisualComponent::SelectNearestFigures(CrowdWorld, CrowdSelectionPC->PlayerCameraManager->GetCameraLocation());
+    float CrowdDistance = 100000.f;
+    if (APlayerController* CrowdPC = CrowdWorld->GetFirstPlayerController())
+        if (CrowdPC->PlayerCameraManager) CrowdDistance = FVector::Distance(CrowdPC->PlayerCameraManager->GetCameraLocation(), Figure->GetComponentLocation());
+    int32 CrowdBand = UStrategyCrowdModel::DistanceBand(CrowdDistance);
+    if (CrowdBand == 0 && !CrowdSub->NearFigures.Contains(Figure)) CrowdBand = 1;
+    if (CrowdBand == 1 && CrowdDistance < 2500.f) CrowdBand = 4;
+    const FString CrowdGroupKey = FString::FromInt(CrowdBand) + TEXT("|") + Figure->GetOwner()->GetPathName() + TEXT("|") + CrowdModel->GetPathName() + (bLiving ? TEXT("|living") : TEXT("|fallen"));
     FStrategyCrowdAuxGroup& CrowdGroup = CrowdSub->AuxiliaryGroups.FindOrAdd(CrowdGroupKey);
     if (!IsValid(CrowdGroup.Instances))
     {
         CrowdGroup = FStrategyCrowdAuxGroup();
         CrowdGroup.Instances = NewObject<UInstancedStaticMeshComponent>(Figure->GetOwner(), NAME_None, RF_Transient);
-        CrowdGroup.Instances->SetStaticMesh(CrowdModel->GetMesh());
+        CrowdGroup.Instances->SetStaticMesh(CrowdModel->GetMesh(CrowdBand));
+        CrowdGroup.Instances->SetCullDistances(0, 100000);
         CrowdGroup.Instances->SetNumCustomDataFloats(UStrategyCrowdModel::CustomDataFloats);
         CrowdGroup.Instances->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-        CrowdGroup.Instances->SetCastShadow(false);
+        CrowdGroup.Instances->SetCastShadow(CrowdBand == 0 || CrowdBand == 4);
+        CrowdGroup.Instances->SetCastContactShadow(false);
         CrowdGroup.Instances->bVisibleInRayTracing = false;
         for (int32 CrowdMaterialIndex = 0; CrowdMaterialIndex < CrowdModel->GetNumMaterials(); ++CrowdMaterialIndex)
             CrowdGroup.Instances->SetMaterial(CrowdMaterialIndex, CrowdModel->GetMaterial(CrowdMaterialIndex));
@@ -313,7 +364,7 @@ bool UStrategyCrowdSubsystem::DrawAuxiliary(USkeletalMeshComponent* Figure, USke
         if (CrowdPC->PlayerCameraManager)
             UStrategyInfantryVisualComponent::SelectNearestFigures(CrowdWorld, CrowdPC->PlayerCameraManager->GetCameraLocation());
     const int32 CrowdBudget = CrowdSub->NearBudget;
-    bool CrowdTargetNear = bLiving && CrowdSub->NearFigures.Contains(Figure);
+    bool CrowdTargetNear = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864CrowdSkeletalNear")) && bLiving && CrowdSub->NearFigures.Contains(Figure);
     const bool CrowdWasNear = CrowdAux.NearBlend > 0.f;
     if (!CrowdWasNear && CrowdSub->NearGeometryCount >= FMath::Max(0, CrowdBudget)) CrowdTargetNear = false;
     if (CrowdAux.BlendFrame != GFrameCounter)
@@ -340,6 +391,8 @@ bool UStrategyCrowdSubsystem::DrawAuxiliary(USkeletalMeshComponent* Figure, USke
     }
     else if (Figure->GetSkeletalMeshAsset()) Figure->SetSkeletalMeshAsset(nullptr);
     Figure->SetVisibility(CrowdIsNear);
+    Figure->SetCastContactShadow(false);
+    Figure->SetCastShadow(CrowdIsNear && CrowdDistance < 2500.f);
     Figure->SetComponentTickEnabled(false);
     float CrowdData[UStrategyCrowdModel::CustomDataFloats];
     CrowdModel->MakeCustomData(Clip, CrowdWorld->GetTimeSeconds(), 0.f, false, CrowdData, CrowdWorld->GetTimeSeconds(), Position);
@@ -360,6 +413,8 @@ bool UStrategyCrowdSubsystem::DrawAuxiliary(USkeletalMeshComponent* Figure, USke
         CrowdData[15] = CrowdPaletteAllowed && CrowdAppearance->Overrides.bOverrideHeadgearDetail ? 1.f : 0.f;
     }
     CrowdData[16] = (1.f - CrowdAux.NearBlend) * Opacity;
+    CrowdData[17] = CrowdDistance > 3000.f ? 1.f : 0.f;
+    CrowdData[18] = 0.f; // auxiliary poses are held fractional frames
     const int32* CrowdExistingSlot = CrowdGroup.Slots.Find(Figure);
     const int32 CrowdSlot = CrowdExistingSlot ? *CrowdExistingSlot : !CrowdGroup.FreeSlots.IsEmpty() ? CrowdGroup.FreeSlots.Pop(EAllowShrinking::No) : CrowdGroup.Instances->AddInstance(Figure->GetComponentTransform(), true);
     if (!CrowdExistingSlot) CrowdGroup.Slots.Add(Figure, CrowdSlot);
@@ -382,7 +437,7 @@ bool UStrategyCrowdModel::RiflePose(const UAnimSequence* Clip, float Position, b
     return true;
 }
 
-bool UStrategyCrowdModel::Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMesh* Rifle, const TArray<UAnimSequence*>& InClips, const FStrategyCrowdRifleGrip& Grip)
+bool UStrategyCrowdModel::Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMesh* Rifle, const TArray<UAnimSequence*>& InClips, const FStrategyCrowdRifleGrip& Grip, int32 SourceLOD)
 {
     BakeVersion = 0;
     Clips.Reset();
@@ -394,7 +449,8 @@ bool UStrategyCrowdModel::Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMes
     {
         return false;
     }
-    const int32 LODIndex = FMath::Clamp(CrowdLOD, 0, RenderData->LODRenderData.Num() - 1);
+    if (!RenderData->LODRenderData.IsValidIndex(SourceLOD)) return false;
+    const int32 LODIndex = SourceLOD;
     const FSkeletalMeshLODRenderData& LOD = RenderData->LODRenderData[LODIndex];
     const FPositionVertexBuffer& Positions = LOD.StaticVertexBuffers.PositionVertexBuffer;
     const FStaticMeshVertexBuffer& Vertices = LOD.StaticVertexBuffers.StaticMeshVertexBuffer;
@@ -469,8 +525,10 @@ bool UStrategyCrowdModel::Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMes
     TArray<FVertexInstanceID> BodyInstances;
     BodyInstances.SetNum(int32(LOD.GetNumVertices()));
     const TArray<FSkeletalMaterial>& SoldierMaterials = Soldier->GetMaterials();
-    for (const FSkelMeshRenderSection& Section : LOD.RenderSections)
+    const FSkeletalMeshLODInfo* CrowdSourceLODInfo = Soldier->GetLODInfo(LODIndex);
+    for (int32 CrowdSectionIndex = 0; CrowdSectionIndex < LOD.RenderSections.Num(); ++CrowdSectionIndex)
     {
+        const FSkelMeshRenderSection& Section = LOD.RenderSections[CrowdSectionIndex];
         for (uint32 v = Section.BaseVertexIndex; v < Section.BaseVertexIndex + Section.NumVertices && v < uint32(BodyInstances.Num()); ++v)
         {
             TArray<TPair<int32, float>, TInlineAllocator<12>> Influences;
@@ -503,8 +561,12 @@ bool UStrategyCrowdModel::Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMes
             const FVector4f T = Vertices.VertexTangentX(v);
             BodyInstances[v] = AddVertex(Positions.VertexPosition(v), FVector3f(N.X, N.Y, N.Z), FVector3f(T.X, T.Y, T.Z), Vertices.GetVertexUV(v, 0), Bone, W);
         }
-        UMaterialInterface* Source = SoldierMaterials.IsValidIndex(Section.MaterialIndex) ? SoldierMaterials[Section.MaterialIndex].MaterialInterface.Get() : nullptr;
-        const FPolygonGroupID Group = GroupFor(Section.MaterialIndex, Source);
+        int32 CrowdSourceMaterialIndex = Section.MaterialIndex;
+        if (CrowdSourceLODInfo && CrowdSourceLODInfo->LODMaterialMap.IsValidIndex(CrowdSectionIndex) &&
+            CrowdSourceLODInfo->LODMaterialMap[CrowdSectionIndex] != INDEX_NONE)
+            CrowdSourceMaterialIndex = CrowdSourceLODInfo->LODMaterialMap[CrowdSectionIndex];
+        UMaterialInterface* Source = SoldierMaterials.IsValidIndex(CrowdSourceMaterialIndex) ? SoldierMaterials[CrowdSourceMaterialIndex].MaterialInterface.Get() : nullptr;
+        const FPolygonGroupID Group = GroupFor(CrowdSourceMaterialIndex, Source);
         for (uint32 t = 0; t < Section.NumTriangles; ++t)
         {
             const uint32 I = Section.BaseIndex + t * 3;
@@ -524,7 +586,7 @@ bool UStrategyCrowdModel::Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMes
     bool bCrowdRifleAdded = false;
     if (Rifle && Rifle->GetRenderData() && Rifle->GetRenderData()->LODResources.Num() > 0)
     {
-        const FStaticMeshLODResources& R = Rifle->GetRenderData()->LODResources[0];
+        const FStaticMeshLODResources& R = Rifle->GetRenderData()->LODResources[FMath::Min(SourceLOD, Rifle->GetRenderData()->LODResources.Num() - 1)];
         TArray<uint32> RifleIndices;
         R.IndexBuffer.GetCopy(RifleIndices);
         if (R.VertexBuffers.PositionVertexBuffer.GetVertexData() && R.VertexBuffers.StaticMeshVertexBuffer.GetTangentData() &&
@@ -702,12 +764,15 @@ bool UStrategyCrowdModel::Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMes
     {
         UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(Parent, this);
         MID->SetTextureParameterValue(TEXT("BoneTex"), BoneTexture);
-        if (UTexture* Diffuse = FirstTexture(GroupSources[g]))
+        UTexture* CrowdAlbedo = FirstTexture(GroupSources[g]);
+        if (!CrowdAlbedo)
         {
-            MID->SetTextureParameterValue(TEXT("Diffuse"), Diffuse);
+            UE_LOG(LogTemp, Error, TEXT("PROJECT1864-CROWD: albedo missing for material slot %d; bake rejected"), g);
+            return false;
         }
+        MID->SetTextureParameterValue(TEXT("Diffuse"), CrowdAlbedo);
         Materials.Add(MID);
-        DiffuseTextures.Add(FirstTexture(GroupSources[g]));
+        DiffuseTextures.Add(CrowdAlbedo);
         const FName Slot(*FString::Printf(TEXT("Crowd_%d"), g));
         Mesh->GetStaticMaterials().Add(FStaticMaterial(MID, Slot, Slot));
     }

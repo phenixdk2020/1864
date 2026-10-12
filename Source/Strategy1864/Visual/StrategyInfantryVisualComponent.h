@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "StrategyVisualFormationPath.h"
+#include "StrategyCrowdModel.h"
 #include "StrategyInfantryVisualComponent.generated.h"
 
 class AStrategyCompanyUnit;
@@ -182,7 +183,7 @@ public:
     float CrowdFarCm = 2000.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry")
-    float CrowdNearCm = 1800.0f;
+    float CrowdNearCm = 1800.0f; // selection radius; default rendering stays VAT, skeletal near is opt-in
 
     /** Global nearest-figure budget; the first active company's setting is used for the frame. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Infantry", meta=(ClampMin="0"))
@@ -432,6 +433,11 @@ private:
     UPROPERTY(Transient)
     TObjectPtr<UStrategyCrowdModel> CrowdModel;
 
+    UPROPERTY(Transient)
+    TArray<FStrategyCrowdAuxGroup> CrowdLODBands; // living/fallen pairs for LOD1..3, plus shadowed LOD1 below 25 m
+    TMap<TWeakObjectPtr<USkeletalMeshComponent>, int32> CrowdFigureBands;
+    double CrowdBandLogAt = 0.0;
+    int32 ResolveCrowdBand(USkeletalMeshComponent* Figure) const;
     bool bResumeCrowdPosesNextTick = false;
     TArray<FTransform> CrowdLivingScratch;
     TArray<FTransform> CrowdFallenScratch;

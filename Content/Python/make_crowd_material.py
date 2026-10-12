@@ -1,6 +1,6 @@
 # Alle fodsoldaters VAT-materiale (PROJECT 1864, the hybrid of baked and full animation; see
 # Source/Strategy1864/Visual/StrategyCrowdModel.h):
-#  - modellen bager LOD0 med RGB vertexfarvemasker; eksisterende soldaterassets bevarer deres LODs;
+#  - modellen bager fire skeletal LODs med RGB vertexfarvemasker;
 #  - M_CrowdVAT_All skins in the vertex shader from the bone texture (three texels a bone, a row a frame): bone indices
 #    in UV1-2, weights in UV3-4, the clip in the instance's custom data (first row, frames, start time, frame rate;
 #    a negative rate plays once and holds), two frames blended.
@@ -78,6 +78,7 @@ def node(cls, x=-1200, **props):
 pos = node(unreal.MaterialExpressionPreSkinnedPosition)
 uv = [node(unreal.MaterialExpressionTextureCoordinate, coordinate_index=i) for i in range(1, 5)]
 data = [node(unreal.MaterialExpressionPerInstanceCustomData, data_index=i) for i in range(4)]
+quality = [node(unreal.MaterialExpressionPerInstanceCustomData, data_index=i) for i in (17, 18)]
 time = node(unreal.MaterialExpressionTime)
 bones = node(unreal.MaterialExpressionTextureObjectParameter, parameter_name='BoneTex', texture=unreal.load_asset('/Game/Battle/Textures/T_Ground_Macro'))
 
@@ -86,35 +87,38 @@ float frames = max(D1, 1.0);
 float t = max((T - D2) * abs(D3), 0.0);
 float f = D3 >= 0.0 ? fmod(t, frames) : min(t, frames - 1.0);
 float f0 = floor(f);
-float a = f - f0;
+float a = StepFrames > 0.5 ? 0.0 : f - f0;
 float f1 = D3 >= 0.0 ? fmod(f0 + 1.0, frames) : min(f0 + 1.0, frames - 1.0);
 int r0 = (int)(D0 + f0);
 int r1 = (int)(D0 + f1);
 float4 P = float4(Pos, 1.0);
 float4 idx = float4(I01, I23);
 float4 w = float4(W01, W23);
+int influences = TwoBones > 0.5 ? 2 : 4;
+if (TwoBones > 0.5) w = float4(w.xy / max(w.x + w.y, 0.00001), 0, 0);
 float3 s0 = 0;
 float3 s1 = 0;
-[unroll] for (int k = 0; k < 4; k++)
+[loop] for (int k = 0; k < influences; k++)
 {
+    if (w[k] <= 0.0) continue;
     int b = (int)(idx[k] + 0.5) * 3;
     s0 += w[k] * float3(dot(P, BoneTex.Load(int3(b, r0, 0))), dot(P, BoneTex.Load(int3(b + 1, r0, 0))), dot(P, BoneTex.Load(int3(b + 2, r0, 0))));
-    s1 += w[k] * float3(dot(P, BoneTex.Load(int3(b, r1, 0))), dot(P, BoneTex.Load(int3(b + 1, r1, 0))), dot(P, BoneTex.Load(int3(b + 2, r1, 0))));
+    [branch] if (a > 0.00001 && r1 != r0) s1 += w[k] * float3(dot(P, BoneTex.Load(int3(b, r1, 0))), dot(P, BoneTex.Load(int3(b + 1, r1, 0))), dot(P, BoneTex.Load(int3(b + 2, r1, 0))));
 }
-return lerp(s0, s1, a) - Pos;
+return (a > 0.00001 && r1 != r0 ? lerp(s0, s1, a) : s0) - Pos;
 '''
 custom = node(unreal.MaterialExpressionCustom, x=-700)
 custom.set_editor_property('code', code)
 custom.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT3)
 custom.set_editor_property('description', 'CrowdSkin')
-names = ['Pos', 'I01', 'I23', 'W01', 'W23', 'D0', 'D1', 'D2', 'D3', 'T', 'BoneTex']
+names = ['Pos', 'I01', 'I23', 'W01', 'W23', 'D0', 'D1', 'D2', 'D3', 'T', 'BoneTex', 'TwoBones', 'StepFrames']
 inputs = []
 for n in names:
     ci = unreal.CustomInput()
     ci.set_editor_property('input_name', n)
     inputs.append(ci)
 custom.set_editor_property('inputs', inputs)
-for n, src in zip(names, [pos] + uv + data + [time, bones]):
+for n, src in zip(names, [pos] + uv + data + [time, bones] + quality):
     mel.connect_material_expressions(src, '', custom, n)
 to_world = node(unreal.MaterialExpressionTransform, x=-400,
                 transform_source_type=unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_LOCAL,
@@ -123,11 +127,11 @@ mel.connect_material_expressions(custom, '', to_world, '')
 mel.connect_material_property(to_world, '', unreal.MaterialProperty.MP_WORLD_POSITION_OFFSET)
 normal = node(unreal.MaterialExpressionPreSkinnedNormal)
 skin_normal = node(unreal.MaterialExpressionCustom)
-skin_normal.set_editor_property('code', code.replace('float4(Pos, 1.0)', 'float4(Pos, 0.0)').replace('return lerp(s0, s1, a) - Pos;', 'return normalize(lerp(s0, s1, a));'))
+skin_normal.set_editor_property('code', code.replace('float4(Pos, 1.0)', 'float4(Pos, 0.0)').replace('return (a > 0.00001 && r1 != r0 ? lerp(s0, s1, a) : s0) - Pos;', 'return normalize(a > 0.00001 && r1 != r0 ? lerp(s0, s1, a) : s0);'))
 skin_normal.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT3)
 skin_normal.set_editor_property('description', 'CrowdSkinNormal')
 skin_normal.set_editor_property('inputs', inputs)
-for n, src in zip(names, [normal] + uv + data + [time, bones]):
+for n, src in zip(names, [normal] + uv + data + [time, bones] + quality):
     mel.connect_material_expressions(src, '', skin_normal, n)
 normal_world = node(unreal.MaterialExpressionTransform,
                     transform_source_type=unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_LOCAL,
@@ -140,10 +144,14 @@ mel.connect_material_property(normal_interpolator, '', unreal.MaterialProperty.M
 
 
 diffuse = node(unreal.MaterialExpressionTextureSampleParameter2D, x=-400, parameter_name='Diffuse',
-               texture=unreal.load_asset('/Game/Battle/Textures/T_Ground_Dirt_D'))
+               texture=unreal.load_asset('/Game/Units/Danish/Infantry1864/Mesh/T_DK_Infantry_1864'))
 # Per-instance colours are evaluated in the vertex stage, then interpolated for the pixel shader.
 mask = node(unreal.MaterialExpressionVertexColor)
-colour_inputs = [('Base', diffuse, 'RGB'), ('Mask', mask, '')]
+# Vertex Color's default output is RGB in UE 5.8; explicitly append its alpha.
+mask_rgba = node(unreal.MaterialExpressionAppendVector)
+mel.connect_material_expressions(mask, '', mask_rgba, 'A')
+mel.connect_material_expressions(mask, 'A', mask_rgba, 'B')
+colour_inputs = [('Base', diffuse, 'RGB'), ('Mask', mask_rgba, '')]
 for part, offset, switch in [('CoatColor', 4, 13), ('TrouserColor', 7, 14), ('HeadgearColor', 10, 15)]:
     channels = [node(unreal.MaterialExpressionPerInstanceCustomData, data_index=i)
                 for i in [offset, offset + 1, offset + 2, switch]]
@@ -160,13 +168,16 @@ recolour = node(unreal.MaterialExpressionCustom)
 recolour.set_editor_property('description', 'Per-instance uniform colours; RGB garment vertex masks')
 recolour.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT3)
 recolour.set_editor_property('code', """
+// Missing vertex colours can read as white: accept only an explicit one-hot garment mask.
+float maskExists = step(0.5, Mask.a) * (1.0 - step(1.01, Mask.r + Mask.g + Mask.b));
+if (max(CoatColor.a, max(TrouserColor.a, HeadgearColor.a)) < 0.5 || maskExists < 0.5) return Base;
 float skin = step(Base.b * 1.3, Base.r) * step(Base.g * 1.12, Base.r)
            * step(Base.b * 1.05, Base.g) * step(0.12, Base.r);
 float belt = step(0.68, min(Base.r, min(Base.g, Base.b)));
 float detail = 0.65 + 0.35 * saturate(dot(Base, float3(.2126,.7152,.0722)));
-float3 result = lerp(Base, CoatColor.rgb * detail, Mask.r * (1-skin) * (1-belt) * CoatColor.a);
-result = lerp(result, TrouserColor.rgb * detail, Mask.g * (1-skin) * TrouserColor.a);
-return lerp(result, HeadgearColor.rgb * detail, Mask.b * (1-skin) * HeadgearColor.a);
+float3 result = lerp(Base, CoatColor.rgb * detail, Mask.r * (1-skin) * (1-belt) * saturate(CoatColor.a));
+result = lerp(result, TrouserColor.rgb * detail, Mask.g * (1-skin) * saturate(TrouserColor.a));
+return lerp(result, HeadgearColor.rgb * detail, Mask.b * (1-skin) * saturate(HeadgearColor.a));
 """)
 recolour_inputs = []
 for key, _, _ in colour_inputs:

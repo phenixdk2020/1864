@@ -37,6 +37,7 @@
 #include "../Units/StrategyCompanyUnit.h"
 #include "../Visual/StrategyInfantryVisualComponent.h"
 #include "../Units/CavalryUnit.h"
+#include "../Artillery/StrategyArtilleryBatteryUnit.h"
 #include "../Units/StrategyDragoonComponent.h"
 #include "../Combat/StrategyStanceComponent.h"
 #include "../Tests/StrategyOOBTestScenario.h"
@@ -1249,9 +1250,9 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     }
     if (!HudHQ && Cast<AStrategyCompanyUnit>(Unit))
         DrawButton(HudX[2], HudY + 160.f, HudW[2], 20.f, TEXT("AFBRYD"), EAction::Disengage, 0, HudCurrent == EStrategyOrderType::Disengage, Unit, &OrderRed);
-    if (!HudHQ && Cast<AStrategyCompanyUnit>(Unit))
+    if (!HudHQ && (Cast<AStrategyCompanyUnit>(Unit) || Cast<ACavalryUnit>(Unit) || Cast<AStrategyArtilleryBatteryUnit>(Unit)))
     {
-        // Turn the company 15 degrees on the spot.
+        // Turn the company, squadron or battery 15 degrees on the spot.
         DrawButton(HudX[3], HudY + 183.f, (HudW[3] - 5.f) * 0.5f, 23.f, TEXT("DREJ -15°"), EAction::Turn, -15, false, Unit);
         DrawButton(HudX[3] + (HudW[3] - 5.f) * 0.5f + 5.f, HudY + 183.f, (HudW[3] - 5.f) * 0.5f, 23.f, TEXT("DREJ +15°"), EAction::Turn, 15, false, Unit);
     }

@@ -145,3 +145,30 @@ Fjerne VAT-figurer kaster ikke længere skygge; nærfigurerne gør stadig. Rifle
 5. Visuel accept: formationer, uniformer, skygger tæt på, rifle/bajonet, røg, trækroner og HUD-tekst skal være læselige. Test alle tre knapper, særskilt figurvalg, genstart/reset, kommandolinje-override og overgang begge veje mellem skeletal/VAT. Kontroller map-volumes, foliage/landscape-LOD og cloud-actors direkte i de binære maps før yderligere ændringer.
 
 Validering i denne ændring: statisk gennemgang og `git diff --check`; ingen build, spilstart eller påstået målt forbedring.
+
+
+## All-VAT: nærfigurer og GPU-geometri — 2026-10-11
+
+Projektejerens måling: 570 figurer, kamera 9 m fra linjen, `-Strategy1864Skirmish=1 -Strategy1864SkirmishDanes=2 -Strategy1864SkirmishAttack -Strategy1864DebugGpu`: Game 4,5–5,8 ms, GPU 19–20 ms (tidligere 8 ms), 634 draw calls og 1,5–8,7 mio. primitives. `Docs/Design/vat_dark_figures.png` viser mørke nærfigurer og korrekt teksturerede figurer længere væk. En ny måling med samme kamera og profil er nødvendig for at fastslå effekten.
+
+**Kodefund:** All-VAT var stadig en hybrid: de nærmeste 24 brugte skeletal meshes, egne materialer og skyggekast; resten brugte VAT uden skyggekast. Alle VAT-figurer var bagt fra LOD0. Custom data matcher: RGB 4–12, overrides 13–15, opacity 16. Bake skriver garment-masker og shaderen skinner normalerne. `FirstTexture` valgte ukritisk første tekstur, og materialets default var jord. Billedet alene afgør ikke, om nærmaterialerne eller selvskygger var den direkte mørkningsårsag.
+
+Standard er nu VAT også tæt på med samme egen albedo og animerede normaler. Det fjerner forskellen mellem nær- og fjernmaterialer. `-Strategy1864CrowdSkeletalNear` bevarer den gamle overgang til eksplicit sammenligning; promotion nulstiller source-materialslots før uniform-overrides. VAT kaster skygger under 25 m: LOD0 under 15 m samt et ekstra LOD1-par for øvrige nærfigurer. Fra 25 m er skyggekast slået fra; kontakt-skyggekast er slået fra på alle VAT-komponenter. Modtagelse af omgivelsernes skygger bevares.
+
+| Ændring | Forventet besparelse / adfærd |
+|---|---|
+| Separate ISM-komponenter for levende/faldne i fire LOD-bånd | Under 15 m: LOD0 kun til globalt nærmeste N (`Strategy1864CrowdNearest`, standard 24); øvrige nærfigurer og 15–60 m: LOD1; 60–120 m: LOD2; derefter LOD3. LOD1 har et ekstra skyggekastende ISM-par under 25 m. Færre vertices/trekanter; flere materialbatches kan øge draw calls. |
+| Skeletal reduktion før VAT-kodning | Scriptet inspicerer/logfører LOD-antal og vertices, genererer manglende LODs med UE-reduceren og afviser tomme LODs samt LODs uden faldende vertex-/trekantantal. Ved LODs på 50/25/12,5 % af LOD0 spares ca. 50/75/87,5 % kropsgeometri pr. figur. Faktiske antal skal læses fra bake-loggen. Rifler bruger eksisterende LODs. Statisk reduktion ville interpolere diskrete bone-indeks i UV og ødelægge animationen. |
+| To stærkeste knogler over 30 m, renormaliserede vægte | Op til 50 % færre BoneTex-loads for position og normal. Nulvægte springes over, også for enkeltknogle-rifler. |
+| Looping animationer over 60 m bruger én række ved bagt FPS | Yderligere op til 50 % færre loads; kombineret: 6 frem for 24 loads pr. position/normal (75 %). Nære klip, transitions, dødsanimationer og holdte fraktionelle poser beholder interpolation. Konstant kliphastighed alene fjerner ikke behovet for interpolation tæt på. |
+| Ingen skeletal-nærfigurer som default | Fjerner deres individuelle skeletal-animation. VAT-skygger begrænses til 25 m; fjern-VAT havde allerede skyggekast fra. Nære VAT-skygger koster stadig shadow-depth/VSM-arbejde. Ingen statisk VSM-cache-politik på bevægelig geometri. |
+| ISM-cull ved 100.000 cm (1 km) | Fjerner rendering af enkeltinstanser ud over grænsen; gameplay bevares. Ingen tidligere figur-cull-værdi blev fundet i Visual-kilderne; dette er en ny eksplicit grænse. |
+| Egen albedo og maskbeskyttet farveblanding | Kendte teksturparametre eller identificerbar/enkelt sRGB-tekstur bruges frem for første tekstur. Manglende albedo afviser bake/runtime-VAT. Default er soldattekstur. Uden override returneres Base direkte; manglende/ugyldig mask recolorer ikke. RGB og alpha pakkes eksplicit, da UE 5.8 Vertex Colors standardudgang kun er RGB. Ingen GPU-besparelse påstås. |
+
+Instansslots bevares pr. komponent; båndskift skjuler/frigiver gammel slot. Casualties/faldne, klipfase, fraktionelle holdte poser, uniformer og rifle-/bajonetskift opdateres også i de ekstra komponenter. Bake afviser forskelligt materiallayout mellem LODs frem for forkert tekstur. Slot-huller kan stadig eksistere. Skeletal-kildernes præcise LOD-antal kan ikke fastslås sikkert alene fra binære assets; scriptets inspektion er nødvendig ved næste autoriserede bagning.
+
+DebugGpu får `PROJECT1864-CROWD` pr. kompagni én gang pr. virkelig sekund: levende og faldne figurantal i hvert bånd samt skeletal-/VAT-skyggekastere. Tallene er repræsentationstal, ikke frustum-/occlusion-synlige figurer. Auxiliary-figurer bruger også bånd/cull. Nye custom data 17/18 vælger to knogler og frame-step; gamle indeks bevares.
+
+**Integration:** BakeVersion 4 kræver ny bagning af `/Game/Battle/VAT` og materialet efter en separat autoriseret editor-build. Version 3 afvises med log og eksisterende skeletal fallback. Forbedringen er derfor ikke aktiv i gamle binære assets. Ingen build, editor/spilstart, bagning eller GPU-måling er udført her. Engine 5.8-headerne, Python-syntaks og diff er kontrolleret statisk; ingen ms-besparelse er målt eller garanteret.
+
+Acceptplan: samme kamera/flags/profil, uniformer uden/med hvert override, normaler, begge retninger over LOD-grænser, globalt N-budget, rifle/bajonet, march/salver/transitions/død, pause/speed og 1 km-cull. Sammenlign også skeletal-near-varianten for at isolere materialer versus selvskygger i det gamle billede.

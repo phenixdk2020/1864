@@ -69,7 +69,7 @@ class STRATEGY1864_API UStrategyCrowdModel : public UObject
 
 public:
     static constexpr float FramesPerSecond = 15.0f;
-    static constexpr int32 CustomDataFloats = 17; // clock, colours/switches, complementary coverage
+    static constexpr int32 CustomDataFloats = 19; // clock, colours/switches, complementary coverage, two-bone/step sampling
 
     /** Editor Python entry point; creates a persistent model, but never saves or starts an editor. */
     UFUNCTION(BlueprintCallable, Category="Strategy|Crowd")
@@ -78,7 +78,12 @@ public:
     /** Load the saved model; null when missing/incomplete. No runtime baking. */
     static UStrategyCrowdModel* Find(UWorld* World, USkeletalMesh* Soldier, UStaticMesh* Rifle, const TArray<UAnimSequence*>& Clips, const FStrategyCrowdRifleGrip& Grip);
 
-    UStaticMesh* GetMesh() const { return Mesh; }
+    UStaticMesh* GetMesh(int32 Band = 0) const
+    {
+        const int32 CrowdMeshLOD = Band == 4 ? 1 : Band; // shadowed LOD1 shares geometry
+        return LODMeshes.IsValidIndex(CrowdMeshLOD) ? LODMeshes[CrowdMeshLOD].Get() : Mesh.Get();
+    }
+    static int32 DistanceBand(float DistanceCm) { return DistanceCm < 1500.f ? 0 : DistanceCm < 6000.f ? 1 : DistanceCm < 12000.f ? 2 : 3; }
     int32 GetNumMaterials() const { return Materials.Num(); }
     UMaterialInterface* GetMaterial(int32 Index) const;
     bool RiflePose(const UAnimSequence* Clip, float Position, bool bLoop, FTransform& Out) const;
@@ -91,7 +96,10 @@ public:
 private:
     static FString AssetPath(const USkeletalMesh* Soldier, const UStaticMesh* Rifle);
     void BindMaterials();
-    bool Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMesh* Rifle, const TArray<UAnimSequence*>& InClips, const FStrategyCrowdRifleGrip& Grip);
+    bool Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMesh* Rifle, const TArray<UAnimSequence*>& InClips, const FStrategyCrowdRifleGrip& Grip, int32 SourceLOD = 0);
+
+    UPROPERTY()
+    TArray<TObjectPtr<UStaticMesh>> LODMeshes;
 
     UPROPERTY()
     TObjectPtr<UStaticMesh> Mesh;
