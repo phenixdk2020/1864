@@ -1249,6 +1249,12 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     }
     if (!HudHQ && Cast<AStrategyCompanyUnit>(Unit))
         DrawButton(HudX[2], HudY + 160.f, HudW[2], 20.f, TEXT("AFBRYD"), EAction::Disengage, 0, HudCurrent == EStrategyOrderType::Disengage, Unit, &OrderRed);
+    if (!HudHQ && Cast<AStrategyCompanyUnit>(Unit))
+    {
+        // Turn the company 15 degrees on the spot.
+        DrawButton(HudX[3], HudY + 183.f, (HudW[3] - 5.f) * 0.5f, 23.f, TEXT("DREJ -15°"), EAction::Turn, -15, false, Unit);
+        DrawButton(HudX[3] + (HudW[3] - 5.f) * 0.5f + 5.f, HudY + 183.f, (HudW[3] - 5.f) * 0.5f, 23.f, TEXT("DREJ +15°"), EAction::Turn, 15, false, Unit);
+    }
     DrawSpecialOrders(Unit, HudX[2] * HudScale, HudOriginY + (HudY + 184.f) * HudScale, HudW[2] * HudScale);   // the member draws in screen pixels
     if (!HudHQ) Text(BaseOrderLabel(Unit), HudX[2], HudY + 210.f, Muted, 0.65f);
     if (HudHQ)
@@ -1608,6 +1614,9 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                         PC->CancelOrderPlacement();
                         PC->IssueOrderToSelection(EStrategyOrderType::Disengage, FVector::ZeroVector, 0.f, false);
                     }
+                    break;
+                case EAction::Turn:
+                    if (PC) { PC->TurnSelection(float(B.Value)); }
                     break;
                 case EAction::BuildFieldworks:
                 case EAction::SkirmishScreen:

@@ -1946,6 +1946,13 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Formationsskift: de sidste mænd går dobbelt så hurtigt (budget længste sti/500 cm/s, 3-9 s); kolonne dannes på 3-6 s og marchen venter, til kolonnen er samlet (bEnterMarchWhileWalking = false).
 - Angrebsdestination: genkendelsesradius omkring fjenden 95 m -> 160 m, så boksen sættes ved skudafstand også ved klik langt ude på en bred linje. Ikke fuldt klarlagt hvorfor boksen lå oven på fjenden hos brugeren; mangler verifikation.
 
+### 2026-10-12 - Højreklik angriber, drejeknapper, samling efter AFBRYD
+
+- Højreklik på eller inden for ca. 95 m af en fjendtlig kompagni-/enhedsmidte giver nu ANGRIB (AttackHere) i stedet for MOVE, så destinationsboksen sættes ved den valgte skudafstand foran fjenden og ikke oven på ham. Klik på åben jord, ALT-vejpunkter og pil-træk er uændret MOVE.
+- Nye knapper DREJ -15° / DREJ +15° (formationspanelet, kun kompagnier): drejer de valgte kompagnier på stedet (Move til egen position med ny front). `AStrategyPlayerController::TurnSelection`.
+- Efter AFBRYD samler mændene sig: når Disengage-ordren slutter planlægges en ordnet omplacering (PlanOrderlyReform) til deres pladser.
+- Ikke testet i spillet: knapper (screenshot viser ikke HUD), højreklik på fjende, samling efter AFBRYD.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

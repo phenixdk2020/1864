@@ -1150,8 +1150,41 @@ void AStrategyPlayerController::TickRightMouse()
     if (WasInputKeyJustReleased(EKeys::RightMouseButton) || !IsInputKeyDown(EKeys::RightMouseButton))
     {
         bRmbCommand = false;
-        IssueOrderToSelection(EStrategyOrderType::Move, RmbStart, bArrow ? Delta.Rotation().Yaw : 0.0f, bArrow, 7200.0f, bRmbAppendWaypoint);
+        // A right-click on (or within ~95 m of) an enemy company is an attack: the unit stops at its chosen fire distance
+        // in front of him, not on top of him. A click on empty ground stays an exact move.
+        bool bRmbOnEnemy = false;
+        if (!bRmbAppendWaypoint && !bArrow)
+        {
+            for (TActorIterator<AStrategyUnit> EnemyIt(World); EnemyIt && !bRmbOnEnemy; ++EnemyIt)
+            {
+                const AStrategyUnit* Foe = *EnemyIt;
+                if (!IsValid(Foe) || !Foe->IsCombatEffective() || Foe->Side == EStrategySide::Neutral ||
+                    Foe->Echelon == EStrategyEchelon::Headquarters || Foe->Echelon == EStrategyEchelon::Supply) continue;
+                bool bFoeOfSelection = false;
+                for (const TObjectPtr<AStrategyUnit>& SelectedFriend : SelectedUnitObjects)
+                    if (IsValid(SelectedFriend) && SelectedFriend->Side != Foe->Side) { bFoeOfSelection = true; break; }
+                if (bFoeOfSelection && FVector::Dist2D(Foe->GetActorLocation(), RmbStart) < 9500.0f) bRmbOnEnemy = true;
+            }
+        }
+        IssueOrderToSelection(bRmbOnEnemy ? EStrategyOrderType::AttackHere : EStrategyOrderType::Move, RmbStart, bArrow ? Delta.Rotation().Yaw : 0.0f, bArrow, 7200.0f, bRmbAppendWaypoint);
         bRmbDragged = false;
+    }
+}
+
+void AStrategyPlayerController::TurnSelection(float DeltaYawDegrees)
+{
+    CancelOrderPlacement();
+    for (AStrategyUnit* TurnUnit : SelectedUnitObjects)
+    {
+        if (!IsValid(TurnUnit) || !TurnUnit->OrderComponent || TurnUnit->Side != EStrategySide::Denmark) continue;
+        FStrategyOrder TurnOrder;
+        TurnOrder.Type = EStrategyOrderType::Move;
+        TurnOrder.TargetLocation = TurnUnit->GetActorLocation();
+        TurnOrder.FacingYaw = FRotator::NormalizeAxis(TurnUnit->GetActorRotation().Yaw + DeltaYawDegrees);
+        TurnOrder.bHasFacing = true;
+        TurnOrder.Authority = EStrategyOrderAuthority::DirectPlayer;
+        TurnOrder.WaypointRouteId = FGuid::NewGuid();
+        TurnUnit->OrderComponent->SetOrder(TurnOrder);
     }
 }
 

@@ -356,6 +356,7 @@ private:
     bool bPendingHold = false;
     bool bWasSettling = false;
     bool bWasVisualTravel = false;
+    bool bWasDisengaging = false;   // AFBRYD was active last frame: the men gather in their slots when it ends
     void UpdateSettling(float DeltaTime);
     void PlanOrderlyReform(bool bDestination, const FTransform& ReformFrame);
     void KeepReformSpacing(float DeltaTime);

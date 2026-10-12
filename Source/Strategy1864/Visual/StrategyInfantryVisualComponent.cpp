@@ -1942,6 +1942,14 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
                 FormationLongestPath, FormationCrossingsAvoided, bArrivalReform ? 1 : 0);
         bFormationPlanPending = false;
     }
+    {
+        // After AFBRYD (backing out step by step) the company gathers: an orderly re-placement into its slots.
+        const bool bDisengagingNow = OwnerCompany->OrderComponent &&
+            OwnerCompany->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Disengage;
+        if (bWasDisengaging && !bDisengagingNow && !bFormationPlanPending && !bArrivalReform && !bSpreadCrawling)
+            PlanOrderlyReform(false, FTransform(FRotator(0.f, VisualPath.Facing, 0.f), VisualPath.Center));
+        bWasDisengaging = bDisengagingNow;
+    }
     VisualPath.PreviousUnit = VisualUnit;
     bWasSettling = bAny;
     bWasVisualTravel = bVisualTravel;

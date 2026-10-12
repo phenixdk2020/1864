@@ -55,6 +55,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Strategy|Orders")
     void IssueHoldToSelection();
+    /** Turns the selected units on the spot (a move to where they stand with a new front). */
+    void TurnSelection(float DeltaYawDegrees);
 
     UFUNCTION(BlueprintPure, Category="Strategy|Orders")
     bool HasPendingOrderPlacement() const { return bOrderPlacementPending; }
