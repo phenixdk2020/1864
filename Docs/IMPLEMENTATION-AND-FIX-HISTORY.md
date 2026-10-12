@@ -1982,6 +1982,12 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 
 - Brugeren har set de bagte figurer og er tilfreds. `-Strategy1864Crowd=0` er fjernet fra Start-3D-Skirmish-Test, Start-3D-Slag-Test og Start-Test-1/2/3, så bagte figurer er standard. `-Strategy1864Crowd=0` kan stadig angives manuelt for almindelige figurer.
 
+### 2026-10-12 - Rapport efter slaget: rammer, fed total, fjendens navn
+
+- Rapporten har nu farvede rammer (grå om overskriften, blå om den danske side, ravgul om modparten) med let farvetone, og total-rækkerne står med fed (tegnet to gange et hår fra hinanden). Hver ny TOTAL-række åbner en ny ramme, så flere parter kan vises.
+- Modpartens total hedder nu fx "PREUSSEN — TOTAL" i stedet for "FJENDEN — TOTAL" i kampagneslag (ReportEnemyName fra kampagnens nationskode; skirmish-test viser stadig FJENDEN). Dataene samler stadig alle modstandere i én blok; adskillelse af flere parter (allierede) mangler.
+- Set i en testkørsel (-Strategy1864TestReport).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

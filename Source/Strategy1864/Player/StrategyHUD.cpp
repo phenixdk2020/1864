@@ -1812,6 +1812,17 @@ void AStrategyHUD::DrawAfterActionReport()
             Text(ReportCell, ReportCellX, ReportCellY, Ink, FMath::Min(1.f, ReportCellWidth / FMath::Max(1.f, ReportMeasuredWidth)));
         };
         float ReportColumnX = ReportX + 20.f;
+        // Framed blocks: a slate frame round the heading, a blue one round the Danish side, an amber one round the opponents.
+        auto ReportFrame = [&](const FLinearColor& ReportColour, float ReportFX, float ReportFY, float ReportFW, float ReportFH)
+        {
+            DrawRect(FLinearColor(ReportColour.R, ReportColour.G, ReportColour.B, 0.10f), ReportFX, ReportFY, ReportFW, ReportFH);
+            DrawRect(ReportColour, ReportFX, ReportFY, ReportFW, 1.5f);
+            DrawRect(ReportColour, ReportFX, ReportFY + ReportFH - 1.5f, ReportFW, 1.5f);
+            DrawRect(ReportColour, ReportFX, ReportFY, 1.5f, ReportFH);
+            DrawRect(ReportColour, ReportFX + ReportFW - 1.5f, ReportFY, 1.5f, ReportFH);
+        };
+        const FLinearColor ReportSlate(0.62f, 0.70f, 0.80f, 1.f), ReportBlue(0.40f, 0.69f, 0.88f, 1.f), ReportAmber(0.95f, 0.72f, 0.28f, 1.f);
+        ReportFrame(ReportSlate, ReportX + 10.f, ReportY + 142.f, ReportW - 20.f, 30.f);
         for (int32 ReportColumn = 0; ReportColumn < 10; ++ReportColumn)
         {
             ReportFitText(ReportHeadings[ReportColumn], ReportColumnX, ReportY + 150.f, ReportUsable * ReportWidths[ReportColumn] - 8.f);
@@ -1821,17 +1832,31 @@ void AStrategyHUD::DrawAfterActionReport()
         const TArray<FString>& ReportLines = ReportScenario->GetReportRows();
         const int32 ReportLastPage = FMath::Max(0, (ReportLines.Num() - 1) / ReportPerPage);
         ReportPage = FMath::Clamp(ReportPage, 0, ReportLastPage);
+        // The first block is the Danish side; every later total row opens another party (allies make more than two).
+        int32 ReportBlock = -1, ReportBlockFirstRow = 0;
+        auto ReportCloseBlock = [&](int32 ReportLastRow)
+        {
+            if (ReportBlock < 0 || ReportLastRow < ReportBlockFirstRow) return;
+            ReportFrame(ReportBlock == 0 ? ReportBlue : ReportAmber, ReportX + 10.f, ReportY + 178.f + ReportBlockFirstRow * 28.f - 3.f,
+                ReportW - 20.f, (ReportLastRow - ReportBlockFirstRow + 1) * 28.f);
+        };
         for (int32 ReportRow = 0; ReportRow < ReportPerPage && ReportPage * ReportPerPage + ReportRow < ReportLines.Num(); ++ReportRow)
         {
             TArray<FString> ReportCells;
             ReportLines[ReportPage * ReportPerPage + ReportRow].ParseIntoArray(ReportCells, TEXT("\t"), false);
+            const bool bReportTotal = ReportCells.Num() > 0 && ReportCells[0].Contains(TEXT("TOTAL"));
+            if (bReportTotal) { ReportCloseBlock(ReportRow - 1); ++ReportBlock; ReportBlockFirstRow = ReportRow; }
+            else if (ReportBlock < 0) { ReportBlock = ReportPage == 0 ? 0 : 1; ReportBlockFirstRow = ReportRow; }
             ReportColumnX = ReportX + 20.f;
             for (int32 ReportColumn = 0; ReportColumn < ReportCells.Num() && ReportColumn < 10; ++ReportColumn)
             {
-                ReportFitText(ReportCells[ReportColumn], ReportColumnX, ReportY + 182.f + ReportRow * 28.f, ReportUsable * ReportWidths[ReportColumn] - 8.f);
+                const float ReportCellY = ReportY + 182.f + ReportRow * 28.f, ReportCellW = ReportUsable * ReportWidths[ReportColumn] - 8.f;
+                ReportFitText(ReportCells[ReportColumn], ReportColumnX, ReportCellY, ReportCellW);
+                if (bReportTotal) ReportFitText(ReportCells[ReportColumn], ReportColumnX + 0.8f, ReportCellY, ReportCellW);   // bold: the totals are drawn twice, a hair apart
                 ReportColumnX += ReportUsable * ReportWidths[ReportColumn];
             }
         }
+        ReportCloseBlock(FMath::Min(ReportPerPage, ReportLines.Num() - ReportPage * ReportPerPage) - 1);
         const float ReportFooter = Canvas->ClipY - 78.f;
         DrawButton(ReportX + 20.f, ReportFooter, 100.f, 30.f, TEXT("FORRIGE"), EAction::ReportPage, -1, false);
         DrawButton(ReportX + 130.f, ReportFooter, 100.f, 30.f, TEXT("NÆSTE"), EAction::ReportPage, 1, false);
