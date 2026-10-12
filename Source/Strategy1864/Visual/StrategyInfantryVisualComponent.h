@@ -331,6 +331,9 @@ private:
         float StartDelay = 0.f;
         float ReformDeadline = -1.f;
         FVector ReformTarget = FVector::ZeroVector;
+        FVector ReformStartLocal = FVector::ZeroVector;   // v2 rigid morph: where he stood in the unit's frame when the change began
+        float ReformStartTime = 0.f;
+        float ReformDuration = 0.f;
         float StartRemaining = 0.f;
         float HaltRemaining = 0.f;
         float SlotYaw = 0.f;

@@ -1521,8 +1521,10 @@ void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, cons
         const int32 ReformFileB = FMath::RoundToInt32(ReformLocalB.Y / ReformFileSpacing);
         const int32 ReformRankA = FMath::RoundToInt32(-ReformLocalA.X / ReformRankSpacing);
         const int32 ReformRankB = FMath::RoundToInt32(-ReformLocalB.X / ReformRankSpacing);
-        if (bReformColumn && !bDestination)
+        if (!bDestination)
         {
+            // v2: monotone in the lateral direction (left to right, front first), so every file slides out sideways in its own band
+            // and no two paths cross (a plain rank-major order made the two streams cross like an X).
             if (ReformFileA != ReformFileB) return ReformFileA < ReformFileB;
             if (ReformRankA != ReformRankB) return ReformRankA < ReformRankB;
         }
@@ -1539,8 +1541,8 @@ void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, cons
     {
         const FVector& ReformAOffset = ReformSlots[ReformA];
         const FVector& ReformBOffset = ReformSlots[ReformB];
-        if (bReformColumn && !bDestination)
-            return ReformAOffset.X != ReformBOffset.X ? ReformAOffset.X > ReformBOffset.X : ReformAOffset.Y < ReformBOffset.Y;
+        if (!bDestination)
+            return ReformAOffset.Y != ReformBOffset.Y ? ReformAOffset.Y < ReformBOffset.Y : ReformAOffset.X > ReformBOffset.X;
         return ReformAOffset.Y != ReformBOffset.Y ? ReformAOffset.Y < ReformBOffset.Y : ReformAOffset.X > ReformBOffset.X;
     });
     // Uncross straight segments by exchanging endpoints. Every exchange strictly shortens total travel.
@@ -1609,6 +1611,9 @@ void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, cons
         ReformSettle.StartRemaining = bDestination ? 0.f : 0.f;
         ReformSettle.HaltRemaining = 0.f;
         ReformSettle.ReformDeadline = VisualAnimationTime + ReformBudget;
+        ReformSettle.ReformStartLocal = ReformFrame.InverseTransformPosition(ReformStart);
+        ReformSettle.ReformStartTime = VisualAnimationTime;
+        ReformSettle.ReformDuration = ReformBudget;
         ReformSettle.WorldVelocity = FVector::ZeroVector;
         ReformSettle.bActive = true;
     }
@@ -1860,7 +1865,18 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         const FVector FigureTarget = VisualUnit.TransformPosition(Settle.Goal);
         // Integrate presentation velocity every frame, with braking near the slot.
         // Substeps affect no orders, simulation positions, collision or game clocks.
-        if (!bSpreadCrawling && (Settle.ReformDeadline >= 0.f || bArrivalReform))
+        if (!bSpreadCrawling && bRigidCompany && !bArrivalReform && Settle.ReformDeadline >= 0.f && Settle.ReformDuration > 0.f)
+        {
+            // v2: the change of formation is a straight glide from the old slot to the new one in the unit's own frame, so the
+            // whole company morphs as one body while it marches (no men chasing a moving slot through world space).
+            const float Alpha = FMath::Clamp((VisualAnimationTime - Settle.ReformStartTime) / Settle.ReformDuration, 0.f, 1.f);
+            const float Eased = Alpha * Alpha * (3.f - 2.f * Alpha);
+            const FVector Local = FMath::Lerp(Settle.ReformStartLocal, Settle.Goal, Eased);
+            FigureWorld = VisualUnit.TransformPosition(Local);
+            Settle.WorldVelocity = DeltaTime > 0.f ? (FigureWorld - FigureBefore) / DeltaTime : FVector::ZeroVector;
+            if (Alpha >= 1.f) Settle.ReformDeadline = -1.f;
+        }
+        else if (!bSpreadCrawling && (Settle.ReformDeadline >= 0.f || bArrivalReform))
         {
             const float ReformTimeLeft = FMath::Max(DeltaTime, Settle.ReformDeadline - VisualAnimationTime);
             const float ReformBaseSpeed = bArrivalReform ? FMath::Max(160.f, ArrivalTravelSpeed * Settle.Pace) : ActualMarchSpeed + RunCmPerSecond * Settle.Pace;
@@ -1887,7 +1903,7 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         const float RunYaw = VisualUnit.InverseTransformVectorNoScale(Settle.WorldVelocity).Rotation().Yaw + SoldierMeshYawOffset;
         const bool bFigureBackstep = OwnerCompany->OrderComponent &&
             OwnerCompany->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Disengage;
-        const float Yaw = bFigureBackstep || Step.Size() >= Distance - 0.1f || (bRigidCompany && !bFormationPlanPending) ? Settle.Yaw :
+        const float Yaw = bFigureBackstep || Step.Size() >= Distance - 0.1f || (bRigidCompany && !bArrivalReform) ? Settle.Yaw :
             (bVisualTravel || Distance > (bArrivalReform ? 0.1f : 30.f) ? RunYaw : Settle.Yaw);
         FRotator Rot = Soldier->GetRelativeRotation();
         const float FigureTurn = FMath::FindDeltaAngleDegrees(Rot.Yaw, Yaw);
@@ -1895,7 +1911,7 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         Rot.Yaw = FStrategyVisualFormationPath::SmoothFacing(Rot.Yaw, Settle.YawVelocity, Yaw, DeltaTime, 120.f);
         Soldier->SetRelativeRotation(Rot);
         Soldier->bPauseAnims = false;
-        UAnimSequence* TravelClip = (!bSlotReforming || bArrivalReform) && Walk ? Walk : Run;
+        UAnimSequence* TravelClip = (!bSlotReforming || bArrivalReform || bRigidCompany) && Walk ? Walk : Run;
         if (TravelClip && SoldierClips.IsValidIndex(i) && (SoldierClips[i].Clip.Get() != TravelClip))
         {
             Soldier->bPauseAnims = false;

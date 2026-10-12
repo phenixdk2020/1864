@@ -1933,6 +1933,12 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Enhedskortet viser uniformbilledet også i 1825 (1851-billedet; teksten om 1825-uniformen står i tooltip). Fanen beholder bredden, højden er 20 % lavere (105x67).
 - Kamporden: et enkeltstående kompagni/eskadron/sektion (nyt træ) hænger nu under en egen HQ-boks ("ubesat", indtil der er en chef) med kompagniet under sig. Enheder, der allerede har et HQ (bataljon, regiment, brigade, division), får ikke et ekstra.
 
+### 2026-10-12 - Formationsskift v2 (stiv krop som i Unity)
+
+- Problem (video 2026-10-12): mændene ved kolonne/linje-skift dannede et stort "A"/X af krydsende strømme og så smadrede ud. Årsag: hver mand løb i verdensrum mod en plads, der flyttede sig med marchen, og pladserne var tildelt rang-for-rang.
+- v2: skiftet sker i enhedens egen ramme. Hver mand glider i en ret linje (smoothstep) fra sin gamle til sin nye plads (`ReformStartLocal/ReformDuration`), så hele kompagniet morpher som én krop under march. Pladserne tildeles monotont i sideretningen (venstre mod højre, forreste først), så ingen stier krydser. Mændene vender fronten og bruger gangbevægelsen under skiftet. Unity byttede slots øjeblikkeligt; her er det en jævn glidning.
+- Test: skirmish-kørsel, linjen dannes som ét ordnet sving; `-Strategy1864Rigid=0` giver den gamle opførsel.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
