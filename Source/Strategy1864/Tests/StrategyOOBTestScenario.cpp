@@ -1522,6 +1522,9 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     const EStrategySide EnemySide = EnemyNation == TEXT("AT") ? EStrategySide::Austria : EStrategySide::Prussia;
     const bool bNeedleGun = EnemyRifle.Contains(TEXT("Dreyse")) || EnemyRifle.Contains(TEXT("ndnål")) || (EnemyRifle.IsEmpty() && EnemySide == EStrategySide::Prussia);
     const FString EnemyLabel = EnemySide == EStrategySide::Austria ? TEXT("Østr.") : TEXT("Pr.");
+    ReportEnemyName = EnemyNation == TEXT("AT") ? FString(TEXT("ØSTRIG")) : EnemyNation == TEXT("PR") ? FString(TEXT("PREUSSEN"))
+        : EnemyNation == TEXT("SE") || EnemyNation == TEXT("SW") ? FString(TEXT("SVERIGE")) : EnemyNation == TEXT("NO") ? FString(TEXT("NORGE"))
+        : EnemyNation == TEXT("HN") ? FString(TEXT("HANNOVER")) : EnemyNation.ToUpper();
     AStrategyHQUnit* EnemyBrigade = SpawnHQ(FName(*FString::Printf(TEXT("EN-%s-BDE"), *EnemyNation)), FString::Printf(TEXT("%s brigade"), *EnemyLabel),
         static_cast<uint8>(EStrategyHQLevel::Brigade), Hostile(-30000.0f, 0.0f), nullptr);
     if (EnemyBrigade)
@@ -4644,7 +4647,7 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
     ReportSummary = (CampaignField ? FString::Printf(TEXT("%s · %s. "), *CampaignField->Place, *ReportCampaignDate.Left(10)) : FString(TEXT("Testslag. "))) + ReportSummary;
     ReportDanes.Name = TEXT("DANSKE — TOTAL");
     ReportDanes.OriginalSide = uint8(EStrategySide::Denmark);
-    ReportEnemy.Name = TEXT("FJENDEN — TOTAL");
+    ReportEnemy.Name = ReportEnemyName + TEXT(" — TOTAL");
     ReportEnemy.OriginalSide = uint8(EStrategySide::Enemy);
     ReportLedgerJson->SetArrayField(TEXT("units"), ReportJsonUnits);
     ReportLedgerJson->SetObjectField(TEXT("danishTotals"), ReportJsonRow(ReportDanes));
@@ -4654,7 +4657,7 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
         ReportDanes.Wounded, ReportEnemy.Wounded));
     ReportRows.Add(ReportDanes.Row(TEXT("DANSKE — TOTAL")));
     ReportRows.Append(ReportDanishRows);
-    ReportRows.Add(ReportEnemy.Row(TEXT("FJENDEN — TOTAL")));
+    ReportRows.Add(ReportEnemy.Row(ReportEnemyName + TEXT(" — TOTAL")));
     ReportRows.Append(ReportEnemyRows);
     ReportText = ReportSummary + TEXT("\nEnhed\tMand ved start\tFaldne\tSårede\tFanger\tErobret udstyr\tTabt udstyr\tSkud\tKamp sek.\tMoraltab\n");
     for (const FString& ReportRow : ReportRows) { ReportText += ReportRow + TEXT("\n"); }

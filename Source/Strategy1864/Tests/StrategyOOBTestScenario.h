@@ -254,6 +254,8 @@ public:
     void FinalizeAfterActionReport();
     const TArray<FString>& GetReportRows() const { return ReportRows; }
     const FString& GetReportSummary() const { return ReportSummary; }
+    /** The opposing nation as the report names it ("PREUSSEN", "ØSTRIG"); several parties are joined with " + ". */
+    FString ReportEnemyName = TEXT("FJENDEN");
     bool HasAfterActionReport() const { return bReportFinalized; }
     FStrategyBattleLedger ReportDanes, ReportEnemy;
 

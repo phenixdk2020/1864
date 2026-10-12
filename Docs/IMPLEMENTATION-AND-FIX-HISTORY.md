@@ -1976,7 +1976,7 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 
 ### 2026-10-12 - Kamera under pause
 
-- Ved pause kunne kameraet kun flyttes via minimap: kamera-pawnen og bevægelseskomponenten tikkede under pause, men springarm'en (der placerer kameraet efter pawnen) gjorde ikke. SpringArm tikker nu også under pause (`bTickEvenWhenPaused`). Ikke bygget (spillet var åbent) og ikke afprøvet.
+- Ved pause kunne kameraet kun flyttes via minimap: kamera-pawnen og bevægelseskomponenten tikkede under pause, men springarm'en (der placerer kameraet efter pawnen) gjorde ikke. SpringArm tikker nu også under pause (`bTickEvenWhenPaused`). Bygget uden fejl; ikke afprøvet i spillet.
 
 ### 2026-10-12 - Bagte figurer som standard
 
