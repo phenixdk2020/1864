@@ -10,4 +10,4 @@ if not exist "%~dp0Saved\Battle\Battlefield_Test.json" (
   pause
   exit /b 1
 )
-start "" "%UE%" "%PROJECT%" /Game/Maps/Strategy1864_Field -game -windowed -ResX=1920 -ResY=1080 -Strategy1864Field=Battlefield_Test.json -Strategy1864Crowd=0 %*
+start "" "%UE%" "%PROJECT%" /Game/Maps/Strategy1864_Field -game -windowed -ResX=1920 -ResY=1080 -Strategy1864Field=Battlefield_Test.json %*

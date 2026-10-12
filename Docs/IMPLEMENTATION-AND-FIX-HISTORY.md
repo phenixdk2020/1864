@@ -1978,6 +1978,10 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 
 - Ved pause kunne kameraet kun flyttes via minimap: kamera-pawnen og bevægelseskomponenten tikkede under pause, men springarm'en (der placerer kameraet efter pawnen) gjorde ikke. SpringArm tikker nu også under pause (`bTickEvenWhenPaused`). Ikke bygget (spillet var åbent) og ikke afprøvet.
 
+### 2026-10-12 - Bagte figurer som standard
+
+- Brugeren har set de bagte figurer og er tilfreds. `-Strategy1864Crowd=0` er fjernet fra Start-3D-Skirmish-Test, Start-3D-Slag-Test og Start-Test-1/2/3, så bagte figurer er standard. `-Strategy1864Crowd=0` kan stadig angives manuelt for almindelige figurer.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
