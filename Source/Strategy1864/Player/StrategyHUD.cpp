@@ -1248,13 +1248,15 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         const FLinearColor* HudColour = OrderIndex == 0 ? &HudOrderBlue : OrderIndex == 2 ? &HudOrderGreen : &HudOrderRed;
         DrawButton(HudX[2] + (OrderIndex % 2) * (HudOrderW + 5.f), HudY + 49.f + (OrderIndex / 2) * (HudHQ ? 44.f : 56.f), HudOrderW, HudHQ ? 38.f : 50.f, HudOrders[OrderIndex], HudActions[OrderIndex], int32(HudTypes[OrderIndex]), HudCurrent == HudTypes[OrderIndex], Unit, HudColour);
     }
+    const bool bHudTurnable = !HudHQ && (Cast<AStrategyCompanyUnit>(Unit) || Cast<ACavalryUnit>(Unit) || Cast<AStrategyArtilleryBatteryUnit>(Unit));
     if (!HudHQ && Cast<AStrategyCompanyUnit>(Unit))
-        DrawButton(HudX[2], HudY + 160.f, HudW[2], 20.f, TEXT("AFBRYD"), EAction::Disengage, 0, HudCurrent == EStrategyOrderType::Disengage, Unit, &OrderRed);
-    if (!HudHQ && (Cast<AStrategyCompanyUnit>(Unit) || Cast<ACavalryUnit>(Unit) || Cast<AStrategyArtilleryBatteryUnit>(Unit)))
+        DrawButton(HudX[2], HudY + 160.f, bHudTurnable ? HudW[2] * 0.52f : HudW[2], 20.f, TEXT("AFBRYD"), EAction::Disengage, 0, HudCurrent == EStrategyOrderType::Disengage, Unit, &OrderRed);
+    if (bHudTurnable)
     {
         // Turn the company, squadron or battery 15 degrees on the spot.
-        DrawButton(HudX[3], HudY + 183.f, (HudW[3] - 5.f) * 0.5f, 23.f, TEXT("DREJ -15°"), EAction::Turn, -15, false, Unit);
-        DrawButton(HudX[3] + (HudW[3] - 5.f) * 0.5f + 5.f, HudY + 183.f, (HudW[3] - 5.f) * 0.5f, 23.f, TEXT("DREJ +15°"), EAction::Turn, 15, false, Unit);
+        const float HudTurnW = HudW[2] * 0.22f;
+        DrawButton(HudX[2] + HudW[2] * 0.55f, HudY + 160.f, HudTurnW, 20.f, TEXT("-15°"), EAction::Turn, -15, false, Unit);
+        DrawButton(HudX[2] + HudW[2] * 0.55f + HudTurnW + 4.f, HudY + 160.f, HudTurnW, 20.f, TEXT("+15°"), EAction::Turn, 15, false, Unit);
     }
     DrawSpecialOrders(Unit, HudX[2] * HudScale, HudOriginY + (HudY + 184.f) * HudScale, HudW[2] * HudScale);   // the member draws in screen pixels
     if (!HudHQ) Text(BaseOrderLabel(Unit), HudX[2], HudY + 210.f, Muted, 0.65f);

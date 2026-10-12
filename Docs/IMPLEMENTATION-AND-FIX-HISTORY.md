@@ -1968,6 +1968,12 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - DREJ -15°/+15° vises nu også for eskadroner og batterier (ikke kun kompagnier).
 - Codex' "vat2" (mørke bagte figurer, LOD-bånd, skyggegrænse 25 m, to knogler over 30 m, culling, båndlog) er flettet ind via patch og bygger. VAT-assets skal genbages, før det virker; visuelt resultat og GPU-gevinst er ikke målt.
 
+### 2026-10-12 - Genbagte figurer, lig-loft 1000, drejeknapper flyttet
+
+- VAT-assets genbagt med Codex' rettelser (4 LOD-niveauer pr. soldat, ny M_CrowdVAT_All). Testkørsel: de bagte figurer er ikke længere mørke (rød/blå uniform), LOD-bånd og skyggetællere logges (PROJECT1864-CROWD). Nær kamera ser bevægelsen stadig sløret/stribet ud på et screenshot (muligvis bevægelsessløring); GPU-tid ikke målt.
+- Lig-loft: 1000 for bagte (instancerede) figurer, 150 for almindelige skeletfigurer.
+- DREJ -15°/+15° flyttet til ordrepanelet ved siden af AFBRYD (de overlappede skudafstand-skyderen).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

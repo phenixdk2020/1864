@@ -954,7 +954,8 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
             if (!FallenAnimation) FallenAnimation = IdleProneAsset.Get();
             Soldier->PlayAnimation(FallenAnimation, false);
             const int32 BattleBodyCount = UStrategyCrowdSubsystem::CountFallen(GetWorld());
-            const bool bKeepBody = bLeaveCorpses && BattleBodyCount < 150;
+            // Baked (instanced) figures keep far more bodies than skeletal ones: a body is one instance in a fixed death pose.
+            const bool bKeepBody = bLeaveCorpses && BattleBodyCount < (bCrowdMode ? 1000 : 150);
             if (bKeepBody) { CorpseComponents.Add(Soldier); CorpseBirthTimes.Add(Now); CorpseFading.Add(false); }
             else
             {
