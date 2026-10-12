@@ -26,6 +26,7 @@ AStrategyCameraPawn::AStrategyCameraPawn()
     SpringArm->SetupAttachment(SceneRoot);
     SpringArm->TargetArmLength = 2600.0f;
     SpringArm->SetRelativeRotation(FRotator(-55.0f, 0.0f, 0.0f));
+    SpringArm->PrimaryComponentTick.bTickEvenWhenPaused = true;   // the arm places the camera after the pawn: it must tick while paused
     SpringArm->bDoCollisionTest = false;
     SpringArm->bInheritPitch = false;
     SpringArm->bInheritRoll = false;

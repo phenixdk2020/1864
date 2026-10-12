@@ -1974,6 +1974,10 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Lig-loft: 1000 for bagte (instancerede) figurer, 150 for almindelige skeletfigurer.
 - DREJ -15°/+15° flyttet til ordrepanelet ved siden af AFBRYD (de overlappede skudafstand-skyderen).
 
+### 2026-10-12 - Kamera under pause
+
+- Ved pause kunne kameraet kun flyttes via minimap: kamera-pawnen og bevægelseskomponenten tikkede under pause, men springarm'en (der placerer kameraet efter pawnen) gjorde ikke. SpringArm tikker nu også under pause (`bTickEvenWhenPaused`). Ikke bygget (spillet var åbent) og ikke afprøvet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
