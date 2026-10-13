@@ -969,10 +969,10 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
             }
             else if (!bSquare)
             {
-                // Ride round to a point beside (and a little behind) his line, out of the front of his fire.
+                // Ride round to a point beside and behind his line, out of the front of his fire and his sight.
                 const FVector PreyRight(-PreyFront.Y, PreyFront.X, 0.0f);
                 const float Side = FVector::DotProduct(FromPrey, PreyRight) >= 0.0f ? 1.0f : -1.0f;
-                FVector Stage = Pinned->GetActorLocation() + PreyRight * Side * 9500.0f - PreyFront * 2500.0f;
+                FVector Stage = Pinned->GetActorLocation() + PreyRight * Side * 8000.0f - PreyFront * 7500.0f;   // beside and well behind his line: he is looking to his front
                 Stage.Z = OwnerUnit->GetActorLocation().Z;
                 if (FVector::Dist2D(OwnerUnit->GetActorLocation(), Stage) > 3000.0f &&
                     (Now - LastFlankOrderTime > 6.0f || FVector::Dist2D(Stage, LastFlankStage) > 1500.0f))

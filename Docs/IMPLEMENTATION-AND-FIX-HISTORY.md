@@ -2107,6 +2107,13 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 
 - Rytterofficeren (`ThinkCavalry`) vælger nu et synligt fjendtligt kompagni, der er under ild, som bytte: står eskadronen mindre end ca. 70 grader fra hans front, rider den til et punkt ved hans flanke (95 m ud, 25 m bagud); står den på flanke/bagside og er under 300 m væk, chargerer den. Aldrig mod en stabil karré (en vaklende karré kan stadig chargeres), og kun hvis officer-AI er slået til, moral over 45 og 45 s siden sidste charge. Logges i enhedsloggen ("Rider om til flanken", "Charge i flanke/ryg"). Ikke afprøvet i et kørt slag endnu.
 
+### 2026-10-13 - Ingen øjne i nakken; rytteri rider om bag fjenden
+
+- Opmærksomhedsregel (`FindVisibleEnemyCavalry`): et kompagni, der er i ildkamp (under ild eller skyder), ser rytteri foran sig i fuld varslingsafstand, fra siden kun på 60 % af afstanden, og bagfra først på ca. 35 m (for sent til at nå karréen). Logges som "Ser ikke rytteriet endnu" i enhedsloggen.
+- Eskadronens opstillingspunkt ligger nu 80 m ud til siden og 75 m bag fjendens linje (før 95 m og 25 m).
+- Test (4 mod 1 med batteri, morter og eskadron, AI-officer, tid x3): eskadronen rider om to gange, opdages bagfra først på 35 m (01:27), kompagniet danner karré for sent, eskadronen chargerer i flanke/ryg på 106 m (01:45, 75 grader fra fjendens front), og afviser derefter charge mod den nye faste karré (01:53). Dansk sejr. Set i enhedsloggene (rapportfilen).
+- Bemærkning fra testen: fjendens husarer fik samme regel mod fjendens eget kompagni, fordi opsætningen giver dem og kompagniet forskellige side-værdier (Prussia/Enemy). Testopsætning, ikke rytterlogik.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

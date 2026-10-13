@@ -156,8 +156,31 @@ AStrategyUnit* UStrategyThreatReactionComponent::FindVisibleEnemyCavalry() const
             (bHasPlayerFormationOrder
                 ? FMath::Clamp(PlayerOrderThreatDistanceScale, 0.0f, 1.0f) : 1.0f);
         const float ThreatDistance = ToCompany.Size2D();
+        // No eyes in the neck: a company that is engaged (under fire, or firing) looks to its front. Riders coming from the side are seen
+        // later, and riders coming from behind are seen only when they are almost on it (too late to form square in time).
+        float AttentionDistance = EffectiveDistance;
+        {
+            const float AttentionNow = GetWorld()->GetTimeSeconds();
+            const bool bEngaged = (OwnerUnit->CombatComponent && OwnerUnit->CombatComponent->UnderFireRemainingSeconds > 0.0f) ||
+                OwnerUnit->BattleLedger.CombatUntil > AttentionNow;
+            if (bEngaged)
+            {
+                FVector OwnFront = OwnerUnit->GetActorForwardVector();
+                OwnFront.Z = 0.0f;
+                const FVector ToRider = (-ToCompany).GetSafeNormal2D();
+                const float FrontDot = FVector::DotProduct(OwnFront.GetSafeNormal(), ToRider);   // 1: dead ahead, -1: directly behind
+                if (FrontDot < -0.17f) { AttentionDistance = FMath::Min(EffectiveDistance, 3500.0f); }
+                else if (FrontDot < 0.17f) { AttentionDistance = EffectiveDistance * 0.6f; }
+                if (AttentionDistance < EffectiveDistance && ThreatDistance > AttentionDistance && ThreatDistance <= EffectiveDistance)
+                {
+                    OwnerUnit->AddUnitLog(TEXT("Kavalerireaktion"), TEXT("Ser ikke rytteriet endnu"),
+                        FString::Printf(TEXT("optaget af ildkamp og rytteriet kommer fra %s (%.0f m væk): ingen øjne i nakken, opdages først på %.0f m"),
+                            FrontDot < -0.17f ? TEXT("bagfra") : TEXT("siden"), ThreatDistance / 100.0f, AttentionDistance / 100.0f), 20.0f);
+                }
+            }
+        }
         // Keep the existing short-range forest/smoke visibility gate after contact selection.
-        if (ThreatDistance > EffectiveDistance || ThreatDistance >= BestDistanceCm ||
+        if (ThreatDistance > AttentionDistance || ThreatDistance >= BestDistanceCm ||
             !OwnerUnit->VisibilityComponent->CanDetectTarget(CavalryThreat, EffectiveDistance))
         {
             STRATEGY1864_DECISION(OwnerUnit, TEXT("Kavalerikandidat"), TEXT("Afvis"),
