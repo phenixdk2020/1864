@@ -2041,6 +2041,13 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - T3: lokal moralsmitte ved sammenbrud: venner inden for 80 m mister moral og samhold én gang, når en enhed går i opløsning (`EvaluateRoutState`). Bestået.
 - T7 (to enheder i floden): UAFKLARET. Positionerne ved fejlen (company dx=-1193, owner; other dx=-1013, ikke ejer) viser, at den ventende enhed står i flodbåndets kant i stedet for ved ventepunktet (dx=-1800). Jeg har tilføjet en tidlig venteregel ved flodkanten (`UpdateBridgeQueueState`), som ikke ændrede resultatet, og positionslog i testen. Årsagen (enhedsafstand/avoidance, eller at den ventende enhed ikke bruger broruten) er ikke fundet.
 
+### 2026-10-13 - Kommandocirkel, rally, ildkegle til/fra
+
+- Kommandocirkel: officerer har en ring (kompagni/eskadron 30-45 m efter inspiration, batteri 25 m, bataljons-HQ 100 m, regiment 150 m, brigade 200 m, division 300 m; `AStrategyUnit::GetCommandRadiusCm`). Ringen tegnes (blå) for valgte danske officerer og kan slås til/fra pr. enhed (knappen CIRKEL: TIL/FRA i HQ-panelet).
+- Rally: knappen RALLY på HQ-panelet samler rutede egne enheder inden for cirklen med det samme (moral min. 40, samhold min. 35, ordre ryddet; 30 s før næste kald). Rutede enheder inden for en egen, ikke-rutet officers cirkel samler sig desuden 2,5 gange hurtigere og tættere på fjenden (`StrategyRoutRecoveryComponent::TryRally`).
+- Ildkegle: tænd/sluk-knap (KEGLE: TIL/FRA) pr. enhed ved skudafstand-skyderen; flaget gælder kun visningen af kegler for valgte enheder, ikke selve ildreglerne.
+- Set på et screenshot (HQ valgt): ring og knapper vises; selve rally-virkningen er ikke afprøvet i et kørt slag.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

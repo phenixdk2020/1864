@@ -117,12 +117,32 @@ void UStrategyRoutRecoveryComponent::StartFallback(AStrategyUnit* Enemy)
     }
 }
 
+namespace
+{
+    // Is a friendly officer, not himself broken, near enough that this unit stands inside his command circle?
+    bool IsInFriendlyCommandCircle(const AStrategyUnit* Unit)
+    {
+        if (!Unit || !Unit->GetWorld()) return false;
+        for (TActorIterator<AStrategyUnit> It(Unit->GetWorld()); It; ++It)
+        {
+            const AStrategyUnit* Officer = *It;
+            if (!IsValid(Officer) || Officer == Unit || Officer->Side != Unit->Side || !Officer->IsCombatEffective() ||
+                Officer->UnitState == EStrategyUnitState::Routed) continue;
+            const float Radius = Officer->GetCommandRadiusCm();
+            if (Radius > 0.0f && FVector::Dist2D(Officer->GetActorLocation(), Unit->GetActorLocation()) <= Radius) return true;
+        }
+        return false;
+    }
+}
+
 void UStrategyRoutRecoveryComponent::TryRally(
     float DeltaTime,
     float NearestEnemyDistanceCm)
 {
+    // Inside an officer's command circle the men rally faster and closer to the enemy.
+    const bool bCommanded = IsInFriendlyCommandCircle(OwnerUnit);
     if (!OwnerUnit ||
-        NearestEnemyDistanceCm < SafeEnemyDistanceCm)
+        NearestEnemyDistanceCm < (bCommanded ? SafeEnemyDistanceCm * 0.5f : SafeEnemyDistanceCm))
     {
         return;
     }
@@ -145,7 +165,7 @@ void UStrategyRoutRecoveryComponent::TryRally(
 
     OwnerUnit->Morale = FMath::Clamp(
         OwnerUnit->Morale +
-        MoraleRecoveryPerSecond *
+        MoraleRecoveryPerSecond * (bCommanded ? 2.5f : 1.0f) *
         InspirationMultiplier *
         NCOMultiplier *
         DeltaTime,

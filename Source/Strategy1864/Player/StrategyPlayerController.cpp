@@ -1171,6 +1171,29 @@ void AStrategyPlayerController::TickRightMouse()
     }
 }
 
+void AStrategyPlayerController::RallyAroundSelection()
+{
+    UWorld* RallyWorld = GetWorld();
+    if (!RallyWorld) return;
+    const double RallyNow = RallyWorld->GetTimeSeconds();
+    for (AStrategyUnit* Officer : SelectedUnitObjects)
+    {
+        if (!IsValid(Officer) || Officer->Side != EStrategySide::Denmark || Officer->GetCommandRadiusCm() <= 0.0f ||
+            !Officer->IsCombatEffective() || Officer->UnitState == EStrategyUnitState::Routed || RallyNow < Officer->RallyCooldownUntil) continue;
+        Officer->RallyCooldownUntil = RallyNow + 30.0;
+        for (TActorIterator<AStrategyUnit> It(RallyWorld); It; ++It)
+        {
+            AStrategyUnit* Routed = *It;
+            if (!IsValid(Routed) || Routed == Officer || Routed->Side != Officer->Side || Routed->UnitState != EStrategyUnitState::Routed ||
+                FVector::Dist2D(Routed->GetActorLocation(), Officer->GetActorLocation()) > Officer->GetCommandRadiusCm()) continue;
+            Routed->Morale = FMath::Max(Routed->Morale, 40.0f);
+            Routed->Cohesion = FMath::Max(Routed->Cohesion, 35.0f);
+            if (Routed->OrderComponent) Routed->OrderComponent->ClearOrder();
+            Routed->SetUnitState(EStrategyUnitState::Ready);
+        }
+    }
+}
+
 void AStrategyPlayerController::TurnSelection(float DeltaYawDegrees)
 {
     CancelOrderPlacement();

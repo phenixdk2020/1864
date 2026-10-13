@@ -331,6 +331,20 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Selection")
     bool bPlayerControllable = true;
 
+    /** The ring round an officer inside which his troops rally and are steadied (the HUD can show or hide it). */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Command")
+    bool bShowCommandCircle = true;
+
+    /** Shows or hides this unit's fire cone when it is selected. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Command")
+    bool bShowFireCone = true;
+
+    /** The command circle's radius (0: this unit commands no circle): company captain 35 m up to a division 300 m. */
+    float GetCommandRadiusCm() const;
+
+    /** Earliest world time at which this officer can call "rally" again. */
+    double RallyCooldownUntil = 0.0;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Selection")
     bool bSelected = false;
 

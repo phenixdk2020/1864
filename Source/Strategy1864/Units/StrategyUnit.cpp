@@ -1,4 +1,5 @@
 #include "StrategyUnit.h"
+#include "StrategyHQUnit.h"
 #include "StrategyWagonTrainComponent.h"
 #include "Engine/World.h"
 #include "../Artillery/StrategyArtilleryBatteryUnit.h"
@@ -502,6 +503,28 @@ void AStrategyUnit::SetSemanticZoomState(EStrategySemanticZoomState NewState)
     if (bChanged)
     {
         OnSemanticZoomChanged(SemanticZoomState);
+    }
+}
+
+float AStrategyUnit::GetCommandRadiusCm() const
+{
+    if (const AStrategyHQUnit* HQ = Cast<AStrategyHQUnit>(this))
+    {
+        switch (HQ->HQLevel)
+        {
+            case EStrategyHQLevel::Battalion: return 10000.0f;
+            case EStrategyHQLevel::Regiment: return 15000.0f;
+            case EStrategyHQLevel::Brigade: return 20000.0f;
+            case EStrategyHQLevel::Division: return 30000.0f;
+        }
+    }
+    const float OfficerSkill = OfficerProfileComponent ? FMath::Clamp(OfficerProfileComponent->Inspiration / 100.0f, 0.0f, 1.0f) : 0.5f;
+    switch (Echelon)
+    {
+        case EStrategyEchelon::Company:
+        case EStrategyEchelon::Cavalry: return FMath::Lerp(3000.0f, 4500.0f, OfficerSkill);
+        case EStrategyEchelon::Artillery: return 2500.0f;
+        default: return 0.0f;
     }
 }
 

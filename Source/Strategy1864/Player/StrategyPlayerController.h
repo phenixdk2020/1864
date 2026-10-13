@@ -57,6 +57,8 @@ public:
     void IssueHoldToSelection();
     /** Turns the selected units on the spot (a move to where they stand with a new front). */
     void TurnSelection(float DeltaYawDegrees);
+    /** An officer calls "rally": routed friends inside his command circle recover at once (30 s before he can call again). */
+    void RallyAroundSelection();
 
     UFUNCTION(BlueprintPure, Category="Strategy|Orders")
     bool HasPendingOrderPlacement() const { return bOrderPlacementPending; }

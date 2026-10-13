@@ -299,6 +299,17 @@ void AStrategyHUD::DrawHUD()
             if (RouteIt->bPlayerControllable) DrawMovementRoute(*RouteIt, RouteSelection.Contains(*RouteIt));
     }
 
+    // The selected officers' command circles.
+    if (const AStrategyPlayerController* CirclePC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
+    {
+        for (const AStrategyUnit* Officer : CirclePC->GetSelectedUnits())
+        {
+            const float Radius = IsValid(Officer) ? Officer->GetCommandRadiusCm() : 0.0f;
+            if (Radius > 0.0f && Officer->bShowCommandCircle && Officer->Side == EStrategySide::Denmark)
+                DrawDebugCircle(GetWorld(), Officer->GetActorLocation() + FVector(0.f, 0.f, 60.f), Radius, 72, FColor(120, 200, 255), false, 0.0f, SDPG_World, 14.0f, FVector(1, 0, 0), FVector(0, 1, 0), false);
+        }
+    }
+
     // Fire cones under the panels: the selected units', and the duel's two companies.
     {
         TSet<const AStrategyUnit*> Drawn;
@@ -307,7 +318,7 @@ void AStrategyHUD::DrawHUD()
         {
             for (const AStrategyUnit* Unit : ConePC->GetSelectedUnits())
             {
-                if (IsValid(Unit) && Unit->FireControlComponent && !IsCommandHQ(Unit) && !Drawn.Contains(Unit) && Unit->Side == EStrategySide::Denmark)
+                if (IsValid(Unit) && Unit->FireControlComponent && !IsCommandHQ(Unit) && !Drawn.Contains(Unit) && Unit->Side == EStrategySide::Denmark && Unit->bShowFireCone)
                 {
                     DrawFireCone(Unit, bLegend);
                     bLegend = false;
@@ -1262,6 +1273,13 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     if (!HudHQ) Text(BaseOrderLabel(Unit), HudX[2], HudY + 210.f, Muted, 0.65f);
     if (HudHQ)
     {
+        // Rally and the command circle's switch.
+        const float HudHalfW = (HudW[3] - 5.f) * 0.5f;
+        DrawButton(HudX[3], HudY + 183.f, HudHalfW, 23.f, TEXT("RALLY"), EAction::Rally, 0, false, Unit);
+        DrawButton(HudX[3] + HudHalfW + 5.f, HudY + 183.f, HudHalfW, 23.f, Unit->bShowCommandCircle ? TEXT("CIRKEL: TIL") : TEXT("CIRKEL: FRA"), EAction::CommandCircle, 0, Unit->bShowCommandCircle, Unit);
+    }
+    if (HudHQ)
+    {
         const TCHAR* HudExtra[] = {TEXT("ANGRIB"), TEXT("FORSVAR"), TEXT("SAML")};
         const EStrategyOrderType HudExtraTypes[] = {EStrategyOrderType::AttackHere, EStrategyOrderType::DefendHere, EStrategyOrderType::Assemble};
         for (int32 ExtraIndex = 0; ExtraIndex < 3; ++ExtraIndex)
@@ -1348,7 +1366,8 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         DrawLine(ConeX, HudY + 185.f, ConeX + 14.f, HudY + 177.f, Muted, 1.2f);
         DrawLine(ConeX, HudY + 185.f, ConeX + 14.f, HudY + 193.f, Muted, 1.2f);
         DrawLine(ConeX + 14.f, HudY + 177.f, ConeX + 14.f, HudY + 193.f, Muted, 1.2f);
-        Text(FString::Printf(TEXT("KEGLE \u00b1%.0f\u00b0"), HudFC->FireConeHalfAngleDegrees), ConeX + 22.f, HudY + 178.f, Muted, 0.72f);
+        DrawButton(ConeX + 20.f, HudY + 172.f, 78.f, 22.f, Unit->bShowFireCone ? TEXT("KEGLE: TIL") : TEXT("KEGLE: FRA"), EAction::ConeToggle, 0, Unit->bShowFireCone, Unit);
+        Text(FString::Printf(TEXT("\u00b1%.0f\u00b0"), HudFC->FireConeHalfAngleDegrees), ConeX + 24.f, HudY + 196.f, Muted, 0.66f);
     }
     if (HudHQ && Unit->bOfficerAIEnabled && Unit->AITelemetryComponent && !Unit->AITelemetryComponent->CurrentTask.IsEmpty())
     {
@@ -1617,6 +1636,15 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                         PC->CancelOrderPlacement();
                         PC->IssueOrderToSelection(EStrategyOrderType::Disengage, FVector::ZeroVector, 0.f, false);
                     }
+                    break;
+                case EAction::Rally:
+                    if (PC) { PC->RallyAroundSelection(); }
+                    break;
+                case EAction::CommandCircle:
+                    if (Unit) { Unit->bShowCommandCircle = !Unit->bShowCommandCircle; }
+                    break;
+                case EAction::ConeToggle:
+                    if (Unit) { Unit->bShowFireCone = !Unit->bShowFireCone; }
                     break;
                 case EAction::Turn:
                     if (PC) { PC->TurnSelection(float(B.Value)); }
