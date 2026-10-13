@@ -2048,6 +2048,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Ildkegle: tænd/sluk-knap (KEGLE: TIL/FRA) pr. enhed ved skudafstand-skyderen; flaget gælder kun visningen af kegler for valgte enheder, ikke selve ildreglerne.
 - Set på et screenshot (HQ valgt): ring og knapper vises; selve rally-virkningen er ikke afprøvet i et kørt slag.
 
+### 2026-10-13 - Kommandocirkel kun for HQ; knapper gælder alle valgte
+
+- Kun HQ-enheder har en kommandocirkel (kompagni, eskadron og batteri har ingen). Rally-knap og cirkel-knap findes kun på HQ-panelet.
+- Ildkegle til/fra og cirkel til/fra sættes for alle valgte enheder, når man vælger flere (tegner en firkant); skudafstand, ildmetode, formation og AI gjorde det allerede. DREJ ±15° drejer alle valgte.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

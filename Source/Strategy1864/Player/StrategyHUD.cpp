@@ -1641,10 +1641,21 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                     if (PC) { PC->RallyAroundSelection(); }
                     break;
                 case EAction::CommandCircle:
-                    if (Unit) { Unit->bShowCommandCircle = !Unit->bShowCommandCircle; }
+                    if (Unit)
+                    {
+                        // The clicked unit decides the new state; every selected officer gets it.
+                        const bool bNewCircle = !Unit->bShowCommandCircle;
+                        if (PC) { for (AStrategyUnit* Selected : PC->GetSelectedUnits()) if (IsValid(Selected)) Selected->bShowCommandCircle = bNewCircle; }
+                        Unit->bShowCommandCircle = bNewCircle;
+                    }
                     break;
                 case EAction::ConeToggle:
-                    if (Unit) { Unit->bShowFireCone = !Unit->bShowFireCone; }
+                    if (Unit)
+                    {
+                        const bool bNewCone = !Unit->bShowFireCone;
+                        if (PC) { for (AStrategyUnit* Selected : PC->GetSelectedUnits()) if (IsValid(Selected)) Selected->bShowFireCone = bNewCone; }
+                        Unit->bShowFireCone = bNewCone;
+                    }
                     break;
                 case EAction::Turn:
                     if (PC) { PC->TurnSelection(float(B.Value)); }

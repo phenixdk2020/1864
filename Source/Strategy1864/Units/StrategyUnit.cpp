@@ -518,14 +518,8 @@ float AStrategyUnit::GetCommandRadiusCm() const
             case EStrategyHQLevel::Division: return 30000.0f;
         }
     }
-    const float OfficerSkill = OfficerProfileComponent ? FMath::Clamp(OfficerProfileComponent->Inspiration / 100.0f, 0.0f, 1.0f) : 0.5f;
-    switch (Echelon)
-    {
-        case EStrategyEchelon::Company:
-        case EStrategyEchelon::Cavalry: return FMath::Lerp(3000.0f, 4500.0f, OfficerSkill);
-        case EStrategyEchelon::Artillery: return 2500.0f;
-        default: return 0.0f;
-    }
+    // Only the headquarters (staff officers) command a circle; company captains and battery chiefs do not.
+    return 0.0f;
 }
 
 FString AStrategyUnit::GetNATOEchelonSymbol() const
