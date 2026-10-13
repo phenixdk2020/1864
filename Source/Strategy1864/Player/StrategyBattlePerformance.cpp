@@ -4,6 +4,7 @@
 #include "../Units/StrategyUnit.h"
 #include "../Units/CavalryUnit.h"
 #include "EngineUtils.h"
+#include "Kismet/GameplayStatics.h"
 #include "Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
@@ -192,6 +193,16 @@ void Strategy1864Performance::Tick(APlayerController* Controller, float DeltaTim
         FPlatformTime::ToMilliseconds(BattlePerfGpuCycles.load()), BattleFigures, BattlePerfDrawCalls.load(), BattlePerfTris.load(), BattlePerfWorst);
     BattlePerfWorst = 0;
     // Test flag: -Strategy1864ProfileGpu runs Unreal's GPU profile once, 30 seconds in, and writes it to the log (LogRHI / "Profile GPU").
+    // Test flag: -Strategy1864TimeScale=<n> runs the battle n times faster (global time dilation, set once).
+    {
+        static bool bScaled = false;
+        double Scale = 1.0;
+        if (!bScaled && FParse::Value(FCommandLine::Get(), TEXT("Strategy1864TimeScale="), Scale) && Scale > 0.0)
+        {
+            bScaled = true;
+            UGameplayStatics::SetGlobalTimeDilation(Controller->GetWorld(), float(FMath::Clamp(Scale, 0.1, 10.0)));
+        }
+    }
     // Test flag: -Strategy1864DumpUnitLogs=<seconds> writes every unit's log to the log file once, at that world time (needs -Strategy1864DebugGpu).
     {
         static bool bDumped = false;

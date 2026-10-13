@@ -118,6 +118,8 @@ private:
     TWeakObjectPtr<AStrategyUnit> FlankEnemy;
     TWeakObjectPtr<AStrategyUnit> FlankBase;
     float LastChargeTime = -1000.0f;
+    float LastFlankOrderTime = -1000.0f;       // the squadron's ride round to a pinned company's flank
+    FVector LastFlankStage = FVector::ZeroVector;
     float LastFallBackTime = -1000.0f;
     float BayonetUntil = 0.0f;
     float NormalSpeed = 0.0f;

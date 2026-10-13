@@ -922,6 +922,81 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
             Why = W;
         }
     }
+    // A company our fire holds down is the squadron's prey: ride round to its flank or rear, and charge from there.
+    // Never against a steady square (it stays out of that fire), and never frontally into a line that is not wavering.
+    if (Cavalry && OwnerUnit->bOfficerAIEnabled && OwnerUnit->Morale > 45.0f && Now - LastChargeTime > 45.0f)
+    {
+        AStrategyUnit* Pinned = nullptr;
+        float PinnedDistance = 70000.0f;
+        for (const FStrategyContactRecord& PinContact : OwnerUnit->ContactComponent->GetKnownContacts())
+        {
+            AStrategyUnit* Prey = PinContact.ObservedUnit.Get();
+            if (!PinContact.bCurrentlyVisible || !IsValid(Prey) || Prey->Side == OwnerUnit->Side || Prey->Side == EStrategySide::Neutral ||
+                Prey->Echelon != EStrategyEchelon::Company || !Prey->IsCombatEffective() || !Prey->CombatComponent ||
+                Prey->CombatComponent->UnderFireRemainingSeconds <= 0.0f) continue;
+            const float PreyDistance = FVector::Dist2D(Prey->GetActorLocation(), OwnerUnit->GetActorLocation());
+            if (PreyDistance < PinnedDistance) { PinnedDistance = PreyDistance; Pinned = Prey; }
+        }
+        if (Pinned)
+        {
+            FVector PreyFront = Pinned->GetActorForwardVector();
+            PreyFront.Z = 0.0f;
+            PreyFront = PreyFront.GetSafeNormal();
+            FVector FromPrey = OwnerUnit->GetActorLocation() - Pinned->GetActorLocation();
+            FromPrey.Z = 0.0f;
+            FromPrey = FromPrey.GetSafeNormal();
+            const float FrontDot = FVector::DotProduct(PreyFront, FromPrey);   // 1: straight in front of him, -1: behind him
+            const bool bSquare = Pinned->FormationComponent && Pinned->FormationComponent->CurrentFormation == EStrategyFormationType::Square;
+            FString SquareWhy;
+            const bool bOpen = !bSquare || IsOpenToCharge(Pinned, SquareWhy);
+            const bool bOnFlank = FrontDot < 0.35f;   // about 70 degrees or more from his front
+            if (bOpen && bOnFlank && PinnedDistance < 30000.0f)
+            {
+                FStrategyOrder FlankCharge;
+                FlankCharge.Type = EStrategyOrderType::Charge;
+                FlankCharge.TargetLocation = Pinned->GetActorLocation();
+                FlankCharge.FacingYaw = (Pinned->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
+                FlankCharge.bHasFacing = true;
+                FlankCharge.Authority = EStrategyOrderAuthority::OfficerAI;
+                if (OwnerUnit->OrderComponent->SetOrder(FlankCharge))
+                {
+                    LastChargeTime = Now;
+                    OwnerUnit->AddUnitLog(TEXT("Rytterofficer"), TEXT("Charge i flanke/ryg"), FString::Printf(TEXT("%s er fastholdt af egen ild; eskadronen står %.0f grader fra hans front, %.0f m væk"),
+                        *Pinned->DisplayName.ToString(), FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(FrontDot, -1.0f, 1.0f))), PinnedDistance / 100.0f), 0.0f);
+                    Decide(TEXT("Chok i flanken!"), FString::Printf(TEXT("%s holdes fast af ild (%.0f m)"), *Pinned->DisplayName.ToString(), PinnedDistance / 100.0f));
+                    return;
+                }
+            }
+            else if (!bSquare)
+            {
+                // Ride round to a point beside (and a little behind) his line, out of the front of his fire.
+                const FVector PreyRight(-PreyFront.Y, PreyFront.X, 0.0f);
+                const float Side = FVector::DotProduct(FromPrey, PreyRight) >= 0.0f ? 1.0f : -1.0f;
+                FVector Stage = Pinned->GetActorLocation() + PreyRight * Side * 9500.0f - PreyFront * 2500.0f;
+                Stage.Z = OwnerUnit->GetActorLocation().Z;
+                if (FVector::Dist2D(OwnerUnit->GetActorLocation(), Stage) > 3000.0f &&
+                    (Now - LastFlankOrderTime > 6.0f || FVector::Dist2D(Stage, LastFlankStage) > 1500.0f))
+                {
+                    FStrategyOrder FlankMove;
+                    FlankMove.Type = EStrategyOrderType::Move;
+                    FlankMove.TargetLocation = Stage;
+                    FlankMove.FacingYaw = (Pinned->GetActorLocation() - Stage).Rotation().Yaw;
+                    FlankMove.bHasFacing = true;
+                    FlankMove.Authority = EStrategyOrderAuthority::OfficerAI;
+                    if (OwnerUnit->OrderComponent->SetOrder(FlankMove))
+                    {
+                        LastFlankOrderTime = Now;
+                        LastFlankStage = Stage;
+                        OwnerUnit->AddUnitLog(TEXT("Rytterofficer"), TEXT("Rider om til flanken"), FString::Printf(TEXT("%s er fastholdt af egen ild; eskadronen står %.0f grader fra hans front: rider til hans %s flanke"),
+                            *Pinned->DisplayName.ToString(), FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(FrontDot, -1.0f, 1.0f))), Side > 0.0f ? TEXT("højre") : TEXT("venstre")), 8.0f);
+                        Decide(TEXT("Rider om"), FString::Printf(TEXT("Flanken på %s (%.0f m)"), *Pinned->DisplayName.ToString(), PinnedDistance / 100.0f));
+                        return;
+                    }
+                }
+                else if (Now - LastFlankOrderTime < 60.0f) { return; }   // on the way round: do not fall back
+            }
+        }
+    }
     STRATEGY1864_DECISION(OwnerUnit, TEXT("Ryttervurdering"), TEXT("Vurder charge/afstandshold"), TEXT("Eksisterende charge-betingelser"),
         FString::Printf(TEXT("target=%s offensive=%d morale=%.1f chargeAge=%.2f cavalryComponent=%d distanceCm=%.1f"),
             Target ? *Target->StableUnitId.ToString() : TEXT("-"), IsOffensive(), OwnerUnit->Morale, Now - LastChargeTime, Cavalry != nullptr, Distance),

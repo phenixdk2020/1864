@@ -2096,6 +2096,17 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Enhedsloggen viste forløbet: ANGRIB fra bataljons-HQ til alle fire, march i kolonne, linje ved 195 m fra fjenden (udfoldningsgrænsen), et kompagni "i reserve", et "går udenom egen ild", et "ildbasen: holder og skyder", derefter salver.
 - Nyt testflag `-Strategy1864DumpUnitLogs=<sek>` (kræver `-Strategy1864DebugGpu`) skriver alle enheders logge til loggen (PROJECT1864-UNITLOG).
 
+### 2026-10-13 - GPU: heste og våben på Nanite (150 mio. -> 14 mio. trekanter)
+
+- Fund (4 mod 1, SkirmishArms): GPU 30-35 ms og 150 mio. trekanter, mod 8,5 ms og 5 mio. uden våben. Én enkelt eskadron på 80 mand alene: 79 mio. trekanter og 19,5 ms. Årsag: kun infanteriet er bagt; hestene er almindelige statiske modeller (`SM_Horse_Static`: 470.000 trekanter, ét detaljeniveau, tegnet pr. hest og pr. pas), og kanoner, morterer, sadler, sabler og vogne ligger heller ikke på detaljeniveauer.
+- Rettelse: Nanite slået til og gemt på SM_Horse_Static, SM_Cannon_1864, SM_Mortar_1864, SM_Saddle, SM_Saber, SM_Scabbard, SM_Wagon_* (`Content/Python/enable_nanite_items.py`). Resultat: eskadron alene 79 -> 7,8 mio. trekanter og 19,5 -> 8,2 ms; fuld opsætning (4 kompagnier + batteri + morter + eskadron på begge sider) 150 -> 14 mio. og 34 -> 9,5 ms (1280x720).
+- Rytterne er stadig ikke bagte; rytteri, artillerimandskab og -kanoner er en senere bagning (se backlog). Nye testflag: `-Strategy1864TimeScale=<n>` og `-Strategy1864DumpUnitLogs=<sek>`.
+- Rytteriets flankeregel (se nedenfor) er bygget, men ikke afprøvet i et kørt slag.
+
+### 2026-10-13 - Rytteri: ride om og chargere et fastholdt kompagni
+
+- Rytterofficeren (`ThinkCavalry`) vælger nu et synligt fjendtligt kompagni, der er under ild, som bytte: står eskadronen mindre end ca. 70 grader fra hans front, rider den til et punkt ved hans flanke (95 m ud, 25 m bagud); står den på flanke/bagside og er under 300 m væk, chargerer den. Aldrig mod en stabil karré (en vaklende karré kan stadig chargeres), og kun hvis officer-AI er slået til, moral over 45 og 45 s siden sidste charge. Logges i enhedsloggen ("Rider om til flanken", "Charge i flanke/ryg"). Ikke afprøvet i et kørt slag endnu.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
