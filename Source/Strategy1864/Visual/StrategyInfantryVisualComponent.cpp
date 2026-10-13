@@ -1860,11 +1860,13 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         const FVector FigureTarget = VisualUnit.TransformPosition(Settle.Goal);
         // Integrate presentation velocity every frame, with braking near the slot.
         // Substeps affect no orders, simulation positions, collision or game clocks.
+        float MorphAlpha = -1.f;
         if (!bSpreadCrawling && bRigidCompany && !bArrivalReform && Settle.ReformDeadline >= 0.f && Settle.ReformDuration > 0.f)
         {
             // v2: the change of formation is a straight glide from the old slot to the new one in the unit's own frame, so the
             // whole company morphs as one body while it marches (no men chasing a moving slot through world space).
             const float Alpha = FMath::Clamp((VisualAnimationTime - Settle.ReformStartTime) / Settle.ReformDuration, 0.f, 1.f);
+            MorphAlpha = Alpha;
             const float Eased = Alpha * Alpha * (3.f - 2.f * Alpha);
             const FVector Local = FMath::Lerp(Settle.ReformStartLocal, Settle.Goal, Eased);
             FigureWorld = VisualUnit.TransformPosition(Local);
@@ -1898,7 +1900,11 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         const float RunYaw = VisualUnit.InverseTransformVectorNoScale(Settle.WorldVelocity).Rotation().Yaw + SoldierMeshYawOffset;
         const bool bFigureBackstep = OwnerCompany->OrderComponent &&
             OwnerCompany->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Disengage;
-        const float Yaw = bFigureBackstep || Step.Size() >= Distance - 0.1f || (bRigidCompany && !bArrivalReform) ? Settle.Yaw :
+        // Changing formation: the man walks facing the way he goes (never sideways or backwards), and turns to the front over the last
+        // fifth of the way.
+        const bool bMorphWalking = bRigidCompany && !bArrivalReform && !bFigureBackstep && MorphAlpha >= 0.f && MorphAlpha < 0.8f &&
+            Settle.WorldVelocity.SizeSquared2D() > 60.f * 60.f;
+        const float Yaw = bMorphWalking ? RunYaw : bFigureBackstep || Step.Size() >= Distance - 0.1f || (bRigidCompany && !bArrivalReform) ? Settle.Yaw :
             (bVisualTravel || Distance > (bArrivalReform ? 0.1f : 30.f) ? RunYaw : Settle.Yaw);
         FRotator Rot = Soldier->GetRelativeRotation();
         const float FigureTurn = FMath::FindDeltaAngleDegrees(Rot.Yaw, Yaw);
@@ -1928,6 +1934,22 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             bCrowdDataDirty = true;
         }
         bCrowdDirty = true;
+    }
+    if (bFormationPlanPending && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugFormation")) && VisualAnimationTime - FormationPlanStarted > 4.f &&
+        FMath::FloorToInt((VisualAnimationTime - FormationPlanStarted) / 3.f) != FMath::FloorToInt((VisualAnimationTime - FormationPlanStarted - DeltaTime) / 3.f))
+    {
+        // A reform that runs long: who is still on the way, and how far from the place.
+        int32 Unplaced = 0; float Worst = 0.f; int32 Waiting = 0;
+        for (int32 i = 0; i < SoldierSettle.Num(); ++i)
+        {
+            const FSettle& Man = SoldierSettle[i];
+            if (!SoldierComponents.IsValidIndex(i) || !SoldierComponents[i]) continue;
+            const float Gap = FVector::Dist2D(SoldierComponents[i]->GetRelativeLocation(), Man.Goal);
+            if (Gap > 30.f) { ++Unplaced; Worst = FMath::Max(Worst, Gap); }
+            if (Man.StartRemaining > 0.f || Man.HaltRemaining > 0.f) ++Waiting;
+        }
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864DebugFormation %s still-reforming t=%.1f unplaced=%d worst-gap-cm=%.0f waiting=%d arrival=%d front-reached=%d"),
+            *OwnerCompany->StableUnitId.ToString(), VisualAnimationTime - FormationPlanStarted, Unplaced, Worst, Waiting, bArrivalReform ? 1 : 0, bArrivalFrontReached ? 1 : 0);
     }
     if (bFormationPlanPending && !bSpreadCrawling) KeepReformSpacing(DeltaTime);
     bool bReformStillWalking = false;

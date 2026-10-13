@@ -241,7 +241,10 @@ void UStrategyOrderComponent::ResolveAttackDestination(FStrategyOrder& AttackOrd
     if (!AttackEnemy) return;
     AttackOrder.AttackTarget = AttackEnemy;
     const FVector AttackFoe = AttackEnemy->GetActorLocation();
-    FVector AttackBack = (AttackUnit->GetActorLocation() - AttackFoe).GetSafeNormal2D();
+    // With a waypoint route the unit arrives from the point before the last one, not from where it stands now.
+    FVector AttackFrom = AttackUnit->GetActorLocation();
+    if (AttackOrder.Waypoints.Num() >= 2) AttackFrom = AttackOrder.Waypoints[AttackOrder.Waypoints.Num() - 2];
+    FVector AttackBack = (AttackFrom - AttackFoe).GetSafeNormal2D();
     if (AttackBack.IsNearlyZero()) AttackBack = -AttackUnit->GetActorForwardVector();
     // The lines are rarely parallel. The unit stands where the corner of its line that is farthest from the enemy still reaches the
     // nearest point of his front: it may go a little further than the plain distance, so the whole first rank can fire.

@@ -549,7 +549,7 @@ bool AStrategyPlayerController::IssueOrderToSelection(
         Order.Authority = EStrategyOrderAuthority::DirectPlayer;
         Order.GroupRouteOffset = Order.TargetLocation - TargetLocation;
         Order.WaypointRouteId = FGuid::NewGuid();
-        if (bAppendWaypoint && OrderType == EStrategyOrderType::Move)
+        if (bAppendWaypoint && (OrderType == EStrategyOrderType::Move || OrderType == EStrategyOrderType::AttackHere))
         {
             FStrategyOrder PreviousRoute = Unit->OrderComponent->GetLatestRequestedOrder();
             for (const FCourier& PendingRoute : Couriers)
@@ -559,6 +559,7 @@ bool AStrategyPlayerController::IssueOrderToSelection(
             if (bCanExtend)
             {
                 Order = PreviousRoute;
+                Order.Type = OrderType;   // the last point decides: a move, or an attack that stops at fire distance in front of the enemy
             Order.AttackTarget.Reset(); // The appended endpoint may name another enemy.
                 if (Order.Waypoints.IsEmpty())
                 {
@@ -1153,7 +1154,7 @@ void AStrategyPlayerController::TickRightMouse()
         // A right-click on (or within ~95 m of) an enemy company is an attack: the unit stops at its chosen fire distance
         // in front of him, not on top of him. A click on empty ground stays an exact move.
         bool bRmbOnEnemy = false;
-        if (!bRmbAppendWaypoint && !bArrow)
+        if (!bArrow)
         {
             for (TActorIterator<AStrategyUnit> EnemyIt(World); EnemyIt && !bRmbOnEnemy; ++EnemyIt)
             {

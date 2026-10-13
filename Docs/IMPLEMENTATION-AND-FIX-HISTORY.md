@@ -2068,6 +2068,13 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 
 - Positionslogen viste, at kompagniet gik tilbage mod vest efter første krydsning. Årsagen var testopsætningen: flodens akse (0,1,0) giver tværnormalen (-1,0,0), så vestbredden er side +1 og østbredden side -1, og de to ventepladser/udgang lå på de forkerte sider. Aksen er vendt til (0,-1,0) i testen. T7 består (begge krydser, ingen samtidighed, begge frigiver broen). Den tidlige venteregel ved flodkanten er beholdt (harmløs).
 
+### 2026-10-13 - Waypoint-angreb og mændenes retning ved formationsskift
+
+- Højreklik på en fjende med ALT (vejpunkter) giver nu en angrebsordre som sidste punkt (før blev den Move og endte oven på fjenden). `IssueOrderToSelection` accepterer AttackHere som tilføjet punkt og sætter ordretypen efter det sidste punkt.
+- Angrebsdestinationen regnes nu ud fra punktet før det sidste vejpunkt (retningen enheden kommer fra), ikke fra enhedens nuværende placering, så stop-afstanden og det fjerneste hjørne passer med den virkelige tilgang (`ResolveAttackDestination`).
+- Under et formationsskift går hver mand nu med ansigtet i gåretningen (ikke sidelæns/baglæns) og vender fronten over de sidste 20 % af vejen.
+- Nyt debuglog (`-Strategy1864DebugFormation`): "still-reforming" hvert 3. s efter 4 s med antal ikke-placerede mænd og største afstand. Årsagen til, at nogle mænd ikke kommer på plads efter ankomst, er endnu ikke fundet (kræver en optagelse af forløbet med loggen).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
