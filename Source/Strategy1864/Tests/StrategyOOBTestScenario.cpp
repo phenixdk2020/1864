@@ -168,6 +168,19 @@ void AStrategyOOBTestScenario::BeginPlay()
             : ECollisionEnabled::NoCollision);
     }
 
+    // Never allow acceptance's process exit to close an editor/PIE session.
+    const bool bAcceptanceRequested = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864AcceptAll")) ||
+        FString(FCommandLine::Get()).Contains(TEXT("Strategy1864Accept="), ESearchCase::IgnoreCase);
+    if (bAcceptanceRequested && GetWorld()->WorldType != EWorldType::Game)
+    {
+        bBehaviourAcceptance = true;
+        bAcceptanceFinished = true;
+        UE_LOG(LogTemp, Error, TEXT("PROJECT1864-ACCEPT START FAIL accept kraever en separat -game proces; editor/PIE afvist"));
+        return;
+    }
+    // Acceptance owns an isolated fixture and bypasses campaign/duel/shot/outcome drivers.
+    if (BeginBehaviourAcceptance()) return;
+
     // The battle's light and air (a low warm sun, haze, grading) on every battle map.
     if (AStrategyBattleAtmosphere* Atmosphere = GetWorld()->SpawnActor<AStrategyBattleAtmosphere>(AStrategyBattleAtmosphere::StaticClass(), Origin, FRotator::ZeroRotator))
     {
@@ -2019,6 +2032,11 @@ float AStrategyOOBTestScenario::GetPontoonSecondsLeft() const
 void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    if (bBehaviourAcceptance)
+    {
+        TickBehaviourAcceptance(DeltaSeconds);
+        return;
+    }
     TickShots();
     TickBattleLedger(DeltaSeconds);
     if (!BattleOutcome.IsEmpty()) { FinalizeAfterActionReport(); }

@@ -74,7 +74,7 @@ Eksemplerne er argumenter, som kan tilføjes en relevant launcher (alle viderese
 
 ## Slag
 
-Opdatering 2026-10-10: `Strategy1864DebugDecisions` viser også den fælles missionspause (lag `ReactionAI`), carré-cooldownens klarstatus og afvist automatisk SPRED under cooldown. Ingen nye T1/T2/T3-acceptflag er implementeret endnu.
+Opdatering 2026-10-10: `Strategy1864DebugDecisions` viser også den fælles missionspause (lag `ReactionAI`), carré-cooldownens klarstatus og afvist automatisk SPRED under cooldown. Acceptflag er tilføjet 2026-10-10; se nedenfor. Ingen acceptkørsel er udført.
 
 Manuel regression til senere godkendt kørsel: giv FLYT med flere vejpunkter i ryttertesten og kontroller, at automatisk carré stopper bevægelsen, bevarer ordre/serial/rute og først genoptager efter 20 s uden trussel, færdig reformering og den fælles pauses 10 s ro. Gentag med ny HOLD/FLYT, formationsordre og AI OFF under pausen; den gamle ordre må ikke genopstå. Kontroller også stop-og-ild efterfulgt af automatisk SPRED, mindst 15 s mellem normale automatiske formationsskift, manuel SPRED/SAML, AFBRYD, BYG og rout. Akut carré må omgå cooldown; manuel carré beholder sin eksisterende marchregel. Dette er en testprocedure, ikke et bestået resultat.
 
@@ -137,6 +137,35 @@ Kortvalg og scenarie er afgørende: duel-, Skirmish- og kampagneslag har forskel
 
 `Strategy1864Shots` tager billede 0,8 simulationssekunder efter kameraskift og gemmer `Saved/Screenshots/battle_shot_XX.png` (uden UI i screenshot-request). Ukendt mål springes over. Kampagnebilleder gemmes samme sted som `ui_shot_XX.png`, `timed_shot_N.png` og `menu_shot.png`. Quit-flag afslutter den proces, testen kører i.
 
+## Automatisk enhedsadfærdsaccept (2026-10-10)
+
+**Review 2026-10-11:** Den eksisterende runner har 29 ID'er og matrixen 190 rækker. Windows afviser redigering/erstatning af de tre nye filer fra den afbrudte kørsel (`StrategyBehaviourTests.cpp`, matrixen og launcheren). [Adfaerd-accept-rettelser.patch](../Adfaerd-accept-rettelser.patch) er derfor **forberedt, men ikke anvendt**. Patchen tilføjer ni afgrænsede fixtures: **SUSPEND-WAYPOINT, CLEAR-SUSPEND, RELOAD, SCREEN-SQUARE, SPREAD-MOVE, ARTILLERY-DEPLOY, DRAGOON, CAVALRY-STILL, ADVANCE-FIRE**; i alt 38 ID'er, heraf syv mangelrapporter, og 199 matrixrækker. De nye ID'er kan først bruges efter anvendelse af patch og brugerens eget build. Eksempel efter dette: `& .\Start-Test-Adfaerd.bat -Strategy1864Accept=RELOAD`. Log: `PROJECT1864-ACCEPT RELOAD PASS|FAIL`.
+
+Patchen retter også 9–10 s-hullet i resume-check, en ugyldig broreference, SETUP ved fejlet spawn, rapportens summary efter manglende matrix og launcherens arbejdsmappe. Patchen retter også afsnitsmarkørerne for §1–2 og §10 samt dubleret SETUP-log. Audio-rækken bruger `PROJECT1864-AUDIO`; manglende kontrakter betegnes som mangelrapporter. Scenarioaktørens editor/PIE-vagt er allerede anvendt: acceptflag afvises dér med `PROJECT1864-ACCEPT START FAIL`, og processens exit kaldes ikke. Ingen build eller spil-/editorkørsel er udført.
+
+`Source/Strategy1864/Tests/StrategyBehaviourTests.cpp` udvider den eksisterende scenarioaktør. Accept-mode tager forrang for duel/skirmish/kampagneopsætning og deres afslutnings-/skærmbilleddrivere. Brug Skirmish-kortet med den eksisterende scenarioaktør; ingen ny map-asset kræves. Flad QA anbefales for reproducerbare syns- og bevægelsesforhold.
+
+| Flag | Virkning | Eksempelargument |
+|---|---|---|
+| `Strategy1864Accept` | Ét ID, uafhængigt af store/små bogstaver; ukendt ID giver FAIL. AcceptAll har forrang, hvis begge angives. | `-Strategy1864Accept=STOPFIRE` |
+| `Strategy1864AcceptAll` | 29 ID'er sekventielt i samme verden; nye enheder pr. case og oprydning mellem dem. | `-Strategy1864AcceptAll` |
+| `Strategy1864AcceptTimeout` | Timeout pr. case i simulerede verdenssekunder, begrænset 60–120; standard 120. Succes/kontraktfejl afslutter tidligere. | `-Strategy1864AcceptTimeout=120` |
+| `Strategy1864AcceptSpeed` | Global time dilation, begrænset 0,5–10; standard 5. Det er ikke slagurets ClockRate. | `-Strategy1864AcceptSpeed=1` |
+
+ID'er: **T1–T10**, **MOVE, STOPFIRE, NEW-HOLD, DELAY, SPREAD, SCREEN, WORKS, WORKS-CANCEL, CONTACT, ROE, AMMO, ROUT, DESTINATION, SQUARE-ZONES, LONG-MOVE, SQUARE-GATES, FIREBLOCK, DISENGAGE, WORKS-MOVE**. Assertionerne bruger rigtige komponenter. T1 kontrollerer carré-start inden X=5 s, HALT/bajonetter/snapshot, mindst20s release, reformering og resume; det er ikke en charge-overlevelsesprøve. T3 kontrollerer lokal moralsmitte/cooldown og forventes at afsløre den manglende smitteregel. T7 marcherer to kompagnier fra samme bred over QA-bro og observerer ejerskab, flodposition og ankomst.
+
+**T2/T4/T5/T6/T8/T9/T10 giver `FAIL NOT_IMPLEMENTED`**, fordi fulde designkontrakter mangler. De er automatiske mangelrapporter, ikke implementerede fulde fixtures. DELAY beviser ikke T4, og DESTINATION/SQUARE-ZONES beviser ikke HUD eller salveandele. AFBRYD, charge, artilleri/morterbeskyttelse, UI, save/load, audio og mange designvariationer kræver stadig manuel test/videre fixtures. Se [Test-Skema-Enhedsadfaerd.md](Test-Skema-Enhedsadfaerd.md) for alle rækker og afgrænsninger.
+
+Eksakt samlet kommando fra projektroden: `& .\Start-Test-Adfaerd.bat`. Enkeltcase: `& .\Start-Test-Adfaerd.bat -Strategy1864Accept=CONTACT -Strategy1864AcceptSpeed=1`. Direkte start:
+
+```powershell
+& "I:\Spil\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe" "$PWD\Game1864.uproject" /Game/Maps/Strategy1864_Skirmish -game -windowed -nosplash -unattended -Strategy1864FlatQA -Strategy1864AcceptAll -Strategy1864DebugDecisions
+```
+
+Launcheren venter på processen og viderefører exitkode: **0** ved alle PASS, **1** ved assertion/timeout/manglende kontrakt/rapportfejl, **2** ved manglende executable/projekt. Accept-mode afslutter kun sin egen proces efter sidste case. Brug ikke acceptflag i brugerens eksisterende editorproces. Log: `PROJECT1864-ACCEPT <id> SETUP`, `PROJECT1864-ACCEPT <id> PASS|FAIL <årsag>`, resultatlinjer og `PROJECT1864-ACCEPT SUMMARY pass=N fail=M`. Rapport: `Saved/Reports/accept_<UTC-timestamp>.md` med resultater og hele matrixen; kun observerede PASS-rækker afkrydses. Fejl tælles, også ved rapportskrivning. Originalmatrixen røres ikke.
+
+Seed1864 bruges til kamp-RNG, men eksisterende variable ticks/andre RNG-veje betyder, at fuld determinisme ikke er bevist. Testinput via offentlige ordre-/skade-/moralmetoder er ikke en simulation af spillerklik. Intet er bygget eller kørt ved denne opdatering.
+
 ## Launchere i projektroden
 
 Launcherens indhold er autoritativt; flere ældre `rem`-kommentarer beskriver automatisk angreb, 1851-start eller fortsættelse fra autogem, som den aktuelle kode ikke længere garanterer.
@@ -152,6 +181,7 @@ Launcherens indhold er autoritativt; flere ældre `rem`-kommentarer beskriver au
 | `Start-Livgarden-Svensk-Test.bat` | QA-kort, Duel, kamera 2500 cm, fokus 0, pitch −35°. |
 | `Start-Test-1-Kompagni-mod-Kompagni.bat` | Skirmish=1, Danes=1, Swedes, EnemyDefends, Passive. |
 | `Start-Test-2-Bataillon-mod-Kompagni.bat` | Skirmish=1, Danes=4, HoldReserve, Swedes, EnemyDefends, Passive. Bemærk stavningen Bataillon i filnavnet. |
+| `Start-Test-Adfaerd.bat` | Skirmish-kort, FlatQA, AcceptAll (eller enkelt Accept), DebugDecisions, nosplash/unattended; venter og afslutter med testens exitkode. |
 | `Start-Test-3-Rytteri.bat` | Skirmish=1, Danes=2, Cavalry, Swedes, EnemyDefends, Passive. |
 
 Eksempel i PowerShell: `& .\Start-Test-3-Rytteri.bat -Strategy1864DebugOfficer "-Strategy1864Shots=30:RIDER:4000:0.5"`. Dette er et eksempel; ikke kørt ved dokumentopdateringen.

@@ -123,6 +123,34 @@ public:
     TArray<AStrategyUnit*> GetSpawnedUnits() const;
 
 private:
+    bool BeginBehaviourAcceptance();
+    void StartBehaviourAcceptanceCase();
+    void TickBehaviourAcceptance(float DeltaSeconds);
+    void FinishBehaviourAcceptanceCase(bool bPassed, const FString& Reason);
+    void WriteBehaviourAcceptanceReport();
+    bool bBehaviourAcceptance = false;
+    bool bAcceptanceFinished = false;
+    TArray<FString> AcceptanceIds;
+    int32 AcceptanceIndex = 0;
+    int32 AcceptancePassCount = 0;
+    int32 AcceptanceFailCount = 0;
+    float AcceptanceElapsed = 0.0f;
+    float AcceptanceTimeout = 120.0f;
+    float AcceptanceDilation = 5.0f;
+    int32 AcceptancePhase = 0;
+    int32 AcceptanceSerial = 0;
+    int32 AcceptanceAmmo = 0;
+    float AcceptanceEventAt = 0.0f;
+    FVector AcceptanceStart = FVector::ZeroVector;
+    FVector AcceptanceSnapshot = FVector::ZeroVector;
+    TArray<FString> AcceptanceResults;
+    TMap<FString, bool> AcceptanceOutcomes;
+    UPROPERTY(Transient) TObjectPtr<AStrategyCompanyUnit> AcceptanceCompany;
+    UPROPERTY(Transient) TObjectPtr<AStrategyCompanyUnit> AcceptanceOther;
+    UPROPERTY(Transient) TObjectPtr<AStrategyCompanyUnit> AcceptanceFar;
+    UPROPERTY(Transient) TObjectPtr<ACavalryUnit> AcceptanceCavalry;
+    UPROPERTY(Transient) TObjectPtr<AStrategyArtilleryBatteryUnit> AcceptanceBattery;
+
     AStrategyHQUnit* SpawnHQ(
         const FName StableId,
         const FString& Name,
