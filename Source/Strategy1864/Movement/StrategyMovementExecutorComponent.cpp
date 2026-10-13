@@ -123,6 +123,8 @@ void UStrategyMovementExecutorComponent::BeginMovementForOrder(const FStrategyOr
 {
     if (OwnerUnit)
     {
+        OwnerUnit->AddUnitLog(TEXT("Bevægelse"), TEXT("March påbegyndt"), FString::Printf(TEXT("mål %.0f m væk%s"), FVector::Dist2D(OwnerUnit->GetActorLocation(), Order.TargetLocation) / 100.0f,
+            Order.Waypoints.Num() > 1 ? *FString::Printf(TEXT(", %d vejpunkter"), Order.Waypoints.Num()) : TEXT("")), 3.0f);
         if (OwnerUnit->FieldOfficerComponent) OwnerUnit->FieldOfficerComponent->LeaveAutomaticFireCover();
         if (OwnerUnit->FieldworksComponent) OwnerUnit->FieldworksComponent->CancelFieldworks();
     }
@@ -302,6 +304,7 @@ void UStrategyMovementExecutorComponent::TickComponent(
             (OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
              OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn ||
              OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::CavalryColumn))
+            OwnerUnit->FormationReason = TEXT("stop-og-ild: ildkontakt under march, går fra kolonne i kampformation");
             OwnerUnit->FormationComponent->SetFormation(FireBattleFormation);
         if (!OwnerUnit->FormationTransition || !OwnerUnit->FormationTransition->IsReforming())
             OwnerUnit->SetUnitState(EStrategyUnitState::Ready);
@@ -638,6 +641,7 @@ void UStrategyMovementExecutorComponent::TickComponent(
 
 void UStrategyMovementExecutorComponent::FinishMovement()
 {
+    if (OwnerUnit) OwnerUnit->AddUnitLog(TEXT("Bevægelse"), TEXT("Nået målet"), TEXT("ankommet til ordrens destination"), 3.0f);
     if (OwnerUnit && OwnerUnit->OrderComponent)
     {
         const FStrategyOrder FinishedRoute = OwnerUnit->OrderComponent->GetCurrentOrder();
@@ -680,6 +684,7 @@ void UStrategyMovementExecutorComponent::FinishMovement()
 
 void UStrategyMovementExecutorComponent::StopMovement()
 {
+    if (OwnerUnit && bHasMovementGoal) OwnerUnit->AddUnitLog(TEXT("Bevægelse"), TEXT("Marchen standset"), TEXT("stop, ildreaktion, ny ordre eller afbrydelse (se linjerne omkring)"), 5.0f);
     SuspendedMission = FStrategyOrder();
     FireReactionQuietSeconds = 0.f;
     bHoldingForFire = false;

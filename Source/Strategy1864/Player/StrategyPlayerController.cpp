@@ -1187,6 +1187,7 @@ void AStrategyPlayerController::RallyAroundSelection()
             AStrategyUnit* Routed = *It;
             if (!IsValid(Routed) || Routed == Officer || Routed->Side != Officer->Side || Routed->UnitState != EStrategyUnitState::Routed ||
                 FVector::Dist2D(Routed->GetActorLocation(), Officer->GetActorLocation()) > Officer->GetCommandRadiusCm()) continue;
+            Routed->AddUnitLog(TEXT("Moral"), TEXT("Samlet af rally-kald"), FString::Printf(TEXT("%s kaldte rally; enheden stod inden for kommandocirklen"), *Officer->DisplayName.ToString()), 0.0f);
             Routed->Morale = FMath::Max(Routed->Morale, 40.0f);
             Routed->Cohesion = FMath::Max(Routed->Cohesion, 35.0f);
             if (Routed->OrderComponent) Routed->OrderComponent->ClearOrder();

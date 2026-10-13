@@ -187,6 +187,8 @@ void UStrategyRoutRecoveryComponent::TryRally(
         return;
     }
 
+    OwnerUnit->AddUnitLog(TEXT("Moral"), TEXT("Samlet sig"), FString::Printf(TEXT("moral %.0f og samhold %.0f over grænsen%s"), OwnerUnit->Morale, OwnerUnit->Cohesion,
+        bCommanded ? TEXT("; inden for en officers kommandocirkel (hurtigere)") : TEXT("")), 0.0f);
     OwnerUnit->OrderComponent->ClearOrder();
     OwnerUnit->SetUnitState(EStrategyUnitState::Ready);
     bFallbackIssued = false;

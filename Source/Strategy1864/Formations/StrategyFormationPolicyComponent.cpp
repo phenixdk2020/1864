@@ -156,6 +156,7 @@ void UStrategyFormationPolicyComponent::Deploy()
     const EStrategyFormationType Now = OwnerUnit->FormationComponent->CurrentFormation;
     if (IsColumn(Now) && Now != EStrategyFormationType::DefileColumn)
     {
+        if (OwnerUnit->FormationReason.IsEmpty()) OwnerUnit->FormationReason = TEXT("marchen er slut: stoppet, ankommet eller ny ordre");
         OwnerUnit->FormationComponent->SetFormation(BattleFormation);
         OwnerUnit->SetUnitState(EStrategyUnitState::Reforming);
     }
@@ -196,12 +197,15 @@ void UStrategyFormationPolicyComponent::ApplyInitialMovementFormation(const FStr
     {
         if (Now != EStrategyFormationType::DefileColumn)
         {
+            OwnerUnit->FormationReason = FString::Printf(TEXT("marchordre på %.0f m og ingen fjende inden for %.0f m"), DistanceCm / 100.0f, bEnemyClose ? 0.0f : DeployDistanceCm(Enemy) / 100.0f);
             OwnerUnit->FormationComponent->SetFormation(ColumnFormation());
         }
         bMarching = true;
     }
     else if (IsColumn(Now) && Now != EStrategyFormationType::DefileColumn)
     {
+        OwnerUnit->FormationReason = bEnemyClose ? FString::Printf(TEXT("fjenden er allerede inden for %.0f m: bevæger sig i sin kampformation"), DeployDistanceCm(Enemy) / 100.0f)
+            : FString::Printf(TEXT("kort march (%.0f m): ingen kolonne"), DistanceCm / 100.0f);
         OwnerUnit->FormationComponent->SetFormation(BattleFormation);
         bMarching = false;
     }
@@ -220,6 +224,7 @@ void UStrategyFormationPolicyComponent::EvaluateEarlyDeployment()
     AStrategyUnit* NearestEnemy = FindNearestEnemy(EnemyDistanceCm);
     if (NearestEnemy && EnemyDistanceCm <= DeployDistanceCm(NearestEnemy))
     {
+        OwnerUnit->FormationReason = FString::Printf(TEXT("fjenden %.0f m væk, indenfor udfoldningsgrænsen på %.0f m (long range + sikkerhedsafstand)"), EnemyDistanceCm / 100.0f, DeployDistanceCm(NearestEnemy) / 100.0f);
         Deploy();
         return;
     }
@@ -230,6 +235,7 @@ void UStrategyFormationPolicyComponent::EvaluateEarlyDeployment()
         if (Order.NextWaypointIndex >= Order.Waypoints.Num() - 1 &&
             FVector::Dist2D(OwnerUnit->GetActorLocation(), Order.TargetLocation) <= 2500.0f)
         {
+            OwnerUnit->FormationReason = TEXT("under 25 m fra målet: danner linje til sidste stræk");
             Deploy();
         }
     }

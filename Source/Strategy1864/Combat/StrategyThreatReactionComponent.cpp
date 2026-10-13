@@ -240,6 +240,7 @@ void UStrategyThreatReactionComponent::EnterSquare()
     {
         const bool bBayonetsAlreadyFixed = OwnerUnit->EquipmentVisualComponent &&
             OwnerUnit->EquipmentVisualComponent->bBayonetFixed;
+        OwnerUnit->FormationReason = TEXT("kavaleritrussel: karré (se Kavalerireaktion-linjen for afstand og fart)");
         OwnerUnit->FormationComponent->SetFormation(EStrategyFormationType::Square);
         // Emergency cavalry defence may enter immediately; release and cover
         // re-entry still obey the shared cooldown.
@@ -274,6 +275,7 @@ void UStrategyThreatReactionComponent::TryLeaveSquare(float DeltaTime)
 
     if (OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square)
     {
+        OwnerUnit->FormationReason = TEXT("kavaleritruslen er væk længe nok: tilbage til den tidligere formation");
         OwnerUnit->FormationComponent->SetFormation(PreThreatFormation);
         NotifyReactionFormationChanged();
     }

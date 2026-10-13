@@ -77,6 +77,30 @@ bool UStrategyOrderComponent::SetOrder(const FStrategyOrder& NewOrder)
     CurrentOrder = RouteOrder;
     CurrentOrder.OrderSerial = NextOrderSerial++;
     SetExecutionState(EStrategyOrderExecutionState::Pending);
+    if (const AStrategyUnit* LogUnit = Cast<AStrategyUnit>(GetOwner()))
+    {
+        const TCHAR* OrderName = TEXT("ordre");
+        switch (CurrentOrder.Type)
+        {
+            case EStrategyOrderType::Move: OrderName = TEXT("FLYT"); break;
+            case EStrategyOrderType::AttackHere: OrderName = TEXT("ANGRIB"); break;
+            case EStrategyOrderType::DefendHere: OrderName = TEXT("FORSVAR"); break;
+            case EStrategyOrderType::Hold: OrderName = TEXT("STOP/HOLD"); break;
+            case EStrategyOrderType::Advance: OrderName = TEXT("RYK FREM"); break;
+            case EStrategyOrderType::Withdraw: OrderName = TEXT("TILBAGE"); break;
+            case EStrategyOrderType::Assemble: OrderName = TEXT("SAML"); break;
+            case EStrategyOrderType::ScoutHere: OrderName = TEXT("SPEJD"); break;
+            case EStrategyOrderType::Charge: OrderName = TEXT("CHARGE"); break;
+            case EStrategyOrderType::ArtilleryFireMission: OrderName = TEXT("ILDMISSION"); break;
+            case EStrategyOrderType::Disengage: OrderName = TEXT("AFBRYD"); break;
+            default: break;
+        }
+        const TCHAR* Source = CurrentOrder.Authority == EStrategyOrderAuthority::DirectPlayer ? TEXT("spilleren") :
+            CurrentOrder.Authority == EStrategyOrderAuthority::OfficerAI ? TEXT("officerens AI") : TEXT("arvet fra overordnet");
+        LogUnit->AddUnitLog(TEXT("Ordre"), FString::Printf(TEXT("%s modtaget"), OrderName),
+            FString::Printf(TEXT("givet af %s; mål %.0f m væk%s"), Source, FVector::Dist2D(LogUnit->GetActorLocation(), CurrentOrder.TargetLocation) / 100.0f,
+                CurrentOrder.Waypoints.Num() > 1 ? *FString::Printf(TEXT("; %d vejpunkter"), CurrentOrder.Waypoints.Num()) : TEXT("")), 0.0f);
+    }
     OnOrderChanged.Broadcast(CurrentOrder);
     return true;
 }

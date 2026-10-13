@@ -41,6 +41,26 @@ void UStrategyFormationTransitionComponent::HandleFormationChanged(
         return;
     }
 
+    {
+        // The unit log: which formation to which, and why (whoever asked set FormationReason).
+        auto FormationText = [](EStrategyFormationType Formation) -> const TCHAR*
+        {
+            switch (Formation)
+            {
+                case EStrategyFormationType::Line: return TEXT("linje");
+                case EStrategyFormationType::MarchColumn: return TEXT("kolonne");
+                case EStrategyFormationType::Square: return TEXT("karré");
+                case EStrategyFormationType::CavalryLine: return TEXT("rytterlinje");
+                case EStrategyFormationType::CavalryColumn: return TEXT("rytterkolonne");
+                case EStrategyFormationType::DefileColumn: return TEXT("defilé-kolonne");
+            }
+            return TEXT("?");
+        };
+        OwnerUnit->AddUnitLog(TEXT("Formation"), FString::Printf(TEXT("%s -> %s"), FormationText(OldFormation), FormationText(NewFormation)),
+            OwnerUnit->FormationReason.IsEmpty() ? FString(TEXT("årsag ikke angivet (spillerens valg eller en intern regel)")) : OwnerUnit->FormationReason, 0.0f);
+        OwnerUnit->FormationReason.Reset();
+    }
+
     const float StrengthFactor =
         FMath::Max(0.0f, static_cast<float>(OwnerUnit->CurrentStrength) / 100.0f);
 

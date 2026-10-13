@@ -26,6 +26,8 @@ bool UStrategyStanceComponent::SetStance(EStrategyStance NewStance)
 
     if (NewStance != EStrategyStance::Prone && Unit->FieldOfficerComponent)
         Unit->FieldOfficerComponent->LeaveAutomaticFireCover();
+    if (Stance != NewStance)
+        Unit->AddUnitLog(TEXT("Stilling"), NewStance == EStrategyStance::Standing ? TEXT("Står op") : NewStance == EStrategyStance::Kneeling ? TEXT("Knæler") : TEXT("Lægger sig ned"), TEXT("ordre eller officerens vurdering (dækning/ild)"), 3.0f);
     Stance = NewStance;
     return true;
 }

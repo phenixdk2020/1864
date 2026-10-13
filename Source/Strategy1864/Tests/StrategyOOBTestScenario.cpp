@@ -4913,6 +4913,18 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
     ReportText += FString::Printf(TEXT("Forventet tilbage fra lazaret: ca. %d–%d danske og %d–%d fjendtlige (88–96%% ved uændret pleje; prognose, ikke et fast udfald).\n"),
         FMath::RoundToInt(ReportDanes.Wounded * .88f), FMath::RoundToInt(ReportDanes.Wounded * .96f), FMath::RoundToInt(ReportEnemy.Wounded * .88f), FMath::RoundToInt(ReportEnemy.Wounded * .96f));
     for (const FString& ReportDetail : ReportDetails) { ReportText += ReportDetail + TEXT("\n"); }
+    // The unit logs (what happened to each unit and what triggered it) go into the report file for later reading.
+    {
+        ReportText += TEXT("\n=== ENHEDSLOG ===\n");
+        for (TActorIterator<AStrategyUnit> LogIt(GetWorld()); LogIt; ++LogIt)
+        {
+            const AStrategyUnit* LogUnit = *LogIt;
+            if (!IsValid(LogUnit) || LogUnit->UnitLog.IsEmpty()) { continue; }
+            ReportText += FString::Printf(TEXT("-- %s (%s)\n"), *LogUnit->DisplayName.ToString(), *LogUnit->StableUnitId.ToString());
+            for (const AStrategyUnit::FUnitLogEntry& LogEntry : LogUnit->UnitLog)
+                ReportText += FString::Printf(TEXT("%02d:%02d [%s] %s - %s\n"), int32(LogEntry.Time) / 60, int32(LogEntry.Time) % 60, *LogEntry.Category, *LogEntry.What, *LogEntry.Why);
+        }
+    }
     const FString ReportDir = FPaths::ProjectSavedDir() / TEXT("Reports");
     IFileManager::Get().MakeDirectory(*ReportDir, true);
     const FString ReportPath = ReportDir / (TEXT("battle_") + FDateTime::UtcNow().ToString(TEXT("%Y%m%d_%H%M%S_%s")) + TEXT(".txt"));

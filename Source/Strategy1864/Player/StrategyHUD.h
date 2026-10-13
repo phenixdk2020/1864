@@ -56,7 +56,7 @@ public:
 private:
     enum class EAction : uint8
     {
-        None, Minimap, FinishBattle, ReportToggle, ReportPage, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, Disengage, Turn, Rally, CommandCircle, ConeToggle, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount, FigureScale, BattleQuality, TimeControl, Shadows, BuildFieldworks, SkirmishScreen, Spread, AudioVolume, AudioMute
+        None, Minimap, FinishBattle, ReportToggle, ReportPage, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, Disengage, Turn, Rally, CommandCircle, ConeToggle, UnitLog, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount, FigureScale, BattleQuality, TimeControl, Shadows, BuildFieldworks, SkirmishScreen, Spread, AudioVolume, AudioMute
     };
 
     struct FButton
@@ -97,6 +97,9 @@ private:
     void DrawUnitHover();
     /** Zoomed far out the figures are hidden: every unit is shown as a NATO map symbol (frame, arm mark and echelon). */
     void DrawNatoSymbols();
+    /** The selected unit's log: what happened and what triggered it (opened with the LOG button of the unit panel). */
+    void DrawUnitLog();
+    bool bShowUnitLog = false;
     TArray<TPair<FString, float>> Notices;
     void DrawSettings();
     /** The fire cone of a unit on the ground (as the QA design): from the formation's front corners, the

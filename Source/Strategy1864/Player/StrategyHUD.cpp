@@ -425,6 +425,7 @@ void AStrategyHUD::DrawHUD()
     }
 
     DrawNatoSymbols();
+    DrawUnitLog();
     DrawUnitHover();
 
     if (!bSelectionBoxActive)
@@ -1249,6 +1250,7 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         const float HudPillW = (HudLeadW * 0.77f - 16.f) / 5.f;
         DrawButton(HudX[1] + HudLeadW * 0.23f + DrillIndex * (HudPillW + 4.f), 165.f, HudPillW, 35.f, HudDrills[DrillIndex], HudUnlocked ? EAction::FireDrill : EAction::None, int32(HudModes[DrillIndex]), HudUnlocked && Unit->FireDrillComponent && Unit->FireDrillComponent->DrillMode == HudModes[DrillIndex], Unit);
     }
+    DrawButton(HudX[0] + HudW[0] - 66.f, HudY + 4.f, 62.f, 20.f, bShowUnitLog ? TEXT("LOG: TIL") : TEXT("LOG"), EAction::UnitLog, 0, bShowUnitLog, Unit);
     const EStrategyOrderType HudCurrent = Unit->OrderComponent ? Unit->OrderComponent->GetCurrentOrder().Type : EStrategyOrderType::None;
     const float HudOrderW = (HudW[2] - 5.f) / 2.f;
     const TCHAR* HudOrders[] = {TEXT("RYK FREM"), TEXT("TILBAGE"), TEXT("CHARGE"), TEXT("STOP")};
@@ -1650,6 +1652,9 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                         Unit->bShowCommandCircle = bNewCircle;
                     }
                     break;
+                case EAction::UnitLog:
+                    bShowUnitLog = !bShowUnitLog;
+                    break;
                 case EAction::ConeToggle:
                     if (Unit)
                     {
@@ -1700,6 +1705,7 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                         {
                             Unit->ThreatReactionComponent->NotifyPlayerFormationOrder(EStrategyFormationType(B.Value));
                         }
+                        Unit->FormationReason = TEXT("spilleren trykkede på formationsknappen");
                         Unit->FormationComponent->SetFormation(EStrategyFormationType(B.Value));
                     }
                     break;
@@ -1758,6 +1764,45 @@ void AStrategyHUD::AddNotice(const FString& Text)
 }
 
 // Mouse over a unit: its name, the men left out of the men it started with, and its morale.
+void AStrategyHUD::DrawUnitLog()
+{
+    static bool bLogFlagChecked = false;
+    if (!bLogFlagChecked) { bLogFlagChecked = true; if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864ShowUnitLog"))) { bShowUnitLog = true; } }   // test flag: the unit log open from the start
+    if (!bShowUnitLog || !Canvas) { return; }
+    const AStrategyPlayerController* LogPC = Cast<AStrategyPlayerController>(GetOwningPlayerController());
+    const AStrategyUnit* LogUnit = nullptr;
+    if (LogPC) { for (const AStrategyUnit* Candidate : LogPC->GetSelectedUnits()) { if (IsValid(Candidate)) { LogUnit = Candidate; break; } } }
+    const float W = FMath::Min(900.f, Canvas->ClipX * 0.62f);
+    const int32 MaxRows = 18;
+    const float RowH = 17.f;
+    const int32 Rows = LogUnit ? FMath::Min(MaxRows, LogUnit->UnitLog.Num()) : 0;
+    const float H = 30.f + FMath::Max(1, Rows) * RowH + 8.f;
+    const float X = 14.f, Y = Canvas->ClipY - 232.f - H;
+    Panels.Add(FBox2D(FVector2D(X, Y), FVector2D(X + W, Y + H)));
+    DrawRect(FLinearColor(0.03f, 0.05f, 0.08f, 0.95f), X, Y, W, H);
+    DrawRect(Gold, X, Y, W, 1.5f);
+    Text(LogUnit ? FString::Printf(TEXT("ENHEDSLOG  ·  %s"), *LogUnit->DisplayName.ToString()) : FString(TEXT("ENHEDSLOG  ·  vælg en enhed")), X + 10.f, Y + 7.f, Gold, 0.85f);
+    if (!LogUnit) { return; }
+    if (Rows == 0) { Text(TEXT("Ingen hændelser endnu."), X + 10.f, Y + 32.f, Muted, 0.8f); return; }
+    for (int32 Row = 0; Row < Rows; ++Row)
+    {
+        const AStrategyUnit::FUnitLogEntry& Entry = LogUnit->UnitLog[LogUnit->UnitLog.Num() - Rows + Row];
+        const float RowY = Y + 30.f + Row * RowH;
+        const FString Stamp = FString::Printf(TEXT("%02d:%02d"), int32(Entry.Time) / 60, int32(Entry.Time) % 60);
+        const FString Head = FString::Printf(TEXT("%s  [%s]  %s"), *Stamp, *Entry.Category, *Entry.What);
+        float HeadW = 0.f, HeadH = 0.f;
+        GetTextSize(Head, HeadW, HeadH, nullptr, 0.78f);
+        Text(Head, X + 10.f, RowY, Ink, 0.78f);
+        if (!Entry.Why.IsEmpty() && X + 18.f + HeadW < X + W - 40.f)
+        {
+            float WhyW = 0.f, WhyH = 0.f;
+            GetTextSize(Entry.Why, WhyW, WhyH, nullptr, 0.72f);
+            const float Room = X + W - 16.f - (X + 18.f + HeadW);
+            Text(TEXT("— ") + Entry.Why, X + 14.f + HeadW, RowY + 1.f, Muted, FMath::Min(0.72f, 0.72f * Room / FMath::Max(1.f, WhyW + 14.f)));
+        }
+    }
+}
+
 void AStrategyHUD::DrawNatoSymbols()
 {
     APlayerController* PC = GetOwningPlayerController();

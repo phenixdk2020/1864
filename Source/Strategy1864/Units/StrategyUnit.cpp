@@ -396,6 +396,8 @@ int32 AStrategyUnit::ApplyStrengthLossWithCause(int32 RequestedLoss, FName Cause
     {
         RecordBattleLoss(AppliedLoss, Cause);
         CurrentStrength -= AppliedLoss;
+        if (AppliedLoss > 0)
+            AddUnitLog(TEXT("Tab"), TEXT("Mænd ramt"), FString::Printf(TEXT("%d mand (årsag: %s); styrke nu %d"), AppliedLoss, *Cause.ToString(), CurrentStrength), 4.0f);
     }
     BattleInflictor = ReportPreviousInflictor;
     if (CombatComponent) CombatComponent->CancelMarchUnderFire();
@@ -504,6 +506,24 @@ void AStrategyUnit::SetSemanticZoomState(EStrategySemanticZoomState NewState)
     {
         OnSemanticZoomChanged(SemanticZoomState);
     }
+}
+
+void AStrategyUnit::AddUnitLog(const FString& Category, const FString& What, const FString& Why, float RepeatSeconds) const
+{
+    const UWorld* LogWorld = GetWorld();
+    const float Now = LogWorld ? LogWorld->GetTimeSeconds() : 0.0f;
+    const FString Key = Category + TEXT("|") + What;
+    if (const float* Last = UnitLogKeyTime.Find(Key))
+    {
+        if (Now - *Last < RepeatSeconds && Now >= *Last) { return; }
+    }
+    UnitLogKeyTime.Add(Key, Now);
+    FUnitLogEntry& Entry = UnitLog.AddDefaulted_GetRef();
+    Entry.Time = Now;
+    Entry.Category = Category;
+    Entry.What = What;
+    Entry.Why = Why;
+    if (UnitLog.Num() > 120) { UnitLog.RemoveAt(0, UnitLog.Num() - 120, EAllowShrinking::No); }
 }
 
 float AStrategyUnit::GetCommandRadiusCm() const
@@ -619,6 +639,13 @@ void AStrategyUnit::RecordBattleVolley(int32 Rounds)
     BattleLedger.LastVolleyRounds = Rounds;
     ++BattleLedger.Volleys;
     BattleLedger.VolleyRounds.Add(Rounds);
+    {
+        const int32 AmmoNow = BattleLedger.AmmoLeft();
+        AddUnitLog(TEXT("Ild"), FString::Printf(TEXT("Salve nr. %d afgivet"), BattleLedger.Volleys),
+            FString::Printf(TEXT("%d skud; ammunition tilbage ca. %d af %d"), Rounds, AmmoNow, BattleLedger.StartAmmo), 0.0f);
+        if (BattleLedger.StartAmmo > 0 && AmmoNow * 5 <= BattleLedger.StartAmmo)
+            AddUnitLog(TEXT("Ammunition"), TEXT("Ammunitionen er ved at slippe op"), FString::Printf(TEXT("under 20 %% tilbage (%d af %d)"), AmmoNow, BattleLedger.StartAmmo), 60.0f);
+    }
 }
 
 FStrategyReportEquipment AStrategyUnit::RemainingReportEquipment() const

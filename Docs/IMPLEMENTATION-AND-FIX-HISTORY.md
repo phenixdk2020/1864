@@ -2085,6 +2085,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 
 - Formationer, enheder og kompagnier kan navngives i Kamporden med en Aa-knap på boksen og en navneboks (genbruger den eksisterende tekstindtastning; `BeginOOBRename`, `PaintOOBNameDialog`, `ACampaign1851Map::RenameFormation/RenameCompany`). Kompagninavne gemmes (save-version 36) og sendes med til 3D-slaget. Bygget uden fejl; selve dialogen er ikke afprøvet i et kørt spil, og kompagninavne kan blive på forkert kompagni ved deling/samling af enheder. Se Docs/Kamporden-Regler.md.
 
+### 2026-10-13 - Enhedslog
+
+- Hver enhed har en log (`AStrategyUnit::AddUnitLog`, højst 120 poster) over hændelser og årsager: ordrer, march (start, mål, standset), formationsskift med årsag, kavalerireaktion og afvisninger, stop-og-ild, salver, ammunition, tab, moral (opløsning/samling/smitte/rally), stilling, og alle kamp-AI'ens beslutningspunkter (`STRATEGY1864_DECISION` fodrer nu loggen altid; konsollinjen kræver stadig `-Strategy1864DebugDecisions`). Rutinevurderinger filtreres fra, gentagelser samles.
+- HUD: knappen LOG i enhedspanelet åbner et vindue med den valgte enheds seneste 18 poster; loggen skrives også ind i rapportfilen. Set på et screenshot (formationsskift med årsag, stop-og-ild, salve). Se Docs/Enhedslog.md.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -331,6 +331,15 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Selection")
     bool bPlayerControllable = true;
 
+    /** The unit log: what happened to the unit and what triggered it (shown in the HUD, written into the report file). */
+    struct FUnitLogEntry { float Time = 0.f; FString Category; FString What; FString Why; };
+    mutable TArray<FUnitLogEntry> UnitLog;
+    mutable TMap<FString, float> UnitLogKeyTime;
+    /** Adds an entry; the same category+text within RepeatSeconds is dropped (the evaluations repeat several times a second). */
+    void AddUnitLog(const FString& Category, const FString& What, const FString& Why, float RepeatSeconds = 20.0f) const;
+    /** Why the next formation change happens (set by whoever asks for it; read and cleared by the formation transition). */
+    FString FormationReason;
+
     /** The ring round an officer inside which his troops rally and are steadied (the HUD can show or hide it). */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Command")
     bool bShowCommandCircle = true;

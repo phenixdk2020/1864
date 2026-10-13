@@ -648,6 +648,8 @@ void UStrategyCombatComponent::EvaluateRoutState()
         return;
     }
 
+    OwnerUnit->AddUnitLog(TEXT("Moral"), TEXT("Gået i opløsning"), FString::Printf(TEXT("moral %.0f (grænse %.0f), samhold %.0f (grænse %.0f)"),
+        OwnerUnit->Morale, RoutMoraleThreshold, OwnerUnit->Cohesion, RoutCohesionThreshold), 0.0f);
     OwnerUnit->SetUnitState(EStrategyUnitState::Routed);
 
     // A rout shakes the friends close by (within 80 m): once, when the unit breaks; those far away feel nothing.
@@ -662,6 +664,7 @@ void UStrategyCombatComponent::EvaluateRoutState()
                 FVector::Dist2D(Friend->GetActorLocation(), OwnerUnit->GetActorLocation()) > RoutContagionRadiusCm || !Friend->CombatComponent)
                 continue;
             const float FriendShock = (Friend->ConditionComponent ? Friend->ConditionComponent->GetMoraleShockMultiplier() : 1.0f);
+            Friend->AddUnitLog(TEXT("Moral"), TEXT("Rystet af nabo i opløsning"), FString::Printf(TEXT("%s brød sammen %.0f m væk: moral -%.0f"), *OwnerUnit->DisplayName.ToString(), FVector::Dist2D(Friend->GetActorLocation(), OwnerUnit->GetActorLocation()) / 100.0f, 6.0f * FriendShock), 15.0f);
             Friend->Morale = FMath::Clamp(Friend->Morale - 6.0f * FriendShock, 0.0f, 100.0f);
             Friend->Cohesion = FMath::Clamp(Friend->Cohesion - 4.0f * FriendShock, 0.0f, 100.0f);
             Friend->CombatComponent->EvaluateRoutState();

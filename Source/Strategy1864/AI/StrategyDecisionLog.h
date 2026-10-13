@@ -13,7 +13,16 @@ inline void Strategy1864LogDecision(const AStrategyUnit* DecisionUnit, const TCH
     const FString& DecisionWinner, const FString& DecisionReason,
     const FString& DecisionInputs, const FString& DecisionRejected)
 {
-    if (!DecisionUnit || !FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugDecisions"))) return;
+    if (!DecisionUnit) return;
+    // The unit's own log (what it decided and why) is kept always; the console line only with the debug flag.
+    {
+        // Only the decisions a reader wants to see: the routine evaluations and observations repeat all the time and stay out of the log.
+        const FString Layer(DecisionLayer);
+        const bool bRoutine = Layer == TEXT("Ordrearv") || Layer == TEXT("Kontakt") || Layer == TEXT("Infanterivurdering") ||
+            Layer == TEXT("Feltofficer-vurdering") || Layer == TEXT("Ryttervurdering") || DecisionWinner.StartsWith(TEXT("Vurder"));
+        if (!bRoutine) DecisionUnit->AddUnitLog(DecisionLayer, DecisionWinner, DecisionReason, Layer == TEXT("Kavalerireaktion") || Layer == TEXT("Kavalerikandidat") ? 45.0f : 20.0f);
+    }
+    if (!FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugDecisions"))) return;
     const FStrategyOrder DecisionOrder = DecisionUnit->OrderComponent
         ? DecisionUnit->OrderComponent->GetCurrentOrder() : FStrategyOrder();
     UE_LOG(LogTemp, Display,
@@ -28,7 +37,5 @@ inline void Strategy1864LogDecision(const AStrategyUnit* DecisionUnit, const TCH
         *DecisionInputs, *DecisionRejected);
 }
 
-// Keep string formatting and input snapshots out of normal gameplay ticks.
-#define STRATEGY1864_DECISION(...) \
-    do { if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugDecisions"))) \
-        Strategy1864LogDecision(__VA_ARGS__); } while (false)
+// The decision points feed the unit log (HUD, report file); the console line needs -Strategy1864DebugDecisions.
+#define STRATEGY1864_DECISION(...)     do { Strategy1864LogDecision(__VA_ARGS__); } while (false)
