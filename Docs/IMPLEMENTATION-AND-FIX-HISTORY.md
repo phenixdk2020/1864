@@ -2053,6 +2053,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Kun HQ-enheder har en kommandocirkel (kompagni, eskadron og batteri har ingen). Rally-knap og cirkel-knap findes kun på HQ-panelet.
 - Ildkegle til/fra og cirkel til/fra sættes for alle valgte enheder, når man vælger flere (tegner en firkant); skudafstand, ildmetode, formation og AI gjorde det allerede. DREJ ±15° drejer alle valgte.
 
+### 2026-10-13 - NATO-symboler ved udzoomning; tydeligere rapportikoner
+
+- Ved Operational/Strategic/VeryFar zoom (kameraafstand fra ca. 235 m) tegnes hver enhed som NATO-kortsymbol i HUD'en: ramme (blå egne/allierede, rød fjende, grå rutet), mærke (infanteri kryds, rytteri skrå streg, artilleri prik, stab flag), enhedsgrad over (I, II, III, X, XX) og navn på stabe; valgte enheder får gul kant. Før forsvandt figurerne ved stor afstand uden at noget kom i stedet. Nyt testflag `-Strategy1864SemanticZoom=0..4` tvinger zoom-tilstanden. Set på screenshot.
+- Rapportikoner: den lyse plade er fjernet; ikonerne har i stedet en tynd lys kant i selve billedet og er større (20-32 px). Genimporteret. Ikke set i en rapport endnu.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

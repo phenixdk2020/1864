@@ -1,4 +1,6 @@
 #include "StrategySemanticZoomComponent.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 #include "../Player/StrategyCameraPawn.h"
 #include "../Units/StrategyUnit.h"
@@ -39,6 +41,15 @@ EStrategySemanticZoomState UStrategySemanticZoomComponent::ResolveZoomState() co
     if (!GetWorld())
     {
         return EStrategySemanticZoomState::Close;
+    }
+
+    // Test flag: -Strategy1864SemanticZoom=<0 close, 1 medium, 2 operational, 3 strategic, 4 very far> forces the state.
+    int32 ForcedState = -1;
+    if (FParse::Value(FCommandLine::Get(), TEXT("Strategy1864SemanticZoom="), ForcedState) && ForcedState >= 0 && ForcedState <= 4)
+    {
+        static const EStrategySemanticZoomState Forced[5] = { EStrategySemanticZoomState::Close, EStrategySemanticZoomState::Medium,
+            EStrategySemanticZoomState::Operational, EStrategySemanticZoomState::Strategic, EStrategySemanticZoomState::VeryFar };
+        return Forced[ForcedState];
     }
 
     const APlayerController* PC = GetWorld()->GetFirstPlayerController();

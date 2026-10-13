@@ -424,6 +424,7 @@ void AStrategyHUD::DrawHUD()
         DrawCommandPanel(Selected.Num() > 0 && IsValid(Selected[0]) ? Selected[0] : nullptr);
     }
 
+    DrawNatoSymbols();
     DrawUnitHover();
 
     if (!bSelectionBoxActive)
@@ -1757,6 +1758,73 @@ void AStrategyHUD::AddNotice(const FString& Text)
 }
 
 // Mouse over a unit: its name, the men left out of the men it started with, and its morale.
+void AStrategyHUD::DrawNatoSymbols()
+{
+    APlayerController* PC = GetOwningPlayerController();
+    if (!PC || !Canvas || !GetWorld()) { return; }
+    const TArray<AStrategyUnit*> Selected = Cast<AStrategyPlayerController>(PC) ? Cast<AStrategyPlayerController>(PC)->GetSelectedUnits() : TArray<AStrategyUnit*>();
+    for (TActorIterator<AStrategyUnit> It(GetWorld()); It; ++It)
+    {
+        const AStrategyUnit* U = *It;
+        if (!IsValid(U) || (U->SemanticZoomState != EStrategySemanticZoomState::Operational && U->SemanticZoomState != EStrategySemanticZoomState::Strategic && U->SemanticZoomState != EStrategySemanticZoomState::VeryFar) ||
+            U->Echelon == EStrategyEchelon::Supply || U->Side == EStrategySide::Neutral || U->UnitState == EStrategyUnitState::Destroyed) { continue; }
+        FVector2D P;
+        if (!PC->ProjectWorldLocationToScreen(U->GetActorLocation(), P)) { continue; }
+        // Size by echelon; the colours: blue the Danes and their allies, red the enemy.
+        float W = 34.f, H = 22.f;
+        FString Mark = TEXT("I");
+        switch (U->Echelon)
+        {
+            case EStrategyEchelon::Battalion: W = 42.f; H = 27.f; Mark = TEXT("II"); break;
+            case EStrategyEchelon::Regiment: W = 50.f; H = 31.f; Mark = TEXT("III"); break;
+            case EStrategyEchelon::Brigade: W = 58.f; H = 35.f; Mark = TEXT("X"); break;
+            case EStrategyEchelon::Division: W = 66.f; H = 39.f; Mark = TEXT("XX"); break;
+            default: break;
+        }
+        const bool bFriend = U->Side == EStrategySide::Denmark || U->Side == EStrategySide::Allied;
+        const FLinearColor Fill = bFriend ? FLinearColor(0.35f, 0.62f, 0.95f, 0.92f) : FLinearColor(0.92f, 0.38f, 0.34f, 0.92f);
+        const FLinearColor Line(0.04f, 0.05f, 0.08f, 1.f);
+        const bool bRouted = U->UnitState == EStrategyUnitState::Routed;
+        const float X = P.X - W * 0.5f, Y = P.Y - H * 0.5f;
+        DrawRect(bRouted ? FLinearColor(0.5f, 0.5f, 0.5f, 0.85f) : Fill, X, Y, W, H);
+        DrawRect(Line, X, Y, W, 2.f); DrawRect(Line, X, Y + H - 2.f, W, 2.f); DrawRect(Line, X, Y, 2.f, H); DrawRect(Line, X + W - 2.f, Y, 2.f, H);
+        // The arm: infantry a cross corner to corner, cavalry one slash, artillery a dot; staff units a flag stroke.
+        switch (U->Echelon)
+        {
+            case EStrategyEchelon::Cavalry:
+                DrawLine(X + 2.f, Y + H - 2.f, X + W - 2.f, Y + 2.f, Line, 2.f);
+                break;
+            case EStrategyEchelon::Artillery:
+                DrawRect(Line, P.X - 4.f, P.Y - 4.f, 8.f, 8.f);
+                break;
+            case EStrategyEchelon::Headquarters:
+                DrawLine(X + 6.f, Y + H - 4.f, X + 6.f, Y + 4.f, Line, 2.f);
+                DrawRect(Line, X + 6.f, Y + 4.f, 10.f, 7.f);
+                break;
+            default:
+                DrawLine(X + 2.f, Y + 2.f, X + W - 2.f, Y + H - 2.f, Line, 2.f);
+                DrawLine(X + 2.f, Y + H - 2.f, X + W - 2.f, Y + 2.f, Line, 2.f);
+                break;
+        }
+        float MW = 0.f, MH = 0.f;
+        GetTextSize(Mark, MW, MH);
+        Text(Mark, P.X - MW * 0.5f, Y - MH - 3.f, Ink);
+        if (Selected.Contains(U))
+        {
+            const FLinearColor Sel(1.f, 0.85f, 0.3f, 1.f);
+            DrawRect(Sel, X - 4.f, Y - 4.f, W + 8.f, 2.f); DrawRect(Sel, X - 4.f, Y + H + 2.f, W + 8.f, 2.f);
+            DrawRect(Sel, X - 4.f, Y - 4.f, 2.f, H + 8.f); DrawRect(Sel, X + W + 2.f, Y - 4.f, 2.f, H + 8.f);
+        }
+        if (U->Echelon != EStrategyEchelon::Company && U->Echelon != EStrategyEchelon::Cavalry && U->Echelon != EStrategyEchelon::Artillery)
+        {
+            const FString Name = U->DisplayName.ToString();
+            float NW = 0.f, NH = 0.f;
+            GetTextSize(Name, NW, NH, nullptr, 0.7f);
+            Text(Name, P.X - NW * 0.5f, Y + H + 4.f, Ink, 0.7f);
+        }
+    }
+}
+
 void AStrategyHUD::DrawUnitHover()
 {
     APlayerController* PC = GetOwningPlayerController();
@@ -1847,17 +1915,15 @@ void AStrategyHUD::DrawReportEquipment(const FString& Cell, float X, float Y, fl
     }
     // The cell is divided evenly: an icon and its count in each sixth.
     const float Slot = Width / 6.f;
-    const float IconSize = FMath::Clamp(Slot * 0.62f, 16.f, 26.f);
+    const float IconSize = FMath::Clamp(Slot * 0.72f, 20.f, 32.f);
     for (int32 Kind = 0; Kind < 6; ++Kind)
     {
         const float SlotX = X + Kind * Slot;
         const bool bNone = Counts[Kind] <= 0;
-        // A light plate behind the picture so the dark colours stand out on the dark table.
-        DrawRect(bNone ? FLinearColor(0.80f, 0.77f, 0.68f, 0.28f) : FLinearColor(0.90f, 0.86f, 0.74f, 1.f), SlotX - 2.f, Y - 5.f, IconSize + 4.f, IconSize + 4.f);
         if (ReportIconTextures.IsValidIndex(Kind) && ReportIconTextures[Kind])
-            DrawTexture(ReportIconTextures[Kind], SlotX, Y - 3.f, IconSize, IconSize, 0.f, 0.f, 1.f, 1.f,
-                bNone ? FLinearColor(1.f, 1.f, 1.f, 0.55f) : FLinearColor::White, EBlendMode::BLEND_Translucent);
-        Text(FString::FromInt(Counts[Kind]), SlotX + IconSize + 5.f, Y, bNone ? Muted : Colour);
+            DrawTexture(ReportIconTextures[Kind], SlotX, Y - 7.f, IconSize, IconSize, 0.f, 0.f, 1.f, 1.f,
+                bNone ? FLinearColor(1.f, 1.f, 1.f, 0.38f) : FLinearColor::White, EBlendMode::BLEND_Translucent);
+        Text(FString::FromInt(Counts[Kind]), SlotX + IconSize + 4.f, Y, bNone ? Muted : Colour);
     }
 }
 

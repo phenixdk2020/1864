@@ -619,6 +619,18 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
         if (!IsValid(SpawnedRiverBarrier)) { FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: bro forsvandt")); return; }
         const bool bAcceptanceFirstOwner = SpawnedRiverBarrier->IsCrossingOwner(AcceptanceCompany);
         const bool bAcceptanceSecondOwner = SpawnedRiverBarrier->IsCrossingOwner(AcceptanceOther);
+        {
+            static float LastT7Log = -10.0f;
+            if (AcceptanceElapsed - LastT7Log >= 1.0f || AcceptanceElapsed < LastT7Log)
+            {
+                LastT7Log = AcceptanceElapsed;
+                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-ACCEPT T7 t=%.0f company dx=%.0f dy=%.0f own=%d wait=%d idx=%d goal=%d | other dx=%.0f dy=%.0f own=%d wait=%d idx=%d goal=%d"), AcceptanceElapsed,
+                    AcceptanceCompany->GetActorLocation().X - SpawnedRiverBarrier->GetActorLocation().X, AcceptanceCompany->GetActorLocation().Y - SpawnedRiverBarrier->GetActorLocation().Y,
+                    bAcceptanceFirstOwner, AcceptanceCompany->MovementExecutor->IsWaitingForBridge(), AcceptanceCompany->MovementExecutor->GetRoutePointIndexForTest(), AcceptanceCompany->MovementExecutor->HasMovementGoal(),
+                    AcceptanceOther->GetActorLocation().X - SpawnedRiverBarrier->GetActorLocation().X, AcceptanceOther->GetActorLocation().Y - SpawnedRiverBarrier->GetActorLocation().Y,
+                    bAcceptanceSecondOwner, AcceptanceOther->MovementExecutor->IsWaitingForBridge(), AcceptanceOther->MovementExecutor->GetRoutePointIndexForTest(), AcceptanceOther->MovementExecutor->HasMovementGoal());
+            }
+        }
         if (bAcceptanceFirstOwner && bAcceptanceSecondOwner) { FinishBehaviourAcceptanceCase(false, TEXT("to samtidige broejere")); return; }
         if (SpawnedRiverBarrier->IsInsideRiver(AcceptanceCompany->GetActorLocation()) && SpawnedRiverBarrier->IsInsideRiver(AcceptanceOther->GetActorLocation()))
         {

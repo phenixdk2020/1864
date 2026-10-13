@@ -95,6 +95,8 @@ private:
     int32 BattleQualityPreset = -1;
     void DrawNotices();
     void DrawUnitHover();
+    /** Zoomed far out the figures are hidden: every unit is shown as a NATO map symbol (frame, arm mark and echelon). */
+    void DrawNatoSymbols();
     TArray<TPair<FString, float>> Notices;
     void DrawSettings();
     /** The fire cone of a unit on the ground (as the QA design): from the formation's front corners, the

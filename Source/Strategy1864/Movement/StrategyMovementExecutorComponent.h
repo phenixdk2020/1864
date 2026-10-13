@@ -74,6 +74,8 @@ public:
 
     UFUNCTION(BlueprintPure, Category="Strategy|Movement")
     bool HasMovementGoal() const { return bHasMovementGoal; }
+    bool IsWaitingForBridge() const { return bWaitingForBridge; }
+    int32 GetRoutePointIndexForTest() const { return RoutePointIndex; }
 
     UFUNCTION(BlueprintPure, Category="Strategy|Movement")
     FVector GetMovementGoal() const { return MovementGoal; }
