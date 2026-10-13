@@ -1,4 +1,5 @@
 #include "StrategyUnit.h"
+#include "StrategyWagonTrainComponent.h"
 #include "Engine/World.h"
 #include "../Artillery/StrategyArtilleryBatteryUnit.h"
 #include "../AI/StrategyOfficerProfileComponent.h"
@@ -7,6 +8,8 @@
 #include "../Artillery/StrategyMortarFireComponent.h"
 #include "../Logistics/StrategySupplyWagonUnit.h"
 #include "../Visual/StrategyCavalryVisualComponent.h"
+#include "../Visual/StrategyArtilleryVisualComponent.h"
+#include "../Visual/StrategyHQVisualComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/TextRenderComponent.h"
@@ -70,6 +73,7 @@ AStrategyUnit::AStrategyUnit()
 {
     PrimaryActorTick.bCanEverTick = false;
 
+    WagonTrainComponent = CreateDefaultSubobject<UStrategyWagonTrainComponent>(TEXT("WagonTrainComponent"));
     SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
     SetRootComponent(SceneRoot);
 
@@ -205,6 +209,14 @@ void AStrategyUnit::SetSelected(bool bNewSelected)
 FVector AStrategyUnit::GetVisualCentroid() const
 {
     FVector LocalCentroid;
+    if (const UStrategyHQVisualComponent* TrainStaffVisual = FindComponentByClass<UStrategyHQVisualComponent>())
+    {
+        if (TrainStaffVisual->GetDrawnCenter(LocalCentroid)) return LocalCentroid;
+    }
+    if (const UStrategyArtilleryVisualComponent* TrainArtilleryVisual = FindComponentByClass<UStrategyArtilleryVisualComponent>())
+    {
+        if (TrainArtilleryVisual->GetDrawnCenter(LocalCentroid)) return LocalCentroid;
+    }
     if (const UStrategyInfantryVisualComponent* Visual = FindComponentByClass<UStrategyInfantryVisualComponent>())
     {
         if (Visual->GetFigureLocalCentroid(LocalCentroid)) { return GetActorTransform().TransformPosition(LocalCentroid); }
@@ -602,13 +614,16 @@ FStrategyReportEquipment AStrategyUnit::RemainingReportEquipment() const
         if (const AStrategyMortarBatteryUnit* ReportMortar = Cast<AStrategyMortarBatteryUnit>(this))
         {
             ReportKit.Guns = 0;
-            ReportKit.Mortars = FMath::Max(0, ReportMortar->MortarPieceCount - ReportMortar->DestroyedGunCount);
+            ReportKit.Mortars = FMath::Max(0, ReportMortar->MortarPieceCount - ReportMortar->DestroyedGunCount -
+                (ReportMortar->WagonTrainComponent ? ReportMortar->WagonTrainComponent->GetTransportedMortarCount() : 0));
         }
     }
     else if (const AStrategySupplyWagonUnit* ReportWagon = Cast<AStrategySupplyWagonUnit>(this))
     {
         ReportKit.Wagons = ReportWagon->WagonCondition > 0.f ? 1 : 0;
         ReportKit.Horses = ReportWagon->HorseStrength;
+        if (const AStrategyWagonTrain* ReportTrain = Cast<AStrategyWagonTrain>(ReportWagon))
+            ReportKit.Mortars = ReportTrain->bMortarLoad && ReportTrain->WagonCondition > 0.f ? 1 : 0;
     }
     else if (Echelon == EStrategyEchelon::Company || Echelon == EStrategyEchelon::Cavalry)
     {
@@ -637,6 +652,7 @@ void AStrategyUnit::RecordEquipmentCapture(AStrategyUnit* Captor)
     if (BattleLedger.bFrozen || Captor->BattleLedger.bFrozen) { return; }
     Captor->BattleLedger.Captured.Add(BattleLedger.Abandoned);
     BattleLedger.Abandoned = FStrategyReportEquipment(); // Each abandoned item can only be awarded once.
+    if (AStrategyWagonTrain* ReportTrainTarget = Cast<AStrategyWagonTrain>(this)) ReportTrainTarget->RecordMortarLoss(false);
 }
 
 void AStrategyUnit::CaptureBattlePrisoners(AStrategyUnit* Captor)

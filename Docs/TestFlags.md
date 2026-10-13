@@ -176,3 +176,7 @@ Se [Audio.md](Audio.md) for WAV-generering, editorimport, HUD-indstillinger og m
 - `-Strategy1864DebugReport`: logger hele den færdige rapport med PROJECT1864-REPORT.
 - `-Strategy1864TestReport`: kort skirmish med syntetiske tab, såret officer og fanger efter 15 simulerede sekunder; vælger selv lille skirmish, hvis en kampagneanmodning ikke har forrang.
 - Se `Docs/AfterAction.md` for forventninger og kampagnekontrol. Flagene giver ikke tilladelse til at starte spil/editor.
+
+## Vogntog i 3D-slaget (2026-10-11)
+
+`-Strategy1864Train` aktiverer teststandarder for vogne og to statiske trækheste pr. vogn i skirmish og øvrige testscenarier: bataljon 2 vogne/60 m, feltbatteri 1 pr. 2 kanoner/25 m, morterbatteri 1 pr. morter/25 m og brigade/divisionsstab 4 forsyningsvogne/250 m. Kampagnens eksplicitte `wagons`/`horses` fra Units.json har forrang, også nul. Log: `PROJECT1864-TRAIN`. Se [Wagons.md](Wagons.md) for erobring, ammunition, import og manuelle kontrolpunkter. Flaget er ikke kørt og giver ikke i sig selv tilladelse til spilstart.

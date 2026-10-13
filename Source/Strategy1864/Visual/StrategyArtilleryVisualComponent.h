@@ -22,6 +22,8 @@ class STRATEGY1864_API UStrategyArtilleryVisualComponent : public UActorComponen
 public:
     UStrategyArtilleryVisualComponent();
 
+    bool GetDrawnCenter(FVector& OutTrainCenter) const;
+
     virtual void BeginPlay() override;
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -34,6 +36,7 @@ public:
 
 private:
     void Rebuild();
+    void UpdateTransport();
     FStrategyVisualFormationPath ArtilleryVisualPath;
     TArray<FTransform> GunGoals;
     TArray<FVector> GunVelocities;
@@ -45,6 +48,10 @@ private:
     UPROPERTY(Transient)
     TObjectPtr<UStaticMesh> GunMesh;
 
+    UPROPERTY(Transient) TObjectPtr<UInstancedStaticMeshComponent> BatteryLimbers;
+    UPROPERTY(Transient) TObjectPtr<UInstancedStaticMeshComponent> BatteryTeamHorses;
+    UPROPERTY(Transient) TObjectPtr<UInstancedStaticMeshComponent> BatteryHarness;
+    bool bTransportAssetsAttempted = false;
     bool bMortar = false;
     int32 BuiltTotal = -1;
     int32 BuiltWorking = -1;

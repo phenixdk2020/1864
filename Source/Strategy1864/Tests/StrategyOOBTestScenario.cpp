@@ -1,4 +1,5 @@
 #include "StrategyOOBTestScenario.h"
+#include "../Units/StrategyWagonTrainComponent.h"
 #include "../Player/StrategyBattleQuality.h"
 
 #include "Misc/CommandLine.h"
@@ -1265,6 +1266,14 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
 
     // The rules on a Danish company: the regiment's own training (reload, accuracy, morale, cohesion), the
     // converted weapons, the fire methods it has drilled to 60, the doctrine and the AI defaults.
+    auto ConfigureCampaignTrain = [](AStrategyUnit* TrainUnit, const TSharedPtr<FJsonObject>& TrainData)
+    {
+        if (!TrainUnit || !TrainUnit->WagonTrainComponent) return;
+        double TrainWagons = 0.0, TrainHorses = 0.0;
+        TrainData->TryGetNumberField(TEXT("wagons"), TrainWagons);
+        TrainData->TryGetNumberField(TEXT("horses"), TrainHorses);
+        TrainUnit->WagonTrainComponent->Configure(int32(FMath::Clamp(TrainWagons, 0.0, 128.0)), int32(FMath::Clamp(TrainHorses, 0.0, 1000000.0)));
+    };
     auto ApplyCampaignAppearance = [&](AStrategyUnit* CustomUnit, const TSharedPtr<FJsonObject>& CustomData)
     {
         if (!CustomUnit || !CustomUnit->UniformAppearanceComponent) { return; }
@@ -1366,6 +1375,8 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
 
     AStrategyHQUnit* Army = SpawnHQ(TEXT("DK-FIELD-HQ"), TEXT("Felthæren"), static_cast<uint8>(EStrategyHQLevel::Division), Danish(-30000.0f, 0.0f), nullptr);
     Face(Army, false);
+    // Campaign equipment belongs to the exported regiment rows, not an invented army reserve.
+    if (Army && Army->WagonTrainComponent) Army->WagonTrainComponent->Configure(0, 0);
     float Y = -(Battalions.Num() - 1) * BattalionWidth * 0.5f;
     for (const TSharedPtr<FJsonObject>& U : Battalions)
     {
@@ -1377,6 +1388,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             const TSharedPtr<FJsonObject>* Commander = nullptr;
             if (Battle->TryGetObjectField(TEXT("commander"), Commander)) { SetOfficer(Major, *Commander); }
         }
+        ConfigureCampaignTrain(Major, U);
         CampaignUnitOf.Add(Major, Id);
         const TArray<TSharedPtr<FJsonValue>>& Subs = Battle->GetArrayField(TEXT("subunits"));
         int32 Number = 0;
@@ -1427,6 +1439,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         if (ACavalryUnit* Cav = SpawnCavalry(FName(*FString::Printf(TEXT("DK-%s"), *Id)), U->GetStringField(TEXT("name")), Danish(-6000.0f, Side), Army))
         {
             Face(Cav, false);
+            ConfigureCampaignTrain(Cav, U);
             ApplyCampaignAppearance(Cav, U);
             const TSharedPtr<FJsonObject>* CustomFactors = nullptr;
             if (U->TryGetObjectField(TEXT("battleFactors"), CustomFactors))
@@ -1473,8 +1486,14 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     {
         const TSharedPtr<FJsonObject>& U = Guns[g];
         const FString Id = U->GetStringField(TEXT("id"));
-        if (AStrategyArtilleryBatteryUnit* Battery = SpawnArtilleryBattery(FName(*FString::Printf(TEXT("DK-%s"), *Id)), U->GetStringField(TEXT("name")),
-            Danish(-14000.0f, (g - (Guns.Num() - 1) * 0.5f) * 14000.0f), Army))
+        double TrainCampaignMortars = 0.0;
+        U->TryGetNumberField(TEXT("mortars"), TrainCampaignMortars);
+        const FName TrainBatteryId(*FString::Printf(TEXT("DK-%s"), *Id));
+        const FVector TrainBatteryPlace = Danish(-14000.0f, (g - (Guns.Num() - 1) * 0.5f) * 14000.0f);
+        AStrategyArtilleryBatteryUnit* TrainSpawnedBattery = TrainCampaignMortars > 0.0
+            ? SpawnMortarBattery(TrainBatteryId, U->GetStringField(TEXT("name")), TrainBatteryPlace, Army)
+            : SpawnArtilleryBattery(TrainBatteryId, U->GetStringField(TEXT("name")), TrainBatteryPlace, Army);
+        if (AStrategyArtilleryBatteryUnit* Battery = TrainSpawnedBattery)
         {
             Face(Battery, false);
             ApplyCampaignAppearance(Battery, U);
@@ -1497,6 +1516,16 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             U->TryGetNumberField(TEXT("horses"), ReportCampaignHorses);
             Battery->HorseStrength = FMath::Max(0, int32(ReportCampaignHorses));
             Battery->GunCount = CustomGuns;
+            if (AStrategyMortarBatteryUnit* TrainMortarBattery = Cast<AStrategyMortarBatteryUnit>(Battery))
+            {
+                TrainMortarBattery->GunCount = TrainMortarBattery->MortarPieceCount = int32(FMath::Clamp(TrainCampaignMortars, 0.0, 128.0));
+                TrainMortarBattery->MortarCrewStrength = Battery->CrewStrength;
+                TrainMortarBattery->MortarDeploymentComponent->HorseStrength = Battery->HorseStrength;
+                double TrainCampaignWagons = 0.0;
+                U->TryGetNumberField(TEXT("wagons"), TrainCampaignWagons);
+                TrainMortarBattery->MortarDeploymentComponent->WagonStrength = int32(FMath::Clamp(TrainCampaignWagons, 0.0, 128.0));
+            }
+            ConfigureCampaignTrain(Battery, U);
             ConfigureRuntimeQALabel(Battery);
             CampaignUnitOf.Add(Battery, Id);
         }
@@ -1887,6 +1916,16 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
             ReportRegiments.FindOrAdd(ReportPair.Value).Captured.Add(ReportUnit->BattleLedger.Captured);
             ReportRegiments.FindOrAdd(ReportPair.Value).Lost.Add(ReportUnit->BattleLedger.Lost);
         }
+    }
+    for (TActorIterator<AStrategyWagonTrain> TrainReportIt(GetWorld()); TrainReportIt; ++TrainReportIt)
+    {
+        const AStrategyWagonTrain* TrainReportUnit = *TrainReportIt;
+        AStrategyUnit* TrainReportParent = Cast<AStrategyUnit>(TrainReportUnit->GetOwner());
+        const FString TrainCampaignId = CampaignUnitOf.FindRef(TrainReportParent);
+        if (TrainCampaignId.IsEmpty() || IsDormant(TrainReportUnit)) continue;
+        FStrategyBattleLedger& TrainRegimentLedger = ReportRegiments.FindOrAdd(TrainCampaignId);
+        TrainRegimentLedger.Captured.Add(TrainReportUnit->BattleLedger.Captured);
+        TrainRegimentLedger.Lost.Add(TrainReportUnit->BattleLedger.Lost);
     }
     {
         // The officers the battle has taken from their posts: ours (wounded, prisoners) and the enemy's.
@@ -4794,7 +4833,7 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
         }
         TSharedRef<FJsonObject> ReportUnitJson = ReportJsonRow(ReportLedger);
         ReportUnitJson->SetStringField(TEXT("id"), ReportUnit->StableUnitId.ToString());
-        ReportUnitJson->SetStringField(TEXT("campaignId"), CampaignUnitOf.FindRef(ReportUnit));
+        ReportUnitJson->SetStringField(TEXT("campaignId"), CampaignUnitOf.FindRef(Cast<AStrategyWagonTrain>(ReportUnit) ? Cast<AStrategyUnit>(ReportUnit->GetOwner()) : ReportUnit));
         ReportJsonUnits.Add(MakeShared<FJsonValueObject>(ReportUnitJson));
         // Staff strengths are organizational aggregates, not additional soldiers.
         if (ReportUnit->Echelon == EStrategyEchelon::Battalion || ReportUnit->Echelon == EStrategyEchelon::Regiment || ReportUnit->Echelon == EStrategyEchelon::Brigade ||

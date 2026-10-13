@@ -1,4 +1,5 @@
 #include "StrategySupplyWagonUnit.h"
+#include "../Units/StrategyWagonTrainComponent.h"
 
 #include "StrategySupplyCargoComponent.h"
 #include "StrategySupplyCaptureComponent.h"
@@ -142,6 +143,8 @@ void AStrategySupplyWagonUnit::ApplySupplyDamage(
             if (BattleLedger.bEquipmentAbandoned) { BattleLedger.Abandoned.Wagons = 0; }
             else { ++BattleLedger.Lost.Wagons; }
         }
+        if (bReportWagonWasIntact) UE_LOG(LogTemp, Log, TEXT("PROJECT1864-TRAIN %s: vogn ødelagt"), *StableUnitId.ToString());
+        if (AStrategyWagonTrain* TrainTarget = Cast<AStrategyWagonTrain>(this)) TrainTarget->RecordMortarLoss(true);
         OwnershipState = EStrategySupplyOwnershipState::Destroyed;
         SetUnitState(EStrategyUnitState::Destroyed);
 

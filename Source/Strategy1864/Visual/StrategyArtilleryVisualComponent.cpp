@@ -2,6 +2,11 @@
 
 #include "../Artillery/StrategyArtilleryBatteryUnit.h"
 #include "../Artillery/StrategyMortarBatteryUnit.h"
+#include "../Artillery/StrategyMortarDeploymentComponent.h"
+#include "../Units/StrategyWagonTrainComponent.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+#include "Engine/World.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -73,8 +78,32 @@ void UStrategyArtilleryVisualComponent::TickComponent(float DeltaTime, ELevelTic
         GunShown.SetScale3D(FMath::Lerp(GunShown.GetScale3D(), GunGoals[GunIndex].GetScale3D(), GunAlpha));
         Guns->UpdateInstanceTransform(GunIndex, GunShown, false, false, false);
     }
+    if (const AStrategyMortarBatteryUnit* TransportMortar = Cast<AStrategyMortarBatteryUnit>(GetOwner()))
+    {
+        if (TransportMortar->WagonTrainComponent)
+        {
+            const int32 TransportCount = TransportMortar->WagonTrainComponent->GetTransportedMortarCount();
+            for (int32 TransportIndex = 0; TransportIndex < FMath::Min(TransportCount, Guns->GetInstanceCount()); ++TransportIndex)
+            {
+                FTransform TransportShown;
+                if (Guns->GetInstanceTransform(TransportIndex, TransportShown))
+                {
+                    TransportShown.SetScale3D(FVector::ZeroVector);
+                    Guns->UpdateInstanceTransform(TransportIndex, TransportShown, false, false, false);
+                }
+            }
+        }
+    }
+    UpdateTransport();
     Guns->MarkRenderStateDirty();
     ArtilleryVisualPath.PreviousUnit = GetOwner()->GetActorTransform();
+}
+
+bool UStrategyArtilleryVisualComponent::GetDrawnCenter(FVector& OutTrainCenter) const
+{
+    if (!Guns || Guns->GetInstanceCount() == 0) return false;
+    OutTrainCenter = ArtilleryVisualPath.Center;
+    return true;
 }
 
 void UStrategyArtilleryVisualComponent::Rebuild()
@@ -91,9 +120,9 @@ void UStrategyArtilleryVisualComponent::Rebuild()
     }
     const AStrategyMortarBatteryUnit* Mortars = Cast<AStrategyMortarBatteryUnit>(Battery);
     const int32 Total = Mortars ? FMath::Max(1, Mortars->MortarPieceCount) : FMath::Max(1, Battery->GunCount);
-    const int32 Destroyed = Mortars ? 0 : FMath::Clamp(Battery->DestroyedGunCount, 0, Total);
+    const int32 Destroyed = FMath::Clamp(Battery->DestroyedGunCount, 0, Total);
     const int32 Working = Mortars ? FMath::Clamp(Mortars->GetOperationalMortarCount(), 0, Total) : FMath::Clamp(Battery->GetOperationalGunCount(), 0, Total);
-    const bool bLimbered = Battery->CanNormalMove();
+    const bool bLimbered = Mortars && Mortars->MortarDeploymentComponent ? Mortars->MortarDeploymentComponent->CanMoveNormally() : Battery->CanNormalMove();
     if (Total == BuiltTotal && Working == BuiltWorking && Destroyed == BuiltDestroyed && bLimbered == bBuiltLimbered)
     {
         return;
@@ -135,4 +164,98 @@ void UStrategyArtilleryVisualComponent::Rebuild()
         Guns->ClearInstances();
         Guns->AddInstances(Instances, false, false);
     }
+}
+
+void UStrategyArtilleryVisualComponent::UpdateTransport()
+{
+    AStrategyArtilleryBatteryUnit* TransportBattery = Cast<AStrategyArtilleryBatteryUnit>(GetOwner());
+    if (!TransportBattery || bMortar || !Guns) return;
+    if (TransportBattery->bOutOfPlay || TransportBattery->IsHidden())
+    {
+        if (BatteryLimbers) BatteryLimbers->SetVisibility(false);
+        if (BatteryTeamHorses) BatteryTeamHorses->SetVisibility(false);
+        if (BatteryHarness) BatteryHarness->SetVisibility(false);
+        return;
+    }
+    const bool bTransportEnabled = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864Train")) ||
+        (TransportBattery->WagonTrainComponent && TransportBattery->WagonTrainComponent->WagonCount >= 0);
+    if (!bTransportEnabled) return;
+    if (!bTransportAssetsAttempted)
+    {
+        bTransportAssetsAttempted = true;
+        auto TransportMakeISM = [&](const TCHAR* TransportAsset, const TCHAR* TransportName)
+        {
+            UStaticMesh* TransportMesh = LoadObject<UStaticMesh>(nullptr, TransportAsset);
+            if (!TransportMesh) return static_cast<UInstancedStaticMeshComponent*>(nullptr);
+            UInstancedStaticMeshComponent* TransportISM = NewObject<UInstancedStaticMeshComponent>(TransportBattery, FName(TransportName));
+            TransportISM->SetStaticMesh(TransportMesh);
+            TransportISM->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            TransportISM->SetCastShadow(false);
+            TransportISM->bVisibleInRayTracing = false;
+            TransportISM->SetupAttachment(TransportBattery->GetRootComponent());
+            TransportISM->RegisterComponent();
+            TransportISM->SetAbsolute(true, true, true);
+            TransportISM->SetWorldTransform(FTransform::Identity);
+            return TransportISM;
+        };
+        BatteryLimbers = TransportMakeISM(TEXT("/Game/Units/Items/SM_Wagon_Empty.SM_Wagon_Empty"), TEXT("BatteryLimbers"));
+        BatteryTeamHorses = TransportMakeISM(TEXT("/Game/Units/Items/SM_Horse_Static.SM_Horse_Static"), TEXT("BatteryTeamHorses"));
+        BatteryHarness = TransportMakeISM(TEXT("/Engine/BasicShapes/Cube.Cube"), TEXT("BatteryHarness"));
+    }
+    if (!BatteryLimbers || !BatteryTeamHorses || !BatteryHarness) return;
+    const bool bTransportMoving = TransportBattery->CanNormalMove();
+    BatteryLimbers->SetVisibility(bTransportMoving);
+    BatteryTeamHorses->SetVisibility(bTransportMoving);
+    BatteryHarness->SetVisibility(bTransportMoving);
+    if (!bTransportMoving) return;
+    const int32 TransportPieces = Guns->GetInstanceCount();
+    if (BatteryLimbers->GetInstanceCount() != TransportPieces)
+    {
+        BatteryLimbers->ClearInstances(); BatteryTeamHorses->ClearInstances(); BatteryHarness->ClearInstances();
+        for (int32 TransportIndex = 0; TransportIndex < TransportPieces; ++TransportIndex)
+        {
+            BatteryLimbers->AddInstance(FTransform::Identity);
+            for (int32 TransportHorse = 0; TransportHorse < 2; ++TransportHorse)
+            {
+                BatteryTeamHorses->AddInstance(FTransform::Identity);
+                BatteryHarness->AddInstance(FTransform::Identity);
+            }
+        }
+    }
+    auto TransportTransform = [](UStaticMesh* TransportMesh, const FVector& TransportGround, const FRotator& TransportFacing, float TransportLength)
+    {
+        const FBox TransportBounds = TransportMesh->GetBoundingBox();
+        const FVector TransportSize = TransportBounds.GetSize();
+        const bool bTransportAlongX = TransportSize.X >= TransportSize.Y;
+        const float TransportScale = TransportLength / FMath::Max(1.f, float(bTransportAlongX ? TransportSize.X : TransportSize.Y));
+        const FRotator TransportRotation = TransportFacing + FRotator(0.f, bTransportAlongX ? 0.f : -90.f, 0.f);
+        const FVector TransportPivot(TransportBounds.GetCenter().X, TransportBounds.GetCenter().Y, TransportBounds.Min.Z);
+        return FTransform(TransportRotation, TransportGround - TransportRotation.RotateVector(TransportPivot * TransportScale), FVector(TransportScale));
+    };
+    for (int32 TransportIndex = 0; TransportIndex < TransportPieces; ++TransportIndex)
+    {
+        FTransform TransportGun;
+        if (!Guns->GetInstanceTransform(TransportIndex, TransportGun, true)) continue;
+        const FRotator TransportFacing(0.f, TransportGun.Rotator().Yaw - CannonYaw - 180.f, 0.f);
+        const bool bTransportWorking = TransportIndex < TransportBattery->GetOperationalGunCount();
+        const FVector TransportGround = TransportGun.GetLocation();
+        FTransform TransportLimber = TransportTransform(BatteryLimbers->GetStaticMesh(), TransportGround + TransportFacing.RotateVector(FVector(350.f, 0.f, 0.f)), TransportFacing, 210.f);
+        if (!bTransportWorking) TransportLimber.SetScale3D(FVector::ZeroVector);
+        BatteryLimbers->UpdateInstanceTransform(TransportIndex, TransportLimber, true, false, true);
+        for (int32 TransportHorse = 0; TransportHorse < 2; ++TransportHorse)
+        {
+            const int32 TransportHorseIndex = TransportIndex * 2 + TransportHorse;
+            const bool bTransportHasHorse = bTransportWorking && TransportHorseIndex < TransportBattery->HorseStrength;
+            const float TransportWave = FMath::Sin(GetWorld()->GetTimeSeconds() * (ArtilleryVisualPath.bMovingVisuals ? 12.f : 2.f) + TransportHorseIndex);
+            const FVector TransportPlace = TransportGround + TransportFacing.RotateVector(FVector(650.f, TransportHorse ? 65.f : -65.f, TransportWave * (ArtilleryVisualPath.bMovingVisuals ? 5.f : 1.f)));
+            FTransform TransportHorseShown = TransportTransform(BatteryTeamHorses->GetStaticMesh(), TransportPlace,
+                TransportFacing + FRotator(TransportWave * 2.f, 0.f, TransportWave * 0.7f), 240.f);
+            if (!bTransportHasHorse) TransportHorseShown.SetScale3D(FVector::ZeroVector);
+            BatteryTeamHorses->UpdateInstanceTransform(TransportHorseIndex, TransportHorseShown, true, false, true);
+            BatteryHarness->UpdateInstanceTransform(TransportHorseIndex,
+                FTransform(TransportFacing, TransportGround + TransportFacing.RotateVector(FVector(500.f, TransportHorse ? 65.f : -65.f, 95.f)),
+                    bTransportHasHorse ? FVector(2.8f, 0.025f, 0.025f) : FVector::ZeroVector), true, false, true);
+        }
+    }
+    BatteryLimbers->MarkRenderStateDirty(); BatteryTeamHorses->MarkRenderStateDirty(); BatteryHarness->MarkRenderStateDirty();
 }

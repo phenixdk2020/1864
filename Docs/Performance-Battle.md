@@ -172,3 +172,10 @@ DebugGpu får `PROJECT1864-CROWD` pr. kompagni én gang pr. virkelig sekund: lev
 **Integration:** BakeVersion 4 kræver ny bagning af `/Game/Battle/VAT` og materialet efter en separat autoriseret editor-build. Version 3 afvises med log og eksisterende skeletal fallback. Forbedringen er derfor ikke aktiv i gamle binære assets. Ingen build, editor/spilstart, bagning eller GPU-måling er udført her. Engine 5.8-headerne, Python-syntaks og diff er kontrolleret statisk; ingen ms-besparelse er målt eller garanteret.
 
 Acceptplan: samme kamera/flags/profil, uniformer uden/med hvert override, normaler, begge retninger over LOD-grænser, globalt N-budget, rifle/bajonet, march/salver/transitions/død, pause/speed og 1 km-cull. Sammenlign også skeletal-near-varianten for at isolere materialer versus selvskygger i det gamle billede.
+## Vogntog (2026-10-11)
+
+Vogne, statiske heste, trækstænger og ammunitionskasser tegnes med ISM pr. tog, også under otte vogne; over otte oprettes ingen individuelle renderkomponenter pr. figur. De første to vogne har separate ISM-grupper med skygger, når kameraet er inden for 250 m af første vogn; øvrige vogne, heste og detaljer kaster ikke skygge. Enkeltstående vognactors bevares som skademål, men deres almindelige AI-/bevægelses-/forsyningsticks og QA-figurer er slået fra.
+
+Togets samlede positions-/instansopdatering kører nominelt 20 gange pr. simulationssekund. Hver ISM markeres til renderopdatering én gang efter gruppens ændringer. Sporet beskæres løbende og samples binært. Overløb/genforsyning undersøges én gang pr. sekund, overførsel højst hvert 10. sekund; erobringens komponenttick kører også ved 1 Hz. Enhedssøgninger er fortsat lineære pr. vogn og bør måles ved mange tog, før en rumlig indeksstruktur tilføjes. Maksimum er 128 vogne pr. tog. Kanonernes ekstra forspand bruger tre ISM-grupper uden skygger.
+
+Der er ingen målt performancegevinst: build og spilstart er ikke udført. Ved senere godkendt måling sammenlignes samme scene med/uden `-Strategy1864Train`, 2/8/16+ vogne, march/stop og nær-/fjernkamera med `stat unit`, `stat gpu` og shadow-depth-capture. Se [Wagons.md](Wagons.md).

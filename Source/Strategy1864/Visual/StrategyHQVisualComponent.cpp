@@ -40,6 +40,13 @@ void UStrategyHQVisualComponent::BeginPlay()
     }
 }
 
+bool UStrategyHQVisualComponent::GetDrawnCenter(FVector& OutTrainCenter) const
+{
+    if (!bBuilt) return false;
+    OutTrainCenter = ShownLocation;
+    return true;
+}
+
 int32 UStrategyHQVisualComponent::RiderCount() const
 {
     if (!OwnerHQ) { return 2; }

@@ -6,6 +6,7 @@
 #include "../Combat/StrategyBattleLedger.h"
 #include "StrategyUnit.generated.h"
 
+class UStrategyWagonTrainComponent;
 class USceneComponent;
 class USphereComponent;
 class UTextRenderComponent;
@@ -115,6 +116,9 @@ class STRATEGY1864_API AStrategyUnit : public APawn
 
 public:
     AStrategyUnit();
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Train")
+    TObjectPtr<UStrategyWagonTrainComponent> WagonTrainComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Components")
     TObjectPtr<USceneComponent> SceneRoot;

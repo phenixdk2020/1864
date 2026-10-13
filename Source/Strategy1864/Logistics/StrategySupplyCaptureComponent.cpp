@@ -1,8 +1,10 @@
 #include "StrategySupplyCaptureComponent.h"
 
 #include "StrategySupplyWagonUnit.h"
+#include "../Units/StrategyWagonTrainComponent.h"
 #include "StrategySupplyComponent.h"
 #include "../Units/StrategyUnit.h"
+#include "../Units/StrategyHQUnit.h"
 #include "EngineUtils.h"
 
 UStrategySupplyCaptureComponent::UStrategySupplyCaptureComponent()
@@ -23,7 +25,7 @@ void UStrategySupplyCaptureComponent::TickComponent(
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-    if (!OwnerWagon ||
+    if (!OwnerWagon || OwnerWagon->bOutOfPlay || OwnerWagon->BattleLedger.bFrozen ||
         OwnerWagon->OwnershipState !=
             EStrategySupplyOwnershipState::Abandoned)
     {
@@ -77,6 +79,10 @@ AStrategyUnit* UStrategySupplyCaptureComponent::FindCapturingEnemy() const
 
         if (!IsValid(Candidate) ||
             Candidate == OwnerWagon ||
+            Candidate->bOutOfPlay ||
+            Candidate->Echelon == EStrategyEchelon::Supply ||
+            Candidate->Echelon == EStrategyEchelon::Headquarters ||
+            Cast<AStrategyHQUnit>(Candidate) ||
             Candidate->Side == EStrategySide::Neutral ||
             Candidate->Side == OwnerWagon->Side ||
             !Candidate->IsCombatEffective())
@@ -87,7 +93,7 @@ AStrategyUnit* UStrategySupplyCaptureComponent::FindCapturingEnemy() const
         const float Distance =
             FVector::Dist2D(
                 OwnerWagon->GetActorLocation(),
-                Candidate->GetActorLocation());
+                Candidate->GetVisualCentroid());
 
         if (Distance <= BestDistance)
         {
@@ -112,6 +118,10 @@ bool UStrategySupplyCaptureComponent::HasFriendlyProtection() const
 
         if (!IsValid(Candidate) ||
             Candidate == OwnerWagon ||
+            Candidate->bOutOfPlay ||
+            Candidate->Echelon == EStrategyEchelon::Supply ||
+            Candidate->Echelon == EStrategyEchelon::Headquarters ||
+            Cast<AStrategyHQUnit>(Candidate) ||
             Candidate->Side != OwnerWagon->Side ||
             !Candidate->IsCombatEffective())
         {
@@ -120,7 +130,7 @@ bool UStrategySupplyCaptureComponent::HasFriendlyProtection() const
 
         if (FVector::Dist2D(
                 OwnerWagon->GetActorLocation(),
-                Candidate->GetActorLocation()) <=
+                Candidate->GetVisualCentroid()) <=
             CaptureRadiusCm * 1.5f)
         {
             return true;
@@ -138,6 +148,7 @@ void UStrategySupplyCaptureComponent::CompleteCapture(
         return;
     }
 
+    UE_LOG(LogTemp, Log, TEXT("PROJECT1864-TRAIN %s erobret af %s"), *OwnerWagon->StableUnitId.ToString(), *Captor->StableUnitId.ToString());
     OwnerWagon->RecordEquipmentCapture(Captor);
     OwnerWagon->Side = Captor->Side;
     OwnerWagon->OwnershipState =
@@ -153,7 +164,7 @@ void UStrategySupplyCaptureComponent::CompleteCapture(
 
     if (OwnerWagon->SupplyComponent)
     {
-        OwnerWagon->SupplyComponent->bActsAsSupplySource = true;
+        OwnerWagon->SupplyComponent->bActsAsSupplySource = !Cast<AStrategyWagonTrain>(OwnerWagon);
     }
 
     OwnerWagon->RefreshDebugLabel();

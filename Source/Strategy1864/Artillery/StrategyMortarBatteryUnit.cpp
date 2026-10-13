@@ -1,6 +1,7 @@
 #include "StrategyMortarBatteryUnit.h"
 #include "StrategyMortarDeploymentComponent.h"
 #include "StrategyMortarFireComponent.h"
+#include "../Units/StrategyWagonTrainComponent.h"
 
 AStrategyMortarBatteryUnit::AStrategyMortarBatteryUnit()
 {
@@ -33,5 +34,7 @@ int32 AStrategyMortarBatteryUnit::GetOperationalMortarCount() const
     }
 
     const int32 CrewLimited = FMath::Max(1, MortarCrewStrength / 8);
-    return FMath::Min(MortarPieceCount, CrewLimited);
+    const int32 TrainStrandedMortars = MortarDeploymentComponent && MortarDeploymentComponent->CanFire() && WagonTrainComponent
+        ? WagonTrainComponent->GetTransportedMortarCount() : 0;
+    return FMath::Min(FMath::Max(0, MortarPieceCount - DestroyedGunCount - DisabledGunCount - TrainStrandedMortars), CrewLimited);
 }

@@ -1,4 +1,5 @@
 #include "StrategyArtilleryBatteryUnit.h"
+#include "../Units/StrategyWagonTrainComponent.h"
 #include "StrategyMortarBatteryUnit.h"
 #include "../Visual/StrategyArtilleryVisualComponent.h"
 
@@ -232,6 +233,13 @@ void AStrategyArtilleryBatteryUnit::ApplyBatteryDamage(
     int32 GunDestroyed)
 {
     if (BattleLedger.bFrozen) { return; }
+    // Packed mortars are separate wagon targets; a hit on the battery cannot destroy the same piece twice.
+    if (Cast<AStrategyMortarBatteryUnit>(this) && WagonTrainComponent)
+    {
+        const int32 TrainExposedPieces = FMath::Max(0, GunCount - DestroyedGunCount - WagonTrainComponent->GetTransportedMortarCount());
+        GunDestroyed = FMath::Clamp(GunDestroyed, 0, TrainExposedPieces);
+        GunDisabled = FMath::Clamp(GunDisabled, 0, FMath::Max(0, TrainExposedPieces - GunDestroyed - DisabledGunCount));
+    }
     const int32 AppliedPersonnel =
         FMath::Clamp(PersonnelLoss, 0, CrewStrength + DriverStrength);
 

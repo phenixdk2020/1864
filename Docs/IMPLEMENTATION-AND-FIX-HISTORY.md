@@ -2012,6 +2012,13 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Kampagnen: ved STOR SEJR trækker taberen sig til nærmeste sikre egen by (forrige rutestrækning først), taber moral og samhold efter graden; ved SEJR kun mindre moral/samhold; ved DELVIS SEJR ingen tilbagetrækning. Fjendtlige korps har nu moral og samhold (gemmes i War, save-version 35).
 - Geværreglen bruger nu graderne (uafgjort: begge holder feltet).
 - Bygget uden fejl; rapporttesten kører, grader og kampagnevirkning er ikke afprøvet i et rigtigt kampagneslag.
+### 2026-10-11 — Vogntog og heste i 3D-slaget
+
+- Gennemgået og færdiggjort de delvise ændringer: vogntog med afstandssamplet positionsspor, terrænprojektion, to statiske heste pr. vogn, kropsbevægelse, korrekt vognstørrelse og ISM-grupper med begrænsede nærskygger. Stabens tegnede centrum f?lges ogs?. Hjulene er ikke separate meshdele.
+- Kampagnens wagons/horses konfigurerer bataljons-, rytter- og batteritog; teststandarder aktiveres med Strategy1864Train. Rideheste reserveres f?r begr?nsning af store kampagnetal; alle stabe udelukkes fra vognerobring/-beskyttelse. Heste fordeles uden at genbruge batteriets trækheste eller rytteriets rideheste. Morterbatterier bruger mortervogne under transport og tomme vogne ved opstilling.
+- Eksisterende skademål/erobring og BattleLedger registrerer vogn-/hestetab og transporterede morterer; døde/erobrede morterer fjernes fra operativt antal. Vogntab forbindes også med regimentets kampagneresultat. Ammunitionsvogne genforsyner kompagnier inden for 150 m fra endelig last med PROJECT1864-TRAIN-logning.
+- Manuel import_horse_rigged.py opretter SK_Horse_1864, fælles skelet og syv hesteklip til senere brug; runtime bruger stadig static mesh. Importscriptets assetnavne rettet til opgavens navngivning. Docs/Wagons.md, TestFlags.md og Performance-Battle.md beskriver adfærd og begrænsninger.
+- Kontrol: statisk gennemlæsning, UE 5.8-headerkontrol, Python-syntaks og git diff --check. Ingen build, spil/editorstart, import eller commit; visuel kontrol og performancemåling udestår.
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

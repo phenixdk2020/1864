@@ -26,6 +26,8 @@ class STRATEGY1864_API UStrategyHQVisualComponent : public UActorComponent
 public:
     UStrategyHQVisualComponent();
 
+    bool GetDrawnCenter(FVector& OutTrainCenter) const;
+
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
