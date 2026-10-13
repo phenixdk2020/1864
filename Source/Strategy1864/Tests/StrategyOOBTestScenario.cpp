@@ -83,6 +83,7 @@
 #include "../Artillery/StrategyMortarDeploymentComponent.h"
 #include "../Artillery/StrategyMortarFireComponent.h"
 #include "../Engineering/StrategyDefensivePosition.h"
+#include "../Engineering/StrategyPositionOccupancyComponent.h"
 #include "../Combat/StrategyDetachmentComponent.h"
 #include "../AI/StrategyNCOComponent.h"
 #include "../Combat/StrategyFireDrillComponent.h"
@@ -1046,6 +1047,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     bCampaignBattle = true;
     CampaignBattleId = BattleId;
     CampaignUnitOf.Reset();
+    CampaignForts.Reset();
     const FString Dir = FPaths::ProjectSavedDir() / TEXT("Battle");
 
     // The request: which Danish units fight, the enemy, the rules (research, doctrine, AI defaults).
@@ -1058,13 +1060,20 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     double BearingDeg = -90.0;   // the enemy from the south when the request does not say
     TSharedPtr<FJsonObject> Request;
     {
-        FString Text;
+        FString Text, RequestFormat;
+        int32 RequestId = 0;
+        const TArray<TSharedPtr<FJsonValue>>* RequestUnits = nullptr;
+        const TSharedPtr<FJsonObject>* RequestEnemy = nullptr;
         if (BattleId > 0 && FFileHelper::LoadFileToString(Text, *(Dir / FString::Printf(TEXT("BattleRequest_%d.json"), BattleId))) &&
-            FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Request) && Request.IsValid())
+            FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Request) && Request.IsValid() &&
+            Request->TryGetStringField(TEXT("format"), RequestFormat) && RequestFormat == TEXT("PROJECT1864-BattleRequest-1") &&
+            Request->TryGetNumberField(TEXT("battleId"), RequestId) && RequestId == BattleId &&
+            Request->TryGetArrayField(TEXT("danishUnitIds"), RequestUnits) && Request->TryGetObjectField(TEXT("enemy"), RequestEnemy))
         {
             double RequestBattleSeed = QARandomSeed;
             if (Request->TryGetNumberField(TEXT("battleSeed"), RequestBattleSeed)) { QARandomSeed = int32(RequestBattleSeed); }
-            for (const TSharedPtr<FJsonValue>& V : Request->GetArrayField(TEXT("danishUnitIds"))) { DanishIds.Add(V->AsString()); }
+            for (const TSharedPtr<FJsonValue>& V : *RequestUnits)
+            { if (V.IsValid() && V->Type == EJson::String) { DanishIds.Add(V->AsString()); } }
             const TArray<TSharedPtr<FJsonValue>>* ReserveList = nullptr;
             if (Request->TryGetArrayField(TEXT("reserveUnitIds"), ReserveList))
             {
@@ -1078,7 +1087,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
                 AtmosphereActor->DayOfYear = float(BattleDate.GetDayOfYear());
                 BattleBaseDay = AtmosphereActor->DayOfYear;
             }
-            const TSharedPtr<FJsonObject> Enemy = Request->GetObjectField(TEXT("enemy"));
+            const TSharedPtr<FJsonObject> Enemy = *RequestEnemy;
             EnemyMen = Enemy->GetNumberField(TEXT("men"));
             EnemyNation = Enemy->GetStringField(TEXT("nation"));
             Enemy->TryGetStringField(TEXT("rifle"), EnemyRifle);
@@ -1161,7 +1170,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
                     continue;
                 }
                 const FString Type = (*Battle)->GetStringField(TEXT("type"));
-                if (DanishIds.Num() > 0)
+                if (Request.IsValid())
                 {
                     if (DanishIds.Contains(U->GetStringField(TEXT("id"))) || ReserveIds.Contains(U->GetStringField(TEXT("id")))) { Units.Add(U); }
                     continue;
@@ -1490,6 +1499,120 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
         }
     }
 
+    // Fort companies are absent from Units.json's field strength. Keep their ledger separate
+    // so their losses return to the fort, never to the parent battalion a second time.
+    const TArray<TSharedPtr<FJsonValue>>* FortIds = nullptr;
+    FString FortsFile;
+    if (Request.IsValid() && Request->TryGetArrayField(TEXT("fortIds"), FortIds) && FortIds->Num() > 0 &&
+        Request->TryGetStringField(TEXT("fortsFile"), FortsFile))
+    {
+        FString FortText;
+        TSharedPtr<FJsonObject> FortDoc;
+        const TArray<TSharedPtr<FJsonValue>>* FortEntries = nullptr;
+        double BattleKmX = 0.0, BattleKmY = 0.0;
+        if (Request->TryGetNumberField(TEXT("mapKmX"), BattleKmX) && Request->TryGetNumberField(TEXT("mapKmY"), BattleKmY) &&
+            FFileHelper::LoadFileToString(FortText, *(Dir / FortsFile)) &&
+            FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(FortText), FortDoc) && FortDoc.IsValid() &&
+            FortDoc->TryGetArrayField(TEXT("fortifications"), FortEntries))
+        {
+            for (const TSharedPtr<FJsonValue>& FortValue : *FortEntries)
+            {
+                const TSharedPtr<FJsonObject> FortData = FortValue.IsValid() && FortValue->Type == EJson::Object ? FortValue->AsObject() : nullptr;
+                int32 FortId = 0;
+                bool bFortBuilt = false;
+                if (!FortData.IsValid() || !FortData->TryGetNumberField(TEXT("id"), FortId) ||
+                    !FortData->TryGetBoolField(TEXT("built"), bFortBuilt) || !bFortBuilt ||
+                    !FortIds->ContainsByPredicate([FortId](const TSharedPtr<FJsonValue>& FortRef)
+                    { return FortRef.IsValid() && FortRef->Type == EJson::Number && FortRef->AsNumber() == FortId; })) { continue; }
+                double FortKmX = 0.0, FortKmY = 0.0, FortBearing = 0.0, FortSize = 51.0, FortCover = 30.0;
+                if (!FortData->TryGetNumberField(TEXT("mapKmX"), FortKmX) || !FortData->TryGetNumberField(TEXT("mapKmY"), FortKmY) ||
+                    !FMath::IsFinite(FortKmX) || !FMath::IsFinite(FortKmY)) { continue; }
+                FortData->TryGetNumberField(TEXT("facingBearingDeg"), FortBearing);
+                FortData->TryGetNumberField(TEXT("sizeM"), FortSize);
+                FortData->TryGetNumberField(TEXT("coverPercent"), FortCover);
+                const FRotator FortRotation(0.0, FortBearing, 0.0); // compass bearing -> world +X north, +Y east
+                FVector FortCentre = Origin + FVector((FortKmY - BattleKmY) * 100000.0, (FortKmX - BattleKmX) * 100000.0, 0.0);
+                FortCentre.Z = CampaignField->GroundZ(FortCentre);
+                FCampaignFortBattle& FortRecord = CampaignForts.AddDefaulted_GetRef();
+                FortRecord.Id = FortId;
+                auto PlaceFortUnit = [&](AStrategyUnit* FortUnit, bool bFortGun)
+                {
+                    if (!FortUnit) { return; }
+                    FortUnit->SetActorRotation(FortRotation);
+                    FortRecord.Units.Add(FortUnit);
+                    ConfigureRuntimeQALabel(FortUnit);
+                    AStrategyDefensivePosition* FortPosition = World->SpawnActor<AStrategyDefensivePosition>(
+                        AStrategyDefensivePosition::StaticClass(), FortUnit->GetActorLocation(), FortRotation, Params);
+                    if (FortPosition)
+                    {
+                        FortPosition->PositionType = bFortGun ? EStrategyDefensivePositionType::GunEmplacement : EStrategyDefensivePositionType::Redoubt;
+                        FortPosition->OwningSide = EStrategySide::Denmark;
+                        FortPosition->LengthCm = float(FortSize * 100.0);
+                        FortPosition->CapacityMen = FortUnit->CurrentStrength;
+                        FortPosition->FrontalHitMultiplier = float(1.0 - FMath::Clamp(FortCover / 100.0, 0.0, 0.95));
+                        FortPosition->RefreshNavigationObstacle();
+                        SpawnedDefensivePositions.Add(FortPosition);
+                        FortRecord.Positions.Add(FortPosition);
+                        if (FortUnit->PositionOccupancyComponent) { FortUnit->PositionOccupancyComponent->OccupyPosition(FortPosition); }
+                    }
+                };
+                const TArray<TSharedPtr<FJsonValue>>* FortCompanies = nullptr;
+                if (FortData->TryGetArrayField(TEXT("companies"), FortCompanies))
+                {
+                    for (int32 FortCompanyIndex = 0; FortCompanyIndex < FortCompanies->Num(); ++FortCompanyIndex)
+                    {
+                        const TSharedPtr<FJsonValue>& FortCompanyValue = (*FortCompanies)[FortCompanyIndex];
+                        const TSharedPtr<FJsonObject> FortCompany = FortCompanyValue.IsValid() && FortCompanyValue->Type == EJson::Object ? FortCompanyValue->AsObject() : nullptr;
+                        int32 FortMen = 0;
+                        if (!FortCompany.IsValid() || !FortCompany->TryGetNumberField(TEXT("men"), FortMen) || FortMen <= 0) { continue; }
+                        FVector FortCompanyLocation = FortCentre + FortRotation.RotateVector(FVector(-1500.0 * FortCompanyIndex, 0.0, 0.0));
+                        FortCompanyLocation.Z = CampaignField->GroundZ(FortCompanyLocation);
+                        AStrategyCompanyUnit* FortDefender = SpawnCompany(FName(*FString::Printf(TEXT("DK-FORT-%d-C%d"), FortId, FortCompanyIndex)),
+                            FString::Printf(TEXT("Skanse %d, kompagni %d"), FortId, FortCompanyIndex + 1), FortCompanyIndex + 1,
+                            FortCompanyLocation, Army, static_cast<uint8>(EStrategySide::Denmark));
+                        if (FortDefender)
+                        {
+                            FortDefender->InitialStrength = FortDefender->CurrentStrength = FortMen;
+                            ApplyDanish(FortDefender, FortCompany);
+                            double FortCartridges = 60.0;
+                            FortData->TryGetNumberField(TEXT("cartridgesPerMan"), FortCartridges);
+                            if (FortDefender->CombatComponent) { FortDefender->CombatComponent->ConfigureCartridgesPerMan(float(FortCartridges)); }
+                            const TSharedPtr<FJsonObject>* FortCaptain = nullptr;
+                            if (FortCompany->TryGetObjectField(TEXT("captain"), FortCaptain)) { SetOfficer(FortDefender, *FortCaptain); }
+                            PlaceFortUnit(FortDefender, false);
+                        }
+                    }
+                }
+                int32 FortGuns = 0, FortGunners = 0;
+                FortData->TryGetNumberField(TEXT("guns"), FortGuns);
+                FortData->TryGetNumberField(TEXT("gunners"), FortGunners);
+                if (FortGuns > 0 && FortGunners > 0)
+                {
+                    AStrategyArtilleryBatteryUnit* FortBattery = SpawnArtilleryBattery(FName(*FString::Printf(TEXT("DK-FORT-%d-GUNS"), FortId)),
+                        FString::Printf(TEXT("Skanse %d, kanoner"), FortId), FortCentre, Army);
+                    if (FortBattery)
+                    {
+                        FortBattery->GunCount = FortGuns;
+                        FortBattery->InitialStrength = FortBattery->CurrentStrength = FortGunners;
+                        FortBattery->CrewStrength = FortGunners;
+                        FortBattery->DriverStrength = FortBattery->HorseStrength = 0;
+                        double FortRounds = 0.0;
+                        FortData->TryGetNumberField(TEXT("roundsPerGun"), FortRounds);
+                        if (FortBattery->ArtilleryAmmunitionComponent)
+                        {
+                            UStrategyArtilleryAmmunitionComponent* FortAmmo = FortBattery->ArtilleryAmmunitionComponent;
+                            FortAmmo->RoundShotRounds = FMath::Max(0, FMath::RoundToInt(FortRounds * FortGuns));
+                            FortAmmo->ShellRounds = FortAmmo->ShrapnelRounds = FortAmmo->CanisterRounds = 0;
+                            FortAmmo->MaximumTotalRounds = FortAmmo->RoundShotRounds;
+                            FortAmmo->SelectAmmo(EStrategyArtilleryAmmoType::RoundShot);
+                        }
+                        PlaceFortUnit(FortBattery, true);
+                    }
+                }
+            }
+        }
+    }
+
     // The Danish reserves wait out of play until their morning.
     ReserveGroups.Reset();
     DormantUnits.Reset();
@@ -1686,6 +1809,16 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
             DanesNow += FMath::Max(0, Unit->BattleLedger.StartMen - Lost);
         }
     }
+    for (const FCampaignFortBattle& FortRecord : CampaignForts)
+    {
+        for (const TWeakObjectPtr<AStrategyUnit>& FortUnit : FortRecord.Units)
+        {
+            if (!FortUnit.IsValid()) { continue; }
+            const FStrategyBattleLedger& FortLedger = FortUnit->BattleLedger;
+            DanesStart += FortLedger.StartMen;
+            DanesNow += FMath::Max(0, FortLedger.StartMen - FortLedger.Killed - FortLedger.Wounded - FortLedger.Prisoners);
+        }
+    }
     const float DanesLeft = DanesStart > 0 ? float(DanesNow) / DanesStart : 0.0f;
     const float EnemyLeft = EnemyStart > 0 ? float(EnemyNow) / EnemyStart : 0.0f;
     // The battle's own decision when it came (a side broken), else by the share each side has left.
@@ -1698,6 +1831,29 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
     Doc->SetStringField(TEXT("format"), TEXT("PROJECT1864-BattleResult-1"));
     Doc->SetNumberField(TEXT("battleId"), CampaignBattleId);
     Doc->SetStringField(TEXT("outcome"), Outcome);
+    TArray<TSharedPtr<FJsonValue>> FortResults;
+    for (const FCampaignFortBattle& FortRecord : CampaignForts)
+    {
+        int32 FortStart = 0, FortLost = 0;
+        bool bFortTaken = Outcome == TEXT("enemy_victory"); // retreat cedes the fixed works
+        for (const TWeakObjectPtr<AStrategyDefensivePosition>& FortPosition : FortRecord.Positions)
+        {
+            bFortTaken |= FortPosition.IsValid() && FortPosition->OwningSide != EStrategySide::Denmark && FortPosition->OwningSide != EStrategySide::Neutral;
+        }
+        for (const TWeakObjectPtr<AStrategyUnit>& FortUnit : FortRecord.Units)
+        {
+            if (!FortUnit.IsValid() || Cast<AStrategyArtilleryBatteryUnit>(FortUnit.Get())) { continue; }
+            const FStrategyBattleLedger& FortLedger = FortUnit->BattleLedger;
+            FortStart += FortLedger.StartMen;
+            FortLost += FortLedger.Killed + FortLedger.Wounded + FortLedger.Prisoners;
+        }
+        TSharedRef<FJsonObject> FortResult = MakeShared<FJsonObject>();
+        FortResult->SetNumberField(TEXT("id"), FortRecord.Id);
+        FortResult->SetBoolField(TEXT("captured"), bFortTaken);
+        FortResult->SetNumberField(TEXT("lossShare"), FortStart > 0 ? FMath::Clamp(double(FortLost) / FortStart, 0.0, 1.0) : 0.0);
+        FortResults.Add(MakeShared<FJsonValueObject>(FortResult));
+    }
+    Doc->SetArrayField(TEXT("forts"), FortResults);
     Doc->SetNumberField(TEXT("enemyLosses"), ReportEnemy.Killed + ReportEnemy.Wounded + ReportEnemy.Prisoners);
     Doc->SetNumberField(TEXT("reportVersion"), 1);
     Doc->SetStringField(TEXT("reportText"), ReportText);

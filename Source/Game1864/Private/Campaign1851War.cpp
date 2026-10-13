@@ -556,7 +556,7 @@ bool ACampaign1851Map::IsAmtOccupied(const FCampaign1851Amt& A) const
 	return Cities.IsValidIndex(Seat) && !Cities[Seat].Occupier.IsEmpty();
 }
 
-TArray<FString> ACampaign1851Map::SaveWar() const
+TArray<FString> ACampaign1851Map::SaveWar(int32 PendingBattleId) const
 {
 	TArray<FString> Out;
 	Out.Add(FString::Printf(TEXT("state|%.2f|%d"), Tension, bAtWar ? 1 : 0));
@@ -610,7 +610,7 @@ TArray<FString> ACampaign1851Map::SaveWar() const
 		FString Units, FortIds;
 		for (int32 r : B.Regiments) { if (Regiments.IsValidIndex(r)) { Units += (Units.IsEmpty() ? TEXT("") : TEXT(",")) + Regiments[r].Id; } }
 		for (int32 f : B.Forts) { FortIds += (FortIds.IsEmpty() ? TEXT("") : TEXT(",")) + FString::FromInt(f); }
-		Out.Add(FString::Printf(TEXT("battle|%d|%.4f|%.3f|%.3f|%d|%d|%s|%s|%d"), B.Id, B.Day, B.Km.X, B.Km.Y, B.Town, CorpsIndexOf(B), *Units, *FortIds, B.bWaiting ? 1 : 0));
+		Out.Add(FString::Printf(TEXT("battle|%d|%.4f|%.3f|%.3f|%d|%d|%s|%s|%d"), B.Id, B.Day, B.Km.X, B.Km.Y, B.Town, CorpsIndexOf(B), *Units, *FortIds, (B.bWaiting || B.Id == PendingBattleId) ? 1 : 0));
 	}
 	return Out;
 }
@@ -722,9 +722,11 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 			C.Guns = FCString::Atoi(*P[4]);
 			C.Km = FVector2D(FCString::Atod(*P[5]), FCString::Atod(*P[6]));
 			C.Town = FindCity(P[7]);
-			if (C.Town != INDEX_NONE)
+			// Older saves also store the next town while marching. Keep the saved position;
+			// the normal war tick replans towards the objectives from this point.
+			if (C.Town != INDEX_NONE && FVector2D::Distance(C.Km, TownKm(C.Town)) > 0.002)
 			{
-				C.Km = TownKm(C.Town);
+				C.Town = INDEX_NONE;
 			}
 			TArray<FString> Objectives;
 			P[8].ParseIntoArray(Objectives, TEXT(","));

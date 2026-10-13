@@ -164,15 +164,17 @@ float ACampaign1851Map::BattleOdds(const FCampaign1851Battle& B) const
 	return R * R / (1.f + R * R);
 }
 
-bool ACampaign1851Map::FightBattleIn3D(int32 BattleId)
+bool ACampaign1851Map::FightBattleIn3D(int32 BattleId, TFunctionRef<bool()> SaveCampaign, FString* OutWhy)
 {
 	// The request: where, when, who. The units and forts in full are in Units.json and Fortifications.json.
 	FCampaign1851Battle* B = Battles.FindByPredicate([BattleId](const FCampaign1851Battle& X) { return X.Id == BattleId; });
 	const int32 Ci = B ? CorpsIndexOf(*B) : INDEX_NONE;
 	if (!B || Ci == INDEX_NONE)
 	{
+		if (OutWhy) { *OutWhy = TEXT("Slaget eller fjendens korps findes ikke længere"); }
 		return false;
 	}
+	const TArray<int32> OriginalRegiments = B->Regiments;
 	ExportUnits();
 	ExportForts();
 	const FCampaign1851EnemyCorps& C = EnemyCorps[Ci];
@@ -189,6 +191,8 @@ bool ACampaign1851Map::FightBattleIn3D(int32 BattleId)
 	Doc->SetNumberField(TEXT("temperatureC"), FMath::RoundToInt(GetTemperature()));
 	Doc->SetBoolField(TEXT("ice"), IsIceWinter());
 	Doc->SetBoolField(TEXT("snow"), Now.GetMonth() == 12 || Now.GetMonth() <= 2);
+	Doc->SetNumberField(TEXT("mapKmX"), B->Km.X);
+	Doc->SetNumberField(TEXT("mapKmY"), B->Km.Y);
 	Doc->SetNumberField(TEXT("lat"), LatLon.X);
 	Doc->SetNumberField(TEXT("lon"), LatLon.Y);
 	Doc->SetStringField(TEXT("nearTown"), Cities.IsValidIndex(B->Town) ? Cities[B->Town].Name : FString());
@@ -243,7 +247,20 @@ bool ACampaign1851Map::FightBattleIn3D(int32 BattleId)
 	FString Text;
 	FJsonSerializer::Serialize(Doc, TJsonWriterFactory<>::Create(&Text));
 	IFileManager::Get().MakeDirectory(*BattleDir(), true);
-	FFileHelper::SaveStringToFile(Text, *(BattleDir() / FString::Printf(TEXT("BattleRequest_%d.json"), B->Id)), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
+	const FString RequestPath = BattleDir() / FString::Printf(TEXT("BattleRequest_%d.json"), B->Id);
+	if (!FFileHelper::SaveStringToFile(Text, *RequestPath, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM))
+	{
+		B->Regiments = OriginalRegiments;
+		if (OutWhy) { *OutWhy = TEXT("Kunne ikke skrive slagets BattleRequest-fil. Slaget er ikke startet."); }
+		return false;
+	}
+	// Save the pending state in the snapshot only; publish it in memory after the save succeeds.
+	if (!SaveCampaign())
+	{
+		B->Regiments = OriginalRegiments;
+		if (OutWhy) { *OutWhy = TEXT("Kunne ikke gemme Autosave. Slaget er ikke startet."); }
+		return false;
+	}
 	B->bWaiting = true;
 	News.Add(FString::Printf(TEXT("Slaget sendt til 3D: BattleRequest_%d.json (venter på BattleResult_%d.json)"), B->Id, B->Id));
 	return true;
@@ -336,6 +353,13 @@ void ACampaign1851Map::PollBattleResults()
 				{
 					UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|battle|Ugyldigt fort i %s ignoreret"), *Path);
 					continue;
+				}
+				const int32 FortResultId = int32(ResultFortId);
+				if (!Battles[b].Forts.Contains(FortResultId)) { continue; }
+				double FortLossShare = 0.0;
+				if (F->TryGetNumberField(TEXT("lossShare"), FortLossShare) && FMath::IsFinite(FortLossShare))
+				{
+					O.FortLossShare.Add(FortResultId, float(FMath::Clamp(FortLossShare, 0.0, 1.0)));
 				}
 				bool bCaptured = false;
 				F->TryGetBoolField(TEXT("captured"), bCaptured);
@@ -663,6 +687,9 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 			C.Men -= Lost;
 			DanishLosses += Lost;
 		}
+		int32 FortInside = 0, FortReserve = 0;
+		FortMen(Forts[Fi], FortInside, FortReserve);
+		Forts[Fi].Garrison = FortInside + FortReserve;
 		Forts[Fi].RoundsPerGun = FMath::Max(0.f, Forts[Fi].RoundsPerGun - 60.f);
 		Forts[Fi].CartridgesPerMan = FMath::Max(0.f, Forts[Fi].CartridgesPerMan - 40.f);
 	}
@@ -670,7 +697,7 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 	for (int32 Id : O.CapturedForts)
 	{
 		const int32 Fi = FortIndex(Id);
-		if (Fi != INDEX_NONE)
+		if (Fi != INDEX_NONE && B.Forts.Contains(Id))
 		{
 			// The companies that got away go back to their battalions; the guns are lost.
 			News.Add(FString::Printf(TEXT("%s er taget af fjenden"), *Forts[Fi].Name));

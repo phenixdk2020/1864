@@ -339,6 +339,14 @@ private:
     int32 CampaignBattleId = 0;
     /** The units of the battle and the campaign unit each belongs to ("" for the enemy). */
     TMap<TWeakObjectPtr<AStrategyUnit>, FString> CampaignUnitOf;
+    struct FCampaignFortBattle
+    {
+        int32 Id = 0;
+        TArray<TWeakObjectPtr<AStrategyUnit>> Units;
+        TArray<TWeakObjectPtr<AStrategyDefensivePosition>> Positions;
+    };
+    TArray<FCampaignFortBattle> CampaignForts;
+
 
     /** The duel: each company advances until the enemy is inside its own active fire range, then holds and
      *  fires; the fire cones of both are drawn. */

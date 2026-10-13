@@ -1170,12 +1170,16 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	{
 		bFight3DDone = true;
 		const int32 BattleId = Map->GetBattles()[0].Id;
-		if (Map->FightBattleIn3D(BattleId))
+		FString BattleError;
+		if (Map->FightBattleIn3D(BattleId, [this, BattleId]() { return SaveToSlot(TEXT("Autosave"), true, BattleId); }, &BattleError))
 		{
-			SaveToSlot(TEXT("Autosave"), true);
 			GEngine->GameViewport->RemoveViewportWidgetContent(Overlay.ToSharedRef());
 			UGameplayStatics::OpenLevel(this, FName(TEXT("Strategy1864_Field")), true, FString::Printf(TEXT("Battle=%d"), BattleId));
 			return;
+		}
+		else if (Overlay.IsValid())
+		{
+			Overlay->ShowToast(BattleError);
 		}
 	}
 	if (bAutoBattles && Map.IsValid() && Map->GetBattles().Num() > 0)
@@ -1929,15 +1933,19 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 		{
 			// The battle in 3D (the Strategy1864 battle in this project): the request, the units and the field are
 			// written, the campaign saved; the battle map opens and comes back here with BattleResult_N.json.
-			if (Map->FightBattleIn3D(Module))
+			FString BattleError;
+			if (Map->FightBattleIn3D(Module, [this, Module]() { return SaveToSlot(TEXT("Autosave"), true, Module); }, &BattleError))
 			{
-				SaveToSlot(TEXT("Autosave"), true);
 				if (GEngine && GEngine->GameViewport && Overlay.IsValid())
 				{
 					GEngine->GameViewport->RemoveViewportWidgetContent(Overlay.ToSharedRef());
 				}
 				UGameplayStatics::OpenLevel(this, FName(TEXT("Strategy1864_Field")), true, FString::Printf(TEXT("Battle=%d"), Module));
 				return;
+			}
+			else if (Overlay.IsValid())
+			{
+				Overlay->ShowToast(BattleError);
 			}
 		}
 		else if (Button == SCampaign1851Overlay::EButton::BattleAuto)
@@ -2641,7 +2649,7 @@ void ACampaign1851PlayerController::CampaignLoad(const FString& Slot)
 	LoadFromSlot(Slot.IsEmpty() ? TEXT("Quicksave") : Slot);
 }
 
-bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
+bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet, int32 PendingBattleId)
 {
 	if (!Map.IsValid() || !bCampaignStarted)
 	{
@@ -2650,7 +2658,8 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	}
 	const ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
 	UCampaign1851SaveGame* Save = Cast<UCampaign1851SaveGame>(UGameplayStatics::CreateSaveGameObject(UCampaign1851SaveGame::StaticClass()));
-	if (Save) { Save->Scenario = ACampaign1851Map::ScenarioIndex(); }
+	if (!Save) { return false; }
+	Save->Scenario = ACampaign1851Map::ScenarioIndex();
 	Save->SavedAt = FDateTime::Now();
 	Save->CameraTarget = Camera ? Camera->GetTarget() : LastCameraTarget;
 	Save->CameraDistanceKm = Camera ? Camera->GetDistanceKm() : LastCameraDistanceKm;
@@ -2720,7 +2729,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet)
 	Save->Rifles = Map->GetRifles();
 	Save->HorseStock = Map->GetHorseStock();
 	Save->Footing = uint8(Map->GetFooting());
-	Save->War = Map->SaveWar();
+	Save->War = Map->SaveWar(PendingBattleId);
 	Save->Neighbours = Map->SaveNeighbours();
 	Save->Diplomacy = Map->SaveDiplomacy();
 	Save->Research = Map->SaveResearch();

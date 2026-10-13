@@ -1067,12 +1067,12 @@ public:
 	void EvaluateEvents(bool bMonthly);
 	/** For tests: the federal execution and the declaration of war now. */
 	void ForceWar() { SpawnCorps(TEXT("Forbundskorpset (Sachsen, Hannover)"), TEXT("DE"), 0.09f, TEXT("Altona"), { TEXT("Rendsborg") }, 0.f); Tension = 80.f; DeclareWar(); }
-	TArray<FString> SaveWar() const;
+	TArray<FString> SaveWar(int32 PendingBattleId = INDEX_NONE) const;
 	void RestoreWar(const TArray<FString>& Lines);
 	/** Battles at hand (the game pauses for the player's choice). */
 	const TArray<FCampaign1851Battle>& GetBattles() const { return Battles; }
 	/** Writes Saved/Battle/BattleRequest_N.json for the 3D battle game and waits for BattleResult_N.json. */
-	bool FightBattleIn3D(int32 BattleId);
+	bool FightBattleIn3D(int32 BattleId, TFunctionRef<bool()> SaveCampaign, FString* OutWhy = nullptr);
 	void AutoResolveBattle(int32 BattleId);
 	void RetreatFromBattle(int32 BattleId);
 	/** The Danes' chance of winning (0-1) by strength, quality, cover and supply. */

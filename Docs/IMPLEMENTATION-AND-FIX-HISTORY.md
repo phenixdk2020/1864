@@ -2000,6 +2000,12 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Kolonne: under dannelsen af marchkolonnen drejer enheden mod første vejpunkt, så kolonnen har front i gåretningen (MovementExecutor, pausegrenen).
 - Rapport: ikonerne står på lys plade og er større, blokkene er ugennemsigtige (blå/ravgul). Ikke set i en kørsel af mig.
 
+### 2026-10-13 - Rettelser fra kodegennemgangen (Codex, overtaget)
+
+- Autosave/BattleRequest-fejl afbryder nu overgangen til 3D og viser en toast (`FightBattleIn3D` tager en gem-funktion; `SaveToSlot` returnerer fejl, hvis save-objektet ikke kan oprettes; det ventende slag gemmes med).
+- Gemte fjendtlige korps beholder deres koordinater ved indlæsning i stedet for at hoppe til destinationsbyen (`RestoreWar`).
+- Fortimport til 3D og tomt `danishUnitIds` er rettet af Codex i testscenariet (se diff i Source/Strategy1864/Tests/StrategyOOBTestScenario.cpp). Bygget uden fejl; ikke afprøvet i spillet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

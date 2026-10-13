@@ -91,7 +91,7 @@ private:
 	void BuildTownBuilding(int32 CityIndex, const FString& Key);
 
 	/** Writes the campaign to a save slot; bQuiet skips the on-screen message (autosave). */
-	bool SaveToSlot(const FString& Slot, bool bQuiet = false);
+	bool SaveToSlot(const FString& Slot, bool bQuiet = false, int32 PendingBattleId = INDEX_NONE);
 	bool LoadFromSlot(const FString& Slot);
 	void OpenGameMenu();
 	FString SlotLabel(const FString& Slot) const;
