@@ -192,6 +192,22 @@ void Strategy1864Performance::Tick(APlayerController* Controller, float DeltaTim
         FPlatformTime::ToMilliseconds(BattlePerfGpuCycles.load()), BattleFigures, BattlePerfDrawCalls.load(), BattlePerfTris.load(), BattlePerfWorst);
     BattlePerfWorst = 0;
     // Test flag: -Strategy1864ProfileGpu runs Unreal's GPU profile once, 30 seconds in, and writes it to the log (LogRHI / "Profile GPU").
+    // Test flag: -Strategy1864DumpUnitLogs=<seconds> writes every unit's log to the log file once, at that world time (needs -Strategy1864DebugGpu).
+    {
+        static bool bDumped = false;
+        double DumpAt = -1.0;
+        if (!bDumped && FParse::Value(FCommandLine::Get(), TEXT("Strategy1864DumpUnitLogs="), DumpAt) && DumpAt > 0.0 && Controller->GetWorld() && Controller->GetWorld()->GetTimeSeconds() > DumpAt)
+        {
+            bDumped = true;
+            for (TActorIterator<AStrategyUnit> DumpIt(Controller->GetWorld()); DumpIt; ++DumpIt)
+            {
+                const AStrategyUnit* DumpUnit = *DumpIt;
+                if (!IsValid(DumpUnit)) continue;
+                for (const AStrategyUnit::FUnitLogEntry& Entry : DumpUnit->UnitLog)
+                    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-UNITLOG %s t=%.0f [%s] %s - %s"), *DumpUnit->StableUnitId.ToString(), Entry.Time, *Entry.Category, *Entry.What, *Entry.Why);
+            }
+        }
+    }
     static bool bProfiled = false;
     if (!bProfiled && BattleNow > 30.0 && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864ProfileGpu")) && GEngine)
     {

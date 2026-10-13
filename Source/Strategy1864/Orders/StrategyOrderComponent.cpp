@@ -274,6 +274,12 @@ void UStrategyOrderComponent::ResolveAttackDestination(FStrategyOrder& AttackOrd
     // nearest point of his front: it may go a little further than the plain distance, so the whole first rank can fire.
     const float AttackReach = AttackRange - 300.0f;
     float AttackStand = AttackReach;
+    // The order's own sideways place (the flank plan gives every company a lateral slot) is kept: the stand-off point is
+    // measured along the line from the enemy, then moved sideways by the same amount, so the companies stand side by side
+    // instead of all on the same spot.
+    const FVector AttackOurFront = -AttackBack;
+    const FVector AttackOurRight(-AttackOurFront.Y, AttackOurFront.X, 0.0f);
+    const float AttackLateral = FMath::Clamp(FVector::DotProduct(AttackOrder.TargetLocation - AttackFoe, AttackOurRight), -12000.0f, 12000.0f);
     {
         const float OurHalf = AttackUnit->FormationComponent ? 0.5f * AttackUnit->FormationComponent->EstimateFrontageCm(FMath::Max(1, AttackUnit->CurrentStrength)) : 2400.0f;
         const float FoeHalf = AttackEnemy->FormationComponent ? 0.5f * AttackEnemy->FormationComponent->EstimateFrontageCm(FMath::Max(1, AttackEnemy->CurrentStrength)) : 2400.0f;
@@ -292,13 +298,13 @@ void UStrategyOrderComponent::ResolveAttackDestination(FStrategyOrder& AttackOrd
         const FVector OurRight(-OurFront.Y, OurFront.X, 0.0f);
         for (float Distance = AttackReach; Distance > AttackReach * 0.55f; Distance -= 100.0f)
         {
-            const FVector Centre = AttackFoe + AttackBack * Distance;
+            const FVector Centre = AttackFoe + AttackBack * Distance + AttackOurRight * AttackLateral;
             const float Worst = FMath::Max(DistanceToFoeFront(Centre - OurRight * OurHalf), DistanceToFoeFront(Centre + OurRight * OurHalf));
             AttackStand = Distance;
             if (Worst <= AttackReach) break;
         }
     }
-    AttackOrder.TargetLocation = AttackFoe + AttackBack * AttackStand;
+    AttackOrder.TargetLocation = AttackFoe + AttackBack * AttackStand + AttackOurRight * AttackLateral;
     AttackOrder.TargetLocation.Z = AttackUnit->GetActorLocation().Z;
     AttackOrder.FacingYaw = (-AttackBack).Rotation().Yaw;
     AttackOrder.bHasFacing = true;

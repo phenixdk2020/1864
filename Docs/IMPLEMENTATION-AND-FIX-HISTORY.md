@@ -2090,6 +2090,12 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Hver enhed har en log (`AStrategyUnit::AddUnitLog`, højst 120 poster) over hændelser og årsager: ordrer, march (start, mål, standset), formationsskift med årsag, kavalerireaktion og afvisninger, stop-og-ild, salver, ammunition, tab, moral (opløsning/samling/smitte/rally), stilling, og alle kamp-AI'ens beslutningspunkter (`STRATEGY1864_DECISION` fodrer nu loggen altid; konsollinjen kræver stadig `-Strategy1864DebugDecisions`). Rutinevurderinger filtreres fra, gentagelser samles.
 - HUD: knappen LOG i enhedspanelet åbner et vindue med den valgte enheds seneste 18 poster; loggen skrives også ind i rapportfilen. Set på et screenshot (formationsskift med årsag, stop-og-ild, salve). Se Docs/Enhedslog.md.
 
+### 2026-10-13 - Angreb: kompagnierne beholder deres sideværts plads
+
+- Fund i en 4-mod-1-test (AI-officer, reserve): kompagnierne endte oven i hinanden foran fjenden. Årsag: `ResolveAttackDestination` satte hver enheds mål på samme punkt foran fjendens midte og kasserede den sideværts plads, flankeplanen havde givet hver enhed. Nu måles stand-off-punktet langs linjen fra fjenden og flyttes sideværts med ordrens egen forskydning (højst 120 m), så kompagnierne står side om side. Set på screenshots (to kompagnier i ildlinjen, to bagved).
+- Enhedsloggen viste forløbet: ANGRIB fra bataljons-HQ til alle fire, march i kolonne, linje ved 195 m fra fjenden (udfoldningsgrænsen), et kompagni "i reserve", et "går udenom egen ild", et "ildbasen: holder og skyder", derefter salver.
+- Nyt testflag `-Strategy1864DumpUnitLogs=<sek>` (kræver `-Strategy1864DebugGpu`) skriver alle enheders logge til loggen (PROJECT1864-UNITLOG).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
