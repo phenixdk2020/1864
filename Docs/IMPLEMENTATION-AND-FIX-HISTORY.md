@@ -2114,6 +2114,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Test (4 mod 1 med batteri, morter og eskadron, AI-officer, tid x3): eskadronen rider om to gange, opdages bagfra først på 35 m (01:27), kompagniet danner karré for sent, eskadronen chargerer i flanke/ryg på 106 m (01:45, 75 grader fra fjendens front), og afviser derefter charge mod den nye faste karré (01:53). Dansk sejr. Set i enhedsloggene (rapportfilen).
 - Bemærkning fra testen: fjendens husarer fik samme regel mod fjendens eget kompagni, fordi opsætningen giver dem og kompagniet forskellige side-værdier (Prussia/Enemy). Testopsætning, ikke rytterlogik.
 
+### 2026-10-13 - Jernbaneøkonomi: ny tyngdemodel
+
+- Den første formel (passagerer efter befolkning, fragt efter længde) gav for lidt: selv København-Roskilde ville aldrig tjene sig ind (248 år). Ny model i `RailwayIncomePerYear` og `Tools/Economy/rail_model.py`: passagerer = 0,9 x sqrt(popA x popB) rejser pr. år x afstand x 0,03 rd/person-km; fragt = 0,15 t pr. indbygger (dobbelt ved havneby) x afstand x 0,012 rd/ton-km; alle par af byer på linjen tæller; banen er 15 % længere end luftlinjen; staten får 100 % af egne linjer og 15 % af koncessionslinjer.
+- Resultat (egen linje): København-Roskilde 40.000 rd/år (tilbagebetaling 12 år), Odense-Nyborg 7.200 (147 år), Aarhus-Randers 11.200 (96 år), Fredericia-Kolding 3.300 (aldrig). Bygget; ikke afprøvet i spillet. Mangler: vækst af byer ved stationer, nedsat indtægt ved krig/afbrudt bro, rejser pr. år der vokser med årene.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

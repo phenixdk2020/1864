@@ -18,6 +18,10 @@ CHARACTER = "3d/DK_Infantry_1864.fbx"   # in ComfyUI/input
 
 # name, prompt, duration seconds, seed
 CLIPS = [
+    # Muzzle-loader (standing) in three phases; see Docs/Manglende-Animationer.md section 6 (L1).
+    ("A_Load_Muzzle_Standing_P1", "A soldier standing with his musket butt resting on the ground bites open a paper cartridge with his teeth and pours the gunpowder down the barrel.", 4.0, 41),
+    ("A_Load_Muzzle_Standing_P2", "A soldier standing with his musket butt on the ground pushes a lead ball into the muzzle, draws the ramrod, rams the charge down the barrel twice, and returns the ramrod under the barrel.", 5.0, 42),
+    ("A_Load_Muzzle_Standing_P3", "A soldier standing with a musket puts a percussion cap on the nipple, then raises the musket to his shoulder and aims forward.", 3.5, 43),
     ("A_Dive_To_Prone", "A soldier carrying a rifle throws himself to the ground and lies flat on his stomach.", 2.5, 11),
     ("A_Run_Crouched", "A soldier carrying a rifle runs forward bent over low, staying small.", 2.5, 12),
     ("A_Fix_Bayonet", "A soldier standing holding a musket fixes a bayonet onto the barrel with both hands.", 3.0, 13),

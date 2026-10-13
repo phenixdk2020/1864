@@ -387,16 +387,33 @@ double ACampaign1851Map::NetworkUpkeepPerYear() const
 
 double ACampaign1851Map::RailwayIncomePerYear() const
 {
+	// A gravity model (the same numbers as Tools/Economy/rail_model.py):
+	// passengers: trips a year between two towns = 0.9 * sqrt(popA * popB); income = trips * distance * 0.03 rd per person-km;
+	// freight: 0.15 t per inhabitant, double when one of the towns is a port; income = tons * distance * 0.012 rd per ton-km.
+	// Every pair of towns on the line counts (so stations in between add traffic). The state keeps all of its own lines and 15 %
+	// of the concession lines.
+	constexpr double TripsFactor = 0.9, FarePerKm = 0.03, TonsPerHead = 0.15, PortFactor = 2.0, FreightRate = 0.012, TrackFactor = 1.15;
 	const FDateTime Now = GetDate();
 	double Total = 0.0;
 	for (int32 r = 0; r < Railways.Num(); ++r)
 	{
 		const FCampaign1851Railway& Line = Railways[r];
 		if (!Line.IsOpen(Now)) { continue; }
-		double People = 0.0;
-		for (const int32 Town : Line.Towns) { if (Cities.IsValidIndex(Town)) { People += Cities[Town].Population; } }
-		const double Passengers = People * 0.03 * FMath::Clamp(Line.LengthKm / 40.0, 0.5, 4.0);
-		const double Freight = Line.LengthKm * 60.0 + People * 0.01;
+		TArray<int32> Towns;
+		for (const int32 Town : Line.Towns) { if (Cities.IsValidIndex(Town)) { Towns.Add(Town); } }
+		double Passengers = 0.0, Freight = 0.0;
+		for (int32 a = 0; a < Towns.Num(); ++a)
+		{
+			for (int32 b = a + 1; b < Towns.Num(); ++b)
+			{
+				const double PopA = Cities[Towns[a]].Population, PopB = Cities[Towns[b]].Population;
+				const double Km = FVector2D::Distance(TownKm(Towns[a]), TownKm(Towns[b])) * TrackFactor;
+				Passengers += TripsFactor * FMath::Sqrt(PopA * PopB) * Km * FarePerKm;
+				double Tons = TonsPerHead * (PopA + PopB) / FMath::Max(1, Towns.Num() - 1);
+				if (IsCoastalTown(Towns[a]) || IsCoastalTown(Towns[b])) { Tons *= PortFactor; }
+				Freight += Tons * Km * FreightRate;
+			}
+		}
 		Total += (Passengers + Freight) * (r >= HistoricRailways ? 1.0 : 0.15);
 	}
 	return Total;
