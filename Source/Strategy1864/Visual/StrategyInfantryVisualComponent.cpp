@@ -2923,7 +2923,7 @@ int32 UStrategyInfantryVisualComponent::ResolveCrowdBand(USkeletalMeshComponent*
     // LOD0 is reserved for the global nearest N (including complementary handoff).
     const UStrategyCrowdSubsystem* CrowdLODSub = GetWorld()->GetSubsystem<UStrategyCrowdSubsystem>();
     if (CrowdBand == 0 && !CrowdNearFigures.Contains(Figure) && (!CrowdLODSub || !CrowdLODSub->NearFigures.Contains(Figure))) CrowdBand = 1;
-    if (CrowdBand == 1 && CrowdDistance < 2500.f) CrowdBand = 4;
+    if (CrowdBand == 1 && CrowdDistance < 1200.f) CrowdBand = 4;
     return CrowdBand;
 }
 

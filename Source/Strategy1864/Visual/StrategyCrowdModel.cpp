@@ -325,7 +325,7 @@ bool UStrategyCrowdSubsystem::DrawAuxiliary(USkeletalMeshComponent* Figure, USke
         if (CrowdPC->PlayerCameraManager) CrowdDistance = FVector::Distance(CrowdPC->PlayerCameraManager->GetCameraLocation(), Figure->GetComponentLocation());
     int32 CrowdBand = UStrategyCrowdModel::DistanceBand(CrowdDistance);
     if (CrowdBand == 0 && !CrowdSub->NearFigures.Contains(Figure)) CrowdBand = 1;
-    if (CrowdBand == 1 && CrowdDistance < 2500.f) CrowdBand = 4;
+    if (CrowdBand == 1 && CrowdDistance < 1200.f) CrowdBand = 4;   // the shadow-casting LOD1 only inside 12 m
     const FString CrowdGroupKey = FString::FromInt(CrowdBand) + TEXT("|") + Figure->GetOwner()->GetPathName() + TEXT("|") + CrowdModel->GetPathName() + (bLiving ? TEXT("|living") : TEXT("|fallen"));
     FStrategyCrowdAuxGroup& CrowdGroup = CrowdSub->AuxiliaryGroups.FindOrAdd(CrowdGroupKey);
     if (!IsValid(CrowdGroup.Instances))

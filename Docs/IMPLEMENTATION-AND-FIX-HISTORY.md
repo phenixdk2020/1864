@@ -2058,6 +2058,12 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Ved Operational/Strategic/VeryFar zoom (kameraafstand fra ca. 235 m) tegnes hver enhed som NATO-kortsymbol i HUD'en: ramme (blå egne/allierede, rød fjende, grå rutet), mærke (infanteri kryds, rytteri skrå streg, artilleri prik, stab flag), enhedsgrad over (I, II, III, X, XX) og navn på stabe; valgte enheder får gul kant. Før forsvandt figurerne ved stor afstand uden at noget kom i stedet. Nyt testflag `-Strategy1864SemanticZoom=0..4` tvinger zoom-tilstanden. Set på screenshot.
 - Rapportikoner: den lyse plade er fjernet; ikonerne har i stedet en tynd lys kant i selve billedet og er større (20-32 px). Genimporteret. Ikke set i en rapport endnu.
 
+### 2026-10-13 - GPU i nærbillede: måling (ingen figur-hovedårsag)
+
+- Nærbillede (kamera 9 m fra en dansk linje, 1080p, bagte figurer): GPU ca. 11 ms, ca. 9 mio. trekanter. `-Strategy1864ProfileGpu` (nyt flag) dumper Unreals GPU-profil i loggen efter 30 s: Scene 7,7 ms; BasePass 1,2; deferred lys 1,1; efterbehandling 2,6 (TSR 2,0); Lumen (DiffuseIndirectAndAO) op til 3,3 i en måling; VSM-projektion 0,7. Figurerne er ikke hovedposten.
+- Detaljeniveauerne for bagte figurer er skærpet (LOD0 kun < 8 m og kun de nærmeste N, LOD1 til 25 m, LOD2 til 60 m; skyggekastende LOD1 kun < 12 m). Gav ingen målbar ændring i GPU-ms ved 1080p.
+- GPU-belastningen vokser med skærmopløsningen (Lumen, VSM, TSR): ved 4K er den fire gange pixelmængden. Kvalitetsniveauerne LAV/MIDDEL/HOEJ (renderopløsning 70/85/100 %, billigere Lumen og skygger) er den vigtigste knap; ikke ændret her.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

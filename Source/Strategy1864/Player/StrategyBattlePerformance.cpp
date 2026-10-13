@@ -4,6 +4,7 @@
 #include "../Units/StrategyUnit.h"
 #include "../Units/CavalryUnit.h"
 #include "EngineUtils.h"
+#include "Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Engine/World.h"
@@ -190,4 +191,11 @@ void Strategy1864Performance::Tick(APlayerController* Controller, float DeltaTim
         BattleFrameMs, FPlatformTime::ToMilliseconds(GGameThreadTime), FPlatformTime::ToMilliseconds(BattlePerfDrawCycles.load()),
         FPlatformTime::ToMilliseconds(BattlePerfGpuCycles.load()), BattleFigures, BattlePerfDrawCalls.load(), BattlePerfTris.load(), BattlePerfWorst);
     BattlePerfWorst = 0;
+    // Test flag: -Strategy1864ProfileGpu runs Unreal's GPU profile once, 30 seconds in, and writes it to the log (LogRHI / "Profile GPU").
+    static bool bProfiled = false;
+    if (!bProfiled && BattleNow > 30.0 && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864ProfileGpu")) && GEngine)
+    {
+        bProfiled = true;
+        GEngine->Exec(Controller->GetWorld(), TEXT("ProfileGPU"));
+    }
 }

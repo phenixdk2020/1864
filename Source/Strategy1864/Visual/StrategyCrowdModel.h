@@ -83,7 +83,8 @@ public:
         const int32 CrowdMeshLOD = Band == 4 ? 1 : Band; // shadowed LOD1 shares geometry
         return LODMeshes.IsValidIndex(CrowdMeshLOD) ? LODMeshes[CrowdMeshLOD].Get() : Mesh.Get();
     }
-    static int32 DistanceBand(float DistanceCm) { return DistanceCm < 1500.f ? 0 : DistanceCm < 6000.f ? 1 : DistanceCm < 12000.f ? 2 : 3; }
+    // LOD0 only inside 8 m (and only the nearest N), LOD1 to 25 m, LOD2 to 60 m, LOD3 beyond.
+    static int32 DistanceBand(float DistanceCm) { return DistanceCm < 800.f ? 0 : DistanceCm < 2500.f ? 1 : DistanceCm < 6000.f ? 2 : 3; }
     int32 GetNumMaterials() const { return Materials.Num(); }
     UMaterialInterface* GetMaterial(int32 Index) const;
     bool RiflePose(const UAnimSequence* Clip, float Position, bool bLoop, FTransform& Out) const;
