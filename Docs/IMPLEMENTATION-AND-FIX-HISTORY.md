@@ -2039,7 +2039,7 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - ADVANCE-FIRE: forventede et fast mål; en fremrykning mod en fjende stiller sig nu ved skudafstand foran ham, så testen sammenligner med ordrens løste mål. Bestået.
 - T1 (karré): min egen "saml i kolonne før march" (6 s pause) ramte også rytteriet, som så stod stille og blev afvist som "for lav fart". Samlingen før march gælder nu kun infanteri. Bestået.
 - T3: lokal moralsmitte ved sammenbrud: venner inden for 80 m mister moral og samhold én gang, når en enhed går i opløsning (`EvaluateRoutState`). Bestået.
-- T7 (to enheder i floden): UAFKLARET. Positionerne ved fejlen (company dx=-1193, owner; other dx=-1013, ikke ejer) viser, at den ventende enhed står i flodbåndets kant i stedet for ved ventepunktet (dx=-1800). Jeg har tilføjet en tidlig venteregel ved flodkanten (`UpdateBridgeQueueState`), som ikke ændrede resultatet, og positionslog i testen. Årsagen (enhedsafstand/avoidance, eller at den ventende enhed ikke bruger broruten) er ikke fundet.
+- T7 (to enheder i floden): LØST senere samme dag (se nedenfor). Oprindelig note: UAFKLARET. Positionerne ved fejlen (company dx=-1193, owner; other dx=-1013, ikke ejer) viser, at den ventende enhed står i flodbåndets kant i stedet for ved ventepunktet (dx=-1800). Jeg har tilføjet en tidlig venteregel ved flodkanten (`UpdateBridgeQueueState`), som ikke ændrede resultatet, og positionslog i testen. Årsagen (enhedsafstand/avoidance, eller at den ventende enhed ikke bruger broruten) er ikke fundet.
 
 ### 2026-10-13 - Kommandocirkel, rally, ildkegle til/fra
 
@@ -2063,6 +2063,10 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Nærbillede (kamera 9 m fra en dansk linje, 1080p, bagte figurer): GPU ca. 11 ms, ca. 9 mio. trekanter. `-Strategy1864ProfileGpu` (nyt flag) dumper Unreals GPU-profil i loggen efter 30 s: Scene 7,7 ms; BasePass 1,2; deferred lys 1,1; efterbehandling 2,6 (TSR 2,0); Lumen (DiffuseIndirectAndAO) op til 3,3 i en måling; VSM-projektion 0,7. Figurerne er ikke hovedposten.
 - Detaljeniveauerne for bagte figurer er skærpet (LOD0 kun < 8 m og kun de nærmeste N, LOD1 til 25 m, LOD2 til 60 m; skyggekastende LOD1 kun < 12 m). Gav ingen målbar ændring i GPU-ms ved 1080p.
 - GPU-belastningen vokser med skærmopløsningen (Lumen, VSM, TSR): ved 4K er den fire gange pixelmængden. Kvalitetsniveauerne LAV/MIDDEL/HOEJ (renderopløsning 70/85/100 %, billigere Lumen og skygger) er den vigtigste knap; ikke ændret her.
+
+### 2026-10-13 - T7 løst: testens flod var vendt forkert
+
+- Positionslogen viste, at kompagniet gik tilbage mod vest efter første krydsning. Årsagen var testopsætningen: flodens akse (0,1,0) giver tværnormalen (-1,0,0), så vestbredden er side +1 og østbredden side -1, og de to ventepladser/udgang lå på de forkerte sider. Aksen er vendt til (0,-1,0) i testen. T7 består (begge krydser, ingen samtidighed, begge frigiver broen). Den tidlige venteregel ved flodkanten er beholdt (harmløs).
 
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.

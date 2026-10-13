@@ -266,7 +266,9 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
             AcceptanceOther->SetActorLocation(AcceptanceStart + FVector(0, 6000, 0));
             SpawnedRiverBarrier = GetWorld()->SpawnActor<AStrategyRiverBarrier>(AStrategyRiverBarrier::StaticClass(), AcceptanceStart + FVector(15000, 0, 0), FRotator::ZeroRotator);
             if (!SpawnedRiverBarrier) { FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: bro mangler")); return; }
-            SpawnedRiverBarrier->RiverAxisDirection = FVector(0, 1, 0);
+            // The across-river normal is (-axis.y, axis.x): axis (0,-1,0) gives +X, so the west bank is side -1 (bank A, offset -X)
+            // and the east bank side +1 (bank B, offset +X), matching the approach offsets below.
+            SpawnedRiverBarrier->RiverAxisDirection = FVector(0, -1, 0);
             SpawnedRiverBarrier->BankAApproachOffset = FVector(-1800, 0, 0);
             SpawnedRiverBarrier->BankBApproachOffset = FVector(1800, 0, 0);
             Strategy1864Acceptance::Order(AcceptanceCompany, EStrategyOrderType::Move, AcceptanceStart + FVector(25000, 0, 0));
