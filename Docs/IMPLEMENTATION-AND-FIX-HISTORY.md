@@ -2006,6 +2006,13 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Gemte fjendtlige korps beholder deres koordinater ved indlæsning i stedet for at hoppe til destinationsbyen (`RestoreWar`).
 - Fortimport til 3D og tomt `danishUnitIds` er rettet af Codex i testscenariet (se diff i Source/Strategy1864/Tests/StrategyOOBTestScenario.cpp). Bygget uden fejl; ikke afprøvet i spillet.
 
+### 2026-10-13 - Sejrsgrader, sejrspoint og tilbagetog (Codex, overtaget)
+
+- Fem grader pr. side: UAFGJORT, DELVIS SEJR, SEJR, STOR SEJR (og DELVIST NEDERLAG, NEDERLAG, STORT NEDERLAG) ud fra sejrspoint og styrkeandel; sejrspoint for begge parter står i rapportens overskrift og i resultatfilen (victoryGrade, danishPoints, enemyPoints).
+- Kampagnen: ved STOR SEJR trækker taberen sig til nærmeste sikre egen by (forrige rutestrækning først), taber moral og samhold efter graden; ved SEJR kun mindre moral/samhold; ved DELVIS SEJR ingen tilbagetrækning. Fjendtlige korps har nu moral og samhold (gemmes i War, save-version 35).
+- Geværreglen bruger nu graderne (uafgjort: begge holder feltet).
+- Bygget uden fejl; rapporttesten kører, grader og kampagnevirkning er ikke afprøvet i et rigtigt kampagneslag.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

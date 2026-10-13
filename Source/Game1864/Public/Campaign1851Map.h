@@ -61,6 +61,8 @@ struct FCampaign1851SupplyColumn
 /** An enemy corps on the map (war): its strength and the towns it marches on in turn. */
 struct FCampaign1851EnemyCorps
 {
+    float Morale = 0.8f;
+    float Cohesion = 70.f;
 	int32 Id = 0;
 	FString Name;
 	FString Nation;          // "PR", "AT", "DE" (the Confederation)
@@ -139,6 +141,10 @@ struct FCampaign1851ReportEquipment
 /** What a battle cost and decided (from the 3D battle, the automatic resolution, or a retreat). */
 struct FCampaign1851BattleOutcome
 {
+    // Transient result metadata; -1 keeps the legacy result behaviour.
+    int32 VictoryGrade = -1;
+    int32 DanishPoints = 0, EnemyPoints = 0;
+    FString VictoryGradeText;
 	bool bDanishWin = false;
 	bool bDraw = false;
 	bool bRetreat = false;

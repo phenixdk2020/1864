@@ -1057,6 +1057,7 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
     FString EnemyNation = TEXT("PR");
     FString EnemyRifle;
     double EnemyQuality = 1.0;
+    double ReportEnemyMorale = .8, ReportEnemyCohesion = 70.0;
     double BearingDeg = -90.0;   // the enemy from the south when the request does not say
     TSharedPtr<FJsonObject> Request;
     {
@@ -1092,6 +1093,8 @@ bool AStrategyOOBTestScenario::BuildCampaignBattle(const FString& BattlefieldFil
             EnemyNation = Enemy->GetStringField(TEXT("nation"));
             Enemy->TryGetStringField(TEXT("rifle"), EnemyRifle);
             Enemy->TryGetNumberField(TEXT("quality"), EnemyQuality);
+            Enemy->TryGetNumberField(TEXT("morale"), ReportEnemyMorale);
+            Enemy->TryGetNumberField(TEXT("cohesion"), ReportEnemyCohesion);
             Enemy->TryGetNumberField(TEXT("bearingDeg"), BearingDeg);
         }
         else
@@ -1819,14 +1822,7 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
             DanesNow += FMath::Max(0, FortLedger.StartMen - FortLedger.Killed - FortLedger.Wounded - FortLedger.Prisoners);
         }
     }
-    const float DanesLeft = DanesStart > 0 ? float(DanesNow) / DanesStart : 0.0f;
-    const float EnemyLeft = EnemyStart > 0 ? float(EnemyNow) / EnemyStart : 0.0f;
-    // The battle's own decision when it came (a side broken), else by the share each side has left.
-    int32 DanishPoints = 0, EnemyPoints = 0;
-    GetObjectivePoints(DanishPoints, EnemyPoints);
-    const FString Outcome = !BattleOutcome.IsEmpty() ? (bDanishVictory ? TEXT("danish_victory") : BattleOutcome.StartsWith(TEXT("UAFGJORT")) ? TEXT("draw") : TEXT("enemy_victory"))
-        : DanishPoints >= EnemyPoints + 100 ? TEXT("danish_victory") : EnemyPoints >= DanishPoints + 100 ? TEXT("enemy_victory")
-        : DanesLeft > EnemyLeft + 0.05f ? TEXT("danish_victory") : EnemyLeft > DanesLeft + 0.05f ? TEXT("enemy_victory") : TEXT("draw");
+    const FString Outcome = ReportVictoryGrade == 0 ? TEXT("draw") : bDanishVictory ? TEXT("danish_victory") : TEXT("enemy_victory");
     TSharedRef<FJsonObject> Doc = MakeShared<FJsonObject>();
     Doc->SetStringField(TEXT("format"), TEXT("PROJECT1864-BattleResult-1"));
     Doc->SetNumberField(TEXT("battleId"), CampaignBattleId);
@@ -1917,8 +1913,10 @@ void AStrategyOOBTestScenario::FinishCampaignBattle()
         Doc->SetArrayField(TEXT("officers"), Ours);
         Doc->SetArrayField(TEXT("enemyOfficers"), Theirs);
     }
-    Doc->SetNumberField(TEXT("danishPoints"), DanishPoints);
-    Doc->SetNumberField(TEXT("enemyPoints"), EnemyPoints);
+    Doc->SetNumberField(TEXT("danishPoints"), ReportDanishPoints);
+    Doc->SetNumberField(TEXT("enemyPoints"), ReportEnemyPoints);
+    Doc->SetNumberField(TEXT("victoryGrade"), ReportVictoryGrade);
+    Doc->SetStringField(TEXT("victoryGradeText"), BattleOutcome);
     TArray<TSharedPtr<FJsonValue>> UnitList;
     for (const TPair<FString, int32>& L : Losses)
     {
@@ -4685,9 +4683,9 @@ void AStrategyOOBTestScenario::TickBattleLedger(float DeltaSeconds)
 void AStrategyOOBTestScenario::FinalizeAfterActionReport()
 {
     if (bReportFinalized || !GetWorld()) { return; }
-    if (BattleOutcome.IsEmpty())
     {
-        int32 ReportDanishPoints = 0, ReportEnemyPoints = 0;
+        const bool bReportDecided = !BattleOutcome.IsEmpty();
+        const bool bReportDecidedDraw = BattleOutcome.StartsWith(TEXT("UAFGJORT"));
         GetObjectivePoints(ReportDanishPoints, ReportEnemyPoints);
         int32 ReportDanishStart = 0, ReportEnemyStart = 0, ReportDanishLeft = 0, ReportEnemyLeft = 0;
         for (TActorIterator<AStrategyUnit> ReportDecision(GetWorld()); ReportDecision; ++ReportDecision)
@@ -4699,13 +4697,28 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
             const FStrategyBattleLedger& ReportDecisionLedger = ReportDecision->BattleLedger;
             const bool bReportOwnSide = ReportDecisionLedger.OriginalSide == uint8(EStrategySide::Denmark) || ReportDecisionLedger.OriginalSide == uint8(EStrategySide::Allied);
             (bReportOwnSide ? ReportDanishStart : ReportEnemyStart) += ReportDecisionLedger.StartMen;
-            (bReportOwnSide ? ReportDanishLeft : ReportEnemyLeft) += ReportDecisionLedger.StartMen - ReportDecisionLedger.Killed - ReportDecisionLedger.Wounded - ReportDecisionLedger.Prisoners;
+            (bReportOwnSide ? ReportDanishLeft : ReportEnemyLeft) += FMath::Max(0, ReportDecisionLedger.StartMen - ReportDecisionLedger.Killed - ReportDecisionLedger.Wounded - ReportDecisionLedger.Prisoners);
         }
         const float ReportDanishShare = ReportDanishStart > 0 ? float(ReportDanishLeft) / ReportDanishStart : 0.f;
         const float ReportEnemyShare = ReportEnemyStart > 0 ? float(ReportEnemyLeft) / ReportEnemyStart : 0.f;
-        bDanishVictory = ReportDanishPoints >= ReportEnemyPoints + 100 || (ReportEnemyPoints < ReportDanishPoints + 100 && ReportDanishShare > ReportEnemyShare + .05f);
-        const bool bReportEnemyWin = !bDanishVictory && (ReportEnemyPoints >= ReportDanishPoints + 100 || ReportEnemyShare > ReportDanishShare + .05f);
-        BattleOutcome = bDanishVictory ? TEXT("DANSK SEJR") : bReportEnemyWin ? TEXT("NEDERLAG") : TEXT("UAFGJORT");
+        const int64 ReportPointDelta = int64(ReportDanishPoints) - ReportEnemyPoints;
+        const float ReportShareDelta = ReportDanishShare - ReportEnemyShare;
+        bool bReportDraw = bReportDecidedDraw;
+        if (!bReportDecided)
+        {
+            bReportDraw = FMath::Abs(ReportPointDelta) < 100 && FMath::Abs(ReportShareDelta) <= .05f;
+            bDanishVictory = !bReportDraw && (ReportPointDelta >= 100 || (ReportPointDelta > -100 && ReportShareDelta > .05f));
+        }
+        const int64 ReportWinnerPoints = bDanishVictory ? ReportPointDelta : -ReportPointDelta;
+        const float ReportWinnerShare = bDanishVictory ? ReportDanishShare : ReportEnemyShare;
+        const float ReportLoserShare = bDanishVictory ? ReportEnemyShare : ReportDanishShare;
+        // Gameplay thresholds, mirrored in Docs/AfterAction.md. An already decided winner is preserved.
+        ReportVictoryGrade = bReportDraw ? 0
+            : ReportWinnerPoints >= 300 && ReportWinnerShare >= .50f && ReportWinnerShare - ReportLoserShare >= .20f ? 3
+            : ReportWinnerPoints >= 100 || ReportWinnerShare - ReportLoserShare >= .10f ? 2 : 1;
+        BattleOutcome = ReportVictoryGrade == 0 ? TEXT("UAFGJORT")
+            : bDanishVictory ? (ReportVictoryGrade == 3 ? TEXT("STOR SEJR") : ReportVictoryGrade == 2 ? TEXT("SEJR") : TEXT("DELVIS SEJR"))
+            : (ReportVictoryGrade == 3 ? TEXT("STORT NEDERLAG") : ReportVictoryGrade == 2 ? TEXT("NEDERLAG") : TEXT("DELVIST NEDERLAG"));
     }
     bReportFinalized = true;
     // Pause the simulation at the outcome; HUD and report navigation still draw while paused.
@@ -4755,8 +4768,8 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
     TArray<FString> ReportDanishRows, ReportEnemyRows, ReportDetails;
     // Rifles: a casualty's rifle stays on the field. The side that keeps the field recovers its own (about a tenth is broken);
     // the side that leaves it loses them all, and the victor picks them up as booty. A draw: both keep the field.
-    const bool bReportDanesKeepField = BattleOutcome != TEXT("NEDERLAG");
-    const bool bReportEnemyKeepsField = BattleOutcome != TEXT("DANSK SEJR");
+    const bool bReportDanesKeepField = ReportVictoryGrade == 0 || bDanishVictory;
+    const bool bReportEnemyKeepsField = ReportVictoryGrade == 0 || !bDanishVictory;
     int32 ReportRiflesTakenByDanes = 0, ReportRiflesTakenByEnemy = 0;
     for (TActorIterator<AStrategyUnit> ReportIt(GetWorld()); ReportIt; ++ReportIt)
     {
@@ -4831,7 +4844,7 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
     ReportRows.Append(ReportDanishRows);
     ReportRows.Add(ReportEnemy.Row(ReportEnemyName + TEXT(" — TOTAL")));
     ReportRows.Append(ReportEnemyRows);
-    ReportText = ReportSummary + TEXT("\nEnhed\tMand ved start\tFaldne\tSårede\tFanger\tErobret udstyr\tTabt udstyr\tSkud\tKamp sek.\tMoraltab\n");
+    ReportText = BattleOutcome + FString::Printf(TEXT(" | Sejrspoint: Danmark %d, %s %d\n"), ReportDanishPoints, *ReportEnemyName, ReportEnemyPoints) + ReportSummary + TEXT("\nEnhed\tMand ved start\tFaldne\tSårede\tFanger\tErobret udstyr\tTabt udstyr\tSkud\tKamp sek.\tMoraltab\n");
     for (const FString& ReportRow : ReportRows) { ReportText += ReportRow + TEXT("\n"); }
     ReportText += TEXT("Udfald: ") + (BattleOutcome.IsEmpty() ? FString(TEXT("slaget afsluttet af spilleren")) : BattleOutcome) + TEXT("\n");
     ReportText += TEXT("K=kanoner, M=mortérer, G=geværer, H=heste, V=vogne, F=faner. Sårede overgår til lazaret; tilbagevenden afhænger af pleje.\n");

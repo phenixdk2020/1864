@@ -1831,7 +1831,11 @@ void AStrategyHUD::DrawAfterActionReport()
         const float ReportX = 30.f, ReportY = 100.f, ReportW = Canvas->ClipX - 60.f;
         DrawPanel(ReportX, ReportY, ReportW, Canvas->ClipY - 130.f);
         Text(TEXT("RAPPORT EFTER SLAGET"), ReportX + 20.f, ReportY + 16.f, Ink, 1.3f);
-        Text(ReportScenario->GetBattleOutcome().IsEmpty() ? FString(TEXT("SLAGET AFSLUTTET")) : ReportScenario->GetBattleOutcome(), ReportX + 20.f, ReportY + 45.f, Gold);
+        const FString ReportOutcomeLine = FString::Printf(TEXT("%s | Sejrspoint: Danmark %d, %s %d"),
+            *ReportScenario->GetBattleOutcome(), ReportScenario->ReportDanishPoints, *ReportScenario->ReportEnemyName, ReportScenario->ReportEnemyPoints);
+        float ReportOutcomeWidth = 0.f, ReportOutcomeHeight = 0.f;
+        GetTextSize(ReportOutcomeLine, ReportOutcomeWidth, ReportOutcomeHeight);
+        Text(ReportOutcomeLine, ReportX + 20.f, ReportY + 45.f, Gold, FMath::Min(1.f, (ReportW - 40.f) / FMath::Max(1.f, ReportOutcomeWidth)));
         Text(ReportScenario->GetReportSummary(), ReportX + 20.f, ReportY + 72.f, Ink);
         {
             // The legend of the equipment icons, then the note on the wounded.

@@ -266,7 +266,8 @@ public:
 	 * 33: neighbour mobilisation identities; old saves initialise peaceful neighbour armies.
 	 * 34: southern district reserves/treasuries in Neighbours; regiment corps remain in War.
 	 */
-	static constexpr int32 CurrentVersion = 34;
+	// 35: corps morale/cohesion in War; missing corps-condition rows default to 0.8/70.
+	static constexpr int32 CurrentVersion = 35;
 
     // v32: exact report, prisoner pools, extended service entries and officer careers; old saves default to empty.
     UPROPERTY() FString LastAfterActionReport;

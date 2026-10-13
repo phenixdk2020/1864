@@ -258,6 +258,9 @@ public:
     FString ReportEnemyName = TEXT("FJENDEN");
     bool HasAfterActionReport() const { return bReportFinalized; }
     FStrategyBattleLedger ReportDanes, ReportEnemy;
+    // Frozen with the report: 0 draw, 1 partial, 2 victory, 3 major (winner relative).
+    int32 ReportVictoryGrade = 0;
+    int32 ReportDanishPoints = 0, ReportEnemyPoints = 0;
 
 
 private:

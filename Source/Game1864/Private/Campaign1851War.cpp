@@ -589,6 +589,7 @@ TArray<FString> ACampaign1851Map::SaveWar(int32 PendingBattleId) const
 	for (int32 k = 0; k < EnemyCorps.Num(); ++k)
 	{
 		const FCampaign1851EnemyCorps& C = EnemyCorps[k];
+        Out.Add(FString::Printf(TEXT("corps-condition|%d|%.6f|%.6f"), k, C.Morale, C.Cohesion));
 		Out.Add(FString::Printf(TEXT("intel|%d|%.3f|%.3f|%.2f|%d|%d"), k, C.SeenKm.X, C.SeenKm.Y, C.SeenDay, C.SeenMen, C.StartMen));
 		FString Barred;
 		for (int32 Town : C.Barred)
@@ -661,6 +662,14 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 				if (Cities.IsValidIndex(Index)) { C.Barred.AddUnique(Index); }
 			}
 		}
+        // v35 migration: old saves have no condition row and retain the constructor defaults.
+        else if (P.Num() == 4 && P[0] == TEXT("corps-condition") && EnemyCorps.IsValidIndex(FCString::Atoi(*P[1])))
+        {
+            FCampaign1851EnemyCorps& ReportCorps = EnemyCorps[FCString::Atoi(*P[1])];
+            const float ReportMorale = FCString::Atof(*P[2]), ReportCohesion = FCString::Atof(*P[3]);
+            ReportCorps.Morale = FMath::IsFinite(ReportMorale) ? FMath::Clamp(ReportMorale, .05f, 1.f) : .8f;
+            ReportCorps.Cohesion = FMath::IsFinite(ReportCohesion) ? FMath::Clamp(ReportCohesion, 10.f, 100.f) : 70.f;
+        }
 		else if (P.Num() == 7 && P[0] == TEXT("intel") && EnemyCorps.IsValidIndex(FCString::Atoi(*P[1])))
 		{
 			FCampaign1851EnemyCorps& C = EnemyCorps[FCString::Atoi(*P[1])];

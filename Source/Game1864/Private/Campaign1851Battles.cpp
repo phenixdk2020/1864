@@ -145,6 +145,7 @@ void ACampaign1851Map::BattleStrengths(const FCampaign1851Battle& B, float& OutD
 	}
 	const int32 Ci = CorpsIndexOf(B);
 	OutEnemy = Ci != INDEX_NONE ? EnemyCorps[Ci].Men * EnemyQuality(EnemyCorps[Ci].Nation, ActiveScenario().Id == TEXT("1825") ? GetDate().GetYear() : 1864) + EnemyCorps[Ci].Guns * GunWorth : 0.f;
+    if (Ci != INDEX_NONE) { OutEnemy *= (EnemyCorps[Ci].Morale / .8f + EnemyCorps[Ci].Cohesion / 70.f) * .5f; }
 	if (Ci != INDEX_NONE)
 	{
 		const FCampaign1851NeighbourArmy* NeighbourDefender = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& A) { return A.CorpsId == EnemyCorps[Ci].Id && A.bGarrison; });
@@ -233,6 +234,8 @@ bool ACampaign1851Map::FightBattleIn3D(int32 BattleId, TFunctionRef<bool()> Save
 	Enemy->SetStringField(TEXT("nation"), C.Nation);
 	Enemy->SetNumberField(TEXT("men"), C.Men);
 	Enemy->SetNumberField(TEXT("guns"), C.Guns);
+    Enemy->SetNumberField(TEXT("morale"), C.Morale);
+    Enemy->SetNumberField(TEXT("cohesion"), C.Cohesion);
 	Enemy->SetStringField(TEXT("rifle"), ActiveScenario().Id == TEXT("1825") ? EnemyRifle(C.Nation, GetDate().GetYear()) : C.Nation == TEXT("PR") ? TEXT("Dreyse tændnålsgevær (bagladeriffel)") : C.Nation == TEXT("AT") ? TEXT("Lorenz-riffel (forladeriffel)") : TEXT("forladeriffel"));
 	Enemy->SetNumberField(TEXT("quality"), EnemyQuality(C.Nation, ActiveScenario().Id == TEXT("1825") ? GetDate().GetYear() : 1864));
 	// Where the enemy comes from (degrees north of east, the battlefield's axes): from his corps; from the south
@@ -301,6 +304,30 @@ void ACampaign1851Map::PollBattleResults()
         }
 		O.bDanishWin = Outcome == TEXT("danish_victory");
 		O.bDraw = Outcome == TEXT("draw");
+        // Optional for legacy result files, but an extended result must be complete and consistent.
+        if (Json->HasField(TEXT("victoryGrade")))
+        {
+            double ReportGradeValue = -1.0, ReportDanishValue = -1.0, ReportEnemyValue = -1.0;
+            const bool bReportGradeValid = Json->TryGetNumberField(TEXT("victoryGrade"), ReportGradeValue)
+                && Json->TryGetNumberField(TEXT("danishPoints"), ReportDanishValue)
+                && Json->TryGetNumberField(TEXT("enemyPoints"), ReportEnemyValue)
+                && FMath::IsFinite(ReportGradeValue) && ReportGradeValue >= 0.0 && ReportGradeValue <= 3.0
+                && FMath::IsFinite(ReportDanishValue) && ReportDanishValue >= 0.0 && ReportDanishValue <= MAX_int32
+                && FMath::IsFinite(ReportEnemyValue) && ReportEnemyValue >= 0.0 && ReportEnemyValue <= MAX_int32;
+            if (!bReportGradeValid || ReportGradeValue != int32(ReportGradeValue)
+                || ReportDanishValue != int32(ReportDanishValue) || ReportEnemyValue != int32(ReportEnemyValue)
+                || (O.bDraw != (ReportGradeValue == 0.0)))
+            {
+                UE_LOG(LogTemp, Warning, TEXT("PROJECT1864-REPORT: ugyldig sejrsgrad eller point i %s; slaget venter fortsat"), *Path);
+                continue;
+            }
+            O.VictoryGrade = int32(ReportGradeValue);
+            O.DanishPoints = int32(ReportDanishValue);
+            O.EnemyPoints = int32(ReportEnemyValue);
+            O.VictoryGradeText = O.bDraw ? TEXT("UAFGJORT")
+                : O.bDanishWin ? (O.VictoryGrade == 3 ? TEXT("STOR SEJR") : O.VictoryGrade == 2 ? TEXT("SEJR") : TEXT("DELVIS SEJR"))
+                : (O.VictoryGrade == 3 ? TEXT("STORT NEDERLAG") : O.VictoryGrade == 2 ? TEXT("NEDERLAG") : TEXT("DELVIST NEDERLAG"));
+        }
 		double EnemyLosses = 0.0;
 		Json->TryGetNumberField(TEXT("enemyLosses"), EnemyLosses);
 		if (!FMath::IsFinite(EnemyLosses) || EnemyLosses < 0.0 || EnemyLosses > MAX_int32)
@@ -545,6 +572,58 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 	const int32 Ci = CorpsIndexOf(B);
     const FString ReportOpposingNation = Ci != INDEX_NONE ? EnemyCorps[Ci].Nation : FString(TEXT("Enemy"));
 	const FString Place = Cities.IsValidIndex(B.Town) ? Cities[B.Town].Name : FString(TEXT("?"));
+    const bool bReportGraded = O.VictoryGrade >= 0;
+    const float ReportDefeatMorale = O.VictoryGrade == 3 ? .20f : O.VictoryGrade == 2 ? .10f : O.VictoryGrade == 1 ? .05f : 0.f;
+    const float ReportDefeatCohesion = ReportDefeatMorale * 100.f;
+    // Post-battle withdrawal is resolved immediately, before contact can create another battle.
+    // Prefer the previous route leg; otherwise choose the nearest reachable own town outside contact.
+    auto ReportRetreatTown = [&](const FString& ReportNation, const FVector2D& ReportFrom,
+        const TArray<FCampaign1851Leg>& ReportRoute, int32 ReportLeg, bool bReportDanishLoser) -> int32
+    {
+        auto ReportSafeTown = [&](int32 ReportTown) -> bool
+        {
+            if (!Cities.IsValidIndex(ReportTown) || ReportTown == B.Town) { return false; }
+            const FCampaign1851City& ReportCity = Cities[ReportTown];
+            const bool bReportOwn = ReportCity.Occupier.IsEmpty()
+                ? (ReportCity.NationId == ReportNation || (bReportDanishLoser && !ReportCity.bForeign))
+                : ReportCity.Occupier == ReportNation;
+            if (!bReportOwn || FVector2D::Distance(TownKm(ReportTown), B.Km) <= 8.0) { return false; }
+            if (bReportDanishLoser)
+            {
+                for (const FCampaign1851EnemyCorps& ReportOther : EnemyCorps)
+                {
+                    if (ReportOther.Men > 0 && FVector2D::Distance(TownKm(ReportTown), ReportOther.Km) <= 8.0) { return false; }
+                }
+            }
+            else
+            {
+                for (const FCampaign1851Regiment& ReportOther : Regiments)
+                {
+                    if (ReportOther.PresentMen() > 0 && FVector2D::Distance(TownKm(ReportTown), ReportOther.Km) <= 8.0) { return false; }
+                }
+            }
+            TArray<FCampaign1851Leg> ReportEscapeRoute;
+            return PlanMarch(INDEX_NONE, ReportFrom, ReportTown, TownKm(ReportTown), 20.f,
+                ECampaign1851RouteMode::RoadsOnly, ReportEscapeRoute, nullptr, ReportNation);
+        };
+        const int32 ReportPreviousLeg = FMath::Min(ReportLeg, ReportRoute.Num() - 1);
+        if (ReportRoute.IsValidIndex(ReportPreviousLeg) && ReportSafeTown(ReportRoute[ReportPreviousLeg].From))
+        {
+            return ReportRoute[ReportPreviousLeg].From;
+        }
+        int32 ReportRefuge = INDEX_NONE;
+        double ReportNearestKm = 1.e30;
+        for (int32 ReportTown = 0; ReportTown < Cities.Num(); ++ReportTown)
+        {
+            const double ReportDistance = FVector2D::Distance(ReportFrom, TownKm(ReportTown));
+            if (ReportDistance < ReportNearestKm && ReportSafeTown(ReportTown))
+            {
+                ReportRefuge = ReportTown;
+                ReportNearestKm = ReportDistance;
+            }
+        }
+        return ReportRefuge;
+    };
     if (!O.bFromBattle3D)
     {
         TArray<TSharedPtr<FJsonValue>> ReportAutomaticOfficers;
@@ -631,8 +710,9 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 		Rec.TotalCaptured += Entry.Captured;
 		Rec.TotalEnemyKilled += Entry.EnemyKilled;
 		DanishLosses += Lost;
-		R.Morale = FMath::Clamp(R.Morale + (O.bExactReport ? -O.UnitMoraleLoss.FindRef(L.Key) / 100.f : (O.bDanishWin ? 0.05f : O.bDraw ? -0.05f : -0.15f)), 0.05f, 1.f);
-		R.Cohesion = FMath::Max(10.f, R.Cohesion - (O.bDanishWin ? 5.f : 20.f));
+		R.Morale = FMath::Clamp(R.Morale + (O.bExactReport ? -O.UnitMoraleLoss.FindRef(L.Key) / 100.f : (O.bDanishWin ? 0.05f : O.bDraw ? -0.05f : bReportGraded ? 0.f : -0.15f))
+            - (bReportGraded && !O.bDanishWin && !O.bDraw ? ReportDefeatMorale : 0.f), 0.05f, 1.f);
+        R.Cohesion = FMath::Max(10.f, R.Cohesion - (O.bDanishWin ? 5.f : bReportGraded && !O.bDraw ? ReportDefeatCohesion : 20.f));
 		R.Experience = FMath::Min(100.f, R.Experience + 5.f);
 		for (const int32 o : { R.Chief, R.General })
 		{
@@ -750,10 +830,29 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 		C.bEngaged = false;
 		if (O.bDanishWin)
 		{
-			// Beaten: it falls back and waits for reinforcements (or breaks up if too weak).
-			C.RestUntil = CampaignDays + 20.0;
+            if (bReportGraded)
+            {
+                C.Morale = FMath::Max(.05f, C.Morale - ReportDefeatMorale);
+                C.Cohesion = FMath::Max(10.f, C.Cohesion - ReportDefeatCohesion);
+                if (O.VictoryGrade == 3)
+                {
+                    const int32 ReportRefuge = ReportRetreatTown(C.Nation, C.Km, C.Route, C.Leg, false);
+                    if (ReportRefuge != INDEX_NONE)
+                    {
+                        C.Town = ReportRefuge;
+                        C.Km = TownKm(ReportRefuge);
+                        C.SeenKm = C.Km;
+                        C.Leg = 0;
+                        C.LegElapsed = 0.f;
+                        News.Add(C.Name + TEXT(" trækker sig tilbage til ") + Cities[ReportRefuge].Name);
+                    }
+                    else { News.Add(C.Name + TEXT(" kan ikke finde en sikker tilbagetogsvej")); }
+                }
+            }
+			// Beaten: waits for reinforcements (legacy results may still dissolve a weak corps).
+			C.RestUntil = CampaignDays + (bReportGraded ? 5.0 * O.VictoryGrade : 20.0);
 			C.Route.Reset();
-			if (C.Men < 4000)
+			if (C.Men <= 0 || (!bReportGraded && C.Men < 4000))
 			{
 				News.Add(FString::Printf(TEXT("%s er slået i opløsning"), *C.Name));
 				EnemyCorps.RemoveAt(Ci);
@@ -764,8 +863,28 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 			C.RestUntil = CampaignDays + 3.0;
 		}
 	}
-	// A defeat or a retreat: the Danes fall back north to the nearest town of their own.
-	if (!O.bDanishWin && !O.bDraw)
+    if (bReportGraded && O.VictoryGrade == 3 && !O.bDanishWin)
+    {
+        for (int32 ReportRegiment : B.Regiments)
+        {
+            if (!Regiments.IsValidIndex(ReportRegiment) || Regiments[ReportRegiment].PresentMen() <= 0) { continue; }
+            FCampaign1851Regiment& ReportUnit = Regiments[ReportRegiment];
+            const int32 ReportRefuge = ReportRetreatTown(ReportUnit.Nation, ReportUnit.Km, ReportUnit.Route, ReportUnit.Leg, true);
+            if (ReportRefuge == INDEX_NONE)
+            {
+                News.Add(ReportUnit.Name + TEXT(" kan ikke finde en sikker tilbagetogsvej"));
+                continue;
+            }
+            StopRegiment(ReportRegiment);
+            ReportUnit.Town = ReportRefuge;
+            ReportUnit.Km = TownKm(ReportRefuge);
+            ReportUnit.Group = 0;
+            UpdateRegimentPiece(ReportRegiment);
+            News.Add(ReportUnit.Name + TEXT(" trækker sig tilbage til ") + Cities[ReportRefuge].Name);
+        }
+    }
+	// Preserve voluntary withdrawal and legacy result files; graded minor defeats hold their position.
+	if (!O.bDanishWin && !O.bDraw && (O.bRetreat || !bReportGraded))
 	{
 		int32 Refuge = INDEX_NONE;
 		double BestKm = 1e9;
@@ -794,7 +913,7 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 			}
 		}
 	}
-	const TCHAR* Result = O.bRetreat ? TEXT("tilbagetog uden kamp") : O.bDanishWin ? TEXT("dansk sejr") : O.bDraw ? TEXT("uafgjort") : TEXT("dansk nederlag");
+	const TCHAR* Result = O.bRetreat ? TEXT("tilbagetog uden kamp") : bReportGraded ? *O.VictoryGradeText : O.bDanishWin ? TEXT("dansk sejr") : O.bDraw ? TEXT("uafgjort") : TEXT("dansk nederlag");
 	News.Add(FString::Printf(TEXT("Slaget ved %s: %s  ·  danske tab %d, fjendens tab %d%s"), *Place, Result, DanishLosses, O.EnemyLosses, O.bFromBattle3D ? TEXT("  (fra 3D-slaget)") : TEXT("")));
 	FCampaign1851Decision D;
 	D.Day = CampaignDays;
@@ -802,6 +921,10 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
 	D.Portfolio = ECampaign1851Portfolio::War;
 	D.Action = FString::Printf(TEXT("Slaget ved %s: %s"), *Place, Result);
 	D.Reasons = FString::Printf(TEXT("danske tab %d  ·  fjendens tab %d"), DanishLosses, O.EnemyLosses);
+    if (bReportGraded)
+    {
+        D.Reasons += FString::Printf(TEXT(" | Sejrspoint: Danmark %d, modstanderen %d"), O.DanishPoints, O.EnemyPoints);
+    }
 	D.bDone = true;
 	AddDecision(D);
     if (!O.bExactReport)
