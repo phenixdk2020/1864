@@ -36,3 +36,10 @@ Regel 2: Træk herover opretter FELTHÆREN -> bataljonschef -> kompagnier uden e
 Dragmarkering på kilde og mål, officerernes plusknapper, HQ-knappernes tegnings-/hitorden og den permanente ny-hær-boks er bevaret. Klikkæden i controlleren har ikke fået nye `else if`-grene; den nye returhandler ligger selvstændigt i `TreeDrop`.
 
 Nye anvendelser af TArray/TSet, svage objektpointere, afrunding og Slate-klip er kontrolleret mod Unreal 5.8-headerne under `I:/Spil/Epic Games/UE_5.8/Engine/Source`. Kontekstfelterne er midlertidig UI-tilstand; eksisterende gemte `Town`/`Formation` anvendes fortsat, og gemmeformatet ændres ikke. Scenariedata for 1825 og 1851 er ikke ændret. Den faktiske gengivelse og interaktion er endnu ikke spiltestet.
+
+## Navngivning (2026-10-13)
+
+- Hver boks i Kamporden har en lille **Aa**-knap: formationsboksen (felthær, division, brigade, regiment-stab) øverst til venstre, enheden (bataljon/regiment) øverst til venstre, og hvert kompagni (eskadron, sektion) øverst til venstre i sin boks.
+- Klik på Aa åbner en navneboks midt i vinduet. Skriv for at erstatte navnet, Enter gemmer, Esc annullerer; højst 40 tegn. Et tomt kompagninavn gendanner det automatiske ("1. Kompagni"); tomt formations- eller enhedsnavn afvises.
+- Navnene gemmes i savefilen (version 36: kompagninavne på enheden; formations- og enhedsnavne blev allerede gemt) og følger med til 3D-slaget via slagfilen (kompagniets navn står i HUD'ens kamporden).
+- Kendt begrænsning: kompagninavne følger kompagniets nummer i enheden; flytter man kompagnier mellem enheder, eller deler/samler enheder, kan navnene stå på det forkerte kompagni.

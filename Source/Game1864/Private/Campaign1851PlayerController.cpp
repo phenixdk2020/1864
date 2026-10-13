@@ -1509,6 +1509,12 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			Overlay->ShowToast(Why);
 			Button = SCampaign1851Overlay::EButton::Block;   // handled: the click must not fall through to the map
 		}
+		if (Button == SCampaign1851Overlay::EButton::OOBRename)
+		{
+			// "Aa" on a box in the Kamporden: name the formation (1), the unit (2) or the company (3).
+			Overlay->BeginOOBRename(Module / 1000000, (Module % 1000000) / 100, Module % 100);
+			Button = SCampaign1851Overlay::EButton::Block;
+		}
 		if (Button == SCampaign1851Overlay::EButton::OOBUnitChief)
 		{
 			// The "+" on a unit's box in the army chart: appoint or change its chief (the picker works on the chosen unit).

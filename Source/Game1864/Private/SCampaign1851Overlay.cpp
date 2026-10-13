@@ -2306,7 +2306,40 @@ void SCampaign1851Overlay::BeginUnitRename(int32 RegimentIndex)
 	CloseUnitCustomisation();
 	if (!Map.IsValid() || !Map->GetRegiments().IsValidIndex(RegimentIndex)) { return; }
 	CustomUnitIndex = RegimentIndex;
+	NameKind = 0;
 	UnitNameDraft = Map->GetRegiments()[RegimentIndex].Name;
+	bEditingUnitName = bReplaceUnitName = true;
+	SetVisibility(EVisibility::Visible);
+	FSlateApplication::Get().SetKeyboardFocus(SharedThis(this), EFocusCause::SetDirectly);
+}
+
+void SCampaign1851Overlay::BeginOOBRename(int32 Kind, int32 Id, int32 Sub)
+{
+	CloseUnitCustomisation();
+	if (!Map.IsValid()) { return; }
+	FString Current;
+	if (Kind == 1)
+	{
+		const int32 At = Map->FormationIndex(Id);
+		if (At == INDEX_NONE) { return; }
+		Current = Map->GetFormations()[At].Name;
+	}
+	else if (Kind == 2)
+	{
+		if (!Map->GetRegiments().IsValidIndex(Id)) { return; }
+		Current = Map->GetRegiments()[Id].Name;
+	}
+	else if (Kind == 3)
+	{
+		if (!Map->GetRegiments().IsValidIndex(Id)) { return; }
+		Current = Map->CompanyCustomName(Id, Sub);
+		if (Current.IsEmpty()) { Current = FString::Printf(TEXT("%d. Kompagni"), Map->CompanyNumber(Id, Sub)); }
+	}
+	else { return; }
+	CustomUnitIndex = Id;
+	NameKind = Kind;
+	NameSub = Sub;
+	UnitNameDraft = Current;
 	bEditingUnitName = bReplaceUnitName = true;
 	SetVisibility(EVisibility::Visible);
 	FSlateApplication::Get().SetKeyboardFocus(SharedThis(this), EFocusCause::SetDirectly);
@@ -2327,7 +2360,12 @@ void SCampaign1851Overlay::ChooseUnitUniform(int32 Swatch)
 
 void SCampaign1851Overlay::CloseUnitCustomisation(bool bAccept)
 {
-	if (bAccept && bEditingUnitName && Map.IsValid()) { Map->RenameUnit(CustomUnitIndex, UnitNameDraft); }
+	if (bAccept && bEditingUnitName && Map.IsValid())
+	{
+		if (NameKind == 1) { Map->RenameFormation(CustomUnitIndex, UnitNameDraft); }
+		else if (NameKind == 3) { Map->RenameCompany(CustomUnitIndex, NameSub, UnitNameDraft); }
+		else { Map->RenameUnit(CustomUnitIndex, UnitNameDraft); }
+	}
 	if (bEditingUnitName)
 	{
 		SetVisibility(EVisibility::HitTestInvisible);
@@ -2335,6 +2373,8 @@ void SCampaign1851Overlay::CloseUnitCustomisation(bool bAccept)
 	}
 	bEditingUnitName = bEditingUnitUniform = false;
 	CustomUnitIndex = INDEX_NONE;
+	NameKind = 0;
+	NameSub = INDEX_NONE;
 }
 
 FReply SCampaign1851Overlay::OnKeyChar(const FGeometry& Geometry, const FCharacterEvent& Event)
@@ -2459,7 +2499,7 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 	PaintTextFit(Geometry, Out, Layer + 2, Co != INDEX_NONE ? FString::Printf(TEXT("%s  ·  %s"), *R.Name, Campaign1851Army::ArmName(R.Arm))
 		: FString::Printf(TEXT("%s  ·  %s%s"), Campaign1851Army::ArmName(R.Arm), Campaign1851Army::ExperienceName(R.Experience), Parts > 1 ? TEXT("  ·  gennemsnit for enheden") : TEXT("")),
 		Pos + FVector2D(22.f, 78.f), Serif(12, EFace::Italic), Gold, Size.X - 44.f);
-	if ((bEditingUnitName || bEditingUnitUniform) && CustomUnitIndex == RegimentIndex)
+	if ((bEditingUnitName || bEditingUnitUniform) && CustomUnitIndex == RegimentIndex && NameKind == 0)
 	{
 		PaintButton(Geometry, Out, Layer + 3, Pos + FVector2D(22.f, 118.f), FVector2D(160.f, 26.f), TEXT("TILBAGE"), EButton::UnitCustomClose);
 		if (bEditingUnitName)
@@ -4549,8 +4589,28 @@ bool SCampaign1851Overlay::CanTakeOOBGarrisonUnit(int32 Unit) const
 	return OOBPlace != INDEX_NONE && OOBUnit.Town == OOBPlace && !OOBUnit.IsMarching();
 }
 
+void SCampaign1851Overlay::PaintOOBNameDialog(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
+{
+	if (bEditingUnitName && NameKind != 0)
+	{
+		// The name box of the Kamporden: formation, unit or company.
+		const FVector2D DialogSize(480.f, 150.f);
+		const FVector2D DialogPos = Pos + (Size - DialogSize) * 0.5f;
+		const FSlateBrush* DialogWhite = FCoreStyle::Get().GetBrush("WhiteBrush");
+		FSlateDrawElement::MakeBox(Out, Layer + 90, Geometry.ToPaintGeometry(DialogSize + FVector2D(8.f, 8.f), FSlateLayoutTransform(DialogPos - FVector2D(4.f, 4.f))), DialogWhite, ESlateDrawEffect::None, FLinearColor(0.f, 0.f, 0.f, 0.6f));
+		FSlateDrawElement::MakeBox(Out, Layer + 91, Geometry.ToPaintGeometry(DialogSize, FSlateLayoutTransform(DialogPos)), DialogWhite, ESlateDrawEffect::None, FLinearColor(0.10f, 0.08f, 0.06f, 1.f));
+		PaintText(Geometry, Out, Layer + 92, NameKind == 1 ? TEXT("NAVNGIV FORMATIONEN") : NameKind == 3 ? TEXT("NAVNGIV KOMPAGNIET") : TEXT("NAVNGIV ENHEDEN"), DialogPos + FVector2D(18.f, 14.f), Serif(14), Gold);
+		FSlateDrawElement::MakeBox(Out, Layer + 92, Geometry.ToPaintGeometry(FVector2D(DialogSize.X - 36.f, 34.f), FSlateLayoutTransform(DialogPos + FVector2D(18.f, 44.f))), DialogWhite, ESlateDrawEffect::None, FLinearColor(0.02f, 0.02f, 0.03f, 1.f));
+		PaintTextFit(Geometry, Out, Layer + 93, UnitNameDraft + TEXT("|"), DialogPos + FVector2D(24.f, 52.f), Serif(16), bReplaceUnitName ? Gold : Ink, DialogSize.X - 48.f);
+		PaintText(Geometry, Out, Layer + 92, TEXT("Skriv for at erstatte. Enter gemmer, Esc annullerer. Tomt navn: automatisk navn (kompagni)."), DialogPos + FVector2D(18.f, 86.f), Serif(10, EFace::Italic), MutedInk, 0.f, false);
+		PaintButton(Geometry, Out, Layer + 93, DialogPos + FVector2D(18.f, 108.f), FVector2D(130.f, 28.f), TEXT("ANNULLER"), EButton::UnitCustomClose, 0);
+		PaintButton(Geometry, Out, Layer + 93, DialogPos + FVector2D(160.f, 108.f), FVector2D(130.f, 28.f), TEXT("GEM NAVN"), EButton::UnitCustomClose, 1);
+	}
+}
+
 void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const
 {
+
 	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
 	const TArray<FCampaign1851Formation>& Forms = Map->GetFormations();
 	const TArray<FCampaign1851Officer>& Officers = Map->GetOfficers();
@@ -4947,6 +5007,14 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 					PaintButton(Geometry, Out, Layer + 6, PlusMin, FVector2D(14.f, 12.f), TEXT("+"), Posts[Post], F.Id);
 				}
 			}
+			{
+				const FVector2D PencilMin(Min.X + 4.f, Min.Y + 4.f);
+				if (Visible(PencilMin, PencilMin + FVector2D(18.f, 12.f)))
+				{
+					PaintButton(Geometry, Out, Layer + 6, PencilMin, FVector2D(18.f, 12.f), TEXT("Aa"), EButton::OOBRename, 1000000 + F.Id * 100);
+					AddTip(PencilMin, FVector2D(18.f, 12.f), TEXT("Navngiv formationen"));
+				}
+			}
 			if (F.Echelon != ECampaign1851Echelon::Army)
 			{
 				const FVector2D ChiefMin(Min.X + BoxW - 34.f, Min.Y + 30.f);
@@ -5007,6 +5075,7 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 			if (Visible(FVector2D(X, RowTop), FVector2D(X + BoxW, RowTop + UnitH)))
 			{
 				PaintButton(Geometry, Out, Layer + 6, FVector2D(X + BoxW - 19.f, RowTop + 3.f), FVector2D(16.f, 14.f), TEXT("+"), EButton::OOBUnitChief, i);
+				PaintButton(Geometry, Out, Layer + 6, FVector2D(X + 4.f, RowTop + 3.f), FVector2D(18.f, 12.f), TEXT("Aa"), EButton::OOBRename, 2000000 + i * 100);
 			}
 			// Its companies, stacked under it.
 			float Y = RowTop + UnitH + 10.f;
@@ -5016,8 +5085,9 @@ void SCampaign1851Overlay::PaintOOBChart(const FGeometry& Geometry, FSlateWindow
 				Line(FVector2D(Spine, Y - 10.f), FVector2D(Spine, Y + CompH * 0.5f));
 				Line(FVector2D(Spine, Y + CompH * 0.5f), FVector2D(X + 16.f, Y + CompH * 0.5f));
 				Box(FVector2D(X + 16.f, Y), FVector2D(BoxW - 16.f, CompH), TreeKey(ETreeKind::Company, i * 10 + k), 2,
-					{ FString::Printf(TEXT("%d. Kompagni [I]"), Map->CompanyNumber(i, k)), OfficerText(R.Captains[k]),
+					{ Map->CompanyCustomName(i, k).IsEmpty() ? FString::Printf(TEXT("%d. Kompagni [I]"), Map->CompanyNumber(i, k)) : Map->CompanyCustomName(i, k) + TEXT(" [I]"), OfficerText(R.Captains[k]),
 					  FString::Printf(TEXT("%d/%d mand"), Map->CompanyMen(i, k), R.MaxMen / FMath::Max(1, R.Captains.Num())) }, false, ArmSlot(R));
+				PaintButton(Geometry, Out, Layer + 6, FVector2D(X + 20.f, Y + 3.f), FVector2D(18.f, 12.f), TEXT("Aa"), EButton::OOBRename, 3000000 + i * 100 + k);
 				Y += CompH + 5.f;
 			}
 			X += BoxW + Gap;
@@ -5209,7 +5279,7 @@ void SCampaign1851Overlay::BuildTreeRows(TArray<FTreeRow>& Rows) const
 				FTreeRow Company;
 				Company.Key = TreeKey(ETreeKind::Company, i * 10 + k);
 				Company.Depth = Depth + 1;
-				Company.Text = FString::Printf(TEXT("%d. Kompagni [I]"), Map->CompanyNumber(i, k));
+				Company.Text = Map->CompanyCustomName(i, k).IsEmpty() ? FString::Printf(TEXT("%d. Kompagni [I]"), Map->CompanyNumber(i, k)) : Map->CompanyCustomName(i, k) + TEXT(" [I]");
 				const int32 FortIdx = R.CompanyFort.IsValidIndex(k) ? Map->FortIndex(R.CompanyFort[k]) : INDEX_NONE;
 				Company.Info = FString::Printf(TEXT("%s  ·  %d/%d%s"), Officers.IsValidIndex(R.Captains[k]) ? *OfficerText(R.Captains[k]) : TEXT("ingen kaptajn"),
 					Map->CompanyMen(i, k), R.MaxMen / R.Captains.Num(), FortIdx != INDEX_NONE ? *FString::Printf(TEXT("  ·  i %s"), *Map->GetForts()[FortIdx].Name) : TEXT(""));
@@ -6368,6 +6438,7 @@ void SCampaign1851Overlay::PaintWindow(const FGeometry& Geometry, FSlateWindowEl
 			}
 		}
 		PaintOOBChart(Geometry, Out, Layer + 2, Pos + FVector2D(24.f, 96.f), Size - FVector2D(48.f, 120.f));
+		PaintOOBNameDialog(Geometry, Out, Layer + 2, Pos + FVector2D(24.f, 96.f), Size - FVector2D(48.f, 120.f));
 	}
 	else if (Window == EWindow::Towns)
 	{

@@ -2637,6 +2637,7 @@ TArray<FCampaign1851RegimentSave> ACampaign1851Map::SaveArmy() const
 	{
 		FCampaign1851RegimentSave& S = Out.AddDefaulted_GetRef();
 		S.CustomName = R.CustomName;
+		S.CompanyNames = R.CompanyNames;
 		S.OriginalName = R.OriginalName;
 		S.UniformPalette = TArray<int32>(R.UniformPalette, 3);
 		S.WeaponLevel = R.WeaponLevel;
@@ -2729,6 +2730,8 @@ int32 ACampaign1851Map::RestoreArmy(const TArray<FCampaign1851RegimentSave>& Sav
 		if (!S.OriginalName.IsEmpty()) { R.OriginalName = S.OriginalName; }
 		R.CustomName = S.CustomName.Left(80).TrimStartAndEnd();
 		if (!R.CustomName.IsEmpty()) { R.Name = R.CustomName; }
+		R.CompanyNames.Reset();
+		for (const FString& SavedCompanyName : S.CompanyNames) { R.CompanyNames.Add(SavedCompanyName.Left(40).TrimStartAndEnd()); }
 		for (int32 CustomPiece = 0; CustomPiece < 3; ++CustomPiece)
 		{
 			R.UniformPalette[CustomPiece] = S.UniformPalette.IsValidIndex(CustomPiece) ? FMath::Clamp(S.UniformPalette[CustomPiece], -1, 11) : -1;

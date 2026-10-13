@@ -1027,6 +1027,12 @@ public:
 	FString ArmyWeaponText(ECampaign1851Arm Arm) const;
 	FString ArmyUniformText(ECampaign1851Arm Arm) const;
 	bool RenameUnit(int32 RegimentIndex, const FString& NewName);
+	/** Names a formation (brigade, division, regiment staff ...). Empty or over-long names are refused (trimmed to 40). */
+	bool RenameFormation(int32 FormationId, const FString& NewName);
+	/** Names one of a unit's companies; an empty name restores the automatic one. */
+	bool RenameCompany(int32 RegimentIndex, int32 CompanyIndex, const FString& NewName);
+	/** The player's name for a company, or an empty string when it has none. */
+	FString CompanyCustomName(int32 RegimentIndex, int32 CompanyIndex) const;
 	bool SetUnitUniform(int32 RegimentIndex, int32 Piece, int32 PaletteIndex);
 	static FLinearColor UnitPaletteColor(int32 PaletteIndex);
 	FLinearColor UnitUniformColor(const FCampaign1851Regiment& Regiment, int32 Piece) const;

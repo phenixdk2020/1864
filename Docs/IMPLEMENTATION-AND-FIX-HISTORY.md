@@ -2081,6 +2081,10 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Midlertidige ikoner Icon_Ammo / Icon_Food (Tools/Report/make_report_icons_extra.py; rører ikke de øvrige ikoner), importeret som /Game/UI/ReportIcons/T_Icon_Ammo/T_Icon_Food. Set i en testkørsel.
 - Kampagnens depoter trækker endnu ikke brugt ammunition/mad af efter slaget.
 
+### 2026-10-13 - Navngivning i Kamporden
+
+- Formationer, enheder og kompagnier kan navngives i Kamporden med en Aa-knap på boksen og en navneboks (genbruger den eksisterende tekstindtastning; `BeginOOBRename`, `PaintOOBNameDialog`, `ACampaign1851Map::RenameFormation/RenameCompany`). Kompagninavne gemmes (save-version 36) og sendes med til 3D-slaget. Bygget uden fejl; selve dialogen er ikke afprøvet i et kørt spil, og kompagninavne kan blive på forkert kompagni ved deling/samling af enheder. Se Docs/Kamporden-Regler.md.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

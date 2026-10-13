@@ -126,6 +126,8 @@ struct FCampaign1851RegimentSave
 	GENERATED_BODY()
 	/** v29: per-unit names, palette and paid weapon conversion. */
 	UPROPERTY() FString CustomName;
+	/** v36: the player's company names (empty entries = automatic). */
+	UPROPERTY() TArray<FString> CompanyNames;
 	UPROPERTY() FString OriginalName;
 	UPROPERTY() TArray<int32> UniformPalette;
 	UPROPERTY() int32 WeaponLevel = -1;
@@ -267,7 +269,8 @@ public:
 	 * 34: southern district reserves/treasuries in Neighbours; regiment corps remain in War.
 	 */
 	// 35: corps morale/cohesion in War; missing corps-condition rows default to 0.8/70.
-	static constexpr int32 CurrentVersion = 35;
+	// 36: player-given company names on regiments (empty in older saves = automatic names); formation names were already saved.
+	static constexpr int32 CurrentVersion = 36;
 
     // v32: exact report, prisoner pools, extended service entries and officer careers; old saves default to empty.
     UPROPERTY() FString LastAfterActionReport;

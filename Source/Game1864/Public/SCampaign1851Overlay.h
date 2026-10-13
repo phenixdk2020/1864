@@ -30,6 +30,11 @@ public:
 	virtual FReply OnKeyDown(const FGeometry& Geometry, const FKeyEvent& Event) override;
 	virtual FReply OnMouseButtonDown(const FGeometry& Geometry, const FPointerEvent& Event) override;
 	void BeginUnitRename(int32 RegimentIndex);
+	/** Opens the name box for a formation (Kind 1: Id = formation id), a unit (2: Id = regiment index) or a company (3: Id = regiment, Sub = company index). */
+	void BeginOOBRename(int32 Kind, int32 Id, int32 Sub);
+	void PaintOOBNameDialog(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size) const;
+	int32 NameKind = 0;   // 0: the unit card's own rename; 1/2/3 as BeginOOBRename
+	int32 NameSub = INDEX_NONE;
 	void OpenUnitUniform(int32 RegimentIndex);
 	void CloseUnitCustomisation(bool bAccept = false);
 	void ChooseUnitUniform(int32 Swatch);
@@ -56,7 +61,7 @@ public:
 	enum class EButton : uint8 { None, Build, ShowOnMap, BuildModule, Menu, SaveSlot, LoadSlot, CloseMenu, NewGame, Speed, Treasury, BuildTown, ShowSite, BuildLink, ShowLink,
 		Regiment, RegimentPiece, RegimentRow, ArmyHome, ArmyHalt, OfficerChange, GeneralChange, OfficerPick, OfficerRecruit, PickerClose, TrainingProgram, OfficerInfo, OfficerCardClose, ProgramPick, RouteMode, ArmyCancel, TownTab,
 		MainMenu, WindowClose, TableSort, TableRow, TablePage, OfficerFilter, OfficerDismiss, ClosePanel, ExitGame,
-		OfficerPromote, OpenOOB, OOBCommand, OOBUnitChief, CommandGeneralChange, TrainOrder, TrainMove, MinistryBudget, BattleViewEnter, BattleViewLeave,
+		OfficerPromote, OpenOOB, OOBCommand, OOBUnitChief, OOBRename, CommandGeneralChange, TrainOrder, TrainMove, MinistryBudget, BattleViewEnter, BattleViewLeave,
 		OrderAll, OrderUnit, OrderExecute, OrderCancel,
 		TreeRow, TreeToggle, TreeNew, FormationInsertHQ, FormationChief, FormationDissolve, FormationDeputy, FormationStaff, FormationChiefRemove,
 		TownBuildingsTab, Delegate, Reserve, DecisionExecute, Deviation,

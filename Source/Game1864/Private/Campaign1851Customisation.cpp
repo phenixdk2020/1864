@@ -13,6 +13,41 @@ bool ACampaign1851Map::RenameUnit(int32 RegimentIndex, const FString& NewName)
 	return true;
 }
 
+namespace
+{
+	FString CleanName(const FString& Raw, int32 MaxLength)
+	{
+		FString Clean = Raw.Left(MaxLength).TrimStartAndEnd();
+		Clean.ReplaceInline(TEXT("\n"), TEXT(" "));
+		Clean.ReplaceInline(TEXT("\r"), TEXT(" "));
+		return Clean;
+	}
+}
+
+bool ACampaign1851Map::RenameFormation(int32 FormationId, const FString& NewName)
+{
+	const int32 At = FormationIndex(FormationId);
+	const FString Clean = CleanName(NewName, 40);
+	if (At == INDEX_NONE || Clean.IsEmpty()) { return false; }
+	Formations[At].Name = Clean;
+	return true;
+}
+
+bool ACampaign1851Map::RenameCompany(int32 RegimentIndex, int32 CompanyIndex, const FString& NewName)
+{
+	if (!Regiments.IsValidIndex(RegimentIndex) || CompanyIndex < 0 || CompanyIndex >= FMath::Max(1, SubUnitCount(RegimentIndex))) { return false; }
+	FCampaign1851Regiment& R = Regiments[RegimentIndex];
+	while (R.CompanyNames.Num() <= CompanyIndex) { R.CompanyNames.Add(FString()); }
+	R.CompanyNames[CompanyIndex] = CleanName(NewName, 40);
+	return true;
+}
+
+FString ACampaign1851Map::CompanyCustomName(int32 RegimentIndex, int32 CompanyIndex) const
+{
+	return Regiments.IsValidIndex(RegimentIndex) && Regiments[RegimentIndex].CompanyNames.IsValidIndex(CompanyIndex)
+		? Regiments[RegimentIndex].CompanyNames[CompanyIndex] : FString();
+}
+
 FLinearColor ACampaign1851Map::UnitPaletteColor(int32 PaletteIndex)
 {
 	static const FColor CustomPalette[] = {

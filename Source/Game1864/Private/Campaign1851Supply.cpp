@@ -511,7 +511,7 @@ TSharedRef<FJsonObject> ACampaign1851Map::BattleOrganisationJson(int32 Regiment)
 		{
 			TSharedRef<FJsonObject> S = MakeShared<FJsonObject>();
 			S->SetStringField(TEXT("kind"), TEXT("squadron"));
-			S->SetStringField(TEXT("name"), FString::Printf(TEXT("%d. ESKADRON"), s + 1));
+			S->SetStringField(TEXT("name"), R.CompanyNames.IsValidIndex(s) && !R.CompanyNames[s].IsEmpty() ? R.CompanyNames[s] : FString::Printf(TEXT("%d. ESKADRON"), s + 1));
 			S->SetNumberField(TEXT("men"), Present / Squadrons + (s < Present % Squadrons ? 1 : 0));
 			S->SetNumberField(TEXT("establishment"), Size);
 			Subs.Add(MakeShared<FJsonValueObject>(S));
@@ -542,7 +542,7 @@ TSharedRef<FJsonObject> ACampaign1851Map::BattleOrganisationJson(int32 Regiment)
 			TSharedRef<FJsonObject> S = MakeShared<FJsonObject>();
 			const int32 Fort = R.CompanyFort.IsValidIndex(c) ? R.CompanyFort[c] : 0;
 			S->SetStringField(TEXT("kind"), TEXT("company"));
-			S->SetStringField(TEXT("name"), FString::Printf(TEXT("%d. KOMPAGNI"), c + 1));
+			S->SetStringField(TEXT("name"), R.CompanyNames.IsValidIndex(c) && !R.CompanyNames[c].IsEmpty() ? R.CompanyNames[c] : FString::Printf(TEXT("%d. KOMPAGNI"), c + 1));
 			S->SetNumberField(TEXT("men"), Fort != 0 ? 0 : Present / InField + (k < Present % InField ? 1 : 0));
 			S->SetNumberField(TEXT("establishment"), 190);
 			S->SetNumberField(TEXT("fortId"), Fort);

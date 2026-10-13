@@ -234,6 +234,8 @@ struct FCampaign1851Regiment
 {
 	/** Name mirrors CustomName after a rename, keeping all existing labels and exports consistent. */
 	FString CustomName;
+	/** The player's names for the unit's companies (squadrons, sections), by company index; empty = the automatic "N. Kompagni". */
+	TArray<FString> CompanyNames;
 	FString OriginalName; // stable identity for cavalry type; never inferred from a player name
 	int32 UniformPalette[3] = { -1, -1, -1 }; // coat, trousers, headgear; -1 = national default
 	int32 WeaponLevel = -1; // -1 = scenario default; firearms 0..3, guns 0..1
