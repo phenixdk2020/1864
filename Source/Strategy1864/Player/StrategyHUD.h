@@ -70,6 +70,10 @@ private:
     bool bReportOpen = false, bReportSeen = false;
     int32 ReportPage = 0;
     void DrawAfterActionReport();
+    /** The equipment cell of the report ("0K 0M 6G 0H 0V 1F") drawn as icons with counts. Returns false until the icons are loaded. */
+    void DrawReportEquipment(const FString& Cell, float X, float Y, float Width, const FLinearColor& Colour);
+    UPROPERTY(Transient)
+    TArray<TObjectPtr<UTexture2D>> ReportIconTextures;
     void DrawOOB();
     void DrawOOBRow(AStrategyUnit* Unit, int32 Depth, float& Y, int32 Guard);
     float CommandHeight() const;

@@ -1988,6 +1988,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Modpartens total hedder nu fx "PREUSSEN — TOTAL" i stedet for "FJENDEN — TOTAL" i kampagneslag (ReportEnemyName fra kampagnens nationskode; skirmish-test viser stadig FJENDEN). Dataene samler stadig alle modstandere i én blok; adskillelse af flere parter (allierede) mangler.
 - Set i en testkørsel (-Strategy1864TestReport).
 
+### 2026-10-13 - Rapport: udstyr som ikoner, backlog
+
+- Udstyrskolonnerne (erobret/tabt) viser nu seks ikoner med antal (kanon, morter, gevær, hest, vogn, fane; nul dæmpet) i stedet for "0K 0M 6G...". Ikonerne er brugerens egne (Reference/UI/ReportIcons/Original_AI), frigjort fra baggrund og importeret som /Game/UI/ReportIcons/T_Icon_* (Content/Python/import_report_icons.py, Tools/Report/make_report_icons.py). Forklaringslinjen øverst bruger de samme ikoner. Ikke set i en kørsel af mig (screenshot af rapporten lykkedes ikke i testen).
+- Backlog udvidet: erobre faner/fanebærer, nye lade-animationer, køb af våben, produktion pr. måned, dragoner med sabel, ammunition og mad i rapporten, dækning/stilling i træfsandsynlighed.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

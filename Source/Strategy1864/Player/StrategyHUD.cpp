@@ -1787,6 +1787,39 @@ void AStrategyHUD::DrawNotices()
     }
 }
 
+void AStrategyHUD::DrawReportEquipment(const FString& Cell, float X, float Y, float Width, const FLinearColor& Colour)
+{
+    // K cannons, M mortars, G rifles, H horses, V wagons, F flags: all six are shown, a zero dimmed.
+    static const TCHAR* IconNames[6] = { TEXT("Cannon"), TEXT("Mortar"), TEXT("Rifle"), TEXT("Horse"), TEXT("Wagon"), TEXT("Flag") };
+    static const TCHAR Letters[6] = { 'K', 'M', 'G', 'H', 'V', 'F' };
+    if (ReportIconTextures.IsEmpty())
+    {
+        for (const TCHAR* IconName : IconNames)
+            ReportIconTextures.Add(LoadObject<UTexture2D>(nullptr, *FString::Printf(TEXT("/Game/UI/ReportIcons/T_Icon_%s.T_Icon_%s"), IconName, IconName)));
+    }
+    int32 Counts[6] = { 0, 0, 0, 0, 0, 0 };
+    TArray<FString> Tokens;
+    Cell.ParseIntoArray(Tokens, TEXT(" "), true);
+    for (const FString& Token : Tokens)
+    {
+        if (Token.Len() < 2) continue;
+        for (int32 LetterIndex = 0; LetterIndex < 6; ++LetterIndex)
+            if (Token[Token.Len() - 1] == Letters[LetterIndex]) { Counts[LetterIndex] = FCString::Atoi(*Token.Left(Token.Len() - 1)); break; }
+    }
+    // The cell is divided evenly: an icon and its count in each sixth.
+    const float Slot = Width / 6.f;
+    const float IconSize = FMath::Clamp(Slot * 0.55f, 14.f, 22.f);
+    for (int32 Kind = 0; Kind < 6; ++Kind)
+    {
+        const float SlotX = X + Kind * Slot;
+        const bool bNone = Counts[Kind] <= 0;
+        if (ReportIconTextures.IsValidIndex(Kind) && ReportIconTextures[Kind])
+            DrawTexture(ReportIconTextures[Kind], SlotX, Y - 2.f, IconSize, IconSize, 0.f, 0.f, 1.f, 1.f,
+                bNone ? FLinearColor(1.f, 1.f, 1.f, 0.35f) : FLinearColor::White, EBlendMode::BLEND_Translucent);
+        Text(FString::FromInt(Counts[Kind]), SlotX + IconSize + 3.f, Y, bNone ? Muted : Colour);
+    }
+}
+
 void AStrategyHUD::DrawAfterActionReport()
 {
     for (TActorIterator<AStrategyOOBTestScenario> ReportScenario(GetWorld()); ReportScenario; ++ReportScenario)
@@ -1798,7 +1831,22 @@ void AStrategyHUD::DrawAfterActionReport()
         Text(TEXT("RAPPORT EFTER SLAGET"), ReportX + 20.f, ReportY + 16.f, Ink, 1.3f);
         Text(ReportScenario->GetBattleOutcome().IsEmpty() ? FString(TEXT("SLAGET AFSLUTTET")) : ReportScenario->GetBattleOutcome(), ReportX + 20.f, ReportY + 45.f, Gold);
         Text(ReportScenario->GetReportSummary(), ReportX + 20.f, ReportY + 72.f, Ink);
-        Text(TEXT("K=kanoner  M=mortérer  G=geværer  H=heste  V=vogne  F=faner · Sårede til lazaret (prognose 88–96% tilbage)"), ReportX + 20.f, ReportY + 96.f, Ink);
+        {
+            // The legend of the equipment icons, then the note on the wounded.
+            static const TCHAR* LegendText[6] = { TEXT("kanoner"), TEXT("mortérer"), TEXT("geværer"), TEXT("heste"), TEXT("vogne"), TEXT("faner") };
+            if (ReportIconTextures.IsEmpty()) { DrawReportEquipment(FString(), 0.f, -100.f, 1.f, Ink); }
+            float LegendX = ReportX + 20.f;
+            for (int32 LegendIndex = 0; LegendIndex < 6; ++LegendIndex)
+            {
+                if (ReportIconTextures.IsValidIndex(LegendIndex) && ReportIconTextures[LegendIndex])
+                    DrawTexture(ReportIconTextures[LegendIndex], LegendX, ReportY + 92.f, 22.f, 22.f, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, EBlendMode::BLEND_Translucent);
+                float LegendW = 0.f, LegendH = 0.f;
+                GetTextSize(LegendText[LegendIndex], LegendW, LegendH);
+                Text(LegendText[LegendIndex], LegendX + 26.f, ReportY + 96.f, Ink);
+                LegendX += 26.f + LegendW + 18.f;
+            }
+            Text(TEXT("· Sårede til lazaret (prognose 88–96% tilbage)"), LegendX, ReportY + 96.f, Ink);
+        }
         Text(FString::Printf(TEXT("Officerer (sårede/fangne): danske %d/%d · fjendtlige %d/%d"),
             ReportScenario->ReportDanes.OfficersWounded, ReportScenario->ReportDanes.OfficersCaptured,
             ReportScenario->ReportEnemy.OfficersWounded, ReportScenario->ReportEnemy.OfficersCaptured), ReportX + 20.f, ReportY + 120.f, Ink);
@@ -1851,6 +1899,12 @@ void AStrategyHUD::DrawAfterActionReport()
             for (int32 ReportColumn = 0; ReportColumn < ReportCells.Num() && ReportColumn < 10; ++ReportColumn)
             {
                 const float ReportCellY = ReportY + 182.f + ReportRow * 28.f, ReportCellW = ReportUsable * ReportWidths[ReportColumn] - 8.f;
+                if (ReportColumn == 5 || ReportColumn == 6)
+                {
+                    DrawReportEquipment(ReportCells[ReportColumn], ReportColumnX, ReportCellY, ReportCellW, Ink);
+                    ReportColumnX += ReportUsable * ReportWidths[ReportColumn];
+                    continue;
+                }
                 ReportFitText(ReportCells[ReportColumn], ReportColumnX, ReportCellY, ReportCellW);
                 if (bReportTotal) ReportFitText(ReportCells[ReportColumn], ReportColumnX + 0.8f, ReportCellY, ReportCellW);   // bold: the totals are drawn twice, a hair apart
                 ReportColumnX += ReportUsable * ReportWidths[ReportColumn];

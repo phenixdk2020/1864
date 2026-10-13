@@ -117,3 +117,14 @@ Alle nabolande skal have samme inddeling som Danmark: amter/distrikter med græn
 
 ## Jernbane som indkomst (2026-10-11)
 - Tog og togstrækninger bidrager endnu ikke til økonomien. Forslag: passagerindtægt (efter byernes befolkning og linjelængde), fragtindtægt (varer fra overskuds- til underskudsbyer), drift/vedligehold som udgift, og nedsat indtægt når linjen bruges til tropper eller er afbrudt (station/bro). Kode: Campaign1851Network.cpp, Campaign1851Army.cpp (ResetTroopTrains), økonomi i Campaign1851Resources.cpp.
+
+## Ønsker 2026-10-13 (til planlægning)
+
+- **Erobre faner:** en fane kan erobres; fanebærer med egen animation (bærer, falder, taber fanen); en ny soldat samler fanen op igen. Erobret fane tæller i rapporten (F) og i moral/prestige. Kræver animationer til fanebærer (hold fanen, falde, samle op).
+- **Nye lade-animationer** til gevær (forladning/slagrør/bagladning, stående/knælende/liggende) og kanon/morter.
+- **Køb af våben og udstyr fra andre** (andre nationer og private; pris, leveringstid, kvalitet; kobles til handel/diplomati).
+- **Bygninger der selv fremstiller udstyr:** mængde pr. måned (geværer, kanoner, ammunition, sadler, vogne) efter bygning, arbejdere og råvarer.
+- **Kavaleri og dragoner med sabler:** dragoner har gevær, når de sidder af, og sabel, når de sidder op igen (test af skift); sabel i hånden i charge.
+- **Fanebærer-animationer** (se erobre faner).
+- **Rapport efter slaget:** ammunition og mad med (ikoner mangler), nationsemblemer ved totalerne, sejrspoint og sejrsgrad (uafgjort, delvis, sejr, stor sejr; taberen trækker sig ved stor sejr).
+- **Dækning og stilling i træfsandsynlighed:** se Docs/Kamp-AI-Design-v2.0.md (knælende/liggende rammes sværere og rammer bedre; dækning i terræn).
