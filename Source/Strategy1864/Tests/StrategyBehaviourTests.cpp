@@ -145,6 +145,8 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
         if (AcceptanceId == TEXT("MOVE") || AcceptanceId == TEXT("STOPFIRE") || AcceptanceId == TEXT("NEW-HOLD") || AcceptanceId == TEXT("T1"))
         {
             AcceptanceOther->SetActorLocation(AcceptanceStart + FVector(200000, 0, 0));
+            // A stop-and-fire reaction is the officer's: with the AI off the company marches on under fire (player's choice).
+            if (AcceptanceId == TEXT("STOPFIRE") || AcceptanceId == TEXT("NEW-HOLD")) AcceptanceCompany->bOfficerAIEnabled = true;
             Strategy1864Acceptance::Order(AcceptanceCompany, EStrategyOrderType::Move, AcceptanceStart + FVector(10000, 0, 0));
             AcceptanceSerial = AcceptanceCompany->OrderComponent->GetCurrentOrder().OrderSerial;
             if (AcceptanceId == TEXT("T1"))
@@ -280,6 +282,7 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
         else if (AcceptanceId == TEXT("SUSPEND-WAYPOINT") || AcceptanceId == TEXT("CLEAR-SUSPEND"))
         {
             AcceptanceOther->SetActorLocation(AcceptanceStart + FVector(200000, 0, 0));
+            AcceptanceCompany->bOfficerAIEnabled = true;
             FStrategyOrder AcceptanceRoute;
             AcceptanceRoute.Type = EStrategyOrderType::Move;
             AcceptanceRoute.Authority = EStrategyOrderAuthority::DirectPlayer;
@@ -365,7 +368,8 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
         { FinishBehaviourAcceptanceCase(false, TEXT("fremrykning genoptaget foer 10s uden ildkontakt")); return; }
         if (AcceptancePhase == 2 && AcceptanceSinceEvent > 50.0f)
         { AcceptanceCheck(!AcceptanceCompany->MovementExecutor->GetSuspendedMission().IsValidOrder() &&
-            FVector::Dist2D(AcceptanceCompany->GetActorLocation(), AcceptanceStart + FVector(15000, 0, 0)) < 100.0f,
+            // The advance stands off at its chosen fire distance in front of the enemy it names: the goal is the order's resolved target.
+            FVector::Dist2D(AcceptanceCompany->GetActorLocation(), AcceptanceCompany->OrderComponent->GetCurrentOrder().TargetLocation) < 100.0f,
             TEXT("ADVANCE: rigtig salve under suspension, fjende ude af syne, hysterese og samme mission til maal")); return; }
     }
 

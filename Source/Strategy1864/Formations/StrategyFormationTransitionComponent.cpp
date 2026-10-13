@@ -7,6 +7,7 @@
 #include "../Combat/StrategyFireControlComponent.h"
 #include "../Combat/StrategyCombatComponent.h"
 #include "../Units/StrategyUnit.h"
+#include "../Units/CavalryUnit.h"
 #include "../AI/StrategyNCOComponent.h"
 
 UStrategyFormationTransitionComponent::UStrategyFormationTransitionComponent()
@@ -69,8 +70,9 @@ void UStrategyFormationTransitionComponent::HandleFormationChanged(
     const bool bDeployWhileWalking = bColumnToLine && OwnerUnit->CombatComponent &&
         !OwnerUnit->CombatComponent->FindBestTarget(false);
     // The men gather in column first, then the march begins (the visual morph into column takes up to six seconds).
-    const bool bEnterMarchWhileWalking = false;
-    if (NewFormation == EStrategyFormationType::MarchColumn || NewFormation == EStrategyFormationType::CavalryColumn)
+    // Cavalry does not wait: its column forms on the move.
+    const bool bEnterMarchWhileWalking = NewFormation == EStrategyFormationType::CavalryColumn || OwnerUnit->IsA<ACavalryUnit>();
+    if (NewFormation == EStrategyFormationType::MarchColumn && !OwnerUnit->IsA<ACavalryUnit>())
         ReformRemainingSeconds = FMath::Max(ReformRemainingSeconds, 6.0f);
     if (!bEnterMarchWhileWalking && !bDeployWhileWalking && OwnerUnit->MovementExecutor &&
         OwnerUnit->MovementExecutor->HasMovementGoal())
