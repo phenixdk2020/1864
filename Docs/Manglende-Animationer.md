@@ -98,3 +98,19 @@ Vognfører, sygetransport, officersbud, hesteføring, læssende arbejdere (forsy
 5. **Resten:** 21-24, 29-31, 35, 39, 42, 8-10, 13, 19.
 
 Når et sæt er leveret, kører jeg import og bagning (se `Docs/Performance-Battle.md` og `Content/Python/bake_all_vat.py`, når Codex har afleveret den), og kobler klippene til situationerne i `StrategyInfantryVisualComponent` og kavaleri/artilleri-komponenterne.
+
+## 6. Lade-animationer til gammeldags gevær (2026-10-13)
+
+Behov: lade **stående, knælende og liggende**, hver i to våbentyper. Et klip pr. stilling og våbentype, delt i faser med markører (så spillet kan strække hver fase til epokens ladetid og sætte lyd på de rigtige øjeblikke). Skelet og krav som i afsnit 0 (Mixamo-skelet, 30 fps, in place, geværet i hånden som del af klippet).
+
+| # | Klip | Faser (markører) | Længde | Findes i dag |
+|---|---|---|---|---|
+| L1 | `A_Load_Muzzle_Standing` (forlader) | 1 sænk gevær, kolbe ved foden · 2 tag patron og bid den op · 3 hæld krudt i løbet · 4 kugle i munding, riv papir af · 5 træk ladestok, stød ned (2 stød), sæt tilbage · 6 løft gevær, fænghætte på (percussion) eller pandekrudt og luk pandejern (flintlås) · 7 anslag | 18-20 s i alt ved ca. 3 skud i minuttet (fasefordeling 1:1,5:2:2,5:5,5:3:1,5 pct. af tiden); strækkes til ladetiden | delvist: `A_Combat_ReloadStanding` (ét generisk klip) |
+| L2 | `A_Load_Muzzle_Kneeling` | samme syv faser, knæ i jorden, kolben på låret; ladestokken trækkes kortere | som L1 | nej (kun overgange og knæl-idle) |
+| L3 | `A_Load_Muzzle_Prone` | samme faser liggende på siden/ryggen: vend på siden, lad, vend tilbage i anslag; ladestokken kortere | som L1 | delvist: `A_Prone_Reloading` |
+| L4 | `A_Load_Breech_Standing` (bagladning, Dreyse) | 1 sænk gevær · 2 åbn kammer (træk bolt tilbage) · 3 læg patron ind · 4 luk og spænd · 5 anslag | 4-6 s i alt (ca. 6-8 skud i minuttet) | nej |
+| L5 | `A_Load_Breech_Kneeling` | samme fem faser knælende | som L4 | nej |
+| L6 | `A_Load_Breech_Prone` | samme fem faser liggende (kan lades liggende) | som L4 | nej |
+| L7 | `A_Load_Sitting` | beholdes (`A_Reload_sitting`) til siddende ryttere og dragoner | | ja |
+
+Koblingen i spillet: ladetid pr. epoke og pr. stilling styrer, hvor hurtigt klippet afspilles (faserne strækkes ens), og lydmarkørerne sætter lyd på krudt, ladestok, hane og skud. Indtil klippene findes, bruges de nuværende generiske klip.
