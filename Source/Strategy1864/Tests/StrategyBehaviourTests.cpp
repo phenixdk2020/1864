@@ -621,7 +621,12 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
         const bool bAcceptanceSecondOwner = SpawnedRiverBarrier->IsCrossingOwner(AcceptanceOther);
         if (bAcceptanceFirstOwner && bAcceptanceSecondOwner) { FinishBehaviourAcceptanceCase(false, TEXT("to samtidige broejere")); return; }
         if (SpawnedRiverBarrier->IsInsideRiver(AcceptanceCompany->GetActorLocation()) && SpawnedRiverBarrier->IsInsideRiver(AcceptanceOther->GetActorLocation()))
-        { FinishBehaviourAcceptanceCase(false, TEXT("to enheder inde i floden samtidigt")); return; }
+        {
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-ACCEPT T7 pos: company dx=%.0f dy=%.0f owner=%d state=%d | other dx=%.0f dy=%.0f owner=%d state=%d | bridge x=%.0f"),
+                AcceptanceCompany->GetActorLocation().X - SpawnedRiverBarrier->GetActorLocation().X, AcceptanceCompany->GetActorLocation().Y - SpawnedRiverBarrier->GetActorLocation().Y, bAcceptanceFirstOwner, int32(AcceptanceCompany->UnitState),
+                AcceptanceOther->GetActorLocation().X - SpawnedRiverBarrier->GetActorLocation().X, AcceptanceOther->GetActorLocation().Y - SpawnedRiverBarrier->GetActorLocation().Y, bAcceptanceSecondOwner, int32(AcceptanceOther->UnitState),
+                SpawnedRiverBarrier->GetActorLocation().X);
+            FinishBehaviourAcceptanceCase(false, TEXT("to enheder inde i floden samtidigt")); return; }
         if (bAcceptanceFirstOwner || bAcceptanceSecondOwner) AcceptancePhase = 2;
         if (AcceptancePhase == 2 && AcceptanceCompany->GetActorLocation().X > AcceptanceStart.X + 22000 && AcceptanceOther->GetActorLocation().X > AcceptanceStart.X + 22000)
         { AcceptanceCheck(!bAcceptanceFirstOwner && !bAcceptanceSecondOwner, TEXT("begge krydsede; ingen samtidighed; begge frigav broen")); return; }

@@ -908,8 +908,12 @@ void UStrategyMovementExecutorComponent::UpdateBridgeQueueState(
     const FVector Approach =
         RoutePoints[ActiveRoutePlan.BridgeEnterPointIndex];
 
+    // A unit that has not got the bridge must stand still before the water, not drift into it: it asks for the slot already
+    // when its centre is within about 15 m of the river's edge.
+    const bool bNearWater = FMath::Abs(Bridge->SignedBankDistance(CurrentLocation)) <= Bridge->RiverHalfWidthCm + 1500.0f &&
+        RoutePointIndex >= ActiveRoutePlan.BridgeEnterPointIndex - 1;
     const bool bAtApproach =
-        RoutePointIndex >= ActiveRoutePlan.BridgeEnterPointIndex ||
+        RoutePointIndex >= ActiveRoutePlan.BridgeEnterPointIndex || bNearWater ||
         FVector::Dist2D(CurrentLocation, Approach) <= 500.0f;
 
     if (!bAtApproach)

@@ -2033,6 +2033,14 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Wagon-tog (Docs/Wagons.md): vogne og heste bag enheder, `-Strategy1864Train`; logger PROJECT1864-TRAIN; bygget og set i log (vogne vises som egne linjer i kamporden, kan filtreres senere); udseende af vognene ikke set i et screenshot.
 - Testskema (Docs/Test-Skema-Enhedsadfaerd.md) og `Start-Test-Adfaerd.bat -Strategy1864AcceptAll`: køres nu. Resultat 2026-10-13: 23 bestået, 15 fejlet. De fejlede er ægte åbne punkter (se loggen, PROJECT1864-ACCEPT SUMMARY), fx SUSPEND-WAYPOINT, CLEAR-SUSPEND og ADVANCE-FIRE.
 
+### 2026-10-13 - Accepttestfejl rettet (6 af 7)
+
+- STOPFIRE, NEW-HOLD, SUSPEND-WAYPOINT, CLEAR-SUSPEND: testopsætningen slog ikke officer-AI til, så ildreaktionen (stop-og-skyd) ikke kunne suspendere marchen; rettet i StrategyBehaviourTests.cpp. Bestået.
+- ADVANCE-FIRE: forventede et fast mål; en fremrykning mod en fjende stiller sig nu ved skudafstand foran ham, så testen sammenligner med ordrens løste mål. Bestået.
+- T1 (karré): min egen "saml i kolonne før march" (6 s pause) ramte også rytteriet, som så stod stille og blev afvist som "for lav fart". Samlingen før march gælder nu kun infanteri. Bestået.
+- T3: lokal moralsmitte ved sammenbrud: venner inden for 80 m mister moral og samhold én gang, når en enhed går i opløsning (`EvaluateRoutState`). Bestået.
+- T7 (to enheder i floden): UAFKLARET. Positionerne ved fejlen (company dx=-1193, owner; other dx=-1013, ikke ejer) viser, at den ventende enhed står i flodbåndets kant i stedet for ved ventepunktet (dx=-1800). Jeg har tilføjet en tidlig venteregel ved flodkanten (`UpdateBridgeQueueState`), som ikke ændrede resultatet, og positionslog i testen. Årsagen (enhedsafstand/avoidance, eller at den ventende enhed ikke bruger broruten) er ikke fundet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -650,6 +650,24 @@ void UStrategyCombatComponent::EvaluateRoutState()
 
     OwnerUnit->SetUnitState(EStrategyUnitState::Routed);
 
+    // A rout shakes the friends close by (within 80 m): once, when the unit breaks; those far away feel nothing.
+    if (UWorld* RoutWorld = GetWorld())
+    {
+        constexpr float RoutContagionRadiusCm = 8000.0f;
+        for (TActorIterator<AStrategyUnit> RoutNeighbour(RoutWorld); RoutNeighbour; ++RoutNeighbour)
+        {
+            AStrategyUnit* Friend = *RoutNeighbour;
+            if (!IsValid(Friend) || Friend == OwnerUnit || Friend->Side != OwnerUnit->Side || !Friend->IsCombatEffective() ||
+                Friend->Echelon == EStrategyEchelon::Headquarters || Friend->Echelon == EStrategyEchelon::Supply ||
+                FVector::Dist2D(Friend->GetActorLocation(), OwnerUnit->GetActorLocation()) > RoutContagionRadiusCm || !Friend->CombatComponent)
+                continue;
+            const float FriendShock = (Friend->ConditionComponent ? Friend->ConditionComponent->GetMoraleShockMultiplier() : 1.0f);
+            Friend->Morale = FMath::Clamp(Friend->Morale - 6.0f * FriendShock, 0.0f, 100.0f);
+            Friend->Cohesion = FMath::Clamp(Friend->Cohesion - 4.0f * FriendShock, 0.0f, 100.0f);
+            Friend->CombatComponent->EvaluateRoutState();
+        }
+    }
+
     if (OwnerUnit->MovementExecutor)
     {
         OwnerUnit->MovementExecutor->StopMovement();
