@@ -4796,6 +4796,9 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
         ReportJson->SetNumberField(TEXT("expectedLazaretReturnMax"), FMath::RoundToInt(ReportLedger.Wounded * .96f));
         ReportJson->SetNumberField(TEXT("prisoners"), ReportLedger.Prisoners);
         ReportJson->SetNumberField(TEXT("ammoFired"), ReportLedger.AmmoFired);
+        ReportJson->SetNumberField(TEXT("ammoStart"), ReportLedger.StartAmmo);
+        ReportJson->SetNumberField(TEXT("ammoLeft"), ReportLedger.AmmoLeft());
+        ReportJson->SetNumberField(TEXT("foodDaysLeft"), ReportLedger.FoodDaysLeft());
         ReportJson->SetNumberField(TEXT("volleys"), ReportLedger.Volleys);
         ReportJson->SetNumberField(TEXT("combatSeconds"), ReportLedger.CombatSeconds);
         ReportJson->SetNumberField(TEXT("highestMoraleLoss"), ReportLedger.HighestMoraleLoss);
@@ -4835,6 +4838,7 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
         ReportUnit->EnsureBattleLedger();
         FStrategyBattleLedger& ReportLedger = ReportUnit->BattleLedger;
         ReportLedger.bFrozen = true;
+        ReportLedger.FoodUsedDays = BattleClock / 86400.0f;   // the provisions the battle clock has used up
         const UStrategyOfficerProfileComponent* ReportOfficer = ReportUnit->OfficerProfileComponent;
         ReportLedger.OfficersWounded = ReportOfficer && ReportOfficer->Fate == 1 ? 1 : 0;
         ReportLedger.OfficersCaptured = ReportOfficer && ReportOfficer->Fate == 2 ? 1 : 0;
@@ -4882,6 +4886,7 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
             ReportDetails.Add(FString::Printf(TEXT("  %s: %d"), *ReportCauseName, ReportCause.Value));
         }
     }
+    ReportDanes.FoodUsedDays = ReportEnemy.FoodUsedDays = BattleClock / 86400.0f;
     ReportDanes.Captured.SmallArms += ReportRiflesTakenByDanes;
     ReportEnemy.Captured.SmallArms += ReportRiflesTakenByEnemy;
     ReportSummary = FString::Printf(TEXT("Danske tab: %d faldne, %d sårede, %d fanger; fjendens tab: %d faldne, %d sårede, %d fanger."),
@@ -4901,7 +4906,7 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
     ReportRows.Append(ReportDanishRows);
     ReportRows.Add(ReportEnemy.Row(ReportEnemyName + TEXT(" — TOTAL")));
     ReportRows.Append(ReportEnemyRows);
-    ReportText = BattleOutcome + FString::Printf(TEXT(" | Sejrspoint: Danmark %d, %s %d\n"), ReportDanishPoints, *ReportEnemyName, ReportEnemyPoints) + ReportSummary + TEXT("\nEnhed\tMand ved start\tFaldne\tSårede\tFanger\tErobret udstyr\tTabt udstyr\tSkud\tKamp sek.\tMoraltab\n");
+    ReportText = BattleOutcome + FString::Printf(TEXT(" | Sejrspoint: Danmark %d, %s %d\n"), ReportDanishPoints, *ReportEnemyName, ReportEnemyPoints) + ReportSummary + TEXT("\nEnhed\tMand ved start\tFaldne\tSårede\tFanger\tErobret udstyr\tTabt udstyr\tAmmunition (tilbage/start)\tMad (dage)\tSkud\tKamp sek.\tMoraltab\n");
     for (const FString& ReportRow : ReportRows) { ReportText += ReportRow + TEXT("\n"); }
     ReportText += TEXT("Udfald: ") + (BattleOutcome.IsEmpty() ? FString(TEXT("slaget afsluttet af spilleren")) : BattleOutcome) + TEXT("\n");
     ReportText += TEXT("K=kanoner, M=mortérer, G=geværer, H=heste, V=vogne, F=faner. Sårede overgår til lazaret; tilbagevenden afhænger af pleje.\n");

@@ -26,6 +26,10 @@ struct FStrategyBattleLedger
     int32 EnemyKilled = 0;
     int32 OfficersWounded = 0, OfficersCaptured = 0;
     int32 AmmoFired = 0, Volleys = 0, LastVolleyRounds = 0, StartAmmo = 0;
+    /** Food: every unit starts a battle with three days of provisions (no campaign figure is passed yet); the battle clock uses it up. */
+    float StartFoodDays = 3.0f, FoodUsedDays = 0.0f;
+    int32 AmmoLeft() const { return FMath::Max(0, StartAmmo - AmmoFired); }
+    float FoodDaysLeft() const { return FMath::Max(0.0f, StartFoodDays - FoodUsedDays); }
     float CombatUntil = 0.f, CombatSeconds = 0.f, HighestMoraleLoss = 0.f, StartMorale = 100.f;
     FStrategyReportEquipment Captured, Lost, Abandoned;
     TArray<int32> VolleyRounds;
@@ -33,7 +37,7 @@ struct FStrategyBattleLedger
     void Add(const FStrategyBattleLedger& Other)
     {
         StartMen += Other.StartMen; Killed += Other.Killed; Wounded += Other.Wounded; Prisoners += Other.Prisoners;
-        AmmoFired += Other.AmmoFired; Volleys += Other.Volleys;
+        AmmoFired += Other.AmmoFired; Volleys += Other.Volleys; StartAmmo += Other.StartAmmo;
         VolleyRounds.Append(Other.VolleyRounds);
         for (const TPair<FName, int32>& ReportCause : Other.LossByCause) { LossByCause.FindOrAdd(ReportCause.Key) += ReportCause.Value; }
         EnemyKilled += Other.EnemyKilled; OfficersWounded += Other.OfficersWounded; OfficersCaptured += Other.OfficersCaptured;
@@ -43,7 +47,8 @@ struct FStrategyBattleLedger
     }
     FString Row(const FString& Label) const
     {
-        return FString::Printf(TEXT("%s\t%d\t%d\t%d\t%d\t%s\t%s\t%d\t%.1f\t%.1f"), *Label, StartMen, Killed, Wounded,
-            Prisoners, *Captured.Text(), *Lost.Text(), AmmoFired, CombatSeconds, HighestMoraleLoss);
+        // Label, men at start, killed, wounded, prisoners, captured kit, lost kit, ammunition left/start, food days left, rounds fired, combat seconds, morale loss.
+        return FString::Printf(TEXT("%s\t%d\t%d\t%d\t%d\t%s\t%s\t%d/%d\t%.1f\t%d\t%.1f\t%.1f"), *Label, StartMen, Killed, Wounded,
+            Prisoners, *Captured.Text(), *Lost.Text(), AmmoLeft(), StartAmmo, FoodDaysLeft(), AmmoFired, CombatSeconds, HighestMoraleLoss);
     }
 };

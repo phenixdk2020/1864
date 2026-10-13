@@ -1897,7 +1897,7 @@ void AStrategyHUD::DrawNotices()
 void AStrategyHUD::DrawReportEquipment(const FString& Cell, float X, float Y, float Width, const FLinearColor& Colour)
 {
     // K cannons, M mortars, G rifles, H horses, V wagons, F flags: all six are shown, a zero dimmed.
-    static const TCHAR* IconNames[6] = { TEXT("Cannon"), TEXT("Mortar"), TEXT("Rifle"), TEXT("Horse"), TEXT("Wagon"), TEXT("Flag") };
+    static const TCHAR* IconNames[8] = { TEXT("Cannon"), TEXT("Mortar"), TEXT("Rifle"), TEXT("Horse"), TEXT("Wagon"), TEXT("Flag"), TEXT("Ammo"), TEXT("Food") };
     static const TCHAR Letters[6] = { 'K', 'M', 'G', 'H', 'V', 'F' };
     if (ReportIconTextures.IsEmpty())
     {
@@ -1961,8 +1961,8 @@ void AStrategyHUD::DrawAfterActionReport()
         Text(FString::Printf(TEXT("Officerer (sårede/fangne): danske %d/%d · fjendtlige %d/%d"),
             ReportScenario->ReportDanes.OfficersWounded, ReportScenario->ReportDanes.OfficersCaptured,
             ReportScenario->ReportEnemy.OfficersWounded, ReportScenario->ReportEnemy.OfficersCaptured), ReportX + 20.f, ReportY + 120.f, Ink);
-        const float ReportWidths[] = { .20f, .07f, .055f, .055f, .055f, .155f, .155f, .065f, .095f, .095f };
-        const TCHAR* ReportHeadings[] = { TEXT("Enhed"), TEXT("Mand ved start"), TEXT("Faldne"), TEXT("Sårede"), TEXT("Fanger"), TEXT("Erobret udstyr"), TEXT("Tabt udstyr"), TEXT("Skud"), TEXT("Kamp sek."), TEXT("Moraltab") };
+        const float ReportWidths[] = { .15f, .055f, .045f, .045f, .045f, .185f, .185f, .085f, .055f, .04f, .05f, .06f };
+        const TCHAR* ReportHeadings[] = { TEXT("Enhed"), TEXT("Mand ved start"), TEXT("Faldne"), TEXT("Sårede"), TEXT("Fanger"), TEXT("Erobret udstyr"), TEXT("Tabt udstyr"), TEXT("Ammunition"), TEXT("Mad (dage)"), TEXT("Skud"), TEXT("Kamp sek."), TEXT("Moraltab") };
         const float ReportUsable = ReportW - 40.f;
         auto ReportFitText = [&](const FString& ReportCell, float ReportCellX, float ReportCellY, float ReportCellWidth)
         {
@@ -1982,7 +1982,7 @@ void AStrategyHUD::DrawAfterActionReport()
         };
         const FLinearColor ReportSlate(0.62f, 0.70f, 0.80f, 1.f), ReportBlue(0.40f, 0.69f, 0.88f, 1.f), ReportAmber(0.95f, 0.72f, 0.28f, 1.f);
         ReportFrame(ReportSlate, ReportX + 10.f, ReportY + 142.f, ReportW - 20.f, 30.f);
-        for (int32 ReportColumn = 0; ReportColumn < 10; ++ReportColumn)
+        for (int32 ReportColumn = 0; ReportColumn < 12; ++ReportColumn)
         {
             ReportFitText(ReportHeadings[ReportColumn], ReportColumnX, ReportY + 150.f, ReportUsable * ReportWidths[ReportColumn] - 8.f);
             ReportColumnX += ReportUsable * ReportWidths[ReportColumn];
@@ -2019,9 +2019,20 @@ void AStrategyHUD::DrawAfterActionReport()
             if (bReportTotal) { ReportCloseBlock(ReportRow - 1); ++ReportBlock; ReportBlockFirstRow = ReportRow; }
             else if (ReportBlock < 0) { ReportBlock = ReportPage == 0 ? 0 : 1; ReportBlockFirstRow = ReportRow; }
             ReportColumnX = ReportX + 20.f;
-            for (int32 ReportColumn = 0; ReportColumn < ReportCells.Num() && ReportColumn < 10; ++ReportColumn)
+            for (int32 ReportColumn = 0; ReportColumn < ReportCells.Num() && ReportColumn < 12; ++ReportColumn)
             {
                 const float ReportCellY = ReportY + 182.f + ReportRow * 28.f, ReportCellW = ReportUsable * ReportWidths[ReportColumn] - 8.f;
+                if (ReportColumn == 7 || ReportColumn == 8)
+                {
+                    // Ammunition (left/start) and food (days left): a small icon, then the figure.
+                    const int32 ExtraIcon = ReportColumn == 7 ? 6 : 7;
+                    if (ReportIconTextures.IsEmpty()) { DrawReportEquipment(FString(), 0.f, -100.f, 1.f, Ink); }
+                    if (ReportIconTextures.IsValidIndex(ExtraIcon) && ReportIconTextures[ExtraIcon])
+                        DrawTexture(ReportIconTextures[ExtraIcon], ReportColumnX, ReportCellY - 7.f, 26.f, 26.f, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, EBlendMode::BLEND_Translucent);
+                    ReportFitText(ReportCells[ReportColumn], ReportColumnX + 30.f, ReportCellY, ReportCellW - 30.f);
+                    ReportColumnX += ReportUsable * ReportWidths[ReportColumn];
+                    continue;
+                }
                 if (ReportColumn == 5 || ReportColumn == 6)
                 {
                     DrawReportEquipment(ReportCells[ReportColumn], ReportColumnX, ReportCellY, ReportCellW, Ink);

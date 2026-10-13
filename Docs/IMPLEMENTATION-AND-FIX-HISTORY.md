@@ -2075,6 +2075,12 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Under et formationsskift går hver mand nu med ansigtet i gåretningen (ikke sidelæns/baglæns) og vender fronten over de sidste 20 % af vejen.
 - Nyt debuglog (`-Strategy1864DebugFormation`): "still-reforming" hvert 3. s efter 4 s med antal ikke-placerede mænd og største afstand. Årsagen til, at nogle mænd ikke kommer på plads efter ankomst, er endnu ikke fundet (kræver en optagelse af forløbet med loggen).
 
+### 2026-10-13 - Rapport: ammunition og mad
+
+- To nye kolonner i rapporten: Ammunition (tilbage/start; start = enhedens beholdning ved slagets begyndelse, tilbage = start minus affyrede skud) og Mad (dage tilbage). Mad var ikke modelleret i slaget: hver enhed starter med 3 dages proviant (`FStrategyBattleLedger::StartFoodDays`), og slagets spilleur bruger den (`FoodUsedDays = BattleClock / 86400`). Ingen kampagnetal sendes endnu; vognes indhold (mad/ammunition) tælles ikke. Tallene står også i rapportteksten og resultat-JSON (ammoStart, ammoLeft, foodDaysLeft).
+- Midlertidige ikoner Icon_Ammo / Icon_Food (Tools/Report/make_report_icons_extra.py; rører ikke de øvrige ikoner), importeret som /Game/UI/ReportIcons/T_Icon_Ammo/T_Icon_Food. Set i en testkørsel.
+- Kampagnens depoter trækker endnu ikke brugt ammunition/mad af efter slaget.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
