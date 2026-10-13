@@ -2124,6 +2124,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Brugerens egne billeder (sække/tønde/kasse med brød; ammunitionskasser med kugler, granat og krudtposer) erstatter ikonerne `Icon_Food` og `Icon_Ammo` i kamprapporten. Baggrunden er gjort gennemsigtig og billedet beskåret til 256x256; de gamle ligger i `Reference/UI/ReportIcons/old`. Genimporteret med `import_report_icons.py` (UnrealEditor-Cmd ligger i `I:/Spil/Epic Games/UE_5.8`). Ikke set i spillet endnu.
 - Nye Mixamo-klip lagt i `Reference/Units/MultiView` (Reload, Reload kneeling, Rifle Punch, Side Step, Turn, Signaling samt sabelsættet til kavaleriet). Plan: bruges i stedet for HY-Motion til ladning, fordi Mixamo-klippene er lavet med gevær i hånden. Endnu ikke importeret.
 
+### 2026-10-13 - Mixamo-klip importeret (ladning, nærkamp, signal, sabel)
+
+- Nyt `Tools/Animation/build_mixamo_extra_set.py` bager brugerens nye Mixamo-klip til fælles rig (rod låst i xz): `ReloadStanding` (nu rigtig Mixamo-ladning på 6,9 s, erstatter den gamle afledte), `ReloadKneeling`, `RiflePunch`, `SideStep`, `Turn`, `Signal`, `DeathBackHeadshot` samt kavaleriets `SabreDraw/Withdraw/Sheath/Sheath2/Combo/Fight`. `import_infantry_combat_set.py` læser nu også `manifest_extra.json`. Alle 20 klip ligger i `/Game/Units/Human/CombatAnimations`.
+- Ikke koblet til spillet endnu: kun `ReloadStanding` bruges (erstattet automatisk). Mangler: knælende ladning til stance-systemet, kolbeslag i nærkamp, sabelsæt til kavaleriet, signal til HQ, og genbagning af crowd-VAT så klippene ses i bagte figurer. Ladetiden (ca. 18 s i spillet) skal strækkes/loops – klippet er 6,9 s.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

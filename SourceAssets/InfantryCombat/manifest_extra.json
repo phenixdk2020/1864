@@ -1,0 +1,108 @@
+{
+  "clips": [
+    {
+      "name": "ReloadStanding",
+      "file": "A_Combat_ReloadStanding.fbx",
+      "frames": 207,
+      "fps": 30,
+      "duration": 6.866666666666666,
+      "bones": 41
+    },
+    {
+      "name": "ReloadKneeling",
+      "file": "A_Combat_ReloadKneeling.fbx",
+      "frames": 207,
+      "fps": 30,
+      "duration": 6.866666666666666,
+      "bones": 41
+    },
+    {
+      "name": "RiflePunch",
+      "file": "A_Combat_RiflePunch.fbx",
+      "frames": 84,
+      "fps": 30,
+      "duration": 2.7666666666666666,
+      "bones": 41
+    },
+    {
+      "name": "SideStep",
+      "file": "A_Combat_SideStep.fbx",
+      "frames": 36,
+      "fps": 30,
+      "duration": 1.1666666666666667,
+      "bones": 41
+    },
+    {
+      "name": "Turn",
+      "file": "A_Combat_Turn.fbx",
+      "frames": 45,
+      "fps": 30,
+      "duration": 1.4666666666666666,
+      "bones": 41
+    },
+    {
+      "name": "Signal",
+      "file": "A_Combat_Signal.fbx",
+      "frames": 196,
+      "fps": 30,
+      "duration": 6.5,
+      "bones": 41
+    },
+    {
+      "name": "DeathBackHeadshot",
+      "file": "A_Combat_DeathBackHeadshot.fbx",
+      "frames": 112,
+      "fps": 30,
+      "duration": 3.7,
+      "bones": 41
+    },
+    {
+      "name": "SabreDraw",
+      "file": "A_Combat_SabreDraw.fbx",
+      "frames": 16,
+      "fps": 30,
+      "duration": 0.5,
+      "bones": 41
+    },
+    {
+      "name": "SabreWithdraw",
+      "file": "A_Combat_SabreWithdraw.fbx",
+      "frames": 46,
+      "fps": 30,
+      "duration": 1.5,
+      "bones": 41
+    },
+    {
+      "name": "SabreSheath",
+      "file": "A_Combat_SabreSheath.fbx",
+      "frames": 51,
+      "fps": 30,
+      "duration": 1.6666666666666667,
+      "bones": 41
+    },
+    {
+      "name": "SabreSheath2",
+      "file": "A_Combat_SabreSheath2.fbx",
+      "frames": 26,
+      "fps": 30,
+      "duration": 0.8333333333333334,
+      "bones": 41
+    },
+    {
+      "name": "SabreCombo",
+      "file": "A_Combat_SabreCombo.fbx",
+      "frames": 137,
+      "fps": 30,
+      "duration": 4.533333333333333,
+      "bones": 41
+    },
+    {
+      "name": "SabreFight",
+      "file": "A_Combat_SabreFight.fbx",
+      "frames": 246,
+      "fps": 30,
+      "duration": 8.166666666666666,
+      "bones": 41
+    }
+  ]
+}
