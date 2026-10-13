@@ -2119,6 +2119,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Den første formel (passagerer efter befolkning, fragt efter længde) gav for lidt: selv København-Roskilde ville aldrig tjene sig ind (248 år). Ny model i `RailwayIncomePerYear` og `Tools/Economy/rail_model.py`: passagerer = 0,9 x sqrt(popA x popB) rejser pr. år x afstand x 0,03 rd/person-km; fragt = 0,15 t pr. indbygger (dobbelt ved havneby) x afstand x 0,012 rd/ton-km; alle par af byer på linjen tæller; banen er 15 % længere end luftlinjen; staten får 100 % af egne linjer og 15 % af koncessionslinjer.
 - Resultat (egen linje): København-Roskilde 40.000 rd/år (tilbagebetaling 12 år), Odense-Nyborg 7.200 (147 år), Aarhus-Randers 11.200 (96 år), Fredericia-Kolding 3.300 (aldrig). Bygget; ikke afprøvet i spillet. Mangler: vækst af byer ved stationer, nedsat indtægt ved krig/afbrudt bro, rejser pr. år der vokser med årene.
 
+### 2026-10-13 - Nye ikoner til mad og ammunition
+
+- Brugerens egne billeder (sække/tønde/kasse med brød; ammunitionskasser med kugler, granat og krudtposer) erstatter ikonerne `Icon_Food` og `Icon_Ammo` i kamprapporten. Baggrunden er gjort gennemsigtig og billedet beskåret til 256x256; de gamle ligger i `Reference/UI/ReportIcons/old`. Genimporteret med `import_report_icons.py` (UnrealEditor-Cmd ligger i `I:/Spil/Epic Games/UE_5.8`). Ikke set i spillet endnu.
+- Nye Mixamo-klip lagt i `Reference/Units/MultiView` (Reload, Reload kneeling, Rifle Punch, Side Step, Turn, Signaling samt sabelsættet til kavaleriet). Plan: bruges i stedet for HY-Motion til ladning, fordi Mixamo-klippene er lavet med gevær i hånden. Endnu ikke importeret.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
