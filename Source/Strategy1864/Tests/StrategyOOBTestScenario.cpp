@@ -4597,6 +4597,11 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
         return ReportJson;
     };
     TArray<FString> ReportDanishRows, ReportEnemyRows, ReportDetails;
+    // Rifles: a casualty's rifle stays on the field. The side that keeps the field recovers its own (about a tenth is broken);
+    // the side that leaves it loses them all, and the victor picks them up as booty. A draw: both keep the field.
+    const bool bReportDanesKeepField = BattleOutcome != TEXT("NEDERLAG");
+    const bool bReportEnemyKeepsField = BattleOutcome != TEXT("DANSK SEJR");
+    int32 ReportRiflesTakenByDanes = 0, ReportRiflesTakenByEnemy = 0;
     for (TActorIterator<AStrategyUnit> ReportIt(GetWorld()); ReportIt; ++ReportIt)
     {
         AStrategyUnit* ReportUnit = *ReportIt;
@@ -4609,6 +4614,15 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
         ReportLedger.OfficersCaptured = ReportOfficer && ReportOfficer->Fate == 2 ? 1 : 0;
         const bool bReportDanish = ReportLedger.OriginalSide == uint8(EStrategySide::Denmark) || ReportLedger.OriginalSide == uint8(EStrategySide::Allied);
         if (ReportLedger.OriginalSide == uint8(EStrategySide::Neutral)) { continue; }
+        if (ReportUnit->Echelon == EStrategyEchelon::Company || ReportUnit->Echelon == EStrategyEchelon::Cavalry)
+        {
+            const int32 ReportRiflesOnField = ReportLedger.Abandoned.SmallArms;
+            const int32 ReportRiflesBroken = FMath::RoundToInt(ReportRiflesOnField * 0.10f);
+            const bool bReportKeepsField = bReportDanish ? bReportDanesKeepField : bReportEnemyKeepsField;
+            ReportLedger.Lost.SmallArms = bReportKeepsField ? ReportRiflesBroken : ReportRiflesOnField;
+            const bool bReportOtherKeeps = bReportDanish ? (bReportEnemyKeepsField && !bReportDanesKeepField) : (bReportDanesKeepField && !bReportEnemyKeepsField);
+            if (!bReportKeepsField && bReportOtherKeeps) { (bReportDanish ? ReportRiflesTakenByEnemy : ReportRiflesTakenByDanes) += ReportRiflesOnField - ReportRiflesBroken; }
+        }
         TSharedRef<FJsonObject> ReportUnitJson = ReportJsonRow(ReportLedger);
         ReportUnitJson->SetStringField(TEXT("id"), ReportUnit->StableUnitId.ToString());
         ReportUnitJson->SetStringField(TEXT("campaignId"), CampaignUnitOf.FindRef(ReportUnit));
@@ -4642,6 +4656,8 @@ void AStrategyOOBTestScenario::FinalizeAfterActionReport()
             ReportDetails.Add(FString::Printf(TEXT("  %s: %d"), *ReportCauseName, ReportCause.Value));
         }
     }
+    ReportDanes.Captured.SmallArms += ReportRiflesTakenByDanes;
+    ReportEnemy.Captured.SmallArms += ReportRiflesTakenByEnemy;
     ReportSummary = FString::Printf(TEXT("Danske tab: %d faldne, %d sårede, %d fanger; fjendens tab: %d faldne, %d sårede, %d fanger."),
         ReportDanes.Killed, ReportDanes.Wounded, ReportDanes.Prisoners, ReportEnemy.Killed, ReportEnemy.Wounded, ReportEnemy.Prisoners);
     ReportSummary = (CampaignField ? FString::Printf(TEXT("%s · %s. "), *CampaignField->Place, *ReportCampaignDate.Left(10)) : FString(TEXT("Testslag. "))) + ReportSummary;

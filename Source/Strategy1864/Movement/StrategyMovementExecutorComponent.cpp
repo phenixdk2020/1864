@@ -347,6 +347,23 @@ void UStrategyMovementExecutorComponent::TickComponent(
     {
         PauseRemainingSeconds = FMath::Max(0.0f, PauseRemainingSeconds - DeltaTime);
 
+        // Forming a column for a march: the column's head turns to face the way the unit will go while the men gather.
+        if (OwnerUnit->FormationComponent && CurrentOrder.IsValidOrder() &&
+            (OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
+             OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::CavalryColumn) &&
+            OwnerUnit->FormationTransition && OwnerUnit->FormationTransition->IsReforming())
+        {
+            const FVector MarchTarget = CurrentOrder.Waypoints.IsValidIndex(CurrentOrder.NextWaypointIndex)
+                ? CurrentOrder.Waypoints[CurrentOrder.NextWaypointIndex] : CurrentOrder.TargetLocation;
+            const FVector ToTarget = (MarchTarget - OwnerUnit->GetActorLocation()).GetSafeNormal2D();
+            if (!ToTarget.IsNearlyZero())
+            {
+                FRotator ColumnFront = OwnerUnit->GetActorRotation();
+                ColumnFront.Yaw = FMath::FixedTurn(ColumnFront.Yaw, ToTarget.Rotation().Yaw, TurnSpeedDegreesPerSecond * DeltaTime);
+                OwnerUnit->SetActorRotation(ColumnFront);
+            }
+        }
+
         if (PauseRemainingSeconds <= 0.0f &&
             OwnerUnit->UnitState == EStrategyUnitState::UnderFire)
         {

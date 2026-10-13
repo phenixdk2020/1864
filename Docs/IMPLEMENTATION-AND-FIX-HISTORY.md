@@ -1993,6 +1993,13 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Udstyrskolonnerne (erobret/tabt) viser nu seks ikoner med antal (kanon, morter, gevær, hest, vogn, fane; nul dæmpet) i stedet for "0K 0M 6G...". Ikonerne er brugerens egne (Reference/UI/ReportIcons/Original_AI), frigjort fra baggrund og importeret som /Game/UI/ReportIcons/T_Icon_* (Content/Python/import_report_icons.py, Tools/Report/make_report_icons.py). Forklaringslinjen øverst bruger de samme ikoner. Ikke set i en kørsel af mig (screenshot af rapporten lykkedes ikke i testen).
 - Backlog udvidet: erobre faner/fanebærer, nye lade-animationer, køb af våben, produktion pr. måned, dragoner med sabel, ammunition og mad i rapporten, dækning/stilling i træfsandsynlighed.
 
+### 2026-10-13 - Geværer, stop-afstand, kolonnens front, rapportens ikoner
+
+- Geværer: en faldens gevær bliver på marken. Den side, der holder feltet, beholder sine (ca. 10 % går i stykker), den, der forlader det, mister alle, og sejrherren får dem som erobret. Før talte alle tab (faldne + sårede + fanger) som tabte geværer (48 tabt ved 16 faldne).
+- Angreb: enheden stiller sig, hvor det fjerneste hjørne af dens linje lige når fjendens nærmeste front, så hele første række kan skyde (kan blive lidt nærmere end skudafstanden, når linjerne ikke er parallelle). `ResolveAttackDestination`.
+- Kolonne: under dannelsen af marchkolonnen drejer enheden mod første vejpunkt, så kolonnen har front i gåretningen (MovementExecutor, pausegrenen).
+- Rapport: ikonerne står på lys plade og er større, blokkene er ugennemsigtige (blå/ravgul). Ikke set i en kørsel af mig.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

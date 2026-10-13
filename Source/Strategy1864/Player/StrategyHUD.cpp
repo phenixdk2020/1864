@@ -1808,15 +1808,17 @@ void AStrategyHUD::DrawReportEquipment(const FString& Cell, float X, float Y, fl
     }
     // The cell is divided evenly: an icon and its count in each sixth.
     const float Slot = Width / 6.f;
-    const float IconSize = FMath::Clamp(Slot * 0.55f, 14.f, 22.f);
+    const float IconSize = FMath::Clamp(Slot * 0.62f, 16.f, 26.f);
     for (int32 Kind = 0; Kind < 6; ++Kind)
     {
         const float SlotX = X + Kind * Slot;
         const bool bNone = Counts[Kind] <= 0;
+        // A light plate behind the picture so the dark colours stand out on the dark table.
+        DrawRect(bNone ? FLinearColor(0.80f, 0.77f, 0.68f, 0.28f) : FLinearColor(0.90f, 0.86f, 0.74f, 1.f), SlotX - 2.f, Y - 5.f, IconSize + 4.f, IconSize + 4.f);
         if (ReportIconTextures.IsValidIndex(Kind) && ReportIconTextures[Kind])
-            DrawTexture(ReportIconTextures[Kind], SlotX, Y - 2.f, IconSize, IconSize, 0.f, 0.f, 1.f, 1.f,
-                bNone ? FLinearColor(1.f, 1.f, 1.f, 0.35f) : FLinearColor::White, EBlendMode::BLEND_Translucent);
-        Text(FString::FromInt(Counts[Kind]), SlotX + IconSize + 3.f, Y, bNone ? Muted : Colour);
+            DrawTexture(ReportIconTextures[Kind], SlotX, Y - 3.f, IconSize, IconSize, 0.f, 0.f, 1.f, 1.f,
+                bNone ? FLinearColor(1.f, 1.f, 1.f, 0.55f) : FLinearColor::White, EBlendMode::BLEND_Translucent);
+        Text(FString::FromInt(Counts[Kind]), SlotX + IconSize + 5.f, Y, bNone ? Muted : Colour);
     }
 }
 
@@ -1863,7 +1865,7 @@ void AStrategyHUD::DrawAfterActionReport()
         // Framed blocks: a slate frame round the heading, a blue one round the Danish side, an amber one round the opponents.
         auto ReportFrame = [&](const FLinearColor& ReportColour, float ReportFX, float ReportFY, float ReportFW, float ReportFH)
         {
-            DrawRect(FLinearColor(ReportColour.R, ReportColour.G, ReportColour.B, 0.10f), ReportFX, ReportFY, ReportFW, ReportFH);
+            DrawRect(FLinearColor(ReportColour.R * 0.22f, ReportColour.G * 0.22f, ReportColour.B * 0.22f, 1.f), ReportFX, ReportFY, ReportFW, ReportFH);   // a solid, darker tone of the frame colour
             DrawRect(ReportColour, ReportFX, ReportFY, ReportFW, 1.5f);
             DrawRect(ReportColour, ReportFX, ReportFY + ReportFH - 1.5f, ReportFW, 1.5f);
             DrawRect(ReportColour, ReportFX, ReportFY, 1.5f, ReportFH);
@@ -1881,13 +1883,25 @@ void AStrategyHUD::DrawAfterActionReport()
         const int32 ReportLastPage = FMath::Max(0, (ReportLines.Num() - 1) / ReportPerPage);
         ReportPage = FMath::Clamp(ReportPage, 0, ReportLastPage);
         // The first block is the Danish side; every later total row opens another party (allies make more than two).
-        int32 ReportBlock = -1, ReportBlockFirstRow = 0;
-        auto ReportCloseBlock = [&](int32 ReportLastRow)
+        // The blocks are solid, so they are drawn first and the text on top.
         {
-            if (ReportBlock < 0 || ReportLastRow < ReportBlockFirstRow) return;
-            ReportFrame(ReportBlock == 0 ? ReportBlue : ReportAmber, ReportX + 10.f, ReportY + 178.f + ReportBlockFirstRow * 28.f - 3.f,
-                ReportW - 20.f, (ReportLastRow - ReportBlockFirstRow + 1) * 28.f);
-        };
+            int32 PreBlock = -1, PreFirst = 0;
+            const int32 PreRows = FMath::Min(ReportPerPage, ReportLines.Num() - ReportPage * ReportPerPage);
+            for (int32 PreRow = 0; PreRow <= PreRows; ++PreRow)
+            {
+                const bool bPreEnd = PreRow == PreRows;
+                const bool bPreTotal = !bPreEnd && ReportLines[ReportPage * ReportPerPage + PreRow].Left(40).Contains(TEXT("TOTAL"));
+                if (bPreEnd || bPreTotal)
+                {
+                    if (PreBlock >= 0 && PreRow - 1 >= PreFirst)
+                        ReportFrame(PreBlock == 0 ? ReportBlue : ReportAmber, ReportX + 10.f, ReportY + 178.f + PreFirst * 28.f - 3.f, ReportW - 20.f, (PreRow - PreFirst) * 28.f);
+                    if (bPreTotal) { ++PreBlock; PreFirst = PreRow; }
+                }
+                else if (PreBlock < 0) { PreBlock = ReportPage == 0 ? 0 : 1; PreFirst = PreRow; }
+            }
+        }
+        int32 ReportBlock = -1, ReportBlockFirstRow = 0;
+        auto ReportCloseBlock = [&](int32) {};
         for (int32 ReportRow = 0; ReportRow < ReportPerPage && ReportPage * ReportPerPage + ReportRow < ReportLines.Num(); ++ReportRow)
         {
             TArray<FString> ReportCells;

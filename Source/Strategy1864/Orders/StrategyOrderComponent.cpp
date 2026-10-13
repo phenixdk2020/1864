@@ -1,4 +1,5 @@
 #include "StrategyOrderComponent.h"
+#include "../Formations/StrategyFormationComponent.h"
 #include "../Units/StrategyUnit.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
 #include "../Combat/StrategyFireControlComponent.h"
@@ -242,7 +243,35 @@ void UStrategyOrderComponent::ResolveAttackDestination(FStrategyOrder& AttackOrd
     const FVector AttackFoe = AttackEnemy->GetActorLocation();
     FVector AttackBack = (AttackUnit->GetActorLocation() - AttackFoe).GetSafeNormal2D();
     if (AttackBack.IsNearlyZero()) AttackBack = -AttackUnit->GetActorForwardVector();
-    AttackOrder.TargetLocation = AttackFoe + AttackBack * (AttackRange - 300.0f);
+    // The lines are rarely parallel. The unit stands where the corner of its line that is farthest from the enemy still reaches the
+    // nearest point of his front: it may go a little further than the plain distance, so the whole first rank can fire.
+    const float AttackReach = AttackRange - 300.0f;
+    float AttackStand = AttackReach;
+    {
+        const float OurHalf = AttackUnit->FormationComponent ? 0.5f * AttackUnit->FormationComponent->EstimateFrontageCm(FMath::Max(1, AttackUnit->CurrentStrength)) : 2400.0f;
+        const float FoeHalf = AttackEnemy->FormationComponent ? 0.5f * AttackEnemy->FormationComponent->EstimateFrontageCm(FMath::Max(1, AttackEnemy->CurrentStrength)) : 2400.0f;
+        FVector FoeFront = AttackEnemy->GetActorForwardVector();
+        FoeFront.Z = 0.0f;
+        const FVector FoeRight = FVector(-FoeFront.Y, FoeFront.X, 0.0f).GetSafeNormal();
+        const FVector FoeA = AttackFoe - FoeRight * FoeHalf, FoeB = AttackFoe + FoeRight * FoeHalf;
+        auto DistanceToFoeFront = [&](const FVector& Point)
+        {
+            const FVector Along = FoeB - FoeA;
+            const float AlongLength = Along.SizeSquared2D();
+            const float T = AlongLength > 1.0f ? FMath::Clamp(FVector::DotProduct(Point - FoeA, Along) / AlongLength, 0.0f, 1.0f) : 0.0f;
+            return FVector::Dist2D(Point, FoeA + Along * T);
+        };
+        const FVector OurFront = -AttackBack;
+        const FVector OurRight(-OurFront.Y, OurFront.X, 0.0f);
+        for (float Distance = AttackReach; Distance > AttackReach * 0.55f; Distance -= 100.0f)
+        {
+            const FVector Centre = AttackFoe + AttackBack * Distance;
+            const float Worst = FMath::Max(DistanceToFoeFront(Centre - OurRight * OurHalf), DistanceToFoeFront(Centre + OurRight * OurHalf));
+            AttackStand = Distance;
+            if (Worst <= AttackReach) break;
+        }
+    }
+    AttackOrder.TargetLocation = AttackFoe + AttackBack * AttackStand;
     AttackOrder.TargetLocation.Z = AttackUnit->GetActorLocation().Z;
     AttackOrder.FacingYaw = (-AttackBack).Rotation().Yaw;
     AttackOrder.bHasFacing = true;
