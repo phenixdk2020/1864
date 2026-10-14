@@ -2146,6 +2146,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Ved gennemsyn af `Reload.fbx` på den danske soldat viste det sig, at klippet er en knælende ladning. Jeg havde importeret det som `A_Combat_ReloadStanding` og overskrevet den gamle stående ladning, så stående enheder ville have knælet under ladning. Rettet: den gamle stående ladning er gendannet fra git, og Mixamo-klippet hedder nu `A_Combat_ReloadKneelingB` (ved siden af `A_Combat_ReloadKneeling`). Genimporteret i `/Game/Units/Human/CombatAnimations`. Ingen standing-klip af Mixamo findes endnu.
 - Gennemgang af `1864_Musket_Reload_v03_Spec_og_Assets.zip` og Codex-arbejdsordren (R:\Onedrive\TEMP 3D UNREAL): pakken er kun en specifikation, ikke en animation. Skelettet er det samme 41-knogles Mixamo-skelet som vores; riflen er en perkussionsmusket med hane og uden fast ladestok (ladestok er derfor en separat prop); alle fem FBX'er er normaliseret i størrelse og skal skaleres (rifle 2,0, ladestok 1,2, patron 0,49, fænghætte 0,13 enheder; fænghætten er en kop). Arbejdsordren henviser til det gamle repo (`Strategy`/`unreal-port`) og skal tilpasses `1864-Campaign`. Kontaktark: `Docs/musket_v03_props.png`, `Docs/mixamo_reload_on_dk.png`.
 
+### 2026-10-14 - Forberedelse: lavpoly-rekvisitter til bagte ladefigurer
+
+- `Tools/Animation/decimate_reload_props.py` decimerer ladestok (3.938 -> 1.227 trekanter), papirpatron (22.944 -> 1.672) og fænghætte (1.632 -> 511); resultatet i `SourceAssets/MusketReloadV03/Lowpoly`, kilderne i `Kildeassets`. Mål var 700/500/300; Blenders decimering ramte højere, så tallene skal strammes, før de bruges i mængden (summen er ca. 3.400 trekanter pr. figur, for meget i en bagt mængde; mål under 1.000).
+- Plan: rekvisitterne bliver hjælpeknogler på en bagt soldatmodel (ladestok på riflen i alle klip, patron/fænghætte skaleret til nul uden for ladning), så bagningen viser ladestokken. Afventer Codex' ladeanimation (cx-musket) for knogle-bevægelsen.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
