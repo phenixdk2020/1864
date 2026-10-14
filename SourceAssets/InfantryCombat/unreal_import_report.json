@@ -114,6 +114,21 @@
       "name": "A_Combat_ReloadStandingV03",
       "asset": "/Game/Units/Human/CombatAnimations/A_Combat_ReloadStandingV03.A_Combat_ReloadStandingV03",
       "seconds": 11.0
+    },
+    {
+      "name": "A_Combat_CavSabreDraw",
+      "asset": "/Game/Units/Human/CombatAnimations/A_Combat_CavSabreDraw.A_Combat_CavSabreDraw",
+      "seconds": 0.5
+    },
+    {
+      "name": "A_Combat_CavSabreSlash",
+      "asset": "/Game/Units/Human/CombatAnimations/A_Combat_CavSabreSlash.A_Combat_CavSabreSlash",
+      "seconds": 4.5333333015441895
+    },
+    {
+      "name": "A_Combat_CavSabreFight",
+      "asset": "/Game/Units/Human/CombatAnimations/A_Combat_CavSabreFight.A_Combat_CavSabreFight",
+      "seconds": 8.166666984558105
     }
   ]
 }

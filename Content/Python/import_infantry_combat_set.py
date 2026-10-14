@@ -3,9 +3,8 @@ from pathlib import Path
 root=Path(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()))
 source=root/'SourceAssets/InfantryCombat'
 manifest=json.loads((source/'manifest.json').read_text())
-extra=source/'manifest_extra.json'
-if extra.exists():
-    seen={c['name'] for c in manifest['clips']}
+for extra in (source/'manifest_extra.json', source/'manifest_cav.json'):
+  if extra.exists():
     manifest['clips']=[c for c in manifest['clips'] if c['name'] not in {e['name'] for e in json.loads(extra.read_text())['clips']}]+json.loads(extra.read_text())['clips']
 skeleton=unreal.load_asset('/Game/Units/Human/Skeletons/SK_Human_1864')
 if not skeleton:

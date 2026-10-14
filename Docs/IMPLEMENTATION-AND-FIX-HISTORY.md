@@ -2161,6 +2161,10 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 
 - Torsoen læner nu 6-14 grader mod riflen (Spine/Spine1, drejet om soldatens højre akse) i ladefaserne, så armene ikke er strakt helt ud; patron og fænghætte forstørret (skala 0,40 og 0,26). Genimporteret `A_Combat_ReloadStandingV03`. Stadig ikke koblet til spillet.
 
+### 2026-10-14 - Sabelklip til rytterne (kun data)
+
+- `Tools/Animation/build_cavalry_sabre_set.py`: rytterens sæde (bækken og ben fra 'Reload sitting') med overkroppen fra Mixamo-sabelklippene; `A_Combat_CavSabreDraw` (0,5 s), `A_Combat_CavSabreSlash` (4,5 s, fra One Hand Sword Combo) og `A_Combat_CavSabreFight` (8,2 s). Importeret i `/Game/Units/Human/CombatAnimations` (`import_infantry_combat_set.py` læser nu også `manifest_cav.json`). Ikke koblet til spillet: ryttere tegnes som bagte hjælpefigurer (`DrawAuxiliary`) med et statisk sabel-mesh, som ikke kan følge en bevægende hånd; kobling kræver sabelposer pr. billede i crowd-modellen (som RiflePoses) og genbagning.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

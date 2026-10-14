@@ -1,0 +1,28 @@
+{
+  "clips": [
+    {
+      "name": "CavSabreDraw",
+      "file": "A_Combat_CavSabreDraw.fbx",
+      "frames": 16,
+      "fps": 30,
+      "duration": 0.5,
+      "bones": 41
+    },
+    {
+      "name": "CavSabreSlash",
+      "file": "A_Combat_CavSabreSlash.fbx",
+      "frames": 137,
+      "fps": 30,
+      "duration": 4.533333333333333,
+      "bones": 41
+    },
+    {
+      "name": "CavSabreFight",
+      "file": "A_Combat_CavSabreFight.fbx",
+      "frames": 246,
+      "fps": 30,
+      "duration": 8.166666666666666,
+      "bones": 41
+    }
+  ]
+}
