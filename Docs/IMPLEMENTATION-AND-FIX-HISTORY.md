@@ -2136,6 +2136,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Køretur (4x tid, 240 s spilletid, enhedslog): begge batterier vælger mål og skyder salver (ca. 4-6 skud pr. salve), mortéren skyder hver ca. 21. s, svensk artilleri rammer dansk kompagni fra ca. t=185 (4-5 mand pr. træfning). Den danske eskadron venter ('Lurer'), rider om til flanken, og chargede i flanke/ryg på t=111 (13 mand tabt hos fjenden, trak sig tilbage på t=122). Svenske husarer rykker ind mod kompagni 1 (holder formationen på 138/80 m).
 - Observeret, ikke rettet: de danske kompagnier står passive ('Holder stillingen' på 414 m) fordi testen er `Passive` og venter på spillerordre; salvestørrelsen falder fra 6 til 1 skud for det danske batteri over tid (mandskabstab eller ammunitionstype - ikke undersøgt).
 
+### 2026-10-14 - Batteriets kegle følger valgt ammunition
+
+- Når et batteri har valgt kardæsk, tegnes den aktive kegle og fyldte flade ud til anden ring (`CloseRangeCm`, 400 m); ellers til lang rækkevidde. Batterier står ellers på 'Hold ild' i brandkontrollen og fik ingen fyldt flade. Kun visning, ingen ændring af skydereglerne (`StrategyHUD.cpp`). Bygget, ikke set i spillet.
+- Svar på spørgsmål: ammunitionen vælges automatisk efter afstand (kardæsk mod kompagni/kavaleri inden for 22 % af maks, højst 400 m). Der findes endnu ingen 'effektiv afstand' under maks pr. ammunitionstype; foreslået som næste skridt (træfsikkerhed falder fra effektiv til maks).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

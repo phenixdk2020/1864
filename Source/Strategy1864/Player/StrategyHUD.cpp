@@ -38,6 +38,7 @@
 #include "../Visual/StrategyInfantryVisualComponent.h"
 #include "../Units/CavalryUnit.h"
 #include "../Artillery/StrategyArtilleryBatteryUnit.h"
+#include "../Artillery/StrategyArtilleryAmmunitionComponent.h"
 #include "../Units/StrategyDragoonComponent.h"
 #include "../Combat/StrategyStanceComponent.h"
 #include "../Tests/StrategyOOBTestScenario.h"
@@ -719,8 +720,17 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
     const FLinearColor Faint(1.0f, 1.0f, 1.0f, 0.55f);
     const bool bDanish = Unit->Side == EStrategySide::Denmark;
     const FLinearColor Active = bDanish ? FLinearColor::FromSRGBColor(FColor(255, 186, 40)) : FLinearColor::FromSRGBColor(FColor(255, 96, 60));
-    const float ActiveRange = Fire->GetActiveRangeCm();
-    const bool bHold = Fire->FirePolicy == EStrategyFirePolicy::Hold;
+    float ActiveRange = Fire->GetActiveRangeCm();
+    bool bHold = Fire->FirePolicy == EStrategyFirePolicy::Hold;
+    // A battery's reach is its chosen shot: canister (the second ring) when the enemy is close, otherwise the long range.
+    if (const AStrategyArtilleryBatteryUnit* Battery = Cast<AStrategyArtilleryBatteryUnit>(Unit))
+    {
+        if (Battery->ArtilleryAmmunitionComponent)
+        {
+            bHold = false;
+            ActiveRange = Battery->ArtilleryAmmunitionComponent->SelectedAmmo == EStrategyArtilleryAmmoType::Canister ? Fire->CloseRangeCm : Fire->LongRangeCm;
+        }
+    }
 
     struct FRange { float Cm; const TCHAR* Name; };
     const FRange Ranges[] = { { Fire->CloseRangeCm, TEXT("CLOSE") }, { Fire->MediumRangeCm, TEXT("MEDIUM") }, { Fire->LongRangeCm, TEXT("LONG") } };
