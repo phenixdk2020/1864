@@ -1,0 +1,50 @@
+{
+  "scenario": "1851",
+  "note": "Handel 1851 (Danmarks Statistik, Tabelværk 21. hæfte: Told og Skibsfart 1851). Årsstrømme, ikke beholdninger pr. 1. juli. Importeret fra Codex' cirka-design 2026-10-14; kildetal er afskrevet fra kilden, resten er ikke brugt. Holsten og Lauenborg er ikke med; kongerigets eksport er søværts (landeksport mangler). Værdierne er officielle priser og må ikke trækkes fra hinanden som en handelsbalance.",
+  "source": {
+    "url": "https://www.dst.dk/Site/Dst/Udgivelser/GetPubFile.aspx?id=21849&sid=skib1851",
+    "title": "Statistisk Tabelværk21.hæfte: Told og Skibsfart1851, udgivet1852",
+    "type": "contemporary_official_statistics"
+  },
+  "unitWeight": "historiske danske pund (ikke omregnet til tons)",
+  "unitValue": "rigsbankdaler",
+  "areas": {
+    "Kongeriget Danmark": {
+      "importWeight": 845323833,
+      "exportWeight": 553571434,
+      "turnoverWeight": 1398895267,
+      "importValue": 28134769,
+      "exportValue": 14705228,
+      "turnoverValue": 42839997
+    },
+    "Slesvig": {
+      "importWeight": 215450090,
+      "exportWeight": 72107425,
+      "turnoverWeight": 287557515,
+      "importValue": 8463604,
+      "exportValue": 3900496,
+      "turnoverValue": 12364100
+    },
+    "Kongeriget og Slesvig": {
+      "importWeight": 1060773923,
+      "exportWeight": 625678859,
+      "turnoverWeight": 1686452782,
+      "importValue": 36598373,
+      "exportValue": 18605724,
+      "turnoverValue": 55204097
+    }
+  },
+  "comparison1847": {
+    "area": "Kongeriget og Slesvig",
+    "turnoverWeight": 1389530925,
+    "turnoverValue": 48694754
+  },
+  "status": "source_transcribed",
+  "limitations": [
+    "Holsten er ifølge indledningen ikke medtaget i1851-toldstatistikken. Lauenborg må heller ikke antages inkluderet.",
+    "Kongerigets eksport opgøres søværts; landeksport til/gennem hertugdømmerne mangler i disse tabeller.",
+    "Officielle import- og eksportværdier er opgjort på forskellige prisgrundlag; forskellen er ikke en fuldstændig national handelsbalance.",
+    "Årsregnskab1851 er efterfølgende viden, ikke en kendt årsstrøm ved1.juli1851.",
+    "Ingen omregning fra historiske pund til moderne tons uden enhedsverifikation."
+  ]
+}

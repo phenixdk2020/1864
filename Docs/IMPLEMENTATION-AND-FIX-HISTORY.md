@@ -2177,6 +2177,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - **Kamera følger enheden:** tast G (CameraFollow) følger første valgte enhed (figurernes midte), blød glidning (4/s, også under pause); WASD, højreklik-træk eller Home afbryder.
 - **Revisionsrapport (Gemini) gennemgået:** stort set om den gamle mappe; i dette repo er `Map.IsValid()` allerede kontrolleret, og `GetBoneLocation` bruges ikke. Rettet: dubleret `DefaultGraphicsRHI` i `DefaultEngine.ini`. Ikke rettet: `import_horse_rigged.py` har en absolut sti; projektet ligger i OneDrive (rapportens P0, bygger lykkes dog).
 
+### 2026-10-14 - Landeskabelon og handelsdata 1851
+
+- Nyt `Docs/Landeskabelon.md`: tre niveauer af et land (abstrakt, nabo på kortet, fuldt land), alle felter spillet bruger pr. land med fil og status, regler for at tilføje et land, hvor Sverige-Norge står i dag (abstrakte tal, et Skåne-udsnit, ingen svenske begivenheder) og en prioriteret opgaveliste, plus en skabelon til udfyldning.
+- Ny `Data/Campaign1851/Trade_1851.json`: kildebelagte handelstal 1851 (Danmarks Statistik) fra Codex' cirka-design til at kalibrere eksportmodellen. Selve kalibreringen af modellen er ikke lavet. Resten af Codex' design (amtstal, økonomi, hær) er ikke brugt, fordi vores data er mere detaljerede; kongeriget og hertugdømmernes samlede befolkning bruges som sanity check (vores kort 2,30 mio. mod 2,37 mio.).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
