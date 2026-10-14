@@ -2129,6 +2129,13 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Nyt `Tools/Animation/build_mixamo_extra_set.py` bager brugerens nye Mixamo-klip til fælles rig (rod låst i xz): `ReloadStanding` (nu rigtig Mixamo-ladning på 6,9 s, erstatter den gamle afledte), `ReloadKneeling`, `RiflePunch`, `SideStep`, `Turn`, `Signal`, `DeathBackHeadshot` samt kavaleriets `SabreDraw/Withdraw/Sheath/Sheath2/Combo/Fight`. `import_infantry_combat_set.py` læser nu også `manifest_extra.json`. Alle 20 klip ligger i `/Game/Units/Human/CombatAnimations`.
 - Ikke koblet til spillet endnu: kun `ReloadStanding` bruges (erstattet automatisk). Mangler: knælende ladning til stance-systemet, kolbeslag i nærkamp, sabelsæt til kavaleriet, signal til HQ, og genbagning af crowd-VAT så klippene ses i bagte figurer. Ladetiden (ca. 18 s i spillet) skal strækkes/loops – klippet er 6,9 s.
 
+### 2026-10-14 - Test 4: bataljon med kanoner, morter og eskadron mod svensk kompagni
+
+- Ny `Start-Test-4-Kanoner.bat` (4 danske kompagnier + reserve, batteri, morter og eskadron mod et svensk kompagni med batteri, morter og eskadron; `-Strategy1864SkirmishArms`). Flagene fandtes; det nye er bat-filen og en rettelse.
+- Fejl rettet i testopsætningen: de svenske batteri/morter/eskadron fik siden Prussia og skød derfor på det svenske kompagni (kardæsk på 40 m, friendly fire). Nu `FoeSide`, og enhederne hedder "Sv. ...".
+- Køretur (4x tid, 240 s spilletid, enhedslog): begge batterier vælger mål og skyder salver (ca. 4-6 skud pr. salve), mortéren skyder hver ca. 21. s, svensk artilleri rammer dansk kompagni fra ca. t=185 (4-5 mand pr. træfning). Den danske eskadron venter ('Lurer'), rider om til flanken, og chargede i flanke/ryg på t=111 (13 mand tabt hos fjenden, trak sig tilbage på t=122). Svenske husarer rykker ind mod kompagni 1 (holder formationen på 138/80 m).
+- Observeret, ikke rettet: de danske kompagnier står passive ('Holder stillingen' på 414 m) fordi testen er `Passive` og venter på spillerordre; salvestørrelsen falder fra 6 til 1 skud for det danske batteri over tid (mandskabstab eller ammunitionstype - ikke undersøgt).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

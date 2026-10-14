@@ -420,13 +420,13 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
             const FString Tag = bDane ? TEXT("DK") : TEXT("EN");
             auto Own = [&](AStrategyUnit* U)
             {
-                U->Side = bDane ? EStrategySide::Denmark : EStrategySide::Prussia;
+                U->Side = bDane ? EStrategySide::Denmark : FoeSide;
                 U->bPlayerControllable = bDane;
                 U->bOfficerAIEnabled = true;
                 U->SetActorRotation(FRotator(0.0f, bDane ? 0.0f : 180.0f, 0.0f));
                 U->RefreshDebugLabel();
             };
-            if (AStrategyArtilleryBatteryUnit* Battery = SpawnArtilleryBattery(FName(*(Tag + TEXT("-SKIRMISH-BTY"))), bDane ? TEXT("2. Batteri") : TEXT("Pr. 4-pdr Batterie"),
+            if (AStrategyArtilleryBatteryUnit* Battery = SpawnArtilleryBattery(FName(*(Tag + TEXT("-SKIRMISH-BTY"))), bDane ? TEXT("2. Batteri") : bSwedes ? TEXT("Sv. 4-pdr Batteri") : TEXT("Pr. 4-pdr Batterie"),
                 Line + FVector(Back * 4000.0f, 0.0f, 0.0f), Hq))
             {
                 Own(Battery);
@@ -444,7 +444,7 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
                     Battery->ArtilleryAmmunitionComponent->CanisterRounds = 40;
                 }
             }
-            if (AStrategyMortarBatteryUnit* Mortar = SpawnMortarBattery(FName(*(Tag + TEXT("-SKIRMISH-MRT"))), bDane ? TEXT("Morterbatteri") : TEXT("Pr. Mörser"),
+            if (AStrategyMortarBatteryUnit* Mortar = SpawnMortarBattery(FName(*(Tag + TEXT("-SKIRMISH-MRT"))), bDane ? TEXT("Morterbatteri") : bSwedes ? TEXT("Sv. Morter") : TEXT("Pr. Mörser"),
                 Line + FVector(Back * 9000.0f, 9000.0f, 0.0f), Hq))
             {
                 Own(Mortar);
@@ -453,7 +453,7 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
                     Mortar->MortarFireComponent->SetUnitTarget(bDane ? EnemyTarget : DanishTarget);
                 }
             }
-            if (ACavalryUnit* Squadron = SpawnCavalry(FName(*(Tag + TEXT("-SKIRMISH-SQN"))), bDane ? TEXT("1. Eskadron") : TEXT("Pr. Husaren"),
+            if (ACavalryUnit* Squadron = SpawnCavalry(FName(*(Tag + TEXT("-SKIRMISH-SQN"))), bDane ? TEXT("1. Eskadron") : bSwedes ? TEXT("Sv. Husarer") : TEXT("Pr. Husaren"),
                 Line + FVector(Back * 2000.0f, -16000.0f, 0.0f), Hq))
             {
                 Own(Squadron);
