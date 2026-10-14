@@ -2151,6 +2151,12 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - `Tools/Animation/decimate_reload_props.py` decimerer ladestok (3.938 -> 1.227 trekanter), papirpatron (22.944 -> 1.672) og fænghætte (1.632 -> 511); resultatet i `SourceAssets/MusketReloadV03/Lowpoly`, kilderne i `Kildeassets`. Mål var 700/500/300; Blenders decimering ramte højere, så tallene skal strammes, før de bruges i mængden (summen er ca. 3.400 trekanter pr. figur, for meget i en bagt mængde; mål under 1.000).
 - Plan: rekvisitterne bliver hjælpeknogler på en bagt soldatmodel (ladestok på riflen i alle klip, patron/fænghætte skaleret til nul uden for ladning), så bagningen viser ladestokken. Afventer Codex' ladeanimation (cx-musket) for knogle-bevægelsen.
 
+### 2026-10-14 - Stående musketladning v03 (første version)
+
+- Codex' forsøg (worktree `cx-musket`) blev forkastet: armene blev strakt til bånd og riflen svævede over hovedet. Ny version bygget af mig i Blender med arm-IK: `Tools/Animation/build_standing_reload_v03.py` (331 billeder, 30 fps, 11 s, ingen root motion, base = Rifle Idle, hænder styret efter riflens greb, patrontaske, mund, ladestok og fænghætte) og `preview_standing_reload_v03.py` (kontaktark/gif). Skala: rifle 0,8, ladestok 0,9, patron 0,245, fænghætte 0,19 (fænghætten er overdrevet, så den kan ses).
+- Resultat: `SourceAssets/InfantryCombat/A_Combat_ReloadStandingV03.fbx` importeret som `/Game/Units/Human/CombatAnimations/A_Combat_ReloadStandingV03` (overskriver ikke den gamle). Rekvisitternes bevægelse (en transform pr. billede for rifle, ladestok, patron, fænghætte) ligger i `SourceAssets/MusketReloadV03/props_v03.json`. Preview: `Docs/musket_v03_preview.gif`.
+- Kendte mangler: ikke koblet til spillet endnu (ingen komponent, ingen notifies i Unreal, ingen bagning med rekvisitter); hænderne roterer ikke om riflen (kun position styres); arme er stive, torsoen læner ikke; patronen er meget lille; ladestoksfasen er forenklet (ét greb); ladetid skal skaleres til enhedens ladetid (11 s klip vs ca. 18-20 s i spillet); lavpoly-rekvisitter (`SourceAssets/MusketReloadV03/Lowpoly`) afventer knogler i bagningen.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -109,6 +109,11 @@
       "name": "A_Combat_SabreFight",
       "asset": "/Game/Units/Human/CombatAnimations/A_Combat_SabreFight.A_Combat_SabreFight",
       "seconds": 8.166666984558105
+    },
+    {
+      "name": "A_Combat_ReloadStandingV03",
+      "asset": "/Game/Units/Human/CombatAnimations/A_Combat_ReloadStandingV03.A_Combat_ReloadStandingV03",
+      "seconds": 11.0
     }
   ]
 }

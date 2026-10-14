@@ -103,6 +103,14 @@
       "fps": 30,
       "duration": 8.166666666666666,
       "bones": 41
+    },
+    {
+      "name": "ReloadStandingV03",
+      "file": "A_Combat_ReloadStandingV03.fbx",
+      "frames": 331,
+      "fps": 30,
+      "duration": 11.0,
+      "bones": 41
     }
   ]
 }
