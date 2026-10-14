@@ -296,6 +296,18 @@ bool UStrategyFireControlComponent::IsTargetFarSideInFireField(const AStrategyUn
     {
         return IsLocationInsideFireField(Target->GetActorLocation(), RangeCm);
     }
+    // Distances run from the front line (as IsLocationInsideFireField does), not from the unit's centre; a square measures from its centre.
+    const bool bSquareFront = Unit->FormationComponent && Unit->FormationComponent->CurrentFormation == EStrategyFormationType::Square;
+    FVector FrontLeft, FrontRight;
+    GetFireFront(FrontLeft, FrontRight, 0);
+    const FVector FrontLateral = (FrontRight - FrontLeft).GetSafeNormal2D();
+    const float FrontWidth = FVector::Dist2D(FrontLeft, FrontRight);
+    auto FrontDistance = [&](const FVector& P)
+    {
+        if (bSquareFront || FrontWidth < 1.0f) { return FVector::Dist2D(Unit->GetActorLocation(), P); }
+        const float Across = FMath::Clamp(FVector::DotProduct(P - FrontLeft, FrontLateral), 0.0f, FrontWidth);
+        return FVector::Dist2D(FrontLeft + FrontLateral * Across, P);
+    };
     float FarCornerCm = -1.0f;
     for (int32 Index = 1; Index + 2 < Points.Num(); Index += 3)
     {
@@ -303,7 +315,7 @@ bool UStrategyFireControlComponent::IsTargetFarSideInFireField(const AStrategyUn
         for (int32 Part = 0; Part < 3; ++Part)
         {
             if (!IsLocationInsideFireField(Points[Index + Part], MAX_flt)) continue;
-            const float D = FVector::Dist2D(Unit->GetActorLocation(), Points[Index + Part]);
+            const float D = FrontDistance(Points[Index + Part]);
             NearestCm = NearestCm < 0.0f ? D : FMath::Min(NearestCm, D);
         }
         if (NearestCm >= 0.0f) { FarCornerCm = FMath::Max(FarCornerCm, NearestCm); }

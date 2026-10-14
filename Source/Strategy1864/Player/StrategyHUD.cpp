@@ -790,7 +790,7 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
             }
         }
         // The sides from the front corners out to the long range, dashed white, with their angles.
-        const float Long = Fire->LongRangeCm;
+        const float Long = BatteryMaximum > 0.0f ? BatteryMaximum : Fire->LongRangeCm;
         for (const float Sign : { -1.0f, 1.0f })
         {
             const FVector Corner = Sign < 0.0f ? Left : Right;

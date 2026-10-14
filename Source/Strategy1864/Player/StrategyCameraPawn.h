@@ -78,7 +78,7 @@ public:
         return ProjectileFollowTarget.Get();
     }
 
-    /** Follows the first selected unit (F toggles). Any camera movement of the player's own ends it. */
+    /** Follows the first selected unit (G toggles). Any camera movement of the player's own ends it. */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Camera|Follow")
     bool bFollowingUnit = false;
 

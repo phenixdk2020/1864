@@ -127,6 +127,15 @@ Flag, våbenskjold, uniformsbilleder (fra mange vinkler), portrætter, figurmesh
 11. Billeder: svenske og norske flag, uniformsbilleder pr. periode, portrætter (hvis nødvendigt).
 12. Kamp: AI-doktriner, hvordan den svenske hær adskiller sig (fx kavaleri, kampstil), forsyning ved den danske grænse.
 
+### 4.4 Status for Codex' svensk-norske pakke (2026-10-14, aften)
+
+Codex-agenten har leveret en importpakke i `C:/Users/allan/Documents/Codex/2026-10-12/l/outputs/Sverige-Norge-agent/Spilimport/` (README, `Nations1851.json`, `Nations_1825.json`, `Population_1825/1851/1864.json`, `cities_neighbours_1825/1851.json`, `Events.json`, `Officers*.json`, `Trade_1851.json`, `Valuta.json`, `Union-regler.json` samt `SE/` og `NO/` med `Army*.json`, `Army_Neighbours*.json` og `Economy_1825/1851.json`) plus `Research/`, `Arbejdsstatus.md`, `Daekningsmatrix.md` og `verifikationslog.txt`.
+
+- Nøglerne følger spillets filer; ekstra felter er `fieldStatus`, `sovereign`, `union`, `active`, `note`, `source`, `status` og `commodities`. `Nations1851.json` mangler `canGuarantee`, `Trade_1851.json` mangler `comparison1847`. Det er delvise overlays, ikke færdige kampagnefiler.
+- Ukendte tal står som `null` med begrundelse (bl.a. fredsstyrke og dele af økonomien); spillets indlæsning skal håndtere `null`, før noget importeres. Intet er importeret i spillet.
+- I pakken: SE befolkning 3.498.336 og NO 1.417.310 i 1851-nationsfilen (skøn fra län/amter), norsk skat og gæld dobbelt belagt, svensk statsfinans 1825/1850/1851 fra Fregert og Gustafsson.
+- Preussen, Østrig, Hannover/Sachsen og uniformundersøgelsen er ikke lavet: Codex' kvote var brugt op, og den åbner igen 15. oktober kl. 02:38.
+
 ### 4.3 Foreslået rækkefølge
 1. Kilder for 1825 og 1851: befolkning pr. län (SCB), hærens opbygning (indelningsverket), Norges folketælling 1801, 1835, 1865 (til interpolering), Norges hær (værnepligt).
 2. Abstrakte tal (afsnit 2.1, 2.5, 2.8 fredsstyrke) færdige og kildebelagte, så nationen kan indgå i AI'en.

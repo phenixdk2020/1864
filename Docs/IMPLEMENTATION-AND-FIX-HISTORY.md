@@ -2187,6 +2187,12 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Nyt `Docs/Uniformer-Lande.md`: status for de 107 foreslåede uniformmodeller (13 lavet eller delvis, 94 backlog) pr. land, hvordan en figur laves i dag (billede, 3D, skelet, import, bagning), en strategi med fælles kroppe, farvepresets og hovedbeklædning som egen mesh, tre perioder pr. land (1825, 1851, 1864, mens regnearket næsten kun dækker 1864), prioritering og en skabelon til billedprompter. Ingen figurer er lavet.
 - Codex-opgaver sat i kø (kører efter landepakkerne): uniformundersøgelse pr. land og periode med kilder, farvepalette og færdige billedprompter i `Uniformer-agent`.
 
+### 2026-10-14 (aften) - Rettelser efter revisionsrapport, Sverige-Norge-pakke og Codex-kvote
+
+- Rapport fra Gemini/Antigravity (`1864_Campaign_Revisionsrapport.md`) gennemgået punkt for punkt. Rettet: batteriets stiplede sidelinjer i `StrategyHUD.cpp` brugte kanonens generelle rækkevidde (`Fire->LongRangeCm`) og går nu kun til den valgte ammunitions maks (`BatteryMaximum`); `IsTargetFarSideInFireField` måler nu afstand fra forreste geled (som `IsLocationInsideFireField`), ikke fra enhedens midte (firkant uændret); `PlayerTick` og `FocusSite` i `Campaign1851PlayerController.cpp` tjekker `Map.IsValid()` (de øvrige `Map->`-kald var allerede beskyttet i funktionernes begyndelse); kommentaren i `StrategyCameraPawn.h` siger nu (G toggles). Ikke gjort: de syv Toolset-plugins i `Game1864.uproject` er ikke slået fra, fordi de hænger sammen med Unreal-MCP; de fem scripts, der peger på den gamle mappe (`Game1864`), er ikke flyttet.
+- Acceptancetest efter rettelserne: 31 består, 7 fejler (T2, T4, T5, T6, T8, T9, T10, alle 'ikke implementeret').
+- Codex-agenten leverede en Sverige-Norge-importpakke (se `Docs/Landeskabelon.md` afsnit 4.4). Codex' kvote løb derefter ud (åbner igen 15. oktober kl. 02:38), så Preussen, Østrig, Hannover/Sachsen og uniformundersøgelsen er ikke lavet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

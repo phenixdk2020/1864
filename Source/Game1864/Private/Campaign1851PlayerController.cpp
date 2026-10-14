@@ -934,7 +934,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 	TryInit();
 	ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
-	if (!bInitialised || !Camera)
+	if (!bInitialised || !Camera || !Map.IsValid())
 	{
 		return;
 	}
@@ -3037,7 +3037,7 @@ void ACampaign1851PlayerController::OpenGameMenu()
 void ACampaign1851PlayerController::FocusSite(const ACampaign1851ConstructionSite* Site)
 {
 	ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
-	if (!Site || !Camera)
+	if (!Site || !Camera || !Map.IsValid())
 	{
 		return;
 	}
