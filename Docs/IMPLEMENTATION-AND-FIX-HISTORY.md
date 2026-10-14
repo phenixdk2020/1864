@@ -2182,6 +2182,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Nyt `Docs/Landeskabelon.md`: tre niveauer af et land (abstrakt, nabo på kortet, fuldt land), alle felter spillet bruger pr. land med fil og status, regler for at tilføje et land, hvor Sverige-Norge står i dag (abstrakte tal, et Skåne-udsnit, ingen svenske begivenheder) og en prioriteret opgaveliste, plus en skabelon til udfyldning.
 - Ny `Data/Campaign1851/Trade_1851.json`: kildebelagte handelstal 1851 (Danmarks Statistik) fra Codex' cirka-design til at kalibrere eksportmodellen. Selve kalibreringen af modellen er ikke lavet. Resten af Codex' design (amtstal, økonomi, hær) er ikke brugt, fordi vores data er mere detaljerede; kongeriget og hertugdømmernes samlede befolkning bruges som sanity check (vores kort 2,30 mio. mod 2,37 mio.).
 
+### 2026-10-14 - Uniformplan for landenes militær
+
+- Nyt `Docs/Uniformer-Lande.md`: status for de 107 foreslåede uniformmodeller (13 lavet eller delvis, 94 backlog) pr. land, hvordan en figur laves i dag (billede, 3D, skelet, import, bagning), en strategi med fælles kroppe, farvepresets og hovedbeklædning som egen mesh, tre perioder pr. land (1825, 1851, 1864, mens regnearket næsten kun dækker 1864), prioritering og en skabelon til billedprompter. Ingen figurer er lavet.
+- Codex-opgaver sat i kø (kører efter landepakkerne): uniformundersøgelse pr. land og periode med kilder, farvepalette og færdige billedprompter i `Uniformer-agent`.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
