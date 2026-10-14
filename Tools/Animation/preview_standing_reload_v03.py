@@ -53,7 +53,7 @@ def set_cam(kind):
     cam.location = pos
     cam.rotation_euler = (look - pos).to_track_quat('-Z', 'Y').to_euler()
 set_cam(VIEW)
-scales = {'rifle': 0.8, 'rod': 0.9, 'cart': 0.245, 'cap': 0.19}
+scales = {'rifle': 0.8, 'rod': 0.9, 'cart': 0.40, 'cap': 0.26}
 for f in FR:
     pose_at(f); i = f - 1
     for n, o in meshes.items():

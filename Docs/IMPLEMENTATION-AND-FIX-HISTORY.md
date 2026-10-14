@@ -2157,6 +2157,10 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Resultat: `SourceAssets/InfantryCombat/A_Combat_ReloadStandingV03.fbx` importeret som `/Game/Units/Human/CombatAnimations/A_Combat_ReloadStandingV03` (overskriver ikke den gamle). Rekvisitternes bevægelse (en transform pr. billede for rifle, ladestok, patron, fænghætte) ligger i `SourceAssets/MusketReloadV03/props_v03.json`. Preview: `Docs/musket_v03_preview.gif`.
 - Kendte mangler: ikke koblet til spillet endnu (ingen komponent, ingen notifies i Unreal, ingen bagning med rekvisitter); hænderne roterer ikke om riflen (kun position styres); arme er stive, torsoen læner ikke; patronen er meget lille; ladestoksfasen er forenklet (ét greb); ladetid skal skaleres til enhedens ladetid (11 s klip vs ca. 18-20 s i spillet); lavpoly-rekvisitter (`SourceAssets/MusketReloadV03/Lowpoly`) afventer knogler i bagningen.
 
+### 2026-10-14 - Musketladning v03, anden omgang: torso læner, større patron og hætte
+
+- Torsoen læner nu 6-14 grader mod riflen (Spine/Spine1, drejet om soldatens højre akse) i ladefaserne, så armene ikke er strakt helt ud; patron og fænghætte forstørret (skala 0,40 og 0,26). Genimporteret `A_Combat_ReloadStandingV03`. Stadig ikke koblet til spillet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -13,7 +13,7 @@ args = sys.argv[sys.argv.index('--') + 1:]
 KILDE, IDLE, OUT = Path(args[0]), args[1], Path(args[2])
 OUT.mkdir(parents=True, exist_ok=True)
 FIRST, LAST = 1, 331
-RIFLE_SCALE, ROD_SCALE, CART_SCALE, CAP_SCALE = 0.8, 0.9, 0.245, 0.19
+RIFLE_SCALE, ROD_SCALE, CART_SCALE, CAP_SCALE = 0.8, 0.9, 0.40, 0.26
 RIFLE_HALF = 1.0 * RIFLE_SCALE                      # butt at -1, muzzle at +1 in the FBX
 ROD_LEN = 1.196 * ROD_SCALE
 AXIS_Z, AXIS_Y = 0.08 * RIFLE_SCALE, 0.02 * RIFLE_SCALE   # the barrel's centre line in the FBX
@@ -83,6 +83,18 @@ def smooth(t):
 
 def lerp(a, b, t):
     return tuple(x + (y - x) * t for x, y in zip(a, b))
+
+
+LEAN = {0: 0, 24: 0, 40: 6, 100: 10, 130: 12, 168: 8, 200: 12, 235: 14, 262: 8, 280: 6, 300: 8, 330: 0}
+
+
+def lean_at(frame):
+    ks = sorted(LEAN)
+    for a, b in zip(ks, ks[1:]):
+        if a <= frame <= b:
+            t = (frame - a) / (b - a)
+            return LEAN[a] + (LEAN[b] - LEAN[a]) * smooth(t)
+    return 0.0
 
 
 def key_pair(frame):
@@ -245,6 +257,16 @@ frames_data = {}
 finals = {}
 for f in range(FIRST, LAST + 1):
     kk = solve(f - 1)
+    for pb in arm.pose.bones:
+        pb.matrix_basis = base[pb.name]
+    bpy.context.view_layer.update()
+    ang = math.radians(lean_at(f - 1))
+    for bn, share in (('mixamorig:Spine', 0.5), ('mixamorig:Spine1', 0.5)):
+        pb = arm.pose.bones[bn]
+        pivot = arm.matrix_world @ pb.head
+        R = Matrix.Translation(pivot) @ Quaternion(right_v, -ang * share).to_matrix().to_4x4() @ Matrix.Translation(-pivot)
+        pb.matrix = arm.matrix_world.inverted() @ (R @ (arm.matrix_world @ pb.matrix))
+        bpy.context.view_layer.update()
     tg['LH'].location = W(kk['hands']['LH'])
     tg['RH'].location = W(kk['hands']['RH'])
     bpy.context.view_layer.update()
