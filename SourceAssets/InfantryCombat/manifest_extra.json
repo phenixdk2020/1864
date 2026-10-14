@@ -1,8 +1,8 @@
 {
   "clips": [
     {
-      "name": "ReloadStanding",
-      "file": "A_Combat_ReloadStanding.fbx",
+      "name": "ReloadKneelingB",
+      "file": "A_Combat_ReloadKneelingB.fbx",
       "frames": 207,
       "fps": 30,
       "duration": 6.866666666666666,

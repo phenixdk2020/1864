@@ -2141,6 +2141,11 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Når et batteri har valgt kardæsk, tegnes den aktive kegle og fyldte flade ud til anden ring (`CloseRangeCm`, 400 m); ellers til lang rækkevidde. Batterier står ellers på 'Hold ild' i brandkontrollen og fik ingen fyldt flade. Kun visning, ingen ændring af skydereglerne (`StrategyHUD.cpp`). Bygget, ikke set i spillet.
 - Svar på spørgsmål: ammunitionen vælges automatisk efter afstand (kardæsk mod kompagni/kavaleri inden for 22 % af maks, højst 400 m). Der findes endnu ingen 'effektiv afstand' under maks pr. ammunitionstype; foreslået som næste skridt (træfsikkerhed falder fra effektiv til maks).
 
+### 2026-10-14 - Rettelse: Mixamo `Reload.fbx` er knælende, ikke stående
+
+- Ved gennemsyn af `Reload.fbx` på den danske soldat viste det sig, at klippet er en knælende ladning. Jeg havde importeret det som `A_Combat_ReloadStanding` og overskrevet den gamle stående ladning, så stående enheder ville have knælet under ladning. Rettet: den gamle stående ladning er gendannet fra git, og Mixamo-klippet hedder nu `A_Combat_ReloadKneelingB` (ved siden af `A_Combat_ReloadKneeling`). Genimporteret i `/Game/Units/Human/CombatAnimations`. Ingen standing-klip af Mixamo findes endnu.
+- Gennemgang af `1864_Musket_Reload_v03_Spec_og_Assets.zip` og Codex-arbejdsordren (R:\Onedrive\TEMP 3D UNREAL): pakken er kun en specifikation, ikke en animation. Skelettet er det samme 41-knogles Mixamo-skelet som vores; riflen er en perkussionsmusket med hane og uden fast ladestok (ladestok er derfor en separat prop); alle fem FBX'er er normaliseret i størrelse og skal skaleres (rifle 2,0, ladestok 1,2, patron 0,49, fænghætte 0,13 enheder; fænghætten er en kop). Arbejdsordren henviser til det gamle repo (`Strategy`/`unreal-port`) og skal tilpasses `1864-Campaign`. Kontaktark: `Docs/musket_v03_props.png`, `Docs/mixamo_reload_on_dk.png`.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -12,7 +12,7 @@ INF = 'Animationer M\u00e6nd'
 CAV = 'Danish Cavalry'
 # name, folder, file, lock_root_xz (movement belongs to the strategy unit)
 clips = [
-    ('ReloadStanding', INF, 'Reload.fbx', True),
+    ('ReloadKneelingB', INF, 'Reload.fbx', True),
     ('ReloadKneeling', INF, 'Reload kneeling.fbx', True),
     ('RiflePunch', INF, 'Rifle Punch.fbx', True),
     ('SideStep', INF, 'Rifle Side Step.fbx', True),

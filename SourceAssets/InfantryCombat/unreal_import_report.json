@@ -46,6 +46,11 @@
       "seconds": 6.866666793823242
     },
     {
+      "name": "A_Combat_ReloadKneelingB",
+      "asset": "/Game/Units/Human/CombatAnimations/A_Combat_ReloadKneelingB.A_Combat_ReloadKneelingB",
+      "seconds": 6.866666793823242
+    },
+    {
       "name": "A_Combat_ReloadKneeling",
       "asset": "/Game/Units/Human/CombatAnimations/A_Combat_ReloadKneeling.A_Combat_ReloadKneeling",
       "seconds": 6.866666793823242
