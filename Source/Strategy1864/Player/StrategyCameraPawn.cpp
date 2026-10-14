@@ -1,4 +1,8 @@
 ﻿#include "StrategyCameraPawn.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+#include "InputKeyEventArgs.h"
+#include "HAL/PlatformTime.h"
 #include "StrategyHUD.h"
 #include "Misc/ConfigCacheIni.h"
 #include "StrategyPlayerController.h"
@@ -82,6 +86,45 @@ void AStrategyCameraPawn::Tick(float DeltaTime)
         DeltaTime = FApp::GetDeltaTime();
     }
 
+    // Test flag: -Strategy1864PauseCameraTest pauses the battle after 5 s, drives the camera forward for 2 s while paused and logs how far it got.
+    {
+        static double TestStart = -1.0, MoveStart = -1.0;
+        static FVector StartLocation = FVector::ZeroVector;
+        static bool bTestDone = false;
+        if (!bTestDone && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864PauseCameraTest")))
+        {
+            const double RealNow = FPlatformTime::Seconds();
+            if (TestStart < 0.0) { TestStart = RealNow; }
+            if (MoveStart < 0.0 && RealNow - TestStart > 5.0)
+            {
+                UGameplayStatics::SetGamePaused(this, true);
+                MoveStart = RealNow;
+                StartLocation = GetActorLocation();
+                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-PAUSECAM: paused at %s"), *StartLocation.ToString());
+            }
+            if (MoveStart >= 0.0)
+            {
+                // A real W key through the input system: the axis binding must run while paused.
+                static bool bKeyDown = false;
+                APlayerController* TestPC = Cast<APlayerController>(GetController());
+                if (!bKeyDown && TestPC)
+                {
+                    bKeyDown = true;
+                    TestPC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::W, IE_Pressed, 1.0f));
+                }
+                if (RealNow - MoveStart > 2.0)
+                {
+                    if (TestPC) { TestPC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::W, IE_Released, 0.0f)); }
+                    bTestDone = true;
+                    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-PAUSECAM: paused=%d moved %.0f cm in 2 s (dt %.4f, velocity %.0f)"),
+                        UGameplayStatics::IsGamePaused(this) ? 1 : 0, FVector::Dist(StartLocation, GetActorLocation()), DeltaTime,
+                        MovementComponent ? MovementComponent->Velocity.Size() : -1.f);
+                    UGameplayStatics::SetGamePaused(this, false);
+                }
+            }
+        }
+    }
+
     if (MovementComponent)
     {
         const APlayerController* PC = Cast<APlayerController>(GetController());
@@ -100,7 +143,26 @@ void AStrategyCameraPawn::Tick(float DeltaTime)
     }
     if (!bFollowingProjectile)
     {
-        if (bFocusTransition)
+        if (bFollowingUnit)
+        {
+            // Glide after the unit's figures (their centre, not the order point), in real time, also while paused.
+            if (AStrategyUnit* Followed = FollowedUnit.Get())
+            {
+                FVector Point = Followed->GetActorLocation();
+                if (const UStrategyInfantryVisualComponent* FollowVisual = Followed->FindComponentByClass<UStrategyInfantryVisualComponent>())
+                {
+                    FVector Centroid;
+                    if (FollowVisual->GetFigureLocalCentroid(Centroid)) Point = Followed->GetActorTransform().TransformPosition(Centroid);
+                }
+                const FVector Goal(Point.X, Point.Y, Point.Z + 100.f);
+                SetActorLocation(FMath::Lerp(GetActorLocation(), Goal, 1.f - FMath::Exp(-UnitFollowSmoothing * DeltaTime)));
+            }
+            else
+            {
+                StopUnitFollow();
+            }
+        }
+        else if (bFocusTransition)
         {
             const float FocusAlpha = 1.f - FMath::Exp(-8.f * DeltaTime);
             SetActorLocation(FMath::Lerp(GetActorLocation(), FocusTarget, FocusAlpha));
@@ -182,6 +244,7 @@ void AStrategyCameraPawn::SetupPlayerInputComponent(UInputComponent* PlayerInput
     PlayerInputComponent->BindAction(TEXT("CameraPan"), IE_Pressed, this, &AStrategyCameraPawn::BeginCameraPan).bExecuteWhenPaused = true;
     PlayerInputComponent->BindAction(TEXT("CameraPan"), IE_Released, this, &AStrategyCameraPawn::EndCameraPan).bExecuteWhenPaused = true;
     PlayerInputComponent->BindAction(TEXT("CameraFocus"), IE_Pressed, this, &AStrategyCameraPawn::FocusSelected).bExecuteWhenPaused = true;
+    PlayerInputComponent->BindAction(TEXT("CameraFollow"), IE_Pressed, this, &AStrategyCameraPawn::ToggleFollowSelected).bExecuteWhenPaused = true;
     PlayerInputComponent->BindAction(TEXT("CameraOverview"), IE_Pressed, this, &AStrategyCameraPawn::PresetOverview).bExecuteWhenPaused = true;
     PlayerInputComponent->BindAction(TEXT("CameraTactical"), IE_Pressed, this, &AStrategyCameraPawn::PresetTactical).bExecuteWhenPaused = true;
     PlayerInputComponent->BindAction(TEXT("CameraSoldiers"), IE_Pressed, this, &AStrategyCameraPawn::PresetSoldiers).bExecuteWhenPaused = true;
@@ -190,6 +253,7 @@ void AStrategyCameraPawn::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 void AStrategyCameraPawn::MoveForward(float Value)
 {
+    if (!FMath::IsNearlyZero(Value)) { StopUnitFollow(); }
     if (!FMath::IsNearlyZero(Value) && bFollowingProjectile)
     {
         StopProjectileFollow(true);
@@ -209,6 +273,7 @@ void AStrategyCameraPawn::MoveForward(float Value)
 
 void AStrategyCameraPawn::MoveRight(float Value)
 {
+    if (!FMath::IsNearlyZero(Value)) { StopUnitFollow(); }
     if (!FMath::IsNearlyZero(Value) && bFollowingProjectile)
     {
         StopProjectileFollow(true);
@@ -371,10 +436,36 @@ void AStrategyCameraPawn::MouseOrbitY(float Value)
         SpringArm->SetRelativeRotation(Rotation);
     }
 }
-void AStrategyCameraPawn::BeginCameraPan() { bRightMousePan = true; }
+void AStrategyCameraPawn::BeginCameraPan() { bRightMousePan = true; StopUnitFollow(); }
 void AStrategyCameraPawn::EndCameraPan() { bRightMousePan = false; }
+void AStrategyCameraPawn::ToggleFollowSelected()
+{
+    if (bFollowingUnit) { StopUnitFollow(); return; }
+    if (AStrategyPlayerController* PC = Cast<AStrategyPlayerController>(GetController()))
+    {
+        for (AStrategyUnit* Candidate : PC->GetSelectedUnits())
+        {
+            if (IsValid(Candidate))
+            {
+                if (bFollowingProjectile) StopProjectileFollow(true);
+                FollowedUnit = Candidate;
+                bFollowingUnit = true;
+                bFocusTransition = false;
+                return;
+            }
+        }
+    }
+}
+
+void AStrategyCameraPawn::StopUnitFollow()
+{
+    bFollowingUnit = false;
+    FollowedUnit.Reset();
+}
+
 void AStrategyCameraPawn::FocusSelected()
 {
+    StopUnitFollow();
     if (AStrategyPlayerController* PC = Cast<AStrategyPlayerController>(GetController()))
     {
         const TArray<AStrategyUnit*> Units = PC->GetSelectedUnits();

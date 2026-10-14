@@ -39,6 +39,8 @@
 #include "../Units/CavalryUnit.h"
 #include "../Artillery/StrategyArtilleryBatteryUnit.h"
 #include "../Artillery/StrategyArtilleryAmmunitionComponent.h"
+#include "../Units/StrategyHQUnit.h"
+#include "../Artillery/StrategyArtilleryFireMissionComponent.h"
 #include "../Units/StrategyDragoonComponent.h"
 #include "../Combat/StrategyStanceComponent.h"
 #include "../Tests/StrategyOOBTestScenario.h"
@@ -74,6 +76,7 @@ namespace
     bool IsCommandHQ(const AStrategyUnit* Unit)
     {
         // Any unit with subordinates is a headquarters (the staff does not fire, so no fire cone).
+        if (Cast<AStrategyHQUnit>(Unit)) { return true; }
         if (Unit->CommandComponent && Unit->CommandComponent->CurrentSubordinates.Num() > 0) { return true; }
         return Unit->Echelon == EStrategyEchelon::Division || Unit->Echelon == EStrategyEchelon::Brigade ||
             Unit->Echelon == EStrategyEchelon::Regiment || Unit->Echelon == EStrategyEchelon::Battalion ||
@@ -681,7 +684,7 @@ void AStrategyHUD::DrawMovementRoute(const AStrategyUnit* Unit, bool bSelected)
 void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
 {
     const UStrategyFireControlComponent* Fire = Unit->FireControlComponent;
-    if (!Fire || !Unit->IsCombatEffective())
+    if (!Fire || !Unit->IsCombatEffective() || IsCommandHQ(Unit))
     {
         return;
     }
@@ -722,18 +725,22 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
     const FLinearColor Active = bDanish ? FLinearColor::FromSRGBColor(FColor(255, 186, 40)) : FLinearColor::FromSRGBColor(FColor(255, 96, 60));
     float ActiveRange = Fire->GetActiveRangeCm();
     bool bHold = Fire->FirePolicy == EStrategyFirePolicy::Hold;
-    // A battery's reach is its chosen shot: canister (the second ring) when the enemy is close, otherwise the long range.
+    // A battery's rings follow its chosen shot: the shot's maximum, its effective range (the filled band) and, for case shot, nothing beyond.
+    float BatteryEffective = -1.0f, BatteryMaximum = -1.0f;
     if (const AStrategyArtilleryBatteryUnit* Battery = Cast<AStrategyArtilleryBatteryUnit>(Unit))
     {
-        if (Battery->ArtilleryAmmunitionComponent)
+        if (Battery->ArtilleryAmmunitionComponent && Battery->ArtilleryFireMissionComponent)
         {
+            const EStrategyArtilleryAmmoType Ammo = Battery->ArtilleryAmmunitionComponent->SelectedAmmo;
             bHold = false;
-            ActiveRange = Battery->ArtilleryAmmunitionComponent->SelectedAmmo == EStrategyArtilleryAmmoType::Canister ? Fire->CloseRangeCm : Fire->LongRangeCm;
+            BatteryEffective = Battery->ArtilleryFireMissionComponent->GetEffectiveRangeCm(Ammo);
+            BatteryMaximum = Battery->ArtilleryFireMissionComponent->GetMaximumRangeCm(Ammo);
+            ActiveRange = BatteryEffective;
         }
     }
 
     struct FRange { float Cm; const TCHAR* Name; };
-    const FRange Ranges[] = { { Fire->CloseRangeCm, TEXT("CLOSE") }, { Fire->MediumRangeCm, TEXT("MEDIUM") }, { Fire->LongRangeCm, TEXT("LONG") } };
+    const FRange Ranges[] = { { BatteryEffective > 0.0f ? BatteryEffective * 0.4f : Fire->CloseRangeCm, TEXT("CLOSE") }, { BatteryEffective > 0.0f ? BatteryEffective : Fire->MediumRangeCm, TEXT("MEDIUM") }, { BatteryMaximum > 0.0f ? BatteryMaximum : Fire->LongRangeCm, TEXT("LONG") } };
     if (!bTagMounted && Fire->IsBattleFormationReady() && (!ConeVisual || ConeVisual->IsVisualFormationComplete()))
     {
         // The chosen band filled (front to the chosen range), translucent; the enemy's cone only in outline (its fill
@@ -1230,7 +1237,9 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         return false;
     };
     const bool HudFormationEnabled = HudSupports([](AStrategyUnit* HudCandidate) { return !IsCommandHQ(HudCandidate) && HudCandidate->FormationComponent; });
-    const FLinearColor HudOnRed(0.65f, 0.24f, 0.28f, 1.f), HudOffGreen(0.22f, 0.82f, 0.46f, 1.f);
+    // The chosen state lights up: ON green, OFF red; the other stays dark.
+    const FLinearColor HudAIOnColour(0.22f, 0.72f, 0.40f, 1.f), HudAIOffColour(0.78f, 0.20f, 0.24f, 1.f), HudAIDark(0.16f, 0.19f, 0.21f, 1.f);
+    const FLinearColor HudOnRed = Unit->bOfficerAIEnabled ? HudAIOnColour : HudAIDark, HudOffGreen = !Unit->bOfficerAIEnabled ? HudAIOffColour : HudAIDark;
     const float HudLeadW = HudW[1];
     auto HudInlinePills = [&](float X, float W, float Y, const TCHAR* const* Labels, int32 Count, EAction Action, int32 Active, bool Enabled)
     {
@@ -1970,14 +1979,18 @@ void AStrategyHUD::DrawReportEquipment(const FString& Cell, float X, float Y, fl
     }
     // The cell is divided evenly: an icon and its count in each sixth.
     const float Slot = Width / 6.f;
-    const float IconSize = FMath::Clamp(Slot * 0.72f, 20.f, 32.f);
+    const float IconSize = FMath::Clamp(Slot * 0.72f, 22.f, 30.f);
     for (int32 Kind = 0; Kind < 6; ++Kind)
     {
         const float SlotX = X + Kind * Slot;
         const bool bNone = Counts[Kind] <= 0;
         if (ReportIconTextures.IsValidIndex(Kind) && ReportIconTextures[Kind])
+        {
+            // A light plate behind the icon so the dark equipment art reads against the dark report; a zero is a dimmer plate.
+            DrawRect(bNone ? FLinearColor(0.60f, 0.58f, 0.52f, 0.35f) : FLinearColor(0.93f, 0.90f, 0.78f, 0.96f), SlotX - 2.f, Y - 9.f, IconSize + 4.f, IconSize + 4.f);
             DrawTexture(ReportIconTextures[Kind], SlotX, Y - 7.f, IconSize, IconSize, 0.f, 0.f, 1.f, 1.f,
-                bNone ? FLinearColor(1.f, 1.f, 1.f, 0.38f) : FLinearColor::White, EBlendMode::BLEND_Translucent);
+                bNone ? FLinearColor(1.f, 1.f, 1.f, 0.55f) : FLinearColor::White, EBlendMode::BLEND_Translucent);
+        }
         Text(FString::FromInt(Counts[Kind]), SlotX + IconSize + 4.f, Y, bNone ? Muted : Colour);
     }
 }

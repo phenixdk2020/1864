@@ -1,4 +1,6 @@
 #include "StrategyFireControlComponent.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 #include "StrategyVisibilityComponent.h"
 #include "../Formations/StrategyFormationTransitionComponent.h"
@@ -278,6 +280,41 @@ bool UStrategyFireControlComponent::IsLocationInsideFireField(FVector Location, 
     return false;
 }
 
+bool UStrategyFireControlComponent::IsTargetFarSideInFireField(const AStrategyUnit* Target, float RangeCm) const
+{
+    if (!IsValid(Target) || RangeCm <= 0.0f) return false;
+    const AStrategyUnit* Unit = OwnerUnit ? OwnerUnit.Get() : Cast<AStrategyUnit>(GetOwner());
+    if (!Unit) return false;
+    // Test flag: -Strategy1864NoFarCorner opens fire on the target's middle as before.
+    static const bool bNoFarCorner = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864NoFarCorner"));
+    if (bNoFarCorner) { return IsLocationInsideFireField(Target->GetActorLocation(), RangeCm); }
+    // Fire is opened when the far corner of the target's near face is within the range, not when the middle of the line is.
+    // The sample points are the target's centre, then (front, rear, middle) across its width: for each place across the width
+    // the nearest of the three is its near face, and the furthest of those places is the far corner.
+    const TArray<FVector> Points = GetTargetSamplePoints(Target);
+    if (Points.Num() < 4)
+    {
+        return IsLocationInsideFireField(Target->GetActorLocation(), RangeCm);
+    }
+    float FarCornerCm = -1.0f;
+    for (int32 Index = 1; Index + 2 < Points.Num(); Index += 3)
+    {
+        float NearestCm = -1.0f;
+        for (int32 Part = 0; Part < 3; ++Part)
+        {
+            if (!IsLocationInsideFireField(Points[Index + Part], MAX_flt)) continue;
+            const float D = FVector::Dist2D(Unit->GetActorLocation(), Points[Index + Part]);
+            NearestCm = NearestCm < 0.0f ? D : FMath::Min(NearestCm, D);
+        }
+        if (NearestCm >= 0.0f) { FarCornerCm = FMath::Max(FarCornerCm, NearestCm); }
+    }
+    if (FarCornerCm < 0.0f)
+    {
+        return false;
+    }
+    return FarCornerCm <= RangeCm;
+}
+
 bool UStrategyFireControlComponent::CanEngageTarget(const AStrategyUnit* Target, bool bRequireFireCone) const
 {
     const AStrategyUnit* Unit = OwnerUnit ? OwnerUnit.Get() : Cast<AStrategyUnit>(GetOwner());
@@ -292,7 +329,7 @@ bool UStrategyFireControlComponent::CanEngageTarget(const AStrategyUnit* Target,
         return false;
     }
 
-    if (bRequireFireCone ? !IsLocationInsideFireField(Target->GetActorLocation(), GetActiveRangeCm()) :
+    if (bRequireFireCone ? !IsTargetFarSideInFireField(Target, GetActiveRangeCm()) :
         FVector::Dist2D(Unit->GetActorLocation(), Target->GetActorLocation()) > GetActiveRangeCm())
     {
         return false;

@@ -74,6 +74,10 @@ public:
     UFUNCTION(BlueprintPure, Category="Strategy|Fire")
     bool IsLocationInsideFireField(FVector Location, float RangeCm) const;
 
+    /** True when the furthest man of the target that the fire cone covers is within RangeCm. */
+    bool IsTargetFarSideInFireField(const AStrategyUnit* Target, float RangeCm) const;
+
+
     /** Can a man standing at From (facing Forward) bring his musket to bear on any part of the target
      *  formation: ahead of him, inside the range, within the half angle of the fire cone from his place. */
     bool CanPointBearOn(const FVector& From, const FVector& Forward, const AStrategyUnit* Target, float RangeCm) const;

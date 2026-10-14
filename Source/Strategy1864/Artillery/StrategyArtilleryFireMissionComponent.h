@@ -146,6 +146,10 @@ public:
         EStrategyArtilleryAmmoType AmmoType) const;
 
     UFUNCTION(BlueprintPure, Category="Strategy|Artillery")
+    float GetEffectiveRangeCm(
+        EStrategyArtilleryAmmoType AmmoType) const;
+
+    UFUNCTION(BlueprintPure, Category="Strategy|Artillery")
     bool CanEngageTarget(const AStrategyUnit* Target) const;
 
     UFUNCTION(BlueprintPure, Category="Strategy|Artillery")

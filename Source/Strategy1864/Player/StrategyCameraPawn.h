@@ -4,6 +4,7 @@
 #include "GameFramework/Pawn.h"
 #include "StrategyCameraPawn.generated.h"
 
+class AStrategyUnit;
 class UCameraComponent;
 class UFloatingPawnMovement;
 class USceneComponent;
@@ -77,7 +78,21 @@ public:
         return ProjectileFollowTarget.Get();
     }
 
+    /** Follows the first selected unit (F toggles). Any camera movement of the player's own ends it. */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Camera|Follow")
+    bool bFollowingUnit = false;
+
+    UFUNCTION(BlueprintCallable, Category="Strategy|Camera|Follow")
+    void ToggleFollowSelected();
+
+    UFUNCTION(BlueprintCallable, Category="Strategy|Camera|Follow")
+    void StopUnitFollow();
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Camera|Follow")
+    float UnitFollowSmoothing = 4.0f;
+
 private:
+    TWeakObjectPtr<AStrategyUnit> FollowedUnit;
     void MoveForward(float Value);
     void MoveRight(float Value);
     void ZoomCamera(float Value);

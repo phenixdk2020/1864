@@ -351,6 +351,28 @@ float UStrategyArtilleryFireMissionComponent::GetMaximumRangeCm(
     }
 }
 
+float UStrategyArtilleryFireMissionComponent::GetEffectiveRangeCm(
+    EStrategyArtilleryAmmoType AmmoType) const
+{
+    // Where the shot does its best work; beyond it accuracy and effect fall off towards the maximum.
+    float Fraction = 0.5f;
+    switch (AmmoType)
+    {
+        case EStrategyArtilleryAmmoType::Canister:
+            Fraction = 0.625f;      // about 250 m of a 400 m limit
+            break;
+        case EStrategyArtilleryAmmoType::Shrapnel:
+        case EStrategyArtilleryAmmoType::Shell:
+            Fraction = 0.6f;
+            break;
+        case EStrategyArtilleryAmmoType::RoundShot:
+        default:
+            Fraction = 0.5f;
+            break;
+    }
+    return GetMaximumRangeCm(AmmoType) * Fraction;
+}
+
 bool UStrategyArtilleryFireMissionComponent::CanEngageTarget(
     const AStrategyUnit* Target) const
 {
@@ -509,7 +531,11 @@ bool UStrategyArtilleryFireMissionComponent::SelectBestAmmoForTarget(
 
     TArray<EStrategyArtilleryAmmoType> Preference;
 
-    if (Distance <= GetMaximumRangeCm(EStrategyArtilleryAmmoType::Canister) &&
+    // Case shot where it is effective (a little further out while it is already loaded, so the choice does not flip-flop).
+    const float CanisterReach =
+        GetEffectiveRangeCm(EStrategyArtilleryAmmoType::Canister) *
+        (OwnerBattery->ArtilleryAmmunitionComponent->SelectedAmmo == EStrategyArtilleryAmmoType::Canister ? 1.3f : 1.0f);
+    if (Distance <= FMath::Min(CanisterReach, GetMaximumRangeCm(EStrategyArtilleryAmmoType::Canister)) &&
         (Target->Echelon == EStrategyEchelon::Company ||
          Target->Echelon == EStrategyEchelon::Cavalry))
     {
@@ -825,9 +851,14 @@ int32 UStrategyArtilleryFireMissionComponent::ResolveCasualties(
     const float RangeFraction =
         FMath::Clamp(DistanceCm / MaxRange, 0.0f, 1.0f);
 
+    // Full accuracy out to the shot's effective range, then falling off towards its maximum.
+    const float EffectiveRange = GetEffectiveRangeCm(AmmoType);
+    const float OverEffective =
+        FMath::Clamp((DistanceCm - EffectiveRange) / FMath::Max(1.0f, MaxRange - EffectiveRange), 0.0f, 1.0f);
+
     float HitChance =
         GetBaseGunHitChance(AmmoType) * WeaponAccuracyFactor *
-        FMath::Lerp(1.0f, 0.45f, RangeFraction);
+        FMath::Lerp(1.0f, 0.45f, OverEffective);
 
     if (Target->StanceComponent)
     {
@@ -878,7 +909,7 @@ int32 UStrategyArtilleryFireMissionComponent::ResolveCasualties(
     }
 
     const float MissDispersionCm =
-        FMath::Lerp(450.0f, 2800.0f, RangeFraction);
+        FMath::Lerp(450.0f, 2800.0f, OverEffective);
 
     int32 Casualties = 0;
 
@@ -969,9 +1000,12 @@ bool UStrategyArtilleryFireMissionComponent::FireAtLocation(
     const float RangeFraction =
         FMath::Clamp(DistanceCm / MaxRange, 0.0f, 1.0f);
 
+    const float ManualEffective = GetEffectiveRangeCm(AmmoType);
+    const float ManualOver =
+        FMath::Clamp((DistanceCm - ManualEffective) / FMath::Max(1.0f, MaxRange - ManualEffective), 0.0f, 1.0f);
     const float DispersionCm =
         ManualAreaRadiusCm +
-        FMath::Lerp(250.0f, 2200.0f, RangeFraction);
+        FMath::Lerp(250.0f, 2200.0f, ManualOver);
 
     TMap<AStrategyUnit*, int32> CasualtiesByTarget;
     TArray<FVector> ImpactLocations;
@@ -1034,7 +1068,7 @@ bool UStrategyArtilleryFireMissionComponent::FireAtLocation(
 
         float HitChance =
             GetBaseGunHitChance(AmmoType) * WeaponAccuracyFactor *
-            FMath::Lerp(1.0f, 0.45f, RangeFraction);
+            FMath::Lerp(1.0f, 0.45f, ManualOver);
 
         CasualtiesByTarget.FindOrAdd(BestTarget); // Include misses in the single incoming-fire notification per salvo.
         if (BestTarget->StanceComponent) HitChance *= BestTarget->StanceComponent->GetIncomingArtilleryHitMultiplier();

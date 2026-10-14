@@ -257,6 +257,8 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
         }
         else if (AcceptanceId == TEXT("DISENGAGE"))
         {
+            // Fire opens when the far corner of the enemy's front is in range, so the enemy is placed close enough for all of it.
+            AcceptanceOther->SetActorLocation(AcceptanceStart + FVector(4000, 0, 0));
             AcceptanceCompany->FireDisciplineComponent->SetDiscipline(EStrategyFireDiscipline::FireAtWill);
             Strategy1864Acceptance::Order(AcceptanceCompany, EStrategyOrderType::Disengage, AcceptanceStart);
         }

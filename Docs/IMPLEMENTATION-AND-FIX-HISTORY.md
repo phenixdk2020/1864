@@ -2165,6 +2165,18 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 
 - `Tools/Animation/build_cavalry_sabre_set.py`: rytterens sæde (bækken og ben fra 'Reload sitting') med overkroppen fra Mixamo-sabelklippene; `A_Combat_CavSabreDraw` (0,5 s), `A_Combat_CavSabreSlash` (4,5 s, fra One Hand Sword Combo) og `A_Combat_CavSabreFight` (8,2 s). Importeret i `/Game/Units/Human/CombatAnimations` (`import_infantry_combat_set.py` læser nu også `manifest_cav.json`). Ikke koblet til spillet: ryttere tegnes som bagte hjælpefigurer (`DrawAuxiliary`) med et statisk sabel-mesh, som ikke kan følge en bevægende hånd; kobling kræver sabelposer pr. billede i crowd-modellen (som RiflePoses) og genbagning.
 
+### 2026-10-14 - Skudafstand, ildåbning, HUD og kamera (bygget, 31 af 38 acceptancetests består)
+
+- **Effektiv skudafstand (artilleri):** `GetEffectiveRangeCm` pr. ammunitionstype (kardæsk 62,5 % af sin maks = ca. 250 m, shrapnel og granat 60 %, kugle 50 %). Træfsikkerhed og spredning er fulde ud til den effektive afstand og falder derefter mod maks (før faldt de fra 0 m). Kardæsk vælges inden for sin effektive afstand (30 % længere, mens den allerede er valgt, så valget ikke hopper). Kardæskens tab-multiplikator er uændret.
+- **Batterikegle:** ringene følger den valgte ammunition (effektiv afstand som fyldt flade, maks som yderste ring); batterier havde før ingen fyldt flade (standard 'Hold ild').
+- **HQ uden skydekegle:** alle `AStrategyHQUnit` springes over (også i `DrawFireCone`).
+- **Ildåbning ved fjerneste hjørne:** `CanEngageTarget` (med kegle) kræver nu, at fjendens fjerneste hjørne på den nære flade ligger inden for rækkevidde (`IsTargetFarSideInFireField`), ikke kun midtpunktet; før åbnede kompagniet ild, når halvdelen af fjendens linje var uden for rækkevidde. Testflag `-Strategy1864NoFarCorner` slår reglen fra. Acceptancetesten `DISENGAGE` stillede fjenden 60 m væk, hvor hjørnet lå uden for 70 m; fixturen er flyttet til 40 m.
+- **Rapportikoner:** lys plade bag kanon/morter/rifle/hest/vogn/fane; nuller dæmpes mindre (`DrawReportEquipment`).
+- **AI-knap:** ON lyser grøn, OFF rød, den anden mørk (før altid ON rød, OFF grøn).
+- **Kamera under pause:** testflag `-Strategy1864PauseCameraTest` (pauser efter 5 s, sender en W-tast, logger flytningen). Resultat i den nuværende bygning: kameraet flytter sig også under pause (54.000 cm på 2 s, både via kode og via simuleret W). Brugerens rapport om, at kun minimap virker, er derfor ikke gentaget; mistanke: ældre bygning, musehjul eller højreklik-træk. Uafklaret.
+- **Kamera følger enheden:** tast G (CameraFollow) følger første valgte enhed (figurernes midte), blød glidning (4/s, også under pause); WASD, højreklik-træk eller Home afbryder.
+- **Revisionsrapport (Gemini) gennemgået:** stort set om den gamle mappe; i dette repo er `Map.IsValid()` allerede kontrolleret, og `GetBoneLocation` bruges ikke. Rettet: dubleret `DefaultGraphicsRHI` i `DefaultEngine.ini`. Ikke rettet: `import_horse_rigged.py` har en absolut sti; projektet ligger i OneDrive (rapportens P0, bygger lykkes dog).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
