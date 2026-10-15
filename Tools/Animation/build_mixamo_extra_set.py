@@ -63,7 +63,7 @@ def bake(rig, name, frames):
     path = output / ('A_Combat_' + name + '.fbx')
     bpy.ops.export_scene.fbx(filepath=str(path), use_selection=True, object_types={'ARMATURE'},
         add_leaf_bones=False, bake_anim_use_all_actions=False, bake_anim_use_nla_strips=False,
-        bake_anim_simplify_factor=0, axis_forward='-Y', axis_up='Z')
+        bake_anim_simplify_factor=0, axis_forward='-Z', axis_up='Y')
     return {'name': name, 'file': path.name, 'frames': len(frames), 'fps': 30,
             'duration': (len(frames) - 1) / 30, 'bones': len(rig.data.bones)}
 

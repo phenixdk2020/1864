@@ -2010,7 +2010,7 @@ void AStrategyHUD::DrawReportEquipment(const FString& Cell, float X, float Y, fl
     }
     // The cell is divided evenly: an icon and its count in each sixth.
     const float Slot = Width / 6.f;
-    const float IconSize = FMath::Clamp(Slot * 0.46f, 22.f, 34.f);
+    const float IconSize = FMath::Clamp(Slot * 0.55f, 26.f, 41.f);
     for (int32 Kind = 0; Kind < 6; ++Kind)
     {
         const float SlotX = X + Kind * Slot;
@@ -2018,7 +2018,7 @@ void AStrategyHUD::DrawReportEquipment(const FString& Cell, float X, float Y, fl
         if (ReportIconTextures.IsValidIndex(Kind) && ReportIconTextures[Kind])
         {
             // The icons carry their own light outline; a zero is drawn dimmer.
-            DrawTexture(ReportIconTextures[Kind], SlotX, Y - 9.f, IconSize, IconSize, 0.f, 0.f, 1.f, 1.f,
+            DrawTexture(ReportIconTextures[Kind], SlotX, Y - 12.f, IconSize, IconSize, 0.f, 0.f, 1.f, 1.f,
                 bNone ? FLinearColor(1.f, 1.f, 1.f, 0.45f) : FLinearColor::White, EBlendMode::BLEND_Translucent);
         }
         Text(FString::FromInt(Counts[Kind]), SlotX + IconSize + 3.f, Y - 1.f, bNone ? Muted : Colour, 1.1f);
@@ -2062,7 +2062,7 @@ void AStrategyHUD::DrawAfterActionReport()
         const float ReportWidths[] = { .115f, .045f, .04f, .04f, .04f, .23f, .23f, .085f, .055f, .035f, .04f, .045f };
         const TCHAR* ReportHeadings[] = { TEXT("Enhed"), TEXT("Mand ved start"), TEXT("Faldne"), TEXT("Sårede"), TEXT("Fanger"), TEXT("Erobret udstyr"), TEXT("Tabt udstyr"), TEXT("Ammunition"), TEXT("Mad (dage)"), TEXT("Skud"), TEXT("Kamp sek."), TEXT("Moraltab") };
         const float ReportUsable = ReportW - 40.f;
-        const float ReportRowH = 36.f;   // a larger row for the larger text and icons
+        const float ReportRowH = 40.f;   // a larger row for the larger text and icons
         auto ReportFitText = [&](const FString& ReportCell, float ReportCellX, float ReportCellY, float ReportCellWidth)
         {
             float ReportMeasuredWidth = 0.f, ReportMeasuredHeight = 0.f;

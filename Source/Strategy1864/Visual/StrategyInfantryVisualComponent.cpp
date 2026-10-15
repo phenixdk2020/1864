@@ -325,16 +325,18 @@ void UStrategyInfantryVisualComponent::TickComponent(
         const float Now = GetWorld()->GetTimeSeconds();
         if (FMath::FloorToInt(Now / 10.0f) != FMath::FloorToInt((Now - DeltaTime) / 10.0f))
         {
-            int32 Walking = 0, Firing = 0, Loading = 0;
+            int32 Walking = 0, Firing = 0, Loading = 0, ShoulderClips = 0;
             for (const FPlayedClip& Clip : SoldierClips)
             {
                 const FString Name = Clip.Clip.IsValid() ? Clip.Clip->GetName() : FString();
                 Walking += Name.Contains(TEXT("Walk")) ? 1 : 0;
+                ShoulderClips += Name.Contains(TEXT("Shoulder")) ? 1 : 0;
                 Firing += Name.Contains(TEXT("Fire")) || Name.Contains(TEXT("Firing")) ? 1 : 0;
                 Loading += Name.Contains(TEXT("Reload")) ? 1 : 0;
             }
-            UE_LOG(LogTemp, Display, TEXT("COMBAT-ANIMATION-AUDIT %s strength=%d walk=%d fire=%d reload=%d corpses=%d"),
-                *OwnerCompany->DisplayName.ToString(), CurrentStrength, Walking, Firing, Loading, CorpseComponents.Num());
+            UE_LOG(LogTemp, Display, TEXT("COMBAT-ANIMATION-AUDIT %s strength=%d walk=%d fire=%d reload=%d corpses=%d shoulderCol=%d shoulderClips=%d formation=%d"),
+                *OwnerCompany->DisplayName.ToString(), CurrentStrength, Walking, Firing, Loading, CorpseComponents.Num(), bShoulderColumn ? 1 : 0, ShoulderClips,
+                OwnerCompany->FormationComponent ? int32(OwnerCompany->FormationComponent->CurrentFormation) : -1);
         }
     }
 }
@@ -1844,6 +1846,17 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
     const bool bVisualTravel = !bArrivalReform && (VisualPath.bMovingVisuals || bActorMoved);
     const bool bSpreadCrawling = OwnerCompany->StanceComponent && OwnerCompany->StanceComponent->Stance == EStrategyStance::Prone;
     UAnimSequence* Walk = (bSpreadCrawling ? CrawlProneAsset : WalkStandingAsset).Get();
+    // The column marches with the rifle on the shoulder (the travel clip is chosen here, not by ResolveAnimation): up/down in one cycle at the change.
+    const bool bShoulderClips = !bSpreadCrawling && !WalkShoulderAsset.IsNull() && !ShoulderUpAsset.IsNull() && !ShoulderDownAsset.IsNull();
+    if (bShoulderClips)
+    {
+        if (ShoulderTransitionEnd > GetWorld()->GetTimeSeconds()) { Walk = (bShoulderRising ? ShoulderUpAsset : ShoulderDownAsset).Get(); }
+        else if (bShoulderColumn) { Walk = WalkShoulderAsset.Get(); }
+    }
+    const auto IsWalkFamily = [this](const UAnimSequence* Clip)
+    {
+        return Clip && (Clip == WalkStandingAsset.Get() || Clip == WalkShoulderAsset.Get() || Clip == ShoulderUpAsset.Get() || Clip == ShoulderDownAsset.Get());
+    };
     if (bFormationPlanPending)
     {
         FormationStepStarts.SetNum(SoldierComponents.Num());
@@ -1927,7 +1940,7 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             Settle.bActive = Settle.HaltRemaining > 0.f || FMath::Abs(FMath::FindDeltaAngleDegrees(ArrivedRotation.Yaw, Settle.Yaw)) > 0.1f;
             Soldier->bPauseAnims = true;
             if (Walk && SoldierClips.IsValidIndex(i) &&
-                (SoldierClips[i].Clip.Get() == Walk || SoldierClips[i].Clip.Get() == Run))
+                (IsWalkFamily(SoldierClips[i].Clip.Get()) || SoldierClips[i].Clip.Get() == Walk || SoldierClips[i].Clip.Get() == Run))
                 RecordClip(Soldier, SoldierClips[i].Clip.Get(), true,
                     SoldierClips[i].Rate > 0.f ? (VisualAnimationTime - SoldierClips[i].Start) * SoldierClips[i].Rate : SoldierClips[i].HeldPosition, 0.f);
             if (!Settle.bActive && !bVisualTravel && SettleIdle)
@@ -2009,7 +2022,13 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         {
             Soldier->bPauseAnims = false;
             Soldier->PlayAnimation(TravelClip, true);
-            const float FigurePhase = Settle.WalkPhase * TravelClip->GetPlayLength();
+            float FigurePhase = Settle.WalkPhase * TravelClip->GetPlayLength();
+            if (IsWalkFamily(SoldierClips[i].Clip.Get()) && IsWalkFamily(TravelClip) && SoldierClips[i].Rate > 0.f && SoldierClips[i].Clip->GetPlayLength() > 0.f)
+            {
+                // Swapping between the walk variants (rifle up/down): keep the stride phase, only the arms change.
+                const float PreviousPosition = FMath::Fmod((VisualAnimationTime - SoldierClips[i].Start) * SoldierClips[i].Rate, SoldierClips[i].Clip->GetPlayLength());
+                FigurePhase = FMath::Clamp(PreviousPosition, 0.f, FMath::Max(0.f, TravelClip->GetPlayLength() - 0.001f));
+            }
             Soldier->SetPosition(FigurePhase, false);
             RecordClip(Soldier, TravelClip, true, FigurePhase, 1.0f);
         }

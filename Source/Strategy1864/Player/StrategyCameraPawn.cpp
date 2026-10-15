@@ -1,5 +1,6 @@
 ﻿#include "StrategyCameraPawn.h"
 #include "Misc/CommandLine.h"
+#include "EngineUtils.h"
 #include "Misc/Parse.h"
 #include "Camera/PlayerCameraManager.h"
 #include "InputKeyEventArgs.h"
@@ -124,6 +125,26 @@ void AStrategyCameraPawn::Tick(float DeltaTime)
                 {
                     bKeyDown = true;
                     TestPC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::W, IE_Pressed, 1.0f));
+                }
+                static bool bPauseShot = false;
+                static bool bPauseFocused = false;
+                if (!bPauseFocused && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864PauseShotFocus")))
+                {
+                    // Test aid: put the camera behind the first Danish unit while paused, to look at the men in the pause.
+                    bPauseFocused = true;
+                    for (TActorIterator<AStrategyUnit> FocusIt(GetWorld()); FocusIt; ++FocusIt)
+                        if (FocusIt->Side == EStrategySide::Denmark && FocusIt->Echelon == EStrategyEchelon::Company)
+                        {
+                            SetActorLocation(FocusIt->GetActorLocation() + FVector(0.f, 0.f, 0.f));
+                            SetActorRotation(FRotator(0.f, FocusIt->GetActorRotation().Yaw, 0.f));
+                            ApplyPreset(1200.0f, -25.0f);
+                            break;
+                        }
+                }
+                if (!bPauseShot && RealNow - MoveStart > 1.0)
+                {
+                    bPauseShot = true;
+                    if (APlayerController* ShotPC = Cast<APlayerController>(GetController())) { ShotPC->ConsoleCommand(TEXT("HighResShot 1280x720")); }
                 }
                 if (RealNow - MoveStart > 2.0)
                 {

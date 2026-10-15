@@ -308,7 +308,7 @@ bpy.context.view_layer.objects.active = arm
 path = OUT / 'A_Combat_ReloadStandingV03.fbx'
 bpy.ops.export_scene.fbx(filepath=str(path), use_selection=True, object_types={'ARMATURE'}, add_leaf_bones=False,
                          bake_anim_use_all_actions=False, bake_anim_use_nla_strips=False, bake_anim_simplify_factor=0,
-                         axis_forward='-Y', axis_up='Z')
+                         axis_forward='-Z', axis_up='Y')
 
 # ---- prop transforms per frame (Blender world, i.e. the same space as the armature) ----
 props = {'fps': 30, 'frames': LAST - FIRST + 1, 'scale': dict(rifle=RIFLE_SCALE, rod=ROD_SCALE, cart=CART_SCALE, cap=CAP_SCALE),

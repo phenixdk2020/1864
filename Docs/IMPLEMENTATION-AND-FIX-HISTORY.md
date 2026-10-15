@@ -2276,6 +2276,14 @@ Efter brugerens test og to optagelser:
 - Frontbredden holdes ved at dybden tyndes først (`LineRanksFor`).
 - Acceptance: 31 pass, 7 NOT_IMPLEMENTED.
 
+### 2026-10-15 - Geværet på skulderen virker nu i kolonne; markering og AAR-ikoner
+
+- Årsag til at skuldergrebet ikke sås: marchen bruger en egen rejse-klipvælger (`UpdateSettling`), ikke `ResolveAnimation`; den valgte altid det almindelige gangklip. Nu vælges WalkShoulder / ShoulderUp / ShoulderDown der, med bevaret skridtfase ved skifte. Audit-loggen (`-Strategy1864AnimationAudit`) viser `shoulderClips`.
+- De nye klip lå ned i spillet (hele kolonnen vandret): FBX-eksporten skal bruge Mixamos egne akser (-Z fremad, Y op). Rettet i alle Blender-scripts og skulderklippene er genimporteret og genbagt; kontrolleret på skærmbillede (mændene står, geværet lodret ved højre hofte/skulder).
+- Markering: klik på hele det tegnede formationsfelt (skærmudsnit plus 14 px) vælger enheden; før var der et dødt punkt ved siderne af en bred linje (kun 140 px fra midten).
+- AAR-ikoner 20 % større (26-41 px), rækkehøjde 40.
+- Testhjælp: `-Strategy1864PauseShotFocus` og HighResShot i PauseCameraTest.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

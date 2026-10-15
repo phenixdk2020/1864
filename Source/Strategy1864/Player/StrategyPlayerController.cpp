@@ -9,6 +9,8 @@
 #include "InputCoreTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Units/StrategyUnit.h"
+#include "../Units/StrategyCompanyUnit.h"
+#include "../Visual/StrategyInfantryVisualComponent.h"
 #include "../Units/CavalryUnit.h"
 #include "../Units/StrategyHQUnit.h"
 #include "../AI/StrategyOfficerProfileComponent.h"
@@ -325,7 +327,24 @@ void AStrategyPlayerController::SelectSingleUnderCursor()
                         continue;
                     }
 
-                    const float Distance = FVector2D::Distance(Cursor, ScreenPoint);
+                    float Distance = FVector2D::Distance(Cursor, ScreenPoint);
+                    // A wide line: anywhere inside the drawn formation (its screen outline plus a margin) counts as a hit.
+                    if (const AStrategyCompanyUnit* Company = Cast<AStrategyCompanyUnit>(Candidate))
+                    {
+                        FTransform DrawnFrame;
+                        FBox DrawnBox;
+                        if (Company->InfantryVisualComponent && Company->InfantryVisualComponent->GetDrawnFormation(DrawnFrame, DrawnBox) && DrawnBox.IsValid)
+                        {
+                            FBox2D Outline(ForceInit);
+                            for (int32 Corner = 0; Corner < 8; ++Corner)
+                            {
+                                const FVector Local((Corner & 1) ? DrawnBox.Max.X : DrawnBox.Min.X, (Corner & 2) ? DrawnBox.Max.Y : DrawnBox.Min.Y, (Corner & 4) ? 180.f : 0.f);
+                                FVector2D CornerScreen;
+                                if (ProjectWorldLocationToScreen(DrawnFrame.TransformPosition(Local), CornerScreen, false)) { Outline += CornerScreen; }
+                            }
+                            if (Outline.bIsValid && Outline.ExpandBy(14.f).IsInside(Cursor)) { Distance = FMath::Min(Distance, 1.0f); }
+                        }
+                    }
                     if (Distance < BestDistance)
                     {
                         BestDistance = Distance;
