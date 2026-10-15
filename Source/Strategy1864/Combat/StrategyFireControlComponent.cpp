@@ -314,13 +314,14 @@ bool UStrategyFireControlComponent::IsTargetFarSideInFireField(const AStrategyUn
         float NearestCm = -1.0f;
         for (int32 Part = 0; Part < 3; ++Part)
         {
-            if (!IsLocationInsideFireField(Points[Index + Part], MAX_flt)) continue;
             const float D = FrontDistance(Points[Index + Part]);
             NearestCm = NearestCm < 0.0f ? D : FMath::Min(NearestCm, D);
         }
         if (NearestCm >= 0.0f) { FarCornerCm = FMath::Max(FarCornerCm, NearestCm); }
     }
-    if (FarCornerCm < 0.0f)
+    // The target must be in front of the unit (its middle inside the cone), and ALL of its near face, even the part that lies
+    // beside the cone, must be within the range: the man in the far corner decides.
+    if (FarCornerCm < 0.0f || !IsLocationInsideFireField(Target->GetActorLocation(), MAX_flt))
     {
         return false;
     }

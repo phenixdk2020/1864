@@ -1,6 +1,7 @@
 ﻿#include "StrategyCameraPawn.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Camera/PlayerCameraManager.h"
 #include "InputKeyEventArgs.h"
 #include "HAL/PlatformTime.h"
 #include "StrategyHUD.h"
@@ -86,10 +87,20 @@ void AStrategyCameraPawn::Tick(float DeltaTime)
         DeltaTime = FApp::GetDeltaTime();
     }
 
+    // While the battle is paused the engine does not move the view with the pawn (the minimap box moved, the picture stood still);
+    // update the camera manager ourselves. -Strategy1864NoPauseCamFix leaves it to the engine (for comparison).
+    if (UGameplayStatics::IsGamePaused(this) && !FParse::Param(FCommandLine::Get(), TEXT("Strategy1864NoPauseCamFix")))
+    {
+        if (APlayerController* PausedPC = Cast<APlayerController>(GetController()))
+        {
+            if (PausedPC->PlayerCameraManager) { PausedPC->PlayerCameraManager->UpdateCamera(DeltaTime); }
+        }
+    }
+
     // Test flag: -Strategy1864PauseCameraTest pauses the battle after 5 s, drives the camera forward for 2 s while paused and logs how far it got.
     {
         static double TestStart = -1.0, MoveStart = -1.0;
-        static FVector StartLocation = FVector::ZeroVector;
+        static FVector StartLocation = FVector::ZeroVector, StartView = FVector::ZeroVector;
         static bool bTestDone = false;
         if (!bTestDone && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864PauseCameraTest")))
         {
@@ -100,7 +111,9 @@ void AStrategyCameraPawn::Tick(float DeltaTime)
                 UGameplayStatics::SetGamePaused(this, true);
                 MoveStart = RealNow;
                 StartLocation = GetActorLocation();
-                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-PAUSECAM: paused at %s"), *StartLocation.ToString());
+                if (const APlayerController* StartPC = Cast<APlayerController>(GetController()))
+                    if (StartPC->PlayerCameraManager) { StartView = StartPC->PlayerCameraManager->GetCameraLocation(); }
+                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-PAUSECAM: paused at %s, view at %s"), *StartLocation.ToString(), *StartView.ToString());
             }
             if (MoveStart >= 0.0)
             {
@@ -116,8 +129,11 @@ void AStrategyCameraPawn::Tick(float DeltaTime)
                 {
                     if (TestPC) { TestPC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::W, IE_Released, 0.0f)); }
                     bTestDone = true;
-                    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-PAUSECAM: paused=%d moved %.0f cm in 2 s (dt %.4f, velocity %.0f)"),
-                        UGameplayStatics::IsGamePaused(this) ? 1 : 0, FVector::Dist(StartLocation, GetActorLocation()), DeltaTime,
+                    float ViewMoved = -1.f;
+                    if (const APlayerController* EndPC = Cast<APlayerController>(GetController()))
+                        if (EndPC->PlayerCameraManager) { ViewMoved = FVector::Dist(StartView, EndPC->PlayerCameraManager->GetCameraLocation()); }
+                    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-PAUSECAM: paused=%d pawn moved %.0f cm, VIEW moved %.0f cm in 2 s (dt %.4f, velocity %.0f)"),
+                        UGameplayStatics::IsGamePaused(this) ? 1 : 0, FVector::Dist(StartLocation, GetActorLocation()), ViewMoved, DeltaTime,
                         MovementComponent ? MovementComponent->Velocity.Size() : -1.f);
                     UGameplayStatics::SetGamePaused(this, false);
                 }

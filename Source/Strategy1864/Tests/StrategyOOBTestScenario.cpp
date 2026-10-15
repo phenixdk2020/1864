@@ -188,10 +188,11 @@ void AStrategyOOBTestScenario::BeginPlay()
         AtmosphereActor = Atmosphere;
     }
     FParse::Value(FCommandLine::Get(), TEXT("Strategy1864StartHour="), StartHour);
-    // Respect the user's frame limit/high-refresh monitor. Tests may request a limit explicitly.
-    float StrategyBattleFpsCap = 0.f;
-    if (GEngine && FParse::Value(FCommandLine::Get(), TEXT("Strategy1864FpsCap="), StrategyBattleFpsCap) &&
-        !FParse::Param(FCommandLine::Get(), TEXT("Strategy1864NoFpsCap")))
+    // A 60 FPS limit by default, so the GPU does not run flat out (it sat above 90 % uncapped). -Strategy1864FpsCap=<n> sets another
+    // limit (0 = none) and -Strategy1864NoFpsCap leaves the engine's own setting alone.
+    float StrategyBattleFpsCap = 60.f;
+    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864FpsCap="), StrategyBattleFpsCap);
+    if (GEngine && !FParse::Param(FCommandLine::Get(), TEXT("Strategy1864NoFpsCap")))
     {
         GEngine->Exec(GetWorld(), *FString::Printf(TEXT("t.MaxFPS %.3f"), FMath::Max(0.f, StrategyBattleFpsCap)));
     }

@@ -1979,19 +1979,18 @@ void AStrategyHUD::DrawReportEquipment(const FString& Cell, float X, float Y, fl
     }
     // The cell is divided evenly: an icon and its count in each sixth.
     const float Slot = Width / 6.f;
-    const float IconSize = FMath::Clamp(Slot * 0.72f, 22.f, 30.f);
+    const float IconSize = FMath::Clamp(Slot * 0.46f, 22.f, 34.f);
     for (int32 Kind = 0; Kind < 6; ++Kind)
     {
         const float SlotX = X + Kind * Slot;
         const bool bNone = Counts[Kind] <= 0;
         if (ReportIconTextures.IsValidIndex(Kind) && ReportIconTextures[Kind])
         {
-            // A light plate behind the icon so the dark equipment art reads against the dark report; a zero is a dimmer plate.
-            DrawRect(bNone ? FLinearColor(0.60f, 0.58f, 0.52f, 0.35f) : FLinearColor(0.93f, 0.90f, 0.78f, 0.96f), SlotX - 2.f, Y - 9.f, IconSize + 4.f, IconSize + 4.f);
-            DrawTexture(ReportIconTextures[Kind], SlotX, Y - 7.f, IconSize, IconSize, 0.f, 0.f, 1.f, 1.f,
-                bNone ? FLinearColor(1.f, 1.f, 1.f, 0.55f) : FLinearColor::White, EBlendMode::BLEND_Translucent);
+            // The icons carry their own light outline; a zero is drawn dimmer.
+            DrawTexture(ReportIconTextures[Kind], SlotX, Y - 9.f, IconSize, IconSize, 0.f, 0.f, 1.f, 1.f,
+                bNone ? FLinearColor(1.f, 1.f, 1.f, 0.45f) : FLinearColor::White, EBlendMode::BLEND_Translucent);
         }
-        Text(FString::FromInt(Counts[Kind]), SlotX + IconSize + 4.f, Y, bNone ? Muted : Colour);
+        Text(FString::FromInt(Counts[Kind]), SlotX + IconSize + 3.f, Y - 1.f, bNone ? Muted : Colour, 1.1f);
     }
 }
 
@@ -2018,25 +2017,26 @@ void AStrategyHUD::DrawAfterActionReport()
             for (int32 LegendIndex = 0; LegendIndex < 6; ++LegendIndex)
             {
                 if (ReportIconTextures.IsValidIndex(LegendIndex) && ReportIconTextures[LegendIndex])
-                    DrawTexture(ReportIconTextures[LegendIndex], LegendX, ReportY + 92.f, 22.f, 22.f, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, EBlendMode::BLEND_Translucent);
+                    DrawTexture(ReportIconTextures[LegendIndex], LegendX, ReportY + 90.f, 28.f, 28.f, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, EBlendMode::BLEND_Translucent);
                 float LegendW = 0.f, LegendH = 0.f;
                 GetTextSize(LegendText[LegendIndex], LegendW, LegendH);
-                Text(LegendText[LegendIndex], LegendX + 26.f, ReportY + 96.f, Ink);
-                LegendX += 26.f + LegendW + 18.f;
+                Text(LegendText[LegendIndex], LegendX + 32.f, ReportY + 96.f, Ink);
+                LegendX += 32.f + LegendW + 18.f;
             }
             Text(TEXT("· Sårede til lazaret (prognose 88–96% tilbage)"), LegendX, ReportY + 96.f, Ink);
         }
         Text(FString::Printf(TEXT("Officerer (sårede/fangne): danske %d/%d · fjendtlige %d/%d"),
             ReportScenario->ReportDanes.OfficersWounded, ReportScenario->ReportDanes.OfficersCaptured,
             ReportScenario->ReportEnemy.OfficersWounded, ReportScenario->ReportEnemy.OfficersCaptured), ReportX + 20.f, ReportY + 120.f, Ink);
-        const float ReportWidths[] = { .15f, .055f, .045f, .045f, .045f, .185f, .185f, .085f, .055f, .04f, .05f, .06f };
+        const float ReportWidths[] = { .115f, .045f, .04f, .04f, .04f, .23f, .23f, .085f, .055f, .035f, .04f, .045f };
         const TCHAR* ReportHeadings[] = { TEXT("Enhed"), TEXT("Mand ved start"), TEXT("Faldne"), TEXT("Sårede"), TEXT("Fanger"), TEXT("Erobret udstyr"), TEXT("Tabt udstyr"), TEXT("Ammunition"), TEXT("Mad (dage)"), TEXT("Skud"), TEXT("Kamp sek."), TEXT("Moraltab") };
         const float ReportUsable = ReportW - 40.f;
+        const float ReportRowH = 36.f;   // a larger row for the larger text and icons
         auto ReportFitText = [&](const FString& ReportCell, float ReportCellX, float ReportCellY, float ReportCellWidth)
         {
             float ReportMeasuredWidth = 0.f, ReportMeasuredHeight = 0.f;
             GetTextSize(ReportCell, ReportMeasuredWidth, ReportMeasuredHeight);
-            Text(ReportCell, ReportCellX, ReportCellY, Ink, FMath::Min(1.f, ReportCellWidth / FMath::Max(1.f, ReportMeasuredWidth)));
+            Text(ReportCell, ReportCellX, ReportCellY, Ink, FMath::Min(1.25f, ReportCellWidth / FMath::Max(1.f, ReportMeasuredWidth)));
         };
         float ReportColumnX = ReportX + 20.f;
         // Framed blocks: a slate frame round the heading, a blue one round the Danish side, an amber one round the opponents.
@@ -2049,13 +2049,13 @@ void AStrategyHUD::DrawAfterActionReport()
             DrawRect(ReportColour, ReportFX + ReportFW - 1.5f, ReportFY, 1.5f, ReportFH);
         };
         const FLinearColor ReportSlate(0.62f, 0.70f, 0.80f, 1.f), ReportBlue(0.40f, 0.69f, 0.88f, 1.f), ReportAmber(0.95f, 0.72f, 0.28f, 1.f);
-        ReportFrame(ReportSlate, ReportX + 10.f, ReportY + 142.f, ReportW - 20.f, 30.f);
+        ReportFrame(ReportSlate, ReportX + 10.f, ReportY + 142.f, ReportW - 20.f, 32.f);
         for (int32 ReportColumn = 0; ReportColumn < 12; ++ReportColumn)
         {
             ReportFitText(ReportHeadings[ReportColumn], ReportColumnX, ReportY + 150.f, ReportUsable * ReportWidths[ReportColumn] - 8.f);
             ReportColumnX += ReportUsable * ReportWidths[ReportColumn];
         }
-        const int32 ReportPerPage = FMath::Max(1, FMath::FloorToInt((Canvas->ClipY - ReportY - 275.f) / 28.f));
+        const int32 ReportPerPage = FMath::Max(1, FMath::FloorToInt((Canvas->ClipY - ReportY - 275.f) / ReportRowH));
         const TArray<FString>& ReportLines = ReportScenario->GetReportRows();
         const int32 ReportLastPage = FMath::Max(0, (ReportLines.Num() - 1) / ReportPerPage);
         ReportPage = FMath::Clamp(ReportPage, 0, ReportLastPage);
@@ -2071,7 +2071,7 @@ void AStrategyHUD::DrawAfterActionReport()
                 if (bPreEnd || bPreTotal)
                 {
                     if (PreBlock >= 0 && PreRow - 1 >= PreFirst)
-                        ReportFrame(PreBlock == 0 ? ReportBlue : ReportAmber, ReportX + 10.f, ReportY + 178.f + PreFirst * 28.f - 3.f, ReportW - 20.f, (PreRow - PreFirst) * 28.f);
+                        ReportFrame(PreBlock == 0 ? ReportBlue : ReportAmber, ReportX + 10.f, ReportY + 178.f + PreFirst * ReportRowH - 3.f, ReportW - 20.f, (PreRow - PreFirst) * ReportRowH);
                     if (bPreTotal) { ++PreBlock; PreFirst = PreRow; }
                 }
                 else if (PreBlock < 0) { PreBlock = ReportPage == 0 ? 0 : 1; PreFirst = PreRow; }
@@ -2089,15 +2089,15 @@ void AStrategyHUD::DrawAfterActionReport()
             ReportColumnX = ReportX + 20.f;
             for (int32 ReportColumn = 0; ReportColumn < ReportCells.Num() && ReportColumn < 12; ++ReportColumn)
             {
-                const float ReportCellY = ReportY + 182.f + ReportRow * 28.f, ReportCellW = ReportUsable * ReportWidths[ReportColumn] - 8.f;
+                const float ReportCellY = ReportY + 182.f + ReportRow * ReportRowH, ReportCellW = ReportUsable * ReportWidths[ReportColumn] - 8.f;
                 if (ReportColumn == 7 || ReportColumn == 8)
                 {
                     // Ammunition (left/start) and food (days left): a small icon, then the figure.
                     const int32 ExtraIcon = ReportColumn == 7 ? 6 : 7;
                     if (ReportIconTextures.IsEmpty()) { DrawReportEquipment(FString(), 0.f, -100.f, 1.f, Ink); }
                     if (ReportIconTextures.IsValidIndex(ExtraIcon) && ReportIconTextures[ExtraIcon])
-                        DrawTexture(ReportIconTextures[ExtraIcon], ReportColumnX, ReportCellY - 7.f, 26.f, 26.f, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, EBlendMode::BLEND_Translucent);
-                    ReportFitText(ReportCells[ReportColumn], ReportColumnX + 30.f, ReportCellY, ReportCellW - 30.f);
+                        DrawTexture(ReportIconTextures[ExtraIcon], ReportColumnX, ReportCellY - 9.f, 34.f, 34.f, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, EBlendMode::BLEND_Translucent);
+                    ReportFitText(ReportCells[ReportColumn], ReportColumnX + 38.f, ReportCellY, ReportCellW - 38.f);
                     ReportColumnX += ReportUsable * ReportWidths[ReportColumn];
                     continue;
                 }

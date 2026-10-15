@@ -2193,6 +2193,14 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Acceptancetest efter rettelserne: 31 består, 7 fejler (T2, T4, T5, T6, T8, T9, T10, alle 'ikke implementeret').
 - Codex-agenten leverede en Sverige-Norge-importpakke (se `Docs/Landeskabelon.md` afsnit 4.4). Codex' kvote løb derefter ud (åbner igen 15. oktober kl. 02:38), så Preussen, Østrig, Hannover/Sachsen og uniformundersøgelsen er ikke lavet.
 
+### 2026-10-15 - Optagelse: ildåbning, pausekamera, FPS-loft, rapportens ikoner
+
+- **Kamera under pause (årsag fundet):** med `-Strategy1864PauseCameraTest` flyttede kamera-pawnen sig 54.123 cm under pause, men selve billedet (`PlayerCameraManager`) flyttede sig 0 cm; det passer med optagelsen, hvor kun minimap-firkanten flyttede sig. Rettelse: `AStrategyCameraPawn::Tick` kalder `UpdateCamera` på kameramanageren, mens spillet er pauset (med rettelsen følger billedet 54.123 cm). Flag `-Strategy1864NoPauseCamFix` slår rettelsen fra til sammenligning.
+- **Ildåbning (anden rettelse):** den første version ignorerede hjørnepunkter uden for keglen og åbnede derfor stadig ild, når kun halvdelen af fjendens linje var inden for rækkevidde. `IsTargetFarSideInFireField` måler nu hele fjendens nære flade (også delen ved siden af keglen); kun fjendens midte skal ligge i keglen. Kompagniet kommer derfor tættere på, før det stopper og skyder.
+- **GPU over 90 %:** toplinjen 'FPS N/A | GPU % | CPU % | LAT N/A' i optagelsen er et overlay uden for spillet, og GPU-procenten er systemets udnyttelse uden billedhastighedsloft (målt: 8,5 til 9 ms GPU pr. billede). Standardloft sat til 60 FPS (`-Strategy1864FpsCap=<n>`, 0 = intet loft, `-Strategy1864NoFpsCap` = motorens egen indstilling).
+- **Rapportens ikoner:** den lyse plade bag ikonerne fjernet (ikonerne har selv en lys kant og er gennemsigtige); tekst og ikoner større (række 36 px, tekst op til 1,25x, ikon 22 til 34 px), udstyrskolonnerne bredere (23 % hver), så tre-cifrede tal og 'Moraltab' ikke overlapper eller klippes. Kontrolleret på et skærmbillede af rapporten.
+- Acceptancetest: 31 består, 7 'ikke implementeret' (uændret).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
