@@ -851,7 +851,7 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
         // The front to the enemy: a line fires only ahead.
         const float ToEnemy = (Enemy->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
         const float Off = FMath::Abs(FMath::FindDeltaAngleDegrees(OwnerUnit->GetActorRotation().Yaw, ToEnemy));
-        if (Off > 45.0f)
+        if (Off > 20.0f)   // was 45: a line that is shot at obliquely must turn its front to the enemy
         {
             FStrategyOrder Hold;
             Hold.Type = EStrategyOrderType::Hold;

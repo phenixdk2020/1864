@@ -5,6 +5,7 @@
 #include "StrategyVisibilityComponent.h"
 #include "../Formations/StrategyFormationTransitionComponent.h"
 #include "../Units/StrategyUnit.h"
+#include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "StrategyContactComponent.h"
 #include "../Visual/StrategyInfantryVisualComponent.h"
@@ -288,6 +289,17 @@ bool UStrategyFireControlComponent::IsTargetFarSideInFireField(const AStrategyUn
     // Test flag: -Strategy1864NoFarCorner opens fire on the target's middle as before.
     static const bool bNoFarCorner = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864NoFarCorner"));
     if (bNoFarCorner) { return IsLocationInsideFireField(Target->GetActorLocation(), RangeCm); }
+    // A unit that stands still fires at whatever of the target is within reach (it is being shot at; standing silent is wrong). The strict
+    // rule, all of the near face within range, decides only when a marching unit stops to fire, so it walks until the far corner is in range.
+    const bool bMarching = Unit->MovementExecutor && Unit->MovementExecutor->HasMovementGoal();
+    if (!bMarching)
+    {
+        for (const FVector& P : GetTargetSamplePoints(Target))
+        {
+            if (IsLocationInsideFireField(P, RangeCm)) { return true; }
+        }
+        return false;
+    }
     // Fire is opened when the far corner of the target's near face is within the range, not when the middle of the line is.
     // The sample points are the target's centre, then (front, rear, middle) across its width: for each place across the width
     // the nearest of the three is its near face, and the furthest of those places is the far corner.

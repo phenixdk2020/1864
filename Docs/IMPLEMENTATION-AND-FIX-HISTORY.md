@@ -2201,6 +2201,15 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - **Rapportens ikoner:** den lyse plade bag ikonerne fjernet (ikonerne har selv en lys kant og er gennemsigtige); tekst og ikoner større (række 36 px, tekst op til 1,25x, ikon 22 til 34 px), udstyrskolonnerne bredere (23 % hver), så tre-cifrede tal og 'Moraltab' ikke overlapper eller klippes. Kontrolleret på et skærmbillede af rapporten.
 - Acceptancetest: 31 består, 7 'ikke implementeret' (uændret).
 
+### 2026-10-15 - Stop og ild ved fjendens fjerneste hjørne, fjenden drejer fronten
+
+Efter brugerens test (skærmbillede: fjendens linje drejet skråt, kompagniet står stille uden at skyde, mens fjenden skyder salver):
+- **Ildregel (`IsTargetFarSideInFireField`):** er enheden i march, kræves hele fjendens nære flade inden for rækkevidde, målt fra vores forreste geled (kun fjendens midte skal være i keglen), så marchen først stopper, når den fjerneste mand er inde. Står enheden stille, skyder den på alt, hvad der er inden for rækkevidde og kegle (før stod den tavs, hvis et hjørne lå udenfor).
+- **Angrebsmål (`ResolveAttackDestination`):** målet beregnes nu ud fra, at begge ender af fjendens linje ligger inden for rækkevidde af vores front (nærmeste punkt), også når hans linje er drejet; søger ned til 40 % af rækkevidden (før 55 %, og målt fra vores hjørner til hans front).
+- **Fjendens front (`StrategyFieldOfficerComponent`):** en linje, der skydes på skråt, svinger fronten mod fjenden, når fjenden er mere end 20 grader ude af kurs (før 45).
+- Acceptancetest: 31 består, 7 'ikke implementeret'. Ikke set i spillet: rettelserne skal afprøves med et rigtigt angreb.
+- Ikon: brugerens nye gevær (fire varianter) kunne ikke bruges, fordi billedet ikke lå som fil; `Icon_Rifle.png` er uændret.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

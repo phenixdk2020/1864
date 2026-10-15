@@ -287,7 +287,7 @@ void UStrategyOrderComponent::ResolveAttackDestination(FStrategyOrder& AttackOrd
         FoeFront.Z = 0.0f;
         const FVector FoeRight = FVector(-FoeFront.Y, FoeFront.X, 0.0f).GetSafeNormal();
         const FVector FoeA = AttackFoe - FoeRight * FoeHalf, FoeB = AttackFoe + FoeRight * FoeHalf;
-        auto DistanceToFoeFront = [&](const FVector& Point)
+        [[maybe_unused]] auto DistanceToFoeFront = [&](const FVector& Point)
         {
             const FVector Along = FoeB - FoeA;
             const float AlongLength = Along.SizeSquared2D();
@@ -296,10 +296,20 @@ void UStrategyOrderComponent::ResolveAttackDestination(FStrategyOrder& AttackOrd
         };
         const FVector OurFront = -AttackBack;
         const FVector OurRight(-OurFront.Y, OurFront.X, 0.0f);
-        for (float Distance = AttackReach; Distance > AttackReach * 0.55f; Distance -= 100.0f)
+        // The man in the enemy's far corner decides: both ends of his line must lie within the range of OUR front line (the nearest
+        // point on it), whichever way his line is turned. Stand as far out as that allows.
+        auto DistanceToOurFront = [&](const FVector& Point, const FVector& Centre)
+        {
+            const FVector SegA = Centre - OurRight * OurHalf, SegB = Centre + OurRight * OurHalf;
+            const FVector Along = SegB - SegA;
+            const float AlongLength = Along.SizeSquared2D();
+            const float T = AlongLength > 1.0f ? FMath::Clamp(FVector::DotProduct(Point - SegA, Along) / AlongLength, 0.0f, 1.0f) : 0.0f;
+            return FVector::Dist2D(Point, SegA + Along * T);
+        };
+        for (float Distance = AttackReach; Distance > AttackReach * 0.4f; Distance -= 100.0f)
         {
             const FVector Centre = AttackFoe + AttackBack * Distance + AttackOurRight * AttackLateral;
-            const float Worst = FMath::Max(DistanceToFoeFront(Centre - OurRight * OurHalf), DistanceToFoeFront(Centre + OurRight * OurHalf));
+            const float Worst = FMath::Max(DistanceToOurFront(FoeA, Centre), DistanceToOurFront(FoeB, Centre));
             AttackStand = Distance;
             if (Worst <= AttackReach) break;
         }
