@@ -2210,6 +2210,10 @@ Efter brugerens test (skærmbillede: fjendens linje drejet skråt, kompagniet st
 - Acceptancetest: 31 består, 7 'ikke implementeret'. Ikke set i spillet: rettelserne skal afprøves med et rigtigt angreb.
 - Ikon: brugerens nye gevær (fire varianter) kunne ikke bruges, fordi billedet ikke lå som fil; `Icon_Rifle.png` er uændret.
 
+### 2026-10-15 - Nyt gevær-ikon til rapporten
+
+- `Icon_Rifle.png` erstattet af brugerens tegning (`R:\Onedrive\TEMP 3D UNREAL\Historiske musketter med bajonetter.png`, perkussionsmusketter med bajonet): de to øverste geværer, baggrunden fjernet, lys kant som de øvrige ikoner, drejet ca. 28 grader og tilpasset 256x256. To geværer læser bedre i ikonstørrelse (26 til 34 px) end ét tyndt eller fire (striber). Genimporteret med `import_report_icons.py`; den gamle fil ligger ikke længere i `old/`. Ikke set i selve rapporten (ikonet er kontrolleret i lille størrelse).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
