@@ -2226,6 +2226,13 @@ Efter brugerens test og to optagelser:
 - **Rapportens gevær:** ét gevær, drejet 38 grader og fyldende hele ikonet (`Historiske musketter med bajonetter.png`).
 - Acceptancetest: 31 består, 7 'ikke implementeret'. Ikke set i spillet: lukning af rækker og fjendens drejning.
 
+### 2026-10-15 - Ordreknapper: destinationscirkel og farver; hurtigere første salve
+
+- **RYK FREM og TILBAGE:** et tryk gør knappen blå (armeret, `GetPendingOrderType`), og en blå cirkel (500 cm, med indre ring og en linje fra de valgte enheder) følger markøren på jorden, så man ser, hvor ordren går hen (`DrawHUD`, `GetGroundPointUnderCursor`). Når ordren er givet og udføres (enheden har et marchmål og holder ikke for ild, ordretype Advance/AttackHere/Move eller Withdraw), er knappen grøn; når den er færdig, rød. CHARGE: rød, blå med fældet bajonet, grøn når den chargerer.
+- **Første salve:** mændene løfter geværet med dobbelt hastighed (0,87 s klip, 0,85 x halvt = ca. 0,37 s), og skuddene spredes over 0,15 s (salve) eller 0,35 s (rækkeild) i stedet for 0,2 og 0,6 s. Kun visningen er ændret (`UpdatePersonalActions`, `HandleVolleyVisualEvent`); kampreglerne er uændrede.
+- Acceptancetest: 29 bestod i en samlet kørsel, hvor T7 og ARTILLERY-DEPLOY fejlede på timing, mens Codex belastede maskinen; begge består, når de køres alene (T7 60,9 s, ARTILLERY-DEPLOY 12 s afprotsning). Tidligere kørsler: 31 består.
+- Codex-køen (`codex_queue.py`, scratchpad) kører Sverige-Norge runde 6 og uniformundersøgelserne og genstarter selv efter kvotegrænsen.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

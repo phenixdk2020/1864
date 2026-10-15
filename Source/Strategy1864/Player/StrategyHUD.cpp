@@ -304,6 +304,23 @@ void AStrategyHUD::DrawHUD()
             if (RouteIt->bPlayerControllable) DrawMovementRoute(*RouteIt, RouteSelection.Contains(*RouteIt));
     }
 
+    // An armed RYK FREM / TILBAGE: a blue circle follows the cursor so the player sees where the order will go.
+    if (const AStrategyPlayerController* PlacePC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
+    {
+        const EStrategyOrderType PlaceType = PlacePC->GetPendingOrderType();
+        FVector PlacePoint;
+        if (PlaceType != EStrategyOrderType::None && PlacePC->GetGroundPointUnderCursor(PlacePoint))
+        {
+            const FVector PlaceLift = PlacePoint + FVector(0.f, 0.f, 60.f);
+            const FColor PlaceColour(110, 175, 225);
+            DrawDebugCircle(GetWorld(), PlaceLift, 500.0f, 48, PlaceColour, false, 0.0f, SDPG_World, 14.0f, FVector(1, 0, 0), FVector(0, 1, 0), false);
+            DrawDebugCircle(GetWorld(), PlaceLift, 120.0f, 24, PlaceColour, false, 0.0f, SDPG_World, 14.0f, FVector(1, 0, 0), FVector(0, 1, 0), false);
+            for (const AStrategyUnit* PlaceUnit : PlacePC->GetSelectedUnits())
+                if (IsValid(PlaceUnit))
+                    DrawDebugLine(GetWorld(), PlaceUnit->GetActorLocation() + FVector(0.f, 0.f, 60.f), PlaceLift, PlaceColour, false, 0.0f, SDPG_World, 6.0f);
+        }
+    }
+
     // The selected officers' command circles.
     if (const AStrategyPlayerController* CirclePC = Cast<AStrategyPlayerController>(GetOwningPlayerController()))
     {
@@ -1282,11 +1299,15 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     {
         const FLinearColor HudOrderBlue(0.40f, 0.69f, 0.88f), HudOrderGreen(0.34f, 0.78f, 0.57f), HudOrderRed(0.85f, 0.39f, 0.43f);
         // ADVANCE: green while the unit marches on something, red when it stands. CHARGE: red; blue once the bayonets are fixed; green when charging.
-        const bool bHudMarching = Unit->MovementExecutor && Unit->MovementExecutor->HasMovementGoal() && !Unit->MovementExecutor->IsHoldingForFire() &&
-            (HudCurrent == EStrategyOrderType::Advance || HudCurrent == EStrategyOrderType::AttackHere || HudCurrent == EStrategyOrderType::Move);
         const bool bHudCharging = HudCurrent == EStrategyOrderType::Charge && Unit->MovementExecutor && Unit->MovementExecutor->HasMovementGoal();
         const bool bHudBayonets = Unit->EquipmentVisualComponent && Unit->EquipmentVisualComponent->bBayonetFixed;
-        const FLinearColor* HudColour = OrderIndex == 0 ? (bHudMarching ? &HudOrderGreen : &HudOrderRed)
+        // RYK FREM and TILBAGE: blue once pressed (waiting for a place), green while the order is carried out, red when done or not given.
+        const AStrategyPlayerController* HudButtonPC = Cast<AStrategyPlayerController>(GetOwningPlayerController());
+        const bool bHudArmed = HudButtonPC && HudButtonPC->GetPendingOrderType() == HudTypes[OrderIndex];
+        const bool bHudExecuting = Unit->MovementExecutor && Unit->MovementExecutor->HasMovementGoal() && !Unit->MovementExecutor->IsHoldingForFire() &&
+            (OrderIndex == 0 ? (HudCurrent == EStrategyOrderType::Advance || HudCurrent == EStrategyOrderType::AttackHere || HudCurrent == EStrategyOrderType::Move)
+                             : HudCurrent == EStrategyOrderType::Withdraw);
+        const FLinearColor* HudColour = (OrderIndex <= 1) ? (bHudArmed ? &HudOrderBlue : bHudExecuting ? &HudOrderGreen : &HudOrderRed)
             : OrderIndex == 2 ? (bHudCharging ? &HudOrderGreen : bHudBayonets ? &HudOrderBlue : &HudOrderRed) : &HudOrderRed;
         DrawButton(HudX[2] + (OrderIndex % 2) * (HudOrderW + 5.f), HudY + 49.f + (OrderIndex / 2) * (HudHQ ? 44.f : 56.f), HudOrderW, HudHQ ? 38.f : 50.f, HudOrders[OrderIndex], HudActions[OrderIndex], int32(HudTypes[OrderIndex]), HudCurrent == HudTypes[OrderIndex], Unit, HudColour);
     }

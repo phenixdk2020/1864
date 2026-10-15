@@ -63,6 +63,10 @@ public:
     UFUNCTION(BlueprintPure, Category="Strategy|Orders")
     bool HasPendingOrderPlacement() const { return bOrderPlacementPending; }
 
+    /** The order a pressed ORDER button waits to place (None when nothing is armed). */
+    EStrategyOrderType GetPendingOrderType() const { return bOrderPlacementPending ? PendingOrderType : EStrategyOrderType::None; }
+    bool GetGroundPointUnderCursor(FVector& OutWorldPoint) const { return ResolveGroundPointUnderCursor(OutWorldPoint); }
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Selection")
     float BoxSelectionThresholdPixels = 6.0f;
 

@@ -503,7 +503,7 @@ void UStrategyInfantryVisualComponent::HandleVolleyVisualEvent(
     }
     // How the shots spread: a volley goes off together, fire by rank in a ripple, independent fire man by man.
     const EStrategyFireDrillMode Mode = Drill ? Drill->DrillMode : EStrategyFireDrillMode::FrontRank;
-    const float Spread = Mode == EStrategyFireDrillMode::Volley ? 0.2f : Mode == EStrategyFireDrillMode::Independent ? 2.5f : 0.6f;
+    const float Spread = Mode == EStrategyFireDrillMode::Volley ? 0.15f : Mode == EStrategyFireDrillMode::Independent ? 2.5f : 0.35f;
     for (int32 i = Order.Num() - 1; i > 0; --i) { Order.Swap(i, FMath::RandRange(0, i)); }
     for (int32 k = 0; k < Firing && k < Order.Num(); ++k)
     {
@@ -640,9 +640,13 @@ void UStrategyInfantryVisualComponent::UpdatePersonalActions()
             }
             else
             {
+                // The men are loaded: they bring the musket up briskly (twice the clip's speed) so the first volley is not slow in coming.
+                const float RaiseRate = 2.0f;
                 PlayOnSoldier(Soldier, Raise, false, false);
+                Soldier->SetPlayRate(RaiseRate);
+                RecordClip(Soldier, Raise, false, 0.0f, RaiseRate);
                 Phase = PhaseRaise;
-                SoldierBusyUntil[i] = Now + Raise->GetPlayLength() * 0.85f;
+                SoldierBusyUntil[i] = Now + Raise->GetPlayLength() * 0.85f / RaiseRate;
             }
             continue;
         }
