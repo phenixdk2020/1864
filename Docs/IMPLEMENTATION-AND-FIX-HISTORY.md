@@ -2269,6 +2269,13 @@ Efter brugerens test og to optagelser:
 - Fjendens frontskifte: en DefendHere/Hold-ordre, der 'udføres', blokerer ikke længere for at svinge fronten mod en fjende mere end 20 grader ude af kurs (årsag til at fjenden blev stående i 1 mod 1, hvor han har DefendHere). Test: -Strategy1864EnemyTurn bruger nu DefendHere; logger 'Svinger fronten'.
 - Acceptance: 31 pass, 7 NOT_IMPLEMENTED (som forventet).
 
+### 2026-10-15 - Geledskifte efter tab (efter designnotatet 'Tab og geledskifte')
+
+- `StepUpFiles()`: efter tab i en linje rykker manden lige bag hullet frem i sin egen file (2.->1. geled, derefter 3.->2.); ingen sidelæns flytning. Slotrang opdateres til ildrytmen.
+- Geledene lukkes sidelæns (`RebuildFormation`) efter 3 s ro eller senest 8 s efter første tab; lav moral forlænger tiden op til det dobbelte (notatet: 3-10 s).
+- Frontbredden holdes ved at dybden tyndes først (`LineRanksFor`).
+- Acceptance: 31 pass, 7 NOT_IMPLEMENTED.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -301,9 +301,10 @@ void UStrategyInfantryVisualComponent::TickComponent(
         }
     }
     // Close ranks: two and a half quiet seconds after the last loss, with the company standing still, the survivors re-form into the compact line.
-    // In a fight the company holds or creeps forward under a standing goal, so only the visible march blocks it; steady losses close up after 4 s at the latest.
+    const float CloseRanksSlowdown = 1.0f + (1.0f - FMath::Clamp(OwnerCompany->Morale, 0.f, 100.f) / 100.f);
+    // In a fight the company holds or creeps forward under a standing goal, so only the visible march blocks it; low morale slows the closing (3-10 s as the design paper asks), steady losses close up after 8 s at the latest.
     if (bClosingRanksPending && PendingKillCount == 0 && !bFormationPlanPending && !bArrivalReform &&
-        (GetWorld()->GetTimeSeconds() - LastLossTimeSeconds > 1.0f || GetWorld()->GetTimeSeconds() - FirstPendingLossTimeSeconds > 4.0f) &&
+        (GetWorld()->GetTimeSeconds() - LastLossTimeSeconds > 3.0f * CloseRanksSlowdown || GetWorld()->GetTimeSeconds() - FirstPendingLossTimeSeconds > 8.0f * CloseRanksSlowdown) &&
         !(OwnerCompany->FormationTransition && OwnerCompany->FormationTransition->IsReforming()) && !VisualPath.bMovingVisuals)
     {
         bClosingRanksPending = false;
@@ -913,6 +914,38 @@ void UStrategyInfantryVisualComponent::QueueKills(int32 Count)
     KillSoldiers(Count);
 }
 
+void UStrategyInfantryVisualComponent::StepUpFiles()
+{
+    if (!OwnerCompany || !OwnerCompany->FormationComponent ||
+        OwnerCompany->FormationComponent->CurrentFormation != EStrategyFormationType::Line ||
+        SoldierSettle.Num() != SoldierComponents.Num() || SoldierSlots.Num() != SoldierComponents.Num())
+    {
+        return;
+    }
+    const float RankSpacing = FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierRankSpacingCm);
+    const float FileTolerance = FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierLateralSpacingCm * 0.5f);
+    const int32 Ranks = FMath::Max(1, OwnerCompany->FormationComponent->RankCount);
+    TArray<int32> Done;
+    for (int32 i = 0; i < SoldierSettle.Num(); ++i)
+    {
+        if (Done.Contains(i) || !SoldierSettle[i].bPlaced) { continue; }
+        TArray<int32> File;   // everyone in this man's file, front to back
+        for (int32 j = 0; j < SoldierSettle.Num(); ++j)
+            if (SoldierSettle[j].bPlaced && FMath::Abs(SoldierSettle[j].Slot.Y - SoldierSettle[i].Slot.Y) <= FileTolerance) { File.Add(j); Done.Add(j); }
+        File.Sort([&](int32 A, int32 B) { return SoldierSettle[A].Slot.X > SoldierSettle[B].Slot.X; });
+        for (int32 k = 0; k < File.Num(); ++k)
+        {
+            FSettle& Settle = SoldierSettle[File[k]];
+            const float NewX = -float(k) * RankSpacing;
+            if (FMath::Abs(Settle.Slot.X - NewX) < 1.f) { continue; }
+            Settle.Slot.X = NewX;
+            Settle.Goal = Settle.Slot;
+            Settle.bActive = true;
+            SoldierSlots[File[k]] = (SoldierSlots[File[k]] / Ranks) * Ranks + FMath::Min(k, Ranks - 1);
+        }
+    }
+}
+
 void UStrategyInfantryVisualComponent::ProcessPendingKills()
 {
     if (PendingKills.Num() == 0)
@@ -934,6 +967,7 @@ void UStrategyInfantryVisualComponent::ProcessPendingKills()
     }
     if (bAny)
     {
+        StepUpFiles();
         bScaleOnlyRebuild = true;
         RebuildFormation();
         bScaleOnlyRebuild = false;

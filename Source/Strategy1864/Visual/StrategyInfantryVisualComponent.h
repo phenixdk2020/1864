@@ -274,6 +274,8 @@ private:
     void MarchDust(float Now);
     float NextMarchDust = 0.0f;
     void ProcessPendingKills();
+    /** After losses in a line: the man directly behind a gap steps forward in his own file (2nd to 1st rank, then 3rd to 2nd). */
+    void StepUpFiles();
     struct FPendingKill { int32 Count = 0; FVector Location = FVector::ZeroVector; float Time = 0.0f; bool bCone = false; FVector Origin = FVector::ZeroVector; };
     TArray<FPendingKill> PendingKills;
     int32 PendingKillCount = 0;
