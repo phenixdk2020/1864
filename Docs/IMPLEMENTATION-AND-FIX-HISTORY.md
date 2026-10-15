@@ -2240,6 +2240,14 @@ Efter brugerens test og to optagelser:
 - **Rettelse:** de otte oprindelige klip er gendannet fra git (commit 7da8c5d^); importscriptet importerer nu kun de ekstra klip (`manifest_extra.json`, `manifest_cav.json`) og rører aldrig de oprindelige otte; alle crowd-modeller er bagt om med 30 FPS (7.354 rækker pr. model). Kontrolleret med skærmbilleder: kolonnen står op og marcherer.
 - Lærdom: genimporter aldrig eksisterende klip uden at sammenligne med originalen; en uventet filstørrelse i git er et varsel.
 
+### 2026-10-15 - Tab foran, rækkerne lukker op, destinationsboks, fjendens front (test)
+
+- **Tab fra den side, kuglerne kommer fra** (`KillSoldiers`): hvis retningen til skytterne er kendt (`CasualtySourceLocation`), falder mændene i forreste geled ved ild forfra (vinkel under 70 grader), i bageste geled ved ild bagfra (over 110) og de nærmeste mænd ved ild fra siden; uden kendt retning stadig tilfældigt. Kartætsk (kegle) er uændret.
+- **Trin frem fra anden og tredje geled:** de overlevende lukker rækkerne 2,5 sekunder efter sidste tab, når kompagniet står stille (`bClosingRanksPending`, før 6 sekunder); den kompakte opstilling samler mændene bag de faldne forreste mænd i forreste geled. Ikke set i spillet; skal vurderes visuelt.
+- **Destinationsboksen** tegnes ikke, når enheden har skudt inden for de sidste 30 sekunder (før 4; en ladning tager ca. 20).
+- **Fjendens front:** med `-Strategy1864EnemyTurn=35` (ny testflag: fjenden holder med fronten 35 grader forkert) svinger fjenden fronten mod Danerne ved t=2 ('Svinger fronten'), og fjendens kamp-AI holder den derefter vendt mod fjenden. I en almindelig 1 mod 1 er fjenden under 20 grader ude af kurs, så der sker ikke noget; grænsen er 20 grader. Ekstra beslutningslog 'Frontvurdering (fjende)' med `-Strategy1864DebugDecisions`.
+- Acceptancetest: 31 består, 7 'ikke implementeret'.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

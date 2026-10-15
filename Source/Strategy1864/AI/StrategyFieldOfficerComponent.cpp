@@ -788,6 +788,13 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
     {
         // His battle AI leads the company to its range, but a line that stands still and is shot at from the side must still turn its
         // front to the enemy (it stood and fired at an angle, as in the 1 v 1 test).
+        {
+            const float DebugToFoe = (Enemy->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
+            STRATEGY1864_DECISION(OwnerUnit, TEXT("Feltofficer"), TEXT("Frontvurdering (fjende)"), TEXT("Svinger fronten, hvis fjenden er mere end 20 grader ude af kurs"),
+                FString::Printf(TEXT("executing=%d distanceCm=%.0f offDegrees=%.1f yaw=%.1f toFoe=%.1f"), OwnerUnit->OrderComponent->IsPhysicallyExecuting(), Distance,
+                    FMath::Abs(FMath::FindDeltaAngleDegrees(OwnerUnit->GetActorRotation().Yaw, DebugToFoe)), OwnerUnit->GetActorRotation().Yaw, DebugToFoe),
+                TEXT("frontskifte for fjendens side"));
+        }
         if (!OwnerUnit->OrderComponent->IsPhysicallyExecuting() && Distance < 50000.0f)
         {
             const float ToFoe = (Enemy->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
@@ -805,6 +812,7 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
                     Decide(TEXT("Svinger fronten"), FString::Printf(TEXT("%s står %.0f° på skrå"), *Enemy->DisplayName.ToString(), OffFront));
                     return;
                 }
+                Decide(TEXT("Frontskifte afvist"), TEXT("SetOrder returnerede false for fjendens frontskifte"));
             }
         }
         STRATEGY1864_DECISION(OwnerUnit, TEXT("Feltofficer"), TEXT("Overlad fremrykning til autonom AI"), TEXT("Fjendens normale fremrykning har en anden ejer"),

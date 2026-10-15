@@ -368,7 +368,10 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
         if (AStrategyCompanyUnit* Company = SpawnCompany(FName(*FString::Printf(TEXT("EN-SKIRMISH-C%d"), e + 1)), FString::Printf(TEXT("%s %d. Kp."), bSwedes ? TEXT("Sv.") : TEXT("Pr."), e + 1), e + 1,
             EnemyLine + FVector(0.0f, (e - (EnemyCompanies - 1) * 0.5f) * 7200.0f, 0.0f), EnemyMajor, static_cast<uint8>(FoeSide)))
         {
-            Company->SetActorRotation(FRotator(0.0f, 180.0f, 0.0f));
+            // -Strategy1864EnemyTurn=<degrees>: the enemy line starts turned that much off the Danes (to test that he swings his front).
+            float EnemyTurnDegrees = 0.f;
+            FParse::Value(FCommandLine::Get(), TEXT("Strategy1864EnemyTurn="), EnemyTurnDegrees);
+            Company->SetActorRotation(FRotator(0.0f, 180.0f + EnemyTurnDegrees, 0.0f));
             Company->bPlayerControllable = false;
             if (Company->AutonomousBattleAIComponent)
             {
@@ -473,6 +476,26 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
     if (bSkirmishCavalry || FParse::Param(FCommandLine::Get(), TEXT("Strategy1864EnemyDefends")))
     {
         SetEnemyAttacking(false);
+    }
+    // -Strategy1864EnemyTurn=<degrees>: the enemy companies hold with their front turned that much off the Danes (test of his front swing).
+    {
+        float EnemyTurnTest = 0.f;
+        if (FParse::Value(FCommandLine::Get(), TEXT("Strategy1864EnemyTurn="), EnemyTurnTest) && EnemyTurnTest != 0.f)
+        {
+            for (AStrategyCompanyUnit* TurnCompany : All)
+            {
+                if (TurnCompany && TurnCompany->Side == FoeSide && TurnCompany->OrderComponent)
+                {
+                    FStrategyOrder TurnTestHold;
+                    TurnTestHold.Type = EStrategyOrderType::Hold;
+                    TurnTestHold.TargetLocation = TurnCompany->GetActorLocation();
+                    TurnTestHold.FacingYaw = 180.0f + EnemyTurnTest;
+                    TurnTestHold.bHasFacing = true;
+                    TurnTestHold.Authority = EStrategyOrderAuthority::OfficerAI;
+                    TurnCompany->OrderComponent->SetOrder(TurnTestHold);
+                }
+            }
+        }
     }
     if (bSkirmishCavalry)
     {

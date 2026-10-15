@@ -615,8 +615,9 @@ void AStrategyHUD::DrawMovementRoute(const AStrategyUnit* Unit, bool bSelected)
         (RouteOrder.Type == EStrategyOrderType::Move || RouteOrder.Type == EStrategyOrderType::Advance ||
          RouteOrder.Type == EStrategyOrderType::AttackHere || !RouteOrder.Waypoints.IsEmpty());
     if (!bRouteActive) return;
-    // Once the unit has begun to fire, its destination box is no longer drawn (the march is held or over).
-    if (Unit->CombatComponent && GetWorld() && GetWorld()->GetTimeSeconds() - Unit->CombatComponent->LastFiredTimeSeconds < 4.0f) return;
+    // Once the unit has begun to fire, its destination box is no longer drawn (the march is held or over). A volley and its reloading take
+    // about twenty seconds, so "in action" means a shot within the last thirty.
+    if (Unit->CombatComponent && GetWorld() && GetWorld()->GetTimeSeconds() - Unit->CombatComponent->LastFiredTimeSeconds < 30.0f) return;
     const FLinearColor RouteColour = bSelected ? Gold : FLinearColor(1.0f, 1.0f, 1.0f, 0.22f);
     const float RouteYaw = RouteOrder.bHasFacing ? RouteOrder.FacingYaw : Unit->GetActorRotation().Yaw;
     const FVector RouteGoal = RouteOrder.TargetLocation;

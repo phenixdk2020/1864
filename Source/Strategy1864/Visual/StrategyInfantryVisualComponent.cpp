@@ -278,8 +278,8 @@ void UStrategyInfantryVisualComponent::TickComponent(
         OwnerCompany->QAPlaceholderMesh->SetVisibility(false);
     }
     ProcessPendingKills();
-    // Close ranks: six quiet seconds after the last loss, with the company standing still, the survivors re-form into the compact line.
-    if (bClosingRanksPending && GetWorld()->GetTimeSeconds() - LastLossTimeSeconds > 6.0f && PendingKillCount == 0 && !bFormationPlanPending && !bArrivalReform &&
+    // Close ranks: two and a half quiet seconds after the last loss, with the company standing still, the survivors re-form into the compact line.
+    if (bClosingRanksPending && GetWorld()->GetTimeSeconds() - LastLossTimeSeconds > 2.5f && PendingKillCount == 0 && !bFormationPlanPending && !bArrivalReform &&
         !(OwnerCompany->MovementExecutor && OwnerCompany->MovementExecutor->HasMovementGoal()) &&
         !(OwnerCompany->FormationTransition && OwnerCompany->FormationTransition->IsReforming()) && !VisualPath.bMovingVisuals)
     {
@@ -951,7 +951,29 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
                 if (ConeDistance < ConeNearestDistance) { ConeNearestDistance = ConeDistance; i = ConeCandidate; }
             }
         }
-        // A shot: the man who falls is random across the whole company (not always the front men in the middle).
+        // Rifle fire: the men fall where the bullets arrive. Shot from the front, the front rank loses them (and the men behind step up,
+        // see the closing of ranks); from behind the rear rank; from the side the men nearest the shooters. Without a known direction: random.
+        if (OwnerCompany && !OwnerCompany->CasualtySourceLocation.IsNearlyZero() && !(Near && ConeOrigin))
+        {
+            const FVector ShotLocal = OwnerCompany->GetActorTransform().InverseTransformPosition(OwnerCompany->CasualtySourceLocation);
+            const float ShotAngle = FMath::Abs(FMath::RadiansToDegrees(FMath::Atan2(ShotLocal.Y, ShotLocal.X)));   // 0 = straight ahead
+            const float RankBand = FMath::Max(60.f, OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->SoldierRankSpacingCm * 0.6f : 60.f);
+            float FrontX = -TNumericLimits<float>::Max(), RearX = TNumericLimits<float>::Max();
+            for (const USkeletalMeshComponent* Standing : SoldierComponents)
+                if (Standing) { FrontX = FMath::Max(FrontX, Standing->GetRelativeLocation().X); RearX = FMath::Min(RearX, Standing->GetRelativeLocation().X); }
+            TArray<int32> Candidates;
+            int32 NearestToShooters = i;
+            float NearestDistance = TNumericLimits<float>::Max();
+            for (int32 c = 0; c < SoldierComponents.Num(); ++c)
+            {
+                if (!SoldierComponents[c]) continue;
+                const float X = SoldierComponents[c]->GetRelativeLocation().X;
+                if ((ShotAngle <= 70.f && X >= FrontX - RankBand) || (ShotAngle >= 110.f && X <= RearX + RankBand)) Candidates.Add(c);
+                const float D = FVector::DistSquared2D(SoldierComponents[c]->GetComponentLocation(), OwnerCompany->CasualtySourceLocation);
+                if (D < NearestDistance) { NearestDistance = D; NearestToShooters = c; }
+            }
+            i = !Candidates.IsEmpty() ? Candidates[FMath::RandRange(0, Candidates.Num() - 1)] : (ShotAngle > 70.f && ShotAngle < 110.f ? NearestToShooters : i);
+        }
         USkeletalMeshComponent* Soldier = SoldierComponents[i];
         if (Soldier)
         {
