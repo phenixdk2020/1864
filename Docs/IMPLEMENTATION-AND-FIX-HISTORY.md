@@ -2233,6 +2233,13 @@ Efter brugerens test og to optagelser:
 - Acceptancetest: 29 bestod i en samlet kørsel, hvor T7 og ARTILLERY-DEPLOY fejlede på timing, mens Codex belastede maskinen; begge består, når de køres alene (T7 60,9 s, ARTILLERY-DEPLOY 12 s afprotsning). Tidligere kørsler: 31 består.
 - Codex-køen (`codex_queue.py`, scratchpad) kører Sverige-Norge runde 6 og uniformundersøgelserne og genstarter selv efter kvotegrænsen.
 
+### 2026-10-15 - Rettelse: de bagte mænd lå ned (årsag: genimporteret `A_Combat_Walk`)
+
+- **Fejl:** efter bagningen med 30 FPS lå mændene ned i marchkolonnen. Det skyldtes ikke billedraten: også en bagning med 15 FPS gav liggende mænd, mens de gamle bagte filer fra før (commit 27473c5) var i orden.
+- **Årsag:** `import_infantry_combat_set.py` genimporterede ved min import af Mixamo-klippene (2026-10-13) også de otte oprindelige klip (`A_Combat_Idle`, `Walk`, `Aim`, `Fire`, tre dødsklip og `ReloadStanding`); `A_Combat_Walk.uasset` blev derved 317.595 til 655.429 byte og afviger fra originalen. Walk er marchanimationen, så den bagte kolonne lå ned (de levende figurer brugte samme klip, men blev først set efter bagning).
+- **Rettelse:** de otte oprindelige klip er gendannet fra git (commit 7da8c5d^); importscriptet importerer nu kun de ekstra klip (`manifest_extra.json`, `manifest_cav.json`) og rører aldrig de oprindelige otte; alle crowd-modeller er bagt om med 30 FPS (7.354 rækker pr. model). Kontrolleret med skærmbilleder: kolonnen står op og marcherer.
+- Lærdom: genimporter aldrig eksisterende klip uden at sammenligne med originalen; en uventet filstørrelse i git er et varsel.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

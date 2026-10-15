@@ -3,9 +3,13 @@ from pathlib import Path
 root=Path(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()))
 source=root/'SourceAssets/InfantryCombat'
 manifest=json.loads((source/'manifest.json').read_text())
+# Only the extra clips are (re)imported. The original eight (Idle, Walk, Aim, Fire, three deaths, ReloadStanding) are NEVER re-imported:
+# a re-import on 2026-10-13 changed A_Combat_Walk and the marching men lay down in the baked crowd.
+extras=[]
 for extra in (source/'manifest_extra.json', source/'manifest_cav.json'):
-  if extra.exists():
-    manifest['clips']=[c for c in manifest['clips'] if c['name'] not in {e['name'] for e in json.loads(extra.read_text())['clips']}]+json.loads(extra.read_text())['clips']
+    if extra.exists():
+        extras+=json.loads(extra.read_text())['clips']
+manifest['clips']=extras
 skeleton=unreal.load_asset('/Game/Units/Human/Skeletons/SK_Human_1864')
 if not skeleton:
     raise RuntimeError('Shared human skeleton missing')
