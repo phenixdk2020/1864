@@ -241,6 +241,7 @@ void UStrategyInfantryVisualComponent::TickComponent(
         bScaleOnlyRebuild = true; // Losses leave holes; surviving identities keep their slots.
         RebuildFormation();
         bScaleOnlyRebuild = false;
+        if (CachedStrength != INDEX_NONE && CurrentStrength < CachedStrength) { bClosingRanksPending = true; LastLossTimeSeconds = GetWorld()->GetTimeSeconds(); }
         CachedStrength = CurrentStrength;
     }
 
@@ -277,6 +278,14 @@ void UStrategyInfantryVisualComponent::TickComponent(
         OwnerCompany->QAPlaceholderMesh->SetVisibility(false);
     }
     ProcessPendingKills();
+    // Close ranks: six quiet seconds after the last loss, with the company standing still, the survivors re-form into the compact line.
+    if (bClosingRanksPending && GetWorld()->GetTimeSeconds() - LastLossTimeSeconds > 6.0f && PendingKillCount == 0 && !bFormationPlanPending && !bArrivalReform &&
+        !(OwnerCompany->MovementExecutor && OwnerCompany->MovementExecutor->HasMovementGoal()) &&
+        !(OwnerCompany->FormationTransition && OwnerCompany->FormationTransition->IsReforming()) && !VisualPath.bMovingVisuals)
+    {
+        bClosingRanksPending = false;
+        RebuildFormation();
+    }
     UpdateSettling(DeltaTime);
     ApplyPendingStance(GetWorld()->GetTimeSeconds());
     MarchDust(GetWorld()->GetTimeSeconds());

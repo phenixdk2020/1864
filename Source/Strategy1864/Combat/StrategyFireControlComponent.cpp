@@ -5,6 +5,7 @@
 #include "StrategyVisibilityComponent.h"
 #include "../Formations/StrategyFormationTransitionComponent.h"
 #include "../Units/StrategyUnit.h"
+#include "../Units/StrategyHQUnit.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "StrategyContactComponent.h"
@@ -36,7 +37,7 @@ void UStrategyFireControlComponent::TickComponent(
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-    if (!bDrawQARangeCones || !OwnerUnit)
+    if (!bDrawQARangeCones || !OwnerUnit || Cast<AStrategyHQUnit>(OwnerUnit))   // a headquarters does not fire: no cone
     {
         return;
     }

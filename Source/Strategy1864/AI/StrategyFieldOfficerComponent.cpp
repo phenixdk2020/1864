@@ -786,6 +786,27 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
     // The enemy's own companies are led to their range by his battle AI; the Danish captain closes himself.
     if (bEnemySide)
     {
+        // His battle AI leads the company to its range, but a line that stands still and is shot at from the side must still turn its
+        // front to the enemy (it stood and fired at an angle, as in the 1 v 1 test).
+        if (!OwnerUnit->OrderComponent->IsPhysicallyExecuting() && Distance < 50000.0f)
+        {
+            const float ToFoe = (Enemy->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
+            const float OffFront = FMath::Abs(FMath::FindDeltaAngleDegrees(OwnerUnit->GetActorRotation().Yaw, ToFoe));
+            if (OffFront > 20.0f)
+            {
+                FStrategyOrder TurnHold;
+                TurnHold.Type = EStrategyOrderType::Hold;
+                TurnHold.TargetLocation = OwnerUnit->GetActorLocation();
+                TurnHold.FacingYaw = ToFoe;
+                TurnHold.bHasFacing = true;
+                TurnHold.Authority = EStrategyOrderAuthority::OfficerAI;
+                if (OwnerUnit->OrderComponent->SetOrder(TurnHold))
+                {
+                    Decide(TEXT("Svinger fronten"), FString::Printf(TEXT("%s står %.0f° på skrå"), *Enemy->DisplayName.ToString(), OffFront));
+                    return;
+                }
+            }
+        }
         STRATEGY1864_DECISION(OwnerUnit, TEXT("Feltofficer"), TEXT("Overlad fremrykning til autonom AI"), TEXT("Fjendens normale fremrykning har en anden ejer"),
             FString::Printf(TEXT("side=%d distanceCm=%.1f"), int32(OwnerUnit->Side), Distance), TEXT("dansk lokal fremrykning/frontskifte: afvist for denne side"));
         return;

@@ -2214,6 +2214,18 @@ Efter brugerens test (skærmbillede: fjendens linje drejet skråt, kompagniet st
 
 - `Icon_Rifle.png` erstattet af brugerens tegning (`R:\Onedrive\TEMP 3D UNREAL\Historiske musketter med bajonetter.png`, perkussionsmusketter med bajonet): de to øverste geværer, baggrunden fjernet, lys kant som de øvrige ikoner, drejet ca. 28 grader og tilpasset 256x256. To geværer læser bedre i ikonstørrelse (26 til 34 px) end ét tyndt eller fire (striber). Genimporteret med `import_report_icons.py`; den gamle fil ligger ikke længere i `old/`. Ikke set i selve rapporten (ikonet er kontrolleret i lille størrelse).
 
+### 2026-10-15 - HQ-kegle, destinationsboks, knapfarver, fjendens front, rækkerne lukker, bagning 30 FPS
+
+Efter brugerens test og to optagelser:
+- **HQ uden kegle:** de røde, orange og grønne QA-buer i verdenen (`DrawQARangeCones`) tegnes ikke længere for HQ-enheder (de tegnedes, når et HQ var valgt).
+- **Destinationsboksen** tegnes ikke, når enheden har skudt inden for de sidste 4 sekunder (`DrawMovementRoute`).
+- **Ordreknapper:** RYK FREM er grøn, mens enheden marcherer mod noget (Advance, AttackHere eller Move med et mål, ikke stop-og-ild), ellers rød. CHARGE er rød; blå, når bajonetterne er fældet; grøn, når enheden chargerer. TILBAGE og STOP er røde (TILBAGE giver en `Withdraw`-ordre: marcher bagud mod et punkt, med fronten bevaret efter ordren; den bruges også af officersAI'en ved tab).
+- **Fjendens front:** loggen fra 1 mod 1 viste, at fjendens kompagni afviste al lokal omtanke ('Overlad fremrykning til autonom AI'), før frontdrejningen blev nået, så det drejede aldrig. Nu drejer en stillestående fjendelinje, der skydes på mere end 20 grader fra siden, sin front mod modstanderen (`ThinkInfantry`, fjendens gren).
+- **Rækkerne lukker:** tab efterlader huller (overlevende beholder pladsen, bevidst). Seks stille sekunder efter sidste tab, mens kompagniet står stille, laver `UStrategyInfantryVisualComponent` nu en ny opstilling til den kompakte linje (`bClosingRanksPending`, `RebuildFormation`).
+- **Bagning:** crowd-modellerne var bagt med 15 prøver i sekundet, hvilket gjorde gang, løb og vending utydelige (langsomme klip som sigte og stå så fine ud). `FramesPerSecond` sat til 30, og alle modeller bagt om (`bake_all_vat.py`, 7.354 rækker pr. model, grænse 16.384). Målt: 8,2 ms GPU, 60 FPS med det nye loft.
+- **Rapportens gevær:** ét gevær, drejet 38 grader og fyldende hele ikonet (`Historiske musketter med bajonetter.png`).
+- Acceptancetest: 31 består, 7 'ikke implementeret'. Ikke set i spillet: lukning af rækker og fjendens drejning.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

@@ -40,6 +40,7 @@
 #include "../Artillery/StrategyArtilleryBatteryUnit.h"
 #include "../Artillery/StrategyArtilleryAmmunitionComponent.h"
 #include "../Units/StrategyHQUnit.h"
+#include "../Visual/StrategyEquipmentVisualComponent.h"
 #include "../Artillery/StrategyArtilleryFireMissionComponent.h"
 #include "../Units/StrategyDragoonComponent.h"
 #include "../Combat/StrategyStanceComponent.h"
@@ -597,6 +598,8 @@ void AStrategyHUD::DrawMovementRoute(const AStrategyUnit* Unit, bool bSelected)
         (RouteOrder.Type == EStrategyOrderType::Move || RouteOrder.Type == EStrategyOrderType::Advance ||
          RouteOrder.Type == EStrategyOrderType::AttackHere || !RouteOrder.Waypoints.IsEmpty());
     if (!bRouteActive) return;
+    // Once the unit has begun to fire, its destination box is no longer drawn (the march is held or over).
+    if (Unit->CombatComponent && GetWorld() && GetWorld()->GetTimeSeconds() - Unit->CombatComponent->LastFiredTimeSeconds < 4.0f) return;
     const FLinearColor RouteColour = bSelected ? Gold : FLinearColor(1.0f, 1.0f, 1.0f, 0.22f);
     const float RouteYaw = RouteOrder.bHasFacing ? RouteOrder.FacingYaw : Unit->GetActorRotation().Yaw;
     const FVector RouteGoal = RouteOrder.TargetLocation;
@@ -1278,7 +1281,13 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
     for (int32 OrderIndex = 0; OrderIndex < 4; ++OrderIndex)
     {
         const FLinearColor HudOrderBlue(0.40f, 0.69f, 0.88f), HudOrderGreen(0.34f, 0.78f, 0.57f), HudOrderRed(0.85f, 0.39f, 0.43f);
-        const FLinearColor* HudColour = OrderIndex == 0 ? &HudOrderBlue : OrderIndex == 2 ? &HudOrderGreen : &HudOrderRed;
+        // ADVANCE: green while the unit marches on something, red when it stands. CHARGE: red; blue once the bayonets are fixed; green when charging.
+        const bool bHudMarching = Unit->MovementExecutor && Unit->MovementExecutor->HasMovementGoal() && !Unit->MovementExecutor->IsHoldingForFire() &&
+            (HudCurrent == EStrategyOrderType::Advance || HudCurrent == EStrategyOrderType::AttackHere || HudCurrent == EStrategyOrderType::Move);
+        const bool bHudCharging = HudCurrent == EStrategyOrderType::Charge && Unit->MovementExecutor && Unit->MovementExecutor->HasMovementGoal();
+        const bool bHudBayonets = Unit->EquipmentVisualComponent && Unit->EquipmentVisualComponent->bBayonetFixed;
+        const FLinearColor* HudColour = OrderIndex == 0 ? (bHudMarching ? &HudOrderGreen : &HudOrderRed)
+            : OrderIndex == 2 ? (bHudCharging ? &HudOrderGreen : bHudBayonets ? &HudOrderBlue : &HudOrderRed) : &HudOrderRed;
         DrawButton(HudX[2] + (OrderIndex % 2) * (HudOrderW + 5.f), HudY + 49.f + (OrderIndex / 2) * (HudHQ ? 44.f : 56.f), HudOrderW, HudHQ ? 38.f : 50.f, HudOrders[OrderIndex], HudActions[OrderIndex], int32(HudTypes[OrderIndex]), HudCurrent == HudTypes[OrderIndex], Unit, HudColour);
     }
     const bool bHudTurnable = !HudHQ && (Cast<AStrategyCompanyUnit>(Unit) || Cast<ACavalryUnit>(Unit) || Cast<AStrategyArtilleryBatteryUnit>(Unit));

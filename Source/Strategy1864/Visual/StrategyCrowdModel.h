@@ -59,7 +59,7 @@ struct FStrategyCrowdClip
 };
 
 /** Persistent editor-baked infantry plus rifle. UV1-4 hold bones/weights, RGB vertex colours hold
- *  garment masks; the float texture stores three matrix texels per bone at 15 samples/second.
+ *  garment masks; the float texture stores three matrix texels per bone at 30 samples/second (15 made walking and turning indistinct).
  *  Runtime loads this asset and gives every instance its own clip clock and uniform palette.
  */
 UCLASS(BlueprintType)
@@ -68,7 +68,7 @@ class STRATEGY1864_API UStrategyCrowdModel : public UObject
     GENERATED_BODY()
 
 public:
-    static constexpr float FramesPerSecond = 15.0f;
+    static constexpr float FramesPerSecond = 30.0f;
     static constexpr int32 CustomDataFloats = 19; // clock, colours/switches, complementary coverage, two-bone/step sampling
 
     /** Editor Python entry point; creates a persistent model, but never saves or starts an editor. */
