@@ -18,8 +18,8 @@ OUT = PROJECT / 'SourceAssets/InfantryCombat'
 OUT.mkdir(parents=True, exist_ok=True)
 WALK = MULTI / 'Animationer Mænd' / 'Walking with rifle.fbx'
 ARM_BONES = ['Arm', 'ForeArm', 'Hand'] + ['Hand%s%d' % (f, i) for f in ('Thumb', 'Index', 'Middle', 'Ring', 'Pinky') for i in (1, 2, 3, 4)]
-RIGHT_HAND = (0.26, 0.12, 1.00)    # soldier frame (x right, y forward, z up): the butt held at the hip
-LEFT_HAND = (-0.30, 0.00, 0.93)    # the left arm hangs and swings
+RIGHT_HAND = (0.20, 0.20, 1.18)    # soldier frame (x right, y forward, z up): the butt held at the hip
+LEFT_HAND = (-0.28, 0.00, 0.93)    # the left arm hangs and swings
 
 
 def load():

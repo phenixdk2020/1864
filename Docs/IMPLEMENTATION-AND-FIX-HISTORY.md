@@ -2284,6 +2284,14 @@ Efter brugerens test og to optagelser:
 - AAR-ikoner 20 % større (26-41 px), rækkehøjde 40.
 - Testhjælp: `-Strategy1864PauseShotFocus` og HighResShot i PauseCameraTest.
 
+### 2026-10-15 - Pause, skuldergevær tæt på fotoet, klip-viser, AAR-forklaring
+
+- Pause: kontrolleren ticker nu også under pause, så højreklik-ordrer virker; infanterikomponentens tid står stille under pause, så kompagniet ikke marcherer eller omformer, mens spillet er pauset (ordren udføres først, når tiden går).
+- Geværet på skulderen: højre hånd i brysthøjde (Blender: RIGHT_HAND 0.20/0.20/1.18), løbet næsten lodret med hældning udad (92 % op, 32 % ud, 10 % tilbage); klippene genimporteret og baget; kontrolleret på skærmbillede.
+- Klip-viser: `Start-Klipviser.bat` (`-Strategy1864ClipViewer[=filter]`) viser alle bagte klip i et gitter med navn og længde (AStrategyClipViewer).
+- AAR: forklaringslinjen øverst har nu ammunition og mad; ikonerne 5 % mindre (efter de 20 % større).
+- Acceptance: 31 pass, 7 NOT_IMPLEMENTED.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

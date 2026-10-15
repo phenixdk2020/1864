@@ -1,4 +1,5 @@
 #include "StrategyOOBTestScenario.h"
+#include "StrategyClipViewer.h"
 #include "../Units/StrategyWagonTrainComponent.h"
 #include "../Player/StrategyBattleQuality.h"
 
@@ -147,6 +148,13 @@ AStrategyOOBTestScenario::AStrategyOOBTestScenario()
 void AStrategyOOBTestScenario::BeginPlay()
 {
     Super::BeginPlay();
+
+    // -Strategy1864ClipViewer[=filter]: a grid of the baked clips (see StrategyClipViewer.h), placed on the flat QA ground.
+    FString ClipViewerFilter;
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864ClipViewer")) || FParse::Value(FCommandLine::Get(), TEXT("Strategy1864ClipViewer="), ClipViewerFilter))
+    {
+        GetWorld()->SpawnActor<AStrategyClipViewer>(FVector(-60000.f, 40000.f, 0.f), FRotator::ZeroRotator);
+    }
 
     if (QAFlatGround)
     {

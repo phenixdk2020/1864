@@ -206,6 +206,8 @@ void UStrategyInfantryVisualComponent::TickComponent(
         return;
     }
 
+    // The component ticks while paused (the crowd follows the camera) but the men stand still: no marching or re-forming under a pause.
+    if (UGameplayStatics::IsGamePaused(this)) { DeltaTime = 0.f; }
     VisualAnimationTime += FMath::Max(0.f, DeltaTime);
     if (DeltaTime <= 0.f)
     {

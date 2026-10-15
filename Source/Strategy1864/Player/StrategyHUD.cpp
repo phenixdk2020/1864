@@ -2010,7 +2010,7 @@ void AStrategyHUD::DrawReportEquipment(const FString& Cell, float X, float Y, fl
     }
     // The cell is divided evenly: an icon and its count in each sixth.
     const float Slot = Width / 6.f;
-    const float IconSize = FMath::Clamp(Slot * 0.55f, 26.f, 41.f);
+    const float IconSize = FMath::Clamp(Slot * 0.52f, 25.f, 39.f);
     for (int32 Kind = 0; Kind < 6; ++Kind)
     {
         const float SlotX = X + Kind * Slot;
@@ -2042,13 +2042,13 @@ void AStrategyHUD::DrawAfterActionReport()
         Text(ReportScenario->GetReportSummary(), ReportX + 20.f, ReportY + 72.f, Ink);
         {
             // The legend of the equipment icons, then the note on the wounded.
-            static const TCHAR* LegendText[6] = { TEXT("kanoner"), TEXT("mortérer"), TEXT("geværer"), TEXT("heste"), TEXT("vogne"), TEXT("faner") };
+            static const TCHAR* LegendText[8] = { TEXT("kanoner"), TEXT("mortérer"), TEXT("geværer"), TEXT("heste"), TEXT("vogne"), TEXT("faner"), TEXT("ammunition"), TEXT("mad") };
             if (ReportIconTextures.IsEmpty()) { DrawReportEquipment(FString(), 0.f, -100.f, 1.f, Ink); }
             float LegendX = ReportX + 20.f;
-            for (int32 LegendIndex = 0; LegendIndex < 6; ++LegendIndex)
+            for (int32 LegendIndex = 0; LegendIndex < 8; ++LegendIndex)
             {
                 if (ReportIconTextures.IsValidIndex(LegendIndex) && ReportIconTextures[LegendIndex])
-                    DrawTexture(ReportIconTextures[LegendIndex], LegendX, ReportY + 90.f, 28.f, 28.f, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, EBlendMode::BLEND_Translucent);
+                    DrawTexture(ReportIconTextures[LegendIndex], LegendX, ReportY + 90.f, 27.f, 27.f, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, EBlendMode::BLEND_Translucent);
                 float LegendW = 0.f, LegendH = 0.f;
                 GetTextSize(LegendText[LegendIndex], LegendW, LegendH);
                 Text(LegendText[LegendIndex], LegendX + 32.f, ReportY + 96.f, Ink);
@@ -2127,7 +2127,7 @@ void AStrategyHUD::DrawAfterActionReport()
                     const int32 ExtraIcon = ReportColumn == 7 ? 6 : 7;
                     if (ReportIconTextures.IsEmpty()) { DrawReportEquipment(FString(), 0.f, -100.f, 1.f, Ink); }
                     if (ReportIconTextures.IsValidIndex(ExtraIcon) && ReportIconTextures[ExtraIcon])
-                        DrawTexture(ReportIconTextures[ExtraIcon], ReportColumnX, ReportCellY - 9.f, 34.f, 34.f, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, EBlendMode::BLEND_Translucent);
+                        DrawTexture(ReportIconTextures[ExtraIcon], ReportColumnX, ReportCellY - 9.f, 32.f, 32.f, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, EBlendMode::BLEND_Translucent);
                     ReportFitText(ReportCells[ReportColumn], ReportColumnX + 38.f, ReportCellY, ReportCellW - 38.f);
                     ReportColumnX += ReportUsable * ReportWidths[ReportColumn];
                     continue;

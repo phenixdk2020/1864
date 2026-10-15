@@ -705,7 +705,7 @@ bool UStrategyCrowdModel::Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMes
                 const FVector Right = Space[RightHand].GetLocation();
                 const FVector Side = (Space[RightShoulderBone].GetLocation() - Space[LeftShoulderBone].GetLocation()).GetSafeNormal();
                 const FVector Forward = FVector::CrossProduct(Side, FVector::UpVector).GetSafeNormal();
-                const FVector Barrel = (FVector::UpVector * 0.97f + Side * 0.18f - Forward * 0.05f).GetSafeNormal();
+                const FVector Barrel = (FVector::UpVector * 0.92f + Side * 0.32f - Forward * 0.10f).GetSafeNormal();
                 const FVector TopHint = Side;
                 const FRotator Rotation = FRotationMatrix::MakeFromXZ(Grip.bBarrelAlongNegativeX ? -Barrel : Barrel, TopHint).Rotator();
                 const float ButtX = Grip.bBarrelAlongNegativeX ? RifleBox.Max.X : RifleBox.Min.X;

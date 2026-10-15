@@ -27,6 +27,7 @@
 AStrategyPlayerController::AStrategyPlayerController()
 {
     PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bTickEvenWhenPaused = true;   // right-click orders must work while the battle is paused
     bShowMouseCursor = true;
     bEnableClickEvents = true;
     bEnableMouseOverEvents = true;
@@ -124,7 +125,7 @@ void AStrategyPlayerController::PlayerTick(float DeltaTime)
         }
     }
     Super::PlayerTick(DeltaTime);
-    TickCouriers(DeltaTime);
+    if (!UGameplayStatics::IsGamePaused(this)) { TickCouriers(DeltaTime); }
     TickRightMouse();
     // Test (-Strategy1864TestCourier): after 25 s the Danish company farthest from the staff is ordered 200 m forward.
     static bool bTestCourier = false;
