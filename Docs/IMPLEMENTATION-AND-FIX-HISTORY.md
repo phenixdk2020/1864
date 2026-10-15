@@ -2256,6 +2256,12 @@ Efter brugerens test og to optagelser:
 - Importscriptet importerer kun ekstraklip og rører aldrig de otte oprindelige.
 - Verificeret med skærmbilleder (kolonne: gevær skråt på skulderen; overgang til linje: gevær i hænderne).
 
+### 2026-10-15 - Geværet næsten lodret på skulderen, motion blur slået fra
+
+- Skulder-reglen i bagningen: løbet står næsten lodret med let hældning udad (reference: foto af dansk infanterist og rekonstruktører), ikke bagud.
+- `r.DefaultFeature.MotionBlur=False`: striberne ved zoom-ud under pause var bevægelses-blur.
+- Frame-rate-tjek: alle kilde-animationer i /Game/Units er samplet ved 30 FPS eller tættere, og alle bagninger er 30 FPS (7480 rækker); intet klip er bagt ved 15.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
