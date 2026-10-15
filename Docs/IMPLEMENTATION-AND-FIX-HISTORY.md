@@ -2248,6 +2248,14 @@ Efter brugerens test og to optagelser:
 - **Fjendens front:** med `-Strategy1864EnemyTurn=35` (ny testflag: fjenden holder med fronten 35 grader forkert) svinger fjenden fronten mod Danerne ved t=2 ('Svinger fronten'), og fjendens kamp-AI holder den derefter vendt mod fjenden. I en almindelig 1 mod 1 er fjenden under 20 grader ude af kurs, så der sker ikke noget; grænsen er 20 grader. Ekstra beslutningslog 'Frontvurdering (fjende)' med `-Strategy1864DebugDecisions`.
 - Acceptancetest: 31 består, 7 'ikke implementeret'.
 
+### 2026-10-15 - Geværet på skulderen i kolonne
+
+- Nye klip `WalkShoulder`, `ShoulderUp`, `ShoulderDown` (Blender, kun armene ændres; ben og krop er projektets egen march).
+- Infanterikomponenten skifter ved overgang til/fra March-/DefileColumn: geværet løftes op på skulderen (1,4 s) og sænkes igen ved opstilling i linje.
+- Bagningen placerer geværet på skulderen for klip med 'Shoulder' i navnet; baget igen ved 30 FPS (7480 rækker).
+- Importscriptet importerer kun ekstraklip og rører aldrig de otte oprindelige.
+- Verificeret med skærmbilleder (kolonne: gevær skråt på skulderen; overgang til linje: gevær i hænderne).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

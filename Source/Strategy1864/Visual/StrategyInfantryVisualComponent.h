@@ -347,6 +347,13 @@ private:
         float StanceEnd = -1.f;
         float NearBlend = 0.f;
     };
+    /** The column carries the rifle on the shoulder: one cycle up when the company goes into column, one down when it forms line. */
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> WalkShoulderAsset;
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> ShoulderUpAsset;
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> ShoulderDownAsset;
+    bool bShoulderColumn = false;
+    bool bShoulderRising = false;
+    float ShoulderTransitionEnd = -1.f;
     bool bScaleOnlyRebuild = false;
     /** Losses leave holes (survivors keep their places); a few quiet seconds after the last loss the men close ranks into the compact line. */
     bool bClosingRanksPending = false;

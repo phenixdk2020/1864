@@ -61,6 +61,12 @@ UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
 
     WalkStandingAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_Walk.A_Combat_Walk")));
+    WalkShoulderAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_WalkShoulder.A_Combat_WalkShoulder")));
+    ShoulderUpAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_ShoulderUp.A_Combat_ShoulderUp")));
+    ShoulderDownAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_ShoulderDown.A_Combat_ShoulderDown")));
 
     RunStandingAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Running.A_Running")));
@@ -278,6 +284,17 @@ void UStrategyInfantryVisualComponent::TickComponent(
         OwnerCompany->QAPlaceholderMesh->SetVisibility(false);
     }
     ProcessPendingKills();
+    {
+        const bool bColumnNow = OwnerCompany->FormationComponent &&
+            (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
+             OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn);
+        if (bColumnNow != bShoulderColumn)
+        {
+            bShoulderColumn = bColumnNow;
+            bShoulderRising = bColumnNow;
+            ShoulderTransitionEnd = GetWorld()->GetTimeSeconds() + 1.37f;   // one walking cycle (the clips are 1.37 s)
+        }
+    }
     // Close ranks: two and a half quiet seconds after the last loss, with the company standing still, the survivors re-form into the compact line.
     if (bClosingRanksPending && GetWorld()->GetTimeSeconds() - LastLossTimeSeconds > 2.5f && PendingKillCount == 0 && !bFormationPlanPending && !bArrivalReform &&
         !(OwnerCompany->MovementExecutor && OwnerCompany->MovementExecutor->HasMovementGoal()) &&
@@ -1079,7 +1096,7 @@ bool UStrategyInfantryVisualComponent::EnsureAssetsLoaded()
     LoadedRifleMesh = RifleMeshAsset.LoadSynchronous();
     LoadedRifleBayonetMesh = RifleBayonetMeshAsset.LoadSynchronous();
     LoadedBattleFadeMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/EngineDebugMaterials/M_SimpleTranslucent.M_SimpleTranslucent"));
-    const TSoftObjectPtr<UAnimSequence>* BattleAnimationAssets[] = { &IdleStandingAsset, &WalkStandingAsset, &RunStandingAsset, &AimStandingAsset, &FireStandingAsset, &ReloadStandingAsset, &IdleKneelingAsset, &AimKneelingAsset, &FireKneelingAsset, &ReloadKneelingAsset, &IdleProneAsset, &CrawlProneAsset, &FireProneAsset, &ReloadProneAsset, &BayonetChargeAsset, &BayonetThrustAsset, &DeathAsset, &DeathAsset2, &DeathAsset3, &RaiseToAimAsset, &LoadAsset, &RiseFromLoadAsset, &ReadyAsset, &AimHoldAsset, &DeathWalkingAsset };
+    const TSoftObjectPtr<UAnimSequence>* BattleAnimationAssets[] = { &IdleStandingAsset, &WalkStandingAsset, &RunStandingAsset, &AimStandingAsset, &FireStandingAsset, &ReloadStandingAsset, &IdleKneelingAsset, &AimKneelingAsset, &FireKneelingAsset, &ReloadKneelingAsset, &IdleProneAsset, &CrawlProneAsset, &FireProneAsset, &ReloadProneAsset, &BayonetChargeAsset, &BayonetThrustAsset, &DeathAsset, &DeathAsset2, &DeathAsset3, &RaiseToAimAsset, &LoadAsset, &RiseFromLoadAsset, &ReadyAsset, &AimHoldAsset, &DeathWalkingAsset, &WalkShoulderAsset, &ShoulderUpAsset, &ShoulderDownAsset };
     CrowdStanceClips.Reset();
     for (const TCHAR* CrowdStanceName : { TEXT("A_Rifle_Stand_To_Kneel"), TEXT("A_Rifle_Kneel_To_Stand"), TEXT("A_Rifle_Kneel_To_Prone"), TEXT("A_Rifle_Prone_To_Kneel") })
     {
@@ -2283,6 +2300,19 @@ UAnimSequence* UStrategyInfantryVisualComponent::ResolveAnimation(
             return CrawlProneAsset.Get();
         }
 
+        // The column marches with the rifle on the shoulder; one cycle takes it up (into column) or down (into line).
+        if (!WalkShoulderAsset.IsNull() && !ShoulderUpAsset.IsNull() && !ShoulderDownAsset.IsNull())
+        {
+            if (ShoulderTransitionEnd > GetWorld()->GetTimeSeconds())
+            {
+                bOutLooping = false;
+                return bShoulderRising ? ShoulderUpAsset.Get() : ShoulderDownAsset.Get();
+            }
+            if (bShoulderColumn)
+            {
+                return WalkShoulderAsset.Get();
+            }
+        }
         return WalkStandingAsset.Get();
     }
 

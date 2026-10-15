@@ -695,7 +695,26 @@ bool UStrategyCrowdModel::Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMes
             }
             // The rifle: from the right hand towards the left (as the visual component aligns it).
             FTransform RifleTransform = FTransform::Identity;
-            if (RightHand != INDEX_NONE)
+            // Shoulder-arms clips ('...Shoulder...'): the butt is in the right hand and the barrel rests up and back over the right shoulder,
+            // not along the line from the right to the left hand.
+            const int32 RightShoulderBone = RefSkeleton.FindBoneIndex(FName(*Grip.RightHand.ToString().Replace(TEXT("Hand"), TEXT("Shoulder"))));
+            const int32 LeftShoulderBone = RefSkeleton.FindBoneIndex(FName(*Grip.LeftHand.ToString().Replace(TEXT("Hand"), TEXT("Shoulder"))));
+            if (RightHand != INDEX_NONE && RifleBox.IsValid && Clip->GetName().Contains(TEXT("Shoulder")) &&
+                RightShoulderBone != INDEX_NONE && LeftShoulderBone != INDEX_NONE)
+            {
+                const FVector Right = Space[RightHand].GetLocation();
+                const FVector Side = (Space[RightShoulderBone].GetLocation() - Space[LeftShoulderBone].GetLocation()).GetSafeNormal();
+                const FVector Forward = FVector::CrossProduct(Side, FVector::UpVector).GetSafeNormal();
+                const FVector Barrel = (FVector::UpVector * 0.90f - Forward * 0.45f).GetSafeNormal();
+                const FVector TopHint = -Forward;
+                const FRotator Rotation = FRotationMatrix::MakeFromXZ(Grip.bBarrelAlongNegativeX ? -Barrel : Barrel, TopHint).Rotator();
+                const float ButtX = Grip.bBarrelAlongNegativeX ? RifleBox.Max.X : RifleBox.Min.X;
+                const float GripX = ButtX + (RifleBox.Max.X - RifleBox.Min.X) * 0.30f * (Grip.bBarrelAlongNegativeX ? -1.0f : 1.0f);
+                RifleTransform = FTransform(Rotation, Right - Rotation.RotateVector(FVector(GripX, 0.0f, 0.0f)));
+                if (f == 0 && C.StartRow == 0) { FirstHand = Right; }
+                else if (!bMoved && FVector::Dist(FirstHand, Right) > 1.0f) { bMoved = true; }
+            }
+            else if (RightHand != INDEX_NONE)
             {
                 const FVector Right = Space[RightHand].GetLocation();
                 const FVector Left = LeftHand != INDEX_NONE ? Space[LeftHand].GetLocation() : Right;

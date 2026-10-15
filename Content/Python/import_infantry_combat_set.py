@@ -6,7 +6,7 @@ manifest=json.loads((source/'manifest.json').read_text())
 # Only the extra clips are (re)imported. The original eight (Idle, Walk, Aim, Fire, three deaths, ReloadStanding) are NEVER re-imported:
 # a re-import on 2026-10-13 changed A_Combat_Walk and the marching men lay down in the baked crowd.
 extras=[]
-for extra in (source/'manifest_extra.json', source/'manifest_cav.json'):
+for extra in (source/'manifest_extra.json', source/'manifest_cav.json', source/'manifest_shoulder.json'):
     if extra.exists():
         extras+=json.loads(extra.read_text())['clips']
 manifest['clips']=extras

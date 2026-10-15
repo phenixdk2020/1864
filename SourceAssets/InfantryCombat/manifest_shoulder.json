@@ -1,0 +1,28 @@
+{
+  "clips": [
+    {
+      "name": "WalkShoulder",
+      "file": "A_Combat_WalkShoulder.fbx",
+      "frames": 42,
+      "fps": 30,
+      "duration": 1.3666666666666667,
+      "bones": 41
+    },
+    {
+      "name": "ShoulderUp",
+      "file": "A_Combat_ShoulderUp.fbx",
+      "frames": 42,
+      "fps": 30,
+      "duration": 1.3666666666666667,
+      "bones": 41
+    },
+    {
+      "name": "ShoulderDown",
+      "file": "A_Combat_ShoulderDown.fbx",
+      "frames": 42,
+      "fps": 30,
+      "duration": 1.3666666666666667,
+      "bones": 41
+    }
+  ]
+}
