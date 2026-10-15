@@ -487,7 +487,7 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
                 if (TurnCompany && TurnCompany->Side == FoeSide && TurnCompany->OrderComponent)
                 {
                     FStrategyOrder TurnTestHold;
-                    TurnTestHold.Type = EStrategyOrderType::Hold;
+                    TurnTestHold.Type = EStrategyOrderType::DefendHere;   // as -Strategy1864EnemyDefends gives it
                     TurnTestHold.TargetLocation = TurnCompany->GetActorLocation();
                     TurnTestHold.FacingYaw = 180.0f + EnemyTurnTest;
                     TurnTestHold.bHasFacing = true;

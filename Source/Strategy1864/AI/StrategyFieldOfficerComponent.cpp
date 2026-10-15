@@ -795,7 +795,8 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
                     FMath::Abs(FMath::FindDeltaAngleDegrees(OwnerUnit->GetActorRotation().Yaw, DebugToFoe)), OwnerUnit->GetActorRotation().Yaw, DebugToFoe),
                 TEXT("frontskifte for fjendens side"));
         }
-        if (!OwnerUnit->OrderComponent->IsPhysicallyExecuting() && Distance < 50000.0f)
+        // A defend/hold order that is "executing" (holding the ground) must not stop the line from swinging its front.
+        if ((!OwnerUnit->OrderComponent->IsPhysicallyExecuting() || (OwnerUnit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::DefendHere || OwnerUnit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Hold)) && Distance < 50000.0f)
         {
             const float ToFoe = (Enemy->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
             const float OffFront = FMath::Abs(FMath::FindDeltaAngleDegrees(OwnerUnit->GetActorRotation().Yaw, ToFoe));

@@ -2,6 +2,21 @@
 #include "../Units/StrategyUnit.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
 
+namespace
+{
+    // A line that loses men keeps its frontage as long as it can (every man of the front rank can fire): the rear ranks thin out first,
+    // and the line only narrows once a single rank is left. The files are those of the full-strength line.
+    int32 LineRanksFor(const AActor* Owner, int32 RankCount, int32 /*Strength*/)
+    {
+        const int32 Nominal = FMath::Max(1, RankCount);
+        const AStrategyUnit* Unit = Cast<AStrategyUnit>(Owner);
+        if (!Unit || Unit->InitialStrength <= 0 || Unit->CurrentStrength >= Unit->InitialStrength) { return Nominal; }
+        // By the unit's share of its full strength (the drawn figures can be fewer than the men): depth follows the share, the files stay.
+        const float Share = float(FMath::Max(0, Unit->CurrentStrength)) / float(Unit->InitialStrength);
+        return FMath::Clamp(FMath::CeilToInt(Share * Nominal - 0.001f), 1, Nominal);
+    }
+}
+
 UStrategyFormationComponent::UStrategyFormationComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
@@ -131,7 +146,7 @@ TArray<FStrategyFormationSlot> UStrategyFormationComponent::GenerateSoldierSlots
     const int32 EffectiveRanks =
         CurrentFormation == EStrategyFormationType::CavalryLine
         ? 4
-        : FMath::Max(1, RankCount);
+        : (CurrentFormation == EStrategyFormationType::Line ? LineRanksFor(GetOwner(), RankCount, Strength) : FMath::Max(1, RankCount));
     const int32 Files = FMath::CeilToInt(static_cast<float>(Strength) / EffectiveRanks);
 
     for (int32 Index = 0; Index < Strength; ++Index)
@@ -186,7 +201,7 @@ float UStrategyFormationComponent::EstimateFrontageCm(int32 Strength) const
     const int32 EffectiveRanks =
         CurrentFormation == EStrategyFormationType::CavalryLine
         ? 4
-        : FMath::Max(1, RankCount);
+        : (CurrentFormation == EStrategyFormationType::Line ? LineRanksFor(GetOwner(), RankCount, Strength) : FMath::Max(1, RankCount));
     const int32 Files = FMath::CeilToInt(static_cast<float>(Strength) / EffectiveRanks);
     return FMath::Max(0, Files - 1) * SoldierLateralSpacingCm;
 }

@@ -358,6 +358,7 @@ private:
     /** Losses leave holes (survivors keep their places); a few quiet seconds after the last loss the men close ranks into the compact line. */
     bool bClosingRanksPending = false;
     float LastLossTimeSeconds = -1000.f;
+    float FirstPendingLossTimeSeconds = -1000.f;   // the first loss not yet closed up (ranks close even under steady losses)
     bool bRigidCompany = true;   // -Strategy1864Rigid=0 returns to the per-man chase with the spring-smoothed centre
     FStrategyVisualFormationPath VisualPath;
     TArray<FSettle> SoldierSettle;       // parallel to SoldierComponents

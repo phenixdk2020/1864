@@ -2262,6 +2262,13 @@ Efter brugerens test og to optagelser:
 - `r.DefaultFeature.MotionBlur=False`: striberne ved zoom-ud under pause var bevægelses-blur.
 - Frame-rate-tjek: alle kilde-animationer i /Game/Units er samplet ved 30 FPS eller tættere, og alle bagninger er 30 FPS (7480 rækker); intet klip er bagt ved 15.
 
+### 2026-10-15 - Bredden holdes ved tab, og fjenden svinger fronten under DefendHere
+
+- Linje der mister mænd: dybden aftager først (3 -> 2 -> 1 geled efter andelen af styrken), så frontbredden og dermed antallet af skytter holdes; først med ét geled snævres linjen ind (`LineRanksFor` i StrategyFormationComponent.cpp, bruges af både slots og frontbredde-estimatet).
+- Lukning af geledene sker nu også i kamp under et stående mål (kun synlig march blokerer), efter 1 s ro eller senest 4 s efter første tab.
+- Fjendens frontskifte: en DefendHere/Hold-ordre, der 'udføres', blokerer ikke længere for at svinge fronten mod en fjende mere end 20 grader ude af kurs (årsag til at fjenden blev stående i 1 mod 1, hvor han har DefendHere). Test: -Strategy1864EnemyTurn bruger nu DefendHere; logger 'Svinger fronten'.
+- Acceptance: 31 pass, 7 NOT_IMPLEMENTED (som forventet).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
