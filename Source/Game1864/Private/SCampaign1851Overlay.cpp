@@ -126,10 +126,18 @@ void SCampaign1851Overlay::Construct(const FArguments& InArgs)
 	{
 		TownBrushes.Add(CardBrush(M.Card));
 	}
-	// The soldiers in their uniforms (Tools/Campaign/make_uniform_cards.py) and the colours.
+	// The soldiers in their uniforms (Tools/Campaign/make_uniform_cards.py), one per arm, plus the nation plates
+	// (T_Uniform_<Nation>_<Arm>); a missing nation plate caches the Danish one, so the lookup happens once.
 	for (const TCHAR* Arm : { TEXT("Infantry"), TEXT("Guard"), TEXT("Jager"), TEXT("Cavalry"), TEXT("Artillery"), TEXT("HorseArtillery"), TEXT("Hussar") })
 	{
-		UniformBrushes.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Uniforms/T_Uniform_%s.T_Uniform_%s"), Arm, Arm)));
+		const TSharedPtr<FSlateBrush> UniformFallback = CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Uniforms/T_Uniform_%s.T_Uniform_%s"), Arm, Arm));
+		UniformBrushes.Add(UniformFallback);
+		for (const TCHAR* UniformNation : { TEXT("SE"), TEXT("NO"), TEXT("PR") })
+		{
+			const FString UniformKey = FString::Printf(TEXT("%s_%s"), UniformNation, Arm);
+			const TSharedPtr<FSlateBrush> NationPlate = CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Uniforms/T_Uniform_%s.T_Uniform_%s"), *UniformKey, *UniformKey));
+			NationUniformBrushes.Add(UniformKey, NationPlate.IsValid() && NationPlate->GetResourceObject() ? NationPlate : UniformFallback);
+		}
 	}
 	FlagBrush = CardBrush(TEXT("/Game/Units/Flags/T_Flag_DK.T_Flag_DK"));
 	for (int32 n = 0; n < 12; ++n)
@@ -2553,18 +2561,22 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 	const bool bHussar = R.Arm == ECampaign1851Arm::Cavalry && (R.OriginalName.IsEmpty() ? R.Name : R.OriginalName).Contains(TEXT("usar"));
 	const int32 Arm = bHussar ? 6 : FMath::Clamp(int32(R.Arm), 0, 5);
 	const FVector2D Picture(Pos.X + 22.f, Pos.Y + 96.f + ChipsH);
+	const TCHAR* UniformArmNames[] = { TEXT("Infantry"), TEXT("Guard"), TEXT("Jager"), TEXT("Cavalry"), TEXT("Artillery"), TEXT("HorseArtillery"), TEXT("Hussar") };
+	const TSharedPtr<FSlateBrush>* UnitUniform = NationUniformBrushes.Find(R.Nation + TEXT("_") + UniformArmNames[Arm]);
+	if (!UnitUniform && UniformBrushes.IsValidIndex(Arm)) { UnitUniform = &UniformBrushes[Arm]; }
+	const bool bUnitUniformValid = UnitUniform && UnitUniform->IsValid() && (*UnitUniform)->GetResourceObject();
 	if (Map->ActiveScenario().Id == TEXT("1825"))
 	{
 		// The picture is the 1851 one (no 1825 pictures yet); the tip says what the 1825 soldier wore.
-		if (UniformBrushes.IsValidIndex(Arm) && UniformBrushes[Arm]->GetResourceObject())
+		if (bUnitUniformValid)
 		{
-			FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(150.f, 225.f), FSlateLayoutTransform(Picture)), UniformBrushes[Arm].Get());
+			FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(150.f, 225.f), FSlateLayoutTransform(Picture)), UnitUniform->Get());
 		}
 		AddTip(Picture, FVector2D(150.f, 225.f), TEXT("Billedet er 1851-uniformen. 1825: ") + Map->ArmyUniformText(R.Arm) + TEXT(". ") + Map->ArmyWeaponText(R.Arm));
 	}
-	else if (UniformBrushes.IsValidIndex(Arm) && UniformBrushes[Arm]->GetResourceObject())
+	else if (bUnitUniformValid)
 	{
-		FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(150.f, 225.f), FSlateLayoutTransform(Picture)), UniformBrushes[Arm].Get());
+		FSlateDrawElement::MakeBox(Out, Layer + 2, Geometry.ToPaintGeometry(FVector2D(150.f, 225.f), FSlateLayoutTransform(Picture)), UnitUniform->Get());
 	}
 	else
 	{

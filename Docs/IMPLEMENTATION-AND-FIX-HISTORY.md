@@ -2297,6 +2297,12 @@ Efter brugerens test og to optagelser:
 - `Docs/HANDOVER-2026-10-16.md`: status, regler, byg og test, åbne punkter og faldgruber til den næste agent (Opus).
 - `Docs/PROJEKT-OVERBLIK.md`: forklarer hele projektet (mapper, slagmodulet, figurer og mængdetegning, kampagnen, start/byg/test, regler, lande og mangler).
 
+### 2026-10-16 - Nationsbestemte uniformer på kampagnens enhedskort
+
+- `make_uniform_cards.py`: danske plader bevares; nye `SE`-, `NO`- og `PR`-plader beskæres centreret til 2:3 og gemmes i 400 x 600. Manglende kilder springes over med besked og samlet oversigt; Norge har ingen husar.
+- `SCampaign1851Overlay`: regimentets `Nation` vælger nationspladen. Plader og manglende opslag caches ved oprettelsen med dansk fallback; teksturer holdes i live som i `CardBrush`.
+- Statisk kontrol mod UE 5.8-headere. Ikke bygget eller testet i spil. De nye PNG'er skal stadig importeres med `Tools/Campaign/import_building_cards.py`, som kræver, at editoren er lukket. Ingen import eller commit udført.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

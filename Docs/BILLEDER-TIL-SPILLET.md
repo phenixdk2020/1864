@@ -38,6 +38,8 @@ Eksempel: `T_Bld_Schoolhouse.png`, `T_Bld_Cannon_Foundry.png`.
 `T_Uniform_Cavalry.png` (dragon), `T_Uniform_Hussar.png` (husar), `T_Uniform_Artillery.png` (artillerist, fod),
 `T_Uniform_HorseArtillery.png` (ridende artilleri).
 
+Nationsplader: `T_Uniform_<Nation>_<Arm>.png`, hvor nation er `SE` (Sverige), `NO` (Norge) eller `PR` (Preussen). Enhedskortet bruger regimentets nation og falder tilbage til `T_Uniform_<Arm>.png`, hvis nationspladen mangler. Scriptet skriver 400 × 600 og centrerer beskæringen til 2:3 for nye plader; de danske billeder bevares.
+
 ## 3. Portrætter (`Reference/Campaign1851/Portraits/`): 512 × 640 (4:5), hoved og skuldre forfra
 
 Spillet giver hver person ét af puljens billeder ud fra navnet, så det er typer, ikke ligheder. Jo flere forskellige,

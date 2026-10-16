@@ -502,6 +502,7 @@ private:
 	mutable TArray<int32> OOBKnownGarrisonTowns; // Keep observed garrison headings when their last unit leaves.
 	int32 OOBBuilding = INDEX_NONE;
 	TArray<TSharedPtr<FSlateBrush>> UniformBrushes;   // a soldier per arm (ECampaign1851Arm)
+	TMap<FString, TSharedPtr<FSlateBrush>> NationUniformBrushes; // Nation_arm; missing plates cache the Danish fallback.
 	TSharedPtr<FSlateBrush> FlagBrush;
 	/** Portraits (types of the time): officers, generals, ministers; one by the person's name. */
 	TArray<TSharedPtr<FSlateBrush>> OfficerPortraits, GeneralPortraits, MinisterPortraits;
