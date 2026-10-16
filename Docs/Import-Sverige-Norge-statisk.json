@@ -1,0 +1,536 @@
+{
+  "date": "2026-10-16",
+  "cppDelimiterCheck": "passed",
+  "ue58Headers": [
+    "Runtime/Json/Public/Dom/JsonObject.h",
+    "Runtime/Json/Public/Dom/JsonValue.h",
+    "Runtime/Core/Public/Templates/SharedPointer.h",
+    "Runtime/Core/Public/Containers/Array.h",
+    "Runtime/Core/Public/Containers/UnrealString.h"
+  ],
+  "lineEndings": [
+    {
+      "file": "Source\\Game1864\\Private\\Campaign1851Army.cpp",
+      "CRLF": 2860,
+      "LF": 2860,
+      "bareCR": 0
+    },
+    {
+      "file": "Source\\Game1864\\Private\\Campaign1851Map.cpp",
+      "CRLF": 2038,
+      "LF": 2038,
+      "bareCR": 0
+    },
+    {
+      "file": "Source\\Game1864\\Private\\Campaign1851Ministers.cpp",
+      "CRLF": 452,
+      "LF": 452,
+      "bareCR": 0
+    },
+    {
+      "file": "Source\\Game1864\\Private\\Campaign1851Nations.cpp",
+      "CRLF": 1131,
+      "LF": 1131,
+      "bareCR": 0
+    },
+    {
+      "file": "Source\\Game1864\\Private\\Campaign1851Neighbours.cpp",
+      "CRLF": 645,
+      "LF": 645,
+      "bareCR": 0
+    },
+    {
+      "file": "Source\\Game1864\\Private\\Campaign1851Officers.cpp",
+      "CRLF": 1038,
+      "LF": 1038,
+      "bareCR": 0
+    },
+    {
+      "file": "Source\\Game1864\\Private\\Campaign1851Json.h",
+      "CRLF": 30,
+      "LF": 30,
+      "bareCR": 0
+    },
+    {
+      "file": "Tools\\Countries\\import_sweden_norway.py",
+      "CRLF": 166,
+      "LF": 166,
+      "bareCR": 0
+    },
+    {
+      "file": "Tools\\Countries\\validate_sweden_norway.py",
+      "CRLF": 67,
+      "LF": 67,
+      "bareCR": 0
+    },
+    {
+      "file": "Tools\\Map1851\\validate_neighbours.py",
+      "CRLF": 154,
+      "LF": 154,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Data-status.json",
+      "CRLF": 116736,
+      "LF": 116736,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Diplomati.json",
+      "CRLF": 74,
+      "LF": 74,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Districts_1825.json",
+      "CRLF": 0,
+      "LF": 648,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Districts_1851.json",
+      "CRLF": 0,
+      "LF": 648,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Events.json",
+      "CRLF": 417,
+      "LF": 417,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady-manifest.json",
+      "CRLF": 158,
+      "LF": 158,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady-proveniens.json",
+      "CRLF": 69293,
+      "LF": 69293,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Kamp-AI.json",
+      "CRLF": 81,
+      "LF": 81,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Kildegrundlag.json",
+      "CRLF": 12618,
+      "LF": 12618,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Kortkrav.json",
+      "CRLF": 5362,
+      "LF": 5362,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Runde7-cirkatal.json",
+      "CRLF": 6453,
+      "LF": 6453,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Sources.json",
+      "CRLF": 702,
+      "LF": 702,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Union-regler.json",
+      "CRLF": 19,
+      "LF": 19,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Valuta.json",
+      "CRLF": 62,
+      "LF": 62,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\cities_neighbours_1825.json",
+      "CRLF": 5071,
+      "LF": 5071,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\cities_neighbours_1851.json",
+      "CRLF": 5071,
+      "LF": 5071,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\Nations1851.json",
+      "CRLF": 68,
+      "LF": 68,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\Nations_1825.json",
+      "CRLF": 79,
+      "LF": 79,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\Officers1851.json",
+      "CRLF": 90,
+      "LF": 90,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\Officers_1825.json",
+      "CRLF": 74,
+      "LF": 74,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\Population_1825.json",
+      "CRLF": 656,
+      "LF": 656,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\Population_1851.json",
+      "CRLF": 656,
+      "LF": 656,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\Trade_1825.json",
+      "CRLF": 33,
+      "LF": 33,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\Trade_1851.json",
+      "CRLF": 33,
+      "LF": 33,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\NO\\Army1851.json",
+      "CRLF": 500,
+      "LF": 500,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\NO\\Army_1825.json",
+      "CRLF": 570,
+      "LF": 570,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\NO\\Army_Neighbours_1825.json",
+      "CRLF": 115,
+      "LF": 115,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\NO\\Army_Neighbours_1851.json",
+      "CRLF": 115,
+      "LF": 115,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\NO\\Economy_1825.json",
+      "CRLF": 21,
+      "LF": 21,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\NO\\Economy_1851.json",
+      "CRLF": 21,
+      "LF": 21,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\NO\\Ministers_1825.json",
+      "CRLF": 122,
+      "LF": 122,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\NO\\Ministers_1851.json",
+      "CRLF": 122,
+      "LF": 122,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\NO\\Supply_1825.json",
+      "CRLF": 77,
+      "LF": 77,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\NO\\Supply_1851.json",
+      "CRLF": 77,
+      "LF": 77,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\SE\\Army1851.json",
+      "CRLF": 745,
+      "LF": 745,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\SE\\Army_1825.json",
+      "CRLF": 809,
+      "LF": 809,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\SE\\Army_Neighbours_1825.json",
+      "CRLF": 346,
+      "LF": 346,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\SE\\Army_Neighbours_1851.json",
+      "CRLF": 346,
+      "LF": 346,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\SE\\Economy_1825.json",
+      "CRLF": 21,
+      "LF": 21,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\SE\\Economy_1851.json",
+      "CRLF": 21,
+      "LF": 21,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\SE\\Ministers_1825.json",
+      "CRLF": 122,
+      "LF": 122,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\SE\\Ministers_1851.json",
+      "CRLF": 122,
+      "LF": 122,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\SE\\Supply_1825.json",
+      "CRLF": 71,
+      "LF": 71,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\GameReady\\SE\\Supply_1851.json",
+      "CRLF": 71,
+      "LF": 71,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\NO\\Army1851.json",
+      "CRLF": 4722,
+      "LF": 4722,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\NO\\Army_1825.json",
+      "CRLF": 4608,
+      "LF": 4608,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\NO\\Army_Neighbours_1825.json",
+      "CRLF": 778,
+      "LF": 778,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\NO\\Army_Neighbours_1851.json",
+      "CRLF": 783,
+      "LF": 783,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\NO\\Economy_1825.json",
+      "CRLF": 429,
+      "LF": 429,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\NO\\Economy_1851.json",
+      "CRLF": 414,
+      "LF": 414,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\NO\\Ministers_1825.json",
+      "CRLF": 1542,
+      "LF": 1542,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\NO\\Ministers_1851.json",
+      "CRLF": 1542,
+      "LF": 1542,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\NO\\Navy_1825.json",
+      "CRLF": 942,
+      "LF": 942,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\NO\\Navy_1851.json",
+      "CRLF": 1155,
+      "LF": 1155,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\SE\\Army1851.json",
+      "CRLF": 6692,
+      "LF": 6692,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\SE\\Army_1825.json",
+      "CRLF": 6616,
+      "LF": 6616,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\SE\\Army_Neighbours_1825.json",
+      "CRLF": 2352,
+      "LF": 2352,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\SE\\Army_Neighbours_1851.json",
+      "CRLF": 2352,
+      "LF": 2352,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\SE\\Economy_1825.json",
+      "CRLF": 411,
+      "LF": 411,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\SE\\Economy_1851.json",
+      "CRLF": 419,
+      "LF": 419,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\SE\\Ministers_1825.json",
+      "CRLF": 1542,
+      "LF": 1542,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\SE\\Ministers_1851.json",
+      "CRLF": 1542,
+      "LF": 1542,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\SE\\Navy_1825.json",
+      "CRLF": 718,
+      "LF": 718,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Countries\\SwedenNorway\\Research\\SE\\Navy_1851.json",
+      "CRLF": 739,
+      "LF": 739,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Army_Neighbours_1825.json",
+      "CRLF": 1790,
+      "LF": 1790,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Army_Neighbours_1851.json",
+      "CRLF": 1794,
+      "LF": 1794,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Nations1851.json",
+      "CRLF": 624,
+      "LF": 624,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Nations_1825.json",
+      "CRLF": 736,
+      "LF": 736,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Trade_1825.json",
+      "CRLF": 0,
+      "LF": 33,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\Trade_1851.json",
+      "CRLF": 66,
+      "LF": 66,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\cities_neighbours_1825.json",
+      "CRLF": 22866,
+      "LF": 22866,
+      "bareCR": 0
+    },
+    {
+      "file": "Data\\Campaign1851\\cities_neighbours_1851.json",
+      "CRLF": 27931,
+      "LF": 27931,
+      "bareCR": 0
+    },
+    {
+      "file": "Docs\\Import-Sverige-Norge.md",
+      "CRLF": 0,
+      "LF": 115,
+      "bareCR": 0
+    },
+    {
+      "file": "Docs\\Import-Sverige-Norge-rapport.json",
+      "CRLF": 0,
+      "LF": 3219,
+      "bareCR": 0
+    },
+    {
+      "file": "Docs\\Landeskabelon.md",
+      "CRLF": 184,
+      "LF": 184,
+      "bareCR": 0
+    },
+    {
+      "file": "Docs\\Naboer.md",
+      "CRLF": 135,
+      "LF": 135,
+      "bareCR": 0
+    },
+    {
+      "file": "Docs\\IMPLEMENTATION-AND-FIX-HISTORY.md",
+      "CRLF": 2377,
+      "LF": 2377,
+      "bareCR": 0
+    }
+  ],
+  "note": "Statisk headerkontrol, ingen kompilering eller spiltest."
+}

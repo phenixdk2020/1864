@@ -1,0 +1,21 @@
+{
+  "ruralTax": 0.12,
+  "urbanTax": 0.25,
+  "grainPerHead": 0.264997,
+  "cattlePerHead": 0.35,
+  "butterPerHead": 0.006,
+  "grainPrice": 28,
+  "cattlePrice": 18,
+  "butterPrice": 300,
+  "exportDuty": 0.02,
+  "creditBase": 0.05,
+  "constructionCost": 1.05,
+  "unskilledDailyWage": 0.2,
+  "ironPrice": 65,
+  "coalPrice": 18,
+  "timberPrice": 3,
+  "powderPrice": 0.8,
+  "clothPrice": 0.6,
+  "leatherPrice": 0.75,
+  "note": "Runde 6 cirkamodel. Årsregnskabsankre bevaret, kasse/priser/løn/renter er skøn. JSON har ikke alle motorenheder; units er foreslået kontrakt, der kræver loaderkontrol. Riksmynt er ikke samtidens valuta før 1855."
+}

@@ -270,7 +270,8 @@ public:
 	 */
 	// 35: corps morale/cohesion in War; missing corps-condition rows default to 0.8/70.
 	// 36: player-given company names on regiments (empty in older saves = automatic names); formation names were already saved.
-	static constexpr int32 CurrentVersion = 36;
+	// 37: event files with windows, history and event references; War rows carry `events-format|37` (older saves close the undecided events already past).
+	static constexpr int32 CurrentVersion = 37;
 
     // v32: exact report, prisoner pools, extended service entries and officer careers; old saves default to empty.
     UPROPERTY() FString LastAfterActionReport;

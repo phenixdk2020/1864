@@ -291,6 +291,12 @@ void UStrategyMovementExecutorComponent::TickComponent(
     if (MovementFireTarget && CurrentOrder.AttackTarget.Get() == MovementFireTarget &&
         !bHoldingForFire && FVector::Dist2D(OwnerUnit->GetActorLocation(), CurrentOrder.TargetLocation) > FMath::Max(ArrivalToleranceCm, 1200.0f))
         MovementFireTarget = nullptr;   // (within 12 m of the stand-off point it may halt and fire: no crawl over the last metres before the first volley)
+    // The halt must not come on the arc: an enemy in front of the unit (inside the fire cone) stops an attack/advance only when the
+    // far corner of his front, measured from OUR front line as fire control does, is inside the approach range. Before, the middle of
+    // his line within the range stopped it, so only the men nearest him could fire. An enemy outside the cone still halts as before.
+    if (MovementFireTarget && !bHoldingForFire && OwnerUnit->FireControlComponent->IsInsideFireCone(MovementFireTarget) &&
+        !OwnerUnit->FireControlComponent->IsTargetFarSideInFireField(MovementFireTarget, OwnerUnit->FireControlComponent->GetApproachHaltRangeCm()))
+        MovementFireTarget = nullptr;
     if (MovementFireTarget)
     {
         FireReactionQuietSeconds = 0.0f;

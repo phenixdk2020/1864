@@ -1,0 +1,3219 @@
+{
+  "added": [
+    "cities_neighbours_1825.json/outside:Uddevalla",
+    "cities_neighbours_1825.json/outside:Strömstad",
+    "cities_neighbours_1825.json/outside:Fredrikstad",
+    "cities_neighbours_1825.json/outside:Moss",
+    "cities_neighbours_1825.json/outside:Drammen",
+    "cities_neighbours_1825.json/outside:Tønsberg",
+    "cities_neighbours_1825.json/outside:Larvik",
+    "cities_neighbours_1825.json/outside:Horten",
+    "cities_neighbours_1825.json/outside:Drøbak",
+    "cities_neighbours_1825.json/outside:Lidköping",
+    "cities_neighbours_1825.json/outside:Vänersborg",
+    "cities_neighbours_1825.json/outside:Vadstena",
+    "cities_neighbours_1825.json/outside:Norrköping",
+    "cities_neighbours_1825.json/outside:Linköping",
+    "cities_neighbours_1825.json/outside:Skara",
+    "cities_neighbours_1825.json/outside:Mariestad",
+    "cities_neighbours_1825.json/outside:Stockholm",
+    "cities_neighbours_1825.json/outside:Karlstad",
+    "cities_neighbours_1825.json/outside:Arvika",
+    "cities_neighbours_1825.json/outside:Svinesund SE",
+    "cities_neighbours_1825.json/outside:Svinesund NO",
+    "cities_neighbours_1825.json/outside:Sarpsborg",
+    "cities_neighbours_1825.json/outside:Kongsvinger",
+    "cities_neighbours_1825.json/outside:Kaholmen",
+    "cities_neighbours_1825.json/outside:Fredriksvern",
+    "cities_neighbours_1825.json/outside:Fryken south",
+    "cities_neighbours_1825.json/outside:Klarälven rail landing",
+    "cities_neighbours_1825.json/outside:Uppsala",
+    "cities_neighbours_1825.json/outside:Örebro",
+    "cities_neighbours_1825.json/outside:Malmköping",
+    "cities_neighbours_1825.json/outside:Falun",
+    "cities_neighbours_1825.json/outside:Gävle",
+    "cities_neighbours_1825.json/outside:Piteå",
+    "cities_neighbours_1825.json/outside:Umeå",
+    "cities_neighbours_1825.json/outside:Östersund",
+    "cities_neighbours_1825.json/outside:Härnösand",
+    "cities_neighbours_1825.json/outside:Visby",
+    "cities_neighbours_1825.json/outside:Trondheim",
+    "cities_neighbours_1825.json/outside:Bergen",
+    "cities_neighbours_1825.json/outside:Kristiansand",
+    "cities_neighbours_1825.json/outside:Västerås",
+    "cities_neighbours_1825.json/cities:Karlshamn",
+    "cities_neighbours_1825.json/outside:Kalmar",
+    "cities_neighbours_1825.json/cities:Jönköping",
+    "cities_neighbours_1825.json/cities:Växjö",
+    "cities_neighbours_1825.json/outside:Västervik",
+    "cities_neighbours_1825.json/cities:Borås",
+    "cities_neighbours_1825.json/cities:Marstrand",
+    "cities_neighbours_1825.json/cities:Eksjö",
+    "Army_Neighbours_1825.json:garrison-Karlshamn",
+    "Army_Neighbours_1825.json:garrison-Jönköping",
+    "Army_Neighbours_1825.json:garrison-Växjö",
+    "Army_Neighbours_1825.json:garrison-Borås",
+    "Army_Neighbours_1825.json:garrison-Marstrand",
+    "Army_Neighbours_1825.json:garrison-Eksjö",
+    "Trade_1825.json",
+    "cities_neighbours_1851.json/outside:Uddevalla",
+    "cities_neighbours_1851.json/outside:Strömstad",
+    "cities_neighbours_1851.json/outside:Fredrikstad",
+    "cities_neighbours_1851.json/outside:Moss",
+    "cities_neighbours_1851.json/outside:Drammen",
+    "cities_neighbours_1851.json/outside:Tønsberg",
+    "cities_neighbours_1851.json/outside:Larvik",
+    "cities_neighbours_1851.json/outside:Horten",
+    "cities_neighbours_1851.json/outside:Drøbak",
+    "cities_neighbours_1851.json/outside:Lidköping",
+    "cities_neighbours_1851.json/outside:Vänersborg",
+    "cities_neighbours_1851.json/outside:Vadstena",
+    "cities_neighbours_1851.json/outside:Norrköping",
+    "cities_neighbours_1851.json/outside:Linköping",
+    "cities_neighbours_1851.json/outside:Skara",
+    "cities_neighbours_1851.json/outside:Mariestad",
+    "cities_neighbours_1851.json/outside:Stockholm",
+    "cities_neighbours_1851.json/outside:Karlstad",
+    "cities_neighbours_1851.json/outside:Arvika",
+    "cities_neighbours_1851.json/outside:Svinesund SE",
+    "cities_neighbours_1851.json/outside:Svinesund NO",
+    "cities_neighbours_1851.json/outside:Sarpsborg",
+    "cities_neighbours_1851.json/outside:Kongsvinger",
+    "cities_neighbours_1851.json/outside:Kaholmen",
+    "cities_neighbours_1851.json/outside:Fredriksvern",
+    "cities_neighbours_1851.json/outside:Fryken south",
+    "cities_neighbours_1851.json/outside:Klarälven rail landing",
+    "cities_neighbours_1851.json/outside:Uppsala",
+    "cities_neighbours_1851.json/outside:Örebro",
+    "cities_neighbours_1851.json/outside:Malmköping",
+    "cities_neighbours_1851.json/outside:Falun",
+    "cities_neighbours_1851.json/outside:Gävle",
+    "cities_neighbours_1851.json/outside:Piteå",
+    "cities_neighbours_1851.json/outside:Umeå",
+    "cities_neighbours_1851.json/outside:Östersund",
+    "cities_neighbours_1851.json/outside:Härnösand",
+    "cities_neighbours_1851.json/outside:Visby",
+    "cities_neighbours_1851.json/outside:Trondheim",
+    "cities_neighbours_1851.json/outside:Bergen",
+    "cities_neighbours_1851.json/outside:Kristiansand",
+    "cities_neighbours_1851.json/outside:Västerås",
+    "cities_neighbours_1851.json/cities:Karlshamn",
+    "cities_neighbours_1851.json/outside:Kalmar",
+    "cities_neighbours_1851.json/cities:Jönköping",
+    "cities_neighbours_1851.json/cities:Växjö",
+    "cities_neighbours_1851.json/outside:Västervik",
+    "cities_neighbours_1851.json/cities:Borås",
+    "cities_neighbours_1851.json/cities:Marstrand",
+    "cities_neighbours_1851.json/cities:Eksjö",
+    "Army_Neighbours_1851.json:garrison-Karlshamn",
+    "Army_Neighbours_1851.json:garrison-Jönköping",
+    "Army_Neighbours_1851.json:garrison-Växjö",
+    "Army_Neighbours_1851.json:garrison-Borås",
+    "Army_Neighbours_1851.json:garrison-Marstrand",
+    "Army_Neighbours_1851.json:garrison-Eksjö",
+    "Trade_1851.json/areas:Sverige",
+    "Trade_1851.json/areas:Norge"
+  ],
+  "updated": [
+    "cities_neighbours_1825.json/outside:Kristiania/Oslo",
+    "cities_neighbours_1825.json/outside:Fredrikshald/Fredriksten",
+    "cities_neighbours_1825.json/outside:Karlsborg",
+    "cities_neighbours_1825.json/cities:Malmø",
+    "cities_neighbours_1825.json/cities:Helsingborg",
+    "cities_neighbours_1825.json/cities:Landskrona",
+    "cities_neighbours_1825.json/cities:Lund",
+    "cities_neighbours_1825.json/cities:Ystad",
+    "cities_neighbours_1825.json/cities:Trelleborg",
+    "cities_neighbours_1825.json/cities:Kristianstad",
+    "cities_neighbours_1825.json/cities:Karlskrona",
+    "cities_neighbours_1825.json/cities:Halmstad",
+    "cities_neighbours_1825.json/cities:Göteborg",
+    "cities_neighbours_1825.json/cities:Varberg",
+    "Nations_1825.json:SE",
+    "Nations_1825.json:NO",
+    "Army_Neighbours_1825.json:garrison-Helsingborg",
+    "Army_Neighbours_1825.json:garrison-Lund",
+    "Army_Neighbours_1825.json:garrison-Ystad",
+    "Army_Neighbours_1825.json:garrison-Trelleborg",
+    "Army_Neighbours_1825.json:garrison-Halmstad",
+    "Army_Neighbours_1825.json:garrison-Göteborg",
+    "Army_Neighbours_1825.json:garrison-Varberg",
+    "Army_Neighbours_1825.json:SE-south",
+    "cities_neighbours_1851.json/outside:Kristiania/Oslo",
+    "cities_neighbours_1851.json/outside:Fredrikshald/Fredriksten",
+    "cities_neighbours_1851.json/outside:Karlsborg",
+    "cities_neighbours_1851.json/cities:Malmø",
+    "cities_neighbours_1851.json/cities:Helsingborg",
+    "cities_neighbours_1851.json/cities:Landskrona",
+    "cities_neighbours_1851.json/cities:Lund",
+    "cities_neighbours_1851.json/cities:Ystad",
+    "cities_neighbours_1851.json/cities:Trelleborg",
+    "cities_neighbours_1851.json/cities:Kristianstad",
+    "cities_neighbours_1851.json/cities:Karlskrona",
+    "cities_neighbours_1851.json/cities:Halmstad",
+    "cities_neighbours_1851.json/cities:Göteborg",
+    "cities_neighbours_1851.json/cities:Varberg",
+    "Nations1851.json:SE",
+    "Nations1851.json:NO",
+    "Army_Neighbours_1851.json:garrison-Helsingborg",
+    "Army_Neighbours_1851.json:garrison-Lund",
+    "Army_Neighbours_1851.json:garrison-Ystad",
+    "Army_Neighbours_1851.json:garrison-Trelleborg",
+    "Army_Neighbours_1851.json:garrison-Halmstad",
+    "Army_Neighbours_1851.json:garrison-Göteborg",
+    "Army_Neighbours_1851.json:garrison-Varberg",
+    "Army_Neighbours_1851.json:SE-south"
+  ],
+  "skippedNull": [
+    "cities_neighbours_1825.json/cities/5/population/1864",
+    "cities_neighbours_1851.json/cities/5/population/1864",
+    "Trade_1851.json/comparison1847",
+    "Trade_1825.json/comparison1847"
+  ],
+  "conflicts": [],
+  "deferred": [
+    "1825: Uddevalla: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Strömstad: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Kristiania/Oslo: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Fredrikshald/Fredriksten: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Fredrikstad: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Moss: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Drammen: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Tønsberg: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Larvik: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Horten: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Drøbak: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Karlsborg: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Lidköping: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Vänersborg: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Vadstena: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Norrköping: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Linköping: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Skara: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Mariestad: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Stockholm: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Karlstad: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Arvika: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Svinesund SE: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Svinesund NO: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Sarpsborg: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Kongsvinger: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Kaholmen: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Fredriksvern: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Fryken south: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Klarälven rail landing: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Uppsala: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Örebro: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Malmköping: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Falun: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Gävle: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Piteå: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Umeå: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Östersund: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Härnösand: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Visby: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Trondheim: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Bergen: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Kristiansand: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Västerås: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Kalmar: uden kortunderstøttelse eller scenarie-pop",
+    "1825: Västervik: uden kortunderstøttelse eller scenarie-pop",
+    "1825: rute Lund–Landskrona: geometri/endepunkt mangler",
+    "1825: rute Göteborg–Uddevalla: geometri/endepunkt mangler",
+    "1825: rute Uddevalla–Strömstad: geometri/endepunkt mangler",
+    "1825: rute Strömstad–Svinesund SE: geometri/endepunkt mangler",
+    "1825: rute Svinesund SE–Svinesund NO: geometri/endepunkt mangler",
+    "1825: rute Svinesund NO–Fredrikshald/Fredriksten: geometri/endepunkt mangler",
+    "1825: rute Fredrikshald/Fredriksten–Sarpsborg: geometri/endepunkt mangler",
+    "1825: rute Sarpsborg–Fredrikstad: geometri/endepunkt mangler",
+    "1825: rute Sarpsborg–Moss: geometri/endepunkt mangler",
+    "1825: rute Moss–Drøbak: geometri/endepunkt mangler",
+    "1825: rute Drøbak–Kristiania/Oslo: geometri/endepunkt mangler",
+    "1825: rute Kristiania/Oslo–Kongsvinger: geometri/endepunkt mangler",
+    "1825: rute Kongsvinger–Arvika: geometri/endepunkt mangler",
+    "1825: rute Arvika–Karlstad: geometri/endepunkt mangler",
+    "1825: rute Karlstad–Vänersborg: geometri/endepunkt mangler",
+    "1825: rute Vänersborg–Uddevalla: geometri/endepunkt mangler",
+    "1825: rute Malmø–Ystad: geometri/endepunkt mangler",
+    "1825: rute Kristianstad–Karlshamn: geometri/endepunkt mangler",
+    "1825: rute Karlshamn–Karlskrona: geometri/endepunkt mangler",
+    "1825: rute Karlskrona–Kalmar: geometri/endepunkt mangler",
+    "1825: rute Kristianstad–Växjö: geometri/endepunkt mangler",
+    "1825: rute Växjö–Jönköping: geometri/endepunkt mangler",
+    "1825: rute Växjö–Kalmar: geometri/endepunkt mangler",
+    "1825: rute Jönköping–Eksjö: geometri/endepunkt mangler",
+    "1825: rute Eksjö–Västervik: geometri/endepunkt mangler",
+    "1825: rute Göteborg–Borås: geometri/endepunkt mangler",
+    "1825: rute Borås–Jönköping: geometri/endepunkt mangler",
+    "1825: rute Jönköping–Karlsborg: geometri/endepunkt mangler",
+    "1825: rute Göteborg–Marstrand: geometri/endepunkt mangler",
+    "1825: rute Moss–Horten: geometri/endepunkt mangler",
+    "1825: rute Drøbak–Kaholmen: geometri/endepunkt mangler",
+    "1825: rute Horten–Tønsberg: geometri/endepunkt mangler",
+    "1825: rute Tønsberg–Larvik: geometri/endepunkt mangler",
+    "1825: rute Larvik–Fredriksvern: geometri/endepunkt mangler",
+    "1825: rute Drammen–Horten: geometri/endepunkt mangler",
+    "1825: rute Drammen–Kristiania/Oslo: geometri/endepunkt mangler",
+    "1825: garrison-Kalmar: samlingsby uden aktivt kort",
+    "1825: garrison-Västervik: samlingsby uden aktivt kort",
+    "1825: garrison-Uddevalla: samlingsby uden aktivt kort",
+    "1825: garrison-Strömstad: samlingsby uden aktivt kort",
+    "1825: garrison-Karlsborg: samlingsby uden aktivt kort",
+    "1825: garrison-Lidköping: samlingsby uden aktivt kort",
+    "1825: garrison-Vänersborg: samlingsby uden aktivt kort",
+    "1825: garrison-Vadstena: samlingsby uden aktivt kort",
+    "1825: garrison-Norrköping: samlingsby uden aktivt kort",
+    "1825: garrison-Linköping: samlingsby uden aktivt kort",
+    "1825: garrison-Skara: samlingsby uden aktivt kort",
+    "1825: garrison-Mariestad: samlingsby uden aktivt kort",
+    "1825: garrison-Stockholm: samlingsby uden aktivt kort",
+    "1825: garrison-Kristiania/Oslo: samlingsby uden aktivt kort",
+    "1825: garrison-Fredrikshald/Fredriksten: samlingsby uden aktivt kort",
+    "1825: garrison-Fredrikstad: samlingsby uden aktivt kort",
+    "1825: garrison-Moss: samlingsby uden aktivt kort",
+    "1825: garrison-Drammen: samlingsby uden aktivt kort",
+    "1825: garrison-Tønsberg: samlingsby uden aktivt kort",
+    "1825: garrison-Larvik: samlingsby uden aktivt kort",
+    "1825: garrison-Horten: samlingsby uden aktivt kort",
+    "1825: garrison-Drøbak: samlingsby uden aktivt kort",
+    "1825: NO-field: samlingsby uden aktivt kort",
+    "1851: Uddevalla: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Strömstad: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Kristiania/Oslo: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Fredrikshald/Fredriksten: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Fredrikstad: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Moss: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Drammen: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Tønsberg: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Larvik: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Horten: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Drøbak: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Karlsborg: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Lidköping: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Vänersborg: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Vadstena: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Norrköping: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Linköping: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Skara: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Mariestad: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Stockholm: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Karlstad: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Arvika: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Svinesund SE: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Svinesund NO: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Sarpsborg: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Kongsvinger: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Kaholmen: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Fredriksvern: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Fryken south: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Klarälven rail landing: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Uppsala: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Örebro: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Malmköping: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Falun: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Gävle: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Piteå: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Umeå: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Östersund: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Härnösand: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Visby: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Trondheim: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Bergen: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Kristiansand: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Västerås: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Kalmar: uden kortunderstøttelse eller scenarie-pop",
+    "1851: Västervik: uden kortunderstøttelse eller scenarie-pop",
+    "1851: rute Lund–Landskrona: geometri/endepunkt mangler",
+    "1851: rute Göteborg–Uddevalla: geometri/endepunkt mangler",
+    "1851: rute Uddevalla–Strömstad: geometri/endepunkt mangler",
+    "1851: rute Strömstad–Svinesund SE: geometri/endepunkt mangler",
+    "1851: rute Svinesund SE–Svinesund NO: geometri/endepunkt mangler",
+    "1851: rute Svinesund NO–Fredrikshald/Fredriksten: geometri/endepunkt mangler",
+    "1851: rute Fredrikshald/Fredriksten–Sarpsborg: geometri/endepunkt mangler",
+    "1851: rute Sarpsborg–Fredrikstad: geometri/endepunkt mangler",
+    "1851: rute Sarpsborg–Moss: geometri/endepunkt mangler",
+    "1851: rute Moss–Drøbak: geometri/endepunkt mangler",
+    "1851: rute Drøbak–Kristiania/Oslo: geometri/endepunkt mangler",
+    "1851: rute Kristiania/Oslo–Kongsvinger: geometri/endepunkt mangler",
+    "1851: rute Kongsvinger–Arvika: geometri/endepunkt mangler",
+    "1851: rute Arvika–Karlstad: geometri/endepunkt mangler",
+    "1851: rute Karlstad–Vänersborg: geometri/endepunkt mangler",
+    "1851: rute Vänersborg–Uddevalla: geometri/endepunkt mangler",
+    "1851: rute Malmø–Ystad: geometri/endepunkt mangler",
+    "1851: rute Kristianstad–Karlshamn: geometri/endepunkt mangler",
+    "1851: rute Karlshamn–Karlskrona: geometri/endepunkt mangler",
+    "1851: rute Karlskrona–Kalmar: geometri/endepunkt mangler",
+    "1851: rute Kristianstad–Växjö: geometri/endepunkt mangler",
+    "1851: rute Växjö–Jönköping: geometri/endepunkt mangler",
+    "1851: rute Växjö–Kalmar: geometri/endepunkt mangler",
+    "1851: rute Jönköping–Eksjö: geometri/endepunkt mangler",
+    "1851: rute Eksjö–Västervik: geometri/endepunkt mangler",
+    "1851: rute Göteborg–Borås: geometri/endepunkt mangler",
+    "1851: rute Borås–Jönköping: geometri/endepunkt mangler",
+    "1851: rute Jönköping–Karlsborg: geometri/endepunkt mangler",
+    "1851: rute Göteborg–Marstrand: geometri/endepunkt mangler",
+    "1851: rute Moss–Horten: geometri/endepunkt mangler",
+    "1851: rute Drøbak–Kaholmen: geometri/endepunkt mangler",
+    "1851: rute Horten–Tønsberg: geometri/endepunkt mangler",
+    "1851: rute Tønsberg–Larvik: geometri/endepunkt mangler",
+    "1851: rute Larvik–Fredriksvern: geometri/endepunkt mangler",
+    "1851: rute Drammen–Horten: geometri/endepunkt mangler",
+    "1851: rute Drammen–Kristiania/Oslo: geometri/endepunkt mangler",
+    "1851: garrison-Kalmar: samlingsby uden aktivt kort",
+    "1851: garrison-Västervik: samlingsby uden aktivt kort",
+    "1851: garrison-Uddevalla: samlingsby uden aktivt kort",
+    "1851: garrison-Strömstad: samlingsby uden aktivt kort",
+    "1851: garrison-Karlsborg: samlingsby uden aktivt kort",
+    "1851: garrison-Lidköping: samlingsby uden aktivt kort",
+    "1851: garrison-Vänersborg: samlingsby uden aktivt kort",
+    "1851: garrison-Vadstena: samlingsby uden aktivt kort",
+    "1851: garrison-Norrköping: samlingsby uden aktivt kort",
+    "1851: garrison-Linköping: samlingsby uden aktivt kort",
+    "1851: garrison-Skara: samlingsby uden aktivt kort",
+    "1851: garrison-Mariestad: samlingsby uden aktivt kort",
+    "1851: garrison-Stockholm: samlingsby uden aktivt kort",
+    "1851: garrison-Kristiania/Oslo: samlingsby uden aktivt kort",
+    "1851: garrison-Fredrikshald/Fredriksten: samlingsby uden aktivt kort",
+    "1851: garrison-Fredrikstad: samlingsby uden aktivt kort",
+    "1851: garrison-Moss: samlingsby uden aktivt kort",
+    "1851: garrison-Drammen: samlingsby uden aktivt kort",
+    "1851: garrison-Tønsberg: samlingsby uden aktivt kort",
+    "1851: garrison-Larvik: samlingsby uden aktivt kort",
+    "1851: garrison-Horten: samlingsby uden aktivt kort",
+    "1851: garrison-Drøbak: samlingsby uden aktivt kort",
+    "1851: NO-field: samlingsby uden aktivt kort"
+  ],
+  "coverage": [
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Uddevalla",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        113.059285794888,
+        707.2646047517736
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Strömstad",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        67.35886952774875,
+        771.6669614963803
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Kristiania/Oslo",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        42.0184789716791,
+        879.4107172417166
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Fredrikshald/Fredriksten",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        79.47466368950388,
+        791.9778251443907
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Fredrikstad",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        52.96954684022427,
+        802.4221953152207
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Moss",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        37.22739629379419,
+        826.3279486203196
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Drammen",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        11.455688508912594,
+        860.455918285066
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Tønsberg",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        23.17417749324553,
+        807.5796065692759
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Larvik",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        2.005149556036148,
+        783.7643230093059
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Horten",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        27.382574767326894,
+        824.2514277178547
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Drøbak",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        35.46035212321007,
+        851.721559289779
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Karlsborg",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        261.9727379478026,
+        734.7984190403197
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Lidköping",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        183.67682693671176,
+        727.0139996120444
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Vänersborg",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        135.60383599380174,
+        711.3828625357603
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Vadstena",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        284.7150164431895,
+        726.3983436949482
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Norrköping",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        358.79616825832244,
+        747.7811570089948
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Linköping",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        327.5272486481052,
+        725.3363884697945
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Skara",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        200.61382077582283,
+        714.572036853262
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Mariestad",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        221.09573940258528,
+        751.6420837118606
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Stockholm",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        457.4658495551264,
+        840.4555385197336
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Karlstad",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        198.7202854933185,
+        824.8506684686755
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Arvika",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        145.89655111289161,
+        853.2343295196144
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Svinesund SE",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        71.66943499531709,
+        787.2813877246747
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Svinesund NO",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        71.26062251332289,
+        787.7182090112661
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Sarpsborg",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        63.11184009952271,
+        809.8929344984774
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Kongsvinger",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        110.71727306435825,
+        911.254670588889
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Kaholmen",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        34.042282630766465,
+        852.9296618902487
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Fredriksvern",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        2.3526465607678144,
+        777.5492810609312
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Fryken south",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        187.77957385025314,
+        838.2124897852048
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Klarälven rail landing",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        192.6308856802882,
+        838.5540990872436
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Uppsala",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        426.552250770736,
+        896.2400817376214
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Örebro",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        296.50088751646814,
+        819.303545348798
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Malmköping",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        384.0517623669559,
+        810.983959099401
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Falun",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        307.8479828839262,
+        968.439681495304
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Gävle",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        389.28471586087403,
+        983.4074641482032
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Piteå",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        533.7578365574813,
+        1521.6581956000016
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Umeå",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        503.97254219600245,
+        1349.7708713051588
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Östersund",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        233.50603534176147,
+        1248.8121551687611
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Härnösand",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        406.4802662269623,
+        1203.6736968760124
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Visby",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        493.0040270286085,
+        654.9302141766494
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Trondheim",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        19.7439474630242,
+        1268.9090415989415
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Bergen",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        -257.35737936715924,
+        940.8325829219372
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Kristiansand",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        -117.80929700140273,
+        684.8469657503643
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Västerås",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        368.36675723285356,
+        862.6015147974681
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Malmø",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        188.7213924586399,
+        404.73950666671874
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Helsingborg",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        167.37071960738496,
+        452.9458666485028
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Landskrona",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        176.6069917804955,
+        433.7261894934563
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Lund",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        199.95983553483512,
+        416.23926022384234
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Ystad",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        240.9994224209382,
+        387.63824090642925
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Trelleborg",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        199.47065311959435,
+        379.7217039857603
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Kristianstad",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        258.27774968223054,
+        455.4006582440891
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Karlskrona",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        345.70736241367473,
+        476.059953949899
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Halmstad",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        174.62772045061854,
+        523.0679880134759
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Göteborg",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        116.97911120651744,
+        635.9413036678152
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Varberg",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        135.98667610089487,
+        569.6041162778831
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Karlshamn",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        300.9705738161093,
+        473.90646624937057
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Kalmar",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        388.13370180227236,
+        535.611808240483
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Jönköping",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        246.8789710738934,
+        649.9767029306751
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Växjö",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        291.95102080079573,
+        552.170010305598
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Västervik",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        393.555008073937,
+        658.3274434983963
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Borås",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        174.74578477099118,
+        639.4854904292029
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Marstrand",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        93.62702902512844,
+        655.3566163409956
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Eksjö",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        295.65581270540645,
+        640.1922333639193
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-stockholm-city",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        457.4658495551264,
+        840.4555385197336
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-stockholm",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        457.50903820298674,
+        840.5722947974779
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-uppsala",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        426.59525897828087,
+        896.3564414224422
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-sodermanland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        404.3070430899337,
+        770.0967217127494
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-ostergotland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        284.7150164431895,
+        726.3983436949482
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-jonkoping",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        246.8789710738934,
+        649.9767029306751
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-kronoberg",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        291.95102080079573,
+        552.170010305598
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-kalmar",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        388.13370180227236,
+        535.611808240483
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-gotland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        492.82099186124617,
+        654.4610378593318
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-blekinge",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        345.70736241367473,
+        476.059953949899
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-kristianstad",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        258.27774968223054,
+        455.4006582440891
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-malmohus",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        188.7213924586399,
+        404.73950666671874
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-halland",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        174.62772045061854,
+        523.0679880134759
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-goteborg-bohus",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        116.97911120651744,
+        635.9413036678152
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-alvsborg",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        174.74578477099118,
+        639.4854904292029
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-skaraborg",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        261.9727379478026,
+        734.7984190403197
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-varmland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        198.5445177015264,
+        824.9531042156444
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-orebro",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        296.3165934295594,
+        818.7333601936218
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-vastmanland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        368.086283588551,
+        862.5755215379913
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-kopparberg",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        307.71092528216894,
+        968.7626127946477
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-gavleborg",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        389.23534240686615,
+        982.8447185846754
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-vasternorrland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        406.62232732809736,
+        1203.3551902904828
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-jamtland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        233.69928961384895,
+        1248.9359323479387
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-vasterbotten",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        503.7079995322013,
+        1350.1797625114045
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "SE-norrbotten",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        533.744572941247,
+        1521.9927471140008
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-akershus-city",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        42.0184789716791,
+        879.4107172417166
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-smaalenene",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        79.47466368950388,
+        791.9778251443907
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-hedemarken",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        58.23167504255046,
+        976.8878788201245
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-christians",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        25.32111182021806,
+        1013.1132936122344
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-buskerud",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        11.455688508912594,
+        860.455918285066
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-jarlsberg-larvik",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        23.17417749324553,
+        807.5796065692759
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-bratsberg",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -22.242672916766807,
+        801.2487797420363
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-nedenes",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -71.6531620695826,
+        718.5592543732283
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-lister-mandal",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -117.50585963161147,
+        685.1716893120094
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-stavanger",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -245.03538506438207,
+        781.9215996531912
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-sondre-bergenhus-city",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -257.59264970236785,
+        940.62581907998
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-nordre-bergenhus",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -169.32539065995917,
+        1023.4631965591949
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-romsdal",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -145.233669867816,
+        1195.428669454875
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-sondre-trondhjem",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        19.993867655374494,
+        1268.9104613407092
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-nordre-trondhjem",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        73.4618724052799,
+        1334.904189118668
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-nordland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        190.50441137706818,
+        1700.099535798699
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "district",
+      "name": "NO-finmarken",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        349.4273290264854,
+        1977.725226724578
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Uddevalla",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        113.059285794888,
+        707.2646047517736
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Strömstad",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        67.35886952774875,
+        771.6669614963803
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Kristiania/Oslo",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        42.0184789716791,
+        879.4107172417166
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Fredrikshald/Fredriksten",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        79.47466368950388,
+        791.9778251443907
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Fredrikstad",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        52.96954684022427,
+        802.4221953152207
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Moss",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        37.22739629379419,
+        826.3279486203196
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Drammen",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        11.455688508912594,
+        860.455918285066
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Tønsberg",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        23.17417749324553,
+        807.5796065692759
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Larvik",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        2.005149556036148,
+        783.7643230093059
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Horten",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        27.382574767326894,
+        824.2514277178547
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Drøbak",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        35.46035212321007,
+        851.721559289779
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Karlsborg",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        261.9727379478026,
+        734.7984190403197
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Lidköping",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        183.67682693671176,
+        727.0139996120444
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Vänersborg",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        135.60383599380174,
+        711.3828625357603
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Vadstena",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        284.7150164431895,
+        726.3983436949482
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Norrköping",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        358.79616825832244,
+        747.7811570089948
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Linköping",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        327.5272486481052,
+        725.3363884697945
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Skara",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        200.61382077582283,
+        714.572036853262
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Mariestad",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        221.09573940258528,
+        751.6420837118606
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Stockholm",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        457.4658495551264,
+        840.4555385197336
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Karlstad",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        198.7202854933185,
+        824.8506684686755
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Arvika",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        145.89655111289161,
+        853.2343295196144
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Svinesund SE",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        71.66943499531709,
+        787.2813877246747
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Svinesund NO",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        71.26062251332289,
+        787.7182090112661
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Sarpsborg",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        63.11184009952271,
+        809.8929344984774
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Kongsvinger",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        110.71727306435825,
+        911.254670588889
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Kaholmen",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        34.042282630766465,
+        852.9296618902487
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Fredriksvern",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        2.3526465607678144,
+        777.5492810609312
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Fryken south",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        187.77957385025314,
+        838.2124897852048
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Klarälven rail landing",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        192.6308856802882,
+        838.5540990872436
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Uppsala",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        426.552250770736,
+        896.2400817376214
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Örebro",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        296.50088751646814,
+        819.303545348798
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Malmköping",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        384.0517623669559,
+        810.983959099401
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Falun",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        307.8479828839262,
+        968.439681495304
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Gävle",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        389.28471586087403,
+        983.4074641482032
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Piteå",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        533.7578365574813,
+        1521.6581956000016
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Umeå",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        503.97254219600245,
+        1349.7708713051588
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Östersund",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        233.50603534176147,
+        1248.8121551687611
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Härnösand",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        406.4802662269623,
+        1203.6736968760124
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Visby",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        493.0040270286085,
+        654.9302141766494
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Trondheim",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        19.7439474630242,
+        1268.9090415989415
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Bergen",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        -257.35737936715924,
+        940.8325829219372
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Kristiansand",
+      "nation": "NO",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        -117.80929700140273,
+        684.8469657503643
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Västerås",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        368.36675723285356,
+        862.6015147974681
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Malmø",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        188.7213924586399,
+        404.73950666671874
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Helsingborg",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        167.37071960738496,
+        452.9458666485028
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Landskrona",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        176.6069917804955,
+        433.7261894934563
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Lund",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        199.95983553483512,
+        416.23926022384234
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Ystad",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        240.9994224209382,
+        387.63824090642925
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Trelleborg",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        199.47065311959435,
+        379.7217039857603
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Kristianstad",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        258.27774968223054,
+        455.4006582440891
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Karlskrona",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        345.70736241367473,
+        476.059953949899
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Halmstad",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        174.62772045061854,
+        523.0679880134759
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Göteborg",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        116.97911120651744,
+        635.9413036678152
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Varberg",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        135.98667610089487,
+        569.6041162778831
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Karlshamn",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        300.9705738161093,
+        473.90646624937057
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Kalmar",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        388.13370180227236,
+        535.611808240483
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Jönköping",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        246.8789710738934,
+        649.9767029306751
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Växjö",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        291.95102080079573,
+        552.170010305598
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Västervik",
+      "nation": "SE",
+      "insideExtent": false,
+      "ownerGridMatches": false,
+      "onMap": false,
+      "km": [
+        393.555008073937,
+        658.3274434983963
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Borås",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        174.74578477099118,
+        639.4854904292029
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Marstrand",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        93.62702902512844,
+        655.3566163409956
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Eksjö",
+      "nation": "SE",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "onMap": true,
+      "km": [
+        295.65581270540645,
+        640.1922333639193
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-stockholm-city",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        457.4658495551264,
+        840.4555385197336
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-stockholm",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        457.50903820298674,
+        840.5722947974779
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-uppsala",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        426.59525897828087,
+        896.3564414224422
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-sodermanland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        404.3070430899337,
+        770.0967217127494
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-ostergotland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        284.7150164431895,
+        726.3983436949482
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-jonkoping",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        246.8789710738934,
+        649.9767029306751
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-kronoberg",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        291.95102080079573,
+        552.170010305598
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-kalmar",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        388.13370180227236,
+        535.611808240483
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-gotland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        492.82099186124617,
+        654.4610378593318
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-blekinge",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        345.70736241367473,
+        476.059953949899
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-kristianstad",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        258.27774968223054,
+        455.4006582440891
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-malmohus",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        188.7213924586399,
+        404.73950666671874
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-halland",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        174.62772045061854,
+        523.0679880134759
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-goteborg-bohus",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        116.97911120651744,
+        635.9413036678152
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-alvsborg",
+      "insideExtent": true,
+      "onMap": false,
+      "km": [
+        174.74578477099118,
+        639.4854904292029
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-skaraborg",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        261.9727379478026,
+        734.7984190403197
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-varmland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        198.5445177015264,
+        824.9531042156444
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-orebro",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        296.3165934295594,
+        818.7333601936218
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-vastmanland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        368.086283588551,
+        862.5755215379913
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-kopparberg",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        307.71092528216894,
+        968.7626127946477
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-gavleborg",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        389.23534240686615,
+        982.8447185846754
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-vasternorrland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        406.62232732809736,
+        1203.3551902904828
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-jamtland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        233.69928961384895,
+        1248.9359323479387
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-vasterbotten",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        503.7079995322013,
+        1350.1797625114045
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "SE-norrbotten",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        533.744572941247,
+        1521.9927471140008
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-akershus-city",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        42.0184789716791,
+        879.4107172417166
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-smaalenene",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        79.47466368950388,
+        791.9778251443907
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-hedemarken",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        58.23167504255046,
+        976.8878788201245
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-christians",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        25.32111182021806,
+        1013.1132936122344
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-buskerud",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        11.455688508912594,
+        860.455918285066
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-jarlsberg-larvik",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        23.17417749324553,
+        807.5796065692759
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-bratsberg",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -22.242672916766807,
+        801.2487797420363
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-nedenes",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -71.6531620695826,
+        718.5592543732283
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-lister-mandal",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -117.50585963161147,
+        685.1716893120094
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-stavanger",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -245.03538506438207,
+        781.9215996531912
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-sondre-bergenhus-city",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -257.59264970236785,
+        940.62581907998
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-nordre-bergenhus",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -169.32539065995917,
+        1023.4631965591949
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-romsdal",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        -145.233669867816,
+        1195.428669454875
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-sondre-trondhjem",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        19.993867655374494,
+        1268.9104613407092
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-nordre-trondhjem",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        73.4618724052799,
+        1334.904189118668
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-nordland",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        190.50441137706818,
+        1700.099535798699
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "district",
+      "name": "NO-finmarken",
+      "insideExtent": false,
+      "onMap": false,
+      "km": [
+        349.4273290264854,
+        1977.725226724578
+      ]
+    }
+  ],
+  "mapping": [
+    {
+      "overlay": "SE/Army_1825.json",
+      "schema": "Army_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/SE/Army_1825.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Army.cpp:LoadArmy (kun dansk pulje)"
+    },
+    {
+      "overlay": "SE/Supply_1825.json",
+      "schema": "Army_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/SE/Supply_1825.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Army.cpp:LoadArmy / ArmyEquipmentNumber (kun dansk pulje)"
+    },
+    {
+      "overlay": "SE/Economy_1825.json",
+      "schema": "Economy_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/SE/Economy_1825.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Economy.cpp:EconomyValue (1825 DK; 1851 hardcoded)"
+    },
+    {
+      "overlay": "SE/Army_Neighbours_1825.json",
+      "schema": "Army_Neighbours_1825.json",
+      "target": "Army_Neighbours_1825.json",
+      "loader": "Campaign1851Neighbours.cpp:LoadNeighbours",
+      "existingLoader": "Campaign1851Neighbours.cpp:LoadNeighbours"
+    },
+    {
+      "overlay": "SE/Ministers_1825.json",
+      "schema": "Ministers_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/SE/Ministers_1825.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Ministers.cpp:LoadScenarioMinisters (kun 1825 DK)"
+    },
+    {
+      "overlay": "NO/Army_1825.json",
+      "schema": "Army_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/NO/Army_1825.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Army.cpp:LoadArmy (kun dansk pulje)"
+    },
+    {
+      "overlay": "NO/Supply_1825.json",
+      "schema": "Army_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/NO/Supply_1825.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Army.cpp:LoadArmy / ArmyEquipmentNumber (kun dansk pulje)"
+    },
+    {
+      "overlay": "NO/Economy_1825.json",
+      "schema": "Economy_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/NO/Economy_1825.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Economy.cpp:EconomyValue (1825 DK; 1851 hardcoded)"
+    },
+    {
+      "overlay": "NO/Army_Neighbours_1825.json",
+      "schema": "Army_Neighbours_1825.json",
+      "target": "Army_Neighbours_1825.json",
+      "loader": "Campaign1851Neighbours.cpp:LoadNeighbours",
+      "existingLoader": "Campaign1851Neighbours.cpp:LoadNeighbours"
+    },
+    {
+      "overlay": "NO/Ministers_1825.json",
+      "schema": "Ministers_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/NO/Ministers_1825.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Ministers.cpp:LoadScenarioMinisters (kun 1825 DK)"
+    },
+    {
+      "overlay": "Nations_1825.json",
+      "schema": "Nations_1825.json",
+      "target": "Nations_1825.json",
+      "loader": "Campaign1851Nations.cpp:LoadNations",
+      "existingLoader": "Campaign1851Nations.cpp:LoadNations"
+    },
+    {
+      "overlay": "Population_1825.json",
+      "schema": "Population_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/Population_1825.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Map.cpp:LoadData (1825-overlay; 1851 basekort)"
+    },
+    {
+      "overlay": "cities_neighbours_1825.json",
+      "schema": "cities_neighbours_1825.json",
+      "target": "cities_neighbours_1825.json",
+      "loader": "Campaign1851Neighbours.cpp:LoadNeighbours",
+      "existingLoader": "Campaign1851Neighbours.cpp:LoadNeighbours"
+    },
+    {
+      "overlay": "Officers_1825.json",
+      "schema": "Officers_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/Officers_1825.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Officers.cpp:LoadOfficers (kun dansk pulje)"
+    },
+    {
+      "overlay": "SE/Army1851.json",
+      "schema": "Army1851.json",
+      "target": "Countries/SwedenNorway/GameReady/SE/Army1851.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Army.cpp:LoadArmy (kun dansk pulje)"
+    },
+    {
+      "overlay": "SE/Supply_1851.json",
+      "schema": "Army_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/SE/Supply_1851.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Army.cpp:LoadArmy / ArmyEquipmentNumber (kun dansk pulje)"
+    },
+    {
+      "overlay": "SE/Economy_1851.json",
+      "schema": "Economy_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/SE/Economy_1851.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Economy.cpp:EconomyValue (1825 DK; 1851 hardcoded)"
+    },
+    {
+      "overlay": "SE/Army_Neighbours_1851.json",
+      "schema": "Army_Neighbours_1851.json",
+      "target": "Army_Neighbours_1851.json",
+      "loader": "Campaign1851Neighbours.cpp:LoadNeighbours",
+      "existingLoader": "Campaign1851Neighbours.cpp:LoadNeighbours"
+    },
+    {
+      "overlay": "SE/Ministers_1851.json",
+      "schema": "Ministers_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/SE/Ministers_1851.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Ministers.cpp:LoadScenarioMinisters (kun 1825 DK)"
+    },
+    {
+      "overlay": "NO/Army1851.json",
+      "schema": "Army1851.json",
+      "target": "Countries/SwedenNorway/GameReady/NO/Army1851.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Army.cpp:LoadArmy (kun dansk pulje)"
+    },
+    {
+      "overlay": "NO/Supply_1851.json",
+      "schema": "Army_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/NO/Supply_1851.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Army.cpp:LoadArmy / ArmyEquipmentNumber (kun dansk pulje)"
+    },
+    {
+      "overlay": "NO/Economy_1851.json",
+      "schema": "Economy_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/NO/Economy_1851.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Economy.cpp:EconomyValue (1825 DK; 1851 hardcoded)"
+    },
+    {
+      "overlay": "NO/Army_Neighbours_1851.json",
+      "schema": "Army_Neighbours_1851.json",
+      "target": "Army_Neighbours_1851.json",
+      "loader": "Campaign1851Neighbours.cpp:LoadNeighbours",
+      "existingLoader": "Campaign1851Neighbours.cpp:LoadNeighbours"
+    },
+    {
+      "overlay": "NO/Ministers_1851.json",
+      "schema": "Ministers_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/NO/Ministers_1851.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Ministers.cpp:LoadScenarioMinisters (kun 1825 DK)"
+    },
+    {
+      "overlay": "Nations1851.json",
+      "schema": "Nations1851.json",
+      "target": "Nations1851.json",
+      "loader": "Campaign1851Nations.cpp:LoadNations",
+      "existingLoader": "Campaign1851Nations.cpp:LoadNations"
+    },
+    {
+      "overlay": "Population_1851.json",
+      "schema": "Population_1825.json",
+      "target": "Countries/SwedenNorway/GameReady/Population_1851.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Map.cpp:LoadData (1825-overlay; 1851 basekort)"
+    },
+    {
+      "overlay": "cities_neighbours_1851.json",
+      "schema": "cities_neighbours_1851.json",
+      "target": "cities_neighbours_1851.json",
+      "loader": "Campaign1851Neighbours.cpp:LoadNeighbours",
+      "existingLoader": "Campaign1851Neighbours.cpp:LoadNeighbours"
+    },
+    {
+      "overlay": "Officers1851.json",
+      "schema": "Officers1851.json",
+      "target": "Countries/SwedenNorway/GameReady/Officers1851.json",
+      "loader": "Ingen national loader; arkiv, ikke aktiv dansk data",
+      "existingLoader": "Campaign1851Officers.cpp:LoadOfficers (kun dansk pulje)"
+    },
+    {
+      "overlay": "Trade_1851.json",
+      "schema": "Trade_1851.json",
+      "target": "Trade_1851.json",
+      "loader": "Ingen C++-loader; kalibreringsdata",
+      "existingLoader": "Ingen C++-loader; kalibreringsdata"
+    },
+    {
+      "overlay": "Trade_1825.json",
+      "schema": "Trade_1851.json",
+      "target": "Trade_1825.json",
+      "loader": "Ingen C++-loader; kalibreringsdata",
+      "existingLoader": "Ingen C++-loader; kalibreringsdata"
+    }
+  ],
+  "lineEndings": [
+    {
+      "file": "Army_Neighbours_1825.json",
+      "CRLF": 1790,
+      "LF": 1790,
+      "bareCR": 0
+    },
+    {
+      "file": "Army_Neighbours_1851.json",
+      "CRLF": 1794,
+      "LF": 1794,
+      "bareCR": 0
+    },
+    {
+      "file": "cities_neighbours_1825.json",
+      "CRLF": 22866,
+      "LF": 22866,
+      "bareCR": 0
+    },
+    {
+      "file": "cities_neighbours_1851.json",
+      "CRLF": 27931,
+      "LF": 27931,
+      "bareCR": 0
+    },
+    {
+      "file": "Nations1851.json",
+      "CRLF": 624,
+      "LF": 624,
+      "bareCR": 0
+    },
+    {
+      "file": "Nations_1825.json",
+      "CRLF": 736,
+      "LF": 736,
+      "bareCR": 0
+    },
+    {
+      "file": "Trade_1825.json",
+      "CRLF": 0,
+      "LF": 33,
+      "bareCR": 0
+    },
+    {
+      "file": "Trade_1851.json",
+      "CRLF": 66,
+      "LF": 66,
+      "bareCR": 0
+    }
+  ],
+  "counts": {
+    "added": 113,
+    "updated": 48,
+    "skippedNull": 4,
+    "conflicts": 0,
+    "deferred": 210
+  }
+}

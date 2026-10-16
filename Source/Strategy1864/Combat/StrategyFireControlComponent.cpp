@@ -76,6 +76,22 @@ float UStrategyFireControlComponent::GetActiveRangeCm() const
     }
 }
 
+float UStrategyFireControlComponent::GetApproachStandRangeCm() const
+{
+    // About 88 % of the range, at least 5 m inside it, but never so close that the line is in bayonet reach (25 m, or the range if shorter).
+    const float RangeCm = GetActiveRangeCm();
+    if (RangeCm <= 0.0f) return 0.0f;
+    return FMath::Max(FMath::Min(RangeCm * 0.88f, RangeCm - 500.0f), FMath::Min(RangeCm, 2500.0f));
+}
+
+float UStrategyFireControlComponent::GetApproachHaltRangeCm() const
+{
+    // About 92 % of the range, at least 3 m inside it: the stop-and-fire halt comes a little before the stand-off point, never on the arc.
+    const float RangeCm = GetActiveRangeCm();
+    if (RangeCm <= 0.0f) return 0.0f;
+    return FMath::Max(GetApproachStandRangeCm(), FMath::Min(RangeCm * 0.92f, RangeCm - 300.0f));
+}
+
 FString UStrategyFireControlComponent::GetActiveRangeLabel() const
 {
     const TCHAR* Label = TEXT("Hold ild");

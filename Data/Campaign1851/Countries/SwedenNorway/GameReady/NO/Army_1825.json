@@ -1,0 +1,570 @@
+{
+  "nation": "NO",
+  "note": "Runde 6: landsdækkende første OOB-model med kendte enhedsnavne og eksplicitte skøn; IKKE en verificeret fuldstændig historisk dagsrulle. Norske infanterikorps efter 1818-oversigten. Ingeniør-/stabsdetaljer og alle dagschefer mangler.",
+  "commands": [
+    {
+      "id": "NO_CMD1",
+      "name": "1. Akershusiske brigade",
+      "area": "1. Akershusiske brigade",
+      "hq": "Fredrikshald/Fredriksten",
+      "general": "G_NO_WEDEL",
+      "towns": [
+        "Fredrikshald/Fredriksten"
+      ]
+    },
+    {
+      "id": "NO_CMD2",
+      "name": "2. Akershusiske brigade",
+      "area": "2. Akershusiske brigade",
+      "hq": "Kristiania/Oslo",
+      "general": "G_NO_WEDEL",
+      "towns": [
+        "Kristiania/Oslo"
+      ]
+    },
+    {
+      "id": "NO_CMD3",
+      "name": "Trondhjemske brigade",
+      "area": "Trondhjemske brigade",
+      "hq": "Trondheim",
+      "general": "G_NO_WEDEL",
+      "towns": [
+        "Trondheim"
+      ]
+    },
+    {
+      "id": "NO_CMD4",
+      "name": "Bergenhusiske brigade",
+      "area": "Bergenhusiske brigade",
+      "hq": "Bergen",
+      "general": "G_NO_WEDEL",
+      "towns": [
+        "Bergen"
+      ]
+    },
+    {
+      "id": "NO_CMD5",
+      "name": "Kristianssandske brigade",
+      "area": "Kristianssandske brigade",
+      "hq": "Kristiansand",
+      "general": "G_NO_WEDEL",
+      "towns": [
+        "Kristiansand"
+      ]
+    }
+  ],
+  "regiments": [
+    {
+      "id": "NO_1AK_V",
+      "name": "1. Akershusiske gevorbne musketerkorps",
+      "arm": "infantry",
+      "home": "Fredrikshald/Fredriksten",
+      "men": 340,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_JAEGER",
+      "name": "Norske jægerkorps",
+      "arm": "jager",
+      "home": "Kristiania/Oslo",
+      "men": 340,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 58,
+        "drill": 55,
+        "fieldcraft": 65,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_TR_V",
+      "name": "Trondhjemske gevorbne musketerkorps",
+      "arm": "infantry",
+      "home": "Trondheim",
+      "men": 340,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_BE_V",
+      "name": "Bergenhusiske gevorbne musketerkorps",
+      "arm": "infantry",
+      "home": "Bergen",
+      "men": 340,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_KR_V",
+      "name": "Kristianssandske gevorbne musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiansand",
+      "men": 340,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_ART",
+      "name": "Den norske artilleribrigade",
+      "arm": "artillery",
+      "home": "Kristiania/Oslo",
+      "men": 72,
+      "horses": 224,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_KAV",
+      "name": "Kavalleribrigaden",
+      "arm": "cavalry",
+      "home": "Kristiania/Oslo",
+      "men": 72,
+      "horses": 1071,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B1K1",
+      "name": "Smålenske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Fredrikshald/Fredriksten",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B1K2",
+      "name": "Romerike nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Fredrikshald/Fredriksten",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B1K3",
+      "name": "Hedemarkske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Fredrikshald/Fredriksten",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B1K4",
+      "name": "Gudbrandsdalske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Fredrikshald/Fredriksten",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B1K5",
+      "name": "Østerdalske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Fredrikshald/Fredriksten",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B2K1",
+      "name": "Akerske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiania/Oslo",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B2K2",
+      "name": "Valderske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiania/Oslo",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B2K3",
+      "name": "Hallingdalske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiania/Oslo",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B2K4",
+      "name": "Numedalske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiania/Oslo",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B3K1",
+      "name": "Innherredske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Trondheim",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B3K2",
+      "name": "Romsdalske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Trondheim",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B3K3",
+      "name": "Trondhjemske nationale jegerkorps",
+      "arm": "jager",
+      "home": "Trondheim",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 58,
+        "drill": 55,
+        "fieldcraft": 65,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B4K1",
+      "name": "Nordfjordske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Bergen",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B4K2",
+      "name": "Søndfjordske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Bergen",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B4K3",
+      "name": "Hardangerske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Bergen",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B4K4",
+      "name": "Sognske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Bergen",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B5K1",
+      "name": "Stavangerske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiansand",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B5K2",
+      "name": "Nedenæsiske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiansand",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "NO_B5K3",
+      "name": "Telemarkske nationale jegerkorps",
+      "arm": "jager",
+      "home": "Kristiansand",
+      "men": 24,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 58,
+        "drill": 55,
+        "fieldcraft": 65,
+        "endurance": 60,
+        "assault": 56
+      }
+    }
+  ],
+  "equipment": {
+    "rifles": 17300,
+    "guns": 48,
+    "horses": 1439,
+    "mortars": 12,
+    "wagons": 128,
+    "raw": [
+      20,
+      15,
+      82,
+      122,
+      408,
+      306
+    ],
+    "foodDays": 30,
+    "columns": 5,
+    "infantryReload": 1.2,
+    "infantryAccuracy": 0.8,
+    "carbineReload": 24,
+    "infantryWeapon": "Ældre dansk-norske flintlåse; m/1825 kun begyndende indfasning",
+    "cavalryWeapon": "Flintlåskarabin, pistol og sabel",
+    "artilleryWeapon": "Glatløbet forladeskyts; 6-/12-pundig kanon og haubits som spilklasser; ingen riflet baglader",
+    "uniforms": [
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret"
+    ],
+    "kitReserve": 2040
+  },
+  "magazines": [
+    {
+      "town": "Kristiania/Oslo",
+      "food": 91800.0,
+      "fodder": 8634.0,
+      "ammo": 550.8
+    },
+    {
+      "town": "Fredrikshald/Fredriksten",
+      "food": 61200.0,
+      "fodder": 5756.0,
+      "ammo": 367.2
+    },
+    {
+      "town": "Horten",
+      "food": 30600.0,
+      "fodder": 2878.0,
+      "ammo": 183.6
+    },
+    {
+      "town": "Kristiansand",
+      "food": 45900.0,
+      "fodder": 4317.0,
+      "ammo": 275.4
+    },
+    {
+      "town": "Trondheim",
+      "food": 45900.0,
+      "fodder": 4317.0,
+      "ammo": 275.4
+    },
+    {
+      "town": "Bergen",
+      "food": 30600.0,
+      "fodder": 2878.0,
+      "ammo": 183.6
+    }
+  ]
+}

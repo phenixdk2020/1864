@@ -1,0 +1,79 @@
+{
+  "scenario": "1851",
+  "note": "Preussen, dateret importgrundlag. Kilde/skøn/spil står i fieldStatus og Data-status.json. Delvist overlay; null kræver håndtering, ikke nulkonvertering. Ingen motor-/slagtest. Zollverein-tal må ikke automatisk fordeles som Preussens udenrigshandel. tradeValue i Nations er en traktatbonus.",
+  "source": {
+    "id": "ZOLL",
+    "title": "DHM, Deutscher Zollverein 1850–1866",
+    "url": "https://www.dhm.de/lemo/kapitel/reaktionszeit/wirtschaft/zollverein",
+    "access": "læst",
+    "locator": "Første afsnit og Hannover",
+    "note": "Preussisk initiativ 1834; Hannover-aftale 1851 med indtræden senere."
+  },
+  "unitWeight": "ton (ingen ukontrolleret konvertering fra Zentner)",
+  "unitValue": "rigsdaler sølv",
+  "areas": {
+    "Preussen": {
+      "importWeight": null,
+      "exportWeight": null,
+      "turnoverWeight": null,
+      "importValue": null,
+      "exportValue": null,
+      "turnoverValue": null,
+      "fieldStatus": {
+        "importWeight": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "exportWeight": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "turnoverWeight": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "importValue": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "exportValue": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "turnoverValue": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    }
+  },
+  "comparison1847": {
+    "area": "Preussen",
+    "turnoverWeight": null,
+    "turnoverValue": null,
+    "fieldStatus": {
+      "turnoverWeight": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "turnoverValue": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "status": "skøn",
+  "limitations": [
+    "National import/eksport og bilateral Danmarkshandel ikke afskrevet.",
+    "Zollverein er toldområde, ikke en ekstra nation med egen befolkning.",
+    "Årsstrømme 1851 er ikke beholdninger ved 1. juli."
+  ]
+}

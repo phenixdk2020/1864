@@ -1,0 +1,131 @@
+{
+  "note": "Preussen, dateret importgrundlag. Kilde/skøn/spil står i fieldStatus og Data-status.json. Delvist overlay; null kræver håndtering, ikke nulkonvertering. Ingen motor-/slagtest.",
+  "nations": [
+    {
+      "id": "PR",
+      "name": "Preussen",
+      "onMap": false,
+      "controller": "ai",
+      "weights": [
+        1.2,
+        1.1,
+        1,
+        0.2,
+        0.8,
+        1,
+        1,
+        1
+      ],
+      "caution": 0.4,
+      "reserve": 400000,
+      "population": 12144210,
+      "railKm": 0,
+      "armyMen": null,
+      "growth": 0.7,
+      "taxPerHead": null,
+      "note": "Friedrich Wilhelm III; monarki uden national forfatning. Preussen, dateret importgrundlag. Kilde/skøn/spil står i fieldStatus og Data-status.json. Delvist overlay; null kræver håndtering, ikke nulkonvertering. Ingen motor-/slagtest.",
+      "relation": 10,
+      "tradeValue": 3200,
+      "role": "Selvstændig stat",
+      "period": "1825-07-01",
+      "infantry": "Linjeinfanteri; garde; let infanteri med flintelås",
+      "cavalry": "Periodens rytteri med blanke våben",
+      "artillery": "Glatløbet feltartilleri",
+      "priority": "Høj",
+      "group": "stormagt",
+      "active": true,
+      "canAlly": false,
+      "canGuarantee": false,
+      "status": "Befolkning og fredsstyrke: afrundede periode-skøn; relation og finansdata: spilskøn",
+      "fieldStatus": {
+        "weights/0": {
+          "status": "spil",
+          "source": "GAME-Nations_1825.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "weights/1": {
+          "status": "spil",
+          "source": "GAME-Nations_1825.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "weights/2": {
+          "status": "spil",
+          "source": "GAME-Nations_1825.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "weights/3": {
+          "status": "spil",
+          "source": "GAME-Nations_1825.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "weights/4": {
+          "status": "spil",
+          "source": "GAME-Nations_1825.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "weights/5": {
+          "status": "spil",
+          "source": "GAME-Nations_1825.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "weights/6": {
+          "status": "spil",
+          "source": "GAME-Nations_1825.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "weights/7": {
+          "status": "spil",
+          "source": "GAME-Nations_1825.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "caution": {
+          "status": "spil",
+          "source": "GAME-Nations_1825.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "reserve": {
+          "status": "spil",
+          "source": "GAME-Nations_1825.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPRE-gesamt.htm",
+          "reason": "Halvårslineær interpolation af ultimo året før og scenarieårets ultimo. Afrundet til person; ingen sikkerhed om præcis folketællingsdato.",
+          "method": "round((P[y-1]+P[y])/2)",
+          "unit": "personer"
+        },
+        "railKm": {
+          "status": "kilde",
+          "source": "HGIS-STATE",
+          "reason": "Ingen offentlig lokomotivbane i 1825; første forbindelser 1838. Omfatter ikke industrielle spor."
+        },
+        "armyMen": {
+          "status": "skøn",
+          "source": "RANGLIST",
+          "reason": "Faktisk fredsfremmøde pr. 1. juli ikke afskrevet; spillets 127.000 er ikke observation."
+        },
+        "growth": {
+          "status": "spil",
+          "source": "GAME-Nations_1825.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "taxPerHead": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Budgetindtægter er ikke direkte skat; land/by-skat og total skattedefinition mangler."
+        },
+        "relation": {
+          "status": "spil",
+          "source": "GAME-Nations_1825.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "tradeValue": {
+          "status": "spil",
+          "source": "GAME-Nations_1825.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        }
+      }
+    }
+  ]
+}

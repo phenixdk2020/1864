@@ -1,0 +1,4722 @@
+{
+  "nation": "NO",
+  "note": "Runde 6: landsdækkende første OOB-model med kendte enhedsnavne og eksplicitte skøn; IKKE en verificeret fuldstændig historisk dagsrulle. Norske infanterikorps efter 1818-oversigten. Ingeniør-/stabsdetaljer og alle dagschefer mangler.",
+  "commands": [
+    {
+      "id": "NO_CMD1",
+      "name": "1. Akershusiske brigade",
+      "area": "1. Akershusiske brigade",
+      "hq": "Fredrikshald/Fredriksten",
+      "general": "G_NO_BLOCH",
+      "towns": [
+        "Fredrikshald/Fredriksten"
+      ],
+      "status": "spil",
+      "source": "DESIGN",
+      "note": "Historisk person valgt som overordnet kampagnechef (spil); ikke påstået chef for alle disse historiske distrikter."
+    },
+    {
+      "id": "NO_CMD2",
+      "name": "2. Akershusiske brigade",
+      "area": "2. Akershusiske brigade",
+      "hq": "Kristiania/Oslo",
+      "general": "G_NO_BLOCH",
+      "towns": [
+        "Kristiania/Oslo"
+      ],
+      "status": "spil",
+      "source": "DESIGN",
+      "note": "Historisk person valgt som overordnet kampagnechef (spil); ikke påstået chef for alle disse historiske distrikter."
+    },
+    {
+      "id": "NO_CMD3",
+      "name": "Trondhjemske brigade",
+      "area": "Trondhjemske brigade",
+      "hq": "Trondheim",
+      "general": "G_NO_BLOCH",
+      "towns": [
+        "Trondheim"
+      ],
+      "status": "spil",
+      "source": "DESIGN",
+      "note": "Historisk person valgt som overordnet kampagnechef (spil); ikke påstået chef for alle disse historiske distrikter."
+    },
+    {
+      "id": "NO_CMD4",
+      "name": "Bergenhusiske brigade",
+      "area": "Bergenhusiske brigade",
+      "hq": "Bergen",
+      "general": "G_NO_BLOCH",
+      "towns": [
+        "Bergen"
+      ],
+      "status": "spil",
+      "source": "DESIGN",
+      "note": "Historisk person valgt som overordnet kampagnechef (spil); ikke påstået chef for alle disse historiske distrikter."
+    },
+    {
+      "id": "NO_CMD5",
+      "name": "Kristianssandske brigade",
+      "area": "Kristianssandske brigade",
+      "hq": "Kristiansand",
+      "general": "G_NO_BLOCH",
+      "towns": [
+        "Kristiansand"
+      ],
+      "status": "spil",
+      "source": "DESIGN",
+      "note": "Historisk person valgt som overordnet kampagnechef (spil); ikke påstået chef for alle disse historiske distrikter."
+    }
+  ],
+  "regiments": [
+    {
+      "id": "NO_1AK_V",
+      "name": "1. Akershusiske gevorbne musketerkorps",
+      "arm": "infantry",
+      "home": "Fredrikshald/Fredriksten",
+      "men": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "recruitmentSystem": "værvet",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.85; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.85; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            204,
+            400
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol.",
+      "theatre": "south",
+      "authorisedMen": 400,
+      "enrolledPeaceMen": 380,
+      "mobilisableMen": 340,
+      "commander": null
+    },
+    {
+      "id": "NO_JAEGER",
+      "name": "Norske jægerkorps",
+      "arm": "jager",
+      "home": "Kristiania/Oslo",
+      "men": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 58,
+        "drill": 55,
+        "fieldcraft": 65,
+        "endurance": 60,
+        "assault": 56
+      },
+      "recruitmentSystem": "værvet",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.85; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.85; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            204,
+            400
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol.",
+      "theatre": "south",
+      "authorisedMen": 400,
+      "enrolledPeaceMen": 380,
+      "mobilisableMen": 340,
+      "commander": null
+    },
+    {
+      "id": "NO_TR_V",
+      "name": "Trondhjemske gevorbne musketerkorps",
+      "arm": "infantry",
+      "home": "Trondheim",
+      "men": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "recruitmentSystem": "værvet",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.85; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.85; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            204,
+            400
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol.",
+      "theatre": "national",
+      "authorisedMen": 400,
+      "enrolledPeaceMen": 380,
+      "mobilisableMen": 340,
+      "commander": null
+    },
+    {
+      "id": "NO_BE_V",
+      "name": "Bergenhusiske gevorbne musketerkorps",
+      "arm": "infantry",
+      "home": "Bergen",
+      "men": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "recruitmentSystem": "værvet",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.85; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.85; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            204,
+            400
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol.",
+      "theatre": "national",
+      "authorisedMen": 400,
+      "enrolledPeaceMen": 380,
+      "mobilisableMen": 340,
+      "commander": null
+    },
+    {
+      "id": "NO_KR_V",
+      "name": "Kristianssandske gevorbne musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiansand",
+      "men": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "recruitmentSystem": "værvet",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.85; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.85; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            204,
+            400
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol.",
+      "theatre": "national",
+      "authorisedMen": 400,
+      "enrolledPeaceMen": 380,
+      "mobilisableMen": 340,
+      "commander": null
+    },
+    {
+      "id": "NO_ART",
+      "name": "Den norske artilleribrigade",
+      "arm": "artillery",
+      "home": "Kristiania/Oslo",
+      "men": 72,
+      "horses": 224,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "recruitmentSystem": "udskrevet",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            43,
+            108
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            145.6,
+            302.4
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            1080,
+            1320
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            1020,
+            1200
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            780,
+            1140
+          ]
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol.",
+      "theatre": "south",
+      "authorisedMen": 1200,
+      "enrolledPeaceMen": 1140,
+      "mobilisableMen": 1020,
+      "commander": null
+    },
+    {
+      "id": "NO_KAV",
+      "name": "Kavalleribrigaden",
+      "arm": "cavalry",
+      "home": "Kristiania/Oslo",
+      "men": 72,
+      "horses": 1071,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "recruitmentSystem": "udskrevet",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            43,
+            108
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            696.15,
+            1445.85
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            1080,
+            1320
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            1020,
+            1200
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            780,
+            1140
+          ]
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol.",
+      "theatre": "south",
+      "authorisedMen": 1200,
+      "enrolledPeaceMen": 1140,
+      "mobilisableMen": 1020,
+      "commander": null
+    },
+    {
+      "id": "NO_B1K1",
+      "name": "Smålenske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Fredrikshald/Fredriksten",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "south",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B1K2",
+      "name": "Romerike nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Fredrikshald/Fredriksten",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "south",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B1K3",
+      "name": "Hedemarkske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Fredrikshald/Fredriksten",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "south",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B1K4",
+      "name": "Gudbrandsdalske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Fredrikshald/Fredriksten",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "south",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B1K5",
+      "name": "Østerdalske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Fredrikshald/Fredriksten",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "south",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B2K1",
+      "name": "Akerske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiania/Oslo",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "south",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B2K2",
+      "name": "Valderske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiania/Oslo",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "south",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B2K3",
+      "name": "Hallingdalske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiania/Oslo",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "south",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B2K4",
+      "name": "Numedalske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiania/Oslo",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "south",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B3K1",
+      "name": "Innherredske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Trondheim",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "national",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B3K2",
+      "name": "Romsdalske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Trondheim",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "national",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B3K3",
+      "name": "Trondhjemske nationale jegerkorps",
+      "arm": "jager",
+      "home": "Trondheim",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "national",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 58,
+        "drill": 55,
+        "fieldcraft": 65,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B4K1",
+      "name": "Nordfjordske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Bergen",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "national",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B4K2",
+      "name": "Søndfjordske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Bergen",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "national",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B4K3",
+      "name": "Hardangerske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Bergen",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "national",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B4K4",
+      "name": "Sognske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Bergen",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "national",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B5K1",
+      "name": "Stavangerske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiansand",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "national",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B5K2",
+      "name": "Nedenæsiske nationale musketerkorps",
+      "arm": "infantry",
+      "home": "Kristiansand",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "national",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    },
+    {
+      "id": "NO_B5K3",
+      "name": "Telemarkske nationale jegerkorps",
+      "arm": "jager",
+      "home": "Kristiansand",
+      "recruitmentSystem": "udskrevet",
+      "theatre": "national",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "NO_ARMY_OFFICIAL",
+        "R6_NOCORPS"
+      ],
+      "authorisedMen": 400,
+      "fieldStatus": {
+        "authorisedMen": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL"
+          ],
+          "reason": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "method": "Organisationsanker; afrundet normmodel, ikke dateret rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "NO_ARMY_OFFICIAL"
+            ]
+          ],
+          "interval": [
+            360,
+            440
+          ]
+        },
+        "enrolledPeaceMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "method": "Besatte fredsruller anslået til 95 % af norm; indelte bor normalt hjemme.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            340,
+            400
+          ]
+        },
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "method": "Fysisk tilstedeværende fredsstyrke: norm × 0.06; skøn over daglig tjeneste/øvelse, IKKE dokumenteret fremmøde.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            14,
+            36
+          ]
+        },
+        "mobilisableMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "method": "Første mobilisering: 85 % norm; beväringsenheder 60 % pga. kort øvelse. Inkluderer fredsmanden.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260,
+            380
+          ]
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "method": "Mobiliseret hestebehov: rytteri inkl. remonter; artilleritræk; infanteriets lille stab/tros. Ikke ekstra civile heste.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3.9,
+            8.1
+          ]
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "method": "1825 har endnu veteraner fra 1813–14; 1851 lang fred. Heuristik, ikke mandskabsbiografier.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            75
+          ]
+        },
+        "skills": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "method": "Seks faglige startskøn på 0–100; følsomhed ±15 point.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            30,
+            80
+          ]
+        },
+        "home": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Kampagnesamlingsby i rekrutteringsområdet, ikke påstand om fredskaserne."
+        },
+        "commander": {
+          "status": "kilde",
+          "source": [
+            "R6_MODEL",
+            "NO_ARMY_OFFICIAL",
+            "R6_NOCORPS"
+          ],
+          "reason": "Regimentschefen på scenariedagen er ikke dokumenteret. Ingen opdigtet person."
+        }
+      },
+      "enrolledPeaceMen": 380,
+      "men": 24,
+      "mobilisableMen": 340,
+      "horses": 6,
+      "experience": 45,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 58,
+        "drill": 55,
+        "fieldcraft": 65,
+        "endurance": 60,
+        "assault": 56
+      },
+      "commander": null,
+      "note": "Runde 6: cirkamodel. men er fysisk fredstilstedeværelse; mobilisableMen er samme pulje efter indkaldelse. Norm/indelta er ikke dagligt fremmøde. Home er samlingsby. Historisk enhedsnavn; eksakt norm og dagsnavn kræver rullekontrol."
+    }
+  ],
+  "equipment": {
+    "rifles": 17300,
+    "guns": 48,
+    "horses": 1439,
+    "mortars": 12,
+    "wagons": 128,
+    "raw": [
+      20,
+      15,
+      82,
+      122,
+      408,
+      306
+    ],
+    "foodDays": 30,
+    "columns": 5,
+    "infantryReload": 0.9,
+    "infantryAccuracy": 1.0,
+    "carbineReload": 20,
+    "infantryWeapon": "Blandet perkussionsmuskett, pillar-breech og kammerlader m/1842/1846/1849",
+    "cavalryWeapon": "Blandet flintlås/perkussionskarabin, pistol og sabel",
+    "artilleryWeapon": "Glatløbet forladeskyts; 6-/12-pundig kanon og haubits som spilklasser; ingen riflet baglader",
+    "uniforms": [
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret"
+    ],
+    "kitReserve": 2040,
+    "note": "Beholdninger og udleveringsandele er cirkaskøn; ingen ny arsenalliste. Geværer inkluderer udleverede våben og reserve. Kanoner er feltbeholdning; fæstnings- og flådekanoner er separate.",
+    "fieldStatus": {
+      "rifles": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "method": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          11245.0,
+          23355.0
+        ]
+      },
+      "guns": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "method": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          31.2,
+          64.8
+        ]
+      },
+      "horses": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "method": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          935.35,
+          1942.65
+        ]
+      },
+      "mortars": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "method": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          7.8,
+          16.2
+        ]
+      },
+      "wagons": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "method": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          83.2,
+          172.8
+        ]
+      },
+      "foodDays": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "method": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          19.5,
+          40.5
+        ]
+      },
+      "columns": {
+        "status": "spil",
+        "source": "R6_MODEL",
+        "reason": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning."
+      },
+      "kitReserve": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "method": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          1326.0,
+          2754.0
+        ]
+      },
+      "infantryReload": {
+        "status": "spil",
+        "source": "R6_MODEL",
+        "reason": "Relativ motorfaktor; 1.2 = glatløbet baseline. Fysiske sekunder står i weaponModels og må ikke læses direkte som denne faktor."
+      },
+      "infantryAccuracy": {
+        "status": "spil",
+        "source": "R6_MODEL",
+        "reason": "Relativ motortræffaktor, IKKE sandsynlighed; normaliseret efter lås og riffelandel."
+      },
+      "carbineReload": {
+        "status": "spil",
+        "source": "R6_MODEL",
+        "reason": "Våben-/forsyningsmodel: geværlager = mobiliserbar linje × 1,7, vogne = en pr. 80 mand, heste = OOB-behov, 30 dages central beholdning."
+      },
+      "uniforms": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Tekstproxy, ingen periodeverificeret uniformsmodel eller billedpakke."
+      },
+      "raw": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Spilressource-slots: slotrækkefølgen kan ikke udledes af JSON-skema alene. Tallene er eksplicitte spilvalg; må IKKE kaldes ton krudt eller fødevarer. Se fysiske nationalStocks."
+      }
+    },
+    "rawUnits": [
+      "engine_raw_slot_0",
+      "engine_raw_slot_1",
+      "engine_raw_slot_2",
+      "engine_raw_slot_3",
+      "engine_raw_slot_4",
+      "engine_raw_slot_5"
+    ],
+    "rawNote": "Spilressource-slots: slotrækkefølgen kan ikke udledes af JSON-skema alene. Tallene er eksplicitte spilvalg; må IKKE kaldes ton krudt eller fødevarer. Se fysiske nationalStocks.",
+    "weaponModels": [
+      {
+        "model": "percussion_smoothbore",
+        "status": "spil",
+        "source": [
+          "R5_SVARTKRUTT",
+          "R5_SVARTKRUTT_KAM",
+          "R6_MODEL"
+        ],
+        "note": "Spiltest ved 100 m, synligt stillestående kompagnimål, oplært skytte; ikke historisk målt træfprocent i kamp.",
+        "share": 0.55,
+        "fieldStatus": {
+          "share": {
+            "status": "skøn",
+            "source": "R6_MODEL",
+            "reason": "Konservativ indfasningsandel. Norsk senere samlet produktion er ikke lig lager i juli 1851.",
+            "method": "Konservativ indfasningsandel. Norsk senere samlet produktion er ikke lig lager i juli 1851.",
+            "anchors": [
+              "R6_MODEL"
+            ],
+            "interval": [
+              0.4,
+              0.7000000000000001
+            ]
+          },
+          "reloadSeconds": {
+            "status": "spil",
+            "source": "DESIGN",
+            "reason": "Tørvejr, stående skytte; forfatterens våbenmodel. Kampild reduceres af røg/træthed."
+          },
+          "hitProbability100m": {
+            "status": "spil",
+            "source": "DESIGN",
+            "reason": "Mål- og afstandsspecifik balanceværdi; ikke kildebelagt måling."
+          }
+        },
+        "reloadSeconds": 25,
+        "hitProbability100m": 0.3
+      },
+      {
+        "model": "flint_smoothbore",
+        "status": "spil",
+        "source": [
+          "R5_SVARTKRUTT",
+          "R5_SVARTKRUTT_KAM",
+          "R6_MODEL"
+        ],
+        "note": "Spiltest ved 100 m, synligt stillestående kompagnimål, oplært skytte; ikke historisk målt træfprocent i kamp.",
+        "share": 0.2,
+        "fieldStatus": {
+          "share": {
+            "status": "skøn",
+            "source": "R6_MODEL",
+            "reason": "Konservativ indfasningsandel. Norsk senere samlet produktion er ikke lig lager i juli 1851.",
+            "method": "Konservativ indfasningsandel. Norsk senere samlet produktion er ikke lig lager i juli 1851.",
+            "anchors": [
+              "R6_MODEL"
+            ],
+            "interval": [
+              0.05000000000000002,
+              0.35
+            ]
+          },
+          "reloadSeconds": {
+            "status": "spil",
+            "source": "DESIGN",
+            "reason": "Tørvejr, stående skytte; forfatterens våbenmodel. Kampild reduceres af røg/træthed."
+          },
+          "hitProbability100m": {
+            "status": "spil",
+            "source": "DESIGN",
+            "reason": "Mål- og afstandsspecifik balanceværdi; ikke kildebelagt måling."
+          }
+        },
+        "reloadSeconds": 30,
+        "hitProbability100m": 0.25
+      },
+      {
+        "model": "pillar_rifle",
+        "status": "spil",
+        "source": [
+          "R5_SVARTKRUTT",
+          "R5_SVARTKRUTT_KAM",
+          "R6_MODEL"
+        ],
+        "note": "Spiltest ved 100 m, synligt stillestående kompagnimål, oplært skytte; ikke historisk målt træfprocent i kamp.",
+        "share": 0.15,
+        "fieldStatus": {
+          "share": {
+            "status": "skøn",
+            "source": "R6_MODEL",
+            "reason": "Konservativ indfasningsandel. Norsk senere samlet produktion er ikke lig lager i juli 1851.",
+            "method": "Konservativ indfasningsandel. Norsk senere samlet produktion er ikke lig lager i juli 1851.",
+            "anchors": [
+              "R6_MODEL"
+            ],
+            "interval": [
+              0,
+              0.3
+            ]
+          },
+          "reloadSeconds": {
+            "status": "spil",
+            "source": "DESIGN",
+            "reason": "Tørvejr, stående skytte; forfatterens våbenmodel. Kampild reduceres af røg/træthed."
+          },
+          "hitProbability100m": {
+            "status": "spil",
+            "source": "DESIGN",
+            "reason": "Mål- og afstandsspecifik balanceværdi; ikke kildebelagt måling."
+          }
+        },
+        "reloadSeconds": 40,
+        "hitProbability100m": 0.5
+      },
+      {
+        "model": "kammerlader",
+        "status": "spil",
+        "source": [
+          "R5_SVARTKRUTT",
+          "R5_SVARTKRUTT_KAM",
+          "R6_MODEL"
+        ],
+        "note": "Spiltest ved 100 m, synligt stillestående kompagnimål, oplært skytte; ikke historisk målt træfprocent i kamp.",
+        "share": 0.1,
+        "fieldStatus": {
+          "share": {
+            "status": "skøn",
+            "source": "R6_MODEL",
+            "reason": "Konservativ indfasningsandel. Norsk senere samlet produktion er ikke lig lager i juli 1851.",
+            "method": "Konservativ indfasningsandel. Norsk senere samlet produktion er ikke lig lager i juli 1851.",
+            "anchors": [
+              "R6_MODEL"
+            ],
+            "interval": [
+              0,
+              0.25
+            ]
+          },
+          "reloadSeconds": {
+            "status": "spil",
+            "source": "DESIGN",
+            "reason": "Tørvejr, stående skytte; forfatterens våbenmodel. Kampild reduceres af røg/træthed."
+          },
+          "hitProbability100m": {
+            "status": "spil",
+            "source": "DESIGN",
+            "reason": "Mål- og afstandsspecifik balanceværdi; ikke kildebelagt måling."
+          }
+        },
+        "reloadSeconds": 15,
+        "hitProbability100m": 0.55
+      }
+    ]
+  },
+  "magazines": [
+    {
+      "town": "Kristiania/Oslo",
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "note": "Valgt depotby; rationdage/foderdage og ammo i 1000 patronækvivalenter. Fysisk placering i perioden ikke bevist. Loader skal bekræfte enhedsmapping.",
+      "food": 91800.0,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            59670.0,
+            123930.0
+          ]
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            5612.1,
+            11655.9
+          ]
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            358.02,
+            743.58
+          ]
+        },
+        "powderKg": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3580.2,
+            7435.8
+          ]
+        }
+      },
+      "fodder": 8634.0,
+      "ammo": 550.8,
+      "powderKg": 5508.0
+    },
+    {
+      "town": "Fredrikshald/Fredriksten",
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "note": "Valgt depotby; rationdage/foderdage og ammo i 1000 patronækvivalenter. Fysisk placering i perioden ikke bevist. Loader skal bekræfte enhedsmapping.",
+      "food": 61200.0,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            39780.0,
+            82620.0
+          ]
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            3741.4,
+            7770.6
+          ]
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            238.68,
+            495.72
+          ]
+        },
+        "powderKg": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            2386.8,
+            4957.2
+          ]
+        }
+      },
+      "fodder": 5756.0,
+      "ammo": 367.2,
+      "powderKg": 3672.0
+    },
+    {
+      "town": "Horten",
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "note": "Valgt depotby; rationdage/foderdage og ammo i 1000 patronækvivalenter. Fysisk placering i perioden ikke bevist. Loader skal bekræfte enhedsmapping.",
+      "food": 30600.0,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            19890.0,
+            41310.0
+          ]
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            1870.7,
+            3885.3
+          ]
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            119.34,
+            247.86
+          ]
+        },
+        "powderKg": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            1193.4,
+            2478.6
+          ]
+        }
+      },
+      "fodder": 2878.0,
+      "ammo": 183.6,
+      "powderKg": 1836.0
+    },
+    {
+      "town": "Kristiansand",
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "note": "Valgt depotby; rationdage/foderdage og ammo i 1000 patronækvivalenter. Fysisk placering i perioden ikke bevist. Loader skal bekræfte enhedsmapping.",
+      "food": 45900.0,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            29835.0,
+            61965.0
+          ]
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            2806.05,
+            5827.95
+          ]
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            179.01,
+            371.79
+          ]
+        },
+        "powderKg": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            1790.1,
+            3717.9
+          ]
+        }
+      },
+      "fodder": 4317.0,
+      "ammo": 275.4,
+      "powderKg": 2754.0
+    },
+    {
+      "town": "Trondheim",
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "note": "Valgt depotby; rationdage/foderdage og ammo i 1000 patronækvivalenter. Fysisk placering i perioden ikke bevist. Loader skal bekræfte enhedsmapping.",
+      "food": 45900.0,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            29835.0,
+            61965.0
+          ]
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            2806.05,
+            5827.95
+          ]
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            179.01,
+            371.79
+          ]
+        },
+        "powderKg": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            1790.1,
+            3717.9
+          ]
+        }
+      },
+      "fodder": 4317.0,
+      "ammo": 275.4,
+      "powderKg": 2754.0
+    },
+    {
+      "town": "Bergen",
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "note": "Valgt depotby; rationdage/foderdage og ammo i 1000 patronækvivalenter. Fysisk placering i perioden ikke bevist. Loader skal bekræfte enhedsmapping.",
+      "food": 30600.0,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            19890.0,
+            41310.0
+          ]
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            1870.7,
+            3885.3
+          ]
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            119.34,
+            247.86
+          ]
+        },
+        "powderKg": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "method": "Fordeling af national beholdning med eksplicit vægt; ingen ekstra lagerpulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            1193.4,
+            2478.6
+          ]
+        }
+      },
+      "fodder": 2878.0,
+      "ammo": 183.6,
+      "powderKg": 1836.0
+    }
+  ],
+  "organisation": {
+    "lineAuthorisedMen": 12000,
+    "standingEnlistedCirca": 2000,
+    "landvernAuthorisedMen": 8000,
+    "landvernDeployableMen": 6000,
+    "note": "Linje/landværn er organisations- og cirkatal; landværn nedlagt 1816/genoprettet 1837 som papirstruktur. Status fremgår pr. felt.",
+    "fieldStatus": {
+      "lineAuthorisedMen": {
+        "status": "kilde",
+        "source": "NO_ARMY_OFFICIAL",
+        "reason": "12.000 menige på norm; ikke fredsfremmøde."
+      },
+      "standingEnlistedCirca": {
+        "status": "skøn",
+        "source": "SNL_FORSVAR",
+        "reason": "Ca. 2.000 fra eksisterende landepakkes SNL-anker, ikke dateret mønstring."
+      },
+      "landvernAuthorisedMen": {
+        "status": "kilde",
+        "source": "NO_ARMY_OFFICIAL",
+        "reason": "1825 ingen organisation; 1851 vedtaget norm 8.000, ikke fremmøde."
+      },
+      "landvernDeployableMen": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Norsk landværn: 0 i 1825; i 1851 75 % af 8.000 norm, kun hjemligt forsvar.",
+        "method": "Norsk landværn: 0 i 1825; i 1851 75 % af 8.000 norm, kun hjemligt forsvar.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          4000,
+          8000
+        ]
+      },
+      "staffNcoMusicianNorm1818": {
+        "status": "kilde",
+        "source": "R6_NOCORPS",
+        "reason": "1818-norm ud over 12.000 menige. Ikke automatisk ekstra kampstyrke; detaljeret personelfordeling mangler."
+      },
+      "peacePresentCirca": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Sum af regimentsmodellens disjunkte puljer; se regimentsvise ankre.",
+        "method": "Sum af regimentsmodellens disjunkte puljer; se regimentsvise ankre.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          1495.0,
+          3105.0
+        ]
+      },
+      "peaceEnrolledCirca": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Sum af regimentsmodellens disjunkte puljer; se regimentsvise ankre.",
+        "method": "Sum af regimentsmodellens disjunkte puljer; se regimentsvise ankre.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          7410.0,
+          15390.0
+        ]
+      },
+      "lineMobilisableCirca": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Sum af regimentsmodellens disjunkte puljer; se regimentsvise ankre.",
+        "method": "Sum af regimentsmodellens disjunkte puljer; se regimentsvise ankre.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          6630.0,
+          13770.0
+        ]
+      },
+      "mobilisedHorseRequirement": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Sum af regimentsmodellens disjunkte puljer; se regimentsvise ankre.",
+        "method": "Sum af regimentsmodellens disjunkte puljer; se regimentsvise ankre.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          935.35,
+          1942.65
+        ]
+      },
+      "observedPeaceMuster": {
+        "status": "kilde",
+        "source": "NO_ARMY_OFFICIAL",
+        "reason": "Ingen dateret fysisk mønstringsrulle læst; cirkamodellen erstatter ikke en observation."
+      }
+    },
+    "status": "skøn",
+    "source": "R6_MODEL",
+    "staffNcoMusicianNorm1818": 2303,
+    "peacePresentCirca": 2300,
+    "peaceEnrolledCirca": 11400,
+    "lineMobilisableCirca": 10200,
+    "mobilisedHorseRequirement": 1439,
+    "observedPeaceMuster": null
+  },
+  "nationalStocks": {
+    "status": "skøn",
+    "source": "R6_MODEL",
+    "note": "Nationale hærbeholdninger, flåden udeladt. Magasinerne nedenfor er en FORDELING af disse totaler.",
+    "smallArmsTotal": 17300,
+    "fieldStatus": {
+      "smallArmsTotal": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "method": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          11245.0,
+          23355.0
+        ]
+      },
+      "fieldGunsTotal": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "method": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          31.2,
+          64.8
+        ]
+      },
+      "horsesRequired": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "method": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          935.35,
+          1942.65
+        ]
+      },
+      "wagonsTotal": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "method": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          83.2,
+          172.8
+        ]
+      },
+      "powderKg": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "method": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          11934.0,
+          24786.0
+        ]
+      },
+      "foodRationDays": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "method": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          198900.0,
+          413100.0
+        ]
+      },
+      "fodderHorseDays": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "method": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          18707.0,
+          38853.0
+        ]
+      },
+      "smallArmsRounds": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "method": "Forsyningsnorm: 180 skud à ca. 10 g krudt; 30 rationdage pr. mobiliserbar linjemand, 20 foderdage pr. hest.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          1193400.0,
+          2478600.0
+        ]
+      }
+    },
+    "fieldGunsTotal": 48,
+    "horsesRequired": 1439,
+    "wagonsTotal": 128,
+    "powderKg": 18360,
+    "foodRationDays": 306000,
+    "fodderHorseDays": 28780,
+    "smallArmsRounds": 1836000
+  }
+}

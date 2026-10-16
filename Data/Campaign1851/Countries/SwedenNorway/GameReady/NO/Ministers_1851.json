@@ -1,0 +1,122 @@
+{
+  "sovereign": {
+    "name": "Oscar I",
+    "born": 1799,
+    "government": "Konstitutionelt monarki i personalunion"
+  },
+  "note": "Historiske personer. Otte semantiske ressorter fordeles som spilvalg; samme person kan dække flere, men må ikke ansættes flere gange. Navy/Foreign kan være stedfortrædende kandidat, ikke faktisk ressortchef. Ni 1–10-statistikker er skøn; skill/thrift/caution er skøn på 0–100.",
+  "portfolios": [
+    {
+      "portfolio": "Interior",
+      "candidates": [
+        {
+          "name": "Frederik Stang",
+          "born": 1808,
+          "role": "indreminister; Interior-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "PublicWorks",
+      "candidates": [
+        {
+          "name": "Frederik Stang",
+          "born": 1808,
+          "role": "indreminister; PublicWorks-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "War",
+      "candidates": [
+        {
+          "name": "Thomas Edvard von Westen Sylow",
+          "born": 1792,
+          "role": "arméminister; War-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Transport",
+      "candidates": [
+        {
+          "name": "Frederik Stang",
+          "born": 1808,
+          "role": "indreminister; Transport-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Intendance",
+      "candidates": [
+        {
+          "name": "Thomas Edvard von Westen Sylow",
+          "born": 1792,
+          "role": "arméminister; Intendance-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Foreign",
+      "candidates": [
+        {
+          "name": "Frederik Due",
+          "born": 1796,
+          "role": "statsminister i Stockholm; Foreign-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Navy",
+      "candidates": [
+        {
+          "name": "Ole Wilhelm Erichsen",
+          "born": 1793,
+          "role": "marineminister; Navy-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Finance",
+      "candidates": [
+        {
+          "name": "Christian Zetlitz Bretteville",
+          "born": 1800,
+          "role": "finansminister; Finance-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    }
+  ]
+}

@@ -3,6 +3,7 @@
 #include "Campaign1851Map.h"
 
 #include "Dom/JsonObject.h"
+#include "Campaign1851Json.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
@@ -55,13 +56,13 @@ bool ACampaign1851Map::LoadOfficers()
 	}
 	GeneralsAtStart.Reset();
 	if (b1825) { OfficerScenarioData = Json; }
-	for (const TSharedPtr<FJsonValue>& Value : Json->GetArrayField(TEXT("generals")))
+	for (const TSharedPtr<FJsonValue>& Value : Campaign1851Json::Array(*Json, TEXT("generals")))
 	{
-		const TSharedPtr<FJsonObject> O = Value->AsObject();
+		const TSharedPtr<FJsonObject> O = Campaign1851Json::Row(Value);
 		FCampaign1851Officer G;
-		G.Id = O->GetStringField(TEXT("id"));
-		G.Name = O->GetStringField(TEXT("name"));
-		G.Rank = O->GetStringField(TEXT("rank"));
+		if (!O->TryGetStringField(TEXT("id"), G.Id) || G.Id.IsEmpty()) { continue; }
+		O->TryGetStringField(TEXT("name"), G.Name);
+		O->TryGetStringField(TEXT("rank"), G.Rank);
 		O->TryGetNumberField(TEXT("born"), G.Born);
 		int32 StartAway = 0;
 		O->TryGetNumberField(TEXT("away"), StartAway);
@@ -119,16 +120,23 @@ FCampaign1851Officer ACampaign1851Map::MakeOfficer(FRandomStream& Rng, bool bGen
 	O.Born = GetDate().GetYear() - (bGeneral ? Rng.RandRange(50, 64) : Rng.RandRange(34, 52));
 	if (OfficerScenarioData.IsValid())
 	{
-		const TSharedPtr<FJsonObject> Profiles = OfficerScenarioData->GetObjectField(TEXT("profiles"));
+		const TSharedPtr<FJsonObject> Profiles = Campaign1851Json::Object(*OfficerScenarioData, TEXT("profiles"));
 		const FString ProfileKey = bGeneral ? TEXT("general") : Rank == TEXT("Kaptajn") ? TEXT("captain") : TEXT("chief");
-		const TSharedPtr<FJsonObject> Profile = Profiles->GetObjectField(ProfileKey);
+		const TSharedPtr<FJsonObject> Profile = Campaign1851Json::Object(*Profiles, *ProfileKey);
 		for (int32 s = 0; s < NumStats; ++s)
 		{
-			const int32 Base = Profile->GetIntegerField(StatKeys[s]);
+			int32 Base = 0;
+			if (!Profile->TryGetNumberField(StatKeys[s], Base)) { continue; }
 			O.Stats[s] = uint8(FMath::Clamp(FMath::RoundToInt((Base + Rng.RandRange(-10, 10)) / 10.f), 1, 10));
 		}
-		O.Born = GetDate().GetYear() - Rng.RandRange(Profile->GetIntegerField(TEXT("ageMin")), Profile->GetIntegerField(TEXT("ageMax")));
-		O.Experience = Rng.FRandRange(float(Profile->GetNumberField(TEXT("experienceMin"))), float(Profile->GetNumberField(TEXT("experienceMax"))));
+		int32 ImportOfficerAgeMin = 0, ImportOfficerAgeMax = 0;
+		if (Profile->TryGetNumberField(TEXT("ageMin"), ImportOfficerAgeMin)
+			&& Profile->TryGetNumberField(TEXT("ageMax"), ImportOfficerAgeMax) && ImportOfficerAgeMin <= ImportOfficerAgeMax)
+		{ O.Born = GetDate().GetYear() - Rng.RandRange(ImportOfficerAgeMin, ImportOfficerAgeMax); }
+		float ImportOfficerXpMin = 0, ImportOfficerXpMax = 0;
+		if (Profile->TryGetNumberField(TEXT("experienceMin"), ImportOfficerXpMin)
+			&& Profile->TryGetNumberField(TEXT("experienceMax"), ImportOfficerXpMax) && ImportOfficerXpMin <= ImportOfficerXpMax)
+		{ O.Experience = Rng.FRandRange(ImportOfficerXpMin, ImportOfficerXpMax); }
 	}
 	return O;
 }

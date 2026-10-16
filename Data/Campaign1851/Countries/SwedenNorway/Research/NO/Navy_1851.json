@@ -1,0 +1,1155 @@
+{
+  "nation": "NO",
+  "scenarioDate": "1851-07-01",
+  "status": "skøn",
+  "source": [
+    "R6_MODEL",
+    "R5_NORSHIPS"
+  ],
+  "note": "Klassebeholdning er cirkamodel, navngivne skibe er daterede eksempler, IKKE en komplet verificeret navneliste eller kommissionsrulle. activeCraft er delmængde af inventoryCraft.",
+  "classes": [
+    {
+      "class": "frigate",
+      "coastal": false,
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "R6_NAVY1914"
+      ],
+      "inventoryCraft": 1,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            1,
+            1
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            245,
+            455
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            245,
+            455
+          ]
+        }
+      },
+      "activeCraft": 0,
+      "crewPerCraft": 350,
+      "activeCrew": 0,
+      "mobilisedCrew": 350
+    },
+    {
+      "class": "brig",
+      "coastal": false,
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "R6_NAVY1914"
+      ],
+      "inventoryCraft": 1,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            1,
+            1
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            1,
+            1
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            70,
+            130
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            70,
+            130
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            70,
+            130
+          ]
+        }
+      },
+      "activeCraft": 1,
+      "crewPerCraft": 100,
+      "activeCrew": 100,
+      "mobilisedCrew": 100
+    },
+    {
+      "class": "corvette",
+      "coastal": false,
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "R6_NAVY1914"
+      ],
+      "inventoryCraft": 3,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            2,
+            4
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            1,
+            3
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            105,
+            195
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            210,
+            390
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            315,
+            585
+          ]
+        }
+      },
+      "activeCraft": 2,
+      "crewPerCraft": 150,
+      "activeCrew": 300,
+      "mobilisedCrew": 450
+    },
+    {
+      "class": "steam_corvette",
+      "coastal": false,
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "R6_NAVY1914"
+      ],
+      "inventoryCraft": 1,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            1,
+            1
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            105,
+            195
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            105,
+            195
+          ]
+        }
+      },
+      "activeCraft": 0,
+      "crewPerCraft": 150,
+      "activeCrew": 0,
+      "mobilisedCrew": 150
+    },
+    {
+      "class": "bomb_schooner",
+      "coastal": false,
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "R6_NAVY1914"
+      ],
+      "inventoryCraft": 3,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            2,
+            4
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            1,
+            3
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            46,
+            84
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            91,
+            169
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            136,
+            254
+          ]
+        }
+      },
+      "activeCraft": 2,
+      "crewPerCraft": 65,
+      "activeCrew": 130,
+      "mobilisedCrew": 195
+    },
+    {
+      "class": "steam_schooner",
+      "coastal": false,
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "R6_NAVY1914"
+      ],
+      "inventoryCraft": 2,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            1,
+            3
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            1,
+            3
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            28,
+            52
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            56,
+            104
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            56,
+            104
+          ]
+        }
+      },
+      "activeCraft": 2,
+      "crewPerCraft": 40,
+      "activeCrew": 80,
+      "mobilisedCrew": 80
+    },
+    {
+      "class": "paddle_steamer",
+      "coastal": false,
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "R6_NAVY1914"
+      ],
+      "inventoryCraft": 1,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            1,
+            1
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            1,
+            1
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            52,
+            98
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            52,
+            98
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            52,
+            98
+          ]
+        }
+      },
+      "activeCraft": 1,
+      "crewPerCraft": 75,
+      "activeCrew": 75,
+      "mobilisedCrew": 75
+    },
+    {
+      "class": "gun_sloop",
+      "coastal": true,
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "R6_NAVY1914"
+      ],
+      "inventoryCraft": 85,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            59,
+            110
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            8,
+            16
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            46,
+            84
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            546,
+            1014
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            3867,
+            7182
+          ]
+        }
+      },
+      "activeCraft": 12,
+      "crewPerCraft": 65,
+      "activeCrew": 780,
+      "mobilisedCrew": 5525
+    },
+    {
+      "class": "gun_yawl",
+      "coastal": true,
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "R6_NAVY1914"
+      ],
+      "inventoryCraft": 38,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            27,
+            49
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            8,
+            16
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            18,
+            32
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            210,
+            390
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R6_NAVY1914"
+          ],
+          "reason": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "method": "1. juli-model under 1851-årsankeret: Desideria endnu ikke klar i modellen, 85/38 rofartøjer mod årsanker 89/39. Aktiv andel og besætning er skøn, ikke kommissionsrulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R6_NAVY1914"
+            ]
+          ],
+          "interval": [
+            665,
+            1235
+          ]
+        }
+      },
+      "activeCraft": 12,
+      "crewPerCraft": 25,
+      "activeCrew": 300,
+      "mobilisedCrew": 950
+    }
+  ],
+  "bases": [
+    "Fredriksvern",
+    "Horten",
+    "Bergen",
+    "Trondheim"
+  ],
+  "annualInventory1851": {
+    "frigates": 2,
+    "corvettes": 4,
+    "brigs": 1,
+    "gunSchooners": 3,
+    "gunSloops": 89,
+    "gunYawls": 39,
+    "steamships": 3,
+    "status": "kilde",
+    "source": "R6_NAVY1914",
+    "locator": "Trykt side 30, Samlet antal i 1851",
+    "note": "Årsbeholdning. Corvettes inkluderer dampkorvetten Nidaros; steamships er Nordcap/Gyller/Gler. Ikke samme dag som scenariet."
+  },
+  "namedExamples": [
+    {
+      "name": "Freia",
+      "class": "frigate",
+      "status": "kilde",
+      "source": "R6_NAVY1914",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    },
+    {
+      "name": "Lougen",
+      "class": "brig",
+      "status": "kilde",
+      "source": "R6_NAVY1914",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    },
+    {
+      "name": "Ellida",
+      "class": "corvette",
+      "status": "kilde",
+      "source": "R6_NAVY1914",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    },
+    {
+      "name": "Ørnen",
+      "class": "corvette",
+      "status": "kilde",
+      "source": "R6_NAVY1914",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    },
+    {
+      "name": "Nidaros",
+      "class": "steam_corvette",
+      "status": "kilde",
+      "source": "R6_NAVY1914",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    },
+    {
+      "name": "Sleipner",
+      "class": "bomb_schooner",
+      "status": "kilde",
+      "source": "R6_NAVY1914",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    },
+    {
+      "name": "Vale",
+      "class": "bomb_schooner",
+      "status": "kilde",
+      "source": "R6_NAVY1914",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    },
+    {
+      "name": "Uller",
+      "class": "bomb_schooner",
+      "status": "kilde",
+      "source": "R6_NAVY1914",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    },
+    {
+      "name": "Gyller",
+      "class": "steam_schooner",
+      "status": "kilde",
+      "source": "R6_NAVY1914",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    },
+    {
+      "name": "Gler",
+      "class": "steam_schooner",
+      "status": "kilde",
+      "source": "R6_NAVY1914",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    },
+    {
+      "name": "Nordstjernen",
+      "class": "corvette",
+      "status": "kilde",
+      "source": "R6_NAVY1914"
+    },
+    {
+      "name": "Nordcap",
+      "class": "paddle_steamer",
+      "status": "kilde",
+      "source": "R6_NAVY1914"
+    },
+    {
+      "name": "Desideria",
+      "class": "frigate",
+      "scenarioAvailability": "not_ready_assumption",
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "R6_NAVY1914"
+      ],
+      "note": "Søsat 1851, præcis tilgængelighed 1. juli ikke belagt. Kun i årsankeret; ikke scenariets beholdning."
+    }
+  ],
+  "peaceCrewCirca": 1765,
+  "fieldStatus": {
+    "peaceCrewCirca": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Sum af aktive fartøjers bemandingsnormer; base-/værftsfolk ikke medregnet. Ikke dateret flåderulle.",
+      "method": "Sum af aktive fartøjers bemandingsnormer; base-/værftsfolk ikke medregnet. Ikke dateret flåderulle.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        1147.25,
+        2382.75
+      ]
+    },
+    "fullManningCirca": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Sum normbemanding af modelbeholdning; for SE kun rimelighedskontrol mod ca. 20.000, ingen observation.",
+      "method": "Sum normbemanding af modelbeholdning; for SE kun rimelighedskontrol mod ca. 20.000, ingen observation.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        5118.75,
+        10631.25
+      ]
+    }
+  },
+  "fullManningCirca": 7875
+}

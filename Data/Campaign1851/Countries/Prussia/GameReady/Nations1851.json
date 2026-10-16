@@ -1,0 +1,105 @@
+{
+  "note": "Preussen, dateret importgrundlag. Kilde/skøn/spil står i fieldStatus og Data-status.json. Delvist overlay; null kræver håndtering, ikke nulkonvertering. Ingen motor-/slagtest.",
+  "nations": [
+    {
+      "id": "PR",
+      "name": "Preussen",
+      "onMap": false,
+      "controller": "ai",
+      "weights": [
+        1.0,
+        1.2,
+        1.4,
+        1.0
+      ],
+      "caution": 0.4,
+      "reserve": 400000,
+      "population": 16718740,
+      "railKm": 2900,
+      "armyMen": null,
+      "growth": 1.1,
+      "taxPerHead": null,
+      "note": "Friedrich Wilhelm IV; forfatning 1850. Londontraktaten 1852 er fremtid. Preussen, dateret importgrundlag. Kilde/skøn/spil står i fieldStatus og Data-status.json. Delvist overlay; null kræver håndtering, ikke nulkonvertering. Ingen motor-/slagtest.",
+      "relation": -35,
+      "tradeValue": 5000,
+      "role": "Kernefraktion",
+      "period": "1851-07-01",
+      "infantry": "Musketier/linjeinfanteri; Fusilier; Jäger; Grenadier/Garde",
+      "cavalry": "Husar; Uhlan; Dragon; Kürassér",
+      "artillery": "Feltartilleri; ridende artilleri",
+      "priority": "Høj",
+      "group": "stormagt",
+      "canAlly": false,
+      "canGuarantee": false,
+      "fieldStatus": {
+        "weights/0": {
+          "status": "spil",
+          "source": "GAME-Nations1851.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "weights/1": {
+          "status": "spil",
+          "source": "GAME-Nations1851.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "weights/2": {
+          "status": "spil",
+          "source": "GAME-Nations1851.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "weights/3": {
+          "status": "spil",
+          "source": "GAME-Nations1851.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "caution": {
+          "status": "spil",
+          "source": "GAME-Nations1851.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "reserve": {
+          "status": "spil",
+          "source": "GAME-Nations1851.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPRE-gesamt.htm",
+          "reason": "Halvårslineær interpolation af ultimo året før og scenarieårets ultimo. Afrundet til person; ingen sikkerhed om præcis folketællingsdato.",
+          "method": "round((P[y-1]+P[y])/2)",
+          "unit": "personer"
+        },
+        "railKm": {
+          "status": "spil",
+          "source": "GAME-Nations1851.json",
+          "reason": "Bevarer spillets 2.900 km som modelanker; ikke et verificeret 1851-tal."
+        },
+        "armyMen": {
+          "status": "skøn",
+          "source": "RANGLIST",
+          "reason": "Faktisk fredsfremmøde pr. 1. juli ikke afskrevet; spillets 127.000 er ikke observation."
+        },
+        "growth": {
+          "status": "spil",
+          "source": "GAME-Nations1851.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "taxPerHead": {
+          "status": "skøn",
+          "source": "FIN1851",
+          "reason": "Budgetindtægter er ikke direkte skat; land/by-skat og total skattedefinition mangler."
+        },
+        "relation": {
+          "status": "spil",
+          "source": "GAME-Nations1851.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        },
+        "tradeValue": {
+          "status": "spil",
+          "source": "GAME-Nations1851.json",
+          "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "scenario": "1851",
+  "nation": "NO",
+  "note": "Materielbilag i Army_1825-form; regimenter tomme, må ikke spawnes som anden hær.",
+  "commands": [],
+  "regiments": [],
+  "equipment": {
+    "rifles": 17300,
+    "guns": 48,
+    "horses": 1439,
+    "mortars": 12,
+    "wagons": 128,
+    "raw": [
+      20,
+      15,
+      82,
+      122,
+      408,
+      306
+    ],
+    "foodDays": 30,
+    "columns": 5,
+    "infantryReload": 0.9,
+    "infantryAccuracy": 1.0,
+    "carbineReload": 20,
+    "infantryWeapon": "Blandet perkussionsmuskett, pillar-breech og kammerlader m/1842/1846/1849",
+    "cavalryWeapon": "Blandet flintlås/perkussionskarabin, pistol og sabel",
+    "artilleryWeapon": "Glatløbet forladeskyts; 6-/12-pundig kanon og haubits som spilklasser; ingen riflet baglader",
+    "uniforms": [
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret"
+    ],
+    "kitReserve": 2040
+  },
+  "magazines": [
+    {
+      "town": "Kristiania/Oslo",
+      "food": 91800.0,
+      "fodder": 8634.0,
+      "ammo": 550.8
+    },
+    {
+      "town": "Fredrikshald/Fredriksten",
+      "food": 61200.0,
+      "fodder": 5756.0,
+      "ammo": 367.2
+    },
+    {
+      "town": "Horten",
+      "food": 30600.0,
+      "fodder": 2878.0,
+      "ammo": 183.6
+    },
+    {
+      "town": "Kristiansand",
+      "food": 45900.0,
+      "fodder": 4317.0,
+      "ammo": 275.4
+    },
+    {
+      "town": "Trondheim",
+      "food": 45900.0,
+      "fodder": 4317.0,
+      "ammo": 275.4
+    },
+    {
+      "town": "Bergen",
+      "food": 30600.0,
+      "fodder": 2878.0,
+      "ammo": 183.6
+    }
+  ]
+}

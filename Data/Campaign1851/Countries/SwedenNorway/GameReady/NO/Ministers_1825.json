@@ -1,0 +1,122 @@
+{
+  "sovereign": {
+    "name": "Karl XIV Johan",
+    "born": 1763,
+    "government": "Konstitutionelt monarki i personalunion"
+  },
+  "note": "Historiske personer. Otte semantiske ressorter fordeles som spilvalg; samme person kan dække flere, men må ikke ansættes flere gange. Navy/Foreign kan være stedfortrædende kandidat, ikke faktisk ressortchef. Ni 1–10-statistikker er skøn; skill/thrift/caution er skøn på 0–100.",
+  "portfolios": [
+    {
+      "portfolio": "Interior",
+      "candidates": [
+        {
+          "name": "Christian Adolph Diriks",
+          "born": 1775,
+          "role": "justitsminister; Interior-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "PublicWorks",
+      "candidates": [
+        {
+          "name": "Jonas Collett",
+          "born": 1772,
+          "role": "finansminister og førstestatsråd; PublicWorks-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "War",
+      "candidates": [
+        {
+          "name": "Nicolai Johan Lohmann Krog",
+          "born": 1787,
+          "role": "arméminister til 15. oktober 1825; War-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Transport",
+      "candidates": [
+        {
+          "name": "Jonas Collett",
+          "born": 1772,
+          "role": "finansminister og førstestatsråd; Transport-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Intendance",
+      "candidates": [
+        {
+          "name": "Nicolai Johan Lohmann Krog",
+          "born": 1787,
+          "role": "arméminister til 15. oktober 1825; Intendance-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Foreign",
+      "candidates": [
+        {
+          "name": "Mathias Sommerhielm",
+          "born": 1764,
+          "role": "statsminister i Stockholm; Foreign-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Navy",
+      "candidates": [
+        {
+          "name": "Poul Christian Holst",
+          "born": 1789,
+          "role": "marineminister og fungerende kirke-/undervisningsminister; Navy-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Finance",
+      "candidates": [
+        {
+          "name": "Jonas Collett",
+          "born": 1772,
+          "role": "finansminister og førstestatsråd; Finance-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    }
+  ]
+}

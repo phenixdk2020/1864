@@ -1,0 +1,195 @@
+{
+  "note": "Afvigelser bevares; ingen skjult populationsrest tildeles en provins.",
+  "checks": [
+    {
+      "scope": "province_vs_nation",
+      "year": 1825,
+      "provinceSum": 12155306,
+      "nationalEstimate": 12144210,
+      "difference": 11096,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Uafhængige serier afstemmes ikke ved skjult residual. Hohenzollern ikke med i 1825."
+    },
+    {
+      "scope": "POM_districts_vs_province",
+      "year": 1825,
+      "districtSum": 838911,
+      "provinceEstimate": 839188,
+      "difference": -277,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "BRB_districts_vs_province",
+      "year": 1825,
+      "districtSum": 1474854,
+      "provinceEstimate": 1476142,
+      "difference": -1288,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "SLE_districts_vs_province",
+      "year": 1825,
+      "districtSum": 2285680,
+      "provinceEstimate": 2294309,
+      "difference": -8629,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "SAP_districts_vs_province",
+      "year": 1825,
+      "districtSum": 1353401,
+      "provinceEstimate": 1356446,
+      "difference": -3045,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "WFA_districts_vs_province",
+      "year": 1825,
+      "districtSum": 1176987,
+      "provinceEstimate": 1177842,
+      "difference": -855,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "RHP_districts_vs_province",
+      "year": 1825,
+      "districtSum": 2103024,
+      "provinceEstimate": 2102342,
+      "difference": 682,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "POS_districts_vs_province",
+      "year": 1825,
+      "districtSum": 1026041,
+      "provinceEstimate": 1017424,
+      "difference": 8617,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "PRU_districts_vs_province",
+      "year": 1825,
+      "districtSum": 1894423,
+      "provinceEstimate": 1891613,
+      "difference": 2810,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "province_vs_nation",
+      "year": 1851,
+      "provinceSum": 16682275,
+      "nationalEstimate": 16718740,
+      "difference": -36465,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Uafhængige serier afstemmes ikke ved skjult residual. Hohenzollern ikke med i 1825."
+    },
+    {
+      "scope": "POM_districts_vs_province",
+      "year": 1851,
+      "districtSum": 1225515,
+      "provinceEstimate": 1230951,
+      "difference": -5436,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "BRB_districts_vs_province",
+      "year": 1851,
+      "districtSum": 2165780,
+      "provinceEstimate": 2171787,
+      "difference": -6007,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "SLE_districts_vs_province",
+      "year": 1851,
+      "districtSum": 3118541,
+      "provinceEstimate": 3122591,
+      "difference": -4050,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "SAP_districts_vs_province",
+      "year": 1851,
+      "districtSum": 1809376,
+      "provinceEstimate": 1804886,
+      "difference": 4490,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "WFA_districts_vs_province",
+      "year": 1851,
+      "districtSum": 1486508,
+      "provinceEstimate": 1490928,
+      "difference": -4420,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "RHP_districts_vs_province",
+      "year": 1851,
+      "districtSum": 2873278,
+      "provinceEstimate": 2862068,
+      "difference": 11210,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "POS_districts_vs_province",
+      "year": 1851,
+      "districtSum": 1366990,
+      "provinceEstimate": 1383284,
+      "difference": -16294,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "PRU_districts_vs_province",
+      "year": 1851,
+      "districtSum": 2546678,
+      "provinceEstimate": 2554408,
+      "difference": -7730,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    },
+    {
+      "scope": "HZL_districts_vs_province",
+      "year": 1851,
+      "districtSum": 61372,
+      "provinceEstimate": 61372,
+      "difference": 0,
+      "status": "skøn",
+      "source": "HGIS-INTRO",
+      "reason": "Distriktsinterpolation og provinsserie er selvstændige. Ingen tvungen korrektion."
+    }
+  ]
+}

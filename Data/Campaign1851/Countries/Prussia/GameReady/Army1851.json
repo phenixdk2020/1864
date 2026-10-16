@@ -1,0 +1,4232 @@
+{
+  "scenario": 1851,
+  "nation": "PR",
+  "note": "Preussen, dateret importgrundlag. Kilde/skøn/spil står i fieldStatus og Data-status.json. Delvist overlay; null kræver håndtering, ikke nulkonvertering. Ingen motor-/slagtest. regiments er navne-/typekatalog med null for ruller; separat Army_Neighbours er spilmodellen. De er alternative repræsentationer, ikke additive.",
+  "commands": [
+    {
+      "id": "PR-C-G",
+      "name": "Gardekorps",
+      "area": "Garde",
+      "hq": null,
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "1851-organisation",
+      "fieldStatus": {
+        "hq": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-I",
+      "name": "I. Armeekorps",
+      "area": "Ost- og Westpreussen",
+      "hq": "Königsberg",
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "1851-organisation",
+      "fieldStatus": {
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-II",
+      "name": "II. Armeekorps",
+      "area": "Pommern",
+      "hq": "Stettin",
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "1851-organisation",
+      "fieldStatus": {
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-III",
+      "name": "III. Armeekorps",
+      "area": "Brandenburg",
+      "hq": "Frankfurt an der Oder",
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "1851-organisation",
+      "fieldStatus": {
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-IV",
+      "name": "IV. Armeekorps",
+      "area": "Sachsen",
+      "hq": "Magdeburg",
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "1851-organisation",
+      "fieldStatus": {
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-V",
+      "name": "V. Armeekorps",
+      "area": "Posen",
+      "hq": "Posen",
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "1851-organisation",
+      "fieldStatus": {
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-VI",
+      "name": "VI. Armeekorps",
+      "area": "Schlesien",
+      "hq": "Breslau",
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "1851-organisation",
+      "fieldStatus": {
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-VII",
+      "name": "VII. Armeekorps",
+      "area": "Westfalen",
+      "hq": "Münster",
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "1851-organisation",
+      "fieldStatus": {
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-VIII",
+      "name": "VIII. Armeekorps",
+      "area": "Rheinland",
+      "hq": "Koblenz",
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "1851-organisation",
+      "fieldStatus": {
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    }
+  ],
+  "regiments": [
+    {
+      "id": "PR-IR1",
+      "name": "Infanterie-Regiment Nr. 1",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR2",
+      "name": "Infanterie-Regiment Nr. 2",
+      "arm": "infantry",
+      "home": "Stettin",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR3",
+      "name": "Infanterie-Regiment Nr. 3",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR4",
+      "name": "Infanterie-Regiment Nr. 4",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR5",
+      "name": "Infanterie-Regiment Nr. 5",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR6",
+      "name": "Infanterie-Regiment Nr. 6",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR7",
+      "name": "Infanterie-Regiment Nr. 7",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR8",
+      "name": "Infanterie-Regiment Nr. 8",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR9",
+      "name": "Infanterie-Regiment Nr. 9",
+      "arm": "infantry",
+      "home": "Stargard",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR10",
+      "name": "Infanterie-Regiment Nr. 10",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR11",
+      "name": "Infanterie-Regiment Nr. 11",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR12",
+      "name": "Infanterie-Regiment Nr. 12",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR13",
+      "name": "Infanterie-Regiment Nr. 13",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR14",
+      "name": "Infanterie-Regiment Nr. 14",
+      "arm": "infantry",
+      "home": "Stralsund",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR15",
+      "name": "Infanterie-Regiment Nr. 15",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR16",
+      "name": "Infanterie-Regiment Nr. 16",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR17",
+      "name": "Infanterie-Regiment Nr. 17",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR18",
+      "name": "Infanterie-Regiment Nr. 18",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR19",
+      "name": "Infanterie-Regiment Nr. 19",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR20",
+      "name": "Infanterie-Regiment Nr. 20",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR21",
+      "name": "Infanterie-Regiment Nr. 21",
+      "arm": "infantry",
+      "home": "Stettin",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR22",
+      "name": "Infanterie-Regiment Nr. 22",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR23",
+      "name": "Infanterie-Regiment Nr. 23",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR24",
+      "name": "Infanterie-Regiment Nr. 24",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR25",
+      "name": "Infanterie-Regiment Nr. 25",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR26",
+      "name": "Infanterie-Regiment Nr. 26",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR27",
+      "name": "Infanterie-Regiment Nr. 27",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR28",
+      "name": "Infanterie-Regiment Nr. 28",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR29",
+      "name": "Infanterie-Regiment Nr. 29",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR30",
+      "name": "Infanterie-Regiment Nr. 30",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR31",
+      "name": "Infanterie-Regiment Nr. 31",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR32",
+      "name": "Infanterie-Regiment Nr. 32",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "line",
+      "source": "ARMY1851",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR33",
+      "name": "Infanterie-Regiment Nr. 33",
+      "arm": "infantry",
+      "home": null,
+      "command": null,
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "organisationClass": "lineReserve",
+      "source": "ROON-BIO",
+      "note": "Styrke/hjemsted og korpstildeling kræver Rangliste. Standardnummer er identifikation; moderne tilnavne udeladt. 33–40 kræver navneafstemning; kilden beskriver otte reserve-regimenter, ikke deres numre.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "command": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-G1",
+      "name": "1. Garde-Regiment zu Fuß",
+      "arm": "guard",
+      "home": null,
+      "command": "PR-C-G",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GUARD1",
+      "note": "Historisk navne-/typepost. Nummer/navneform skal periodeafstemmes; G2 kun katalogspor, ikke læst rangliste.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-GKA",
+      "name": "Kaiser Alexander Garde-Grenadier-Regiment",
+      "arm": "guard",
+      "home": null,
+      "command": "PR-C-G",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GUARD-PRIMARY",
+      "note": "Historisk navne-/typepost. Nummer/navneform skal periodeafstemmes; G2 kun katalogspor, ikke læst rangliste.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-GKF",
+      "name": "Kaiser Franz Garde-Grenadier-Regiment",
+      "arm": "guard",
+      "home": null,
+      "command": "PR-C-G",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GUARD-PRIMARY",
+      "note": "Historisk navne-/typepost. Nummer/navneform skal periodeafstemmes; G2 kun katalogspor, ikke læst rangliste.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-GR",
+      "name": "Garde-Reserve-Regiment",
+      "arm": "guard",
+      "home": null,
+      "command": "PR-C-G",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "ARMY1851",
+      "note": "Historisk navne-/typepost. Nummer/navneform skal periodeafstemmes; G2 kun katalogspor, ikke læst rangliste.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-GJ",
+      "name": "Garde-Jäger-Bataillon",
+      "arm": "infantry",
+      "home": null,
+      "command": "PR-C-G",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "ARMY1851",
+      "note": "Historisk navne-/typepost. Nummer/navneform skal periodeafstemmes; G2 kun katalogspor, ikke læst rangliste.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-GS",
+      "name": "Garde-Schützen-Bataillon",
+      "arm": "infantry",
+      "home": null,
+      "command": "PR-C-G",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "ARMY1851",
+      "note": "Historisk navne-/typepost. Nummer/navneform skal periodeafstemmes; G2 kun katalogspor, ikke læst rangliste.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-GDC",
+      "name": "Gardes du Corps",
+      "arm": "cavalry",
+      "home": null,
+      "command": "PR-C-G",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "ARMY1851",
+      "note": "Historisk navne-/typepost. Nummer/navneform skal periodeafstemmes; G2 kun katalogspor, ikke læst rangliste.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-GKR",
+      "name": "Garde-Kürassier-Regiment",
+      "arm": "cavalry",
+      "home": null,
+      "command": "PR-C-G",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "ARMY1851",
+      "note": "Historisk navne-/typepost. Nummer/navneform skal periodeafstemmes; G2 kun katalogspor, ikke læst rangliste.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-GU1",
+      "name": "1. Garde-Ulanen-Regiment",
+      "arm": "cavalry",
+      "home": null,
+      "command": "PR-C-G",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "ARMY1851",
+      "note": "Historisk navne-/typepost. Nummer/navneform skal periodeafstemmes; G2 kun katalogspor, ikke læst rangliste.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-GU2",
+      "name": "2. Garde-Ulanen-Regiment",
+      "arm": "cavalry",
+      "home": null,
+      "command": "PR-C-G",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "ARMY1851",
+      "note": "Historisk navne-/typepost. Nummer/navneform skal periodeafstemmes; G2 kun katalogspor, ikke læst rangliste.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-GD",
+      "name": "Garde-Dragoner-Regiment",
+      "arm": "cavalry",
+      "home": null,
+      "command": "PR-C-G",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "ARMY1851",
+      "note": "Historisk navne-/typepost. Nummer/navneform skal periodeafstemmes; G2 kun katalogspor, ikke læst rangliste.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-GH",
+      "name": "Garde-Husaren-Regiment",
+      "arm": "cavalry",
+      "home": null,
+      "command": "PR-C-G",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "ARMY1851",
+      "note": "Historisk navne-/typepost. Nummer/navneform skal periodeafstemmes; G2 kun katalogspor, ikke læst rangliste.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-GA",
+      "name": "Garde-Artillerie-Brigade",
+      "arm": "artillery",
+      "home": null,
+      "command": "PR-C-G",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "ARMY1851",
+      "note": "Historisk navne-/typepost. Nummer/navneform skal periodeafstemmes; G2 kun katalogspor, ikke læst rangliste.",
+      "fieldStatus": {
+        "home": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-JG2",
+      "name": "2. Jäger-Bataillon",
+      "arm": "infantry",
+      "home": "Greifswald",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GAME-Army_Neighbours_1851.json",
+      "note": "Arvet kortenhedsnavn; Landwehr-posten er en spilgruppe, ikke et historisk regiment.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-KR2",
+      "name": "Kürassier-Regiment Königin (Pommersches) Nr. 2",
+      "arm": "cavalry",
+      "home": "Pasewalk",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GAME-Army_Neighbours_1851.json",
+      "note": "Arvet kortenhedsnavn; Landwehr-posten er en spilgruppe, ikke et historisk regiment.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-ART2",
+      "name": "2. Artillerie-Brigade (feltdetachement)",
+      "arm": "artillery",
+      "home": "Stettin",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GAME-Army_Neighbours_1851.json",
+      "note": "Arvet kortenhedsnavn; Landwehr-posten er en spilgruppe, ikke et historisk regiment.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-LW",
+      "name": "Pommerske Landwehr-bataljoner (samlet skøn)",
+      "arm": "infantry",
+      "home": "Greifswald",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GAME-Army_Neighbours_1851.json",
+      "note": "Arvet kortenhedsnavn; Landwehr-posten er en spilgruppe, ikke et historisk regiment.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    }
+  ],
+  "equipment": {
+    "rifles": null,
+    "guns": null,
+    "horses": null,
+    "mortars": null,
+    "wagons": null,
+    "raw": null,
+    "foodDays": null,
+    "columns": null,
+    "infantryReload": null,
+    "infantryAccuracy": null,
+    "carbineReload": null,
+    "infantryWeapon": "Perkussionsgeværer, Dreyse M/1841 til dele af infanteriet; jægerbøsser. Ingen dokumenteret national udrustningsandel.",
+    "cavalryWeapon": "Karabin/pistol, sabel; lanse eller kyras efter enhed. Model/fordeling ukendt.",
+    "artilleryWeapon": "1851: glatløbet forladeskyts; præcise kalibre, batterier og lagre ukendt.",
+    "uniforms": [],
+    "kitReserve": null,
+    "fieldStatus": {
+      "rifles": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "guns": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "horses": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "mortars": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "wagons": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "raw": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "foodDays": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "columns": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "infantryReload": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "infantryAccuracy": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "carbineReload": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "kitReserve": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "magazines": [
+    {
+      "town": "Bergen på Rügen",
+      "food": null,
+      "fodder": null,
+      "ammo": null,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "town": "Greifswald",
+      "food": null,
+      "fodder": null,
+      "ammo": null,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "town": "Kolberg",
+      "food": null,
+      "fodder": null,
+      "ammo": null,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "town": "Stettin",
+      "food": null,
+      "fodder": null,
+      "ammo": null,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "town": "Stralsund",
+      "food": null,
+      "fodder": null,
+      "ammo": null,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "town": "Swinemünde",
+      "food": null,
+      "fodder": null,
+      "ammo": null,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    }
+  ],
+  "fieldStatus": {
+    "scenario": {
+      "status": "skøn",
+      "source": "DESIGN",
+      "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+    }
+  }
+}

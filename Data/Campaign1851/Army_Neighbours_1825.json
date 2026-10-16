@@ -41,8 +41,8 @@
       "nation": "SE",
       "town": "Helsingborg",
       "garrison": true,
-      "men": 150,
-      "mobilisedMen": 150,
+      "men": 40,
+      "mobilisedMen": 40,
       "guns": 0,
       "district": ""
     },
@@ -63,8 +63,8 @@
       "nation": "SE",
       "town": "Lund",
       "garrison": true,
-      "men": 100,
-      "mobilisedMen": 100,
+      "men": 40,
+      "mobilisedMen": 40,
       "guns": 0,
       "district": ""
     },
@@ -74,8 +74,8 @@
       "nation": "SE",
       "town": "Ystad",
       "garrison": true,
-      "men": 150,
-      "mobilisedMen": 150,
+      "men": 40,
+      "mobilisedMen": 40,
       "guns": 0,
       "district": ""
     },
@@ -85,8 +85,8 @@
       "nation": "SE",
       "town": "Trelleborg",
       "garrison": true,
-      "men": 50,
-      "mobilisedMen": 50,
+      "men": 40,
+      "mobilisedMen": 40,
       "guns": 0,
       "district": ""
     },
@@ -118,8 +118,8 @@
       "nation": "SE",
       "town": "Halmstad",
       "garrison": true,
-      "men": 150,
-      "mobilisedMen": 150,
+      "men": 40,
+      "mobilisedMen": 40,
       "guns": 0,
       "district": ""
     },
@@ -129,8 +129,8 @@
       "nation": "SE",
       "town": "Göteborg",
       "garrison": true,
-      "men": 700,
-      "mobilisedMen": 700,
+      "men": 500,
+      "mobilisedMen": 500,
       "guns": 20,
       "district": ""
     },
@@ -184,16 +184,56 @@
         {
           "name": "Fæstningsinfanteri",
           "men": 808
-        }
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
       ],
       "batteries": [
         {
           "name": "Fæstningsartilleri",
           "men": 192,
           "guns": 24
-        }
-      ]
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
+      ]
+    ,
+"note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Stettin",
       "name": "Garnison i Stettin",
@@ -211,16 +251,56 @@
         {
           "name": "Fæstningsinfanteri",
           "men": 1616
-        }
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
       ],
       "batteries": [
         {
           "name": "Fæstningsartilleri",
           "men": 384,
           "guns": 48
-        }
-      ]
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
+      ]
+    ,
+"note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Bremen",
       "name": "Garnison i Bremen",
@@ -238,9 +318,9 @@
       "nation": "SE",
       "town": "Varberg",
       "garrison": true,
-      "men": 100,
-      "mobilisedMen": 100,
-      "guns": 4,
+      "men": 80,
+      "mobilisedMen": 80,
+      "guns": 0,
       "district": ""
     },
     {
@@ -253,7 +333,27 @@
       "mobilisedMen": 400,
       "guns": 0,
       "district": "PR-greifswald"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Bergen på Rügen",
       "name": "Garnison i Bergen på Rügen",
@@ -264,7 +364,27 @@
       "mobilisedMen": 100,
       "guns": 0,
       "district": "PR-ruegen"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Stade",
       "name": "Garnison i Stade",
@@ -692,7 +812,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-anklam"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Swinemünde",
       "name": "Garnison i Swinemünde",
@@ -710,16 +850,56 @@
         {
           "name": "Fæstningsinfanteri",
           "men": 308
-        }
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
       ],
       "batteries": [
         {
           "name": "Fæstningsartilleri",
           "men": 192,
           "guns": 24
-        }
-      ]
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
+      ]
+    ,
+"note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Stargard",
       "name": "Garnison i Stargard",
@@ -730,7 +910,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-saatzig"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Pasewalk",
       "name": "Garnison i Pasewalk",
@@ -741,7 +941,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-ueckermuende"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Demmin",
       "name": "Garnison i Demmin",
@@ -752,7 +972,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-demmin"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Ueckermünde",
       "name": "Garnison i Ueckermünde",
@@ -763,7 +1003,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-ueckermuende"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Wolgast",
       "name": "Garnison i Wolgast",
@@ -774,7 +1034,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-greifswald"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Barth",
       "name": "Garnison i Barth",
@@ -785,7 +1065,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-franzburg"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Grimmen",
       "name": "Garnison i Grimmen",
@@ -796,7 +1096,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-franzburg"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Tribsees",
       "name": "Garnison i Tribsees",
@@ -807,7 +1127,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-franzburg"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Franzburg",
       "name": "Garnison i Franzburg",
@@ -818,7 +1158,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-franzburg"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Putbus",
       "name": "Garnison i Putbus",
@@ -829,7 +1189,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-ruegen"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Garz på Rügen",
       "name": "Garnison i Garz på Rügen",
@@ -840,7 +1220,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-ruegen"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Sassnitz",
       "name": "Garnison i Sassnitz",
@@ -851,7 +1251,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-ruegen"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Gartz",
       "name": "Garnison i Gartz",
@@ -862,7 +1282,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-randow"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Prenzlau",
       "name": "Garnison i Prenzlau",
@@ -873,7 +1313,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-prenzlau"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Schwedt",
       "name": "Garnison i Schwedt",
@@ -884,7 +1344,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-angermuende"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Bergedorf",
       "name": "Garnison i Bergedorf",
@@ -935,16 +1415,56 @@
         {
           "name": "Fæstningsinfanteri",
           "men": 912
-        }
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
       ],
       "batteries": [
         {
           "name": "Fæstningsartilleri",
           "men": 288,
           "guns": 36
-        }
-      ]
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
+      ]
+    ,
+"note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Angermünde",
       "name": "Garnison i Angermünde",
@@ -955,7 +1475,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-angermuende"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Passow",
       "name": "Garnison i Passow",
@@ -966,7 +1506,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-angermuende"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Tantow",
       "name": "Garnison i Tantow",
@@ -977,7 +1537,27 @@
       "mobilisedMen": 0,
       "guns": 0,
       "district": "PR-angermuende"
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "garrison-Lauenburg",
       "name": "Garnison i Lauenburg",
@@ -1014,9 +1594,9 @@
         "1825": 35000,
         "1851": 40000
       },
-      "guns": 48,
-      "men": 2500,
-      "mobilisedMen": 35000,
+      "guns": 72,
+      "men": 4451,
+      "mobilisedMen": 12689,
       "legacyAggregate": false
     },
     {
@@ -1028,16 +1608,62 @@
       "peaceMen": {
         "1825": 5000,
         "1851": 6500
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
       "warMen": {
         "1825": 18000,
         "1851": 24000
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
       "guns": 60,
       "men": 0,
       "mobilisedMen": 0,
       "legacyAggregate": true
+    ,
+"status": "spil",
+  "note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "MEC-field",
       "name": "Mecklenburgsk brigade",
@@ -1114,54 +1740,169 @@
         {
           "name": "1. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "2. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "3. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "4. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "5. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "6. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "7. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "8. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "9. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "10. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "11. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "12. Kompanie",
           "men": 250
-        }
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
       ],
       "garrison": false
+    ,
+"note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "PR-IR9",
       "name": "Infanterie-Regiment Nr. 9",
@@ -1181,54 +1922,169 @@
         {
           "name": "1. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "2. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "3. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "4. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "5. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "6. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "7. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "8. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "9. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "10. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "11. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "12. Kompanie",
           "men": 250
-        }
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
       ],
       "garrison": false
+    ,
+"note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "PR-IR14",
       "name": "Infanterie-Regiment Nr. 14",
@@ -1248,54 +2104,169 @@
         {
           "name": "1. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "2. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "3. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "4. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "5. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "6. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "7. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "8. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "9. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "10. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "11. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "12. Kompanie",
           "men": 250
-        }
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
       ],
       "garrison": false
+    ,
+"note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "PR-IR21",
       "name": "Infanterie-Regiment Nr. 21",
@@ -1315,54 +2286,169 @@
         {
           "name": "1. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "2. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "3. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "4. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "5. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "6. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "7. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "8. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "9. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "10. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "11. Kompanie",
           "men": 250
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "12. Kompanie",
           "men": 250
-        }
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
       ],
       "garrison": false
+    ,
+"note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "PR-JG2",
       "name": "2. Jäger-Abteilung",
@@ -1382,22 +2468,73 @@
         {
           "name": "1. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "2. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "3. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "4. Kompanie",
           "men": 150
-        }
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
       ],
       "garrison": false
+    ,
+"note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "PR-KR2",
       "name": "Kürassier-Regiment Königin (Pommersches) Nr. 2",
@@ -1417,22 +2554,73 @@
         {
           "name": "1. Eskadron",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "2. Eskadron",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "3. Eskadron",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "4. Eskadron",
           "men": 150
-        }
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
       ],
       "garrison": false
+    ,
+"note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "PR-ART2",
       "name": "2. Artillerie-Brigade (feltdetachement)",
@@ -1453,35 +2641,132 @@
           "name": "1. Batterie",
           "men": 200,
           "guns": 8
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "2. Batterie",
           "men": 200,
           "guns": 8
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "3. Batterie",
           "men": 200,
           "guns": 8
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "4. Batterie",
           "men": 200,
           "guns": 8
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "5. Batterie",
           "men": 200,
           "guns": 8
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "6. Batterie",
           "men": 200,
           "guns": 8
-        }
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
       ],
       "garrison": false
+    ,
+"note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "PR-LW",
       "name": "Pommerske Landwehr-bataljoner (samlet skøn)",
@@ -1501,102 +2786,313 @@
         {
           "name": "1. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "2. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "3. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "4. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "5. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "6. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "7. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "8. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "9. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "10. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "11. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "12. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "13. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "14. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "15. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "16. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "17. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "18. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "19. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "20. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "21. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "22. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "23. Kompanie",
           "men": 150
-        },
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
         {
           "name": "24. Kompanie",
           "men": 150
-        }
+        ,
+"fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+}
       ],
       "garrison": false
+    ,
+"note": "Arvet scenariemodel, ingen samtidig mønstringsliste. Garnison/felthær må ikke lægges oven i nationale ruller.",
+  "fieldStatus": {
+    "men": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     },
+    "mobilisedMen": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-Army_Neighbours_1825.json",
+      "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
+    }
+  }
+},
     {
       "id": "MEC-INF",
       "name": "Großherzoglich Mecklenburgisches Infanterie-Kontingent",
@@ -1719,5 +3215,72 @@
       ],
       "garrison": false
     }
-  ]
+  ,
+{
+  "id": "garrison-Karlshamn",
+  "name": "Garnison i Karlshamn",
+  "nation": "SE",
+  "town": "Karlshamn",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": ""
+},
+{
+  "id": "garrison-Jönköping",
+  "name": "Garnison i Jönköping",
+  "nation": "SE",
+  "town": "Jönköping",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": ""
+},
+{
+  "id": "garrison-Växjö",
+  "name": "Garnison i Växjö",
+  "nation": "SE",
+  "town": "Växjö",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": ""
+},
+{
+  "id": "garrison-Borås",
+  "name": "Garnison i Borås",
+  "nation": "SE",
+  "town": "Borås",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": ""
+},
+{
+  "id": "garrison-Marstrand",
+  "name": "Garnison i Marstrand",
+  "nation": "SE",
+  "town": "Marstrand",
+  "garrison": true,
+  "men": 250,
+  "mobilisedMen": 250,
+  "guns": 24,
+  "district": ""
+},
+{
+  "id": "garrison-Eksjö",
+  "name": "Garnison i Eksjö",
+  "nation": "SE",
+  "town": "Eksjö",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": ""
+}
+]
 }

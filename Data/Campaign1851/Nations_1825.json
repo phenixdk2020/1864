@@ -40,7 +40,7 @@
     },
     {
       "id": "SE",
-      "name": "Sverige-Norge",
+      "name": "Sverige",
       "onMap": false,
       "controller": "ai",
       "weights": [
@@ -54,25 +54,25 @@
         1
       ],
       "caution": 0.7,
-      "reserve": 150000,
-      "population": 3820000,
+      "reserve": 21908,
+      "population": 2752555,
       "railKm": 0,
-      "armyMen": 42000,
+      "armyMen": 8651,
       "growth": 0.7,
-      "taxPerHead": 0.16,
-      "note": "Sverige-Norge under Karl XIV Johan; union fra 1814, samlet i denne række. Ingen udviklet skandinavisme endnu.",
+      "taxPerHead": 2.50374,
+      "note": "Runde 6: separate delstatsbudgetter og OOB-puljer; cirkaskøn for styrke/skat. onMap forbliver false indtil raster og loader er integreret.",
       "relation": 5,
-      "tradeValue": 2200,
+      "tradeValue": 1100,
       "canAlly": true,
       "role": "Selvstændig stat",
       "period": "1825",
-      "infantry": "Linjeinfanteri; garde; let infanteri med flintelås",
+      "infantry": "Svensk glatløbet flintlås m/1815, ældre modeller",
       "cavalry": "Periodens rytteri med blanke våben",
       "artillery": "Glatløbet feltartilleri",
       "priority": "Høj",
       "group": "norden",
       "active": true,
-      "canGuarantee": false,
+      "canGuarantee": true,
       "status": "Befolkning og fredsstyrke: afrundede periode-skøn; relation og finansdata: spilskøn"
     },
     {
@@ -92,7 +92,7 @@
       ],
       "caution": 0.4,
       "reserve": 400000,
-      "population": 12200000,
+      "population": 12144210,
       "railKm": 0,
       "armyMen": 130000,
       "growth": 0.7,
@@ -111,7 +111,99 @@
       "canAlly": false,
       "canGuarantee": false,
       "status": "Befolkning og fredsstyrke: afrundede periode-skøn; relation og finansdata: spilskøn"
+    ,
+"packageNote": "Friedrich Wilhelm III; monarki uden national forfatning. Preussen, dateret importgrundlag. Kilde/skøn/spil står i fieldStatus og Data-status.json. Delvist overlay; null kræver håndtering, ikke nulkonvertering. Ingen motor-/slagtest.",
+  "packagePeriod": "1825-07-01",
+  "fieldStatus": {
+    "weights/0": {
+      "status": "spil",
+      "source": "GAME-Nations_1825.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
     },
+    "weights/1": {
+      "status": "spil",
+      "source": "GAME-Nations_1825.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "weights/2": {
+      "status": "spil",
+      "source": "GAME-Nations_1825.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "weights/3": {
+      "status": "spil",
+      "source": "GAME-Nations_1825.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "weights/4": {
+      "status": "spil",
+      "source": "GAME-Nations_1825.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "weights/5": {
+      "status": "spil",
+      "source": "GAME-Nations_1825.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "weights/6": {
+      "status": "spil",
+      "source": "GAME-Nations_1825.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "weights/7": {
+      "status": "spil",
+      "source": "GAME-Nations_1825.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "caution": {
+      "status": "spil",
+      "source": "GAME-Nations_1825.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-Nations_1825.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "population": {
+      "status": "skøn",
+      "source": "HGIS-BevPRE-gesamt.htm",
+      "reason": "Halvårslineær interpolation af ultimo året før og scenarieårets ultimo. Afrundet til person; ingen sikkerhed om præcis folketællingsdato.",
+      "method": "round((P[y-1]+P[y])/2)",
+      "unit": "personer"
+    },
+    "railKm": {
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Ingen offentlig lokomotivbane i 1825; første forbindelser 1838. Omfatter ikke industrielle spor."
+    },
+    "armyMen": {
+      "status": "skøn",
+      "source": "RANGLIST",
+      "reason": "Faktisk fredsfremmøde pr. 1. juli ikke afskrevet; spillets 127.000 er ikke observation."
+    },
+    "growth": {
+      "status": "spil",
+      "source": "GAME-Nations_1825.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "taxPerHead": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Budgetindtægter er ikke direkte skat; land/by-skat og total skattedefinition mangler."
+    },
+    "relation": {
+      "status": "spil",
+      "source": "GAME-Nations_1825.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "tradeValue": {
+      "status": "spil",
+      "source": "GAME-Nations_1825.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    }
+  }
+},
     {
       "id": "AT",
       "name": "Østrig",
@@ -265,18 +357,18 @@
       "name": "Norge",
       "role": "Selvstændig stat",
       "period": "1825",
-      "infantry": "Linjeinfanteri; garde; let infanteri med flintelås",
+      "infantry": "Ældre dansk-norske flintlåse; m/1825 kun begyndende indfasning",
       "cavalry": "Periodens rytteri med blanke våben",
       "artillery": "Glatløbet feltartilleri",
       "priority": "Mellem",
       "group": "norden",
-      "population": 0,
+      "population": 1051318,
       "railKm": 0,
-      "armyMen": 0,
+      "armyMen": 2300,
       "growth": 0.7,
-      "taxPerHead": 0,
-      "relation": 0,
-      "tradeValue": 0,
+      "taxPerHead": 2.43504,
+      "relation": 5,
+      "tradeValue": 1100,
       "weights": [
         1.2,
         1.1,
@@ -288,13 +380,13 @@
         1
       ],
       "caution": 0.7,
-      "reserve": 60000,
-      "note": "Norges befolkning og hær indgår i Sverige-Norge (SE); inaktiv række bevarer tidligere indeks.",
+      "reserve": 7900,
+      "note": "Runde 6: separate delstatsbudgetter og OOB-puljer; cirkaskøn for styrke/skat. onMap forbliver false indtil raster og loader er integreret.",
       "onMap": false,
       "controller": "ai",
-      "active": false,
+      "active": true,
       "canAlly": false,
-      "canGuarantee": false,
+      "canGuarantee": true,
       "status": "Befolkning og fredsstyrke: afrundede periode-skøn; relation og finansdata: spilskøn"
     },
     {

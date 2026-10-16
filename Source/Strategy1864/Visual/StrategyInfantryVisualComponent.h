@@ -355,7 +355,8 @@ private:
     UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> ShoulderDownAsset;
     bool bShoulderColumn = false;
     bool bShoulderRising = false;
-    float ShoulderTransitionEnd = -1.f;
+    float ShoulderTransitionEnd = -1.f;   // safety cap only; the real end is when the Up/Down clips have played to their end (UpdateSettling)
+    float ShoulderTransitionStart = -1.f;
     bool bScaleOnlyRebuild = false;
     /** Losses leave holes (survivors keep their places); a few quiet seconds after the last loss the men close ranks into the compact line. */
     bool bClosingRanksPending = false;

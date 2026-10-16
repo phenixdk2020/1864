@@ -241,10 +241,13 @@ void UStrategyInfantryVisualComponent::TickComponent(
     {
         const int32 Desired = GetDesiredVisualCount();
         const int32 Standing = SoldierComponents.Num() - PendingKillCount;
+        const int32 StandingBeforeTickLoss = SoldierComponents.Num();
         if (bLeaveCorpses && CachedStrength != INDEX_NONE && Desired < Standing)
         {
             QueueKills(Standing - Desired);
         }
+        // Men who fell at once: the man behind steps up inside his own file (a loss that lands later is handled by ProcessPendingKills).
+        if (SoldierComponents.Num() < StandingBeforeTickLoss) { StepUpFiles(); }
         EnsureVisualCount(Desired + PendingKillCount);
         bScaleOnlyRebuild = true; // Losses leave holes; surviving identities keep their slots.
         RebuildFormation();
@@ -299,7 +302,9 @@ void UStrategyInfantryVisualComponent::TickComponent(
         {
             bShoulderColumn = bColumnNow;
             bShoulderRising = bColumnNow;
-            ShoulderTransitionEnd = GetWorld()->GetTimeSeconds() + 1.37f;   // one walking cycle (the clips are 1.37 s)
+            ShoulderTransitionStart = GetWorld()->GetTimeSeconds();
+            // Safety cap only: UpdateSettling ends the transition when the Up/Down clips have played to their end (length / play rate).
+            ShoulderTransitionEnd = ShoulderTransitionStart + 4.0f;
         }
     }
     // Close ranks: two and a half quiet seconds after the last loss, with the company standing still, the survivors re-form into the compact line.
@@ -843,11 +848,24 @@ void UStrategyInfantryVisualComponent::HandleCasualtyVisualEvent(int32 AppliedLo
     const int32 FiguresLost = FMath::Max(0, SoldierComponents.Num() - PendingKillCount - GetDesiredVisualCount());
     FStrategyImpactRegistry::FImpact CasualtyImpact;
     const float CasualtyNow = GetWorld()->GetTimeSeconds();
+    const int32 StandingBeforeCasualty = SoldierComponents.Num();
     if (!bDirectedFire && FStrategyImpactRegistry::Find(GetWorld(), OwnerCompany->GetActorLocation(), 6500.f, CasualtyNow, CasualtyImpact))
         QueueKills(FiguresLost);
     else
         KillSoldiers(FiguresLost, &SourceLocation);
     CachedStrength = OwnerCompany->CurrentStrength;
+    // Local replacement first: the man directly behind steps up inside his own file, no sideways move yet.
+    if (SoldierComponents.Num() < StandingBeforeCasualty)
+    {
+        StepUpFiles();
+        bScaleOnlyRebuild = true;
+        RebuildFormation();
+        bScaleOnlyRebuild = false;
+    }
+    // CachedStrength is set above, so the tick never sees this drop: the delayed closing of ranks is armed here (3-10 s, slower at low morale).
+    if (!bClosingRanksPending) { FirstPendingLossTimeSeconds = CasualtyNow; }
+    bClosingRanksPending = true;
+    LastLossTimeSeconds = CasualtyNow;
     UpdateFormationBounds();
 }
 
@@ -932,10 +950,10 @@ void UStrategyInfantryVisualComponent::StepUpFiles()
     TArray<int32> Done;
     for (int32 i = 0; i < SoldierSettle.Num(); ++i)
     {
-        if (Done.Contains(i) || !SoldierSettle[i].bPlaced) { continue; }
+        if (Done.Contains(i) || !SoldierSettle[i].bPlaced || SoldierSettle[i].Slot.X > 0.5f) { continue; }   // skirmisher screen men (slot ahead of the front) are no part of a file
         TArray<int32> File;   // everyone in this man's file, front to back
         for (int32 j = 0; j < SoldierSettle.Num(); ++j)
-            if (SoldierSettle[j].bPlaced && FMath::Abs(SoldierSettle[j].Slot.Y - SoldierSettle[i].Slot.Y) <= FileTolerance) { File.Add(j); Done.Add(j); }
+            if (SoldierSettle[j].bPlaced && SoldierSettle[j].Slot.X <= 0.5f && FMath::Abs(SoldierSettle[j].Slot.Y - SoldierSettle[i].Slot.Y) <= FileTolerance) { File.Add(j); Done.Add(j); }
         File.Sort([&](int32 A, int32 B) { return SoldierSettle[A].Slot.X > SoldierSettle[B].Slot.X; });
         for (int32 k = 0; k < File.Num(); ++k)
         {
@@ -967,6 +985,7 @@ void UStrategyInfantryVisualComponent::ProcessPendingKills()
             PendingKillCount = FMath::Max(0, PendingKillCount - Due.Count);
             KillSoldiers(Due.Count, &Due.Location, Due.bCone ? &Due.Origin : nullptr);
             bAny = true;
+            if (bClosingRanksPending) { LastLossTimeSeconds = Now; }   // the closing of ranks counts from the moment the men fall
         }
     }
     if (bAny)
@@ -1788,13 +1807,17 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
     // The men run to their places in a new formation (out into line, in to the column) at a jog, turning the way they run, and take
     // the company's pose when they are there.
     const float RunCmPerSecond = 420.0f;
+    // Blender world-space low-foot backward travel / stance time; armature scale 0.01, soldier scale 1.
+    // SourceAssets/InfantryCombat/walk_speed_measurement.json; both cycles are 41/30 seconds.
+    constexpr float InfantryWalkClipCmPerSecond = 76.99816f;
+    constexpr float InfantryShoulderWalkClipCmPerSecond = 81.72886f;
     const FTransform VisualUnit = OwnerCompany->GetActorTransform();
     const bool bVisualColumn = OwnerCompany->FormationComponent &&
         (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
          OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn);
     if (!VisualPath.bInitialized) { VisualPath.Reset(VisualUnit); }
     const float ActualMarchSpeed = OwnerCompany->MovementExecutor ? OwnerCompany->MovementExecutor->GetExecutedVelocity().Size2D() : 0.f;
-    const float VisualWalkSpeed = FMath::Max(160.f, ActualMarchSpeed);
+    const float VisualWalkSpeed = FMath::Max(1.f, ActualMarchSpeed);
     const FStrategyOrder ArrivalOrder = OwnerCompany->OrderComponent ? OwnerCompany->OrderComponent->GetCurrentOrder() : FStrategyOrder();
     if (bArrivalReform && (ArrivalOrder.OrderSerial != ArrivalOrderSerial ||
         !ArrivalOrder.TargetLocation.Equals(ArrivalDestination, 1.f) ||
@@ -1881,6 +1904,8 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
     }
     UAnimSequence* Run = bSpreadCrawling ? Walk : RunStandingAsset.Get();
     bool bSettleIdleLoop = true;
+    float ShoulderSlowestFraction = 1.f;
+    bool bShoulderAnyPlaying = false;
     UAnimSequence* SettleIdle = bArrivalReform ? IdleStandingAsset.Get() : ResolveAnimation(bSettleIdleLoop);
     for (int32 i = 0; i < SoldierComponents.Num() && i < SoldierSettle.Num(); ++i)
     {
@@ -1919,7 +1944,7 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         {
             Soldier->bPauseAnims = true;
             if (SoldierClips.IsValidIndex(i) && SoldierClips[i].Clip.IsValid())
-                RecordClip(Soldier, SoldierClips[i].Clip.Get(), true,
+                RecordClip(Soldier, SoldierClips[i].Clip.Get(), SoldierClips[i].bLoop,
                     SoldierClips[i].Rate > 0.f ? (VisualAnimationTime - SoldierClips[i].Start) * SoldierClips[i].Rate : SoldierClips[i].HeldPosition, 0.f);
             bAny = true;
             continue;
@@ -1943,7 +1968,7 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             Soldier->bPauseAnims = true;
             if (Walk && SoldierClips.IsValidIndex(i) &&
                 (IsWalkFamily(SoldierClips[i].Clip.Get()) || SoldierClips[i].Clip.Get() == Walk || SoldierClips[i].Clip.Get() == Run))
-                RecordClip(Soldier, SoldierClips[i].Clip.Get(), true,
+                RecordClip(Soldier, SoldierClips[i].Clip.Get(), SoldierClips[i].bLoop,
                     SoldierClips[i].Rate > 0.f ? (VisualAnimationTime - SoldierClips[i].Start) * SoldierClips[i].Rate : SoldierClips[i].HeldPosition, 0.f);
             if (!Settle.bActive && !bVisualTravel && SettleIdle)
             {
@@ -2023,21 +2048,28 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         if (TravelClip && SoldierClips.IsValidIndex(i) && (SoldierClips[i].Clip.Get() != TravelClip))
         {
             Soldier->bPauseAnims = false;
-            Soldier->PlayAnimation(TravelClip, true);
+            // Rifle up/down play once from their first frame (the arm movement lives in clip time); everything else loops.
+            const bool bShoulderOnceClip = TravelClip == ShoulderUpAsset.Get() || TravelClip == ShoulderDownAsset.Get();
+            Soldier->PlayAnimation(TravelClip, !bShoulderOnceClip);
             float FigurePhase = Settle.WalkPhase * TravelClip->GetPlayLength();
-            if (IsWalkFamily(SoldierClips[i].Clip.Get()) && IsWalkFamily(TravelClip) && SoldierClips[i].Rate > 0.f && SoldierClips[i].Clip->GetPlayLength() > 0.f)
+            if (bShoulderOnceClip) FigurePhase = 0.f;
+            else if (IsWalkFamily(SoldierClips[i].Clip.Get()) && IsWalkFamily(TravelClip) && SoldierClips[i].Rate > 0.f && SoldierClips[i].Clip->GetPlayLength() > 0.f)
             {
                 // Swapping between the walk variants (rifle up/down): keep the stride phase, only the arms change.
                 const float PreviousPosition = FMath::Fmod((VisualAnimationTime - SoldierClips[i].Start) * SoldierClips[i].Rate, SoldierClips[i].Clip->GetPlayLength());
                 FigurePhase = FMath::Clamp(PreviousPosition, 0.f, FMath::Max(0.f, TravelClip->GetPlayLength() - 0.001f));
             }
             Soldier->SetPosition(FigurePhase, false);
-            RecordClip(Soldier, TravelClip, true, FigurePhase, 1.0f);
+            RecordClip(Soldier, TravelClip, !bShoulderOnceClip, FigurePhase, 1.0f);
         }
         if (TravelClip && SoldierClips.IsValidIndex(i))
         {
             const FPlayedClip PreviousClip = SoldierClips[i];
-            const float DesiredVisualRate = FMath::Clamp(Step.Size2D() / FMath::Max(0.001f, DeltaTime) / (TravelClip == Run ? RunCmPerSecond : 160.f), 0.01f, 4.f);
+            // Shoulder transitions share WalkShoulder's leg cycle. Keep crawl/run calibration unchanged.
+            const bool bShoulderTravel = TravelClip == WalkShoulderAsset.Get() || TravelClip == ShoulderUpAsset.Get() || TravelClip == ShoulderDownAsset.Get();
+            const float InfantryTravelClipSpeed = TravelClip == Run ? RunCmPerSecond :
+                IsWalkFamily(TravelClip) ? (bShoulderTravel ? InfantryShoulderWalkClipCmPerSecond : InfantryWalkClipCmPerSecond) : 160.f;
+            const float DesiredVisualRate = FMath::Clamp(Step.Size2D() / FMath::Max(0.001f, DeltaTime) / InfantryTravelClipSpeed, 0.01f, 4.f);
             const float VisualRate = FMath::Lerp(PreviousClip.Rate, DesiredVisualRate, 1.f - FMath::Exp(-12.f * DeltaTime));
             const float VisualNow = VisualAnimationTime;
             Soldier->SetPlayRate(VisualRate);
@@ -2047,6 +2079,25 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             bCrowdDataDirty = true;
         }
         bCrowdDirty = true;
+    }
+    // Every man counts, also those still waiting to start, frozen or inactive this frame (they were skipped above), so one finished man
+    // cannot end the rifle up/down for the others.
+    for (const FPlayedClip& ShoulderPlayed : SoldierClips)
+    {
+        if (!ShoulderPlayed.Clip.IsValid() || (ShoulderPlayed.Clip.Get() != ShoulderUpAsset.Get() && ShoulderPlayed.Clip.Get() != ShoulderDownAsset.Get())) continue;
+        const float ShoulderPosition = ShoulderPlayed.Rate > 0.f ? FMath::Max(0.f, (VisualAnimationTime - ShoulderPlayed.Start) * ShoulderPlayed.Rate) : ShoulderPlayed.HeldPosition;
+        ShoulderSlowestFraction = FMath::Min(ShoulderSlowestFraction, ShoulderPosition / FMath::Max(0.01f, ShoulderPlayed.Clip->GetPlayLength()));
+        bShoulderAnyPlaying = true;
+    }
+    if (bShoulderClips && ShoulderTransitionEnd > GetWorld()->GetTimeSeconds())
+    {
+        // Ends when the clips are played out at their own play rate (length / rate), not after a fixed wall time; if nobody plays them in
+        // this path (they are driven by ResolveAnimation at rate 1) the 1.37 s clip length applies.
+        if (bShoulderAnyPlaying ? ShoulderSlowestFraction >= 1.f : GetWorld()->GetTimeSeconds() - ShoulderTransitionStart >= 1.37f)
+        {
+            ShoulderTransitionEnd = GetWorld()->GetTimeSeconds();
+            bCrowdDirty = true;
+        }
     }
     if (bFormationPlanPending && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugFormation")) && VisualAnimationTime - FormationPlanStarted > 4.f &&
         FMath::FloorToInt((VisualAnimationTime - FormationPlanStarted) / 3.f) != FMath::FloorToInt((VisualAnimationTime - FormationPlanStarted - DeltaTime) / 3.f))

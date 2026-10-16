@@ -1,0 +1,33 @@
+{
+  "scenario": "1851",
+  "note": "Runde 6: samlede handelsstrømme er brede cirkaskøn. Enkeltvarers oprindelige observerede vægt er bevaret; totaler er IKKE summer af de ufuldstændige varer.",
+  "source": {
+    "title": "Se Sources.json og fieldStatus",
+    "url": "https://www.ssb.no/a/histstat/hs1968.pdf"
+  },
+  "unitWeight": "metric tonnes for totals; original commodity units retained",
+  "unitValue": "rigsdaler sølv per year",
+  "areas": {
+    "Sverige": {
+      "importWeight": 500000,
+      "exportWeight": 1200000,
+      "turnoverWeight": 1700000,
+      "importValue": 24000000,
+      "exportValue": 22000000,
+      "turnoverValue": 46000000
+    },
+    "Norge": {
+      "importWeight": 300000,
+      "exportWeight": 650000,
+      "turnoverWeight": 950000,
+      "importValue": 10000000,
+      "exportValue": 11000000,
+      "turnoverValue": 21000000
+    }
+  },
+  "status": "kilde",
+  "limitations": [
+    "Bilateral Danmark-handel og 1847-sammenligning ikke dokumenteret; totalskøn ±50–60 %."
+  ],
+  "comparison1847": null
+}

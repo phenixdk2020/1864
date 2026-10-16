@@ -61,6 +61,15 @@ bool ACampaign1851Map::EventFact(const FString& Key, float& Out) const
 	else if (Key == TEXT("kasse")) Out = float(Treasury);
 	else if (Key == TEXT("mobiliseret")) Out = Footing != ECampaign1851Footing::Peace ? 1.f : 0.f;
 	else if (Key == TEXT("maegling")) Out = HasPeaceConference() ? 1.f : 0.f;
+	else if (Key == TEXT("krig")) Out = bAtWar ? 1.f : 0.f;
+	else if (Key.StartsWith(TEXT("begivenhed.")) || Key.StartsWith(TEXT("udeblevet.")))
+	{
+		// begivenhed.<id>: the event has occurred (or is history that occurred); udeblevet.<id>: it was tried and did not occur.
+		const bool EventFactFired = Key.StartsWith(TEXT("begivenhed."));
+		const FString EventRefId = Key.Mid(EventFactFired ? 11 : 10);
+		if (!EventKnownIds.Contains(EventRefId)) return false;
+		Out = (EventFactFired ? EventsFired : EventsBlocked).Contains(EventRefId) ? 1.f : 0.f;
+	}
 	else if (Key.StartsWith(TEXT("opinion.")))
 	{
 		const FString EventCurrent = Key.Mid(8);
@@ -124,6 +133,13 @@ void ACampaign1851Map::ResetWar()
 		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-EVENT|kunne ikke læse %s"), *EventPath); return;
 	}
 	TSet<FString> EventIds;
+	EventKnownIds.Reset();
+	for (const TSharedPtr<FJsonValue>& EventPreRow : EventRows)
+	{
+		FString EventPreId;
+		const TSharedPtr<FJsonObject> EventPreObj = EventPreRow->Type == EJson::Object ? EventPreRow->AsObject() : nullptr;
+		if (EventPreObj.IsValid() && EventPreObj->TryGetStringField(TEXT("id"), EventPreId) && !EventPreId.IsEmpty()) EventKnownIds.Add(EventPreId);
+	}
 	for (const TSharedPtr<FJsonValue>& EventRow : EventRows)
 	{
 		const TSharedPtr<FJsonObject> EventObj = EventRow->Type == EJson::Object ? EventRow->AsObject() : nullptr;
@@ -138,20 +154,37 @@ void ACampaign1851Map::ResetWar()
 			&& EventObj->TryGetStringField(TEXT("forudsaetninger"), Event.Preconditions) && !Event.Preconditions.IsEmpty()
 			&& EventObj->TryGetStringField(TEXT("blokeringer"), Event.Blockers)
 			&& EventObj->TryGetStringField(TEXT("avis"), Event.Gazette) && EventObj->TryGetStringField(TEXT("log"), Event.CouncilLog);
+		double EventEndYear = EventYear, EventEndMonth = EventMonth;
+		FString EventHistory;
+		if (EventValid)
+		{
+			// Optional window end: `vindue.tilAar` and `vindue.tilMaaned` together, not before the start.
+			if ((*EventWindow)->HasField(TEXT("tilAar")) || (*EventWindow)->HasField(TEXT("tilMaaned")))
+				EventValid &= (*EventWindow)->TryGetNumberField(TEXT("tilAar"), EventEndYear) && (*EventWindow)->TryGetNumberField(TEXT("tilMaaned"), EventEndMonth)
+					&& FMath::IsFinite(EventEndYear) && FMath::IsFinite(EventEndMonth) && EventEndYear >= 1 && EventEndYear <= 9998 && EventEndMonth >= 1 && EventEndMonth <= 12
+					&& EventEndYear == FMath::FloorToDouble(EventEndYear) && EventEndMonth == FMath::FloorToDouble(EventEndMonth)
+					&& EventEndYear * 12.0 + EventEndMonth >= EventYear * 12.0 + EventMonth;
+			// Optional `historik` (indtraf | udeblev) is only allowed for an event wholly before the scenario's start.
+			EventObj->TryGetStringField(TEXT("historik"), EventHistory);
+			EventValid &= EventHistory.IsEmpty() || ((EventHistory == TEXT("indtraf") || EventHistory == TEXT("udeblev")) && EventValid
+				&& (FDateTime(int32(EventEndYear), int32(EventEndMonth), 1) - StartDate()).GetTotalDays() < 0.0);
+		}
 		if (EventValid)
 		{
 			FString EventWhy; bool EventExpressionValid;
 			const auto EventFacts = [this](const FString& EventK, float& V) { return EventFact(EventK, V); };
 			CampaignEventMVP::Expression(Event.Preconditions, EventFacts, EventWhy, EventExpressionValid); EventValid &= EventExpressionValid;
 			CampaignEventMVP::Expression(Event.Blockers, EventFacts, EventWhy, EventExpressionValid); EventValid &= EventExpressionValid;
+			// A history event is never played, so its effects are optional documentation; every other event needs both outcomes.
 			const auto EventReadEffects = [&](const TCHAR* EventField, TMap<FString, float>& EventDest)
 			{
 				const TSharedPtr<FJsonObject>* EventEffectObject = nullptr;
-				if (!EventObj->TryGetObjectField(EventField, EventEffectObject) || (*EventEffectObject)->Values.IsEmpty()) return false;
+				if (!EventObj->TryGetObjectField(EventField, EventEffectObject) || (*EventEffectObject)->Values.IsEmpty()) return !EventHistory.IsEmpty() && !EventObj->HasField(EventField);
 				for (const auto& EventPair : (*EventEffectObject)->Values)
 				{
 					double EventAmount = 0; float EventExisting = 0;
 					const FString EventK(EventPair.Key.ToView());   // the JSON map's key is a shared string in 5.8
+					if (EventK == TEXT("fieldStatus")) continue;   // status and source of the values (Docs/Import-Preussen.md), not an effect
 					double EventCap = EventK == TEXT("spaending") ? 25 : EventK == TEXT("stemning") ? 10 : EventK == TEXT("kasse") ? 50000 : EventK == TEXT("gaeldrente") ? 100 : EventK == TEXT("forbundskorps") ? 1 : EventK.StartsWith(TEXT("forhold.")) ? 15 : EventK.StartsWith(TEXT("forskning.")) ? 1 : -1;
 					if (EventCap < 0 || !EventPair.Value->TryGetNumber(EventAmount) || !FMath::IsFinite(EventAmount) || FMath::Abs(EventAmount) > EventCap
 						|| ((EventK.StartsWith(TEXT("forhold.")) || EventK.StartsWith(TEXT("forskning."))) && !EventFact(EventK, EventExisting))
@@ -159,16 +192,25 @@ void ACampaign1851Map::ResetWar()
 					{ UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-EVENT|%s|afvist effekt %s"), *Event.Id, *EventK); return false; }
 					EventDest.Add(EventK, float(EventAmount));
 				}
-				return true;
+				return !EventDest.IsEmpty() || !EventHistory.IsEmpty();
 			};
 			EventValid &= EventReadEffects(TEXT("effekter"), Event.Effects);
 			EventValid &= EventReadEffects(TEXT("udeblivelse"), Event.BlockedEffects);
-			EventValid &= Event.BlockedEffects.FindRef(TEXT("spaending")) != 0.f || Event.BlockedEffects.FindRef(TEXT("kasse")) != 0.f || Event.BlockedEffects.FindRef(TEXT("stemning")) != 0.f;
+			EventValid &= !EventHistory.IsEmpty() || Event.BlockedEffects.FindRef(TEXT("spaending")) != 0.f || Event.BlockedEffects.FindRef(TEXT("kasse")) != 0.f || Event.BlockedEffects.FindRef(TEXT("stemning")) != 0.f;
 		}
 		if (!EventValid) { UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-EVENT|afvist event %s"), *Event.Id); continue; }
 		EventIds.Add(Event.Id);
 		Event.Day = (FDateTime(int32(EventYear), int32(EventMonth), 1) - StartDate()).GetTotalDays();
 		Event.Probability = float(EventChance);
+		Event.LastDay = (FDateTime(int32(EventEndYear), int32(EventEndMonth), 1) - StartDate()).GetTotalDays();
+		Event.Months = int32(EventEndYear * 12.0 + EventEndMonth - EventYear * 12.0 - EventMonth) + 1;
+		// An event wholly before the start is history: never fired by the monthly loop, only entered as fired or not.
+		Event.bHistory = Event.LastDay < 0.0;
+		Event.bHistoryFired = Event.bHistory && EventHistory == TEXT("indtraf");
+		if (Event.bHistory)
+		{
+			if (Event.bHistoryFired) EventsFired.AddUnique(Event.Id); else EventsBlocked.AddUnique(Event.Id);
+		}
 		EventPlan.Add(MoveTemp(Event));
 	}
 }
@@ -190,7 +232,9 @@ void ACampaign1851Map::EvaluateEvents(bool bMonthly)
 		const auto EventFacts = [this](const FString& EventK, float& V) { return EventFact(EventK, V); };
 		const bool EventPreconditions = CampaignEventMVP::Expression(Event.Preconditions, EventFacts, EventWhy, EventValid);
 		const bool EventBlocked = !Event.Blockers.IsEmpty() && CampaignEventMVP::Expression(Event.Blockers, EventFacts, EventBlockWhy, EventBlockValid);
-		const float EventChance = FMath::Clamp(Event.Probability * (1.f + (0.5f - Event.Probability) * Deviation), 0.f, 1.f);
+		const float EventTotalChance = FMath::Clamp(Event.Probability * (1.f + (0.5f - Event.Probability) * Deviation), 0.f, 1.f);
+		// A window of N months spreads the total chance over its N monthly tries: 1 - (1 - p)^(1/N).
+		const float EventChance = Event.Months > 1 ? 1.f - FMath::Pow(1.f - EventTotalChance, 1.f / float(Event.Months)) : EventTotalChance;
 		// Stateless draw: ordering, debug explanations and save/load never consume random state.
 		const uint32 EventSeed = HashCombine(HashCombine(uint32(Seed), GetTypeHash(ActiveScenario().Id)), GetTypeHash(Event.Id));
 		const float EventRoll = FRandomStream(int32(HashCombine(EventSeed, uint32(EventToday)))).FRand();
@@ -200,6 +244,7 @@ void ACampaign1851Map::EvaluateEvents(bool bMonthly)
 				*Event.Id, EventToday, EventDue ? 1 : 0, EventResolved ? 1 : 0, EventChance, EventRoll, *EventWhy, *EventBlockWhy);
 		if (EventResolved || (!EventForce && (!bMonthly || !EventDue))) continue;
 		const bool EventFired = EventForce || (EventValid && EventBlockValid && EventPreconditions && !EventBlocked && EventRoll < EventChance);
+		if (!EventFired && !EventForce && CampaignDays < Event.LastDay) continue;   // the window is still open: try again next month
 		if (EventFired) EventsFired.AddUnique(Event.Id); else EventsBlocked.AddUnique(Event.Id);
 		FString EventExplanation = EventForce ? TEXT("Tvunget af CampaignEvents") : !EventPreconditions ? EventWhy : EventBlocked ? TEXT("Blokering: ") + EventBlockWhy
 			: EventFired ? EventWhy : FString::Printf(TEXT("Forudsætninger opfyldt: %s; tilfældighed %.3f >= %.3f"), *EventWhy, EventRoll, EventChance);
@@ -230,6 +275,7 @@ void ACampaign1851Map::EvaluateEvents(bool bMonthly)
 			EventSource = FString::Printf(TEXT("Kilde: egen registreret beslutning '%s' (dag %.0f); aktuel tilstand ovenfor"), *EventPrevious.Action, EventPrevious.Day);
 			break;
 		}
+		if (!EventFired && Event.Months > 1) EventExplanation += TEXT(" (vinduet er udløbet)");
 		EventExplanation += TEXT(". ") + EventSource;
 		const TMap<FString, float>& EventApplied = EventFired ? Event.Effects : Event.BlockedEffects;
 		TArray<FString> EffectKeys; EventApplied.GetKeys(EffectKeys); EffectKeys.Sort();
@@ -561,7 +607,7 @@ TArray<FString> ACampaign1851Map::SaveWar(int32 PendingBattleId) const
 	TArray<FString> Out;
 	Out.Add(FString::Printf(TEXT("state|%.2f|%d"), Tension, bAtWar ? 1 : 0));
 	Out.Add(FString::Printf(TEXT("intel-clock|%d"), LastWarDay));
-	Out.Add(TEXT("events-format|29"));
+	Out.Add(TEXT("events-format|37"));
 	for (const FString& EventId : EventsBlocked) Out.Add(TEXT("blocked|") + EventId);
 	for (const FString& E : EventsFired)
 	{
@@ -621,11 +667,12 @@ void ACampaign1851Map::RestoreWar(const TArray<FString>& Lines)
 	// Definitions come from scenario data; resolved outcomes come from the save.
 	ResetWar();
 	LastWarDay = FMath::FloorToInt(CampaignDays);
-	// A save from before the event files: the events already past are taken as resolved.
-	if (!Lines.Contains(TEXT("events-format|29")))
+	// A save from before the event files (29) or the windows/history/event references (37): the undecided events already past are taken as
+	// resolved, so that newly added events do not charge their consequences afterwards. History events keep their start state.
+	if (!Lines.Contains(TEXT("events-format|37")))
 	{
 		for (const FPlannedEvent& Event : EventPlan)
-			if (Event.Day < CampaignDays) EventsBlocked.AddUnique(Event.Id);
+			if (Event.LastDay < CampaignDays && !EventsFired.Contains(Event.Id)) EventsBlocked.AddUnique(Event.Id);
 	}
 	for (const FString& Line : Lines)
 	{

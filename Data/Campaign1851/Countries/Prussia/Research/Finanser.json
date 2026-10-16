@@ -1,0 +1,94 @@
+{
+  "note": "Budget og årsregnskab adskilt; usikre cifre null.",
+  "currencyConversion": {
+    "value": 1.3214285714285714,
+    "status": "skøn",
+    "source": "RIGSDALER",
+    "reason": "Sølvindholdsparitet: (1/14)/(1/18½)=37/28 rigsdaler sølv pr. preussisk taler. Ikke spotkurs, papirkurs eller købekraft.",
+    "sources": [
+      "THALER",
+      "RIGSDALER"
+    ],
+    "formula": "18.5 / 14",
+    "unit": "rigsdaler sølv / taler"
+  },
+  "scenarios": {
+    "1825": {
+      "budgetRevenueThaler": {
+        "value": null,
+        "status": "skøn",
+        "source": "HANDBOOK",
+        "reason": "Finanstabeller lokaliseret, men ikke læst i uddraget."
+      },
+      "ordinaryExpenditureThaler": {
+        "value": null,
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ingen pålidelig 1825-tabel afskrevet."
+      },
+      "debtThaler": {
+        "value": null,
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Scenarieafgrænset gæld mangler."
+      },
+      "treasuryStartThaler": {
+        "value": null,
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Kontant startkasse er ikke årsindtægt."
+      }
+    },
+    "1851": {
+      "budgetRevenueThaler": {
+        "value": null,
+        "status": "skøn",
+        "source": "FIN1851",
+        "reason": "Eksakte sidste cifre kan ikke læses sikkert; OCR og trykt saldo stemmer ikke."
+      },
+      "ordinaryExpenditureThaler": {
+        "value": null,
+        "status": "skøn",
+        "source": "FIN1851",
+        "reason": "Sidste cifre og saldo ikke sikkert afstemt."
+      },
+      "budgetRevenueCircaThaler": {
+        "value": 94700000,
+        "status": "skøn",
+        "source": "FIN1851",
+        "reason": "Cirka 94,7 mio. taler fra læst budgetartikel; afrundet til 0,1 mio., ikke realiseret indtægt."
+      },
+      "ordinaryExpenditureCircaThaler": {
+        "value": 93500000,
+        "status": "skøn",
+        "source": "FIN1851",
+        "reason": "Cirka 93,5 mio. taler; afrundet til 0,1 mio., ikke realiseret udgift."
+      },
+      "extraordinaryExpenditureThaler": {
+        "value": 3229248,
+        "status": "kilde",
+        "source": "FIN1851",
+        "reason": "Læsbart budgetforslag i trykt artikel; militærkrisens yderligere omkostninger ikke inkluderet."
+      },
+      "reportedSurplusThaler": {
+        "value": 1211248,
+        "status": "kilde",
+        "source": "FIN1851",
+        "reason": "Trykt påstået saldo; må ikke bruges som verificeret forskel mellem de uklare hovedbeløb."
+      },
+      "debtThaler": {
+        "value": null,
+        "status": "skøn",
+        "source": "DEBT-BLOCKED",
+        "reason": "Oprindelig avis blokeret; søgeresultat alene anvendes ikke til gældstal."
+      },
+      "treasuryStartThaler": {
+        "value": null,
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ingen kassebeholdning pr. 1. juli afskrevet."
+      }
+    }
+  },
+  "budgetArithmeticWarning": "De læste sidste cifre og trykt overskud kan ikke afstemmes; cirkabudget må ikke danne et eksakt overskud."
+}

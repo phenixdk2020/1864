@@ -1,0 +1,417 @@
+[
+  {
+    "id": "se_no_union_budget",
+    "navn": "Unionens separate hære og budgetter",
+    "vindue": {
+      "aar": 1851,
+      "maaned": 7
+    },
+    "sandsynlighed": 0.7,
+    "forudsaetninger": "forhold.SE >= 0",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": 2
+    },
+    "udeblivelse": {
+      "spaending": 0
+    },
+    "avis": "Unionens separate hære og budgetter",
+    "log": "Unionens separate hære og budgetter",
+    "status": "spil",
+    "source": "STORTINGET_UNION",
+    "note": "Spilvalg om unionsfriktion; ingen ny fælles kasse eller hær oprettes.",
+    "fieldStatus": {
+      "vindue": {
+        "status": "spil",
+        "source": "STORTINGET_UNION",
+        "reason": "År historisk kontekst; vinduets præcise måned er spilvalg, bortset fra novembertraktaten. Ingen fremtidig garanti gælder ved start 1851."
+      },
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "effekter": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "udeblivelse": {
+        "status": "spil",
+        "source": "DESIGN"
+      }
+    },
+    "stateContract": {
+      "status": "spil",
+      "source": "DESIGN",
+      "prerequisites": "forhold.SE >= 0",
+      "effects": {
+        "spaending": 2
+      },
+      "note": "Eksisterende parserudtryk bevares. stateContract kræver adapter; effekter her er ikke automatisk understøttet af motoren."
+    }
+  },
+  {
+    "id": "se_no_crimea_neutrality",
+    "navn": "Krimkrigen: svensk-norsk neutralitet",
+    "vindue": {
+      "aar": 1854,
+      "maaned": 1
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "ikke mobiliseret",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": -3
+    },
+    "udeblivelse": {
+      "spaending": 0
+    },
+    "avis": "Krimkrigen: svensk-norsk neutralitet",
+    "log": "Krimkrigen: svensk-norsk neutralitet",
+    "status": "spil",
+    "source": "CRIMEA",
+    "note": "Neutralitetsordningen hører til januar 1854; krigen begyndte 1853. Sandsynlighed og mekanik er spilvalg.",
+    "fieldStatus": {
+      "vindue": {
+        "status": "spil",
+        "source": "CRIMEA",
+        "reason": "År historisk kontekst; vinduets præcise måned er spilvalg, bortset fra novembertraktaten. Ingen fremtidig garanti gælder ved start 1851."
+      },
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "effekter": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "udeblivelse": {
+        "status": "spil",
+        "source": "DESIGN"
+      }
+    },
+    "stateContract": {
+      "status": "spil",
+      "source": "DESIGN",
+      "prerequisites": "ikke mobiliseret",
+      "effects": {
+        "SE_NO.neutrality": "crimean",
+        "SE_NO.interventionAllowed": false
+      },
+      "note": "Eksisterende parserudtryk bevares. stateContract kræver adapter; effekter her er ikke automatisk understøttet af motoren."
+    }
+  },
+  {
+    "id": "se_no_november_treaty",
+    "navn": "Novembertraktaten med Storbritannien og Frankrig",
+    "vindue": {
+      "aar": 1855,
+      "maaned": 11
+    },
+    "sandsynlighed": 0.75,
+    "forudsaetninger": "forhold.GB >= 30 og forhold.FR >= 10 og ikke mobiliseret",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": -5
+    },
+    "udeblivelse": {
+      "spaending": 0
+    },
+    "avis": "Novembertraktaten med Storbritannien og Frankrig",
+    "log": "Novembertraktaten med Storbritannien og Frankrig",
+    "status": "spil",
+    "source": "NOVEMBER1855",
+    "note": "Historisk aftale 21.11.1855. Garantien mod Rusland kræver særskilt garantimekanik; spaending-effekten alene implementerer den ikke.",
+    "fieldStatus": {
+      "vindue": {
+        "status": "spil",
+        "source": "NOVEMBER1855",
+        "reason": "År historisk kontekst; vinduets præcise måned er spilvalg, bortset fra novembertraktaten. Ingen fremtidig garanti gælder ved start 1851."
+      },
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "effekter": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "udeblivelse": {
+        "status": "spil",
+        "source": "DESIGN"
+      }
+    },
+    "stateContract": {
+      "status": "spil",
+      "source": "DESIGN",
+      "prerequisites": "forhold.GB >= 30 og forhold.FR >= 10 og ikke mobiliseret",
+      "effects": {
+        "guarantees.append": {
+          "guarantors": [
+            "GB",
+            "FR"
+          ],
+          "protected": [
+            "SE",
+            "NO"
+          ],
+          "against": "RU",
+          "scope": "territorial concessions/coercion",
+          "start": "1855-11-21"
+        }
+      },
+      "note": "Eksisterende parserudtryk bevares. stateContract kræver adapter; effekter her er ikke automatisk understøttet af motoren."
+    }
+  },
+  {
+    "id": "se_no_scandinavism",
+    "navn": "Skandinavisme og forsvarsforbund",
+    "vindue": {
+      "aar": 1856,
+      "maaned": 6
+    },
+    "sandsynlighed": 0.6,
+    "forudsaetninger": "forhold.SE >= 40",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": -2
+    },
+    "udeblivelse": {
+      "spaending": 0
+    },
+    "avis": "Skandinavisme og forsvarsforbund",
+    "log": "Skandinavisme og forsvarsforbund",
+    "status": "spil",
+    "source": "SCANDINAVISM",
+    "note": "Politisk tilnærmelse; relationstærskel og sandsynlighed er spilvalg.",
+    "fieldStatus": {
+      "vindue": {
+        "status": "spil",
+        "source": "SCANDINAVISM",
+        "reason": "År historisk kontekst; vinduets præcise måned er spilvalg, bortset fra novembertraktaten. Ingen fremtidig garanti gælder ved start 1851."
+      },
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "effekter": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "udeblivelse": {
+        "status": "spil",
+        "source": "DESIGN"
+      }
+    },
+    "stateContract": {
+      "status": "spil",
+      "source": "DESIGN",
+      "prerequisites": "forhold.SE >= 40",
+      "effects": {
+        "spaending": -2
+      },
+      "note": "Eksisterende parserudtryk bevares. stateContract kræver adapter; effekter her er ikke automatisk understøttet af motoren."
+    }
+  },
+  {
+    "id": "se_no_union_revision",
+    "navn": "Unionsrevision møder norsk modstand",
+    "vindue": {
+      "aar": 1860,
+      "maaned": 6
+    },
+    "sandsynlighed": 0.6,
+    "forudsaetninger": "forhold.SE >= 0",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": 4
+    },
+    "udeblivelse": {
+      "spaending": 0
+    },
+    "avis": "Unionsrevision møder norsk modstand",
+    "log": "Unionsrevision møder norsk modstand",
+    "status": "spil",
+    "source": "SCANDINAVISM",
+    "note": "Årskontekst kilde; måned og effekt valgt til spillet.",
+    "fieldStatus": {
+      "vindue": {
+        "status": "spil",
+        "source": "SCANDINAVISM",
+        "reason": "År historisk kontekst; vinduets præcise måned er spilvalg, bortset fra novembertraktaten. Ingen fremtidig garanti gælder ved start 1851."
+      },
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "effekter": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "udeblivelse": {
+        "status": "spil",
+        "source": "DESIGN"
+      }
+    },
+    "stateContract": {
+      "status": "spil",
+      "source": "DESIGN",
+      "prerequisites": "forhold.SE >= 0",
+      "effects": {
+        "spaending": 4
+      },
+      "note": "Eksisterende parserudtryk bevares. stateContract kræver adapter; effekter her er ikke automatisk understøttet af motoren."
+    }
+  },
+  {
+    "id": "se_no_aid1864",
+    "navn": "1864: spørgsmålet om hjælp til Danmark",
+    "vindue": {
+      "aar": 1864,
+      "maaned": 2
+    },
+    "sandsynlighed": 0.15,
+    "forudsaetninger": "forhold.SE >= 60 og forhold.GB >= 45 og mobiliseret",
+    "blokeringer": "se_no_noaid1864",
+    "effekter": {
+      "spaending": -5
+    },
+    "udeblivelse": {
+      "spaending": 0
+    },
+    "avis": "1864: spørgsmålet om hjælp til Danmark",
+    "log": "1864: spørgsmålet om hjælp til Danmark",
+    "status": "spil",
+    "source": "SCANDINAVISM",
+    "note": "Kontrafaktisk hjælp; 12.000 er spil-loft fra eksisterende regimenter, ingen gratis tropper.",
+    "fieldStatus": {
+      "vindue": {
+        "status": "spil",
+        "source": "SCANDINAVISM",
+        "reason": "År historisk kontekst; vinduets præcise måned er spilvalg, bortset fra novembertraktaten. Ingen fremtidig garanti gælder ved start 1851."
+      },
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "effekter": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "udeblivelse": {
+        "status": "spil",
+        "source": "DESIGN"
+      }
+    },
+    "stateContract": {
+      "status": "spil",
+      "source": "DESIGN",
+      "prerequisites": {
+        "all": [
+          "SE.relation.DK >= 60",
+          "GB.support == true",
+          "NO.appropriation == true",
+          "SE.appropriation == true",
+          "SE_NO.aidDecision == undecided"
+        ]
+      },
+      "effects": {
+        "SE_NO.aidDecision": "aid",
+        "SE_NO.maxExpeditionMen": 12000,
+        "SE_NO.expeditionDraw": "existing OOB only"
+      },
+      "note": "Eksisterende parserudtryk bevares. stateContract kræver adapter; effekter her er ikke automatisk understøttet af motoren.",
+      "exclusiveGroup": "se_no_aid1864"
+    }
+  },
+  {
+    "id": "se_no_noaid1864",
+    "navn": "1864: regeringerne afviser militær intervention",
+    "vindue": {
+      "aar": 1864,
+      "maaned": 3
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "forhold.SE < 60",
+    "blokeringer": "se_no_aid1864",
+    "effekter": {
+      "spaending": 3
+    },
+    "udeblivelse": {
+      "spaending": 0
+    },
+    "avis": "1864: regeringerne afviser militær intervention",
+    "log": "1864: regeringerne afviser militær intervention",
+    "status": "spil",
+    "source": "SCANDINAVISM",
+    "note": "Kontrafaktisk hjælp; 12.000 er spil-loft fra eksisterende regimenter, ingen gratis tropper.",
+    "fieldStatus": {
+      "vindue": {
+        "status": "spil",
+        "source": "SCANDINAVISM",
+        "reason": "År historisk kontekst; vinduets præcise måned er spilvalg, bortset fra novembertraktaten. Ingen fremtidig garanti gælder ved start 1851."
+      },
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "effekter": {
+        "status": "spil",
+        "source": "DESIGN"
+      },
+      "udeblivelse": {
+        "status": "spil",
+        "source": "DESIGN"
+      }
+    },
+    "stateContract": {
+      "status": "spil",
+      "source": "DESIGN",
+      "prerequisites": {
+        "all": [
+          "SE_NO.aidDecision == undecided"
+        ],
+        "any": [
+          "SE.relation.DK < 60",
+          "GB.support == false",
+          "NO.appropriation == false"
+        ]
+      },
+      "effects": {
+        "SE_NO.aidDecision": "refuse"
+      },
+      "note": "Eksisterende parserudtryk bevares. stateContract kræver adapter; effekter her er ikke automatisk understøttet af motoren.",
+      "exclusiveGroup": "se_no_aid1864"
+    }
+  },
+  {
+    "id": "se_no_union1825",
+    "navn": "Norsk bevilling og hjemligt forsvar i unionen",
+    "vindue": {
+      "aar": 1825,
+      "maaned": 7
+    },
+    "sandsynlighed": 1,
+    "forudsaetninger": "",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": 0
+    },
+    "udeblivelse": {
+      "spaending": 0
+    },
+    "avis": "Separate hære og bevillinger",
+    "log": "Unionens kasser er adskilte",
+    "status": "spil",
+    "source": "STORTINGET_UNION",
+    "stateContract": {
+      "prerequisites": {
+        "scenario": "1825"
+      },
+      "effects": {
+        "union.separateBudgets": true,
+        "NO.landvernAbroad": false
+      }
+    },
+    "note": "Spilregel, ikke en dateret ny historisk lov i juli 1825."
+  }
+]

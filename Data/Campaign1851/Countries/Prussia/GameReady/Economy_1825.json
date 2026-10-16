@@ -1,0 +1,165 @@
+{
+  "ruralTax": null,
+  "urbanTax": null,
+  "grainPerHead": null,
+  "cattlePerHead": null,
+  "butterPerHead": null,
+  "grainPrice": null,
+  "cattlePrice": null,
+  "butterPrice": null,
+  "exportDuty": null,
+  "creditBase": null,
+  "constructionCost": null,
+  "unskilledDailyWage": null,
+  "ironPrice": null,
+  "coalPrice": null,
+  "timberPrice": null,
+  "powderPrice": null,
+  "clothPrice": null,
+  "leatherPrice": null,
+  "note": "Preussen, dateret importgrundlag. Kilde/skøn/spil står i fieldStatus og Data-status.json. Delvist overlay; null kræver håndtering, ikke nulkonvertering. Ingen motor-/slagtest. Penge: rigsdaler sølv via metallisk paritet 37/28. Cirka-budget står separat; direkte skat/årsregnskab/startkasse er ukendt.",
+  "nation": "PR",
+  "scenario": 1825,
+  "currency": "rigsdaler sølv",
+  "currencyConversion": {
+    "from": "preussisk taler",
+    "to": "rigsdaler sølv",
+    "factor": 1.3214285714285714,
+    "formula": "18.5 / 14",
+    "note": "Sølvindholdsparitet: (1/14)/(1/18½)=37/28 rigsdaler sølv pr. preussisk taler. Ikke spotkurs, papirkurs eller købekraft.",
+    "fieldStatus": {
+      "factor": {
+        "status": "skøn",
+        "source": "RIGSDALER",
+        "reason": "Sølvindholdsparitet: (1/14)/(1/18½)=37/28 rigsdaler sølv pr. preussisk taler. Ikke spotkurs, papirkurs eller købekraft.",
+        "sources": [
+          "THALER",
+          "RIGSDALER"
+        ],
+        "formula": "18.5 / 14",
+        "unit": "rigsdaler sølv / taler"
+      }
+    }
+  },
+  "ordinaryRevenue": null,
+  "ordinaryExpenditure": null,
+  "debt": null,
+  "treasuryStart": null,
+  "fieldStatus": {
+    "ruralTax": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "urbanTax": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "grainPerHead": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "cattlePerHead": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "butterPerHead": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "grainPrice": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "cattlePrice": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "butterPrice": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "exportDuty": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "creditBase": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "constructionCost": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "unskilledDailyWage": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "ironPrice": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "coalPrice": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "timberPrice": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "powderPrice": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "clothPrice": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "leatherPrice": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "scenario": {
+      "status": "spil",
+      "source": "DESIGN",
+      "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+    },
+    "ordinaryRevenue": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "ordinaryExpenditure": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "debt": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    },
+    "treasuryStart": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+}

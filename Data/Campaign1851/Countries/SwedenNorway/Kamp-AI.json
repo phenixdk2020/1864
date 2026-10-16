@@ -1,0 +1,81 @@
+{
+  "note": "Første utestede balanceprofil, ikke historisk måling eller motorimplementering. OOB, forsyning og våbenmodellens antagelser bruges samlet.",
+  "status": "spil",
+  "source": [
+    "DESIGN",
+    "MANKELL_R4",
+    "NO_ARMY_OFFICIAL",
+    "R5_SVARTKRUTT",
+    "R5_SVARTKRUTT_KAM"
+  ],
+  "profiles": {
+    "SE_1825": {
+      "aggression": 0.48,
+      "caution": 0.65,
+      "reserveFraction": 0.25,
+      "discipline": 0.65,
+      "guardCommitThreshold": 0.75,
+      "cavalryChargeDisorderThreshold": 0.65,
+      "squareThreatDistanceM": 250,
+      "artilleryConcentrationGuns": 12,
+      "supplyLowDays": 5,
+      "supplyRetreatDays": 2,
+      "marchKmPerDay": 22,
+      "sustainedRoundsPerMinute": 1.5,
+      "norwegianLandvernAbroad": false,
+      "status": "spil",
+      "source": "DESIGN"
+    },
+    "SE_1851": {
+      "aggression": 0.48,
+      "caution": 0.65,
+      "reserveFraction": 0.25,
+      "discipline": 0.65,
+      "guardCommitThreshold": 0.75,
+      "cavalryChargeDisorderThreshold": 0.65,
+      "squareThreatDistanceM": 250,
+      "artilleryConcentrationGuns": 12,
+      "supplyLowDays": 5,
+      "supplyRetreatDays": 2,
+      "marchKmPerDay": 22,
+      "sustainedRoundsPerMinute": 1.8,
+      "norwegianLandvernAbroad": false,
+      "status": "spil",
+      "source": "DESIGN"
+    },
+    "NO_1825": {
+      "aggression": 0.35,
+      "caution": 0.78,
+      "reserveFraction": 0.3,
+      "discipline": 0.6,
+      "guardCommitThreshold": 0.75,
+      "cavalryChargeDisorderThreshold": 0.65,
+      "squareThreatDistanceM": 250,
+      "artilleryConcentrationGuns": 6,
+      "supplyLowDays": 5,
+      "supplyRetreatDays": 2,
+      "marchKmPerDay": 18,
+      "sustainedRoundsPerMinute": 1.5,
+      "norwegianLandvernAbroad": false,
+      "status": "spil",
+      "source": "DESIGN"
+    },
+    "NO_1851": {
+      "aggression": 0.35,
+      "caution": 0.78,
+      "reserveFraction": 0.3,
+      "discipline": 0.6,
+      "guardCommitThreshold": 0.75,
+      "cavalryChargeDisorderThreshold": 0.65,
+      "squareThreatDistanceM": 250,
+      "artilleryConcentrationGuns": 6,
+      "supplyLowDays": 5,
+      "supplyRetreatDays": 2,
+      "marchKmPerDay": 18,
+      "sustainedRoundsPerMinute": 2.0,
+      "norwegianLandvernAbroad": false,
+      "status": "spil",
+      "source": "DESIGN"
+    }
+  }
+}

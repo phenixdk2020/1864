@@ -106,7 +106,18 @@ Flag, våbenskjold, uniformsbilleder (fra mange vinkler), portrætter, figurmesh
 
 ## 4. Sverige-Norge: hvor vi står, og hvad der mangler
 
-### 4.1 Hvad vi har i dag
+### 4.0 Gældende integrationsstatus — 2026-10-16
+
+Runde 7 er delvist importeret; **niveau B er ikke fuldført**. Se [Import-Sverige-Norge.md](Import-Sverige-Norge.md) for alle 30 filers mapping, loaderændringer, proveniens, kortdækning, rapport og risici. Afsnit 4.1 og 4.4 nedenfor beskriver det tidligere udgangspunkt.
+
+- SE/NO har separate aktive nationsrækker i både 1825 og 1851; nations-onMap=false bevares, fordi feltet kræver eget økonomi-/rekrutteringskort.
+- 17 svenske bypunkter understøttes af eksisterende extent/ejergrid, heraf seks nye. Garnisoner og SE-south er opdateret fra pakken. 46 by-/transportpunkter pr. scenarie ligger udenfor og bevares som onMap=false-metadata. Ingen norsk by er på det aktive kort.
+- 42 distrikter pr. scenarie er bevaret som ikke-aktive data; 8 repræsentative punkter er indenfor extent, men der mangler polygoner og distriktsgrid. Ingen kortbinærer ændres.
+- National OOB, Supply, økonomi, officerer, ministre, events, valuta og unionsregler er bevaret med proveniens. De er ikke koblet til danske puljer. National OOB og nabohær spawnes ikke samtidigt.
+- Niveau B mangler stadig sammenhængende ruter/kort, svensk-norsk krigs-/unionsadapter, national forsynings-/mandskabskobling og spil-/savevalidering. Niveau C mangler derudover fulde nationale systemer og grafik som beskrevet i importnotatet.
+- Begge naboscenarier består statisk validering; 350 beskyttede rækker er byteidentiske. Ingen build, spil/editorstart, spiltest eller commit.
+
+### 4.1 Udgangspunkt før importen
 - `Nations1851.json`: `SE` (Sverige): befolkning 3.480.000, hær 35.000, reserve 150.000, skat 0,2 pr. hoved, relation 40, handelsværdi 3.000, alliance mulig (`canAlly`), `onMap: false`, vægte [1.2, 1.0, 0.8, 0.5], forsigtighed 0,7. `NO` (Norge): 1.490.000, hær 12.000, reserve 60.000, relation 45, `onMap: false`. Begge er skøn.
 - `cities_neighbours_1851.json`: svenske byer i Skåne (Malmö, Helsingborg, Landskrona, Lund, Ystad m.fl.) og punkter uden for kortet (Kristiania/Oslo, Fredrikshald, Karlsborg) med ejer og krone.
 - `Army_Neighbours_1851.json`: garnisoner i Malmö (400 mand, 8 kanoner), Landskrona (400, 12), Helsingborg (150), Lund (100), Ystad (150) m.fl. Sveriges 35.000 til 40.000 mobiliserbare er unionens sydlige krigsteater, ikke garnisonen.
@@ -142,6 +153,14 @@ Codex-agenten har leveret en importpakke i `C:/Users/allan/Documents/Codex/2026-
 3. Kortudsnit og byer (niveau B), garnisoner og felthær.
 4. Uniformer og figurer til 1851 (kun hvis spillet kan føres 1851 til 1859); tjek først, hvad der findes.
 5. Test: en slagtest med svenske kompagnier (findes allerede) og en kampagnetest med en svensk mobilisering ved grænsen.
+
+### 4.5 Preussen: status 2026-10-16
+
+Preussen er **niveau B for kortdata** (ikke niveau C, ikke spilbart). Importeret fra `Preussen-agent/Spilimport` med `Tools/Countries/import_prussia.py`; se [Import-Preussen.md](Import-Preussen.md) for mapping, rapport og huller.
+
+- Aktivt: 25 byer, 13 distrikter, 33 ruter, 25 garnisoner og 9 felthærposter pr. scenarie (1825 og 1851 adskilt), alle inden for kortudsnittet og nåelige fra København (fem via færge). Pakkens tal er de samme som spillets arvede skøn; importen tilføjer status/kilde pr. tal og opdaterer kun den nationale befolkning (HGIS-skøn). Köslin er `onMap=false`.
+- Arkiveret, ikke aktivt (kræver preussisk pulje eller loaderudvidelse): hærkatalog, officerer (Müffling, Wrangel, Stockhausen), økonomi (alle satser `null`), provinsbefolkning, handel og 12 events. Events er ikke aktiveret, fordi de ændrer dansk spænding og delvis afvises af `ResetWar`.
+- Mangler til en fuld modstander: faktiske ruller og chefer, økonomital, forsyning og mobiliseringskalender, krigsmodel ud over det nuværende PR/AT/DE-flag, kortrastre, flåde. Relation 1851 er spillets −20 (pakken har −35; ikke taget over).
 
 ## 5. Kalibreringsdata brugt fra Codex' cirka-design (2026-10-14)
 

@@ -3,6 +3,7 @@
 #include "Campaign1851Scenery.h"
 #include "Components/StaticMeshComponent.h"
 #include "Dom/JsonObject.h"
+#include "Campaign1851Json.h"
 #include "Materials/MaterialInterface.h"
 #include "Math/NumericLimits.h"
 #include "Misc/FileHelper.h"
@@ -26,9 +27,9 @@ bool ACampaign1851Map::LoadNeighbours(FJsonObject& MapJson)
 		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|neighbours|ingen scenariedata; bevarer oprindeligt kort"));
 		return false;
 	}
-	const TSharedPtr<FJsonObject> NeighbourGrid = NeighbourJson->GetObjectField(TEXT("ownerGrid"));
-	NeighbourGrid->TryGetNumberField(TEXT("width"), NeighbourOwnerW);
-	NeighbourGrid->TryGetNumberField(TEXT("height"), NeighbourOwnerH);
+	const TSharedPtr<FJsonObject> NeighbourGrid = Campaign1851Json::Object(*NeighbourJson, TEXT("ownerGrid"));
+	if (!NeighbourGrid->TryGetNumberField(TEXT("width"), NeighbourOwnerW)
+		|| !NeighbourGrid->TryGetNumberField(TEXT("height"), NeighbourOwnerH)) { return false; }
 	if (NeighbourOwnerW <= 0 || NeighbourOwnerH <= 0 || NeighbourOwnerW > 2048 || NeighbourOwnerH > 2048
 		|| !FFileHelper::LoadFileToArray(NeighbourOwners, *(NeighbourDir / TEXT("Neighbours_Owners.bin")))
 		|| NeighbourOwners.Num() != NeighbourOwnerW * NeighbourOwnerH)
@@ -37,18 +38,22 @@ bool ACampaign1851Map::LoadNeighbours(FJsonObject& MapJson)
 		UE_LOG(LogTemp, Error, TEXT("CAMPAIGN-1851|neighbours|ugyldigt ejergrid"));
 		return false;
 	}
-	const TSharedPtr<FJsonObject> NeighbourIds = NeighbourGrid->GetObjectField(TEXT("ids"));
+	const TSharedPtr<FJsonObject> NeighbourIds = Campaign1851Json::Object(*NeighbourGrid, TEXT("ids"));
 	const TArray<TSharedPtr<FJsonValue>>* SouthRows = nullptr;
 	if (NeighbourJson->TryGetArrayField(TEXT("districts"), SouthRows))
 	{
 		for (const TSharedPtr<FJsonValue>& SouthValue : *SouthRows)
 		{
-			const TSharedPtr<FJsonObject> SouthRow = SouthValue->AsObject();
+			const TSharedPtr<FJsonObject> SouthRow = Campaign1851Json::Row(SouthValue);
+			double SouthRequiredPopulation = 0;
+			if (Campaign1851Json::String(*SouthRow, TEXT("id")).IsEmpty()
+				|| !SouthRow->TryGetNumberField(TEXT("population"), SouthRequiredPopulation) || SouthRequiredPopulation <= 0)
+			{ NeighbourDistricts.Reset(); return false; }
 			FCampaign1851NeighbourDistrict& SouthDistrict = NeighbourDistricts.AddDefaulted_GetRef();
-			SouthDistrict.Id = SouthRow->GetStringField(TEXT("id"));
-			SouthDistrict.Name = SouthRow->GetStringField(TEXT("name"));
-			SouthDistrict.Nation = SouthRow->GetStringField(TEXT("nation"));
-			SouthDistrict.Region = SouthRow->GetStringField(TEXT("region"));
+			SouthDistrict.Id = Campaign1851Json::String(*SouthRow, TEXT("id"));
+			SouthDistrict.Name = Campaign1851Json::String(*SouthRow, TEXT("name"));
+			SouthDistrict.Nation = Campaign1851Json::String(*SouthRow, TEXT("nation"));
+			SouthDistrict.Region = Campaign1851Json::String(*SouthRow, TEXT("region"));
 			// Seats are resolved after neighbour towns have been appended below.
 			SouthRow->TryGetNumberField(TEXT("population"), SouthDistrict.Population);
 			SouthRow->TryGetNumberField(TEXT("urban"), SouthDistrict.Urban);
@@ -71,28 +76,44 @@ bool ACampaign1851Map::LoadNeighbours(FJsonObject& MapJson)
 	}
 	for (const auto& NeighbourPair : NeighbourIds->Values)
 	{
-		NeighbourOwnerIds.Add(uint8(NeighbourPair.Value->AsNumber()), FString(NeighbourPair.Key.ToView()));
+		uint8 NeighbourOwnerId = 0;
+		if (NeighbourPair.Value->TryGetNumber(NeighbourOwnerId))
+		{ NeighbourOwnerIds.Add(NeighbourOwnerId, FString(NeighbourPair.Key.ToView())); }
 	}
-	for (const TSharedPtr<FJsonValue>& NeighbourValue : NeighbourJson->GetArrayField(TEXT("nations")))
+	for (const TSharedPtr<FJsonValue>& NeighbourValue : Campaign1851Json::Array(*NeighbourJson, TEXT("nations")))
 	{
-		const TSharedPtr<FJsonObject> NeighbourRow = NeighbourValue->AsObject();
-		const FString NeighbourId = NeighbourRow->GetStringField(TEXT("id"));
-		const TArray<TSharedPtr<FJsonValue>>& NeighbourRGB = NeighbourRow->GetArrayField(TEXT("colour"));
+		const TSharedPtr<FJsonObject> NeighbourRow = Campaign1851Json::Row(NeighbourValue);
+		const FString NeighbourId = Campaign1851Json::String(*NeighbourRow, TEXT("id"));
+		const TArray<TSharedPtr<FJsonValue>>& NeighbourRGB = Campaign1851Json::Array(*NeighbourRow, TEXT("colour"));
+		if (NeighbourId.IsEmpty() || NeighbourRGB.Num() != 3
+			|| NeighbourRGB[0]->Type != EJson::Number || NeighbourRGB[1]->Type != EJson::Number || NeighbourRGB[2]->Type != EJson::Number) { continue; }
 		NeighbourColours.Add(NeighbourId, FLinearColor::FromSRGBColor(FColor(uint8(NeighbourRGB[0]->AsNumber()), uint8(NeighbourRGB[1]->AsNumber()), uint8(NeighbourRGB[2]->AsNumber()))));
 		if (NeighbourId != TEXT("DK"))
 		{
+			double NeighbourLabelLat = 0, NeighbourLabelLon = 0;
+			if (!NeighbourRow->TryGetNumberField(TEXT("lat"), NeighbourLabelLat)
+				|| !NeighbourRow->TryGetNumberField(TEXT("lon"), NeighbourLabelLon)) { continue; }
 			FCampaign1851Label& NeighbourLabel = Labels.AddDefaulted_GetRef();
-			NeighbourLabel.Text = NeighbourRow->GetStringField(TEXT("name"));
-			NeighbourLabel.Lat = NeighbourRow->GetNumberField(TEXT("lat"));
-			NeighbourLabel.Lon = NeighbourRow->GetNumberField(TEXT("lon"));
+			NeighbourLabel.Text = Campaign1851Json::String(*NeighbourRow, TEXT("name"));
+			NeighbourRow->TryGetNumberField(TEXT("lat"), NeighbourLabel.Lat);
+			NeighbourRow->TryGetNumberField(TEXT("lon"), NeighbourLabel.Lon);
 			NeighbourLabel.Kind = TEXT("foreign");
 		}
 	}
-	for (const TSharedPtr<FJsonValue>& NeighbourValue : NeighbourJson->GetArrayField(TEXT("cities")))
+	for (const TSharedPtr<FJsonValue>& NeighbourValue : Campaign1851Json::Array(*NeighbourJson, TEXT("cities")))
 	{
-		const TSharedPtr<FJsonObject> NeighbourRow = NeighbourValue->AsObject();
-		const FString NeighbourName = NeighbourRow->GetStringField(TEXT("name"));
+		const TSharedPtr<FJsonObject> NeighbourRow = Campaign1851Json::Row(NeighbourValue);
+		const FString NeighbourName = Campaign1851Json::String(*NeighbourRow, TEXT("name"));
+		// An incomplete point never creates a town at (0,0) or with zero population.
+		bool NeighbourOnMap = true;
+		NeighbourRow->TryGetBoolField(TEXT("onMap"), NeighbourOnMap);
+		if (!NeighbourOnMap || NeighbourName.IsEmpty()) { continue; }
 		int32 NeighbourIndex = FindCity(NeighbourName);
+		double NeighbourLatitude = 0, NeighbourLongitude = 0;
+		int32 NeighbourPopulation = 0;
+		if (NeighbourIndex == INDEX_NONE && (!NeighbourRow->TryGetNumberField(TEXT("lat"), NeighbourLatitude)
+			|| !NeighbourRow->TryGetNumberField(TEXT("lon"), NeighbourLongitude)
+			|| !NeighbourRow->TryGetNumberField(TEXT("pop"), NeighbourPopulation) || NeighbourPopulation <= 0)) { continue; }
 		if (NeighbourIndex != INDEX_NONE && !Cities[NeighbourIndex].bForeign) { continue; }
 		if (NeighbourIndex == INDEX_NONE)
 		{
@@ -101,10 +122,10 @@ bool ACampaign1851Map::LoadNeighbours(FJsonObject& MapJson)
 		}
 		FCampaign1851City& NeighbourCity = Cities[NeighbourIndex];
 		NeighbourCity.bForeign = true;
-		NeighbourCity.Lat = NeighbourRow->GetNumberField(TEXT("lat"));
-		NeighbourCity.Lon = NeighbourRow->GetNumberField(TEXT("lon"));
-		NeighbourCity.Population = int32(NeighbourRow->GetNumberField(TEXT("pop")));
-		NeighbourCity.NationId = NeighbourRow->GetStringField(TEXT("owner"));
+		NeighbourRow->TryGetNumberField(TEXT("lat"), NeighbourCity.Lat);
+		NeighbourRow->TryGetNumberField(TEXT("lon"), NeighbourCity.Lon);
+		NeighbourRow->TryGetNumberField(TEXT("pop"), NeighbourCity.Population);
+		NeighbourRow->TryGetStringField(TEXT("owner"), NeighbourCity.NationId);
 		NeighbourRow->TryGetStringField(TEXT("region"), NeighbourCity.Region);
 		NeighbourRow->TryGetStringField(TEXT("fortName"), NeighbourCity.NeighbourFortName);
 		NeighbourRow->TryGetBoolField(TEXT("harbour"), NeighbourCity.bHarbour);
@@ -128,41 +149,47 @@ bool ACampaign1851Map::LoadNeighbours(FJsonObject& MapJson)
 		for (int32 SouthIndex = 0; SouthIndex < SouthRows->Num(); ++SouthIndex)
 		{
 			FCampaign1851NeighbourDistrict& SouthDistrict = NeighbourDistricts[SouthIndex];
-			SouthDistrict.Seat = FindCity((*SouthRows)[SouthIndex]->AsObject()->GetStringField(TEXT("seat")));
+			SouthDistrict.Seat = FindCity(Campaign1851Json::String(*Campaign1851Json::Row((*SouthRows)[SouthIndex]), TEXT("seat")));
 			SouthDistrict.Treasury = 3.0 * (SouthDistrict.Urban * SouthDistrict.UrbanTax + FMath::Max(0, SouthDistrict.Population - SouthDistrict.Urban) * SouthDistrict.RuralTax);
 		}
 	}
 	// Merge JSON network before its normal loader; do not reset or renumber existing links.
-	TArray<TSharedPtr<FJsonValue>> NeighbourLinks = MapJson.GetArrayField(TEXT("links"));
-	TArray<TSharedPtr<FJsonValue>> NeighbourRoads = MapJson.GetArrayField(TEXT("roads"));
-	for (const TSharedPtr<FJsonValue>& NeighbourValue : NeighbourJson->GetArrayField(TEXT("links")))
+	TArray<TSharedPtr<FJsonValue>> NeighbourLinks = Campaign1851Json::Array(MapJson, TEXT("links"));
+	TArray<TSharedPtr<FJsonValue>> NeighbourRoads = Campaign1851Json::Array(MapJson, TEXT("roads"));
+	for (const TSharedPtr<FJsonValue>& NeighbourValue : Campaign1851Json::Array(*NeighbourJson, TEXT("links")))
 	{
+		const TSharedPtr<FJsonObject> NeighbourLinkRow = Campaign1851Json::Row(NeighbourValue);
+		if (Campaign1851Json::Array(*NeighbourLinkRow, TEXT("km")).Num() < 2
+			|| Campaign1851Json::String(*NeighbourLinkRow, TEXT("a")).IsEmpty()
+			|| Campaign1851Json::String(*NeighbourLinkRow, TEXT("b")).IsEmpty()) { continue; }
 		NeighbourLinks.Add(NeighbourValue);
 		TSharedPtr<FJsonObject> NeighbourRoad = MakeShared<FJsonObject>();
-		NeighbourRoad->SetStringField(TEXT("kind"), NeighbourValue->AsObject()->GetNumberField(TEXT("ferryKm")) > 0 ? TEXT("ferry") : TEXT("main"));
-		NeighbourRoad->SetArrayField(TEXT("km"), NeighbourValue->AsObject()->GetArrayField(TEXT("km")));
+		double NeighbourFerryKm = 0; // absent/null ferry distance means no ferry
+		Campaign1851Json::Row(NeighbourValue)->TryGetNumberField(TEXT("ferryKm"), NeighbourFerryKm);
+		NeighbourRoad->SetStringField(TEXT("kind"), NeighbourFerryKm > 0 ? TEXT("ferry") : TEXT("main"));
+		NeighbourRoad->SetArrayField(TEXT("km"), Campaign1851Json::Array(*Campaign1851Json::Row(NeighbourValue), TEXT("km")));
 		NeighbourRoads.Add(MakeShared<FJsonValueObject>(NeighbourRoad));
 	}
 	MapJson.SetArrayField(TEXT("links"), MoveTemp(NeighbourLinks));
 	MapJson.SetArrayField(TEXT("roads"), MoveTemp(NeighbourRoads));
-	TArray<TSharedPtr<FJsonValue>> NeighbourRails = MapJson.GetArrayField(TEXT("railways"));
-	NeighbourRails.Append(NeighbourJson->GetArrayField(TEXT("railways")));
+	TArray<TSharedPtr<FJsonValue>> NeighbourRails = Campaign1851Json::Array(MapJson, TEXT("railways"));
+	NeighbourRails.Append(Campaign1851Json::Array(*NeighbourJson, TEXT("railways")));
 	MapJson.SetArrayField(TEXT("railways"), MoveTemp(NeighbourRails));
 	NeighbourText.Reset();
 	TSharedPtr<FJsonObject> NeighbourArmyJson;
 	if (FFileHelper::LoadFileToString(NeighbourText, *(NeighbourDir / (TEXT("Army_Neighbours_") + ActiveScenario().Id + TEXT(".json"))))
 		&& FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(NeighbourText), NeighbourArmyJson) && NeighbourArmyJson.IsValid())
 	{
-		for (const TSharedPtr<FJsonValue>& NeighbourValue : NeighbourArmyJson->GetArrayField(TEXT("armies")))
+		for (const TSharedPtr<FJsonValue>& NeighbourValue : Campaign1851Json::Array(*NeighbourArmyJson, TEXT("armies")))
 		{
-			const TSharedPtr<FJsonObject> NeighbourRow = NeighbourValue->AsObject();
+			const TSharedPtr<FJsonObject> NeighbourRow = Campaign1851Json::Row(NeighbourValue);
 			FCampaign1851NeighbourArmy NeighbourArmy;
-			NeighbourArmy.Id = NeighbourRow->GetStringField(TEXT("id"));
-			NeighbourArmy.Name = NeighbourRow->GetStringField(TEXT("name"));
-			NeighbourArmy.Nation = NeighbourRow->GetStringField(TEXT("nation"));
-			NeighbourArmy.Town = FindCity(NeighbourRow->GetStringField(TEXT("town")));
-			NeighbourRow->TryGetNumberField(TEXT("men"), NeighbourArmy.Men);
-			NeighbourRow->TryGetNumberField(TEXT("mobilisedMen"), NeighbourArmy.MobilisedMen);
+			NeighbourArmy.Id = Campaign1851Json::String(*NeighbourRow, TEXT("id"));
+			NeighbourArmy.Name = Campaign1851Json::String(*NeighbourRow, TEXT("name"));
+			NeighbourArmy.Nation = Campaign1851Json::String(*NeighbourRow, TEXT("nation"));
+			NeighbourArmy.Town = FindCity(Campaign1851Json::String(*NeighbourRow, TEXT("town")));
+			if (!NeighbourRow->TryGetNumberField(TEXT("men"), NeighbourArmy.Men)
+				|| !NeighbourRow->TryGetNumberField(TEXT("mobilisedMen"), NeighbourArmy.MobilisedMen)) { continue; }
 			NeighbourRow->TryGetNumberField(TEXT("guns"), NeighbourArmy.Guns);
 			NeighbourRow->TryGetBoolField(TEXT("garrison"), NeighbourArmy.bGarrison);
 			NeighbourRow->TryGetStringField(TEXT("district"), NeighbourArmy.District);
@@ -175,14 +202,16 @@ bool ACampaign1851Map::LoadNeighbours(FJsonObject& MapJson)
 				if (!NeighbourRow->TryGetArrayField(SouthArmField, SouthUnits)) { continue; }
 				for (const TSharedPtr<FJsonValue>& SouthUnit : *SouthUnits)
 				{
-					const TSharedPtr<FJsonObject> SouthUnitRow = SouthUnit->AsObject();
-					NeighbourArmy.Subunits.Add(FString::Printf(TEXT("%s: %d mand"), *SouthUnitRow->GetStringField(TEXT("name")), int32(SouthUnitRow->GetNumberField(TEXT("men")))));
+					const TSharedPtr<FJsonObject> SouthUnitRow = Campaign1851Json::Row(SouthUnit);
+					int32 SouthSubunitMen = 0;
+					if (!SouthUnitRow->TryGetNumberField(TEXT("men"), SouthSubunitMen)) { continue; }
+					NeighbourArmy.Subunits.Add(FString::Printf(TEXT("%s: %d mand"), *Campaign1851Json::String(*SouthUnitRow, TEXT("name")), SouthSubunitMen));
 				}
 			}
-			if (Cities.IsValidIndex(NeighbourArmy.Town)) { NeighbourArmyAtStart.Add(NeighbourArmy); }
+			if (!NeighbourArmy.Id.IsEmpty() && Cities.IsValidIndex(NeighbourArmy.Town)) { NeighbourArmyAtStart.Add(NeighbourArmy); }
 		}
 	}
-	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|neighbours|scenarie=%s|byer=%d|hære=%d|grid=%dx%d"), *ActiveScenario().Id, NeighbourJson->GetArrayField(TEXT("cities")).Num(), NeighbourArmyAtStart.Num(), NeighbourOwnerW, NeighbourOwnerH);
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|neighbours|scenarie=%s|byer=%d|hære=%d|grid=%dx%d"), *ActiveScenario().Id, Campaign1851Json::Array(*NeighbourJson, TEXT("cities")).Num(), NeighbourArmyAtStart.Num(), NeighbourOwnerW, NeighbourOwnerH);
 	return true;
 }
 

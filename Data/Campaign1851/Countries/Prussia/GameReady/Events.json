@@ -1,0 +1,698 @@
+[
+  {
+    "id": "pr_1848",
+    "navn": "Preussen intervenerer i Slesvig-Holsten",
+    "vindue": {
+      "aar": 1848,
+      "maaned": 4,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "spaending >= 40 og forhold.PR < 0",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": 10,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": 0,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "avis": "Preussen intervenerer i Slesvig-Holsten",
+    "log": "Preussen intervenerer i Slesvig-Holsten",
+    "source": "WAR",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Dato/emne historisk; betingelse, sandsynlighed og effekt er egne spilvalg. Før startdatoen skal posten initialisere historik, ikke afspilles igen.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      }
+    }
+  },
+  {
+    "id": "pr_malmo",
+    "navn": "Våbenstilstanden i Malmø",
+    "vindue": {
+      "aar": 1848,
+      "maaned": 8,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "spaending >= 40",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": -10,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": 0,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "avis": "Våbenstilstanden i Malmø",
+    "log": "Våbenstilstanden i Malmø",
+    "source": "WAR",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Dato/emne historisk; betingelse, sandsynlighed og effekt er egne spilvalg. Før startdatoen skal posten initialisere historik, ikke afspilles igen.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      }
+    }
+  },
+  {
+    "id": "pr_berlinpeace",
+    "navn": "Preussen slutter fred med Danmark",
+    "vindue": {
+      "aar": 1850,
+      "maaned": 7,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "spaending >= 40",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": -15,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": 0,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "avis": "Preussen slutter fred med Danmark",
+    "log": "Preussen slutter fred med Danmark",
+    "source": "WAR",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Dato/emne historisk; betingelse, sandsynlighed og effekt er egne spilvalg. Før startdatoen skal posten initialisere historik, ikke afspilles igen.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      }
+    }
+  },
+  {
+    "id": "pr_olmuetz",
+    "navn": "Olmütz: preussisk tilbagetog over for Østrig",
+    "vindue": {
+      "aar": 1850,
+      "maaned": 11,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "forhold.PR < 30",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": -5,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": 0,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "avis": "Olmütz: preussisk tilbagetog over for Østrig",
+    "log": "Olmütz: preussisk tilbagetog over for Østrig",
+    "source": "MANTEUFFEL",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Dato/emne historisk; betingelse, sandsynlighed og effekt er egne spilvalg. Før startdatoen skal posten initialisere historik, ikke afspilles igen.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      }
+    }
+  },
+  {
+    "id": "pr_1851",
+    "navn": "Afvikling af den slesvig-holstenske opstand",
+    "vindue": {
+      "aar": 1851,
+      "maaned": 1,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "spaending >= 30",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": -10,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": 0,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "avis": "Afvikling af den slesvig-holstenske opstand",
+    "log": "Afvikling af den slesvig-holstenske opstand",
+    "source": "WAR",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Dato/emne historisk; betingelse, sandsynlighed og effekt er egne spilvalg. Før startdatoen skal posten initialisere historik, ikke afspilles igen.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      }
+    }
+  },
+  {
+    "id": "pr_zollverein",
+    "navn": "Zollverein træder i kraft",
+    "vindue": {
+      "aar": 1834,
+      "maaned": 1,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "ikke mobiliseret",
+    "blokeringer": "",
+    "effekter": {
+      "kasse": 0,
+      "fieldStatus": {
+        "kasse": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": 0,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "avis": "Zollverein træder i kraft",
+    "log": "Zollverein træder i kraft",
+    "source": "ZOLL",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Dato/emne historisk; betingelse, sandsynlighed og effekt er egne spilvalg. Før startdatoen skal posten initialisere historik, ikke afspilles igen.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      }
+    }
+  },
+  {
+    "id": "pr_hannover_zoll",
+    "navn": "Toldaftale med Hannover",
+    "vindue": {
+      "aar": 1851,
+      "maaned": 9,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "ikke mobiliseret",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": -1,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": 0,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "avis": "Toldaftale med Hannover",
+    "log": "Toldaftale med Hannover",
+    "source": "ZOLL",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Dato/emne historisk; betingelse, sandsynlighed og effekt er egne spilvalg. Før startdatoen skal posten initialisere historik, ikke afspilles igen.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      }
+    }
+  },
+  {
+    "id": "pr_roon1859",
+    "navn": "Roon og forberedelsen af hærreform",
+    "vindue": {
+      "aar": 1859,
+      "maaned": 12,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "forhold.PR < 50",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": 1,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": 0,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "avis": "Roon og forberedelsen af hærreform",
+    "log": "Roon og forberedelsen af hærreform",
+    "source": "ROON-BIO",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Dato/emne historisk; betingelse, sandsynlighed og effekt er egne spilvalg. Før startdatoen skal posten initialisere historik, ikke afspilles igen.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      }
+    }
+  },
+  {
+    "id": "pr_roon1860",
+    "navn": "Roons reformforslag skaber budgetkonflikt",
+    "vindue": {
+      "aar": 1860,
+      "maaned": 1,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "forhold.PR < 50",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": 3,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": 0,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "avis": "Roons reformforslag skaber budgetkonflikt",
+    "log": "Roons reformforslag skaber budgetkonflikt",
+    "source": "ROON",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Dato/emne historisk; betingelse, sandsynlighed og effekt er egne spilvalg. Før startdatoen skal posten initialisere historik, ikke afspilles igen.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      }
+    }
+  },
+  {
+    "id": "london",
+    "navn": "Londontraktaten 1852: integritet og arvefølge anerkendes",
+    "vindue": {
+      "aar": 1852,
+      "maaned": 5,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "forhold.GB >= 45 og ikke mobiliseret",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": -10,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": 3,
+      "kasse": -2500,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "kasse": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "avis": "Londontraktaten 1852: integritet og arvefølge anerkendes",
+    "log": "Londontraktaten 1852: integritet og arvefølge anerkendes",
+    "source": "LONDON",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Erstatning/upsert for eksisterende id; må ikke tilføjes som dublet. Alle betingelser/effekter er spilvalg. Ingen militær bistandsgaranti; ikke aktiv 1. juli 1851.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      }
+    }
+  },
+  {
+    "id": "execution",
+    "navn": "Forbundseksekutionen: saksiske og hannoveranske tropper rykker ind i Holsten",
+    "vindue": {
+      "aar": 1863,
+      "maaned": 12,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "spaending >= 60 og forhold.PR < 30",
+    "blokeringer": "maegling",
+    "effekter": {
+      "spaending": 12,
+      "forbundskorps": 1,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "forbundskorps": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "kasse": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "avis": "Forbundseksekutionen: saksiske og hannoveranske tropper rykker ind i Holsten",
+    "log": "Forbundseksekutionen: saksiske og hannoveranske tropper rykker ind i Holsten",
+    "source": "WAR",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Erstatning/upsert for eksisterende id; må ikke tilføjes som dublet. Alle betingelser/effekter er spilvalg. Hannoveranske og saksiske eksekutionstropper; ikke en preussisk besættelse af Holsten i 1851.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      }
+    }
+  },
+  {
+    "id": "ultimatum",
+    "navn": "Preussen og Østrig stiller ultimatum: Novemberforfatningen skal ophæves på 48 timer",
+    "vindue": {
+      "aar": 1864,
+      "maaned": 1,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "sandsynlighed": 0.85,
+    "forudsaetninger": "spaending >= 70 og ikke maegling",
+    "blokeringer": "garant.GB og garant.RU",
+    "effekter": {
+      "spaending": 15,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": -3,
+      "kasse": 2500,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "kasse": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        }
+      }
+    },
+    "avis": "Preussen og Østrig stiller ultimatum: Novemberforfatningen skal ophæves på 48 timer",
+    "log": "Preussen og Østrig stiller ultimatum: Novemberforfatningen skal ophæves på 48 timer",
+    "source": "ULTIMATUM",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Erstatning/upsert for eksisterende id; må ikke tilføjes som dublet. Alle betingelser/effekter er spilvalg. Januarvindue undgår uklar dag; 16./17. januar i specialstudiet, 6. januar i Lex-oversigt.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      }
+    }
+  }
+]

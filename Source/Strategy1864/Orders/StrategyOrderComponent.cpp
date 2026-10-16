@@ -272,7 +272,9 @@ void UStrategyOrderComponent::ResolveAttackDestination(FStrategyOrder& AttackOrd
     if (AttackBack.IsNearlyZero()) AttackBack = -AttackUnit->GetActorForwardVector();
     // The lines are rarely parallel. The unit stands where the corner of its line that is farthest from the enemy still reaches the
     // nearest point of his front: it may go a little further than the plain distance, so the whole first rank can fire.
-    const float AttackReach = AttackRange - 300.0f;
+    // The reach is clearly INSIDE the range (about 88 %, at least 5 m): fire control lets a marching unit open fire only when the enemy's
+    // far corner is within the range, so a stand-off on the arc itself (range minus 3 m, as before) left part of the front unable to fire.
+    const float AttackReach = AttackUnit->FireControlComponent->GetApproachStandRangeCm();
     float AttackStand = AttackReach;
     // The order's own sideways place (the flank plan gives every company a lateral slot) is kept: the stand-off point is
     // measured along the line from the enemy, then moved sideways by the same amount, so the companies stand side by side
@@ -318,7 +320,7 @@ void UStrategyOrderComponent::ResolveAttackDestination(FStrategyOrder& AttackOrd
     AttackOrder.TargetLocation.Z = AttackUnit->GetActorLocation().Z;
     AttackOrder.FacingYaw = (-AttackBack).Rotation().Yaw;
     AttackOrder.bHasFacing = true;
-    if (FVector::Dist2D(AttackUnit->GetActorLocation(), AttackFoe) < AttackRange - 300.f)
+    if (FVector::Dist2D(AttackUnit->GetActorLocation(), AttackFoe) < AttackStand - 300.f)
         AttackOrder.bKeepFacing = true; // Already too close: back out facing the enemy.
     if (!AttackOrder.Waypoints.IsEmpty()) AttackOrder.Waypoints.Last() = AttackOrder.TargetLocation;
 }

@@ -1,0 +1,122 @@
+{
+  "sovereign": {
+    "name": "Karl XIV Johan",
+    "born": 1763,
+    "government": "Konstitutionelt monarki i personalunion"
+  },
+  "note": "Historiske personer. Otte semantiske ressorter fordeles som spilvalg; samme person kan dække flere, men må ikke ansættes flere gange. Navy/Foreign kan være stedfortrædende kandidat, ikke faktisk ressortchef. Ni 1–10-statistikker er skøn; skill/thrift/caution er skøn på 0–100.",
+  "portfolios": [
+    {
+      "portfolio": "Interior",
+      "candidates": [
+        {
+          "name": "Gustaf af Wetterstedt",
+          "born": 1776,
+          "role": "udenrigsminister; Interior-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "PublicWorks",
+      "candidates": [
+        {
+          "name": "Baltzar Bogislaus von Platen",
+          "born": 1766,
+          "role": "kanalbygger og statsmand; PublicWorks-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "War",
+      "candidates": [
+        {
+          "name": "Magnus Fredrik Ferdinand Björnstjerna",
+          "born": 1779,
+          "role": "generaladjudant/stabschef; War-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Transport",
+      "candidates": [
+        {
+          "name": "Baltzar Bogislaus von Platen",
+          "born": 1766,
+          "role": "kanalbygger og statsmand; Transport-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Intendance",
+      "candidates": [
+        {
+          "name": "Magnus Fredrik Ferdinand Björnstjerna",
+          "born": 1779,
+          "role": "generaladjudant/stabschef; Intendance-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Foreign",
+      "candidates": [
+        {
+          "name": "Gustaf af Wetterstedt",
+          "born": 1776,
+          "role": "udenrigsminister; Foreign-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Navy",
+      "candidates": [
+        {
+          "name": "Magnus Fredrik Ferdinand Björnstjerna",
+          "born": 1779,
+          "role": "generaladjudant/stabschef; Navy-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Finance",
+      "candidates": [
+        {
+          "name": "Gustaf af Wetterstedt",
+          "born": 1776,
+          "role": "udenrigsminister; Finance-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    }
+  ]
+}

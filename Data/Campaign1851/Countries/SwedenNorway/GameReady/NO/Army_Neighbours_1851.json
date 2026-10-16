@@ -1,0 +1,115 @@
+{
+  "scenario": "1851",
+  "note": "Runde 6 cirkamodel. Alle garnisoner og felthæren er allokeringer af national OOB. Fredsgarnisonen kan kræve indkaldelse fra lokal pulje; ingen påstand om faktisk dagligt fremmøde.",
+  "armies": [
+    {
+      "id": "garrison-Kristiania/Oslo",
+      "name": "Garnison i Kristiania/Oslo",
+      "nation": "NO",
+      "town": "Kristiania/Oslo",
+      "garrison": true,
+      "men": 450,
+      "mobilisedMen": 450,
+      "guns": 24,
+      "district": ""
+    },
+    {
+      "id": "garrison-Fredrikshald/Fredriksten",
+      "name": "Garnison i Fredrikshald/Fredriksten",
+      "nation": "NO",
+      "town": "Fredrikshald/Fredriksten",
+      "garrison": true,
+      "men": 400,
+      "mobilisedMen": 400,
+      "guns": 40,
+      "district": ""
+    },
+    {
+      "id": "garrison-Fredrikstad",
+      "name": "Garnison i Fredrikstad",
+      "nation": "NO",
+      "town": "Fredrikstad",
+      "garrison": true,
+      "men": 300,
+      "mobilisedMen": 300,
+      "guns": 24,
+      "district": ""
+    },
+    {
+      "id": "garrison-Moss",
+      "name": "Garnison i Moss",
+      "nation": "NO",
+      "town": "Moss",
+      "garrison": true,
+      "men": 25,
+      "mobilisedMen": 25,
+      "guns": 0,
+      "district": ""
+    },
+    {
+      "id": "garrison-Drammen",
+      "name": "Garnison i Drammen",
+      "nation": "NO",
+      "town": "Drammen",
+      "garrison": true,
+      "men": 25,
+      "mobilisedMen": 25,
+      "guns": 0,
+      "district": ""
+    },
+    {
+      "id": "garrison-Tønsberg",
+      "name": "Garnison i Tønsberg",
+      "nation": "NO",
+      "town": "Tønsberg",
+      "garrison": true,
+      "men": 25,
+      "mobilisedMen": 25,
+      "guns": 0,
+      "district": ""
+    },
+    {
+      "id": "garrison-Larvik",
+      "name": "Garnison i Larvik",
+      "nation": "NO",
+      "town": "Larvik",
+      "garrison": true,
+      "men": 25,
+      "mobilisedMen": 25,
+      "guns": 0,
+      "district": ""
+    },
+    {
+      "id": "garrison-Horten",
+      "name": "Garnison i Horten",
+      "nation": "NO",
+      "town": "Horten",
+      "garrison": true,
+      "men": 150,
+      "mobilisedMen": 150,
+      "guns": 8,
+      "district": ""
+    },
+    {
+      "id": "garrison-Drøbak",
+      "name": "Garnison i Drøbak",
+      "nation": "NO",
+      "town": "Drøbak",
+      "garrison": true,
+      "men": 80,
+      "mobilisedMen": 80,
+      "guns": 10,
+      "district": ""
+    },
+    {
+      "id": "NO-field",
+      "name": "Norsk linjefelthær",
+      "nation": "NO",
+      "town": "Kristiania/Oslo",
+      "garrison": false,
+      "men": 1040,
+      "mobilisedMen": 4300,
+      "guns": 24
+    }
+  ]
+}

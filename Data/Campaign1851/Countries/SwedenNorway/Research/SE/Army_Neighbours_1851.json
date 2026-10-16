@@ -1,0 +1,2352 @@
+{
+  "scenario": "1851",
+  "note": "Runde 6 cirkamodel. Alle garnisoner og felthæren er allokeringer af national OOB. Fredsgarnisonen kan kræve indkaldelse fra lokal pulje; ingen påstand om faktisk dagligt fremmøde.",
+  "armies": [
+    {
+      "id": "garrison-Malmø",
+      "name": "Garnison i Malmø",
+      "nation": "SE",
+      "town": "Malmø",
+      "garrison": true,
+      "men": 400,
+      "mobilisedMen": 400,
+      "guns": 8,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260.0,
+            540.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            5.2,
+            10.8
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260.0,
+            540.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_SS",
+          "men": 400
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Helsingborg",
+      "name": "Garnison i Helsingborg",
+      "nation": "SE",
+      "town": "Helsingborg",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_SK_H",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Landskrona",
+      "name": "Garnison i Landskrona",
+      "nation": "SE",
+      "town": "Landskrona",
+      "garrison": true,
+      "men": 400,
+      "mobilisedMen": 400,
+      "guns": 12,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260.0,
+            540.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            7.8,
+            16.2
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            260.0,
+            540.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_NS",
+          "men": 400
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Lund",
+      "name": "Garnison i Lund",
+      "nation": "SE",
+      "town": "Lund",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_NS",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Ystad",
+      "name": "Garnison i Ystad",
+      "nation": "SE",
+      "town": "Ystad",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_SK_D",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Trelleborg",
+      "name": "Garnison i Trelleborg",
+      "nation": "SE",
+      "town": "Trelleborg",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_NS",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Kristianstad",
+      "name": "Garnison i Kristianstad",
+      "nation": "SE",
+      "town": "Kristianstad",
+      "garrison": true,
+      "men": 650,
+      "mobilisedMen": 650,
+      "guns": 12,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            422.5,
+            877.5
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            7.8,
+            16.2
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            422.5,
+            877.5
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_NS",
+          "men": 370
+        },
+        {
+          "regimentId": "SE_VENDES_A",
+          "men": 280
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Karlskrona",
+      "name": "Garnison i Karlskrona",
+      "nation": "SE",
+      "town": "Karlskrona",
+      "garrison": true,
+      "men": 1200,
+      "mobilisedMen": 1200,
+      "guns": 36,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            780.0,
+            1620.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            23.4,
+            48.6
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            780.0,
+            1620.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_SS",
+          "men": 452
+        },
+        {
+          "regimentId": "SE_KRON",
+          "men": 748
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Halmstad",
+      "name": "Garnison i Halmstad",
+      "nation": "SE",
+      "town": "Halmstad",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_HALL",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Göteborg",
+      "name": "Garnison i Göteborg",
+      "nation": "SE",
+      "town": "Göteborg",
+      "garrison": true,
+      "men": 500,
+      "mobilisedMen": 500,
+      "guns": 20,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            325.0,
+            675.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            13.0,
+            27.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            325.0,
+            675.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_GOTA_A",
+          "men": 500
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Varberg",
+      "name": "Garnison i Varberg",
+      "nation": "SE",
+      "town": "Varberg",
+      "garrison": true,
+      "men": 80,
+      "mobilisedMen": 80,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            52.0,
+            108.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            52.0,
+            108.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_KRON",
+          "men": 80
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Karlshamn",
+      "name": "Garnison i Karlshamn",
+      "nation": "SE",
+      "town": "Karlshamn",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_KRON",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Kalmar",
+      "name": "Garnison i Kalmar",
+      "nation": "SE",
+      "town": "Kalmar",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_KAL",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Jönköping",
+      "name": "Garnison i Jönköping",
+      "nation": "SE",
+      "town": "Jönköping",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_JON",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Växjö",
+      "name": "Garnison i Växjö",
+      "nation": "SE",
+      "town": "Växjö",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_KRON",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Västervik",
+      "name": "Garnison i Västervik",
+      "nation": "SE",
+      "town": "Västervik",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_KRON",
+          "men": 27
+        },
+        {
+          "regimentId": "SE_JON",
+          "men": 13
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Borås",
+      "name": "Garnison i Borås",
+      "nation": "SE",
+      "town": "Borås",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_ELF",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Marstrand",
+      "name": "Garnison i Marstrand",
+      "nation": "SE",
+      "town": "Marstrand",
+      "garrison": true,
+      "men": 250,
+      "mobilisedMen": 250,
+      "guns": 24,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            162.5,
+            337.5
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            15.6,
+            32.4
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            162.5,
+            337.5
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_JON",
+          "men": 250
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Eksjö",
+      "name": "Garnison i Eksjö",
+      "nation": "SE",
+      "town": "Eksjö",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_SM_GR",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Uddevalla",
+      "name": "Garnison i Uddevalla",
+      "nation": "SE",
+      "town": "Uddevalla",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_BOH",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Strömstad",
+      "name": "Garnison i Strömstad",
+      "nation": "SE",
+      "town": "Strömstad",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_JON",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Karlsborg",
+      "name": "Garnison i Karlsborg",
+      "nation": "SE",
+      "town": "Karlsborg",
+      "garrison": true,
+      "men": 300,
+      "mobilisedMen": 300,
+      "guns": 12,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            195.0,
+            405.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            7.8,
+            16.2
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            195.0,
+            405.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_JON",
+          "men": 300
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Lidköping",
+      "name": "Garnison i Lidköping",
+      "nation": "SE",
+      "town": "Lidköping",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_JON",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Vänersborg",
+      "name": "Garnison i Vänersborg",
+      "nation": "SE",
+      "town": "Vänersborg",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_VG",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Vadstena",
+      "name": "Garnison i Vadstena",
+      "nation": "SE",
+      "town": "Vadstena",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_JON",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Norrköping",
+      "name": "Garnison i Norrköping",
+      "nation": "SE",
+      "town": "Norrköping",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_JON",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Linköping",
+      "name": "Garnison i Linköping",
+      "nation": "SE",
+      "town": "Linköping",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_LG1",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Skara",
+      "name": "Garnison i Skara",
+      "nation": "SE",
+      "town": "Skara",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_SKAR",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Mariestad",
+      "name": "Garnison i Mariestad",
+      "nation": "SE",
+      "town": "Mariestad",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_JON",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "garrison-Stockholm",
+      "name": "Garnison i Stockholm",
+      "nation": "SE",
+      "town": "Stockholm",
+      "garrison": true,
+      "men": 40,
+      "mobilisedMen": 40,
+      "guns": 0,
+      "district": "",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "method": "Garnisonsallokering fra regimenternes mobiliserbare pulje; ikke ekstra mænd. Bestykning er operativt cirkaskøn.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            26.0,
+            54.0
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "method": "En uge til svensk lokal vagt, længere norsk indkaldelse; 50 % usikkerhed.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4.55,
+            9.45
+          ]
+        }
+      },
+      "note": "En city.garrison-reference, ikke yderligere soldater der må lægges til regimenterne.",
+      "drawsFrom": [
+        {
+          "regimentId": "SE_SVEA_G",
+          "men": 40
+        }
+      ],
+      "mobilisationDays": 7
+    },
+    {
+      "id": "SE-field",
+      "name": "Svensk sydlig felthær",
+      "nation": "SE",
+      "town": "Kristianstad",
+      "garrison": false,
+      "men": 4451,
+      "mobilisedMen": 12689,
+      "guns": 72,
+      "mobilisationDays": 21,
+      "note": "drawsFrom er eneste spawn-ledger. men og mobilisedMen er to tilstande af samme mænd. Garnisonerne er trukket fra; ingen unionshær lægges oveni.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Sydteatrets fredstilstedeværelse; visningsværdi, ikke ekstra spawn-pulje.",
+          "method": "Sydteatrets fredstilstedeværelse; visningsværdi, ikke ekstra spawn-pulje.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            2893.15,
+            6008.85
+          ]
+        },
+        "mobilisedMen": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Sydteatrets regimenter minus faktisk allokerede garnisoner; nationalt bagland og landværn udeladt.",
+          "method": "Sydteatrets regimenter minus faktisk allokerede garnisoner; nationalt bagland og landværn udeladt.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            8247.85,
+            17130.15
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Sydteatrets første feltartilleri; skøn over batterier, ikke alle arsenal-/fæstningskanoner.",
+          "method": "Sydteatrets første feltartilleri; skøn over batterier, ikke alle arsenal-/fæstningskanoner.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            46.8,
+            97.2
+          ]
+        },
+        "mobilisationDays": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Lokalt indkald plus samling og hesterekvisition; 1851 planlægning hurtigere, men ingen jernbanetransport.",
+          "method": "Lokalt indkald plus samling og hesterekvisition; 1851 planlægning hurtigere, men ingen jernbanetransport.",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            13.65,
+            28.35
+          ]
+        }
+      },
+      "drawsFrom": [
+        {
+          "regimentId": "SE_JON",
+          "men": 132
+        },
+        {
+          "regimentId": "SE_KAL",
+          "men": 895
+        },
+        {
+          "regimentId": "SE_BOH",
+          "men": 725
+        },
+        {
+          "regimentId": "SE_ELF",
+          "men": 980
+        },
+        {
+          "regimentId": "SE_SKAR",
+          "men": 980
+        },
+        {
+          "regimentId": "SE_SM_H",
+          "men": 510
+        },
+        {
+          "regimentId": "SE_SK_H",
+          "men": 810
+        },
+        {
+          "regimentId": "SE_SK_D",
+          "men": 810
+        },
+        {
+          "regimentId": "SE_GOTA_A",
+          "men": 350
+        },
+        {
+          "regimentId": "SE_VENDES_A",
+          "men": 570
+        },
+        {
+          "regimentId": "SE_LG1",
+          "men": 980
+        },
+        {
+          "regimentId": "SE_LG2",
+          "men": 850
+        },
+        {
+          "regimentId": "SE_VG",
+          "men": 810
+        },
+        {
+          "regimentId": "SE_SM_GR",
+          "men": 385
+        },
+        {
+          "regimentId": "SE_VGD",
+          "men": 850
+        },
+        {
+          "regimentId": "SE_VAR",
+          "men": 772
+        },
+        {
+          "regimentId": "SE_VAR_J",
+          "men": 510
+        },
+        {
+          "regimentId": "SE_HALL",
+          "men": 260
+        },
+        {
+          "regimentId": "SE_HUS_K",
+          "men": 510
+        }
+      ]
+    }
+  ]
+}

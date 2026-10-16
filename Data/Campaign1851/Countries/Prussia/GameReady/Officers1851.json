@@ -1,0 +1,202 @@
+{
+  "note": "Preussen, dateret importgrundlag. Kilde/skøn/spil står i fieldStatus og Data-status.json. Delvist overlay; null kræver håndtering, ikke nulkonvertering. Ingen motor-/slagtest.",
+  "stats": [
+    "leadership",
+    "inspiration",
+    "initiative",
+    "tactical",
+    "staff",
+    "discipline",
+    "aggression",
+    "composure",
+    "political"
+  ],
+  "generals": [
+    {
+      "id": "PR_WRANGEL",
+      "name": "Friedrich von Wrangel",
+      "rank": "General af kavalleriet",
+      "born": 1784,
+      "leadership": 5,
+      "inspiration": 5,
+      "initiative": 5,
+      "tactical": 5,
+      "staff": 5,
+      "discipline": 5,
+      "aggression": 5,
+      "composure": 5,
+      "political": 5,
+      "experience": 50,
+      "nation": "PR",
+      "source": "WRANGEL",
+      "note": "Ni neutrale egenskaber som spilskøn; ikke en historisk rangering. 1851: Wrangel med orlovsforbehold; Stockhausen krigsminister, ikke automatisk feltchef.",
+      "fieldStatus": {
+        "born": {
+          "status": "kilde",
+          "source": "WRANGEL",
+          "reason": "Biografisk fødselsår."
+        },
+        "leadership": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "inspiration": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "initiative": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "tactical": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "staff": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "discipline": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "aggression": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "composure": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "political": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        }
+      }
+    },
+    {
+      "id": "PR_STOCKHAUSEN",
+      "name": "August von Stockhausen",
+      "rank": "Generalløjtnant",
+      "born": null,
+      "leadership": 5,
+      "inspiration": 5,
+      "initiative": 5,
+      "tactical": 5,
+      "staff": 5,
+      "discipline": 5,
+      "aggression": 5,
+      "composure": 5,
+      "political": 5,
+      "experience": 50,
+      "nation": "PR",
+      "source": "STOCKHAUSEN",
+      "note": "Ni neutrale egenskaber som spilskøn; ikke en historisk rangering. 1851: Wrangel med orlovsforbehold; Stockhausen krigsminister, ikke automatisk feltchef.",
+      "fieldStatus": {
+        "born": {
+          "status": "skøn",
+          "source": "STOCKHAUSEN",
+          "reason": "Fødselsår ikke afskrevet sikkert i læst artikel."
+        },
+        "leadership": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "inspiration": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "initiative": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "tactical": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "staff": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "discipline": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "aggression": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "composure": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "political": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+        }
+      }
+    }
+  ],
+  "firstNames": [],
+  "surnames": [],
+  "pay": {
+    "officer": null,
+    "general": null,
+    "fieldStatus": {
+      "officer": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "general": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "recruitCost": {
+    "officer": null,
+    "general": null,
+    "fieldStatus": {
+      "officer": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "general": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  }
+}

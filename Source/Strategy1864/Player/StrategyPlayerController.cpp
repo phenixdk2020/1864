@@ -28,6 +28,9 @@ AStrategyPlayerController::AStrategyPlayerController()
 {
     PrimaryActorTick.bCanEverTick = true;
     PrimaryActorTick.bTickEvenWhenPaused = true;   // right-click orders must work while the battle is paused
+    // Under pause the engine only runs input and Tick(), not PlayerTick(), unless this is set; the right mouse
+    // (TickRightMouse) and the selection box live in PlayerTick, so without it right-click did nothing while paused.
+    bShouldPerformFullTickWhenPaused = true;
     bShowMouseCursor = true;
     bEnableClickEvents = true;
     bEnableMouseOverEvents = true;

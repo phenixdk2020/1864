@@ -1,0 +1,112 @@
+{
+  "note": "Hashliste; manifestet og efterfølgende kontrolrapport har ingen selvhash.",
+  "readyForImport": false,
+  "readyForBattle": false,
+  "files": [
+    {
+      "file": "Spilimport/Army1851.json",
+      "bytes": 153774,
+      "sha256": "8d3aee94154e0a57557c35802f633b0201d1c126c4524ee3dc5dc3f0a90a8b52"
+    },
+    {
+      "file": "Spilimport/Army_1825.json",
+      "bytes": 33796,
+      "sha256": "0d684aa51f3b2946db7de6e37c4e1d8f99d74ced75a56b4170f1740842c24ad7"
+    },
+    {
+      "file": "Spilimport/Army_Neighbours_1825.json",
+      "bytes": 75464,
+      "sha256": "b8fbd0ebddf14c0f4ecce8bbe594d50025313171db010344372a06039731af2d"
+    },
+    {
+      "file": "Spilimport/Army_Neighbours_1851.json",
+      "bytes": 75464,
+      "sha256": "281cd899a8dd983d3fc2ec28c43d5a2a4a52865437510c0d2a29929df866f77c"
+    },
+    {
+      "file": "Spilimport/cities_neighbours_1825.json",
+      "bytes": 294875,
+      "sha256": "ef5da29b7db13e62269fe476334f1b974c16814bd00654fa3614b552c7b9080e"
+    },
+    {
+      "file": "Spilimport/cities_neighbours_1851.json",
+      "bytes": 311424,
+      "sha256": "9a795e4067ebcd8c4b827943757403a97f5fc4abedf3b92140dcd6d2bd434473"
+    },
+    {
+      "file": "Spilimport/Data-status.json",
+      "bytes": 2738377,
+      "sha256": "5b9ad7b3e5f47e5672231dc3e5118eb6b9adf33e9a593adecdf4fba663daecf5"
+    },
+    {
+      "file": "Spilimport/Economy_1825.json",
+      "bytes": 5552,
+      "sha256": "2d10dc945457d6370b0bcc696a61a6012e384926668d28dc466c4c70a6064d70"
+    },
+    {
+      "file": "Spilimport/Economy_1851.json",
+      "bytes": 6178,
+      "sha256": "85b24e3e6010f43760ed91714b3650be9e507f7842c83b2d60b7668eeb0f3d78"
+    },
+    {
+      "file": "Spilimport/Events.json",
+      "bytes": 22240,
+      "sha256": "245bee5a99ad9a7d0cd542b85f17bffdfd4175c16e146b0e58deff9b3b434f05"
+    },
+    {
+      "file": "Spilimport/Kildegrundlag.json",
+      "bytes": 785340,
+      "sha256": "df9181ad8dce1cb72beb05b819893484268fa91f3e612697919358dd5a1aa62e"
+    },
+    {
+      "file": "Spilimport/Nations1851.json",
+      "bytes": 4084,
+      "sha256": "f008c13c9ae57b778d4105c3bb24fd4ecb6e4ae23729630baa214eeae1094a4f"
+    },
+    {
+      "file": "Spilimport/Nations_1825.json",
+      "bytes": 5062,
+      "sha256": "e9f01b82312853b63b93f1faa88cb39c066d1634d669161918d6038791f03853"
+    },
+    {
+      "file": "Spilimport/Officers1851.json",
+      "bytes": 7212,
+      "sha256": "7025b406b934e1b17de316676c7f572e71a60e09196f0829442fd187cf2f54ee"
+    },
+    {
+      "file": "Spilimport/Officers_1825.json",
+      "bytes": 4143,
+      "sha256": "a1c071853bd880a46c7728e74d1b51839fc71d09756fda8e87ce60fba32745af"
+    },
+    {
+      "file": "Spilimport/Population_1825.json",
+      "bytes": 34684,
+      "sha256": "48fa1968d8dc8a2cf998e19a11cf8372403c47e40620c0c0e4f3ef4cfe5f2e9c"
+    },
+    {
+      "file": "Spilimport/Population_1851.json",
+      "bytes": 34835,
+      "sha256": "9113b5555510ecb04a2024f22230e5c19a5100f20ea13cf51994d660b8f04c5f"
+    },
+    {
+      "file": "Spilimport/Population_1864.json",
+      "bytes": 34718,
+      "sha256": "8cf88e675755b79bde537759cd61fa9b3a09346eb5b939ba3e539410dea23fc6"
+    },
+    {
+      "file": "Spilimport/Skema-kontrol.json",
+      "bytes": 8967,
+      "sha256": "e18c57f4c306382b523b0c8e8bf26b4c3c836179440c61799e34673ce74a98e9"
+    },
+    {
+      "file": "Spilimport/Sources.json",
+      "bytes": 49113,
+      "sha256": "ccd4580d02f38bf39c4fc8409b7bc9b0b067f7858ec876f436ed23dbdc25313f"
+    },
+    {
+      "file": "Spilimport/Trade_1851.json",
+      "bytes": 2925,
+      "sha256": "cce571dd9f44caf55007bc8c11af92e231d469af76921bc17c720727f498ba43"
+    }
+  ]
+}

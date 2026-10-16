@@ -1,0 +1,74 @@
+{
+  "status": "spil",
+  "source": [
+    "DESIGN",
+    "STORTINGET_UNION",
+    "NOVEMBER1855",
+    "SCANDINAVISM"
+  ],
+  "note": "Relationsskala -100..100, alle værdier og runtime-tilstande er spilvalg. Kun dateret historisk kontekst er kilde. Novembergarantien angår Rusland, ikke generel dansk hjælp.",
+  "scenarios": {
+    "1825": {
+      "members": {
+        "SE": {
+          "relations": {
+            "DK": 25,
+            "NO": 65,
+            "RU": 10,
+            "GB": 25,
+            "FR": 20
+          },
+          "guarantees": []
+        },
+        "NO": {
+          "relations": {
+            "DK": 35,
+            "SE": 55,
+            "RU": 0,
+            "GB": 30,
+            "FR": 15
+          },
+          "guarantees": []
+        }
+      },
+      "union": {
+        "separateTreasuries": true,
+        "norwegianLandvernAbroad": false,
+        "warRequiresNorwegianAppropriation": true,
+        "sharedForeignMinister": "SE",
+        "automaticMilitaryAidToDenmark": false
+      }
+    },
+    "1851": {
+      "members": {
+        "SE": {
+          "relations": {
+            "DK": 40,
+            "NO": 65,
+            "RU": -15,
+            "GB": 25,
+            "FR": 20
+          },
+          "guarantees": []
+        },
+        "NO": {
+          "relations": {
+            "DK": 45,
+            "SE": 55,
+            "RU": 0,
+            "GB": 30,
+            "FR": 15
+          },
+          "guarantees": []
+        }
+      },
+      "union": {
+        "separateTreasuries": true,
+        "norwegianLandvernAbroad": false,
+        "warRequiresNorwegianAppropriation": true,
+        "sharedForeignMinister": "SE",
+        "automaticMilitaryAidToDenmark": false
+      }
+    }
+  }
+}

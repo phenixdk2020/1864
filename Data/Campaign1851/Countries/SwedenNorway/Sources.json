@@ -1,0 +1,702 @@
+{
+  "SCB_population": {
+    "title": "Historisk statistik för Sverige, del 1, befolkning, 1969",
+    "url": "https://gupea.ub.gu.se/server/api/core/bitstreams/9627f7eb-1e28-4d74-b5f5-8f7fb9ec4601/content",
+    "publisher": "Statistiska centralbyrån; digitaliseret af Göteborgs universitetsbibliotek",
+    "type": "official_statistical_compilation",
+    "locator": "Tabel 5, trykt side 50, PDF-side 51; afgrænsningsnote side 49",
+    "local_file": "scb_population.pdf",
+    "accessed": "2026-10-13",
+    "sha256": "cd3e8a3c4555ceb10806b4616ca10d9b3839c8d84dfb30226a283579e13840c2",
+    "sourceId": "SCB_population"
+  },
+  "SCB_agriculture": {
+    "title": "Historisk statistik för Sverige, del 2, jordbruk m.m.",
+    "url": "https://share.scb.se/OV9993/Data/Historisk%20statistik/Historisk%20statistik%20f%C3%B6r%20Sverige%201700-1900-tal/Del2-Vaderlek-lantmateri-jordbruk-skogsbruk-fiske-tom-1955-Historisk-statistik-1700-talet-1800-talet-1900-talet.pdf",
+    "type": "official_statistical_compilation",
+    "local_file": "scb_agriculture.pdf",
+    "accessed": "2026-10-13",
+    "sha256": "9f375161771b27a701649699c53350c785d5c214c0f2fe61803276a54fce119c",
+    "sourceId": "SCB_agriculture"
+  },
+  "SCB_OVERSIKT": {
+    "title": "Historisk statistik för Sverige. Statistiska översiktstabeller (utöver i del I och II publicerade t.o.m. år 1950), Statistiska centralbyrån",
+    "year": null,
+    "url": "http://share.scb.se/OV9993/Data/Historisk%20statistik/Historisk%20statistik%20f%C3%B6r%20Sverige%201700-1900-tal/Statistiska-oversiktsabeller-utover-i-del-I-och-del-II-publicerade-tom-ar-1950.pdf",
+    "localFile": "work/research/sverige-norge-agent/scb-oversiktstabeller.pdf",
+    "pages": "305 sider i den digitaliserede udgave",
+    "type": "official_retrospective_compilation",
+    "note": "Udgivelsesåret er ikke laest i uddraget og står derfor som null (ukendt).",
+    "sourceId": "SCB_OVERSIKT"
+  },
+  "SCB_DEL3": {
+    "title": "Historisk statistik för Sverige. Del 3, Utrikeshandel 1732–1970",
+    "year": null,
+    "url": "http://share.scb.se/OV9993/Data/Historisk%20statistik/Historisk%20statistik%20f%C3%B6r%20Sverige%201700-1900-tal/Del3-Utrikeshandel-1732-1970.pdf",
+    "localFile": "work/research/sverige-norge-agent/scb-del3-utrikeshandel.pdf",
+    "pages": "230 sider i den digitaliserede udgave",
+    "type": "official_retrospective_compilation",
+    "note": "Kilden kan læses som tekst, men PDF'en har fontfejl (japanske CMap-fonte), så tabelafskrift kræver billedkontrol før import.",
+    "sourceId": "SCB_DEL3"
+  },
+  "SCB_ALDRE1811": {
+    "title": "SCB, Äldre statistik: Officiell statistik 1811–1860 (serieoversigt)",
+    "year": 2019,
+    "url": "https://www.scb.se/hitta-statistik/aldre-statistik/innehall/officiell-statistik-1811-1860/",
+    "type": "national_statistics_series_overview",
+    "note": "Oversigt over de officielle serier FØR BiSOS. Bruges som dokumentation for hvilke serier der findes for perioden, ikke som tal.",
+    "sourceId": "SCB_ALDRE1811"
+  },
+  "SCB_BISOS": {
+    "title": "SCB, Bidrag till Sveriges officiella statistik (BiSOS) 1851–1917 (serieoversigt)",
+    "year": 2019,
+    "url": "https://www.scb.se/hitta-statistik/aldre-statistik/innehall/bidrag-till-sveriges-officiella-statistik/",
+    "type": "national_statistics_series_overview",
+    "note": "Kilde til at afgrænse hvilke svenske serier der dækker hhv. 1851 og senere.",
+    "sourceId": "SCB_BISOS"
+  },
+  "JVMUSEET": {
+    "title": "Järnvägsmuseet, tidslinje: 1856 – Invigning av järnvägen",
+    "year": 2025,
+    "url": "https://www.jarnvagsmuseet.se/utforska/tidslinje/1800-tal/1856---jarnvagen-invigs",
+    "type": "museum_secondary",
+    "sourceId": "JVMUSEET"
+  },
+  "LST_ORE": {
+    "title": "Länsstyrelsen Örebro: Nora Ervalla järnväg",
+    "year": null,
+    "url": "https://www.lansstyrelsen.se/orebro/besoksmal/kulturmiljoer/nora-ervalla-jarnvag.html",
+    "type": "public_authority_secondary",
+    "sourceId": "LST_ORE"
+  },
+  "GOTAKANAL": {
+    "title": "Göta kanalbolaget: Göta kanals historia",
+    "year": null,
+    "url": "https://www.gotakanal.se/sv/en-vacker-historia",
+    "type": "operator_history_secondary",
+    "sourceId": "GOTAKANAL"
+  },
+  "FREGERT2014": {
+    "title": "Fiscal statistics for Sweden, 1670–2011 (kapitel 5 i Historical Monetary and Financial Statistics for Sweden, Volume II), Klas Fregert og Roger Gustafsson, Sveriges Riksbank",
+    "year": 2014,
+    "url": "https://www.riksbank.se/globalassets/media/forskning/monetar-statistik/volym2/chapter5_-volume2_140613.pdf",
+    "localFile": "work/research/sverige-norge-agent/fregert-fiscal-sweden.pdf",
+    "type": "peer_reviewed_research_dataset",
+    "note": "Appendix 5, Table A5.1: 'Expenditures, revenues, interest payments, central bank transfers, seigniorage and debt of the Swedish central government 1670–2011 in thousands of SEK'. Beløb i perioden 1809–1857 er omregnet fra riksdaler banco efter Table 5.5: 1 rdr bco = 1,5 SEK. Kolonneforkortelser er defineret i kapitelappendikset: Gt+It = statslig konsumption, overførsler og investeringer; itBt-1 = rentebetalinger på statsobligationer; Tt = statens indtægter; CBTt = centralbankoverførsler til staten; DEFt = samlet budgetunderskud for den fiskale gren; Bt = statsgæld; itBtP-1 = rentebetalinger på gæld ejet af offentligheden; St = seigniorage; DEFtC = samlet underskud for den konsoliderede stat; BtP = statsgæld ejet af offentligheden.",
+    "sourceId": "FREGERT2014"
+  },
+  "SOU1923_49": {
+    "title": "SOU 1923:49, Statens ställning till järnvägarna i Sverige med särskild hänsyn till inlösningsfrågan",
+    "year": 1923,
+    "url": "https://lagen.nu/sou/1923:49",
+    "localFile": "work/research/sverige-norge-agent/sou1923-49.html",
+    "type": "official_inquiry_historical_compilation",
+    "note": "Statens offentliga utredningar 1923. Tallene er en SENERE historisk sammenstilling af 1800-tallets forhold, ikke samtidig statistik. Bruges derfor som dokumenterede cifre, ikke som simultaneous observationer. Afsnittet om näringslivets utveckling står på trykt side 14.",
+    "sourceId": "SOU1923_49"
+  },
+  "HOGMAN": {
+    "title": "Hans Högman: Indelningsverket under 1800-talet",
+    "year": null,
+    "url": "https://www.hhogman.se/indelningsverket-1800-tal.htm",
+    "type": "genealogy_historical_overview",
+    "note": "Privat historisk oversigt. Bruges kun til organisationstal (antal rotar) og er markeret som sådan, ikke som faktisk styrke.",
+    "sourceId": "HOGMAN"
+  },
+  "MANKELL1866": {
+    "title": "J. Mankell, Anteckningar rörande svenska regementernas historia (1866)",
+    "year": 1866,
+    "url": "https://runeberg.org/mjantreg/",
+    "type": "contemporary_regimental_history",
+    "sourceId": "MANKELL1866"
+  },
+  "HISTORIA_NU_SILL": {
+    "title": "Historia Nu: Det stora sillfisket – när sillen gick till i Bohuslän",
+    "year": null,
+    "url": "https://historia.nu/historia-nu/det-stora-sillfisket-nar-sillen-gick-till-i-bohuslan/",
+    "type": "popular_historical_article",
+    "note": "Senere populærhistorisk fremstilling. Vigtigst her er dateringen af sildestorperioderne: ca. 1752–1809 og næste fra 1877.",
+    "sourceId": "HISTORIA_NU_SILL"
+  },
+  "SKOGSHISTORIA_SAG": {
+    "title": "Skogshistoriska Sällskapet: Sågverksnäringens historia 1850–2010",
+    "year": null,
+    "url": "https://skogshistoria.se/tidender-artiklar/sagverksnaringens-historia-1850-2010/",
+    "type": "trade_history_secondary",
+    "sourceId": "SKOGSHISTORIA_SAG"
+  },
+  "TAMRAKAR_SAWMILL": {
+    "title": "Rijan Tamrakar, Sawmilling in Sweden: Past, present and future",
+    "year": 2016,
+    "url": "https://www.nepjol.info/index.php/INIT/article/view/10260",
+    "type": "academic_overview",
+    "note": "Bred, årtisbaseret oversigt. Bruges kun som overgrænse for 1830'erne.",
+    "sourceId": "TAMRAKAR_SAWMILL"
+  },
+  "LARARSTIFTELSEN_FOLKSKOLA": {
+    "title": "Lärarstiftelsen: När startade folkskolan i Sverige?",
+    "year": null,
+    "url": "https://lararstiftelsen.se/nar-startade-folkeskolan-i-sverige/",
+    "type": "popular_historical_article",
+    "note": "Gengiver samtidige inventeringer af skolegang for 1839 og 1847.",
+    "sourceId": "LARARSTIFTELSEN_FOLKSKOLA"
+  },
+  "RIKSDAGEN_STAND": {
+    "title": "Sveriges riksdag: From things and assemblies to the Riksdag of today",
+    "year": null,
+    "url": "https://www.riksdagen.se/en/how-the-riksdag-works/the-history-of-the-riksdag/from-things-and-assemblies-to-the-riksdag-of-today/",
+    "type": "parliament_history_secondary",
+    "note": "Beskriver stænderrigsdagen og hvem der stod uden for politisk indflydelse. Det er en beskrivelse af systemet, ikke en optælling af stemmeberettigede.",
+    "sourceId": "RIKSDAGEN_STAND"
+  },
+  "SSB_1845": {
+    "title": "Statistiske Tabeller for Kongeriget Norge, ottende række, 1847",
+    "url": "https://www.ssb.no/a/histstat/nos/st_08r_1836-45.pdf",
+    "publisher": "Departementet for det Indre; digitaliseret hos SSB",
+    "type": "contemporary_official_statistics",
+    "locator": "Oversigt, trykt side II, PDF-side 5; omtale af total side I",
+    "local_file": "st_08r_1836-45.pdf",
+    "accessed": "2026-10-13",
+    "sha256": "30bbc1d7a3a86173f508d73debdc99eb04dc8f525bdea3fb809a04eb1c54200a",
+    "sourceId": "SSB_1845"
+  },
+  "SSB_1855": {
+    "title": "Statistiske Tabeller, sekstende række, folketælling 1855",
+    "url": "https://www.ssb.no/a/histstat/nos/st_16r_1846-55.pdf",
+    "publisher": "Departementet for det Indre; digitaliseret hos SSB",
+    "type": "contemporary_official_statistics",
+    "locator": "Tabel 10, trykt side 51, PDF-side 68; landbrug trykt side XI, PDF-side 12",
+    "local_file": "st_16r_1846-55.pdf",
+    "accessed": "2026-10-13",
+    "sha256": "07311fd66f47516cbdde717a49daad80bd40e0a7acd0b09f5c952939408650f3",
+    "sourceId": "SSB_1855"
+  },
+  "SSB_HS1968": {
+    "title": "Historisk statistikk 1968, NOS X 245, Statistisk sentralbyrå",
+    "year": 1969,
+    "url": "https://www.ssb.no/a/histstat/hs1968.pdf",
+    "localFile": "work/research/sverige-norge-agent/hs1968.pdf",
+    "pages": "649 sider i den digitaliserede udgave",
+    "type": "official_retrospective_compilation",
+    "note": "SSB's egen retrospektive samling. Flere serier er udtrykt i kroner, dvs. omregnet af 1969-udgaven; den oprindelige periodes enhed var spesidaler. Omregningsfaktoren er ikke laest i tabellen og skal derfor ikke bruges uden videre.",
+    "sourceId": "SSB_HS1968"
+  },
+  "SSB_HS1914": {
+    "title": "Statistiske Oversigter 1914 (Resumé retrospectif), Det Statistiske Centralbureau, Kristiania",
+    "year": 1914,
+    "url": "https://www.ssb.no/a/histstat/hs1914.pdf",
+    "localFile": "work/research/sverige-norge-agent/hs1914.pdf",
+    "type": "official_retrospective_summary",
+    "note": "Norsk retrospektiv oversigt fra 1914. Tabel 45 (statsgæld og statskassens aktiver) har faste 5- og 10-årsskridt tilbage til 1815, mens Tabel 46 (ordinære statsindtægter og -udgifter) først begynder med gennemsnittet 1850–1854.",
+    "sourceId": "SSB_HS1914"
+  },
+  "NO_FIN1878": {
+    "title": "Oversigt over Kongeriget Norges Finantser 1850–1876, Finants-Departementet, 1878",
+    "year": 1878,
+    "url": "https://www.ssb.no/a/histstat/nos/nos_i_d1_1850-76.pdf",
+    "type": "official_retrospective_reclassification_of_state_accounts",
+    "note": "Allerede brugt af hovedagenten i Historiske-norske-statsfinanser-1851.json. Genbruges her som kilde til 1851, ikke genafskrevet.",
+    "sourceId": "NO_FIN1878"
+  },
+  "SNL_HAEREN": {
+    "title": "Store norske leksikon: Hærens historie",
+    "year": 2024,
+    "url": "https://snl.no/H%C3%A6rens_historie",
+    "type": "encyclopedia_secondary",
+    "sourceId": "SNL_HAEREN"
+  },
+  "SNL_FORSVAR": {
+    "title": "Store norske leksikon: Norges forsvar fra 1814 til 1880",
+    "year": 2024,
+    "url": "https://snl.no/Norges_forsvar_fra_1814_til_1880",
+    "type": "encyclopedia_secondary",
+    "sourceId": "SNL_FORSVAR"
+  },
+  "SSB_FISKEEXPORT": {
+    "title": "Statistisk sentralbyrå: Fiskeeksport i 200 år",
+    "year": 2019,
+    "url": "https://www.ssb.no/420245/fiskeeksport-i-200-ar",
+    "type": "official_statistics_historical_series",
+    "note": "SSB's egen historiske eksportserie. 1851-mængderne for tørrfisk og klipfisk er læst herfra. Serien begynder 1830, så 1825 ligger uden for den.",
+    "sourceId": "SSB_FISKEEXPORT"
+  },
+  "SSB_UTENRIKSHANDEL_KILDE": {
+    "title": "Statistisk sentralbyrå: Utenrikshandel – statistikkgrunnlag",
+    "year": 2019,
+    "url": "https://www.ssb.no/historisk-statistikk/nasjonal-okonomi-utenrikshandel-og-priser/utenrikshandel-statistikkgrunnlag",
+    "type": "official_statistics_method_note",
+    "note": "SSB's egen metodebeskrivelse: fuldstændig varehandelsstatistik findes fra 1835, udgivet hvert tredje år til 1850 og årligt fra 1851. Mængder findes, værdier først fra 1865 (ældre værdier er beregnet retrospektivt).",
+    "sourceId": "SSB_UTENRIKSHANDEL_KILDE"
+  },
+  "SSB_LOFOTEN_SERIE": {
+    "title": "Statistisk sentralbyrå: Karneval og oljestrid (om lofotstatistikken)",
+    "year": 2016,
+    "url": "https://www.ssb.no/jord-skog-jakt-og-fiskeri/artikler-og-publikasjoner/karneval-i-lofoten--295714",
+    "type": "official_statistics_historical_article",
+    "note": "Dokumenterer hvornår lofotstatistikken begynder: systematiske optællinger følger efter Lofotloven, og den første beretning blev lavet for 1859.",
+    "sourceId": "SSB_LOFOTEN_SERIE"
+  },
+  "NH_TORSK": {
+    "title": "Arnljot Løseth, Norgeshistorie (UiO): Den pålitelige torsken – torskefisket på 1800-tallet",
+    "year": 2016,
+    "url": "https://www.norgeshistorie.no/bygging-av-stat-og-nasjon/1436-Den%20p%C3%A5litelige%20torsken%20%E2%80%93%20torskefisket%20p%C3%A5%201800-tallet.html",
+    "type": "academic_historical_overview",
+    "note": "Senere faglig fremstilling. Deltagertallene er afrundede størrelsesordener for perioder, ikke samtidige årlige optællinger for 1825 eller 1851.",
+    "sourceId": "NH_TORSK"
+  },
+  "NH_SILD": {
+    "title": "Arnljot Løseth, Norgeshistorie (UiO): Den lunefulle silda – sildefisket på 1800-tallet",
+    "year": 2016,
+    "url": "https://www.norgeshistorie.no/bygging-av-stat-og-nasjon/1437-Den%20lunefulle%20silda%E2%80%93sildefisket%20p%C3%A5%201800-tallet.html",
+    "type": "academic_historical_overview",
+    "note": "Senere faglig fremstilling. Kilden siger selv, at deltagerantallet for 1854 «kanskje» lå tæt på 30 000 fiskere.",
+    "sourceId": "NH_SILD"
+  },
+  "KRINGOM_SILD": {
+    "title": "Nils Kolle, Kringom: En sand guldgrube (om vårsildfisket)",
+    "year": 2019,
+    "url": "https://kringom.no/nb/en-sand-guldgrube",
+    "type": "popular_historical_article",
+    "note": "Senere populærhistorisk fremstilling, der gengiver et samtidigt skøn fra fyrdirektør Arntzen for 1849 og periodens fangstniveau.",
+    "sourceId": "KRINGOM_SILD"
+  },
+  "SNL_SKOGBRUK": {
+    "title": "Store norske leksikon: skogbruk i Norge",
+    "year": 2024,
+    "url": "https://snl.no/skogbruk_i_Norge",
+    "type": "encyclopedia_secondary",
+    "note": "Senere oversigtsværk; savværkstallet gælder 1840 og er et nærår, ikke 1825/1851.",
+    "sourceId": "SNL_SKOGBRUK"
+  },
+  "UIO_SKOLESTAT": {
+    "title": "Universitetet i Oslo (IPED): Norsk skolestatistikk 1660–1853",
+    "year": null,
+    "url": "https://www.uv.uio.no/iped/forskning/prosjekter/tveit-norsk-skolestatistikk/",
+    "type": "research_project_description",
+    "note": "Senere digital bearbejdning af historiske skolekilder. Projektet skriver selv, at elevtal først kendes fra 1818, og at tallene gælder skolepligtige børn, ikke nødvendigvis børn, der faktisk mødte.",
+    "sourceId": "UIO_SKOLESTAT"
+  },
+  "NH_HUSMANN": {
+    "title": "Jan Eivind Myhre, Norgeshistorie (UiO): Husmannsvesenet",
+    "year": 2016,
+    "url": "https://www.norgeshistorie.no/bygging-av-stat-og-nasjon/1413-husmannsvesenet.html",
+    "type": "academic_historical_overview",
+    "note": "Senere faglig fremstilling med 1855-tal. Husmannsvesenet nåede sit højdepunkt i 1855, så tallene er et nærår for 1851, ikke en 1851-opgørelse.",
+    "sourceId": "NH_HUSMANN"
+  },
+  "LOKALHISTORIEWIKI_LANDVERN": {
+    "title": "Lokalhistoriewiki: Landvern",
+    "year": null,
+    "url": "https://lokalhistoriewiki.no/index.php?title=Landvern",
+    "type": "local_history_wiki_secondary",
+    "note": "Siger at landværnet blev nedlagt efter loven af 1816, at Stortinget vedtog et landværn på 8 000 i 1837, og at afdelingerne først mange år efter blev ordentligt organiseret og trænet. Årstallet strider mod SNL's 1836.",
+    "sourceId": "LOKALHISTORIEWIKI_LANDVERN"
+  },
+  "TU_UNIVERSITET": {
+    "title": "Teknisk Ukeblad: Universitetspionerene",
+    "year": null,
+    "url": "https://www.tu.no/innsikt/universitetspionerene/1269461",
+    "type": "journalistic_history",
+    "note": "Journalistisk historieskrivning; studenttallene er pejlemærker, ikke kildelagte årsopgørelser for 1825 eller 1851.",
+    "sourceId": "TU_UNIVERSITET"
+  },
+  "STORTINGET_UNION": {
+    "title": "Stortinget: I unionen (om unionen med Sverige 1814–1905)",
+    "year": null,
+    "url": "https://www.stortinget.no/no/Stortinget-og-demokratiet/Historikk/stortinget-og-unionen-med-sverige/i-unionen/",
+    "type": "parliament_history_secondary",
+    "sourceId": "STORTINGET_UNION"
+  },
+  "UIO_RIKSAKT": {
+    "title": "Fortid (UiO): Riksakten av 6. august 1815 – Norgeshistoriens viktigste dokument?",
+    "year": 2014,
+    "url": "https://foreninger.uio.no/fortid/artikler/2014/riksakten-av-6-august-1815-norgeshistoriens-vikti.html",
+    "type": "academic_article_secondary",
+    "sourceId": "UIO_RIKSAKT"
+  },
+  "SCB_POP_R4": {
+    "title": "Historisk statistik för Sverige del 1, tabel 5 og 12",
+    "url": "https://share.scb.se/OV9993/Data/Historisk%20statistik/Historisk%20statistik%20f%C3%B6r%20Sverige%201700-1900-tal/Del1-Befolkning-1720-1967.pdf",
+    "localFile": "../Research/scb-population.pdf"
+  },
+  "SCB_TRADE_R4": {
+    "title": "Historisk statistik för Sverige del 3, tabel 2.15",
+    "url": "https://share.scb.se/OV9993/Data/Historisk%20statistik/Historisk%20statistik%20f%C3%B6r%20Sverige%201700-1900-tal/Del3-Utrikeshandel-1732-1970.pdf",
+    "localFile": "../Research/scb-trade.pdf"
+  },
+  "BERG1851": {
+    "title": "Bergskollegii berättelse 1851",
+    "url": "https://share.scb.se/ov9993/data/historisk%20statistik/Officiell%20statistik%201811-1860%2FBergshantering%201833-1857%2FBergshantering-1851.pdf",
+    "localFile": "../Research/berg1851.pdf"
+  },
+  "FACTORY1851": {
+    "title": "Commerce-Collegii berättelse 1851",
+    "url": "https://share.scb.se/ov9993/data/historisk%20statistik/Officiell%20statistik%201811-1860%2FFabriker%20och%20manufakturer%201830-1857%2FFabrikernas-och-manufakturernas-stallning-1851.pdf",
+    "localFile": "../Research/factory1851.pdf"
+  },
+  "SCHOOL1974": {
+    "title": "SCB PM 1974:5 Elever i obligatoriska skolor 1847–1962",
+    "url": "https://share.scb.se/OV9993/Data/Historisk%20statistik/Historisk%20statistik%20f%C3%B6r%20Sverige%201700-1900-tal/Elever-i-obligatoriska-skolor-1847-1962.pdf",
+    "localFile": "../Research/scb-schools.pdf"
+  },
+  "TAX1883": {
+    "title": "Skatteregleringskomiténs betänkande III, 1883, trykt side 149",
+    "url": "https://weburn.kb.se/riks/tv%C3%A5kammarriksdagen/pdf/web/1883/web_kombet_1883____3_4/kombet_1883____3_4_01.pdf",
+    "localFile": "../Research/tax1883.pdf"
+  },
+  "NO_ARMY_OFFICIAL": {
+    "title": "Forsvaret: Hæren i unionstida, forsvarsutvikling",
+    "url": "https://www.forsvaret.no/om-forsvaret/organisasjon/haeren/haeren-400-ar/historien/haeren-i-unionstida/haeren-i-unionstida-forsvarsutvikling"
+  },
+  "ANKER1885": {
+    "title": "C. J. Anker: Biografiske data om 330 generalspersoner, 1885",
+    "url": "https://arkivkopia.se/bok/runeberg-acj330bio",
+    "localFile": "../Research/anker1885.html"
+  },
+  "MANKELL_R4": {
+    "title": "J. Mankell: Anteckningar rörande svenska regementernas historia, 1866",
+    "url": "https://runeberg.org/mjantreg/",
+    "localFile": "../Research/mankell.html"
+  },
+  "NO_BUDGET1824": {
+    "title": "Storting 1824: Indtægtsbudget, Juli 235–244, 499 og 519–522",
+    "url": "https://www.stortinget.no/no/Saker-og-publikasjoner/Stortingsforhandlinger/Saksside/?did=DIVL19399&mtid=9&pid=1814-1870&vt=a",
+    "localFile": "../Research/no-budget1824-index.html",
+    "access": "Register læst; billed-endpoint svarede 404. Ingen beløb afskrevet."
+  },
+  "NO_CITY1855_R4": {
+    "title": "Statistiske Tabeller sekstende række, 1855 byoversigt",
+    "url": "https://www.ssb.no/a/histstat/nos/st_16r_1846-55.pdf",
+    "localFile": "../Research/ssb1855.pdf",
+    "locator": "Trykt side III, PDF-side 4; afgrænsningsfodnote tabel 10 trykt 51/PDF 68"
+  },
+  "DK_CURRENCY": {
+    "title": "Nationalbanken: Historiske mønter",
+    "url": "https://www.nationalbanken.dk/da/vores-arbejde/sedler-og-moenter/historiske-moenter"
+  },
+  "SE_CURRENCY": {
+    "title": "Riksbanken: De första moderna sedlarna",
+    "url": "https://www.riksbank.se/sv/om-riksbanken/historia/historisk-tidslinje/1800-1899/de-forsta-moderna-sedlarna/"
+  },
+  "SE_CURRENCY_RESEARCH": {
+    "title": "Riksbanken, monetær historie kapitel 4",
+    "url": "https://www.riksbank.se/globalassets/media/forskning/monetar-statistik/volym1/4.pdf"
+  },
+  "NO_CURRENCY": {
+    "title": "Norges Bank: History of Norges Bank",
+    "url": "https://www.norges-bank.no/en/topics/about/history/history-of-norges-bank/"
+  },
+  "NOVEMBER1855": {
+    "title": "SNL: Novembertraktaten",
+    "url": "https://snl.no/Novembertraktaten"
+  },
+  "SCANDINAVISM": {
+    "title": "SNL: skandinavisme",
+    "url": "https://snl.no/skandinavisme"
+  },
+  "CRIMEA": {
+    "title": "SNL: Krimkrigen",
+    "url": "https://snl.no/Krimkrigen"
+  },
+  "LOWENHIELM": {
+    "title": "Svenskt biografiskt lexikon: Gustaf C F Löwenhielm",
+    "url": "https://sok.riksarkivet.se/SBL/Mobil/Artikel/10119"
+  },
+  "CARL_LOWENHIELM": {
+    "title": "Svenskt biografiskt lexikon: Carl Gustaf Löwenhielm",
+    "url": "https://sok.riksarkivet.se/SBL/Mobil/Artikel/10114"
+  },
+  "WEDEL": {
+    "title": "SNL: Ferdinand Wedel Jarlsberg",
+    "url": "https://snl.no/Ferdinand_Wedel_Jarlsberg"
+  },
+  "NO_GENERALS": {
+    "title": "SNL: kommanderende general",
+    "url": "https://snl.no/kommanderende_general"
+  },
+  "DESIGN": {
+    "title": "Denne importpakkes eksplicitte spilvalg",
+    "localFile": "README.md",
+    "note": "Ingen historisk kilde; parametre for en første prototype."
+  },
+  "SCHEMA": {
+    "title": "Spillets eksisterende dataformater",
+    "localFile": "Skema-kontrol.json",
+    "note": "Kun struktur og indekskontrakt; ikke historisk belæg."
+  },
+  "GAME:Nations1851.json": {
+    "title": "Nations1851.json",
+    "path": "R:\\Onedrive\\1864-Campaign\\Data\\Campaign1851\\Nations1851.json",
+    "type": "spildata; ikke historisk kilde"
+  },
+  "GAME:Nations_1825.json": {
+    "title": "Nations_1825.json",
+    "path": "R:\\Onedrive\\1864-Campaign\\Data\\Campaign1851\\Nations_1825.json",
+    "type": "spildata; ikke historisk kilde"
+  },
+  "GAME:Army1851.json": {
+    "title": "Army1851.json",
+    "path": "R:\\Onedrive\\1864-Campaign\\Data\\Campaign1851\\Army1851.json",
+    "type": "spildata; ikke historisk kilde"
+  },
+  "GAME:Army_1825.json": {
+    "title": "Army_1825.json",
+    "path": "R:\\Onedrive\\1864-Campaign\\Data\\Campaign1851\\Army_1825.json",
+    "type": "spildata; ikke historisk kilde"
+  },
+  "GAME:Army_Neighbours_1851.json": {
+    "title": "Army_Neighbours_1851.json",
+    "path": "R:\\Onedrive\\1864-Campaign\\Data\\Campaign1851\\Army_Neighbours_1851.json",
+    "type": "spildata; ikke historisk kilde"
+  },
+  "GAME:cities_neighbours_1851.json": {
+    "title": "cities_neighbours_1851.json",
+    "path": "R:\\Onedrive\\1864-Campaign\\Data\\Campaign1851\\cities_neighbours_1851.json",
+    "type": "spildata; ikke historisk kilde"
+  },
+  "GAME:Economy_1825.json": {
+    "title": "Economy_1825.json",
+    "path": "R:\\Onedrive\\1864-Campaign\\Data\\Campaign1851\\Economy_1825.json",
+    "type": "spildata; ikke historisk kilde"
+  },
+  "GAME:Population_1825.json": {
+    "title": "Population_1825.json",
+    "path": "R:\\Onedrive\\1864-Campaign\\Data\\Campaign1851\\Population_1825.json",
+    "type": "spildata; ikke historisk kilde"
+  },
+  "GAME:Officers1851.json": {
+    "title": "Officers1851.json",
+    "path": "R:\\Onedrive\\1864-Campaign\\Data\\Campaign1851\\Officers1851.json",
+    "type": "spildata; ikke historisk kilde"
+  },
+  "GAME:Events.json": {
+    "title": "Events.json",
+    "path": "R:\\Onedrive\\1864-Campaign\\Data\\Campaign1851\\Events.json",
+    "type": "spildata; ikke historisk kilde"
+  },
+  "GAME:Trade_1851.json": {
+    "title": "Trade_1851.json",
+    "path": "R:\\Onedrive\\1864-Campaign\\Data\\Campaign1851\\Trade_1851.json",
+    "type": "spildata; ikke historisk kilde"
+  },
+  "GAME:Denmark1851_Map.json": {
+    "title": "Denmark1851_Map.json",
+    "path": "R:\\Onedrive\\1864-Campaign\\Data\\Campaign1851\\Denmark1851_Map.json",
+    "type": "spildata; ikke historisk kilde"
+  },
+  "R5_VHFK": {
+    "title": "Varvshistoriska föreningen i Karlskrona: Svenska flottan i förvandling mellan 1850–1900",
+    "url": "https://www.vhfk.se/varvets-historia/forteckning-over-varvets-300-nybyggen-under-300-ar/svenska-flottan-i-forvandling-mellan-1850-1900/",
+    "type": "foreningsarkiv_secondary",
+    "quality": "sekundær redegørelse med tekniske dataark for de enkelte skibe; ikke en samtidig kommissionsrulle"
+  },
+  "R5_HOGMAN_ORLOGS": {
+    "title": "Hans Högman: Örlogsfartyg i den svenska flottan",
+    "url": "https://www.hhogman.se/orlogsfartyg-sve.htm",
+    "type": "genealogi_og_militærhistorisk_oversigt",
+    "quality": "oversigt; angiver årstal for færdiggørelse og klasse, ikke fredsstyrke"
+  },
+  "R5_FLOTTPLAN": {
+    "title": "1817 års flottplan, gengivet i den svenske artikel om linjeskibet Carl XIV Johan",
+    "url": "https://sv.wikipedia.org/wiki/Carl_XIV_Johan_(fartyg)",
+    "type": "leksikon_secondary",
+    "quality": "plan og skibsdatering; planen er en norm, ikke en styrkeopgørelse"
+  },
+  "R5_NORNAVY": {
+    "title": "Royal Norwegian Navy – history (1814-roster)",
+    "url": "https://en.wikipedia.org/wiki/Royal_Norwegian_Navy",
+    "type": "leksikon_secondary",
+    "quality": "1814-tallene gælder opgørelsen ved adskillelsen, ikke 1825"
+  },
+  "R5_NORSHIPS": {
+    "title": "List of Royal Norwegian Navy ships (tjenesteperioder)",
+    "url": "https://en.wikipedia.org/wiki/List_of_Royal_Norwegian_Navy_ships",
+    "type": "leksikon_liste_secondary",
+    "quality": "tjenesteperioder; en periode der dækker 1825/1851 beviser ikke kommando på dagen"
+  },
+  "R5_FORSVARSBYGG": {
+    "title": "Forsvarsbygg: Karljohansvern",
+    "url": "https://www.forsvarsbygg.no/en/festningene/karljohansvern",
+    "type": "offentlig_myndighed_secondary",
+    "quality": "anlæggets etablering; siger intet om flådens fartøjer"
+  },
+  "R5_FREDRIKSVERN": {
+    "title": "Fredriksvern verft – verftets historie",
+    "url": "https://fvv.stavern.no/verftets-historie.html",
+    "type": "museumssecondary",
+    "quality": "søgeresultat-tekst kunne læses, selve siden ikke udtrukket; skal efterprøves"
+  },
+  "R5_SVARTKRUTT": {
+    "title": "The Guns of the Union (1814–1905), svartkrutt.net",
+    "url": "https://svartkrutt.net/articles/vis.php?id=46",
+    "type": "specialistartikel",
+    "quality": "model- og kaliberoplysninger; ingen antalsopgørelse for scenariedatoerne"
+  },
+  "R5_SVARTKRUTT_KAM": {
+    "title": "The Norwegian Kammerlader, svartkrutt.net",
+    "url": "https://svartkrutt.net/articles/vis.php?id=4",
+    "type": "specialistartikel",
+    "quality": "model- og produktionsskøn; produktion er ikke beholdning"
+  },
+  "R5_NORSKEVAAPEN": {
+    "title": "Norskevaapen: M1825/41 og 1829/41 infanterimuskett (Kongsberg)",
+    "url": "http://norskevaapen.no/?p=563",
+    "type": "samlerfaglig_secondary",
+    "quality": "kaliber som 16-bore; konverteringerne dateres her"
+  },
+  "R5_ARMEMUSEUM": {
+    "title": "Armémuseum: Gevär m/1815-49 og Gevär m/1840",
+    "url": "https://digitaltmuseum.se/011024383478/gevar-m-1815-49",
+    "type": "museumskatalog",
+    "quality": "genstandens mål og produktionsår, ikke hærens samlede beholdning"
+  },
+  "R5_SNL_VAPEN": {
+    "title": "Store norske leksikon: håndskytevåpen",
+    "url": "https://snl.no/h%C3%A5ndskytev%C3%A5pen",
+    "type": "leksikon_secondary",
+    "quality": "afrundet kaliber for kammerlader; ikke modelregne"
+  },
+  "R5_VAGHISTORIA": {
+    "title": "Hans Högman: Svensk väghistoria",
+    "url": "https://www.hhogman.se/vaghistoria-sve.htm",
+    "type": "militærhistorisk_oversigt",
+    "quality": "lovfæstede bredder og daterede vejanlæg; ingen rutefortegnelse for 1825/1851"
+  },
+  "R5_HOGMAN_ROAD2": {
+    "title": "Hans Högman: Swedish Road History (2)",
+    "url": "https://www.hhogman.se/road-history-2-swe.htm",
+    "type": "militærhistorisk_oversigt",
+    "quality": "den gamle svenske mils længde 1699–1889"
+  },
+  "R5_PIARC": {
+    "title": "Paulsrud og Hoftun: Glimpses from road history in Norway, Routes/Roads 364",
+    "url": "https://routesroadsmag.piarc.org/en/Routes-Roads-Magazine-Issue-364/1399,Routes-Roads-Magazine-Glimpses-Road-History-Norway",
+    "type": "fagtidsskrift_secondary",
+    "quality": "vejvæsenets administrative milepæle, ikke vejnettets tilstand"
+  },
+  "R5_BRIDGEINFO": {
+    "title": "Bridgeinfo: Old Svinesund Bridge",
+    "url": "https://www.bridgeinfo.net/bridge/index.php?ID=7",
+    "type": "broregister_secondary",
+    "quality": "åbningsår for broen; bekræfter at overfarten før 1946 var med båd"
+  },
+  "R5_VISITNORWAY": {
+    "title": "Visit Norway: The Svinesund Bridges",
+    "url": "https://www.visitnorway.com/listings/the-svinesund-bridges/16206/",
+    "type": "turisme_secondary",
+    "quality": "bekræfter broår 1946 og 2005"
+  },
+  "R5_ORESUND": {
+    "title": "Øresundsbron: History",
+    "url": "https://www.oresundsbron.com/en/about-oresundsbron/about-us/history",
+    "type": "operatør_secondary",
+    "quality": "fast forbindelse først 2000; siger intet om færgeruter i 1825/1851"
+  },
+  "R5_MUSEUMNORD": {
+    "title": "Museum Nord: When the road came to the north (utilgængelig)",
+    "url": "https://www.museumnord.no/en/stories/when-the-road-came-to-the-north/",
+    "type": "museum_secondary",
+    "quality": "siden svarede 403; den citerede 1824-vejlov er derfor IKKE brugt som belæg"
+  },
+  "R6_MODEL": {
+    "title": "Runde 6: eksplicit cirkamodel og følsomhedsintervaller",
+    "localFile": "../Research/Runde6/Metode.md",
+    "type": "author_estimate_not_observation"
+  },
+  "R6_ROTAR": {
+    "title": "Högman: regementernes ståndsområder, rotar og øvelsessteder",
+    "url": "https://www.hhogman.se/regementsomraden-infanteri.htm",
+    "localFile": "../Research/Runde6/rotar.html",
+    "quality": "Senere oversigt; ikke dateret mønstringsrulle."
+  },
+  "R6_NO1825": {
+    "title": "Norges regering: First Wedel Government, daterede ressortskift",
+    "url": "https://www.regjeringen.no/en/the-government/previous-governments/regjeringer-siden-1814/historiske-regjeringer/governments-1814-1905/first-wedel-government-1814---1836/id506769/"
+  },
+  "R6_NO1851": {
+    "title": "Norges regering: Løvenskiold/Vogt-ministeriet, daterede ressortskift",
+    "url": "https://www.regjeringen.no/no/om-regjeringa/tidligere-regjeringer-og-historie/sok-i-regjeringer-siden-1814/historiske-regjeringer/regjeringsliste1814-1905/lovenskioldvogt-ministeriet-1844-1856/id506788/"
+  },
+  "R6_HOHENHAUSEN": {
+    "title": "SBL: Carl Ludvig von Hohenhausen",
+    "url": "https://sok.riksarkivet.se/sbl/mobil/Artikel/13708"
+  },
+  "R6_GRIPENSTEDT": {
+    "title": "SBL: Johan August Gripenstedt, fungerende finansminister på scenariedagen",
+    "url": "https://sok.riksarkivet.se/sbl/Presentation.aspx?forceOrdinarySite=true&id=13222"
+  },
+  "R6_BJORNSTJERNA": {
+    "title": "SBL: Magnus Fredrik Ferdinand Björnstjerna",
+    "url": "https://sok.riksarkivet.se/sbl/artikel/18340"
+  },
+  "R6_STIERNELD": {
+    "title": "SBL: Stierneld, inklusive Gustaf Algernon",
+    "url": "https://sok.riksarkivet.se/sbl/Presentation.aspx?id=20161"
+  },
+  "R6_OSCARSBORG": {
+    "title": "Forsvarsbygg: Oscarsborg historisk oversigt",
+    "url": "https://www.forsvarsbygg.no/no/verneplaner/oscarsborg-festning/historikk/historisk-oversikt/",
+    "quality": "Byggefaser; ingen fuld 1851-bestykningsliste. Første kommandant 1853."
+  },
+  "R6_OSCAR_LAW": {
+    "title": "Fredningsforskrift: Oscarsborgs bygningsdateringer",
+    "url": "https://lovdata.no/dokument/LF/forskrift/2014-04-09-1986/%C2%A71",
+    "quality": "1848-batterier; senere ombygget skyts må ikke føres tilbage."
+  },
+  "R6_GEOMETRY": {
+    "title": "Forfatterens groft afrundede WGS84-kontrolpunkter og rutemodel",
+    "localFile": "../Research/Runde6/Kortkontrakt.md",
+    "quality": "Skøn, IKKE opmålt historisk kort eller moderne vejregister."
+  },
+  "R6_UNIFORM_AUDIT": {
+    "title": "Read-only gennemgang 2026-10-15 af Uniformer-Lande.md og tom agentmappe",
+    "localFile": "../Research/Runde6/Uniformstatus.md"
+  },
+  "R6_NOCORPS": {
+    "title": "Norsk lokalhistorisk institutt: Hæren, Hærordningen av 1818",
+    "url": "https://lokalhistoriewiki.no/wiki/H%C3%A6ren",
+    "localFile": "../Research/Runde6/no_corps.txt",
+    "quality": "Sekundær institutionsoversigt, navneliste og norm; ikke dagsrulle."
+  },
+  "R6_NAVY1914": {
+    "title": "Norges sjøforsvar 1814–1914, trykt side 30–32",
+    "url": "https://arkivkopia.se/bok/runeberg-norgesjo",
+    "localFile": "../Research/Runde6/navy1914.txt",
+    "quality": "Retrospektiv 1851-årsbeholdning, IKKE 1. juli-kommission."
+  },
+  "R6_WETTERSTEDT": {
+    "title": "Svenska Akademien: Gustaf af Wetterstedt",
+    "url": "https://www.svenskaakademien.se/svenska-akademien/ledamotsregister/gustaf-af-wetterstedt"
+  },
+  "R6_PLATEN": {
+    "title": "SBL: Baltzar Bogislaus von Platen",
+    "url": "https://sok.riksarkivet.se/sbl/Presentation.aspx?forceOrdinarySite=true&id=7315"
+  },
+  "R6_PLATEN_JR": {
+    "title": "SBL: Baltzar Julius Ernst von Platen",
+    "url": "https://sok.riksarkivet.se/sbl/Presentation.aspx?forceOrdinarySite=true&id=7317"
+  },
+  "R6_FAHRAEUS": {
+    "title": "Svenska män och kvinnor/oversigt: Johan Fredrik Fåhræus",
+    "url": "https://runeberg.org/kunskapens/5-8/0348.html",
+    "quality": "Sekundær biografisk identitet og embedsperiode."
+  },
+  "R6_NO_WAGE": {
+    "title": "Harald Hals: Eidanger bygdehistorie I, s. 299–305, amtmandsberetningens dagløn",
+    "url": "https://www.porsgrunn.folkebibl.no/bok/hals/b1/eb-23.html",
+    "quality": "Lokalt nærårsanker: 1830–1850 20–32 skilling uden kost; 1851–1855 36–60. Ikke national løn."
+  },
+  "R6_SE_WAGE_LEAD": {
+    "title": "Riksbanken: Söderberg, lønserie til 1850; datasæt ikke læst",
+    "url": "https://www.riksbank.se/globalassets/media/forskning/monetar-statistik/volym1/volumeich9wages_1850.xls",
+    "quality": "Download svarede 403; IKKE anvendt som numerisk kilde. Svensk løn forbliver forfatterskøn."
+  },
+  "R7_MODEL": {
+    "title": "Runde 7: reproducerbare cirkaskøn",
+    "localFile": "../Research/Runde7/Metode.md",
+    "type": "forfatterskøn; ikke observation"
+  },
+  "R7_UNIFORM": {
+    "title": "Uniformsagentens daterede aflevering, læst 15.10.2026",
+    "localFile": "../Research/Runde7/Uniformer/Afleveringskontrol.md"
+  }
+}

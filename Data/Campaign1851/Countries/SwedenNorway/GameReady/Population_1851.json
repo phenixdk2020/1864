@@ -1,0 +1,656 @@
+{
+  "scenario": "1851",
+  "note": "Land/by kun som eksplicitte andelsskøn i 1851; 1825/1864-split ukendt. 1864 er reference. Sweden: 24 län + Stockholms stad. Norway: 17 kildens amtgrupper inkl. Christiania/Bergen i deres gruppe.",
+  "cities": [
+    {
+      "name": "Malmø",
+      "pop": 13378,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Helsingborg",
+      "pop": 4199,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Landskrona",
+      "pop": 4217,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Lund",
+      "pop": 6794,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Ystad",
+      "pop": 5101,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Trelleborg",
+      "pop": 1500,
+      "status": "kilde",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Kristianstad",
+      "pop": 5455,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Karlskrona",
+      "pop": 14157,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Halmstad",
+      "pop": 2820,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Göteborg",
+      "pop": 26630,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Varberg",
+      "pop": 2142,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Karlshamn",
+      "pop": 5099,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Kalmar",
+      "pop": 6705,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Jönköping",
+      "pop": 6080,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Växjö",
+      "pop": 2693,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Västervik",
+      "pop": 4391,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Borås",
+      "pop": 2746,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Marstrand",
+      "pop": 1017,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    },
+    {
+      "name": "Eksjö",
+      "pop": 1868,
+      "status": "skøn",
+      "source": "SCB_POP_R4"
+    }
+  ],
+  "foreignCities": [
+    {
+      "name": "Uddevalla",
+      "pop": 3872,
+      "status": "skøn"
+    },
+    {
+      "name": "Strömstad",
+      "pop": 1366,
+      "status": "skøn"
+    },
+    {
+      "name": "Kristiania/Oslo",
+      "pop": 1500,
+      "status": "kilde"
+    },
+    {
+      "name": "Fredrikshald/Fredriksten",
+      "pop": 6680,
+      "status": "skøn"
+    },
+    {
+      "name": "Fredrikstad",
+      "pop": 3139,
+      "status": "skøn"
+    },
+    {
+      "name": "Moss",
+      "pop": 4197,
+      "status": "skøn"
+    },
+    {
+      "name": "Drammen",
+      "pop": 9223,
+      "status": "skøn"
+    },
+    {
+      "name": "Tønsberg",
+      "pop": 2591,
+      "status": "skøn"
+    },
+    {
+      "name": "Larvik",
+      "pop": 4524,
+      "status": "skøn"
+    },
+    {
+      "name": "Horten",
+      "pop": 1500,
+      "status": "kilde"
+    },
+    {
+      "name": "Drøbak",
+      "pop": 1508,
+      "status": "skøn"
+    },
+    {
+      "name": "Karlsborg",
+      "pop": 1500,
+      "status": "kilde"
+    },
+    {
+      "name": "Lidköping",
+      "pop": 2461,
+      "status": "skøn"
+    },
+    {
+      "name": "Vänersborg",
+      "pop": 3117,
+      "status": "skøn"
+    },
+    {
+      "name": "Vadstena",
+      "pop": 2234,
+      "status": "skøn"
+    },
+    {
+      "name": "Norrköping",
+      "pop": 17067,
+      "status": "skøn"
+    },
+    {
+      "name": "Linköping",
+      "pop": 5285,
+      "status": "skøn"
+    },
+    {
+      "name": "Skara",
+      "pop": 1885,
+      "status": "skøn"
+    },
+    {
+      "name": "Mariestad",
+      "pop": 2070,
+      "status": "skøn"
+    },
+    {
+      "name": "Stockholm",
+      "pop": 94033,
+      "status": "skøn"
+    }
+  ],
+  "amter": [
+    {
+      "id": 1,
+      "name": "Stockholms stad",
+      "towns": [
+        "Stockholm"
+      ],
+      "urban": 93557,
+      "rural": 0,
+      "population": 93557,
+      "status": "skøn"
+    },
+    {
+      "id": 2,
+      "name": "Stockholms län",
+      "towns": [],
+      "urban": 4893,
+      "rural": 110090,
+      "population": 114983,
+      "status": "skøn"
+    },
+    {
+      "id": 3,
+      "name": "Uppsala län",
+      "towns": [],
+      "urban": 8380,
+      "rural": 81098,
+      "population": 89478,
+      "status": "skøn"
+    },
+    {
+      "id": 4,
+      "name": "Södermanlands län",
+      "towns": [],
+      "urban": 11071,
+      "rural": 109398,
+      "population": 120469,
+      "status": "skøn"
+    },
+    {
+      "id": 5,
+      "name": "Östergötlands län",
+      "towns": [
+        "Vadstena",
+        "Norrköping",
+        "Linköping"
+      ],
+      "urban": 26972,
+      "rural": 196396,
+      "population": 223368,
+      "status": "skøn"
+    },
+    {
+      "id": 6,
+      "name": "Jönköpings län",
+      "towns": [
+        "Jönköping",
+        "Eksjö"
+      ],
+      "urban": 8793,
+      "rural": 154948,
+      "population": 163741,
+      "status": "skøn"
+    },
+    {
+      "id": 7,
+      "name": "Kronobergs län",
+      "towns": [
+        "Växjö"
+      ],
+      "urban": 2679,
+      "rural": 134650,
+      "population": 137329,
+      "status": "skøn"
+    },
+    {
+      "id": 8,
+      "name": "Kalmar län, tabellens opgørelse",
+      "towns": [
+        "Kalmar",
+        "Västervik"
+      ],
+      "urban": 13027,
+      "rural": 190173,
+      "population": 203200,
+      "status": "skøn"
+    },
+    {
+      "id": 9,
+      "name": "Gotlands län",
+      "towns": [],
+      "urban": 4526,
+      "rural": 40287,
+      "population": 44813,
+      "status": "skøn"
+    },
+    {
+      "id": 10,
+      "name": "Blekinge län",
+      "towns": [
+        "Karlskrona",
+        "Karlshamn"
+      ],
+      "urban": 20697,
+      "rural": 87472,
+      "population": 108169,
+      "status": "skøn"
+    },
+    {
+      "id": 11,
+      "name": "Kristianstads län",
+      "towns": [
+        "Kristianstad"
+      ],
+      "urban": 8143,
+      "rural": 182140,
+      "population": 190283,
+      "status": "skøn"
+    },
+    {
+      "id": 12,
+      "name": "Malmöhus län",
+      "towns": [
+        "Malmø",
+        "Helsingborg",
+        "Landskrona",
+        "Lund",
+        "Ystad",
+        "Trelleborg"
+      ],
+      "urban": 34410,
+      "rural": 220218,
+      "population": 254628,
+      "status": "skøn"
+    },
+    {
+      "id": 13,
+      "name": "Hallands län",
+      "towns": [
+        "Halmstad",
+        "Varberg"
+      ],
+      "urban": 7552,
+      "rural": 98681,
+      "population": 106233,
+      "status": "skøn"
+    },
+    {
+      "id": 14,
+      "name": "Göteborgs och Bohus län",
+      "towns": [
+        "Göteborg",
+        "Uddevalla",
+        "Strömstad",
+        "Marstrand"
+      ],
+      "urban": 33305,
+      "rural": 155183,
+      "population": 188488,
+      "status": "skøn"
+    },
+    {
+      "id": 15,
+      "name": "Älvsborgs län",
+      "towns": [
+        "Borås"
+      ],
+      "urban": 10005,
+      "rural": 236944,
+      "population": 246949,
+      "status": "skøn"
+    },
+    {
+      "id": 16,
+      "name": "Skaraborgs län",
+      "towns": [
+        "Karlsborg",
+        "Lidköping",
+        "Skara",
+        "Mariestad"
+      ],
+      "urban": 8755,
+      "rural": 192029,
+      "population": 200784,
+      "status": "skøn"
+    },
+    {
+      "id": 17,
+      "name": "Värmlands län",
+      "towns": [],
+      "urban": 7180,
+      "rural": 215765,
+      "population": 222945,
+      "status": "skøn"
+    },
+    {
+      "id": 18,
+      "name": "Örebro län",
+      "towns": [],
+      "urban": 8038,
+      "rural": 130141,
+      "population": 138179,
+      "status": "skøn"
+    },
+    {
+      "id": 19,
+      "name": "Västmanlands län",
+      "towns": [],
+      "urban": 10790,
+      "rural": 86119,
+      "population": 96909,
+      "status": "skøn"
+    },
+    {
+      "id": 20,
+      "name": "Kopparbergs län",
+      "towns": [],
+      "urban": 6070,
+      "rural": 146150,
+      "population": 152220,
+      "status": "skøn"
+    },
+    {
+      "id": 21,
+      "name": "Gävleborgs län",
+      "towns": [],
+      "urban": 13101,
+      "rural": 107676,
+      "population": 120777,
+      "status": "skøn"
+    },
+    {
+      "id": 22,
+      "name": "Västernorrlands län",
+      "towns": [],
+      "urban": 5620,
+      "rural": 94743,
+      "population": 100363,
+      "status": "skøn"
+    },
+    {
+      "id": 23,
+      "name": "Jämtlands län",
+      "towns": [],
+      "urban": 823,
+      "rural": 51832,
+      "population": 52655,
+      "status": "skøn"
+    },
+    {
+      "id": 24,
+      "name": "Västerbottens län",
+      "towns": [],
+      "urban": 1523,
+      "rural": 66978,
+      "population": 68501,
+      "status": "skøn"
+    },
+    {
+      "id": 25,
+      "name": "Norrbottens län",
+      "towns": [],
+      "urban": 3242,
+      "rural": 56073,
+      "population": 59315,
+      "status": "skøn"
+    },
+    {
+      "id": 101,
+      "name": "Akershus med Christiania",
+      "towns": [
+        "Kristiania/Oslo",
+        "Drøbak"
+      ],
+      "urban": 38848,
+      "rural": 80667,
+      "population": 119515,
+      "status": "skøn"
+    },
+    {
+      "id": 102,
+      "name": "Smaalenene",
+      "towns": [
+        "Fredrikshald/Fredriksten",
+        "Fredrikstad",
+        "Moss"
+      ],
+      "urban": 16182,
+      "rural": 63375,
+      "population": 79557,
+      "status": "skøn"
+    },
+    {
+      "id": 103,
+      "name": "Hedemarken",
+      "towns": [],
+      "urban": 1402,
+      "rural": 93565,
+      "population": 94967,
+      "status": "skøn"
+    },
+    {
+      "id": 104,
+      "name": "Christians",
+      "towns": [],
+      "urban": 1195,
+      "rural": 108363,
+      "population": 109558,
+      "status": "skøn"
+    },
+    {
+      "id": 105,
+      "name": "Buskerud",
+      "towns": [
+        "Drammen"
+      ],
+      "urban": 14994,
+      "rural": 72457,
+      "population": 87451,
+      "status": "skøn"
+    },
+    {
+      "id": 106,
+      "name": "Jarlsberg og Laurvig",
+      "towns": [
+        "Tønsberg",
+        "Larvik",
+        "Horten"
+      ],
+      "urban": 11978,
+      "rural": 56674,
+      "population": 68652,
+      "status": "skøn"
+    },
+    {
+      "id": 107,
+      "name": "Bratsberg, samlede Telemark/Bamble-grupper",
+      "towns": [],
+      "urban": 12445,
+      "rural": 62456,
+      "population": 74901,
+      "status": "skøn"
+    },
+    {
+      "id": 108,
+      "name": "Nedenes og Robygdelaget",
+      "towns": [],
+      "urban": 8816,
+      "rural": 47964,
+      "population": 56780,
+      "status": "skøn"
+    },
+    {
+      "id": 109,
+      "name": "Lister og Mandal",
+      "towns": [],
+      "urban": 14416,
+      "rural": 50500,
+      "population": 64916,
+      "status": "skøn"
+    },
+    {
+      "id": 110,
+      "name": "Stavanger",
+      "towns": [],
+      "urban": 13846,
+      "rural": 71693,
+      "population": 85539,
+      "status": "skøn"
+    },
+    {
+      "id": 111,
+      "name": "Søndre Bergenhus med Bergen",
+      "towns": [],
+      "urban": 24693,
+      "rural": 99051,
+      "population": 123744,
+      "status": "skøn"
+    },
+    {
+      "id": 112,
+      "name": "Nordre Bergenhus",
+      "towns": [],
+      "urban": 0,
+      "rural": 79912,
+      "population": 79912,
+      "status": "skøn"
+    },
+    {
+      "id": 113,
+      "name": "Romsdal inkl. Søndmøre",
+      "towns": [],
+      "urban": 7260,
+      "rural": 78985,
+      "population": 86245,
+      "status": "skøn"
+    },
+    {
+      "id": 114,
+      "name": "Søndre Trondhjem",
+      "towns": [],
+      "urban": 15489,
+      "rural": 77683,
+      "population": 93172,
+      "status": "skøn"
+    },
+    {
+      "id": 115,
+      "name": "Nordre Trondhjem",
+      "towns": [],
+      "urban": 1348,
+      "rural": 69071,
+      "population": 70419,
+      "status": "skøn"
+    },
+    {
+      "id": 116,
+      "name": "Nordland",
+      "towns": [],
+      "urban": 212,
+      "rural": 71939,
+      "population": 72151,
+      "status": "skøn"
+    },
+    {
+      "id": 117,
+      "name": "Finmarken, tabellens nordlige område",
+      "towns": [],
+      "urban": 4901,
+      "rural": 44930,
+      "population": 49831,
+      "status": "skøn"
+    }
+  ]
+}

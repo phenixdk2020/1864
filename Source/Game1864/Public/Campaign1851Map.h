@@ -172,6 +172,13 @@ struct FPlannedEvent
 	FString Id, Text, Preconditions, Blockers, Gazette, CouncilLog;
 	double Day = 0.0;
 	float Probability = 1.f;
+	/** Optional window `vindue.tilAar/tilMaaned`: the event is tried every month from Day to LastDay (first day of the last month) and
+	 *  Probability is the chance over the whole window (Months checks). Without it LastDay == Day and Months == 1: the old one-shot event. */
+	double LastDay = 0.0;
+	int32 Months = 1;
+	/** Optional `historik`: the window lies wholly before the scenario's start. The event is never played; it is entered as fired
+	 *  (`indtraf`) or not fired (`udeblev`) so that later events can refer to it. */
+	bool bHistory = false, bHistoryFired = false;
 	TMap<FString, float> Effects, BlockedEffects;
 };
 
@@ -1849,6 +1856,7 @@ private:
 	TArray<FString> EventsFired;
 	TArray<FString> EventsBlocked;
 	TArray<FPlannedEvent> EventPlan;
+	TSet<FString> EventKnownIds;   // every id in the scenario's event file, for the facts begivenhed.<id> / udeblevet.<id>
 	TArray<FCampaign1851EnemyCorps> EnemyCorps;
 	int32 NextCorpsId = 1;
 	int32 LastWarDay = -1;

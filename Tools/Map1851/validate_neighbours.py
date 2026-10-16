@@ -22,12 +22,21 @@ for year in (1825,1851):
     assert cities['scenario']==armies['scenario']==str(year)
     rows = cities['cities']
     source = json.loads((ROOT/'Tools/Map1851/neighbours.json').read_text(encoding='utf-8'))
-    # Stable legacy city prefix, no changes to northern towns or armies.
+    # Stable legacy prefix; Swedish values now checked against the imported package.
+    sweden_package = DATA / 'Countries/SwedenNorway/GameReady'
+    sweden_overlay = json.loads((sweden_package/f'cities_neighbours_{year}.json').read_text(encoding='utf-8-sig'))
+    sweden_rows = {c['name']: c for c in sweden_overlay['cities']}
     assert [c['name'] for c in rows[:len(source['cities'])]] == [c['name'] for c in source['cities']]
     for original in source['cities']:
         if original['owner'] != 'SE': continue
         actual = next(c for c in rows if c['name']==original['name'])
-        assert all(actual[k]==v for k,v in original.items())
+        expected = {**original, **{k:v for k,v in sweden_rows[original['name']].items() if v is not None and k != 'district'}}
+        def assert_overlay(actual_value, expected_value):
+            for overlay_key, overlay_value in expected_value.items():
+                if overlay_value is None: continue
+                if isinstance(overlay_value, dict): assert_overlay(actual_value[overlay_key], overlay_value)
+                else: assert actual_value[overlay_key]==overlay_value, (original['name'],overlay_key)
+        assert_overlay(actual, expected)
     names = [c['name'] for c in rows]
     assert len(names)==len(set(names))
     grid = cities['ownerGrid']
@@ -62,7 +71,10 @@ for year in (1825,1851):
     for original in source['armies']:
         if original['nation']!='SE': continue
         actual = next(a for a in armies['armies'] if a['id']==original['id'])
-        assert actual['men']==original['peaceMen'][str(year)] and actual['mobilisedMen']==original['warMen'][str(year)]
+        sweden_armies = json.loads((sweden_package/f'SE/Army_Neighbours_{year}.json').read_text(encoding='utf-8-sig'))['armies']
+        package_id = 'SE-field' if original['id']=='SE-south' else original['id']
+        expected = next(a for a in sweden_armies if a['id']==package_id)
+        assert actual['men']==expected['men'] and actual['mobilisedMen']==expected['mobilisedMen']
     southern = json.loads((ROOT/'Tools/Map1851/south.json').read_text(encoding='utf-8'))
     assert 40 <= len(southern['cities']) <= 60
     districts = cities['districts']

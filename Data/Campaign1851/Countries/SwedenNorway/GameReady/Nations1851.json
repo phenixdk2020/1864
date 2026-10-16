@@ -1,0 +1,68 @@
+{
+  "note": "SE/NO-overlay. Erstat kun de to id-rækker; øvrige nationer og indeks bevares. Null kræver bevidst håndtering i loader/AI. Feltstatus står ved siden af tallene og i Data-status.json. Ikke en fuld erstatning af spillets fil.",
+  "nations": [
+    {
+      "id": "SE",
+      "name": "Sverige",
+      "onMap": false,
+      "controller": "ai",
+      "weights": [
+        1.2,
+        1.0,
+        0.8,
+        0.5
+      ],
+      "caution": 0.7,
+      "reserve": 21908,
+      "population": 3498336,
+      "railKm": 0,
+      "armyMen": 8651,
+      "growth": 1.1,
+      "taxPerHead": 3.09473,
+      "note": "Runde 6: separate delstatsbudgetter og OOB-puljer; cirkaskøn for styrke/skat. onMap forbliver false indtil raster og loader er integreret.",
+      "relation": 40,
+      "tradeValue": 3000,
+      "canAlly": true,
+      "role": "Kernefraktion",
+      "period": "1851",
+      "infantry": "Blandet m/1815-konvertering og m/1840/1845/1849 perkussion",
+      "cavalry": "Husar; Dragon; livregements-kavaleri",
+      "artillery": "Feltartilleri; ridende artilleri",
+      "priority": "Høj",
+      "group": "norden",
+      "active": true,
+      "canGuarantee": true
+    },
+    {
+      "id": "NO",
+      "name": "Norge",
+      "role": "Skandinavisk fraktion",
+      "period": "1851",
+      "infantry": "Blandet perkussionsmuskett, pillar-breech og kammerlader m/1842/1846/1849",
+      "cavalry": "Dragon/rytter",
+      "artillery": "Feltartilleri",
+      "priority": "Mellem",
+      "group": "norden",
+      "population": 1417310,
+      "railKm": 0,
+      "armyMen": 2300,
+      "growth": 1.2,
+      "taxPerHead": 3.78633,
+      "relation": 45,
+      "tradeValue": 2000,
+      "weights": [
+        1.1,
+        1.1,
+        0.8,
+        0.6
+      ],
+      "caution": 0.7,
+      "reserve": 7900,
+      "note": "Runde 6: separate delstatsbudgetter og OOB-puljer; cirkaskøn for styrke/skat. onMap forbliver false indtil raster og loader er integreret.",
+      "onMap": false,
+      "controller": "ai",
+      "active": true,
+      "canGuarantee": true
+    }
+  ]
+}

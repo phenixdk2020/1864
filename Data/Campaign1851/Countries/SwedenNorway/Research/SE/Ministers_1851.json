@@ -1,0 +1,1542 @@
+{
+  "nation": "SE",
+  "scenarioDate": "1851-07-01",
+  "sovereign": {
+    "name": "Oscar I",
+    "born": 1799,
+    "government": "Konstitutionelt monarki i personalunion",
+    "status": "kilde",
+    "source": "STORTINGET_UNION"
+  },
+  "note": "Historiske personer. Otte semantiske ressorter fordeles som spilvalg; samme person kan dække flere, men må ikke ansættes flere gange. Navy/Foreign kan være stedfortrædende kandidat, ikke faktisk ressortchef. Ni 1–10-statistikker er skøn; skill/thrift/caution er skøn på 0–100.",
+  "portfolios": [
+    {
+      "portfolio": "Interior",
+      "candidates": [
+        {
+          "name": "Johan Fredrik Fåhræus",
+          "born": 1796,
+          "role": "civilminister; Interior-fordeling er spilvalg",
+          "historical": true,
+          "status": "skøn",
+          "source": "R6_FAHRAEUS",
+          "actualPortfolioConfirmed": true,
+          "fieldStatus": {
+            "born": {
+              "status": "kilde",
+              "source": "R6_FAHRAEUS",
+              "reason": "Historisk person; biografisk år, ikke et spilskøn."
+            },
+            "leadership": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "inspiration": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "initiative": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "tactical": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "staff": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "discipline": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "aggression": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "composure": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "political": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "skill": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "thrift": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "caution": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            }
+          },
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ],
+      "status": "spil",
+      "source": "DESIGN"
+    },
+    {
+      "portfolio": "PublicWorks",
+      "candidates": [
+        {
+          "name": "Johan Fredrik Fåhræus",
+          "born": 1796,
+          "role": "civilminister; PublicWorks-fordeling er spilvalg",
+          "historical": true,
+          "status": "skøn",
+          "source": "R6_FAHRAEUS",
+          "actualPortfolioConfirmed": false,
+          "fieldStatus": {
+            "born": {
+              "status": "kilde",
+              "source": "R6_FAHRAEUS",
+              "reason": "Historisk person; biografisk år, ikke et spilskøn."
+            },
+            "leadership": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "inspiration": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "initiative": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "tactical": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "staff": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "discipline": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "aggression": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "composure": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "political": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "skill": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "thrift": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "caution": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            }
+          },
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ],
+      "status": "spil",
+      "source": "DESIGN"
+    },
+    {
+      "portfolio": "War",
+      "candidates": [
+        {
+          "name": "Carl Ludvig von Hohenhausen",
+          "born": 1787,
+          "role": "landforsvarsminister; War-fordeling er spilvalg",
+          "historical": true,
+          "status": "skøn",
+          "source": "R6_HOHENHAUSEN",
+          "actualPortfolioConfirmed": true,
+          "fieldStatus": {
+            "born": {
+              "status": "kilde",
+              "source": "R6_HOHENHAUSEN",
+              "reason": "Historisk person; biografisk år, ikke et spilskøn."
+            },
+            "leadership": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "inspiration": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "initiative": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "tactical": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "staff": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "discipline": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "aggression": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "composure": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "political": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "skill": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "thrift": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "caution": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            }
+          },
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ],
+      "status": "spil",
+      "source": "DESIGN"
+    },
+    {
+      "portfolio": "Transport",
+      "candidates": [
+        {
+          "name": "Johan Fredrik Fåhræus",
+          "born": 1796,
+          "role": "civilminister; Transport-fordeling er spilvalg",
+          "historical": true,
+          "status": "skøn",
+          "source": "R6_FAHRAEUS",
+          "actualPortfolioConfirmed": false,
+          "fieldStatus": {
+            "born": {
+              "status": "kilde",
+              "source": "R6_FAHRAEUS",
+              "reason": "Historisk person; biografisk år, ikke et spilskøn."
+            },
+            "leadership": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "inspiration": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "initiative": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "tactical": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "staff": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "discipline": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "aggression": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "composure": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "political": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "skill": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "thrift": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "caution": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            }
+          },
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ],
+      "status": "spil",
+      "source": "DESIGN"
+    },
+    {
+      "portfolio": "Intendance",
+      "candidates": [
+        {
+          "name": "Carl Ludvig von Hohenhausen",
+          "born": 1787,
+          "role": "landforsvarsminister; Intendance-fordeling er spilvalg",
+          "historical": true,
+          "status": "skøn",
+          "source": "R6_HOHENHAUSEN",
+          "actualPortfolioConfirmed": false,
+          "fieldStatus": {
+            "born": {
+              "status": "kilde",
+              "source": "R6_HOHENHAUSEN",
+              "reason": "Historisk person; biografisk år, ikke et spilskøn."
+            },
+            "leadership": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "inspiration": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "initiative": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "tactical": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "staff": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "discipline": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "aggression": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "composure": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "political": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "skill": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "thrift": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "caution": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            }
+          },
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ],
+      "status": "spil",
+      "source": "DESIGN"
+    },
+    {
+      "portfolio": "Foreign",
+      "candidates": [
+        {
+          "name": "Gustaf Algernon Stierneld",
+          "born": 1791,
+          "role": "udenrigsminister; Foreign-fordeling er spilvalg",
+          "historical": true,
+          "status": "skøn",
+          "source": "R6_STIERNELD",
+          "actualPortfolioConfirmed": true,
+          "fieldStatus": {
+            "born": {
+              "status": "kilde",
+              "source": "R6_STIERNELD",
+              "reason": "Historisk person; biografisk år, ikke et spilskøn."
+            },
+            "leadership": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "inspiration": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "initiative": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "tactical": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "staff": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "discipline": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "aggression": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "composure": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "political": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "skill": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "thrift": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "caution": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            }
+          },
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ],
+      "status": "spil",
+      "source": "DESIGN"
+    },
+    {
+      "portfolio": "Navy",
+      "candidates": [
+        {
+          "name": "Baltzar Julius Ernst von Platen",
+          "born": 1804,
+          "role": "søforsvarsminister; Navy-fordeling er spilvalg",
+          "historical": true,
+          "status": "skøn",
+          "source": "R6_PLATEN_JR",
+          "actualPortfolioConfirmed": true,
+          "fieldStatus": {
+            "born": {
+              "status": "kilde",
+              "source": "R6_PLATEN_JR",
+              "reason": "Historisk person; biografisk år, ikke et spilskøn."
+            },
+            "leadership": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "inspiration": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "initiative": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "tactical": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "staff": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "discipline": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "aggression": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "composure": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "political": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "skill": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "thrift": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "caution": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            }
+          },
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ],
+      "status": "spil",
+      "source": "DESIGN"
+    },
+    {
+      "portfolio": "Finance",
+      "candidates": [
+        {
+          "name": "Johan August Gripenstedt",
+          "born": 1813,
+          "role": "fungerende finansminister 10. januar–21. oktober; Finance-fordeling er spilvalg",
+          "historical": true,
+          "status": "skøn",
+          "source": "R6_GRIPENSTEDT",
+          "actualPortfolioConfirmed": true,
+          "fieldStatus": {
+            "born": {
+              "status": "kilde",
+              "source": "R6_GRIPENSTEDT",
+              "reason": "Historisk person; biografisk år, ikke et spilskøn."
+            },
+            "leadership": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "inspiration": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "initiative": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "tactical": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "staff": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "discipline": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "aggression": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "composure": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "political": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "method": "Neutral ni-statsprofil 1–10; ikke vurdering målt i kilder.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                3,
+                7
+              ]
+            },
+            "skill": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "thrift": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            },
+            "caution": {
+              "status": "skøn",
+              "source": "R6_MODEL",
+              "reason": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "method": "Neutral ressortprofil; konservativ forsigtighed, ikke historisk måling.",
+              "anchors": [
+                "R6_MODEL"
+              ],
+              "interval": [
+                40,
+                85
+              ]
+            }
+          },
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ],
+      "status": "spil",
+      "source": "DESIGN"
+    }
+  ]
+}

@@ -62,6 +62,12 @@ public:
     UFUNCTION(BlueprintPure, Category="Strategy|Fire")
     FString GetActiveRangeLabel() const;
 
+    /** Attack approach: the distance (front line to the enemy's far corner) the unit walks to, clearly inside the active range. */
+    float GetApproachStandRangeCm() const;
+
+    /** Attack approach: the far-corner distance at which a marching unit may stop to fire (a little looser than the stand-off). */
+    float GetApproachHaltRangeCm() const;
+
     UFUNCTION(BlueprintPure, Category="Strategy|Fire")
     bool IsInsideFireCone(const AStrategyUnit* Target) const;
 

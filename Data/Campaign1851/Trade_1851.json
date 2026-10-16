@@ -33,7 +33,24 @@
       "exportValue": 18605724,
       "turnoverValue": 55204097
     }
+  ,
+"Sverige": {
+    "importWeight": 500000,
+    "exportWeight": 1200000,
+    "turnoverWeight": 1700000,
+    "importValue": 24000000,
+    "exportValue": 22000000,
+    "turnoverValue": 46000000
   },
+  "Norge": {
+    "importWeight": 300000,
+    "exportWeight": 650000,
+    "turnoverWeight": 950000,
+    "importValue": 10000000,
+    "exportValue": 11000000,
+    "turnoverValue": 21000000
+  }
+},
   "comparison1847": {
     "area": "Kongeriget og Slesvig",
     "turnoverWeight": 1389530925,

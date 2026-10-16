@@ -1,0 +1,1818 @@
+{
+  "added": [],
+  "updated": [
+    "cities_neighbours_1825.json/cities:Stralsund",
+    "cities_neighbours_1825.json/cities:Stettin",
+    "cities_neighbours_1825.json/cities:Greifswald",
+    "cities_neighbours_1825.json/cities:Bergen på Rügen",
+    "cities_neighbours_1825.json/cities:Anklam",
+    "cities_neighbours_1825.json/cities:Swinemünde",
+    "cities_neighbours_1825.json/cities:Stargard",
+    "cities_neighbours_1825.json/cities:Pasewalk",
+    "cities_neighbours_1825.json/cities:Demmin",
+    "cities_neighbours_1825.json/cities:Ueckermünde",
+    "cities_neighbours_1825.json/cities:Wolgast",
+    "cities_neighbours_1825.json/cities:Barth",
+    "cities_neighbours_1825.json/cities:Grimmen",
+    "cities_neighbours_1825.json/cities:Tribsees",
+    "cities_neighbours_1825.json/cities:Franzburg",
+    "cities_neighbours_1825.json/cities:Putbus",
+    "cities_neighbours_1825.json/cities:Garz på Rügen",
+    "cities_neighbours_1825.json/cities:Sassnitz",
+    "cities_neighbours_1825.json/cities:Gartz",
+    "cities_neighbours_1825.json/cities:Prenzlau",
+    "cities_neighbours_1825.json/cities:Schwedt",
+    "cities_neighbours_1825.json/cities:Kolberg",
+    "cities_neighbours_1825.json/cities:Angermünde",
+    "cities_neighbours_1825.json/cities:Passow",
+    "cities_neighbours_1825.json/cities:Tantow",
+    "cities_neighbours_1825.json/outside:Köslin",
+    "cities_neighbours_1825.json/districts:PR-stralsund",
+    "cities_neighbours_1825.json/districts:PR-franzburg",
+    "cities_neighbours_1825.json/districts:PR-greifswald",
+    "cities_neighbours_1825.json/districts:PR-ruegen",
+    "cities_neighbours_1825.json/districts:PR-demmin",
+    "cities_neighbours_1825.json/districts:PR-anklam",
+    "cities_neighbours_1825.json/districts:PR-usedom",
+    "cities_neighbours_1825.json/districts:PR-ueckermuende",
+    "cities_neighbours_1825.json/districts:PR-randow",
+    "cities_neighbours_1825.json/districts:PR-saatzig",
+    "cities_neighbours_1825.json/districts:PR-prenzlau",
+    "cities_neighbours_1825.json/districts:PR-angermuende",
+    "cities_neighbours_1825.json/districts:PR-kolberg",
+    "cities_neighbours_1825.json/links:Rostock-Stralsund",
+    "cities_neighbours_1825.json/links:Stralsund-Greifswald",
+    "cities_neighbours_1825.json/links:Greifswald-Stettin",
+    "cities_neighbours_1825.json/links:Stralsund-Bergen på Rügen",
+    "cities_neighbours_1825.json/links:Ribnitz-Barth",
+    "cities_neighbours_1825.json/links:Barth-Stralsund",
+    "cities_neighbours_1825.json/links:Friedland-Anklam",
+    "cities_neighbours_1825.json/links:Anklam-Ueckermünde",
+    "cities_neighbours_1825.json/links:Ueckermünde-Stettin",
+    "cities_neighbours_1825.json/links:Stralsund-Grimmen",
+    "cities_neighbours_1825.json/links:Grimmen-Demmin",
+    "cities_neighbours_1825.json/links:Demmin-Neubrandenburg",
+    "cities_neighbours_1825.json/links:Stralsund-Franzburg",
+    "cities_neighbours_1825.json/links:Franzburg-Tribsees",
+    "cities_neighbours_1825.json/links:Tribsees-Demmin",
+    "cities_neighbours_1825.json/links:Greifswald-Anklam",
+    "cities_neighbours_1825.json/links:Anklam-Pasewalk",
+    "cities_neighbours_1825.json/links:Pasewalk-Prenzlau",
+    "cities_neighbours_1825.json/links:Prenzlau-Schwedt",
+    "cities_neighbours_1825.json/links:Schwedt-Gartz",
+    "cities_neighbours_1825.json/links:Gartz-Stettin",
+    "cities_neighbours_1825.json/links:Stettin-Stargard",
+    "cities_neighbours_1825.json/links:Stargard-Kolberg",
+    "cities_neighbours_1825.json/links:Angermünde-Passow",
+    "cities_neighbours_1825.json/links:Passow-Tantow",
+    "cities_neighbours_1825.json/links:Tantow-Stettin",
+    "cities_neighbours_1825.json/links:Angermünde-Schwedt",
+    "cities_neighbours_1825.json/links:Prenzlau-Angermünde",
+    "cities_neighbours_1825.json/links:Greifswald-Wolgast",
+    "cities_neighbours_1825.json/links:Bergen på Rügen-Putbus",
+    "cities_neighbours_1825.json/links:Putbus-Garz på Rügen",
+    "cities_neighbours_1825.json/links:Bergen på Rügen-Sassnitz",
+    "cities_neighbours_1825.json/links:Wolgast-Swinemünde",
+    "cities_neighbours_1825.json/nations:PR",
+    "Nations_1825.json:PR",
+    "Army_Neighbours_1825.json:garrison-Stralsund",
+    "Army_Neighbours_1825.json:garrison-Stettin",
+    "Army_Neighbours_1825.json:garrison-Greifswald",
+    "Army_Neighbours_1825.json:garrison-Bergen på Rügen",
+    "Army_Neighbours_1825.json:garrison-Anklam",
+    "Army_Neighbours_1825.json:garrison-Swinemünde",
+    "Army_Neighbours_1825.json:garrison-Stargard",
+    "Army_Neighbours_1825.json:garrison-Pasewalk",
+    "Army_Neighbours_1825.json:garrison-Demmin",
+    "Army_Neighbours_1825.json:garrison-Ueckermünde",
+    "Army_Neighbours_1825.json:garrison-Wolgast",
+    "Army_Neighbours_1825.json:garrison-Barth",
+    "Army_Neighbours_1825.json:garrison-Grimmen",
+    "Army_Neighbours_1825.json:garrison-Tribsees",
+    "Army_Neighbours_1825.json:garrison-Franzburg",
+    "Army_Neighbours_1825.json:garrison-Putbus",
+    "Army_Neighbours_1825.json:garrison-Garz på Rügen",
+    "Army_Neighbours_1825.json:garrison-Sassnitz",
+    "Army_Neighbours_1825.json:garrison-Gartz",
+    "Army_Neighbours_1825.json:garrison-Prenzlau",
+    "Army_Neighbours_1825.json:garrison-Schwedt",
+    "Army_Neighbours_1825.json:garrison-Kolberg",
+    "Army_Neighbours_1825.json:garrison-Angermünde",
+    "Army_Neighbours_1825.json:garrison-Passow",
+    "Army_Neighbours_1825.json:garrison-Tantow",
+    "Army_Neighbours_1825.json:PR-pomerania",
+    "Army_Neighbours_1825.json:PR-IR2",
+    "Army_Neighbours_1825.json:PR-IR9",
+    "Army_Neighbours_1825.json:PR-IR14",
+    "Army_Neighbours_1825.json:PR-IR21",
+    "Army_Neighbours_1825.json:PR-JG2",
+    "Army_Neighbours_1825.json:PR-KR2",
+    "Army_Neighbours_1825.json:PR-ART2",
+    "Army_Neighbours_1825.json:PR-LW",
+    "cities_neighbours_1851.json/cities:Stralsund",
+    "cities_neighbours_1851.json/cities:Stettin",
+    "cities_neighbours_1851.json/cities:Greifswald",
+    "cities_neighbours_1851.json/cities:Bergen på Rügen",
+    "cities_neighbours_1851.json/cities:Anklam",
+    "cities_neighbours_1851.json/cities:Swinemünde",
+    "cities_neighbours_1851.json/cities:Stargard",
+    "cities_neighbours_1851.json/cities:Pasewalk",
+    "cities_neighbours_1851.json/cities:Demmin",
+    "cities_neighbours_1851.json/cities:Ueckermünde",
+    "cities_neighbours_1851.json/cities:Wolgast",
+    "cities_neighbours_1851.json/cities:Barth",
+    "cities_neighbours_1851.json/cities:Grimmen",
+    "cities_neighbours_1851.json/cities:Tribsees",
+    "cities_neighbours_1851.json/cities:Franzburg",
+    "cities_neighbours_1851.json/cities:Putbus",
+    "cities_neighbours_1851.json/cities:Garz på Rügen",
+    "cities_neighbours_1851.json/cities:Sassnitz",
+    "cities_neighbours_1851.json/cities:Gartz",
+    "cities_neighbours_1851.json/cities:Prenzlau",
+    "cities_neighbours_1851.json/cities:Schwedt",
+    "cities_neighbours_1851.json/cities:Kolberg",
+    "cities_neighbours_1851.json/cities:Angermünde",
+    "cities_neighbours_1851.json/cities:Passow",
+    "cities_neighbours_1851.json/cities:Tantow",
+    "cities_neighbours_1851.json/outside:Köslin",
+    "cities_neighbours_1851.json/districts:PR-stralsund",
+    "cities_neighbours_1851.json/districts:PR-franzburg",
+    "cities_neighbours_1851.json/districts:PR-greifswald",
+    "cities_neighbours_1851.json/districts:PR-ruegen",
+    "cities_neighbours_1851.json/districts:PR-demmin",
+    "cities_neighbours_1851.json/districts:PR-anklam",
+    "cities_neighbours_1851.json/districts:PR-usedom",
+    "cities_neighbours_1851.json/districts:PR-ueckermuende",
+    "cities_neighbours_1851.json/districts:PR-randow",
+    "cities_neighbours_1851.json/districts:PR-saatzig",
+    "cities_neighbours_1851.json/districts:PR-prenzlau",
+    "cities_neighbours_1851.json/districts:PR-angermuende",
+    "cities_neighbours_1851.json/districts:PR-kolberg",
+    "cities_neighbours_1851.json/links:Rostock-Stralsund",
+    "cities_neighbours_1851.json/links:Stralsund-Greifswald",
+    "cities_neighbours_1851.json/links:Greifswald-Stettin",
+    "cities_neighbours_1851.json/links:Stralsund-Bergen på Rügen",
+    "cities_neighbours_1851.json/links:Ribnitz-Barth",
+    "cities_neighbours_1851.json/links:Barth-Stralsund",
+    "cities_neighbours_1851.json/links:Friedland-Anklam",
+    "cities_neighbours_1851.json/links:Anklam-Ueckermünde",
+    "cities_neighbours_1851.json/links:Ueckermünde-Stettin",
+    "cities_neighbours_1851.json/links:Stralsund-Grimmen",
+    "cities_neighbours_1851.json/links:Grimmen-Demmin",
+    "cities_neighbours_1851.json/links:Demmin-Neubrandenburg",
+    "cities_neighbours_1851.json/links:Stralsund-Franzburg",
+    "cities_neighbours_1851.json/links:Franzburg-Tribsees",
+    "cities_neighbours_1851.json/links:Tribsees-Demmin",
+    "cities_neighbours_1851.json/links:Greifswald-Anklam",
+    "cities_neighbours_1851.json/links:Anklam-Pasewalk",
+    "cities_neighbours_1851.json/links:Pasewalk-Prenzlau",
+    "cities_neighbours_1851.json/links:Prenzlau-Schwedt",
+    "cities_neighbours_1851.json/links:Schwedt-Gartz",
+    "cities_neighbours_1851.json/links:Gartz-Stettin",
+    "cities_neighbours_1851.json/links:Stettin-Stargard",
+    "cities_neighbours_1851.json/links:Stargard-Kolberg",
+    "cities_neighbours_1851.json/links:Angermünde-Passow",
+    "cities_neighbours_1851.json/links:Passow-Tantow",
+    "cities_neighbours_1851.json/links:Tantow-Stettin",
+    "cities_neighbours_1851.json/links:Angermünde-Schwedt",
+    "cities_neighbours_1851.json/links:Prenzlau-Angermünde",
+    "cities_neighbours_1851.json/links:Greifswald-Wolgast",
+    "cities_neighbours_1851.json/links:Bergen på Rügen-Putbus",
+    "cities_neighbours_1851.json/links:Putbus-Garz på Rügen",
+    "cities_neighbours_1851.json/links:Bergen på Rügen-Sassnitz",
+    "cities_neighbours_1851.json/links:Wolgast-Swinemünde",
+    "cities_neighbours_1851.json/nations:PR",
+    "Nations1851.json:PR",
+    "Army_Neighbours_1851.json:garrison-Stralsund",
+    "Army_Neighbours_1851.json:garrison-Stettin",
+    "Army_Neighbours_1851.json:garrison-Greifswald",
+    "Army_Neighbours_1851.json:garrison-Bergen på Rügen",
+    "Army_Neighbours_1851.json:garrison-Anklam",
+    "Army_Neighbours_1851.json:garrison-Swinemünde",
+    "Army_Neighbours_1851.json:garrison-Stargard",
+    "Army_Neighbours_1851.json:garrison-Pasewalk",
+    "Army_Neighbours_1851.json:garrison-Demmin",
+    "Army_Neighbours_1851.json:garrison-Ueckermünde",
+    "Army_Neighbours_1851.json:garrison-Wolgast",
+    "Army_Neighbours_1851.json:garrison-Barth",
+    "Army_Neighbours_1851.json:garrison-Grimmen",
+    "Army_Neighbours_1851.json:garrison-Tribsees",
+    "Army_Neighbours_1851.json:garrison-Franzburg",
+    "Army_Neighbours_1851.json:garrison-Putbus",
+    "Army_Neighbours_1851.json:garrison-Garz på Rügen",
+    "Army_Neighbours_1851.json:garrison-Sassnitz",
+    "Army_Neighbours_1851.json:garrison-Gartz",
+    "Army_Neighbours_1851.json:garrison-Prenzlau",
+    "Army_Neighbours_1851.json:garrison-Schwedt",
+    "Army_Neighbours_1851.json:garrison-Kolberg",
+    "Army_Neighbours_1851.json:garrison-Angermünde",
+    "Army_Neighbours_1851.json:garrison-Passow",
+    "Army_Neighbours_1851.json:garrison-Tantow",
+    "Army_Neighbours_1851.json:PR-pomerania",
+    "Army_Neighbours_1851.json:PR-IR2",
+    "Army_Neighbours_1851.json:PR-IR9",
+    "Army_Neighbours_1851.json:PR-IR14",
+    "Army_Neighbours_1851.json:PR-IR21",
+    "Army_Neighbours_1851.json:PR-JG2",
+    "Army_Neighbours_1851.json:PR-KR2",
+    "Army_Neighbours_1851.json:PR-ART2",
+    "Army_Neighbours_1851.json:PR-LW"
+  ],
+  "skippedNull": [
+    "cities_neighbours_1825.json/cities/Stralsund/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Stralsund/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Stralsund/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Stettin/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Stettin/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Stettin/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Greifswald/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Greifswald/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Greifswald/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Bergen på Rügen/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Bergen på Rügen/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Bergen på Rügen/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Anklam/population/1864",
+    "cities_neighbours_1825.json/cities/Anklam/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Anklam/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Anklam/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Swinemünde/population/1864",
+    "cities_neighbours_1825.json/cities/Swinemünde/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Swinemünde/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Swinemünde/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Stargard/population/1864",
+    "cities_neighbours_1825.json/cities/Stargard/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Stargard/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Stargard/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Pasewalk/population/1864",
+    "cities_neighbours_1825.json/cities/Pasewalk/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Pasewalk/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Pasewalk/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Demmin/population/1864",
+    "cities_neighbours_1825.json/cities/Demmin/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Demmin/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Demmin/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Ueckermünde/population/1864",
+    "cities_neighbours_1825.json/cities/Ueckermünde/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Ueckermünde/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Ueckermünde/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Wolgast/population/1864",
+    "cities_neighbours_1825.json/cities/Wolgast/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Wolgast/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Wolgast/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Barth/population/1864",
+    "cities_neighbours_1825.json/cities/Barth/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Barth/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Barth/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Grimmen/population/1864",
+    "cities_neighbours_1825.json/cities/Grimmen/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Grimmen/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Grimmen/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Tribsees/population/1864",
+    "cities_neighbours_1825.json/cities/Tribsees/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Tribsees/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Tribsees/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Franzburg/population/1864",
+    "cities_neighbours_1825.json/cities/Franzburg/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Franzburg/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Franzburg/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Putbus/population/1864",
+    "cities_neighbours_1825.json/cities/Putbus/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Putbus/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Putbus/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Garz på Rügen/population/1864",
+    "cities_neighbours_1825.json/cities/Garz på Rügen/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Garz på Rügen/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Garz på Rügen/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Sassnitz/population/1864",
+    "cities_neighbours_1825.json/cities/Sassnitz/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Sassnitz/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Sassnitz/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Gartz/population/1864",
+    "cities_neighbours_1825.json/cities/Gartz/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Gartz/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Gartz/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Prenzlau/population/1864",
+    "cities_neighbours_1825.json/cities/Prenzlau/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Prenzlau/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Prenzlau/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Schwedt/population/1864",
+    "cities_neighbours_1825.json/cities/Schwedt/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Schwedt/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Schwedt/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Kolberg/population/1864",
+    "cities_neighbours_1825.json/cities/Kolberg/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Kolberg/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Kolberg/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Angermünde/population/1864",
+    "cities_neighbours_1825.json/cities/Angermünde/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Angermünde/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Angermünde/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Passow/population/1864",
+    "cities_neighbours_1825.json/cities/Passow/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Passow/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Passow/historicalPopulation/1864",
+    "cities_neighbours_1825.json/cities/Tantow/population/1864",
+    "cities_neighbours_1825.json/cities/Tantow/historicalPopulation/1825",
+    "cities_neighbours_1825.json/cities/Tantow/historicalPopulation/1851",
+    "cities_neighbours_1825.json/cities/Tantow/historicalPopulation/1864",
+    "Nations_1825.json/nations/PR/armyMen",
+    "Nations_1825.json/nations/PR/taxPerHead",
+    "cities_neighbours_1851.json/cities/Stralsund/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Stralsund/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Stralsund/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Stettin/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Stettin/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Stettin/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Greifswald/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Greifswald/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Greifswald/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Bergen på Rügen/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Bergen på Rügen/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Bergen på Rügen/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Anklam/population/1864",
+    "cities_neighbours_1851.json/cities/Anklam/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Anklam/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Anklam/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Swinemünde/population/1864",
+    "cities_neighbours_1851.json/cities/Swinemünde/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Swinemünde/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Swinemünde/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Stargard/population/1864",
+    "cities_neighbours_1851.json/cities/Stargard/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Stargard/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Stargard/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Pasewalk/population/1864",
+    "cities_neighbours_1851.json/cities/Pasewalk/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Pasewalk/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Pasewalk/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Demmin/population/1864",
+    "cities_neighbours_1851.json/cities/Demmin/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Demmin/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Demmin/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Ueckermünde/population/1864",
+    "cities_neighbours_1851.json/cities/Ueckermünde/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Ueckermünde/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Ueckermünde/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Wolgast/population/1864",
+    "cities_neighbours_1851.json/cities/Wolgast/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Wolgast/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Wolgast/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Barth/population/1864",
+    "cities_neighbours_1851.json/cities/Barth/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Barth/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Barth/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Grimmen/population/1864",
+    "cities_neighbours_1851.json/cities/Grimmen/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Grimmen/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Grimmen/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Tribsees/population/1864",
+    "cities_neighbours_1851.json/cities/Tribsees/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Tribsees/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Tribsees/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Franzburg/population/1864",
+    "cities_neighbours_1851.json/cities/Franzburg/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Franzburg/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Franzburg/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Putbus/population/1864",
+    "cities_neighbours_1851.json/cities/Putbus/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Putbus/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Putbus/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Garz på Rügen/population/1864",
+    "cities_neighbours_1851.json/cities/Garz på Rügen/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Garz på Rügen/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Garz på Rügen/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Sassnitz/population/1864",
+    "cities_neighbours_1851.json/cities/Sassnitz/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Sassnitz/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Sassnitz/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Gartz/population/1864",
+    "cities_neighbours_1851.json/cities/Gartz/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Gartz/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Gartz/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Prenzlau/population/1864",
+    "cities_neighbours_1851.json/cities/Prenzlau/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Prenzlau/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Prenzlau/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Schwedt/population/1864",
+    "cities_neighbours_1851.json/cities/Schwedt/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Schwedt/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Schwedt/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Kolberg/population/1864",
+    "cities_neighbours_1851.json/cities/Kolberg/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Kolberg/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Kolberg/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Angermünde/population/1864",
+    "cities_neighbours_1851.json/cities/Angermünde/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Angermünde/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Angermünde/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Passow/population/1864",
+    "cities_neighbours_1851.json/cities/Passow/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Passow/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Passow/historicalPopulation/1864",
+    "cities_neighbours_1851.json/cities/Tantow/population/1864",
+    "cities_neighbours_1851.json/cities/Tantow/historicalPopulation/1825",
+    "cities_neighbours_1851.json/cities/Tantow/historicalPopulation/1851",
+    "cities_neighbours_1851.json/cities/Tantow/historicalPopulation/1864",
+    "Nations1851.json/nations/PR/armyMen",
+    "Nations1851.json/nations/PR/taxPerHead"
+  ],
+  "conflicts": [
+    "Events: london findes i dansk eventfil; pakkens version aendrer dansk spaending og er ikke aktiveret",
+    "Events: execution findes i dansk eventfil; pakkens version aendrer dansk spaending og er ikke aktiveret",
+    "Events: ultimatum findes i dansk eventfil; pakkens version aendrer dansk spaending og er ikke aktiveret"
+  ],
+  "deferred": [
+    "1825: Köslin: uden for kortudsnittet (onMap=false), ingen vejforbindelse",
+    "1825: ownerGrid/districtGrid-fieldStatus er faelles for alle nationer og importeres ikke",
+    "1851: Köslin: uden for kortudsnittet (onMap=false), ingen vejforbindelse",
+    "1851: ownerGrid/districtGrid-fieldStatus er faelles for alle nationer og importeres ikke",
+    "Events.json: 12 hændelser arkiveret, ingen aktiveret (se events)"
+  ],
+  "valueConflicts": [
+    "Nations1851.json:PR/relation: spillet -20 bevaret; pakke -35 er markeret spil/GAME- og afviger"
+  ],
+  "statusKept": [
+    "cities_neighbours_1825.json/cities:Stralsund/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Stettin/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Greifswald/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Bergen på Rügen/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Anklam/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Swinemünde/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Stargard/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Pasewalk/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Demmin/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Ueckermünde/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Wolgast/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Barth/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Grimmen/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Tribsees/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Franzburg/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Putbus/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Garz på Rügen/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Sassnitz/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Gartz/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Prenzlau/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Schwedt/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Kolberg/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Angermünde/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Passow/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/cities:Tantow/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/districts:PR-stralsund/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/districts:PR-franzburg/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/districts:PR-greifswald/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/districts:PR-ruegen/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/districts:PR-demmin/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/districts:PR-anklam/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/districts:PR-usedom/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/districts:PR-ueckermuende/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/districts:PR-randow/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/districts:PR-saatzig/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/districts:PR-prenzlau/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/districts:PR-angermuende/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1825.json/districts:PR-kolberg/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1825.json:garrison-Stralsund/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1825.json:garrison-Stettin/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1825.json:garrison-Swinemünde/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1825.json:garrison-Kolberg/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1825.json:PR-IR2/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1825.json:PR-IR9/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1825.json:PR-IR14/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1825.json:PR-IR21/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1825.json:PR-JG2/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1825.json:PR-KR2/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1825.json:PR-ART2/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1825.json:PR-LW/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Stralsund/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Stettin/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Greifswald/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Bergen på Rügen/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Anklam/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Swinemünde/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Stargard/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Pasewalk/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Demmin/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Ueckermünde/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Wolgast/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Barth/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Grimmen/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Tribsees/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Franzburg/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Putbus/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Garz på Rügen/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Sassnitz/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Gartz/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Prenzlau/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Schwedt/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Kolberg/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Angermünde/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Passow/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/cities:Tantow/populationStatus: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/districts:PR-stralsund/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/districts:PR-franzburg/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/districts:PR-greifswald/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/districts:PR-ruegen/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/districts:PR-demmin/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/districts:PR-anklam/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/districts:PR-usedom/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/districts:PR-ueckermuende/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/districts:PR-randow/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/districts:PR-saatzig/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/districts:PR-prenzlau/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/districts:PR-angermuende/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "cities_neighbours_1851.json/districts:PR-kolberg/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1851.json:garrison-Stralsund/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1851.json:garrison-Stettin/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1851.json:garrison-Swinemünde/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1851.json:garrison-Kolberg/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1851.json:PR-IR2/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1851.json:PR-IR9/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1851.json:PR-IR14/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1851.json:PR-IR21/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1851.json:PR-JG2/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1851.json:PR-KR2/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1851.json:PR-ART2/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)",
+    "Army_Neighbours_1851.json:PR-LW/status: spillets \"estimated\" bevaret; pakke \"spil\" (staar i fieldStatus)"
+  ],
+  "coverage": [
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Stralsund",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        200.362,
+        261.023
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Stettin",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        301.446,
+        168.272
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Greifswald",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        220.477,
+        238.218
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Bergen på Rügen",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        222.0,
+        274.245
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Anklam",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        241.918,
+        212.549
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Swinemünde",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        278.293,
+        220.565
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Stargard",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        334.409,
+        160.317
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Pasewalk",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        263.735,
+        174.731
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Demmin",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        199.155,
+        216.343
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Ueckermünde",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        265.914,
+        200.582
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Wolgast",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        246.26,
+        234.709
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Barth",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        176.656,
+        266.298
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Grimmen",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        198.187,
+        239.006
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Tribsees",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        179.762,
+        236.374
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Franzburg",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        187.632,
+        246.696
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Putbus",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        224.868,
+        267.258
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Garz på Rügen",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        217.3,
+        262.67
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Sassnitz",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        235.146,
+        285.689
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Gartz",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        291.973,
+        143.059
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Prenzlau",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        256.289,
+        153.166
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Schwedt",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        286.101,
+        126.328
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Kolberg",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        362.546,
+        255.962
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Angermünde",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        267.309,
+        120.128
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Passow",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        274.368,
+        134.893
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Tantow",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        288.951,
+        150.007
+      ]
+    },
+    {
+      "scenario": "1825",
+      "kind": "city",
+      "name": "Köslin",
+      "insideExtent": false,
+      "ownerGridMatches": null,
+      "districtGridMatches": null,
+      "onMap": false,
+      "km": [
+        401.019,
+        261.111
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Stralsund",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        200.362,
+        261.023
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Stettin",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        301.446,
+        168.272
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Greifswald",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        220.477,
+        238.218
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Bergen på Rügen",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        222.0,
+        274.245
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Anklam",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        241.918,
+        212.549
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Swinemünde",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        278.293,
+        220.565
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Stargard",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        334.409,
+        160.317
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Pasewalk",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        263.735,
+        174.731
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Demmin",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        199.155,
+        216.343
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Ueckermünde",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        265.914,
+        200.582
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Wolgast",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        246.26,
+        234.709
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Barth",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        176.656,
+        266.298
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Grimmen",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        198.187,
+        239.006
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Tribsees",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        179.762,
+        236.374
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Franzburg",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        187.632,
+        246.696
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Putbus",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        224.868,
+        267.258
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Garz på Rügen",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        217.3,
+        262.67
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Sassnitz",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        235.146,
+        285.689
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Gartz",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        291.973,
+        143.059
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Prenzlau",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        256.289,
+        153.166
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Schwedt",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        286.101,
+        126.328
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Kolberg",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        362.546,
+        255.962
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Angermünde",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        267.309,
+        120.128
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Passow",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        274.368,
+        134.893
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Tantow",
+      "insideExtent": true,
+      "ownerGridMatches": true,
+      "districtGridMatches": true,
+      "onMap": true,
+      "km": [
+        288.951,
+        150.007
+      ]
+    },
+    {
+      "scenario": "1851",
+      "kind": "city",
+      "name": "Köslin",
+      "insideExtent": false,
+      "ownerGridMatches": null,
+      "districtGridMatches": null,
+      "onMap": false,
+      "km": [
+        401.019,
+        261.111
+      ]
+    }
+  ],
+  "mapping": [
+    {
+      "overlay": "Nations_1825.json / Nations1851.json",
+      "schema": "samme",
+      "loader": "Campaign1851Nations.cpp:LoadNations",
+      "target": "Nations_1825.json / Nations1851.json",
+      "action": "PR-raekke flettet"
+    },
+    {
+      "overlay": "cities_neighbours_<aar>.json",
+      "schema": "samme",
+      "loader": "Campaign1851Neighbours.cpp:LoadNeighbours",
+      "target": "samme",
+      "action": "PR-byer, -distrikter, -ruter, -territorium og -nation flettet; Koeslin i outside"
+    },
+    {
+      "overlay": "Army_Neighbours_<aar>.json",
+      "schema": "samme",
+      "loader": "Campaign1851Neighbours.cpp:LoadNeighbours (haerdelen)",
+      "target": "samme",
+      "action": "PR-garnisoner og felthaer flettet"
+    },
+    {
+      "overlay": "Army_1825.json / Army1851.json",
+      "schema": "Army_1825.json / Army1851.json",
+      "loader": "Campaign1851Army.cpp:LoadArmy (kun dansk pulje)",
+      "target": "Countries/Prussia/GameReady/",
+      "action": "arkiveret"
+    },
+    {
+      "overlay": "Officers_1825.json / Officers1851.json",
+      "schema": "Officers_1825.json / Officers1851.json",
+      "loader": "Campaign1851Officers.cpp:LoadOfficers (kun dansk pulje)",
+      "target": "Countries/Prussia/GameReady/",
+      "action": "arkiveret"
+    },
+    {
+      "overlay": "Economy_1825.json / Economy_1851.json",
+      "schema": "Economy_1825.json",
+      "loader": "Campaign1851Economy.cpp:EconomyValue (dansk; 1851 hardcoded)",
+      "target": "Countries/Prussia/GameReady/",
+      "action": "arkiveret (alle satser null)"
+    },
+    {
+      "overlay": "Events.json",
+      "schema": "Events.json / Events_1825.json",
+      "loader": "Campaign1851War.cpp:ResetWar",
+      "target": "Countries/Prussia/GameReady/",
+      "action": "arkiveret, ikke aktiveret"
+    },
+    {
+      "overlay": "Population_1825/1851/1864.json",
+      "schema": "Population_1825.json",
+      "loader": "Campaign1851Map.cpp:LoadData (dansk amtsoverlay)",
+      "target": "Countries/Prussia/GameReady/",
+      "action": "arkiveret"
+    },
+    {
+      "overlay": "Trade_1851.json",
+      "schema": "Trade_1851.json",
+      "loader": "ingen",
+      "target": "Countries/Prussia/GameReady/",
+      "action": "arkiveret (alle totaler null)"
+    },
+    {
+      "overlay": "Manifest, Data-status, Sources, Kildegrundlag, Skema-kontrol, Verifikation, README, Research",
+      "schema": "dokumentation",
+      "loader": "ingen",
+      "target": "Countries/Prussia/",
+      "action": "arkiveret"
+    }
+  ],
+  "lineEndings": [
+    {
+      "file": "Army_Neighbours_1825.json",
+      "CRLF": 3286,
+      "LF": 3286,
+      "bareCR": 0
+    },
+    {
+      "file": "Army_Neighbours_1851.json",
+      "CRLF": 3290,
+      "LF": 3290,
+      "bareCR": 0
+    },
+    {
+      "file": "cities_neighbours_1825.json",
+      "CRLF": 26542,
+      "LF": 26542,
+      "bareCR": 0
+    },
+    {
+      "file": "cities_neighbours_1851.json",
+      "CRLF": 31607,
+      "LF": 31607,
+      "bareCR": 0
+    },
+    {
+      "file": "Economy_South_1825.json",
+      "CRLF": 2613,
+      "LF": 2613,
+      "bareCR": 0
+    },
+    {
+      "file": "Economy_South_1851.json",
+      "CRLF": 2613,
+      "LF": 2613,
+      "bareCR": 0
+    },
+    {
+      "file": "Nations1851.json",
+      "CRLF": 698,
+      "LF": 698,
+      "bareCR": 0
+    },
+    {
+      "file": "Nations_1825.json",
+      "CRLF": 828,
+      "LF": 828,
+      "bareCR": 0
+    }
+  ],
+  "archived": [
+    "Countries/Prussia/GameReady/Army1851.json",
+    "Countries/Prussia/GameReady/Army_1825.json",
+    "Countries/Prussia/GameReady/Army_Neighbours_1825.json",
+    "Countries/Prussia/GameReady/Army_Neighbours_1851.json",
+    "Countries/Prussia/Data-status.json",
+    "Countries/Prussia/GameReady/Economy_1825.json",
+    "Countries/Prussia/GameReady/Economy_1851.json",
+    "Countries/Prussia/GameReady/Events.json",
+    "Countries/Prussia/Kildegrundlag.json",
+    "Countries/Prussia/GameReady/Nations1851.json",
+    "Countries/Prussia/GameReady/Nations_1825.json",
+    "Countries/Prussia/GameReady/Officers1851.json",
+    "Countries/Prussia/GameReady/Officers_1825.json",
+    "Countries/Prussia/GameReady/Population_1825.json",
+    "Countries/Prussia/GameReady/Population_1851.json",
+    "Countries/Prussia/GameReady/Population_1864.json",
+    "Countries/Prussia/Skema-kontrol.json",
+    "Countries/Prussia/Sources.json",
+    "Countries/Prussia/GameReady/Trade_1851.json",
+    "Countries/Prussia/GameReady/cities_neighbours_1825.json",
+    "Countries/Prussia/GameReady/cities_neighbours_1851.json",
+    "Countries/Prussia/Manifest.json",
+    "Countries/Prussia/Verifikation.json",
+    "Countries/Prussia/README.md",
+    "Countries/Prussia/Research/Afstemning.json",
+    "Countries/Prussia/Research/Finanser.json",
+    "Countries/Prussia/Research/Haerorganisation.json",
+    "Countries/Prussia/Research/HGIS-tabeller.json",
+    "Countries/Prussia/Research/Jernbaner.json",
+    "Countries/Prussia/Research/Metode-og-kildekritik.md",
+    "Countries/Prussia/Research/Resthuller.md",
+    "Countries/Prussia/Research/Spilvalg.md",
+    "Countries/Prussia/Arbejdsstatus.md",
+    "Countries/Prussia/Daekningsmatrix.md",
+    "Countries/Prussia/Kilder.md",
+    "Countries/Prussia/Preussen-landepakke-1825-1851.md"
+  ],
+  "events": [
+    {
+      "id": "pr_1848",
+      "window": "1848-04",
+      "replacesDanishEventIn": [],
+      "beforeScenarioStart": {
+        "1825": false,
+        "1851": true
+      },
+      "loaderRejects": [
+        "udeblivelse uden ikke-nul spaending/kasse/stemning: afvises af ResetWar"
+      ],
+      "activated": true
+    },
+    {
+      "id": "pr_malmo",
+      "window": "1848-08",
+      "replacesDanishEventIn": [],
+      "beforeScenarioStart": {
+        "1825": false,
+        "1851": true
+      },
+      "loaderRejects": [
+        "udeblivelse uden ikke-nul spaending/kasse/stemning: afvises af ResetWar"
+      ],
+      "activated": true
+    },
+    {
+      "id": "pr_berlinpeace",
+      "window": "1850-07",
+      "replacesDanishEventIn": [],
+      "beforeScenarioStart": {
+        "1825": false,
+        "1851": true
+      },
+      "loaderRejects": [
+        "udeblivelse uden ikke-nul spaending/kasse/stemning: afvises af ResetWar"
+      ],
+      "activated": true
+    },
+    {
+      "id": "pr_olmuetz",
+      "window": "1850-11",
+      "replacesDanishEventIn": [],
+      "beforeScenarioStart": {
+        "1825": false,
+        "1851": true
+      },
+      "loaderRejects": [
+        "udeblivelse uden ikke-nul spaending/kasse/stemning: afvises af ResetWar"
+      ],
+      "activated": true
+    },
+    {
+      "id": "pr_1851",
+      "window": "1851-01",
+      "replacesDanishEventIn": [],
+      "beforeScenarioStart": {
+        "1825": false,
+        "1851": true
+      },
+      "loaderRejects": [
+        "udeblivelse uden ikke-nul spaending/kasse/stemning: afvises af ResetWar"
+      ],
+      "activated": true
+    },
+    {
+      "id": "pr_zollverein",
+      "window": "1834-01",
+      "replacesDanishEventIn": [],
+      "beforeScenarioStart": {
+        "1825": false,
+        "1851": true
+      },
+      "loaderRejects": [
+        "udeblivelse uden ikke-nul spaending/kasse/stemning: afvises af ResetWar"
+      ],
+      "activated": true
+    },
+    {
+      "id": "pr_hannover_zoll",
+      "window": "1851-09",
+      "replacesDanishEventIn": [],
+      "beforeScenarioStart": {
+        "1825": false,
+        "1851": false
+      },
+      "loaderRejects": [
+        "udeblivelse uden ikke-nul spaending/kasse/stemning: afvises af ResetWar"
+      ],
+      "activated": true
+    },
+    {
+      "id": "pr_roon1859",
+      "window": "1859-12",
+      "replacesDanishEventIn": [],
+      "beforeScenarioStart": {
+        "1825": false,
+        "1851": false
+      },
+      "loaderRejects": [
+        "udeblivelse uden ikke-nul spaending/kasse/stemning: afvises af ResetWar"
+      ],
+      "activated": true
+    },
+    {
+      "id": "pr_roon1860",
+      "window": "1860-01",
+      "replacesDanishEventIn": [],
+      "beforeScenarioStart": {
+        "1825": false,
+        "1851": false
+      },
+      "loaderRejects": [
+        "udeblivelse uden ikke-nul spaending/kasse/stemning: afvises af ResetWar"
+      ],
+      "activated": true
+    },
+    {
+      "id": "london",
+      "window": "1852-05",
+      "replacesDanishEventIn": [
+        "1851"
+      ],
+      "beforeScenarioStart": {
+        "1825": false,
+        "1851": false
+      },
+      "loaderRejects": [],
+      "activated": true
+    },
+    {
+      "id": "execution",
+      "window": "1863-12",
+      "replacesDanishEventIn": [
+        "1851"
+      ],
+      "beforeScenarioStart": {
+        "1825": false,
+        "1851": false
+      },
+      "loaderRejects": [],
+      "activated": true
+    },
+    {
+      "id": "ultimatum",
+      "window": "1864-01",
+      "replacesDanishEventIn": [
+        "1851"
+      ],
+      "beforeScenarioStart": {
+        "1825": false,
+        "1851": false
+      },
+      "loaderRejects": [],
+      "activated": true
+    }
+  ],
+  "reachability": [
+    {
+      "scenario": "1825",
+      "prussianCities": 25,
+      "reachableFromKobenhavnWithFerries": [
+        "Stralsund",
+        "Stettin",
+        "Greifswald",
+        "Bergen på Rügen",
+        "Anklam",
+        "Swinemünde",
+        "Stargard",
+        "Pasewalk",
+        "Demmin",
+        "Ueckermünde",
+        "Wolgast",
+        "Barth",
+        "Grimmen",
+        "Tribsees",
+        "Franzburg",
+        "Putbus",
+        "Garz på Rügen",
+        "Sassnitz",
+        "Gartz",
+        "Prenzlau",
+        "Schwedt",
+        "Kolberg",
+        "Angermünde",
+        "Passow",
+        "Tantow"
+      ],
+      "unreachableWithFerries": [],
+      "reachableOverLandFromRatzeburg": [
+        "Stralsund",
+        "Stettin",
+        "Greifswald",
+        "Anklam",
+        "Stargard",
+        "Pasewalk",
+        "Demmin",
+        "Ueckermünde",
+        "Wolgast",
+        "Barth",
+        "Grimmen",
+        "Tribsees",
+        "Franzburg",
+        "Gartz",
+        "Prenzlau",
+        "Schwedt",
+        "Kolberg",
+        "Angermünde",
+        "Passow",
+        "Tantow"
+      ],
+      "needFerry": [
+        "Bergen på Rügen",
+        "Swinemünde",
+        "Putbus",
+        "Garz på Rügen",
+        "Sassnitz"
+      ],
+      "offMapNoRoute": [
+        "Köslin"
+      ]
+    },
+    {
+      "scenario": "1851",
+      "prussianCities": 25,
+      "reachableFromKobenhavnWithFerries": [
+        "Stralsund",
+        "Stettin",
+        "Greifswald",
+        "Bergen på Rügen",
+        "Anklam",
+        "Swinemünde",
+        "Stargard",
+        "Pasewalk",
+        "Demmin",
+        "Ueckermünde",
+        "Wolgast",
+        "Barth",
+        "Grimmen",
+        "Tribsees",
+        "Franzburg",
+        "Putbus",
+        "Garz på Rügen",
+        "Sassnitz",
+        "Gartz",
+        "Prenzlau",
+        "Schwedt",
+        "Kolberg",
+        "Angermünde",
+        "Passow",
+        "Tantow"
+      ],
+      "unreachableWithFerries": [],
+      "reachableOverLandFromRatzeburg": [
+        "Stralsund",
+        "Stettin",
+        "Greifswald",
+        "Anklam",
+        "Stargard",
+        "Pasewalk",
+        "Demmin",
+        "Ueckermünde",
+        "Wolgast",
+        "Barth",
+        "Grimmen",
+        "Tribsees",
+        "Franzburg",
+        "Gartz",
+        "Prenzlau",
+        "Schwedt",
+        "Kolberg",
+        "Angermünde",
+        "Passow",
+        "Tantow"
+      ],
+      "needFerry": [
+        "Bergen på Rügen",
+        "Swinemünde",
+        "Putbus",
+        "Garz på Rügen",
+        "Sassnitz"
+      ],
+      "offMapNoRoute": [
+        "Köslin"
+      ]
+    }
+  ],
+  "archiveNulls": {
+    "Army_1825.json": 64,
+    "Army1851.json": 211,
+    "Economy_1825.json": 22,
+    "Economy_1851.json": 22,
+    "Officers_1825.json": 4,
+    "Officers1851.json": 5,
+    "Population_1825.json": 77,
+    "Population_1851.json": 74,
+    "Population_1864.json": 77,
+    "Trade_1851.json": 8,
+    "Events.json": 0
+  },
+  "counts": {
+    "added": 0,
+    "updated": 216,
+    "skippedNull": 196,
+    "conflicts": 3,
+    "deferred": 5,
+    "valueConflicts": 1,
+    "statusKept": 100
+  },
+  "eventActivation": {
+    "script": "Tools/Countries/activate_prussia_events.py",
+    "note": "Events aktiveret efter brugerens beslutning 2026-10-16; se Docs/Import-Preussen.md, afsnittet Begivenheder.",
+    "events": [
+      {
+        "scenario": "1825",
+        "id": "pr_zollverein",
+        "mode": "vindue",
+        "window": "1834-01 .. 1835-06",
+        "probability": 0.8,
+        "history": null
+      },
+      {
+        "scenario": "1825",
+        "id": "pr_hannover_zoll",
+        "mode": "vindue",
+        "window": "1851-09 .. 1852-12",
+        "probability": 0.75,
+        "history": null
+      },
+      {
+        "scenario": "1825",
+        "id": "pr_roon1859",
+        "mode": "vindue",
+        "window": "1859-12 .. 1860-06",
+        "probability": 0.7,
+        "history": null
+      },
+      {
+        "scenario": "1825",
+        "id": "pr_roon1860",
+        "mode": "vindue",
+        "window": "1860-01 .. 1862-06",
+        "probability": 0.7,
+        "history": null
+      },
+      {
+        "scenario": "1851",
+        "id": "pr_zollverein",
+        "mode": "historik",
+        "window": "1834-01",
+        "probability": 0.85,
+        "history": "indtraf"
+      },
+      {
+        "scenario": "1851",
+        "id": "pr_1848",
+        "mode": "historik",
+        "window": "1848-04",
+        "probability": 0.85,
+        "history": "indtraf"
+      },
+      {
+        "scenario": "1851",
+        "id": "pr_malmo",
+        "mode": "historik",
+        "window": "1848-08",
+        "probability": 0.85,
+        "history": "indtraf"
+      },
+      {
+        "scenario": "1851",
+        "id": "pr_berlinpeace",
+        "mode": "historik",
+        "window": "1850-07",
+        "probability": 0.85,
+        "history": "indtraf"
+      },
+      {
+        "scenario": "1851",
+        "id": "pr_olmuetz",
+        "mode": "historik",
+        "window": "1850-11",
+        "probability": 0.85,
+        "history": "indtraf"
+      },
+      {
+        "scenario": "1851",
+        "id": "pr_1851",
+        "mode": "historik",
+        "window": "1851-01",
+        "probability": 0.85,
+        "history": "indtraf"
+      },
+      {
+        "scenario": "1851",
+        "id": "pr_hannover_zoll",
+        "mode": "vindue",
+        "window": "1851-09 .. 1852-12",
+        "probability": 0.75,
+        "history": null
+      },
+      {
+        "scenario": "1851",
+        "id": "pr_roon1859",
+        "mode": "vindue",
+        "window": "1859-12 .. 1860-06",
+        "probability": 0.7,
+        "history": null
+      },
+      {
+        "scenario": "1851",
+        "id": "pr_roon1860",
+        "mode": "vindue",
+        "window": "1860-01 .. 1862-06",
+        "probability": 0.7,
+        "history": null
+      },
+      {
+        "scenario": "1851",
+        "id": "london",
+        "mode": "flettet med dansk event",
+        "window": "1852-05",
+        "probability": 0.85,
+        "history": null
+      },
+      {
+        "scenario": "1851",
+        "id": "execution",
+        "mode": "flettet med dansk event",
+        "window": "1863-12",
+        "probability": 0.85,
+        "history": null
+      },
+      {
+        "scenario": "1851",
+        "id": "ultimatum",
+        "mode": "flettet med dansk event",
+        "window": "1864-01",
+        "probability": 0.85,
+        "history": null
+      }
+    ]
+  }
+}

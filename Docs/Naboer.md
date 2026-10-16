@@ -1,5 +1,9 @@
 ﻿# Danmarks naboer på kampagnekortet
 
+## Sverige-Norge ? opdatering 2026-10-16
+
+[Importnotatet](Import-Sverige-Norge.md) er g?ldende for svenske/norske tal og d?kning efter runde 7-importen. De ?ldre afsnits svenske baseline og styrker nedenfor er historik. Der er 88 nabobyer, 113 ruter og 104 h?rposter pr. scenarie; de seks nye svenske bypunkter mangler nye vejforbindelser. Norge forbliver uden for kortet. Efter en ny eksport skal `python Tools/Countries/import_sweden_norway.py` k?res f?r `python Tools/Map1851/validate_neighbours.py`. Niveau B er ikke fuldf?rt.
+
 ## Fase 0 — inventar (2026-10-10)
 
 Kortets autoritative LAEA-udsnit er x −160,577..384,332 og y 111,195..669,478 km, størrelse 544,91 × 558,28 km; projektionens centrum er 52°N, 10°Ø. Geografisk ramme omtrent 7,6..15,75°Ø og 53..57,9°N. Bornholm er på hovedkortet. Kristiania/Oslo, Fredrikshald/Fredriksten og Karlsborg ligger udenfor og findes kun i metadata; de flyttes ikke ind på kortet. Norge hører til den svenske unions politiske model, uden norske byer i udsnittet.

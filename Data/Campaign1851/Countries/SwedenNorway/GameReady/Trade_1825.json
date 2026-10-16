@@ -1,0 +1,33 @@
+{
+  "scenario": "1825",
+  "note": "Runde 7: 1825-handelscirkatal; 1851 pr. indbygger reduceret til 65 %. Ikke afskrevet handelsstatistik.",
+  "source": {
+    "title": "Se Sources.json og fieldStatus",
+    "url": "https://www.ssb.no/a/histstat/hs1968.pdf"
+  },
+  "unitWeight": "metric tonnes for totals; original commodity units retained",
+  "unitValue": "rigsdaler sølv per year",
+  "areas": {
+    "Sverige": {
+      "importWeight": 255716,
+      "exportWeight": 613718,
+      "turnoverWeight": 869434,
+      "importValue": 12274366,
+      "exportValue": 11251503,
+      "turnoverValue": 23525869
+    },
+    "Norge": {
+      "importWeight": 144645,
+      "exportWeight": 313398,
+      "turnoverWeight": 458043,
+      "importValue": 4821505,
+      "exportValue": 5303655,
+      "turnoverValue": 10125160
+    }
+  },
+  "status": "kilde",
+  "limitations": [
+    "Bilateral Danmark-handel og 1847-sammenligning ikke dokumenteret; totalskøn ±50–60 %."
+  ],
+  "comparison1847": null
+}

@@ -1,0 +1,62 @@
+{
+  "note": "Dokumenteret fælles spilregneenhed via senere møntpariteter. Dette er et spilvalg for sammenlignelighed, ikke observerede valutakurser 1.7.1825/1851 eller købekraftsparitet. Riksmynt eksisterede først fra 1855. Sveriges banco-kurs før 1834 må ikke fremstilles som fast specie-kurs.",
+  "target": "rigsdaler sølv",
+  "status": "spil",
+  "source": [
+    "DK_CURRENCY",
+    "SE_CURRENCY",
+    "SE_CURRENCY_RESEARCH",
+    "NO_CURRENCY"
+  ],
+  "rules": [
+    {
+      "from": "riksdaler riksmynt / senere SEK",
+      "factor": 0.5,
+      "status": "spil",
+      "source": [
+        "DK_CURRENCY",
+        "SE_CURRENCY_RESEARCH"
+      ],
+      "reason": "1 riksmynt = 1 SEK ved svensk reform; 2 danske kroner = 1 rigsdaler. Fælles senere kroneparitet valgt som spilnormalisering."
+    },
+    {
+      "from": "Norwegian speciedaler",
+      "factor": 2,
+      "status": "spil",
+      "source": [
+        "NO_CURRENCY",
+        "DK_CURRENCY"
+      ],
+      "reason": "4 norske kroner/speciedaler og 2 danske kroner/rigsdaler; senere paritet som model."
+    },
+    {
+      "from": "riksdaler banco i Fregerts omregnede regnskab",
+      "factor": 0.75,
+      "status": "spil",
+      "source": [
+        "FREGERT2014",
+        "DK_CURRENCY"
+      ],
+      "reason": "Fregert bruger 1 banco = 1,5 SEK; SEK/2 giver 0,75 spil-rigsdaler. Ikke observeret vekselkurs før 1834."
+    },
+    {
+      "from": "thousand_SEK_1873_parity",
+      "factor": 500,
+      "status": "spil",
+      "source": [
+        "FREGERT2014",
+        "DK_CURRENCY"
+      ]
+    },
+    {
+      "from": "riksdaler uspecificeret / tax1883 enhed ikke bekræftet",
+      "factor": null,
+      "status": "kilde",
+      "source": [
+        "FACTORY1851",
+        "TAX1883"
+      ],
+      "reason": "Valutasort/enhed ikke sikkert læst; ingen konvertering."
+    }
+  ]
+}

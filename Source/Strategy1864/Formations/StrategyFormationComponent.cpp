@@ -4,16 +4,12 @@
 
 namespace
 {
-    // A line that loses men keeps its frontage as long as it can (every man of the front rank can fire): the rear ranks thin out first,
-    // and the line only narrows once a single rank is left. The files are those of the full-strength line.
-    int32 LineRanksFor(const AActor* Owner, int32 RankCount, int32 /*Strength*/)
+    // A line that loses men keeps its depth (design paper 2026-10-16): a loss is replaced inside its own file by the man behind
+    // (StepUpFiles), and when the ranks close sideways the line gets shorter, not thinner. So the rank count is always the nominal one
+    // (2 or 3) and the front shrinks by whole files; only the last file may be short.
+    int32 LineRanksFor(const AActor* /*Owner*/, int32 RankCount, int32 /*Strength*/)
     {
-        const int32 Nominal = FMath::Max(1, RankCount);
-        const AStrategyUnit* Unit = Cast<AStrategyUnit>(Owner);
-        if (!Unit || Unit->InitialStrength <= 0 || Unit->CurrentStrength >= Unit->InitialStrength) { return Nominal; }
-        // By the unit's share of its full strength (the drawn figures can be fewer than the men): depth follows the share, the files stay.
-        const float Share = float(FMath::Max(0, Unit->CurrentStrength)) / float(Unit->InitialStrength);
-        return FMath::Clamp(FMath::CeilToInt(Share * Nominal - 0.001f), 1, Nominal);
+        return FMath::Max(1, RankCount);
     }
 }
 

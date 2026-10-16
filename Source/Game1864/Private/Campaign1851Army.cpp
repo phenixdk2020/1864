@@ -8,6 +8,7 @@
 #include "Campaign1851Scenery.h"
 #include "Components/StaticMeshComponent.h"
 #include "Dom/JsonObject.h"
+#include "Campaign1851Json.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInterface.h"
 #include "Misc/FileHelper.h"
@@ -353,33 +354,35 @@ bool ACampaign1851Map::LoadArmy()
 	{
 		for (const TSharedPtr<FJsonValue>& V : *ArmyMagazineArray)
 		{
-			const TSharedPtr<FJsonObject> M = V->AsObject();
+			const TSharedPtr<FJsonObject> M = Campaign1851Json::Row(V);
 			FCampaign1851DepotCapacity Cap;
-			Cap.Food = float(M->GetNumberField(TEXT("food")));
-			Cap.Fodder = float(M->GetNumberField(TEXT("fodder")));
-			Cap.Ammo = float(M->GetNumberField(TEXT("ammo")));
-			ArmyScenarioMagazines.Add(M->GetStringField(TEXT("town")), Cap);
+			if (!M->TryGetNumberField(TEXT("food"), Cap.Food)
+				|| !M->TryGetNumberField(TEXT("fodder"), Cap.Fodder)
+				|| !M->TryGetNumberField(TEXT("ammo"), Cap.Ammo)
+				|| Campaign1851Json::String(*M, TEXT("town")).IsEmpty()) { continue; }
+			ArmyScenarioMagazines.Add(Campaign1851Json::String(*M, TEXT("town")), Cap);
 		}
 	}
 	ArmyAtStart.Reset();
 	FString Nation = TEXT("DK");
 	Json->TryGetStringField(TEXT("nation"), Nation);
-	for (const TSharedPtr<FJsonValue>& Value : Json->GetArrayField(TEXT("regiments")))
+	for (const TSharedPtr<FJsonValue>& Value : Campaign1851Json::Array(*Json, TEXT("regiments")))
 	{
-		const TSharedPtr<FJsonObject> O = Value->AsObject();
+		const TSharedPtr<FJsonObject> O = Campaign1851Json::Row(Value);
 		FCampaign1851Regiment R;
-		R.Id = O->GetStringField(TEXT("id"));
-		R.Name = O->GetStringField(TEXT("name"));
+		R.Id = Campaign1851Json::String(*O, TEXT("id"));
+		R.Name = Campaign1851Json::String(*O, TEXT("name"));
 		R.OriginalName = R.Name;
 		R.Nation = Nation;
-		R.Arm = Campaign1851Army::ParseArm(O->GetStringField(TEXT("arm")));
-		R.Home = FindCity(O->GetStringField(TEXT("home")));
+		R.Arm = Campaign1851Army::ParseArm(Campaign1851Json::String(*O, TEXT("arm")));
+		R.Home = FindCity(Campaign1851Json::String(*O, TEXT("home")));
 		if (R.Home == INDEX_NONE)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|army|%s: unknown town %s"), *R.Name, *O->GetStringField(TEXT("home")));
+			UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|army|%s: unknown town %s"), *R.Name, *Campaign1851Json::String(*O, TEXT("home")));
 			continue;
 		}
-		R.Men = R.MaxMen = int32(O->GetNumberField(TEXT("men")));
+		if (R.Id.IsEmpty() || !O->TryGetNumberField(TEXT("men"), R.Men)) { continue; }
+		R.MaxMen = R.Men;
 		O->TryGetNumberField(TEXT("guns"), R.Guns);
 		R.Present = ArmyPeacePresent(R.Arm);
 		O->TryGetNumberField(TEXT("companies"), R.SavedCompanies);
@@ -412,12 +415,13 @@ bool ACampaign1851Map::LoadArmy()
 	{
 		for (const TSharedPtr<FJsonValue>& Value : *CommandArray)
 		{
-			const TSharedPtr<FJsonObject> O = Value->AsObject();
+			const TSharedPtr<FJsonObject> O = Campaign1851Json::Row(Value);
 			FCampaign1851Command C;
-			C.Id = O->GetStringField(TEXT("id"));
-			C.Name = O->GetStringField(TEXT("name"));
+			C.Id = Campaign1851Json::String(*O, TEXT("id"));
+			if (C.Id.IsEmpty()) { continue; }
+			C.Name = Campaign1851Json::String(*O, TEXT("name"));
 			O->TryGetStringField(TEXT("area"), C.Area);
-			C.HQ = FindCity(O->GetStringField(TEXT("hq")));
+			C.HQ = FindCity(Campaign1851Json::String(*O, TEXT("hq")));
 			TArray<FString> Towns;
 			O->TryGetStringArrayField(TEXT("towns"), Towns);
 			for (const FString& T : Towns)

@@ -1,0 +1,19 @@
+{
+  "id": "SE-NO",
+  "members": [
+    "SE",
+    "NO"
+  ],
+  "note": "Dokumenteret separate institutioner; runtime-reglerne nedenfor er integrationsforslag. Begge 1825-rækker er aktive, SE er ikke længere aggregat.",
+  "source": "STORTINGET_UNION",
+  "rules": {
+    "population": "sum nationale rækker én gang; byer er inkluderet i län/amt",
+    "army": "Separate nationale OOB-puljer. Mobiliserbar linje inkluderer fredens mænd; garnisoner/felthær trækkes via drawsFrom, aldrig oveni.",
+    "treasury": "separate kasser, ingen automatisk pooling",
+    "warDecision": "fælles konges udenrigspolitik; norske bevillinger og hjemlige begrænsninger kræver egen model",
+    "norwegianLandvern": "1825 ingen landværnspulje; 1851 særskilt hjemlig reserve, ikke eksportstyrke."
+  },
+  "implementedInGame": false,
+  "status": "spil",
+  "schemaSource": "Docs/Landeskabelon.md 2.1, 3.4; eksisterende motor har kun noter"
+}

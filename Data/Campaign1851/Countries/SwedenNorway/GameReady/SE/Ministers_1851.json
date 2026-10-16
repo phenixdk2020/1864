@@ -1,0 +1,122 @@
+{
+  "sovereign": {
+    "name": "Oscar I",
+    "born": 1799,
+    "government": "Konstitutionelt monarki i personalunion"
+  },
+  "note": "Historiske personer. Otte semantiske ressorter fordeles som spilvalg; samme person kan dække flere, men må ikke ansættes flere gange. Navy/Foreign kan være stedfortrædende kandidat, ikke faktisk ressortchef. Ni 1–10-statistikker er skøn; skill/thrift/caution er skøn på 0–100.",
+  "portfolios": [
+    {
+      "portfolio": "Interior",
+      "candidates": [
+        {
+          "name": "Johan Fredrik Fåhræus",
+          "born": 1796,
+          "role": "civilminister; Interior-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "PublicWorks",
+      "candidates": [
+        {
+          "name": "Johan Fredrik Fåhræus",
+          "born": 1796,
+          "role": "civilminister; PublicWorks-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "War",
+      "candidates": [
+        {
+          "name": "Carl Ludvig von Hohenhausen",
+          "born": 1787,
+          "role": "landforsvarsminister; War-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Transport",
+      "candidates": [
+        {
+          "name": "Johan Fredrik Fåhræus",
+          "born": 1796,
+          "role": "civilminister; Transport-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Intendance",
+      "candidates": [
+        {
+          "name": "Carl Ludvig von Hohenhausen",
+          "born": 1787,
+          "role": "landforsvarsminister; Intendance-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Foreign",
+      "candidates": [
+        {
+          "name": "Gustaf Algernon Stierneld",
+          "born": 1791,
+          "role": "udenrigsminister; Foreign-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Navy",
+      "candidates": [
+        {
+          "name": "Baltzar Julius Ernst von Platen",
+          "born": 1804,
+          "role": "søforsvarsminister; Navy-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    },
+    {
+      "portfolio": "Finance",
+      "candidates": [
+        {
+          "name": "Johan August Gripenstedt",
+          "born": 1813,
+          "role": "fungerende finansminister 10. januar–21. oktober; Finance-fordeling er spilvalg",
+          "historical": true,
+          "skill": 60,
+          "thrift": 60,
+          "caution": 70
+        }
+      ]
+    }
+  ]
+}

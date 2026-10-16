@@ -1,0 +1,108 @@
+{
+  "note": "Samtidig organisationsbeskrivelse, ikke summerbar styrkeliste. Se konfliktkontrol.",
+  "corps": [
+    [
+      "G",
+      "Gardekorps",
+      null,
+      "Garde"
+    ],
+    [
+      "I",
+      "I. Armeekorps",
+      "Königsberg",
+      "Ost- og Westpreussen"
+    ],
+    [
+      "II",
+      "II. Armeekorps",
+      "Stettin",
+      "Pommern"
+    ],
+    [
+      "III",
+      "III. Armeekorps",
+      "Frankfurt an der Oder",
+      "Brandenburg"
+    ],
+    [
+      "IV",
+      "IV. Armeekorps",
+      "Magdeburg",
+      "Sachsen"
+    ],
+    [
+      "V",
+      "V. Armeekorps",
+      "Posen",
+      "Posen"
+    ],
+    [
+      "VI",
+      "VI. Armeekorps",
+      "Breslau",
+      "Schlesien"
+    ],
+    [
+      "VII",
+      "VII. Armeekorps",
+      "Münster",
+      "Westfalen"
+    ],
+    [
+      "VIII",
+      "VIII. Armeekorps",
+      "Koblenz",
+      "Rheinland"
+    ]
+  ],
+  "guardDescription": "Fodgarde, gardereserve, jægere/skytter, artilleribrigade og flere gardekavallerityper.",
+  "landwehr": "Landwehr er indkaldelige ældre årgange. Første og andet opbud adskilles fra aktive soldater.",
+  "kriegsreserve": "Krigsreservister er genindkaldeligt tidligere linjemandskab til erstatning; ingen ekstra samtidigt stående hær.",
+  "reserveCount": {
+    "value": null,
+    "status": "skøn",
+    "source": "RANGLIST",
+    "reason": "Ingen afstemt optælling med Landwehr-opbud og Kriegsreserve."
+  },
+  "peaceMen1825": {
+    "value": null,
+    "status": "skøn",
+    "source": "RANGLIST",
+    "reason": "Ingen mønstringsrulle læst."
+  },
+  "peaceMen1851": {
+    "value": null,
+    "status": "skøn",
+    "source": "RANGLIST",
+    "reason": "Ingen mønstringsrulle læst."
+  },
+  "sourceClaims": [
+    {
+      "value": 500000,
+      "status": "skøn",
+      "source": "ARMY1851",
+      "reason": "Samtidig cirkapåstand om krigspotentiale uden andet Landwehr-opbud; ikke faktisk fremmøde."
+    },
+    {
+      "value": 130000,
+      "status": "kilde",
+      "source": "ROON-BIO",
+      "reason": "Biografiens nærår 1820; ikke 1825.",
+      "reference": "1820"
+    },
+    {
+      "value": 138000,
+      "status": "skøn",
+      "source": "ROON-BIO",
+      "reason": "Biografiens 1854: 1820-tal + 8.000; ikke 1851.",
+      "reference": "1854"
+    }
+  ],
+  "conflicts": [
+    "OCR siger otte linjeregimenter pr. korps, men 32 nationalt; dette kan ikke begge være korrekt.",
+    "Kavalleritypernes totalsum og trykt eskadronantal er ikke konsistent; ingen fuld OOB beregnet.",
+    "Otte dages mobilisering i artikel er vurdering, ikke målt lokal mobiliseringstid."
+  ],
+  "comparison1864": "Reform og bredere Dreyse-udbredelse skal indføres efter start. Ingen 1864-ruller kopieret ind i 1851. Hele regimentstilvæksten og batteriernes våbenfordeling kræver nye kilder."
+}

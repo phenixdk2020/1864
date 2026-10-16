@@ -1,0 +1,74 @@
+{
+  "note": "Brug nationens namePools. Navnede generaler er historiske personer; en kombination fra navnepuljen er altid en GENERERET officer, aldrig en dokumenteret historisk chef. Generisk fælles pulje er bevidst tom.",
+  "stats": [
+    "leadership",
+    "inspiration",
+    "initiative",
+    "tactical",
+    "staff",
+    "discipline",
+    "aggression",
+    "composure",
+    "political"
+  ],
+  "generals": [
+    {
+      "id": "G_SE_LOWENHIELM",
+      "name": "Gustaf Carl Fredrik Löwenhielm",
+      "born": 1771,
+      "rank": "Generalløjtnant",
+      "leadership": 5,
+      "inspiration": 5,
+      "initiative": 5,
+      "tactical": 5,
+      "staff": 5,
+      "discipline": 5,
+      "aggression": 5,
+      "composure": 5,
+      "political": 5,
+      "experience": 50
+    },
+    {
+      "id": "G_NO_WEDEL",
+      "name": "Ferdinand Wedel Jarlsberg",
+      "born": 1781,
+      "rank": "Generalmajor (årsdatering; dag ikke bekræftet)",
+      "leadership": 5,
+      "inspiration": 5,
+      "initiative": 5,
+      "tactical": 5,
+      "staff": 5,
+      "discipline": 5,
+      "aggression": 5,
+      "composure": 5,
+      "political": 5,
+      "experience": 50
+    },
+    {
+      "id": "G_SE_BJORN",
+      "name": "Magnus Fredrik Ferdinand Björnstjerna",
+      "born": 1779,
+      "rank": "Generalløjtnant",
+      "experience": 60,
+      "leadership": 5,
+      "inspiration": 5,
+      "initiative": 5,
+      "tactical": 5,
+      "staff": 5,
+      "discipline": 5,
+      "aggression": 5,
+      "composure": 5,
+      "political": 5
+    }
+  ],
+  "firstNames": [],
+  "surnames": [],
+  "pay": {
+    "officer": 600,
+    "general": 3000
+  },
+  "recruitCost": {
+    "officer": 1200,
+    "general": 6000
+  }
+}

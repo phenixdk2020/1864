@@ -1,0 +1,809 @@
+{
+  "nation": "SE",
+  "note": "Runde 6: landsdækkende første OOB-model med kendte enhedsnavne og eksplicitte skøn; IKKE en verificeret fuldstændig historisk dagsrulle. Norske infanterikorps efter 1818-oversigten. Ingeniør-/stabsdetaljer og alle dagschefer mangler.",
+  "commands": [
+    {
+      "id": "SE_CMD1",
+      "name": "Svensk kampagnekommando 1 (spil)",
+      "area": "Skåne og Blekinge",
+      "hq": "Kristianstad",
+      "general": "G_SE_BJORN",
+      "towns": [
+        "Kristianstad"
+      ]
+    },
+    {
+      "id": "SE_CMD2",
+      "name": "Svensk kampagnekommando 2 (spil)",
+      "area": "Småland",
+      "hq": "Växjö",
+      "general": "G_SE_BJORN",
+      "towns": [
+        "Växjö"
+      ]
+    },
+    {
+      "id": "SE_CMD3",
+      "name": "Svensk kampagnekommando 3 (spil)",
+      "area": "Halland og Västergötland/Bohuslän",
+      "hq": "Göteborg",
+      "general": "G_SE_BJORN",
+      "towns": [
+        "Göteborg"
+      ]
+    },
+    {
+      "id": "SE_CMD4",
+      "name": "Svensk kampagnekommando 4 (spil)",
+      "area": "Stockholm og øvrige Sverige",
+      "hq": "Stockholm",
+      "general": "G_SE_BJORN",
+      "towns": [
+        "Stockholm"
+      ]
+    }
+  ],
+  "regiments": [
+    {
+      "id": "SE_SVEA_G",
+      "name": "Svea Lif-Gardet",
+      "arm": "guard",
+      "home": "Stockholm",
+      "men": 850,
+      "horses": 15,
+      "experience": 60,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 65,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_ANDRA_G",
+      "name": "Andra Lif-Gardet",
+      "arm": "guard",
+      "home": "Stockholm",
+      "men": 680,
+      "horses": 12,
+      "experience": 60,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 65,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_LG_H",
+      "name": "Lif-Gardet till häst",
+      "arm": "cavalry",
+      "home": "Stockholm",
+      "men": 340,
+      "horses": 357,
+      "experience": 60,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_NS",
+      "name": "Norra Skånska Infanteri-Regementet",
+      "arm": "infantry",
+      "home": "Kristianstad",
+      "men": 100,
+      "horses": 15,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_SS",
+      "name": "Södra Skånska Infanteri-Regementet",
+      "arm": "infantry",
+      "home": "Malmø",
+      "men": 100,
+      "horses": 15,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_KRON",
+      "name": "Kronobergs Regemente",
+      "arm": "infantry",
+      "home": "Växjö",
+      "men": 110,
+      "horses": 17,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_JON",
+      "name": "Jönköpings Regemente",
+      "arm": "infantry",
+      "home": "Jönköping",
+      "men": 110,
+      "horses": 17,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_KAL",
+      "name": "Calmare Regemente",
+      "arm": "infantry",
+      "home": "Kalmar",
+      "men": 110,
+      "horses": 17,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_BOH",
+      "name": "Bohusläns Regemente",
+      "arm": "infantry",
+      "home": "Uddevalla",
+      "men": 90,
+      "horses": 14,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_ELF",
+      "name": "Elfsborgs Regemente",
+      "arm": "infantry",
+      "home": "Borås",
+      "men": 120,
+      "horses": 18,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_SKAR",
+      "name": "Skaraborgs Regemente",
+      "arm": "infantry",
+      "home": "Skara",
+      "men": 120,
+      "horses": 18,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_SM_H",
+      "name": "Smålands Husar-Regemente",
+      "arm": "cavalry",
+      "home": "Eksjö",
+      "men": 60,
+      "horses": 536,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_SK_H",
+      "name": "Skånska Husar-Regementet",
+      "arm": "cavalry",
+      "home": "Helsingborg",
+      "men": 100,
+      "horses": 892,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_SK_D",
+      "name": "Skånska Dragon-Regementet",
+      "arm": "cavalry",
+      "home": "Ystad",
+      "men": 100,
+      "horses": 892,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_SVEA_A",
+      "name": "Svea Artilleri-Regemente",
+      "arm": "artillery",
+      "home": "Stockholm",
+      "men": 1020,
+      "horses": 224,
+      "experience": 60,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_GOTA_A",
+      "name": "Göta Artilleri-Regemente",
+      "arm": "artillery",
+      "home": "Göteborg",
+      "men": 850,
+      "horses": 187,
+      "experience": 60,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_VENDES_A",
+      "name": "Vendes Artilleri-Regemente",
+      "arm": "artillery",
+      "home": "Kristianstad",
+      "men": 850,
+      "horses": 187,
+      "experience": 60,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_LG_DR",
+      "name": "Lif-Regementets Dragon-Corps",
+      "arm": "cavalry",
+      "home": "Uppsala",
+      "men": 50,
+      "horses": 446,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_LG_HU",
+      "name": "Lif-Regementets Husar-Corps",
+      "arm": "cavalry",
+      "home": "Örebro",
+      "men": 50,
+      "horses": 446,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_LG_GR",
+      "name": "Lif-Regementets Grenadier-Corps",
+      "arm": "infantry",
+      "home": "Örebro",
+      "men": 50,
+      "horses": 8,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_LG1",
+      "name": "Första Lif-Grenadier-Regementet",
+      "arm": "infantry",
+      "home": "Linköping",
+      "men": 120,
+      "horses": 18,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_LG2",
+      "name": "Andra Lif-Grenadier-Regementet",
+      "arm": "infantry",
+      "home": "Linköping",
+      "men": 100,
+      "horses": 15,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_VG",
+      "name": "Vestgöta Regemente",
+      "arm": "infantry",
+      "home": "Vänersborg",
+      "men": 100,
+      "horses": 15,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_SM_GR",
+      "name": "Smålands Grenadier-Bataljon",
+      "arm": "infantry",
+      "home": "Eksjö",
+      "men": 50,
+      "horses": 8,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_UPP",
+      "name": "Upplands Regemente",
+      "arm": "infantry",
+      "home": "Uppsala",
+      "men": 120,
+      "horses": 18,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_SOD",
+      "name": "Södermanlands Regemente",
+      "arm": "infantry",
+      "home": "Malmköping",
+      "men": 120,
+      "horses": 18,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_DAL",
+      "name": "Dal-Regementet",
+      "arm": "infantry",
+      "home": "Falun",
+      "men": 120,
+      "horses": 18,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_HEL",
+      "name": "Helsinge Regemente",
+      "arm": "infantry",
+      "home": "Gävle",
+      "men": 120,
+      "horses": 18,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_VGD",
+      "name": "Vestgöta-Dals Regemente",
+      "arm": "infantry",
+      "home": "Vänersborg",
+      "men": 100,
+      "horses": 15,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_VMA",
+      "name": "Vestmanlands Regemente",
+      "arm": "infantry",
+      "home": "Västerås",
+      "men": 120,
+      "horses": 18,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_NORRB",
+      "name": "Norrbottens Fältjägare-Corps",
+      "arm": "jager",
+      "home": "Piteå",
+      "men": 40,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 58,
+        "drill": 55,
+        "fieldcraft": 65,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_VASTERB",
+      "name": "Vesterbottens Regemente",
+      "arm": "infantry",
+      "home": "Umeå",
+      "men": 60,
+      "horses": 9,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_NER",
+      "name": "Nerikes Regemente",
+      "arm": "infantry",
+      "home": "Örebro",
+      "men": 60,
+      "horses": 9,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_VAR",
+      "name": "Vermlands Regemente",
+      "arm": "infantry",
+      "home": "Karlstad",
+      "men": 91,
+      "horses": 14,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_JAM",
+      "name": "Jemtlands Regemente",
+      "arm": "jager",
+      "home": "Östersund",
+      "men": 80,
+      "horses": 12,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 58,
+        "drill": 55,
+        "fieldcraft": 65,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_VAR_J",
+      "name": "Vermlands Fältjägare-Regemente",
+      "arm": "jager",
+      "home": "Karlstad",
+      "men": 510,
+      "horses": 9,
+      "experience": 60,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 58,
+        "drill": 55,
+        "fieldcraft": 65,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_HALL",
+      "name": "Hallands Bataljon",
+      "arm": "infantry",
+      "home": "Halmstad",
+      "men": 50,
+      "horses": 5,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_VNORR",
+      "name": "Vester-Norrlands Bevärings-Bataljon",
+      "arm": "infantry",
+      "home": "Härnösand",
+      "men": 60,
+      "horses": 6,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_GOT",
+      "name": "Gottlands National-Beväring",
+      "arm": "infantry",
+      "home": "Visby",
+      "men": 250,
+      "horses": 27,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_HUS_K",
+      "name": "Kronprinsens Husar-Regemente",
+      "arm": "cavalry",
+      "home": "Malmø",
+      "men": 510,
+      "horses": 536,
+      "experience": 60,
+      "skills": {
+        "loading": 60,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    },
+    {
+      "id": "SE_JAM_H",
+      "name": "Jemtlands Häst-Jägare-Corps",
+      "arm": "cavalry",
+      "home": "Östersund",
+      "men": 10,
+      "horses": 89,
+      "experience": 60,
+      "skills": {
+        "loading": 48,
+        "marksmanship": 46,
+        "drill": 55,
+        "fieldcraft": 48,
+        "endurance": 60,
+        "assault": 56
+      }
+    }
+  ],
+  "equipment": {
+    "rifles": 52000,
+    "guns": 144,
+    "horses": 5216,
+    "mortars": 24,
+    "wagons": 382,
+    "raw": [
+      61,
+      46,
+      244,
+      367,
+      1222,
+      917
+    ],
+    "foodDays": 30,
+    "columns": 8,
+    "infantryReload": 1.2,
+    "infantryAccuracy": 0.8,
+    "carbineReload": 24,
+    "infantryWeapon": "Svensk glatløbet flintlås m/1815, ældre modeller",
+    "cavalryWeapon": "Flintlåskarabin, pistol og sabel",
+    "artilleryWeapon": "Glatløbet forladeskyts; 6-/12-pundig kanon og haubits som spilklasser; ingen riflet baglader",
+    "uniforms": [
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret"
+    ],
+    "kitReserve": 6112
+  },
+  "magazines": [
+    {
+      "town": "Stockholm",
+      "food": 229192.5,
+      "fodder": 26080.0,
+      "ammo": 1375.155
+    },
+    {
+      "town": "Kristianstad",
+      "food": 275031.0,
+      "fodder": 31296.0,
+      "ammo": 1650.186
+    },
+    {
+      "town": "Göteborg",
+      "food": 183354.0,
+      "fodder": 20864.0,
+      "ammo": 1100.124
+    },
+    {
+      "town": "Karlskrona",
+      "food": 137515.5,
+      "fodder": 15648.0,
+      "ammo": 825.093
+    },
+    {
+      "town": "Karlsborg",
+      "food": 91677.0,
+      "fodder": 10432.0,
+      "ammo": 550.062
+    }
+  ]
+}

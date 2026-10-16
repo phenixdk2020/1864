@@ -1,0 +1,5362 @@
+{
+  "note": "Kortbygger-sidecar: lat/lon WGS84, ingen motorprojektion.",
+  "regions": [
+    {
+      "id": "SE-stockholm-city",
+      "name": "Stockholms stad",
+      "nation": "SE",
+      "seat": "Stockholm",
+      "population1825": 79082,
+      "population1851": 93557,
+      "lat": 59.329,
+      "lon": 18.069,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "SE-stockholm",
+      "name": "Stockholms län",
+      "nation": "SE",
+      "seat": "Stockholm",
+      "population1825": 102555,
+      "population1851": 114983,
+      "lat": 59.33,
+      "lon": 18.07,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "SE-uppsala",
+      "name": "Uppsala län",
+      "nation": "SE",
+      "seat": "Uppsala",
+      "population1825": 81729,
+      "population1851": 89478,
+      "lat": 59.86,
+      "lon": 17.64,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "SE-sodermanland",
+      "name": "Södermanlands län",
+      "nation": "SE",
+      "seat": "Nyköping",
+      "population1825": 106242,
+      "population1851": 120469,
+      "lat": 58.75,
+      "lon": 17.01,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "SE-ostergotland",
+      "name": "Östergötlands län",
+      "nation": "SE",
+      "seat": "Vadstena",
+      "population1825": 181304,
+      "population1851": 223368,
+      "lat": 58.448,
+      "lon": 14.89,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "SE-jonkoping",
+      "name": "Jönköpings län",
+      "nation": "SE",
+      "seat": "Jönköping",
+      "population1825": 129150,
+      "population1851": 163741,
+      "lat": 57.783,
+      "lon": 14.162,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "SE-kronoberg",
+      "name": "Kronobergs län",
+      "nation": "SE",
+      "seat": "Växjö",
+      "population1825": 102039,
+      "population1851": 137329,
+      "lat": 56.879,
+      "lon": 14.805,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "SE-kalmar",
+      "name": "Kalmar län, tabellens opgørelse",
+      "nation": "SE",
+      "seat": "Kalmar",
+      "population1825": 159636,
+      "population1851": 203200,
+      "lat": 56.663,
+      "lon": 16.356,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "SE-gotland",
+      "name": "Gotlands län",
+      "nation": "SE",
+      "seat": "Visby",
+      "population1825": 37892,
+      "population1851": 44813,
+      "lat": 57.63,
+      "lon": 18.29,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "SE-blekinge",
+      "name": "Blekinge län",
+      "nation": "SE",
+      "seat": "Karlskrona",
+      "population1825": 84676,
+      "population1851": 108169,
+      "lat": 56.161,
+      "lon": 15.586,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "SE-kristianstad",
+      "name": "Kristianstads län",
+      "nation": "SE",
+      "seat": "Kristianstad",
+      "population1825": 144308,
+      "population1851": 190283,
+      "lat": 56.029,
+      "lon": 14.157,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "SE-malmohus",
+      "name": "Malmöhus län",
+      "nation": "SE",
+      "seat": "Malmø",
+      "population1825": 190639,
+      "population1851": 254628,
+      "lat": 55.605,
+      "lon": 13.004,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "SE-halland",
+      "name": "Hallands län",
+      "nation": "SE",
+      "seat": "Halmstad",
+      "population1825": 85099,
+      "population1851": 106233,
+      "lat": 56.674,
+      "lon": 12.857,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "SE-goteborg-bohus",
+      "name": "Göteborgs och Bohus län",
+      "nation": "SE",
+      "seat": "Göteborg",
+      "population1825": 145511,
+      "population1851": 188488,
+      "lat": 57.707,
+      "lon": 11.967,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "SE-alvsborg",
+      "name": "Älvsborgs län",
+      "nation": "SE",
+      "seat": "Borås",
+      "population1825": 185322,
+      "population1851": 246949,
+      "lat": 57.721,
+      "lon": 12.94,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "SE-skaraborg",
+      "name": "Skaraborgs län",
+      "nation": "SE",
+      "seat": "Karlsborg",
+      "population1825": 158503,
+      "population1851": 200784,
+      "lat": 58.537,
+      "lon": 14.51,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "SE-varmland",
+      "name": "Värmlands län",
+      "nation": "SE",
+      "seat": "Karlstad",
+      "population1825": 161857,
+      "population1851": 222945,
+      "lat": 59.38,
+      "lon": 13.5,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "SE-orebro",
+      "name": "Örebro län",
+      "nation": "SE",
+      "seat": "Örebro",
+      "population1825": 108373,
+      "population1851": 138179,
+      "lat": 59.27,
+      "lon": 15.21,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "SE-vastmanland",
+      "name": "Västmanlands län",
+      "nation": "SE",
+      "seat": "Västerås",
+      "population1825": 88319,
+      "population1851": 96909,
+      "lat": 59.61,
+      "lon": 16.54,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "SE-kopparberg",
+      "name": "Kopparbergs län",
+      "nation": "SE",
+      "seat": "Falun",
+      "population1825": 128732,
+      "population1851": 152220,
+      "lat": 60.61,
+      "lon": 15.63,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "SE-gavleborg",
+      "name": "Gävleborgs län",
+      "nation": "SE",
+      "seat": "Gävle",
+      "population1825": 96237,
+      "population1851": 120777,
+      "lat": 60.67,
+      "lon": 17.14,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "SE-vasternorrland",
+      "name": "Västernorrlands län",
+      "nation": "SE",
+      "seat": "Härnösand",
+      "population1825": 71721,
+      "population1851": 100363,
+      "lat": 62.63,
+      "lon": 17.94,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "SE-jamtland",
+      "name": "Jämtlands län",
+      "nation": "SE",
+      "seat": "Östersund",
+      "population1825": 38899,
+      "population1851": 52655,
+      "lat": 63.18,
+      "lon": 14.64,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "SE-vasterbotten",
+      "name": "Västerbottens län",
+      "nation": "SE",
+      "seat": "Umeå",
+      "population1825": 44455,
+      "population1851": 68501,
+      "lat": 63.83,
+      "lon": 20.26,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "SE-norrbotten",
+      "name": "Norrbottens län",
+      "nation": "SE",
+      "seat": "Piteå",
+      "population1825": 40275,
+      "population1851": 59315,
+      "lat": 65.32,
+      "lon": 21.48,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SCB_population"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "NO-akershus-city",
+      "name": "Akershus med Christiania",
+      "nation": "NO",
+      "seat": "Kristiania/Oslo",
+      "population1825": 82484,
+      "population1851": 119515,
+      "lat": 59.913,
+      "lon": 10.752,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "NO-smaalenene",
+      "name": "Smaalenene",
+      "nation": "NO",
+      "seat": "Fredrikshald/Fredriksten",
+      "population1825": 57521,
+      "population1851": 79557,
+      "lat": 59.12,
+      "lon": 11.39,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "NO-hedemarken",
+      "name": "Hedemarken",
+      "nation": "NO",
+      "seat": "Hamar-området",
+      "population1825": 71108,
+      "population1851": 94967,
+      "lat": 60.79,
+      "lon": 11.07,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "NO-christians",
+      "name": "Christians",
+      "nation": "NO",
+      "seat": "Lillehammer",
+      "population1825": 83103,
+      "population1851": 109558,
+      "lat": 61.12,
+      "lon": 10.47,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "NO-buskerud",
+      "name": "Buskerud",
+      "nation": "NO",
+      "seat": "Drammen",
+      "population1825": 70136,
+      "population1851": 87451,
+      "lat": 59.744,
+      "lon": 10.204,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "NO-jarlsberg-larvik",
+      "name": "Jarlsberg og Laurvig",
+      "nation": "NO",
+      "seat": "Tønsberg",
+      "population1825": 49791,
+      "population1851": 68652,
+      "lat": 59.267,
+      "lon": 10.407,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Befolkning fra disjunkte län/amter; punkt er sæde/nærmeste kendte by, ikke regioncentroid. Null: ingen eksisterende punktreference."
+    },
+    {
+      "id": "NO-bratsberg",
+      "name": "Bratsberg, samlede Telemark/Bamble-grupper",
+      "nation": "NO",
+      "seat": "Skien",
+      "population1825": 57720,
+      "population1851": 74901,
+      "lat": 59.21,
+      "lon": 9.61,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "NO-nedenes",
+      "name": "Nedenes og Robygdelaget",
+      "nation": "NO",
+      "seat": "Arendal",
+      "population1825": 41924,
+      "population1851": 56780,
+      "lat": 58.46,
+      "lon": 8.77,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "NO-lister-mandal",
+      "name": "Lister og Mandal",
+      "nation": "NO",
+      "seat": "Kristiansand",
+      "population1825": 49590,
+      "population1851": 64916,
+      "lat": 58.15,
+      "lon": 8.0,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "NO-stavanger",
+      "name": "Stavanger",
+      "nation": "NO",
+      "seat": "Stavanger",
+      "population1825": 57464,
+      "population1851": 85539,
+      "lat": 58.97,
+      "lon": 5.73,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "NO-sondre-bergenhus-city",
+      "name": "Søndre Bergenhus med Bergen",
+      "nation": "NO",
+      "seat": "Bergen",
+      "population1825": 95506,
+      "population1851": 123744,
+      "lat": 60.39,
+      "lon": 5.32,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "NO-nordre-bergenhus",
+      "name": "Nordre Bergenhus",
+      "nation": "NO",
+      "seat": "Leikanger",
+      "population1825": 63789,
+      "population1851": 79912,
+      "lat": 61.18,
+      "lon": 6.85,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "NO-romsdal",
+      "name": "Romsdal inkl. Søndmøre",
+      "nation": "NO",
+      "seat": "Molde",
+      "population1825": 64151,
+      "population1851": 86245,
+      "lat": 62.74,
+      "lon": 7.16,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "NO-sondre-trondhjem",
+      "name": "Søndre Trondhjem",
+      "nation": "NO",
+      "seat": "Trondheim",
+      "population1825": 71178,
+      "population1851": 93172,
+      "lat": 63.43,
+      "lon": 10.4,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "NO-nordre-trondhjem",
+      "name": "Nordre Trondhjem",
+      "nation": "NO",
+      "seat": "Steinkjer-området",
+      "population1825": 52494,
+      "population1851": 70419,
+      "lat": 64.02,
+      "lon": 11.5,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "NO-nordland",
+      "name": "Nordland",
+      "nation": "NO",
+      "seat": "Bodø",
+      "population1825": 52831,
+      "population1851": 72151,
+      "lat": 67.28,
+      "lon": 14.4,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    },
+    {
+      "id": "NO-finmarken",
+      "name": "Finmarken, tabellens nordlige område",
+      "nation": "NO",
+      "seat": "Tromsø",
+      "population1825": 30528,
+      "population1851": 49831,
+      "lat": 69.65,
+      "lon": 18.96,
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "SSB_1845",
+        "SSB_1855"
+      ],
+      "reason": "Afrundet repræsentativt punkt, ±0,1 grad; ikke altid datidens amtmandssæde. Befolkning er separat cirkaskøn fra disjunkte amt/län."
+    }
+  ],
+  "ports": [
+    {
+      "name": "Malmø",
+      "lat": 55.605,
+      "lon": 13.004,
+      "owner": "SE",
+      "region": "Skåne",
+      "population": {
+        "1825": 7597,
+        "1851": 13378,
+        "1864": 21255
+      },
+      "harbour": true,
+      "fortress": true,
+      "fortName": "Malmøhus",
+      "garrison": 400,
+      "guns": 8,
+      "railwayYear": 1856,
+      "pop": 13378,
+      "railway": false,
+      "fieldStatus": {
+        "lat": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "lon": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "population": {
+          "1825": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1825-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1820-12-31",
+                "value": 6723
+              },
+              {
+                "date": "1830-12-31",
+                "value": 8665
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1851": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1851-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1850-12-31",
+                "value": 13087
+              },
+              {
+                "date": "1860-12-31",
+                "value": 18919
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1864": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1864-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1860-12-31",
+                "value": 18919
+              },
+              {
+                "date": "1870-12-31",
+                "value": 25593
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          }
+        },
+        "harbour": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "fortress": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "garrison": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Malmöhus; begrænset militær funktion, ikke moderne feltfæstning",
+          "method": "Operativt cirkatal; funktionsanker: Malmöhus; begrænset militær funktion, ikke moderne feltfæstning",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            200,
+            600
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Malmöhus; begrænset militær funktion, ikke moderne feltfæstning",
+          "method": "Operativt cirkatal; funktionsanker: Malmöhus; begrænset militær funktion, ikke moderne feltfæstning",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            4,
+            12
+          ]
+        },
+        "railwayYear": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "pop": {
+          "status": "skøn",
+          "source": "SCB_POP_R4",
+          "reference": "1851-07-01",
+          "locator": "Tabel 12, trykt/PDF side 61–62",
+          "anchors": [
+            {
+              "date": "1850-12-31",
+              "value": 13087
+            },
+            {
+              "date": "1860-12-31",
+              "value": 18919
+            }
+          ],
+          "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+        },
+        "district": {
+          "status": "skøn",
+          "source": "SCHEMA",
+          "reason": "Historisk län-/amttilhørsforhold som første mapping; grænsekontrol mangler."
+        }
+      },
+      "note": "Befolkning, fæstningsfunktion og militærbestykning har separate statusser. Outside betyder uden for det eksisterende kort, ikke en ny kortudstrækning.",
+      "outsideMap": false,
+      "district": "SE-malmohus",
+      "militaryNote": "Malmöhus; begrænset militær funktion, ikke moderne feltfæstning"
+    },
+    {
+      "name": "Helsingborg",
+      "lat": 56.046,
+      "lon": 12.694,
+      "owner": "SE",
+      "region": "Skåne",
+      "population": {
+        "1825": 2660,
+        "1851": 4199,
+        "1864": 6246
+      },
+      "harbour": true,
+      "fortress": false,
+      "garrison": 40,
+      "guns": 0,
+      "railwayYear": 1865,
+      "pop": 4199,
+      "railway": false,
+      "fieldStatus": {
+        "lat": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "lon": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "population": {
+          "1825": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1825-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1820-12-31",
+                "value": 2391
+              },
+              {
+                "date": "1830-12-31",
+                "value": 2990
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1851": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1851-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1850-12-31",
+                "value": 4140
+              },
+              {
+                "date": "1860-12-31",
+                "value": 5333
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1864": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1864-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1860-12-31",
+                "value": 5333
+              },
+              {
+                "date": "1870-12-31",
+                "value": 7941
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          }
+        },
+        "harbour": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "fortress": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "garrison": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "method": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            20,
+            60
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "method": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "railwayYear": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "pop": {
+          "status": "skøn",
+          "source": "SCB_POP_R4",
+          "reference": "1851-07-01",
+          "locator": "Tabel 12, trykt/PDF side 61–62",
+          "anchors": [
+            {
+              "date": "1850-12-31",
+              "value": 4140
+            },
+            {
+              "date": "1860-12-31",
+              "value": 5333
+            }
+          ],
+          "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+        },
+        "district": {
+          "status": "skøn",
+          "source": "SCHEMA",
+          "reason": "Historisk län-/amttilhørsforhold som første mapping; grænsekontrol mangler."
+        }
+      },
+      "note": "Befolkning, fæstningsfunktion og militærbestykning har separate statusser. Outside betyder uden for det eksisterende kort, ikke en ny kortudstrækning.",
+      "outsideMap": false,
+      "district": "SE-malmohus",
+      "militaryNote": "Lokal vagt, ikke feltfæstning"
+    },
+    {
+      "name": "Landskrona",
+      "lat": 55.87,
+      "lon": 12.83,
+      "owner": "SE",
+      "region": "Skåne",
+      "population": {
+        "1825": 3504,
+        "1851": 4217,
+        "1864": 6444
+      },
+      "harbour": true,
+      "fortress": true,
+      "fortName": "Landskrona citadel",
+      "garrison": 400,
+      "guns": 12,
+      "railwayYear": 1865,
+      "pop": 4217,
+      "railway": false,
+      "fieldStatus": {
+        "lat": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "lon": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "population": {
+          "1825": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1825-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1820-12-31",
+                "value": 3488
+              },
+              {
+                "date": "1830-12-31",
+                "value": 3523
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1851": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1851-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1850-12-31",
+                "value": 4139
+              },
+              {
+                "date": "1860-12-31",
+                "value": 5703
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1864": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1864-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1860-12-31",
+                "value": 5703
+              },
+              {
+                "date": "1870-12-31",
+                "value": 7821
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          }
+        },
+        "harbour": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "fortress": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "garrison": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Citadel; depot-/fængselsrolle, kun begrænset operativ bestykning",
+          "method": "Operativt cirkatal; funktionsanker: Citadel; depot-/fængselsrolle, kun begrænset operativ bestykning",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            200,
+            600
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Citadel; depot-/fængselsrolle, kun begrænset operativ bestykning",
+          "method": "Operativt cirkatal; funktionsanker: Citadel; depot-/fængselsrolle, kun begrænset operativ bestykning",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            6,
+            18
+          ]
+        },
+        "railwayYear": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "pop": {
+          "status": "skøn",
+          "source": "SCB_POP_R4",
+          "reference": "1851-07-01",
+          "locator": "Tabel 12, trykt/PDF side 61–62",
+          "anchors": [
+            {
+              "date": "1850-12-31",
+              "value": 4139
+            },
+            {
+              "date": "1860-12-31",
+              "value": 5703
+            }
+          ],
+          "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+        },
+        "district": {
+          "status": "skøn",
+          "source": "SCHEMA",
+          "reason": "Historisk län-/amttilhørsforhold som første mapping; grænsekontrol mangler."
+        }
+      },
+      "note": "Befolkning, fæstningsfunktion og militærbestykning har separate statusser. Outside betyder uden for det eksisterende kort, ikke en ny kortudstrækning.",
+      "outsideMap": false,
+      "district": "SE-malmohus",
+      "militaryNote": "Citadel; depot-/fængselsrolle, kun begrænset operativ bestykning"
+    },
+    {
+      "name": "Ystad",
+      "lat": 55.429,
+      "lon": 13.82,
+      "owner": "SE",
+      "region": "Skåne",
+      "population": {
+        "1825": 3698,
+        "1851": 5101,
+        "1864": 5627
+      },
+      "harbour": true,
+      "fortress": false,
+      "garrison": 40,
+      "guns": 0,
+      "railwayYear": 1874,
+      "pop": 5101,
+      "railway": false,
+      "fieldStatus": {
+        "lat": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "lon": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "population": {
+          "1825": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1825-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1820-12-31",
+                "value": 3474
+              },
+              {
+                "date": "1830-12-31",
+                "value": 3972
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1851": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1851-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1850-12-31",
+                "value": 5089
+              },
+              {
+                "date": "1860-12-31",
+                "value": 5324
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1864": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1864-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1860-12-31",
+                "value": 5324
+              },
+              {
+                "date": "1870-12-31",
+                "value": 6191
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          }
+        },
+        "harbour": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "fortress": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "garrison": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "method": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            20,
+            60
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "method": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "railwayYear": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "pop": {
+          "status": "skøn",
+          "source": "SCB_POP_R4",
+          "reference": "1851-07-01",
+          "locator": "Tabel 12, trykt/PDF side 61–62",
+          "anchors": [
+            {
+              "date": "1850-12-31",
+              "value": 5089
+            },
+            {
+              "date": "1860-12-31",
+              "value": 5324
+            }
+          ],
+          "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+        },
+        "district": {
+          "status": "skøn",
+          "source": "SCHEMA",
+          "reason": "Historisk län-/amttilhørsforhold som første mapping; grænsekontrol mangler."
+        }
+      },
+      "note": "Befolkning, fæstningsfunktion og militærbestykning har separate statusser. Outside betyder uden for det eksisterende kort, ikke en ny kortudstrækning.",
+      "outsideMap": false,
+      "district": "SE-malmohus",
+      "militaryNote": "Lokal vagt, ikke feltfæstning"
+    },
+    {
+      "name": "Trelleborg",
+      "lat": 55.376,
+      "lon": 13.157,
+      "owner": "SE",
+      "region": "Skåne",
+      "population": {
+        "1825": null,
+        "1851": null,
+        "1864": null
+      },
+      "harbour": true,
+      "fortress": false,
+      "garrison": 40,
+      "guns": 0,
+      "railwayYear": 1875,
+      "pop": null,
+      "railway": false,
+      "fieldStatus": {
+        "lat": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "lon": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "population": {
+          "1825": {
+            "status": "kilde",
+            "source": "SCB_POP_R4",
+            "reason": "Byens årstal ikke sikkert afskrevet endnu."
+          },
+          "1851": {
+            "status": "kilde",
+            "source": "SCB_POP_R4",
+            "reason": "Byens årstal ikke sikkert afskrevet endnu."
+          },
+          "1864": {
+            "status": "kilde",
+            "source": "SCB_POP_R4",
+            "reason": "Byens årstal ikke sikkert afskrevet endnu."
+          }
+        },
+        "harbour": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "fortress": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "garrison": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "method": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            20,
+            60
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "method": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "railwayYear": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "pop": {
+          "status": "kilde",
+          "source": "SCB_POP_R4",
+          "reason": "Byens årstal ikke sikkert afskrevet endnu."
+        },
+        "district": {
+          "status": "skøn",
+          "source": "SCHEMA",
+          "reason": "Historisk län-/amttilhørsforhold som første mapping; grænsekontrol mangler."
+        }
+      },
+      "note": "Befolkning, fæstningsfunktion og militærbestykning har separate statusser. Outside betyder uden for det eksisterende kort, ikke en ny kortudstrækning.",
+      "outsideMap": false,
+      "district": "SE-malmohus",
+      "militaryNote": "Lokal vagt, ikke feltfæstning"
+    },
+    {
+      "name": "Karlskrona",
+      "lat": 56.161,
+      "lon": 15.586,
+      "owner": "SE",
+      "region": "Blekinge",
+      "population": {
+        "1825": 11621,
+        "1851": 14157,
+        "1864": 15740
+      },
+      "harbour": true,
+      "fortress": true,
+      "fortName": "Kungsholmen og Drottningskär",
+      "garrison": 1200,
+      "guns": 36,
+      "railwayYear": 1874,
+      "pop": 14157,
+      "railway": false,
+      "fieldStatus": {
+        "lat": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "lon": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "population": {
+          "1825": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1825-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1820-12-31",
+                "value": 11573
+              },
+              {
+                "date": "1830-12-31",
+                "value": 11680
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1851": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1851-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1850-12-31",
+                "value": 14097
+              },
+              {
+                "date": "1860-12-31",
+                "value": 15300
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1864": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1864-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1860-12-31",
+                "value": 15300
+              },
+              {
+                "date": "1870-12-31",
+                "value": 16558
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          }
+        },
+        "harbour": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "fortress": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "garrison": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Kungsholmen/Drottningskär; søværn og hær deles om personel",
+          "method": "Operativt cirkatal; funktionsanker: Kungsholmen/Drottningskär; søværn og hær deles om personel",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            600,
+            1800
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Kungsholmen/Drottningskär; søværn og hær deles om personel",
+          "method": "Operativt cirkatal; funktionsanker: Kungsholmen/Drottningskär; søværn og hær deles om personel",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            18,
+            54
+          ]
+        },
+        "railwayYear": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "pop": {
+          "status": "skøn",
+          "source": "SCB_POP_R4",
+          "reference": "1851-07-01",
+          "locator": "Tabel 12, trykt/PDF side 61–62",
+          "anchors": [
+            {
+              "date": "1850-12-31",
+              "value": 14097
+            },
+            {
+              "date": "1860-12-31",
+              "value": 15300
+            }
+          ],
+          "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+        },
+        "district": {
+          "status": "skøn",
+          "source": "SCHEMA",
+          "reason": "Historisk län-/amttilhørsforhold som første mapping; grænsekontrol mangler."
+        }
+      },
+      "note": "Befolkning, fæstningsfunktion og militærbestykning har separate statusser. Outside betyder uden for det eksisterende kort, ikke en ny kortudstrækning.",
+      "outsideMap": false,
+      "district": "SE-blekinge",
+      "militaryNote": "Kungsholmen/Drottningskär; søværn og hær deles om personel"
+    },
+    {
+      "name": "Halmstad",
+      "lat": 56.674,
+      "lon": 12.857,
+      "owner": "SE",
+      "region": "Halland",
+      "population": {
+        "1825": 1735,
+        "1851": 2820,
+        "1864": 4572
+      },
+      "harbour": true,
+      "fortress": false,
+      "garrison": 40,
+      "guns": 0,
+      "railwayYear": 1877,
+      "pop": 2820,
+      "railway": false,
+      "fieldStatus": {
+        "lat": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "lon": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "population": {
+          "1825": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1825-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1820-12-31",
+                "value": 1611
+              },
+              {
+                "date": "1830-12-31",
+                "value": 1887
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1851": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1851-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1850-12-31",
+                "value": 2761
+              },
+              {
+                "date": "1860-12-31",
+                "value": 3945
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1864": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1864-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1860-12-31",
+                "value": 3945
+              },
+              {
+                "date": "1870-12-31",
+                "value": 5738
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          }
+        },
+        "harbour": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "fortress": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "garrison": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "method": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            20,
+            60
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "method": "Operativt cirkatal; funktionsanker: Lokal vagt, ikke feltfæstning",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "railwayYear": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "pop": {
+          "status": "skøn",
+          "source": "SCB_POP_R4",
+          "reference": "1851-07-01",
+          "locator": "Tabel 12, trykt/PDF side 61–62",
+          "anchors": [
+            {
+              "date": "1850-12-31",
+              "value": 2761
+            },
+            {
+              "date": "1860-12-31",
+              "value": 3945
+            }
+          ],
+          "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+        },
+        "district": {
+          "status": "skøn",
+          "source": "SCHEMA",
+          "reason": "Historisk län-/amttilhørsforhold som første mapping; grænsekontrol mangler."
+        }
+      },
+      "note": "Befolkning, fæstningsfunktion og militærbestykning har separate statusser. Outside betyder uden for det eksisterende kort, ikke en ny kortudstrækning.",
+      "outsideMap": false,
+      "district": "SE-halland",
+      "militaryNote": "Lokal vagt, ikke feltfæstning"
+    },
+    {
+      "name": "Göteborg",
+      "lat": 57.707,
+      "lon": 11.967,
+      "owner": "SE",
+      "region": "Göteborg/Bohuslän",
+      "population": {
+        "1825": 18551,
+        "1851": 26630,
+        "1864": 43778
+      },
+      "harbour": true,
+      "fortress": true,
+      "fortName": "Nya Älvsborg",
+      "garrison": 500,
+      "guns": 20,
+      "railwayYear": 1856,
+      "pop": 26630,
+      "railway": false,
+      "fieldStatus": {
+        "lat": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "lon": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "population": {
+          "1825": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1825-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1820-12-31",
+                "value": 16519
+              },
+              {
+                "date": "1830-12-31",
+                "value": 21036
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1851": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1851-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1850-12-31",
+                "value": 26084
+              },
+              {
+                "date": "1860-12-31",
+                "value": 37043
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1864": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1864-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1860-12-31",
+                "value": 37043
+              },
+              {
+                "date": "1870-12-31",
+                "value": 56288
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          }
+        },
+        "harbour": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "fortress": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "garrison": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Nya Älvsborg; havneforsvar",
+          "method": "Operativt cirkatal; funktionsanker: Nya Älvsborg; havneforsvar",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            250,
+            750
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Nya Älvsborg; havneforsvar",
+          "method": "Operativt cirkatal; funktionsanker: Nya Älvsborg; havneforsvar",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            10,
+            30
+          ]
+        },
+        "railwayYear": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "pop": {
+          "status": "skøn",
+          "source": "SCB_POP_R4",
+          "reference": "1851-07-01",
+          "locator": "Tabel 12, trykt/PDF side 61–62",
+          "anchors": [
+            {
+              "date": "1850-12-31",
+              "value": 26084
+            },
+            {
+              "date": "1860-12-31",
+              "value": 37043
+            }
+          ],
+          "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+        },
+        "district": {
+          "status": "skøn",
+          "source": "SCHEMA",
+          "reason": "Historisk län-/amttilhørsforhold som første mapping; grænsekontrol mangler."
+        }
+      },
+      "note": "Befolkning, fæstningsfunktion og militærbestykning har separate statusser. Outside betyder uden for det eksisterende kort, ikke en ny kortudstrækning.",
+      "outsideMap": false,
+      "district": "SE-goteborg-bohus",
+      "militaryNote": "Nya Älvsborg; havneforsvar"
+    },
+    {
+      "name": "Varberg",
+      "lat": 57.105,
+      "lon": 12.25,
+      "owner": "SE",
+      "region": "Halland",
+      "population": {
+        "1825": 1626,
+        "1851": 2142,
+        "1864": 2447
+      },
+      "harbour": true,
+      "fortress": true,
+      "fortName": "Varbergs fæstning (depot/fængsel)",
+      "garrison": 80,
+      "guns": 0,
+      "railwayYear": 1880,
+      "pop": 2142,
+      "railway": false,
+      "fieldStatus": {
+        "lat": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "lon": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Kortplacering: eksisterende spildatapunkt eller afrundet moderne placeringsskøn; ikke historisk afgrænsning."
+        },
+        "population": {
+          "1825": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1825-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1820-12-31",
+                "value": 1494
+              },
+              {
+                "date": "1830-12-31",
+                "value": 1787
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1851": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1851-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1850-12-31",
+                "value": 2123
+              },
+              {
+                "date": "1860-12-31",
+                "value": 2503
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          },
+          "1864": {
+            "status": "skøn",
+            "source": "SCB_POP_R4",
+            "reference": "1864-07-01",
+            "locator": "Tabel 12, trykt/PDF side 61–62",
+            "anchors": [
+              {
+                "date": "1860-12-31",
+                "value": 2503
+              },
+              {
+                "date": "1870-12-31",
+                "value": 2344
+              }
+            ],
+            "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+          }
+        },
+        "harbour": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "fortress": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "garrison": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Depot/fængsel; ingen aktiv batteristyrke i modellen",
+          "method": "Operativt cirkatal; funktionsanker: Depot/fængsel; ingen aktiv batteristyrke i modellen",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            40,
+            120
+          ]
+        },
+        "guns": {
+          "status": "skøn",
+          "source": "R6_MODEL",
+          "reason": "Operativt cirkatal; funktionsanker: Depot/fængsel; ingen aktiv batteristyrke i modellen",
+          "method": "Operativt cirkatal; funktionsanker: Depot/fængsel; ingen aktiv batteristyrke i modellen",
+          "anchors": [
+            "R6_MODEL"
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "railwayYear": {
+          "status": "spil",
+          "source": "GAME:cities_neighbours_1851.json",
+          "reason": "Eksisterende spilvalg, ikke verificeret garnisons-/bestykningsliste."
+        },
+        "pop": {
+          "status": "skøn",
+          "source": "SCB_POP_R4",
+          "reference": "1851-07-01",
+          "locator": "Tabel 12, trykt/PDF side 61–62",
+          "anchors": [
+            {
+              "date": "1850-12-31",
+              "value": 2123
+            },
+            {
+              "date": "1860-12-31",
+              "value": 2503
+            }
+          ],
+          "reason": "Lineær interpolation af decembers bytal; grænseændringer kan påvirke serien."
+        },
+        "district": {
+          "status": "skøn",
+          "source": "SCHEMA",
+          "reason": "Historisk län-/amttilhørsforhold som første mapping; grænsekontrol mangler."
+        }
+      },
+      "note": "Befolkning, fæstningsfunktion og militærbestykning har separate statusser. Outside betyder uden for det eksisterende kort, ikke en ny kortudstrækning.",
+      "outsideMap": false,
+      "district": "SE-halland",
+      "militaryNote": "Depot/fængsel; ingen aktiv batteristyrke i modellen"
+    },
+    {
+      "name": "Kaholmen",
+      "lat": 59.675,
+      "lon": 10.605,
+      "owner": "NO",
+      "region": "Akershus",
+      "population": {
+        "1825": null,
+        "1851": null,
+        "1864": null
+      },
+      "pop": null,
+      "harbour": true,
+      "fortress": true,
+      "garrison": 0,
+      "guns": 0,
+      "railway": false,
+      "railwayYear": null,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Fæstningskontrolpunkt. Samme mandskab/kanoner som Drøbak; aldrig ekstra garnison.",
+      "fieldStatus": {
+        "population": {
+          "status": "kilde",
+          "source": "R6_GEOMETRY",
+          "reason": "Trafik-/fæstningspunkt, ikke afstemt bybefolkning eller verificeret baneår."
+        },
+        "pop": {
+          "status": "kilde",
+          "source": "R6_GEOMETRY",
+          "reason": "Trafik-/fæstningspunkt, ikke afstemt bybefolkning eller verificeret baneår."
+        },
+        "railwayYear": {
+          "status": "kilde",
+          "source": "R6_GEOMETRY",
+          "reason": "Trafik-/fæstningspunkt, ikke afstemt bybefolkning eller verificeret baneår."
+        },
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet by-/kontrolpunkt; ca. 2 km usikkerhed, ingen historisk opmåling.",
+          "method": "Afrundet by-/kontrolpunkt; ca. 2 km usikkerhed, ingen historisk opmåling.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            59.654999999999994,
+            59.695
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet by-/kontrolpunkt; ca. 2 km usikkerhed, ingen historisk opmåling.",
+          "method": "Afrundet by-/kontrolpunkt; ca. 2 km usikkerhed, ingen historisk opmåling.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            10.585,
+            10.625
+          ]
+        }
+      },
+      "militaryAliasOf": "Drøbak"
+    },
+    {
+      "name": "Fredriksvern",
+      "lat": 58.997,
+      "lon": 10.041,
+      "owner": "NO",
+      "region": "Jarlsberg og Larvik",
+      "population": {
+        "1825": null,
+        "1851": null,
+        "1864": null
+      },
+      "pop": null,
+      "harbour": true,
+      "fortress": false,
+      "garrison": 0,
+      "guns": 0,
+      "railway": false,
+      "railwayYear": null,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet kontrolpunkt; trafikpunkt/fæstning er ikke nødvendigvis bykommune. Befolkning ukendt, ikke nul.",
+      "fieldStatus": {
+        "population": {
+          "status": "kilde",
+          "source": "R6_GEOMETRY",
+          "reason": "Trafik-/fæstningspunkt, ikke afstemt bybefolkning eller verificeret baneår."
+        },
+        "pop": {
+          "status": "kilde",
+          "source": "R6_GEOMETRY",
+          "reason": "Trafik-/fæstningspunkt, ikke afstemt bybefolkning eller verificeret baneår."
+        },
+        "railwayYear": {
+          "status": "kilde",
+          "source": "R6_GEOMETRY",
+          "reason": "Trafik-/fæstningspunkt, ikke afstemt bybefolkning eller verificeret baneår."
+        },
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet by-/kontrolpunkt; ca. 2 km usikkerhed, ingen historisk opmåling.",
+          "method": "Afrundet by-/kontrolpunkt; ca. 2 km usikkerhed, ingen historisk opmåling.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            58.977,
+            59.017
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet by-/kontrolpunkt; ca. 2 km usikkerhed, ingen historisk opmåling.",
+          "method": "Afrundet by-/kontrolpunkt; ca. 2 km usikkerhed, ingen historisk opmåling.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            10.021,
+            10.061
+          ]
+        }
+      }
+    }
+  ],
+  "fortresses": [
+    {
+      "name": "Malmöhus",
+      "city": "Malmø",
+      "troopsAlias": "Malmø",
+      "lat": 55.604,
+      "lon": 12.987,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet fæstningspunkt. Brug byens garnisons-/kanonpulje én gang; Karlskronas to anlæg deler puljen. Kaholmen 1825 har ingen senere fæstningsstyrke.",
+      "fieldStatus": {
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            55.583999999999996,
+            55.624
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            12.967,
+            13.007
+          ]
+        }
+      }
+    },
+    {
+      "name": "Landskrona citadel",
+      "city": "Landskrona",
+      "troopsAlias": "Landskrona",
+      "lat": 55.871,
+      "lon": 12.823,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet fæstningspunkt. Brug byens garnisons-/kanonpulje én gang; Karlskronas to anlæg deler puljen. Kaholmen 1825 har ingen senere fæstningsstyrke.",
+      "fieldStatus": {
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            55.851,
+            55.891000000000005
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            12.803,
+            12.843
+          ]
+        }
+      }
+    },
+    {
+      "name": "Kristianstads fæstningsby",
+      "city": "Kristianstad",
+      "troopsAlias": "Kristianstad",
+      "lat": 56.029,
+      "lon": 14.157,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet fæstningspunkt. Brug byens garnisons-/kanonpulje én gang; Karlskronas to anlæg deler puljen. Kaholmen 1825 har ingen senere fæstningsstyrke.",
+      "fieldStatus": {
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            56.009,
+            56.04900000000001
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            14.137,
+            14.177
+          ]
+        }
+      }
+    },
+    {
+      "name": "Kungsholmen",
+      "city": "Karlskrona",
+      "troopsAlias": "Karlskrona",
+      "lat": 56.108,
+      "lon": 15.592,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet fæstningspunkt. Brug byens garnisons-/kanonpulje én gang; Karlskronas to anlæg deler puljen. Kaholmen 1825 har ingen senere fæstningsstyrke.",
+      "fieldStatus": {
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            56.087999999999994,
+            56.128
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            15.572000000000001,
+            15.612
+          ]
+        }
+      }
+    },
+    {
+      "name": "Drottningskär",
+      "city": "Karlskrona",
+      "troopsAlias": "Karlskrona",
+      "lat": 56.111,
+      "lon": 15.561,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet fæstningspunkt. Brug byens garnisons-/kanonpulje én gang; Karlskronas to anlæg deler puljen. Kaholmen 1825 har ingen senere fæstningsstyrke.",
+      "fieldStatus": {
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            56.090999999999994,
+            56.131
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            15.541,
+            15.581
+          ]
+        }
+      }
+    },
+    {
+      "name": "Carlsten",
+      "city": "Marstrand",
+      "troopsAlias": "Marstrand",
+      "lat": 57.886,
+      "lon": 11.577,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet fæstningspunkt. Brug byens garnisons-/kanonpulje én gang; Karlskronas to anlæg deler puljen. Kaholmen 1825 har ingen senere fæstningsstyrke.",
+      "fieldStatus": {
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            57.866,
+            57.906000000000006
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            11.557,
+            11.597
+          ]
+        }
+      }
+    },
+    {
+      "name": "Nya Älvsborg",
+      "city": "Göteborg",
+      "troopsAlias": "Göteborg",
+      "lat": 57.674,
+      "lon": 11.853,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet fæstningspunkt. Brug byens garnisons-/kanonpulje én gang; Karlskronas to anlæg deler puljen. Kaholmen 1825 har ingen senere fæstningsstyrke.",
+      "fieldStatus": {
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            57.653999999999996,
+            57.694
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            11.833,
+            11.873
+          ]
+        }
+      }
+    },
+    {
+      "name": "Karlsborg",
+      "city": "Karlsborg",
+      "troopsAlias": "Karlsborg",
+      "lat": 58.53,
+      "lon": 14.52,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet fæstningspunkt. Brug byens garnisons-/kanonpulje én gang; Karlskronas to anlæg deler puljen. Kaholmen 1825 har ingen senere fæstningsstyrke.",
+      "fieldStatus": {
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            58.51,
+            58.550000000000004
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            14.5,
+            14.54
+          ]
+        }
+      }
+    },
+    {
+      "name": "Fredriksten",
+      "city": "Fredrikshald/Fredriksten",
+      "troopsAlias": "Fredrikshald/Fredriksten",
+      "lat": 59.12,
+      "lon": 11.398,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet fæstningspunkt. Brug byens garnisons-/kanonpulje én gang; Karlskronas to anlæg deler puljen. Kaholmen 1825 har ingen senere fæstningsstyrke.",
+      "fieldStatus": {
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            59.099999999999994,
+            59.14
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            11.378,
+            11.418
+          ]
+        }
+      }
+    },
+    {
+      "name": "Gamlebyen/Kongsten",
+      "city": "Fredrikstad",
+      "troopsAlias": "Fredrikstad",
+      "lat": 59.203,
+      "lon": 10.961,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet fæstningspunkt. Brug byens garnisons-/kanonpulje én gang; Karlskronas to anlæg deler puljen. Kaholmen 1825 har ingen senere fæstningsstyrke.",
+      "fieldStatus": {
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            59.183,
+            59.223000000000006
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            10.941,
+            10.981
+          ]
+        }
+      }
+    },
+    {
+      "name": "Akershus",
+      "city": "Kristiania/Oslo",
+      "troopsAlias": "Kristiania/Oslo",
+      "lat": 59.907,
+      "lon": 10.736,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet fæstningspunkt. Brug byens garnisons-/kanonpulje én gang; Karlskronas to anlæg deler puljen. Kaholmen 1825 har ingen senere fæstningsstyrke.",
+      "fieldStatus": {
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            59.88699999999999,
+            59.927
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            10.716000000000001,
+            10.756
+          ]
+        }
+      }
+    },
+    {
+      "name": "Karljohansvern",
+      "city": "Horten",
+      "troopsAlias": "Horten",
+      "lat": 59.426,
+      "lon": 10.486,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet fæstningspunkt. Brug byens garnisons-/kanonpulje én gang; Karlskronas to anlæg deler puljen. Kaholmen 1825 har ingen senere fæstningsstyrke.",
+      "fieldStatus": {
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            59.406,
+            59.446000000000005
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            10.466000000000001,
+            10.506
+          ]
+        }
+      }
+    },
+    {
+      "name": "Kaholmen",
+      "city": "Drøbak",
+      "troopsAlias": "Drøbak",
+      "lat": 59.675,
+      "lon": 10.605,
+      "status": "skøn",
+      "source": "R6_GEOMETRY",
+      "note": "Afrundet fæstningspunkt. Brug byens garnisons-/kanonpulje én gang; Karlskronas to anlæg deler puljen. Kaholmen 1825 har ingen senere fæstningsstyrke.",
+      "fieldStatus": {
+        "lat": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            59.654999999999994,
+            59.695
+          ]
+        },
+        "lon": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "method": "Afrundet geografisk stedskøn; ikke historisk geodætisk kontrol.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            10.585,
+            10.625
+          ]
+        }
+      }
+    }
+  ],
+  "routes": [
+    {
+      "a": "Malmø",
+      "b": "Lund",
+      "roadKm": 19.3,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          13.004,
+          55.605
+        ],
+        [
+          13.191,
+          55.704
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            16.41,
+            27.02
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Lund",
+      "b": "Landskrona",
+      "roadKm": 35.0,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          13.191,
+          55.704
+        ],
+        [
+          12.83,
+          55.87
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            29.75,
+            49.0
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Landskrona",
+      "b": "Helsingborg",
+      "roadKm": 25.6,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          12.83,
+          55.87
+        ],
+        [
+          12.694,
+          56.046
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            21.76,
+            35.84
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Helsingborg",
+      "b": "Halmstad",
+      "roadKm": 84.7,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          12.694,
+          56.046
+        ],
+        [
+          12.857,
+          56.674
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            72.0,
+            118.58
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Halmstad",
+      "b": "Varberg",
+      "roadKm": 72.6,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          12.857,
+          56.674
+        ],
+        [
+          12.25,
+          57.105
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            61.71,
+            101.64
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Varberg",
+      "b": "Göteborg",
+      "roadKm": 82.9,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          12.25,
+          57.105
+        ],
+        [
+          11.967,
+          57.707
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            70.47,
+            116.06
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Göteborg",
+      "b": "Uddevalla",
+      "roadKm": 85.8,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          11.967,
+          57.707
+        ],
+        [
+          11.935,
+          58.35
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            72.93,
+            120.12
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Uddevalla",
+      "b": "Strömstad",
+      "roadKm": 94.8,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          11.935,
+          58.35
+        ],
+        [
+          11.172,
+          58.939
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            80.58,
+            132.72
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Strömstad",
+      "b": "Svinesund SE",
+      "roadKm": 19.5,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          11.172,
+          58.939
+        ],
+        [
+          11.252,
+          59.079
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            16.57,
+            27.3
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Svinesund SE",
+      "b": "Svinesund NO",
+      "roadKm": 0,
+      "ferryKm": 0.6,
+      "ferry": "boat",
+      "chaussee": false,
+      "wgs84": [
+        [
+          11.252,
+          59.079
+        ],
+        [
+          11.245,
+          59.083
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.51,
+            0.84
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Svinesund NO",
+      "b": "Fredrikshald/Fredriksten",
+      "roadKm": 11.1,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          11.245,
+          59.083
+        ],
+        [
+          11.39,
+          59.12
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            9.43,
+            15.54
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Fredrikshald/Fredriksten",
+      "b": "Sarpsborg",
+      "roadKm": 29.1,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          11.39,
+          59.12
+        ],
+        [
+          11.109,
+          59.284
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            24.73,
+            40.74
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Sarpsborg",
+      "b": "Fredrikstad",
+      "roadKm": 15.1,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          11.109,
+          59.284
+        ],
+        [
+          10.929,
+          59.218
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            12.83,
+            21.14
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Sarpsborg",
+      "b": "Moss",
+      "roadKm": 36.8,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          11.109,
+          59.284
+        ],
+        [
+          10.657,
+          59.435
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            31.28,
+            51.52
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Moss",
+      "b": "Drøbak",
+      "roadKm": 30.6,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          10.657,
+          59.435
+        ],
+        [
+          10.63,
+          59.664
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            26.01,
+            42.84
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Drøbak",
+      "b": "Kristiania/Oslo",
+      "roadKm": 34.2,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          10.63,
+          59.664
+        ],
+        [
+          10.752,
+          59.913
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            29.07,
+            47.88
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Kristiania/Oslo",
+      "b": "Kongsvinger",
+      "roadKm": 90.7,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          10.752,
+          59.913
+        ],
+        [
+          11.998,
+          60.188
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            77.09,
+            126.98
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Kongsvinger",
+      "b": "Arvika",
+      "roadKm": 81.5,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          11.998,
+          60.188
+        ],
+        [
+          12.592,
+          59.655
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            69.27,
+            114.1
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Arvika",
+      "b": "Karlstad",
+      "roadKm": 71.8,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          12.592,
+          59.655
+        ],
+        [
+          13.503,
+          59.379
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            61.03,
+            100.52
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Karlstad",
+      "b": "Vänersborg",
+      "roadKm": 156.1,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          13.503,
+          59.379
+        ],
+        [
+          12.323,
+          58.381
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            132.69,
+            218.54
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Vänersborg",
+      "b": "Uddevalla",
+      "roadKm": 27.5,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          12.323,
+          58.381
+        ],
+        [
+          11.935,
+          58.35
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            23.38,
+            38.5
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Malmø",
+      "b": "Ystad",
+      "roadKm": 66.0,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          13.004,
+          55.605
+        ],
+        [
+          13.82,
+          55.429
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            56.1,
+            92.4
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Ystad",
+      "b": "Kristianstad",
+      "roadKm": 84.0,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          13.82,
+          55.429
+        ],
+        [
+          14.157,
+          56.029
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            71.4,
+            117.6
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Lund",
+      "b": "Kristianstad",
+      "roadKm": 84.3,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          13.191,
+          55.704
+        ],
+        [
+          14.157,
+          56.029
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            71.66,
+            118.02
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Kristianstad",
+      "b": "Karlshamn",
+      "roadKm": 55.9,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          14.157,
+          56.029
+        ],
+        [
+          14.863,
+          56.171
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            47.52,
+            78.26
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Karlshamn",
+      "b": "Karlskrona",
+      "roadKm": 53.7,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          14.863,
+          56.171
+        ],
+        [
+          15.586,
+          56.161
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            45.65,
+            75.18
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Karlskrona",
+      "b": "Kalmar",
+      "roadKm": 87.8,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          15.586,
+          56.161
+        ],
+        [
+          16.356,
+          56.663
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            74.63,
+            122.92
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Kristianstad",
+      "b": "Växjö",
+      "roadKm": 123.1,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          14.157,
+          56.029
+        ],
+        [
+          14.805,
+          56.879
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            104.63,
+            172.34
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Växjö",
+      "b": "Jönköping",
+      "roadKm": 129.2,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          14.805,
+          56.879
+        ],
+        [
+          14.162,
+          57.783
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            109.82,
+            180.88
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Växjö",
+      "b": "Kalmar",
+      "roadKm": 117.0,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          14.805,
+          56.879
+        ],
+        [
+          16.356,
+          56.663
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            99.45,
+            163.8
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Jönköping",
+      "b": "Eksjö",
+      "roadKm": 59.6,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          14.162,
+          57.783
+        ],
+        [
+          14.97,
+          57.667
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            50.66,
+            83.44
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Eksjö",
+      "b": "Västervik",
+      "roadKm": 119.4,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          14.97,
+          57.667
+        ],
+        [
+          16.637,
+          57.758
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            101.49,
+            167.16
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Göteborg",
+      "b": "Borås",
+      "roadKm": 69.4,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          11.967,
+          57.707
+        ],
+        [
+          12.94,
+          57.721
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            58.99,
+            97.16
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Borås",
+      "b": "Jönköping",
+      "roadKm": 87.4,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          12.94,
+          57.721
+        ],
+        [
+          14.162,
+          57.783
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            74.29,
+            122.36
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Jönköping",
+      "b": "Karlsborg",
+      "roadKm": 103.5,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          14.162,
+          57.783
+        ],
+        [
+          14.51,
+          58.537
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            87.97,
+            144.9
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Göteborg",
+      "b": "Marstrand",
+      "roadKm": 0,
+      "ferryKm": 31.9,
+      "ferry": "boat",
+      "chaussee": false,
+      "wgs84": [
+        [
+          11.967,
+          57.707
+        ],
+        [
+          11.582,
+          57.887
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            27.11,
+            44.66
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Moss",
+      "b": "Horten",
+      "roadKm": 0,
+      "ferryKm": 10.5,
+      "ferry": "boat",
+      "chaussee": false,
+      "wgs84": [
+        [
+          10.657,
+          59.435
+        ],
+        [
+          10.483,
+          59.417
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            8.92,
+            14.7
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Drøbak",
+      "b": "Kaholmen",
+      "roadKm": 0,
+      "ferryKm": 2.0,
+      "ferry": "boat",
+      "chaussee": false,
+      "wgs84": [
+        [
+          10.63,
+          59.664
+        ],
+        [
+          10.605,
+          59.675
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            1.7,
+            2.8
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Horten",
+      "b": "Tønsberg",
+      "roadKm": 20.7,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          10.483,
+          59.417
+        ],
+        [
+          10.407,
+          59.267
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            17.59,
+            28.98
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Tønsberg",
+      "b": "Larvik",
+      "roadKm": 38.2,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          10.407,
+          59.267
+        ],
+        [
+          10.035,
+          59.053
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            32.47,
+            53.48
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Larvik",
+      "b": "Fredriksvern",
+      "roadKm": 7.5,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          10.035,
+          59.053
+        ],
+        [
+          10.041,
+          58.997
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            6.38,
+            10.5
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Drammen",
+      "b": "Horten",
+      "roadKm": 47.5,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          10.204,
+          59.744
+        ],
+        [
+          10.483,
+          59.417
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            40.38,
+            66.5
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    },
+    {
+      "a": "Drammen",
+      "b": "Kristiania/Oslo",
+      "roadKm": 43.1,
+      "ferryKm": 0,
+      "ferry": "",
+      "chaussee": false,
+      "wgs84": [
+        [
+          10.204,
+          59.744
+        ],
+        [
+          10.752,
+          59.913
+        ]
+      ],
+      "status": "skøn",
+      "source": [
+        "R6_GEOMETRY",
+        "R5_VAGHISTORIA",
+        "R5_BRIDGEINFO"
+      ],
+      "note": "Topologisk foreslået perioderute; mellembyer/vejlinje IKKE kildeverificeret. Længde = geodætisk afstand × omvejsfaktor. Ingen nutidig vejafstand anvendt. km er først defineret efter motorprojektion.",
+      "fieldStatus": {
+        "roadKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            36.63,
+            60.34
+          ]
+        },
+        "ferryKm": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "method": "Geodætisk byafstand × 1,2 vej / 1,05 færge; interval 0,85–1,4 × skøn.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": [
+            0.0,
+            0.0
+          ]
+        },
+        "wgs84": {
+          "status": "skøn",
+          "source": "R6_GEOMETRY",
+          "reason": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "method": "Endepunkter groft afrundede, mellemforløb ukendt.",
+          "anchors": [
+            "R6_GEOMETRY"
+          ],
+          "interval": "Endepunkter ca. ±2 km; ingen verificeret vejlinje."
+        }
+      }
+    }
+  ],
+  "requiredTheatre": [
+    "Skåne",
+    "Halland",
+    "Blekinge",
+    "Småland",
+    "Göteborg/Bohuslän",
+    "Smaalenene/Østfold",
+    "Akershus/Christiania",
+    "Buskerud",
+    "Jarlsberg og Larvik",
+    "Bratsberg"
+  ]
+}

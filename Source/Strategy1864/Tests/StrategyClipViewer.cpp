@@ -32,7 +32,9 @@ void AStrategyClipViewer::BeginPlay()
     TArray<FAssetData> Assets;
     Registry.Get().GetAssetsByPath(FName("/Game/Units"), Assets, true);
     Assets.Sort([](const FAssetData& A, const FAssetData& B) { return A.AssetName.LexicalLess(B.AssetName); });
-    const int32 Columns = 10;
+    // Wide spacing so neighbouring clips (sabre swings, deaths, reloads) do not overlap; -Strategy1864ClipViewerSpacing=<cm> overrides.
+    const int32 Columns = ClipViewerColumns;
+    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864ClipViewerSpacing="), ClipViewerSpacing);
     int32 Index = 0;
     for (const FAssetData& Data : Assets)
     {
@@ -44,7 +46,7 @@ void AStrategyClipViewer::BeginPlay()
         Figure->SetupAttachment(GetRootComponent());
         Figure->RegisterComponent();
         Figure->SetSkeletalMeshAsset(Mesh);
-        Figure->SetRelativeLocation(FVector((Index / Columns) * 350.f, (Index % Columns) * 280.f, 0.f));
+        Figure->SetRelativeLocation(FVector((Index / Columns) * ClipViewerSpacing * 1.2f, (Index % Columns) * ClipViewerSpacing, 0.f));
         Figure->SetRelativeRotation(FRotator(0.f, 150.f, 0.f));   // turned toward the camera, a little to the side
         UTextRenderComponent* Label = NewObject<UTextRenderComponent>(this);
         Label->SetupAttachment(GetRootComponent());
@@ -53,7 +55,7 @@ void AStrategyClipViewer::BeginPlay()
         Label->SetWorldSize(30.f);
         Label->SetTextRenderColor(FColor::White);
         Label->SetHorizontalAlignment(EHTA_Center);
-        Label->SetRelativeLocation(FVector((Index / Columns) * 350.f, (Index % Columns) * 280.f, 215.f));
+        Label->SetRelativeLocation(FVector((Index / Columns) * ClipViewerSpacing * 1.2f, (Index % Columns) * ClipViewerSpacing, 215.f));
         Label->SetRelativeRotation(FRotator(0.f, 180.f, 0.f));
         Figures.Add({Figure, Clip, Data.AssetName.ToString()});
         ++Index;
@@ -76,19 +78,19 @@ void AStrategyClipViewer::Tick(float DeltaSeconds)
                 if (PresetAt < 0.0)
                 {
                     PresetAt = FPlatformTime::Seconds();
-                    if (AStrategyCameraPawn* CameraPawn = Cast<AStrategyCameraPawn>(PC->GetPawn())) { CameraPawn->ApplyPreset(2200.f, -28.f); }
+                    if (AStrategyCameraPawn* CameraPawn = Cast<AStrategyCameraPawn>(PC->GetPawn())) { CameraPawn->ApplyPreset(3600.f, -30.f); }
                 }
                 if (FPlatformTime::Seconds() - PresetAt < 1.5) { return; }   // let the camera settle, then hang the grid in front of it
                 bPlaced = true;
                 FVector CameraLocation; FRotator CameraRotation;
                 PC->GetPlayerViewPoint(CameraLocation, CameraRotation);
                 const FRotator Facing(0.f, CameraRotation.Yaw, 0.f);
-                const int32 Rows = FMath::Max(1, FMath::DivideAndRoundUp(Figures.Num(), 10));
+                const int32 Rows = FMath::Max(1, FMath::DivideAndRoundUp(Figures.Num(), ClipViewerColumns));
                 const FVector Look = CameraRotation.Vector();
                 const float ToGround = Look.Z < -0.05f ? FMath::Clamp(CameraLocation.Z / -Look.Z, 1500.f, 9000.f) : 3300.f;
                 const FVector Centre = FVector(CameraLocation.X + Look.X * ToGround, CameraLocation.Y + Look.Y * ToGround, 0.f);   // the ground point the camera looks at (flat QA map at 0)
                 SetActorRotation(Facing);
-                SetActorLocation(Centre - Facing.RotateVector(FVector((Rows - 1) * 175.f, (10 - 1) * 140.f, 0.f)));
+                SetActorLocation(Centre - Facing.RotateVector(FVector((Rows - 1) * ClipViewerSpacing * 0.6f, (ClipViewerColumns - 1) * ClipViewerSpacing * 0.5f, 0.f)));
                 UE_LOG(LogTemp, Display, TEXT("CLIPVIEWER: grid at %s (%d rows), camera %s"), *GetActorLocation().ToString(), Rows, *CameraLocation.ToString());
             }
     }

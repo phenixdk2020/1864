@@ -4,13 +4,17 @@
 
 ## Data og afvikling
 
-Roden er en JSON-liste. Hvert event har `id`, `navn`, `vindue: {aar, maaned}`, `sandsynlighed` (0–1), `forudsaetninger`, `blokeringer`, `effekter`, `udeblivelse`, `avis` og `log`. De to effektfelter er objekter med numeriske værdier. `udeblivelse` er obligatorisk og skal ændre spænding, stemning eller kasse. Id'er skal være entydige inden for scenariet.
+Roden er en JSON-liste. Hvert event har `id`, `navn`, `vindue: {aar, maaned}` (valgfrit `tilAar`, `tilMaaned`), `sandsynlighed` (0–1), `forudsaetninger`, `blokeringer`, `effekter`, `udeblivelse`, `avis` og `log`. De to effektfelter er objekter med numeriske værdier. `udeblivelse` er obligatorisk og skal ændre spænding, stemning eller kasse. Id'er skal være entydige inden for scenariet. Ekstra nøgler (`source`, `historyStatus`, `designStatus`, `note`, `fieldStatus` og et indlejret `fieldStatus` i effektobjekter) er status/kilde og ignoreres af spillet.
 
-Ved første månedsafvikling fra vinduets første dag afgøres eventet én gang: forudsætninger skal være sande, og en eventuel blokering skal være falsk. Ved afvisning eller tabt sandsynlighedskast anvendes `udeblivelse`. Eventet forsøges aldrig igen. Månedsloopet kører ved månedsskifte; debugtvang kan afvikles dagligt. Begivenheder afhænger af verdens tilstand, aldrig af et tidligere event-id.
+**Vindue (valgfrit).** Med `vindue.tilAar` og `tilMaaned` (begge, ikke før starten) forsøges eventet hver måned fra vinduets første måned til og med slutmåneden. `sandsynlighed` gælder hele vinduet (hvert forsøg bruger `1 - (1 - p)^(1/N)`, N = antal måneder), forudsætninger og blokeringer vurderes ved hvert forsøg, og først ved udløb (sidste måned) bruges `udeblivelse`. Uden slutdato er eventet en engangsafgørelse som før.
+
+**Historik (valgfrit).** Et event, hvis vindue slutter før scenariets start (1. juli), afspilles aldrig. Uden `historik` lukkes det tavst som uafgjort. `"historik": "indtraf"` (eller `"udeblev"`) markerer det som indtruffet (eller ikke), så senere events kan henvise til det; `effekter` og `udeblivelse` er da valgfri dokumentation. `historik` på et event, der ikke ligger før starten, afvises.
+
+Ved første månedsafvikling fra vinduets første dag afgøres eventet én gang: forudsætninger skal være sande, og en eventuel blokering skal være falsk. Ved afvisning eller tabt sandsynlighedskast anvendes `udeblivelse`. Eventet forsøges aldrig igen. Månedsloopet kører ved månedsskifte; debugtvang kan afvikles dagligt. Begivenheder afhænger af verdens tilstand og, hvis data bruger `begivenhed.<id>`/`udeblevet.<id>`, af om et andet event er indtruffet eller udeblevet.
 
 Den faktiske sandsynlighed er `clamp(p * (1 + (0.5 - p) * Deviation), 0, 1)`. Et separat `FRandomStream`-kast beregnes af seed, scenarie-id, event-id og heltallig kampagnedag. Evalueringens rækkefølge og debugforklaringer forbruger ikke en fælles tilfældighedsstrøm. Samme data, tilstand, seed, scenarie og dag giver samme udfald; spillerens ændringer af fakta kan give et andet udfald.
 
-Gemmeversion 29 bevarer udløste og afviste id'er i `UCampaign1851SaveGame::War` som `fired|id` og `blocked|id`, samt `events-format|29`. Plan og kast rekonstrueres fra data og seed. Gamle gemninger beholder udløste id'er og får allerede passerede vinduer lukket uden nye effekter, så nye regler ikke efteropkræver historiske konsekvenser. Fremtidige events bruger det nye system. Gemninger, hvor datafiler ændres bagefter, følger de nye data for endnu uafgjorte events.
+Gemmeversion 37 (tidligere 29) bevarer udløste og afviste id'er i `UCampaign1851SaveGame::War` som `fired|id` og `blocked|id`, samt `events-format|37`; uafgjorte events med forbigået vindue lukkes i ældre gemninger uden følger. Plan og kast rekonstrueres fra data og seed. Gamle gemninger beholder udløste id'er og får allerede passerede vinduer lukket uden nye effekter, så nye regler ikke efteropkræver historiske konsekvenser. Fremtidige events bruger det nye system. Gemninger, hvor datafiler ændres bagefter, følger de nye data for endnu uafgjorte events.
 
 ## Lukket udtrykssprog
 
@@ -18,7 +22,7 @@ Et udtryk er ét eller flere led adskilt af præcis ` og `. Hvert led er `[ikke 
 
 Eksempel: `spaending >= 45 og opinion.ejder >= 25 og ikke besat.Kiel`.
 
-Der er ingen parenteser, `eller`, aritmetik, variabeltildeling, eventreferencer eller scripting. Ukendte fakta, operatorer og ikke-numeriske grænser afviser hele eventet ved indlæsning med en logadvarsel.
+Der er ingen parenteser, `eller`, aritmetik, variabeltildeling eller scripting; eventreferencer er kun de to fakta nedenfor. Ukendte fakta, operatorer og ikke-numeriske grænser afviser hele eventet ved indlæsning med en logadvarsel.
 
 ## Fakta fra eksisterende systemer
 
@@ -37,6 +41,9 @@ Alle fakta læses af den ene funktion `ACampaign1851Map::EventFact`; der findes 
 | `vaerk.dannevirke`, `vaerk.dybbol`, `vaerk.fredericia` | 1 når det tilsvarende eksisterende værksprogram er påbegyndt (ProgrammeState 2), ellers 0; ikke et løfte om færdige skanser |
 | `maegling` | 1 når den eksisterende fredskonference er aktiv, ellers 0 |
 | `kasse` | Statskassen i rigsdaler |
+| `krig` | 1 når Danmark er i krig, ellers 0 |
+| `begivenhed.<id>` | 1 når eventet er indtruffet (også som historik), ellers 0; ukendt id afviser eventet |
+| `udeblevet.<id>` | 1 når eventet er afgjort som udeblevet, ellers 0 (et endnu uafgjort event er 0 i begge) |
 
 ## Tilladte effekter
 

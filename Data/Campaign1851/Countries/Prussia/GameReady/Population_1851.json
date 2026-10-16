@@ -1,0 +1,1117 @@
+{
+  "scenario": "1851",
+  "note": "Preussen, dateret importgrundlag. Kilde/skøn/spil står i fieldStatus og Data-status.json. Delvist overlay; null kræver håndtering, ikke nulkonvertering. Ingen motor-/slagtest. amter er skemanavnet; level/parent adskiller provinser, Bezirke og Berlin. Nationaltotal må aldrig være sum af alle rækker.",
+  "cities": [],
+  "foreignCities": [],
+  "amter": [
+    {
+      "id": "PR-P-POM",
+      "name": "Pommern",
+      "nation": "PR",
+      "seat": "Stettin",
+      "towns": [],
+      "population": 1230951,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "province",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvPOM-gesamt.htm",
+          "reason": "Historisk provins; byer inkluderet. Ingen sammenlægning af niveauer."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-P-BRB",
+      "name": "Brandenburg",
+      "nation": "PR",
+      "seat": "Potsdam",
+      "towns": [],
+      "population": 2171787,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "province",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvBRB-gesamt.htm",
+          "reason": "Berlin er inkluderet, ikke en ekstra national komponent. Ingen sammenlægning af niveauer."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-P-SLE",
+      "name": "Schlesien",
+      "nation": "PR",
+      "seat": "Breslau",
+      "towns": [],
+      "population": 3122591,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "province",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvSLE-gesamt.htm",
+          "reason": "Historisk provins; byer inkluderet. Ingen sammenlægning af niveauer."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-P-SAP",
+      "name": "Sachsen",
+      "nation": "PR",
+      "seat": "Magdeburg",
+      "towns": [],
+      "population": 1804886,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "province",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvSAP-gesamt.htm",
+          "reason": "Preussisk provins Sachsen, ikke Kongeriget Sachsen. Ingen sammenlægning af niveauer."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-P-WFA",
+      "name": "Westfalen",
+      "nation": "PR",
+      "seat": "Münster",
+      "towns": [],
+      "population": 1490928,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "province",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvWFA-gesamt.htm",
+          "reason": "Historisk provins; byer inkluderet. Ingen sammenlægning af niveauer."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-P-RHP",
+      "name": "Rheinland",
+      "nation": "PR",
+      "seat": "Koblenz",
+      "towns": [],
+      "population": 2862068,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "province",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvRHP-gesamt.htm",
+          "reason": "Rheinprovinz samlet i 1822; HGIS-provinsafgraensning anvendes. Ingen sammenlægning af niveauer."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-P-POS",
+      "name": "Posen",
+      "nation": "PR",
+      "seat": "Posen",
+      "towns": [],
+      "population": 1383284,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "province",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvPOS-gesamt.htm",
+          "reason": "Historisk provins; byer inkluderet. Ingen sammenlægning af niveauer."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-P-PRU",
+      "name": "Preussen",
+      "nation": "PR",
+      "seat": "Königsberg",
+      "towns": [],
+      "population": 2554408,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "reporting_group",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-STATE",
+          "reason": "To særskilte provinser i 1825; forenet provins i 1851. Ingen sammenlægning af niveauer."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-P-HZL",
+      "name": "Hohenzollern",
+      "nation": "PR",
+      "seat": "Sigmaringen",
+      "towns": [],
+      "population": 61372,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "reporting_group",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-STATE",
+          "reason": "Ikke en almindelig provins; Hohenzollernsche Lande blev preussisk i 1850. Ingen sammenlægning af niveauer."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-STR",
+      "name": "Stralsund",
+      "nation": "PR",
+      "seat": "Stralsund",
+      "towns": [],
+      "population": 190993,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-POM",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvPOM-STR.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-STE",
+      "name": "Stettin",
+      "nation": "PR",
+      "seat": "Stettin",
+      "towns": [],
+      "population": 576122,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-POM",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvPOM-STE.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-KOS",
+      "name": "Köslin",
+      "nation": "PR",
+      "seat": "Köslin",
+      "towns": [],
+      "population": 458400,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-POM",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvPOM-KOS.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-POT",
+      "name": "Potsdam",
+      "nation": "PR",
+      "seat": "Potsdam",
+      "towns": [],
+      "population": 858030,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-BRB",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvBRB-POT.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-FFO",
+      "name": "Frankfurt an der Oder",
+      "nation": "PR",
+      "seat": "Frankfurt an der Oder",
+      "towns": [],
+      "population": 878506,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-BRB",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvBRB-FFO.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-BRE",
+      "name": "Breslau",
+      "nation": "PR",
+      "seat": "Breslau",
+      "towns": [],
+      "population": 1200584,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-SLE",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvSLE-BRE.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-LEG",
+      "name": "Liegnitz",
+      "nation": "PR",
+      "seat": "Liegnitz",
+      "towns": [],
+      "population": 932374,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-SLE",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvSLE-LEG.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-OPP",
+      "name": "Oppeln",
+      "nation": "PR",
+      "seat": "Oppeln",
+      "towns": [],
+      "population": 985583,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-SLE",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvSLE-OPP.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-MAG",
+      "name": "Magdeburg",
+      "nation": "PR",
+      "seat": "Magdeburg",
+      "towns": [],
+      "population": 705546,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-SAP",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvSAP-MAG.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-MRB",
+      "name": "Merseburg",
+      "nation": "PR",
+      "seat": "Merseburg",
+      "towns": [],
+      "population": 753290,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-SAP",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvSAP-MRB.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-EFU",
+      "name": "Erfurt",
+      "nation": "PR",
+      "seat": "Erfurt",
+      "towns": [],
+      "population": 350540,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-SAP",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvSAP-EFU.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-MUE",
+      "name": "Münster",
+      "nation": "PR",
+      "seat": "Münster",
+      "towns": [],
+      "population": 426452,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-WFA",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvWFA-MUE.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-MIN",
+      "name": "Minden",
+      "nation": "PR",
+      "seat": "Minden",
+      "towns": [],
+      "population": 468969,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-WFA",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvWFA-MIN.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-ARB",
+      "name": "Arnsberg",
+      "nation": "PR",
+      "seat": "Arnsberg",
+      "towns": [],
+      "population": 591087,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-WFA",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvWFA-ARB.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-ACH",
+      "name": "Aachen",
+      "nation": "PR",
+      "seat": "Aachen",
+      "towns": [],
+      "population": 416872,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-RHP",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvRHP-ACH.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-DUE",
+      "name": "Düsseldorf",
+      "nation": "PR",
+      "seat": "Düsseldorf",
+      "towns": [],
+      "population": 933498,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-RHP",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvRHP-DUE.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-KLN",
+      "name": "Köln",
+      "nation": "PR",
+      "seat": "Köln",
+      "towns": [],
+      "population": 506596,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-RHP",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvRHP-KLN.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-KLZ",
+      "name": "Koblenz",
+      "nation": "PR",
+      "seat": "Koblenz",
+      "towns": [],
+      "population": 511140,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-RHP",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvRHP-KLZ.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-TRI",
+      "name": "Trier",
+      "nation": "PR",
+      "seat": "Trier",
+      "towns": [],
+      "population": 505172,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-RHP",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvRHP-TRI.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-POR",
+      "name": "Posen",
+      "nation": "PR",
+      "seat": "Posen",
+      "towns": [],
+      "population": 902250,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-POS",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvPOS-POR.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-BRO",
+      "name": "Bromberg",
+      "nation": "PR",
+      "seat": "Bromberg",
+      "towns": [],
+      "population": 464740,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-POS",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvPOS-BRO.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-KNB",
+      "name": "Königsberg",
+      "nation": "PR",
+      "seat": "Königsberg",
+      "towns": [],
+      "population": 868164,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-PRU",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvOSP-KNB.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-GUM",
+      "name": "Gumbinnen",
+      "nation": "PR",
+      "seat": "Gumbinnen",
+      "towns": [],
+      "population": 627986,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-PRU",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvOSP-GUM.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-DAN",
+      "name": "Danzig",
+      "nation": "PR",
+      "seat": "Danzig",
+      "towns": [],
+      "population": 415373,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-PRU",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvWEP-DAN.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-MAW",
+      "name": "Marienwerder",
+      "nation": "PR",
+      "seat": "Marienwerder",
+      "towns": [],
+      "population": 635155,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-PRU",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvWEP-MAW.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-HZH",
+      "name": "Hohenzollern-Hechingen",
+      "nation": "PR",
+      "seat": "Hohenzollern-Hechingen",
+      "towns": [],
+      "population": 20594,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-HZL",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPRE-HZH.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-RB-HZS",
+      "name": "Hohenzollern-Sigmaringen",
+      "nation": "PR",
+      "seat": "Hohenzollern-Sigmaringen",
+      "towns": [],
+      "population": 40778,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "regierungsbezirk",
+      "parent": "PR-P-HZL",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPRE-HZS.htm",
+          "reason": "Halvårsinterpolation; 1864 er ultimo-reference; særskilte originalnoter i observationslisten."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-BER",
+      "name": "Berlin",
+      "nation": "PR",
+      "seat": "Berlin",
+      "towns": [],
+      "population": 429244,
+      "urban": null,
+      "rural": null,
+      "status": "skøn",
+      "level": "city",
+      "parent": "PR-P-BRB",
+      "fieldStatus": {
+        "population": {
+          "status": "skøn",
+          "source": "HGIS-BevPREProvBRB-BER.htm",
+          "reason": "Allerede inkluderet i provinsen. Halvårsinterpolation; 1864 ultimo-reference."
+        },
+        "urban": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "rural": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    }
+  ],
+  "nationalPopulation": 16718740,
+  "fieldStatus": {
+    "nationalPopulation": {
+      "status": "skøn",
+      "source": "HGIS-BevPRE-gesamt.htm",
+      "reason": "Halvårsskøn i scenarier; 1864 ultimo og militærbefolkning udeladt."
+    }
+  }
+}

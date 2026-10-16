@@ -1,0 +1,419 @@
+{
+  "ruralTax": 0.12,
+  "urbanTax": 0.25,
+  "grainPerHead": 0.3,
+  "cattlePerHead": 0.35,
+  "butterPerHead": 0.006,
+  "grainPrice": 34,
+  "cattlePrice": 22,
+  "butterPrice": 360,
+  "exportDuty": 0.02,
+  "creditBase": 0.05,
+  "constructionCost": 1.05,
+  "unskilledDailyWage": 0.27,
+  "ironPrice": 65,
+  "coalPrice": 18,
+  "timberPrice": 3,
+  "powderPrice": 0.8,
+  "clothPrice": 0.6,
+  "leatherPrice": 0.75,
+  "note": "Runde 6 cirkamodel. Årsregnskabsankre bevaret, kasse/priser/løn/renter er skøn. JSON har ikke alle motorenheder; units er foreslået kontrakt, der kræver loaderkontrol. Riksmynt er ikke samtidens valuta før 1855.",
+  "nation": "SE",
+  "currency": "rigsdaler sølv",
+  "taxPerHead": 3.09473,
+  "fieldStatus": {
+    "ruralTax": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Effektiv direkte modelskat pr. indbygger pr. år; øvrig skat er residual i taxAnnual, må ikke lægges oveni denne.",
+      "method": "Effektiv direkte modelskat pr. indbygger pr. år; øvrig skat er residual i taxAnnual, må ikke lægges oveni denne.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        0.06,
+        0.21
+      ]
+    },
+    "urbanTax": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Effektiv direkte modelskat pr. indbygger pr. år; øvrig skat er residual i taxAnnual, må ikke lægges oveni denne.",
+      "method": "Effektiv direkte modelskat pr. indbygger pr. år; øvrig skat er residual i taxAnnual, må ikke lægges oveni denne.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        0.125,
+        0.4375
+      ]
+    },
+    "grainPerHead": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        0.15,
+        0.525
+      ]
+    },
+    "cattlePerHead": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        0.175,
+        0.6125
+      ]
+    },
+    "butterPerHead": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        0.003,
+        0.0105
+      ]
+    },
+    "grainPrice": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        17.0,
+        59.5
+      ]
+    },
+    "cattlePrice": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        11.0,
+        38.5
+      ]
+    },
+    "butterPrice": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        180.0,
+        630.0
+      ]
+    },
+    "exportDuty": {
+      "status": "spil",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste."
+    },
+    "creditBase": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        0.025,
+        0.0875
+      ]
+    },
+    "constructionCost": {
+      "status": "spil",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste."
+    },
+    "unskilledDailyWage": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        0.135,
+        0.4725
+      ]
+    },
+    "ironPrice": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        32.5,
+        113.75
+      ]
+    },
+    "coalPrice": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        9.0,
+        31.5
+      ]
+    },
+    "timberPrice": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        1.5,
+        5.25
+      ]
+    },
+    "powderPrice": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        0.4,
+        1.4
+      ]
+    },
+    "clothPrice": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        0.3,
+        1.05
+      ]
+    },
+    "leatherPrice": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "method": "Lønanker ca. 0,20–0,30 rigsdaler/dag; korn ca. 120–140 daglønninger/ton, kvæg ca. 80–100 daglønninger/dyr. Eksportland: jern/tømmer billigere; norsk kornfragt +15 %. Bredt forfatterskøn uden lokal prisliste.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        0.375,
+        1.3125
+      ]
+    },
+    "taxPerHead": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Samlet statsskat inkl. told/afgifter divideret med national befolkning; ingen direkte hovedskat.",
+      "method": "Samlet statsskat inkl. told/afgifter divideret med national befolkning; ingen direkte hovedskat.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        2.01157,
+        4.17789
+      ]
+    },
+    "debt": {
+      "status": "skøn",
+      "source": [
+        "FREGERT2014",
+        "DK_CURRENCY"
+      ],
+      "reference": "1851",
+      "locator": "Table A5.1 (cont.), trykt side 214, PDF-side 32",
+      "formula": "sourceValue * 1000 / 2",
+      "reason": "Senere parity-omregning 1000 SEK × 0,5. Årets gæld har ikke verificeret 1. juli-dato."
+    },
+    "treasuryStart": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Startlikviditet = halvanden måneds årlig indtægt; scenariebeholdning, ikke historisk kasse eller årsoverskud.",
+      "method": "Startlikviditet = halvanden måneds årlig indtægt; scenariebeholdning, ikke historisk kasse eller årsoverskud.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        578333,
+        3470000
+      ]
+    },
+    "ordinaryRevenue": {
+      "status": "skøn",
+      "source": [
+        "FREGERT2014",
+        "DK_CURRENCY"
+      ],
+      "reference": "1851",
+      "locator": "Table A5.1 (cont.), trykt side 214, PDF-side 32",
+      "formula": "sourceValue * 1000 / 2",
+      "reason": "Senere parity-omregning 1000 SEK × 0,5. Årets gæld har ikke verificeret 1. juli-dato."
+    },
+    "taxAnnual": {
+      "status": "skøn",
+      "source": [
+        "R6_MODEL",
+        "FREGERT2014"
+      ],
+      "reason": "Statsindtægt × modelandel 78 % SE / 80 % NO; gebyrer og øvrig ikke-skat holdes ude.",
+      "method": "Statsindtægt × modelandel 78 % SE / 80 % NO; gebyrer og øvrig ikke-skat holdes ude.",
+      "anchors": [
+        [
+          "R6_MODEL",
+          "FREGERT2014"
+        ]
+      ],
+      "interval": [
+        8328000,
+        12492000
+      ]
+    }
+  },
+  "debt": 6819500,
+  "treasuryStart": 1735000,
+  "ordinaryRevenue": 13880000,
+  "taxAnnual": 10826400,
+  "taxBreakdown": {
+    "status": "skøn",
+    "source": "R6_MODEL",
+    "customs": 4330560,
+    "fieldStatus": {
+      "customs": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Syntetisk skattemix, ikke afskrevet kategori. Norske svenske-lignende kategorier = 0 som ikke anvendt i model; øvrige norske skatter ligger i other.",
+        "method": "Syntetisk skattemix, ikke afskrevet kategori. Norske svenske-lignende kategorier = 0 som ikke anvendt i model; øvrige norske skatter ligger i other.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          2814864.0,
+          5846256.0
+        ]
+      },
+      "landRent": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Syntetisk skattemix, ikke afskrevet kategori. Norske svenske-lignende kategorier = 0 som ikke anvendt i model; øvrige norske skatter ligger i other.",
+        "method": "Syntetisk skattemix, ikke afskrevet kategori. Norske svenske-lignende kategorier = 0 som ikke anvendt i model; øvrige norske skatter ligger i other.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          1759290.0,
+          3653910.0
+        ]
+      },
+      "crownTithe": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Syntetisk skattemix, ikke afskrevet kategori. Norske svenske-lignende kategorier = 0 som ikke anvendt i model; øvrige norske skatter ligger i other.",
+        "method": "Syntetisk skattemix, ikke afskrevet kategori. Norske svenske-lignende kategorier = 0 som ikke anvendt i model; øvrige norske skatter ligger i other.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          703716.0,
+          1461564.0
+        ]
+      },
+      "bevillningar": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Syntetisk skattemix, ikke afskrevet kategori. Norske svenske-lignende kategorier = 0 som ikke anvendt i model; øvrige norske skatter ligger i other.",
+        "method": "Syntetisk skattemix, ikke afskrevet kategori. Norske svenske-lignende kategorier = 0 som ikke anvendt i model; øvrige norske skatter ligger i other.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          1055574.0,
+          2192346.0
+        ]
+      },
+      "other": {
+        "status": "skøn",
+        "source": "R6_MODEL",
+        "reason": "Syntetisk skattemix, ikke afskrevet kategori. Norske svenske-lignende kategorier = 0 som ikke anvendt i model; øvrige norske skatter ligger i other.",
+        "method": "Syntetisk skattemix, ikke afskrevet kategori. Norske svenske-lignende kategorier = 0 som ikke anvendt i model; øvrige norske skatter ligger i other.",
+        "anchors": [
+          "R6_MODEL"
+        ],
+        "interval": [
+          703716.0,
+          1461564.0
+        ]
+      }
+    },
+    "landRent": 2706600,
+    "crownTithe": 1082640,
+    "bevillningar": 1623960,
+    "other": 1082640
+  },
+  "taxBreakdownOriginal": {
+    "landRentDebited": 4703418.23,
+    "crownTitheDebited": 1561336.94,
+    "unit": "table_monetary_unit_unconfirmed",
+    "status": "kilde",
+    "source": "TAX1883",
+    "note": "Trykt 149/PDF 155. Enheds- og budgetafgrænsning ikke afstemt; indgår ikke i taxPerHead."
+  },
+  "units": {
+    "money": "rigsdaler sølv, senere paritet som spilnormalisering",
+    "ruralTax": "rigsdaler/person/year",
+    "urbanTax": "rigsdaler/person/year",
+    "grainPerHead": "ton/person/year",
+    "cattlePerHead": "head/person",
+    "butterPerHead": "ton/person/year",
+    "grainPrice": "rigsdaler/ton",
+    "cattlePrice": "rigsdaler/head",
+    "butterPrice": "rigsdaler/ton",
+    "ironPrice": "rigsdaler/ton",
+    "coalPrice": "rigsdaler/ton",
+    "timberPrice": "rigsdaler/m3",
+    "powderPrice": "rigsdaler/kg",
+    "clothPrice": "rigsdaler/metre",
+    "leatherPrice": "rigsdaler/kg",
+    "unskilledDailyWage": "rigsdaler/day",
+    "creditBase": "annual fractional interest",
+    "constructionCost": "dimensionless multiplier"
+  }
+}

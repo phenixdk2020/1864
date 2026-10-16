@@ -2307,6 +2307,106 @@ Efter brugerens test og to optagelser:
 
 - De fem `T_Uniform_PR_*.png` er fjernet igen: kildebillederne var for dårligt genereret (mørk baggrund med bånd, lille figur, andet lys end de danske og svenske). Preussiske enheder viser den danske plade via fallback, indtil nye billeder i 2:3 er lavet; derefter køres `make_uniform_cards.py` igen.
 
+### 2026-10-16 - Højreklik virker under pause
+
+- Årsag: under pause kører UE 5.8 (`APlayerController::TickActor`, `LEVELTICK_PauseTick`) kun input og `Tick()` og springer `PlayerTick()` over, medmindre `bShouldPerformFullTickWhenPaused` er sat. `TickRightMouse` (destination, angreb på fjende, front-pil) og markeringsboksen ligger i `PlayerTick`, så `bTickEvenWhenPaused` alene var ikke nok.
+- `AStrategyPlayerController`: `bShouldPerformFullTickWhenPaused = true`. Ordonnanserne står fortsat stille under pause (`TickCouriers` kaldes kun uden pause), så ordren afgår, når spillet fortsætter. Bivirkning: genveje uden `bExecuteWhenPaused` (officer-AI, sværhedsgrad, projektil-debug) virker nu også under pause.
+- Statisk kontrolleret mod UE 5.8-headerne (flaget er `protected` i `PlayerController.h`).
+
+### 2026-10-16 - Tab og geledskifte: manden bagved rykker frem, geledene lukkes (2 og 3 geledder)
+
+- Årsag (fra spilertest, kompagni i linje med 3 geledder, huller i fronten blev ikke fyldt): `HandleCasualtyVisualEvent` (`StrategyInfantryVisualComponent.cpp`) fjerner mændene med det samme og sætter `CachedStrength`, så tick-grenen, der kaldte tab-håndteringen, aldrig så et fald. Derfor blev `StepUpFiles()` aldrig kaldt for direkte fald (kun for nedslag via `ProcessPendingKills`), og `bClosingRanksPending` blev aldrig sat, så linjen lukkede aldrig sidelæns. `LineRanksFor` tyndede desuden dybden ud efter tabsandel, så en lukning gav en tyndere linje i stedet for en kortere.
+- `HandleCasualtyVisualEvent`: efter faldene kaldes `StepUpFiles()` og en `bScaleOnlyRebuild`-genopbygning; derefter armeres den forsinkede lukning (`bClosingRanksPending`, `FirstPendingLossTimeSeconds`, `LastLossTimeSeconds`). Den moralskalerede forsinkelse (3-10 s, `CloseRanksSlowdown`) er uændret.
+- Tick-grenen ved styrkeændring kalder også `StepUpFiles()`, hvis mænd faldt med det samme; `ProcessPendingKills` opdaterer `LastLossTimeSeconds`, når nedslagene lander.
+- `StepUpFiles`: skærmydselsmænd (slot foran fronten, `Slot.X > 0.5`) indgår ikke i filerne.
+- `LineRanksFor` (`StrategyFormationComponent.cpp`): giver altid det nominelle geledtal (2 eller 3). Fronten bliver kortere i hele filer, dybden bevares; kun sidste file kan være kort. Ændrer også `EstimateFrontageCm` (en svækket linje får kortere front i kampberegningen).
+- Resultat for 2/3 geledder: 1. geled falder: 2. rykker frem (3 geledder: derefter 3. til 2.). 2. geled falder: 3. rykker op, fronten uændret. 3. geled falder: ingen bevægelse. 1. og 2. falder: 3. går forrest, midten tom. Hel file væk: hul, indtil lukningen efter 3-10 s samler linjen sidelæns.
+- Ny acceptancesag `LOSS-RANKS` (`StrategyBehaviourTests.cpp`): kontrollerer, at en svækket linje beholder 2 og 3 geleder og får `ceil(N/geleder)` filer. Selve step-up inde i en file ses på skærmbillede.
+- Statisk kontrol mod UE 5.8-headere. Ikke bygget eller testet i spillet; ikke commitet.
+
+### 2026-10-16 - Angrebet stopper for tidligt (ild på buen)
+
+- Årsag: `UStrategyMovementExecutorComponent` standsede en ANGRIB/FREMRYK-march (stop-og-ild) så snart fjendens MIDTE var inden for rækkevidden (`FindBestTarget(false)` = center til center), og stand-off-punktet i `ResolveAttackDestination` lå kun 3 m inden for rækkevidden. Fronten stod derfor på 70 m-buen, og kun de nærmeste mænd kunne skyde. Ildkontrollen måler ellers fra egen frontlinje til fjendens fjerneste hjørne.
+- `StrategyFireControlComponent`: nye `GetApproachStandRangeCm()` (ca. 88 % af rækkevidden, mindst 5 m inden for, aldrig under 25 m) og `GetApproachHaltRangeCm()` (ca. 92 %, mindst 3 m inden for).
+- `StrategyOrderComponent::ResolveAttackDestination`: stand-off bruger `GetApproachStandRangeCm()` i stedet for rækkevidde minus 3 m (MELLEM 70 m giver ca. 61,6 m, KORT 40 m ca. 35 m, LANG 100 m ca. 88 m). Bak-ud-grænsen følger stand-off-afstanden.
+- `StrategyMovementExecutorComponent`: en fjende foran enheden (i ildkeglen) standser kun angreb/fremrykning, når fjendens fjerneste hjørne er inden for `GetApproachHaltRangeCm()` (samme geometri som ildkontrollen). Fjende uden for keglen standser som før. Flyt, Hold/Forsvar og AI'ens egne ordrer er uændrede.
+- Test: `DESTINATION` i `StrategyBehaviourTests.cpp` kræver nu stand-off tydeligt inden for rækkevidden (ikke på buen) og halt-afstand mellem stand-off og rækkevidde.
+- Statisk kontrolleret mod UE 5.8-headerne. Ikke bygget eller testet i spil.
+
+### 2026-10-16 - Gevær på skulderen i kolonne: rigtig stilling og klippene gjort stedstro
+
+- Årsag 1, geværets stilling: bagningsreglen i `StrategyCrowdModel.cpp` satte løbet til `Up*0.92 + Side*0.32 - Forward*0.10` (ca. 19 grader udad, kun 6 grader bagud) med grebet 30 % oppe på geværet, så løbet stod næsten lodret foran brystet. Foto-referencen (`Reference/Animation`) har løbet ca. 23 grader fra lodret, bagud over skulderen (mundingen bag hovedet) og lidt udad ved siden af hovedet, med kolben lige under hånden. `Forward = Cross(Side, Up)` er korrekt for skelettet (testet geometrisk i Blender).
+- Årsag 2, klippene: `A_Combat_WalkShoulder`, `ShoulderUp` og `ShoulderDown` var bygget af den rå Mixamo-gang, som har ca. 1,2 m fremadgående rod-bevægelse pr. cyklus (Hips), mens `A_Combat_Walk` er stedstro. Hver mand gled derfor 1,2 m frem og sprang tilbage ved hvert loop (hop, ophobning og overlap forrest i kolonnen), og håndmålet i verden blev hægtet af, så hånden blev trukket bagud og armen strakt (set på før-billederne).
+- `StrategyCrowdModel.cpp`: løbsretning `Up*0.90 + Side*0.20 - Forward*0.33`, grebet 15 % fra kolben. Kun reglen for klip med "Shoulder" i navnet; øvrige klip og `bBarrelAlongNegativeX` uændrede.
+- `Tools/Animation/build_shoulder_arms_set.py`: bygger nu af det gemte Mixamo-gangmønster (`SourceAssets/InfantryCombat/walk_rifle_basis.json`, genskabt fra de gamle klip, fordi Mixamo-FBX'en ikke ligger i repoet) på projektets skelet. Hips gøres stedstro som i `build_infantry_combat_set.py` og sænkes ca. 4 cm, så de står i samme højde som `A_Combat_Walk`. Højre hånd ved ribbenene ca. 15 cm over bæltet (0,21 / 0,15 / 1,06), hænderne følger bækkenet, bøjningsretningen for albuen justeret, siderettelsen tages fra lårene i stedet for skuldrene. Eksport uændret: `axis_forward='-Z'`, `axis_up='Y'`. De otte originale kamp-klip er ikke rørt.
+- Nye/ændrede værktøjer: `preview_shoulder_rule.py` (spejler C++-reglen i Blender, rendrer front, side og 3/4 med geværet), `preview_shoulder_arms.py` opdateret til den nye regel.
+- Genererede filer (gen-bygget i Blender, ikke importeret): `A_Combat_WalkShoulder.fbx`, `A_Combat_ShoulderUp.fbx`, `A_Combat_ShoulderDown.fbx`, `manifest_shoulder.json`, `shoulder_poses_preview.json`. Før/efter-billeder i `Saved/Codex/shoulder_arms/` (`BEFORE_old_rule_and_clip.png`, `AFTER_final.png`).
+- Uafklaret uden spil: geværets rigtige længde i spillet (`SM_Rifle_1`; Blender-eksemplet bruger 80 % af `Riffel.fbx`), overgangen `ShoulderUp`/`ShoulderDown` (fase og loop, se nedenfor) og om fødderne glider (afspilningshastigheden regnes ud fra 160 cm/s pr. 1,0, mens klippets egen skridtfart er ca. 86 cm/s). Disse ligger i `StrategyInfantryVisualComponent.cpp`, som ikke blev rettet her.
+- Skal køres bagefter (editoren lukket): importen `Content/Python/import_infantry_combat_set.py` (tager `manifest_shoulder.json`), derefter VAT-/mængdebagningen og bygning. Intet er bygget, bagt eller set i spillet; ikke commitet.
+
+### 2026-10-16 - Skuldergevær: rene overgange ved marchskift (kun læst, ikke bygget eller prøvet i spillet)
+
+- Årsag 1: `ShoulderUp`/`ShoulderDown` overtog gangfasen fra det forrige gangklip, så armene sprang til en tilfældig midter- eller slutstilling. De starter nu ved position 0 (`UpdateSettling` i `StrategyInfantryVisualComponent.cpp`).
+- Årsag 2: `UpdateSettling` spillede dem som løkke (`PlayAnimation(TravelClip, true)`), mens `ResolveAnimation` brugte `bOutLooping=false`; armene røg tilbage ved hvert hop. De spilles nu én gang og optages med `bLoop=false`, så det baget (VAT) spor bruger en negativ billedrate og holder sidste billede. Fastfrysningsgrenene bevarer klippets egen `bLoop`.
+- Årsag 3: `ShoulderTransitionEnd` var fast 1,37 s vægtid, uafhængigt af afspilningshastigheden. Overgangen slutter nu, når den langsomste mand har spillet klippet ud (længde / hastighed); 4 s er kun et sikkerhedsloft, og uden mænd i denne sti gælder de 1,37 s. Derefter skiftes til `A_Combat_WalkShoulder` (eller `A_Combat_Walk` efter ShoulderDown). Ny medlemsvariabel `ShoulderTransitionStart`.
+- Ikke ændret: divisoren 160 cm/s til afspilningshastigheden. Standardmarchen er 600 cm/s (`MoveSpeedCmPerSecond`), mens gangklippets naturlige skridt er ca. 86 cm/s, så fødderne glider (rate når loftet 4).
+- Ikke bygget og ikke prøvet i spillet.
+
+### 2026-10-16 - Rettelser efter Codex-gennemgang
+
+- Skulderovergangen: færdig-kontrollen for ShoulderUp/Down tæller nu alle mænd i en egen løkke (også dem, der venter, er frosne eller inaktive), så én færdig mand ikke afslutter overgangen for de andre.
+- `UStrategyCrowdModel::BakeVersion` 4 -> 5, så den gamle VAT-bagning afvises, og den nye geværregel bages ind.
+- Fire løse LF-linjeskift i `StrategyInfantryVisualComponent.cpp` gjort til CRLF. Ikke bygget endnu.
+
+### 2026-10-16 — Infanteriets marchfart og målt gangtempo
+
+- Kompagniets constructor sætter nu 150 cm/s (5,4 km/t). Fællesstandard 600, HQ, rytteri 900, artilleri 550 og vogne 450 bevares. Ilmarchens faktor 1,9 giver automatisk 285 cm/s.
+- Blender 5.2 headless måler eksisterende FBX uden at ændre dem: LeftFoot/RightFoot relativt til Hips i verdenskoordinater, projiceret på skridtets primære vandrette akse (hver fods spor centreres separat). Standfase estimeres som baglæns bevægelse med begge intervalender i fodens nederste 25 % af højdespændet. Samlet baglæns stræk / samlet standfasetid for begge fødder giver referencefarten. Armaturets skala 0,01 indgår i matrix_world; meter omregnes til cm. Soldaterkomponenten oprettes med standardskala 1; scenariet skalerer ikke kompagniet. Begge cyklusser: frames 2–43, 30 fps, 1,3667 s.
+- Målt: A_Combat_Walk 76,99816 cm/s; A_Combat_WalkShoulder 81,72886 cm/s. Separate navngivne konstanter bruges; skulderovergange bruger skuldergangens ben-cyklus. Run 420 og crawl-kalibrering bevares. Reproducerbart script: Tools/Animation/measure_infantry_walk_speed.py. Standfaseintervaller, afstande, tider og FBX-hashes: SourceAssets/InfantryCombat/walk_speed_measurement.json.
+- VisualWalkSpeed følger faktisk udført marchfart med minimum 1 cm/s i stedet for 160. Clamp 0,01–4 bevares: normal march kræver rate ca. 1,95/1,84; ilmarch ca. 3,70/3,49. Eksisterende rateudglatning bevares.
+- Acceptfrister: MOVE 30→120 s; LONG-MOVE 55→220 s; SUSPEND-WAYPOINT 35→110 s; SPREAD-MOVE 20→71 s; STOPFIRE 25→70 s; ADVANCE-FIRE fase 2 50→170 s. Faste 10 s ro og 3 s rejsning bevares. Disse seks samt T7/brokrydsning og DISENGAGE får basis-timeout ×4 (normalt 480 s). NEW-HOLD og CLEAR-SUSPEND beholder fristerne. Rapporten forklarer basis-timeout og marchfaktoren. Scenarie-headerens 120 s forbliver basis; ingen andre klart fartafledte frister fundet i scenariekoden.
+- Gennemgået og bevaret: formationspauser/reform (styrke/NCO og selvstændigt figurtempo); 160 ved slot-indhentning, reformbudget, ankomstreform og ArrivalTravelSpeed-standard; kurérens egen galopfart og afstand/fart-ETA; AI-scan og trussels-/ildhysterese; bevægelsesfaktorer for terræn, tilstand, stance og carré. Ingen detektion af fastkørsel baseret på forventede 600 cm/s fundet. Alternativ ikke-rigid visualsti har fortsat særskilte indhentnings-/svinghastigheder (300/400 minimum); standard rigid følger aktøren direkte.
+- Risici: standfasemålingen er et gennemsnit, ikke fod-IK; fodhastigheden varierer gennem skridtet, og rateudglatning giver korte afvigelser. Hurtig reform/rotation kan ramme rate-loftet (gang ca. 308/327 cm/s), så glidning under disse manøvrer kan stadig forekomme. Figurernes selvstændige 160-værdier ændres ikke; gangklippenes kalibrering gælder også dér. Importerede Unreal-assets skal svare til de målte FBX-filer; ingen genimport. Blueprint-overrides kan tilsidesætte constructorens fart. Langsommere infanteri ændrer balancen mod rytteri/artilleri; carré-faktor 0,08 giver nu 12 cm/s.
+- Statisk UE 5.8-headerkontrol: FMath::Max/Clamp og eksisterende SetPlayRate-signatur; nyt include peger på projektets eksisterende MovementExecutor-header. Ingen nye engine-API'er. Eksisterende gennemgåede ændringer bevares. CRLF kontrolleres med byteoptælling.
+- **Ikke bygget eller testet i spil/editor. Ingen commit.** Kun Blender-måling, statisk gennemgang samt diff- og linjeslutningskontrol.
+
+### 2026-10-16 — Rå FBX-kontrol og skulder-eksport
+
+- Binær FBX-parser: gammel og ny WalkShoulder har identiske globale akser og Armature-transform. Regressionens præcise rodårsag er ikke bevist. Se `Docs/FBX-SHOULDER-AUDIT-2026-10-16.md`.
+- Tre skulder-FBX regenereret med Walks konvention (`-Y` forward, `Z` up) efter backup i `Saved/Codex/shoulder_arms/lying_fbx/`. Rådump bekræfter match af GlobalSettings, Armature og hierarki. Alle knoglekurver i WalkShoulder er bevaret, Hips X/Z er konstante.
+- Alle 17 øvrige FBX matcher allerede Walks akse-/rodkonvention; ingen ændret. De otte originale FBX er hashkontrolleret uændrede. Dumps og kontrolresultater: `Saved/Codex/shoulder_arms/raw_audit/`.
+- Clipsene er **ikke importeret eller set i spil**. Ingen VAT-bagning, build, editor-/spilstart eller commit. Eksporttilpasningen er verificeret statisk; effekten i Unreal er ikke bekræftet.
+
+### 2026-10-16 — Korrigerede FBX-akser og skulderanimationer fra oprejst kilderig
+
+- Brugerens spiltests korrigerer den tidligere audit: Walk-konventionen (-Y/Z, Armature 90/0/180) ligger ned med nuværende importer; -Z/Y med Armature nul står. Y-op alene forklarer ikke det første fejlslagne forsøg fra DK-skelettet; v3 bruger de gamle oprejste skulder-FBX direkte.
+- Alle 17 Z-op extras geneksporteret gennem Blender 5.2 med -Z/Y efter backup i `Saved/Codex/axes_fix/before/`. De tre skulderklip genopbygget fra `old_clips`, Hips X/Z låst til første animationssample, vertikal bob bevaret. Kun højre overarm/underarm genposeres med IK; venstre arm og ben bevarer kildesporene.
+- ShoulderUp havde hånden ved ansigtet og geværet for højt i starten; tidligere generator skiftede skelet og ændrede begge arme. Nu smoothstep/slerp over hele klippet; højre arms endeposer matcher Walk/skuldergangen. Den eksisterende C++-propregel holder stadig geværet i skuldervinkel gennem overgangen; fuld overgang fra tohåndsbæring er ikke implementeret her.
+- Rå FBX-kontrol: alle 20 matcher referencefilens GlobalSettings, Armature-transform og 41-knoglers hierarki eksakt. Otte originale FBX + otte uassets hashkontrolleret uændrede. Kurvebevarelse, root motion og endpoints kontrolleret; rapporter og visuelt inspicerede front/side/3-4-renders ved frames 0,10,24 i `Saved/Codex/shoulder_arms/v3/`.
+- Reproducerbare scripts: `build_shoulder_arms_set.py`, `fix_extra_fbx_axes.py`, `verify_fbx_axes_fix.py`; preview kan nu vise den faktiske eksporterede FBX. Korrigeret audit og præcis liste over 20 genimportnavne i `Docs/FBX-SHOULDER-AUDIT-2026-10-16.md`.
+- Rettet ødelagte danske tegn i Landeskabelonens integrationsstatus (spørgsmålstegn i stedet for æ/ø/å); det legitime spørgsmålstegn i kortafsnittet er bevaret.
+- Ingen Unreal-import, VAT-bagning, build, spil/editor-start eller commit. Ingen C++/Unreal-API-kald ændret. Endelig kontrol i spil af de nye filer afventer brugerens test.
+
+### 2026-10-16 - Preussen: niveau B-import fra Codex-pakken
+
+- Pakken `Preussen-agent/Spilimport` (21 filer, hashkontrolleret mod `Manifest.json`; pakken melder selv `readyForImport=false`) er importeret for 1825 og 1851 hver for sig med `Tools/Countries/import_prussia.py`. Preussen er niveau B (nabo med byer, garnisoner, felthær, veje, distrikter og relation); ikke spilbart.
+- Pakkens PR-byer, -distrikter, -ruter, -garnisoner og -felthær er de samme tal, spillet allerede havde. Importen tilføjer `fieldStatus` (status, kilde, begrundelse pr. tal), noter og null-begrundelser; null overskriver aldrig. Eneste ændrede tal: PR `population` (12.144.210 i 1825, 16.718.740 i 1851, HGIS-skøn). Pakkens `relation` −35 (1851) afviger fra spillets −20; spillets værdi er bevaret og afvigelsen rapporteret.
+- Første import: 0 tilføjede, 216 opdaterede (metadata), 196 null sprunget over, 3 konflikter (events med danske id'er), 5 udskudte, 100 bevarede statusstrenge. Anden kørsel: 0 ændringer. Rapport: `Docs/Import-Preussen-rapport.json`.
+- Hærkatalog, officerer (Müffling, Wrangel, Stockhausen), økonomi, provinsbefolkning, handel og hele pakkens dokumentation er arkiveret byteidentisk i `Data/Campaign1851/Countries/Prussia/`. Events er arkiveret og analyseret, men ikke aktiveret: ni af dem afvises af `ResetWar` (udeblivelse uden effekt), seks ligger før 1851-start, og alle ændrer dansk spænding.
+- Kort: 25 PR-byer ligger inden for extent, på PR-celler i ejergridet og i deres distrikt; alle kan nås fra København (fem via færge: Bergen på Rügen, Putbus, Garz på Rügen, Sassnitz, Swinemünde). Köslin ligger udenfor og er `onMap=false`. Ingen terræn-, højde- eller ejerbinærer er ændret.
+- Ingen C++-ændring var nødvendig; SE/NO-arbejdets nul-sikre indlæsere dækker PR-felterne, og der er ingen nye gemte felter (savversionen er uændret). `Economy_South_<år>.json` følger PR-distrikterne (spejling). Alle danske rækker og SE/NO-rækkerne er byteidentiske.
+- Validering: `validate_neighbours.py` består for begge scenarier; ny `Tools/Countries/validate_prussia.py` (681 urørte rækker byteidentiske med isoleret gengivelse, reproducerbar, idempotent); `validate_sweden_norway.py` justeret til at undtage PR og køre PR-importen i sin gengivelse (230 beskyttede rækker). Se `Docs/Import-Preussen.md`.
+- Ingen build, spil-/editorstart, spiltest eller commit.
+
+### 2026-10-16 - Preussiske events aktiveret (vinduer, historik, flettede id'er)
+
+- Brugerens beslutning: PR-relationen bliver på −20, og de preussiske events må aktiveres, men historien er udgangspunkt, ikke manuskript. Hver hændelse har derfor vindue og sandsynlighed (`spil`), forudsætninger som spillerens valg kan gøre falske og en ikke-nul udeblivelse.
+- Rodårsager i loaderen (`Campaign1851War.cpp`): `udeblivelse` med kun `spaending: 0` blev afvist; seks PR-events før 1851-starten blev afviklet som forfaldne; indlejret `fieldStatus` i effektobjekter blev læst som ukendt effekt; tre id'er (`london`, `execution`, `ultimatum`) var delt med danske events; alt var engangsafgørelser.
+- Loaderen: valgfri `vindue.tilAar/tilMaaned` (månedlige forsøg, sandsynlighed for hele vinduet, `udeblivelse` ved udløb), valgfri `historik` (`indtraf`/`udeblev`) for vinduer før scenariets start (afspilles aldrig, kun markeret), nye fakta `krig`, `begivenhed.<id>`, `udeblevet.<id>`, og `fieldStatus` springes over i effektobjekter. Eksisterende felter genbrugt (sandsynlighed med seedet kast pr. seed/scenarie/id/dag, forudsætninger, blokeringer). Danske events uden de nye felter opfører sig som før.
+- Gem: `CurrentVersion` 36 → 37, formatlinjen er `events-format|37`; ældre gemninger får uafgjorte, forbigåede events lukket uden følger. Ingen nye `UPROPERTY`; kastet er ren funktion af seed, scenarie, id og dag, så en gemning kaster ikke igen.
+- Data: `Tools/Countries/activate_prussia_events.py` skriver PR-events i `Events.json` (6 historik + `pr_hannover_zoll`, `pr_roon1859`, `pr_roon1860`; de tre id-konflikter flettet ved kun at tilføje status/kilde til de danske poster, da PR-varianterne er identiske) og `Events_1825.json` (`pr_zollverein`, `pr_hannover_zoll`, `pr_roon1859`, `pr_roon1860`). Spændingsfølger højst ±3. Valideringer tilpasset (`validate_prussia.py` kører nu aktiveringen i den isolerede gengivelse). Se `Docs/Import-Preussen.md` (Begivenheder) og `Docs/Events.md`.
+- Ikke bygget, ikke prøvet i spillet, ikke committet. UE-API-kald er kun kontrolleret mod 5.8-headerne.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

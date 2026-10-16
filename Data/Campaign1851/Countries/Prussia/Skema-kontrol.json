@@ -1,0 +1,269 @@
+{
+  "note": "Læste originale JSON-formater, topnøgler og inputhash. Metadataudvidelser kræver loaderkontrol.",
+  "schemas": [
+    {
+      "file": "Nations1851.json",
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Nations1851.json",
+      "sha256": "2422ff45be1a79584fe02f5946efcc50b1a79dae456f2bcf32208a849c350840",
+      "rootType": "object",
+      "keys": [
+        "note",
+        "nations"
+      ]
+    },
+    {
+      "file": "Nations_1825.json",
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Nations_1825.json",
+      "sha256": "884066a062a0b4ffa75489caa92c37917395a60e158c7896035d2176ca4fceb6",
+      "rootType": "object",
+      "keys": [
+        "note",
+        "nations"
+      ]
+    },
+    {
+      "file": "Army1851.json",
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army1851.json",
+      "sha256": "4908ff4ad8892a232a53df74c7bb4f795cd35274ecfc3e4ee47dbfbd061978b1",
+      "rootType": "object",
+      "keys": [
+        "note",
+        "nation",
+        "commands",
+        "regiments"
+      ]
+    },
+    {
+      "file": "Army_1825.json",
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_1825.json",
+      "sha256": "035de3d936b20ad11574fa8382a9ae06744922fcb6e937f97d793333831fafb6",
+      "rootType": "object",
+      "keys": [
+        "scenario",
+        "nation",
+        "note",
+        "commands",
+        "regiments",
+        "equipment",
+        "magazines"
+      ]
+    },
+    {
+      "file": "Army_Neighbours_1851.json",
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_Neighbours_1851.json",
+      "sha256": "defe0938b37ddfae2e8c615ff90a38c1fcd633631d8cb59904e52676dab47ddd",
+      "rootType": "object",
+      "keys": [
+        "scenario",
+        "note",
+        "armies"
+      ]
+    },
+    {
+      "file": "cities_neighbours_1851.json",
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/cities_neighbours_1851.json",
+      "sha256": "4523a2911101fd39d7334c4fb898d97601869b9944a3b1c113f0311f5cf11323",
+      "rootType": "object",
+      "keys": [
+        "scenario",
+        "note",
+        "cities",
+        "links",
+        "nations",
+        "territories",
+        "ownerGrid",
+        "outside",
+        "railways",
+        "districts",
+        "districtGrid"
+      ]
+    },
+    {
+      "file": "Economy_1825.json",
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Economy_1825.json",
+      "sha256": "c3ee88bb6be7e555d37762b132a3882e49f75b291c2f9600e992163bb3dc0c23",
+      "rootType": "object",
+      "keys": [
+        "note",
+        "ruralTax",
+        "urbanTax",
+        "grainPerHead",
+        "cattlePerHead",
+        "butterPerHead",
+        "grainPrice",
+        "cattlePrice",
+        "butterPrice",
+        "exportDuty",
+        "creditBase",
+        "constructionCost",
+        "unskilledDailyWage",
+        "ironPrice",
+        "coalPrice",
+        "timberPrice",
+        "powderPrice",
+        "clothPrice",
+        "leatherPrice"
+      ]
+    },
+    {
+      "file": "Population_1825.json",
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Population_1825.json",
+      "sha256": "7f4ddf8f2fcf0b01727c556d454c310babe86ff3ca58a83e88bb0261063215f5",
+      "rootType": "object",
+      "keys": [
+        "scenario",
+        "note",
+        "cities",
+        "foreignCities",
+        "amter"
+      ]
+    },
+    {
+      "file": "Officers1851.json",
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Officers1851.json",
+      "sha256": "c36d5bed99d78c52cc4c72c7dbf3117f35e4a386d1d748fcbb7f21e2960ed893",
+      "rootType": "object",
+      "keys": [
+        "note",
+        "stats",
+        "generals",
+        "firstNames",
+        "surnames",
+        "pay",
+        "recruitCost"
+      ]
+    },
+    {
+      "file": "Events.json",
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Events.json",
+      "sha256": "238972715ab74a515b4105410e5841bebed938b8c6099564243747f58dbfdf0b",
+      "rootType": "array",
+      "keys": []
+    },
+    {
+      "file": "Trade_1851.json",
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Trade_1851.json",
+      "sha256": "393e2e0c319796ce25c007c53ce466ae654bdb810ef2b8a49f23a3d7ed282953",
+      "rootType": "object",
+      "keys": [
+        "scenario",
+        "note",
+        "source",
+        "unitWeight",
+        "unitValue",
+        "areas",
+        "comparison1847",
+        "status",
+        "limitations"
+      ]
+    },
+    {
+      "file": "Army_Neighbours_1825.json",
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_Neighbours_1825.json",
+      "sha256": "5e6325efbabe3ee895ca07105d37dad3b0287a042343fbdf70cc776d8354365d",
+      "rootType": "object",
+      "keys": [
+        "scenario",
+        "note",
+        "armies"
+      ]
+    },
+    {
+      "file": "cities_neighbours_1825.json",
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/cities_neighbours_1825.json",
+      "sha256": "e92b26743537bc4d685b640801afdf7b39a764e83ac4d3260a208987ee0c05dd",
+      "rootType": "object",
+      "keys": [
+        "scenario",
+        "note",
+        "cities",
+        "links",
+        "nations",
+        "territories",
+        "ownerGrid",
+        "outside",
+        "railways",
+        "districts",
+        "districtGrid"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Nations1851.json",
+      "sha256": "2422ff45be1a79584fe02f5946efcc50b1a79dae456f2bcf32208a849c350840"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Nations_1825.json",
+      "sha256": "884066a062a0b4ffa75489caa92c37917395a60e158c7896035d2176ca4fceb6"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army1851.json",
+      "sha256": "4908ff4ad8892a232a53df74c7bb4f795cd35274ecfc3e4ee47dbfbd061978b1"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_1825.json",
+      "sha256": "035de3d936b20ad11574fa8382a9ae06744922fcb6e937f97d793333831fafb6"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_Neighbours_1851.json",
+      "sha256": "defe0938b37ddfae2e8c615ff90a38c1fcd633631d8cb59904e52676dab47ddd"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/cities_neighbours_1851.json",
+      "sha256": "4523a2911101fd39d7334c4fb898d97601869b9944a3b1c113f0311f5cf11323"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Economy_1825.json",
+      "sha256": "c3ee88bb6be7e555d37762b132a3882e49f75b291c2f9600e992163bb3dc0c23"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Population_1825.json",
+      "sha256": "7f4ddf8f2fcf0b01727c556d454c310babe86ff3ca58a83e88bb0261063215f5"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Officers1851.json",
+      "sha256": "c36d5bed99d78c52cc4c72c7dbf3117f35e4a386d1d748fcbb7f21e2960ed893"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Events.json",
+      "sha256": "238972715ab74a515b4105410e5841bebed938b8c6099564243747f58dbfdf0b"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Trade_1851.json",
+      "sha256": "393e2e0c319796ce25c007c53ce466ae654bdb810ef2b8a49f23a3d7ed282953"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_Neighbours_1825.json",
+      "sha256": "5e6325efbabe3ee895ca07105d37dad3b0287a042343fbdf70cc776d8354365d"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Data/Campaign1851/cities_neighbours_1825.json",
+      "sha256": "e92b26743537bc4d685b640801afdf7b39a764e83ac4d3260a208987ee0c05dd"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Docs/Landeskabelon.md",
+      "sha256": "ce6bd63cefd678bb754f4197edb9500481c65ea0991b130b25366c3aec58720b"
+    },
+    {
+      "path": "R:/Onedrive/1864-Campaign/Docs/Naboer.md",
+      "sha256": "9eacad37ac5bc30f25f5ccbd5a2d0ce8b08830bdd9622d05586fd39fe2fb8aae"
+    },
+    {
+      "path": "C:/Users/allan/Documents/Codex/2026-10-12/l/outputs/Sverige-Norge-agent/Arbejdsstatus.md",
+      "sha256": "2d59c149075db0868993dbcfb3241928a28e8f66ddd8df7a1e156fbbcafa7c0d"
+    },
+    {
+      "path": "C:/Users/allan/Documents/Codex/2026-10-12/l/outputs/Sverige-Norge-agent/Daekningsmatrix.md",
+      "sha256": "dd1110fde52efc04fe2253a9144613646d9ce140e11d35215440be0aa2f4b31b"
+    },
+    {
+      "path": "C:/Users/allan/Documents/Codex/2026-10-12/l/outputs/Sverige-Norge-agent/verifikationslog.txt",
+      "sha256": "48e8649cc6ee6e98abfb6ba3bd9c4f6e6b0bafdfea1ad8a2000601525095e464"
+    },
+    {
+      "path": "C:/Users/allan/Documents/Codex/2026-10-12/l/outputs/Sverige-Norge-agent/Spilimport/README.md",
+      "sha256": "06af76360a834b0f9491d4351a50bf7dabd37509013c593d0fea8d1e50d78aa9"
+    }
+  ]
+}

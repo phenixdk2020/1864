@@ -6,6 +6,7 @@
 #include "Campaign1851Buildings.h"
 #include "Campaign1851ConstructionSite.h"
 #include "Dom/JsonObject.h"
+#include "Campaign1851Json.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
@@ -125,20 +126,21 @@ bool ACampaign1851Map::LoadNations()
 		return false;
 	}
 	NationsAtStart.Reset();
-	for (const TSharedPtr<FJsonValue>& Value : Json->GetArrayField(TEXT("nations")))
+	for (const TSharedPtr<FJsonValue>& Value : Campaign1851Json::Array(*Json, TEXT("nations")))
 	{
-		const TSharedPtr<FJsonObject> O = Value->AsObject();
+		const TSharedPtr<FJsonObject> O = Campaign1851Json::Row(Value);
 		FCampaign1851Nation N;
-		N.Id = O->GetStringField(TEXT("id"));
-		N.Name = O->GetStringField(TEXT("name"));
+		if (!O->TryGetStringField(TEXT("id"), N.Id) || N.Id.IsEmpty()) { continue; }
+		O->TryGetStringField(TEXT("name"), N.Name);
 		O->TryGetBoolField(TEXT("onMap"), N.bOnMap);
-		N.Controller = O->GetStringField(TEXT("controller")) == TEXT("player") ? ECampaign1851Controller::Player : ECampaign1851Controller::AI;
+		N.Controller = Campaign1851Json::String(*O, TEXT("controller")) == TEXT("player") ? ECampaign1851Controller::Player : ECampaign1851Controller::AI;
 		const TArray<TSharedPtr<FJsonValue>>* Weights = nullptr;
 		if (O->TryGetArrayField(TEXT("weights"), Weights))
 		{
 			for (int32 p = 0; p < int32(ECampaign1851Portfolio::Count); ++p)
 			{
-				N.BaseWeights[p] = p < Weights->Num() ? float((*Weights)[p]->AsNumber()) : 1.f;
+				double ImportWeight = N.BaseWeights[p];
+				if (p < Weights->Num() && (*Weights)[p]->TryGetNumber(ImportWeight)) { N.BaseWeights[p] = float(ImportWeight); }
 			}
 		}
 		double V = 0.0;

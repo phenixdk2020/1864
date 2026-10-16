@@ -1,0 +1,317 @@
+{
+  "note": "År-for-år-register; null er ukendt. 1865 kun anker for sammenligning, ikke scenarie.",
+  "annual": [
+    {
+      "year": 1825,
+      "km": 0,
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Offentlige lokomotivbaner, ikke industrielle spor."
+    },
+    {
+      "year": 1826,
+      "km": 0,
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Offentlige lokomotivbaner, ikke industrielle spor."
+    },
+    {
+      "year": 1827,
+      "km": 0,
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Offentlige lokomotivbaner, ikke industrielle spor."
+    },
+    {
+      "year": 1828,
+      "km": 0,
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Offentlige lokomotivbaner, ikke industrielle spor."
+    },
+    {
+      "year": 1829,
+      "km": 0,
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Offentlige lokomotivbaner, ikke industrielle spor."
+    },
+    {
+      "year": 1830,
+      "km": 0,
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Offentlige lokomotivbaner, ikke industrielle spor."
+    },
+    {
+      "year": 1831,
+      "km": 0,
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Offentlige lokomotivbaner, ikke industrielle spor."
+    },
+    {
+      "year": 1832,
+      "km": 0,
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Offentlige lokomotivbaner, ikke industrielle spor."
+    },
+    {
+      "year": 1833,
+      "km": 0,
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Offentlige lokomotivbaner, ikke industrielle spor."
+    },
+    {
+      "year": 1834,
+      "km": 0,
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Offentlige lokomotivbaner, ikke industrielle spor."
+    },
+    {
+      "year": 1835,
+      "km": 0,
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Offentlige lokomotivbaner, ikke industrielle spor."
+    },
+    {
+      "year": 1836,
+      "km": 0,
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Offentlige lokomotivbaner, ikke industrielle spor."
+    },
+    {
+      "year": 1837,
+      "km": 0,
+      "status": "kilde",
+      "source": "HGIS-STATE",
+      "reason": "Offentlige lokomotivbaner, ikke industrielle spor."
+    },
+    {
+      "year": 1838,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1839,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1840,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1841,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1842,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1843,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1844,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1845,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1846,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1847,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1848,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1849,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1850,
+      "km": 2967.05,
+      "status": "kilde",
+      "source": "RAIL",
+      "reason": "Retrospektiv opgørelse, ikke nøjagtig scenariedato."
+    },
+    {
+      "year": 1851,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1852,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1853,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1854,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1855,
+      "km": 3822.31,
+      "status": "kilde",
+      "source": "RAIL",
+      "reason": "Retrospektiv opgørelse, ikke nøjagtig scenariedato."
+    },
+    {
+      "year": 1856,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1857,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1858,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1859,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1860,
+      "km": 5673.73,
+      "status": "kilde",
+      "source": "RAIL",
+      "reason": "Retrospektiv opgørelse, ikke nøjagtig scenariedato."
+    },
+    {
+      "year": 1861,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1862,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1863,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    },
+    {
+      "year": 1864,
+      "km": null,
+      "status": "skøn",
+      "source": "RAIL",
+      "reason": "Ingen afskrevet årsrække; der interpoleres ikke over ændret afgrænsning."
+    }
+  ],
+  "comparisonAnchors": [
+    {
+      "year": 1850,
+      "km": 2967.05,
+      "status": "kilde",
+      "source": "RAIL"
+    },
+    {
+      "year": 1855,
+      "km": 3822.31,
+      "status": "kilde",
+      "source": "RAIL"
+    },
+    {
+      "year": 1860,
+      "km": 5673.73,
+      "status": "kilde",
+      "source": "RAIL"
+    },
+    {
+      "year": 1865,
+      "km": 6804.62,
+      "status": "kilde",
+      "source": "RAIL"
+    }
+  ],
+  "game1851": {
+    "value": 2900,
+    "status": "spil",
+    "source": "GAME-Nations1851.json",
+    "reason": "Arvet modelanker, ikke 1851-observation."
+  }
+}

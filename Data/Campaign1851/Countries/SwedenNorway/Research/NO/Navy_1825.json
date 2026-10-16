@@ -1,0 +1,942 @@
+{
+  "nation": "NO",
+  "scenarioDate": "1825-07-01",
+  "status": "skøn",
+  "source": [
+    "R6_MODEL",
+    "R5_NORSHIPS"
+  ],
+  "note": "Klassebeholdning er cirkamodel, navngivne skibe er daterede eksempler, IKKE en komplet verificeret navneliste eller kommissionsrulle. activeCraft er delmængde af inventoryCraft.",
+  "classes": [
+    {
+      "class": "line",
+      "coastal": false,
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "inventoryCraft": 0,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            420,
+            980
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        }
+      },
+      "activeCraft": 0,
+      "crewPerCraft": 700,
+      "activeCrew": 0,
+      "mobilisedCrew": 0
+    },
+    {
+      "class": "frigate",
+      "coastal": false,
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "inventoryCraft": 0,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            180,
+            420
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        }
+      },
+      "activeCraft": 0,
+      "crewPerCraft": 300,
+      "activeCrew": 0,
+      "mobilisedCrew": 0
+    },
+    {
+      "class": "brig",
+      "coastal": false,
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "inventoryCraft": 4,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            2,
+            6
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            1,
+            3
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            60,
+            140
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            120,
+            280
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            240,
+            560
+          ]
+        }
+      },
+      "activeCraft": 2,
+      "crewPerCraft": 100,
+      "activeCrew": 200,
+      "mobilisedCrew": 400
+    },
+    {
+      "class": "corvette",
+      "coastal": false,
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "inventoryCraft": 0,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            90,
+            210
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        }
+      },
+      "activeCraft": 0,
+      "crewPerCraft": 150,
+      "activeCrew": 0,
+      "mobilisedCrew": 0
+    },
+    {
+      "class": "bomb_schooner",
+      "coastal": false,
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "inventoryCraft": 0,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            30,
+            70
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        }
+      },
+      "activeCraft": 0,
+      "crewPerCraft": 50,
+      "activeCrew": 0,
+      "mobilisedCrew": 0
+    },
+    {
+      "class": "steam_schooner",
+      "coastal": false,
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "inventoryCraft": 0,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            24,
+            56
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            0,
+            0
+          ]
+        }
+      },
+      "activeCraft": 0,
+      "crewPerCraft": 40,
+      "activeCrew": 0,
+      "mobilisedCrew": 0
+    },
+    {
+      "class": "gun_sloop",
+      "coastal": true,
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "inventoryCraft": 45,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            27,
+            63
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            6,
+            14
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            39,
+            91
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            390,
+            910
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            1755,
+            4095
+          ]
+        }
+      },
+      "activeCraft": 10,
+      "crewPerCraft": 65,
+      "activeCrew": 650,
+      "mobilisedCrew": 2925
+    },
+    {
+      "class": "gun_yawl",
+      "coastal": true,
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "inventoryCraft": 60,
+      "fieldStatus": {
+        "inventoryCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            36,
+            84
+          ]
+        },
+        "activeCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            6,
+            14
+          ]
+        },
+        "crewPerCraft": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            15,
+            35
+          ]
+        },
+        "activeCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            150,
+            350
+          ]
+        },
+        "mobilisedCrew": {
+          "status": "skøn",
+          "source": [
+            "R6_MODEL",
+            "R5_NORSHIPS"
+          ],
+          "reason": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "method": "SE: anker 1817-plan 12 linjeskibe og 1851 over 250 rofartøjer; NO: daterede tjenestelister fra runde 5. Aktiv andel vælges konservativt; besætningsnorm ikke faktisk rulle.",
+          "anchors": [
+            [
+              "R6_MODEL",
+              "R5_NORSHIPS"
+            ]
+          ],
+          "interval": [
+            900,
+            2100
+          ]
+        }
+      },
+      "activeCraft": 10,
+      "crewPerCraft": 25,
+      "activeCrew": 250,
+      "mobilisedCrew": 1500
+    }
+  ],
+  "bases": [
+    "Fredriksvern",
+    "Horten",
+    "Bergen",
+    "Trondheim"
+  ],
+  "namedExamples": [
+    {
+      "name": "Alsen",
+      "class": "brig",
+      "status": "kilde",
+      "source": "R5_NORSHIPS",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    },
+    {
+      "name": "Fredriksværn",
+      "class": "brig",
+      "status": "kilde",
+      "source": "R5_NORSHIPS",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    },
+    {
+      "name": "Langeland",
+      "class": "brig",
+      "status": "kilde",
+      "source": "R5_NORSHIPS",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    },
+    {
+      "name": "Lougen",
+      "class": "brig",
+      "status": "kilde",
+      "source": "R5_NORSHIPS",
+      "note": "Dateret skibseksempel; navn til rådighed i perioden er ikke bevis for kommission 1. juli. Nidaros: 1851-årsdatering alene."
+    }
+  ],
+  "peaceCrewCirca": 1100,
+  "fieldStatus": {
+    "peaceCrewCirca": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Sum af aktive fartøjers bemandingsnormer; base-/værftsfolk ikke medregnet. Ikke dateret flåderulle.",
+      "method": "Sum af aktive fartøjers bemandingsnormer; base-/værftsfolk ikke medregnet. Ikke dateret flåderulle.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        715.0,
+        1485.0
+      ]
+    },
+    "fullManningCirca": {
+      "status": "skøn",
+      "source": "R6_MODEL",
+      "reason": "Sum normbemanding af modelbeholdning; for SE kun rimelighedskontrol mod ca. 20.000, ingen observation.",
+      "method": "Sum normbemanding af modelbeholdning; for SE kun rimelighedskontrol mod ca. 20.000, ingen observation.",
+      "anchors": [
+        "R6_MODEL"
+      ],
+      "interval": [
+        3136.25,
+        6513.75
+      ]
+    }
+  },
+  "fullManningCirca": 4825
+}

@@ -1,0 +1,590 @@
+{
+  "date": "2026-10-15",
+  "passed": 116,
+  "total": 116,
+  "readyForImport": false,
+  "readyForBattle": false,
+  "note": "Statisk datakontrol; ingen motor-, kampagne- eller slagtest. Historiske resthuller er ikke beståede integrationstests.",
+  "checks": [
+    {
+      "check": "Ingen dublerede proveniens-pointere",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Nations_1825.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Nations_1825.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Nations_1825.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Nations1851.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Nations1851.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Nations1851.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Population_1825.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Population_1825.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Population_1825.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Population_1851.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Population_1851.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Population_1851.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Population_1864.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Population_1864.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Population_1864.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "cities_neighbours_1825.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "cities_neighbours_1825.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "cities_neighbours_1825.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "cities_neighbours_1851.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "cities_neighbours_1851.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "cities_neighbours_1851.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Army_Neighbours_1825.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Army_Neighbours_1825.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Army_Neighbours_1825.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Army_1825.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Army_1825.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Army_1825.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Army_Neighbours_1851.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Army_Neighbours_1851.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Army_Neighbours_1851.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Army1851.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Army1851.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Army1851.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Economy_1825.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Economy_1825.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Economy_1825.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Economy_1851.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Economy_1851.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Economy_1851.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Trade_1851.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Trade_1851.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Trade_1851.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Officers_1825.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Officers_1825.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Officers_1825.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Officers1851.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Officers1851.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Officers1851.json: originale topnøgler",
+      "passed": true,
+      "detail": "set()"
+    },
+    {
+      "check": "Events.json: alle tal/null har gyldig proveniens",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "check": "Events.json: rodtype",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "1825: national befolkning og faktisk fredsstyrke",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "1825: unikke regiments-id",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "1825: hærstyrker ukendte",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "1825: byorden bevaret",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "1825: byfunktionsfelter",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "1825: ni generalstats",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "1851: national befolkning og faktisk fredsstyrke",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "1851: unikke regiments-id",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "1851: hærstyrker ukendte",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "1851: byorden bevaret",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "1851: byfunktionsfelter",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "1851: ni generalstats",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Unikke event-id",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Events markeret som spilvirkninger",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Valutaformel",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Hohenzollern ikke preussisk 1825",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Observationer har status og kilde",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Data/Campaign1851/Nations1851.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Data/Campaign1851/Nations_1825.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Data/Campaign1851/Army1851.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_1825.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_Neighbours_1851.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Data/Campaign1851/cities_neighbours_1851.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Data/Campaign1851/Economy_1825.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Data/Campaign1851/Population_1825.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Data/Campaign1851/Officers1851.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Data/Campaign1851/Events.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Data/Campaign1851/Trade_1851.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_Neighbours_1825.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Data/Campaign1851/cities_neighbours_1825.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Docs/Landeskabelon.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: R:/Onedrive/1864-Campaign/Docs/Naboer.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: C:/Users/allan/Documents/Codex/2026-10-12/l/outputs/Sverige-Norge-agent/Arbejdsstatus.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: C:/Users/allan/Documents/Codex/2026-10-12/l/outputs/Sverige-Norge-agent/Daekningsmatrix.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: C:/Users/allan/Documents/Codex/2026-10-12/l/outputs/Sverige-Norge-agent/verifikationslog.txt",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Uændret læst input: C:/Users/allan/Documents/Codex/2026-10-12/l/outputs/Sverige-Norge-agent/Spilimport/README.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Dokument findes: Kilder.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Dokument findes: Arbejdsstatus.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Dokument findes: Daekningsmatrix.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Dokument findes: Preussen-landepakke-1825-1851.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Dokument findes: Research/Resthuller.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Dokument findes: Research/Spilvalg.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Dokument findes: Spilimport/README.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "12 gapkontroller",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Army1851.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Army_1825.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Army_Neighbours_1825.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Army_Neighbours_1851.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/cities_neighbours_1825.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/cities_neighbours_1851.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Data-status.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Economy_1825.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Economy_1851.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Events.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Kildegrundlag.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Nations1851.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Nations_1825.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Officers1851.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Officers_1825.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Population_1825.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Population_1851.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Population_1864.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Skema-kontrol.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Sources.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "Manifesthash: Spilimport/Trade_1851.json",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

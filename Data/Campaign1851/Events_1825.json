@@ -118,5 +118,317 @@
     },
     "avis": "Preussiske tropper rykker ind i Slesvig til hjælp for oprørerne",
     "log": "Preussiske tropper rykker ind i Slesvig til hjælp for oprørerne"
+  },
+  {
+    "id": "pr_zollverein",
+    "navn": "Zollverein træder i kraft",
+    "vindue": {
+      "aar": 1834,
+      "maaned": 1,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "tilAar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Vinduets slutning er et spilvalg: hændelsen forsøges hver måned i vinduet, og sandsynligheden gælder hele vinduet."
+        },
+        "tilMaaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Vinduets slutning er et spilvalg: hændelsen forsøges hver måned i vinduet, og sandsynligheden gælder hele vinduet."
+        }
+      },
+      "tilAar": 1835,
+      "tilMaaned": 6
+    },
+    "sandsynlighed": 0.8,
+    "forudsaetninger": "ikke mobiliseret og ikke krig",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": 1,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Moderat spændingsfølge (højst 3 point) er et spilvalg, ikke en historisk størrelse."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": -1,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Hvad der sker, når hændelsen udebliver, er et spilvalg: lille modsat spændingsændring."
+        }
+      }
+    },
+    "avis": "Zollverein træder i kraft",
+    "log": "Zollverein træder i kraft",
+    "source": "ZOLL",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Dato/emne historisk (kilde ZOLL); vindue, sandsynlighed, betingelser og følger er egne spilvalg. Begivenheden kan udeblive, hvis betingelserne bliver falske (mobilisering, krig, relation til Preussen), og den afgøres ved vinduets udløb.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      },
+      "forudsaetninger": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Betingelserne er spilvalg: spillerens mobilisering, krigstilstand og relation til Preussen kan gøre dem falske."
+      },
+      "blokeringer": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Ingen blokering er et spilvalg."
+      }
+    }
+  },
+  {
+    "id": "pr_hannover_zoll",
+    "navn": "Toldaftale med Hannover",
+    "vindue": {
+      "aar": 1851,
+      "maaned": 9,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "tilAar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Vinduets slutning er et spilvalg: hændelsen forsøges hver måned i vinduet, og sandsynligheden gælder hele vinduet."
+        },
+        "tilMaaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Vinduets slutning er et spilvalg: hændelsen forsøges hver måned i vinduet, og sandsynligheden gælder hele vinduet."
+        }
+      },
+      "tilAar": 1852,
+      "tilMaaned": 12
+    },
+    "sandsynlighed": 0.75,
+    "forudsaetninger": "ikke mobiliseret og ikke krig",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": -1,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Moderat spændingsfølge (højst 3 point) er et spilvalg, ikke en historisk størrelse."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": 1,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Hvad der sker, når hændelsen udebliver, er et spilvalg: lille modsat spændingsændring."
+        }
+      }
+    },
+    "avis": "Toldaftale med Hannover",
+    "log": "Toldaftale med Hannover",
+    "source": "ZOLL",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Dato/emne historisk (kilde ZOLL); vindue, sandsynlighed, betingelser og følger er egne spilvalg. Begivenheden kan udeblive, hvis betingelserne bliver falske (mobilisering, krig, relation til Preussen), og den afgøres ved vinduets udløb.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      },
+      "forudsaetninger": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Betingelserne er spilvalg: spillerens mobilisering, krigstilstand og relation til Preussen kan gøre dem falske."
+      },
+      "blokeringer": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Ingen blokering er et spilvalg."
+      }
+    }
+  },
+  {
+    "id": "pr_roon1859",
+    "navn": "Roon og forberedelsen af hærreform",
+    "vindue": {
+      "aar": 1859,
+      "maaned": 12,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "tilAar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Vinduets slutning er et spilvalg: hændelsen forsøges hver måned i vinduet, og sandsynligheden gælder hele vinduet."
+        },
+        "tilMaaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Vinduets slutning er et spilvalg: hændelsen forsøges hver måned i vinduet, og sandsynligheden gælder hele vinduet."
+        }
+      },
+      "tilAar": 1860,
+      "tilMaaned": 6
+    },
+    "sandsynlighed": 0.7,
+    "forudsaetninger": "forhold.PR < 50 og ikke krig",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": 1,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Moderat spændingsfølge (højst 3 point) er et spilvalg, ikke en historisk størrelse."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": -1,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Hvad der sker, når hændelsen udebliver, er et spilvalg: lille modsat spændingsændring."
+        }
+      }
+    },
+    "avis": "Roon og forberedelsen af hærreform",
+    "log": "Roon og forberedelsen af hærreform",
+    "source": "ROON-BIO",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Dato/emne historisk (kilde ROON-BIO); vindue, sandsynlighed, betingelser og følger er egne spilvalg. Begivenheden kan udeblive, hvis betingelserne bliver falske (mobilisering, krig, relation til Preussen), og den afgøres ved vinduets udløb.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      },
+      "forudsaetninger": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Betingelserne er spilvalg: spillerens mobilisering, krigstilstand og relation til Preussen kan gøre dem falske."
+      },
+      "blokeringer": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Ingen blokering er et spilvalg."
+      }
+    }
+  },
+  {
+    "id": "pr_roon1860",
+    "navn": "Roons reformforslag skaber budgetkonflikt",
+    "vindue": {
+      "aar": 1860,
+      "maaned": 1,
+      "fieldStatus": {
+        "aar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "maaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+        },
+        "tilAar": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Vinduets slutning er et spilvalg: hændelsen forsøges hver måned i vinduet, og sandsynligheden gælder hele vinduet."
+        },
+        "tilMaaned": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Vinduets slutning er et spilvalg: hændelsen forsøges hver måned i vinduet, og sandsynligheden gælder hele vinduet."
+        }
+      },
+      "tilAar": 1862,
+      "tilMaaned": 6
+    },
+    "sandsynlighed": 0.7,
+    "forudsaetninger": "forhold.PR < 50 og begivenhed.pr_roon1859 og ikke krig",
+    "blokeringer": "",
+    "effekter": {
+      "spaending": 3,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Moderat spændingsfølge (højst 3 point) er et spilvalg, ikke en historisk størrelse."
+        }
+      }
+    },
+    "udeblivelse": {
+      "spaending": -1,
+      "fieldStatus": {
+        "spaending": {
+          "status": "spil",
+          "source": "DESIGN",
+          "reason": "Hvad der sker, når hændelsen udebliver, er et spilvalg: lille modsat spændingsændring."
+        }
+      }
+    },
+    "avis": "Roons reformforslag skaber budgetkonflikt",
+    "log": "Roons reformforslag skaber budgetkonflikt",
+    "source": "ROON",
+    "historyStatus": "kilde",
+    "designStatus": "spil",
+    "note": "Dato/emne historisk (kilde ROON); vindue, sandsynlighed, betingelser og følger er egne spilvalg. Begivenheden kan udeblive, hvis betingelserne bliver falske (mobilisering, krig, relation til Preussen), og den afgøres ved vinduets udløb.",
+    "fieldStatus": {
+      "sandsynlighed": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Strukturtal eller eksplicit spilvalg; ikke historisk observation."
+      },
+      "forudsaetninger": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Betingelserne er spilvalg: spillerens mobilisering, krigstilstand og relation til Preussen kan gøre dem falske."
+      },
+      "blokeringer": {
+        "status": "spil",
+        "source": "DESIGN",
+        "reason": "Ingen blokering er et spilvalg."
+      }
+    }
   }
 ]

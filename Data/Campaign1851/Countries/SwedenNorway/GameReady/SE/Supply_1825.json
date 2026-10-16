@@ -1,0 +1,71 @@
+{
+  "scenario": "1825",
+  "nation": "SE",
+  "note": "Materielbilag i Army_1825-form; regimenter tomme, må ikke spawnes som anden hær.",
+  "commands": [],
+  "regiments": [],
+  "equipment": {
+    "rifles": 52000,
+    "guns": 144,
+    "horses": 5216,
+    "mortars": 24,
+    "wagons": 382,
+    "raw": [
+      61,
+      46,
+      244,
+      367,
+      1222,
+      917
+    ],
+    "foodDays": 30,
+    "columns": 8,
+    "infantryReload": 1.2,
+    "infantryAccuracy": 0.8,
+    "carbineReload": 24,
+    "infantryWeapon": "Svensk glatløbet flintlås m/1815, ældre modeller",
+    "cavalryWeapon": "Flintlåskarabin, pistol og sabel",
+    "artilleryWeapon": "Glatløbet forladeskyts; 6-/12-pundig kanon og haubits som spilklasser; ingen riflet baglader",
+    "uniforms": [
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret",
+      "Mørk blå uniformsproxy; korrekt periodesnit ikke verificeret"
+    ],
+    "kitReserve": 6112
+  },
+  "magazines": [
+    {
+      "town": "Stockholm",
+      "food": 229192.5,
+      "fodder": 26080.0,
+      "ammo": 1375.155
+    },
+    {
+      "town": "Kristianstad",
+      "food": 275031.0,
+      "fodder": 31296.0,
+      "ammo": 1650.186
+    },
+    {
+      "town": "Göteborg",
+      "food": 183354.0,
+      "fodder": 20864.0,
+      "ammo": 1100.124
+    },
+    {
+      "town": "Karlskrona",
+      "food": 137515.5,
+      "fodder": 15648.0,
+      "ammo": 825.093
+    },
+    {
+      "town": "Karlsborg",
+      "food": 91677.0,
+      "fodder": 10432.0,
+      "ammo": 550.062
+    }
+  ]
+}

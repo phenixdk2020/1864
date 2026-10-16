@@ -67,7 +67,7 @@ bool AStrategyOOBTestScenario::BeginBehaviourAcceptance()
         TEXT("MOVE"), TEXT("STOPFIRE"), TEXT("NEW-HOLD"), TEXT("DELAY"), TEXT("SPREAD"), TEXT("SCREEN"),
         TEXT("WORKS"), TEXT("WORKS-CANCEL"), TEXT("CONTACT"), TEXT("ROE"), TEXT("AMMO"), TEXT("ROUT"), TEXT("DESTINATION"), TEXT("SQUARE-ZONES"),
         TEXT("LONG-MOVE"), TEXT("SQUARE-GATES"), TEXT("FIREBLOCK"), TEXT("DISENGAGE"), TEXT("WORKS-MOVE"), TEXT("SUSPEND-WAYPOINT"), TEXT("CLEAR-SUSPEND"), TEXT("RELOAD"),
-        TEXT("SCREEN-SQUARE"), TEXT("SPREAD-MOVE"), TEXT("ARTILLERY-DEPLOY"), TEXT("DRAGOON"), TEXT("CAVALRY-STILL"), TEXT("ADVANCE-FIRE")};
+        TEXT("SCREEN-SQUARE"), TEXT("SPREAD-MOVE"), TEXT("ARTILLERY-DEPLOY"), TEXT("DRAGOON"), TEXT("CAVALRY-STILL"), TEXT("ADVANCE-FIRE"), TEXT("LOSS-RANKS")};
     if (bAcceptanceAll) AcceptanceIds = AvailableAcceptanceIds;
     else AcceptanceIds.Add(RequestedAcceptance.ToUpper());
     FParse::Value(FCommandLine::Get(), TEXT("Strategy1864AcceptTimeout="), AcceptanceTimeout);
@@ -116,7 +116,13 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
         FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: kompagni kunne ikke oprettes"));
         return;
     }
-    if (AcceptanceElapsed >= AcceptanceTimeout)
+    // Only movement contracts get a fourfold budget for the 600 -> 150 cm/s march.
+    const bool bAcceptanceMarchBudget = AcceptanceId == TEXT("MOVE") || AcceptanceId == TEXT("LONG-MOVE") ||
+        AcceptanceId == TEXT("STOPFIRE") || AcceptanceId == TEXT("SUSPEND-WAYPOINT") ||
+        AcceptanceId == TEXT("SPREAD-MOVE") || AcceptanceId == TEXT("ADVANCE-FIRE") ||
+        AcceptanceId == TEXT("T7") || AcceptanceId == TEXT("DISENGAGE");
+    const float AcceptanceCaseTimeout = AcceptanceTimeout * (bAcceptanceMarchBudget ? 4.f : 1.f);
+    if (AcceptanceElapsed >= AcceptanceCaseTimeout)
     {
         FinishBehaviourAcceptanceCase(false, FString::Printf(TEXT("TIMEOUT %.1fs phase=%d order=%d state=%d formation=%d suspended=%d"),
             AcceptanceElapsed, AcceptancePhase, int32(AcceptanceCompany->OrderComponent->GetCurrentOrder().Type),
@@ -222,9 +228,15 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
             AcceptanceAttack.TargetLocation = AcceptanceOther->GetActorLocation();
             AcceptanceAttack.AttackTarget = AcceptanceOther;
             AcceptanceCompany->OrderComponent->ResolveAttackDestination(AcceptanceAttack);
-            AcceptanceCheck(FMath::Abs(FVector::Dist2D(AcceptanceAttack.TargetLocation, AcceptanceOther->GetActorLocation()) -
-                (AcceptanceCompany->FireControlComponent->GetActiveRangeCm() - 300.0f)) < 10.0f && AcceptanceAttack.bHasFacing,
-                TEXT("ordrens angrebsmaal paa aktiv raekkevidde minus 3m; HUD vurderes separat")); return;
+            const float AcceptanceStandOff = FVector::Dist2D(AcceptanceAttack.TargetLocation, AcceptanceOther->GetActorLocation());
+            const float AcceptanceApproach = AcceptanceCompany->FireControlComponent->GetApproachStandRangeCm();
+            // Clearly inside the range (at least 5 m, about 88 %), never in bayonet reach, and the halt range lies between stand-off and range.
+            AcceptanceCheck(AcceptanceStandOff <= AcceptanceApproach + 10.0f && AcceptanceStandOff >= AcceptanceApproach * 0.4f &&
+                AcceptanceApproach <= AcceptanceCompany->FireControlComponent->GetActiveRangeCm() - 500.0f + 1.0f &&
+                AcceptanceCompany->FireControlComponent->GetApproachHaltRangeCm() >= AcceptanceApproach &&
+                AcceptanceCompany->FireControlComponent->GetApproachHaltRangeCm() < AcceptanceCompany->FireControlComponent->GetActiveRangeCm() &&
+                AcceptanceAttack.bHasFacing,
+                TEXT("ordrens angrebsmaal tydeligt inden for aktiv raekkevidde (ca. 88 %, mindst 5 m); halt-afstand mellem maal og raekkevidde")); return;
         }
         else if (AcceptanceId == TEXT("SQUARE-ZONES"))
         {
@@ -349,6 +361,7 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
             }
             else AcceptanceCompany->bOfficerAIEnabled = true;
         }
+        else if (AcceptanceId == TEXT("LOSS-RANKS")) { /* no setup: the check below runs on the fixture company without ticking */ }
         else if (AcceptanceId != TEXT("ROE")) { FinishBehaviourAcceptanceCase(false, TEXT("UNKNOWN_ID: se Docs/TestFlags.md")); return; }
     }
     if (AcceptancePhase == 0) return;
@@ -370,7 +383,7 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
         }
         if (AcceptancePhase == 2 && AcceptanceSinceEvent < 9.9f && AcceptanceCompany->MovementExecutor->HasMovementGoal())
         { FinishBehaviourAcceptanceCase(false, TEXT("fremrykning genoptaget foer 10s uden ildkontakt")); return; }
-        if (AcceptancePhase == 2 && AcceptanceSinceEvent > 50.0f)
+        if (AcceptancePhase == 2 && AcceptanceSinceEvent > 170.0f)
         { AcceptanceCheck(!AcceptanceCompany->MovementExecutor->GetSuspendedMission().IsValidOrder() &&
             // The advance stands off at its chosen fire distance in front of the enemy it names: the goal is the order's resolved target.
             FVector::Dist2D(AcceptanceCompany->GetActorLocation(), AcceptanceCompany->OrderComponent->GetCurrentOrder().TargetLocation) < 100.0f,
@@ -394,7 +407,8 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
     {
         if (AcceptanceSinceEvent < 9.9f && AcceptanceCompany->MovementExecutor->HasMovementGoal())
         { FinishBehaviourAcceptanceCase(false, TEXT("rute genoptaget foer 10s ro")); return; }
-        if (AcceptanceSinceEvent > 35.0f)
+        // Keep the 10s quiet period; scale the remaining travel allowance by four.
+        if (AcceptanceSinceEvent > (AcceptanceId == TEXT("SUSPEND-WAYPOINT") ? 110.0f : 35.0f))
         {
             const FStrategyOrder AcceptanceFinalOrder = AcceptanceCompany->OrderComponent->GetCurrentOrder();
             const bool bAcceptanceSnapshotCleared = !AcceptanceCompany->MovementExecutor->GetSuspendedMission().IsValidOrder();
@@ -446,11 +460,47 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
     {
         if (AcceptanceSinceEvent < 2.8f && FVector::Dist2D(AcceptanceCompany->GetActorLocation(), AcceptanceSnapshot) > 1.0f)
         { FinishBehaviourAcceptanceCase(false, TEXT("SPRED marcherede foer 3s rejsning")); return; }
-        if (AcceptanceSinceEvent > 20.0f)
+        // Keep the 3s rise; scale the remaining travel allowance by four.
+        if (AcceptanceSinceEvent > 71.0f)
         { AcceptanceCheck(!AcceptanceCompany->FieldOfficerComponent->IsTakingFireCover() && AcceptanceCompany->StanceComponent->Stance == EStrategyStance::Standing &&
             AcceptanceCompany->FormationComponent->RankCount == 3 &&
             FVector::Dist2D(AcceptanceCompany->GetActorLocation(), AcceptanceStart + FVector(5000, 0, 0)) < 100.0f,
             TEXT("leveret FLYT: rejsning foer march, raekker gendannet, ankomst")); return; }
+    }
+    if (AcceptanceId == TEXT("LOSS-RANKS") && AcceptancePhase == 1)
+    {
+        // Deterministic, no ticking: a line that has lost men keeps its nominal depth (2 and 3 ranks), so the close-up shortens the front
+        // by whole files instead of thinning the depth. Strength is restored before anything ticks. The step-up inside a file is
+        // StepUpFiles (visual component, private) and is checked on a screenshot.
+        UStrategyFormationComponent* RankFormation = AcceptanceCompany->FormationComponent;
+        const EStrategyFormationType RankOldFormation = RankFormation->CurrentFormation;
+        const int32 RankOldCount = RankFormation->RankCount;
+        const int32 RankOldStrength = AcceptanceCompany->CurrentStrength;
+        const int32 RankOldInitial = AcceptanceCompany->InitialStrength;
+        bool bRankOk = true;
+        for (int32 RankTry = 2; RankTry <= 3; ++RankTry)
+        {
+            RankFormation->CurrentFormation = EStrategyFormationType::Line;
+            RankFormation->RankCount = RankTry;
+            AcceptanceCompany->InitialStrength = 150;
+            AcceptanceCompany->CurrentStrength = 90;
+            const int32 RankMen = 90;
+            const TArray<FStrategyFormationSlot> RankSlots = RankFormation->GenerateSoldierSlots(FVector::ZeroVector, 0.0f, RankMen);
+            TSet<int32> RankRows;
+            TSet<int32> RankFiles;
+            for (const FStrategyFormationSlot& RankSlot : RankSlots)
+            {
+                RankRows.Add(FMath::RoundToInt(RankSlot.WorldLocation.X));
+                RankFiles.Add(FMath::RoundToInt(RankSlot.WorldLocation.Y));
+            }
+            bRankOk &= RankRows.Num() == RankTry && RankFiles.Num() == FMath::DivideAndRoundUp(RankMen, RankTry);
+        }
+        RankFormation->CurrentFormation = RankOldFormation;
+        RankFormation->RankCount = RankOldCount;
+        AcceptanceCompany->InitialStrength = RankOldInitial;
+        AcceptanceCompany->CurrentStrength = RankOldStrength;
+        AcceptanceCheck(bRankOk, TEXT("linje med tab beholder 2 og 3 geleddybde; fronten kortes i hele filer"));
+        return;
     }
     if (AcceptanceId == TEXT("ARTILLERY-DEPLOY"))
     {
@@ -501,7 +551,7 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
             TEXT("observeret stillestaaende rytteri 200m udloeser ingen carre i hele observationsvinduet")); return; }
     }
 
-    if (AcceptanceId == TEXT("MOVE") && AcceptanceSinceEvent > 30.0f)
+    if (AcceptanceId == TEXT("MOVE") && AcceptanceSinceEvent > 120.0f)
     {
         AcceptanceCheck(FVector::Dist2D(AcceptanceCompany->GetActorLocation(), AcceptanceStart + FVector(10000, 0, 0)) < 100.0f &&
             AcceptanceCompany->OrderComponent->GetCurrentOrder().OrderSerial == AcceptanceSerial, TEXT("ren FLYT ankommer uden ny ordre")); return;
@@ -521,7 +571,7 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
     {
         if (AcceptanceId == TEXT("STOPFIRE") && AcceptanceSinceEvent < 9.9f && AcceptanceCompany->MovementExecutor->HasMovementGoal())
         { FinishBehaviourAcceptanceCase(false, TEXT("genoptaget foer 10s ro")); return; }
-        if (AcceptanceSinceEvent > 25.0f)
+        if (AcceptanceSinceEvent > (AcceptanceId == TEXT("STOPFIRE") ? 70.0f : 25.0f))
         {
             const bool bAcceptanceHold = AcceptanceCompany->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Hold &&
                 !AcceptanceCompany->MovementExecutor->GetSuspendedMission().IsValidOrder() && !AcceptanceCompany->MovementExecutor->HasMovementGoal();
@@ -574,7 +624,7 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
     }
     if (AcceptanceId == TEXT("WORKS-MOVE") && AcceptanceSinceEvent > 35.0f)
     { AcceptanceCheck(!AcceptanceCompany->FieldworksComponent->bBuilding && !AcceptanceCompany->FieldworksComponent->HasCompletedFieldworks(), TEXT("leveret FLYT annullerer BYG")); return; }
-    if (AcceptanceId == TEXT("LONG-MOVE") && AcceptanceSinceEvent > 55.0f)
+    if (AcceptanceId == TEXT("LONG-MOVE") && AcceptanceSinceEvent > 220.0f)
     { AcceptanceCheck(AcceptanceCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Line &&
         FVector::Dist2D(AcceptanceCompany->GetActorLocation(), AcceptanceStart + FVector(25000, 0, 0)) < 100.0f, TEXT("lang march ankommer i kampformation")); return; }
     if (AcceptanceId == TEXT("DISENGAGE") && AcceptanceCompany->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Hold)
@@ -703,7 +753,7 @@ void AStrategyOOBTestScenario::FinishBehaviourAcceptanceCase(bool bPassed, const
 void AStrategyOOBTestScenario::WriteBehaviourAcceptanceReport()
 {
     const FDateTime AcceptanceNow = FDateTime::UtcNow();
-    FString AcceptanceReport = FString::Printf(TEXT("# Adfaerdsaccept — %s UTC\n\nSimulationstid; speed=%.1f; timeout=%.1fs; seed=1864. PASS gaelder kun assertionens kontrakt.\n\n| ID | Status | Simulerede sekunder | Evidens / aarsag |\n|---|---|---|---|\n"),
+    FString AcceptanceReport = FString::Printf(TEXT("# Adfaerdsaccept — %s UTC\n\nSimulationstid; speed=%.1f; basis-timeout=%.1fs (marchcases x4); seed=1864. PASS gaelder kun assertionens kontrakt.\n\n| ID | Status | Simulerede sekunder | Evidens / aarsag |\n|---|---|---|---|\n"),
         *AcceptanceNow.ToString(), AcceptanceDilation, AcceptanceTimeout);
     for (const FString& AcceptanceRow : AcceptanceResults) AcceptanceReport += AcceptanceRow + TEXT("\n");
     FString AcceptanceMatrix;

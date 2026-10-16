@@ -39,24 +39,27 @@
         0.5
       ],
       "caution": 0.7,
-      "reserve": 150000,
-      "population": 3480000,
+      "reserve": 21908,
+      "population": 3498336,
       "railKm": 0,
-      "armyMen": 35000,
+      "armyMen": 8651,
       "growth": 1.1,
-      "taxPerHead": 0.2,
-      "note": "Forsigtig regering, skandinavisme i opinionen; i union med Norge. Uniformer: m/1860 fra 1860.",
+      "taxPerHead": 3.09473,
+      "note": "Runde 6: separate delstatsbudgetter og OOB-puljer; cirkaskøn for styrke/skat. onMap forbliver false indtil raster og loader er integreret.",
       "relation": 40,
       "tradeValue": 3000,
       "canAlly": true,
       "role": "Kernefraktion",
-      "period": "1860–1866",
-      "infantry": "Linjeinfanteri m/1860; Svea Livgarde; Andra Livgardet; Livregementets Grenadjärkår; 1./2. Livgrenadjärregementet; Fältjägare",
+      "period": "1851",
+      "infantry": "Blandet m/1815-konvertering og m/1840/1845/1849 perkussion",
       "cavalry": "Husar; Dragon; livregements-kavaleri",
       "artillery": "Feltartilleri; ridende artilleri",
       "priority": "Høj",
       "group": "norden"
-    },
+    ,
+"active": true,
+  "canGuarantee": true
+},
     {
       "id": "PR",
       "name": "Preussen",
@@ -70,7 +73,7 @@
       ],
       "caution": 0.4,
       "reserve": 400000,
-      "population": 16330000,
+      "population": 16718740,
       "railKm": 2900,
       "armyMen": 127000,
       "growth": 1.1,
@@ -85,7 +88,81 @@
       "artillery": "Feltartilleri; ridende artilleri",
       "priority": "Høj",
       "group": "stormagt"
+    ,
+"packageNote": "Friedrich Wilhelm IV; forfatning 1850. Londontraktaten 1852 er fremtid. Preussen, dateret importgrundlag. Kilde/skøn/spil står i fieldStatus og Data-status.json. Delvist overlay; null kræver håndtering, ikke nulkonvertering. Ingen motor-/slagtest.",
+  "packagePeriod": "1851-07-01",
+  "canAlly": false,
+  "canGuarantee": false,
+  "fieldStatus": {
+    "weights/0": {
+      "status": "spil",
+      "source": "GAME-Nations1851.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
     },
+    "weights/1": {
+      "status": "spil",
+      "source": "GAME-Nations1851.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "weights/2": {
+      "status": "spil",
+      "source": "GAME-Nations1851.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "weights/3": {
+      "status": "spil",
+      "source": "GAME-Nations1851.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "caution": {
+      "status": "spil",
+      "source": "GAME-Nations1851.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-Nations1851.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "population": {
+      "status": "skøn",
+      "source": "HGIS-BevPRE-gesamt.htm",
+      "reason": "Halvårslineær interpolation af ultimo året før og scenarieårets ultimo. Afrundet til person; ingen sikkerhed om præcis folketællingsdato.",
+      "method": "round((P[y-1]+P[y])/2)",
+      "unit": "personer"
+    },
+    "railKm": {
+      "status": "spil",
+      "source": "GAME-Nations1851.json",
+      "reason": "Bevarer spillets 2.900 km som modelanker; ikke et verificeret 1851-tal."
+    },
+    "armyMen": {
+      "status": "skøn",
+      "source": "RANGLIST",
+      "reason": "Faktisk fredsfremmøde pr. 1. juli ikke afskrevet; spillets 127.000 er ikke observation."
+    },
+    "growth": {
+      "status": "spil",
+      "source": "GAME-Nations1851.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "taxPerHead": {
+      "status": "skøn",
+      "source": "FIN1851",
+      "reason": "Budgetindtægter er ikke direkte skat; land/by-skat og total skattedefinition mangler."
+    },
+    "relation": {
+      "status": "spil",
+      "source": "GAME-Nations1851.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    },
+    "tradeValue": {
+      "status": "spil",
+      "source": "GAME-Nations1851.json",
+      "reason": "Arvet AI-/reserve-/vækst-/handelsmodel; ingen historisk måling."
+    }
+  }
+},
     {
       "id": "AT",
       "name": "Østrig",
@@ -209,17 +286,17 @@
       "id": "NO",
       "name": "Norge",
       "role": "Skandinavisk fraktion",
-      "period": "1851–1866",
-      "infantry": "Linjeinfanteri; Jæger/let infanteri; gardevariant",
+      "period": "1851",
+      "infantry": "Blandet perkussionsmuskett, pillar-breech og kammerlader m/1842/1846/1849",
       "cavalry": "Dragon/rytter",
       "artillery": "Feltartilleri",
       "priority": "Mellem",
       "group": "norden",
-      "population": 1490000,
+      "population": 1417310,
       "railKm": 0,
-      "armyMen": 12000,
+      "armyMen": 2300,
       "growth": 1.2,
-      "taxPerHead": 0.18,
+      "taxPerHead": 3.78633,
       "relation": 45,
       "tradeValue": 2000,
       "weights": [
@@ -229,11 +306,14 @@
         0.6
       ],
       "caution": 0.7,
-      "reserve": 60000,
-      "note": "I union med Sverige under fælles konge; egen hær og eget storting. Den første jernbane (Christiania–Eidsvoll) åbner 1854.",
+      "reserve": 7900,
+      "note": "Runde 6: separate delstatsbudgetter og OOB-puljer; cirkaskøn for styrke/skat. onMap forbliver false indtil raster og loader er integreret.",
       "onMap": false,
       "controller": "ai"
-    },
+    ,
+"active": true,
+  "canGuarantee": true
+},
     {
       "id": "HAN",
       "name": "Kongeriget Hannover",

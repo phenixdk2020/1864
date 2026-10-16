@@ -1,0 +1,812 @@
+{
+  "note": "Kilde-id-register; læst/ulæst/blokeret skelnes.",
+  "sources": {
+    "DESIGN": {
+      "id": "DESIGN",
+      "title": "Preussen-pakkens eksplicitte spilvalg",
+      "url": "../Research/Spilvalg.md",
+      "access": "læst",
+      "locator": "Hele filen",
+      "note": "Ingen historisk kilde; hvert valg skal vurderes ved integration."
+    },
+    "UNKNOWN": {
+      "id": "UNKNOWN",
+      "title": "Undersøgt, men ukendt",
+      "url": "../Research/Resthuller.md",
+      "access": "læst",
+      "locator": "Emnelisten",
+      "note": "Et null er ukendt; status skøn er en klassifikation af et uafklaret felt, ikke et tal."
+    },
+    "GAME-Nations1851.json": {
+      "id": "GAME-Nations1851.json",
+      "title": "Nations1851.json",
+      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Nations1851.json",
+      "access": "læst",
+      "locator": "JSON-pointer i Data-status.json",
+      "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
+    },
+    "GAME-Nations_1825.json": {
+      "id": "GAME-Nations_1825.json",
+      "title": "Nations_1825.json",
+      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Nations_1825.json",
+      "access": "læst",
+      "locator": "JSON-pointer i Data-status.json",
+      "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
+    },
+    "GAME-Army1851.json": {
+      "id": "GAME-Army1851.json",
+      "title": "Army1851.json",
+      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army1851.json",
+      "access": "læst",
+      "locator": "JSON-pointer i Data-status.json",
+      "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
+    },
+    "GAME-Army_1825.json": {
+      "id": "GAME-Army_1825.json",
+      "title": "Army_1825.json",
+      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_1825.json",
+      "access": "læst",
+      "locator": "JSON-pointer i Data-status.json",
+      "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
+    },
+    "GAME-Army_Neighbours_1851.json": {
+      "id": "GAME-Army_Neighbours_1851.json",
+      "title": "Army_Neighbours_1851.json",
+      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_Neighbours_1851.json",
+      "access": "læst",
+      "locator": "JSON-pointer i Data-status.json",
+      "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
+    },
+    "GAME-cities_neighbours_1851.json": {
+      "id": "GAME-cities_neighbours_1851.json",
+      "title": "cities_neighbours_1851.json",
+      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/cities_neighbours_1851.json",
+      "access": "læst",
+      "locator": "JSON-pointer i Data-status.json",
+      "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
+    },
+    "GAME-Economy_1825.json": {
+      "id": "GAME-Economy_1825.json",
+      "title": "Economy_1825.json",
+      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Economy_1825.json",
+      "access": "læst",
+      "locator": "JSON-pointer i Data-status.json",
+      "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
+    },
+    "GAME-Population_1825.json": {
+      "id": "GAME-Population_1825.json",
+      "title": "Population_1825.json",
+      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Population_1825.json",
+      "access": "læst",
+      "locator": "JSON-pointer i Data-status.json",
+      "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
+    },
+    "GAME-Officers1851.json": {
+      "id": "GAME-Officers1851.json",
+      "title": "Officers1851.json",
+      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Officers1851.json",
+      "access": "læst",
+      "locator": "JSON-pointer i Data-status.json",
+      "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
+    },
+    "GAME-Events.json": {
+      "id": "GAME-Events.json",
+      "title": "Events.json",
+      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Events.json",
+      "access": "læst",
+      "locator": "JSON-pointer i Data-status.json",
+      "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
+    },
+    "GAME-Trade_1851.json": {
+      "id": "GAME-Trade_1851.json",
+      "title": "Trade_1851.json",
+      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Trade_1851.json",
+      "access": "læst",
+      "locator": "JSON-pointer i Data-status.json",
+      "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
+    },
+    "GAME-Army_Neighbours_1825.json": {
+      "id": "GAME-Army_Neighbours_1825.json",
+      "title": "Army_Neighbours_1825.json",
+      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_Neighbours_1825.json",
+      "access": "læst",
+      "locator": "JSON-pointer i Data-status.json",
+      "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
+    },
+    "GAME-cities_neighbours_1825.json": {
+      "id": "GAME-cities_neighbours_1825.json",
+      "title": "cities_neighbours_1825.json",
+      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/cities_neighbours_1825.json",
+      "access": "læst",
+      "locator": "JSON-pointer i Data-status.json",
+      "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
+    },
+    "TEMPLATE": {
+      "id": "TEMPLATE",
+      "title": "Landeskabelon",
+      "url": "R:/Onedrive/1864-Campaign/Docs/Landeskabelon.md",
+      "access": "læst",
+      "locator": "2.1–2.13, 3, 4.2",
+      "note": ""
+    },
+    "NABO": {
+      "id": "NABO",
+      "title": "Spillets nabokort og integrationsregler",
+      "url": "R:/Onedrive/1864-Campaign/Docs/Naboer.md",
+      "access": "læst",
+      "locator": "Syd for Danmark og Fase 0",
+      "note": "B betyder kortnabo; onMap=false er korrekt for den nuværende motor."
+    },
+    "HGIS-METHOD": {
+      "id": "HGIS-METHOD",
+      "title": "HGIS årsangivelser",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Systembeschreibung/Grundlagen/Jahresangaben.php",
+      "access": "læst",
+      "locator": "Jahresangaben",
+      "note": "År er generelt ultimo året; kildeåret er ikke automatisk 1. juli."
+    },
+    "HGIS-INTRO": {
+      "id": "HGIS-INTRO",
+      "title": "HGIS befolkning, metode",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Vorbemerkung.php",
+      "access": "læst",
+      "locator": "Vorbemerkung",
+      "note": "Wert 1 officiel størrelse; 2–5 beregninger/skøn. Databasen er læst, ikke de bagvedliggende bøger."
+    },
+    "HGIS-STATE": {
+      "id": "HGIS-STATE",
+      "title": "HGIS Preussen, territorial og økonomisk oversigt",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Multimedia/Staaten/Preussen.php",
+      "access": "læst",
+      "locator": "Verwaltung; Wirtschaft; Verkehr",
+      "note": "Oversigten blander perioder og nævner 4.567 km i 1846; dette bruges ikke som sikkert preussisk banetal."
+    },
+    "RAIL": {
+      "id": "RAIL",
+      "title": "Brockhaus, Preußische Eisenbahnen",
+      "url": "https://retrobibliothek.de/retrobib/seite.html?id=133066",
+      "access": "læst",
+      "locator": "14. opl., bind 13 (1894–96), trykt s. 427, Übersicht A",
+      "note": "Retrospektiv serie med ejerskabs-/driftsdefinition; ikke nødvendigvis kun strækninger inden for grænsen."
+    },
+    "ARMY1851": {
+      "id": "ARMY1851",
+      "title": "Oesterreichischer Soldatenfreund, Die preußische Armee",
+      "url": "https://dokumen.pub/sterreichischer-soldatenfreund-zeitschrift-fr-militrische-interessen-4.html",
+      "access": "læst",
+      "locator": "IV. årgang, nr. 4, 9. januar 1851, artikel Die preußische Armee, s. 13–14 i OCR",
+      "note": "Samtidig udenlandsk beskrivelse. Kun tekst læst, intet originalt sidebillede verificeret. OCR/enhedsantal er indbyrdes modstridende."
+    },
+    "DREYSE": {
+      "id": "DREYSE",
+      "title": "DHM, Vorderlader-Zündnadelgewehr",
+      "url": "https://www.dhm.de/archiv/sammlungen/militaria/waffen/zh218.html",
+      "access": "læst",
+      "locator": "Objektbeskrivelse",
+      "note": "M/1841 blev indført gradvist; ingen dækningsprocent for 1851."
+    },
+    "ROON": {
+      "id": "ROON",
+      "title": "DHM, Chronik 1860",
+      "url": "https://www.dhm.de/lemo/jahreschronik/1860",
+      "access": "læst",
+      "locator": "12. januar",
+      "note": "Reformforslaget til parlamentet; effekter i spillet er egne valg."
+    },
+    "ROON-BIO": {
+      "id": "ROON-BIO",
+      "title": "Deutsche Biographie, Albrecht von Roon",
+      "url": "https://www.deutsche-biographie.de/sfz76891.html",
+      "access": "læst",
+      "locator": "ADB 29 (1889), artikel Roon; tjeneste 1850–51 og reformafsnit",
+      "note": "33. regiment i 1851; først oberst december. Nærårsfredsstyrker er ikke scenarieobservationer."
+    },
+    "ARMY-SECONDARY": {
+      "id": "ARMY-SECONDARY",
+      "title": "Preußische Armee, strukturhistorie",
+      "url": "https://de.wikipedia.org/wiki/Preu%C3%9Fische_Armee",
+      "access": "læst",
+      "locator": "Zwischen Wiener Kongress und Einigungskriegen; Aufbau",
+      "note": "Sekundær oversigt; senere rigslove i værnepligtsafsnittet føres ikke tilbage til 1851."
+    },
+    "GUARD-PRIMARY": {
+      "id": "GUARD-PRIMARY",
+      "title": "Preußischer Staats-Anzeiger 1850 nr. 310",
+      "url": "https://digi.bib.uni-mannheim.de/reichsanzeiger/ocr/film/tesseract-4.0.0-20181201/046-9927/0255.hocr",
+      "access": "læst",
+      "locator": "s. 1, Leichen-Parade",
+      "note": "Navne på Kaiser Alexander/Kaiser Franz og gardekavaleri; OCR læst i søgeresultat, garnison/ruller ikke afskrevet."
+    },
+    "GUARD1": {
+      "id": "GUARD1",
+      "title": "Waldersee, Das erste Garde-Regiment zu Fuss (1854)",
+      "url": "https://books.google.de/books?id=QTcRAAAAYAAJ",
+      "access": "læst",
+      "locator": "Titel og indholdsmetadata",
+      "note": "Navnet verificeret; ikke fuld bogafskrift."
+    },
+    "RANGLIST": {
+      "id": "RANGLIST",
+      "title": "SLUB, Rang- und Quartier-Liste 1851",
+      "url": "https://katalog.slub-dresden.de/id/0-129489034",
+      "access": "katalog læst, årgangen ikke læst",
+      "locator": "Hist.Boruss.1171-1851",
+      "note": "Fysisk bestilling/kopilevering; ikke belæg for styrker eller chefer."
+    },
+    "FIN1851": {
+      "id": "FIN1851",
+      "title": "The Economist, budget for 1851",
+      "url": "https://archive.org/download/sim_economist_1850-12-07_8_380/sim_economist_1850-12-07_8_380.pdf",
+      "access": "læst",
+      "locator": "7. december 1850, bind 8 nr. 380, trykt s. 1355; PDF s. 11 og dublet i s. 12",
+      "note": "PDF hentet og s. 11 billedkontrolleret. Budgetforslag, ikke realiseret regnskab. Sidste cifre er uklare/modstrider OCR og saldo; eksakte hovedbeløb null."
+    },
+    "DEBT-BLOCKED": {
+      "id": "DEBT-BLOCKED",
+      "title": "Hallische Zeitung, statsdebtartikel",
+      "url": "https://opendata2.uni-halle.de/retrieve/15493244-c13e-4b5d-aeca-9423a3671b1a/16872167818560314.pdf",
+      "access": "søgeresultat læst, download blokeret af botkontrol",
+      "locator": "14. marts 1856",
+      "note": "Ingen gældstal importeret; HTML blev leveret i stedet for PDF."
+    },
+    "HANDBOOK": {
+      "id": "HANDBOOK",
+      "title": "Büsch (red.), Handbuch der preussischen Geschichte, bind 2 (1992)",
+      "url": "https://dokumen.pub/handbuch-der-preussischen-geschichte-das-19-jahrhundert-und-grosse-themen-der-geschichte-preussens-band-2-3110083221-9783110083224.html",
+      "access": "delvis OCR læst",
+      "locator": "s. 92 tabel 8; indholdsfortegnelse lokaliserer finans s. 123–128",
+      "note": "Finanstabellerne var ikke til stede i læst uddrag. Alternativ population 1825 = 12.377.799; ikke blandet med HGIS."
+    },
+    "THALER": {
+      "id": "THALER",
+      "title": "Universität Münster, Geldwirtschaft",
+      "url": "https://www.wiwi.uni-muenster.de/wisoge/sites/wisoge/files/downloads/skripte/Grundlegung_Moderne/s11_geldwirtschaft_folien.pdf",
+      "access": "læst",
+      "locator": "slide 15, PDF s. 4",
+      "note": "PDF og sidebillede læst: 14 taler pr. kølnsk mark; 16,704 g sølv."
+    },
+    "RIGSDALER": {
+      "id": "RIGSDALER",
+      "title": "Pengeforordningen 1813",
+      "url": "https://danmarkshistorien.lex.dk/Forordning_om_Forandring_i_Pengev%C3%A6senet,_5._januar_1813",
+      "access": "læst",
+      "locator": "§ 2",
+      "note": "18½ rigsbankdaler pr. kølnsk mark fint sølv. Modelpariteten er ikke sedlernes markedskurs."
+    },
+    "ZOLL": {
+      "id": "ZOLL",
+      "title": "DHM, Deutscher Zollverein 1850–1866",
+      "url": "https://www.dhm.de/lemo/kapitel/reaktionszeit/wirtschaft/zollverein",
+      "access": "læst",
+      "locator": "Første afsnit og Hannover",
+      "note": "Preussisk initiativ 1834; Hannover-aftale 1851 med indtræden senere."
+    },
+    "LONDON": {
+      "id": "LONDON",
+      "title": "Londontraktaten 8. maj 1852, traktattekst",
+      "url": "https://danmarkshistorien.lex.dk/Londontraktaten,_8._maj_1852",
+      "access": "læst",
+      "locator": "Traktatartikler og underskrifter",
+      "note": "Anerkendelse og arvefølge; ingen automatisk militær garanti."
+    },
+    "LONDON-DISTINCTION": {
+      "id": "LONDON-DISTINCTION",
+      "title": "Lex, MYTE: Var dansk brud på Londontraktaten årsag til krigen i 1864?",
+      "url": "https://lex.dk/MYTE_Var_dansk_brud_p%C3%A5_Londontraktaten_%C3%A5rsag_til_krigen_i_1864%3F",
+      "access": "læst",
+      "locator": "Londontraktaten 1852; aftalerne 1851–52",
+      "note": "Traktat og dansk-preussisk-østrigsk noteudveksling holdes adskilt."
+    },
+    "LONDON1850": {
+      "id": "LONDON1850",
+      "title": "Lex, Londonprotokollen",
+      "url": "https://lex.dk/Londonprotokollen",
+      "access": "læst",
+      "locator": "Hele artiklen",
+      "note": "Protokollen 1850 havde ikke Preussen som underskriver; ikke det samme som traktaten 1852."
+    },
+    "WAR": {
+      "id": "WAR",
+      "title": "Lex, de slesvigske krige",
+      "url": "https://lex.dk/de_slesvigske_krige",
+      "access": "læst",
+      "locator": "1848–51 og 1864",
+      "note": "Overblik; datoen 6. januar for ultimatum afviger fra specialstudiet og er markeret som kildestrid."
+    },
+    "ULTIMATUM": {
+      "id": "ULTIMATUM",
+      "title": "Vagn Dybdahl, Bismarck, Europa og Slesvig-Holsten 1862–1866",
+      "url": "https://img.kb.dk/tidsskriftdk/pdf/hto/hto_13rk_0005-PDF/hto_13rk_0005_78689.pdf",
+      "access": "læst i indekseret PDF-tekst, ikke billedkontrolleret",
+      "locator": "Afsnittet om januar 1864; APP IV nr. 332",
+      "note": "Aftale/ultimatum 16. januar; aftalen omtalt som tilbagedateret fra 17. januar. Eventvinduet bruger kun måned."
+    },
+    "WRANGEL": {
+      "id": "WRANGEL",
+      "title": "Deutsche Biographie, Friedrich von Wrangel",
+      "url": "https://www.deutsche-biographie.de/sfz86202.html",
+      "access": "læst",
+      "locator": "ADB 44 (1898), s. 202–213; NDB 28 (2024), tjenesteforløb",
+      "note": "Historisk person; titel Graf fra 1864 føres ikke tilbage til 1851."
+    },
+    "STOCKHAUSEN": {
+      "id": "STOCKHAUSEN",
+      "title": "Deutsche Biographie, August von Stockhausen",
+      "url": "https://www.deutsche-biographie.de/pnd13854638X.html",
+      "access": "læst",
+      "locator": "ADB-artikel Stockhausen; krigsminister til 31.12.1851",
+      "note": ""
+    },
+    "MUFFLING": {
+      "id": "MUFFLING",
+      "title": "Deutsche Biographie, Karl von Müffling",
+      "url": "https://www.deutsche-biographie.de/sfz65940.html?language=en",
+      "access": "læst",
+      "locator": "NDB/ADB, liv og tjeneste",
+      "note": "Død 16.1.1851; kun i 1825-filen."
+    },
+    "MANTEUFFEL": {
+      "id": "MANTEUFFEL",
+      "title": "Deutsche Biographie, Otto von Manteuffel",
+      "url": "https://www.deutsche-biographie.de/sfz57925.html",
+      "access": "læst",
+      "locator": "Olmütz og ministertid",
+      "note": "Statsminister, ikke generalen Edwin von Manteuffel."
+    },
+    "REGENT": {
+      "id": "REGENT",
+      "title": "DHM, Friedrich Wilhelm IV.",
+      "url": "https://www.dhm.de/lemo/biografie/friedrich-wilhelm-iv",
+      "access": "læst",
+      "locator": "1840 og 1850",
+      "note": ""
+    },
+    "REGENT1825": {
+      "id": "REGENT1825",
+      "title": "DHM, Chronik 1840",
+      "url": "https://www.dhm.de/lemo/jahreschronik/1840",
+      "access": "læst",
+      "locator": "7. juni, Friedrich Wilhelm III dør",
+      "note": ""
+    },
+    "WILHELM": {
+      "id": "WILHELM",
+      "title": "DHM, Wilhelm I.",
+      "url": "https://www.dhm.de/lemo/biografie/wilhelm-i",
+      "access": "læst",
+      "locator": "1849–1858, 1857–1858 og 1861",
+      "note": "Prins af Preussen i 1851; ikke konge ved scenariestart."
+    },
+    "KRUPP": {
+      "id": "KRUPP",
+      "title": "DHM, Alfred Krupp",
+      "url": "https://www.dhm.de/lemo/biografie/alfred-krupp",
+      "access": "læst",
+      "locator": "Tidlig industri og 1850erne",
+      "note": "Industrikontekst; ingen universel Krupp-bestykning i 1851."
+    },
+    "HGIS-ErzPRE-gesamt.htm": {
+      "id": "HGIS-ErzPRE-gesamt.htm",
+      "title": "HGIS Germany: ErzPRE-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bergbau/Eisenerz/Staaten/Html/ErzPRE-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/ErzPRE-gesamt.htm"
+    },
+    "HGIS-StKohPRE-gesamt.htm": {
+      "id": "HGIS-StKohPRE-gesamt.htm",
+      "title": "HGIS Germany: StKohPRE-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bergbau/Steinkohle/Staaten/Html/StKohPRE-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/StKohPRE-gesamt.htm"
+    },
+    "HGIS-BevPRE-gesamt.htm": {
+      "id": "HGIS-BevPRE-gesamt.htm",
+      "title": "HGIS Germany: BevPRE-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Gesamt/Html/BevPRE-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPRE-gesamt.htm"
+    },
+    "HGIS-BevPREProvBRB-gesamt.htm": {
+      "id": "HGIS-BevPREProvBRB-gesamt.htm",
+      "title": "HGIS Germany: BevPREProvBRB-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Provinzen/Pre/Html/BevPREProvBRB-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvBRB-gesamt.htm"
+    },
+    "HGIS-BevPREProvBRB-ohne-Berlin.htm": {
+      "id": "HGIS-BevPREProvBRB-ohne-Berlin.htm",
+      "title": "HGIS Germany: BevPREProvBRB-ohne-Berlin.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Provinzen/Pre/Html/BevPREProvBRB-ohne-Berlin.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvBRB-ohne-Berlin.htm"
+    },
+    "HGIS-BevPREProvJKB-gesamt.htm": {
+      "id": "HGIS-BevPREProvJKB-gesamt.htm",
+      "title": "HGIS Germany: BevPREProvJKB-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Provinzen/Pre/Html/BevPREProvJKB-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvJKB-gesamt.htm"
+    },
+    "HGIS-BevPREProvNRH-gesamt.htm": {
+      "id": "HGIS-BevPREProvNRH-gesamt.htm",
+      "title": "HGIS Germany: BevPREProvNRH-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Provinzen/Pre/Html/BevPREProvNRH-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvNRH-gesamt.htm"
+    },
+    "HGIS-BevPREProvOSP-gesamt.htm": {
+      "id": "HGIS-BevPREProvOSP-gesamt.htm",
+      "title": "HGIS Germany: BevPREProvOSP-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Provinzen/Pre/Html/BevPREProvOSP-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvOSP-gesamt.htm"
+    },
+    "HGIS-BevPREProvPOM-gesamt.htm": {
+      "id": "HGIS-BevPREProvPOM-gesamt.htm",
+      "title": "HGIS Germany: BevPREProvPOM-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Provinzen/Pre/Html/BevPREProvPOM-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvPOM-gesamt.htm"
+    },
+    "HGIS-BevPREProvPOS-gesamt.htm": {
+      "id": "HGIS-BevPREProvPOS-gesamt.htm",
+      "title": "HGIS Germany: BevPREProvPOS-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Provinzen/Pre/Html/BevPREProvPOS-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvPOS-gesamt.htm"
+    },
+    "HGIS-BevPREProvPRU-gesamt.htm": {
+      "id": "HGIS-BevPREProvPRU-gesamt.htm",
+      "title": "HGIS Germany: BevPREProvPRU-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Provinzen/Pre/Html/BevPREProvPRU-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvPRU-gesamt.htm"
+    },
+    "HGIS-BevPREProvRHP-gesamt.htm": {
+      "id": "HGIS-BevPREProvRHP-gesamt.htm",
+      "title": "HGIS Germany: BevPREProvRHP-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Provinzen/Pre/Html/BevPREProvRHP-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvRHP-gesamt.htm"
+    },
+    "HGIS-BevPREProvSAP-gesamt.htm": {
+      "id": "HGIS-BevPREProvSAP-gesamt.htm",
+      "title": "HGIS Germany: BevPREProvSAP-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Provinzen/Pre/Html/BevPREProvSAP-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvSAP-gesamt.htm"
+    },
+    "HGIS-BevPREProvSLE-gesamt.htm": {
+      "id": "HGIS-BevPREProvSLE-gesamt.htm",
+      "title": "HGIS Germany: BevPREProvSLE-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Provinzen/Pre/Html/BevPREProvSLE-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvSLE-gesamt.htm"
+    },
+    "HGIS-BevPREProvWEP-gesamt.htm": {
+      "id": "HGIS-BevPREProvWEP-gesamt.htm",
+      "title": "HGIS Germany: BevPREProvWEP-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Provinzen/Pre/Html/BevPREProvWEP-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvWEP-gesamt.htm"
+    },
+    "HGIS-BevPREProvWFA-gesamt.htm": {
+      "id": "HGIS-BevPREProvWFA-gesamt.htm",
+      "title": "HGIS Germany: BevPREProvWFA-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Provinzen/Pre/Html/BevPREProvWFA-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvWFA-gesamt.htm"
+    },
+    "HGIS-BevPRE-HZH.htm": {
+      "id": "HGIS-BevPRE-HZH.htm",
+      "title": "HGIS Germany: BevPRE-HZH.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPRE-HZH.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPRE-HZH.htm"
+    },
+    "HGIS-BevPRE-HZS.htm": {
+      "id": "HGIS-BevPRE-HZS.htm",
+      "title": "HGIS Germany: BevPRE-HZS.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPRE-HZS.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPRE-HZS.htm"
+    },
+    "HGIS-BevPREProvBRB-FFO.htm": {
+      "id": "HGIS-BevPREProvBRB-FFO.htm",
+      "title": "HGIS Germany: BevPREProvBRB-FFO.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvBRB-FFO.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvBRB-FFO.htm"
+    },
+    "HGIS-BevPREProvBRB-POT.htm": {
+      "id": "HGIS-BevPREProvBRB-POT.htm",
+      "title": "HGIS Germany: BevPREProvBRB-POT.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvBRB-POT.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvBRB-POT.htm"
+    },
+    "HGIS-BevPREProvBRB-POTuBER.htm": {
+      "id": "HGIS-BevPREProvBRB-POTuBER.htm",
+      "title": "HGIS Germany: BevPREProvBRB-POTuBER.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvBRB-POTuBER.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvBRB-POTuBER.htm"
+    },
+    "HGIS-BevPREProvOSP-ALL.htm": {
+      "id": "HGIS-BevPREProvOSP-ALL.htm",
+      "title": "HGIS Germany: BevPREProvOSP-ALL.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvOSP-ALL.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvOSP-ALL.htm"
+    },
+    "HGIS-BevPREProvOSP-GUM.htm": {
+      "id": "HGIS-BevPREProvOSP-GUM.htm",
+      "title": "HGIS Germany: BevPREProvOSP-GUM.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvOSP-GUM.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvOSP-GUM.htm"
+    },
+    "HGIS-BevPREProvOSP-KNB.htm": {
+      "id": "HGIS-BevPREProvOSP-KNB.htm",
+      "title": "HGIS Germany: BevPREProvOSP-KNB.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvOSP-KNB.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvOSP-KNB.htm"
+    },
+    "HGIS-BevPREProvPOM-KOS.htm": {
+      "id": "HGIS-BevPREProvPOM-KOS.htm",
+      "title": "HGIS Germany: BevPREProvPOM-KOS.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvPOM-KOS.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvPOM-KOS.htm"
+    },
+    "HGIS-BevPREProvPOM-STE.htm": {
+      "id": "HGIS-BevPREProvPOM-STE.htm",
+      "title": "HGIS Germany: BevPREProvPOM-STE.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvPOM-STE.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvPOM-STE.htm"
+    },
+    "HGIS-BevPREProvPOM-STR.htm": {
+      "id": "HGIS-BevPREProvPOM-STR.htm",
+      "title": "HGIS Germany: BevPREProvPOM-STR.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvPOM-STR.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvPOM-STR.htm"
+    },
+    "HGIS-BevPREProvPOS-BRO.htm": {
+      "id": "HGIS-BevPREProvPOS-BRO.htm",
+      "title": "HGIS Germany: BevPREProvPOS-BRO.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvPOS-BRO.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvPOS-BRO.htm"
+    },
+    "HGIS-BevPREProvPOS-POR.htm": {
+      "id": "HGIS-BevPREProvPOS-POR.htm",
+      "title": "HGIS Germany: BevPREProvPOS-POR.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvPOS-POR.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvPOS-POR.htm"
+    },
+    "HGIS-BevPREProvRHP-ACH.htm": {
+      "id": "HGIS-BevPREProvRHP-ACH.htm",
+      "title": "HGIS Germany: BevPREProvRHP-ACH.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvRHP-ACH.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvRHP-ACH.htm"
+    },
+    "HGIS-BevPREProvRHP-DUE.htm": {
+      "id": "HGIS-BevPREProvRHP-DUE.htm",
+      "title": "HGIS Germany: BevPREProvRHP-DUE.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvRHP-DUE.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvRHP-DUE.htm"
+    },
+    "HGIS-BevPREProvRHP-KLN.htm": {
+      "id": "HGIS-BevPREProvRHP-KLN.htm",
+      "title": "HGIS Germany: BevPREProvRHP-KLN.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvRHP-KLN.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvRHP-KLN.htm"
+    },
+    "HGIS-BevPREProvRHP-KLZ.htm": {
+      "id": "HGIS-BevPREProvRHP-KLZ.htm",
+      "title": "HGIS Germany: BevPREProvRHP-KLZ.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvRHP-KLZ.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvRHP-KLZ.htm"
+    },
+    "HGIS-BevPREProvRHP-TRI.htm": {
+      "id": "HGIS-BevPREProvRHP-TRI.htm",
+      "title": "HGIS Germany: BevPREProvRHP-TRI.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvRHP-TRI.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvRHP-TRI.htm"
+    },
+    "HGIS-BevPREProvSAP-EFU.htm": {
+      "id": "HGIS-BevPREProvSAP-EFU.htm",
+      "title": "HGIS Germany: BevPREProvSAP-EFU.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvSAP-EFU.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvSAP-EFU.htm"
+    },
+    "HGIS-BevPREProvSAP-MAG.htm": {
+      "id": "HGIS-BevPREProvSAP-MAG.htm",
+      "title": "HGIS Germany: BevPREProvSAP-MAG.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvSAP-MAG.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvSAP-MAG.htm"
+    },
+    "HGIS-BevPREProvSAP-MRB.htm": {
+      "id": "HGIS-BevPREProvSAP-MRB.htm",
+      "title": "HGIS Germany: BevPREProvSAP-MRB.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvSAP-MRB.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvSAP-MRB.htm"
+    },
+    "HGIS-BevPREProvSLE-BRE.htm": {
+      "id": "HGIS-BevPREProvSLE-BRE.htm",
+      "title": "HGIS Germany: BevPREProvSLE-BRE.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvSLE-BRE.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvSLE-BRE.htm"
+    },
+    "HGIS-BevPREProvSLE-LEG.htm": {
+      "id": "HGIS-BevPREProvSLE-LEG.htm",
+      "title": "HGIS Germany: BevPREProvSLE-LEG.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvSLE-LEG.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvSLE-LEG.htm"
+    },
+    "HGIS-BevPREProvSLE-OPP.htm": {
+      "id": "HGIS-BevPREProvSLE-OPP.htm",
+      "title": "HGIS Germany: BevPREProvSLE-OPP.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvSLE-OPP.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvSLE-OPP.htm"
+    },
+    "HGIS-BevPREProvWEP-DAN.htm": {
+      "id": "HGIS-BevPREProvWEP-DAN.htm",
+      "title": "HGIS Germany: BevPREProvWEP-DAN.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvWEP-DAN.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvWEP-DAN.htm"
+    },
+    "HGIS-BevPREProvWEP-MAW.htm": {
+      "id": "HGIS-BevPREProvWEP-MAW.htm",
+      "title": "HGIS Germany: BevPREProvWEP-MAW.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvWEP-MAW.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvWEP-MAW.htm"
+    },
+    "HGIS-BevPREProvWFA-ARB.htm": {
+      "id": "HGIS-BevPREProvWFA-ARB.htm",
+      "title": "HGIS Germany: BevPREProvWFA-ARB.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvWFA-ARB.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvWFA-ARB.htm"
+    },
+    "HGIS-BevPREProvWFA-MIN.htm": {
+      "id": "HGIS-BevPREProvWFA-MIN.htm",
+      "title": "HGIS Germany: BevPREProvWFA-MIN.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvWFA-MIN.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvWFA-MIN.htm"
+    },
+    "HGIS-BevPREProvWFA-MUE.htm": {
+      "id": "HGIS-BevPREProvWFA-MUE.htm",
+      "title": "HGIS Germany: BevPREProvWFA-MUE.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/RegBezirke/Preussen/Html/BevPREProvWFA-MUE.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvWFA-MUE.htm"
+    },
+    "HGIS-BevPREProvBRB-BER.htm": {
+      "id": "HGIS-BevPREProvBRB-BER.htm",
+      "title": "HGIS Germany: BevPREProvBRB-BER.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Bevoelkerung/Staedte/Html/BevPREProvBRB-BER.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/BevPREProvBRB-BER.htm"
+    },
+    "HGIS-EisPRE-gesamt.htm": {
+      "id": "HGIS-EisPRE-gesamt.htm",
+      "title": "HGIS Germany: EisPRE-gesamt.htm",
+      "url": "https://www.hgisg-ekompendium.ieg-mainz.de/Dokumentation_Datensaetze/Zeitreihen/Huettenindustrie/Roheisen/Staaten/Html/EisPRE-gesamt.htm",
+      "access": "læst",
+      "locator": "Årsrække; kolonner Einwohnerzahl/Förderung/Produktion, Wert, Quelle, Anmerkung",
+      "note": "Se lokalt tabelarkiv og original kildekode. Kilde 1 Köllmann/Kraus; 2 Volkszahl seit 1816; 7 Fischer/Fehrenbach; 5 ved råjern Hoffmann m.fl. Tabelnoter har forrang.",
+      "localFile": "Research/EisPRE-gesamt.htm"
+    }
+  }
+}

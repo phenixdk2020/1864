@@ -10,6 +10,7 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Dom/JsonObject.h"
+#include "Campaign1851Json.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/Texture2D.h"
 #include "IImageWrapper.h"
@@ -214,8 +215,16 @@ bool ACampaign1851Map::LoadData()
 				const TSharedPtr<FJsonObject> MapRow = MapValue->AsObject();
 				const TSharedPtr<FJsonValue>* Found = PopulationRows->FindByPredicate([&](const TSharedPtr<FJsonValue>& Entry)
 				{
-					return bAmt ? Entry->AsObject()->GetNumberField(TEXT("id")) == MapRow->GetNumberField(TEXT("id"))
-						: Entry->AsObject()->GetStringField(TEXT("name")) == MapRow->GetStringField(TEXT("name"));
+					const TSharedPtr<FJsonObject> ImportPopulationEntry = Campaign1851Json::Row(Entry);
+					if (bAmt)
+					{
+						double ImportPopulationId = 0;
+						return ImportPopulationEntry->TryGetNumberField(TEXT("id"), ImportPopulationId)
+							&& ImportPopulationId == MapRow->GetNumberField(TEXT("id"));
+					}
+					FString ImportPopulationName;
+					return ImportPopulationEntry->TryGetStringField(TEXT("name"), ImportPopulationName)
+						&& ImportPopulationName == MapRow->GetStringField(TEXT("name"));
 				});
 				if (!Found) { UE_LOG(LogTemp, Error, TEXT("CAMPAIGN-1825|ufuldstændige befolkningsdata")); return false; }
 				for (const TCHAR* Field : { TEXT("pop"), TEXT("population"), TEXT("urban"), TEXT("rural") })

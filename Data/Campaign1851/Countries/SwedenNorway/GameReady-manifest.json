@@ -1,0 +1,158 @@
+{
+  "note": "Overlays, kræver integration. National OOB og nabohær er alternative visninger af samme mænd; må ikke spawnes sammen. Ingen navy/AI-loader eller kortbinær opfundet.",
+  "exports": {
+    "SE/Army_1825.json": {
+      "schema": "Army_1825.json",
+      "origin": "SE/Army_1825.json"
+    },
+    "SE/Supply_1825.json": {
+      "schema": "Army_1825.json",
+      "origin": "SE/Army_1825.json"
+    },
+    "SE/Economy_1825.json": {
+      "schema": "Economy_1825.json",
+      "origin": "SE/Economy_1825.json"
+    },
+    "SE/Army_Neighbours_1825.json": {
+      "schema": "Army_Neighbours_1825.json",
+      "origin": "SE/Army_Neighbours_1825.json"
+    },
+    "SE/Ministers_1825.json": {
+      "schema": "Ministers_1825.json",
+      "origin": "SE/Ministers_1825.json"
+    },
+    "NO/Army_1825.json": {
+      "schema": "Army_1825.json",
+      "origin": "NO/Army_1825.json"
+    },
+    "NO/Supply_1825.json": {
+      "schema": "Army_1825.json",
+      "origin": "NO/Army_1825.json"
+    },
+    "NO/Economy_1825.json": {
+      "schema": "Economy_1825.json",
+      "origin": "NO/Economy_1825.json"
+    },
+    "NO/Army_Neighbours_1825.json": {
+      "schema": "Army_Neighbours_1825.json",
+      "origin": "NO/Army_Neighbours_1825.json"
+    },
+    "NO/Ministers_1825.json": {
+      "schema": "Ministers_1825.json",
+      "origin": "NO/Ministers_1825.json"
+    },
+    "Nations_1825.json": {
+      "schema": "Nations_1825.json",
+      "origin": "Nations_1825.json"
+    },
+    "Population_1825.json": {
+      "schema": "Population_1825.json",
+      "origin": "Population_1825.json"
+    },
+    "cities_neighbours_1825.json": {
+      "schema": "cities_neighbours_1825.json",
+      "origin": "cities_neighbours_1825.json"
+    },
+    "Officers_1825.json": {
+      "schema": "Officers_1825.json",
+      "origin": "Officers_1825.json"
+    },
+    "SE/Army1851.json": {
+      "schema": "Army1851.json",
+      "origin": "SE/Army1851.json"
+    },
+    "SE/Supply_1851.json": {
+      "schema": "Army_1825.json",
+      "origin": "SE/Army1851.json"
+    },
+    "SE/Economy_1851.json": {
+      "schema": "Economy_1825.json",
+      "origin": "SE/Economy_1851.json"
+    },
+    "SE/Army_Neighbours_1851.json": {
+      "schema": "Army_Neighbours_1851.json",
+      "origin": "SE/Army_Neighbours_1851.json"
+    },
+    "SE/Ministers_1851.json": {
+      "schema": "Ministers_1825.json",
+      "origin": "SE/Ministers_1851.json"
+    },
+    "NO/Army1851.json": {
+      "schema": "Army1851.json",
+      "origin": "NO/Army1851.json"
+    },
+    "NO/Supply_1851.json": {
+      "schema": "Army_1825.json",
+      "origin": "NO/Army1851.json"
+    },
+    "NO/Economy_1851.json": {
+      "schema": "Economy_1825.json",
+      "origin": "NO/Economy_1851.json"
+    },
+    "NO/Army_Neighbours_1851.json": {
+      "schema": "Army_Neighbours_1851.json",
+      "origin": "NO/Army_Neighbours_1851.json"
+    },
+    "NO/Ministers_1851.json": {
+      "schema": "Ministers_1825.json",
+      "origin": "NO/Ministers_1851.json"
+    },
+    "Nations1851.json": {
+      "schema": "Nations1851.json",
+      "origin": "Nations1851.json"
+    },
+    "Population_1851.json": {
+      "schema": "Population_1825.json",
+      "origin": "Population_1851.json"
+    },
+    "cities_neighbours_1851.json": {
+      "schema": "cities_neighbours_1851.json",
+      "origin": "cities_neighbours_1851.json"
+    },
+    "Officers1851.json": {
+      "schema": "Officers1851.json",
+      "origin": "Officers1851.json"
+    },
+    "Trade_1851.json": {
+      "schema": "Trade_1851.json",
+      "origin": "Trade_1851.json"
+    },
+    "Trade_1825.json": {
+      "schema": "Trade_1851.json",
+      "origin": "Trade_1825.json"
+    }
+  },
+  "schemaSource": "../Research/Runde7/Skemaeksempler.json",
+  "hashes": {
+    "SE/Army_1825.json": "d6ca0c883e653bd8cbe6c4e0b853783c6f2a451b070e7f433062005a4575c87d",
+    "SE/Supply_1825.json": "cfa2f8517a1f48875e4caaaba2379f1f4a484f5ab6f8f548482b339486cbf5cf",
+    "SE/Economy_1825.json": "d6f6da474ccc61060527178691dd3d1089722a99f46bcf77d8777813e5eb614d",
+    "SE/Army_Neighbours_1825.json": "23bec0c3db7bb05aed76be693c3be30cbbb9e683d27a6e406c7aff7af23a7fba",
+    "SE/Ministers_1825.json": "cba69ed26e50d7794414c1bda221f8cf73520950a628da9ca069e7f65cd79bca",
+    "NO/Army_1825.json": "b456fcb763bc4955821e191d4391a6f9aa0bca05c0310c2a2c90499f99e53a88",
+    "NO/Supply_1825.json": "988ed8401e5a847ed34281fc87551b69ce3f02f0444dcf6d074470c1b346bfc5",
+    "NO/Economy_1825.json": "8ef50d8cef5cc0378cd3f77ebd556633db8c95db1c6f443c5816fc2752306641",
+    "NO/Army_Neighbours_1825.json": "04aa61d32d09efe873366c37f1ee0ee28cbb2a3b8dbb769ead7783fd21fe412d",
+    "NO/Ministers_1825.json": "f0138e2c6ed2d60ef1c2a9e2771759a661b51c425b09a2455f7e68071fb050cd",
+    "Nations_1825.json": "5b505a7637040430b3a036108fd4d8bdca97bd35b9f113e0edec0fcb6662a801",
+    "Population_1825.json": "eea9dc9ba35ba1140c509bd9bc9c67af84948bc5199c052a7598d18d3ac57b30",
+    "cities_neighbours_1825.json": "fe42052e1893f5f5000b2d93771a1fc32e199b25b001b5c8ee4cbc2c4b223544",
+    "Officers_1825.json": "81aebe71662ed289a2f81e2874bdc3c7620c68b51f0c57d356a9592a32cff11b",
+    "SE/Army1851.json": "29a13f44aeb427d3611782bed9681eb02996c1d41237220f9329644bcbcac2be",
+    "SE/Supply_1851.json": "020bae137bc74db4209c159530366087c65a43f7005234bbfed509c4b9b2dc83",
+    "SE/Economy_1851.json": "0523d503b0bc6d55e1b4b786319479e426676851d716ce2c88089a5048413055",
+    "SE/Army_Neighbours_1851.json": "d77ee23dabbfa2e8783877a5fc2e3be268eaed21e096cc6bd6ded546917a4f8a",
+    "SE/Ministers_1851.json": "95214b17108b1112f8821b1098066bc39197cf3b16ac70c0a2895a29a8a8b4b8",
+    "NO/Army1851.json": "8b315472b86824f7f6c4b9af9dce7eb49eb2b5de0ec559e82b83f867cc125c44",
+    "NO/Supply_1851.json": "aeaef709df00f7a84cd63c03c6b23f8d3d098da18576751718815afa9d376f76",
+    "NO/Economy_1851.json": "389a6af9b73c77983edde52215cc1152c711e7f1d8ba7cbc1ca15f794cb88697",
+    "NO/Army_Neighbours_1851.json": "a82c22ff7a435c1356ece6ea013e4392bd2496dc7eb2dd71945e6d39cc28e942",
+    "NO/Ministers_1851.json": "a228aaa9d24edf880389d64b5a5c211e44209d692b753fb6cc2f0f3e27d8ece2",
+    "Nations1851.json": "ce8f3db0a687631d4fcb839eaf9de3dec19c7bd11551b987c1a424f052403784",
+    "Population_1851.json": "2957a640c66dec9ac0648230a88a7340445e9180e538b7c0bae709c4913ee95c",
+    "cities_neighbours_1851.json": "f990eeb30f01fa7eb2b7dfcf2a6ac1f56026b3e375a180dce14a30decea7cb9a",
+    "Officers1851.json": "b8b594aa7fa374ec302df6bab326d914a390239dde51f5b7664eb41ed1135379",
+    "Trade_1851.json": "13c631e5025857e74f410d88ebb18540ba36a5c1b4e5f2183a1d3194aca94bc3",
+    "Trade_1825.json": "e8537adc6b2e2a9f874bbc4b6a4d7ce9f3d86d19d16ebba483578104d2c276be"
+  }
+}

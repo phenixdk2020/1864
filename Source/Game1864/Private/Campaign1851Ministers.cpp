@@ -6,6 +6,7 @@
 
 #include "Campaign1851Map.h"
 #include "Dom/JsonObject.h"
+#include "Campaign1851Json.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
@@ -58,19 +59,23 @@ bool ACampaign1851Map::LoadScenarioMinisters()
 		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN|1825|ministers|cannot load Ministers_1825.json"));
 		return false;
 	}
-	const TArray<TSharedPtr<FJsonValue>>& Portfolios = Json->GetArrayField(TEXT("portfolios"));
+	const TArray<TSharedPtr<FJsonValue>>& Portfolios = Campaign1851Json::Array(*Json, TEXT("portfolios"));
 	if (Portfolios.Num() != int32(ECampaign1851Portfolio::Count)) { return false; }
 	for (int32 p = 0; p < Portfolios.Num(); ++p)
 	{
-		for (const TSharedPtr<FJsonValue>& Value : Portfolios[p]->AsObject()->GetArrayField(TEXT("candidates")))
+		for (const TSharedPtr<FJsonValue>& Value : Campaign1851Json::Array(*Campaign1851Json::Row(Portfolios[p]), TEXT("candidates")))
 		{
-			const TSharedPtr<FJsonObject> Entry = Value->AsObject();
+			const TSharedPtr<FJsonObject> Entry = Campaign1851Json::Row(Value);
 			FCampaign1851Minister M;
-			M.Name = Entry->GetStringField(TEXT("name"));
+			if (!Entry->TryGetStringField(TEXT("name"), M.Name) || M.Name.IsEmpty()) { continue; }
+			double ImportMinisterSkill = 0, ImportMinisterThrift = 0, ImportMinisterCaution = 0;
+			if (!Entry->TryGetNumberField(TEXT("skill"), ImportMinisterSkill)
+				|| !Entry->TryGetNumberField(TEXT("thrift"), ImportMinisterThrift)
+				|| !Entry->TryGetNumberField(TEXT("caution"), ImportMinisterCaution)) { continue; }
 			M.Line = ECampaign1851Current::Helstat;
-			M.Skill = uint8(FMath::Clamp(FMath::RoundToInt(Entry->GetNumberField(TEXT("skill")) / 10.0), 1, 10));
-			M.Thrift = uint8(FMath::Clamp(FMath::RoundToInt(Entry->GetNumberField(TEXT("thrift")) / 10.0), 1, 10));
-			M.Caution = uint8(FMath::Clamp(FMath::RoundToInt(Entry->GetNumberField(TEXT("caution")) / 10.0), 1, 10));
+			M.Skill = uint8(FMath::Clamp(FMath::RoundToInt(ImportMinisterSkill / 10.0), 1, 10));
+			M.Thrift = uint8(FMath::Clamp(FMath::RoundToInt(ImportMinisterThrift / 10.0), 1, 10));
+			M.Caution = uint8(FMath::Clamp(FMath::RoundToInt(ImportMinisterCaution / 10.0), 1, 10));
 			ScenarioMinisterPools[p].Add(M);
 		}
 		if (ScenarioMinisterPools[p].IsEmpty()) { return false; }

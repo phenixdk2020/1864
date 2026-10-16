@@ -51,9 +51,9 @@
       "owner": "SE",
       "region": "Skåne",
       "population": {
-        "1825": 7000,
-        "1851": 13000,
-        "1864": 20000
+        "1825": 7597,
+        "1851": 13378,
+        "1864": 21255
       },
       "harbour": true,
       "fortress": true,
@@ -61,9 +61,11 @@
       "garrison": 400,
       "guns": 8,
       "railwayYear": 1856,
-      "pop": 7000,
+      "pop": 7597,
       "railway": false
-    },
+    ,
+"onMap": true
+},
     {
       "name": "Helsingborg",
       "lat": 56.046,
@@ -71,18 +73,20 @@
       "owner": "SE",
       "region": "Skåne",
       "population": {
-        "1825": 2500,
-        "1851": 4500,
-        "1864": 6500
+        "1825": 2660,
+        "1851": 4199,
+        "1864": 6246
       },
       "harbour": true,
       "fortress": false,
-      "garrison": 150,
+      "garrison": 40,
       "guns": 0,
       "railwayYear": 1865,
-      "pop": 2500,
+      "pop": 2660,
       "railway": false
-    },
+    ,
+"onMap": true
+},
     {
       "name": "Landskrona",
       "lat": 55.87,
@@ -90,9 +94,9 @@
       "owner": "SE",
       "region": "Skåne",
       "population": {
-        "1825": 3200,
-        "1851": 4000,
-        "1864": 6500
+        "1825": 3504,
+        "1851": 4217,
+        "1864": 6444
       },
       "harbour": true,
       "fortress": true,
@@ -100,9 +104,11 @@
       "garrison": 400,
       "guns": 12,
       "railwayYear": 1865,
-      "pop": 3200,
+      "pop": 3504,
       "railway": false
-    },
+    ,
+"onMap": true
+},
     {
       "name": "Lund",
       "lat": 55.704,
@@ -110,18 +116,20 @@
       "owner": "SE",
       "region": "Skåne",
       "population": {
-        "1825": 4500,
-        "1851": 7000,
-        "1864": 10000
+        "1825": 3847,
+        "1851": 6794,
+        "1864": 9208
       },
       "harbour": false,
       "fortress": false,
-      "garrison": 100,
+      "garrison": 40,
       "guns": 0,
       "railwayYear": 1856,
-      "pop": 4500,
+      "pop": 3847,
       "railway": false
-    },
+    ,
+"onMap": true
+},
     {
       "name": "Ystad",
       "lat": 55.429,
@@ -129,18 +137,20 @@
       "owner": "SE",
       "region": "Skåne",
       "population": {
-        "1825": 3500,
-        "1851": 4500,
-        "1864": 6500
+        "1825": 3698,
+        "1851": 5101,
+        "1864": 5627
       },
       "harbour": true,
       "fortress": false,
-      "garrison": 150,
+      "garrison": 40,
       "guns": 0,
       "railwayYear": 1874,
-      "pop": 3500,
+      "pop": 3698,
       "railway": false
-    },
+    ,
+"onMap": true
+},
     {
       "name": "Trelleborg",
       "lat": 55.376,
@@ -154,12 +164,14 @@
       },
       "harbour": true,
       "fortress": false,
-      "garrison": 50,
+      "garrison": 40,
       "guns": 0,
       "railwayYear": 1875,
       "pop": 1000,
       "railway": false
-    },
+    ,
+"onMap": true
+},
     {
       "name": "Kristianstad",
       "lat": 56.029,
@@ -167,9 +179,9 @@
       "owner": "SE",
       "region": "Skåne",
       "population": {
-        "1825": 4500,
-        "1851": 5500,
-        "1864": 7500
+        "1825": 3967,
+        "1851": 5455,
+        "1864": 6513
       },
       "harbour": false,
       "fortress": true,
@@ -177,9 +189,11 @@
       "garrison": 650,
       "guns": 12,
       "railwayYear": 1865,
-      "pop": 4500,
+      "pop": 3967,
       "railway": false
-    },
+    ,
+"onMap": true
+},
     {
       "name": "Karlskrona",
       "lat": 56.161,
@@ -187,9 +201,9 @@
       "owner": "SE",
       "region": "Blekinge",
       "population": {
-        "1825": 11000,
-        "1851": 12000,
-        "1864": 17000
+        "1825": 11621,
+        "1851": 14157,
+        "1864": 15740
       },
       "harbour": true,
       "fortress": true,
@@ -197,9 +211,11 @@
       "garrison": 1200,
       "guns": 36,
       "railwayYear": 1874,
-      "pop": 11000,
+      "pop": 11621,
       "railway": false
-    },
+    ,
+"onMap": true
+},
     {
       "name": "Halmstad",
       "lat": 56.674,
@@ -207,18 +223,20 @@
       "owner": "SE",
       "region": "Halland",
       "population": {
-        "1825": 2300,
-        "1851": 3500,
-        "1864": 5000
+        "1825": 1735,
+        "1851": 2820,
+        "1864": 4572
       },
       "harbour": true,
       "fortress": false,
-      "garrison": 150,
+      "garrison": 40,
       "guns": 0,
       "railwayYear": 1877,
-      "pop": 2300,
+      "pop": 1735,
       "railway": false
-    },
+    ,
+"onMap": true
+},
     {
       "name": "Göteborg",
       "lat": 57.707,
@@ -226,19 +244,21 @@
       "owner": "SE",
       "region": "Göteborg/Bohuslän",
       "population": {
-        "1825": 19000,
-        "1851": 26000,
-        "1864": 43000
+        "1825": 18551,
+        "1851": 26630,
+        "1864": 43778
       },
       "harbour": true,
       "fortress": true,
       "fortName": "Nya Älvsborg",
-      "garrison": 700,
+      "garrison": 500,
       "guns": 20,
       "railwayYear": 1856,
-      "pop": 19000,
+      "pop": 18551,
       "railway": false
-    },
+    ,
+"onMap": true
+},
     {
       "name": "Rostock",
       "lat": 54.092,
@@ -312,7 +332,25 @@
         "1825": 16000,
         "1851": 20000,
         "1864": 24000
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
       "harbour": true,
       "fortress": true,
       "fortName": "Stralsunds fæstning",
@@ -323,7 +361,60 @@
       "populationStatus": "estimated",
       "pop": 16000,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Stettin",
       "lat": 53.428,
@@ -334,7 +425,25 @@
         "1825": 26000,
         "1851": 48000,
         "1864": 68000
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
       "harbour": true,
       "fortress": true,
       "fortName": "Stettins fæstning",
@@ -345,7 +454,60 @@
       "populationStatus": "estimated",
       "pop": 26000,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Bremen",
       "lat": 53.079,
@@ -372,19 +534,21 @@
       "owner": "SE",
       "region": "Halland",
       "population": {
-        "1825": 1600,
-        "1851": 2000,
-        "1864": 2800
+        "1825": 1626,
+        "1851": 2142,
+        "1864": 2447
       },
       "harbour": true,
       "fortress": true,
       "fortName": "Varbergs fæstning (depot/fængsel)",
-      "garrison": 100,
-      "guns": 4,
+      "garrison": 80,
+      "guns": 0,
       "railwayYear": 1880,
-      "pop": 1600,
+      "pop": 1626,
       "railway": false
-    },
+    ,
+"onMap": true
+},
     {
       "name": "Greifswald",
       "lat": 54.096,
@@ -395,7 +559,25 @@
         "1825": 8000,
         "1851": 12500,
         "1864": 16500
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
       "harbour": true,
       "fortress": false,
       "garrison": 400,
@@ -405,7 +587,60 @@
       "populationStatus": "estimated",
       "pop": 8000,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Bergen på Rügen",
       "lat": 54.419,
@@ -416,7 +651,25 @@
         "1825": 2500,
         "1851": 3500,
         "1864": 4000
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
       "harbour": false,
       "fortress": false,
       "garrison": 100,
@@ -426,7 +679,60 @@
       "populationStatus": "estimated",
       "pop": 2500,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Stade",
       "lat": 53.6,
@@ -1139,7 +1445,25 @@
       "population": {
         "1825": 6000,
         "1851": 9500
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": true,
       "fortress": false,
@@ -1149,7 +1473,60 @@
       "district": "PR-anklam",
       "pop": 6000,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Swinemünde",
       "lon": 14.251,
@@ -1159,7 +1536,25 @@
       "population": {
         "1825": 3500,
         "1851": 6500
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": true,
       "fortress": true,
@@ -1170,7 +1565,60 @@
       "fortName": "Swinemünde fæstning",
       "pop": 3500,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Stargard",
       "lon": 15.041,
@@ -1180,7 +1628,25 @@
       "population": {
         "1825": 8500,
         "1851": 14000
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": false,
       "fortress": false,
@@ -1190,7 +1656,60 @@
       "district": "PR-saatzig",
       "pop": 8500,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Pasewalk",
       "lon": 13.99,
@@ -1200,7 +1719,25 @@
       "population": {
         "1825": 4000,
         "1851": 6000
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": false,
       "fortress": false,
@@ -1210,7 +1747,60 @@
       "district": "PR-ueckermuende",
       "pop": 4000,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Demmin",
       "lon": 13.041,
@@ -1220,7 +1810,25 @@
       "population": {
         "1825": 5000,
         "1851": 7500
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": false,
       "fortress": false,
@@ -1230,7 +1838,60 @@
       "district": "PR-demmin",
       "pop": 5000,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Ueckermünde",
       "lon": 14.045,
@@ -1240,7 +1901,25 @@
       "population": {
         "1825": 2800,
         "1851": 4500
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": true,
       "fortress": false,
@@ -1250,7 +1929,60 @@
       "district": "PR-ueckermuende",
       "pop": 2800,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Wolgast",
       "lon": 13.774,
@@ -1260,7 +1992,25 @@
       "population": {
         "1825": 5000,
         "1851": 6500
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": true,
       "fortress": false,
@@ -1270,7 +2020,60 @@
       "district": "PR-greifswald",
       "pop": 5000,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Barth",
       "lon": 12.727,
@@ -1280,7 +2083,25 @@
       "population": {
         "1825": 4000,
         "1851": 5500
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": true,
       "fortress": false,
@@ -1290,7 +2111,60 @@
       "district": "PR-franzburg",
       "pop": 4000,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Grimmen",
       "lon": 13.041,
@@ -1300,7 +2174,25 @@
       "population": {
         "1825": 3000,
         "1851": 4000
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": false,
       "fortress": false,
@@ -1310,7 +2202,60 @@
       "district": "PR-franzburg",
       "pop": 3000,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Tribsees",
       "lon": 12.757,
@@ -1320,7 +2265,25 @@
       "population": {
         "1825": 2200,
         "1851": 3000
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": false,
       "fortress": false,
@@ -1330,7 +2293,60 @@
       "district": "PR-franzburg",
       "pop": 2200,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Franzburg",
       "lon": 12.884,
@@ -1340,7 +2356,25 @@
       "population": {
         "1825": 1400,
         "1851": 1800
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": false,
       "fortress": false,
@@ -1350,7 +2384,60 @@
       "district": "PR-franzburg",
       "pop": 1400,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Putbus",
       "lon": 13.471,
@@ -1360,7 +2447,25 @@
       "population": {
         "1825": 800,
         "1851": 1500
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": false,
       "fortress": false,
@@ -1370,7 +2475,60 @@
       "district": "PR-ruegen",
       "pop": 800,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Garz på Rügen",
       "lon": 13.351,
@@ -1380,7 +2538,25 @@
       "population": {
         "1825": 1500,
         "1851": 2000
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": false,
       "fortress": false,
@@ -1390,7 +2566,60 @@
       "district": "PR-ruegen",
       "pop": 1500,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Sassnitz",
       "lon": 13.644,
@@ -1400,7 +2629,25 @@
       "population": {
         "1825": 300,
         "1851": 500
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": true,
       "fortress": false,
@@ -1410,7 +2657,60 @@
       "district": "PR-ruegen",
       "pop": 300,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Gartz",
       "lon": 14.387,
@@ -1420,7 +2720,25 @@
       "population": {
         "1825": 3000,
         "1851": 4200
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": false,
       "fortress": false,
@@ -1430,7 +2748,60 @@
       "district": "PR-randow",
       "pop": 3000,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Prenzlau",
       "lon": 13.86,
@@ -1440,7 +2811,25 @@
       "population": {
         "1825": 8000,
         "1851": 12000
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": false,
       "fortress": false,
@@ -1450,7 +2839,60 @@
       "district": "PR-prenzlau",
       "pop": 8000,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Schwedt",
       "lon": 14.284,
@@ -1460,7 +2902,25 @@
       "population": {
         "1825": 5500,
         "1851": 8500
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": true,
       "fortress": false,
@@ -1470,7 +2930,60 @@
       "district": "PR-angermuende",
       "pop": 5500,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Bergedorf",
       "lon": 10.211,
@@ -1540,7 +3053,25 @@
       "population": {
         "1825": 7000,
         "1851": 11000
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": true,
       "fortress": true,
@@ -1551,7 +3082,60 @@
       "fortName": "Kolberg fæstning",
       "pop": 7000,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Angermünde",
       "lon": 13.998,
@@ -1561,7 +3145,25 @@
       "population": {
         "1825": 3000,
         "1851": 5000
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": false,
       "fortress": false,
@@ -1571,7 +3173,60 @@
       "district": "PR-angermuende",
       "pop": 3000,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Passow",
       "lon": 14.116,
@@ -1581,7 +3236,25 @@
       "population": {
         "1825": 500,
         "1851": 800
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": false,
       "fortress": false,
@@ -1591,7 +3264,60 @@
       "district": "PR-angermuende",
       "pop": 500,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Tantow",
       "lon": 14.348,
@@ -1601,7 +3327,25 @@
       "population": {
         "1825": 400,
         "1851": 700
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1864": {
+      "status": "skøn",
+      "source": "UNKNOWN",
+      "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+    }
+  }
+},
       "populationStatus": "estimated",
       "harbour": false,
       "fortress": false,
@@ -1611,7 +3355,60 @@
       "district": "PR-angermuende",
       "pop": 400,
       "railway": false
+    ,
+"historicalPopulation": {
+    "fieldStatus": {
+      "1825": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1851": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "1864": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "note": "Kortets eksisterende tal er arvede spilvalg. Intet verificeret folketællingsanker; ingen opdigtet historisk garnison.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "garrison": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "guns": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "railwayYear": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "pop": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "name": "Lauenburg",
       "lon": 10.555,
@@ -1650,7 +3447,122 @@
       "pop": 400,
       "railway": false
     }
-  ],
+  ,
+{
+  "name": "Karlshamn",
+  "owner": "SE",
+  "lat": 56.171,
+  "lon": 14.863,
+  "population": {
+    "1825": 3779,
+    "1851": 5099,
+    "1864": 5603
+  },
+  "harbour": false,
+  "fortress": false,
+  "garrison": 40,
+  "guns": 0,
+  "railwayYear": 9999,
+  "pop": 3779,
+  "railway": false,
+  "onMap": true
+},
+{
+  "name": "Jönköping",
+  "owner": "SE",
+  "lat": 57.783,
+  "lon": 14.162,
+  "population": {
+    "1825": 3845,
+    "1851": 6080,
+    "1864": 8646
+  },
+  "harbour": false,
+  "fortress": false,
+  "garrison": 40,
+  "guns": 0,
+  "railwayYear": 9999,
+  "pop": 3845,
+  "railway": false,
+  "onMap": true
+},
+{
+  "name": "Växjö",
+  "owner": "SE",
+  "lat": 56.879,
+  "lon": 14.805,
+  "population": {
+    "1825": 1769,
+    "1851": 2693,
+    "1864": 3403
+  },
+  "harbour": false,
+  "fortress": false,
+  "garrison": 40,
+  "guns": 0,
+  "railwayYear": 9999,
+  "pop": 1769,
+  "railway": false,
+  "onMap": true
+},
+{
+  "name": "Borås",
+  "owner": "SE",
+  "lat": 57.721,
+  "lon": 12.94,
+  "population": {
+    "1825": 2116,
+    "1851": 2746,
+    "1864": 3080
+  },
+  "harbour": false,
+  "fortress": false,
+  "garrison": 40,
+  "guns": 0,
+  "railwayYear": 9999,
+  "pop": 2116,
+  "railway": false,
+  "onMap": true
+},
+{
+  "name": "Marstrand",
+  "owner": "SE",
+  "lat": 57.887,
+  "lon": 11.582,
+  "population": {
+    "1825": 1042,
+    "1851": 1017,
+    "1864": 1170
+  },
+  "harbour": false,
+  "fortress": false,
+  "garrison": 250,
+  "guns": 24,
+  "railwayYear": 9999,
+  "pop": 1042,
+  "railway": false,
+  "onMap": true
+},
+{
+  "name": "Eksjö",
+  "owner": "SE",
+  "lat": 57.667,
+  "lon": 14.97,
+  "population": {
+    "1825": 1322,
+    "1851": 1868,
+    "1864": 2049
+  },
+  "harbour": false,
+  "fortress": false,
+  "garrison": 40,
+  "guns": 0,
+  "railwayYear": 9999,
+  "pop": 1322,
+  "railway": false,
+  "onMap": true
+}
+],
   "links": [
     {
       "a": "Malmø",
@@ -6335,7 +8247,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Stralsund",
       "b": "Greifswald",
@@ -6485,7 +8410,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Greifswald",
       "b": "Stettin",
@@ -6963,7 +8901,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Stralsund",
       "b": "Bergen på Rügen",
@@ -6981,7 +8932,20 @@
       "ferryKm": 25.359,
       "ferry": "Strelasund",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Hamborg",
       "b": "Lübeck",
@@ -9519,7 +11483,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Barth",
       "b": "Stralsund",
@@ -9673,7 +11650,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Lübeck",
       "b": "Rehna",
@@ -11143,7 +13133,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Anklam",
       "b": "Ueckermünde",
@@ -11301,7 +13304,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Ueckermünde",
       "b": "Stettin",
@@ -11523,7 +13539,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Hamborg",
       "b": "Bergedorf",
@@ -15449,7 +17478,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Grimmen",
       "b": "Demmin",
@@ -15599,7 +17641,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Demmin",
       "b": "Neubrandenburg",
@@ -15837,7 +17892,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Stralsund",
       "b": "Franzburg",
@@ -15939,7 +18007,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Franzburg",
       "b": "Tribsees",
@@ -16021,7 +18102,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Tribsees",
       "b": "Demmin",
@@ -16155,7 +18249,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Greifswald",
       "b": "Anklam",
@@ -16325,7 +18432,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Anklam",
       "b": "Pasewalk",
@@ -16559,7 +18679,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Pasewalk",
       "b": "Prenzlau",
@@ -16701,7 +18834,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Prenzlau",
       "b": "Schwedt",
@@ -16891,7 +19037,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Schwedt",
       "b": "Gartz",
@@ -17005,7 +19164,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Gartz",
       "b": "Stettin",
@@ -17171,7 +19343,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Stettin",
       "b": "Stargard",
@@ -17377,7 +19562,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Stargard",
       "b": "Kolberg",
@@ -17939,7 +20137,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Angermünde",
       "b": "Passow",
@@ -18045,7 +20256,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Passow",
       "b": "Tantow",
@@ -18151,7 +20375,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Tantow",
       "b": "Stettin",
@@ -18277,7 +20514,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Angermünde",
       "b": "Schwedt",
@@ -18403,7 +20653,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Prenzlau",
       "b": "Angermünde",
@@ -18613,7 +20876,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Greifswald",
       "b": "Wolgast",
@@ -18779,7 +21055,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Bergen på Rügen",
       "b": "Putbus",
@@ -18841,7 +21130,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Putbus",
       "b": "Garz på Rügen",
@@ -18907,7 +21209,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Bergen på Rügen",
       "b": "Sassnitz",
@@ -19001,7 +21316,20 @@
       "ferryKm": 0,
       "ferry": "",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Harburg",
       "b": "Lüneburg",
@@ -19973,7 +22301,20 @@
       "ferryKm": 35.018,
       "ferry": "Peenestrom / Usedom",
       "chaussee": false
+    ,
+"fieldStatus": {
+    "roadKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "ferryKm": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "a": "Bergedorf",
       "b": "Büchen",
@@ -20516,7 +22857,35 @@
       ],
       "lat": 53.65,
       "lon": 14.3
+    ,
+"fieldStatus": {
+    "colour/0": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "colour/1": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "colour/2": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "MEC",
       "name": "Mecklenburg",
@@ -20908,20 +23277,38 @@
       "crown": "SE",
       "lat": 59.913,
       "lon": 10.752
-    },
+    ,
+"population": {
+    "1825": 15000,
+    "1851": 28000
+  },
+  "onMap": false
+},
     {
       "name": "Fredrikshald/Fredriksten",
       "owner": "NO",
       "crown": "SE",
       "lat": 59.12,
       "lon": 11.39
-    },
+    ,
+"population": {
+    "1825": 4342,
+    "1851": 6680
+  },
+  "onMap": false
+},
     {
       "name": "Karlsborg",
       "owner": "SE",
       "lat": 58.537,
       "lon": 14.51
-    },
+    ,
+"population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "onMap": false
+},
     {
       "name": "Köslin",
       "owner": "PR",
@@ -20930,12 +23317,577 @@
       "population": {
         "1825": 5500,
         "1851": 8500
-      },
+      ,
+"fieldStatus": {
+    "1825": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "1851": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
       "district": "Kreis Köslin",
       "region": "Regierungsbezirk Köslin",
       "status": "estimated"
+    ,
+"fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     }
-  ],
+  },
+  "onMap": false
+}
+  ,
+{
+  "name": "Uddevalla",
+  "owner": "SE",
+  "lat": 58.35,
+  "lon": 11.935,
+  "population": {
+    "1825": 3641,
+    "1851": 3872
+  },
+  "onMap": false
+},
+{
+  "name": "Strömstad",
+  "owner": "SE",
+  "lat": 58.939,
+  "lon": 11.172,
+  "population": {
+    "1825": 1367,
+    "1851": 1366
+  },
+  "onMap": false
+},
+{
+  "name": "Fredrikstad",
+  "owner": "NO",
+  "lat": 59.218,
+  "lon": 10.929,
+  "population": {
+    "1825": 2040,
+    "1851": 3139
+  },
+  "onMap": false
+},
+{
+  "name": "Moss",
+  "owner": "NO",
+  "lat": 59.435,
+  "lon": 10.657,
+  "population": {
+    "1825": 2728,
+    "1851": 4197
+  },
+  "onMap": false
+},
+{
+  "name": "Drammen",
+  "owner": "NO",
+  "lat": 59.744,
+  "lon": 10.204,
+  "population": {
+    "1825": 5995,
+    "1851": 9223
+  },
+  "onMap": false
+},
+{
+  "name": "Tønsberg",
+  "owner": "NO",
+  "lat": 59.267,
+  "lon": 10.407,
+  "population": {
+    "1825": 1684,
+    "1851": 2591
+  },
+  "onMap": false
+},
+{
+  "name": "Larvik",
+  "owner": "NO",
+  "lat": 59.053,
+  "lon": 10.035,
+  "population": {
+    "1825": 2941,
+    "1851": 4524
+  },
+  "onMap": false
+},
+{
+  "name": "Horten",
+  "owner": "NO",
+  "lat": 59.417,
+  "lon": 10.483,
+  "population": {
+    "1825": 700,
+    "1851": 3000
+  },
+  "onMap": false
+},
+{
+  "name": "Drøbak",
+  "owner": "NO",
+  "lat": 59.664,
+  "lon": 10.63,
+  "population": {
+    "1825": 980,
+    "1851": 1508
+  },
+  "onMap": false
+},
+{
+  "name": "Lidköping",
+  "owner": "SE",
+  "lat": 58.505,
+  "lon": 13.158,
+  "population": {
+    "1825": 1721,
+    "1851": 2461
+  },
+  "onMap": false
+},
+{
+  "name": "Vänersborg",
+  "owner": "SE",
+  "lat": 58.381,
+  "lon": 12.323,
+  "population": {
+    "1825": 2165,
+    "1851": 3117
+  },
+  "onMap": false
+},
+{
+  "name": "Vadstena",
+  "owner": "SE",
+  "lat": 58.448,
+  "lon": 14.89,
+  "population": {
+    "1825": 1746,
+    "1851": 2234
+  },
+  "onMap": false
+},
+{
+  "name": "Norrköping",
+  "owner": "SE",
+  "lat": 58.588,
+  "lon": 16.19,
+  "population": {
+    "1825": 9842,
+    "1851": 17067
+  },
+  "onMap": false
+},
+{
+  "name": "Linköping",
+  "owner": "SE",
+  "lat": 58.41,
+  "lon": 15.621,
+  "population": {
+    "1825": 3660,
+    "1851": 5285
+  },
+  "onMap": false
+},
+{
+  "name": "Skara",
+  "owner": "SE",
+  "lat": 58.386,
+  "lon": 13.438,
+  "population": {
+    "1825": 1373,
+    "1851": 1885
+  },
+  "onMap": false
+},
+{
+  "name": "Mariestad",
+  "owner": "SE",
+  "lat": 58.71,
+  "lon": 13.824,
+  "population": {
+    "1825": 1430,
+    "1851": 2070
+  },
+  "onMap": false
+},
+{
+  "name": "Stockholm",
+  "owner": "SE",
+  "lat": 59.329,
+  "lon": 18.069,
+  "population": {
+    "1825": 77842,
+    "1851": 94033
+  },
+  "onMap": false
+},
+{
+  "name": "Karlstad",
+  "lat": 59.379,
+  "lon": 13.503,
+  "owner": "SE",
+  "region": "Värmland",
+  "population": {
+    "1825": 2700,
+    "1851": 3700
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Arvika",
+  "lat": 59.655,
+  "lon": 12.592,
+  "owner": "SE",
+  "region": "Värmland",
+  "population": {
+    "1825": 300,
+    "1851": 600
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Svinesund SE",
+  "lat": 59.079,
+  "lon": 11.252,
+  "owner": "SE",
+  "region": "Bohuslän",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Svinesund NO",
+  "lat": 59.083,
+  "lon": 11.245,
+  "owner": "NO",
+  "region": "Smaalenene",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Sarpsborg",
+  "lat": 59.284,
+  "lon": 11.109,
+  "owner": "NO",
+  "region": "Smaalenene",
+  "population": {
+    "1825": 400,
+    "1851": 1300
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Kongsvinger",
+  "lat": 60.188,
+  "lon": 11.998,
+  "owner": "NO",
+  "region": "Hedemarken",
+  "population": {
+    "1825": 400,
+    "1851": 600
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Kaholmen",
+  "lat": 59.675,
+  "lon": 10.605,
+  "owner": "NO",
+  "region": "Akershus",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Fredriksvern",
+  "lat": 58.997,
+  "lon": 10.041,
+  "owner": "NO",
+  "region": "Jarlsberg og Larvik",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Fryken south",
+  "lat": 59.504,
+  "lon": 13.322,
+  "owner": "SE",
+  "region": "Värmland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Klarälven rail landing",
+  "lat": 59.505,
+  "lon": 13.408,
+  "owner": "SE",
+  "region": "Värmland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Uppsala",
+  "lat": 59.859,
+  "lon": 17.639,
+  "owner": "SE",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Örebro",
+  "lat": 59.275,
+  "lon": 15.214,
+  "owner": "SE",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Malmköping",
+  "lat": 59.134,
+  "lon": 16.731,
+  "owner": "SE",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Falun",
+  "lat": 60.607,
+  "lon": 15.632,
+  "owner": "SE",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Gävle",
+  "lat": 60.675,
+  "lon": 17.142,
+  "owner": "SE",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Piteå",
+  "lat": 65.317,
+  "lon": 21.479,
+  "owner": "SE",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Umeå",
+  "lat": 63.826,
+  "lon": 20.264,
+  "owner": "SE",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Östersund",
+  "lat": 63.179,
+  "lon": 14.636,
+  "owner": "SE",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Härnösand",
+  "lat": 62.633,
+  "lon": 17.938,
+  "owner": "SE",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Visby",
+  "lat": 57.634,
+  "lon": 18.294,
+  "owner": "SE",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Trondheim",
+  "lat": 63.43,
+  "lon": 10.395,
+  "owner": "NO",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Bergen",
+  "lat": 60.392,
+  "lon": 5.324,
+  "owner": "NO",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Kristiansand",
+  "lat": 58.147,
+  "lon": 7.995,
+  "owner": "NO",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Västerås",
+  "lat": 59.61,
+  "lon": 16.545,
+  "owner": "SE",
+  "region": "Strategisk bagland",
+  "population": {
+    "1825": 1000,
+    "1851": 1500
+  },
+  "status": "skøn",
+  "onMap": false
+},
+{
+  "name": "Kalmar",
+  "owner": "SE",
+  "lat": 56.663,
+  "lon": 16.356,
+  "population": {
+    "1825": 5049,
+    "1851": 6705,
+    "1864": 8486
+  },
+  "harbour": false,
+  "fortress": false,
+  "garrison": 40,
+  "guns": 0,
+  "railwayYear": 9999,
+  "pop": 5049,
+  "railway": false,
+  "onMap": false
+},
+{
+  "name": "Västervik",
+  "owner": "SE",
+  "lat": 57.758,
+  "lon": 16.637,
+  "population": {
+    "1825": 2888,
+    "1851": 4391,
+    "1864": 5212
+  },
+  "harbour": false,
+  "fortress": false,
+  "garrison": 40,
+  "guns": 0,
+  "railwayYear": 9999,
+  "pop": 2888,
+  "railway": false,
+  "onMap": false
+}
+],
   "railways": [],
   "districts": [
     {
@@ -21567,7 +24519,116 @@
       "domanialPopulation": 0,
       "treasuryStart": 17280,
       "recruitmentSystem": "Almindelig værnepligt fra 1814, linje / reserve / Landwehr; det gamle kantonsystem er ikke uændret gældende i 1825"
+    ,
+"note": "Eksisterende kortgruppe og nærmeste-sæde-geometri; ikke provins/Regierungsbezirk. Befolkning og lokal økonomi er spilvalg.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "population": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserveShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClassShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "capShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ruralTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urbanTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grainPerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattlePerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urban": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "rural": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClass": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "taxAnnual": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grain": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattle": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "domanialPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "treasuryStart": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "PR-franzburg",
       "name": "Kreis Franzburg",
@@ -21604,7 +24665,116 @@
       "domanialPopulation": 0,
       "treasuryStart": 25560,
       "recruitmentSystem": "Almindelig værnepligt fra 1814, linje / reserve / Landwehr; det gamle kantonsystem er ikke uændret gældende i 1825"
+    ,
+"note": "Eksisterende kortgruppe og nærmeste-sæde-geometri; ikke provins/Regierungsbezirk. Befolkning og lokal økonomi er spilvalg.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "population": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserveShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClassShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "capShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ruralTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urbanTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grainPerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattlePerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urban": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "rural": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClass": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "taxAnnual": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grain": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattle": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "domanialPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "treasuryStart": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "PR-greifswald",
       "name": "Kreis Greifswald",
@@ -21639,7 +24809,116 @@
       "domanialPopulation": 0,
       "treasuryStart": 31320,
       "recruitmentSystem": "Almindelig værnepligt fra 1814, linje / reserve / Landwehr; det gamle kantonsystem er ikke uændret gældende i 1825"
+    ,
+"note": "Eksisterende kortgruppe og nærmeste-sæde-geometri; ikke provins/Regierungsbezirk. Befolkning og lokal økonomi er spilvalg.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "population": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserveShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClassShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "capShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ruralTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urbanTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grainPerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattlePerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urban": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "rural": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClass": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "taxAnnual": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grain": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattle": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "domanialPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "treasuryStart": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "PR-ruegen",
       "name": "Kreis Rügen",
@@ -21676,7 +24955,116 @@
       "domanialPopulation": 0,
       "treasuryStart": 18420,
       "recruitmentSystem": "Almindelig værnepligt fra 1814, linje / reserve / Landwehr; det gamle kantonsystem er ikke uændret gældende i 1825"
+    ,
+"note": "Eksisterende kortgruppe og nærmeste-sæde-geometri; ikke provins/Regierungsbezirk. Befolkning og lokal økonomi er spilvalg.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "population": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserveShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClassShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "capShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ruralTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urbanTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grainPerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattlePerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urban": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "rural": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClass": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "taxAnnual": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grain": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattle": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "domanialPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "treasuryStart": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "PR-demmin",
       "name": "Kreis Demmin",
@@ -21710,7 +25098,116 @@
       "domanialPopulation": 0,
       "treasuryStart": 21240,
       "recruitmentSystem": "Almindelig værnepligt fra 1814, linje / reserve / Landwehr; det gamle kantonsystem er ikke uændret gældende i 1825"
+    ,
+"note": "Eksisterende kortgruppe og nærmeste-sæde-geometri; ikke provins/Regierungsbezirk. Befolkning og lokal økonomi er spilvalg.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "population": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserveShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClassShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "capShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ruralTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urbanTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grainPerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattlePerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urban": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "rural": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClass": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "taxAnnual": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grain": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattle": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "domanialPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "treasuryStart": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "PR-anklam",
       "name": "Kreis Anklam",
@@ -21744,7 +25241,116 @@
       "domanialPopulation": 0,
       "treasuryStart": 18000,
       "recruitmentSystem": "Almindelig værnepligt fra 1814, linje / reserve / Landwehr; det gamle kantonsystem er ikke uændret gældende i 1825"
+    ,
+"note": "Eksisterende kortgruppe og nærmeste-sæde-geometri; ikke provins/Regierungsbezirk. Befolkning og lokal økonomi er spilvalg.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "population": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserveShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClassShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "capShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ruralTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urbanTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grainPerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattlePerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urban": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "rural": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClass": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "taxAnnual": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grain": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattle": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "domanialPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "treasuryStart": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "PR-usedom",
       "name": "Kreis Usedom-Wollin",
@@ -21778,7 +25384,116 @@
       "domanialPopulation": 0,
       "treasuryStart": 18420,
       "recruitmentSystem": "Almindelig værnepligt fra 1814, linje / reserve / Landwehr; det gamle kantonsystem er ikke uændret gældende i 1825"
+    ,
+"note": "Eksisterende kortgruppe og nærmeste-sæde-geometri; ikke provins/Regierungsbezirk. Befolkning og lokal økonomi er spilvalg.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "population": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserveShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClassShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "capShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ruralTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urbanTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grainPerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattlePerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urban": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "rural": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClass": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "taxAnnual": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grain": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattle": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "domanialPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "treasuryStart": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "PR-ueckermuende",
       "name": "Kreis Ueckermünde",
@@ -21813,7 +25528,116 @@
       "domanialPopulation": 0,
       "treasuryStart": 18480,
       "recruitmentSystem": "Almindelig værnepligt fra 1814, linje / reserve / Landwehr; det gamle kantonsystem er ikke uændret gældende i 1825"
+    ,
+"note": "Eksisterende kortgruppe og nærmeste-sæde-geometri; ikke provins/Regierungsbezirk. Befolkning og lokal økonomi er spilvalg.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "population": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserveShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClassShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "capShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ruralTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urbanTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grainPerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattlePerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urban": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "rural": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClass": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "taxAnnual": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grain": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattle": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "domanialPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "treasuryStart": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "PR-randow",
       "name": "Kreis Randow (med Stettin)",
@@ -21848,7 +25672,116 @@
       "domanialPopulation": 0,
       "treasuryStart": 52920,
       "recruitmentSystem": "Almindelig værnepligt fra 1814, linje / reserve / Landwehr; det gamle kantonsystem er ikke uændret gældende i 1825"
+    ,
+"note": "Eksisterende kortgruppe og nærmeste-sæde-geometri; ikke provins/Regierungsbezirk. Befolkning og lokal økonomi er spilvalg.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "population": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserveShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClassShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "capShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ruralTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urbanTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grainPerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattlePerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urban": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "rural": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClass": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "taxAnnual": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grain": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattle": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "domanialPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "treasuryStart": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "PR-saatzig",
       "name": "Kreis Saatzig (kortudsnit)",
@@ -21882,7 +25815,116 @@
       "domanialPopulation": 0,
       "treasuryStart": 18540,
       "recruitmentSystem": "Almindelig værnepligt fra 1814, linje / reserve / Landwehr; det gamle kantonsystem er ikke uændret gældende i 1825"
+    ,
+"note": "Eksisterende kortgruppe og nærmeste-sæde-geometri; ikke provins/Regierungsbezirk. Befolkning og lokal økonomi er spilvalg.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "population": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserveShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClassShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "capShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ruralTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urbanTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grainPerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattlePerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urban": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "rural": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClass": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "taxAnnual": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grain": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattle": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "domanialPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "treasuryStart": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "PR-prenzlau",
       "name": "Kreis Prenzlau (kortudsnit)",
@@ -21916,7 +25958,116 @@
       "domanialPopulation": 0,
       "treasuryStart": 25920,
       "recruitmentSystem": "Almindelig værnepligt fra 1814, linje / reserve / Landwehr; det gamle kantonsystem er ikke uændret gældende i 1825"
+    ,
+"note": "Eksisterende kortgruppe og nærmeste-sæde-geometri; ikke provins/Regierungsbezirk. Befolkning og lokal økonomi er spilvalg.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "population": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserveShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClassShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "capShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ruralTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urbanTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grainPerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattlePerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urban": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "rural": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClass": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "taxAnnual": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grain": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattle": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "domanialPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "treasuryStart": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "PR-angermuende",
       "name": "Kreis Angermünde (kortudsnit)",
@@ -21953,7 +26104,116 @@
       "domanialPopulation": 0,
       "treasuryStart": 21000,
       "recruitmentSystem": "Almindelig værnepligt fra 1814, linje / reserve / Landwehr; det gamle kantonsystem er ikke uændret gældende i 1825"
+    ,
+"note": "Eksisterende kortgruppe og nærmeste-sæde-geometri; ikke provins/Regierungsbezirk. Befolkning og lokal økonomi er spilvalg.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "population": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserveShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClassShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "capShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ruralTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urbanTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grainPerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattlePerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urban": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "rural": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClass": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "taxAnnual": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grain": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattle": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "domanialPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "treasuryStart": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "PR-kolberg",
       "name": "Kreis Fürstenthum (kortudsnit ved Kolberg)",
@@ -21987,7 +26247,116 @@
       "domanialPopulation": 0,
       "treasuryStart": 30600,
       "recruitmentSystem": "Almindelig værnepligt fra 1814, linje / reserve / Landwehr; det gamle kantonsystem er ikke uændret gældende i 1825"
+    ,
+"note": "Eksisterende kortgruppe og nærmeste-sæde-geometri; ikke provins/Regierungsbezirk. Befolkning og lokal økonomi er spilvalg.",
+  "fieldStatus": {
+    "lon": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
     },
+    "lat": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "population": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserveShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClassShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "capShare": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ruralTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urbanTax": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grainPerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattlePerHead": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "urban": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "rural": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "reserve": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "yearlyClass": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "taxAnnual": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "grain": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "cattle": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "ritterschaftPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "domanialPopulation": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    },
+    "treasuryStart": {
+      "status": "spil",
+      "source": "GAME-cities_neighbours_1825.json",
+      "reason": "Arvet kortmodel; koordinater, befolkning, bestykning og linjeføring er ikke verificeret historisk."
+    }
+  }
+},
     {
       "id": "HH-city",
       "name": "Hamborg og Bergedorf",

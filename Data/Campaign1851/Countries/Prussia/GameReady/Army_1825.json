@@ -1,0 +1,986 @@
+{
+  "scenario": 1825,
+  "nation": "PR",
+  "note": "Preussen, dateret importgrundlag. Kilde/skøn/spil står i fieldStatus og Data-status.json. Delvist overlay; null kræver håndtering, ikke nulkonvertering. Ingen motor-/slagtest. regiments er navne-/typekatalog med null for ruller; separat Army_Neighbours er spilmodellen. De er alternative repræsentationer, ikke additive.",
+  "commands": [
+    {
+      "id": "PR-C-G",
+      "name": "Gardekorps",
+      "area": "Garde",
+      "hq": null,
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "Organisationsramme som dokumentationsskøn; 1825-hovedkvarter/chef ikke verificeret.",
+      "fieldStatus": {
+        "hq": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-I",
+      "name": "I. Armeekorps",
+      "area": "Ost- og Westpreussen",
+      "hq": null,
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "Organisationsramme som dokumentationsskøn; 1825-hovedkvarter/chef ikke verificeret.",
+      "fieldStatus": {
+        "hq": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-II",
+      "name": "II. Armeekorps",
+      "area": "Pommern",
+      "hq": null,
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "Organisationsramme som dokumentationsskøn; 1825-hovedkvarter/chef ikke verificeret.",
+      "fieldStatus": {
+        "hq": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-III",
+      "name": "III. Armeekorps",
+      "area": "Brandenburg",
+      "hq": null,
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "Organisationsramme som dokumentationsskøn; 1825-hovedkvarter/chef ikke verificeret.",
+      "fieldStatus": {
+        "hq": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-IV",
+      "name": "IV. Armeekorps",
+      "area": "Sachsen",
+      "hq": null,
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "Organisationsramme som dokumentationsskøn; 1825-hovedkvarter/chef ikke verificeret.",
+      "fieldStatus": {
+        "hq": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-V",
+      "name": "V. Armeekorps",
+      "area": "Posen",
+      "hq": null,
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "Organisationsramme som dokumentationsskøn; 1825-hovedkvarter/chef ikke verificeret.",
+      "fieldStatus": {
+        "hq": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-VI",
+      "name": "VI. Armeekorps",
+      "area": "Schlesien",
+      "hq": null,
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "Organisationsramme som dokumentationsskøn; 1825-hovedkvarter/chef ikke verificeret.",
+      "fieldStatus": {
+        "hq": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-VII",
+      "name": "VII. Armeekorps",
+      "area": "Westfalen",
+      "hq": null,
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "Organisationsramme som dokumentationsskøn; 1825-hovedkvarter/chef ikke verificeret.",
+      "fieldStatus": {
+        "hq": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "id": "PR-C-VIII",
+      "name": "VIII. Armeekorps",
+      "area": "Rheinland",
+      "hq": null,
+      "general": null,
+      "towns": [],
+      "source": "ARMY1851",
+      "note": "Organisationsramme som dokumentationsskøn; 1825-hovedkvarter/chef ikke verificeret.",
+      "fieldStatus": {
+        "hq": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "general": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    }
+  ],
+  "regiments": [
+    {
+      "id": "PR-IR2",
+      "name": "Infanterie-Regiment Nr. 2",
+      "arm": "infantry",
+      "home": "Stettin",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GAME-Army_Neighbours_1825.json",
+      "note": "1825-kortets enhedsmodel; navn, placering og faktisk fremmøde er ikke periodeverificeret.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR9",
+      "name": "Infanterie-Regiment Nr. 9",
+      "arm": "infantry",
+      "home": "Stargard",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GAME-Army_Neighbours_1825.json",
+      "note": "1825-kortets enhedsmodel; navn, placering og faktisk fremmøde er ikke periodeverificeret.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR14",
+      "name": "Infanterie-Regiment Nr. 14",
+      "arm": "infantry",
+      "home": "Stralsund",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GAME-Army_Neighbours_1825.json",
+      "note": "1825-kortets enhedsmodel; navn, placering og faktisk fremmøde er ikke periodeverificeret.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-IR21",
+      "name": "Infanterie-Regiment Nr. 21",
+      "arm": "infantry",
+      "home": "Stettin",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GAME-Army_Neighbours_1825.json",
+      "note": "1825-kortets enhedsmodel; navn, placering og faktisk fremmøde er ikke periodeverificeret.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-JG2",
+      "name": "2. Jäger-Abteilung",
+      "arm": "infantry",
+      "home": "Greifswald",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GAME-Army_Neighbours_1825.json",
+      "note": "1825-kortets enhedsmodel; navn, placering og faktisk fremmøde er ikke periodeverificeret.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-KR2",
+      "name": "Kürassier-Regiment Königin (Pommersches) Nr. 2",
+      "arm": "cavalry",
+      "home": "Pasewalk",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GAME-Army_Neighbours_1825.json",
+      "note": "1825-kortets enhedsmodel; navn, placering og faktisk fremmøde er ikke periodeverificeret.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-ART2",
+      "name": "2. Artillerie-Brigade (feltdetachement)",
+      "arm": "artillery",
+      "home": "Stettin",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GAME-Army_Neighbours_1825.json",
+      "note": "1825-kortets enhedsmodel; navn, placering og faktisk fremmøde er ikke periodeverificeret.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    },
+    {
+      "id": "PR-LW",
+      "name": "Pommerske Landwehr-bataljoner (samlet skøn)",
+      "arm": "infantry",
+      "home": "Greifswald",
+      "command": "PR-C-II",
+      "men": null,
+      "horses": null,
+      "experience": 50,
+      "skills": {
+        "loading": 50,
+        "marksmanship": 50,
+        "drill": 50,
+        "fieldcraft": 50,
+        "endurance": 50,
+        "assault": 50,
+        "fieldStatus": {
+          "loading": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "marksmanship": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "drill": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "fieldcraft": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "endurance": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          },
+          "assault": {
+            "status": "skøn",
+            "source": "DESIGN",
+            "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+          }
+        }
+      },
+      "source": "GAME-Army_Neighbours_1825.json",
+      "note": "1825-kortets enhedsmodel; navn, placering og faktisk fremmøde er ikke periodeverificeret.",
+      "fieldStatus": {
+        "men": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "horses": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "experience": {
+          "status": "skøn",
+          "source": "DESIGN",
+          "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+        }
+      }
+    }
+  ],
+  "equipment": {
+    "rifles": null,
+    "guns": null,
+    "horses": null,
+    "mortars": null,
+    "wagons": null,
+    "raw": null,
+    "foodDays": null,
+    "columns": null,
+    "infantryReload": null,
+    "infantryAccuracy": null,
+    "carbineReload": null,
+    "infantryWeapon": "Flintlåsgeværer; præcise modeller og fordeling ikke afskrevet.",
+    "cavalryWeapon": "Karabin/pistol, sabel; lanse eller kyras efter enhed. Model/fordeling ukendt.",
+    "artilleryWeapon": "Forladeskyts; model og kalibre ikke afskrevet.",
+    "uniforms": [],
+    "kitReserve": null,
+    "fieldStatus": {
+      "rifles": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "guns": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "horses": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "mortars": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "wagons": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "raw": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "foodDays": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "columns": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "infantryReload": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "infantryAccuracy": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "carbineReload": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      },
+      "kitReserve": {
+        "status": "skøn",
+        "source": "UNKNOWN",
+        "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+      }
+    }
+  },
+  "magazines": [
+    {
+      "town": "Bergen på Rügen",
+      "food": null,
+      "fodder": null,
+      "ammo": null,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "town": "Greifswald",
+      "food": null,
+      "fodder": null,
+      "ammo": null,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "town": "Kolberg",
+      "food": null,
+      "fodder": null,
+      "ammo": null,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "town": "Stettin",
+      "food": null,
+      "fodder": null,
+      "ammo": null,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "town": "Stralsund",
+      "food": null,
+      "fodder": null,
+      "ammo": null,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    },
+    {
+      "town": "Swinemünde",
+      "food": null,
+      "fodder": null,
+      "ammo": null,
+      "fieldStatus": {
+        "food": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "fodder": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        },
+        "ammo": {
+          "status": "skøn",
+          "source": "UNKNOWN",
+          "reason": "Ukendt: ingen pålidelig afskrift for den konkrete scenariedato."
+        }
+      }
+    }
+  ],
+  "fieldStatus": {
+    "scenario": {
+      "status": "skøn",
+      "source": "DESIGN",
+      "reason": "Neutral færdighed/erfaring, ingen meritmåling. Tal i enhedsnavne er identifikation."
+    }
+  }
+}
