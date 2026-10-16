@@ -2303,6 +2303,10 @@ Efter brugerens test og to optagelser:
 - `SCampaign1851Overlay`: regimentets `Nation` vælger nationspladen. Plader og manglende opslag caches ved oprettelsen med dansk fallback; teksturer holdes i live som i `CardBrush`.
 - Statisk kontrol mod UE 5.8-headere. Ikke bygget eller testet i spil. De nye PNG'er skal stadig importeres med `Tools/Campaign/import_building_cards.py`, som kræver, at editoren er lukket. Ingen import eller commit udført.
 
+### 2026-10-16 - Preussiske kortbilleder trukket tilbage
+
+- De fem `T_Uniform_PR_*.png` er fjernet igen: kildebillederne var for dårligt genereret (mørk baggrund med bånd, lille figur, andet lys end de danske og svenske). Preussiske enheder viser den danske plade via fallback, indtil nye billeder i 2:3 er lavet; derefter køres `make_uniform_cards.py` igen.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
