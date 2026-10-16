@@ -2292,6 +2292,11 @@ Efter brugerens test og to optagelser:
 - AAR: forklaringslinjen øverst har nu ammunition og mad; ikonerne 5 % mindre (efter de 20 % større).
 - Acceptance: 31 pass, 7 NOT_IMPLEMENTED.
 
+### 2026-10-16 - Overdragelsesnotat og samlet projektoverblik
+
+- `Docs/HANDOVER-2026-10-16.md`: status, regler, byg og test, åbne punkter og faldgruber til den næste agent (Opus).
+- `Docs/PROJEKT-OVERBLIK.md`: forklarer hele projektet (mapper, slagmodulet, figurer og mængdetegning, kampagnen, start/byg/test, regler, lande og mangler).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
