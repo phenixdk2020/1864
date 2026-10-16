@@ -2428,6 +2428,22 @@ Efter brugerens test og to optagelser:
 - Sidelæns opslutning: 8 s ro efter sidste tab (før 3 s), senest 20 s efter første tab (før 8 s), begge ganget med moralfaktoren 1-2.
 - Ikke set i spillet endnu.
 
+### 2026-10-16 - Kolonnemarch: samling i gangtempo, løbeklip ved ilmarch, ILMARCH-knap til spilleren
+
+- Rodårsager (statisk læst, ikke set i spil): (1) `Visual/StrategyInfantryVisualComponent.cpp` `PlanOrderlyReform`: samlingen i kolonne fik tid `længste vej / 500 cm/s` (3-6 s), dvs. flere gange marchfarten (150 cm/s). Gangklippet kan højst følge rate 4 (ca. 308 cm/s), så mændene gled eller løb forbi kompagniets felt. (2) Simulationen holdt marchen i `max(reform, 6 s)` uafhængigt af det visuelle budget, så kompagniet kunne gå, mens mændene stadig samlede sig. (3) Klippet var altid gangklip, også når jordhastigheden oversteg gangklippets rate (ilmarch 285 cm/s giver rate 3,7, charge ligeså). De faste 160/420-værdier i selve figurens indhentning (`FigureSpeed`, `ReformBaseSpeed`, `/ 160.f` ved ankomst) er uændrede: i den stive kompagnitilstand står manden i sin plads i enhedens ramme, så de kommer kun i spil i `-Strategy1864Rigid=0` og ved ankomstreform.
+- Rettelse samling: ved formationsskift til kolonne er tempoet nu `clamp(1,5 x enhedens march, max(160, march), 300)` cm/s, tiden `clamp(længste vej / tempo, 3, 10 s)`, og `UStrategyFormationTransitionComponent::ExtendReformSeconds` forlænger reformen og den holdte march til budgettet + 0,3 s (kun hvis marchen allerede var holdt; rytteri og udrykning på march påvirkes ikke). Udrykning fra kolonne til linje er uændret (500 cm/s, loft 9 s).
+- Rettelse klip: i `UpdateSettling` vælges `Run` (420 cm/s) når jordhastigheden er over 250 cm/s (tilbage til gang under 210), med rate = hastighed / 420. Ilmarch 285 cm/s giver løbeklip ved rate 0,68. `RunCmPerSecond` bruges stadig kun til ægte løb.
+- Ilmarch for spilleren (der fandtes kun AI-ilmarch ved bajonetangreb): ny knap ILMARCH i rækken under AFBRYD (`StrategyHUDSpecialOrders.cpp`, `EAction::DoubleTime`, samme pillestil som BYG/SKYTTEKAEDE/SPRED, tændt = grøn). Den virker på alle valgte kompagnier, kan trykkes før eller efter RYK FREM/ANGRIB (annullerer ikke ventende placering) og er et tempo, ikke en ordre. `UStrategyFieldOfficerComponent::SetManualDoubleTime` genbruger charge-mekanismen (`BeginDoubleTime`/`EndDoubleTime`, `NormalSpeed`, faktor `DoubleTimeFactor` = 1,9, altså 285 cm/s). Slutter ved ankomst (målet væk efter at have været i bevægelse), ved ny Hold/STOP, i karré, når de ikke står, når Fatigue når 95, og når charge slutter. Afvises ved Fatigue >= 85 (`DoubleTimeFatigueLimit`), karré, ikke-stående og under charge, med notits til spilleren.
+- Pris: det eksisterende udmattelsessystem (`Unit->Fatigue`, `UStrategyConditionComponent`): +0,60 pr. sekund oven i march (0,20), altså ca. 4 x så hurtig træthed. Træthed sænker allerede fart (til 0,65 x) og træfsikkerhed. Ingen ny mekanik og ingen samhold-pris.
+- UE 5.8-API: ingen nye engine-kald (kun FMath::Clamp/Max og eksisterende komponent-API). Linjeskift bevaret pr. fil (Visual/officer/condition/HUD CRLF; transition-filerne LF). Ikke bygget, ikke prøvet i spil, ingen commit.
+
+### 2026-10-16 - 13 liggende ekstraklip importeret direkte fra Mixamo
+
+- DeathBackHeadshot, SabreCombo, RiflePunch, ReloadKneeling, ReloadKneelingB, SabreDraw, SabreFight, SabreSheath, SabreSheath2, SabreWithdraw, Turn, Signal og SideStep lå ned. Årsag: de Blender-behandlede kopier fra `build_mixamo_extra_set.py` (rod låst i xz, eksporteret uden mesh/bind pose) kommer ind liggende, uanset importer og importrotation (testet i klip-viseren). Brugerens rå Mixamo-FBX (med mesh og bind pose) står op med både Interchange og den gamle importer.
+- Nyt `Content/Python/import_extras_from_mixamo.py`: sletter hvert asset og importerer det direkte fra Mixamo-filen i `Reference/Units/MultiView` (Animationer Mænd / Danish Cavalry). VAT genbagt; brugeren har set alle 13 stå op i klip-viseren.
+- Rodbevægelse er nu Mixamos egen (ikke låst); SideStep og Turn kan flytte sig lidt. `import_lying_extras_rot.py` (rotationsforsøget) virkede ikke og er fjernet.
+- Skulderklippene (WalkShoulder/ShoulderUp/Down) er uændrede; brugeren synes de ser mærkelige ud — åbent punkt.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
