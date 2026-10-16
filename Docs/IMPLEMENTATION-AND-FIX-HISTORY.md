@@ -2407,6 +2407,21 @@ Efter brugerens test og to optagelser:
 - Data: `Tools/Countries/activate_prussia_events.py` skriver PR-events i `Events.json` (6 historik + `pr_hannover_zoll`, `pr_roon1859`, `pr_roon1860`; de tre id-konflikter flettet ved kun at tilføje status/kilde til de danske poster, da PR-varianterne er identiske) og `Events_1825.json` (`pr_zollverein`, `pr_hannover_zoll`, `pr_roon1859`, `pr_roon1860`). Spændingsfølger højst ±3. Valideringer tilpasset (`validate_prussia.py` kører nu aktiveringen i den isolerede gengivelse). Se `Docs/Import-Preussen.md` (Begivenheder) og `Docs/Events.md`.
 - Ikke bygget, ikke prøvet i spillet, ikke committet. UE-API-kald er kun kontrolleret mod 5.8-headerne.
 
+### 2026-10-16 — Binær FBX-strukturgendannelse og udvidet knoglesporsaudit
+
+- Sammenlignet HEAD WalkShoulder og v3 på komplette FBX-træer, alle Model-felter, kurvenoder, lokale T/R/S-samples ved frames 0/10/24, forbindelser og tidsindstillinger. Begge mangler Pose/BindPose, mesh og deformers; gårsdagens importlog indeholder også bind-pose-advarslen. Ingen dokumenteret 90°-forskel på Armature/Hips-rotationerne er fundet. Årsagen til vandrette kroppe er fortsat ikke bevist.
+- Fundet utilsigtede ændringer i statisk pose: Hips Lcl Translation.Z 121,00222778320312 → -0,36959075927734375 cm samt store ændringer i venstre arms statiske rotationer. Afvigelserne fjernes ved direkte binær patch frem for Blender-geneksport.
+- Alle 20 afledte FBX bruger HEAD WalkShoulders komplette struktur, inklusive statiske knoglefelter og AnimationCurveNode-standardværdier. Tre skulderklip bevarer egne HEAD-spor uden for højre armkæde og Hips X/Z-hold. Øvrige 17 bevarer v3-knoglekurverne og får HEAD-root og tilpasset kliplængde. Effekten i Unreal er ikke verificeret.
+- Værktøj: `Tools/Animation/patch_combat_fbx_curves.py`. Kontrol: HEAD byteidentisk roundtrip; eksakt struktur; kurvebevarelse og frameantal; uafhængig Blender-parser accepterer 21 filer; SHA-256 uændret på otte originale FBX og otte originale uassets. Ingen build, Unreal-import, spil/editor-start eller commit.
+- Rapport, backups, før/efter-hashes og genimportliste: `Saved/Codex/bonetrack_audit/RAPPORT.md`, `verification.json`, `reimport_names.txt`. Genimport/spilkontrol mangler for at afgøre, om orienteringen faktisk er rettet.
+
+### 2026-10-16 - Fjenden vender fronten under DefendHere (rodårsag i 1 mod 1)
+
+- Fjendens ordre i startfilerne (`Start-Test-1/2/3`, `-Strategy1864EnemyDefends -Strategy1864SkirmishPassive`): kompagnierne har `DefendHere` på egen plads med front mod danskerne (autoritet OfficerAI, `bHasFacing`), officer-AI er tændt (`StrategyOOBTestScenario.cpp`, kompagni-løkken), den autonome kamp-AI er slået fra (`SetEnemyAttacking(false)`). `-Strategy1864SkirmishPassive` rammer kun dansk HQ-AI, dansk doktrin og dansk angrebsordre, så den er ikke årsagen.
+- Årsag: feltofficeren nåede 'Svinger fronten' og gav en `Hold`-ordre med `FacingYaw`, men `Hold` udføres kun som stop (`UStrategyMovementExecutorComponent::HandleOrderChanged`: `StopMovement`, `CompleteExecution`); intet læser `FacingYaw` for en `Hold`. Samtidig slår `UStrategyCombatComponent` sin egen drejning mod nærmeste fjende fra, når den aktuelle ordre har `bHasFacing` (`bCommittedFacing`). Resultat: ordren blev accepteret, men fronten drejede aldrig.
+- Rettelse (`StrategyFieldOfficerComponent.cpp`, fjendens gren i `ThinkInfantry`): frontskiftet gives nu som `DefendHere` på stedet (drejning på stedet i eksekutoren, missionsanker holder den nye front). Et skifte, der allerede er givet mod samme fjende (under 5 grader forskel), efterlades, så ordren ikke genstartes ved hvert tjek. Spillerens kompagnier med direkte ordrer berøres ikke (kun fjendesiden), marcherende enheder beholder missionen (som før).
+- Ikke rettet: danske AI-kompagniers frontskift (`!bMoving`-grenen) bruger stadig `Hold` med front og har samme døde facing. Ikke bygget, ikke prøvet i spillet, ikke committet. UE-API er uændret. Ingen accept-test for front/DefendHere findes; ikke udvidet.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

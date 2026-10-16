@@ -30,5 +30,5 @@ private:
     TObjectPtr<USkeletalMesh> Mesh;
     bool bPlaced = false;
     static constexpr int32 ClipViewerColumns = 6;   // figures per row
-    float ClipViewerSpacing = 500.f;                // cm between figures in a row (rows are 1.2x this)
+    float ClipViewerSpacing = 600.f;                // cm between figures in a row (rows are 1.2x this)
 };

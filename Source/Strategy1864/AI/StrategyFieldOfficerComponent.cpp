@@ -800,10 +800,17 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
         {
             const float ToFoe = (Enemy->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
             const float OffFront = FMath::Abs(FMath::FindDeltaAngleDegrees(OwnerUnit->GetActorRotation().Yaw, ToFoe));
-            if (OffFront > 20.0f)
+            // The movement executor only stops a unit on a HOLD and never carries out its facing, and the combat component's own turn is off
+            // while the order carries a facing; so the swing is given as a DefendHere on the spot (a turn in place; the mission anchor then
+            // keeps the new front). A swing already ordered towards this foe is left to finish.
+            const FStrategyOrder FrontSwingCurrent = OwnerUnit->OrderComponent->GetCurrentOrder();
+            const bool bFrontSwingOrdered = FrontSwingCurrent.Type == EStrategyOrderType::DefendHere && FrontSwingCurrent.bHasFacing &&
+                FrontSwingCurrent.Authority == EStrategyOrderAuthority::OfficerAI &&
+                FMath::Abs(FMath::FindDeltaAngleDegrees(FrontSwingCurrent.FacingYaw, ToFoe)) < 5.0f;
+            if (OffFront > 20.0f && !bFrontSwingOrdered)
             {
                 FStrategyOrder TurnHold;
-                TurnHold.Type = EStrategyOrderType::Hold;
+                TurnHold.Type = EStrategyOrderType::DefendHere;
                 TurnHold.TargetLocation = OwnerUnit->GetActorLocation();
                 TurnHold.FacingYaw = ToFoe;
                 TurnHold.bHasFacing = true;

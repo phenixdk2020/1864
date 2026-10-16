@@ -51,11 +51,11 @@ void AStrategyClipViewer::BeginPlay()
         UTextRenderComponent* Label = NewObject<UTextRenderComponent>(this);
         Label->SetupAttachment(GetRootComponent());
         Label->RegisterComponent();
-        Label->SetText(FText::FromString(FString::Printf(TEXT("%s  %.1fs"), *Data.AssetName.ToString().Replace(TEXT("A_"), TEXT("")), Clip->GetPlayLength())));
-        Label->SetWorldSize(30.f);
+        Label->SetText(FText::FromString(FString::Printf(TEXT("%s\n%.1fs"), *Data.AssetName.ToString().Replace(TEXT("A_Combat_"), TEXT("")).Replace(TEXT("A_"), TEXT("")), Clip->GetPlayLength())));
+        Label->SetWorldSize(24.f);
         Label->SetTextRenderColor(FColor::White);
         Label->SetHorizontalAlignment(EHTA_Center);
-        Label->SetRelativeLocation(FVector((Index / Columns) * ClipViewerSpacing * 1.2f, (Index % Columns) * ClipViewerSpacing, 215.f));
+        Label->SetRelativeLocation(FVector((Index / Columns) * ClipViewerSpacing * 1.2f, (Index % Columns) * ClipViewerSpacing, (Index % 2) ? 265.f : 215.f));
         Label->SetRelativeRotation(FRotator(0.f, 180.f, 0.f));
         Figures.Add({Figure, Clip, Data.AssetName.ToString()});
         ++Index;
