@@ -8,6 +8,9 @@ skeleton=unreal.load_asset('/Game/Units/Human/Skeletons/SK_Human_1864')
 dest='/Game/Units/Human/CombatAnimations'
 for clip in ['SabreDraw','SabreFight','SabreCombo','RiflePunch','ReloadKneeling','SabreSheath','SabreSheath2','SabreWithdraw']:
     name='A_Combat_'+clip
+    # A replace-import keeps the asset's stored import settings (rotation 0), so the old asset is deleted first.
+    if unreal.EditorAssetLibrary.does_asset_exist(dest+'/'+name):
+        unreal.EditorAssetLibrary.delete_asset(dest+'/'+name)
     ui=unreal.FbxImportUI(); ui.import_mesh=False; ui.import_as_skeletal=True; ui.import_animations=True
     ui.import_materials=False; ui.import_textures=False; ui.skeleton=skeleton; ui.automated_import_should_detect_type=False
     ui.mesh_type_to_import=unreal.FBXImportType.FBXIT_ANIMATION

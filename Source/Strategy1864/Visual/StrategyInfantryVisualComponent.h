@@ -275,6 +275,7 @@ private:
     float NextMarchDust = 0.0f;
     void ProcessPendingKills();
     /** After losses in a line: the man directly behind a gap steps forward in his own file (2nd to 1st rank, then 3rd to 2nd). */
+    void ScheduleStepUp();   // StepUpFiles after a short, morale-scaled delay
     void StepUpFiles();
     struct FPendingKill { int32 Count = 0; FVector Location = FVector::ZeroVector; float Time = 0.0f; bool bCone = false; FVector Origin = FVector::ZeroVector; };
     TArray<FPendingKill> PendingKills;
@@ -360,6 +361,8 @@ private:
     bool bScaleOnlyRebuild = false;
     /** Losses leave holes (survivors keep their places); a few quiet seconds after the last loss the men close ranks into the compact line. */
     bool bClosingRanksPending = false;
+    bool bStepUpPending = false;
+    float StepUpDueSeconds = 0.f;
     float LastLossTimeSeconds = -1000.f;
     float FirstPendingLossTimeSeconds = -1000.f;   // the first loss not yet closed up (ranks close even under steady losses)
     bool bRigidCompany = true;   // -Strategy1864Rigid=0 returns to the per-man chase with the spring-smoothed centre

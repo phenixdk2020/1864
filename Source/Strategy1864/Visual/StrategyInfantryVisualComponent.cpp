@@ -247,7 +247,7 @@ void UStrategyInfantryVisualComponent::TickComponent(
             QueueKills(Standing - Desired);
         }
         // Men who fell at once: the man behind steps up inside his own file (a loss that lands later is handled by ProcessPendingKills).
-        if (SoldierComponents.Num() < StandingBeforeTickLoss) { StepUpFiles(); }
+        if (SoldierComponents.Num() < StandingBeforeTickLoss) { ScheduleStepUp(); }
         EnsureVisualCount(Desired + PendingKillCount);
         bScaleOnlyRebuild = true; // Losses leave holes; surviving identities keep their slots.
         RebuildFormation();
@@ -310,11 +310,21 @@ void UStrategyInfantryVisualComponent::TickComponent(
     // Close ranks: two and a half quiet seconds after the last loss, with the company standing still, the survivors re-form into the compact line.
     const float CloseRanksSlowdown = 1.0f + (1.0f - FMath::Clamp(OwnerCompany->Morale, 0.f, 100.f) / 100.f);
     // In a fight the company holds or creeps forward under a standing goal, so only the visible march blocks it; low morale slows the closing (3-10 s as the design paper asks), steady losses close up after 8 s at the latest.
+    // The man behind steps up only after a moment (2 s, up to 4 s at low morale), so a hole is seen before it is filled.
+    if (bStepUpPending && GetWorld()->GetTimeSeconds() >= StepUpDueSeconds)
+    {
+        bStepUpPending = false;
+        StepUpFiles();
+        bScaleOnlyRebuild = true;
+        RebuildFormation();
+        bScaleOnlyRebuild = false;
+    }
     if (bClosingRanksPending && PendingKillCount == 0 && !bFormationPlanPending && !bArrivalReform &&
-        (GetWorld()->GetTimeSeconds() - LastLossTimeSeconds > 3.0f * CloseRanksSlowdown || GetWorld()->GetTimeSeconds() - FirstPendingLossTimeSeconds > 8.0f * CloseRanksSlowdown) &&
+        (GetWorld()->GetTimeSeconds() - LastLossTimeSeconds > 8.0f * CloseRanksSlowdown || GetWorld()->GetTimeSeconds() - FirstPendingLossTimeSeconds > 20.0f * CloseRanksSlowdown) &&
         !(OwnerCompany->FormationTransition && OwnerCompany->FormationTransition->IsReforming()) && !VisualPath.bMovingVisuals)
     {
         bClosingRanksPending = false;
+        bStepUpPending = false;   // the full re-form also fills the files
         RebuildFormation();
     }
     UpdateSettling(DeltaTime);
@@ -857,12 +867,12 @@ void UStrategyInfantryVisualComponent::HandleCasualtyVisualEvent(int32 AppliedLo
     // Local replacement first: the man directly behind steps up inside his own file, no sideways move yet.
     if (SoldierComponents.Num() < StandingBeforeCasualty)
     {
-        StepUpFiles();
+        ScheduleStepUp();
         bScaleOnlyRebuild = true;
         RebuildFormation();
         bScaleOnlyRebuild = false;
     }
-    // CachedStrength is set above, so the tick never sees this drop: the delayed closing of ranks is armed here (3-10 s, slower at low morale).
+    // CachedStrength is set above, so the tick never sees this drop: the delayed closing of ranks is armed here (8-40 s, slower at low morale).
     if (!bClosingRanksPending) { FirstPendingLossTimeSeconds = CasualtyNow; }
     bClosingRanksPending = true;
     LastLossTimeSeconds = CasualtyNow;
@@ -936,6 +946,15 @@ void UStrategyInfantryVisualComponent::QueueKills(int32 Count)
     KillSoldiers(Count);
 }
 
+void UStrategyInfantryVisualComponent::ScheduleStepUp()
+{
+    const float StepUpNow = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+    const float StepUpSlowdown = OwnerCompany ? 1.0f + (1.0f - FMath::Clamp(OwnerCompany->Morale, 0.f, 100.f) / 100.f) : 1.0f;
+    // The first loss sets the moment; further losses before it do not push it back (the men behind are already moving up).
+    if (!bStepUpPending) { StepUpDueSeconds = StepUpNow + 2.0f * StepUpSlowdown; }
+    bStepUpPending = true;
+}
+
 void UStrategyInfantryVisualComponent::StepUpFiles()
 {
     if (!OwnerCompany || !OwnerCompany->FormationComponent ||
@@ -990,7 +1009,7 @@ void UStrategyInfantryVisualComponent::ProcessPendingKills()
     }
     if (bAny)
     {
-        StepUpFiles();
+        ScheduleStepUp();
         bScaleOnlyRebuild = true;
         RebuildFormation();
         bScaleOnlyRebuild = false;

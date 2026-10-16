@@ -2422,6 +2422,12 @@ Efter brugerens test og to optagelser:
 - Rettelse (`StrategyFieldOfficerComponent.cpp`, fjendens gren i `ThinkInfantry`): frontskiftet gives nu som `DefendHere` på stedet (drejning på stedet i eksekutoren, missionsanker holder den nye front). Et skifte, der allerede er givet mod samme fjende (under 5 grader forskel), efterlades, så ordren ikke genstartes ved hvert tjek. Spillerens kompagnier med direkte ordrer berøres ikke (kun fjendesiden), marcherende enheder beholder missionen (som før).
 - Ikke rettet: danske AI-kompagniers frontskift (`!bMoving`-grenen) bruger stadig `Hold` med front og har samme døde facing. Ikke bygget, ikke prøvet i spillet, ikke committet. UE-API er uændret. Ingen accept-test for front/DefendHere findes; ikke udvidet.
 
+### 2026-10-16 - Hullerne lukkes langsommere efter tab
+
+- Efter brugerens test: hullerne lukkede for hurtigt. Manden bagved træder nu først frem efter ca. 2 s (op til 4 s ved lav moral) i stedet for med det samme (`ScheduleStepUp`); flere tab inden da udskyder det ikke.
+- Sidelæns opslutning: 8 s ro efter sidste tab (før 3 s), senest 20 s efter første tab (før 8 s), begge ganget med moralfaktoren 1-2.
+- Ikke set i spillet endnu.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
