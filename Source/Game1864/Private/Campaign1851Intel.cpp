@@ -32,7 +32,7 @@ void ACampaign1851Map::UpdateIntel()
 	for (FCampaign1851EnemyCorps& C : EnemyCorps)
 	{
 		// In peace the attachés and the newspapers tell where every corps stands.
-		if (!bAtWar)
+		if (!bAtWar || ((C.Nation == TEXT("SE") || C.Nation == TEXT("NO")) && !IsNeighbourHostile(C.Nation)))
 		{
 			C.bSeen = true;
 			C.SeenKm = C.Km;
@@ -113,7 +113,7 @@ float ACampaign1851Map::EnemyEstimateOfDefence(int32 Town) const
 		{
 			continue;
 		}
-		const bool bWatched = EnemyCorps.ContainsByPredicate([&R](const FCampaign1851EnemyCorps& C) { return FVector2D::Distance(C.Km, R.Km) < 15.0; });
+		const bool bWatched = EnemyCorps.ContainsByPredicate([this, &R](const FCampaign1851EnemyCorps& C) { return IsNeighbourHostile(C.Nation) && FVector2D::Distance(C.Km, R.Km) < 15.0; });
 		Men += R.PresentMen() * (bWatched ? 1.f : 1.f + 0.3f * IntelNoise(i, Town)) + R.Guns * 60.f;
 	}
 	for (const FCampaign1851Fort& F : Forts)
@@ -244,6 +244,8 @@ void ACampaign1851Map::EnemyReinforcements()
 		// A blockade with the sea held halves the drafts (the Baltic ports closed).
 		if (C.Men <= 0 || C.bEngaged) { continue; }
 		const FCampaign1851NeighbourArmy* SouthSource = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& A) { return A.CorpsId == C.Id; });
+		// Legacy abstract corps keep their saved losses, but cannot receive unpaid national drafts.
+		if (ForeignTreasuries.Find(C.Nation) && (!SouthSource || SouthSource->District.IsEmpty())) { continue; }
 		if (const FCampaign1851NeighbourArmy* NeighbourSource = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& A) { return A.CorpsId == C.Id; }))
 		{
 			if (NeighbourSource->bGarrison) { continue; }
@@ -252,7 +254,8 @@ void ACampaign1851Map::EnemyReinforcements()
 				&& !PlanMarch(C.Town, C.Km, NeighbourSource->Town, TownKm(NeighbourSource->Town), 16.f, ECampaign1851RouteMode::RoadsOnly, NeighbourSupplyLegs, nullptr, C.Nation)) { continue; }
 		}
 		const int32 Draft = (C.Nation == TEXT("PR") ? 3000 : 1500) / (bBlockade && HasSeaControl() ? 2 : 1);
-		const int32 SouthTarget = SouthSource && !SouthSource->District.IsEmpty() ? SouthSource->MobilisedMen : C.StartMen * 3 / 2;
+		// Replace losses only up to the manpower actually bought by mobilisation, even at stage 3.
+		const int32 SouthTarget = SouthSource && !SouthSource->District.IsEmpty() ? C.StartMen : C.StartMen * 3 / 2;
 		int32 Add = FMath::Min(Draft, FMath::Max(0, SouthTarget - C.Men));
 		if (SouthSource && !SouthSource->District.IsEmpty())
 		{

@@ -1081,7 +1081,9 @@ bool ACampaign1851Map::OrderMarchTo(const TArray<int32>& Column, int32 CityIndex
 		? FString::Printf(TEXT("%s%s"), *Plan.TrainSource, Plan.WaitDays > 0.01f ? *FString::Printf(TEXT("  ·  kolonnen venter %s på togene"), *FormatDuration(Plan.WaitDays)) : TEXT(""))
 		: Plan.Note;
 	UpdateTroopTrainPieces();
-	return Ordered > 0;
+	const auto LogActionResult = Ordered > 0;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("march"), TEXT("OrderMarchTo"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Column_count"), double(Column.Num()) }, { TEXT("CityIndex"), double(CityIndex) }, { TEXT("TargetKm_x"), TargetKm.X }, { TEXT("TargetKm_y"), TargetKm.Y }, { TEXT("Mode"), double(Mode) } }, {  }); }
+	return LogActionResult;
 }
 
 // ------------------------------------------------------------------ troop trains

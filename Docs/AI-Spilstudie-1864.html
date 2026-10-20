@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-spilstudie 1864</title>
+<style>
+:root{--bg:#f3efe6;--card:#fffdf8;--ink:#28231d;--muted:#6b6257;--line:#d6ccbb;--accent:#9e2a2b;--sec:#e9e3d6;
+--c1:#2f6b3a;--c1b:#e4f0e2;--c2:#1f4e79;--c2b:#e2ebf5;--c3:#9a5a12;--c3b:#f7ead6;--c4:#9e2a2b;--c4b:#f6e2e0;--c5:#5a3f9e;--c5b:#ece6fa;--c6:#8a6d0b;--c6b:#f6f0d2;--c7:#1d6f7a;--c7b:#ddf0f2;--c8:#1f3f73;--c8b:#e1e7f4;--c9:#3b6d11;--c9b:#e8f1dc}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171b;--card:#1f2228;--ink:#ece6da;--muted:#a59d90;--line:#363a42;--accent:#f09595;--sec:#1a1d22;
+--c1:#9fd6a8;--c1b:#1d2e21;--c2:#9cc3ea;--c2b:#1b2a3b;--c3:#f0bb72;--c3b:#352611;--c4:#f2a3a3;--c4b:#3a1f1f;--c5:#c4b5f5;--c5b:#2a2340;--c6:#e8cf6a;--c6b:#332c10;--c7:#8fd8e2;--c7b:#15303a;--c8:#a9bff0;--c8b:#1c2640;--c9:#b0d987;--c9b:#22301a}}
+:root[data-theme="dark"]{--bg:#15171b;--card:#1f2228;--ink:#ece6da;--muted:#a59d90;--line:#363a42;--accent:#f09595;--sec:#1a1d22;
+--c1:#9fd6a8;--c1b:#1d2e21;--c2:#9cc3ea;--c2b:#1b2a3b;--c3:#f0bb72;--c3b:#352611;--c4:#f2a3a3;--c4b:#3a1f1f;--c5:#c4b5f5;--c5b:#2a2340;--c6:#e8cf6a;--c6b:#332c10;--c7:#8fd8e2;--c7b:#15303a;--c8:#a9bff0;--c8b:#1c2640;--c9:#b0d987;--c9b:#22301a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1240px;margin:0 auto;padding:24px 16px 40px}
+header h1{font:700 32px/1.1 Georgia,serif;margin:0;letter-spacing:1px}
+header h1 b{color:var(--accent)}
+header p{margin:6px 0 0;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-size:12px}
+section{background:var(--sec);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:14px}
+section>h2{margin:0 0 10px;font:600 17px/1.2 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.5px}
+section>h2 span{color:var(--accent);margin-right:6px}
+.row{display:grid;gap:10px}
+.c3{grid-template-columns:1.2fr 1fr 1fr}
+.c2{grid-template-columns:1.3fr 1fr}
+@media (max-width:860px){.c3,.c2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.card h3{margin:0 0 6px;font-size:15px}
+.card p{margin:0;color:var(--muted)}
+ul{margin:4px 0 0;padding-left:18px}
+li{margin:1px 0}
+.chk{list-style:none;padding-left:0}
+.chk li::before{content:"☐ ";color:var(--muted)}
+.chk li.ok::before{content:"☑ ";color:var(--c1)}
+.prompt{font-family:ui-monospace,Consolas,monospace;font-size:13px;background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:10px;margin-top:6px}
+.agents{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.agent{border-radius:10px;padding:10px 12px;border:1px solid}
+.agent h3{margin:0;font-size:14px}
+.agent .id{font:12px ui-monospace,Consolas,monospace;opacity:.85}
+.agent ul{font-size:13px;color:var(--ink)}
+.agent .tools{font-size:12px;margin-top:6px;color:var(--muted)}
+.a1{background:var(--c1b);border-color:var(--c1)}.a1 h3{color:var(--c1)}
+.a2{background:var(--c2b);border-color:var(--c2)}.a2 h3{color:var(--c2)}
+.a3{background:var(--c3b);border-color:var(--c3)}.a3 h3{color:var(--c3)}
+.a4{background:var(--c4b);border-color:var(--c4)}.a4 h3{color:var(--c4)}
+.a5{background:var(--c5b);border-color:var(--c5)}.a5 h3{color:var(--c5)}
+.a6{background:var(--c6b);border-color:var(--c6)}.a6 h3{color:var(--c6)}
+.a7{background:var(--c7b);border-color:var(--c7)}.a7 h3{color:var(--c7)}
+.a8{background:var(--c8b);border-color:var(--c8)}.a8 h3{color:var(--c8)}
+.a9{background:var(--c9b);border-color:var(--c9)}.a9 h3{color:var(--c9)}
+.status{display:inline-block;font-size:11px;border-radius:999px;padding:0 7px;margin-left:4px;border:1px solid currentColor;vertical-align:middle}
+.tools4{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.tool h3{display:flex;justify-content:space-between;gap:6px}
+.pin{grid-column:1/-1}
+.pin .apps{display:grid;gap:6px 18px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));margin-top:6px}
+.pin .apps div{font-size:13px}
+.pin .apps b{color:var(--c9)}
+.pipe{display:flex;flex-wrap:wrap;gap:6px;align-items:stretch}
+.pipe div{flex:1 1 110px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px;text-align:center;font-size:13px}
+.pipe div small{display:block;color:var(--muted);font-size:11px}
+.folders{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.folders code{font-size:13px;color:var(--accent)}
+footer{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;margin-top:14px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>AI GAME STUDIO <b>1864</b></h1>
+<p>Lokal AI-drevet produktion · fra idé til spil · Unreal Engine 5.8</p>
+</header>
+
+<section>
+<h2><span>1.</span>Dit projekt-cockpit</h2>
+<div class="row c3">
+  <div class="card"><h3>Du skriver kun til projektlederen</h3>
+    <p>I Claude-appen (Code-fanen eller Remote Control fra telefonen).</p>
+    <div class="prompt">Eksempel: Lav en norsk infanterist fra 1864 ud fra billederne i Reference/Units/Norwegian Infantry. Rig ham, giv ham march med skuldergevær og importér ham til Unreal.</div>
+  </div>
+  <div class="card"><h3>Projektplan (eksempel)</h3>
+    <ul class="chk">
+      <li class="ok">Research og kilder</li><li class="ok">Referencebilleder</li><li>3D-modellering</li><li>Teksturer</li><li>Blender-oprydning</li><li>Rigging og animation</li><li>Unreal-import og VAT</li><li>QA og billedserier</li>
+    </ul>
+  </div>
+  <div class="card"><h3>Færdigt resultat</h3>
+    <ul class="chk">
+      <li class="ok">3D-model (FBX)</li><li class="ok">Teksturer</li><li class="ok">Animationer bagt i VAT</li><li class="ok">Klar i Unreal</li><li class="ok">Historik i Docs/</li>
+    </ul>
+    <p style="margin-top:6px">Til sidst tester du selv i spillet.</p>
+  </div>
+</div>
+</section>
+
+<section>
+<h2><span>2.</span>AI-projektleder og fælles videnbase</h2>
+<div class="row c2">
+  <div class="card"><h3>Orkestrator: Claude Code (Opus)</h3>
+    <p>Forstår opgaven, planlægger, fordeler til agenterne, bygger, tester og rapporterer.</p>
+    <ul><li>Opgaveanalyse og plan (Plan Mode ved nye features)</li><li>Tildeler agenter og styrer rækkefølgen (ingen GPU-kollisioner)</li><li>Kvalitetssikring: læser hver agents resultat og diff</li><li>Bygger med Build.bat, kører testflag og billedserier</li><li>Rapporterer på dansk og fører historikken</li></ul>
+  </div>
+  <div class="card"><h3>Fælles videnbase</h3>
+    <ul><li><b>AGENTS.md / CLAUDE.md:</b> regler for alle agenter</li><li><b>Docs/:</b> historik, Backlog, TestFlags, CampaignLog</li><li><b>Reference/:</b> uniformer, faner, kanoner, BILLEDLISTE.md</li><li><b>Data/Campaign1851/:</b> historiske tal (1825 og 1851)</li><li><b>Hukommelse:</b> dine tidligere ønsker og beslutninger</li></ul>
+  </div>
+</div>
+</section>
+
+<section>
+<h2><span>3.</span>Specialiserede AI-agenter</h2>
+<div class="agents">
+  <div class="agent a1"><h3>Research <span class="status">oprettet</span></h3><div class="id">research · Sonnet</div>
+    <ul><li>Historisk research 1825–1864</li><li>Uniformer, våben, eksercits</li><li>Befolkning, grænser, alliancer</li><li>Kilder; skøn markeres</li></ul></div>
+  <div class="agent a2"><h3>Koncept <span class="status">oprettet</span></h3><div class="id">koncept · Haiku</div>
+    <ul><li>Referencebriefs</li><li>BILLEDLISTE.md pr. nation</li><li>Prompts til billed-apps</li><li>Multiview-krav</li></ul></div>
+  <div class="agent a3"><h3>3D-generering <span class="status">oprettet</span></h3><div class="id">model3d · Sonnet</div>
+    <ul><li>Billede → 3D (Hunyuan3D, TRELLIS2)</li><li>Rekvisitter (Stable Fast 3D)</li><li>Varianter pr. nation</li><li>Én GPU-app ad gangen</li></ul></div>
+  <div class="agent a4"><h3>Tekstur <span class="status">oprettet</span></h3><div class="id">tekstur · Sonnet</div>
+    <ul><li>PBR-teksturer</li><li>Uniformsfarver pr. regiment</li><li>Rettelser med inpainting</li><li>Optimering af størrelse</li></ul></div>
+  <div class="agent a5"><h3>Blender <span class="status">oprettet</span></h3><div class="id">blender · Sonnet</div>
+    <ul><li>Model-oprydning, retopologi</li><li>UV og materialer</li><li>Skalering til Unreal</li><li>FBX-eksport (headless)</li></ul></div>
+  <div class="agent a6"><h3>Rigging og animation <span class="status">oprettet</span></h3><div class="id">rigging-animation · Sonnet</div>
+    <ul><li>Skelet og skinning</li><li>Mixamo-retargeting</li><li>Klip: march, skuldergevær, sidestep, fane</li><li>Gangfart målt i cm/s</li></ul></div>
+  <div class="agent a7"><h3>QA / test <span class="status">oprettet</span></h3><div class="id">qa-test · Haiku</div>
+    <ul><li>Validatorer og acceptancetests</li><li>Mesh-, tekstur- og klip-tjek</li><li>Logs fra testslag</li><li>Rapport med fil:linje</li></ul></div>
+  <div class="agent a8"><h3>Unreal-integration <span class="status">oprettet</span></h3><div class="id">unreal-integration · Sonnet</div>
+    <ul><li>Import med UnrealEditor-Cmd</li><li>Rotation roll 90, backup</li><li>VAT-bagning, BakeVersion</li><li>Kun når editoren er lukket</li></ul></div>
+  <div class="agent a9"><h3>Asset-manager <span class="status">oprettet</span></h3><div class="id">asset-manager · Haiku</div>
+    <ul><li>Navngivning og mappestruktur</li><li>SourceAssets ↔ Content</li><li>Versioner og backups</li><li>Kun lister; sletter intet</li></ul></div>
+</div>
+<div class="agents" style="margin-top:8px">
+  <div class="card"><h3>Kode-agenter</h3>
+    <ul><li><b>Codex</b> (OpenAI, via agenten <code>codex</code>): afgrænsede C++-opgaver og review på din maskine</li><li><b>GitHub Copilot coding agent</b>: tager GitHub-issues og laver pull requests i skyen <span class="status">ikke aktiveret</span></li></ul></div>
+  <div class="card"><h3>Hjælpeagenter <span class="status">findes</span></h3>
+    <ul><li><b>search:</b> finder kode og filer i repoet</li><li><b>docs:</b> slår UE 5.8-, Python- og Blender-API op</li></ul></div>
+</div>
+</section>
+
+<section>
+<h2><span>4.</span>Lokalt værktøjslag</h2>
+<div class="tools4">
+  <div class="card pin"><h3>Pinokio: kører lokale AI-apps (D:\pinokio)</h3>
+    <div class="apps">
+      <div><b>Hunyuan3D-2 LowVRAM:</b> billede → teksturert 3D-figur; hovedværktøj til soldater</div>
+      <div><b>ComfyUI Image to 3D:</b> TRELLIS2 (3D i høj kvalitet), GeometryPack (rens mesh), UniRig (auto-skelet)</div>
+      <div><b>Stable Fast 3D:</b> hurtige rekvisitter: kugle, visker, ladestok</div>
+      <div><b>AniGen:</b> animerbar figur fra ét billede; kandidat til heste</div>
+      <div><b>Puppeteer Auto-Rigger:</b> skelet, skinning og FBX-eksport</div>
+      <div><b>Mesh2Motion:</b> auto-rig og animationsprøve i browseren</div>
+      <div><b>ComfyUI:</b> konceptbilleder, multiview-referencer, teksturer</div>
+      <div><b>Fooocus:</b> hurtige konceptskitser</div>
+      <div><b>Stable Diffusion Forge:</b> inpainting, ikoner, kortgrafik</div>
+      <div><b>FaceFusion:</b> variation i portrætter og ansigter</div>
+      <div><b>FramePack Studio:</b> billede → video som bevægelsesreference</div>
+      <div><b>Wan2GP:</b> AI-video: referenceklip og trailer</div>
+    </div>
+  </div>
+  <div class="card tool"><h3>Blender 5.2</h3><p>Rigging, klip-redigering, spejling, FBX-eksport. Køres headless med scripts.</p></div>
+  <div class="card tool"><h3>Unreal Engine 5.8</h3><p>Spillet: kampagnekort og 3D-slag; import, VAT-bagning, byg og testflag.</p></div>
+  <div class="card tool"><h3>Mixamo (web)</h3><p>Færdige menneskeanimationer som råmateriale.</p></div>
+  <div class="card tool"><h3>Python</h3><p>Kortbygning, validatorer, loganalyse, Unreal- og Blender-scripts.</p></div>
+  <div class="card tool"><h3>PowerShell</h3><p>Build.bat, testkørsler, processtyring (er editoren lukket?).</p></div>
+  <div class="card tool"><h3>Visual Studio / MSVC</h3><p>C++-compileren bag buildet.</p></div>
+  <div class="card tool"><h3>Codex CLI</h3><p>OpenAIs kodeagent, kørt lokalt med brief og faste regler.</p></div>
+  <div class="card tool"><h3>Git, GitHub og Copilot</h3><p>Versionsstyring på branchen campaign. Copilot coding agent kræver aktivering på github.com og at branchen pushes.</p></div>
+  <div class="card tool"><h3>ffmpeg</h3><p>Billeder ud af dine optagelser, så fejl kan ses på tidspunkt.</p></div>
+  <div class="card tool"><h3>OneDrive</h3><p>Synkroniserer projektet; pause under store builds.</p></div>
+</div>
+</section>
+
+<section>
+<h2><span>5.</span>Asset-pipeline og output</h2>
+<div class="pipe">
+  <div>Idé / prompt<small>dig</small></div>
+  <div>Research<small>research</small></div>
+  <div>Referencer<small>koncept</small></div>
+  <div>3D-model<small>model3d</small></div>
+  <div>Oprydning og UV<small>blender</small></div>
+  <div>Teksturer<small>tekstur</small></div>
+  <div>Rigging<small>rigging-animation</small></div>
+  <div>Animation<small>rigging-animation</small></div>
+  <div>Import og VAT<small>unreal-integration</small></div>
+  <div>QA og billeder<small>qa-test</small></div>
+  <div>Klar til spil<small>dig tester</small></div>
+</div>
+</section>
+
+<section>
+<h2><span>6.</span>Projektmapper og resultater</h2>
+<div class="folders">
+  <div class="card"><code>Reference/</code><p>Research og referencebilleder pr. enhed og nation</p></div>
+  <div class="card"><code>SourceAssets/</code><p>Modeller, FBX-klip og kildefiler</p></div>
+  <div class="card"><code>Tools/Animation/</code><p>Blender-scripts til rigging og klip</p></div>
+  <div class="card"><code>Content/</code><p>Unreal-assets: figurer, VAT, materialer, kort</p></div>
+  <div class="card"><code>Content/Python/</code><p>Import- og bagescripts til Unreal</p></div>
+  <div class="card"><code>Source/</code><p>C++: Game1864 (kampagne) og Strategy1864 (slag)</p></div>
+  <div class="card"><code>Docs/</code><p>Historik, Backlog, testflag, denne side</p></div>
+  <div class="card"><code>Saved/Codex/</code><p>Briefs, svar og billedserier fra tests</p></div>
+</div>
+</section>
+
+<footer><span>Pinokio-apps, Blender og Unreal kører lokalt</span><span>Claude, Codex og Copilot er skymodeller</span><span>Fuld kontrol: ingen commit eller push uden dit ja</span><span>Opdateret 2026-10-20</span></footer>
+</main>
+</body>
+</html>

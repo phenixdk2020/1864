@@ -9,6 +9,7 @@
 #include "Campaign1851Fort.h"
 #include "Campaign1851Map.generated.h"
 
+class FCampaign1851DecisionLog;
 class UStaticMeshComponent;
 class FJsonObject;
 class UInstancedStaticMeshComponent;
@@ -510,6 +511,13 @@ struct FCampaign1851NeighbourDistrict
 	double Treasury = 0.0;
 };
 
+/** Scenario estimates in the same rd. game unit as Denmark; no historical exchange rate. */
+struct FCampaign1851ForeignEconomy
+{
+	double GoodsPerHead[3] = { 0.0, 0.0, 0.0 };
+	double ExportDuty = 0.0;
+};
+
 /** Foreign regiments retain stable identities; battle/march state belongs to EnemyCorps. */
 struct FCampaign1851NeighbourArmy
 {
@@ -517,7 +525,10 @@ struct FCampaign1851NeighbourArmy
 	int32 Town = INDEX_NONE;
 	int32 Men = 0, MobilisedMen = 0, Guns = 0;
 	bool bGarrison = false;
-	FString District, Arm, ParentCorps, Chief;
+	FString District, Arm, ParentCorps, Chief, Division, CorpsName, OfficerId;
+	float OfficerMarchFactor = 1.f; // static scenario data, not mutable save state
+	int32 MobilisationDays = 0, MobilisationFullDays = 0, MobilisationStage = 0;
+	double MobilisationStartDay = -1.0;
 	TArray<FString> Subunits;
 	float FoodDays = Campaign1851Supply::FoodCarried, FodderDays = Campaign1851Supply::FodderCarried;
 	/** Once transferred, EnemyCorps owns losses, routes, intelligence and battle state. */
@@ -1076,6 +1087,14 @@ public:
 	FString NeighbourRegimentInfo(int32 Town) const;
 	int32 TakeNeighbourRecruits(const FCampaign1851NeighbourArmy& Army, int32 Wanted);
 	float NeighbourMarchPace(int32 CorpsId) const;
+	/** Scenario personnel, read-only: foreign cabinets cannot be appointed by Denmark. */
+	const FCampaign1851Officer* ForeignCommander(const FString& NationId, const FString& OfficerId = FString()) const;
+	const FCampaign1851Minister* ForeignMinister(const FString& NationId, ECampaign1851Portfolio Portfolio) const;
+	FString ForeignPersonnelInfo(const FString& NationId) const;
+	FString ForeignPersonnelSummary(const FString& NationId) const;
+	double ForeignTreasury(const FString& NationId) const;
+	const TMap<FString, double>& GetForeignTreasuries() const { return ForeignTreasuries; }
+	void RestoreForeignTreasuries(const TMap<FString, double>& Saved);
 	bool NeighbourDetailsKnown(int32 Town) const;
 	void SetNeighbourPoliticalView(bool bPolitical);
 	TArray<FString> SaveNeighbours() const;
@@ -1231,12 +1250,27 @@ public:
 	/** Writes Saved/Battle/Fortifications.json for the 3D battles. */
 	void ExportForts() const;
 
+ // Analysis-only actor context; controller scopes it, simulation/ministries override it.
+ FString CampaignLogActor = TEXT("ai");
+ void CampaignLogSession(const FString& LogEvent, const FString& LogSlot = FString(), int32 LogVersion = UCampaign1851SaveGame::CurrentVersion, const FString& LogStamp = FString());
+ void SuspendCampaignLog();
+ void LogCampaignDecision(const FString& LogNation, const FString& LogKind, const FString& LogWhat, const FString& LogWhy,
+     const FString& LogActorName = FString(), const TMap<FString, double>& LogNumbers = {}, const TMap<FString, FString>& LogStrings = {});
+ void LogCampaignEvent(const FString& LogId, bool bLogPossible, float LogProbability, bool bLogFired, const FString& LogWhy);
+ void TickCampaignLog();
+ void SnapshotCampaignLog();
+ FString CampaignLogNation() const;
+ TSharedPtr<FCampaign1851DecisionLog> CampaignDecisionLog;
+ int32 CampaignLogLastDay = INDEX_NONE;
+ FString CampaignLogLastAutosaveDate;
+ TMap<FString, double> LogCampaignIncome, LogCampaignExpenses;
+
 	// ---- Nations, growth and the national AI (Campaign1851Nations.cpp).
 
 	const TArray<FCampaign1851Nation>& GetNations() const { return Nations; }
 	int32 GetPlayerNation() const { return PlayerNation; }
 	/** How the player runs a portfolio of his own nation (MANUEL, RÅDGIVER, AUTO). */
-	void SetDelegation(ECampaign1851Portfolio P, ECampaign1851Delegation Mode) { if (Nations.IsValidIndex(PlayerNation)) { Nations[PlayerNation].Modes[int32(P)] = Mode; } }
+	void SetDelegation(ECampaign1851Portfolio P, ECampaign1851Delegation Mode);
 	/** Guardrail: cash the ministries must leave in the treasury. */
 	void SetReserve(double Rd) { if (Nations.IsValidIndex(PlayerNation)) { Nations[PlayerNation].Reserve = FMath::Max(0.0, Rd); } }
 	const TArray<FCampaign1851Decision>& GetDecisions() const { return Decisions; }
@@ -1569,6 +1603,11 @@ private:
 	void DailyNeighbourSupply();
 	TArray<FCampaign1851NeighbourArmy> NeighbourArmyAtStart, NeighbourArmies;
 	TArray<FCampaign1851NeighbourDistrict> NeighbourDistricts;
+	TMap<FString, FCampaign1851ForeignEconomy> ForeignEconomies;
+	TMap<FString, double> ForeignTreasuries;
+	bool LoadForeignEconomies();
+	void ResetForeignEconomies();
+	double DistrictExportValuePerYear(ECampaign1851Good Good, double Rural, double PerHead, bool bWar, bool bSeaAccess) const;
 	TArray<uint16> NeighbourDistrictGrid;
 	double NeighbourNextMobilisationDay = -1.0; // derived daily scheduler, not campaign state
 	TArray<uint8> NeighbourOwners;
@@ -1628,6 +1667,8 @@ private:
 
 	TArray<uint16> Height;
 	int32 HeightW = 0, HeightH = 0;
+	/** Derived from map metadata, never save-game state. */
+	float MapTextureYScale = 1.f;
 	TArray<float> GridZ;               // terrain mesh vertex heights (units)
 	TArray<FColor> Features;           // R = monarchy land, G = woodland
 	int32 FeaturesW = 0, FeaturesH = 0;
@@ -1650,6 +1691,12 @@ private:
 	void UpdateTroopTrainPieces();
 	FString OrderNote;
 	bool LoadOfficers();
+	bool LoadForeignOfficers();
+	bool LoadForeignMinisters();
+	TMap<FString, TArray<FCampaign1851Officer>> ForeignOfficers;
+	TMap<FString, FString> ForeignCommanderIds;
+	TMap<FString, TArray<FCampaign1851Minister>> ForeignMinisters;
+	TMap<FString, TArray<FString>> ForeignMinisterRoles;
 	/** The officer corps of 1851: the generals, and a chief for every regiment plus a few in reserve (fixed seed). */
 	void ResetOfficers();
 	FCampaign1851Officer MakeOfficer(FRandomStream& Rng, bool bGeneral, const FString& Rank) const;

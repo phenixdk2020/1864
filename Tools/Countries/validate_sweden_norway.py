@@ -13,6 +13,12 @@ def row_bytes(raw,key,index):
     text=raw.decode('utf-8-sig'); locations,_=spans(text);start,end=locations[(key,index)]
     return text[start:end].encode('utf-8')
 def main():
+    if (DATA/'Countries/LevelB.json').exists():
+        from validate_level_b import validate
+        validate('SE/NO')
+        from validate_level_c import validate as validate_c
+        validate_c()
+        return
     checked=0
     for name,key in [('Nations_1825.json','nations'),('Nations1851.json','nations')]+[(f'{prefix}_{year}.json',key) for year in [1825,1851] for prefix,key in [('cities_neighbours','cities'),('Army_Neighbours','armies')]]:
         original=git_bytes(name); current=(DATA/name).read_bytes(); before=json.loads(original);after=json.loads(current)

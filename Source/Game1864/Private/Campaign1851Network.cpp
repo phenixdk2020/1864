@@ -451,7 +451,9 @@ bool ACampaign1851Map::StartLinkWork(int32 Link, ECampaign1851LinkWork Work, boo
 	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|network|start|%s|%d rd|%.0f days"), *Name, Cost, L.WorkDays);
 	RebuildNetworkMeshes();
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("build"), TEXT("StartLinkWork"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Link"), double(Link) }, { TEXT("Work"), double(Work) }, { TEXT("bCharge"), double(bCharge) } }, {  }); }
+	return LogActionResult;
 }
 
 void ACampaign1851Map::FinishLinkWork(int32 Link)

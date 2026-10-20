@@ -29,6 +29,10 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Condition")
     float ReformFatiguePerSecond = 0.35f;
 
+    /** Extra fatigue per second while marching at the double (on top of MovingFatiguePerSecond): about 4x the march's tiring. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Condition")
+    float DoubleTimeFatiguePerSecond = 0.60f;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Condition")
     float CombatFatiguePerSecond = 0.15f;
 

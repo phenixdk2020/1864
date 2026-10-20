@@ -33,8 +33,12 @@
       "men": 400,
       "mobilisedMen": 400,
       "guns": 8,
-      "district": ""
-    },
+      "district": "SE-malmohus"
+    ,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
     {
       "id": "garrison-Helsingborg",
       "name": "Garnison i Helsingborg",
@@ -44,8 +48,12 @@
       "men": 40,
       "mobilisedMen": 40,
       "guns": 0,
-      "district": ""
-    },
+      "district": "SE-malmohus"
+    ,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
     {
       "id": "garrison-Landskrona",
       "name": "Garnison i Landskrona",
@@ -55,8 +63,12 @@
       "men": 400,
       "mobilisedMen": 400,
       "guns": 12,
-      "district": ""
-    },
+      "district": "SE-malmohus"
+    ,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
     {
       "id": "garrison-Lund",
       "name": "Garnison i Lund",
@@ -66,8 +78,12 @@
       "men": 40,
       "mobilisedMen": 40,
       "guns": 0,
-      "district": ""
-    },
+      "district": "SE-malmohus"
+    ,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
     {
       "id": "garrison-Ystad",
       "name": "Garnison i Ystad",
@@ -77,8 +93,12 @@
       "men": 40,
       "mobilisedMen": 40,
       "guns": 0,
-      "district": ""
-    },
+      "district": "SE-malmohus"
+    ,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
     {
       "id": "garrison-Trelleborg",
       "name": "Garnison i Trelleborg",
@@ -88,8 +108,12 @@
       "men": 40,
       "mobilisedMen": 40,
       "guns": 0,
-      "district": ""
-    },
+      "district": "SE-malmohus"
+    ,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
     {
       "id": "garrison-Kristianstad",
       "name": "Garnison i Kristianstad",
@@ -99,8 +123,12 @@
       "men": 650,
       "mobilisedMen": 650,
       "guns": 12,
-      "district": ""
-    },
+      "district": "SE-kristianstad"
+    ,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
     {
       "id": "garrison-Karlskrona",
       "name": "Garnison i Karlskrona",
@@ -110,8 +138,12 @@
       "men": 1200,
       "mobilisedMen": 1200,
       "guns": 36,
-      "district": ""
-    },
+      "district": "SE-blekinge"
+    ,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
     {
       "id": "garrison-Halmstad",
       "name": "Garnison i Halmstad",
@@ -121,8 +153,12 @@
       "men": 40,
       "mobilisedMen": 40,
       "guns": 0,
-      "district": ""
-    },
+      "district": "SE-halland"
+    ,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
     {
       "id": "garrison-Göteborg",
       "name": "Garnison i Göteborg",
@@ -132,8 +168,12 @@
       "men": 500,
       "mobilisedMen": 500,
       "guns": 20,
-      "district": ""
-    },
+      "district": "SE-goteborg-bohus"
+    ,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
     {
       "id": "garrison-Rostock",
       "name": "Garnison i Rostock",
@@ -233,6 +273,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Stettin",
@@ -300,6 +344,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Bremen",
@@ -321,8 +369,12 @@
       "men": 80,
       "mobilisedMen": 80,
       "guns": 0,
-      "district": ""
-    },
+      "district": "SE-halland"
+    ,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
     {
       "id": "garrison-Greifswald",
       "name": "Garnison i Greifswald",
@@ -353,6 +405,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Bergen på Rügen",
@@ -384,6 +440,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Stade",
@@ -832,6 +892,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Swinemünde",
@@ -899,6 +963,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Stargard",
@@ -930,6 +998,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Pasewalk",
@@ -961,6 +1033,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Demmin",
@@ -992,6 +1068,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Ueckermünde",
@@ -1023,6 +1103,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Wolgast",
@@ -1054,6 +1138,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Barth",
@@ -1085,6 +1173,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Grimmen",
@@ -1116,6 +1208,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Tribsees",
@@ -1147,6 +1243,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Franzburg",
@@ -1178,6 +1278,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Putbus",
@@ -1209,6 +1313,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Garz på Rügen",
@@ -1240,6 +1348,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Sassnitz",
@@ -1271,6 +1383,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Gartz",
@@ -1302,6 +1418,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Prenzlau",
@@ -1333,6 +1453,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Schwedt",
@@ -1364,6 +1488,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Bergedorf",
@@ -1464,6 +1592,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Angermünde",
@@ -1495,6 +1627,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Passow",
@@ -1526,6 +1662,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Tantow",
@@ -1557,6 +1697,10 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
     {
       "id": "garrison-Lauenburg",
@@ -1598,7 +1742,12 @@
       "men": 4451,
       "mobilisedMen": 12689,
       "legacyAggregate": false
-    },
+    ,
+"district": "SE-kristianstad",
+  "mobilisationDays": 14,
+  "mobilisationFullDays": 28,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
     {
       "id": "PR-pomerania",
       "name": "Preussisk pommersk korps",
@@ -1663,6 +1812,93 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 7,
+  "mobilisationFullDays": 28,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt.",
+  "chief": "Friedrich von Wrangel",
+  "chiefStatus": "estimated-field-assignment",
+  "division": "4. Division",
+  "corpsName": "II. Armeekorps (pommersk feltdetachement)",
+  "organisationNote": "Perioderamme fra Prussia/GameReady/Army; feltfordeling og chef er spilskøn."
+,
+"officer": {
+    "id": "PR_WRANGEL",
+    "name": "Friedrich von Wrangel",
+    "rank": "General af kavalleriet",
+    "born": 1784,
+    "leadership": 5,
+    "inspiration": 5,
+    "initiative": 5,
+    "tactical": 5,
+    "staff": 5,
+    "discipline": 5,
+    "aggression": 5,
+    "composure": 5,
+    "political": 5,
+    "experience": 50,
+    "nation": "PR",
+    "source": "WRANGEL",
+    "note": "Ni neutrale egenskaber som spilskøn; ikke en historisk rangering. 1851: Wrangel med orlovsforbehold; Stockhausen krigsminister, ikke automatisk feltchef.",
+    "fieldStatus": {
+      "born": {
+        "status": "kilde",
+        "source": "WRANGEL",
+        "reason": "Biografisk fødselsår."
+      },
+      "leadership": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "inspiration": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "initiative": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "tactical": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "staff": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "discipline": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "aggression": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "composure": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "political": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "experience": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      }
+    }
+  },
+  "officerMarchFactor": 1.0
 },
     {
       "id": "MEC-field",
@@ -1730,8 +1966,8 @@
       "arm": "infantry",
       "town": "Stettin",
       "district": "PR-randow",
-      "chief": "",
-      "chiefStatus": "unknown",
+      "chief": "Friedrich von Wrangel",
+      "chiefStatus": "estimated-field-assignment",
       "men": 1600,
       "mobilisedMen": 3000,
       "guns": 0,
@@ -1902,6 +2138,90 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 7,
+  "mobilisationFullDays": 28,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt.",
+  "corpsName": "II. Armeekorps (pommersk feltdetachement)",
+  "organisationNote": "Perioderamme fra Prussia/GameReady/Army; feltfordeling og chef er spilskøn."
+,
+"officer": {
+    "id": "PR_WRANGEL",
+    "name": "Friedrich von Wrangel",
+    "rank": "General af kavalleriet",
+    "born": 1784,
+    "leadership": 5,
+    "inspiration": 5,
+    "initiative": 5,
+    "tactical": 5,
+    "staff": 5,
+    "discipline": 5,
+    "aggression": 5,
+    "composure": 5,
+    "political": 5,
+    "experience": 50,
+    "nation": "PR",
+    "source": "WRANGEL",
+    "note": "Ni neutrale egenskaber som spilskøn; ikke en historisk rangering. 1851: Wrangel med orlovsforbehold; Stockhausen krigsminister, ikke automatisk feltchef.",
+    "fieldStatus": {
+      "born": {
+        "status": "kilde",
+        "source": "WRANGEL",
+        "reason": "Biografisk fødselsår."
+      },
+      "leadership": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "inspiration": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "initiative": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "tactical": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "staff": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "discipline": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "aggression": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "composure": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "political": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "experience": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      }
+    }
+  },
+  "officerMarchFactor": 1.0
 },
     {
       "id": "PR-IR9",
@@ -1912,8 +2232,8 @@
       "arm": "infantry",
       "town": "Stargard",
       "district": "PR-saatzig",
-      "chief": "",
-      "chiefStatus": "unknown",
+      "chief": "Friedrich von Wrangel",
+      "chiefStatus": "estimated-field-assignment",
       "men": 1600,
       "mobilisedMen": 3000,
       "guns": 0,
@@ -2084,6 +2404,90 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 7,
+  "mobilisationFullDays": 28,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt.",
+  "corpsName": "II. Armeekorps (pommersk feltdetachement)",
+  "organisationNote": "Perioderamme fra Prussia/GameReady/Army; feltfordeling og chef er spilskøn."
+,
+"officer": {
+    "id": "PR_WRANGEL",
+    "name": "Friedrich von Wrangel",
+    "rank": "General af kavalleriet",
+    "born": 1784,
+    "leadership": 5,
+    "inspiration": 5,
+    "initiative": 5,
+    "tactical": 5,
+    "staff": 5,
+    "discipline": 5,
+    "aggression": 5,
+    "composure": 5,
+    "political": 5,
+    "experience": 50,
+    "nation": "PR",
+    "source": "WRANGEL",
+    "note": "Ni neutrale egenskaber som spilskøn; ikke en historisk rangering. 1851: Wrangel med orlovsforbehold; Stockhausen krigsminister, ikke automatisk feltchef.",
+    "fieldStatus": {
+      "born": {
+        "status": "kilde",
+        "source": "WRANGEL",
+        "reason": "Biografisk fødselsår."
+      },
+      "leadership": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "inspiration": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "initiative": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "tactical": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "staff": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "discipline": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "aggression": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "composure": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "political": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "experience": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      }
+    }
+  },
+  "officerMarchFactor": 1.0
 },
     {
       "id": "PR-IR14",
@@ -2094,8 +2498,8 @@
       "arm": "infantry",
       "town": "Stralsund",
       "district": "PR-stralsund",
-      "chief": "",
-      "chiefStatus": "unknown",
+      "chief": "Friedrich von Wrangel",
+      "chiefStatus": "estimated-field-assignment",
       "men": 1600,
       "mobilisedMen": 3000,
       "guns": 0,
@@ -2266,6 +2670,90 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 7,
+  "mobilisationFullDays": 28,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt.",
+  "corpsName": "II. Armeekorps (pommersk feltdetachement)",
+  "organisationNote": "Perioderamme fra Prussia/GameReady/Army; feltfordeling og chef er spilskøn."
+,
+"officer": {
+    "id": "PR_WRANGEL",
+    "name": "Friedrich von Wrangel",
+    "rank": "General af kavalleriet",
+    "born": 1784,
+    "leadership": 5,
+    "inspiration": 5,
+    "initiative": 5,
+    "tactical": 5,
+    "staff": 5,
+    "discipline": 5,
+    "aggression": 5,
+    "composure": 5,
+    "political": 5,
+    "experience": 50,
+    "nation": "PR",
+    "source": "WRANGEL",
+    "note": "Ni neutrale egenskaber som spilskøn; ikke en historisk rangering. 1851: Wrangel med orlovsforbehold; Stockhausen krigsminister, ikke automatisk feltchef.",
+    "fieldStatus": {
+      "born": {
+        "status": "kilde",
+        "source": "WRANGEL",
+        "reason": "Biografisk fødselsår."
+      },
+      "leadership": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "inspiration": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "initiative": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "tactical": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "staff": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "discipline": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "aggression": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "composure": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "political": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "experience": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      }
+    }
+  },
+  "officerMarchFactor": 1.0
 },
     {
       "id": "PR-IR21",
@@ -2276,8 +2764,8 @@
       "arm": "infantry",
       "town": "Stettin",
       "district": "PR-randow",
-      "chief": "",
-      "chiefStatus": "unknown",
+      "chief": "Friedrich von Wrangel",
+      "chiefStatus": "estimated-field-assignment",
       "men": 1600,
       "mobilisedMen": 3000,
       "guns": 0,
@@ -2448,18 +2936,102 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 7,
+  "mobilisationFullDays": 28,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt.",
+  "corpsName": "II. Armeekorps (pommersk feltdetachement)",
+  "organisationNote": "Perioderamme fra Prussia/GameReady/Army; feltfordeling og chef er spilskøn."
+,
+"officer": {
+    "id": "PR_WRANGEL",
+    "name": "Friedrich von Wrangel",
+    "rank": "General af kavalleriet",
+    "born": 1784,
+    "leadership": 5,
+    "inspiration": 5,
+    "initiative": 5,
+    "tactical": 5,
+    "staff": 5,
+    "discipline": 5,
+    "aggression": 5,
+    "composure": 5,
+    "political": 5,
+    "experience": 50,
+    "nation": "PR",
+    "source": "WRANGEL",
+    "note": "Ni neutrale egenskaber som spilskøn; ikke en historisk rangering. 1851: Wrangel med orlovsforbehold; Stockhausen krigsminister, ikke automatisk feltchef.",
+    "fieldStatus": {
+      "born": {
+        "status": "kilde",
+        "source": "WRANGEL",
+        "reason": "Biografisk fødselsår."
+      },
+      "leadership": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "inspiration": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "initiative": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "tactical": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "staff": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "discipline": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "aggression": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "composure": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "political": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "experience": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      }
+    }
+  },
+  "officerMarchFactor": 1.0
 },
     {
       "id": "PR-JG2",
       "name": "2. Jäger-Bataillon",
       "nation": "PR",
       "corps": "PR-pomerania",
-      "division": "Korpsjægere",
+      "division": "4. Division",
       "arm": "infantry",
       "town": "Greifswald",
       "district": "PR-greifswald",
-      "chief": "",
-      "chiefStatus": "unknown",
+      "chief": "Friedrich von Wrangel",
+      "chiefStatus": "estimated-field-assignment",
       "men": 400,
       "mobilisedMen": 600,
       "guns": 0,
@@ -2534,18 +3106,102 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 7,
+  "mobilisationFullDays": 28,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt.",
+  "corpsName": "II. Armeekorps (pommersk feltdetachement)",
+  "organisationNote": "Perioderamme fra Prussia/GameReady/Army; feltfordeling og chef er spilskøn."
+,
+"officer": {
+    "id": "PR_WRANGEL",
+    "name": "Friedrich von Wrangel",
+    "rank": "General af kavalleriet",
+    "born": 1784,
+    "leadership": 5,
+    "inspiration": 5,
+    "initiative": 5,
+    "tactical": 5,
+    "staff": 5,
+    "discipline": 5,
+    "aggression": 5,
+    "composure": 5,
+    "political": 5,
+    "experience": 50,
+    "nation": "PR",
+    "source": "WRANGEL",
+    "note": "Ni neutrale egenskaber som spilskøn; ikke en historisk rangering. 1851: Wrangel med orlovsforbehold; Stockhausen krigsminister, ikke automatisk feltchef.",
+    "fieldStatus": {
+      "born": {
+        "status": "kilde",
+        "source": "WRANGEL",
+        "reason": "Biografisk fødselsår."
+      },
+      "leadership": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "inspiration": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "initiative": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "tactical": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "staff": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "discipline": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "aggression": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "composure": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "political": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "experience": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      }
+    }
+  },
+  "officerMarchFactor": 1.0
 },
     {
       "id": "PR-KR2",
       "name": "Kürassier-Regiment Königin (Pommersches) Nr. 2",
       "nation": "PR",
       "corps": "PR-pomerania",
-      "division": "Korpskavallerie",
+      "division": "4. Division",
       "arm": "cavalry",
       "town": "Pasewalk",
       "district": "PR-ueckermuende",
-      "chief": "",
-      "chiefStatus": "unknown",
+      "chief": "Friedrich von Wrangel",
+      "chiefStatus": "estimated-field-assignment",
       "men": 400,
       "mobilisedMen": 600,
       "guns": 0,
@@ -2620,18 +3276,102 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 7,
+  "mobilisationFullDays": 28,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt.",
+  "corpsName": "II. Armeekorps (pommersk feltdetachement)",
+  "organisationNote": "Perioderamme fra Prussia/GameReady/Army; feltfordeling og chef er spilskøn."
+,
+"officer": {
+    "id": "PR_WRANGEL",
+    "name": "Friedrich von Wrangel",
+    "rank": "General af kavalleriet",
+    "born": 1784,
+    "leadership": 5,
+    "inspiration": 5,
+    "initiative": 5,
+    "tactical": 5,
+    "staff": 5,
+    "discipline": 5,
+    "aggression": 5,
+    "composure": 5,
+    "political": 5,
+    "experience": 50,
+    "nation": "PR",
+    "source": "WRANGEL",
+    "note": "Ni neutrale egenskaber som spilskøn; ikke en historisk rangering. 1851: Wrangel med orlovsforbehold; Stockhausen krigsminister, ikke automatisk feltchef.",
+    "fieldStatus": {
+      "born": {
+        "status": "kilde",
+        "source": "WRANGEL",
+        "reason": "Biografisk fødselsår."
+      },
+      "leadership": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "inspiration": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "initiative": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "tactical": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "staff": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "discipline": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "aggression": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "composure": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "political": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "experience": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      }
+    }
+  },
+  "officerMarchFactor": 1.0
 },
     {
       "id": "PR-ART2",
       "name": "2. Artillerie-Brigade (feltdetachement)",
       "nation": "PR",
       "corps": "PR-pomerania",
-      "division": "Korpsartilleri",
+      "division": "4. Division",
       "arm": "artillery",
       "town": "Stettin",
       "district": "PR-randow",
-      "chief": "",
-      "chiefStatus": "unknown",
+      "chief": "Friedrich von Wrangel",
+      "chiefStatus": "estimated-field-assignment",
       "men": 600,
       "mobilisedMen": 1200,
       "guns": 48,
@@ -2766,18 +3506,102 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 7,
+  "mobilisationFullDays": 28,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt.",
+  "corpsName": "II. Armeekorps (pommersk feltdetachement)",
+  "organisationNote": "Perioderamme fra Prussia/GameReady/Army; feltfordeling og chef er spilskøn."
+,
+"officer": {
+    "id": "PR_WRANGEL",
+    "name": "Friedrich von Wrangel",
+    "rank": "General af kavalleriet",
+    "born": 1784,
+    "leadership": 5,
+    "inspiration": 5,
+    "initiative": 5,
+    "tactical": 5,
+    "staff": 5,
+    "discipline": 5,
+    "aggression": 5,
+    "composure": 5,
+    "political": 5,
+    "experience": 50,
+    "nation": "PR",
+    "source": "WRANGEL",
+    "note": "Ni neutrale egenskaber som spilskøn; ikke en historisk rangering. 1851: Wrangel med orlovsforbehold; Stockhausen krigsminister, ikke automatisk feltchef.",
+    "fieldStatus": {
+      "born": {
+        "status": "kilde",
+        "source": "WRANGEL",
+        "reason": "Biografisk fødselsår."
+      },
+      "leadership": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "inspiration": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "initiative": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "tactical": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "staff": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "discipline": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "aggression": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "composure": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "political": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "experience": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      }
+    }
+  },
+  "officerMarchFactor": 1.0
 },
     {
       "id": "PR-LW",
       "name": "Pommerske Landwehr-bataljoner (samlet skøn)",
       "nation": "PR",
       "corps": "PR-pomerania",
-      "division": "Landwehr",
+      "division": "4. Division",
       "arm": "infantry",
       "town": "Greifswald",
       "district": "PR-greifswald",
-      "chief": "",
-      "chiefStatus": "unknown",
+      "chief": "Friedrich von Wrangel",
+      "chiefStatus": "estimated-field-assignment",
       "men": 0,
       "mobilisedMen": 9600,
       "guns": 0,
@@ -3092,6 +3916,90 @@
       "reason": "Arvet garnisons-/mobiliseringsmodel; ikke kildebelagt faktisk styrke."
     }
   }
+,
+"mobilisationDays": 7,
+  "mobilisationFullDays": 28,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt.",
+  "corpsName": "II. Armeekorps (pommersk feltdetachement)",
+  "organisationNote": "Perioderamme fra Prussia/GameReady/Army; feltfordeling og chef er spilskøn."
+,
+"officer": {
+    "id": "PR_WRANGEL",
+    "name": "Friedrich von Wrangel",
+    "rank": "General af kavalleriet",
+    "born": 1784,
+    "leadership": 5,
+    "inspiration": 5,
+    "initiative": 5,
+    "tactical": 5,
+    "staff": 5,
+    "discipline": 5,
+    "aggression": 5,
+    "composure": 5,
+    "political": 5,
+    "experience": 50,
+    "nation": "PR",
+    "source": "WRANGEL",
+    "note": "Ni neutrale egenskaber som spilskøn; ikke en historisk rangering. 1851: Wrangel med orlovsforbehold; Stockhausen krigsminister, ikke automatisk feltchef.",
+    "fieldStatus": {
+      "born": {
+        "status": "kilde",
+        "source": "WRANGEL",
+        "reason": "Biografisk fødselsår."
+      },
+      "leadership": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "inspiration": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "initiative": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "tactical": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "staff": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "discipline": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "aggression": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "composure": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "political": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      },
+      "experience": {
+        "status": "skøn",
+        "source": "DESIGN",
+        "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+      }
+    }
+  },
+  "officerMarchFactor": 1.0
 },
     {
       "id": "MEC-INF",
@@ -3229,7 +4137,11 @@
   "men": 40,
   "mobilisedMen": 40,
   "guns": 0,
-  "district": ""
+  "district": "SE-blekinge"
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
 {
   "id": "garrison-Jönköping",
@@ -3240,7 +4152,11 @@
   "men": 40,
   "mobilisedMen": 40,
   "guns": 0,
-  "district": ""
+  "district": "SE-jonkoping"
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
 {
   "id": "garrison-Växjö",
@@ -3251,7 +4167,11 @@
   "men": 40,
   "mobilisedMen": 40,
   "guns": 0,
-  "district": ""
+  "district": "SE-kronoberg"
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
 {
   "id": "garrison-Borås",
@@ -3262,7 +4182,11 @@
   "men": 40,
   "mobilisedMen": 40,
   "guns": 0,
-  "district": ""
+  "district": "SE-alvsborg"
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
 {
   "id": "garrison-Marstrand",
@@ -3273,7 +4197,11 @@
   "men": 250,
   "mobilisedMen": 250,
   "guns": 24,
-  "district": ""
+  "district": "SE-goteborg-bohus"
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 },
 {
   "id": "garrison-Eksjö",
@@ -3284,7 +4212,518 @@
   "men": 40,
   "mobilisedMen": 40,
   "guns": 0,
-  "district": ""
+  "district": "SE-jonkoping"
+,
+"mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+}
+,
+{
+  "id": "garrison-Uddevalla",
+  "name": "Garnison i Uddevalla",
+  "nation": "SE",
+  "town": "Uddevalla",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": "SE-goteborg-bohus",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Strömstad",
+  "name": "Garnison i Strömstad",
+  "nation": "SE",
+  "town": "Strömstad",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": "SE-goteborg-bohus",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Karlsborg",
+  "name": "Garnison i Karlsborg",
+  "nation": "SE",
+  "town": "Karlsborg",
+  "garrison": true,
+  "men": 300,
+  "mobilisedMen": 300,
+  "guns": 12,
+  "district": "SE-skaraborg",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Lidköping",
+  "name": "Garnison i Lidköping",
+  "nation": "SE",
+  "town": "Lidköping",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": "SE-skaraborg",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Vänersborg",
+  "name": "Garnison i Vänersborg",
+  "nation": "SE",
+  "town": "Vänersborg",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": "SE-goteborg-bohus",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Vadstena",
+  "name": "Garnison i Vadstena",
+  "nation": "SE",
+  "town": "Vadstena",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": "SE-ostergotland",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Norrköping",
+  "name": "Garnison i Norrköping",
+  "nation": "SE",
+  "town": "Norrköping",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": "SE-ostergotland",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Linköping",
+  "name": "Garnison i Linköping",
+  "nation": "SE",
+  "town": "Linköping",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": "SE-ostergotland",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Skara",
+  "name": "Garnison i Skara",
+  "nation": "SE",
+  "town": "Skara",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": "SE-skaraborg",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Mariestad",
+  "name": "Garnison i Mariestad",
+  "nation": "SE",
+  "town": "Mariestad",
+  "garrison": true,
+  "men": 40,
+  "mobilisedMen": 40,
+  "guns": 0,
+  "district": "SE-skaraborg",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Kristiania/Oslo",
+  "name": "Garnison i Kristiania/Oslo",
+  "nation": "NO",
+  "town": "Kristiania/Oslo",
+  "garrison": true,
+  "men": 450,
+  "mobilisedMen": 450,
+  "guns": 24,
+  "district": "NO-akershus-city",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Fredrikshald/Fredriksten",
+  "name": "Garnison i Fredrikshald/Fredriksten",
+  "nation": "NO",
+  "town": "Fredrikshald/Fredriksten",
+  "garrison": true,
+  "men": 400,
+  "mobilisedMen": 400,
+  "guns": 40,
+  "district": "NO-smaalenene",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Fredrikstad",
+  "name": "Garnison i Fredrikstad",
+  "nation": "NO",
+  "town": "Fredrikstad",
+  "garrison": true,
+  "men": 300,
+  "mobilisedMen": 300,
+  "guns": 24,
+  "district": "NO-smaalenene",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Moss",
+  "name": "Garnison i Moss",
+  "nation": "NO",
+  "town": "Moss",
+  "garrison": true,
+  "men": 25,
+  "mobilisedMen": 25,
+  "guns": 0,
+  "district": "NO-smaalenene",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Drammen",
+  "name": "Garnison i Drammen",
+  "nation": "NO",
+  "town": "Drammen",
+  "garrison": true,
+  "men": 25,
+  "mobilisedMen": 25,
+  "guns": 0,
+  "district": "NO-buskerud",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Tønsberg",
+  "name": "Garnison i Tønsberg",
+  "nation": "NO",
+  "town": "Tønsberg",
+  "garrison": true,
+  "men": 25,
+  "mobilisedMen": 25,
+  "guns": 0,
+  "district": "NO-jarlsberg-larvik",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Larvik",
+  "name": "Garnison i Larvik",
+  "nation": "NO",
+  "town": "Larvik",
+  "garrison": true,
+  "men": 25,
+  "mobilisedMen": 25,
+  "guns": 0,
+  "district": "NO-jarlsberg-larvik",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Horten",
+  "name": "Garnison i Horten",
+  "nation": "NO",
+  "town": "Horten",
+  "garrison": true,
+  "men": 150,
+  "mobilisedMen": 150,
+  "guns": 8,
+  "district": "NO-jarlsberg-larvik",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Drøbak",
+  "name": "Garnison i Drøbak",
+  "nation": "NO",
+  "town": "Drøbak",
+  "garrison": true,
+  "men": 80,
+  "mobilisedMen": 80,
+  "guns": 10,
+  "district": "NO-akershus-city",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "NO-field",
+  "name": "Norsk linjefelthær",
+  "nation": "NO",
+  "town": "Kristiania/Oslo",
+  "garrison": false,
+  "men": 1040,
+  "mobilisedMen": 4300,
+  "guns": 24,
+  "district": "NO-akershus-city",
+  "mobilisationDays": 14,
+  "mobilisationFullDays": 28,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+}
+,
+{
+  "id": "garrison-Karlstad",
+  "name": "Garnison i Karlstad",
+  "nation": "SE",
+  "town": "Karlstad",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "SE-varmland",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Arvika",
+  "name": "Garnison i Arvika",
+  "nation": "SE",
+  "town": "Arvika",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "SE-varmland",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Svinesund SE",
+  "name": "Garnison i Svinesund SE",
+  "nation": "SE",
+  "town": "Svinesund SE",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "SE-varmland",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Svinesund NO",
+  "name": "Garnison i Svinesund NO",
+  "nation": "NO",
+  "town": "Svinesund NO",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "NO-smaalenene",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Sarpsborg",
+  "name": "Garnison i Sarpsborg",
+  "nation": "NO",
+  "town": "Sarpsborg",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "NO-smaalenene",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Kongsvinger",
+  "name": "Garnison i Kongsvinger",
+  "nation": "NO",
+  "town": "Kongsvinger",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "NO-akershus-city",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Kaholmen",
+  "name": "Garnison i Kaholmen",
+  "nation": "NO",
+  "town": "Kaholmen",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "NO-buskerud",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Fredriksvern",
+  "name": "Garnison i Fredriksvern",
+  "nation": "NO",
+  "town": "Fredriksvern",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "NO-bratsberg",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Fryken south",
+  "name": "Garnison i Fryken south",
+  "nation": "SE",
+  "town": "Fryken south",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "SE-varmland",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Klarälven rail landing",
+  "name": "Garnison i Klarälven rail landing",
+  "nation": "SE",
+  "town": "Klarälven rail landing",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "SE-varmland",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Örebro",
+  "name": "Garnison i Örebro",
+  "nation": "SE",
+  "town": "Örebro",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "SE-orebro",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Malmköping",
+  "name": "Garnison i Malmköping",
+  "nation": "SE",
+  "town": "Malmköping",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "SE-vastmanland",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Falun",
+  "name": "Garnison i Falun",
+  "nation": "SE",
+  "town": "Falun",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "SE-kopparberg",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Kristiansand",
+  "name": "Garnison i Kristiansand",
+  "nation": "NO",
+  "town": "Kristiansand",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "NO-lister-mandal",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
+},
+{
+  "id": "garrison-Västerås",
+  "name": "Garnison i Västerås",
+  "nation": "SE",
+  "town": "Västerås",
+  "garrison": true,
+  "men": 0,
+  "mobilisedMen": 0,
+  "guns": 0,
+  "note": "Spilsk?n fra byens garnisonsmodel.",
+  "district": "SE-vastmanland",
+  "mobilisationDays": 0,
+  "mobilisationFullDays": 0,
+  "mobilisationNote": "Spilskøn: samling, reserveindkaldelse, fuld feltstyrke; nationale puljer adskilt."
 }
 ]
 }

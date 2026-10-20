@@ -251,7 +251,7 @@ void UStrategyOrderComponent::ResolveAttackDestination(FStrategyOrder& AttackOrd
     if (!IsValid(AttackEnemy) || !AttackEnemy->IsCombatEffective() || AttackEnemy->Side == AttackUnit->Side)
     {
         AttackEnemy = nullptr;
-        float AttackNearDistance = 16000.0f; // A point within about 95 m of an enemy company's centre (its line is up to ~90 m wide) identifies the intended enemy.
+        float AttackNearDistance = 16000.0f; // A point within about 160 m of an enemy company's centre (its line is up to ~90 m wide) identifies the intended enemy.
         for (TActorIterator<AStrategyUnit> AttackIt(GetWorld()); AttackIt; ++AttackIt)
         {
             AStrategyUnit* AttackCandidate = *AttackIt;
@@ -268,6 +268,21 @@ void UStrategyOrderComponent::ResolveAttackDestination(FStrategyOrder& AttackOrd
     // With a waypoint route the unit arrives from the point before the last one, not from where it stands now.
     FVector AttackFrom = AttackUnit->GetActorLocation();
     if (AttackOrder.Waypoints.Num() >= 2) AttackFrom = AttackOrder.Waypoints[AttackOrder.Waypoints.Num() - 2];
+    const FVector AttackFront = (AttackFoe - AttackFrom).GetSafeNormal2D();
+    const FVector AttackRight(-AttackFront.Y, AttackFront.X, 0.0f);
+    const float AttackLateral = FMath::Clamp(FVector::DotProduct(AttackOrder.TargetLocation - AttackFoe, AttackRight), -12000.0f, 12000.0f);
+    if (!ComputeAttackStand(AttackEnemy, AttackUnit, AttackOrder.TargetLocation, AttackOrder.FacingYaw, AttackFrom, AttackLateral)) return;
+    AttackOrder.bHasFacing = true;
+    if (!AttackOrder.Waypoints.IsEmpty()) AttackOrder.Waypoints.Last() = AttackOrder.TargetLocation;
+}
+
+bool UStrategyOrderComponent::ComputeAttackStand(const AStrategyUnit* AttackEnemy, const AStrategyUnit* AttackUnit,
+    FVector& OutLocation, float& OutFacingYaw, const FVector& AttackFrom, float AttackLateral)
+{
+    if (!IsValid(AttackEnemy) || !IsValid(AttackUnit) || !AttackEnemy->IsCombatEffective() ||
+        AttackEnemy->Side == AttackUnit->Side || !AttackUnit->FireControlComponent ||
+        AttackUnit->FireControlComponent->GetActiveRangeCm() <= 300.0f) return false;
+    const FVector AttackFoe = AttackEnemy->GetActorLocation();
     FVector AttackBack = (AttackFrom - AttackFoe).GetSafeNormal2D();
     if (AttackBack.IsNearlyZero()) AttackBack = -AttackUnit->GetActorForwardVector();
     // The lines are rarely parallel. The unit stands where the corner of its line that is farthest from the enemy still reaches the
@@ -281,46 +296,43 @@ void UStrategyOrderComponent::ResolveAttackDestination(FStrategyOrder& AttackOrd
     // instead of all on the same spot.
     const FVector AttackOurFront = -AttackBack;
     const FVector AttackOurRight(-AttackOurFront.Y, AttackOurFront.X, 0.0f);
-    const float AttackLateral = FMath::Clamp(FVector::DotProduct(AttackOrder.TargetLocation - AttackFoe, AttackOurRight), -12000.0f, 12000.0f);
     {
-        const float OurHalf = AttackUnit->FormationComponent ? 0.5f * AttackUnit->FormationComponent->EstimateFrontageCm(FMath::Max(1, AttackUnit->CurrentStrength)) : 2400.0f;
-        const float FoeHalf = AttackEnemy->FormationComponent ? 0.5f * AttackEnemy->FormationComponent->EstimateFrontageCm(FMath::Max(1, AttackEnemy->CurrentStrength)) : 2400.0f;
-        FVector FoeFront = AttackEnemy->GetActorForwardVector();
-        FoeFront.Z = 0.0f;
-        const FVector FoeRight = FVector(-FoeFront.Y, FoeFront.X, 0.0f).GetSafeNormal();
-        const FVector FoeA = AttackFoe - FoeRight * FoeHalf, FoeB = AttackFoe + FoeRight * FoeHalf;
-        [[maybe_unused]] auto DistanceToFoeFront = [&](const FVector& Point)
-        {
-            const FVector Along = FoeB - FoeA;
-            const float AlongLength = Along.SizeSquared2D();
-            const float T = AlongLength > 1.0f ? FMath::Clamp(FVector::DotProduct(Point - FoeA, Along) / AlongLength, 0.0f, 1.0f) : 0.0f;
-            return FVector::Dist2D(Point, FoeA + Along * T);
-        };
-        const FVector OurFront = -AttackBack;
-        const FVector OurRight(-OurFront.Y, OurFront.X, 0.0f);
+        const float AttackOurHalf = AttackUnit->FormationComponent ? 0.5f * AttackUnit->FormationComponent->EstimateFrontageCm(FMath::Max(1, AttackUnit->CurrentStrength)) : 2400.0f;
+        const float AttackFoeHalf = AttackEnemy->FormationComponent ? 0.5f * AttackEnemy->FormationComponent->EstimateFrontageCm(FMath::Max(1, AttackEnemy->CurrentStrength)) : 2400.0f;
+        FVector AttackFoeFront = AttackEnemy->GetActorForwardVector();
+        AttackFoeFront.Z = 0.0f;
+        const FVector AttackFoeRight = FVector(-AttackFoeFront.Y, AttackFoeFront.X, 0.0f).GetSafeNormal();
+        const FVector AttackFoeA = AttackFoe - AttackFoeRight * AttackFoeHalf, AttackFoeB = AttackFoe + AttackFoeRight * AttackFoeHalf;
         // The man in the enemy's far corner decides: both ends of his line must lie within the range of OUR front line (the nearest
         // point on it), whichever way his line is turned. Stand as far out as that allows.
-        auto DistanceToOurFront = [&](const FVector& Point, const FVector& Centre)
+        auto AttackDistanceToOurFront = [&](const FVector& AttackPoint, const FVector& AttackCentre)
         {
-            const FVector SegA = Centre - OurRight * OurHalf, SegB = Centre + OurRight * OurHalf;
-            const FVector Along = SegB - SegA;
-            const float AlongLength = Along.SizeSquared2D();
-            const float T = AlongLength > 1.0f ? FMath::Clamp(FVector::DotProduct(Point - SegA, Along) / AlongLength, 0.0f, 1.0f) : 0.0f;
-            return FVector::Dist2D(Point, SegA + Along * T);
+            const FVector AttackSegA = AttackCentre - AttackOurRight * AttackOurHalf, AttackSegB = AttackCentre + AttackOurRight * AttackOurHalf;
+            const FVector AttackAlong = AttackSegB - AttackSegA;
+            const float AttackAlongLength = AttackAlong.SizeSquared2D();
+            const float AttackT = AttackAlongLength > 1.0f ? FMath::Clamp(FVector::DotProduct(AttackPoint - AttackSegA, AttackAlong) / AttackAlongLength, 0.0f, 1.0f) : 0.0f;
+            return FVector::Dist2D(AttackPoint, AttackSegA + AttackAlong * AttackT);
         };
-        for (float Distance = AttackReach; Distance > AttackReach * 0.4f; Distance -= 100.0f)
+        for (float AttackDistance = AttackReach; AttackDistance > AttackReach * 0.4f; AttackDistance -= 100.0f)
         {
-            const FVector Centre = AttackFoe + AttackBack * Distance + AttackOurRight * AttackLateral;
-            const float Worst = FMath::Max(DistanceToOurFront(FoeA, Centre), DistanceToOurFront(FoeB, Centre));
-            AttackStand = Distance;
-            if (Worst <= AttackReach) break;
+            const FVector AttackCentre = AttackFoe + AttackBack * AttackDistance + AttackOurRight * AttackLateral;
+            const float AttackWorst = FMath::Max(AttackDistanceToOurFront(AttackFoeA, AttackCentre), AttackDistanceToOurFront(AttackFoeB, AttackCentre));
+            AttackStand = AttackDistance;
+            if (AttackWorst <= AttackReach) break;
         }
     }
-    AttackOrder.TargetLocation = AttackFoe + AttackBack * AttackStand + AttackOurRight * AttackLateral;
-    AttackOrder.TargetLocation.Z = AttackUnit->GetActorLocation().Z;
-    AttackOrder.FacingYaw = (-AttackBack).Rotation().Yaw;
-    AttackOrder.bHasFacing = true;
-    if (FVector::Dist2D(AttackUnit->GetActorLocation(), AttackFoe) < AttackStand - 300.f)
-        AttackOrder.bKeepFacing = true; // Already too close: back out facing the enemy.
-    if (!AttackOrder.Waypoints.IsEmpty()) AttackOrder.Waypoints.Last() = AttackOrder.TargetLocation;
+    OutLocation = AttackFoe + AttackBack * AttackStand + AttackOurRight * AttackLateral;
+    OutLocation.Z = AttackUnit->GetActorLocation().Z;
+    OutFacingYaw = (-AttackBack).Rotation().Yaw;
+    return true;
+}
+
+void UStrategyOrderComponent::RetargetActiveOrder(const FVector& NewTarget, float NewFacingYaw)
+{
+    if (CurrentOrder.Type != EStrategyOrderType::AttackHere && CurrentOrder.Type != EStrategyOrderType::Advance) return;
+    CurrentOrder.TargetLocation = NewTarget;
+    CurrentOrder.FacingYaw = NewFacingYaw;
+    CurrentOrder.bHasFacing = true;
+    if (!CurrentOrder.Waypoints.IsEmpty()) CurrentOrder.Waypoints.Last() = NewTarget;
+    // Same serial, authority and execution state; no order/execution delegates.
 }

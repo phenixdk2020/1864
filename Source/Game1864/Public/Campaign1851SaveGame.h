@@ -271,7 +271,10 @@ public:
 	// 35: corps morale/cohesion in War; missing corps-condition rows default to 0.8/70.
 	// 36: player-given company names on regiments (empty in older saves = automatic names); formation names were already saved.
 	// 37: event files with windows, history and event references; War rows carry `events-format|37` (older saves close the undecided events already past).
-	static constexpr int32 CurrentVersion = 37;
+	// 38: neighbour mobilisation start day and stage.
+	// 39: national foreign treasuries; older saves transfer the existing district balances once.
+	static constexpr int32 CurrentVersion = 39;
+	UPROPERTY() TMap<FString, double> ForeignTreasuries;
 
     // v32: exact report, prisoner pools, extended service entries and officer careers; old saves default to empty.
     UPROPERTY() FString LastAfterActionReport;
@@ -337,6 +340,7 @@ public:
 	UPROPERTY() uint8 Footing = 0;
 	/** War and peace (v22; v29 adds blocked events and event-format migration). */
 	UPROPERTY() TArray<FString> War;
+	/** v38: mobilisation start day/stage in Neighbours (legacy armies keep their saved corps). */
 	/** v33: stable neighbour army id -> corps id; v34 adds southern reserves, cash and carried supply. Casualties remain in War. */
 	UPROPERTY() TArray<FString> Neighbours;
 	/** Foreign affairs (v23): relations, treaties, the Sound Dues, ceded towns. */

@@ -40,8 +40,56 @@ namespace
 	}
 }
 
+bool ACampaign1851Map::LoadForeignOfficers()
+{
+	ForeignOfficers.Reset();
+	ForeignCommanderIds.Reset();
+	FString ForeignText;
+	TSharedPtr<FJsonObject> ForeignJson;
+	if (!FFileHelper::LoadFileToString(ForeignText, *(FPaths::ProjectDir() / (TEXT("Data/Campaign1851/ForeignPersonnel_") + ActiveScenario().Id + TEXT(".json"))))
+		|| !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(ForeignText), ForeignJson) || !ForeignJson.IsValid()) { return false; }
+	for (const TSharedPtr<FJsonValue>& ForeignValue : Campaign1851Json::Array(*ForeignJson, TEXT("nations")))
+	{
+		const TSharedPtr<FJsonObject> ForeignNation = Campaign1851Json::Row(ForeignValue);
+		const FString ForeignId = Campaign1851Json::String(*ForeignNation, TEXT("nation"));
+		if (ForeignId != TEXT("SE") && ForeignId != TEXT("NO") && ForeignId != TEXT("PR")) { continue; }
+		ForeignCommanderIds.Add(ForeignId, Campaign1851Json::String(*ForeignNation, TEXT("commander")));
+		for (const TSharedPtr<FJsonValue>& ForeignOfficerValue : Campaign1851Json::Array(*ForeignNation, TEXT("officers")))
+		{
+			const TSharedPtr<FJsonObject> ForeignRow = Campaign1851Json::Row(ForeignOfficerValue);
+			FCampaign1851Officer ForeignOfficer;
+			ForeignOfficer.Born = 0; // unknown when the archive has null, never invent a birth year
+			if (!ForeignRow->TryGetStringField(TEXT("id"), ForeignOfficer.Id) || ForeignOfficer.Id.IsEmpty()) { continue; }
+			ForeignRow->TryGetStringField(TEXT("name"), ForeignOfficer.Name);
+			ForeignRow->TryGetStringField(TEXT("rank"), ForeignOfficer.Rank);
+			ForeignRow->TryGetNumberField(TEXT("born"), ForeignOfficer.Born);
+			ForeignRow->TryGetNumberField(TEXT("experience"), ForeignOfficer.Experience);
+			ForeignOfficer.bGeneral = true;
+			// The country packs use 1-10 in BOTH scenarios (the Danish 1825 file uses 0-100).
+			for (int32 ForeignStat = 0; ForeignStat < NumStats; ++ForeignStat)
+			{
+				int32 ForeignRating = 5; // missing caution: neutral gameplay estimate
+				ForeignRow->TryGetNumberField(StatKeys[ForeignStat], ForeignRating);
+				ForeignOfficer.Stats[ForeignStat] = uint8(FMath::Clamp(ForeignRating, 1, 10));
+			}
+			ForeignOfficers.FindOrAdd(ForeignId).Add(ForeignOfficer);
+		}
+	}
+	return ForeignOfficers.Num() == 3;
+}
+
+const FCampaign1851Officer* ACampaign1851Map::ForeignCommander(const FString& NationId, const FString& OfficerId) const
+{
+	const TArray<FCampaign1851Officer>* ForeignPool = ForeignOfficers.Find(NationId);
+	const FString* ForeignDefault = ForeignCommanderIds.Find(NationId);
+	if (!ForeignPool || (OfficerId.IsEmpty() && !ForeignDefault)) { return nullptr; }
+	const FString& ForeignWanted = OfficerId.IsEmpty() ? *ForeignDefault : OfficerId;
+	return ForeignPool->FindByPredicate([&](const FCampaign1851Officer& ForeignOfficer) { return ForeignOfficer.Id == ForeignWanted; });
+}
+
 bool ACampaign1851Map::LoadOfficers()
 {
+	if (!LoadForeignOfficers()) { return false; }
 	const bool b1825 = ActiveScenario().Id == TEXT("1825");
 	const FString File = b1825 ? TEXT("Officers_1825.json") : TEXT("Officers1851.json");
 	OfficerScenarioData.Reset();
@@ -284,7 +332,9 @@ bool ACampaign1851Map::OrderTroopTrain(int32 Station)
 	AddTransaction(-TroopTrainCost, FString::Printf(TEXT("Troppetog bestilt til %s (lokomotiv og vogne)"), Cities.IsValidIndex(Station) ? *Cities[Station].Name : TEXT("?")));
 	// X: the station it is landed at, plus one (older saves have 1: the first town, Copenhagen).
 	TrainOrders.Add(FVector2D(double(FMath::Max(Station, 0) + 1), CampaignDays + TroopTrainDeliveryDays));
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("build"), TEXT("OrderTroopTrain"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Station"), double(Station) } }, {  }); }
+	return LogActionResult;
 }
 
 TArray<ACampaign1851Map::FRailNet> ACampaign1851Map::RailNets() const
@@ -423,7 +473,9 @@ bool ACampaign1851Map::AssignOfficer(int32 Officer, int32 Regiment)
 	Post = Officer;
 	O.Regiment = Regiment;
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|officers|%s %s -> %s"), *O.Rank, *O.Name, *R.Name);
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("recruit"), TEXT("AssignOfficer"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Officer"), double(Officer) }, { TEXT("Regiment"), double(Regiment) } }, {  }); }
+	return LogActionResult;
 }
 
 int32 ACampaign1851Map::RecruitOfficer(bool bGeneral, const TCHAR* RecruitmentRank)
@@ -439,7 +491,9 @@ int32 ACampaign1851Map::RecruitOfficer(bool bGeneral, const TCHAR* RecruitmentRa
 	O.Id = FString::Printf(TEXT("R%d"), NextOfficerNumber++);
 	O.bRecruited = true;
 	AddTransaction(-Cost, FString::Printf(TEXT("%s: %s %s"), bGeneral ? TEXT("Udnævnelse") : TEXT("Officer ansat"), *O.Rank, *O.Name));
-	return Officers.Add(O);
+	const auto LogActionResult = Officers.Add(O);
+	if (LogActionResult != INDEX_NONE && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("recruit"), TEXT("RecruitOfficer"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("bGeneral"), double(bGeneral) } }, {  }); }
+	return LogActionResult;
 }
 
 bool ACampaign1851Map::DismissOfficer(int32 Officer)

@@ -11,21 +11,21 @@
   "xMin": -160.57748777062326,
   "xMax": 384.33174484993543,
   "yMin": 111.19521889158699,
-  "yMax": 669.4784806118103
+  "yMax": 1227.7617423320335
  },
  "extent": {
   "lonMin": 7.6,
   "lonMax": 15.75,
   "latMin": 53.0,
-  "latMax": 57.9
+  "latMax": 63.0
  },
  "sizeKm": {
   "width": 544.91,
-  "height": 558.28
+  "height": 1116.57
  },
  "textureSize": {
   "width": 3996,
-  "height": 4096
+  "height": 8192
  },
  "detailTileKm": 2.5,
  "parcelTileKm": 8.0,
@@ -523980,4 +523980,16 @@
    "population": 55000
   }
  ]
+,
+"northExtension": {
+    "originalExtentKm": {
+      "xMin": -160.57748777062326,
+      "xMax": 384.33174484993543,
+      "yMin": 111.19521889158699,
+      "yMax": 669.4784806118103
+    },
+    "originalMapSHA256": "4d189f8e717f31537de0672232ace66af873bcab630e0c750ce5b2f5bab379e9",
+    "originalGridHeight": 787,
+    "note": "Sydlige pixels bevaret; nordligt relief er skøn. Kyst: Natural Earth 10m."
+  }
 }

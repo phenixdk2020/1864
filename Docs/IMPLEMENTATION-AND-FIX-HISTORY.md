@@ -2444,6 +2444,110 @@ Efter brugerens test og to optagelser:
 - Rodbevægelse er nu Mixamos egen (ikke låst); SideStep og Turn kan flytte sig lidt. `import_lying_extras_rot.py` (rotationsforsøget) virkede ikke og er fjernet.
 - Skulderklippene (WalkShoulder/ShoulderUp/Down) er uændrede; brugeren synes de ser mærkelige ud — åbent punkt.
 
+### 2026-10-16 - Slagets knapper i startmenuens stil, med tryk- og ventebekræftelse
+
+- Én fælles knapstil i `AStrategyHUD::DrawButton` (`StrategyHUD.cpp`), hentet fra startmenuens `SCampaign1851Overlay::PaintButton`: brun fyldning (58,40,22,235), guldramme (212,176,102), cremefarvet tekst (242,235,214); valgt/TIL = guldfyldning med mørk tekst (30,22,12). Gælder både de afrundede kommandopanel-piller og de flade knapper (efterrapportens FORRIGE/NÆSTE/LUK/FORLAD SLAGET, indstillinger). Størrelser og placering er uændrede. Semantiske ordrefarver (rød/blå/grøn, AFBRYD, afslut slag) bevares som rammefarve og svag tone i fyldet.
+- Tryk-feedback: `HandleClick` kalder `MarkButtonPressed` ved museklik (nedtryk); knappen vises nedtrykt i 0,30 s i realtid (`FPlatformTime`), så det virker under pause: mørkere fyld, lysere ramme, indre skygge, teksten 1 px ned. Hover lysner knappen.
+- Ventebekræftelse: ordre, formation, stilling, afsiddet, ildpolitik, doktrine, drill, pontonbro, AI og de særlige ordrer (BYG, SKYTTEKAEDE, SPRED, ILMARCH) får desuden en gylden ring der toner ud over 1,4 s. Ny notice "Ordre sendt med kurer til ... (fremme om m:ss)" i `IssueOrderToSelection` (`StrategyPlayerController.cpp`) når en ordre sendes med rytter; de særlige ordrer melder "Ilmarch befalet / ophævet" osv. (`StrategyHUDSpecialOrders.cpp`). Den eksisterende "Ordren er fremme ..."-notice er uændret.
+- Til/fra-knapper (ILMARCH, CIRKEL, KEGLE, LOG, TIL/FRA, VIST/SKJULT, PAUSE/FORTSÆT) viser tilstanden som guld (til) mod brun (fra).
+- UE 5.8: kun `APlayerController::GetMousePosition`, `FMath::Lerp`, `FLinearColor::CopyWithNewOpacity`, `TArray::RemoveAll` (kontrolleret mod headerne). Ikke bygget, ikke testet i spillet. CRLF bevaret.
+
+### 2026-10-16 - Skuldergevær v4: nye klip fra rå Mixamo-gang MED mesh (testmappe, ikke importeret)
+
+- Baggrund: klip eksporteret som kun armatur ligger ned i Unreal (begge importere, alle akser); rå Mixamo-FBX med skinned mesh og bindpose står op. Derfor bygges v4 af `Reference/Units/MultiView/3D figurer/Walking.fbx` (33 knogler, uden tommelfingre, 30 billeder ved 30 fps, med mesh) og eksporteres MED meshen.
+- `Tools/Animation/build_shoulder_arms_set.py` omskrevet: Hips X/Z låses (stedstro, lodret bob bevaret), højre arm genposeres med to-knogle-IK (hånd lavt ved højre hofte, armen næsten strakt, albuen ikke løftet, ca. 0,86 armlængde under skulderen), ben, venstre arm, ryg og hoved bevares. `ShoulderUp`/`ShoulderDown` blander højre arm med smoothstep og slerp. Eksport: `object_types={'ARMATURE','MESH'}`, `add_leaf_bones=False`, `use_mesh_modifiers=False`, bagt animation, `axis_forward='-Z'`, `axis_up='Y'`. Output kun til `Saved/Codex/shoulder_v4/` (SourceAssets er ikke rørt) inkl. `RoundTrip_Walk.fbx` (uændret gang gennem samme eksport).
+- Rå kontrol: rå Mixamo har Y-op, ingen Armature-node, Hips som rod, mesh med -90/100x og BindPose. Round trip og de nye klip har samme GlobalSettings (Y-op), men Blender tilføjer en Armature-nul-node (rotation ca. 0) og knogleværdier i Blenders konvention; BindPose er til stede. Om Unreal-importen står op er ikke afprøvet.
+- Geværregel til v4 (ikke indført i C++): løb `Up*0.975 + Side*0.05 - Forward*0.20` (ca. 12 grader bagud), greb 12 % fra kolben. Den eksisterende regel (0,90/0,20/-0,33, greb 0,15) er for skrå til dette billede.
+- Værktøj: `Tools/Animation/preview_shoulder_v4.py` (renders front/side/3-4 med gevær). Renders og samleark i `Saved/Codex/shoulder_v4/`. Importtest: `Saved/Codex/shoulder_v4/import_test.py` (til `/Game/Units/Human/CombatAnimations/ZTest/A_ZTest_*`). Intet bygget, ingen editor/spil startet, ikke commitet.
+- Bemærkning: gangen dækker ca. 1,5 m pr. cyklus (ca. 150 cm/s), tættere på spillets 160 cm/s end projektets marchgang (ca. 86 cm/s).
+
+### 2026-10-17 — Kolonneeksercits: linje ↔ kolonne ad en fælles bue
+
+Infanteriet skifter nu mellem linje og marchkolonne som i brugerens referenceanimationer:
+
+- **Linje → kolonne:** alle vender på stedet og går i fil langs linjen fra den førende fløj. Kolonnen svinger gennem en bue (R = max(300, 3 × geledafstand)) og marcherer tre i bredden.
+- **Kolonne → linje ved ankomst:** kolonnen styres mod et tilnærmelsesmål, svinger ind, går langs linjeaksen og standser mand for mand. Derefter vender alle front, og linjen ender på ordrens mål.
+- **Fri udfoldning:** linjen dannes foran og til højre for kolonnen.
+- Aktøren flyttes til slutrammen, når sidste mand står.
+- Afbrydelse falder tilbage til den gamle morph, og `-Strategy1864Drill=0` slår den nye manøvre fra.
+- Kompagniets standard er tre geledder.
+
+Filer:
+
+- `Visual/StrategyColumnDrill.h` (ny)
+- `StrategyInfantryVisualComponent`
+- `StrategyMovementExecutorComponent`
+- `StrategyFormationPolicyComponent`
+- `StrategyCompanyUnit`
+- Kontrol: `Tools/Battle/verify_column_drill.py` og `Source/Strategy1864/Tests/verify_column_drill_geometry.py`
+
+Begge kontroller består med 0 krydsninger, og C++ og specifikationen er ens. Mindste afstand mellem mænd er ca. 70 % af filafstanden i buens inderside.
+
+Start, afbrydelse (med årsag) og afslutning (varighed og mindste afstand) logges altid, både som `Strategy1864Drill` i output-loggen og i kompagniets enhedslog. Den løbende afstandsmåling sker kun med `-Strategy1864DebugFormation`.
+
+Bygget uden fejl 17. oktober 2026. Endnu ikke spiltestet.
+
+### 2026-10-17 — Codex: Sverige-Norge og Preussen, niveau B
+
+- Additiv nordudvidelse til Oslofjorden; danske by-/amtsindeks, kortdata og oprindelige pixels bevaret. Begge scenarier har 51 aktive SE/NO-punkter, 20 nordiske distrikter og sammenhængende ruter.
+- Separate svenske/norske hære, reserver og kasser med fælles unionsside; koblet til forsyning, mobilisering og kampagnens krigs-/støttemarch. PR bruger scenarie-OOB, officer og trinvis mobilisering; det ekstra abstrakte PR-korps er fjernet. PR–Danmark er −20 i begge scenarier.
+- Saveversion 38 gemmer mobiliseringsstart og trin. Statisk kildekontrol mod UE 5.8-headerne; ingen build, spil/editorstart eller commit. Source/Strategy1864 er ikke berørt af denne opgave.
+- Valideret: begge landevalidatorer, nabovalidering (122 byer / 153 ruter / 139 hæroptegnelser pr. scenarie), 114 JSON og to byte-idempotente genimporter; git diff --check uden whitespacefejl. Geometri, norske byfordelinger og mobiliseringstider er markerede skøn.
+- Fuld rapport, ændrede filer, save-/regenereringsrisici og niveau C-restarbejde: [Niveau-B-Sverige-Norge-Preussen-2026-10-17.md](Niveau-B-Sverige-Norge-Preussen-2026-10-17.md).
+
+### 2026-10-17 — Kolonnen som en slange (erstatter drill-holdet)
+
+Den første drill-version holdt marchen 41 s for 190 mand og teleporterede kompagniet bagefter, hvorefter det gik baglæns, fordi ruten var planlagt fra det gamle sted. Ankomsten med front faldt også tilbage til den gamle morph. Fundet med det nye testflag `-Strategy1864DrillTest=sek:enhed:frem:højre[:front]` / `sek:enhed:LINE` i 1 mod 1-slaget.
+
+Ny model:
+
+- **March:** MarchColumn følger altid tetens spor (`FStrategyVisualFormationPath`, ikke-stiv for kolonnen også i et stift kompagni). Hver mand drejer, hvor teten drejede. Teten går i marchtempo med 3 m drejeradius på afstand og sigter direkte mod aktøren tæt på, så den aldrig kommer foran eller vender gennem kolonnen.
+- **Linje → kolonne:** sporet sås langs linjens midterste geled, og teten og aktøren stilles ved den førende fløj. Mændene vender på stedet (0,9 s), og så går kolonnen. Ruten planlægges forfra derfra. Rækker og baner glider 75 ↔ 90 cm over de første 4 m.
+- **Kolonne → linje:** stien = det gåede spor + tetens vej ind på linjeaksen + langs aksen til den fjerne fløj. Ved ankomst bruges en Hermite-kurve; frit (Linje-knappen, fjende) bruges en kvart bue til højre. Hver mand standser på sin plads, og så vender alle front.
+- **Tilnærmelsespunkt:** beregnes én gang (ingen iteration) for hver kolonnemarch, også uden front (fronten bliver så marchretningen). Ruten planlægges direkte til punktet. Ankomststatus gemmes i `MovementExecutor`, så den overlever, at ordren bliver til hold.
+
+Afprøvet automatisk med 190 mand:
+
+| Test | Resultat |
+|---|---|
+| Ankomst med front | Linjen står på målet (front 0°) |
+| Ankomst uden front | Front lig marchretningen |
+| Retningsskift midt i marchen | Kører |
+| Linje-knappen | Front lig marchretningen |
+
+Mindste afstand mellem to mænd er 75 cm, og der er ingen "still-reforming".
+
+Begge kolonne → linje-varianter tager ca. 43 s med 190 mand (46 m linje).
+
+Ikke spiltestet visuelt af brugeren endnu.
+
+### 2026-10-18 — Niveau C, første del: udenlandske personer og nationale distriktskasser
+
+SE/NO/PR's arkiverede scenarieofficerer er aktiveret som `FCampaign1851Officer`; nabohærene bruger deres stab via samme marchregel som danskerne samt ledelse/inspiration til moralgenopretning. SE/NO's ministerressorter og dokumenterede preussiske udenrigsministre er indlæst som `FCampaign1851Minister` med nationale opslag til diplomati/events. Personer og statskasse vises skrivebeskyttet i udenrigsvinduet. Øvrige preussiske ressorter er ikke opdigtet; historiske personer og markerede egenskabs-/feltkommandoskøn holdes adskilt.
+
+De aktive distrikters skatter og produktionsbaserede eksporttold tilfalder nu særskilte SE-, NO- og PR-statskasser. Produktionsberegningen deles med Danmark; satser vælges eksplicit pr. scenarie og er markerede spilskøn. Reservister, underhold og magasiner betales nationalt; delvis mobilisering forsøges igen dagligt, uden gratis reserveudtag eller dansk betaling. Off-map landsdele giver ingen skjult indtægt. PR–DK forbliver −20, og eksisterende events er urørte.
+
+Saveversion **39** gemmer `ForeignTreasuries` i `UCampaign1851SaveGame`. Ældre saves overfører deres eksisterende distriktsmidler én gang; lokale beløb nulstilles efter overførsel. Korpsenes tab/positioner/forsyning forbliver i de eksisterende savefelter. Nye statiske person-/økonomifiler regenereres med `Tools/Countries/integrate_level_c.py` uden at ændre arkiverne.
+
+Validering: `validate_sweden_norway.py`, `validate_prussia.py` og `validate_neighbours.py` bestod (exit 0); 118 strengt parsede JSON, arkivhashes/danske kortdata bevaret, fuld genimport x2 byte-idempotent, 122 byer/153 ruter/139 hære pr. scenarie. Fælles Niveau C-kontrol dækker personidentiteter, scenarier, statisk kommando-/savekobling og en separat budgetreference for nul/delvis betaling, genforsøg og kontoadskillelse. `git diff --check` bestod. Nye/ændrede UE-kald er kontrolleret mod lokale UE 5.8-headere; CRLF bevaret. Ingen build, spil/editorstart, .bat-kørsel eller commit; `Source/Strategy1864` er urørt af denne opgave.
+
+Risici/restarbejde: Unreal-save/load og UI er ikke runtime-testet; startkasser, udenlandsk underhold og dækningen af kun aktive distrikter skal balanceres. Officerskarrierer, fulde preussiske kabinetter og resten af Niveau C mangler. Se tillægget 2026-10-18 i `Docs/Niveau-B-Sverige-Norge-Preussen-2026-10-17.md` for filer, kilder og kontrolbegrænsninger.
+
+### 2026-10-18 — Angreb følger et mål i bevægelse (Codex)
+- Standpunktet for AttackHere/Advance beregnes af en fælles funktion og genberegnes hvert sekund. Flytter det sig over max(10 m, 10 % af afstanden), opdateres ordrens mål (`RetargetActiveOrder`, uden ny serial) og ruten, også under ildpause.
+- Er fjenden inden for standafstanden, bliver kompagniet stående og skyder. Et dødt eller flygtende mål beholder sidste punkt.
+- Nye acceptancetests ATTACK-MOVING og ATTACK-APPROACH; ADVANCE-FIRE rettet til det dynamiske mål. Alle 7 acceptancetests bestået.
+
+### 2026-10-20 — Slut op mod fanen, fanebærer, kampagnelog, Lumen fra i slag
+- **Slut op mod fanen:** efter tab lukker linjen sig ind mod midten, så den igen er 3 dyb (ceil(mænd/3) filer). Hvert geled beholder sin rækkefølge, og forreste geleds overskydende flankemænd træder ét geled tilbage. Alle går sidelæns med front mod fjenden (SideStep/SideStepLeft, 35 cm/s), og flankerne starter først. Afprøvet: 45 tab gav 144 mand i 48 filer.
+- **Fanebærer:** en fanebærer går forrest i kolonnen og står foran linjen, med egne klip (A_Combat_ColourWalk/ColourIdle). Stangen er i højre hånd og hælder 12° bagud. Bliver han skudt (lige så tit som andre), falder fanen. Efter 2–4 s smider den nærmeste mand i forreste geled geværet og tager fanen. Moral −5, når fanen falder, og +3, når den rejses.
+- **Slangen og fanebæreren:** fanebæreren og resten af 190/3 efterlod huller i gitteret, så slangen ikke blev sået (kolonnen faldt tilbage til den gamle omformning). Nu tælles filerne ud fra linjens bredde, og en mand uden for gitteret får nærmeste ledige plads. Afprøvet: linje → slange → ankomst i linje, 63 rækker, mindste afstand 75 cm.
+- **Testkommandoer:** `-Strategy1864DrillTest` har fået `KILL:antal` og `KILLCOLOURS`.
+- **Lumen og skygger** er slået fra i slag som standard; `-Strategy1864FullLighting` slår dem til igen.
+- **Kampagnelog (Codex):** JSONL-log over beslutninger for alle nationer (AI, spiller, minister, event), eventforsøg med sandsynlighed og ugentlige snapshots, uden ændring af saveformatet; se `Docs/CampaignLog.md`.
+  - Byggefejl rettet: navnekonflikt med UE's logkategorier `LogActor`/`LogType`, int→double-indsnævring og include-rækkefølge.
+  - Validatoren er flyttet til `Tools/Campaign/validate_campaign_log.py`. Den syntetiske log gav 0 fejl.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

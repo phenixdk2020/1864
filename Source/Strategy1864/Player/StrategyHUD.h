@@ -56,7 +56,7 @@ public:
 private:
     enum class EAction : uint8
     {
-        None, Minimap, FinishBattle, ReportToggle, ReportPage, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, Disengage, Turn, Rally, CommandCircle, ConeToggle, UnitLog, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount, FigureScale, BattleQuality, TimeControl, Shadows, BuildFieldworks, SkirmishScreen, Spread, AudioVolume, AudioMute
+        None, Minimap, FinishBattle, ReportToggle, ReportPage, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, Disengage, Turn, Rally, CommandCircle, ConeToggle, UnitLog, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount, FigureScale, BattleQuality, TimeControl, Shadows, BuildFieldworks, SkirmishScreen, Spread, AudioVolume, AudioMute, DoubleTime
     };
 
     struct FButton
@@ -66,6 +66,19 @@ private:
         int32 Value = 0;
         TWeakObjectPtr<AStrategyUnit> Unit;
     };
+
+    /** A button that was just pressed: shown pressed for a moment (real time, so it also works while paused);
+     *  a button whose effect comes later (a courier, a mode change) then keeps a fading gold ring. */
+    struct FPressedButton
+    {
+        EAction Action = EAction::None;
+        int32 Value = 0;
+        TWeakObjectPtr<AStrategyUnit> Unit;
+        double Start = 0.0;
+        bool bDelayed = false;
+    };
+    TArray<FPressedButton> PressedButtons;
+    void MarkButtonPressed(const FButton& Pressed);
 
     bool bReportOpen = false, bReportSeen = false;
     int32 ReportPage = 0;

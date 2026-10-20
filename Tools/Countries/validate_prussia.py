@@ -40,6 +40,12 @@ def is_pr(row, pr_cities):
 
 
 def main():
+    if (DATA/'Countries/LevelB.json').exists():
+        from validate_level_b import validate
+        validate('PR')
+        from validate_level_c import validate as validate_c
+        validate_c()
+        return
     parsed = 0
     for path in DATA.rglob('*.json'):
         read(path)

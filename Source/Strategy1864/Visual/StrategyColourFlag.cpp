@@ -27,7 +27,10 @@ void AStrategyColourFlag::Setup(AActor* InFollow, const FString& Nation, const F
     {
         AddTickPrerequisiteActor(InFollow);
         if (UStrategyInfantryVisualComponent* ColourVisual = InFollow->FindComponentByClass<UStrategyInfantryVisualComponent>())
+        {
             AddTickPrerequisiteComponent(ColourVisual);
+            ColourVisual->RegisterColours();   // the company gets a colour bearer who carries this flag
+        }
     }
     // The model: 2 m as imported, 2.8 m on the field; the cloth streams to +X from the pole, turned to -X here.
     if (UStaticMesh* Standard = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Units/Items/SM_Flag_Standard.SM_Flag_Standard")))
@@ -117,9 +120,28 @@ void AStrategyColourFlag::Tick(float DeltaSeconds)
     }
     Age += DeltaSeconds;
     FVector P = Target->GetActorTransform().TransformPosition(LocalOffset);
+    float ColourBearerYaw = 0.f;
+    bool bColoursDown = false;
+    bool bCarried = false;
     if (const UStrategyInfantryVisualComponent* ColourVisual = Target->FindComponentByClass<UStrategyInfantryVisualComponent>())
-        ColourVisual->GetDrawnColourPosition(LocalOffset, P);
+    {
+        bCarried = ColourVisual->GetColourTransform(P, ColourBearerYaw, bColoursDown);
+        if (!bCarried) ColourVisual->GetDrawnColourPosition(LocalOffset, P);
+    }
     const FVector Ground = UStrategyTerrainQueryLibrary::ProjectPointToTerrain(this, P);
+    if (bCarried && bColoursDown)
+    {
+        // Fallen with the bearer: the colours lie on the ground beside him.
+        SetActorLocationAndRotation(Ground + FVector(0.f, 0.f, 6.f), FRotator(0.0f, ColourBearerYaw + 70.f, 84.f));
+        return;
+    }
+    if (bCarried)
+    {
+        // Carried: the foot of the pole at knee height, the pole leaning back, the cloth streaming behind the bearer.
+        SetActorLocationAndRotation(P,
+            FRotator(UStrategyInfantryVisualComponent::ColourCarryLeanDeg, ColourBearerYaw + 6.0f * FMath::Sin(Age * 1.3f), 0.0f));
+        return;
+    }
     // The flag streams with the wind (from the west), swinging a little.
     SetActorLocationAndRotation(Ground, FRotator(0.0f, 90.0f + 12.0f * FMath::Sin(Age * 1.3f), 0.0f));
 }

@@ -244,6 +244,11 @@ void ACampaign1851Map::EvaluateEvents(bool bMonthly)
 				*Event.Id, EventToday, EventDue ? 1 : 0, EventResolved ? 1 : 0, EventChance, EventRoll, *EventWhy, *EventBlockWhy);
 		if (EventResolved || (!EventForce && (!bMonthly || !EventDue))) continue;
 		const bool EventFired = EventForce || (EventValid && EventBlockValid && EventPreconditions && !EventBlocked && EventRoll < EventChance);
+
+        LogCampaignEvent(Event.Id, EventValid && EventBlockValid && EventPreconditions && !EventBlocked, EventChance, EventFired,
+            EventForce ? TEXT("Tvunget af CampaignEvents") : !EventValid || !EventBlockValid ? TEXT("Ugyldigt triggerudtryk")
+            : !EventPreconditions ? EventWhy : EventBlocked ? TEXT("Blokering: ") + EventBlockWhy
+            : FString::Printf(TEXT("%s; kast %.4f, chance %.4f"), *EventWhy, EventRoll, EventChance));
 		if (!EventFired && !EventForce && CampaignDays < Event.LastDay) continue;   // the window is still open: try again next month
 		if (EventFired) EventsFired.AddUnique(Event.Id); else EventsBlocked.AddUnique(Event.Id);
 		FString EventExplanation = EventForce ? TEXT("Tvunget af CampaignEvents") : !EventPreconditions ? EventWhy : EventBlocked ? TEXT("Blokering: ") + EventBlockWhy
@@ -330,6 +335,28 @@ void ACampaign1851Map::DailyWar()
 	{
 		DeclareWar();
 	}
+	// Allied foreign columns fight hostile foreign columns on the campaign layer.
+	// Design estimate: simultaneous daily exchange; both losses and carried supply persist.
+	for (FCampaign1851EnemyCorps& UnionCorps : EnemyCorps)
+	{
+		if (!bAtWar || UnionCorps.Men <= 0 || (UnionCorps.Nation != TEXT("SE") && UnionCorps.Nation != TEXT("NO")) || IsNeighbourHostile(UnionCorps.Nation)) { continue; }
+		const bool bUnionAllied = Nations.ContainsByPredicate([](const FCampaign1851Nation& UnionN) { return (UnionN.Id == TEXT("SE") || UnionN.Id == TEXT("NO")) && UnionN.bAlliance; });
+		if (!bUnionAllied) { continue; }
+		for (FCampaign1851EnemyCorps& UnionOpponent : EnemyCorps)
+		{
+			if (UnionOpponent.Men <= 0 || UnionOpponent.bEngaged || !IsNeighbourHostile(UnionOpponent.Nation) || FVector2D::Distance(UnionCorps.Km, UnionOpponent.Km) >= 5.0) { continue; }
+			const int32 UnionLoss = FMath::Min(UnionCorps.Men, FMath::Max(1, FMath::RoundToInt(UnionOpponent.Men * 0.01f)));
+			const int32 UnionEnemyLoss = FMath::Min(UnionOpponent.Men, FMath::Max(1, FMath::RoundToInt(UnionCorps.Men * 0.01f)));
+			UnionCorps.Men -= UnionLoss; UnionOpponent.Men -= UnionEnemyLoss;
+            LogCampaignDecision(UnionCorps.Nation, TEXT("other"), UnionCorps.Name + TEXT(": unionskamp"), TEXT("Fjendtligt korps inden for 5 km"), TEXT("ai"),
+                { { TEXT("losses"), double(UnionLoss) }, { TEXT("enemy_losses"), double(UnionEnemyLoss) } }, { { TEXT("enemy"), UnionOpponent.Nation } });
+            LogCampaignDecision(UnionOpponent.Nation, TEXT("other"), UnionOpponent.Name + TEXT(": unionskamp"), TEXT("Allieret unionskorps inden for 5 km"), TEXT("ai"),
+                { { TEXT("losses"), double(UnionEnemyLoss) }, { TEXT("enemy_losses"), double(UnionLoss) } }, { { TEXT("enemy"), UnionCorps.Nation } });
+			EnemyWarLosses += UnionEnemyLoss;
+			UnionCorps.RestUntil = UnionOpponent.RestUntil = CampaignDays + 1.0;
+			break;
+		}
+	}
 	// Liberation: an occupied town (not ceded) is free again when 300 Danish soldiers or more have stood within
 	// 3 km of it for two days with no enemy corps within 10 km; its amt then pays again.
 	for (int32 c = 0; c < Cities.Num(); ++c)
@@ -346,10 +373,11 @@ void ACampaign1851Map::DailyWar()
 		{
 			Men += !R.IsMarching() && FVector2D::Distance(R.Km, At) < 3.0 ? R.PresentMen() : 0;
 		}
-		const bool bEnemyNear = EnemyCorps.ContainsByPredicate([&](const FCampaign1851EnemyCorps& E) { return E.Men > 0 && FVector2D::Distance(E.Km, At) < 10.0; });
+		const bool bEnemyNear = EnemyCorps.ContainsByPredicate([&](const FCampaign1851EnemyCorps& E) { return IsNeighbourHostile(E.Nation) && E.Men > 0 && FVector2D::Distance(E.Km, At) < 10.0; });
 		City.LiberationDays = Men >= LiberationMen && !bEnemyNear ? City.LiberationDays + 1.f : 0.f;
 		if (City.LiberationDays >= 2.f)
 		{
+            LogCampaignDecision(TEXT("DK"), TEXT("other"), City.Name + TEXT(": befriet"), TEXT("Mindst 300 mand i to doegn uden fjendtligt korps naer byen"), TEXT("ai"), { { TEXT("men"), double(Men) } });
 			City.Occupier.Reset();
 			City.LiberationDays = 0.f;
 			News.Add(FString::Printf(TEXT("%s er befriet: de danske tropper har holdt byen i to døgn"), *City.Name));
@@ -363,8 +391,11 @@ void ACampaign1851Map::MonthlyWar()
 	// The tension drifts back towards an uneasy peace; a mobilised Danish army raises it.
 	if (!bAtWar)
 	{
+		const float LogTensionBefore = Tension;
 		Tension += Footing != ECampaign1851Footing::Peace ? 3.f * GuaranteeDamping() : (25.f - Tension) * 0.03f;
 		Tension = FMath::Clamp(Tension, 0.f, 100.f);
+        LogCampaignDecision(TEXT("DK"), TEXT("relation"), TEXT("Maanedlig spaendingsdrift"), TEXT("Krigsfod eller tilbagevenden mod grundspaending"), TEXT("ai"),
+            { { TEXT("before"), LogTensionBefore }, { TEXT("after"), Tension }, { TEXT("footing"), double(int32(Footing)) } });
 	}
 }
 
@@ -382,8 +413,9 @@ void ACampaign1851Map::DeclareWar()
 	D.Reasons = FString::Printf(TEXT("spændingen nåede %.0f"), Tension);
 	D.bDone = true;
 	AddDecision(D);
+    LogCampaignDecision(TEXT("AT"), TEXT("war"), TEXT("Krig mod Danmark"), TEXT("Kampagnens krigstaerskel er naaet"), TEXT("ai"), { { TEXT("tension"), Tension } }, { { TEXT("target"), TEXT("DK") } });
 	// The allied corps (a share of each nation's army on the abstract model) come over the Eider.
-	SpawnCorps(TEXT("Preussisk I. Korps"), TEXT("PR"), 0.2f, TEXT("Kiel"), { TEXT("Egernførde"), TEXT("Slesvig"), TEXT("Flensborg"), TEXT("Sønderborg") }, 0.f);
+	// PR mobilises its scenario OOB, never an additional abstract army.
 	SpawnCorps(TEXT("Østrigsk VI. Korps"), TEXT("AT"), 0.06f, TEXT("Neumünster"), { TEXT("Rendsborg"), TEXT("Slesvig"), TEXT("Flensborg"), TEXT("Kolding"), TEXT("Fredericia") }, 0.f);
 }
 
@@ -447,6 +479,10 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 	for (int32 k = 0; k < EnemyCorps.Num(); ++k)
 	{
 		FCampaign1851EnemyCorps& C = EnemyCorps[k];
+		const bool bUnionCorps = C.Nation == TEXT("SE") || C.Nation == TEXT("NO");
+		const bool bUnionSupporting = bUnionCorps && !IsNeighbourHostile(C.Nation) && Nations.ContainsByPredicate([](const FCampaign1851Nation& UnionN) { return (UnionN.Id == TEXT("SE") || UnionN.Id == TEXT("NO")) && UnionN.bAlliance; });
+		if (bUnionCorps && !IsNeighbourHostile(C.Nation) && !bUnionSupporting) { continue; }
+		if (C.Men <= 0) { continue; }
 		if (C.bEngaged || CampaignDays < C.RestUntil)
 		{
 			continue;
@@ -458,6 +494,7 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 			const FVector2D SiegeOffset = C.Km - SiegeCentre;
 			C.Km = SiegeCentre + (SiegeOffset.SizeSquared() > 0.01 ? SiegeOffset / SiegeOffset.Size() : FVector2D(0.0, -1.0)) * 8.9;
 			C.bSieging = true;
+            LogCampaignDecision(C.Nation, TEXT("other"), C.Name + TEXT(": belejring"), Cities[C.SiegeTown].Name, TEXT("ai"), { { TEXT("corps"), double(C.Id) }, { TEXT("men"), double(C.Men) } });
 			C.SiegeStart = CampaignDays;
 			C.Route.Reset();
 			C.Town = INDEX_NONE;
@@ -469,7 +506,7 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		const FVector2D SiegeAt = C.bSieging && Cities.IsValidIndex(C.SiegeTown) ? TownKm(C.SiegeTown) : FVector2D(1e9, 1e9);
 		for (const FCampaign1851Regiment& R : Regiments)
 		{
-			if (FVector2D::Distance(R.Km, C.Km) < 5.0 && R.Men > 0 && FVector2D::Distance(R.Km, SiegeAt) > 10.0)
+			if (!bUnionSupporting && FVector2D::Distance(R.Km, C.Km) < 5.0 && R.Men > 0 && FVector2D::Distance(R.Km, SiegeAt) > 10.0)
 			{
 				Contact = R.Name;
 				break;
@@ -477,7 +514,7 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		}
 		for (const FCampaign1851Fort& F : Forts)
 		{
-			if (Contact.IsEmpty() && FVector2D::Distance(F.Km, C.Km) < 5.0 && F.bBuilt && !C.bSieging)
+			if (!bUnionSupporting && Contact.IsEmpty() && FVector2D::Distance(F.Km, C.Km) < 5.0 && F.bBuilt && !C.bSieging)
 			{
 				Contact = F.Name;
 			}
@@ -515,7 +552,22 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 		if (C.Route.Num() == 0)
 		{
 			// The enemy chooses its next objective by what it believes of the Danish defence.
-			if (bAtWar && C.Nation != TEXT("DE") && !ChooseCorpsObjective(k))
+			if (bUnionSupporting)
+			{
+				const FCampaign1851EnemyCorps* UnionTarget = nullptr;
+				double UnionDistance = 1.e30;
+				for (const FCampaign1851EnemyCorps& UnionCandidate : EnemyCorps)
+				{
+					if (UnionCandidate.Men <= 0 || !IsNeighbourHostile(UnionCandidate.Nation)) { continue; }
+					const double UnionCandidateDistance = FVector2D::Distance(C.Km, UnionCandidate.Km);
+					if (UnionCandidateDistance < UnionDistance) { UnionTarget = &UnionCandidate; UnionDistance = UnionCandidateDistance; }
+				}
+				if (!UnionTarget || UnionDistance < 5.0) { continue; }
+				const int32 UnionGoal = Cities.IsValidIndex(UnionTarget->Town) ? UnionTarget->Town : NearestTown(UnionTarget->Km);
+				C.Objectives.Reset();
+				if (Cities.IsValidIndex(UnionGoal)) { C.Objectives.Add(UnionGoal); }
+			}
+			if (bAtWar && !bUnionSupporting && C.Nation != TEXT("DE") && !ChooseCorpsObjective(k))
 			{
 				continue;
 			}
@@ -532,7 +584,7 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 			}
 			// Over water: the Danish fleet bars the Belts; a narrow sound takes a week of gathering boats.
 			FString Ferry;
-			const int32 Water = WaterCrossing(C, Legs, Ferry);
+			const int32 Water = bUnionSupporting ? 0 : WaterCrossing(C, Legs, Ferry);
 			if (Water == 2)
 			{
 				News.Add(FString::Printf(TEXT("%s kan ikke gå over %s: den danske flåde behersker farvandet"), *C.Name, *Ferry));
@@ -552,6 +604,8 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 			}
 			C.CrossingReadyDay = -1.0;
 			C.Route = MoveTemp(Legs);
+            LogCampaignDecision(C.Nation, TEXT("march"), C.Name, TEXT("Rute til valgt maal; passage tilladt"), TEXT("ai"),
+                { { TEXT("corps"), double(C.Id) }, { TEXT("men"), double(C.Men) } }, { { TEXT("target"), Cities[Goal].Name } });
 			C.Leg = 0;
 			C.LegElapsed = 0.f;
 			C.Town = INDEX_NONE;
@@ -574,6 +628,8 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 			const int32 Goal = C.Objectives.Num() > 0 ? C.Objectives[0] : INDEX_NONE;
 			C.Route.Reset();
 			C.Town = Goal;
+            LogCampaignDecision(C.Nation, TEXT("march"), C.Name + TEXT(": ankommet"), TEXT("Marchruten er afsluttet"), TEXT("ai"),
+                { { TEXT("corps"), double(C.Id) }, { TEXT("town"), double(Goal) } });
 			const bool bDefended = Cities.IsValidIndex(Goal) && (HasFortsNear(Goal) || C.SiegeTown == Goal || Regiments.ContainsByPredicate([&](const FCampaign1851Regiment& R) { return R.Men > 0 && FVector2D::Distance(R.Km, TownKm(Goal)) < 5.0; }));
 			if (Cities.IsValidIndex(Goal) && bDefended)
 			{
@@ -582,9 +638,15 @@ void ACampaign1851Map::AdvanceWar(float DeltaDays)
 			else if (Cities.IsValidIndex(Goal))
 			{
 				C.Km = TownKm(Goal);
-				if (Cities[Goal].Occupier.IsEmpty() && !Cities[Goal].bForeign)
+				if (bUnionSupporting)
+                {
+                    if (!Cities[Goal].Occupier.IsEmpty()) LogCampaignDecision(C.Nation, TEXT("other"), Cities[Goal].Name + TEXT(": befriet"), TEXT("Allieret korps ankom til ubeskyttet besat by"), TEXT("ai"));
+                    Cities[Goal].Occupier.Reset();
+                }
+				else if (Cities[Goal].Occupier.IsEmpty() && !Cities[Goal].bForeign)
 				{
 					Cities[Goal].Occupier = C.Nation == TEXT("DE") ? TEXT("PR") : C.Nation;
+                    LogCampaignDecision(C.Nation, TEXT("other"), Cities[Goal].Name + TEXT(": besat"), TEXT("Korps ankom til ubeskyttet by"), TEXT("ai"), { { TEXT("corps"), double(C.Id) } });
 					News.Add(FString::Printf(TEXT("%s er besat af %s"), *Cities[Goal].Name, *C.Name));
 				}
 			}

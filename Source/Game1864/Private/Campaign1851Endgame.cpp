@@ -38,6 +38,8 @@ void ACampaign1851Map::AdjustNationWeight(int32 Portfolio, float Delta)
 	{
 		Nations[n].Weights[Portfolio] = FMath::Clamp(Nations[n].Weights[Portfolio] + Delta, 0.1f, 3.f);
 	}
+
+	if (CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("budget"), TEXT("AdjustNationWeight"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Portfolio"), double(Portfolio) }, { TEXT("Delta"), double(Delta) } }, {  }); }
 }
 
 TArray<FCampaign1851ScoreLine> ACampaign1851Map::FinalScore() const

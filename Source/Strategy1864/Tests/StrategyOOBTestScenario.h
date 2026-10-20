@@ -31,6 +31,9 @@ public:
 
 protected:
     virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+    /** Render settings the battle switched off (Lumen, shadows), with their previous values, restored when the battle ends. */
+    TArray<TPair<FString, FString>> BattleRenderRestore;
     virtual void Tick(float DeltaSeconds) override;
 
 public:
@@ -316,6 +319,11 @@ private:
     bool bDanishVictory = false;
     /** -Strategy1864Shots=sec:unit:distance,...: the view goes to the unit and a screenshot is saved (QA of the look). */
     void TickShots();
+    /** -Strategy1864DrillTest=sec:unit:forwardCm:rightCm[:facingDeg] or sec:unit:LINE,...: scripted moves to see the column drill. */
+    void TickDrillTest();
+    TArray<FString> DrillTestPlan;
+    int32 DrillTestNext = 0;
+    bool bDrillTestParsed = false;
     TArray<FString> ShotPlan;
     int32 NextShot = 0;
     float ShotTakeAt = -1.0f;

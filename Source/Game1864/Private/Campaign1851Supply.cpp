@@ -767,7 +767,9 @@ bool ACampaign1851Map::BuySupplyColumn()
 	AddTransaction(-Campaign1851Supply::ColumnCost, TEXT("Trænkolonne købt (20 vogne, 80 heste)"));
 	TakeHorses(80, TEXT("trænkolonne"));
 	++SupplyColumnCount;
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("recruit"), TEXT("BuySupplyColumn"), TEXT("Ordre gennemført via kortets funktion"), FString(), {  }, {  }); }
+	return LogActionResult;
 }
 
 void ACampaign1851Map::AdvanceSupplyColumns(float DeltaDays)

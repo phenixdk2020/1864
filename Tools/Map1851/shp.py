@@ -36,28 +36,41 @@ def read_dbf(path):
     return records
 
 
-def read_shp(path):
-    """Returns a list of shapes; each shape is a list of parts; each part a list of (lon, lat)."""
-    with open(path, "rb") as f:
-        data = f.read()
-    shapes = []
-    pos = 100
-    while pos < len(data):
-        _, content_len = struct.unpack(">II", data[pos:pos + 8])
-        pos += 8
-        shape_type = struct.unpack("<i", data[pos:pos + 4])[0]
-        if shape_type in (3, 5):  # polyline, polygon
-            n_parts, n_points = struct.unpack("<ii", data[pos + 36:pos + 44])
-            parts_idx = struct.unpack(f"<{n_parts}i", data[pos + 44:pos + 44 + 4 * n_parts])
-            pts_off = pos + 44 + 4 * n_parts
-            coords = struct.unpack(f"<{2 * n_points}d", data[pts_off:pts_off + 16 * n_points])
+def iter_shp(path):
+    """Read one polygon record at a time; northern extension must not retain the whole world."""
+    with open(path, "rb") as stream:
+        stream.seek(100)
+        while True:
+            header = stream.read(8)
+            if not header:
+                break
+            if len(header) != 8:
+                raise ValueError("Truncated shapefile record header")
+            _, content_len = struct.unpack(">II", header)
+            data = stream.read(content_len * 2)
+            if len(data) != content_len * 2:
+                raise ValueError("Truncated shapefile record")
+            shape_type = struct.unpack_from("<i", data)[0]
+            if shape_type not in (3, 5):
+                yield []
+                continue
+            n_parts, n_points = struct.unpack_from("<ii", data, 36)
+            parts_idx = struct.unpack_from(f"<{n_parts}i", data, 44)
+            pts_off = 44 + 4 * n_parts
+            coords = struct.unpack_from(f"<{2 * n_points}d", data, pts_off)
             points = list(zip(coords[0::2], coords[1::2]))
             bounds = list(parts_idx) + [n_points]
-            shapes.append([points[bounds[k]:bounds[k + 1]] for k in range(n_parts)])
-        else:
-            shapes.append([])
-        pos += content_len * 2
-    return shapes
+            yield [points[bounds[k]:bounds[k + 1]] for k in range(n_parts)]
+
+
+def read_shp(path):
+    """Compatibility wrapper for existing full-map generators."""
+    return list(iter_shp(path))
+
+
+def iter_read(path_no_ext):
+    """Geometry streams by record; DBF attributes are small and retain their record order."""
+    return zip(iter_shp(path_no_ext + ".shp"), read_dbf(path_no_ext + ".dbf"))
 
 
 def read(path_no_ext):

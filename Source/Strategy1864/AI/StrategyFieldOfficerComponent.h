@@ -44,6 +44,17 @@ public:
     /** Manual SPRED uses the same cover state as the automatic distant-fire reaction. */
     bool SetManualSpread(bool bEnable);
 
+    /** Double time ("ilmarch"): the bayonet charge's speed raise (x DoubleTimeFactor) ordered by the player. Refused when exhausted, in
+     *  square or not standing; it ends on arrival, on a new Hold order, when the men are exhausted, and with the charge. */
+    bool SetManualDoubleTime(bool bEnable);
+    bool IsDoubleTime() const { return bDoubleTime; }
+
+    UPROPERTY(EditAnywhere, Category="Strategy|Officer|DoubleTime")
+    float DoubleTimeFactor = 1.9f;
+    /** Fatigue (0-100) from which the player cannot order double time; at 95 it ends by itself. */
+    UPROPERTY(EditAnywhere, Category="Strategy|Officer|DoubleTime")
+    float DoubleTimeFatigueLimit = 85.0f;
+
     // Balance estimates: good officers react in 3 s, middling in 8 s, poor never.
     UPROPERTY(EditAnywhere, Category="Strategy|Officer|FireCover")
     float GoodFireCoverDelaySeconds = 3.0f;
@@ -91,6 +102,12 @@ private:
     void ResolveShock(AStrategyUnit* Enemy);
     void StartCharge(AStrategyUnit* Target, const FString& Why);
     void EndCharge();
+    void BeginDoubleTime();
+    void EndDoubleTime();
+    void UpdateDoubleTime();
+    bool bDoubleTime = false;
+    bool bDoubleTimeMoved = false;
+    int32 DoubleTimeOrderSerial = 0;
     bool FallBack(const FString& Why, float DistanceCm);
     void Decide(const FString& Task, const FString& Reason);
 

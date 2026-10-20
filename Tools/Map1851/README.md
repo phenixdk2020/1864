@@ -42,3 +42,24 @@ Unity.exe -batchmode -projectPath <projekt> -executeMethod CampaignMap1851Editor
 ```
 
 Format pr. billede: `sti|bredde|længde|afstand-km|drejning`, flere adskilt af `;`.
+
+## Additiv nordudvidelse til niveau B (2026-10-17)
+
+Det aktive Unreal-kort ligger i `Data/Campaign1851`. Udvid det eksisterende kort uden at genberegne danske provinser/ruter:
+
+```powershell
+python Tools/Map1851/build_map.py SourceAssets/NaturalEarth --out=Data/Campaign1851 --extend-north
+python Tools/Countries/import_sweden_norway.py
+python Tools/Countries/import_prussia.py
+python Tools/Countries/activate_prussia_events.py
+python Tools/Countries/integrate_level_b.py
+python Tools/Map1851/validate_neighbours.py
+python Tools/Countries/validate_sweden_norway.py
+python Tools/Countries/validate_prussia.py
+```
+
+Kør kommandoerne enkeltvis. Nordudvidelsen streamer Natural Earth-landformer og undgår admin-1-datasættet. A* benytter kompakte rasterarrays. Udvidelsen er en no-op, hvis metadata allerede har `northExtension`. Landepakkerne skal være tilgængelige på importernes konfigurerede stier.
+
+Det oprindelige raster bliver nederste halvdel, med identiske danske pixels og uændrede by-/amtsindeks. Nye nordlige distrikter og scenarieopdelte hære aktiveres af `integrate_level_b.py`. En almindelig fuld regenerering uden `--extend-north` er en anden operation og kan overskrive udvidelsen; den kræver særskilt kontrol af danske data.
+
+Se [niveau B-rapporten](../../Docs/Niveau-B-Sverige-Norge-Preussen-2026-10-17.md) for skøn, saveversion 38, valideringsoutput og udestående niveau C. Kørsel af generator/validator giver ikke tilladelse til at starte Unreal.

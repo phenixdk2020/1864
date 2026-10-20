@@ -268,7 +268,9 @@ bool ACampaign1851Map::StartResearch(int32 Topic, FString* OutReason)
 	}
 	const FCampaign1851ResearchTopic& T = Campaign1851Research::Topics()[Topic];
 	News.Add(FString::Printf(TEXT("Forskning: %s påbegyndt (%d måneder, %s rd./md.)"), T.Name, T.Months, *FString::FromInt(int32(T.CostPerMonth))));
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("research"), TEXT("StartResearch"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Topic"), double(Topic) } }, {  }); }
+	return LogActionResult;
 }
 
 void ACampaign1851Map::MonthlyResearch()
@@ -325,6 +327,8 @@ void ACampaign1851Map::MonthlyResearch()
 		if (++Months >= T.Months)
 		{
 			Researched.Add(T.Id);
+            LogCampaignDecision(TEXT("DK"), TEXT("research"), T.Name, TEXT("Forskningens maaneder og finansiering er opfyldt"), TEXT("minister"),
+                { { TEXT("months"), double(Months) }, { TEXT("cost_per_month"), T.CostPerMonth } }, { { TEXT("topic"), T.Id } });
 			News.Add(FString::Printf(TEXT("Forskning færdig: %s. %s"), T.Name, T.Effect));
 			Current = INDEX_NONE;
 			Months = 0;
@@ -363,7 +367,9 @@ bool ACampaign1851Map::SetDoctrine(int32 Level, int32 Choice, FString* OutReason
 	}
 	News.Add(FString::Printf(TEXT("%s doktrin: %s. Omstillingen tager %.0f dage (kampkraft −10 %% imens)"), Campaign1851Research::LevelName(Level),
 		Campaign1851Research::DoctrineName(Level, Choice), DoctrineChangeDays));
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("research"), TEXT("SetDoctrine"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Level"), double(Level) }, { TEXT("Choice"), double(Choice) } }, {  }); }
+	return LogActionResult;
 }
 
 float ACampaign1851Map::DanishQualityFactor(const FCampaign1851Battle& B) const

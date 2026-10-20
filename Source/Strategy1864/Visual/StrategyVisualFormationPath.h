@@ -20,6 +20,11 @@ struct FStrategyVisualFormationPath
     bool bMovingVisuals = false;
     FVector HeadPos = FVector::ZeroVector; // column head: a vehicle with a turn rate, so corners are rounded
     float HeadYaw = 0.f;
+    // Snake column (rigid company in march column): the head walks at march pace and turns on a fixed radius,
+    // so every man turns where the head turned. 0 = the old free head (speed up to 2x walk, 50 deg/s).
+    float HeadSpeedCap = 0.f;
+    float HeadTurnRadiusCm = 0.f;
+    bool bHeadLocked = false;   // snake head has caught the actor: it now walks exactly on the actor's own track
 
     static void SmoothPosition(FVector& Position, FVector& Velocity, const FVector& Target,
                                float Dt, float Frequency)
@@ -115,17 +120,45 @@ struct FStrategyVisualFormationPath
             }
             // The head walks towards its place with a limited turn rate (about 3 m turning radius), so the column
             // bends round a corner instead of folding at it.
+            // Substepped, so the curve does not depend on the frame rate or a hitch.
+            for (float HeadTimeLeft = Dt; HeadTimeLeft > SMALL_NUMBER; )
             {
+                const float HeadDt = FMath::Min(HeadTimeLeft, 1.f / 60.f);
+                HeadTimeLeft -= HeadDt;
                 const FVector To = HeadTarget - HeadPos;
                 const float Dist = To.Size2D();
+                // Snake head locked on the actor (user's recording 2026-10-18: a pursuing head with a turn limit weaved from side
+                // to side round a straight march). Once caught, it walks exactly where the actor walks; the turn radius only
+                // shapes the first convergence from the leading flank and a jump of the actor (new route, relocation).
+                // Lock only when caught AND heading the same way, so the right face still curves off the flank on the radius.
+                const bool bHeadAligned = Dist > 1.f && FMath::Abs(FMath::FindDeltaAngleDegrees(HeadYaw, To.Rotation().Yaw)) < 12.f;
+                if (HeadSpeedCap > 0.f && (bHeadLocked ? Dist < 300.f : (Dist < 40.f && bHeadAligned)))
+                {
+                    bHeadLocked = true;
+                    // A halting actor that settles back a few cm must not turn the head round through its own column.
+                    const bool bSettlingBack = Dist < 50.f && FVector::DotProduct(To, FRotator(0.f, HeadYaw, 0.f).Vector()) < 0.f;
+                    if (!bSettlingBack)
+                    {
+                        if (Dist > 1.f) HeadYaw = To.Rotation().Yaw;
+                        HeadPos = HeadTarget;
+                    }
+                    break;
+                }
+                bHeadLocked = false;
+                float Speed = FMath::Min(Dist * 4.f, FMath::Max(WalkSpeed * 2.f, 300.f));
+                if (HeadSpeedCap > 0.f) Speed = FMath::Min(Speed, HeadSpeedCap);
+                // Snake head: always the same turning radius, at every distance (review 2026-10-18: aiming straight at a
+                // close actor kinked the column, and freezing a head with the target behind it stalled a new march).
+                // The route itself leads to the approach point, so the head does not pass the actor at a halt.
                 if (Dist > 30.f)
                 {
                     const float Want = To.Rotation().Yaw;
-                    const float MaxTurn = 50.f * Dt;
+                    const float HeadTurnRate = HeadTurnRadiusCm > 0.f ?
+                        FMath::Min(50.f, FMath::RadiansToDegrees(FMath::Max(Speed, 1.f) / HeadTurnRadiusCm)) : 50.f;
+                    const float MaxTurn = HeadTurnRate * HeadDt;
                     HeadYaw = FRotator::NormalizeAxis(HeadYaw + FMath::Clamp(FMath::FindDeltaAngleDegrees(HeadYaw, Want), -MaxTurn, MaxTurn));
                 }
-                const float Speed = FMath::Min(Dist * 4.f, FMath::Max(WalkSpeed * 2.f, 300.f));
-                HeadPos += FRotator(0.f, HeadYaw, 0.f).Vector() * (Speed * Dt);
+                HeadPos += FRotator(0.f, HeadYaw, 0.f).Vector() * (Speed * HeadDt);
                 HeadPos.Z = HeadTarget.Z;
             }
             Facing = HeadYaw;

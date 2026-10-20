@@ -427,6 +427,7 @@ bool UStrategyFieldOfficerComponent::UpdateAutomaticLooseOrderUnderFire()
 void UStrategyFieldOfficerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    UpdateDoubleTime();
     if (OwnerUnit && OwnerUnit->FieldworksComponent && OwnerUnit->FieldworksComponent->bBuilding && OwnerUnit->IsCombatEffective())
     {
         Decide(TEXT("BYGGER"), TEXT("Holder stedet mens feltværket bygges"));
@@ -1109,16 +1110,64 @@ void UStrategyFieldOfficerComponent::StartCharge(AStrategyUnit* Target, const FS
     ChargeTarget = Target;
     bCharging = true;
     LastChargeTime = GetWorld()->GetTimeSeconds();
-    if (OwnerUnit->MovementExecutor)
-    {
-        NormalSpeed = OwnerUnit->MovementExecutor->MoveSpeedCmPerSecond;
-        OwnerUnit->MovementExecutor->MoveSpeedCmPerSecond = NormalSpeed * 1.9f;   // at the double
-    }
+    BeginDoubleTime();   // at the double
     if (OwnerUnit->EquipmentVisualComponent)
     {
         OwnerUnit->EquipmentVisualComponent->SetBayonetFixed(true);
     }
     Decide(TEXT("Bajonetangreb"), Why);
+}
+
+void UStrategyFieldOfficerComponent::BeginDoubleTime()
+{
+    if (bDoubleTime || !OwnerUnit || !OwnerUnit->MovementExecutor) return;
+    NormalSpeed = OwnerUnit->MovementExecutor->MoveSpeedCmPerSecond;
+    OwnerUnit->MovementExecutor->MoveSpeedCmPerSecond = NormalSpeed * DoubleTimeFactor;
+    bDoubleTime = true;
+}
+
+void UStrategyFieldOfficerComponent::EndDoubleTime()
+{
+    if (!bDoubleTime) return;
+    bDoubleTime = false;
+    bDoubleTimeMoved = false;
+    if (OwnerUnit && OwnerUnit->MovementExecutor && NormalSpeed > 0.0f)
+        OwnerUnit->MovementExecutor->MoveSpeedCmPerSecond = NormalSpeed;
+}
+
+bool UStrategyFieldOfficerComponent::SetManualDoubleTime(bool bEnable)
+{
+    if (!bEnable)
+    {
+        if (!bCharging) EndDoubleTime();
+        return true;
+    }
+    if (bDoubleTime) return true;
+    if (!OwnerUnit || OwnerUnit->Echelon != EStrategyEchelon::Company || !OwnerUnit->IsCombatEffective() || !OwnerUnit->MovementExecutor ||
+        bCharging || OwnerUnit->Fatigue >= DoubleTimeFatigueLimit ||
+        (OwnerUnit->StanceComponent && OwnerUnit->StanceComponent->Stance != EStrategyStance::Standing) ||
+        (OwnerUnit->FormationComponent && OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square) ||
+        bTakingFireCover) return false;
+    BeginDoubleTime();
+    bDoubleTimeMoved = OwnerUnit->MovementExecutor->HasMovementGoal();
+    DoubleTimeOrderSerial = OwnerUnit->OrderComponent ? OwnerUnit->OrderComponent->GetCurrentOrder().OrderSerial : 0;
+    return true;
+}
+
+void UStrategyFieldOfficerComponent::UpdateDoubleTime()
+{
+    // The charge owns its own speed; a player's double time ends back at the normal pace on arrival, on Halt (a new Hold order),
+    // in square, when not standing and when the men are exhausted.
+    if (!bDoubleTime || bCharging) return;
+    const bool bGoal = OwnerUnit && OwnerUnit->MovementExecutor && OwnerUnit->MovementExecutor->HasMovementGoal();
+    bDoubleTimeMoved |= bGoal;
+    const FStrategyOrder DoubleTimeOrder = OwnerUnit && OwnerUnit->OrderComponent ? OwnerUnit->OrderComponent->GetCurrentOrder() : FStrategyOrder();
+    const bool bHalted = DoubleTimeOrder.Type == EStrategyOrderType::Hold && DoubleTimeOrder.OrderSerial != DoubleTimeOrderSerial;
+    const bool bSquare = OwnerUnit && OwnerUnit->FormationComponent && OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square;
+    const bool bNotStanding = OwnerUnit && OwnerUnit->StanceComponent && OwnerUnit->StanceComponent->Stance != EStrategyStance::Standing;
+    if (!OwnerUnit || !OwnerUnit->IsCombatEffective() || OwnerUnit->Fatigue >= 95.0f || bSquare || bNotStanding || bHalted ||
+        (bDoubleTimeMoved && !bGoal))
+        EndDoubleTime();
 }
 
 void UStrategyFieldOfficerComponent::EndCharge()
@@ -1128,10 +1177,7 @@ void UStrategyFieldOfficerComponent::EndCharge()
         return;
     }
     bCharging = false;
-    if (OwnerUnit && OwnerUnit->MovementExecutor && NormalSpeed > 0.0f)
-    {
-        OwnerUnit->MovementExecutor->MoveSpeedCmPerSecond = NormalSpeed;
-    }
+    EndDoubleTime();
     BayonetUntil = GetWorld()->GetTimeSeconds() + 30.0f;
 }
 

@@ -80,17 +80,22 @@ double ACampaign1851Map::ExportValuePerYear(ECampaign1851Good G) const
 	{
 		Rural += IsAmtOccupied(A) ? 0.0 : A.Rural;
 	}
+	const TCHAR* QuantityKey = G == ECampaign1851Good::Grain ? TEXT("grainPerHead") : G == ECampaign1851Good::Cattle ? TEXT("cattlePerHead") : TEXT("butterPerHead");
+	return DistrictExportValuePerYear(G, Rural, EconomyValue(QuantityKey, GoodPerHead[int32(G)]), bAtWar, HasSeaControl());
+}
+
+double ACampaign1851Map::DistrictExportValuePerYear(ECampaign1851Good G, double Rural, double PerHead, bool bWar, bool bSeaAccess) const
+{
 	const int32 HarvestYear = GetDate().GetMonth() >= 8 ? GetDate().GetYear() : GetDate().GetYear() - 1;
 	const float Harvest = G == ECampaign1851Good::Grain ? 0.85f + 0.3f * EcoHash01(uint32(Seed) + 99u, uint32(HarvestYear)) : 1.f;
 	// War: Hamburg and the Elbe closed to cattle; without the sea every export suffers.
 	float War = 1.f;
-	if (bAtWar)
+	if (bWar)
 	{
 		War = G == ECampaign1851Good::Cattle ? 0.5f : 0.8f;
-		War *= HasSeaControl() ? 1.f : 0.5f;
+		War *= bSeaAccess ? 1.f : 0.5f;
 	}
-	const TCHAR* QuantityKey = G == ECampaign1851Good::Grain ? TEXT("grainPerHead") : G == ECampaign1851Good::Cattle ? TEXT("cattlePerHead") : TEXT("butterPerHead");
-	return Rural * EconomyValue(QuantityKey, GoodPerHead[int32(G)]) * Harvest * PriceIndex(G) * War;
+	return Rural * PerHead * Harvest * PriceIndex(G) * War;
 }
 
 double ACampaign1851Map::ExportDutyPerYear() const
@@ -143,7 +148,9 @@ bool ACampaign1851Map::TakeLoan(double Amount, FString* OutReason)
 	Debt += Amount;
 	AddTransaction(Amount, FString::Printf(TEXT("Statslån i %s: %.1f %%"), Amount >= 250000.0 ? TEXT("London") : TEXT("Hamborg"), Rate * 100.f));
 	News.Add(FString::Printf(TEXT("Statslån på %s rd. til %.1f %%"), *FString::FromInt(int32(Amount)), Rate * 100.f));
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("budget"), TEXT("TakeLoan"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Amount"), double(Amount) } }, {  }); }
+	return LogActionResult;
 }
 
 bool ACampaign1851Map::RepayLoan(double Amount)
@@ -160,7 +167,9 @@ bool ACampaign1851Map::RepayLoan(double Amount)
 	Debt -= Amount;
 	if (Debt == 0.0) { DebtRate = float(EconomyValue(TEXT("creditBase"), 0.04)); }
 	AddTransaction(-Amount, TEXT("Afdrag på statsgælden"));
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("budget"), TEXT("RepayLoan"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Amount"), double(Amount) } }, {  }); }
+	return LogActionResult;
 }
 
 void ACampaign1851Map::MonthlyEconomy()

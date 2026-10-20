@@ -1,3 +1,4 @@
+#include "Campaign1851DecisionLog.h"
 // The ministers and the new portfolios (Docs/Ministers1851.md). Every portfolio has a minister with a name,
 // a political current and three qualities: skill (how well the ministry chooses and how much it achieves),
 // thrift (how much of the money it dares spend) and caution (how bold its foreign, naval and financial
@@ -47,8 +48,91 @@ namespace
 	}
 }
 
+bool ACampaign1851Map::LoadForeignMinisters()
+{
+	ForeignMinisters.Reset();
+	ForeignMinisterRoles.Reset();
+	FString ForeignText;
+	TSharedPtr<FJsonObject> ForeignJson;
+	if (!FFileHelper::LoadFileToString(ForeignText, *(FPaths::ProjectDir() / (TEXT("Data/Campaign1851/ForeignPersonnel_") + ActiveScenario().Id + TEXT(".json"))))
+		|| !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(ForeignText), ForeignJson) || !ForeignJson.IsValid()) { return false; }
+	const TCHAR* ForeignPortfolioKeys[] = { TEXT("Interior"), TEXT("PublicWorks"), TEXT("War"), TEXT("Transport"), TEXT("Intendance"), TEXT("Foreign"), TEXT("Navy"), TEXT("Finance") };
+	for (const TSharedPtr<FJsonValue>& ForeignValue : Campaign1851Json::Array(*ForeignJson, TEXT("nations")))
+	{
+		const TSharedPtr<FJsonObject> ForeignNation = Campaign1851Json::Row(ForeignValue);
+		const FString ForeignId = Campaign1851Json::String(*ForeignNation, TEXT("nation"));
+		if (ForeignId != TEXT("SE") && ForeignId != TEXT("NO") && ForeignId != TEXT("PR")) { continue; }
+		TArray<FCampaign1851Minister>& ForeignCabinet = ForeignMinisters.FindOrAdd(ForeignId);
+		TArray<FString>& ForeignRoles = ForeignMinisterRoles.FindOrAdd(ForeignId);
+		ForeignCabinet.SetNum(int32(ECampaign1851Portfolio::Count));
+		ForeignRoles.SetNum(int32(ECampaign1851Portfolio::Count));
+		for (const TSharedPtr<FJsonValue>& ForeignPortfolioValue : Campaign1851Json::Array(*ForeignNation, TEXT("portfolios")))
+		{
+			const TSharedPtr<FJsonObject> ForeignPortfolio = Campaign1851Json::Row(ForeignPortfolioValue);
+			const FString ForeignKey = Campaign1851Json::String(*ForeignPortfolio, TEXT("portfolio"));
+			const TArray<TSharedPtr<FJsonValue>>& ForeignCandidates = Campaign1851Json::Array(*ForeignPortfolio, TEXT("candidates"));
+			if (ForeignCandidates.IsEmpty()) { continue; }
+			for (int32 ForeignP = 0; ForeignP < UE_ARRAY_COUNT(ForeignPortfolioKeys); ++ForeignP)
+			{
+				if (ForeignKey != ForeignPortfolioKeys[ForeignP]) { continue; }
+				const TSharedPtr<FJsonObject> ForeignEntry = Campaign1851Json::Row(ForeignCandidates[0]);
+				FCampaign1851Minister& ForeignMinisterValue = ForeignCabinet[ForeignP];
+				ForeignEntry->TryGetStringField(TEXT("name"), ForeignMinisterValue.Name);
+				ForeignEntry->TryGetStringField(TEXT("role"), ForeignRoles[ForeignP]);
+				double ForeignSkill = 50, ForeignThrift = 50, ForeignCaution = 50;
+				ForeignEntry->TryGetNumberField(TEXT("skill"), ForeignSkill);
+				ForeignEntry->TryGetNumberField(TEXT("thrift"), ForeignThrift);
+				ForeignEntry->TryGetNumberField(TEXT("caution"), ForeignCaution);
+				ForeignMinisterValue.Skill = uint8(FMath::Clamp(FMath::RoundToInt(ForeignSkill / 10.0), 1, 10));
+				ForeignMinisterValue.Thrift = uint8(FMath::Clamp(FMath::RoundToInt(ForeignThrift / 10.0), 1, 10));
+				ForeignMinisterValue.Caution = uint8(FMath::Clamp(FMath::RoundToInt(ForeignCaution / 10.0), 1, 10));
+			}
+		}
+	}
+	return ForeignMinisters.Num() == 3;
+}
+
+const FCampaign1851Minister* ACampaign1851Map::ForeignMinister(const FString& NationId, ECampaign1851Portfolio Portfolio) const
+{
+	const TArray<FCampaign1851Minister>* ForeignCabinet = ForeignMinisters.Find(NationId);
+	return ForeignCabinet && ForeignCabinet->IsValidIndex(int32(Portfolio)) && !(*ForeignCabinet)[int32(Portfolio)].Name.IsEmpty()
+		? &(*ForeignCabinet)[int32(Portfolio)] : nullptr;
+}
+
+FString ACampaign1851Map::ForeignPersonnelSummary(const FString& NationId) const
+{
+	const FCampaign1851Minister* ForeignEnvoy = ForeignMinister(NationId, ECampaign1851Portfolio::Foreign);
+	const TArray<FCampaign1851Officer>* ForeignPool = ForeignOfficers.Find(NationId);
+	return ForeignEnvoy ? FString::Printf(TEXT("Udenrigs: %s · %d officerer · kasse %.0f rd. (skøn)"), *ForeignEnvoy->Name, ForeignPool ? ForeignPool->Num() : 0, ForeignTreasury(NationId)) : FString();
+}
+
+FString ACampaign1851Map::ForeignPersonnelInfo(const FString& NationId) const
+{
+	FString ForeignInfo = TEXT("Personer ved scenariestart · skrivebeskyttet\nEgenskaber og feltkommando er spilskøn.\n");
+	ForeignInfo += FString::Printf(TEXT("Statskasse: %.2f rd. · kun aktive kortdistrikter (spilskøn)\n"), ForeignTreasury(NationId));
+	if (const TArray<FCampaign1851Officer>* ForeignPool = ForeignOfficers.Find(NationId))
+	{
+		for (const FCampaign1851Officer& ForeignOfficer : *ForeignPool)
+		{
+			ForeignInfo += FString::Printf(TEXT("%s %s · ledelse %d · stab %d%s\n"), *ForeignOfficer.Rank, *ForeignOfficer.Name,
+				ForeignOfficer.Stat(ECampaign1851OfficerStat::Leadership), ForeignOfficer.Stat(ECampaign1851OfficerStat::Staff),
+				ForeignCommander(NationId) == &ForeignOfficer ? TEXT(" · korpschef (fælles stab)") : TEXT(""));
+		}
+	}
+	const TArray<FString>* ForeignRoles = ForeignMinisterRoles.Find(NationId);
+	for (int32 ForeignP = 0; ForeignP < int32(ECampaign1851Portfolio::Count); ++ForeignP)
+	{
+		const FCampaign1851Minister* ForeignM = ForeignMinister(NationId, ECampaign1851Portfolio(ForeignP));
+		if (!ForeignM) { continue; }
+		ForeignInfo += FString::Printf(TEXT("%s: %s · dygtighed %d\n%s\n"), Campaign1851Nations::PortfolioName(ECampaign1851Portfolio(ForeignP)),
+			*ForeignM->Name, ForeignM->Skill, ForeignRoles ? *(*ForeignRoles)[ForeignP] : TEXT(""));
+	}
+	return ForeignInfo;
+}
+
 bool ACampaign1851Map::LoadScenarioMinisters()
 {
+	if (!LoadForeignMinisters()) { return false; }
 	for (TArray<FCampaign1851Minister>& Pool : ScenarioMinisterPools) { Pool.Reset(); }
 	if (ActiveScenario().Id != TEXT("1825")) { return true; }
 	FString Text;
@@ -185,7 +269,9 @@ bool ACampaign1851Map::AppointMinister(int32 Portfolio, int32 Candidate)
 	const FString Old = Ministers[Portfolio].Name;
 	Ministers[Portfolio] = Candidates[Candidate];
 	News.Add(FString::Printf(TEXT("%s afløses af %s som minister for %s"), *Old, *Ministers[Portfolio].Name, Campaign1851Nations::PortfolioName(ECampaign1851Portfolio(Portfolio))));
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult) { LogCampaignDecision(CampaignLogNation(), TEXT("other"), TEXT("AppointMinister"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Portfolio"), double(Portfolio) }, { TEXT("Candidate"), double(Candidate) } }, { { TEXT("previous"), Old }, { TEXT("minister"), Ministers[Portfolio].Name } }); }
+	return LogActionResult;
 }
 
 bool ACampaign1851Map::DismissMinister(int32 Portfolio)
@@ -197,7 +283,9 @@ bool ACampaign1851Map::DismissMinister(int32 Portfolio)
 	const FString Old = Ministers[Portfolio].Name;
 	Ministers[Portfolio] = MakeMinister(ECampaign1851Portfolio(Portfolio), Government, Old);
 	News.Add(FString::Printf(TEXT("%s afskediget; ny minister for %s: %s"), *Old, Campaign1851Nations::PortfolioName(ECampaign1851Portfolio(Portfolio)), *Ministers[Portfolio].Name));
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult) { LogCampaignDecision(CampaignLogNation(), TEXT("other"), TEXT("DismissMinister"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Portfolio"), double(Portfolio) } }, { { TEXT("previous"), Old }, { TEXT("minister"), Ministers[Portfolio].Name } }); }
+	return LogActionResult;
 }
 
 float ACampaign1851Map::MinisterBudgetFactor(ECampaign1851Portfolio P) const
@@ -373,6 +461,7 @@ TArray<FCampaign1851Decision> ACampaign1851Map::MinisterOptions(ECampaign1851Por
 
 bool ACampaign1851Map::CarryOutMinister(const FCampaign1851Decision& D)
 {
+	FCampaign1851LogActorScope LogExecutionScope(this, CampaignLogActor == TEXT("player") ? TEXT("player") : Nations.IsValidIndex(D.Nation) && Nations[D.Nation].IsPlayer() ? TEXT("minister") : TEXT("ai"));
 	switch (D.Kind)
 	{
 	case ECampaign1851DecisionKind::Diplomacy:
@@ -410,6 +499,8 @@ void ACampaign1851Map::StepMinistryBudget(ECampaign1851Portfolio P, int32 Dir)
 	}
 	B = Steps[FMath::Clamp(At + Dir, 0, int32(UE_ARRAY_COUNT(Steps)) - 1)];
 	MinistryPot[int32(P)] = FMath::Min(MinistryPot[int32(P)], B * 3.0);
+
+	if (CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("budget"), TEXT("StepMinistryBudget"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("P"), double(P) }, { TEXT("Dir"), double(Dir) } }, {  }); }
 }
 
 void ACampaign1851Map::RefillMinistryBudgets()

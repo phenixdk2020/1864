@@ -196,6 +196,12 @@ bool ACampaign1851Map::LoadNeighbours(FJsonObject& MapJson)
 			NeighbourRow->TryGetStringField(TEXT("arm"), NeighbourArmy.Arm);
 			NeighbourRow->TryGetStringField(TEXT("corps"), NeighbourArmy.ParentCorps);
 			NeighbourRow->TryGetStringField(TEXT("chief"), NeighbourArmy.Chief);
+			NeighbourArmy.OfficerId = Campaign1851Json::String(*Campaign1851Json::Object(*NeighbourRow, TEXT("officer")), TEXT("id"));
+			NeighbourRow->TryGetStringField(TEXT("division"), NeighbourArmy.Division);
+			NeighbourRow->TryGetStringField(TEXT("corpsName"), NeighbourArmy.CorpsName);
+			NeighbourRow->TryGetNumberField(TEXT("officerMarchFactor"), NeighbourArmy.OfficerMarchFactor);
+			NeighbourRow->TryGetNumberField(TEXT("mobilisationDays"), NeighbourArmy.MobilisationDays);
+			NeighbourRow->TryGetNumberField(TEXT("mobilisationFullDays"), NeighbourArmy.MobilisationFullDays);
 			for (const TCHAR* SouthArmField : { TEXT("companies"), TEXT("squadrons"), TEXT("batteries") })
 			{
 				const TArray<TSharedPtr<FJsonValue>>* SouthUnits = nullptr;
@@ -212,7 +218,58 @@ bool ACampaign1851Map::LoadNeighbours(FJsonObject& MapJson)
 		}
 	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|neighbours|scenarie=%s|byer=%d|hære=%d|grid=%dx%d"), *ActiveScenario().Id, Campaign1851Json::Array(*NeighbourJson, TEXT("cities")).Num(), NeighbourArmyAtStart.Num(), NeighbourOwnerW, NeighbourOwnerH);
-	return true;
+	return LoadForeignEconomies();
+}
+
+bool ACampaign1851Map::LoadForeignEconomies()
+{
+	ForeignEconomies.Reset();
+	FString ForeignText;
+	TSharedPtr<FJsonObject> ForeignJson;
+	if (!FFileHelper::LoadFileToString(ForeignText, *(FPaths::ProjectDir() / (TEXT("Data/Campaign1851/ForeignEconomy_") + ActiveScenario().Id + TEXT(".json"))))
+		|| !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(ForeignText), ForeignJson) || !ForeignJson.IsValid()) { return false; }
+	for (const TSharedPtr<FJsonValue>& ForeignValue : Campaign1851Json::Array(*ForeignJson, TEXT("nations")))
+	{
+		const TSharedPtr<FJsonObject> ForeignRow = Campaign1851Json::Row(ForeignValue);
+		const FString ForeignId = Campaign1851Json::String(*ForeignRow, TEXT("nation"));
+		if (ForeignId != TEXT("SE") && ForeignId != TEXT("NO") && ForeignId != TEXT("PR")) { continue; }
+		FCampaign1851ForeignEconomy ForeignEconomy;
+		ForeignRow->TryGetNumberField(TEXT("grainPerHead"), ForeignEconomy.GoodsPerHead[0]);
+		ForeignRow->TryGetNumberField(TEXT("cattlePerHead"), ForeignEconomy.GoodsPerHead[1]);
+		ForeignRow->TryGetNumberField(TEXT("butterPerHead"), ForeignEconomy.GoodsPerHead[2]);
+		ForeignRow->TryGetNumberField(TEXT("exportDuty"), ForeignEconomy.ExportDuty);
+		ForeignEconomies.Add(ForeignId, ForeignEconomy);
+	}
+	return ForeignEconomies.Num() == 3;
+}
+
+void ACampaign1851Map::ResetForeignEconomies()
+{
+	ForeignTreasuries.Reset();
+	for (const auto& ForeignPair : ForeignEconomies) { ForeignTreasuries.Add(ForeignPair.Key, 0.0); }
+	for (FCampaign1851NeighbourDistrict& ForeignDistrict : NeighbourDistricts)
+	{
+		if (double* ForeignCash = ForeignTreasuries.Find(ForeignDistrict.Nation))
+		{
+			*ForeignCash += ForeignDistrict.Treasury;
+			ForeignDistrict.Treasury = 0.0; // transferred, never two copies of the same money
+		}
+	}
+}
+
+double ACampaign1851Map::ForeignTreasury(const FString& NationId) const
+{
+	const double* ForeignCash = ForeignTreasuries.Find(NationId);
+	return ForeignCash ? *ForeignCash : 0.0;
+}
+
+void ACampaign1851Map::RestoreForeignTreasuries(const TMap<FString, double>& Saved)
+{
+	for (auto& ForeignPair : ForeignTreasuries)
+	{
+		const double* ForeignSaved = Saved.Find(ForeignPair.Key);
+		if (ForeignSaved && FMath::IsFinite(*ForeignSaved)) { ForeignPair.Value = FMath::Max(0.0, *ForeignSaved); }
+	}
 }
 
 FString ACampaign1851Map::TerritoryNation(const FVector2D& Km) const
@@ -235,13 +292,27 @@ FLinearColor ACampaign1851Map::NeighbourColour(const FString& NationId) const
 
 bool ACampaign1851Map::IsNeighbourHostile(const FString& NationId) const
 {
-	return bAtWar && (NationId == TEXT("PR") || NationId == TEXT("AT") || NationId == TEXT("DE"));
+	if (!bAtWar) { return false; }
+	if (NationId == TEXT("SE") || NationId == TEXT("NO"))
+	{
+		// One king decides external policy; the two army/reserve/treasury pools stay separate.
+		const FCampaign1851Nation* UnionSweden = Nations.FindByPredicate([](const FCampaign1851Nation& UnionN) { return UnionN.Id == TEXT("SE"); });
+		const FCampaign1851Nation* UnionNorway = Nations.FindByPredicate([](const FCampaign1851Nation& UnionN) { return UnionN.Id == TEXT("NO"); });
+		return UnionSweden && !(UnionSweden->bAlliance || (UnionNorway && UnionNorway->bAlliance)) && UnionSweden->Relation <= -50.f; // design threshold, not a historical inevitability
+	}
+	return NationId == TEXT("PR") || NationId == TEXT("AT") || NationId == TEXT("DE");
 }
 
 bool ACampaign1851Map::CanEnterNation(const FString& MovingNation, const FString& LandNation) const
 {
 	if (LandNation.IsEmpty()) { return false; }
 	if (MovingNation == LandNation) { return true; }
+	const bool bUnionMoving = MovingNation == TEXT("SE") || MovingNation == TEXT("NO");
+	const bool bUnionLand = LandNation == TEXT("SE") || LandNation == TEXT("NO");
+	if (bUnionMoving && bUnionLand) { return true; }
+	const bool bUnionAlliance = Nations.ContainsByPredicate([](const FCampaign1851Nation& UnionN) { return (UnionN.Id == TEXT("SE") || UnionN.Id == TEXT("NO")) && UnionN.bAlliance; });
+	if (MovingNation == TEXT("DK") && bUnionLand && bUnionAlliance) { return true; }
+	if (bUnionMoving && bUnionAlliance && (LandNation == TEXT("DK") || IsNeighbourHostile(LandNation))) { return true; }
 	if (MovingNation == TEXT("DK"))
 	{
 		if (IsNeighbourHostile(LandNation)) { return true; }
@@ -254,6 +325,7 @@ bool ACampaign1851Map::CanEnterNation(const FString& MovingNation, const FString
 		const FCampaign1851Nation* SouthMovingNation = Nations.FindByPredicate([&](const FCampaign1851Nation& N) { return N.Id == MovingNation; });
 		return IsNeighbourHostile(MovingNation) || MovingNation == TEXT("DE") || (SouthMovingNation && SouthMovingNation->bAlliance);
 	}
+	if (IsNeighbourHostile(MovingNation) && IsNeighbourHostile(LandNation)) { return true; }
 	// Federal belligerents use the northern German military transit corridor; not neutral Sweden.
 	return IsNeighbourHostile(MovingNation) && (LandNation == TEXT("MEC") || LandNation == TEXT("MST") || LandNation == TEXT("HAN") || LandNation == TEXT("HH") || LandNation == TEXT("LUB") || LandNation == TEXT("OLD") || LandNation == TEXT("BRE") || LandNation == TEXT("PR"));
 }
@@ -335,6 +407,7 @@ FString ACampaign1851Map::NeighbourRegimentInfo(int32 Town) const
 		if (SouthArmy.CorpsId && (!SouthCorps || FVector2D::Distance(SouthCorps->Km, TownKm(Town)) >= 8.0)) { continue; }
 		SouthInfo += FString::Printf(TEXT("%s: %d mand · %d %s\n"), *SouthArmy.Name, SouthCorps ? SouthCorps->Men : SouthArmy.Men,
 			SouthArmy.Subunits.Num(), SouthArmy.Arm == TEXT("cavalry") ? TEXT("eskadroner") : SouthArmy.Arm == TEXT("artillery") ? TEXT("batterier") : TEXT("kompagnier"));
+		if (!SouthArmy.Chief.IsEmpty()) { SouthInfo += SouthArmy.CorpsName + TEXT(" / ") + SouthArmy.Division + TEXT(" / ") + SouthArmy.Chief + TEXT("\n"); }
 	}
 	return SouthInfo.IsEmpty() ? TEXT("Ingen registrerede feltregimenter i byen") : SouthInfo;
 }
@@ -342,8 +415,8 @@ FString ACampaign1851Map::NeighbourRegimentInfo(int32 Town) const
 int32 ACampaign1851Map::TakeNeighbourRecruits(const FCampaign1851NeighbourArmy& Army, int32 Wanted)
 {
 	if (Wanted <= 0) { return 0; }
-	// Northern armies retain the first pass's abstract manpower model.
-	if (Army.District.IsEmpty()) { return Wanted; }
+	// Only legacy nations outside this slice retain abstract manpower; never free PR/SE/NO drafts.
+	if (Army.District.IsEmpty()) { return ForeignEconomies.Find(Army.Nation) ? 0 : Wanted; }
 	int32 SouthTaken = 0;
 	for (int32 SouthPass = 0; SouthPass < 2 && SouthTaken < Wanted; ++SouthPass)
 	{
@@ -354,11 +427,19 @@ int32 ACampaign1851Map::TakeNeighbourRecruits(const FCampaign1851NeighbourArmy& 
 			TArray<FCampaign1851Leg> SouthDraftRoute;
 			if (SouthDistrict.Seat != Army.Town && !PlanMarch(SouthDistrict.Seat, TownKm(SouthDistrict.Seat), Army.Town, TownKm(Army.Town),
 				Campaign1851Supply::ColumnKmPerDay, ECampaign1851RouteMode::RoadsOnly, SouthDraftRoute, nullptr, Army.Nation)) { continue; }
+			double* ForeignCash = ForeignTreasuries.Find(Army.Nation);
+			double& ForeignDraftCash = ForeignCash ? *ForeignCash : SouthDistrict.Treasury;
 			const int32 SouthDraft = FMath::Min(FMath::Min(int32(Wanted - SouthTaken), int32(FMath::FloorToInt(SouthDistrict.Reserve))),
-				int32(FMath::FloorToInt(SouthDistrict.Treasury / Campaign1851Army::ReplacementCostPerMan)));
+				int32(FMath::FloorToInt(FMath::Min(ForeignDraftCash / Campaign1851Army::ReplacementCostPerMan, double(Wanted - SouthTaken)))));
 			if (SouthDraft <= 0) { continue; }
 			SouthDistrict.Reserve -= SouthDraft;
-			SouthDistrict.Treasury -= SouthDraft * Campaign1851Army::ReplacementCostPerMan;
+			ForeignDraftCash -= SouthDraft * Campaign1851Army::ReplacementCostPerMan;
+            if (SouthDraft > 0)
+            {
+                LogCampaignExpenses.FindOrAdd(Army.Nation) += SouthDraft * Campaign1851Army::ReplacementCostPerMan;
+                LogCampaignDecision(Army.Nation, TEXT("recruit"), Army.Name, TEXT("Distriktsreserve, rute og udenlandsk statskasse"), TEXT("ai"),
+                    { { TEXT("men"), double(SouthDraft) }, { TEXT("cost"), double(SouthDraft * Campaign1851Army::ReplacementCostPerMan) }, { TEXT("treasury"), double(ForeignDraftCash) } });
+            }
 			SouthTaken += SouthDraft;
 			if (SouthTaken >= Wanted) { break; }
 		}
@@ -368,10 +449,61 @@ int32 ACampaign1851Map::TakeNeighbourRecruits(const FCampaign1851NeighbourArmy& 
 
 void ACampaign1851Map::MonthlyNeighbourDistricts()
 {
+    for (const auto& LogForeignPair : ForeignTreasuries) { LogCampaignIncome.Add(LogForeignPair.Key, 0.0); LogCampaignExpenses.Add(LogForeignPair.Key, 0.0); }
 	for (FCampaign1851NeighbourDistrict& SouthDistrict : NeighbourDistricts)
 	{
 		SouthDistrict.Reserve = FMath::Min(SouthDistrict.Reserve + SouthDistrict.Population * SouthDistrict.ClassShare / 12.f, SouthDistrict.Population * SouthDistrict.CapShare);
-		SouthDistrict.Treasury += (SouthDistrict.Urban * SouthDistrict.UrbanTax + FMath::Max(0, SouthDistrict.Population - SouthDistrict.Urban) * SouthDistrict.RuralTax) / 12.0;
+		const FCampaign1851ForeignEconomy* ForeignEconomy = ForeignEconomies.Find(SouthDistrict.Nation);
+		// As for Danish amter, occupied districts pay no taxes and export nothing.
+		const bool bForeignOccupied = Cities.IsValidIndex(SouthDistrict.Seat) && !Cities[SouthDistrict.Seat].Occupier.IsEmpty();
+		if (ForeignEconomy && bForeignOccupied) { continue; }
+		double ForeignRevenue = SouthDistrict.Urban * SouthDistrict.UrbanTax + FMath::Max(0, SouthDistrict.Population - SouthDistrict.Urban) * SouthDistrict.RuralTax;
+		if (ForeignEconomy)
+		{
+			const bool bForeignWar = bAtWar && (IsNeighbourHostile(SouthDistrict.Nation) || CanEnterNation(TEXT("DK"), SouthDistrict.Nation));
+			if (bForeignWar) { ForeignRevenue *= Campaign1851Mobilisation::WarTaxFactor; }
+			for (int32 ForeignGood = 0; ForeignGood < int32(ECampaign1851Good::Count); ++ForeignGood)
+			{
+				// Same harvest/price/export rules as Denmark; private production is taxed, not minted in full.
+				ForeignRevenue += DistrictExportValuePerYear(ECampaign1851Good(ForeignGood), FMath::Max(0, SouthDistrict.Population - SouthDistrict.Urban),
+					ForeignEconomy->GoodsPerHead[ForeignGood], bForeignWar, !IsNeighbourHostile(SouthDistrict.Nation) || !HasSeaControl()) * ForeignEconomy->ExportDuty;
+			}
+			ForeignTreasuries.FindOrAdd(SouthDistrict.Nation) += ForeignRevenue / 12.0;
+            LogCampaignIncome.FindOrAdd(SouthDistrict.Nation) += ForeignRevenue / 12.0;
+            LogCampaignDecision(SouthDistrict.Nation, TEXT("tax"), SouthDistrict.Name, TEXT("Maanedlig skat og eksport; besatte distrikter betaler ikke"), TEXT("ai"),
+                { { TEXT("income"), double(ForeignRevenue / 12.0) }, { TEXT("treasury"), double(ForeignTreasury(SouthDistrict.Nation)) } });
+		}
+		else { SouthDistrict.Treasury += ForeignRevenue / 12.0; }
+	}
+	// Same per-man sold/drift as a Danish raised unit. Active corps replace their peace cadres.
+	// Insufficient cash pays a proportional share and hurts morale (gameplay estimate).
+	for (auto& ForeignPair : ForeignTreasuries)
+	{
+		double ForeignUpkeep = 0.0;
+		for (const FCampaign1851NeighbourArmy& ForeignArmy : NeighbourArmies)
+		{
+			if (ForeignArmy.Nation != ForeignPair.Key || ForeignArmy.CorpsId != 0) { continue; }
+			const int32 ForeignUnitType = ForeignArmy.Arm == TEXT("cavalry") ? 2 : ForeignArmy.Arm == TEXT("artillery") ? 3 : ForeignArmy.Arm == TEXT("jager") ? 1 : 0;
+			ForeignUpkeep += Campaign1851Army::RaisedUpkeepPerMonth * ForeignArmy.Men / double(Campaign1851Resources::Type(ForeignUnitType).Men);
+		}
+		// Charge every deployed corps, including old abstract corps preserved from earlier saves.
+		for (const FCampaign1851EnemyCorps& ForeignCorps : EnemyCorps)
+		{
+			if (ForeignCorps.Nation != ForeignPair.Key) { continue; }
+			const FCampaign1851NeighbourArmy* ForeignSource = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& ForeignA) { return ForeignA.CorpsId == ForeignCorps.Id; });
+			const FString ForeignArm = ForeignSource ? ForeignSource->Arm : FString();
+			const int32 ForeignUnitType = ForeignArm == TEXT("cavalry") ? 2 : ForeignArm == TEXT("artillery") ? 3 : ForeignArm == TEXT("jager") ? 1 : 0;
+			ForeignUpkeep += Campaign1851Army::RaisedUpkeepPerMonth * ForeignCorps.Men / double(Campaign1851Resources::Type(ForeignUnitType).Men);
+		}
+		const float ForeignPaidShare = ForeignUpkeep > 0.0 ? float(FMath::Clamp(ForeignPair.Value / ForeignUpkeep, 0.0, 1.0)) : 1.f;
+        LogCampaignExpenses.FindOrAdd(ForeignPair.Key) += ForeignUpkeep * ForeignPaidShare;
+        LogCampaignDecision(ForeignPair.Key, TEXT("budget"), TEXT("Haerens maanedlige underhold"), TEXT("Faktisk styrke og tilgaengelig statskasse"), TEXT("ai"),
+            { { TEXT("required"), double(ForeignUpkeep) }, { TEXT("paid"), double(ForeignUpkeep * ForeignPaidShare) }, { TEXT("treasury_before"), double(ForeignPair.Value) } });
+		ForeignPair.Value = FMath::Max(0.0, ForeignPair.Value - ForeignUpkeep);
+		for (FCampaign1851EnemyCorps& ForeignCorps : EnemyCorps)
+		{
+			if (ForeignCorps.Nation == ForeignPair.Key) { ForeignCorps.Morale = FMath::Max(0.05f, ForeignCorps.Morale - (1.f - ForeignPaidShare) * 0.1f); }
+		}
 	}
 	// Refill the same stock objects Denmark can use under an alliance, paid locally.
 	for (int32 SouthTown = 0; SouthTown < Cities.Num(); ++SouthTown)
@@ -386,20 +518,28 @@ void ACampaign1851Map::MonthlyNeighbourDistricts()
 		const float SouthAmmo = FMath::Max(0.f, SouthCap.Ammo - SouthStock.Ammo) * Campaign1851Supply::RefillShare;
 		const double SouthPrice = SouthFood * Campaign1851Supply::DepotPricePerRation + SouthFodder * Campaign1851Supply::FodderPrice + SouthAmmo * Campaign1851Supply::AmmoLoadPrice;
 		if (SouthPrice <= 0.0) { continue; }
-		const float SouthPurchaseShare = float(FMath::Clamp(SouthDistrict->Treasury / SouthPrice, 0.0, 1.0));
+		double* ForeignCash = ForeignTreasuries.Find(SouthDistrict->Nation);
+		double& ForeignDepotCash = ForeignCash ? *ForeignCash : SouthDistrict->Treasury;
+		const float SouthPurchaseShare = float(FMath::Clamp(ForeignDepotCash / SouthPrice, 0.0, 1.0));
 		SouthStock.Food += SouthFood * SouthPurchaseShare;
 		SouthStock.Fodder += SouthFodder * SouthPurchaseShare;
 		SouthStock.Ammo += SouthAmmo * SouthPurchaseShare;
-		SouthDistrict->Treasury = FMath::Max(0.0, SouthDistrict->Treasury - SouthPrice * SouthPurchaseShare);
+        LogCampaignExpenses.FindOrAdd(SouthDistrict->Nation) += SouthPrice * SouthPurchaseShare;
+        LogCampaignDecision(SouthDistrict->Nation, TEXT("budget"), Cities[SouthTown].Name + TEXT(": depotkoeb"), TEXT("Lagerkapacitet og tilgaengelig lokal kasse"), TEXT("ai"),
+            { { TEXT("cost"), double(SouthPrice * SouthPurchaseShare) }, { TEXT("purchase_share"), double(SouthPurchaseShare) } });
+		ForeignDepotCash = FMath::Max(0.0, ForeignDepotCash - SouthPrice * SouthPurchaseShare);
 	}
 }
 
 float ACampaign1851Map::NeighbourMarchPace(int32 CorpsId) const
 {
 	const FCampaign1851NeighbourArmy* SouthArmy = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& A) { return A.CorpsId == CorpsId; });
-	if (!SouthArmy || SouthArmy->Arm.IsEmpty()) { return 16.f; }
+	if (!SouthArmy) { return 16.f; }
 	const ECampaign1851Arm SouthArm = SouthArmy->Arm == TEXT("cavalry") ? ECampaign1851Arm::Cavalry : SouthArmy->Arm == TEXT("artillery") ? ECampaign1851Arm::Artillery : ECampaign1851Arm::Infantry;
-	return Campaign1851Army::MarchKmPerDay(SouthArm);
+	const FCampaign1851Officer* ForeignChief = ForeignCommander(SouthArmy->Nation, SouthArmy->OfficerId);
+	const float ForeignStaffFactor = ForeignChief && !ForeignChief->Away
+		? Campaign1851Army::StaffPaceFactor(ForeignChief->Stat(ECampaign1851OfficerStat::Staff)) : SouthArmy->OfficerMarchFactor;
+	return Campaign1851Army::MarchKmPerDay(SouthArm) * ForeignStaffFactor;
 }
 
 void ACampaign1851Map::DailyNeighbourSupply()
@@ -409,14 +549,26 @@ void ACampaign1851Map::DailyNeighbourSupply()
 		if (SouthArmy.CorpsId <= 0 || SouthArmy.District.IsEmpty()) { continue; }
 		FCampaign1851EnemyCorps* SouthCorps = EnemyCorps.FindByPredicate([&](const FCampaign1851EnemyCorps& C) { return C.Id == SouthArmy.CorpsId; });
 		if (!SouthCorps || SouthCorps->Men <= 0) { continue; }
+		if (const FCampaign1851Officer* ForeignChief = ForeignCommander(SouthArmy.Nation, SouthArmy.OfficerId))
+		{
+			// Same leadership/inspiration recovery rule as Danish regiments; mean training 50 is an estimate.
+			const float ForeignLead = float(ForeignChief->Stat(ECampaign1851OfficerStat::Leadership));
+			const float ForeignInsp = float(ForeignChief->Stat(ECampaign1851OfficerStat::Inspiration));
+			if (!ForeignChief->Away && SouthArmy.FoodDays > 0.f)
+			{
+				const float ForeignTarget = 0.7f + 0.025f * ForeignInsp;
+				SouthCorps->Morale += (ForeignTarget - SouthCorps->Morale) * 0.01f * (0.5f + ForeignLead / 10.f);
+			}
+		}
 		SouthArmy.FoodDays = FMath::Max(0.f, SouthArmy.FoodDays - 1.f);
-		const bool bSouthHorses = SouthArmy.Arm == TEXT("cavalry") || SouthArmy.Arm == TEXT("artillery");
+		const bool bSouthHorses = SouthArmy.Arm == TEXT("cavalry") || SouthArmy.Arm == TEXT("artillery") || SouthCorps->Guns > 0;
 		if (bSouthHorses) { SouthArmy.FodderDays = FMath::Max(0.f, SouthArmy.FodderDays - 1.f); }
 		int32 SouthDepotTown = INDEX_NONE;
 		double SouthNearest = TNumericLimits<double>::Max();
 		for (const auto& SouthDepot : Depots)
 		{
-			if (!Cities.IsValidIndex(SouthDepot.Key) || Cities[SouthDepot.Key].NationId != SouthArmy.Nation
+			if (!Cities.IsValidIndex(SouthDepot.Key) || (Cities[SouthDepot.Key].NationId != SouthArmy.Nation
+					&& !((SouthArmy.Nation == TEXT("SE") || SouthArmy.Nation == TEXT("NO")) && (Cities[SouthDepot.Key].NationId == TEXT("SE") || Cities[SouthDepot.Key].NationId == TEXT("NO"))))
 				|| !Cities[SouthDepot.Key].Occupier.IsEmpty() || SouthDepot.Value.Food < SouthCorps->Men) { continue; }
 			const double SouthDistance = FVector2D::Distance(SouthCorps->Km, TownKm(SouthDepot.Key));
 			if (SouthDistance >= SouthNearest) { continue; }
@@ -457,7 +609,34 @@ void ACampaign1851Map::AdvanceNeighbourArmies()
 	NeighbourNextMobilisationDay = FMath::FloorToDouble(CampaignDays) + 1.0;
 	for (FCampaign1851NeighbourArmy& NeighbourArmy : NeighbourArmies)
 	{
-		if (!IsNeighbourHostile(NeighbourArmy.Nation) || NeighbourArmy.CorpsId || NeighbourArmy.MobilisedMen <= 0 || !Cities.IsValidIndex(NeighbourArmy.Town)) { continue; }
+		const bool bUnionArmy = NeighbourArmy.Nation == TEXT("SE") || NeighbourArmy.Nation == TEXT("NO");
+		const bool bUnionSupport = bAtWar && bUnionArmy && Nations.ContainsByPredicate([](const FCampaign1851Nation& UnionN) { return (UnionN.Id == TEXT("SE") || UnionN.Id == TEXT("NO")) && UnionN.bAlliance; });
+		if ((!IsNeighbourHostile(NeighbourArmy.Nation) && !bUnionSupport) || NeighbourArmy.CorpsId < 0 || NeighbourArmy.MobilisedMen <= 0 || !Cities.IsValidIndex(NeighbourArmy.Town)) { continue; }
+		if (NeighbourArmy.MobilisationStartDay < 0.0) { NeighbourArmy.MobilisationStartDay = NeighbourArmy.CorpsId > 0 ? CampaignDays - NeighbourArmy.MobilisationFullDays : CampaignDays; }
+		const double NeighbourElapsed = CampaignDays - NeighbourArmy.MobilisationStartDay;
+		if (NeighbourElapsed < NeighbourArmy.MobilisationDays) { continue; }
+		const int32 NeighbourStage = NeighbourArmy.bGarrison || NeighbourElapsed >= NeighbourArmy.MobilisationFullDays ? 3 : NeighbourElapsed >= (NeighbourArmy.MobilisationDays + NeighbourArmy.MobilisationFullDays) * 0.5 ? 2 : 1;
+        if (NeighbourStage != NeighbourArmy.MobilisationStage)
+            LogCampaignDecision(NeighbourArmy.Nation, TEXT("mobilise"), NeighbourArmy.Name, TEXT("Mobiliseringstid og krig/allieret stoette"), TEXT("ai"),
+                { { TEXT("before"), double(NeighbourArmy.MobilisationStage) }, { TEXT("mobilisation"), double(NeighbourStage) }, { TEXT("elapsed"), double(NeighbourElapsed) } });
+		const int32 NeighbourTarget = NeighbourArmy.bGarrison ? NeighbourArmy.Men : NeighbourArmy.Men + FMath::RoundToInt(FMath::Max(0, NeighbourArmy.MobilisedMen - NeighbourArmy.Men) * (NeighbourStage == 3 ? 1.f : NeighbourStage == 2 ? 0.5f : 0.f));
+		if (NeighbourArmy.CorpsId > 0)
+		{
+			// Retry partial mobilisation every day; StartMen keeps casualties out of this target.
+			if (NeighbourStage >= NeighbourArmy.MobilisationStage)
+			{
+				FCampaign1851EnemyCorps* NeighbourExisting = EnemyCorps.FindByPredicate([&](const FCampaign1851EnemyCorps& NeighbourC) { return NeighbourC.Id == NeighbourArmy.CorpsId; });
+				if (NeighbourExisting && NeighbourExisting->Men > 0)
+				{
+					const int32 NeighbourDraft = TakeNeighbourRecruits(NeighbourArmy, FMath::Max(0, NeighbourTarget - NeighbourExisting->StartMen));
+					NeighbourExisting->Men += NeighbourDraft; NeighbourExisting->StartMen += NeighbourDraft;
+					NeighbourExisting->Guns = FMath::RoundToInt(NeighbourArmy.Guns * NeighbourExisting->StartMen / float(FMath::Max(1, NeighbourArmy.MobilisedMen)));
+				}
+			}
+			NeighbourArmy.MobilisationStage = NeighbourStage;
+			continue;
+		}
+		NeighbourArmy.MobilisationStage = NeighbourStage;
 		// Local garrisons hold their town. The field corps mobilises once, not once per month.
 		FCampaign1851EnemyCorps NeighbourCorps;
 		NeighbourCorps.Id = NextCorpsId++;
@@ -466,7 +645,7 @@ void ACampaign1851Map::AdvanceNeighbourArmies()
 		NeighbourCorps.Nation = NeighbourArmy.Nation;
 		NeighbourCorps.Town = NeighbourArmy.Town;
 		NeighbourCorps.Km = TownKm(NeighbourArmy.Town);
-		NeighbourCorps.Men = NeighbourArmy.bGarrison ? NeighbourArmy.Men : NeighbourArmy.Men + TakeNeighbourRecruits(NeighbourArmy, FMath::Max(0, NeighbourArmy.MobilisedMen - NeighbourArmy.Men));
+		NeighbourCorps.Men = NeighbourArmy.bGarrison ? NeighbourArmy.Men : NeighbourArmy.Men + TakeNeighbourRecruits(NeighbourArmy, FMath::Max(0, NeighbourTarget - NeighbourArmy.Men));
 		if (NeighbourCorps.Men <= 0) { NeighbourArmy.CorpsId = 0; continue; }
 		NeighbourCorps.StartMen = NeighbourCorps.Men;
 		if (!NeighbourArmy.bGarrison)
@@ -487,6 +666,7 @@ TArray<FString> ACampaign1851Map::SaveNeighbours() const
 	TArray<FString> NeighbourLines;
 	for (const FCampaign1851NeighbourArmy& NeighbourArmy : NeighbourArmies)
 	{
+		NeighbourLines.Add(FString::Printf(TEXT("mobilisation|%s|%.9f|%d"), *NeighbourArmy.Id, NeighbourArmy.MobilisationStartDay, NeighbourArmy.MobilisationStage));
 		if (NeighbourArmy.CorpsId) { NeighbourLines.Add(FString::Printf(TEXT("%s|%d"), *NeighbourArmy.Id, NeighbourArmy.CorpsId)); }
 		if (!NeighbourArmy.District.IsEmpty()) { NeighbourLines.Add(FString::Printf(TEXT("army-supply|%s|%.9f|%.9f"), *NeighbourArmy.Id, NeighbourArmy.FoodDays, NeighbourArmy.FodderDays)); }
 	}
@@ -516,6 +696,13 @@ void ACampaign1851Map::RestoreNeighbours(const TArray<FString>& Lines)
 	{
 		TArray<FString> NeighbourParts;
 		NeighbourLine.ParseIntoArray(NeighbourParts, TEXT("|"), false);
+		if (NeighbourParts.Num() == 4 && NeighbourParts[0] == TEXT("mobilisation"))
+		{
+			FCampaign1851NeighbourArmy* MobilisationArmy = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& MobilisationA) { return MobilisationA.Id == NeighbourParts[1]; });
+			const double MobilisationDay = FCString::Atod(*NeighbourParts[2]);
+			if (MobilisationArmy && FMath::IsFinite(MobilisationDay)) { MobilisationArmy->MobilisationStartDay = MobilisationDay; MobilisationArmy->MobilisationStage = FMath::Clamp(FCString::Atoi(*NeighbourParts[3]), 0, 3); }
+			continue;
+		}
 		if (NeighbourParts.Num() == 4 && NeighbourParts[0] == TEXT("army-supply"))
 		{
 			FCampaign1851NeighbourArmy* SouthArmy = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& A) { return A.Id == NeighbourParts[1]; });
@@ -540,7 +727,7 @@ void ACampaign1851Map::RestoreNeighbours(const TArray<FString>& Lines)
 		}
 		if (NeighbourParts.Num() != 2) { continue; }
 		FCampaign1851NeighbourArmy* NeighbourArmy = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& A) { return A.Id == NeighbourParts[0]; });
-		if (NeighbourArmy) { NeighbourArmy->CorpsId = FCString::Atoi(*NeighbourParts[1]); }
+		if (NeighbourArmy) { NeighbourArmy->CorpsId = FCString::Atoi(*NeighbourParts[1]); if (NeighbourArmy->MobilisationStartDay < 0.0) { NeighbourArmy->MobilisationStage = 3; } }
 	}
 	// v33 used one aggregate corps. Suppress its new child regiments until the next peace/new game.
 	// The aggregate's saved casualties/march remain in War, even if it has been destroyed.
@@ -552,6 +739,8 @@ void ACampaign1851Map::RestoreNeighbours(const TArray<FString>& Lines)
 			if (SouthChild.ParentCorps == SouthAggregate.Id) { SouthChild.CorpsId = -1; }
 		}
 	}
+	// v38 and earlier: migrate the restored district money, never seed a second windfall.
+	ResetForeignEconomies();
 }
 
 void ACampaign1851Map::SetNeighbourPoliticalView(bool bPolitical)

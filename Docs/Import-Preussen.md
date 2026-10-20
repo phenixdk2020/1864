@@ -1,5 +1,8 @@
 # Import af Preussen — 2026-10-16
 
+Opdatering 2026-10-17: Den efterfølgende niveau B-integration er beskrevet i [Niveau-B-Sverige-Norge-Preussen-2026-10-17.md](Niveau-B-Sverige-Norge-Preussen-2026-10-17.md). Det nedenstående beskriver den tidligere importstatus og dens oprindelige begrænsninger. Niveau B er implementeret og statisk valideret; runtime er ikke afprøvet.
+
+
 **Niveau B er opnået for kortdata (byer, garnisoner, felthære, veje, distrikter, relation); Preussen er ikke spilbart (ikke niveau C).** 1825 og 1851 er importeret hver for sig. Ingen build, editor-/spilstart, spiltest eller commit. Events er aktiveret senere samme dag (afsnittet Begivenheder); kun event-loaderen er ændret i C++.
 
 Kilde: `C:/Users/allan/Documents/Codex/2026-10-12/l/outputs/Preussen-agent/Spilimport/` (21 hashede filer, alle kontrolleret mod `Manifest.json`). Pakken melder selv `readyForImport=false` og `readyForBattle=false`: den er et delvist overlay, og alle ukendte tal er `null` med begrundelse. Ingen null er gjort til nul.

@@ -1,0 +1,28 @@
+{
+  "note": "Statisk integration; ingen build eller spiltest.",
+  "union": {
+    "members": [
+      "SE",
+      "NO"
+    ],
+    "sharedForeignPolicy": true,
+    "separateArmies": true,
+    "separateManpower": true,
+    "separateTreasuries": true,
+    "source": "SwedenNorway/Union-regler.json"
+  },
+  "scenarios": [
+    {
+      "scenario": "1825",
+      "cities": 51,
+      "districts": 20,
+      "unreachable": []
+    },
+    {
+      "scenario": "1851",
+      "cities": 51,
+      "districts": 20,
+      "unreachable": []
+    }
+  ]
+}

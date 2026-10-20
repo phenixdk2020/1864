@@ -129,13 +129,17 @@ bool ACampaign1851Map::OrderShip(int32 Class, FString* OutReason)
 	Ships.Add(S);
 	AddTransaction(-K.Cost, FString::Printf(TEXT("Orlogsværftet: %s %s"), K.Name, *S.Name));
 	News.Add(FString::Printf(TEXT("Orlogsværftet lægger %s %s på stabelen (klar om %d måneder)"), K.Name, *S.Name, K.Months));
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("build"), TEXT("OrderShip"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Class"), double(Class) } }, {  }); }
+	return LogActionResult;
 }
 
 void ACampaign1851Map::SetBlockade(bool bOn)
 {
 	bBlockade = bOn;
 	News.Add(bOn ? TEXT("Flåden blokerer de tyske havne") : TEXT("Flåden samles til forsvar af farvandene"));
+
+	if (CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("other"), TEXT("SetBlockade"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("bOn"), double(bOn) } }, {  }); }
 }
 
 void ACampaign1851Map::MonthlyNavy()

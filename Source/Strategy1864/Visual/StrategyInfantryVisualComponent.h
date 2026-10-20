@@ -3,7 +3,9 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "StrategyVisualFormationPath.h"
+#include "StrategyColumnDrill.h"
 #include "StrategyCrowdModel.h"
+#include "../Orders/StrategyOrderTypes.h"
 #include "StrategyInfantryVisualComponent.generated.h"
 
 class AStrategyCompanyUnit;
@@ -193,6 +195,15 @@ public:
     bool IsCrowdMode() const { return bCrowdMode; }
 
     /** Presentation completion: the last living figure has halted (independent of simulation arrival). */
+    bool CanUseColumnDrill() const;
+    /** The colours register here: the company then has a colour bearer. */
+    void RegisterColours() { bHasColours = true; }
+    /** Test only (-Strategy1864DrillTest KILLCOLOURS): the colour bearer falls now. */
+    void DebugKillColourBearer() { if (bColourBearerAlive && ColourBearer) KillColourBearer(); }
+    /** Where the colours stand (the bearer's hand) or lie (fallen with him). False: no bearer yet, the flag keeps its old place. */
+    bool GetColourTransform(FVector& OutColourLocation, float& OutColourYaw, bool& bOutColoursDown) const;
+    /** The pole's lean back from vertical while carried (reference: Reference/Units/MultiView/Flag/Fane_March_*.png). */
+    static constexpr float ColourCarryLeanDeg = 12.f;
     bool IsVisualFormationComplete() const { return !bEnabled || !bFormationPlanPending; }
     bool HasVisualArrivalFrontReached() const { return bArrivalReform && bArrivalFrontReached; }
 
@@ -327,6 +338,19 @@ private:
     /** Each man goes to his place in a new formation (running), and changes stance one after the other: not a teleport. */
     struct FSettle
     {
+        float DrillS0 = 0.f;
+        float DrillLateral = 0.f;
+        float DrillFinalLateral = 0.f;
+        float DrillLaneShift = 0.f;
+        float DrillDelta = 0.f;
+        bool DrillStopped = false;
+        float DrillStopTime = -1.f;    // when he halted on his line place (ShoulderDown starts then)
+        FVector CloseFrom = FVector::ZeroVector;   // closing ranks: side-step from this slot to CloseTo, starting at CloseStart
+        FVector CloseTo = FVector::ZeroVector;
+        float CloseStart = -1.f;
+        float CloseDuration = 0.f;
+        int32 SnakeRow = 0;    // snake column: row behind the head and lane (0..2) while the line->column spacing ramps
+        int32 SnakeLane = 1;
         FVector Goal = FVector::ZeroVector;
         FVector Slot = FVector::ZeroVector;
         FVector WorldVelocity = FVector::ZeroVector;
@@ -354,6 +378,12 @@ private:
     UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> WalkShoulderAsset;
     UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> ShoulderUpAsset;
     UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> ShoulderDownAsset;
+    /** Closing ranks: the men side-step towards the colours, facing the enemy (right step, and its mirror to the left). */
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> SideStepAsset;
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> SideStepLeftAsset;
+    /** The colour bearer's own walk and stand (pole in the right hand at chest height; Tools/Animation/build_colour_bearer.py). */
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> ColourWalkAsset;
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> ColourIdleAsset;
     bool bShoulderColumn = false;
     bool bShoulderRising = false;
     float ShoulderTransitionEnd = -1.f;   // safety cap only; the real end is when the Up/Down clips have played to their end (UpdateSettling)
@@ -377,6 +407,59 @@ private:
     bool bWasDisengaging = false;   // AFBRYD was active last frame: the men gather in their slots when it ends
     void UpdateSettling(float DeltaTime);
     void PlanOrderlyReform(bool bDestination, const FTransform& ReformFrame);
+    bool PlanColumnDrill();
+    /** The colour bearer (user 2026-10-18): one man of the company, out of the file/rank grid, in FRONT of the line and at the head
+     *  of the column, carrying the colours. Shot, the colours fall; after 2-4 s the nearest front-rank man drops his rifle, picks
+     *  them up and takes the bearer's place. */
+    void UpdateColourBearer(float BearerDt);
+    void PromoteColourBearer(bool bBearerInitial);
+    void KillColourBearer();
+    FVector ColourBearerTarget(float& OutBearerYaw) const;
+    UPROPERTY(Transient) TObjectPtr<USkeletalMeshComponent> ColourBearer;
+    UPROPERTY(Transient) TArray<TObjectPtr<USkeletalMeshComponent>> FallenColourBearers;
+    UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> DroppedRifles;
+    bool bHasColours = false;
+    bool bColourBearerAlive = false;
+    bool bColoursDown = false;
+    float ColourPromoteAt = -1.f;
+    float ColourBearerYawVelocity = 0.f;
+    FVector ColourDownLocation = FVector::ZeroVector;
+    float ColourDownYaw = 0.f;
+    /** "Slut op mod fanen": after losses only the files outside a gap side-step inwards, facing the front, as a ripple. */
+    bool CloseRanksTowardColours();
+    void UpdateCloseRanks();
+    bool bClosingRanksStep = false;
+    /** Line -> column as a snake: the trail is seeded along the line, the head starts at the leading flank, the men follow. */
+    bool SeedColumnSnake(const FVector& SnakeFront, const FVector& SnakeAxis, float SnakeFlank, float SnakeWidth, int32 SnakeRows);
+    void UpdateSnakeRamp();
+    float SnakeHoldUntil = -1.f;      // the men face right/left on the spot before the head moves
+    float SnakeHoldStart = -1.f;      // ... and shoulder their rifles (ShoulderUp, standing) during that hold
+    bool bSnakeRamp = false;          // rows open 75 -> 90 cm and lanes close 90 -> 75 cm over the first metres
+    float SnakeRampFrom = 0.f;
+    float SnakeRowSpacing = 0.f;      // row spacing of a column seeded from a line (= file spacing); 0 = generated slots (rank spacing)
+    bool UpdateColumnDrill(float DrillDt);
+    void AbortColumnDrill(const TCHAR* DrillWhy = TEXT("ukendt"));
+    void LogColumnDrillDistance(bool DrillComplete);
+    bool DrillActive = false;
+    bool DrillToColumn = false;
+    bool DrillArrival = false;
+    bool DrillRebuildAborted = false;
+    int32 DrillOrderSerial = INDEX_NONE;
+    int32 DrillStrength = 0;
+    uint8 DrillFormation = 255;
+    float DrillStarted = 0.f;
+    float DrillPlannedLateralSpacing = 0.f;
+    float DrillPlannedRankSpacing = 0.f;
+    float DrillSpeed = 160.f;
+    float DrillDuration = 0.f;
+    float DrillMarchDuration = 0.f;
+    float DrillArcEnd = 0.f;
+    float DrillStraightA = 0.f;
+    float DrillRadius = 300.f;
+    float DrillLogAt = 0.f;
+    FTransform DrillFinalFrame = FTransform::Identity;
+    FStrategyOrder DrillOrder;
+    TArray<FStrategyColumnDrill::FSample> DrillPath;
     void KeepReformSpacing(float DeltaTime);
     TArray<FVector> FormationStepStarts;
     TArray<FVector> FormationStepPositions;

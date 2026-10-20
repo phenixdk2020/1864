@@ -1,5 +1,8 @@
 # Landeskabelon: alt vi skal vide om et land
 
+Opdatering 2026-10-17: Den efterfølgende niveau B-integration er beskrevet i [Niveau-B-Sverige-Norge-Preussen-2026-10-17.md](Niveau-B-Sverige-Norge-Preussen-2026-10-17.md). Det nedenstående beskriver den tidligere importstatus og dens oprindelige begrænsninger. Niveau B er implementeret og statisk valideret; runtime er ikke afprøvet.
+
+
 Formål: én liste over hvad spillet (kampagne og slag) skal bruge for at et land kan spilles eller bruges som modstander, så vi kan føre Danmark mod Sverige-Norge (og senere Preussen, Østrig m.fl.) uden at opdage huller midt i et slag. Danmark er referencen; kolonnen "Danmark i dag" viser, hvor vi står, og "Sverige-Norge i dag" hvor vi mangler.
 
 Dato for dokumentet: 2026-10-14. Alle tal for Sverige-Norge i dette dokument er afrundede ankre fra min viden eller fra Codex' cirka-design og skal kildetjekkes, før de bruges som fakta.

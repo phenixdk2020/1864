@@ -99,7 +99,7 @@ for year in (1825,1851):
         selected = raster==district_grid['ids'][district['id']]
         assert selected.any(), district['id']
         assert all(owner==grid['ids'][district['nation']] for owner in np.frombuffer(raw,dtype='u1')[selected])
-    assert not any(raster[i] for i,owner in enumerate(raw) if owner in (0,grid['ids']['DK'],grid['ids']['SE']))
+    assert not any(raster[i] for i,owner in enumerate(raw) if owner in (0,grid['ids']['DK']))
     for town in rows:
         if not town.get('district'): continue
         assert town['district'] in dids
@@ -150,5 +150,11 @@ for year in (1825,1851):
         assert not cities['railways'] and not any(c['railway'] for c in rows)
         assert not any('rail' in link for link in cities['links'])
     print(f'CAMPAIGN-1851|neighbours|valideret|{year}|{len(rows)} byer|{len(cities["links"])} ruter|{len(ids)} hære')
+# Fælles statisk Niveau C-kontrol uden spil-/editorstart.
+import sys
+sys.path.insert(0, str(ROOT / 'Tools/Countries'))
+from validate_level_c import validate as validate_c
+validate_c(ROOT)
+
 for script in ('export_neighbours.py','validate_neighbours.py','export_south.py','south_seed.py'):
     ast.parse((ROOT/'Tools/Map1851'/script).read_text(encoding='utf-8'))

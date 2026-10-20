@@ -1571,6 +1571,7 @@ void SCampaign1851Overlay::PaintArmy(const FGeometry& Geometry, FSlateWindowElem
 		{
 			continue;   // never seen nor reported
 		}
+		const bool bUnionFriendlyCounter = (C.Nation == TEXT("SE") || C.Nation == TEXT("NO")) && !Map->IsNeighbourHostile(C.Nation);
 		const bool bNow = C.bSeen;
 		const float Fade = bNow ? 1.f : 0.55f;
 		FVector2D P;
@@ -1588,7 +1589,7 @@ void SCampaign1851Overlay::PaintArmy(const FGeometry& Geometry, FSlateWindowElem
 		const FVector2D EBox(50.f, 32.f);
 		const FVector2D Min = P - FVector2D(EBox.X * 0.5f, EBox.Y + 10.f);
 		const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
-		FSlateDrawElement::MakeBox(Out, Layer + 7, Geometry.ToPaintGeometry(EBox, FSlateLayoutTransform(Min)), White, ESlateDrawEffect::None, FLinearColor(0.55f, 0.08f, 0.08f, 0.92f * Fade));
+		FSlateDrawElement::MakeBox(Out, Layer + 7, Geometry.ToPaintGeometry(EBox, FSlateLayoutTransform(Min)), White, ESlateDrawEffect::None, (bUnionFriendlyCounter ? FLinearColor(0.08f, 0.30f, 0.48f, 0.92f * Fade) : FLinearColor(0.55f, 0.08f, 0.08f, 0.92f * Fade)));
 		const FVector2D Max = Min + EBox;
 		const FLinearColor Edge = (C.bEngaged ? Gold : Ink).CopyWithNewOpacity(Fade);
 		DrawLines(Geometry, Out, Layer + 8, { Min, FVector2D(Max.X, Min.Y), Max, FVector2D(Min.X, Max.Y), Min }, Edge, C.bEngaged ? 2.5f : 1.2f);
@@ -1597,7 +1598,7 @@ void SCampaign1851Overlay::PaintArmy(const FGeometry& Geometry, FSlateWindowElem
 		const FLinearColor Pink(1.f, 0.75f, 0.7f, Fade);
 		PaintText(Geometry, Out, Layer + 9, bNow && Map->IsAtWar() ? FString::Printf(TEXT("ca. %s"), *Thousands(C.SeenMen)) : !Map->IsAtWar() ? Thousands(C.Men)
 			: FString::Printf(TEXT("ca. %s?"), *Thousands(C.SeenMen)), FVector2D(P.X, Min.Y - 9.f), Serif(10), Pink, 0.5f);
-		PaintText(Geometry, Out, Layer + 9, C.Nation == TEXT("AT") ? TEXT("ØSTRIG") : C.Nation == TEXT("DE") ? TEXT("FORBUNDET") : TEXT("PREUSSEN"), FVector2D(P.X, Max.Y + 8.f), Serif(9), Pink, 0.5f);
+		PaintText(Geometry, Out, Layer + 9, C.Nation == TEXT("SE") ? TEXT("SVERIGE") : C.Nation == TEXT("NO") ? TEXT("NORGE") : C.Nation == TEXT("AT") ? TEXT("ØSTRIG") : C.Nation == TEXT("DE") ? TEXT("FORBUNDET") : TEXT("PREUSSEN"), FVector2D(P.X, Max.Y + 8.f), Serif(9), Pink, 0.5f);
 		if (!bNow)
 		{
 			const FDateTime Seen = ACampaign1851Map::StartDate() + FTimespan::FromDays(C.SeenDay);
@@ -3340,6 +3341,12 @@ void SCampaign1851Overlay::PaintForeign(const FGeometry& Geometry, FSlateWindowE
 			continue;
 		}
 		PaintTextFit(Geometry, Out, Layer + 1, N.Name, FVector2D(X + Cols[0], Y), Serif(13), Ink, 160.f);
+		const FString ForeignSummary = Map->ForeignPersonnelSummary(N.Id);
+		if (!ForeignSummary.IsEmpty())
+		{
+			AddTip(FVector2D(X, Y - 12.f), FVector2D(160.f, 26.f), Map->ForeignPersonnelInfo(N.Id));
+			PaintTextFit(Geometry, Out, Layer + 1, ForeignSummary, FVector2D(X + 400.f, Y + 16.f), Serif(9), MutedInk, 650.f);
+		}
 		// The relation as a bar from -100 to 100.
 		const FLinearColor RelColour = N.Relation >= 40.f ? FLinearColor(0.45f, 0.75f, 0.4f) : N.Relation >= 0.f ? Ink : FLinearColor(0.95f, 0.4f, 0.35f);
 		PaintBar(Geometry, Out, Layer + 1, FVector2D(X + Cols[1], Y - 5.f), 150.f, (N.Relation + 100.f) / 200.f);

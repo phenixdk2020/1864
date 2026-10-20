@@ -98,7 +98,7 @@
       "growth": 0.7,
       "taxPerHead": 0.2,
       "note": "Frederik Vilhelm III; restaurationspolitik og landværn. Intet nålegevær eller samlet tysk toldforbund endnu.",
-      "relation": 10,
+      "relation": -20,
       "tradeValue": 3200,
       "role": "Selvstændig stat",
       "period": "1825",

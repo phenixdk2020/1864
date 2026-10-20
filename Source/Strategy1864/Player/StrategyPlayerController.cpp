@@ -555,6 +555,9 @@ bool AStrategyPlayerController::IssueOrderToSelection(
         Across = FVector(-Front.Y, Front.X, 0.0f);
     }
     int32 UnitNumber = 0;
+    int32 CouriersDispatched = 0;
+    float LongestCourierRide = 0.0f;
+    FString LastCourierTarget;
     const int32 UnitTotal = SelectedUnitObjects.Num();
     for (AStrategyUnit* Unit : SelectedUnitObjects)
     {
@@ -630,6 +633,9 @@ bool AStrategyPlayerController::IssueOrderToSelection(
             Rider.From = Staff;
             Rider.Travel = 2.0f + Distance / 1200.0f;   // a rider at a hard trot over open ground: about 43 km/h
             Couriers.Add(Rider);
+            ++CouriersDispatched;
+            LongestCourierRide = FMath::Max(LongestCourierRide, Rider.Travel);
+            LastCourierTarget = Unit->DisplayName.ToString();
             bIssuedAny = true;
             continue;
         }
@@ -647,6 +653,17 @@ bool AStrategyPlayerController::IssueOrderToSelection(
         }
     }
 
+    if (CouriersDispatched > 0)
+    {
+        // The order is not carried out yet: say at once that it has been sent and when the rider arrives.
+        if (AStrategyHUD* CourierHud = Cast<AStrategyHUD>(GetHUD()))
+        {
+            const int32 RideSeconds = int32(FMath::CeilToFloat(LongestCourierRide));
+            CourierHud->AddNotice(CouriersDispatched == 1
+                ? FString::Printf(TEXT("Ordre sendt med kurer til %s (fremme om %d:%02d)"), *LastCourierTarget, RideSeconds / 60, RideSeconds % 60)
+                : FString::Printf(TEXT("Ordre sendt med kurer til %d enheder (fremme om %d:%02d)"), CouriersDispatched, RideSeconds / 60, RideSeconds % 60));
+        }
+    }
     return bIssuedAny;
 }
 

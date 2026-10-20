@@ -195,7 +195,9 @@ int32 ACampaign1851Map::StartFort(const FVector2D& Km, bool bLarge, float Yaw, F
 	Forts.Add(F);
 	UpdateFortVisual(Forts.Num() - 1);
 	ExportForts();
-	return F.Id;
+	const auto LogActionResult = F.Id;
+	if (LogActionResult != INDEX_NONE && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("build"), TEXT("StartFort"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Km_x"), Km.X }, { TEXT("Km_y"), Km.Y }, { TEXT("bLarge"), double(bLarge) }, { TEXT("Yaw"), double(Yaw) } }, {  }); }
+	return LogActionResult;
 }
 
 bool ACampaign1851Map::UpgradeFort(int32 Id, ECampaign1851FortWork Work, FString* OutReason)

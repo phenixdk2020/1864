@@ -1,0 +1,394 @@
+{
+  "scenario": "1825",
+  "note": "Historiske personer fra arkiverede landepakker. Egenskaber, erfaring og feltkommando er spilskøn, ikke verificeret historisk rangering. Officerstats 1-10, ministerstats 0-100. Ressortfordeling SE/NO er pakkens spilvalg; delte personer har flere ressorter. PR: kun dokumenterede ressorter, resten ukendt. Ingen tvungen historisk udskiftning.",
+  "nations": [
+    {
+      "nation": "SE",
+      "commander": "G_SE_LOWENHIELM",
+      "officerSource": "Countries/SwedenNorway/GameReady/Officers_1825.json",
+      "officers": [
+        {
+          "id": "G_SE_LOWENHIELM",
+          "name": "Gustaf Carl Fredrik Löwenhielm",
+          "born": 1771,
+          "rank": "Generalløjtnant",
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "experience": 50
+        },
+        {
+          "id": "G_SE_BJORN",
+          "name": "Magnus Fredrik Ferdinand Björnstjerna",
+          "born": 1779,
+          "rank": "Generalløjtnant",
+          "experience": 60,
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5
+        }
+      ],
+      "portfolios": [
+        {
+          "portfolio": "Interior",
+          "candidates": [
+            {
+              "name": "Gustaf af Wetterstedt",
+              "born": 1776,
+              "role": "udenrigsminister; Interior-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "PublicWorks",
+          "candidates": [
+            {
+              "name": "Baltzar Bogislaus von Platen",
+              "born": 1766,
+              "role": "kanalbygger og statsmand; PublicWorks-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "War",
+          "candidates": [
+            {
+              "name": "Magnus Fredrik Ferdinand Björnstjerna",
+              "born": 1779,
+              "role": "generaladjudant/stabschef; War-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Transport",
+          "candidates": [
+            {
+              "name": "Baltzar Bogislaus von Platen",
+              "born": 1766,
+              "role": "kanalbygger og statsmand; Transport-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Intendance",
+          "candidates": [
+            {
+              "name": "Magnus Fredrik Ferdinand Björnstjerna",
+              "born": 1779,
+              "role": "generaladjudant/stabschef; Intendance-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Foreign",
+          "candidates": [
+            {
+              "name": "Gustaf af Wetterstedt",
+              "born": 1776,
+              "role": "udenrigsminister; Foreign-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Navy",
+          "candidates": [
+            {
+              "name": "Magnus Fredrik Ferdinand Björnstjerna",
+              "born": 1779,
+              "role": "generaladjudant/stabschef; Navy-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Finance",
+          "candidates": [
+            {
+              "name": "Gustaf af Wetterstedt",
+              "born": 1776,
+              "role": "udenrigsminister; Finance-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nation": "NO",
+      "commander": "G_NO_WEDEL",
+      "officerSource": "Countries/SwedenNorway/GameReady/Officers_1825.json",
+      "officers": [
+        {
+          "id": "G_NO_WEDEL",
+          "name": "Ferdinand Wedel Jarlsberg",
+          "born": 1781,
+          "rank": "Generalmajor (årsdatering; dag ikke bekræftet)",
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "experience": 50
+        }
+      ],
+      "portfolios": [
+        {
+          "portfolio": "Interior",
+          "candidates": [
+            {
+              "name": "Christian Adolph Diriks",
+              "born": 1775,
+              "role": "justitsminister; Interior-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "PublicWorks",
+          "candidates": [
+            {
+              "name": "Jonas Collett",
+              "born": 1772,
+              "role": "finansminister og førstestatsråd; PublicWorks-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "War",
+          "candidates": [
+            {
+              "name": "Nicolai Johan Lohmann Krog",
+              "born": 1787,
+              "role": "arméminister til 15. oktober 1825; War-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Transport",
+          "candidates": [
+            {
+              "name": "Jonas Collett",
+              "born": 1772,
+              "role": "finansminister og førstestatsråd; Transport-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Intendance",
+          "candidates": [
+            {
+              "name": "Nicolai Johan Lohmann Krog",
+              "born": 1787,
+              "role": "arméminister til 15. oktober 1825; Intendance-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Foreign",
+          "candidates": [
+            {
+              "name": "Mathias Sommerhielm",
+              "born": 1764,
+              "role": "statsminister i Stockholm; Foreign-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Navy",
+          "candidates": [
+            {
+              "name": "Poul Christian Holst",
+              "born": 1789,
+              "role": "marineminister og fungerende kirke-/undervisningsminister; Navy-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Finance",
+          "candidates": [
+            {
+              "name": "Jonas Collett",
+              "born": 1772,
+              "role": "finansminister og førstestatsråd; Finance-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nation": "PR",
+      "commander": "PR_MUFFLING",
+      "officerSource": "Countries/Prussia/GameReady/Officers_1825.json",
+      "officers": [
+        {
+          "id": "PR_MUFFLING",
+          "name": "Karl von Müffling",
+          "rank": "Generalløjtnant",
+          "born": 1775,
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "experience": 50,
+          "nation": "PR",
+          "source": "MUFFLING",
+          "note": "Historisk person; disponering i felten er spilvalg.",
+          "fieldStatus": {
+            "born": {
+              "status": "kilde",
+              "source": "MUFFLING",
+              "reason": "Biografisk fødselsår."
+            },
+            "leadership": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "inspiration": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "initiative": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "tactical": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "staff": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "discipline": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "aggression": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "composure": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "political": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "experience": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            }
+          }
+        }
+      ],
+      "portfolios": [
+        {
+          "portfolio": "Foreign",
+          "candidates": [
+            {
+              "name": "Christian Günther von Bernstorff",
+              "skill": 50,
+              "thrift": 50,
+              "caution": 50,
+              "role": "Udenrigsminister",
+              "source": "https://www.deutsche-biographie.de/gnd116147695.html"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

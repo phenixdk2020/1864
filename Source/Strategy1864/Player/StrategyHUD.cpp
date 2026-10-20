@@ -61,6 +61,15 @@ namespace
     const FLinearColor ActiveGreen = FLinearColor::FromSRGBColor(FColor(36, 132, 58));
     const FLinearColor ExecutingBlue = FLinearColor::FromSRGBColor(FColor(36, 82, 196));
     const FLinearColor ButtonDark = FLinearColor::FromSRGBColor(FColor(52, 32, 30));
+    // The buttons' shared look is the campaign's start menu (SCampaign1851Overlay::PaintButton): brown fill, gold frame, cream text;
+    // gold fill with dark text = chosen / on. The values are copied from the overlay (Gold 212,176,102; Ink 242,235,214).
+    const FLinearColor ButtonGold = FLinearColor::FromSRGBColor(FColor(212, 176, 102));
+    const FLinearColor ButtonInk = FLinearColor::FromSRGBColor(FColor(242, 235, 214));
+    const FLinearColor ButtonBrown = FLinearColor::FromSRGBColor(FColor(58, 40, 22, 235));
+    const FLinearColor ButtonOnInk = FLinearColor::FromSRGBColor(FColor(30, 22, 12));
+    const FLinearColor ButtonPressedEdge = FLinearColor::FromSRGBColor(FColor(255, 236, 160));
+    constexpr double ButtonPressSeconds = 0.30;    // real time, so it also shows while the battle is paused
+    constexpr double ButtonRingSeconds = 1.40;     // a delayed effect: the gold ring fades out over this long
 
     const TCHAR* EchelonMark(const AStrategyUnit* Unit)
     {
@@ -194,27 +203,66 @@ void AStrategyHUD::DrawButton(float X, float Y, float W, float H, const FString&
 {
     const float HudButtonScale = bCommandStyle ? CommandHeight() / 226.f : 1.f;
     const bool HudOrderIcon = bCommandStyle && (Label == TEXT("RYK FREM") || Label == TEXT("TILBAGE") || Label == TEXT("CHARGE") || Label == TEXT("STOP"));
+    // Shared look: state (chosen / hover / pressed / ring after a delayed order) is worked out once for both styles.
+    const bool BtnSemantic = Colour && Colour != &ButtonDark;
+    const bool BtnEnabled = Action != EAction::None;
+    const bool BtnOn = bActive && !BtnSemantic;
+    float BtnMouseX = -1.f, BtnMouseY = -1.f;
+    if (const APlayerController* BtnPC = GetOwningPlayerController()) { BtnPC->GetMousePosition(BtnMouseX, BtnMouseY); }
+    const bool BtnHover = BtnEnabled && BtnMouseX >= X && BtnMouseX <= X + W && BtnMouseY >= Y && BtnMouseY <= Y + H;
+    double BtnAge = -1.0;
+    bool BtnDelayed = false;
+    if (BtnEnabled && Action != EAction::OOBRow)
+    {
+        for (const FPressedButton& BtnMark : PressedButtons)
+        {
+            if (BtnMark.Action == Action && BtnMark.Value == Value && BtnMark.Unit.Get() == Unit)
+            {
+                BtnAge = FPlatformTime::Seconds() - BtnMark.Start;
+                BtnDelayed = BtnMark.bDelayed;
+                break;
+            }
+        }
+    }
+    const bool BtnPressed = BtnAge >= 0.0 && BtnAge < ButtonPressSeconds;
+    const float BtnRingAlpha = (BtnDelayed && BtnAge >= 0.0 && BtnAge < ButtonRingSeconds)
+        ? (BtnAge < ButtonPressSeconds ? 1.f : 1.f - float((BtnAge - ButtonPressSeconds) / (ButtonRingSeconds - ButtonPressSeconds))) : 0.f;
+    FLinearColor BtnFill = BtnOn ? ButtonGold.CopyWithNewOpacity(0.85f)
+        : BtnSemantic ? FMath::Lerp(ButtonBrown, FLinearColor(Colour->R, Colour->G, Colour->B, 1.f), 0.40f) : ButtonBrown;
+    FLinearColor BtnEdge = BtnSemantic ? *Colour : ButtonGold;
+    if (!BtnEnabled) { BtnFill = FLinearColor(BtnFill.R * 0.6f, BtnFill.G * 0.6f, BtnFill.B * 0.6f, BtnFill.A); BtnEdge.A = 0.45f; }
+    else if (BtnPressed)
+    {
+        BtnFill = FLinearColor(BtnFill.R * 0.45f, BtnFill.G * 0.45f, BtnFill.B * 0.45f, 1.f);   // inset: darker fill, brighter frame
+        BtnEdge = ButtonPressedEdge;
+    }
+    else if (BtnHover) { BtnFill = FMath::Lerp(BtnFill, ButtonGold, 0.22f); }
+    const float BtnRadius = bCommandStyle ? (HudOrderIcon ? 10.f * HudButtonScale : H * 0.5f) : 0.f;
+    if (BtnRingAlpha > 0.f && Action != EAction::OOBRow)
+    {
+        FLinearColor BtnRing = ButtonPressedEdge; BtnRing.A = BtnRingAlpha;
+        DrawRounded(X - 3.f * HudButtonScale, Y - 3.f * HudButtonScale, W + 6.f * HudButtonScale, H + 6.f * HudButtonScale, FLinearColor(0.f, 0.f, 0.f, 0.f), &BtnRing, BtnRadius + 3.f * HudButtonScale);
+    }
     if (bCommandStyle && Action == EAction::OOBRow)
     {
         if (bActive) DrawRounded(X, Y, W, H, FLinearColor(0.045f, 0.12f, 0.16f, 0.9f), nullptr, 5.f * HudButtonScale);
     }
     else if (bCommandStyle)
     {
-        const FLinearColor HudBright(0.25f, 0.88f, 0.50f, 1.f);
-        const FLinearColor HudEdge = Colour ? *Colour : bActive ? HudBright : FLinearColor(0.19f, 0.26f, 0.32f, 0.9f);
-        const FLinearColor HudFill = Colour ? FLinearColor(Colour->R * 0.16f, Colour->G * 0.16f, Colour->B * 0.16f, 1.f)
-            : bActive ? FLinearColor(0.025f, 0.19f, 0.10f, 1.f) : FLinearColor(0.025f, 0.041f, 0.055f, 1.f);
-        const float HudRadius = HudOrderIcon ? 10.f * HudButtonScale : H * 0.5f;
+        const FLinearColor HudEdge = BtnEdge;
+        const FLinearColor HudFill = BtnFill;
+        const float HudRadius = BtnRadius;
         if (bActive)
         {
-            // Two translucent rings give the selected pill a restrained halo.
+            // Two translucent rings give the chosen pill a restrained halo.
             FLinearColor HudGlow = HudEdge; HudGlow.A = 0.13f;
             DrawRounded(X - 3.f * HudButtonScale, Y - 3.f * HudButtonScale, W + 6.f * HudButtonScale, H + 6.f * HudButtonScale, HudGlow, &HudGlow, HudRadius + 3.f * HudButtonScale);
             HudGlow.A = 0.28f;
             DrawRounded(X - HudButtonScale, Y - HudButtonScale, W + 2.f * HudButtonScale, H + 2.f * HudButtonScale, HudGlow, &HudGlow, HudRadius + HudButtonScale);
         }
         DrawRounded(X, Y, W, H, HudFill, &HudEdge, HudRadius);
-        DrawLine(X + HudRadius, Y + 2.f, X + W - HudRadius, Y + 2.f, FLinearColor(HudEdge.R, HudEdge.G, HudEdge.B, 0.18f), 1.f);
+        if (BtnPressed) DrawLine(X + HudRadius, Y + 3.f * HudButtonScale, X + W - HudRadius, Y + 3.f * HudButtonScale, FLinearColor(0.f, 0.f, 0.f, 0.45f), 2.f);   // inset shadow
+        else DrawLine(X + HudRadius, Y + 2.f, X + W - HudRadius, Y + 2.f, FLinearColor(HudEdge.R, HudEdge.G, HudEdge.B, 0.18f), 1.f);
         if (HudOrderIcon)
         {
             const float HudIX = X + 19.f * HudButtonScale, HudIY = Y + H * 0.5f;
@@ -236,14 +284,24 @@ void AStrategyHUD::DrawButton(float X, float Y, float W, float H, const FString&
             }
         }
     }
-    else { DrawRect(Colour ? *Colour : bActive ? ActiveGreen : OrderRed, X, Y, W, H); }
+    else
+    {
+        // The report's and the tests' flat buttons: the same frame as the start menu's.
+        const float BtnFrameW = BtnPressed ? 2.5f : 1.5f;
+        DrawRect(BtnFill, X, Y, W, H);
+        DrawRect(BtnEdge, X, Y, W, BtnFrameW);
+        DrawRect(BtnEdge, X, Y + H - BtnFrameW, W, BtnFrameW);
+        DrawRect(BtnEdge, X, Y, BtnFrameW, H);
+        DrawRect(BtnEdge, X + W - BtnFrameW, Y, BtnFrameW, H);
+        if (BtnPressed) DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.40f), X + BtnFrameW, Y + BtnFrameW, W - 2.f * BtnFrameW, 3.f);   // inset shadow
+    }
     float TW = 0.0f, TH = 0.0f;
     GetTextSize(Label, TW, TH, nullptr, 1.0f);
     const float HudTextInset = HudOrderIcon ? 34.f * HudButtonScale : 0.f;
     const float ButtonScale = bCommandStyle ? FMath::Min(0.95f * HudButtonScale, (W - HudTextInset - 8.f * HudButtonScale) / FMath::Max(1.f, TW)) : 1.f;
-    const float HudTextX = X + HudTextInset + (W - HudTextInset - TW * ButtonScale) * 0.5f;
-    const float HudTextY = Y + (H - TH * ButtonScale) * 0.5f;
-    const FLinearColor HudTextColour = bCommandStyle && Action == EAction::None ? Muted : Ink;
+    const float HudTextX = X + HudTextInset + (W - HudTextInset - TW * ButtonScale) * 0.5f + (BtnPressed ? 1.f : 0.f);
+    const float HudTextY = Y + (H - TH * ButtonScale) * 0.5f + (BtnPressed ? 1.f : 0.f);
+    const FLinearColor HudTextColour = !BtnEnabled ? Muted : BtnOn ? ButtonOnInk : ButtonInk;
     Text(Label, HudTextX, HudTextY, HudTextColour, ButtonScale);
     if (bCommandStyle) Text(Label, HudTextX + 0.35f * HudButtonScale, HudTextY, HudTextColour, ButtonScale);
     FButton B;
@@ -252,6 +310,36 @@ void AStrategyHUD::DrawButton(float X, float Y, float W, float H, const FString&
     B.Value = Value;
     B.Unit = Unit;
     Buttons.Add(B);
+}
+
+void AStrategyHUD::MarkButtonPressed(const FButton& Pressed)
+{
+    if (Pressed.Action == EAction::None || Pressed.Action == EAction::OOBRow || Pressed.Action == EAction::Minimap) return;
+    // Orders, formations, stances and special orders do not show their result at once (a courier, a reaction time, a drill):
+    // they keep a fading ring after the press.
+    bool bDelayedEffect = false;
+    switch (Pressed.Action)
+    {
+        case EAction::Order: case EAction::Charge: case EAction::Stop: case EAction::Disengage: case EAction::Turn: case EAction::Rally:
+        case EAction::Formation: case EAction::Stance: case EAction::Dismount: case EAction::FirePolicy: case EAction::Doctrine:
+        case EAction::FireDrill: case EAction::Pontoon: case EAction::BuildFieldworks: case EAction::SkirmishScreen: case EAction::Spread:
+        case EAction::DoubleTime: case EAction::AIToggle:
+            bDelayedEffect = true;
+            break;
+        default: break;
+    }
+    const double PressNow = FPlatformTime::Seconds();
+    for (FPressedButton& Existing : PressedButtons)
+    {
+        if (Existing.Action == Pressed.Action && Existing.Value == Pressed.Value && Existing.Unit.Get() == Pressed.Unit.Get())
+        {
+            Existing.Start = PressNow; Existing.bDelayed = bDelayedEffect;
+            return;
+        }
+    }
+    FPressedButton Mark;
+    Mark.Action = Pressed.Action; Mark.Value = Pressed.Value; Mark.Unit = Pressed.Unit; Mark.Start = PressNow; Mark.bDelayed = bDelayedEffect;
+    PressedButtons.Add(Mark);
 }
 
 void AStrategyHUD::DrawHUD()
@@ -277,6 +365,10 @@ void AStrategyHUD::DrawHUD()
     }
     Buttons.Reset();
     Panels.Reset();
+    {
+        const double PressedNow = FPlatformTime::Seconds();
+        PressedButtons.RemoveAll([PressedNow](const FPressedButton& Mark) { return PressedNow - Mark.Start > ButtonRingSeconds; });
+    }
     if (bReportOpen) { SubordinateMaxOffset = 0; }
     for (TActorIterator<AStrategyOOBTestScenario> ReportScenario(GetWorld()); ReportScenario; ++ReportScenario)
     {
@@ -1522,6 +1614,7 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
         {
             continue;
         }
+        MarkButtonPressed(B);   // pressed look at once (also while paused)
         AStrategyUnit* Unit = B.Unit.Get();
         const bool bSelectionAction = B.Action == EAction::AIToggle || B.Action == EAction::Doctrine ||
             B.Action == EAction::FireDrill || B.Action == EAction::FirePolicy || B.Action == EAction::Formation;
@@ -1719,6 +1812,7 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                 case EAction::BuildFieldworks:
                 case EAction::SkirmishScreen:
                 case EAction::Spread:
+                case EAction::DoubleTime:
                     HandleSpecialOrder(B.Action, B.Value != 0);
                     break;
                 case EAction::Stop:

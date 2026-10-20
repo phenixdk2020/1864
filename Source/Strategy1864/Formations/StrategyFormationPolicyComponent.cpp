@@ -232,7 +232,8 @@ void UStrategyFormationPolicyComponent::EvaluateEarlyDeployment()
     if (OwnerUnit->OrderComponent)
     {
         const FStrategyOrder Order = OwnerUnit->OrderComponent->GetCurrentOrder();
-        if (Order.NextWaypointIndex >= Order.Waypoints.Num() - 1 &&
+        if (!(OwnerUnit->MovementExecutor && OwnerUnit->MovementExecutor->HasColumnDrillApproach()) &&
+            Order.NextWaypointIndex >= Order.Waypoints.Num() - 1 &&
             FVector::Dist2D(OwnerUnit->GetActorLocation(), Order.TargetLocation) <= 2500.0f)
         {
             OwnerUnit->FormationReason = TEXT("under 25 m fra målet: danner linje til sidste stræk");

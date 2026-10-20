@@ -144,7 +144,7 @@ UStrategyCrowdModel* UStrategyCrowdModel::BakeAsset(UWorld* World, USkeletalMesh
     // Subobjects travel in the model's package; no transient MID may enter the saved mesh.
     for (FStaticMaterial& CrowdSlot : CrowdAsset->Mesh->GetStaticMaterials())
         CrowdSlot.MaterialInterface = LoadObject<UMaterialInterface>(nullptr, CrowdMaterialPath);
-    CrowdAsset->BakeVersion = 4;
+    CrowdAsset->BakeVersion = 6;
     CrowdPackage->MarkPackageDirty();
     if (bCrowdNewAsset) FAssetRegistryModule::AssetCreated(CrowdAsset);
     return CrowdAsset;
@@ -182,7 +182,7 @@ UStrategyCrowdModel* UStrategyCrowdModel::Find(UWorld* World, USkeletalMesh* Sol
         return nullptr;
     }
     UStrategyCrowdModel* Model = LoadObject<UStrategyCrowdModel>(nullptr, *AssetPath(Soldier, Rifle));
-    if (!Model || Model->BakeVersion != 4 || Model->LODMeshes.Num() != 4 || Model->LODMeshes.ContainsByPredicate([](const TObjectPtr<UStaticMesh>& CrowdLODMesh) { return !CrowdLODMesh; }) || !Model->Mesh || !Model->BoneTexture ||
+    if (!Model || Model->BakeVersion != 6 || Model->LODMeshes.Num() != 4 || Model->LODMeshes.ContainsByPredicate([](const TObjectPtr<UStaticMesh>& CrowdLODMesh) { return !CrowdLODMesh; }) || !Model->Mesh || !Model->BoneTexture ||
         Clips.ContainsByPredicate([Model](UAnimSequence* CrowdClip) { return CrowdClip && !Model->Clips.Contains(CrowdClip); }))
     {
         Sub->Failed.Add(Key);
@@ -695,21 +695,53 @@ bool UStrategyCrowdModel::Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMes
             }
             // The rifle: from the right hand towards the left (as the visual component aligns it).
             FTransform RifleTransform = FTransform::Identity;
-            // Shoulder-arms clips ('...Shoulder...'): the butt is in the right hand and the barrel rests up and back over the right shoulder,
-            // not along the line from the right to the left hand.
+            // Shoulder-arms clips ('...Shoulder...', v9 2026-10-18 after the user's march reference): the butt end lies in the right hand
+            // at belt height and the barrel rests ON the top of the right shoulder, leaning about 30 degrees back. The barrel runs from
+            // the hand's centre through a contact point fixed to the RightShoulder bone (measured in Blender on every frame of the three
+            // v9 clips: 0.6-1.8 cm clearance, Tools/Animation/measure_shoulder_rifle_v9.py), grip 3 % of the length from the butt.
             const int32 RightShoulderBone = RefSkeleton.FindBoneIndex(FName(*Grip.RightHand.ToString().Replace(TEXT("Hand"), TEXT("Shoulder"))));
             const int32 LeftShoulderBone = RefSkeleton.FindBoneIndex(FName(*Grip.LeftHand.ToString().Replace(TEXT("Hand"), TEXT("Shoulder"))));
             if (RightHand != INDEX_NONE && RifleBox.IsValid && Clip->GetName().Contains(TEXT("Shoulder")) &&
                 RightShoulderBone != INDEX_NONE && LeftShoulderBone != INDEX_NONE)
             {
-                const FVector Right = Space[RightHand].GetLocation();
+                // The hand's centre: halfway between the RightHand bone and its first child (the bone's tail).
+                FVector Right = Space[RightHand].GetLocation();
+                for (int32 ShoulderChild = RightHand + 1; ShoulderChild < NumBones; ++ShoulderChild)
+                    if (RefSkeleton.GetParentIndex(ShoulderChild) == RightHand) { Right = (Right + Space[ShoulderChild].GetLocation()) * 0.5f; break; }
                 const FVector Side = (Space[RightShoulderBone].GetLocation() - Space[LeftShoulderBone].GetLocation()).GetSafeNormal();
                 const FVector Forward = FVector::CrossProduct(Side, FVector::UpVector).GetSafeNormal();
-                const FVector Barrel = (FVector::UpVector * 0.92f + Side * 0.32f - Forward * 0.10f).GetSafeNormal();
-                const FVector TopHint = Side;
+                const FVector ShoulderContact = Space[RightShoulderBone].GetLocation() + Forward * 11.7f + FVector::UpVector * 5.0f + Side * 10.0f;
+                FVector Barrel = (ShoulderContact - Right).GetSafeNormal();
+                if (Barrel.IsNearlyZero()) Barrel = FVector::UpVector;
+                FVector TopHint = Side;
+                float ShoulderGrip = 0.03f;
+                // ShoulderUp/ShoulderDown (v10, standing drill from the line's ready stance): the rifle goes from the ready rule
+                // (right hand -> left hand, grip 22 %) to the shoulder rule by the clip's phase, on a smooth curve (measured in Blender:
+                // linear blending runs the rifle through the shoulder and head). w = smoothstep(clamp((u - 0.10) / 0.65)).
+                const FString ShoulderClipName = Clip->GetName();
+                const bool bShoulderUpClip = ShoulderClipName.Contains(TEXT("ShoulderUp"));
+                const bool bShoulderDownClip = ShoulderClipName.Contains(TEXT("ShoulderDown"));
+                if ((bShoulderUpClip || bShoulderDownClip) && LeftHand != INDEX_NONE)
+                {
+                    FVector ShoulderLeft = Space[LeftHand].GetLocation();
+                    for (int32 ShoulderLeftChild = LeftHand + 1; ShoulderLeftChild < NumBones; ++ShoulderLeftChild)
+                        if (RefSkeleton.GetParentIndex(ShoulderLeftChild) == LeftHand) { ShoulderLeft = (ShoulderLeft + Space[ShoulderLeftChild].GetLocation()) * 0.5f; break; }
+                    const FVector ShoulderReady = (ShoulderLeft - Right).GetSafeNormal();
+                    const float ShoulderPhase = C.Frames > 1 ? float(f) / float(C.Frames - 1) : 1.f;
+                    const float ShoulderU = bShoulderUpClip ? ShoulderPhase : 1.f - ShoulderPhase;
+                    const float ShoulderX = FMath::Clamp((ShoulderU - 0.10f) / 0.65f, 0.f, 1.f);
+                    const float ShoulderW = ShoulderX * ShoulderX * (3.f - 2.f * ShoulderX);
+                    if (!ShoulderReady.IsNearlyZero())
+                    {
+                        Barrel = FQuat::Slerp(FQuat::Identity, FQuat::FindBetweenNormals(ShoulderReady, Barrel), ShoulderW).RotateVector(ShoulderReady).GetSafeNormal();
+                        TopHint = FMath::Lerp(FVector::UpVector, Side, ShoulderW).GetSafeNormal();
+                        if (FMath::Abs(FVector::DotProduct(TopHint, Barrel)) > 0.98f) TopHint = Side;
+                    }
+                    ShoulderGrip = FMath::Lerp(Grip.GripFraction, 0.03f, ShoulderW);
+                }
                 const FRotator Rotation = FRotationMatrix::MakeFromXZ(Grip.bBarrelAlongNegativeX ? -Barrel : Barrel, TopHint).Rotator();
                 const float ButtX = Grip.bBarrelAlongNegativeX ? RifleBox.Max.X : RifleBox.Min.X;
-                const float GripX = ButtX + (RifleBox.Max.X - RifleBox.Min.X) * 0.30f * (Grip.bBarrelAlongNegativeX ? -1.0f : 1.0f);
+                const float GripX = ButtX + (RifleBox.Max.X - RifleBox.Min.X) * ShoulderGrip * (Grip.bBarrelAlongNegativeX ? -1.0f : 1.0f);
                 RifleTransform = FTransform(Rotation, Right - Rotation.RotateVector(FVector(GripX, 0.0f, 0.0f)));
                 if (f == 0 && C.StartRow == 0) { FirstHand = Right; }
                 else if (!bMoved && FVector::Dist(FirstHand, Right) > 1.0f) { bMoved = true; }

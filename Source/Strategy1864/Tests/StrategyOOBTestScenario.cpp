@@ -28,6 +28,7 @@
 #include "../Player/StrategyCameraPawn.h"
 #include "../Visual/StrategyBattleAtmosphere.h"
 #include "EngineUtils.h"
+#include "HAL/IConsoleManager.h"
 #include "../Visual/StrategyInfantryVisualComponent.h"
 
 #include "../Command/StrategyCommandComponent.h"
@@ -203,6 +204,22 @@ void AStrategyOOBTestScenario::BeginPlay()
     if (GEngine && !FParse::Param(FCommandLine::Get(), TEXT("Strategy1864NoFpsCap")))
     {
         GEngine->Exec(GetWorld(), *FString::Printf(TEXT("t.MaxFPS %.3f"), FMath::Max(0.f, StrategyBattleFpsCap)));
+    }
+    // Light battle rendering until the soldier animations are settled (user's call, 2026-10-17): no Lumen GI/reflections
+    // and no dynamic shadows. -Strategy1864FullLighting keeps the project's full lighting (Lumen, virtual shadow maps).
+    if (GEngine && !FParse::Param(FCommandLine::Get(), TEXT("Strategy1864FullLighting")))
+    {
+        BattleRenderRestore.Reset();
+        for (const TCHAR* StrategyLightVariable : { TEXT("r.DynamicGlobalIlluminationMethod"), TEXT("r.ReflectionMethod"),
+            TEXT("r.Shadow.Virtual.Enable"), TEXT("r.ShadowQuality") })
+        {
+            if (IConsoleVariable* StrategyLightCVar = IConsoleManager::Get().FindConsoleVariable(StrategyLightVariable))
+            {
+                BattleRenderRestore.Add(TPair<FString, FString>(StrategyLightVariable, StrategyLightCVar->GetString()));
+                GEngine->Exec(GetWorld(), *FString::Printf(TEXT("%s 0"), StrategyLightVariable));
+            }
+        }
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-RENDER battle lighting: Lumen and dynamic shadows off (-Strategy1864FullLighting to keep them)"));
     }
     FParse::Value(FCommandLine::Get(), TEXT("Strategy1864ClockRate="), ClockRate);
 
@@ -2061,6 +2078,16 @@ float AStrategyOOBTestScenario::GetPontoonSecondsLeft() const
     return PendingPontoons.Num() > 0 && GetWorld() ? FMath::Max(0.0f, PendingPontoons[0].ReadyAt - GetWorld()->GetTimeSeconds()) : 0.0f;
 }
 
+void AStrategyOOBTestScenario::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    // The campaign map runs in the same process: give it back its full lighting.
+    if (GEngine)
+        for (const TPair<FString, FString>& StrategyLightRestore : BattleRenderRestore)
+            GEngine->Exec(GetWorld(), *FString::Printf(TEXT("%s %s"), *StrategyLightRestore.Key, *StrategyLightRestore.Value));
+    BattleRenderRestore.Reset();
+    Super::EndPlay(EndPlayReason);
+}
+
 void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
@@ -2070,6 +2097,7 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
         return;
     }
     TickShots();
+    TickDrillTest();
     TickBattleLedger(DeltaSeconds);
     if (!BattleOutcome.IsEmpty()) { FinalizeAfterActionReport(); }
     if (bSkirmish && !bReportFinalized && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864TestReport")) && GetWorld()->GetTimeSeconds() >= 15.f)
@@ -2326,6 +2354,68 @@ void AStrategyOOBTestScenario::SetEnemyAttacking(bool bAttack)
         U->OrderComponent->SetOrder(Order);
     }
     UE_LOG(LogTemp, Display, TEXT("PROJECT1864-ENEMY: %s"), bAttack ? TEXT("attacks") : TEXT("defends"));
+}
+
+void AStrategyOOBTestScenario::TickDrillTest()
+{
+    if (!bDrillTestParsed)
+    {
+        bDrillTestParsed = true;
+        FString DrillTestText;
+        if (FParse::Value(FCommandLine::Get(), TEXT("Strategy1864DrillTest="), DrillTestText, false))
+            DrillTestText.ParseIntoArray(DrillTestPlan, TEXT(","));
+    }
+    UWorld* DrillTestWorld = GetWorld();
+    if (!DrillTestWorld || DrillTestNext >= DrillTestPlan.Num()) return;
+    TArray<FString> DrillTestParts;
+    DrillTestPlan[DrillTestNext].ParseIntoArray(DrillTestParts, TEXT(":"));
+    if (DrillTestParts.Num() < 3 || DrillTestWorld->GetTimeSeconds() < FCString::Atof(*DrillTestParts[0])) return;
+    ++DrillTestNext;
+    AStrategyUnit* DrillTestUnit = nullptr;
+    for (TActorIterator<AStrategyUnit> DrillTestIt(DrillTestWorld); DrillTestIt; ++DrillTestIt)
+        if (DrillTestIt->StableUnitId.ToString().Contains(DrillTestParts[1])) { DrillTestUnit = *DrillTestIt; break; }
+    if (!DrillTestUnit || !DrillTestUnit->OrderComponent || !DrillTestUnit->FormationComponent)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("PROJECT1864-DRILLTEST no unit %s"), *DrillTestParts[1]);
+        return;
+    }
+    if (DrillTestParts[2].Equals(TEXT("LINE"), ESearchCase::IgnoreCase))
+    {
+        DrillTestUnit->FormationReason = TEXT("drilltest: formationsknappen Linje");
+        DrillTestUnit->FormationComponent->SetFormation(EStrategyFormationType::Line);
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s LINE"), *DrillTestUnit->StableUnitId.ToString());
+        return;
+    }
+    // Losses on demand, to see the files close in and the colours change hands: KILL:n men, or KILLCOLOURS.
+    if (DrillTestParts[2].Equals(TEXT("KILL"), ESearchCase::IgnoreCase) && DrillTestParts.Num() > 3)
+    {
+        const int32 DrillTestLoss = DrillTestUnit->ApplyStrengthLossWithCause(FCString::Atoi(*DrillTestParts[3]), TEXT("DrillTest"), nullptr);
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s KILL %d"), *DrillTestUnit->StableUnitId.ToString(), DrillTestLoss);
+        return;
+    }
+    if (DrillTestParts[2].Equals(TEXT("KILLCOLOURS"), ESearchCase::IgnoreCase))
+    {
+        if (UStrategyInfantryVisualComponent* DrillTestVisual = DrillTestUnit->FindComponentByClass<UStrategyInfantryVisualComponent>())
+            DrillTestVisual->DebugKillColourBearer();
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s KILLCOLOURS"), *DrillTestUnit->StableUnitId.ToString());
+        return;
+    }
+    if (DrillTestParts.Num() < 4) return;
+    const FTransform DrillTestFrame = DrillTestUnit->GetActorTransform();
+    FStrategyOrder DrillTestOrder;
+    DrillTestOrder.Type = EStrategyOrderType::Move;
+    DrillTestOrder.TargetLocation = DrillTestFrame.TransformPosition(
+        FVector(FCString::Atof(*DrillTestParts[2]), FCString::Atof(*DrillTestParts[3]), 0.f));
+    DrillTestOrder.TargetLocation.Z = DrillTestFrame.GetLocation().Z;
+    DrillTestOrder.Authority = EStrategyOrderAuthority::DirectPlayer;
+    if (DrillTestParts.Num() > 4)
+    {
+        DrillTestOrder.bHasFacing = true;
+        DrillTestOrder.FacingYaw = FRotator::NormalizeAxis(DrillTestFrame.Rotator().Yaw + FCString::Atof(*DrillTestParts[4]));
+    }
+    DrillTestUnit->OrderComponent->SetOrder(DrillTestOrder);
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s MOVE to %s facing=%d %.1f"), *DrillTestUnit->StableUnitId.ToString(),
+        *DrillTestOrder.TargetLocation.ToString(), DrillTestOrder.bHasFacing ? 1 : 0, DrillTestOrder.FacingYaw);
 }
 
 void AStrategyOOBTestScenario::TickShots()

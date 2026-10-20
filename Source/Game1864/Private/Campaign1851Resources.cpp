@@ -205,7 +205,9 @@ bool ACampaign1851Map::BuyRaw(ECampaign1851Raw R, float Amount, FString* OutReas
 	const Campaign1851Resources::FRawInfo& I = Campaign1851Resources::Info(R);
 	AddTransaction(-Cost, FString::Printf(TEXT("Indkøb: %.0f %s %s"), Amount, I.Unit, I.Name));
 	RawStock[int32(R)] += Amount;
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("budget"), TEXT("BuyRaw"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("R"), double(R) }, { TEXT("Amount"), double(Amount) } }, {  }); }
+	return LogActionResult;
 }
 
 void ACampaign1851Map::RawFlow(float OutMade[int32(ECampaign1851Raw::Count)], float OutUsed[int32(ECampaign1851Raw::Count)]) const

@@ -1,0 +1,28 @@
+{
+  "scenario": "1851",
+  "status": "estimated",
+  "note": "ALLE produktions-/skattesatser, startkasser og underhold er spilskøn i fælles rd.-regneenhed, ikke historiske valutakurser eller nationale budgettal. Kun aktive kortdistrikter indgår. Produktion genbruger Danmarks scenarievalgte eksportmodel (høst, priser, eksporttold); private producenters omsætning bliver ikke i sin helhed statslig indtægt. Startkasse: sum af eksisterende distriktskasser (tre års grundskat). Underhold pr. mand: dansk RaisedUpkeepPerMonth / våbenartens standardenhed; blandede korps regnes som infanteri (skøn). Ubetalt andel giver op til 0,1 moraltab pr. måned; ingen gratis kredit. Ingen danske reform-/forskningsbonusser overføres. Besat distrikt: nul indtægt; sædebesættelse er forenklet skøn for hele distriktet. Danmarks søkontrol reducerer fjendens eksport; unionen følger alliancebeslutningen.",
+  "nations": [
+    {
+      "nation": "SE",
+      "grainPerHead": 0.6,
+      "cattlePerHead": 0.3,
+      "butterPerHead": 0.15,
+      "exportDuty": 0.02
+    },
+    {
+      "nation": "NO",
+      "grainPerHead": 0.6,
+      "cattlePerHead": 0.3,
+      "butterPerHead": 0.15,
+      "exportDuty": 0.02
+    },
+    {
+      "nation": "PR",
+      "grainPerHead": 0.6,
+      "cattlePerHead": 0.3,
+      "butterPerHead": 0.15,
+      "exportDuty": 0.02
+    }
+  ]
+}

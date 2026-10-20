@@ -2,6 +2,7 @@
 #include "StrategyCombatComponent.h"
 
 #include "../Units/StrategyUnit.h"
+#include "../AI/StrategyFieldOfficerComponent.h"
 
 UStrategyConditionComponent::UStrategyConditionComponent()
 {
@@ -32,6 +33,10 @@ void UStrategyConditionComponent::TickComponent(
     if (OwnerUnit->UnitState == EStrategyUnitState::Moving)
     {
         DeltaFatigue = MovingFatiguePerSecond;
+        if (OwnerUnit->FieldOfficerComponent && OwnerUnit->FieldOfficerComponent->IsDoubleTime())
+        {
+            DeltaFatigue += DoubleTimeFatiguePerSecond;
+        }
     }
     else if (OwnerUnit->UnitState == EStrategyUnitState::Reforming)
     {

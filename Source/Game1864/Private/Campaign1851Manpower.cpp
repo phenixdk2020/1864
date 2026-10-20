@@ -29,6 +29,7 @@ void ACampaign1851Map::ResetManpower()
 	{
 		AmtManpower.Add(float(A.Population) * Campaign1851Army::ManpowerStartShare);
 	}
+	ResetForeignEconomies();
 }
 
 float ACampaign1851Map::ManpowerCap(int32 AmtIndex) const
@@ -177,7 +178,9 @@ int32 ACampaign1851Map::RaiseBattalion(int32 CityIndex, FString* OutReason)
 		R.Captains[k] = Officers.Add(Captain);
 	}
 	News.Add(FString::Printf(TEXT("%s er oprettet i %s: 760 rekrutter"), *R.Name, *Cities[CityIndex].Name));
-	return Index;
+	const auto LogActionResult = Index;
+	if (LogActionResult != INDEX_NONE && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("recruit"), TEXT("RaiseBattalion"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("CityIndex"), double(CityIndex) } }, {  }); }
+	return LogActionResult;
 }
 
 int32 ACampaign1851Map::SplitRegiment(int32 RegimentIndex, FString* OutWhy, int32 MovedCount)

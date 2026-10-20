@@ -40,6 +40,9 @@ public:
     UFUNCTION(BlueprintPure, Category="Strategy|Formation")
     bool IsReforming() const { return ReformRemainingSeconds > 0.0f; }
 
+    /** The visual gather needs longer than the planned reform: keep the reform (and a held march) going until then. Never shortens. */
+    void ExtendReformSeconds(float Seconds);
+
 private:
     UFUNCTION()
     void HandleFormationChanged(

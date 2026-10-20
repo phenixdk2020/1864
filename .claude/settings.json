@@ -1,0 +1,10 @@
+{
+  "model": "opusplan",
+  "effortLevel": "high",
+  "permissions": {
+    "allow": [
+      "Bash(python Tools/Countries/validate_prussia.py)",
+      "Bash(python Tools/Countries/validate_sweden_norway.py)"
+    ]
+  }
+}

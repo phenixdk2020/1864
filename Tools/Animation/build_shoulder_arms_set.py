@@ -1,25 +1,32 @@
-"""Shoulder-arms march: the column carries the rifle on the shoulder (right hand at the butt on the hip, left arm swinging).
-Legs and torso stay the project's own march ('Walking with rifle', so the walking speed still fits); only the arms change.
+"""Shoulder-arms march, v4 (2026-10-16): built from the RAW Mixamo walk WITH skinned mesh and bind pose, exported WITH the mesh.
+(Armature-only exports import into Unreal lying down; the raw Mixamo files stand.)
 
-    blender -b -P build_shoulder_arms_set.py -- <Kildeassets dir> <MultiView dir>
+    blender -b -P build_shoulder_arms_set.py -- [<MultiView dir>] [<out dir>]
 
-Writes SourceAssets/InfantryCombat/A_Combat_{WalkShoulder,ShoulderUp,ShoulderDown}.fbx and manifest_shoulder.json
-(imported by import_infantry_combat_set.py). ShoulderUp / ShoulderDown are one walking cycle in which the arms move between the
-rifle-in-hands carry and the shoulder carry.
+Writes A_Combat_{WalkShoulder,ShoulderUp,ShoulderDown}.fbx and RoundTrip_Walk.fbx (the unmodified walk through the same exporter)
+to <out dir> (default Saved/Codex/shoulder_v4, NOT SourceAssets) plus shoulder_v4_report.json.
+Method: legs, left arm, spine and head come from the Mixamo walk; Hips X/Z held (walk in place, vertical bob kept); the right arm is
+re-posed with two-bone IK so the hand holds the rifle butt low at the right hip (arm almost straight, elbow not lifted).
+ShoulderUp/Down blend the right arm (and fingers) between the walk pose and the carry pose with smoothstep + slerp.
+Environment: SPINE_FIX=<deg> extra backwards pitch spread over Spine/Spine1/Spine2 (hunch fix), POLE_ANGLE=<deg> IK pole angle.
 """
-import bpy, json, math, sys
+import bpy, json, math, os, sys
 from pathlib import Path
-from mathutils import Vector, Matrix, Quaternion
+from mathutils import Vector, Matrix
 
-args = sys.argv[sys.argv.index('--') + 1:]
-KILDE, MULTI = Path(args[0]), Path(args[1])
+a = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 PROJECT = Path(__file__).resolve().parents[2]
-OUT = PROJECT / 'SourceAssets/InfantryCombat'
+MULTI = Path(a[0]) if a else Path(r'R:\Onedrive\Dokumenter\Unreal Projects\Game1864\Reference\Units\MultiView')
+OUT = Path(a[1]) if len(a) > 1 else PROJECT / 'Saved/Codex/shoulder_v4'
 OUT.mkdir(parents=True, exist_ok=True)
-WALK = MULTI / 'Animationer Mænd' / 'Walking with rifle.fbx'
-ARM_BONES = ['Arm', 'ForeArm', 'Hand'] + ['Hand%s%d' % (f, i) for f in ('Thumb', 'Index', 'Middle', 'Ring', 'Pinky') for i in (1, 2, 3, 4)]
-RIGHT_HAND = (0.20, 0.20, 1.18)    # soldier frame (x right, y forward, z up): the butt held at the hip
-LEFT_HAND = (-0.28, 0.00, 0.93)    # the left arm hangs and swings
+WALK = MULTI / '3D figurer' / 'Walking.fbx'
+ARM_BONES = ['Arm', 'ForeArm', 'Hand'] + ['Hand%s%d' % (f, i) for f in ('Index', 'Middle', 'Ring', 'Pinky', 'Thumb') for i in (1, 2, 3, 4)]
+# carry pose relative to the right shoulder: fraction of the arm length straight down (1.0 = hanging straight), lateral/forward offsets in m
+HAND_DOWN = float(os.environ.get('HAND_DOWN', '0.86'))
+HAND_OUT = float(os.environ.get('HAND_OUT', '0.04'))
+HAND_FWD = float(os.environ.get('HAND_FWD', '0.18'))
+SPINE_FIX = float(os.environ.get('SPINE_FIX', '0'))
+POLE_ANGLE = float(os.environ.get('POLE_ANGLE', '-90'))
 
 
 def load():
@@ -34,97 +41,124 @@ def load():
     return arm, act
 
 
+def export(arm, path):
+    for o in bpy.data.objects:
+        o.select_set(False)
+    arm.select_set(True)
+    for o in bpy.data.objects:
+        if o.type == 'MESH' and o.parent == arm:
+            o.select_set(True)
+    bpy.context.view_layer.objects.active = arm
+    bpy.ops.export_scene.fbx(filepath=str(path), use_selection=True, object_types={'ARMATURE', 'MESH'}, add_leaf_bones=False,
+                             use_mesh_modifiers=False, bake_anim=True, bake_anim_use_all_actions=False, bake_anim_use_nla_strips=False,
+                             bake_anim_simplify_factor=0, bake_anim_force_startend_keying=True, axis_forward='-Z', axis_up='Y')
+
+
 arm, act = load()
+sc = bpy.context.scene
+sc.render.fps = 30
 f0, f1 = int(act.frame_range[0]), int(act.frame_range[1])
 N = f1 - f0 + 1
-sc = bpy.context.scene
-# original pose per frame (A)
+export(arm, OUT / 'RoundTrip_Walk.fbx')   # the UNMODIFIED walk through the same exporter
+
+for pb in arm.pose.bones:
+    pb.rotation_mode = 'QUATERNION'
+hips = arm.pose.bones['mixamorig:Hips']
+
+
+def setpose(poses):
+    for pb in arm.pose.bones:
+        pb.matrix_basis = poses[pb.name]
+    bpy.context.view_layer.update()
+
+
+# 1) original local poses + root lock (hips X/Z in armature space held, Y = vertical bob kept) + optional spine fix
 A = []
-HIPZ = []
+T0 = None
 for f in range(f0, f1 + 1):
     sc.frame_set(f)
     bpy.context.view_layer.update()
+    M = hips.matrix.copy()
+    if T0 is None:
+        T0 = M.translation.copy()
+    M.translation.x, M.translation.z = T0.x, T0.z
+    hips.matrix = M
+    bpy.context.view_layer.update()
+    if SPINE_FIX:
+        for n in ('Spine', 'Spine1', 'Spine2'):
+            pb = arm.pose.bones['mixamorig:' + n]
+            m = pb.matrix.copy()
+            t = m.translation.copy()
+            m.translation = Vector((0, 0, 0))
+            m = Matrix.Rotation(math.radians(SPINE_FIX / 3), 4, 'X') @ m   # armature X = the shoulder axis (rotated about the bone head)
+            m.translation = t
+            pb.matrix = m
+            bpy.context.view_layer.update()
     A.append({pb.name: pb.matrix_basis.copy() for pb in arm.pose.bones})
-    HIPZ.append((arm.matrix_world @ arm.pose.bones['mixamorig:Hips'].head).z)
-sc.frame_set(f0)
-bpy.context.view_layer.update()
+setpose(A[0])
 
 
 def head(n):
     return arm.matrix_world @ arm.pose.bones['mixamorig:' + n].head
 
 
+# 2) body frame and carry target, from the first pose
 right_v = head('RightShoulder') - head('LeftShoulder')
 right_v.z = 0
 right_v.normalize()
 up_v = Vector((0, 0, 1))
 fwd_v = up_v.cross(right_v).normalized()
-origin = (head('LeftFoot') + head('RightFoot')) / 2
-origin.z = 0.0
-print('FRAME right', tuple(right_v), 'fwd', tuple(fwd_v))
+sh0 = head('RightArm')
+arm_len = (head('RightForeArm') - head('RightArm')).length + (head('RightHand') - head('RightForeArm')).length
+hips0 = head('Hips')
+hand_target0 = sh0 + right_v * HAND_OUT + fwd_v * HAND_FWD - up_v * (HAND_DOWN * arm_len)
+print('FRAME right', tuple(right_v), 'fwd', tuple(fwd_v), 'armlen', arm_len, 'hand', tuple(hand_target0), 'hips', tuple(hips0))
 
-
-def W(p):
-    return origin + right_v * p[0] + fwd_v * p[1] + up_v * p[2]
-
-
-tg = {}
-for n in ('LH', 'RH', 'LP', 'RP'):
-    e = bpy.data.objects.new(n, None)
-    sc.collection.objects.link(e)
-    tg[n] = e
-for side, p in (('Left', 'LH'), ('Right', 'RH')):
-    pb = arm.pose.bones['mixamorig:%sForeArm' % side]
-    c = pb.constraints.new('IK')
-    c.target = tg[p]
-    c.pole_target = tg['LP' if side == 'Left' else 'RP']
-    c.pole_angle = math.radians(-90.0)
-    c.chain_count = 2
-    c.use_tail = True
-    c.use_stretch = False
-    c.iterations = 80
-tg['LP'].location = W((-0.65, -0.20, 1.15))
-tg['RP'].location = W((0.65, -0.20, 1.15))
-
-finals = []
+# 3) IK for the right arm per frame; the target follows the hips (bob)
+tg = bpy.data.objects.new('RH', None)
+pl = bpy.data.objects.new('RP', None)
+sc.collection.objects.link(tg)
+sc.collection.objects.link(pl)
+fa = arm.pose.bones['mixamorig:RightForeArm']
+c = fa.constraints.new('IK')
+c.target, c.pole_target = tg, pl
+c.pole_angle = math.radians(POLE_ANGLE)
+c.chain_count = 2
+c.use_tail = True
+c.use_stretch = False
+c.iterations = 80
+finalsA, finalsF = [], []
 for i in range(N):
-    sc.frame_set(f0 + i)
+    setpose(A[i])
+    hd = head('Hips') - hips0
+    tg.location = hand_target0 + hd
+    pl.location = sh0 + hd + right_v * 0.35 - fwd_v * 0.6
     bpy.context.view_layer.update()
-    bob = HIPZ[i] - HIPZ[0]
-    swing = math.sin(2 * math.pi * i / N)
-    tg['RH'].location = W((RIGHT_HAND[0], RIGHT_HAND[1], RIGHT_HAND[2] + bob))
-    tg['LH'].location = W((LEFT_HAND[0], LEFT_HAND[1] + 0.12 * swing, LEFT_HAND[2] + bob))
-    bpy.context.view_layer.update()
-    finals.append({pb.name: pb.matrix.copy() for pb in arm.pose.bones})
-# turn the solved poses into local (basis) matrices: remove the constraints, assign parent first
-for pb in arm.pose.bones:
-    for c in list(pb.constraints):
-        pb.constraints.remove(c)
-arm.animation_data_clear()
-for pb in arm.pose.bones:
-    pb.rotation_mode = 'QUATERNION'
-order = sorted(arm.pose.bones, key=lambda b: len(b.parent_recursive))
+    finalsA.append(arm.pose.bones['mixamorig:RightArm'].matrix.copy())
+    finalsF.append(fa.matrix.copy())
+fa.constraints.remove(c)
 B = []
 for i in range(N):
-    for pb in order:
-        pb.matrix = finals[i][pb.name]
-        bpy.context.view_layer.update()
+    setpose(A[i])
+    arm.pose.bones['mixamorig:RightArm'].matrix = finalsA[i]
+    bpy.context.view_layer.update()
+    fa.matrix = finalsF[i]
+    bpy.context.view_layer.update()
     B.append({pb.name: pb.matrix_basis.copy() for pb in arm.pose.bones})
 
 
-def arm_bone(name):
-    short = name.split(':')[-1]
-    return any(short == side + b for side in ('Left', 'Right') for b in ARM_BONES)
+def is_arm(name):
+    return name.split(':')[-1] in ['Right' + b for b in ARM_BONES]
 
 
-def blend(a, b, w):
+def blend(a_, b_, w):
     out = {}
-    for name, ma in a.items():
-        if not arm_bone(name):
+    for name, ma in a_.items():
+        if not is_arm(name):
             out[name] = ma.copy()
             continue
         l0, r0, s0 = ma.decompose()
-        l1, r1, s1 = b[name].decompose()
+        l1, r1, s1 = b_[name].decompose()
         out[name] = Matrix.LocRotScale(l0.lerp(l1, w), r0.slerp(r1, w), s0.lerp(s1, w))
     return out
 
@@ -145,31 +179,19 @@ def bake(name, frames):
         pass
     for i, poses in enumerate(frames, 1):
         for pb in arm.pose.bones:
-            pb.rotation_mode = 'QUATERNION'
             pb.matrix_basis = poses[pb.name]
             pb.keyframe_insert('location', frame=i)
             pb.keyframe_insert('rotation_quaternion', frame=i)
             pb.keyframe_insert('scale', frame=i)
-    sc.render.fps = 30
     sc.frame_start, sc.frame_end = 1, len(frames)
-    bpy.ops.object.select_all(action='DESELECT')
-    arm.select_set(True)
-    bpy.context.view_layer.objects.active = arm
     path = OUT / ('A_Combat_' + name + '.fbx')
-    bpy.ops.export_scene.fbx(filepath=str(path), use_selection=True, object_types={'ARMATURE'}, add_leaf_bones=False,
-                             bake_anim_use_all_actions=False, bake_anim_use_nla_strips=False, bake_anim_simplify_factor=0,
-                             axis_forward='-Z', axis_up='Y')
-    return {'name': name, 'file': path.name, 'frames': len(frames), 'fps': 30, 'duration': (len(frames) - 1) / 30, 'bones': len(arm.data.bones)}
+    export(arm, path)
+    return {'name': name, 'file': path.name, 'frames': len(frames), 'fps': 30, 'bones': len(arm.data.bones)}
 
 
-# the local poses of the three clips, for the preview script (Tools/Animation/preview_shoulder_arms.py)
-POSES = {'WalkShoulder': [blend(A[i], B[i], 1.0) for i in range(N)],
-         'ShoulderUp': [blend(A[i], B[i], smooth(i / (N - 6))) for i in range(N)],
-         'ShoulderDown': [blend(A[i], B[i], 1.0 - smooth(i / (N - 6))) for i in range(N)]}
-(OUT / 'shoulder_poses_preview.json').write_text(json.dumps({k: [{n: [list(r) for r in m] for n, m in fr.items()} for fr in v] for k, v in POSES.items()}))
-report = []
-report.append(bake('WalkShoulder', [blend(A[i], B[i], 1.0) for i in range(N)]))
-report.append(bake('ShoulderUp', [blend(A[i], B[i], smooth(i / (N - 6))) for i in range(N)]))
-report.append(bake('ShoulderDown', [blend(A[i], B[i], 1.0 - smooth(i / (N - 6))) for i in range(N)]))
-(OUT / 'manifest_shoulder.json').write_text(json.dumps({'clips': report}, indent=2))
-print('SHOULDER=' + json.dumps(report))
+T = N - 6   # the transition is complete a few frames before the end, like the earlier generator
+report = [bake('WalkShoulder', [blend(A[i], B[i], 1.0) for i in range(N)]),
+          bake('ShoulderUp', [blend(A[i], B[i], smooth(i / T)) for i in range(N)]),
+          bake('ShoulderDown', [blend(A[i], B[i], 1.0 - smooth(i / T)) for i in range(N)])]
+(OUT / 'shoulder_v4_report.json').write_text(json.dumps({'source': str(WALK), 'clips': report}, indent=2))
+print('SHOULDER_V4=' + json.dumps(report))

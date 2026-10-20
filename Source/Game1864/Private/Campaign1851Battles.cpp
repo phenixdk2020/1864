@@ -62,7 +62,7 @@ int32 ACampaign1851Map::EngageableCorps(const TArray<int32>& Units, double* OutK
 	for (int32 c = 0; c < EnemyCorps.Num(); ++c)
 	{
 		const FCampaign1851EnemyCorps& C = EnemyCorps[c];
-		if (C.Men <= 0 || !C.bSeen || C.bEngaged)
+		if (C.Men <= 0 || !C.bSeen || C.bEngaged || ((C.Nation == TEXT("SE") || C.Nation == TEXT("NO")) && !IsNeighbourHostile(C.Nation)))
 		{
 			continue;
 		}
@@ -592,7 +592,7 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
             {
                 for (const FCampaign1851EnemyCorps& ReportOther : EnemyCorps)
                 {
-                    if (ReportOther.Men > 0 && FVector2D::Distance(TownKm(ReportTown), ReportOther.Km) <= 8.0) { return false; }
+                    if (IsNeighbourHostile(ReportOther.Nation) && ReportOther.Men > 0 && FVector2D::Distance(TownKm(ReportTown), ReportOther.Km) <= 8.0) { return false; }
                 }
             }
             else

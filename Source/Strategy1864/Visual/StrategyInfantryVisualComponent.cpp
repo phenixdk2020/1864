@@ -67,6 +67,14 @@ UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
         FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_ShoulderUp.A_Combat_ShoulderUp")));
     ShoulderDownAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_ShoulderDown.A_Combat_ShoulderDown")));
+    SideStepAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_SideStep.A_Combat_SideStep")));
+    SideStepLeftAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_SideStepLeft.A_Combat_SideStepLeft")));
+    ColourWalkAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_ColourWalk.A_Combat_ColourWalk")));
+    ColourIdleAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_ColourIdle.A_Combat_ColourIdle")));
 
     RunStandingAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Running.A_Running")));
@@ -324,10 +332,15 @@ void UStrategyInfantryVisualComponent::TickComponent(
         !(OwnerCompany->FormationTransition && OwnerCompany->FormationTransition->IsReforming()) && !VisualPath.bMovingVisuals)
     {
         bClosingRanksPending = false;
-        bStepUpPending = false;   // the full re-form also fills the files
-        RebuildFormation();
+        // In line: the files close in towards the colours by side-stepping; otherwise (column, square, spread) the old re-form.
+        if (!CloseRanksTowardColours())
+        {
+            bStepUpPending = false;   // the full re-form also fills the files
+            RebuildFormation();
+        }
     }
     UpdateSettling(DeltaTime);
+    UpdateColourBearer(DeltaTime);
     ApplyPendingStance(GetWorld()->GetTimeSeconds());
     MarchDust(GetWorld()->GetTimeSeconds());
     RefreshAnimation(false);
@@ -1025,6 +1038,12 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
          OwnerCompany->HumanAnimationStateComponent->CurrentAction == EStrategyHumanAnimationAction::Run);
     for (int32 k = 0; k < Count && SoldierComponents.Num() > 0; ++k)
     {
+        // The colour bearer is one man of the company: he falls as often as any other (front-rank fire hits him more).
+        if (bColourBearerAlive && ColourBearer && !(Near && ConeOrigin) && FMath::RandRange(0, SoldierComponents.Num()) == 0)
+        {
+            KillColourBearer();
+            continue;
+        }
         int32 i = FMath::RandRange(0, SoldierComponents.Num() - 1);
         if (Near && ConeOrigin)
         {
@@ -1178,7 +1197,7 @@ bool UStrategyInfantryVisualComponent::EnsureAssetsLoaded()
     LoadedRifleMesh = RifleMeshAsset.LoadSynchronous();
     LoadedRifleBayonetMesh = RifleBayonetMeshAsset.LoadSynchronous();
     LoadedBattleFadeMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/EngineDebugMaterials/M_SimpleTranslucent.M_SimpleTranslucent"));
-    const TSoftObjectPtr<UAnimSequence>* BattleAnimationAssets[] = { &IdleStandingAsset, &WalkStandingAsset, &RunStandingAsset, &AimStandingAsset, &FireStandingAsset, &ReloadStandingAsset, &IdleKneelingAsset, &AimKneelingAsset, &FireKneelingAsset, &ReloadKneelingAsset, &IdleProneAsset, &CrawlProneAsset, &FireProneAsset, &ReloadProneAsset, &BayonetChargeAsset, &BayonetThrustAsset, &DeathAsset, &DeathAsset2, &DeathAsset3, &RaiseToAimAsset, &LoadAsset, &RiseFromLoadAsset, &ReadyAsset, &AimHoldAsset, &DeathWalkingAsset, &WalkShoulderAsset, &ShoulderUpAsset, &ShoulderDownAsset };
+    const TSoftObjectPtr<UAnimSequence>* BattleAnimationAssets[] = { &IdleStandingAsset, &WalkStandingAsset, &RunStandingAsset, &AimStandingAsset, &FireStandingAsset, &ReloadStandingAsset, &IdleKneelingAsset, &AimKneelingAsset, &FireKneelingAsset, &ReloadKneelingAsset, &IdleProneAsset, &CrawlProneAsset, &FireProneAsset, &ReloadProneAsset, &BayonetChargeAsset, &BayonetThrustAsset, &DeathAsset, &DeathAsset2, &DeathAsset3, &RaiseToAimAsset, &LoadAsset, &RiseFromLoadAsset, &ReadyAsset, &AimHoldAsset, &DeathWalkingAsset, &WalkShoulderAsset, &ShoulderUpAsset, &ShoulderDownAsset, &SideStepAsset, &SideStepLeftAsset, &ColourWalkAsset, &ColourIdleAsset };
     CrowdStanceClips.Reset();
     for (const TCHAR* CrowdStanceName : { TEXT("A_Rifle_Stand_To_Kneel"), TEXT("A_Rifle_Kneel_To_Stand"), TEXT("A_Rifle_Kneel_To_Prone"), TEXT("A_Rifle_Prone_To_Kneel") })
     {
@@ -1212,7 +1231,7 @@ int32 UStrategyInfantryVisualComponent::GetDesiredVisualCount() const
     }
 
     const int32 Strength =
-        FMath::Max(0, OwnerCompany->CurrentStrength);
+        FMath::Max(0, OwnerCompany->CurrentStrength - (bColourBearerAlive && ColourBearer ? 1 : 0));
 
     if (Strength <= 0)
     {
@@ -1351,6 +1370,12 @@ void UStrategyInfantryVisualComponent::EnsureVisualCount(
 
 void UStrategyInfantryVisualComponent::RebuildFormation()
 {
+    if (OwnerCompany && OwnerCompany->FormationComponent && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugFormation")))
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s rebuild cached=%d now=%d scale-only=%d path-init=%d figures=%d"),
+            *OwnerCompany->StableUnitId.ToString(), int32(CachedFormationValue), int32(OwnerCompany->FormationComponent->CurrentFormation),
+            bScaleOnlyRebuild ? 1 : 0, VisualPath.bInitialized ? 1 : 0, SoldierComponents.Num());
+    DrillRebuildAborted = DrillActive;
+    if (DrillActive) AbortColumnDrill(TEXT("tab eller ombygning af figurerne"));
     if (!OwnerCompany ||
         !OwnerCompany->FormationComponent ||
         SoldierComponents.Num() == 0)
@@ -1497,8 +1522,19 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
         !(DrawnScreen && (DrawnScreen->State == EStrategySkirmisherState::Deploying || DrawnScreen->IsDeployed())))
     {
         bArrivalReform = false;
-        PlanOrderlyReform(false, FTransform(FRotator(0.f, VisualPath.Facing, 0.f), VisualPath.Center));
+        if (DrillRebuildAborted) UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s not used: figures rebuilt during a drill"), *OwnerCompany->StableUnitId.ToString());
+        if (DrillRebuildAborted || !PlanColumnDrill())
+            PlanOrderlyReform(false, FTransform(FRotator(0.f, VisualPath.Facing, 0.f), VisualPath.Center));
     }
+    else if (!bScaleOnlyRebuild &&
+        ((CachedFormationValue == uint8(EStrategyFormationType::Line) && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn) ||
+         (CachedFormationValue == uint8(EStrategyFormationType::MarchColumn) && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Line)))
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s not used: no orderly reform (visual path initialised=%d, prone or screen out)"),
+            *OwnerCompany->StableUnitId.ToString(), VisualPath.bInitialized ? 1 : 0);
+    if (DrillRebuildAborted && !DrillActive)
+        PlanOrderlyReform(false, OwnerCompany->GetActorTransform());
+    DrillRebuildAborted = false;
+    if (!bScaleOnlyRebuild && OwnerCompany->FormationComponent->CurrentFormation != EStrategyFormationType::MarchColumn) SnakeRowSpacing = 0.f;
     bCrowdDirty = true;
 }
 
@@ -1615,6 +1651,8 @@ void UStrategyInfantryVisualComponent::UpdateFormationBounds()
 
 void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, const FTransform& ReformFrame)
 {
+    DrillActive = false;
+    DrillPath.Reset();
     // Once per change, never a per-frame assignment/path search. Preserve figure identity and clips.
     if (bDestination) ArrivalFormationOrigin = ReformFrame.GetLocation();
     TArray<int32> ReformMen;
@@ -1719,6 +1757,16 @@ void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, cons
             ReformLongest = FMath::Max(ReformLongest, float(FVector::Dist2D(ReformStarts[ReformMen[ReformOrder]], ReformFrame.TransformPosition(ReformSlots[ReformTargets[ReformOrder]]))));
         // Twice as brisk as before: the last men to take their place walk at about 5 m/s; forming a column is quicker still (the march waits for it).
         ReformBudget = FMath::Clamp(ReformLongest / 500.f, 3.f, bReformColumn ? 6.f : 9.f);
+        if (bReformColumn)
+        {
+            // Gathering into column is walked, not run: the pace follows the march (one and a half times the unit's own march speed,
+            // never below a plain march and never above what the walk clip can follow at its 4x rate limit), so the feet keep the ground
+            // speed. The march is held until the last man is in place.
+            const float ReformMarchNominal = OwnerCompany->MovementExecutor ? OwnerCompany->MovementExecutor->MoveSpeedCmPerSecond : 150.f;
+            const float ReformWalkPace = FMath::Clamp(ReformMarchNominal * 1.5f, FMath::Max(160.f, ReformMarchNominal), 300.f);
+            ReformBudget = FMath::Clamp(ReformLongest / ReformWalkPace, 3.f, 10.f);
+            if (OwnerCompany->FormationTransition) OwnerCompany->FormationTransition->ExtendReformSeconds(ReformBudget + 0.3f);
+        }
     }
     FormationPlanStarted = VisualAnimationTime;
     FormationLongestPath = 0.f;
@@ -1823,13 +1871,15 @@ void UStrategyInfantryVisualComponent::KeepReformSpacing(float DeltaTime)
 void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
 {
     if (DeltaTime <= 0.f) return;
+    if (UpdateColumnDrill(DeltaTime)) return;
     // The men run to their places in a new formation (out into line, in to the column) at a jog, turning the way they run, and take
     // the company's pose when they are there.
     const float RunCmPerSecond = 420.0f;
     // Blender world-space low-foot backward travel / stance time; armature scale 0.01, soldier scale 1.
     // SourceAssets/InfantryCombat/walk_speed_measurement.json; both cycles are 41/30 seconds.
     constexpr float InfantryWalkClipCmPerSecond = 76.99816f;
-    constexpr float InfantryShoulderWalkClipCmPerSecond = 81.72886f;
+    // v9 shoulder clips (Mixamo walk, 2026-10-18): Tools/Animation/measure_infantry_walk_speed.py -> walk_speed_measurement.json.
+    constexpr float InfantryShoulderWalkClipCmPerSecond = 137.70097f;
     const FTransform VisualUnit = OwnerCompany->GetActorTransform();
     const bool bVisualColumn = OwnerCompany->FormationComponent &&
         (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
@@ -1878,7 +1928,25 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         int32 RigidSetting = 1;
         if (FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Rigid="), RigidSetting)) bRigidCompany = RigidSetting != 0;
     }
-    if (!bArrivalReform) VisualPath.Advance(VisualUnit, DeltaTime, bVisualColumn, VisualWalkSpeed, bRigidCompany);
+    // A march column is a snake (each man turns where the head turned), even in a rigid company; the line stays rigid.
+    const bool bSnakeColumn = bVisualColumn && bRigidCompany && FStrategyColumnDrill::Enabled() &&
+        OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn;
+    const float SnakeMarchSpeed = OwnerCompany->MovementExecutor ? OwnerCompany->MovementExecutor->MoveSpeedCmPerSecond : 150.f;
+    VisualPath.HeadSpeedCap = bSnakeColumn ? FMath::Max(120.f, SnakeMarchSpeed * 1.15f) : 0.f;
+    VisualPath.HeadTurnRadiusCm = bSnakeColumn ? FStrategyColumnDrill::Radius(OwnerCompany->FormationComponent->SoldierRankSpacingCm, 0.f) : 0.f;
+    if (bSnakeColumn) UpdateSnakeRamp();
+    if (bClosingRanksStep) UpdateCloseRanks();
+    if (bSnakeColumn && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugFormation")) && VisualAnimationTime >= DrillLogAt)
+    {
+        DrillLogAt = VisualAnimationTime + 1.f;
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s snake actor=%s actor-yaw=%.1f head=%s head-yaw=%.1f goal=%s has-goal=%d paused=%d"),
+            *OwnerCompany->StableUnitId.ToString(), *VisualUnit.GetLocation().ToString(), VisualUnit.Rotator().Yaw,
+            *VisualPath.HeadPos.ToString(), VisualPath.HeadYaw, OwnerCompany->MovementExecutor ? *OwnerCompany->MovementExecutor->GetMovementGoal().ToString() : TEXT("-"),
+            OwnerCompany->MovementExecutor && OwnerCompany->MovementExecutor->HasMovementGoal() ? 1 : 0,
+            OwnerCompany->MovementExecutor && OwnerCompany->MovementExecutor->IsTemporarilyPaused() ? 1 : 0);
+    }
+    if (!bArrivalReform && !(bSnakeColumn && VisualAnimationTime < SnakeHoldUntil))
+        VisualPath.Advance(VisualUnit, DeltaTime, bVisualColumn, VisualWalkSpeed, bRigidCompany && !bSnakeColumn);
     else
     {
         // Drawn bounds/flag/HQ keep reading the living figure transforms in the final-facing frame.
@@ -1989,6 +2057,23 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
                 (IsWalkFamily(SoldierClips[i].Clip.Get()) || SoldierClips[i].Clip.Get() == Walk || SoldierClips[i].Clip.Get() == Run))
                 RecordClip(Soldier, SoldierClips[i].Clip.Get(), SoldierClips[i].bLoop,
                     SoldierClips[i].Rate > 0.f ? (VisualAnimationTime - SoldierClips[i].Start) * SoldierClips[i].Rate : SoldierClips[i].HeldPosition, 0.f);
+            UAnimSequence* SnakeShoulderClip = ShoulderUpAsset.Get();
+            if (bSnakeColumn && VisualAnimationTime < SnakeHoldUntil && SnakeShoulderClip && SoldierClips.IsValidIndex(i))
+            {
+                // Shoulder arms on the spot before marching off: the Up clip once, from the hold's start.
+                const float SnakeShoulderAt = FMath::Clamp(VisualAnimationTime - SnakeHoldStart, 0.f, SnakeShoulderClip->GetPlayLength());
+                if (SoldierClips[i].Clip.Get() != SnakeShoulderClip)
+                {
+                    Soldier->PlayAnimation(SnakeShoulderClip, false);
+                    Soldier->SetPosition(SnakeShoulderAt, false);
+                    Soldier->SetPlayRate(1.f);
+                    RecordClip(Soldier, SnakeShoulderClip, false, SnakeShoulderAt, 1.f);
+                }
+                Soldier->bPauseAnims = false;
+                bAny = true;
+                bCrowdDirty = true;
+                continue;
+            }
             if (!Settle.bActive && !bVisualTravel && SettleIdle)
             {
                 if (SoldierClips.IsValidIndex(i) && SoldierClips[i].Clip.Get() != SettleIdle) Soldier->PlayAnimation(SettleIdle, bSettleIdleLoop);
@@ -2064,6 +2149,17 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         Soldier->SetRelativeRotation(Rot);
         Soldier->bPauseAnims = false;
         UAnimSequence* TravelClip = (!bSlotReforming || bArrivalReform || bRigidCompany) && Walk ? Walk : Run;
+        // Closing ranks: a side-step with the front kept, to the right or (mirrored clip) to the left.
+        const bool bCloseStepping = Settle.CloseStart >= 0.f && VisualAnimationTime >= Settle.CloseStart;
+        if (bCloseStepping && SideStepAsset.Get())
+            TravelClip = Settle.CloseTo.Y < Settle.CloseFrom.Y && SideStepLeftAsset.Get() ? SideStepLeftAsset.Get() : SideStepAsset.Get();
+        {
+            // Past the walk clip's comfortable rate (about 3x) the man runs: the Run clip at its own foot speed (420 cm/s), so double
+            // time and a charge are not a shuffle at 4x. Hysteresis keeps a man from flipping between the two clips.
+            const float TravelGroundSpeed = Step.Size2D() / FMath::Max(0.001f, DeltaTime);
+            const bool bTravelWasRun = Run && Run != Walk && SoldierClips.IsValidIndex(i) && SoldierClips[i].Clip.Get() == Run;
+            if (Run && Run != Walk && !bSpreadCrawling && TravelGroundSpeed > (bTravelWasRun ? 210.f : 250.f)) TravelClip = Run;
+        }
         if (TravelClip && SoldierClips.IsValidIndex(i) && (SoldierClips[i].Clip.Get() != TravelClip))
         {
             Soldier->bPauseAnims = false;
@@ -2086,7 +2182,9 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             const FPlayedClip PreviousClip = SoldierClips[i];
             // Shoulder transitions share WalkShoulder's leg cycle. Keep crawl/run calibration unchanged.
             const bool bShoulderTravel = TravelClip == WalkShoulderAsset.Get() || TravelClip == ShoulderUpAsset.Get() || TravelClip == ShoulderDownAsset.Get();
-            const float InfantryTravelClipSpeed = TravelClip == Run ? RunCmPerSecond :
+            // Side-step: one 30 cm step per 1.17 s cycle, in place (measured on A_Combat_SideStep.fbx, 2026-10-18).
+            const bool bSideStepTravel = TravelClip && (TravelClip == SideStepAsset.Get() || TravelClip == SideStepLeftAsset.Get());
+            const float InfantryTravelClipSpeed = bSideStepTravel ? 26.f : TravelClip == Run ? RunCmPerSecond :
                 IsWalkFamily(TravelClip) ? (bShoulderTravel ? InfantryShoulderWalkClipCmPerSecond : InfantryWalkClipCmPerSecond) : 160.f;
             const float DesiredVisualRate = FMath::Clamp(Step.Size2D() / FMath::Max(0.001f, DeltaTime) / InfantryTravelClipSpeed, 0.01f, 4.f);
             const float VisualRate = FMath::Lerp(PreviousClip.Rate, DesiredVisualRate, 1.f - FMath::Exp(-12.f * DeltaTime));
@@ -2486,6 +2584,9 @@ UAnimSequence* UStrategyInfantryVisualComponent::ResolveAnimation(
 
 void UStrategyInfantryVisualComponent::DestroyVisualComponents()
 {
+    DrillActive = false;
+    DrillPath.Reset();
+    if (OwnerCompany && OwnerCompany->MovementExecutor) OwnerCompany->MovementExecutor->ClearColumnDrillApproach();
     VisualPath.bInitialized = false;
     VisualPath.Trail.Reset();
     bArrivalReform = false;
@@ -2623,7 +2724,7 @@ bool UStrategyInfantryVisualComponent::EnsureCrowdModel()
         &IdleStandingAsset, &WalkStandingAsset, &RunStandingAsset, &AimStandingAsset, &FireStandingAsset, &ReloadStandingAsset,
         &IdleKneelingAsset, &AimKneelingAsset, &FireKneelingAsset, &ReloadKneelingAsset, &IdleProneAsset, &CrawlProneAsset,
         &FireProneAsset, &ReloadProneAsset, &BayonetChargeAsset, &BayonetThrustAsset, &DeathAsset, &DeathAsset2, &DeathAsset3,
-        &RaiseToAimAsset, &LoadAsset, &RiseFromLoadAsset, &ReadyAsset, &AimHoldAsset, &DeathWalkingAsset };
+        &RaiseToAimAsset, &LoadAsset, &RiseFromLoadAsset, &ReadyAsset, &AimHoldAsset, &DeathWalkingAsset, &SideStepAsset, &SideStepLeftAsset };
     TArray<UAnimSequence*> Clips;
     for (const TSoftObjectPtr<UAnimSequence>* Asset : All)
     {
@@ -3321,4 +3422,805 @@ void UStrategyInfantryVisualComponent::UpdateStanceTransitions()
         }
         else CrowdSettle.StanceEnd = VisualAnimationTime;
     }
+}
+
+
+bool UStrategyInfantryVisualComponent::PlanColumnDrill()
+{
+    // Every refusal of a line <-> column change is logged with its reason (the old morph runs instead).
+    const auto DrillReject = [this](const TCHAR* DrillWhy) -> bool
+    {
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s not used: %s (formation %d -> %d, figures %d)"),
+            OwnerCompany ? *OwnerCompany->StableUnitId.ToString() : TEXT("?"), DrillWhy, int32(CachedFormationValue),
+            OwnerCompany && OwnerCompany->FormationComponent ? int32(OwnerCompany->FormationComponent->CurrentFormation) : -1,
+            SoldierComponents.Num());
+        return false;
+    };
+    if (!OwnerCompany || !OwnerCompany->MovementExecutor || !OwnerCompany->FormationComponent || !OwnerCompany->OrderComponent)
+        return DrillReject(TEXT("missing component"));
+    const EStrategyFormationType DrillNew = OwnerCompany->FormationComponent->CurrentFormation;
+    const bool DrillEntering = CachedFormationValue == uint8(EStrategyFormationType::Line) && DrillNew == EStrategyFormationType::MarchColumn;
+    const bool DrillLeaving = CachedFormationValue == uint8(EStrategyFormationType::MarchColumn) && DrillNew == EStrategyFormationType::Line;
+    if (!DrillEntering && !DrillLeaving) return false;   // not a line <-> column change: nothing to log
+    if (!FStrategyColumnDrill::Enabled()) return DrillReject(TEXT("-Strategy1864Drill=0"));
+    int32 DrillRigidSetting = 1;
+    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Rigid="), DrillRigidSetting);
+    if (!bRigidCompany || DrillRigidSetting == 0) return DrillReject(TEXT("not a rigid company"));
+    if (!VisualPath.bInitialized) return DrillReject(TEXT("visual path not initialised yet"));
+    if (OwnerCompany->FormationComponent->RankCount != 3 || OwnerCompany->FormationComponent->ColumnWidth != 3)
+        return DrillReject(TEXT("not 3 ranks / 3 abreast"));
+    if (SoldierComponents.IsEmpty() || SoldierComponents.Num() != SoldierSettle.Num())
+        return DrillReject(TEXT("figures not ready"));
+    if (OwnerCompany->StanceComponent && OwnerCompany->StanceComponent->Stance == EStrategyStance::Prone)
+        return DrillReject(TEXT("lying down"));
+    if (OwnerCompany->SkirmisherComponent && (OwnerCompany->SkirmisherComponent->IsDeployed() ||
+        OwnerCompany->SkirmisherComponent->State == EStrategySkirmisherState::Deploying))
+        return DrillReject(TEXT("skirmish screen out"));
+    const float DrillFileSpacing = OwnerCompany->FormationComponent->SoldierLateralSpacingCm;
+    const float DrillRankSpacing = OwnerCompany->FormationComponent->SoldierRankSpacingCm;
+    if (DrillFileSpacing <= 0.f || DrillRankSpacing <= 0.f) return DrillReject(TEXT("zero spacing"));
+    int32 DrillRows = (SoldierComponents.Num() + 2) / 3;
+    if (DrillEntering)
+    {
+        // The line as it stands: losses and the colour bearer (out of the grid) leave holes, so count its files from the
+        // slots (symmetric about the centre), not from the head count.
+        float DrillHalfSpan = 0.f;
+        for (const FSettle& DrillSpanMan : SoldierSettle) DrillHalfSpan = FMath::Max(DrillHalfSpan, FMath::Abs(DrillSpanMan.Slot.Y));
+        DrillRows = FMath::Max(DrillRows, FMath::RoundToInt(2.f * DrillHalfSpan / DrillFileSpacing) + 1);
+    }
+    const float DrillWidth = (DrillRows - 1) * DrillFileSpacing;
+    const FStrategyOrder DrillCurrentOrder = OwnerCompany->OrderComponent->GetCurrentOrder();
+    const FVector DrillOldFacing = FRotator(0.f, VisualPath.Facing, 0.f).Vector();
+    DrillRadius = FStrategyColumnDrill::Radius(DrillRankSpacing, DrillFileSpacing);
+    if (DrillEntering)
+    {
+        // Line -> column: right (or left) face, and the column files off from the flank towards the march goal as a snake.
+        FVector DrillMarch = DrillOldFacing;
+        if (OwnerCompany->MovementExecutor->HasMovementGoal())
+        {
+            DrillMarch = (OwnerCompany->MovementExecutor->GetMovementGoal() - VisualPath.Center).GetSafeNormal2D();
+            if (DrillMarch.IsNearlyZero()) DrillMarch = DrillOldFacing;
+        }
+        const float DrillEnterFlank = FVector::DotProduct(DrillMarch, FStrategyColumnDrill::Right(DrillOldFacing)) >= 0.f ? 1.f : -1.f;
+        if (!SeedColumnSnake(DrillOldFacing, FStrategyColumnDrill::Right(DrillOldFacing) * DrillEnterFlank, DrillEnterFlank, DrillWidth, DrillRows))
+            return DrillReject(TEXT("the line is not in its file/rank grid (snake not seeded)"));
+        return true;
+    }
+    // Column -> line: the men keep following the trail the column has walked; the head leaves it, curves onto the
+    // line's middle-rank axis and walks to the far flank. Every man halts at his place, then all face the front.
+    if (VisualPath.Trail.Num() < 2) return DrillReject(TEXT("no column trail to follow"));
+    FVector DrillLineCentre = FVector::ZeroVector;
+    float DrillLineYaw = 0.f;
+    const bool DrillAtArrival = OwnerCompany->MovementExecutor->GetColumnDrillArrival(DrillLineCentre, DrillLineYaw);
+    const FStrategyVisualFormationPath::FSample DrillHead = VisualPath.Trail.Last();
+    const FVector DrillHeadDir = FRotator(0.f, DrillHead.Yaw, 0.f).Vector();
+    const FVector DrillFront = DrillAtArrival ? FRotator(0.f, DrillLineYaw, 0.f).Vector() : DrillHeadDir;
+    const float DrillFlank = DrillAtArrival ?
+        (FVector::DotProduct(DrillLineCentre - DrillHead.Position, FStrategyColumnDrill::Right(DrillFront)) >= 0.f ? 1.f : -1.f) : 1.f;
+    const FVector DrillAxis = FStrategyColumnDrill::Right(DrillFront) * DrillFlank;
+    const float DrillTrailBase = VisualPath.Trail[0].Distance;
+    DrillPath.Reset();
+    for (const FStrategyVisualFormationPath::FSample& DrillTrailSample : VisualPath.Trail)
+        DrillPath.Add({DrillTrailSample.Position, DrillTrailSample.Yaw, DrillTrailSample.Distance - DrillTrailBase});
+    const float DrillHeadS = DrillPath.Last().Distance;
+    FVector DrillNear;
+    if (DrillAtArrival)
+    {
+        DrillNear = DrillLineCentre - DrillAxis * (DrillWidth * 0.5f);
+        DrillNear.Z = DrillHead.Position.Z;
+        FStrategyColumnDrill::AppendHermite(DrillPath, DrillHead.Position, DrillHeadDir, DrillNear, DrillAxis);
+    }
+    else
+    {
+        const TArray<FStrategyColumnDrill::FSample> DrillTurnPath =
+            FStrategyColumnDrill::BuildPath(DrillHead.Position, DrillHeadDir, 0.f, DrillRadius, DrillAxis, 0.f);
+        for (int32 DrillTurnIndex = 1; DrillTurnIndex < DrillTurnPath.Num(); ++DrillTurnIndex)
+            if (DrillTurnPath[DrillTurnIndex].Distance > 0.f)
+                DrillPath.Add({DrillTurnPath[DrillTurnIndex].Position, DrillTurnPath[DrillTurnIndex].Yaw, DrillHeadS + DrillTurnPath[DrillTurnIndex].Distance});
+        DrillNear = DrillPath.Last().Position;
+    }
+    const float DrillAxisStart = DrillPath.Last().Distance;
+    FStrategyColumnDrill::AppendStraight(DrillPath, DrillNear, DrillAxis, DrillWidth);
+    const float DrillFar = DrillPath.Last().Distance;
+    // Lanes widen from the column's file spacing to the rank spacing over the last three metres before the axis.
+    DrillStraightA = FMath::Max(DrillHeadS, DrillAxisStart - 300.f);
+    DrillArcEnd = DrillAxisStart;
+    DrillFinalFrame = FTransform(DrillFront.Rotation(), DrillNear + DrillAxis * (DrillWidth * 0.5f) + DrillFront * DrillRankSpacing);
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugFormation")))
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s to-line plan arrival=%d head=%s head-yaw=%.1f axis-yaw=%.1f trail-cm=%.0f path-cm=%.0f line=%s front=%.1f"),
+            *OwnerCompany->StableUnitId.ToString(), DrillAtArrival ? 1 : 0, *DrillHead.Position.ToString(), DrillHead.Yaw,
+            DrillAxis.Rotation().Yaw, DrillHeadS, DrillFar, *DrillFinalFrame.GetLocation().ToString(), DrillFront.Rotation().Yaw);
+    // Validate every assignment before modifying any man. An interrupted/partial layout uses the morph.
+    TArray<FSettle> DrillPlanned = SoldierSettle;
+    TArray<int32> DrillSlots;
+    TSet<int32> DrillUsed;
+    const float DrillColumnRowSpacing = SnakeRowSpacing > 0.f ? SnakeRowSpacing : DrillRankSpacing;
+    for (int32 DrillIndex = 0; DrillIndex < SoldierComponents.Num(); ++DrillIndex)
+    {
+        if (!SoldierComponents[DrillIndex] || !SoldierSettle[DrillIndex].bPlaced) return DrillReject(TEXT("a figure is not placed yet"));
+        const FVector DrillWorld = VisualPath.PreviousUnit.TransformPosition(SoldierComponents[DrillIndex]->GetRelativeLocation());
+        // His place on the walked trail: the nearest point of the trail part of the path.
+        double DrillBest = TNumericLimits<double>::Max();
+        float DrillS0 = 0.f;
+        float DrillOffset = 0.f;
+        for (int32 DrillSeg = 0; DrillSeg + 1 < DrillPath.Num() && DrillPath[DrillSeg].Distance < DrillHeadS; ++DrillSeg)
+        {
+            const FVector DrillP0 = DrillPath[DrillSeg].Position;
+            FVector DrillEdge = DrillPath[DrillSeg + 1].Position - DrillP0;
+            DrillEdge.Z = 0.f;
+            const double DrillEdgeLength2 = DrillEdge.SizeSquared2D();
+            const double DrillT = DrillEdgeLength2 > 0.01 ?
+                FMath::Clamp(double(FVector::DotProduct(DrillWorld - DrillP0, DrillEdge)) / DrillEdgeLength2, 0.0, 1.0) : 0.0;
+            const FVector DrillOn = DrillP0 + DrillEdge * DrillT;
+            const double DrillGap = FVector::Dist2D(DrillWorld, DrillOn);
+            if (DrillGap < DrillBest)
+            {
+                DrillBest = DrillGap;
+                DrillS0 = DrillPath[DrillSeg].Distance + float(DrillT) * (DrillPath[DrillSeg + 1].Distance - DrillPath[DrillSeg].Distance);
+                const FVector DrillSide = DrillEdgeLength2 > 0.01 ? FStrategyColumnDrill::Right(DrillEdge.GetSafeNormal2D()) :
+                    FStrategyColumnDrill::Right(FRotator(0.f, DrillPath[DrillSeg].Yaw, 0.f).Vector());
+                DrillOffset = FVector::DotProduct(DrillWorld - DrillOn, DrillSide);
+            }
+        }
+        if (DrillBest > DrillFileSpacing * 2.5) return DrillReject(TEXT("a man is not on the column trail"));
+        const int32 DrillRow = FMath::Clamp(FMath::RoundToInt((DrillHeadS - DrillS0) / DrillColumnRowSpacing), 0, DrillRows - 1);
+        const int32 DrillLane = FMath::Clamp(FMath::RoundToInt(DrillOffset / DrillFileSpacing) + 1, 0, 2);
+        const int32 DrillRank = DrillFlank > 0.f ? DrillLane : 2 - DrillLane;
+        const int32 DrillFile = DrillFlank > 0.f ? DrillRows - 1 - DrillRow : DrillRow;
+        const int32 DrillSlotId = DrillFile * 3 + DrillRank;
+        if (DrillUsed.Contains(DrillSlotId)) return DrillReject(TEXT("slot assignment clash (two men in one place on the trail)"));
+        DrillUsed.Add(DrillSlotId);
+        FSettle& DrillMan = DrillPlanned[DrillIndex];
+        DrillMan.DrillS0 = DrillS0;
+        DrillMan.DrillLateral = DrillOffset;
+        DrillMan.DrillFinalLateral = (DrillLane - 1) * DrillRankSpacing;
+        DrillMan.DrillLaneShift = 0.f;
+        DrillMan.DrillDelta = (DrillFar - DrillRow * DrillFileSpacing) - DrillS0;
+        if (DrillMan.DrillDelta <= 0.f) return DrillReject(TEXT("non-positive walk distance"));
+        DrillMan.DrillStopped = false;
+        DrillMan.DrillStopTime = -1.f;
+        DrillMan.Slot = FVector(-DrillRank * DrillRankSpacing, (DrillFile - (DrillRows - 1) * 0.5f) * DrillFileSpacing, 0.f);
+        DrillMan.SlotYaw = 0.f;
+        DrillMan.ReformDeadline = -1.f;
+        DrillMan.bActive = true;
+        DrillMan.WorldVelocity = FVector::ZeroVector;
+        DrillSlots.Add(DrillSlotId);
+    }
+    SoldierSettle = MoveTemp(DrillPlanned);
+    SoldierSlots = MoveTemp(DrillSlots);
+    DrillToColumn = DrillEntering;
+    DrillArrival = DrillAtArrival;
+    DrillOrder = DrillCurrentOrder;
+    DrillOrderSerial = DrillCurrentOrder.OrderSerial;
+    DrillStrength = OwnerCompany->CurrentStrength;
+    DrillPlannedLateralSpacing = DrillFileSpacing;
+    DrillPlannedRankSpacing = DrillRankSpacing;
+    DrillFormation = uint8(DrillNew);
+    DrillStarted = VisualAnimationTime;
+    DrillLogAt = DrillStarted;
+    DrillSpeed = FMath::Clamp(OwnerCompany->MovementExecutor->MoveSpeedCmPerSecond, 120.f, 160.f);
+    DrillMarchDuration = 0.f;
+    for (const FSettle& DrillMan : SoldierSettle) DrillMarchDuration = FMath::Max(DrillMarchDuration, DrillMan.DrillDelta / DrillSpeed);
+    // Into line: the last man halts, brings his rifle down (ShoulderDown) and faces the front.
+    DrillDuration = DrillMarchDuration + FMath::Max(0.9f, ShoulderDownAsset.Get() ? ShoulderDownAsset.Get()->GetPlayLength() : 0.f);
+    DrillActive = true;
+    OwnerCompany->MovementExecutor->ClearColumnDrillApproach();
+    OwnerCompany->MovementExecutor->ClearColumnDrillArrival();
+    bArrivalReform = false;
+    bFormationPlanPending = true;
+    FormationPlanStarted = DrillStarted;
+    FormationLongestPath = DrillPath.Last().Distance;
+    if (OwnerCompany->FormationTransition) OwnerCompany->FormationTransition->ExtendReformSeconds(DrillDuration + 0.25f);
+    OwnerCompany->MovementExecutor->PauseMovementForSeconds(DrillDuration + 0.25f);
+    // Always logged (once per change): the start of the drill, in the output log and the company's unit log.
+    UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s start kind=%s flank=%s path-cm=%.1f expected-seconds=%.3f final=(%s yaw=%.2f)"),
+        *OwnerCompany->StableUnitId.ToString(),
+        DrillEntering ? TEXT("to-column") : DrillAtArrival ? TEXT("to-line-arrival") : TEXT("to-line-free"),
+        DrillFlank > 0.f ? TEXT("right") : TEXT("left"), DrillPath.Last().Distance, DrillDuration,
+        *DrillFinalFrame.GetLocation().ToString(), DrillFinalFrame.Rotator().Yaw);
+    OwnerCompany->AddUnitLog(TEXT("Formation"),
+        FString::Printf(TEXT("eksercits %s, %s fløj, ca. %.0f s"),
+            DrillEntering ? TEXT("linje -> kolonne") : DrillAtArrival ? TEXT("kolonne -> linje ved målet") : TEXT("kolonne -> linje foran"),
+            DrillFlank > 0.f ? TEXT("højre") : TEXT("venstre"), DrillDuration),
+        FString::Printf(TEXT("fælles bue, %.0f m sti"), DrillPath.Last().Distance / 100.f), 0.0f);
+    return true;
+}
+
+void UStrategyInfantryVisualComponent::AbortColumnDrill(const TCHAR* DrillWhy)
+{
+    if (!DrillActive) return;
+    UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s abort after %.2f s: %s (falls back to the morph)"),
+        OwnerCompany ? *OwnerCompany->StableUnitId.ToString() : TEXT("?"), VisualAnimationTime - DrillStarted, DrillWhy);
+    if (OwnerCompany) OwnerCompany->AddUnitLog(TEXT("Formation"), TEXT("eksercits afbrudt"), DrillWhy, 0.0f);
+    DrillActive = false;
+    DrillPath.Reset();
+    bArrivalReform = false;
+    if (OwnerCompany && OwnerCompany->MovementExecutor) OwnerCompany->MovementExecutor->ClearColumnDrillApproach();
+    // PlanOrderlyReform reads these actual world positions, never the abandoned final frame.
+    PlanOrderlyReform(false, OwnerCompany->GetActorTransform());
+    float DrillFallbackSeconds = 0.f;
+    for (const FSettle& DrillMan : SoldierSettle) DrillFallbackSeconds = FMath::Max(DrillFallbackSeconds, DrillMan.ReformDuration);
+    if (uint8(OwnerCompany->FormationComponent->CurrentFormation) != DrillFormation && OwnerCompany->FormationTransition)
+        DrillFallbackSeconds = FMath::Max(DrillFallbackSeconds, OwnerCompany->FormationTransition->ReformRemainingSeconds);
+    if (OwnerCompany->MovementExecutor) OwnerCompany->MovementExecutor->FinishFormationDrillHold(DrillFallbackSeconds);
+}
+
+void UStrategyInfantryVisualComponent::LogColumnDrillDistance(bool DrillComplete)
+{
+    // The completion is always logged; the running distance (four times a second) only with -Strategy1864DebugFormation.
+    if (!DrillComplete && !FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugFormation"))) return;
+    if (!DrillComplete && VisualAnimationTime < DrillLogAt) return;
+    DrillLogAt = VisualAnimationTime + 0.25f;
+    double DrillMinimum = TNumericLimits<double>::Max();
+    for (int32 DrillA = 0; DrillA < SoldierComponents.Num(); ++DrillA)
+    for (int32 DrillB = DrillA + 1; DrillB < SoldierComponents.Num(); ++DrillB)
+        if (SoldierComponents[DrillA] && SoldierComponents[DrillB])
+            DrillMinimum = FMath::Min(DrillMinimum, FVector::Dist2D(SoldierComponents[DrillA]->GetComponentLocation(), SoldierComponents[DrillB]->GetComponentLocation()));
+    UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s %s elapsed=%.3f min-2d-cm=%.3f"),
+        *OwnerCompany->StableUnitId.ToString(), DrillComplete ? TEXT("complete") : TEXT("distance"), VisualAnimationTime - DrillStarted, DrillMinimum);
+    if (DrillComplete)
+        OwnerCompany->AddUnitLog(TEXT("Formation"), FString::Printf(TEXT("eksercits færdig efter %.1f s"), VisualAnimationTime - DrillStarted),
+            FString::Printf(TEXT("mindste afstand mellem to mænd %.0f cm"), DrillMinimum), 0.0f);
+}
+
+bool UStrategyInfantryVisualComponent::UpdateColumnDrill(float DrillDt)
+{
+    if (!DrillActive) return false;
+    const FStrategyOrder DrillCurrent = OwnerCompany->OrderComponent ? OwnerCompany->OrderComponent->GetCurrentOrder() : FStrategyOrder();
+    // At the destination the finished march order is replaced by a hold: that does not stop the deployment, a new march does.
+    const bool DrillOrderMatters = !DrillArrival || OwnerCompany->MovementExecutor->HasMovementGoal();
+    if ((DrillOrderMatters && (DrillCurrent.OrderSerial != DrillOrderSerial || DrillCurrent.Type != DrillOrder.Type ||
+        !DrillCurrent.TargetLocation.Equals(DrillOrder.TargetLocation, 0.1f) || DrillCurrent.bHasFacing != DrillOrder.bHasFacing ||
+        DrillCurrent.bKeepFacing != DrillOrder.bKeepFacing || DrillCurrent.NextWaypointIndex != DrillOrder.NextWaypointIndex ||
+        DrillCurrent.Waypoints != DrillOrder.Waypoints ||
+        FMath::Abs(FMath::FindDeltaAngleDegrees(DrillCurrent.FacingYaw, DrillOrder.FacingYaw)) > 0.1f)) ||
+        OwnerCompany->CurrentStrength != DrillStrength || SoldierSettle.Num() != SoldierComponents.Num() ||
+        uint8(OwnerCompany->FormationComponent->CurrentFormation) != DrillFormation ||
+        OwnerCompany->FormationComponent->RankCount != 3 || OwnerCompany->FormationComponent->ColumnWidth != 3 ||
+        OwnerCompany->FormationComponent->SoldierLateralSpacingCm != DrillPlannedLateralSpacing ||
+        OwnerCompany->FormationComponent->SoldierRankSpacingCm != DrillPlannedRankSpacing ||
+        OwnerCompany->MovementExecutor->IsHoldingForFire() ||
+        (OwnerCompany->StanceComponent && OwnerCompany->StanceComponent->Stance == EStrategyStance::Prone) ||
+        (OwnerCompany->SkirmisherComponent && (OwnerCompany->SkirmisherComponent->IsDeployed() ||
+            OwnerCompany->SkirmisherComponent->State == EStrategySkirmisherState::Deploying)))
+    {
+        const bool DrillOrderChanged = DrillOrderMatters && (DrillCurrent.OrderSerial != DrillOrderSerial || DrillCurrent.Type != DrillOrder.Type ||
+            !DrillCurrent.TargetLocation.Equals(DrillOrder.TargetLocation, 0.1f) || DrillCurrent.Waypoints != DrillOrder.Waypoints ||
+            DrillCurrent.NextWaypointIndex != DrillOrder.NextWaypointIndex);
+        AbortColumnDrill(DrillOrderChanged ? TEXT("ny eller ændret ordre") :
+            OwnerCompany->CurrentStrength != DrillStrength ? TEXT("tab") :
+            uint8(OwnerCompany->FormationComponent->CurrentFormation) != DrillFormation ? TEXT("nyt formationsskifte") :
+            OwnerCompany->MovementExecutor->IsHoldingForFire() ? TEXT("holder for at skyde") : TEXT("stilling, skærm eller ændret front"));
+        return false;
+    }
+    const FTransform DrillUnit = OwnerCompany->GetActorTransform();
+    const float DrillElapsed = VisualAnimationTime - DrillStarted;
+    const float DrillTravel = FMath::Max(0.f, DrillElapsed - (DrillToColumn ? 0.9f : 0.f)) * DrillSpeed;
+    bool DrillFacingComplete = true;
+    for (int32 DrillIndex = 0; DrillIndex < SoldierComponents.Num(); ++DrillIndex)
+    {
+        USkeletalMeshComponent* DrillSoldier = SoldierComponents[DrillIndex];
+        if (!DrillSoldier) { AbortColumnDrill(TEXT("en figur mangler")); return false; }
+        FSettle& DrillMan = SoldierSettle[DrillIndex];
+        const float DrillS = DrillMan.DrillS0 + FMath::Min(DrillTravel, DrillMan.DrillDelta);
+        const float DrillSpacingAlpha = FMath::Clamp((DrillS - DrillStraightA) /
+            FMath::Max(300.f, DrillArcEnd - DrillStraightA), 0.f, 1.f);
+        const float DrillInitialSpacing = DrillToColumn ? DrillPlannedRankSpacing : DrillPlannedLateralSpacing;
+        const float DrillFinalSpacing = DrillToColumn ? DrillPlannedLateralSpacing : DrillPlannedRankSpacing;
+        const float DrillLaneSpacing = FMath::Lerp(DrillInitialSpacing, DrillFinalSpacing, DrillSpacingAlpha);
+        // Finish a short rear group's lane shift before the first full lane starts
+        // (s0 = file/rank spacing). Full and short curves can merge, never cross.
+        const float DrillTailAlpha = FMath::Clamp(DrillS / (0.75f * DrillFinalSpacing), 0.f, 1.f);
+        const float DrillLateral = FMath::Lerp(DrillMan.DrillLateral, DrillMan.DrillFinalLateral, DrillSpacingAlpha) +
+            DrillMan.DrillLaneShift * DrillLaneSpacing * DrillTailAlpha;
+        float DrillYaw = 0.f;
+        const FVector DrillWorld = FStrategyColumnDrill::Sample(DrillPath, DrillS, DrillLateral, DrillYaw);
+        // The man's own ground speed this frame (inner/outer lane, lane widening): it drives his stride, so feet do not slide.
+        const FVector DrillWasWorld = VisualPath.PreviousUnit.TransformPosition(DrillSoldier->GetRelativeLocation());
+        const float DrillGroundSpeed = DrillDt > 0.f ? float(FVector::Dist2D(DrillWasWorld, DrillWorld)) / DrillDt : 0.f;
+        const bool DrillMoving = DrillGroundSpeed > 8.f;
+        const bool DrillWasStopped = DrillMan.DrillStopped;
+        DrillMan.DrillStopped = DrillTravel >= DrillMan.DrillDelta;
+        if (DrillMan.DrillStopped && !DrillWasStopped) DrillMan.DrillStopTime = VisualAnimationTime;
+        if (!DrillToColumn && DrillElapsed >= DrillMarchDuration) DrillYaw = DrillFinalFrame.Rotator().Yaw;
+        FRotator DrillRotation = DrillSoldier->GetRelativeRotation();
+        DrillRotation.Yaw += FMath::FindDeltaAngleDegrees(DrillUnit.Rotator().Yaw, VisualPath.PreviousUnit.Rotator().Yaw);
+        DrillRotation.Yaw = FStrategyVisualFormationPath::SmoothFacing(DrillRotation.Yaw, DrillMan.YawVelocity,
+            DrillYaw - DrillUnit.Rotator().Yaw + SoldierMeshYawOffset, DrillDt, 120.f);
+        DrillRotation.Roll = 0.f;
+        DrillSoldier->SetRelativeLocation(DrillUnit.InverseTransformPosition(DrillWorld));
+        DrillSoldier->SetRelativeRotation(DrillRotation);
+        DrillFacingComplete &= FMath::Abs(FMath::FindDeltaAngleDegrees(DrillRotation.Yaw,
+            DrillYaw - DrillUnit.Rotator().Yaw + SoldierMeshYawOffset)) < 0.1f;
+        // Into line, the column keeps the rifle on the shoulder while it files along the axis; each man brings it down to the
+        // ready stance (ShoulderDown, standing) when he halts on his place.
+        UAnimSequence* DrillDownClip = ShoulderDownAsset.Get();
+        const bool DrillLowering = !DrillToColumn && !DrillMoving && DrillMan.DrillStopped && DrillDownClip &&
+            VisualAnimationTime - DrillMan.DrillStopTime < DrillDownClip->GetPlayLength();
+        UAnimSequence* DrillClip = DrillMoving ? ((DrillToColumn ? (bShoulderColumn ? WalkShoulderAsset : WalkStandingAsset) :
+            (WalkShoulderAsset.Get() ? WalkShoulderAsset : WalkStandingAsset)).Get()) :
+            (DrillLowering ? DrillDownClip : IdleStandingAsset.Get());
+        if (!DrillClip && DrillMoving) DrillClip = WalkStandingAsset.Get();
+        if (DrillLowering && SoldierClips.IsValidIndex(DrillIndex))
+        {
+            const float DrillDownAt = FMath::Clamp(VisualAnimationTime - DrillMan.DrillStopTime, 0.f, DrillDownClip->GetPlayLength());
+            if (SoldierClips[DrillIndex].Clip.Get() != DrillDownClip)
+            {
+                DrillSoldier->PlayAnimation(DrillDownClip, false);
+                DrillSoldier->SetPosition(DrillDownAt, false);
+                DrillSoldier->SetPlayRate(1.f);
+                RecordClip(DrillSoldier, DrillDownClip, false, DrillDownAt, 1.f);
+            }
+            DrillSoldier->bPauseAnims = false;
+            continue;
+        }
+        if (DrillClip && SoldierClips.IsValidIndex(DrillIndex))
+        {
+            const float DrillClipSpeed = DrillClip == WalkShoulderAsset.Get() ? 137.70097f : 76.99816f;
+            const float DrillRate = DrillMoving ? FMath::Clamp(DrillGroundSpeed / DrillClipSpeed, 0.2f, 3.f) : (bAnimateIdle ? 1.f : 0.f);
+            const FPlayedClip& DrillPlayed = SoldierClips[DrillIndex];
+            const float DrillPlayedLength = DrillPlayed.Clip.IsValid() ? DrillPlayed.Clip->GetPlayLength() : 0.f;
+            // Keep the stride phase on a rate change (no restart on the same foot for everybody); start at the man's own phase.
+            const float DrillPhase = DrillPlayed.Clip.Get() == DrillClip && DrillPlayedLength > 0.f ?
+                FMath::Fmod(FMath::Max(0.f, (VisualAnimationTime - DrillPlayed.Start) * DrillPlayed.Rate), DrillPlayedLength) :
+                DrillMan.WalkPhase * DrillClip->GetPlayLength();
+            if (DrillPlayed.Clip.Get() != DrillClip)
+            {
+                DrillSoldier->PlayAnimation(DrillClip, true);
+                DrillSoldier->SetPosition(DrillPhase, false);
+                DrillSoldier->SetPlayRate(DrillRate);
+                RecordClip(DrillSoldier, DrillClip, true, DrillPhase, DrillRate);
+            }
+            else if (FMath::Abs(DrillPlayed.Rate - DrillRate) > 0.02f)
+            {
+                DrillSoldier->SetPlayRate(DrillRate);
+                RecordClip(DrillSoldier, DrillClip, true, DrillPhase, DrillRate);
+            }
+            DrillSoldier->bPauseAnims = DrillRate == 0.f;
+        }
+    }
+    bCrowdDirty = true;
+    bCrowdDataDirty = true;
+    VisualPath.PreviousUnit = DrillUnit;
+    VisualPath.bMovingVisuals = false;
+    LogColumnDrillDistance(false);
+    if (DrillElapsed >= DrillDuration && DrillFacingComplete)
+    {
+        LogColumnDrillDistance(true);
+        // Serial and order were checked above, immediately before the only simulation relocation.
+        OwnerCompany->MovementExecutor->RelocateAfterFormationDrill(DrillFinalFrame);
+        OwnerCompany->MovementExecutor->FinishFormationDrillHold(0.f);
+        if (!DrillToColumn) OwnerCompany->MovementExecutor->ClearColumnDrillApproach();
+        VisualPath.Reset(OwnerCompany->GetActorTransform());
+        VisualPath.SlotBounds = FBox(ForceInit);
+        for (int32 DrillIndex = 0; DrillIndex < SoldierComponents.Num(); ++DrillIndex)
+        {
+            FSettle& DrillMan = SoldierSettle[DrillIndex];
+            DrillMan.Goal = DrillMan.Slot;
+            DrillMan.bActive = false;
+            DrillMan.ReformDeadline = -1.f;
+            DrillMan.WorldVelocity = FVector::ZeroVector;
+            SoldierComponents[DrillIndex]->SetRelativeLocation(DrillMan.Slot);
+            SoldierComponents[DrillIndex]->SetRelativeRotation(FRotator(0.f, SoldierMeshYawOffset, 0.f));
+            VisualPath.SlotBounds += DrillMan.Slot;
+        }
+        DrillActive = false;
+        DrillPath.Reset();
+        bFormationPlanPending = false;
+        bWasVisualTravel = false;
+        // A deployment during a march (the line button): the march goes on from the line's new place, on a fresh route.
+        if (OwnerCompany->MovementExecutor->HasMovementGoal()) OwnerCompany->MovementExecutor->RestartCurrentOrderExecution();
+    }
+    else if (DrillElapsed > DrillDuration - 0.25f)
+    {
+        // Retain the hold while the bounded-rate facing spring finishes after a hitch.
+        OwnerCompany->MovementExecutor->PauseMovementForSeconds(0.5f);
+        if (OwnerCompany->FormationTransition) OwnerCompany->FormationTransition->ExtendReformSeconds(0.5f);
+    }
+    return true;
+}
+
+
+bool UStrategyInfantryVisualComponent::SeedColumnSnake(const FVector& SnakeFront, const FVector& SnakeAxis, float SnakeFlank,
+    float SnakeWidth, int32 SnakeRows)
+{
+    // Line -> column (reference drill): every man faces along the line on the spot, then the column files off from the
+    // leading flank. The trail is seeded along the middle rank, so each man already stands on it with his rank as a lane;
+    // the head starts at the leading flank and the men follow it as a snake. No hold beyond the turn, no path of its own.
+    const float SnakeLateral = OwnerCompany->FormationComponent->SoldierLateralSpacingCm;
+    const float SnakeRank = OwnerCompany->FormationComponent->SoldierRankSpacingCm;
+    const FVector SnakeFar = VisualPath.Center - SnakeFront * SnakeRank - SnakeAxis * (SnakeWidth * 0.5f);
+    const FVector SnakeLead = SnakeFar + SnakeAxis * SnakeWidth;
+    const FVector SnakeSide = FStrategyColumnDrill::Right(SnakeAxis);
+    TArray<FSettle> SnakePlanned = SoldierSettle;
+    TArray<int32> SnakeSlots;
+    TSet<int32> SnakeUsed;
+    FBox SnakeBounds(ForceInit);
+    for (int32 SnakeIndex = 0; SnakeIndex < SoldierComponents.Num(); ++SnakeIndex)
+    {
+        if (!SoldierComponents[SnakeIndex] || !SoldierSettle[SnakeIndex].bPlaced)
+        {
+            UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill snake seed: man %d not placed"), SnakeIndex);
+            return false;
+        }
+        const FVector SnakeWorld = VisualPath.PreviousUnit.TransformPosition(SoldierComponents[SnakeIndex]->GetRelativeLocation());
+        const float SnakeAlong = FVector::DotProduct(SnakeWorld - SnakeFar, SnakeAxis);
+        const float SnakeAcross = FVector::DotProduct(SnakeWorld - SnakeFar, SnakeSide);
+        const int32 SnakeFileFromFar = FMath::RoundToInt(SnakeAlong / SnakeLateral);
+        int32 SnakeLane = FMath::RoundToInt(SnakeAcross / SnakeRank) + 1;
+        // A man off the grid (the odd man of the remainder, or one displaced by the colour bearer leaving) takes the nearest
+        // free place instead of cancelling the drill.
+        int32 SnakeRow = SnakeRows - 1 - FMath::Clamp(SnakeFileFromFar, 0, SnakeRows - 1);   // row 0 is the leading flank's file, the head
+        SnakeLane = FMath::Clamp(SnakeLane, 0, 2);
+        int32 SnakeId = SnakeRow * 3 + SnakeLane;
+        if (SnakeUsed.Contains(SnakeId))
+        {
+            int32 SnakeBest = INDEX_NONE;
+            float SnakeBestCost = TNumericLimits<float>::Max();
+            for (int32 SnakeTry = 0; SnakeTry < SnakeRows * 3; ++SnakeTry)
+            {
+                if (SnakeUsed.Contains(SnakeTry)) continue;
+                const float SnakeCost = FMath::Abs(SnakeTry / 3 - SnakeRow) * SnakeLateral + FMath::Abs(SnakeTry % 3 - SnakeLane) * SnakeRank;
+                if (SnakeCost < SnakeBestCost) { SnakeBestCost = SnakeCost; SnakeBest = SnakeTry; }
+            }
+            if (SnakeBest == INDEX_NONE)
+            {
+                UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill snake seed: no free place for man %d"), SnakeIndex);
+                return false;
+            }
+            SnakeId = SnakeBest;
+            SnakeRow = SnakeId / 3;
+            SnakeLane = SnakeId % 3;
+        }
+        SnakeUsed.Add(SnakeId);
+        FSettle& SnakeMan = SnakePlanned[SnakeIndex];
+        SnakeMan.SnakeRow = SnakeRow;
+        SnakeMan.SnakeLane = SnakeLane;
+        // Starting slot = where he stands (file spacing along the trail, rank spacing across); UpdateSnakeRamp opens it
+        // to the column's row/lane spacing as the head marches off.
+        SnakeMan.Slot = FVector(-SnakeRow * SnakeLateral, (SnakeLane - 1) * SnakeRank, 0.f);
+        SnakeMan.SlotYaw = 0.f;
+        SnakeMan.ReformDeadline = -1.f;
+        SnakeMan.bActive = true;
+        SnakeMan.WorldVelocity = FVector::ZeroVector;
+        SnakeBounds += SnakeMan.Slot;
+        SnakeSlots.Add(SnakeId);
+    }
+    SoldierSettle = MoveTemp(SnakePlanned);
+    SoldierSlots = MoveTemp(SnakeSlots);
+    VisualPath.SlotBounds = SnakeBounds;
+    const float SnakeYaw = SnakeAxis.Rotation().Yaw;
+    VisualPath.Trail.Reset();
+    VisualPath.Trail.Add({SnakeFar - SnakeAxis * 1000.f, SnakeYaw, -1000.f});
+    VisualPath.Trail.Add({SnakeFar, SnakeYaw, 0.f});
+    VisualPath.Trail.Add({SnakeLead, SnakeYaw, SnakeWidth});
+    VisualPath.TrailDistance = SnakeWidth;
+    VisualPath.HeadPos = SnakeLead;
+    VisualPath.HeadYaw = SnakeYaw;
+    VisualPath.bHeadLocked = false;   // the head curves off the flank first, then locks on the actor's track
+    VisualPath.Facing = SnakeYaw;
+    // Right face and shoulder arms on the spot (ShoulderUp: from the line's ready stance to the shoulder), then march off.
+    const float SnakeShoulderSeconds = ShoulderUpAsset.Get() ? ShoulderUpAsset.Get()->GetPlayLength() : 0.f;
+    const float SnakeHoldSeconds = FMath::Max(0.9f, SnakeShoulderSeconds);
+    SnakeHoldStart = VisualAnimationTime;
+    SnakeHoldUntil = VisualAnimationTime + SnakeHoldSeconds;
+    // The shoulder transition is done standing in the hold; the march starts with the rifle already on the shoulder.
+    ShoulderTransitionEnd = GetWorld()->GetTimeSeconds() + SnakeHoldSeconds;
+    SnakeRowSpacing = SnakeLateral;
+    bSnakeRamp = true;
+    SnakeRampFrom = SnakeWidth;
+    bArrivalReform = false;
+    bFormationPlanPending = false;
+    // In a column the actor is the head (generated column slots are head-anchored): it moves to the leading flank's file
+    // now, and the march is re-routed from there after the turn on the spot.
+    UStrategyMovementExecutorComponent* SnakeMove = OwnerCompany->MovementExecutor;
+    SnakeMove->RelocateAfterFormationDrill(FTransform(FRotator(0.f, SnakeYaw, 0.f), SnakeLead));
+    if (SnakeMove->HasMovementGoal()) SnakeMove->RestartCurrentOrderExecution();
+    SnakeMove->FinishFormationDrillHold(SnakeHoldSeconds);
+    SnakeMove->PauseMovementForSeconds(SnakeHoldSeconds);
+    if (OwnerCompany->FormationTransition) OwnerCompany->FormationTransition->ReformRemainingSeconds =
+        FMath::Min(OwnerCompany->FormationTransition->ReformRemainingSeconds, 1.f);
+    UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s start kind=to-column-snake flank=%s rows=%d head=%s yaw=%.1f goal=%s"),
+        *OwnerCompany->StableUnitId.ToString(), SnakeFlank > 0.f ? TEXT("right") : TEXT("left"), SnakeRows,
+        *SnakeLead.ToString(), SnakeYaw, *SnakeMove->GetMovementGoal().ToString());
+    OwnerCompany->AddUnitLog(TEXT("Formation"),
+        FString::Printf(TEXT("eksercits linje -> kolonne, %s fløj fører"), SnakeFlank > 0.f ? TEXT("højre") : TEXT("venstre")),
+        TEXT("vender på stedet og går i fil efter teten"), 0.0f);
+    return true;
+}
+
+void UStrategyInfantryVisualComponent::UpdateSnakeRamp()
+{
+    if (!bSnakeRamp || !OwnerCompany || !OwnerCompany->FormationComponent) return;
+    // Over the first four metres the head walks, the lanes close from rank to file spacing. The rows keep the line's file
+    // spacing along the trail: opening them while marching off would pull the tail backwards (review 2026-10-18: a global
+    // 75 -> 90 cm ramp moved row 63 of 190 men 9.5 m back during 4 m of head travel).
+    const float SnakeLateral = OwnerCompany->FormationComponent->SoldierLateralSpacingCm;
+    const float SnakeRank = OwnerCompany->FormationComponent->SoldierRankSpacingCm;
+    const float SnakeAlpha = FMath::Clamp((VisualPath.TrailDistance - SnakeRampFrom) / 400.f, 0.f, 1.f);
+    for (FSettle& SnakeMan : SoldierSettle)
+        SnakeMan.Slot = FVector(-SnakeMan.SnakeRow * SnakeLateral,
+            (SnakeMan.SnakeLane - 1) * FMath::Lerp(SnakeRank, SnakeLateral, SnakeAlpha), 0.f);
+    if (SnakeAlpha >= 1.f) bSnakeRamp = false;
+}
+
+bool UStrategyInfantryVisualComponent::CloseRanksTowardColours()
+{
+    // "Slut op mod fanen" (user's recording 2026-10-18: the whole line used to turn sideways and walk in at once). After the
+    // rear men have stepped up, the line is still as wide as before but no longer 3 deep. It now closes to the centre: the
+    // line becomes ceil(men / 3) files wide, every rank keeps its men in their left-right order, the front ranks' surplus
+    // flank men fall back one rank, and everyone side-steps inwards with the front kept, slowly.
+    if (!OwnerCompany || !OwnerCompany->FormationComponent || !bRigidCompany || !SideStepAsset.Get() ||
+        OwnerCompany->FormationComponent->CurrentFormation != EStrategyFormationType::Line ||
+        (OwnerCompany->StanceComponent && OwnerCompany->StanceComponent->Stance == EStrategyStance::Prone) ||
+        SoldierSettle.Num() != SoldierComponents.Num() || SoldierSettle.IsEmpty()) return false;
+    const float CloseLateral = FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierLateralSpacingCm);
+    const float CloseRankSpacing = FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierRankSpacingCm);
+    const int32 CloseRankCount = FMath::Max(1, OwnerCompany->FormationComponent->RankCount);
+    TArray<TArray<int32>> CloseRanks;
+    CloseRanks.SetNum(CloseRankCount);
+    float CloseFrontX = -TNumericLimits<float>::Max();
+    for (const FSettle& CloseFrontMan : SoldierSettle) CloseFrontX = FMath::Max(CloseFrontX, CloseFrontMan.Slot.X);
+    for (int32 CloseIndex = 0; CloseIndex < SoldierSettle.Num(); ++CloseIndex)
+    {
+        const FSettle& CloseMan = SoldierSettle[CloseIndex];
+        if (!CloseMan.bPlaced) return false;
+        const int32 CloseRank = FMath::Clamp(FMath::RoundToInt((CloseFrontX - CloseMan.Slot.X) / CloseRankSpacing), 0, CloseRankCount - 1);
+        CloseRanks[CloseRank].Add(CloseIndex);
+    }
+    const int32 CloseFiles = FMath::DivideAndRoundUp(SoldierSettle.Num(), CloseRankCount);
+    auto CloseByY = [this](int32 CloseA, int32 CloseB) { return SoldierSettle[CloseA].Slot.Y < SoldierSettle[CloseB].Slot.Y; };
+    // Front to rear: a rank with more men than the new width sends its outermost men (alternately right and left) back.
+    for (int32 CloseRank = 0; CloseRank < CloseRankCount; ++CloseRank)
+    {
+        CloseRanks[CloseRank].Sort(CloseByY);
+        const int32 CloseWant = CloseRank < CloseRankCount - 1 ? CloseFiles :
+            SoldierSettle.Num() - CloseFiles * (CloseRankCount - 1);
+        bool bCloseRightEnd = true;
+        while (CloseRank < CloseRankCount - 1 && CloseRanks[CloseRank].Num() > CloseWant)
+        {
+            const int32 CloseSurplus = bCloseRightEnd ? CloseRanks[CloseRank].Pop() : CloseRanks[CloseRank][0];
+            if (!bCloseRightEnd) CloseRanks[CloseRank].RemoveAt(0);
+            CloseRanks[CloseRank + 1].Add(CloseSurplus);
+            bCloseRightEnd = !bCloseRightEnd;
+        }
+    }
+    const float CloseSpeed = 35.f;   // cm/s: a deliberate side-step, about 1.35x the clip's own pace
+    const float CloseNow = VisualAnimationTime;
+    int32 CloseMovers = 0;
+    for (int32 CloseRank = 0; CloseRank < CloseRankCount; ++CloseRank)
+    {
+        TArray<int32>& CloseRow = CloseRanks[CloseRank];
+        CloseRow.Sort(CloseByY);
+        for (int32 CloseOrder = 0; CloseOrder < CloseRow.Num(); ++CloseOrder)
+        {
+            FSettle& CloseMan = SoldierSettle[CloseRow[CloseOrder]];
+            // Centred on the colours; a short rear rank stands in the middle.
+            const FVector CloseTo(CloseFrontX - CloseRank * CloseRankSpacing, (CloseOrder - (CloseRow.Num() - 1) * 0.5f) * CloseLateral, 0.f);
+            const float CloseDistance = FVector::Dist2D(CloseMan.Slot, CloseTo);
+            if (CloseDistance < 5.f) continue;
+            CloseMan.CloseFrom = CloseMan.Slot;
+            CloseMan.CloseTo = CloseTo;
+            // The flanks have furthest to go and start at once; men nearer the centre follow a moment later (a ripple inwards).
+            CloseMan.CloseStart = CloseNow + FMath::Clamp(0.5f - CloseDistance / 400.f, 0.f, 0.5f) + FMath::FRandRange(0.f, 0.25f);
+            CloseMan.CloseDuration = FMath::Max(0.6f, CloseDistance / CloseSpeed);
+            CloseMan.bActive = true;
+            ++CloseMovers;
+        }
+    }
+    bClosingRanksStep = CloseMovers > 0;
+    UE_LOG(LogTemp, Display, TEXT("Strategy1864Close %s close ranks towards the colours: men=%d files=%d movers=%d"),
+        *OwnerCompany->StableUnitId.ToString(), SoldierSettle.Num(), CloseFiles, CloseMovers);
+    if (CloseMovers > 0) OwnerCompany->AddUnitLog(TEXT("Formation"), TEXT("slutter op mod fanen"),
+        FString::Printf(TEXT("%d mand rykker ind sidelæns; linjen er nu %d filer"), CloseMovers, CloseFiles), 0.0f);
+    return true;
+}
+
+void UStrategyInfantryVisualComponent::UpdateCloseRanks()
+{
+    bool bCloseStill = false;
+    VisualPath.SlotBounds = FBox(ForceInit);
+    for (FSettle& CloseMan : SoldierSettle)
+    {
+        if (CloseMan.CloseStart >= 0.f)
+        {
+            const float CloseAlpha = FMath::Clamp((VisualAnimationTime - CloseMan.CloseStart) / FMath::Max(0.01f, CloseMan.CloseDuration), 0.f, 1.f);
+            CloseMan.Slot = FMath::Lerp(CloseMan.CloseFrom, CloseMan.CloseTo, CloseAlpha);
+            CloseMan.bActive = true;
+            if (CloseAlpha >= 1.f) CloseMan.CloseStart = -1.f;
+            else bCloseStill = true;
+        }
+        if (CloseMan.bPlaced) VisualPath.SlotBounds += CloseMan.Slot;
+    }
+    bClosingRanksStep = bCloseStill;
+}
+
+FVector UStrategyInfantryVisualComponent::ColourBearerTarget(float& OutBearerYaw) const
+{
+    // In front: one rank ahead of the front rank in line, one row ahead of the head in column (he leads the snake).
+    const float BearerRank = OwnerCompany && OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->SoldierRankSpacingCm : 90.f;
+    const FTransform BearerUnit = OwnerCompany->GetActorTransform();
+    OutBearerYaw = BearerUnit.Rotator().Yaw;
+    if (DrillActive && !DrillToColumn)
+    {
+        OutBearerYaw = DrillFinalFrame.Rotator().Yaw;
+        return DrillFinalFrame.TransformPosition(FVector(BearerRank, 0.f, 0.f));
+    }
+    const bool BearerColumn = OwnerCompany->FormationComponent &&
+        OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn && VisualPath.Trail.Num() >= 2;
+    if (BearerColumn)
+    {
+        OutBearerYaw = VisualPath.HeadYaw;
+        const float BearerAhead = SnakeRowSpacing > 0.f ? SnakeRowSpacing : BearerRank;
+        return VisualPath.HeadPos + FRotator(0.f, VisualPath.HeadYaw, 0.f).Vector() * BearerAhead;
+    }
+    const float BearerFront = VisualPath.SlotBounds.IsValid ? VisualPath.SlotBounds.Max.X : 0.f;
+    return BearerUnit.TransformPosition(FVector(BearerFront + BearerRank, 0.f, 0.f));
+}
+
+void UStrategyInfantryVisualComponent::PromoteColourBearer(bool bBearerInitial)
+{
+    // The nearest front-rank man (to the fallen colours; at the start, to the centre of the front) leaves his file.
+    if (!OwnerCompany || SoldierComponents.Num() < 4) return;
+    const FTransform BearerUnit = OwnerCompany->GetActorTransform();
+    const FVector BearerNear = bBearerInitial ? BearerUnit.TransformPosition(FVector(0.f, 0.f, 0.f)) : ColourDownLocation;
+    float BearerFrontX = -TNumericLimits<float>::Max();
+    for (const USkeletalMeshComponent* BearerMan : SoldierComponents)
+        if (BearerMan) BearerFrontX = FMath::Max(BearerFrontX, float(BearerMan->GetRelativeLocation().X));
+    const float BearerBand = OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->SoldierRankSpacingCm * 0.6f : 60.f;
+    int32 BearerPick = INDEX_NONE;
+    double BearerBest = TNumericLimits<double>::Max();
+    for (int32 BearerIndex = 0; BearerIndex < SoldierComponents.Num(); ++BearerIndex)
+    {
+        const USkeletalMeshComponent* BearerMan = SoldierComponents[BearerIndex];
+        if (!BearerMan || BearerMan->GetRelativeLocation().X < BearerFrontX - BearerBand) continue;
+        const double BearerDistance = FVector::DistSquared2D(BearerMan->GetComponentLocation(), BearerNear);
+        if (BearerDistance < BearerBest) { BearerBest = BearerDistance; BearerPick = BearerIndex; }
+    }
+    if (BearerPick == INDEX_NONE) return;
+    USkeletalMeshComponent* BearerMan = SoldierComponents[BearerPick];
+    // He drops his rifle (it stays on the ground at his feet) and is taken out of the grid; his file fills from behind.
+    if (WeaponComponents.IsValidIndex(BearerPick) && WeaponComponents[BearerPick])
+        WeaponComponents[BearerPick]->DestroyComponent();
+    if (!bBearerInitial)
+    {
+        if (UStaticMesh* BearerRifleMesh = CurrentRifleMesh())
+        {
+            UStaticMeshComponent* BearerRifle = NewObject<UStaticMeshComponent>(GetOwner());
+            BearerRifle->SetStaticMesh(BearerRifleMesh);
+            BearerRifle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            BearerRifle->SetUsingAbsoluteLocation(true);
+            BearerRifle->SetUsingAbsoluteRotation(true);
+            BearerRifle->RegisterComponent();
+            const FVector BearerFeet = UStrategyTerrainQueryLibrary::ProjectPointToTerrain(this, BearerMan->GetComponentLocation());
+            BearerRifle->SetWorldLocationAndRotation(BearerFeet + FVector(0.f, 0.f, 4.f),
+                FRotator(0.f, BearerUnit.Rotator().Yaw + FMath::FRandRange(-40.f, 40.f), 90.f));
+            DroppedRifles.Add(BearerRifle);
+        }
+    }
+    if (CrowdNearFigures.Remove(BearerMan))
+        if (UStrategyCrowdSubsystem* BearerCrowd = GetWorld()->GetSubsystem<UStrategyCrowdSubsystem>())
+            BearerCrowd->NearGeometryCount = FMath::Max(0, BearerCrowd->NearGeometryCount - 1);
+    SoldierComponents.RemoveAt(BearerPick);
+    if (SoldierSettle.IsValidIndex(BearerPick)) SoldierSettle.RemoveAt(BearerPick);
+    if (SoldierClips.IsValidIndex(BearerPick)) SoldierClips.RemoveAt(BearerPick);
+    if (SoldierSlots.IsValidIndex(BearerPick)) SoldierSlots.RemoveAt(BearerPick);
+    if (WeaponComponents.IsValidIndex(BearerPick)) WeaponComponents.RemoveAt(BearerPick);
+    if (SoldierFireAt.IsValidIndex(BearerPick)) SoldierFireAt.RemoveAt(BearerPick);
+    if (SoldierBusyUntil.IsValidIndex(BearerPick)) SoldierBusyUntil.RemoveAt(BearerPick);
+    if (SoldierFirePhase.IsValidIndex(BearerPick)) SoldierFirePhase.RemoveAt(BearerPick);
+    // The bearer is always drawn as a full skeletal figure (no rifle), whatever the crowd mode.
+    BearerMan->SetVisibility(true, true);
+    BearerMan->SetComponentTickEnabled(true);
+    BearerMan->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+    BearerMan->bPauseAnims = false;
+    if (UAnimSequence* BearerIdle = ColourIdleAsset.Get() ? ColourIdleAsset.Get() : IdleStandingAsset.Get()) BearerMan->PlayAnimation(BearerIdle, true);
+    ColourBearer = BearerMan;
+    bColourBearerAlive = true;
+    ColourPromoteAt = -1.f;
+    bCrowdDirty = true;
+    if (!bBearerInitial)
+    {
+        ScheduleStepUp();
+        bClosingRanksPending = true;
+        LastLossTimeSeconds = GetWorld()->GetTimeSeconds();
+        OwnerCompany->AddUnitLog(TEXT("Fane"), TEXT("ny fanebærer"), TEXT("en mand fra forreste geled smider geværet og tager fanen"), 0.0f);
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864Colours %s new bearer"), *OwnerCompany->StableUnitId.ToString());
+    }
+}
+
+void UStrategyInfantryVisualComponent::KillColourBearer()
+{
+    if (!ColourBearer) return;
+    USkeletalMeshComponent* BearerFallen = ColourBearer;
+    BearerFallen->bPauseAnims = false;
+    UAnimSequence* BearerDeath = DeathAsset.Get() ? DeathAsset.Get() : IdleProneAsset.Get();
+    if (BearerDeath) { BearerFallen->PlayAnimation(BearerDeath, false); BearerFallen->SetPlayRate(FMath::FRandRange(0.9f, 1.1f)); }
+    FallenColourBearers.Add(BearerFallen);
+    ColourBearer = nullptr;
+    bColourBearerAlive = false;
+    bColoursDown = true;
+    ColourDownLocation = BearerFallen->GetComponentLocation();
+    ColourDownYaw = BearerFallen->GetComponentRotation().Yaw - SoldierMeshYawOffset;
+    ColourPromoteAt = GetWorld()->GetTimeSeconds() + FMath::FRandRange(2.f, 4.f);
+    // The colours down: a small blow to the company (an estimate, not a sourced figure); most of it returns when they are raised.
+    OwnerCompany->Morale = FMath::Max(0.f, OwnerCompany->Morale - 5.f);
+    OwnerCompany->AddUnitLog(TEXT("Fane"), TEXT("fanebæreren er faldet"), TEXT("fanen ligger nede"), 0.0f);
+    UE_LOG(LogTemp, Display, TEXT("Strategy1864Colours %s bearer fell"), *OwnerCompany->StableUnitId.ToString());
+}
+
+void UStrategyInfantryVisualComponent::UpdateColourBearer(float BearerDt)
+{
+    if (!bHasColours || !OwnerCompany || !GetWorld() || BearerDt <= 0.f) return;
+    if (!ColourBearer && !bColoursDown && VisualPath.bInitialized && SoldierComponents.Num() >= 4) PromoteColourBearer(true);
+    if (!bColourBearerAlive && ColourPromoteAt >= 0.f && GetWorld()->GetTimeSeconds() >= ColourPromoteAt) PromoteColourBearer(false);
+    if (!ColourBearer || !bColourBearerAlive) return;
+    float BearerYaw = 0.f;
+    FVector BearerGoal = bColoursDown ? ColourDownLocation : ColourBearerTarget(BearerYaw);
+    if (bColoursDown) BearerYaw = OwnerCompany->GetActorRotation().Yaw;
+    BearerGoal = UStrategyTerrainQueryLibrary::ProjectPointToTerrain(this, BearerGoal);
+    FVector BearerHere = ColourBearer->GetComponentLocation();
+    const FVector BearerTo = BearerGoal - BearerHere;
+    const float BearerDistance = BearerTo.Size2D();
+    const float BearerMarch = OwnerCompany->MovementExecutor ? OwnerCompany->MovementExecutor->MoveSpeedCmPerSecond : 150.f;
+    const float BearerSpeed = FMath::Min(BearerDistance * 3.f, FMath::Max(150.f, BearerMarch * 1.3f));
+    const float BearerStep = FMath::Min(BearerDistance, BearerSpeed * BearerDt);
+    if (BearerDistance > 1.f) BearerHere += BearerTo.GetSafeNormal2D() * BearerStep;
+    BearerHere.Z = BearerGoal.Z;
+    const bool BearerWalking = BearerStep / BearerDt > 25.f;
+    const float BearerFacing = BearerWalking ? BearerTo.Rotation().Yaw : BearerYaw;
+    FRotator BearerRotation = ColourBearer->GetComponentRotation();
+    BearerRotation.Pitch = 0.f; BearerRotation.Roll = 0.f;
+    BearerRotation.Yaw = FStrategyVisualFormationPath::SmoothFacing(BearerRotation.Yaw, ColourBearerYawVelocity, BearerFacing + SoldierMeshYawOffset, BearerDt, 160.f);
+    ColourBearer->SetWorldLocationAndRotation(BearerHere, BearerRotation);
+    // Walk (rifle-less arms of the shoulder walk) at his own pace, stand otherwise.
+    UAnimSequence* BearerWalkClip = ColourWalkAsset.Get() ? ColourWalkAsset.Get() : (WalkShoulderAsset.Get() ? WalkShoulderAsset.Get() : WalkStandingAsset.Get());
+    UAnimSequence* BearerClip = BearerWalking ? BearerWalkClip : (ColourIdleAsset.Get() ? ColourIdleAsset.Get() : IdleStandingAsset.Get());
+    if (BearerClip && ColourBearer->GetSingleNodeInstance() && ColourBearer->GetSingleNodeInstance()->GetAnimationAsset() != BearerClip)
+        ColourBearer->PlayAnimation(BearerClip, true);
+    ColourBearer->SetPlayRate(BearerWalking ? FMath::Clamp((BearerStep / BearerDt) / (BearerClip == WalkStandingAsset.Get() ? 76.99816f : 137.70097f), 0.3f, 2.5f) : 1.f);
+    // He reaches the fallen colours: he raises them.
+    if (bColoursDown && BearerDistance < 60.f)
+    {
+        bColoursDown = false;
+        OwnerCompany->Morale = FMath::Min(100.f, OwnerCompany->Morale + 3.f);
+        OwnerCompany->AddUnitLog(TEXT("Fane"), TEXT("fanen er rejst igen"), TEXT("ny fanebærer"), 0.0f);
+    }
+}
+
+bool UStrategyInfantryVisualComponent::GetColourTransform(FVector& OutColourLocation, float& OutColourYaw, bool& bOutColoursDown) const
+{
+    if (!bHasColours) return false;
+    bOutColoursDown = bColoursDown;
+    if (bColoursDown)
+    {
+        OutColourLocation = ColourDownLocation;
+        OutColourYaw = ColourDownYaw;
+        return true;
+    }
+    if (!ColourBearer) return false;
+    // As in the user's reference (Flag/Fane_March_*.png): the pole in his right hand, the hand at chest height, the pole leaning a
+    // little back and its foot at about knee height, the cloth streaming behind him.
+    const FRotator BearerFacing(0.f, ColourBearer->GetComponentRotation().Yaw - SoldierMeshYawOffset, 0.f);
+    // The pole runs through his hand, its foot 65 cm below the hand along the pole (so it follows his stride), leaning back
+    // ColourCarryLeanDeg: the foot sits about 14 cm in front of the hand (measured on the bearer clips, 2026-10-20).
+    const FVector BearerHand = ColourBearer->GetSocketLocation(RightHandBoneName);
+    const float BearerLean = FMath::DegreesToRadians(ColourCarryLeanDeg);
+    const FVector BearerPole = BearerFacing.RotateVector(FVector(-FMath::Sin(BearerLean), 0.f, FMath::Cos(BearerLean)));
+    OutColourLocation = BearerHand - BearerPole * 65.f;
+    OutColourYaw = BearerFacing.Yaw;
+    return true;
+}
+
+bool UStrategyInfantryVisualComponent::CanUseColumnDrill() const
+{
+    int32 DrillRigidSetting = 1;
+    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Rigid="), DrillRigidSetting);
+    return bEnabled && bRigidCompany && DrillRigidSetting != 0 && FStrategyColumnDrill::Enabled() &&
+        OwnerCompany && OwnerCompany->FormationComponent &&
+        OwnerCompany->FormationComponent->RankCount == 3 && OwnerCompany->FormationComponent->ColumnWidth == 3 &&
+        !SoldierComponents.IsEmpty() &&
+        !(OwnerCompany->StanceComponent && OwnerCompany->StanceComponent->Stance == EStrategyStance::Prone) &&
+        !(OwnerCompany->SkirmisherComponent && (OwnerCompany->SkirmisherComponent->IsDeployed() ||
+            OwnerCompany->SkirmisherComponent->State == EStrategySkirmisherState::Deploying));
 }

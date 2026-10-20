@@ -195,6 +195,8 @@ void ACampaign1851Map::MonthlyPolitics()
 		if (bAtWar && PeaceTalksDay < 0.0 && N.Relation >= 60.f && CampaignDays - WarStartDay > 30.0)
 		{
 			PeaceTalksDay = CampaignDays;
+            LogCampaignDecision(N.Id, TEXT("peace"), TEXT("Tilbyder politisk maegling"), TEXT("Venligt forhold og over 30 dages krig"), TEXT("ai"),
+                { { TEXT("relation"), N.Relation }, { TEXT("war_days"), CampaignDays - WarStartDay } });
 			News.Add(FString::Printf(TEXT("%s tilbyder mægling: en fredskonference samles"), *N.Name));
 		}
 	}

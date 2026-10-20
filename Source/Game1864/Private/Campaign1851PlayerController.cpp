@@ -1,4 +1,5 @@
 #include "Campaign1851PlayerController.h"
+#include "Campaign1851DecisionLog.h"
 
 #include "Campaign1851Camera.h"
 #include "Campaign1851Map.h"
@@ -376,6 +377,7 @@ void ACampaign1851PlayerController::EndPlay(const EEndPlayReason::Type Reason)
 		GEngine->GameViewport->RemoveViewportWidgetContent(Overlay.ToSharedRef());
 	}
 	Overlay.Reset();
+	if (Map.IsValid()) Map->CampaignLogSession(TEXT("quit"));
 	Super::EndPlay(Reason);
 }
 
@@ -458,7 +460,7 @@ void ACampaign1851PlayerController::TryInit()
 		bCampaignStarted = true;
 		if (bNeighbourTestStart) { CampaignNewGame(); Overlay->CloseMenu(); }
 		else if (bSiegeTestStart) { CampaignNewGame(); bSiegeTestNewCampaign = true; }
-		else { CampaignBuild(BuildCity); }
+		else { Map->CampaignLogSession(TEXT("new")); CampaignBuild(BuildCity); }
 	}
 	// Test starts: -CampaignSpeed=0..3, -CampaignDate=1852-01-20 (e.g. to see the winter).
 	int32 StartSpeed = 0;
@@ -855,6 +857,7 @@ void ACampaign1851PlayerController::TryInit()
 
 void ACampaign1851PlayerController::CampaignMoney(float Amount)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	if (Map.IsValid())
 	{
 		Map->AddTransaction(Amount - Map->GetTreasury(), TEXT("Testpenge"));
@@ -863,6 +866,7 @@ void ACampaign1851PlayerController::CampaignMoney(float Amount)
 
 void ACampaign1851PlayerController::CampaignBuild(const FString& CityName)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	if (!Map.IsValid())
 	{
 		return;
@@ -884,6 +888,7 @@ void ACampaign1851PlayerController::CampaignBuild(const FString& CityName)
 
 void ACampaign1851PlayerController::FocusPlot(int32 CityIndex)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
 	if (!Map.IsValid() || !Camera || !Map->GetCities().IsValidIndex(CityIndex) || !Map->GetCities()[CityIndex].bHasPlot)
 	{
@@ -897,6 +902,7 @@ void ACampaign1851PlayerController::FocusPlot(int32 CityIndex)
 
 void ACampaign1851PlayerController::CampaignView(float Lat, float Lon, float DistanceKm, float Yaw)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
 	if (!Map.IsValid() || !Camera)
 	{
@@ -921,6 +927,7 @@ bool ACampaign1851PlayerController::ScreenGround(const FVector2D& Screen, FVecto
 
 bool ACampaign1851PlayerController::CursorGround(FVector& Out) const
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	if (Map.IsValid() && Map->IsBattleView())
 	{
 		return false;   // the battlefield model: no map under the cursor
@@ -931,6 +938,7 @@ bool ACampaign1851PlayerController::CursorGround(FVector& Out) const
 
 void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	Super::PlayerTick(DeltaTime);
 	TryInit();
 	ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
@@ -2547,6 +2555,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 
 int32 ACampaign1851PlayerController::FortUnderCursor() const
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	float MX, MY;
 	if (!Map.IsValid() || !GetMousePosition(MX, MY))
 	{
@@ -2581,6 +2590,7 @@ int32 ACampaign1851PlayerController::FortUnderCursor() const
 
 int32 ACampaign1851PlayerController::CityUnderCursor() const
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	float MX, MY;
 	if (!Map.IsValid() || !GetMousePosition(MX, MY))
 	{
@@ -2615,6 +2625,7 @@ int32 ACampaign1851PlayerController::CityUnderCursor() const
 
 void ACampaign1851PlayerController::PickCity()
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	if (!Overlay.IsValid())
 	{
 		return;
@@ -2737,6 +2748,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet,
 	Save->Footing = uint8(Map->GetFooting());
 	Save->War = Map->SaveWar(PendingBattleId);
 	Save->Neighbours = Map->SaveNeighbours();
+	Save->ForeignTreasuries = Map->GetForeignTreasuries();
 	Save->Diplomacy = Map->SaveDiplomacy();
 	Save->Research = Map->SaveResearch();
 	Save->Navy = Map->SaveNavy();
@@ -2752,6 +2764,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet,
 	Save->Summary = FString::Printf(TEXT("%s  ·  %s"), *ACampaign1851Map::FormatDate(Map->GetDate(), true),
 		Parts.Num() > 0 ? *FString::Join(Parts, TEXT("  ·  ")) : TEXT("ingen byggerier"));
 	const bool bOk = UGameplayStatics::SaveGameToSlot(Save, Slot, 0);
+	if (bOk) Map->CampaignLogSession(TEXT("save"), Slot, Save->SaveVersion, Save->SavedAt.ToIso8601());
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|save|%s|%s|%s"), *Slot, bOk ? TEXT("ok") : TEXT("FAILED"), *Save->Summary);
 	if (!bQuiet && Overlay.IsValid())
 	{
@@ -2782,6 +2795,7 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 		UGameplayStatics::OpenLevel(this, FName(TEXT("Campaign1851")));
 		return true; // restoration continues after the scenario's map data have loaded
 	}
+	Map->SuspendCampaignLog();
 	bCampaignStarted = true;
 	Map->ClearProjects();
 	// v1 saves had no calendar: they start on 1 July 1851 at normal speed.
@@ -2881,6 +2895,7 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 		Map->RestoreWar(Save->War);
 	}
 	Map->RestoreNeighbours(Save->SaveVersion >= 33 ? Save->Neighbours : TArray<FString>());
+	if (Save->SaveVersion >= 39) { Map->RestoreForeignTreasuries(Save->ForeignTreasuries); }
 	if (Save->SaveVersion >= 23)
 	{
 		Map->RestoreDiplomacy(Save->Diplomacy);
@@ -2904,6 +2919,7 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 		Overlay->ShowToast(FString::Printf(TEXT("Indlæst  ·  %s  ·  gemt %s"), *SlotLabel(Slot), *Save->SavedAt.ToString(TEXT("%d-%m-%Y %H:%M"))));
 	}
 	Map->UpdateMarkers(Camera->GetDistanceKm());
+	Map->CampaignLogSession(TEXT("load"), Slot, Save->SaveVersion, Save->SavedAt.ToIso8601());
 	AutosaveTimer = 0.f;
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|load|%s|projects=%d/%d|links=%d/%d|version=%d"), *Slot, Restored, Save->Projects.Num(), LinksRestored, Save->Links.Num(), Save->SaveVersion);
 	return true;
@@ -2957,6 +2973,7 @@ void ACampaign1851PlayerController::CampaignNewGame()
 	{
 		return;
 	}
+	Map->SuspendCampaignLog();
 	bCampaignStarted = true;
 	AutosaveTimer = 0.f;
 	Map->ClearProjects();
@@ -2994,6 +3011,7 @@ void ACampaign1851PlayerController::CampaignNewGame()
 		Overlay->CloseMenu();
 		Overlay->ShowToast(FString::Printf(TEXT("Nyt spil  ·  %s"), *ACampaign1851Map::ActiveScenario().Name));
 	}
+	Map->CampaignLogSession(TEXT("new"));
 	// The blank campaign replaces the autosave, so a restart does not bring the old game back.
 	SaveToSlot(TEXT("Autosave"), true);
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|new game"));
@@ -3001,6 +3019,7 @@ void ACampaign1851PlayerController::CampaignNewGame()
 
 void ACampaign1851PlayerController::OpenGameMenu()
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	if (!Overlay.IsValid())
 	{
 		return;
@@ -3036,6 +3055,7 @@ void ACampaign1851PlayerController::OpenGameMenu()
 
 void ACampaign1851PlayerController::FocusSite(const ACampaign1851ConstructionSite* Site)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
 	if (!Site || !Camera || !Map.IsValid())
 	{
@@ -3047,6 +3067,7 @@ void ACampaign1851PlayerController::FocusSite(const ACampaign1851ConstructionSit
 
 TArray<int32> ACampaign1851PlayerController::StackOf(int32 Regiment) const
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	const TArray<FCampaign1851Regiment>& Regs = Map->GetRegiments();
 	if (!Regs.IsValidIndex(Regiment))
 	{
@@ -3083,6 +3104,7 @@ TArray<int32> ACampaign1851PlayerController::StackOf(int32 Regiment) const
 
 void ACampaign1851PlayerController::SelectRegiments(const TArray<int32>& Regiments)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	if (Overlay.IsValid())
 	{
 		Overlay->SetSelectedRegiments(Regiments);
@@ -3097,6 +3119,7 @@ void ACampaign1851PlayerController::SelectRegiments(const TArray<int32>& Regimen
 
 void ACampaign1851PlayerController::MarchSelected(int32 CityIndex, const FVector2D& TargetKm)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	if (!Map.IsValid() || !Overlay.IsValid())
 	{
 		return;
@@ -3135,6 +3158,7 @@ namespace
 
 void ACampaign1851PlayerController::OpenOrderDialog(int32 CityIndex, const FVector2D& TargetKm)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	SCampaign1851Overlay::FOrderDialog& D = Overlay->EditOrder();
 	D = SCampaign1851Overlay::FOrderDialog();
 	D.bOpen = true;
@@ -3150,6 +3174,7 @@ void ACampaign1851PlayerController::OpenOrderDialog(int32 CityIndex, const FVect
 
 void ACampaign1851PlayerController::RefreshOrderDialog()
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	SCampaign1851Overlay::FOrderDialog& D = Overlay->EditOrder();
 	const FDateTime Now = Map->GetDate();
 	for (int32 w = 0; w < 3; ++w)
@@ -3205,6 +3230,7 @@ void ACampaign1851PlayerController::RefreshOrderDialog()
 
 void ACampaign1851PlayerController::ExecuteOrderDialog()
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	SCampaign1851Overlay::FOrderDialog D = Overlay->EditOrder();
 	Overlay->EditOrder().bOpen = false;
 	TArray<FString> Notes;
@@ -3259,6 +3285,7 @@ void ACampaign1851PlayerController::ExecuteOrderDialog()
 
 void ACampaign1851PlayerController::TreeClick(int32 Key)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	using K = SCampaign1851Overlay::ETreeKind;
 	const int32 Id = SCampaign1851Overlay::TreeId(Key);
 	switch (SCampaign1851Overlay::TreeKind(Key))
@@ -3291,6 +3318,7 @@ void ACampaign1851PlayerController::TreeClick(int32 Key)
 
 void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	using K = SCampaign1851Overlay::ETreeKind;
 	if (Target == INDEX_NONE || Target == Source)
 	{
@@ -3577,6 +3605,7 @@ void ACampaign1851PlayerController::TreeDrop(int32 Source, int32 Target)
 
 void ACampaign1851PlayerController::SetBattleView(bool bEnter)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	ACampaign1851Camera* Cam = Cast<ACampaign1851Camera>(GetPawn());
 	if (!Map.IsValid() || !Cam)
 	{
@@ -3606,6 +3635,7 @@ void ACampaign1851PlayerController::SetBattleView(bool bEnter)
 
 void ACampaign1851PlayerController::CampaignTestFieldArmy()
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	if (Map.IsValid())
 	{
 		Map->BuildTestFieldArmy();
@@ -3618,6 +3648,7 @@ void ACampaign1851PlayerController::CampaignTestFieldArmy()
 
 void ACampaign1851PlayerController::BuildLink(int32 Link, ECampaign1851LinkWork Work)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	if (!Map.IsValid() || !Map->GetLinks().IsValidIndex(Link))
 	{
 		return;
@@ -3641,6 +3672,7 @@ void ACampaign1851PlayerController::BuildLink(int32 Link, ECampaign1851LinkWork 
 
 void ACampaign1851PlayerController::FocusLink(int32 Link)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	ACampaign1851Camera* Camera = Cast<ACampaign1851Camera>(GetPawn());
 	if (!Map.IsValid() || !Camera || !Map->GetLinks().IsValidIndex(Link))
 	{
@@ -3659,6 +3691,7 @@ void ACampaign1851PlayerController::FocusLink(int32 Link)
 
 void ACampaign1851PlayerController::BuildTownBuilding(int32 CityIndex, const FString& Key)
 {
+	FCampaign1851LogActorScope LogPlayerScope(Map.Get(), TEXT("player"));
 	if (!Map.IsValid() || CityIndex == INDEX_NONE)
 	{
 		return;

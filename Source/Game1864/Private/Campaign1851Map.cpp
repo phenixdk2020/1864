@@ -1,4 +1,5 @@
 #include "Campaign1851Map.h"
+#include "Campaign1851DecisionLog.h"
 
 #include "Campaign1851Buildings.h"
 #include "Campaign1851ConstructionSite.h"
@@ -30,7 +31,7 @@
 namespace
 {
 	constexpr int32 GridX = 252;
-	constexpr int32 GridY = 342;
+	constexpr int32 GridY = 684; // doubled north extent retains Danish mesh density
 
 	/** Raw map data (height PNG + JSON) lives outside Content so the editor does not offer to import it. */
 	FString DataPath(const TCHAR* File)
@@ -182,6 +183,7 @@ bool ACampaign1851Map::LoadData()
 		Out.Projection = Projection;
 	};
 	ReadExtent(Json->GetObjectField(TEXT("extentKm")), Extent);
+	MapTextureYScale = Json->HasField(TEXT("northExtension")) ? 2.f : 1.f;
 	if (const TSharedPtr<FJsonObject>* BornholmObj = nullptr; Json->TryGetObjectField(TEXT("bornholmKm"), BornholmObj))
 	{
 		ReadExtent(*BornholmObj, Bornholm);   // old data: Bornholm as an inset
@@ -376,6 +378,11 @@ void ACampaign1851Map::BuildTerrain()
 	Attributes.Register();
 	Attributes.GetVertexInstanceUVs().SetNumChannels(1);
 	const FPolygonGroupID Group = Mesh.CreatePolygonGroup();
+	const FPolygonGroupID NorthLandGroup = Mesh.CreatePolygonGroup();
+	const FPolygonGroupID NorthSeaGroup = Mesh.CreatePolygonGroup();
+	Attributes.GetPolygonGroupMaterialSlotNames()[Group] = TEXT("Map");
+	Attributes.GetPolygonGroupMaterialSlotNames()[NorthLandGroup] = TEXT("NorthLand");
+	Attributes.GetPolygonGroupMaterialSlotNames()[NorthSeaGroup] = TEXT("NorthSea");
 
 	TVertexAttributesRef<FVector3f> Positions = Attributes.GetVertexPositions();
 	TVertexInstanceAttributesRef<FVector3f> Normals = Attributes.GetVertexInstanceNormals();
@@ -402,7 +409,7 @@ void ACampaign1851Map::BuildTerrain()
 			Normals[I] = FVector3f::UpVector;
 			Tangents[I] = FVector3f::ForwardVector;
 			Signs[I] = 1.f;
-			UVs.Set(I, 0, FVector2f(float(Uv.X), float(1.0 - Uv.Y)));  // texture row 0 = north
+			UVs.Set(I, 0, FVector2f(float(Uv.X), float(1.0 - Uv.Y * MapTextureYScale)));  // texture row 0 = north
 			Instances.Add(I);
 		}
 	}
@@ -418,7 +425,10 @@ void ACampaign1851Map::BuildTerrain()
 			Swap(B, C);
 		}
 		const FVertexInstanceID Corners[3] = { Instances[A], Instances[B], Instances[C] };
-		Mesh.CreateTriangle(Group, Corners);
+		const FVector3f NorthTriangleCentre = (P0 + P1 + P2) / 3.f;
+		const FVector2D NorthTriangleUv(NorthTriangleCentre.X / (SizeKm.X * KmToUnits) + 0.5, 0.5 - NorthTriangleCentre.Y / (SizeKm.Y * KmToUnits));
+		const bool bNorthTriangle = MapTextureYScale > 1.f && NorthTriangleUv.Y > 1.0 / MapTextureYScale;
+		Mesh.CreateTriangle(bNorthTriangle ? (SampleHeight01(NorthTriangleUv) >= 0.002f ? NorthLandGroup : NorthSeaGroup) : Group, Corners);
 	};
 	for (int32 j = 0; j < GridY; ++j)
 	{
@@ -432,6 +442,14 @@ void ACampaign1851Map::BuildTerrain()
 
 	UStaticMesh* Static = NewObject<UStaticMesh>(this, TEXT("SM_Campaign1851_Terrain"), RF_Transient);
 	Static->GetStaticMaterials().Add(FStaticMaterial(MapMaterial, TEXT("Map")));
+	// Original Danish textures keep their geographic UVs. Northern land/sea use flat colours;
+	// no Content asset import or editor start is needed for the extension.
+	UMaterialInstanceDynamic* NorthLandMaterial = UMaterialInstanceDynamic::Create(LoadObject<UMaterialInterface>(nullptr, FlatColourPath), this);
+	UMaterialInstanceDynamic* NorthSeaMaterial = UMaterialInstanceDynamic::Create(LoadObject<UMaterialInterface>(nullptr, FlatColourPath), this);
+	if (NorthLandMaterial) { NorthLandMaterial->SetVectorParameterValue(TEXT("Color"), Srgb(117, 125, 82)); }
+	if (NorthSeaMaterial) { NorthSeaMaterial->SetVectorParameterValue(TEXT("Color"), Srgb(20, 38, 51)); }
+	Static->GetStaticMaterials().Add(FStaticMaterial(NorthLandMaterial ? static_cast<UMaterialInterface*>(NorthLandMaterial) : static_cast<UMaterialInterface*>(MapMaterial), TEXT("NorthLand")));
+	Static->GetStaticMaterials().Add(FStaticMaterial(NorthSeaMaterial ? static_cast<UMaterialInterface*>(NorthSeaMaterial) : static_cast<UMaterialInterface*>(MapMaterial), TEXT("NorthSea")));
 	Static->bSupportRayTracing = false;
 	UStaticMesh::FBuildMeshDescriptionsParams Params;
 	Params.bFastBuild = true;
@@ -1342,7 +1360,9 @@ ACampaign1851ConstructionSite* ACampaign1851Map::StartProject(int32 CityIndex, b
 		UseMaterials(TownKm(CityIndex), Garrison[0].Cost(), FString::Printf(TEXT("%s, infanterikaserne"), *City.Name));
 	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|barracks started"), *City.Name);
-	return Site;
+	const auto LogActionResult = Site;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("build"), TEXT("StartProject"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("CityIndex"), double(CityIndex) }, { TEXT("bCharge"), double(bCharge) } }, {  }); }
+	return LogActionResult;
 }
 
 bool ACampaign1851Map::StartModule(int32 CityIndex, int32 Module)
@@ -1357,7 +1377,9 @@ bool ACampaign1851Map::StartModule(int32 CityIndex, int32 Module)
 		FString::Printf(TEXT("Materialer bestilt: %s, %s"), *Cities[CityIndex].Name, *Site->ModuleName(Module).ToLower()));
 	UseMaterials(TownKm(CityIndex), Site->ModuleCost(Module), FString::Printf(TEXT("%s, %s"), *Cities[CityIndex].Name, *Site->ModuleName(Module).ToLower()));
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|%s started"), *Cities[CityIndex].Name, *Site->ModuleName(Module));
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("build"), TEXT("StartModule"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("CityIndex"), double(CityIndex) }, { TEXT("Module"), double(Module) } }, {  }); }
+	return LogActionResult;
 }
 
 // ------------------------------------------------------------------ town buildings
@@ -1613,7 +1635,9 @@ ACampaign1851ConstructionSite* ACampaign1851Map::StartBuilding(int32 CityIndex, 
 		UseMaterials(Km, Def->Cost(), FString::Printf(TEXT("%s, %s"), *Cities[CityIndex].Name, *Def->Name.ToLower()));
 	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|project|%s|%s started at %.1f,%.1f km"), *Cities[CityIndex].Name, *Def->Name, Km.X, Km.Y);
-	return Site;
+	const auto LogActionResult = Site;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("build"), TEXT("StartBuilding"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("CityIndex"), double(CityIndex) }, { TEXT("bCharge"), double(bCharge) }, { TEXT("ForcedYaw"), double(ForcedYaw) } }, { { TEXT("Key"), Key } }); }
+	return LogActionResult;
 }
 
 int32 ACampaign1851Map::FindCity(const FString& Name) const
@@ -1689,6 +1713,7 @@ FString ACampaign1851Map::GetSeasonName() const
 
 void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 {
+	FCampaign1851LogActorScope LogSimulationScope(this, TEXT("ai"));
 	if (!bReady)
 	{
 		return;
@@ -1775,6 +1800,8 @@ void ACampaign1851Map::AdvanceTime(float DeltaSeconds)
 		NextDayAt = FPlatformTime::Seconds() + DaySeconds;
 		bDayBeat = false;
 	}
+
+	TickCampaignLog();
 }
 
 void ACampaign1851Map::UpdateSeason()

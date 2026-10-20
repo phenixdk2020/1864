@@ -67,7 +67,7 @@ bool AStrategyOOBTestScenario::BeginBehaviourAcceptance()
         TEXT("MOVE"), TEXT("STOPFIRE"), TEXT("NEW-HOLD"), TEXT("DELAY"), TEXT("SPREAD"), TEXT("SCREEN"),
         TEXT("WORKS"), TEXT("WORKS-CANCEL"), TEXT("CONTACT"), TEXT("ROE"), TEXT("AMMO"), TEXT("ROUT"), TEXT("DESTINATION"), TEXT("SQUARE-ZONES"),
         TEXT("LONG-MOVE"), TEXT("SQUARE-GATES"), TEXT("FIREBLOCK"), TEXT("DISENGAGE"), TEXT("WORKS-MOVE"), TEXT("SUSPEND-WAYPOINT"), TEXT("CLEAR-SUSPEND"), TEXT("RELOAD"),
-        TEXT("SCREEN-SQUARE"), TEXT("SPREAD-MOVE"), TEXT("ARTILLERY-DEPLOY"), TEXT("DRAGOON"), TEXT("CAVALRY-STILL"), TEXT("ADVANCE-FIRE"), TEXT("LOSS-RANKS")};
+        TEXT("SCREEN-SQUARE"), TEXT("SPREAD-MOVE"), TEXT("ARTILLERY-DEPLOY"), TEXT("DRAGOON"), TEXT("CAVALRY-STILL"), TEXT("ADVANCE-FIRE"), TEXT("ATTACK-MOVING"), TEXT("ATTACK-APPROACH"), TEXT("LOSS-RANKS")};
     if (bAcceptanceAll) AcceptanceIds = AvailableAcceptanceIds;
     else AcceptanceIds.Add(RequestedAcceptance.ToUpper());
     FParse::Value(FCommandLine::Get(), TEXT("Strategy1864AcceptTimeout="), AcceptanceTimeout);
@@ -120,12 +120,13 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
     const bool bAcceptanceMarchBudget = AcceptanceId == TEXT("MOVE") || AcceptanceId == TEXT("LONG-MOVE") ||
         AcceptanceId == TEXT("STOPFIRE") || AcceptanceId == TEXT("SUSPEND-WAYPOINT") ||
         AcceptanceId == TEXT("SPREAD-MOVE") || AcceptanceId == TEXT("ADVANCE-FIRE") ||
+        AcceptanceId == TEXT("ATTACK-MOVING") || AcceptanceId == TEXT("ATTACK-APPROACH") ||
         AcceptanceId == TEXT("T7") || AcceptanceId == TEXT("DISENGAGE");
     const float AcceptanceCaseTimeout = AcceptanceTimeout * (bAcceptanceMarchBudget ? 4.f : 1.f);
     if (AcceptanceElapsed >= AcceptanceCaseTimeout)
     {
-        FinishBehaviourAcceptanceCase(false, FString::Printf(TEXT("TIMEOUT %.1fs phase=%d order=%d state=%d formation=%d suspended=%d"),
-            AcceptanceElapsed, AcceptancePhase, int32(AcceptanceCompany->OrderComponent->GetCurrentOrder().Type),
+        FinishBehaviourAcceptanceCase(false, FString::Printf(TEXT("TIMEOUT %s %.1fs: krav om maalopdatering/ankomst/ild ikke opfyldt; phase=%d order=%d state=%d formation=%d suspended=%d"),
+            *AcceptanceId, AcceptanceElapsed, AcceptancePhase, int32(AcceptanceCompany->OrderComponent->GetCurrentOrder().Type),
             int32(AcceptanceCompany->UnitState), int32(AcceptanceCompany->FormationComponent->CurrentFormation),
             AcceptanceCompany->MovementExecutor->GetSuspendedMission().OrderSerial));
         return;
@@ -288,6 +289,27 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
             Strategy1864Acceptance::Order(AcceptanceCompany, EStrategyOrderType::Move, AcceptanceStart + FVector(25000, 0, 0));
             Strategy1864Acceptance::Order(AcceptanceOther, EStrategyOrderType::Move, AcceptanceStart + FVector(25000, 6000, 0));
         }
+        else if (AcceptanceId == TEXT("ATTACK-MOVING") || AcceptanceId == TEXT("ATTACK-APPROACH"))
+        {
+            const bool bAcceptanceMoving = AcceptanceId == TEXT("ATTACK-MOVING");
+            AcceptanceOther->SetActorLocation(AcceptanceStart + FVector(25000, bAcceptanceMoving ? -6000 : 0, 0));
+            AcceptanceOther->SetActorRotation(FRotator(0, bAcceptanceMoving ? 90 : 180, 0));
+            AcceptanceSnapshot = AcceptanceOther->GetActorLocation();
+            AcceptanceOther->MovementExecutor->MoveSpeedCmPerSecond = 150.0f;
+            AcceptanceCompany->MovementExecutor->MoveSpeedCmPerSecond = 150.0f;
+            Strategy1864Acceptance::Order(AcceptanceOther, EStrategyOrderType::Move,
+                AcceptanceStart + (bAcceptanceMoving ? FVector(25000, 6000, 0) : FVector(-10000, 0, 0)));
+            AcceptanceCompany->bOfficerAIEnabled = true;
+            AcceptanceCompany->FireDisciplineComponent->SetDiscipline(EStrategyFireDiscipline::FireAtWill);
+            FStrategyOrder AcceptanceTrackingOrder;
+            AcceptanceTrackingOrder.Type = EStrategyOrderType::AttackHere;
+            AcceptanceTrackingOrder.Authority = EStrategyOrderAuthority::DirectPlayer;
+            AcceptanceTrackingOrder.AttackTarget = AcceptanceOther;
+            AcceptanceTrackingOrder.TargetLocation = AcceptanceOther->GetActorLocation();
+            if (!AcceptanceCompany->OrderComponent->SetOrder(AcceptanceTrackingOrder))
+            { FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: AttackHere afvist")); return; }
+            AcceptanceSerial = AcceptanceCompany->OrderComponent->GetCurrentOrder().OrderSerial;
+        }
         else if (AcceptanceId == TEXT("ADVANCE-FIRE"))
         {
             AcceptanceCompany->bOfficerAIEnabled = true;
@@ -366,6 +388,47 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
     }
     if (AcceptancePhase == 0) return;
     const float AcceptanceSinceEvent = AcceptanceElapsed - AcceptanceEventAt;
+    if (AcceptanceId == TEXT("ATTACK-MOVING") || AcceptanceId == TEXT("ATTACK-APPROACH"))
+    {
+        const FStrategyOrder AcceptanceTrackingOrder = AcceptanceCompany->OrderComponent->GetCurrentOrder();
+        if (AcceptanceTrackingOrder.OrderSerial != AcceptanceSerial || AcceptanceTrackingOrder.Type != EStrategyOrderType::AttackHere)
+        { FinishBehaviourAcceptanceCase(false, TEXT("retargeting erstattede angrebsordren/serial")); return; }
+        const FVector AcceptanceAttackerPosition = AcceptanceCompany->GetActorLocation();
+        const FVector AcceptanceEnemyPosition = AcceptanceOther->GetActorLocation();
+        const float AcceptanceEnemyDistance = FVector::Dist2D(AcceptanceAttackerPosition, AcceptanceEnemyPosition);
+        const float AcceptanceEnemyYaw = (AcceptanceEnemyPosition - AcceptanceAttackerPosition).Rotation().Yaw;
+        const bool bAcceptanceFacing = FMath::Abs(FMath::FindDeltaAngleDegrees(AcceptanceCompany->GetActorRotation().Yaw, AcceptanceEnemyYaw)) <= 30.0f;
+        if (AcceptanceId == TEXT("ATTACK-APPROACH"))
+        {
+            // Check every tick, not just at the successful volley.
+            if (AcceptanceAttackerPosition.X >= AcceptanceEnemyPosition.X)
+            { FinishBehaviourAcceptanceCase(false, TEXT("ATTACK-APPROACH: angriberen passerede fjendens position")); return; }
+            if (AcceptanceCompany->CombatComponent->AmmunitionRounds < AcceptanceAmmo)
+            {
+                AcceptanceCheck(AcceptanceEnemyDistance > 2000.0f && bAcceptanceFacing &&
+                    AcceptanceCompany->MovementExecutor->IsHoldingForFire() &&
+                    AcceptanceCompany->MovementExecutor->GetExecutedVelocity().SizeSquared2D() < 1.0f,
+                    TEXT("ATTACK-APPROACH: standset og skudt foer 20 m, aldrig passeret fjenden, front inden for 30 grader"));
+                return;
+            }
+        }
+        else if (FVector::Dist2D(AcceptanceSnapshot, AcceptanceEnemyPosition) >= 4000.0f)
+        {
+            FVector AcceptanceCurrentStand;
+            float AcceptanceCurrentFacing = 0.0f;
+            if (!UStrategyOrderComponent::ComputeAttackStand(AcceptanceOther, AcceptanceCompany,
+                AcceptanceCurrentStand, AcceptanceCurrentFacing, AcceptanceAttackerPosition))
+            { FinishBehaviourAcceptanceCase(false, TEXT("ATTACK-MOVING: levende maal/standpunkt mangler")); return; }
+            if (FVector::Dist2D(AcceptanceTrackingOrder.TargetLocation, AcceptanceCurrentStand) <= 1500.0f &&
+                AcceptanceCompany->FireControlComponent->CanEngageTarget(AcceptanceOther) && bAcceptanceFacing &&
+                AcceptanceCompany->MovementExecutor->IsHoldingForFire())
+            {
+                AcceptanceCheck(true, TEXT("ATTACK-MOVING: fjenden flyttet mindst 40 m; aktuelt standpunkt inden for 15 m; standset i ildafstand og front inden for 30 grader"));
+                return;
+            }
+        }
+        return; // The shared timeout gives a named FAIL if the contract is never reached.
+    }
     if (AcceptanceId == TEXT("ADVANCE-FIRE"))
     {
         if (AcceptanceCompany->OrderComponent->GetCurrentOrder().OrderSerial != AcceptanceSerial)
@@ -376,18 +439,27 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
                 AcceptanceCompany->MovementExecutor->GetSuspendedMission().OrderSerial != AcceptanceSerial ||
                 AcceptanceCompany->CombatComponent->AmmunitionRounds >= AcceptanceAmmo)
             { FinishBehaviourAcceptanceCase(false, TEXT("synlig ildkontakt gav ikke suspension og virkelig salve")); return; }
-            AcceptanceOther->SetActorLocation(AcceptanceStart + FVector(200000, 0, 0));
+            AcceptanceOther->SetActorLocation(AcceptanceStart + FVector(26000, 0, 0));
             AcceptancePhase = 2;
             AcceptanceEventAt = AcceptanceElapsed;
             return;
         }
         if (AcceptancePhase == 2 && AcceptanceSinceEvent < 9.9f && AcceptanceCompany->MovementExecutor->HasMovementGoal())
         { FinishBehaviourAcceptanceCase(false, TEXT("fremrykning genoptaget foer 10s uden ildkontakt")); return; }
-        if (AcceptancePhase == 2 && AcceptanceSinceEvent > 170.0f)
-        { AcceptanceCheck(!AcceptanceCompany->MovementExecutor->GetSuspendedMission().IsValidOrder() &&
-            // The advance stands off at its chosen fire distance in front of the enemy it names: the goal is the order's resolved target.
-            FVector::Dist2D(AcceptanceCompany->GetActorLocation(), AcceptanceCompany->OrderComponent->GetCurrentOrder().TargetLocation) < 100.0f,
-            TEXT("ADVANCE: rigtig salve under suspension, fjende ude af syne, hysterese og samme mission til maal")); return; }
+        if (AcceptancePhase == 2 && AcceptanceSinceEvent >= 10.0f &&
+            AcceptanceCompany->MovementExecutor->IsHoldingForFire() &&
+            FVector::Dist2D(AcceptanceCompany->GetActorLocation(), AcceptanceCompany->OrderComponent->GetCurrentOrder().TargetLocation) <= 1500.0f)
+        {
+            FVector AcceptanceAdvanceStand;
+            float AcceptanceAdvanceFacing = 0.0f;
+            const bool bAcceptanceAdvanceStand = UStrategyOrderComponent::ComputeAttackStand(AcceptanceOther, AcceptanceCompany,
+                AcceptanceAdvanceStand, AcceptanceAdvanceFacing, AcceptanceCompany->GetActorLocation());
+            AcceptanceCheck(bAcceptanceAdvanceStand &&
+                FVector::Dist2D(AcceptanceCompany->OrderComponent->GetCurrentOrder().TargetLocation, AcceptanceAdvanceStand) <= 1500.0f &&
+                AcceptanceCompany->MovementExecutor->IsHoldingForFire() &&
+                AcceptanceCompany->FireControlComponent->CanEngageTarget(AcceptanceOther),
+                TEXT("ADVANCE: salve, 10s hysterese, samme serial og genoptaget fremrykning til opdateret ildafstand")); return;
+        }
     }
 
     if ((AcceptanceId == TEXT("SUSPEND-WAYPOINT") || AcceptanceId == TEXT("CLEAR-SUSPEND")) && AcceptancePhase == 1 && AcceptanceSinceEvent > 2.0f)

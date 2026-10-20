@@ -67,6 +67,9 @@ public:
     EStrategyCommandVisualState GetCommandVisualState() const;
 
     FStrategyOrder GetLatestRequestedOrder() const { return bHasDelayedOrder ? DelayedOrder : CurrentOrder; }
+    static bool ComputeAttackStand(const AStrategyUnit* AttackEnemy, const AStrategyUnit* AttackUnit,
+        FVector& OutLocation, float& OutFacingYaw, const FVector& AttackFrom, float AttackLateral = 0.0f);
+    void RetargetActiveOrder(const FVector& NewTarget, float NewFacingYaw);
     void ResolveAttackDestination(FStrategyOrder& AttackOrder) const;
     void AdvanceWaypoint() { ++CurrentOrder.NextWaypointIndex; }
 

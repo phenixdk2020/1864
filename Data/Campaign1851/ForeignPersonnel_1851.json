@@ -1,0 +1,499 @@
+{
+  "scenario": "1851",
+  "note": "Historiske personer fra arkiverede landepakker. Egenskaber, erfaring og feltkommando er spilskøn, ikke verificeret historisk rangering. Officerstats 1-10, ministerstats 0-100. Ressortfordeling SE/NO er pakkens spilvalg; delte personer har flere ressorter. PR: kun dokumenterede ressorter, resten ukendt. Ingen tvungen historisk udskiftning.",
+  "nations": [
+    {
+      "nation": "SE",
+      "commander": "G_SE_LOWENHIELM",
+      "officerSource": "Countries/SwedenNorway/GameReady/Officers1851.json",
+      "officers": [
+        {
+          "id": "G_SE_LOWENHIELM",
+          "name": "Gustaf Carl Fredrik Löwenhielm",
+          "born": 1771,
+          "rank": "General af kavaleriet",
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "experience": 50
+        },
+        {
+          "id": "G_SE_CLOWENHIELM",
+          "name": "Carl Gustaf Löwenhielm",
+          "born": 1790,
+          "rank": "Generalløjtnant",
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "experience": 50
+        },
+        {
+          "id": "G_SE_HOHEN",
+          "name": "Carl Ludvig von Hohenhausen",
+          "born": 1787,
+          "rank": "Generalmajor",
+          "experience": 60,
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5
+        }
+      ],
+      "portfolios": [
+        {
+          "portfolio": "Interior",
+          "candidates": [
+            {
+              "name": "Johan Fredrik Fåhræus",
+              "born": 1796,
+              "role": "civilminister; Interior-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "PublicWorks",
+          "candidates": [
+            {
+              "name": "Johan Fredrik Fåhræus",
+              "born": 1796,
+              "role": "civilminister; PublicWorks-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "War",
+          "candidates": [
+            {
+              "name": "Carl Ludvig von Hohenhausen",
+              "born": 1787,
+              "role": "landforsvarsminister; War-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Transport",
+          "candidates": [
+            {
+              "name": "Johan Fredrik Fåhræus",
+              "born": 1796,
+              "role": "civilminister; Transport-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Intendance",
+          "candidates": [
+            {
+              "name": "Carl Ludvig von Hohenhausen",
+              "born": 1787,
+              "role": "landforsvarsminister; Intendance-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Foreign",
+          "candidates": [
+            {
+              "name": "Gustaf Algernon Stierneld",
+              "born": 1791,
+              "role": "udenrigsminister; Foreign-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Navy",
+          "candidates": [
+            {
+              "name": "Baltzar Julius Ernst von Platen",
+              "born": 1804,
+              "role": "søforsvarsminister; Navy-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Finance",
+          "candidates": [
+            {
+              "name": "Johan August Gripenstedt",
+              "born": 1813,
+              "role": "fungerende finansminister 10. januar–21. oktober; Finance-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nation": "NO",
+      "commander": "G_NO_BLOCH",
+      "officerSource": "Countries/SwedenNorway/GameReady/Officers1851.json",
+      "officers": [
+        {
+          "id": "G_NO_BLOCH",
+          "name": "Hans Glad Bloch",
+          "born": 1791,
+          "rank": "Generalløjtnant",
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "experience": 50
+        }
+      ],
+      "portfolios": [
+        {
+          "portfolio": "Interior",
+          "candidates": [
+            {
+              "name": "Frederik Stang",
+              "born": 1808,
+              "role": "indreminister; Interior-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "PublicWorks",
+          "candidates": [
+            {
+              "name": "Frederik Stang",
+              "born": 1808,
+              "role": "indreminister; PublicWorks-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "War",
+          "candidates": [
+            {
+              "name": "Thomas Edvard von Westen Sylow",
+              "born": 1792,
+              "role": "arméminister; War-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Transport",
+          "candidates": [
+            {
+              "name": "Frederik Stang",
+              "born": 1808,
+              "role": "indreminister; Transport-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Intendance",
+          "candidates": [
+            {
+              "name": "Thomas Edvard von Westen Sylow",
+              "born": 1792,
+              "role": "arméminister; Intendance-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Foreign",
+          "candidates": [
+            {
+              "name": "Frederik Due",
+              "born": 1796,
+              "role": "statsminister i Stockholm; Foreign-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Navy",
+          "candidates": [
+            {
+              "name": "Ole Wilhelm Erichsen",
+              "born": 1793,
+              "role": "marineminister; Navy-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        },
+        {
+          "portfolio": "Finance",
+          "candidates": [
+            {
+              "name": "Christian Zetlitz Bretteville",
+              "born": 1800,
+              "role": "finansminister; Finance-fordeling er spilvalg",
+              "historical": true,
+              "skill": 60,
+              "thrift": 60,
+              "caution": 70
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nation": "PR",
+      "commander": "PR_WRANGEL",
+      "officerSource": "Countries/Prussia/GameReady/Officers1851.json",
+      "officers": [
+        {
+          "id": "PR_WRANGEL",
+          "name": "Friedrich von Wrangel",
+          "rank": "General af kavalleriet",
+          "born": 1784,
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "experience": 50,
+          "nation": "PR",
+          "source": "WRANGEL",
+          "note": "Ni neutrale egenskaber som spilskøn; ikke en historisk rangering. 1851: Wrangel med orlovsforbehold; Stockhausen krigsminister, ikke automatisk feltchef.",
+          "fieldStatus": {
+            "born": {
+              "status": "kilde",
+              "source": "WRANGEL",
+              "reason": "Biografisk fødselsår."
+            },
+            "leadership": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "inspiration": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "initiative": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "tactical": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "staff": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "discipline": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "aggression": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "composure": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "political": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "experience": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            }
+          }
+        },
+        {
+          "id": "PR_STOCKHAUSEN",
+          "name": "August von Stockhausen",
+          "rank": "Generalløjtnant",
+          "born": null,
+          "leadership": 5,
+          "inspiration": 5,
+          "initiative": 5,
+          "tactical": 5,
+          "staff": 5,
+          "discipline": 5,
+          "aggression": 5,
+          "composure": 5,
+          "political": 5,
+          "experience": 50,
+          "nation": "PR",
+          "source": "STOCKHAUSEN",
+          "note": "Ni neutrale egenskaber som spilskøn; ikke en historisk rangering. 1851: Wrangel med orlovsforbehold; Stockhausen krigsminister, ikke automatisk feltchef.",
+          "fieldStatus": {
+            "born": {
+              "status": "skøn",
+              "source": "STOCKHAUSEN",
+              "reason": "Fødselsår ikke afskrevet sikkert i læst artikel."
+            },
+            "leadership": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "inspiration": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "initiative": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "tactical": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "staff": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "discipline": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "aggression": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "composure": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "political": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            },
+            "experience": {
+              "status": "skøn",
+              "source": "DESIGN",
+              "reason": "Neutral baseline: hver egenskab 5/10, erfaring 50/100. Ingen vurdering af historiske meritter."
+            }
+          }
+        }
+      ],
+      "portfolios": [
+        {
+          "portfolio": "Foreign",
+          "candidates": [
+            {
+              "name": "Otto von Manteuffel",
+              "skill": 50,
+              "thrift": 50,
+              "caution": 50,
+              "role": "Udenrigsminister",
+              "source": "https://www.deutsche-biographie.de/sfz57925.html"
+            }
+          ]
+        },
+        {
+          "portfolio": "War",
+          "candidates": [
+            {
+              "name": "August von Stockhausen",
+              "skill": 50,
+              "thrift": 50,
+              "caution": 50,
+              "role": "Krigsminister; ikke feltchef",
+              "source": "Countries/Prussia/GameReady/Officers1851.json"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

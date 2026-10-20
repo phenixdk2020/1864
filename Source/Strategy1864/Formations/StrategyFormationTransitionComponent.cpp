@@ -130,6 +130,22 @@ void UStrategyFormationTransitionComponent::TickComponent(
     }
 }
 
+void UStrategyFormationTransitionComponent::ExtendReformSeconds(float Seconds)
+{
+    if (!OwnerUnit || ReformRemainingSeconds <= 0.0f || Seconds <= ReformRemainingSeconds)
+    {
+        return;
+    }
+    ReformRemainingSeconds = Seconds;
+    // Only a march that was already held for the reform is held longer (cavalry and a deployment on the move are not).
+    if (OwnerUnit->MovementExecutor && OwnerUnit->MovementExecutor->HasMovementGoal() && OwnerUnit->MovementExecutor->IsTemporarilyPaused())
+    {
+        OwnerUnit->MovementExecutor->PauseMovementForSeconds(Seconds);
+        OwnerUnit->SetUnitState(EStrategyUnitState::Reforming);
+    }
+    SetComponentTickEnabled(true);
+}
+
 void UStrategyFormationTransitionComponent::CompleteReform()
 {
     if (!OwnerUnit || !OwnerUnit->IsCombatEffective())

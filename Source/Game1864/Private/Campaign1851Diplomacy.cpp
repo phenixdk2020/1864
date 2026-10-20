@@ -122,7 +122,9 @@ bool ACampaign1851Map::DoDiplomacy(int32 NationIndex, EDiplomacyAction Action, F
 	D.Reasons = FString::Printf(TEXT("forholdet er nu %.0f"), N.Relation);
 	D.bDone = true;
 	AddDecision(D);
-	return true;
+	const auto LogActionResult = true;
+
+	return LogActionResult;
 }
 
 float ACampaign1851Map::GuaranteeDamping() const
@@ -181,12 +183,15 @@ void ACampaign1851Map::MonthlyDiplomacy()
 		{
 			continue;
 		}
+		const float LogRelationBefore = N.Relation;
 		N.Relation += (N.BaseRelation - N.Relation) * 0.02f;
 		if (N.Id == TEXT("PR") || N.Id == TEXT("AT"))
 		{
 			N.Relation -= (Tension - 25.f) / 40.f;
 		}
 		N.Relation = FMath::Clamp(N.Relation, -100.f, 100.f);
+        LogCampaignDecision(N.Id, TEXT("relation"), TEXT("Maanedlig relationsdrift"), TEXT("Grundrelation og spaending"), TEXT("ai"),
+            { { TEXT("before"), double(LogRelationBefore) }, { TEXT("relation"), double(N.Relation) }, { TEXT("tension"), double(Tension) } }, { { TEXT("target"), Nations[PlayerNation].Id } });
 	}
 	// In war: the ally sends its brigade once; the guarantors call a conference after two months.
 	if (bAtWar)
@@ -196,6 +201,7 @@ void ACampaign1851Map::MonthlyDiplomacy()
 			if (N.bAlliance && !N.bAllyArrived)
 			{
 				N.bAllyArrived = true;
+                LogCampaignDecision(N.Id, TEXT("alliance"), TEXT("Allieret hjaelpebrigade ankommer"), TEXT("Alliance under krig; en gang pr. krig"), TEXT("ai"));
 				const int32 Copenhagen = FindCity(TEXT("København"));
 				for (int32 b = 0; b < 3 && Copenhagen != INDEX_NONE; ++b)
 				{
@@ -213,6 +219,9 @@ void ACampaign1851Map::MonthlyDiplomacy()
 		if (bGuaranteed && PeaceTalksDay < 0.0 && CampaignDays - WarStartDay > TalksAfter)
 		{
 			PeaceTalksDay = CampaignDays;
+            for (const FCampaign1851Nation& LogGuarantor : Nations) if (LogGuarantor.bGuarantee && LogGuarantor.Relation >= 40.f)
+                LogCampaignDecision(LogGuarantor.Id, TEXT("peace"), TEXT("Kraever fredskonference"), TEXT("Garantier og krigens varighed"), TEXT("ai"),
+                    { { TEXT("war_days"), double(CampaignDays - WarStartDay) }, { TEXT("threshold"), double(TalksAfter) } });
 			News.Add(TEXT("Stormagterne kræver en fredskonference i London: fredsforhandling er mulig på bedre vilkår"));
 		}
 	}
@@ -335,7 +344,9 @@ bool ACampaign1851Map::MakePeace(int32 Offer, FString* OutReason)
 	D.Reasons = Ceded.Num() > 0 ? FString::Printf(TEXT("afstået: %s"), *FString::Join(Ceded, TEXT(", "))) : FString(TEXT("intet afstået"));
 	D.bDone = true;
 	AddDecision(D);
-	return true;
+	const auto LogActionResult = true;
+
+	return LogActionResult;
 }
 
 TArray<FString> ACampaign1851Map::SaveDiplomacy() const

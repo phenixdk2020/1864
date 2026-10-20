@@ -1,4 +1,6 @@
 #include "StrategyMovementExecutorComponent.h"
+#include "../Visual/StrategyColumnDrill.h"
+#include "../Visual/StrategyInfantryVisualComponent.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
 #include "../AI/StrategyDecisionLog.h"
 #include "../Formations/StrategyFormationComponent.h"
@@ -55,6 +57,16 @@ void UStrategyMovementExecutorComponent::BeginPlay()
 
 void UStrategyMovementExecutorComponent::HandleOrderChanged(const FStrategyOrder& NewOrder)
 {
+    AttackRetargetElapsed = 1.0f;
+    AttackStandRangeCm = 0.0f;
+    AttackLateralSlotCm = 0.0f;
+    if (OwnerUnit && NewOrder.AttackTarget.IsValid())
+    {
+        const FVector RetargetFrom = NewOrder.Waypoints.Num() >= 2 ? NewOrder.Waypoints[NewOrder.Waypoints.Num() - 2] : OwnerUnit->GetActorLocation();
+        const FVector RetargetFront = (NewOrder.AttackTarget->GetActorLocation() - RetargetFrom).GetSafeNormal2D();
+        const FVector RetargetRight(-RetargetFront.Y, RetargetFront.X, 0.0f);
+        AttackLateralSlotCm = FVector::DotProduct(NewOrder.TargetLocation - NewOrder.AttackTarget->GetActorLocation(), RetargetRight);
+    }
     SuspendedMission = FStrategyOrder();
     FireReactionQuietSeconds = 0.0f;
     if (!OwnerUnit || !OwnerUnit->OrderComponent)
@@ -128,6 +140,9 @@ void UStrategyMovementExecutorComponent::BeginMovementForOrder(const FStrategyOr
         if (OwnerUnit->FieldOfficerComponent) OwnerUnit->FieldOfficerComponent->LeaveAutomaticFireCover();
         if (OwnerUnit->FieldworksComponent) OwnerUnit->FieldworksComponent->CancelFieldworks();
     }
+    DrillApproachAttemptSerial = INDEX_NONE;
+    DrillApproachSerial = INDEX_NONE;
+    bDrillArrivalArmed = false;
     bHoldingForFire = false;
     ReleaseBridgeSlot();
 
@@ -222,6 +237,7 @@ void UStrategyMovementExecutorComponent::BeginMovementForOrder(const FStrategyOr
 
     GoalFacingYaw = Order.FacingYaw;
     bApplyGoalFacing = Order.bHasFacing && Order.NextWaypointIndex >= Order.Waypoints.Num() - 1;
+    ConfigureColumnDrillApproach(Order);
     bKeepFacingMove = Order.bKeepFacing && Order.bHasFacing;
     ExecutingOrderSerial = Order.OrderSerial;
     bHasMovementGoal = true;
@@ -247,25 +263,96 @@ void UStrategyMovementExecutorComponent::TickComponent(
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
     ExecutedVelocity = FVector::ZeroVector;
 
-    if ((!bHasMovementGoal && !bHoldingForFire) || !OwnerUnit || !OwnerUnit->OrderComponent)
+    if (!OwnerUnit || !OwnerUnit->OrderComponent)
     {
         SetComponentTickEnabled(false);
         return;
     }
 
-    if (OwnerUnit->FieldOfficerComponent && OwnerUnit->FieldOfficerComponent->IsStandingUpFromFireCover()) return;
+    if (HasColumnDrillApproach())
+    {
+        const AStrategyCompanyUnit* DrillCompany = Cast<AStrategyCompanyUnit>(OwnerUnit);
+        if (!DrillCompany || !DrillCompany->InfantryVisualComponent ||
+            !DrillCompany->InfantryVisualComponent->CanUseColumnDrill() ||
+            DrillCompany->InfantryVisualComponent->GetRenderedSoldierCount() != DrillApproachCount)
+            ClearColumnDrillApproach();
+    }
     if (bHoldingForFire && !OwnerUnit->IsCombatEffective())
     {
         StopMovement();
         return;
     }
-    const FStrategyOrder CurrentOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
+    FStrategyOrder CurrentOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
     if (CurrentOrder.OrderSerial != ExecutingOrderSerial ||
         (!IsMovementOrder(CurrentOrder.Type) && !(bHoldingForFire && CurrentOrder.Type == EStrategyOrderType::Hold)))
     {
         StopMovement();
         return;
     }
+
+    AStrategyUnit* RetargetEnemy = CurrentOrder.AttackTarget.Get();
+    const bool bRetargetAttack = (CurrentOrder.Type == EStrategyOrderType::AttackHere || CurrentOrder.Type == EStrategyOrderType::Advance) &&
+        IsValid(RetargetEnemy) && RetargetEnemy->IsCombatEffective() && RetargetEnemy->Side != OwnerUnit->Side;
+    AttackRetargetElapsed += DeltaTime;
+    if (bRetargetAttack && AttackRetargetElapsed >= 1.0f)
+    {
+        AttackRetargetElapsed = 0.0f;
+        const FVector RetargetPosition = OwnerUnit->GetActorLocation();
+        const FVector RetargetFrom = CurrentOrder.Waypoints.Num() >= 2 ?
+            CurrentOrder.Waypoints[CurrentOrder.Waypoints.Num() - 2] : RetargetPosition;
+        FVector RetargetStand;
+        float RetargetFacing = 0.0f;
+        if (UStrategyOrderComponent::ComputeAttackStand(RetargetEnemy, OwnerUnit, RetargetStand, RetargetFacing, RetargetFrom, AttackLateralSlotCm))
+        {
+            AttackStandRangeCm = FVector::Dist2D(RetargetStand, RetargetEnemy->GetActorLocation());
+            const float RetargetDistance = FVector::Dist2D(RetargetPosition, RetargetEnemy->GetActorLocation());
+            // An approaching enemy must not pull us through its position, or cause a backwards march.
+            if (RetargetDistance <= AttackStandRangeCm)
+            {
+                RetargetStand = RetargetPosition;
+                RetargetFacing = (RetargetEnemy->GetActorLocation() - RetargetPosition).Rotation().Yaw;
+            }
+            const float RetargetThreshold = FMath::Max(1000.0f, RetargetDistance * 0.1f);
+            if (FVector::Dist2D(CurrentOrder.TargetLocation, RetargetStand) > RetargetThreshold)
+            {
+                const FVector RetargetDestination = CurrentOrder.Waypoints.IsValidIndex(CurrentOrder.NextWaypointIndex) &&
+                    CurrentOrder.NextWaypointIndex < CurrentOrder.Waypoints.Num() - 1 ? CurrentOrder.ActiveDestination() : RetargetStand;
+                FStrategyRoutePlan RetargetPlan;
+                if (OwnerUnit->RoutePlanner) RetargetPlan = OwnerUnit->RoutePlanner->BuildRoutePlan(RetargetPosition, RetargetDestination);
+                // Reject an unsafe route without discarding the last usable destination.
+                if (!OwnerUnit->RoutePlanner || RetargetPlan.bValid)
+                {
+                    ReleaseBridgeSlot();
+                    OwnerUnit->OrderComponent->RetargetActiveOrder(RetargetStand, RetargetFacing);
+                    CurrentOrder = OwnerUnit->OrderComponent->GetCurrentOrder();
+                    if (bHoldingForFire) SuspendedMission = CurrentOrder;
+                    MovementGoal = RetargetDestination;
+                    ActiveRoutePlan = RetargetPlan;
+                    RoutePoints = RetargetPlan.Points;
+                    if (RoutePoints.IsEmpty()) RoutePoints.Add(MovementGoal);
+                    RoutePointIndex = 0;
+                    GoalFacingYaw = RetargetFacing;
+                    bApplyGoalFacing = CurrentOrder.NextWaypointIndex >= CurrentOrder.Waypoints.Num() - 1;
+                    bTurningToGoalFacing = false;
+                    bHasMovementGoal = !bHoldingForFire;
+                    RefreshColumnDrillApproach();
+                    if (bHasMovementGoal && PauseRemainingSeconds <= 0.0f &&
+                        (!OwnerUnit->FormationTransition || !OwnerUnit->FormationTransition->IsReforming()))
+                        OwnerUnit->SetUnitState(EStrategyUnitState::Moving);
+                }
+            }
+        }
+    }
+    const bool bInsideAttackStand = bRetargetAttack && AttackStandRangeCm > 0.0f &&
+        CurrentOrder.NextWaypointIndex >= CurrentOrder.Waypoints.Num() - 1 &&
+        FVector::Dist2D(OwnerUnit->GetActorLocation(), RetargetEnemy->GetActorLocation()) <= AttackStandRangeCm;
+    if (!bHasMovementGoal && !bHoldingForFire && !bRetargetAttack)
+    {
+        SetComponentTickEnabled(false);
+        return;
+    }
+
+    if (OwnerUnit->FieldOfficerComponent && OwnerUnit->FieldOfficerComponent->IsStandingUpFromFireCover()) return;
 
     // Higher local reactions halt execution before stop-and-fire can turn the
     // front or deploy a column. Manual squares retain their existing movement.
@@ -287,9 +374,9 @@ void UStrategyMovementExecutorComponent::TickComponent(
         OwnerUnit->CombatComponent && OwnerUnit->FireControlComponent &&
         (!OwnerUnit->FireDisciplineComponent || OwnerUnit->FireDisciplineComponent->AllowsAutomaticFire()) ?
         OwnerUnit->CombatComponent->FindBestTarget(false) : nullptr;
-    // A designated enemy has an exact stand-off goal, including backing out when already too close.
+    // A designated enemy has a tracked stand-off goal; an enemy already inside it halts the march.
     if (MovementFireTarget && CurrentOrder.AttackTarget.Get() == MovementFireTarget &&
-        !bHoldingForFire && FVector::Dist2D(OwnerUnit->GetActorLocation(), CurrentOrder.TargetLocation) > FMath::Max(ArrivalToleranceCm, 1200.0f))
+        !bHoldingForFire && !bInsideAttackStand && FVector::Dist2D(OwnerUnit->GetActorLocation(), CurrentOrder.TargetLocation) > FMath::Max(ArrivalToleranceCm, 1200.0f))
         MovementFireTarget = nullptr;   // (within 12 m of the stand-off point it may halt and fire: no crawl over the last metres before the first volley)
     // The halt must not come on the arc: an enemy in front of the unit (inside the fire cone) stops an attack/advance only when the
     // far corner of his front, measured from OUR front line as fire control does, is inside the approach range. Before, the middle of
@@ -351,6 +438,17 @@ void UStrategyMovementExecutorComponent::TickComponent(
         }
         return;
     }
+
+    if (bInsideAttackStand)
+    {
+        FRotator RetargetRotation = OwnerUnit->GetActorRotation();
+        const float RetargetYaw = (RetargetEnemy->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
+        RetargetRotation.Yaw = FMath::FixedTurn(RetargetRotation.Yaw, RetargetYaw, TurnSpeedDegreesPerSecond * DeltaTime);
+        OwnerUnit->SetActorRotation(RetargetRotation);
+        if (!OwnerUnit->FormationTransition || !OwnerUnit->FormationTransition->IsReforming()) OwnerUnit->SetUnitState(EStrategyUnitState::Ready);
+        return;
+    }
+    if (!bHasMovementGoal) return;
 
     if (PauseRemainingSeconds > 0.0f)
     {
@@ -431,6 +529,8 @@ void UStrategyMovementExecutorComponent::TickComponent(
            FVector::Dist2D(CurrentLocation, RoutePoints[RoutePointIndex]) <= FMath::Max(ArrivalToleranceCm, 100.0f))
         ++RoutePointIndex;
 
+    if (RoutePointIndex == RoutePoints.Num() - 1 && !HasColumnDrillApproach())
+        ConfigureColumnDrillApproach(CurrentOrder);
     const FVector ActiveWaypoint = RoutePoints[RoutePointIndex];
     const FVector WaypointDelta = ActiveWaypoint - CurrentLocation;
     const FVector FlatDelta(WaypointDelta.X, WaypointDelta.Y, 0.0f);
@@ -656,7 +756,9 @@ void UStrategyMovementExecutorComponent::FinishMovement()
     }
     ExecutedVelocity = FVector::ZeroVector;
     bHasMovementGoal = false;
-    SetComponentTickEnabled(false);
+    const FStrategyOrder RetargetFinishedOrder = OwnerUnit && OwnerUnit->OrderComponent ? OwnerUnit->OrderComponent->GetCurrentOrder() : FStrategyOrder();
+    SetComponentTickEnabled((RetargetFinishedOrder.Type == EStrategyOrderType::AttackHere || RetargetFinishedOrder.Type == EStrategyOrderType::Advance) &&
+        RetargetFinishedOrder.AttackTarget.IsValid());
 
     if (!OwnerUnit)
     {
@@ -853,9 +955,12 @@ bool UStrategyMovementExecutorComponent::TryRetargetDuringBridge(
     ActiveRoutePlan.bUsesBridge = true;
     ActiveRoutePlan.bValid = true;
 
+    DrillApproachAttemptSerial = INDEX_NONE;
+    DrillApproachSerial = INDEX_NONE;
     MovementGoal = Order.ActiveDestination();
     GoalFacingYaw = Order.FacingYaw;
     bApplyGoalFacing = Order.bHasFacing && Order.NextWaypointIndex >= Order.Waypoints.Num() - 1;
+    RefreshColumnDrillApproach();
     bKeepFacingMove = Order.bKeepFacing && Order.bHasFacing;
     ExecutingOrderSerial = Order.OrderSerial;
     bTurningToGoalFacing = false;
@@ -979,4 +1084,121 @@ void UStrategyMovementExecutorComponent::SuspendMissionForReaction()
             int32(FireOldOrder.Type), FireOldOrder.OrderSerial, FireOldOrder.NextWaypointIndex, FireReactionReleaseSeconds),
         TEXT("permanent HOLD og annullering af rute: afvist; fortsat march: afvist under ildreaktionen"));
     SetComponentTickEnabled(true); // Turn toward a legal fire target without a movement goal.
+}
+
+
+bool UStrategyMovementExecutorComponent::HasColumnDrillApproach() const
+{
+    return DrillApproachSerial != INDEX_NONE && OwnerUnit && OwnerUnit->OrderComponent &&
+        OwnerUnit->OrderComponent->GetCurrentOrder().OrderSerial == DrillApproachSerial;
+}
+
+void UStrategyMovementExecutorComponent::ConfigureColumnDrillApproach(const FStrategyOrder& DrillOrder)
+{
+    const AStrategyCompanyUnit* DrillCompany = Cast<AStrategyCompanyUnit>(OwnerUnit);
+    const bool DrillDebug = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugFormation"));
+    const auto DrillSkip = [&](const TCHAR* DrillWhy)
+    {
+        if (DrillDebug && OwnerUnit)
+            UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s approach not set: %s (order=%d)"), *OwnerUnit->StableUnitId.ToString(), DrillWhy, DrillOrder.OrderSerial);
+    };
+    if (!FStrategyColumnDrill::Enabled() || !DrillCompany || !DrillCompany->InfantryVisualComponent || !OwnerUnit->FormationComponent) return;
+    if (DrillOrder.bKeepFacing) return;   // a side-step keeps its front: no column drill
+    if (!DrillCompany->InfantryVisualComponent->CanUseColumnDrill()) { DrillSkip(TEXT("visual cannot use the drill now")); return; }
+    if (OwnerUnit->FormationComponent->CurrentFormation != EStrategyFormationType::MarchColumn) { DrillSkip(TEXT("not in march column yet")); return; }
+    if (OwnerUnit->FormationComponent->RankCount != 3 || OwnerUnit->FormationComponent->ColumnWidth != 3) { DrillSkip(TEXT("not 3 ranks")); return; }
+    if (DrillOrder.NextWaypointIndex < DrillOrder.Waypoints.Num() - 1 || RoutePoints.IsEmpty()) { DrillSkip(TEXT("not on the last leg")); return; }
+    if (DrillApproachAttemptSerial == DrillOrder.OrderSerial) { DrillSkip(TEXT("already attempted for this order")); return; }
+    DrillApproachAttemptSerial = DrillOrder.OrderSerial;
+    const int32 DrillCount = DrillCompany->InfantryVisualComponent->GetRenderedSoldierCount();
+    if (DrillCount <= 0) return;
+    const float DrillWidth = ((DrillCount + 2) / 3 - 1) * OwnerUnit->FormationComponent->SoldierLateralSpacingCm;
+    const float DrillRadius = FStrategyColumnDrill::Radius(OwnerUnit->FormationComponent->SoldierRankSpacingCm, 0.f);
+    const FVector DrillPrevious = RoutePoints.Num() > 1 ? RoutePoints[RoutePoints.Num() - 2] : OwnerUnit->GetActorLocation();
+    FVector DrillDirection = (DrillOrder.TargetLocation - DrillPrevious).GetSafeNormal2D();
+    // Without a given front the line faces the way the column marched.
+    const FVector DrillFacing = DrillOrder.bHasFacing ? FRotator(0.f, DrillOrder.FacingYaw, 0.f).Vector() :
+        (DrillDirection.IsNearlyZero() ? OwnerUnit->GetActorForwardVector().GetSafeNormal2D() : DrillDirection);
+    if (DrillDirection.IsNearlyZero()) DrillDirection = DrillFacing;
+    // The column enters the line axis from the side it comes from: the head (the actor in a column) stops two turn radii
+    // short of the near flank on the middle-rank line, and the visual head curves in and walks to the far flank.
+    // The order target is the line's middle-rank centre (front-anchored slots put the front rank one rank ahead).
+    const float DrillSide = FVector::DotProduct(DrillDirection, FStrategyColumnDrill::Right(DrillFacing)) >= 0.f ? 1.f : -1.f;
+    const FVector DrillAxis = FStrategyColumnDrill::Right(DrillFacing) * DrillSide;
+    FVector DrillGoal = DrillOrder.TargetLocation - DrillAxis * (DrillWidth * 0.5f + 2.f * DrillRadius);
+    DrillGoal.Z = MovementGoal.Z;
+    MovementGoal = DrillGoal;
+    // Re-route to the approach point itself: the planner's intermediate points lead towards the old target and would
+    // walk the column past the approach point and back again.
+    FStrategyRoutePlan DrillRoute;
+    if (OwnerUnit->RoutePlanner) DrillRoute = OwnerUnit->RoutePlanner->BuildRoutePlan(OwnerUnit->GetActorLocation(), DrillGoal);
+    if (DrillRoute.bValid && DrillRoute.Points.Num() > 0)
+    {
+        ActiveRoutePlan = DrillRoute;
+        RoutePoints = DrillRoute.Points;
+        RoutePoints.Last() = DrillGoal;
+        RoutePointIndex = 0;
+    }
+    else RoutePoints.Last() = DrillGoal;
+    DrillApproachDirection = DrillAxis;
+    DrillApproachSerial = DrillOrder.OrderSerial;
+    DrillApproachCount = DrillCount;
+    bApplyGoalFacing = false;
+    bDrillArrivalArmed = true;
+    DrillArrivalCentre = DrillOrder.TargetLocation;
+    DrillArrivalPoint = DrillGoal;
+    DrillArrivalFacing = DrillFacing.Rotation().Yaw;
+    UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s approach set order=%d goal=%s axis-yaw=%.1f line-centre=%s front=%.1f"), *OwnerUnit->StableUnitId.ToString(),
+        DrillOrder.OrderSerial, *DrillGoal.ToString(), DrillAxis.Rotation().Yaw, *DrillOrder.TargetLocation.ToString(), DrillArrivalFacing);
+}
+
+bool UStrategyMovementExecutorComponent::GetColumnDrillArrival(FVector& OutLineCentre, float& OutFacingYaw) const
+{
+    if (!bDrillArrivalArmed || bHasMovementGoal || !OwnerUnit ||
+        FVector::Dist2D(OwnerUnit->GetActorLocation(), DrillArrivalPoint) > FMath::Max(300.f, ArrivalToleranceCm * 3.f)) return false;
+    OutLineCentre = DrillArrivalCentre;
+    OutFacingYaw = DrillArrivalFacing;
+    return true;
+}
+
+void UStrategyMovementExecutorComponent::RelocateAfterFormationDrill(const FTransform& DrillFrame)
+{
+    if (!OwnerUnit) return;
+    FVector DrillLocation = DrillFrame.GetLocation();
+    // Same ground-height convention as movement: retain the current route-interpolated Z.
+    DrillLocation.Z = OwnerUnit->GetActorLocation().Z;
+    OwnerUnit->SetActorLocationAndRotation(DrillLocation, FRotator(0.f, DrillFrame.Rotator().Yaw, 0.f));
+    ExecutedVelocity = FVector::ZeroVector;
+}
+
+
+void UStrategyMovementExecutorComponent::FinishFormationDrillHold(float DrillRemainingSeconds)
+{
+    // Release only the long hold owned by this drill; the replacement morph retains its budget.
+    PauseRemainingSeconds = FMath::Min(PauseRemainingSeconds, FMath::Max(0.f, DrillRemainingSeconds));
+    if (OwnerUnit && OwnerUnit->FormationTransition)
+        OwnerUnit->FormationTransition->ReformRemainingSeconds = FMath::Min(
+            OwnerUnit->FormationTransition->ReformRemainingSeconds, FMath::Max(0.01f, DrillRemainingSeconds));
+}
+
+
+void UStrategyMovementExecutorComponent::ClearColumnDrillApproach()
+{
+    if (HasColumnDrillApproach() && bHasMovementGoal)
+    {
+        const FStrategyOrder DrillCurrent = OwnerUnit->OrderComponent->GetCurrentOrder();
+        MovementGoal = DrillCurrent.ActiveDestination();
+        if (!RoutePoints.IsEmpty()) RoutePoints.Last() = MovementGoal;
+        bApplyGoalFacing = DrillCurrent.bHasFacing && DrillCurrent.NextWaypointIndex >= DrillCurrent.Waypoints.Num() - 1;
+    }
+    DrillApproachSerial = INDEX_NONE;
+}
+
+
+void UStrategyMovementExecutorComponent::RefreshColumnDrillApproach()
+{
+    if (!OwnerUnit || !OwnerUnit->OrderComponent || !bHasMovementGoal) return;
+    ClearColumnDrillApproach();
+    DrillApproachAttemptSerial = INDEX_NONE;
+    ConfigureColumnDrillApproach(OwnerUnit->OrderComponent->GetCurrentOrder());
 }

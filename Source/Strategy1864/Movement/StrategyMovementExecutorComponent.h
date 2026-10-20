@@ -49,6 +49,17 @@ public:
     UFUNCTION(BlueprintCallable, Category="Strategy|Movement")
     void StopMovement();
 
+    void FinishFormationDrillHold(float DrillRemainingSeconds);
+    void RelocateAfterFormationDrill(const FTransform& DrillFrame);
+    bool HasColumnDrillApproach() const;
+    FVector GetColumnDrillDirection() const { return DrillApproachDirection; }
+    void ClearColumnDrillApproach();
+    void RefreshColumnDrillApproach();
+    /** A column that marched to its approach point: the line the drill must form (middle-rank centre and front),
+        kept after the order completes (its serial changes to a hold on arrival). False once a new march begins. */
+    bool GetColumnDrillArrival(FVector& OutLineCentre, float& OutFacingYaw) const;
+    void ClearColumnDrillArrival() { bDrillArrivalArmed = false; }
+
     UFUNCTION(BlueprintCallable, Category="Strategy|Movement")
     void RestartCurrentOrderExecution();
 
@@ -97,12 +108,24 @@ public:
 private:
     UPROPERTY(Transient)
     FStrategyOrder SuspendedMission;
+    float AttackRetargetElapsed = 1.0f;
+    float AttackLateralSlotCm = 0.0f;
+    float AttackStandRangeCm = 0.0f;
     float FireReactionQuietSeconds = 0.0f;
     bool bHoldingForFire = false;
     FVector ExecutedVelocity = FVector::ZeroVector;
     UFUNCTION()
     void HandleOrderChanged(const FStrategyOrder& NewOrder);
 
+    void ConfigureColumnDrillApproach(const FStrategyOrder& DrillOrder);
+    int32 DrillApproachCount = 0;
+    int32 DrillApproachAttemptSerial = INDEX_NONE;
+    int32 DrillApproachSerial = INDEX_NONE;
+    FVector DrillApproachDirection = FVector::ForwardVector;
+    bool bDrillArrivalArmed = false;
+    FVector DrillArrivalCentre = FVector::ZeroVector;
+    FVector DrillArrivalPoint = FVector::ZeroVector;
+    float DrillArrivalFacing = 0.f;
     void BeginMovementForOrder(const FStrategyOrder& Order);
     bool TryRetargetDuringBridge(const FStrategyOrder& Order);
     void FinishMovement();

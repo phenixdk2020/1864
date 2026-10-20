@@ -1,5 +1,8 @@
 # Import af Sverige-Norge ? 2026-10-16
 
+Opdatering 2026-10-17: Den efterfølgende niveau B-integration er beskrevet i [Niveau-B-Sverige-Norge-Preussen-2026-10-17.md](Niveau-B-Sverige-Norge-Preussen-2026-10-17.md). Det nedenstående beskriver den tidligere importstatus og dens oprindelige begrænsninger. Niveau B er implementeret og statisk valideret; runtime er ikke afprøvet.
+
+
 **Delvis integration; niveau B er ikke fuldf?rt.** 1825 og 1851 har separate imports. Oslofjorden ligger uden for det eksisterende udsnit, og den eksisterende krigsmodel aktiverer kun PR/AT/DE som fjender. Importen udvider svenske kortdata, men opretter ikke en svensk-norsk krigsmekanik. Ingen build, editor-/spilstart, spiltest eller commit.
 
 ## Pakke og afgr?nsning

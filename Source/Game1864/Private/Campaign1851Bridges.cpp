@@ -327,7 +327,9 @@ bool ACampaign1851Map::BridgeAction(int32 Id, EBridgeAction Action, FString* Out
 	}
 	ApplyBridge(B);
 	RebuildBridgeMeshes();
-	return true;
+	const auto LogActionResult = true;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("build"), TEXT("BridgeAction"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Id"), double(Id) }, { TEXT("Action"), double(Action) } }, {  }); }
+	return LogActionResult;
 }
 
 void ACampaign1851Map::RebuildBridgeMeshes()

@@ -1,3 +1,4 @@
+#include "Campaign1851DecisionLog.h"
 // Nations, growth and the national AI of the 1851 campaign (design manual: multi-nation AI parity,
 // granular AI delegation, historically plausible replay variation). ACampaign1851Map's world layer.
 
@@ -443,6 +444,42 @@ void ACampaign1851Map::PrivateInvestment()
 
 void ACampaign1851Map::AddDecision(const FCampaign1851Decision& D)
 {
+
+ const TCHAR* LogKind = TEXT("other");
+ switch (D.Portfolio)
+ {
+ case ECampaign1851Portfolio::Interior: case ECampaign1851Portfolio::PublicWorks: LogKind = TEXT("build"); break;
+ case ECampaign1851Portfolio::War: LogKind = TEXT("recruit"); break;
+ case ECampaign1851Portfolio::Transport: LogKind = TEXT("march"); break;
+ case ECampaign1851Portfolio::Intendance: case ECampaign1851Portfolio::Finance: LogKind = TEXT("budget"); break;
+ case ECampaign1851Portfolio::Foreign: LogKind = TEXT("relation"); break;
+ case ECampaign1851Portfolio::Navy: LogKind = TEXT("build"); break;
+ default: break;
+ }
+ switch (D.Kind)
+ {
+ case ECampaign1851DecisionKind::CivilBuilding: case ECampaign1851DecisionKind::LinkWork: case ECampaign1851DecisionKind::FortProgramme: case ECampaign1851DecisionKind::Ship: case ECampaign1851DecisionKind::TroopTrain: LogKind = TEXT("build"); break;
+ case ECampaign1851DecisionKind::Recruit: case ECampaign1851DecisionKind::Raise: case ECampaign1851DecisionKind::FillPost: case ECampaign1851DecisionKind::Training: LogKind = TEXT("recruit"); break;
+ case ECampaign1851DecisionKind::Diplomacy: LogKind = TEXT("relation"); break;
+ case ECampaign1851DecisionKind::Peace: LogKind = TEXT("peace"); break;
+ case ECampaign1851DecisionKind::Loan: case ECampaign1851DecisionKind::BuyRaw: case ECampaign1851DecisionKind::SupplyColumn: LogKind = TEXT("budget"); break;
+ case ECampaign1851DecisionKind::Doctrine: LogKind = TEXT("research"); break;
+ case ECampaign1851DecisionKind::Blockade: LogKind = TEXT("other"); break;
+ default: break;
+ }
+ if (D.Action.StartsWith(TEXT("Udenrigs:"))) LogKind = TEXT("relation");
+ if (D.Action.StartsWith(TEXT("Fredsslutning:"))) LogKind = TEXT("peace");
+ if (D.Action.Contains(TEXT("går mod")) || D.Action.Contains(TEXT("venter på forstærkninger"))) LogKind = TEXT("march");
+ if (D.Action.Contains(TEXT("mobiliser"), ESearchCase::IgnoreCase)) LogKind = TEXT("mobilise");
+ if (D.Action.Contains(TEXT("erklærer krig"))) LogKind = TEXT("war");
+ if (D.Action.Contains(TEXT("alliance"), ESearchCase::IgnoreCase)) LogKind = TEXT("alliance");
+ const bool bLogEvent = D.Action.StartsWith(TEXT("Begivenhed:"));
+ if (bLogEvent) LogKind = TEXT("event");
+ const FString LogNation = Nations.IsValidIndex(D.Nation) ? Nations[D.Nation].Id : CampaignLogNation();
+ const FString LogActorName = bLogEvent ? TEXT("event") : D.bAdvice || (Nations.IsValidIndex(D.Nation) && Nations[D.Nation].IsPlayer() && CampaignLogActor != TEXT("player")) ? TEXT("minister") : (Nations.IsValidIndex(D.Nation) && !Nations[D.Nation].IsPlayer() ? FString(TEXT("ai")) : CampaignLogActor);
+ LogCampaignDecision(LogNation, LogKind, D.Action, D.Reasons, LogActorName,
+  { { TEXT("cost"), double(D.Cost) }, { TEXT("score"), double(D.Score) }, { TEXT("done"), double(D.bDone ? 1.0 : 0.0) }, { TEXT("advice"), double(D.bAdvice ? 1.0 : 0.0) } },
+  { { TEXT("portfolio"), Campaign1851Nations::PortfolioName(D.Portfolio) }, { TEXT("key"), D.Key } });
 	Decisions.Add(D);
 	if (Decisions.Num() > 300)
 	{
@@ -826,6 +863,7 @@ TArray<FCampaign1851Decision> ACampaign1851Map::DecisionOptions(int32 NationInde
 
 bool ACampaign1851Map::CarryOut(const FCampaign1851Decision& D)
 {
+	FCampaign1851LogActorScope LogExecutionScope(this, CampaignLogActor == TEXT("player") ? TEXT("player") : Nations.IsValidIndex(D.Nation) && Nations[D.Nation].IsPlayer() ? TEXT("minister") : TEXT("ai"));
 	switch (D.Kind)
 	{
 	case ECampaign1851DecisionKind::CivilBuilding:
@@ -892,7 +930,9 @@ bool ACampaign1851Map::ExecuteDecision(int32 Index)
 		return false;
 	}
 	Decisions[Index].bDone = CarryOut(Decisions[Index]);
-	return Decisions[Index].bDone;
+	const auto LogActionResult = Decisions[Index].bDone;
+	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("other"), TEXT("ExecuteDecision"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Index"), double(Index) } }, {  }); }
+	return LogActionResult;
 }
 
 void ACampaign1851Map::RunAbstractNation(int32 NationIndex)
@@ -914,6 +954,10 @@ void ACampaign1851Map::RunAbstractNation(int32 NationIndex)
 	N.ArmyMen = FMath::Min(N.ArmyMen + Share(ECampaign1851Portfolio::War) / 90.0, N.Population * 0.015);
 	N.Industry += Share(ECampaign1851Portfolio::Interior) / FMath::Max(N.Population * 3.0, 1.0);
 	N.Treasury -= Spend;
+    LogCampaignIncome.FindOrAdd(N.Id) = N.Population * N.TaxPerHead * (0.9 + 0.1 * N.Industry) / 12.0;
+    LogCampaignExpenses.FindOrAdd(N.Id) = Spend;
+    LogCampaignDecision(N.Id, TEXT("budget"), TEXT("Abstrakt maanedsbudget"), TEXT("Befolkning, skat, industri, reserve og forsigtighed"), N.IsPlayer() ? TEXT("minister") : TEXT("ai"),
+        { { TEXT("income"), LogCampaignIncome[N.Id] }, { TEXT("expenses"), double(Spend) }, { TEXT("treasury"), double(N.Treasury) }, { TEXT("reserve"), double(N.Reserve) }, { TEXT("caution"), double(N.Caution) } });
 	auto Milestone = [&](double Before, double After, double Step, ECampaign1851Portfolio P, const TCHAR* What)
 	{
 		if (FMath::FloorToDouble(After / Step) > FMath::FloorToDouble(Before / Step))

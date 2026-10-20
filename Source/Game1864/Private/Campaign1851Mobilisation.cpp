@@ -36,7 +36,9 @@ bool ACampaign1851Map::Mobilise(FString* OutReason)
 	MobilisationDecision.bDone = true;
 	AddDecision(MobilisationDecision);
 	News.Add(TEXT("Hæren mobiliseres: de hjemsendte kaldes ind"));
-	return true;
+	const auto LogActionResult = true;
+
+	return LogActionResult;
 }
 
 bool ACampaign1851Map::CanUpgradeToHorseBattery(int32 RegimentIndex, FString* OutWhy) const
@@ -107,6 +109,7 @@ void ACampaign1851Map::Demobilise()
 		AddDecision(DemobilisationDecision);
 		News.Add(TEXT("Hæren sættes på fredsfod: mandskabet hjemsendes"));
 	}
+
 }
 
 void ACampaign1851Map::AdvanceFooting(float DeltaDays)
@@ -133,6 +136,7 @@ void ACampaign1851Map::AdvanceFooting(float DeltaDays)
 	if (Footing == ECampaign1851Footing::Mobilising && bAllIn)
 	{
 		Footing = ECampaign1851Footing::War;
+        LogCampaignDecision(TEXT("DK"), TEXT("mobilise"), TEXT("Mobilisering gennemfoert"), TEXT("Alle enheder er fuldt indkaldt"), TEXT("ai"), { { TEXT("mobilisation"), double(int32(Footing)) } });
 		News.Add(TEXT("Mobiliseringen er gennemført: hæren står på krigsfod"));
 	}
 }

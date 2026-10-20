@@ -991,6 +991,10 @@ def save_png16(path, arr01):
 
 
 def main():
+    if "--extend-north" in sys.argv:
+        from extend_north import extend
+        extend(OUT_DIR, sys.argv[1])
+        return
     ne_dir = sys.argv[1]
     preview = "--preview" in sys.argv
     os.makedirs(OUT_DIR, exist_ok=True)

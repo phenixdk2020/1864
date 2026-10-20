@@ -94,6 +94,8 @@ Kortvalg og scenarie er afgørende: duel-, Skirmish- og kampagneslag har forskel
 | `Strategy1864NoCouriers` | Deaktiverer ordonnanslevering. | `-Strategy1864NoCouriers` |
 | `Strategy1864StartHour` | Starttid på dagen i timer. | `-Strategy1864StartHour=8` |
 | `Strategy1864NoFpsCap` | Undlader standardloftet på 60 FPS. | `-Strategy1864NoFpsCap` |
+| `Strategy1864FullLighting` | Beholder Lumen og dynamiske skygger i slaget (standard: slået fra, indtil animationerne er på plads; kampagnen får dem tilbage efter slaget). | `-Strategy1864FullLighting` |
+| `Strategy1864DrillTest` | Scriptede ordrer til at se kolonneeksercitsen: `sek:enhed:frem:højre[:front]`, `sek:enhed:LINE`, `sek:enhed:KILL:antal` eller `sek:enhed:KILLCOLOURS`, kommasepareret. | `-Strategy1864DrillTest=8:DK-SKIRMISH-C1:4000:13000:0` |
 | `Strategy1864ClockRate` | Slagsekunder pr. simulationssekund. | `-Strategy1864ClockRate=6` |
 | `Strategy1864FlatQA` | Beholder den flade QA-boks frem for engen. | `-Strategy1864FlatQA` |
 | `Strategy1864Field` | Indlæser slagmarksfil fra Saved/Battle. | `-Strategy1864Field=Battlefield_Test.json` |
