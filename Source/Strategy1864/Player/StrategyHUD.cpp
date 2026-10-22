@@ -203,7 +203,8 @@ AStrategyHUD::FUnitStatus AStrategyHUD::UnitStatus(const AStrategyUnit* Unit)
     const bool bStatusMenOut = StatusFit.Men > 0 && StatusFit.Ready < 0.95f;
     Status.bReforming = Unit->UnitState == EStrategyUnitState::Reforming ||
         (Unit->FormationTransition && Unit->FormationTransition->IsReforming()) ||
-        (StatusVisual && !StatusVisual->IsVisualFormationComplete()) || bStatusMenOut;
+        (StatusVisual && !StatusVisual->IsVisualFormationComplete()) || bStatusMenOut ||
+        (StatusVisual && StatusVisual->IsClosingRanks());
     Status.bMoving = Unit->MovementExecutor && !Unit->MovementExecutor->GetExecutedVelocity().IsNearlyZero();
     Status.bFiring = StatusFire && StatusFire->IsBattleFormationReady() && Unit->CombatComponent &&
         Unit->CombatComponent->AmmunitionRounds > 0 && Unit->CombatComponent->FindBestTarget() &&

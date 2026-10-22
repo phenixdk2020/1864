@@ -701,7 +701,9 @@ bool UStrategyCrowdModel::Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMes
             // v9 clips: 0.6-1.8 cm clearance, Tools/Animation/measure_shoulder_rifle_v9.py), grip 3 % of the length from the butt.
             const int32 RightShoulderBone = RefSkeleton.FindBoneIndex(FName(*Grip.RightHand.ToString().Replace(TEXT("Hand"), TEXT("Shoulder"))));
             const int32 LeftShoulderBone = RefSkeleton.FindBoneIndex(FName(*Grip.LeftHand.ToString().Replace(TEXT("Hand"), TEXT("Shoulder"))));
-            if (RightHand != INDEX_NONE && RifleBox.IsValid && Clip->GetName().Contains(TEXT("Shoulder")) &&
+            // The side-step (closing ranks) too: its hands are held wide apart, so a rifle laid from hand to hand stuck out sideways
+            // through the next men in the rank (2026-10-22 video at 6 s); on the shoulder it stands clear of them.
+            if (RightHand != INDEX_NONE && RifleBox.IsValid && (Clip->GetName().Contains(TEXT("Shoulder")) || Clip->GetName().Contains(TEXT("SideStep"))) &&
                 RightShoulderBone != INDEX_NONE && LeftShoulderBone != INDEX_NONE)
             {
                 // The hand's centre: halfway between the RightHand bone and its first child (the bone's tail).

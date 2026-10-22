@@ -2733,6 +2733,30 @@ Fortsættelse af "Formationer der holder sammen". Målt i samme gentagelse af vi
   - **Resultat:** højst 3,5 m i 1 s, mod 8,9 m før.
 - **Tilbage:** under ankomstvandringen passerer mænd hinanden ned til 7–22 cm i kort tid. KOLONNE trykket stillestående ser stadig ud som en linje, til kompagniet marcherer, sådan som slangen er bygget. Linjens svingning om midten (14 m/s ved fløjen) venter på svingningsopgaven.
 
+## 2026-10-22 — Tab, opfyldning og fanen der falder og samles op, testet igen
+
+Test: linje stillestående med `-Strategy1864DrillTest` KILL:15, KILLCOLOURS, KILL:10:90, KILLCOLOURS, KILL:8, KILL:20 med `-Strategy1864FormationMetric` og et kamera, der følger fanen tæt.
+
+- **Fanen virker:** fanebæreren falder, og fanen ligger ved fløjen. Efter ca. 6 s går en ny mand ud, knæler ved stangen, rejser fanen 2 s senere og tager plads ved højre fløj; hans gevær bliver liggende. Gentaget tre gange uden fejl, og fanebæreren er aldrig over 1,4 m fra nærmeste mand.
+- **Fejl:**
+  - **To mand oven i hinanden:** nye tab midt i en sammenrykning lagde to mand fra nabofiler i samme fil. Den ene beholdt en skæv sideposition og stod 3 cm fra naboen, indtil formationen blev bygget om.
+  - **Rettelse:** `StepUpFiles` og `CloseRanksTowardColours` regner nu ud fra den plads, en mand er på vej til (`CloseTo`), ikke den han passerer.
+- **Status:** viser "FORMERER", mens rækkerne rykker op og slutter op mod fanen (`IsClosingRanks`), ikke "HOLDER".
+- **Opsamlingen (brugeren: "lidt off i forhold til hvor flaget ligger"):** den nye fanebærer gik til stangens fod og knælede 60 cm før, stadig med fronten i gangretningen. Nu går han hen ved siden af stangen, 70 cm oppe ad den på kompagniets side og 40 cm fra den, og vender sig mod den. Han knæler først, når han står (under 15 cm fra pladsen) og vender rigtigt (inden for 15°). Stangens retning tages fra fanens egen rotation (0, yaw + 70, 84). Med `-Strategy1864ColourDiag` logges fanens placering på jorden og knæpladsen.
+- **Tilbage:** når en fløjmand trækker en række tilbage, går han diagonalt gennem bagerste række og passerer mænd ned til 2–18 cm i kort tid.
+
+## 2026-10-22 — "Slut op mod fanen": geværet på skulderen under sideskridtet
+
+Brugerens video (`Tab_og_fane_2026-10-22.mp4` ved 6 s, dobbelt fart) og en ChatGPT-analyse: under "slut op mod fanen" så mændene ud til at dreje og løbe sidelæns med geværerne i én lang linje gennem rækken.
+
+- **Måling** (ny `Strategy1864CloseDiag` med `-Strategy1864DebugFormation`): mændene spiller `A_Combat_SideStep`, holder fronten (0° drejning) og går 35 cm/s (1,35 × klippets fart). Bevægelsen og retningen var altså rigtige.
+- **Årsag:** sideskridtklippet holder hænderne bredt ud til siden. Bagningen lægger geværet fra højre til venstre hånd, så det stak vandret ud gennem naboerne 75 cm væk.
+- **Rettelse:** i sideskridtklippene bruger bagningen (`StrategyCrowdModel.cpp`) og de nære figurer (`AlignWeapons`) samme regel som "skuldr gevær": fra højre hånd op over højre skulder. VAT er bagt om (0 fejl). Nærbilleder viser geværerne stående på skulderen under sammenrykningen.
+- **Tilbage:**
+  - Geværet skifter brat fra skulder til "klar", når sideskridtet slutter (mangler overgangsklip).
+  - Klippets sideskridt er brede.
+  - Et sideskridtklip med kortere skridt og geværet på skulderen fra start ville være bedst; det er en opgave for `rigging-animation`.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

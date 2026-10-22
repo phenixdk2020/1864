@@ -2,6 +2,9 @@
 #include "StrategyInfantryVisualComponent.h"
 
 #include "Components/StaticMeshComponent.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+#include "HAL/PlatformTime.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/Texture.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -136,6 +139,16 @@ void AStrategyColourFlag::Tick(float DeltaSeconds)
     {
         // Fallen with the bearer: the colours lie on the ground beside him.
         SetActorLocationAndRotation(Ground + FVector(0.f, 0.f, 6.f), FRotator(0.0f, ColourBearerYaw + 70.f, 84.f));
+        if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864ColourDiag")) && Model)
+        {
+            static double ColourDownDiagNext = 0.0;
+            if (FPlatformTime::Seconds() >= ColourDownDiagNext)
+            {
+                ColourDownDiagNext = FPlatformTime::Seconds() + 1.0;
+                UE_LOG(LogTemp, Display, TEXT("Strategy1864ColourDiag down actor=%s model-bounds=%s..%s visible=%d"), *GetActorLocation().ToString(),
+                    *Model->Bounds.GetBox().Min.ToString(), *Model->Bounds.GetBox().Max.ToString(), Model->IsVisible() ? 1 : 0);
+            }
+        }
         return;
     }
     if (bCarried)

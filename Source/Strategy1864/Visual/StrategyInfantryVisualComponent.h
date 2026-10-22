@@ -223,6 +223,8 @@ public:
     /** The column is filing into line (the drill): the men still walk in column, though the unit's formation is already Line. */
     bool IsDrillingToLine() const { return DrillActive && !DrillToColumn; }
     bool IsDrilling() const { return DrillActive; }
+    /** Men are stepping up into gaps or side-stepping towards the colours. */
+    bool IsClosingRanks() const { return bClosingRanksStep || bClosingRanksPending; }
     bool HasVisualArrivalFrontReached() const { return bArrivalReform && bArrivalFrontReached; }
 
     UFUNCTION(BlueprintCallable, Category="Strategy|Visual|Infantry")
@@ -457,6 +459,7 @@ private:
     bool CloseRanksTowardColours();
     void UpdateCloseRanks();
     bool bClosingRanksStep = false;
+    float CloseDiagNext = 0.f;   // -Strategy1864DebugFormation: next CloseDiag line
     /** Line -> column as a snake: the trail is seeded along the line, the head starts at the leading flank, the men follow. */
     bool SeedColumnSnake(const FVector& SnakeFront, const FVector& SnakeAxis, float SnakeFlank, float SnakeWidth, int32 SnakeRows);
     void UpdateSnakeRamp();

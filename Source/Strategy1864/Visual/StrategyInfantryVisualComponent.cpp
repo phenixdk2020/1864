@@ -983,24 +983,28 @@ void UStrategyInfantryVisualComponent::StepUpFiles()
     const int32 Ranks = FMath::Max(1, OwnerCompany->FormationComponent->RankCount);
     TArray<int32> Done;
     int32 StepUpMovers = 0;
+    // A man still side-stepping or stepping up counts where he is going, not where he passes (2026-10-22 test: new losses in the
+    // middle of a closing put two men of neighbouring files into one file, and one of them stayed 3 cm from his neighbour).
+    const auto StepUpPlace = [this](int32 StepUpMan) { const FSettle& StepUpSettle = SoldierSettle[StepUpMan]; return StepUpSettle.CloseStart >= 0.f ? StepUpSettle.CloseTo : StepUpSettle.Slot; };
     for (int32 i = 0; i < SoldierSettle.Num(); ++i)
     {
-        if (Done.Contains(i) || !SoldierSettle[i].bPlaced || SoldierSettle[i].Slot.X > 0.5f) { continue; }   // skirmisher screen men (slot ahead of the front) are no part of a file
+        if (Done.Contains(i) || !SoldierSettle[i].bPlaced || StepUpPlace(i).X > 0.5f) { continue; }   // skirmisher screen men (slot ahead of the front) are no part of a file
         TArray<int32> File;   // everyone in this man's file, front to back
         for (int32 j = 0; j < SoldierSettle.Num(); ++j)
-            if (SoldierSettle[j].bPlaced && SoldierSettle[j].Slot.X <= 0.5f && FMath::Abs(SoldierSettle[j].Slot.Y - SoldierSettle[i].Slot.Y) <= FileTolerance) { File.Add(j); Done.Add(j); }
-        File.Sort([&](int32 A, int32 B) { return SoldierSettle[A].Slot.X > SoldierSettle[B].Slot.X; });
+            if (SoldierSettle[j].bPlaced && StepUpPlace(j).X <= 0.5f && FMath::Abs(StepUpPlace(j).Y - StepUpPlace(i).Y) <= FileTolerance) { File.Add(j); Done.Add(j); }
+        File.Sort([&](int32 A, int32 B) { return StepUpPlace(A).X > StepUpPlace(B).X; });
         for (int32 k = 0; k < File.Num(); ++k)
         {
             FSettle& Settle = SoldierSettle[File[k]];
+            const FVector StepUpTarget = StepUpPlace(File[k]);
             const float NewX = -float(k) * RankSpacing;
-            if (FMath::Abs(Settle.Slot.X - NewX) < 1.f) { continue; }
+            if (FMath::Abs(StepUpTarget.X - NewX) < 1.f) { continue; }
             // He walks up into the gap, front kept (user 2026-10-21: no man vanishes from his place and appears elsewhere). The
             // rank nearest the gap goes first; same machinery as closing ranks (UpdateCloseRanks moves the slot).
             Settle.CloseFrom = Settle.Slot;
-            Settle.CloseTo = FVector(NewX, Settle.Slot.Y, Settle.Slot.Z);
+            Settle.CloseTo = FVector(NewX, StepUpTarget.Y, Settle.Slot.Z);
             Settle.CloseStart = VisualAnimationTime + 0.25f * k;
-            Settle.CloseDuration = FMath::Max(0.8f, FMath::Abs(Settle.CloseTo.X - Settle.CloseFrom.X) / 70.f);
+            Settle.CloseDuration = FMath::Max(0.8f, FVector::Dist2D(Settle.CloseTo, Settle.CloseFrom) / 70.f);
             Settle.Goal = Settle.CloseTo;
             Settle.bActive = true;
             bClosingRanksStep = true;
@@ -1193,6 +1197,29 @@ void UStrategyInfantryVisualComponent::AlignWeapons()
         // The palms' centres, as in the baked crowd (StrategyCrowdModel.cpp): the rifle lies in the grip, not at the wrists.
         const FVector Right = PalmLocation(Soldier, RightHandBoneName);
         const FVector Left = PalmLocation(Soldier, LeftHandBoneName);
+        // Side-stepping (closing ranks), as in the bake: the rifle from the right hand up over the right shoulder, not from hand to
+        // hand, which held it out sideways through the next men (2026-10-22 video at 6 s).
+        const UAnimSequence* RifleClip = SoldierClips.IsValidIndex(i) ? SoldierClips[i].Clip.Get() : nullptr;
+        if (RifleClip && (RifleClip == SideStepAsset.Get() || RifleClip == SideStepLeftAsset.Get()) && Weapon->GetStaticMesh())
+        {
+            const FName RifleRightShoulder(*RightHandBoneName.ToString().Replace(TEXT("Hand"), TEXT("Shoulder")));
+            const FName RifleLeftShoulder(*LeftHandBoneName.ToString().Replace(TEXT("Hand"), TEXT("Shoulder")));
+            if (Soldier->GetBoneIndex(RifleRightShoulder) != INDEX_NONE && Soldier->GetBoneIndex(RifleLeftShoulder) != INDEX_NONE)
+            {
+                const FVector RifleShoulderAt = Soldier->GetSocketLocation(RifleRightShoulder);
+                const FVector RifleSide = (RifleShoulderAt - Soldier->GetSocketLocation(RifleLeftShoulder)).GetSafeNormal();
+                const FVector RifleForward = FVector::CrossProduct(RifleSide, FVector::UpVector).GetSafeNormal();
+                const FVector RifleContact = RifleShoulderAt + RifleForward * 11.7f + FVector::UpVector * 5.0f + RifleSide * 10.0f;
+                FVector RifleBarrel = (RifleContact - Right).GetSafeNormal();
+                if (RifleBarrel.IsNearlyZero()) RifleBarrel = FVector::UpVector;
+                const FRotator RifleShoulderRotation = FRotationMatrix::MakeFromXZ(bRifleBarrelAlongNegativeX ? -RifleBarrel : RifleBarrel, RifleSide).Rotator();
+                const FBox RifleShoulderBox = Weapon->GetStaticMesh()->GetBoundingBox();
+                const float RifleShoulderButt = bRifleBarrelAlongNegativeX ? RifleShoulderBox.Max.X : RifleShoulderBox.Min.X;
+                const float RifleShoulderGrip = RifleShoulderButt + (RifleShoulderBox.Max.X - RifleShoulderBox.Min.X) * 0.03f * (bRifleBarrelAlongNegativeX ? -1.0f : 1.0f);
+                Weapon->SetWorldLocationAndRotation(Right - RifleShoulderRotation.RotateVector(FVector(RifleShoulderGrip, 0.0f, 0.0f)), RifleShoulderRotation);
+                continue;
+            }
+        }
         FVector Dir = Left - Right;
         if (Dir.Size() < 12.0f)
         {
@@ -2214,6 +2241,15 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             }
             Soldier->SetPosition(FigurePhase, false);
             RecordClip(Soldier, TravelClip, !bShoulderOnceClip, FigurePhase, 1.0f);
+        }
+        if (bCloseStepping && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugFormation")) && VisualAnimationTime >= CloseDiagNext)
+        {
+            CloseDiagNext = VisualAnimationTime + 0.5f;
+            UE_LOG(LogTemp, Display, TEXT("Strategy1864CloseDiag %s man %d clip=%s yaw-off-front=%.0f speed=%.0f rate=%.2f from=%s to=%s mode=%s"),
+                *OwnerCompany->StableUnitId.ToString(), i, TravelClip ? *TravelClip->GetName() : TEXT("-"), FMath::FindDeltaAngleDegrees(Settle.Yaw, Rot.Yaw),
+                Step.Size2D() / FMath::Max(0.001f, DeltaTime), SoldierClips.IsValidIndex(i) ? SoldierClips[i].Rate : -1.f,
+                *Settle.CloseFrom.ToString(), *Settle.CloseTo.ToString(),
+                MorphAlpha >= 0.f ? TEXT("morph") : Settle.ReformDeadline >= 0.f || bArrivalReform ? TEXT("reform") : (bRigidCompany && !bFormationPlanPending) ? TEXT("rigid") : TEXT("smooth"));
         }
         if (TravelClip && SoldierClips.IsValidIndex(i))
         {
@@ -4050,17 +4086,19 @@ bool UStrategyInfantryVisualComponent::CloseRanksTowardColours()
     const int32 CloseRankCount = FMath::Max(1, OwnerCompany->FormationComponent->RankCount);
     TArray<TArray<int32>> CloseRanks;
     CloseRanks.SetNum(CloseRankCount);
+    // Where every man is going (a step-up still under way counts at its end), not where he passes.
+    const auto ClosePlace = [this](int32 ClosePlaceMan) { const FSettle& ClosePlaceSettle = SoldierSettle[ClosePlaceMan]; return ClosePlaceSettle.CloseStart >= 0.f ? ClosePlaceSettle.CloseTo : ClosePlaceSettle.Slot; };
     float CloseFrontX = -TNumericLimits<float>::Max();
-    for (const FSettle& CloseFrontMan : SoldierSettle) CloseFrontX = FMath::Max(CloseFrontX, CloseFrontMan.Slot.X);
+    for (int32 CloseFrontIndex = 0; CloseFrontIndex < SoldierSettle.Num(); ++CloseFrontIndex) CloseFrontX = FMath::Max(CloseFrontX, float(ClosePlace(CloseFrontIndex).X));
     for (int32 CloseIndex = 0; CloseIndex < SoldierSettle.Num(); ++CloseIndex)
     {
         const FSettle& CloseMan = SoldierSettle[CloseIndex];
         if (!CloseMan.bPlaced) return false;
-        const int32 CloseRank = FMath::Clamp(FMath::RoundToInt((CloseFrontX - CloseMan.Slot.X) / CloseRankSpacing), 0, CloseRankCount - 1);
+        const int32 CloseRank = FMath::Clamp(FMath::RoundToInt((CloseFrontX - ClosePlace(CloseIndex).X) / CloseRankSpacing), 0, CloseRankCount - 1);
         CloseRanks[CloseRank].Add(CloseIndex);
     }
     const int32 CloseFiles = FMath::DivideAndRoundUp(SoldierSettle.Num(), CloseRankCount);
-    auto CloseByY = [this](int32 CloseA, int32 CloseB) { return SoldierSettle[CloseA].Slot.Y < SoldierSettle[CloseB].Slot.Y; };
+    auto CloseByY = [&ClosePlace](int32 CloseA, int32 CloseB) { return ClosePlace(CloseA).Y < ClosePlace(CloseB).Y; };
     // Front to rear: a rank with more men than the new width sends its outermost men (alternately right and left) back.
     for (int32 CloseRank = 0; CloseRank < CloseRankCount; ++CloseRank)
     {
@@ -4089,7 +4127,7 @@ bool UStrategyInfantryVisualComponent::CloseRanksTowardColours()
             // Centred on the colours; a short rear rank stands in the middle.
             const FVector CloseTo(CloseFrontX - CloseRank * CloseRankSpacing, (CloseOrder - (CloseRow.Num() - 1) * 0.5f) * CloseLateral, 0.f);
             const float CloseDistance = FVector::Dist2D(CloseMan.Slot, CloseTo);
-            if (CloseDistance < 5.f) continue;
+            if (CloseDistance < 5.f) { CloseMan.CloseStart = -1.f; CloseMan.Slot = CloseTo; continue; }
             CloseMan.CloseFrom = CloseMan.Slot;
             CloseMan.CloseTo = CloseTo;
             // The flanks have furthest to go and start at once; men nearer the centre follow a moment later (a ripple inwards).
@@ -4342,7 +4380,18 @@ void UStrategyInfantryVisualComponent::UpdateColourBearer(float BearerDt)
     }
     float BearerYaw = 0.f;
     FVector BearerGoal = bColoursDown ? ColourDownLocation : ColourBearerTarget(BearerYaw);
-    if (bColoursDown) BearerYaw = OwnerCompany->GetActorRotation().Yaw;
+    if (bColoursDown)
+    {
+        // He kneels beside the fallen pole, about 70 cm up it from the foot, on the company's side, facing it, so the hand that
+        // takes it is at the pole (2026-10-22: he knelt at the foot, facing the front, a metre or more from where it lay). The
+        // pole lies along the colour actor's Z axis, which StrategyColourFlag turns as (0, yaw + 70, 84).
+        const FVector BearerPoleDir = FRotator(0.f, ColourDownYaw + 70.f, 84.f).RotateVector(FVector::UpVector).GetSafeNormal2D();
+        const FVector BearerGrip = ColourDownLocation + BearerPoleDir * 70.f;
+        FVector BearerSide(-BearerPoleDir.Y, BearerPoleDir.X, 0.f);
+        if (FVector::DotProduct(BearerSide, OwnerCompany->GetActorLocation() - BearerGrip) < 0.f) BearerSide = -BearerSide;
+        BearerGoal = BearerGrip + BearerSide * 40.f;
+        BearerYaw = (-BearerSide).Rotation().Yaw;
+    }
     if (!bColoursDown)
     {
         // He keeps with the men: never more than two ranks from the nearest of them, whatever the formation's target says
@@ -4399,13 +4448,17 @@ void UStrategyInfantryVisualComponent::UpdateColourBearer(float BearerDt)
         ColourBearer->PlayAnimation(BearerClip, true);
     ColourBearer->SetPlayRate(BearerWalking ? FMath::Clamp((BearerStep / BearerDt) / (BearerClip == WalkStandingAsset.Get() ? 76.99816f : 137.70097f), 0.3f, 2.5f) : 1.f);
     // He reaches the fallen colours: he raises them.
-    if (bColoursDown && BearerDistance < 60.f && ColourPickupPhase == 0)
+    // He reaches his place beside the pole and has turned to it: he kneels (at 60 cm and still facing the way he walked he knelt
+    // beside it, not at it).
+    if (bColoursDown && BearerDistance < 15.f && ColourPickupPhase == 0 &&
+        FMath::Abs(FMath::FindDeltaAngleDegrees(BearerRotation.Yaw, BearerYaw + SoldierMeshYawOffset)) < 15.f)
     {
         UAnimSequence* PickupKneel = CrowdStanceClips.IsValidIndex(0) ? CrowdStanceClips[0].Get() : nullptr;
         ColourPickupPhase = 1;
         ColourPickupEnd = GetWorld()->GetTimeSeconds() + (PickupKneel ? PickupKneel->GetPlayLength() : 0.5f) + 0.4f;
         if (PickupKneel) { ColourBearer->PlayAnimation(PickupKneel, false); ColourBearer->SetPlayRate(1.f); }
-        UE_LOG(LogTemp, Display, TEXT("Strategy1864Colours %s new bearer kneels at the colours"), *OwnerCompany->StableUnitId.ToString());
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864Colours %s new bearer kneels at the colours: at %s yaw %.0f, colours foot %s"), *OwnerCompany->StableUnitId.ToString(),
+            *ColourBearer->GetComponentLocation().ToString(), ColourBearer->GetComponentRotation().Yaw - SoldierMeshYawOffset, *ColourDownLocation.ToString());
     }
 }
 
