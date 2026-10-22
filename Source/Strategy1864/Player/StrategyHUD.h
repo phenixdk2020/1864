@@ -20,6 +20,10 @@ class STRATEGY1864_API AStrategyHUD : public AHUD
 public:
     virtual void DrawHUD() override;
 
+    /** The status word above a unit (MARCHERER, FORMERER, HOLDER, ANKOMMET ...): one source for the tag, the tests and the panels. */
+    struct FUnitStatus { FString Text = TEXT("HOLDER"); bool bReforming = false; bool bMoving = false; bool bFiring = false; };
+    static FUnitStatus UnitStatus(const AStrategyUnit* Unit);
+
     void BeginSelectionBox(const FVector2D& ScreenPoint);
     void UpdateSelectionBox(const FVector2D& ScreenPoint);
     void EndSelectionBox();
@@ -56,7 +60,7 @@ public:
 private:
     enum class EAction : uint8
     {
-        None, Minimap, FinishBattle, ReportToggle, ReportPage, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, Disengage, Turn, Rally, CommandCircle, ConeToggle, UnitLog, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount, FigureScale, BattleQuality, TimeControl, Shadows, BuildFieldworks, SkirmishScreen, Spread, AudioVolume, AudioMute, DoubleTime
+        None, Minimap, FinishBattle, ReportToggle, ReportPage, SettingsToggle, CameraSpeed, OOBToggle, OOBRow, OOBFold, AIToggle, Doctrine, Order, FirePolicy, Formation, Charge, Stop, Disengage, Turn, Rally, CommandCircle, ConeToggle, UnitLog, FireDrill, Pontoon, EnemyRange, EnemyPosture, EnemyFire, Couriers, Stance, Dismount, FigureScale, BattleQuality, TimeControl, Shadows, BuildFieldworks, SkirmishScreen, Spread, AudioVolume, AudioMute, DoubleTime, FollowCamera
     };
 
     struct FButton
@@ -81,6 +85,9 @@ private:
     void MarkButtonPressed(const FButton& Pressed);
 
     bool bReportOpen = false, bReportSeen = false;
+    // Test runs (temporary, user 2026-10-21): the after action report closes the game after 30 s unless a key or button is pressed.
+    double ReportAutoCloseAt = 0.0;
+    bool bReportAutoCloseArmed = false;
     int32 ReportPage = 0;
     void DrawAfterActionReport();
     /** The equipment cell of the report ("0K 0M 6G 0H 0V 1F") drawn as icons with counts. Returns false until the icons are loaded. */

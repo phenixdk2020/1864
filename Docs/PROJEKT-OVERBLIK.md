@@ -26,7 +26,7 @@ Spillet har to dele, der hænger sammen:
 | `Docs` | Alle designdokumenter; `Docs/Design`, `Docs/Arkiv` |
 | `Start-*.bat` | Genveje til spil og tests (afsnit 6) |
 
-Kanaler (git): `channel-campaign` er `R:\Onedrive\1864-Campaign` (her arbejdes der; slagkoden ligger nu også her), `channel-battle` er `R:\Onedrive\1864-Battle` (udfaset som arbejdsmappe), `main` er det fælles grundlag.
+Kanaler (git): `channel-campaign` er `C:\Projekter\1864-Campaign` (her arbejdes der; slagkoden ligger nu også her), `channel-battle` er `R:\Onedrive\1864-Battle` (udfaset som arbejdsmappe), `main` er det fælles grundlag.
 
 ## 3. Slagmodulet i korte træk
 
@@ -62,7 +62,7 @@ Data ligger i `Data/Campaign1851` (hære og naboer for 1825 og 1851, økonomi, n
 ## 6. Start, byg og test
 
 - **Spil**: `Start-Kampagne-NytSpil.bat` (kampagne), `Start-Test-1-Kompagni-mod-Kompagni.bat`, `-2-Bataillon-mod-Kompagni`, `-3-Rytteri`, `-4-Kanoner`, `Start-Test-Adfaerd.bat`, `Start-Klipviser.bat` (alle bagte klip, filter med `-Strategy1864ClipViewer=<navn>`).
-- **Byg**: `I:\Spil\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat Game1864Editor Win64 Development R:\Onedrive\1864-Campaign\Game1864.uproject -waitmutex`. Editoren og spillet skal være lukket. Fuld build tager 1-10 minutter.
+- **Byg**: `I:\Spil\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat Game1864Editor Win64 Development C:\Projekter\1864-Campaign\Game1864.uproject -waitmutex`. Editoren og spillet skal være lukket. Fuld build tager 1-10 minutter.
 - **Acceptance**: `UnrealEditor.exe` med `/Game/Maps/Strategy1864_Skirmish -game -windowed -nosplash -unattended -Strategy1864FlatQA -Strategy1864AcceptAll -ABSLOG=<fil>`; forventet `pass=31 fail=7` (T2, T4, T5, T6, T8, T9, T10 er endnu ikke implementeret). Enkelt test: `-Strategy1864Accept=<ID>`.
 - **Nyttige flag**: `-Strategy1864Shots=sek:enhed:afstand:pitch` med `-Strategy1864ShotsQuit` (skærmbilleder til `Saved/Screenshots`), `-Strategy1864AnimationAudit`, `-Strategy1864DebugDecisions`, `-Strategy1864DebugGpu`, `-Strategy1864TimeScale=n`, `-Strategy1864PauseCameraTest`, `-Strategy1864EnemyTurn=<grader>`, `-Strategy1864NoFarCorner`, `-Strategy1864SkirmishArms`.
 - **Git Bash** ændrer `/Game/...`-stier; start spillet fra PowerShell.

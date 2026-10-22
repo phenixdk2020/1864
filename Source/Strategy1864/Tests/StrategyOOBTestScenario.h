@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include <atomic>
 #include "GameFramework/Actor.h"
 #include "../Combat/StrategyBattleLedger.h"
 #include "StrategyOOBTestScenario.generated.h"
@@ -288,6 +289,9 @@ public:
     /** The opposing nation as the report names it ("PREUSSEN", "ØSTRIG"); several parties are joined with " + ". */
     FString ReportEnemyName = TEXT("FJENDEN");
     bool HasAfterActionReport() const { return bReportFinalized; }
+    /** Test runs: a key or button on the report keeps the game open (stops the 30 s watchdog). */
+    void CancelAutoClose() { if (ReportAutoCloseCancel.IsValid()) ReportAutoCloseCancel->store(true); }
+    TSharedPtr<std::atomic<bool>, ESPMode::ThreadSafe> ReportAutoCloseCancel;
     FStrategyBattleLedger ReportDanes, ReportEnemy;
     // Frozen with the report: 0 draw, 1 partial, 2 victory, 3 major (winner relative).
     int32 ReportVictoryGrade = 0;
@@ -321,8 +325,28 @@ private:
     void TickShots();
     /** -Strategy1864DrillTest=sec:unit:forwardCm:rightCm[:facingDeg] or sec:unit:LINE,...: scripted moves to see the column drill. */
     void TickDrillTest();
+    // -Strategy1864FollowCam=TARGET:distance-cm:side[:FRONT] - a camera that follows FLAG<unit> (the colours) or a unit smoothly, for
+    // recordings (2026-10-21). TARGET FLAG alone means the Danish colours.
+    void TickFollowCam(float FollowDeltaSeconds);
+    bool bFollowCamParsed = false;
+    bool bFollowCamActive = false;
+    FString FollowCamTarget;
+    float FollowCamDistance = 1500.f;
+    float FollowCamSide = 0.5f;
+    bool bFollowCamFront = false;
+    FVector FollowCamEye = FVector::ZeroVector;
+    FVector FollowCamLook = FVector::ZeroVector;
+    bool bFollowCamPlaced = false;
+    // -Strategy1864Record=start:end - every rendered frame between those game seconds is saved as Saved/Recording/frame_NNNNN.png
+    // (run with -benchmark -fps=30 for a fixed step, then join with ffmpeg). Works with the screen locked (2026-10-21).
+    void TickRecording();
+    bool bRecordParsed = false;
+    float RecordStart = -1.f;
+    float RecordEnd = -1.f;
+    int32 RecordFrame = 0;
     TArray<FString> DrillTestPlan;
     int32 DrillTestNext = 0;
+    double DrillTestMetricNext = 0.0;
     bool bDrillTestParsed = false;
     TArray<FString> ShotPlan;
     int32 NextShot = 0;

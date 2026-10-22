@@ -161,6 +161,22 @@ void SCampaign1851Overlay::Construct(const FArguments& InArgs)
 			MinisterPortraits.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/T_Portrait_Minister_%02d.T_Portrait_Minister_%02d"), n, n)));
 		}
 	}
+	// Foreign pools mirror the Danish CardBrush loading; absent textures remain safe to fall back from.
+	for (const TCHAR* PortraitNationId : { TEXT("SE"), TEXT("NO"), TEXT("PR") })
+	{
+		static const TCHAR* PortraitGroups[] = { TEXT("Officer_Ung"), TEXT("Officer_Aeldre"), TEXT("Officer_Gammel"), TEXT("General"), TEXT("Minister") };
+		static const int32 PortraitCounts[] = { 10, 10, 6, 6, 10 };
+		for (int32 PortraitGroupIndex = 0; PortraitGroupIndex < 5; ++PortraitGroupIndex)
+		{
+			const FString PortraitKey = FString::Printf(TEXT("%s_%s"), PortraitNationId, PortraitGroups[PortraitGroupIndex]);
+			TArray<TSharedPtr<FSlateBrush>>& PortraitPool = NationPortraits.FindOrAdd(PortraitKey);
+			for (int32 PortraitIndex = 0; PortraitIndex < PortraitCounts[PortraitGroupIndex]; ++PortraitIndex)
+			{
+				const FString PortraitAsset = FString::Printf(TEXT("T_Portrait_%s_%s_%02d"), PortraitNationId, PortraitGroups[PortraitGroupIndex], PortraitIndex);
+				PortraitPool.Add(CardBrush(FString::Printf(TEXT("/Game/Campaign1851/Portraits/%s/%s.%s"), PortraitNationId, *PortraitAsset, *PortraitAsset)));
+			}
+		}
+	}
 	BornholmBrush = MakeShared<FSlateBrush>();
 	if (Map.IsValid() && Map->BornholmTexture)
 	{
@@ -2122,8 +2138,43 @@ void SCampaign1851Overlay::PaintArmyInfo(const FGeometry& Geometry, FSlateWindow
 
 }
 
-const FSlateBrush* SCampaign1851Overlay::PortraitFor(const FString& Name, int32 Kind, int32 Age) const
+FString SCampaign1851Overlay::PortraitNationForMinister(const FCampaign1851Minister& PortraitMinister) const
 {
+	// Ministers have no Nation member in this revision. Resolve the actual owning cabinet,
+	// not the name: Sweden and Norway may share historical ministers with identical names.
+	if (Map.IsValid())
+	{
+		for (const TCHAR* PortraitCabinetNation : { TEXT("SE"), TEXT("NO"), TEXT("PR") })
+		{
+			for (int32 PortraitPortfolio = 0; PortraitPortfolio < int32(ECampaign1851Portfolio::Count); ++PortraitPortfolio)
+			{
+				if (Map->ForeignMinister(PortraitCabinetNation, ECampaign1851Portfolio(PortraitPortfolio)) == &PortraitMinister)
+				{
+					return PortraitCabinetNation;
+				}
+			}
+		}
+	}
+	return TEXT("DK");
+}
+
+const FSlateBrush* SCampaign1851Overlay::PortraitFor(const FString& Name, int32 Kind, int32 Age, const FString& PortraitNation) const
+{
+	if (!PortraitNation.IsEmpty() && PortraitNation != TEXT("DK"))
+	{
+		const TCHAR* PortraitGroup = Kind == 2 ? TEXT("Minister") : Kind == 1 ? TEXT("General")
+			: Age >= 0 ? (Age < 38 ? TEXT("Officer_Ung") : Age < 50 ? TEXT("Officer_Aeldre") : TEXT("Officer_Gammel")) : TEXT("Officer_Aeldre");
+		const FString PortraitKey = FString::Printf(TEXT("%s_%s"), *PortraitNation, PortraitGroup);
+		if (const TArray<TSharedPtr<FSlateBrush>>* PortraitPool = NationPortraits.Find(PortraitKey))
+		{
+			if (PortraitPool->Num() > 0)
+			{
+				const TSharedPtr<FSlateBrush>& PortraitBrush = (*PortraitPool)[GetTypeHash(Name) % uint32(PortraitPool->Num())];
+				if (PortraitBrush.IsValid() && PortraitBrush->GetResourceObject()) { return PortraitBrush.Get(); }
+			}
+		}
+		// A missing nation set or invalid selected brush uses the unchanged Danish selection below.
+	}
 	// Officers by age (a general is older than a captain), the same face for the whole career whatever the rank: the
 	// age group's pool when it has pictures, else the old pools.
 	if (Kind != 2 && Age >= 0)
@@ -2158,22 +2209,22 @@ const FSlateBrush* SCampaign1851Overlay::PortraitFor(const FString& Name, int32 
 	return nullptr;
 }
 
-void SCampaign1851Overlay::PaintPortrait(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind) const
+void SCampaign1851Overlay::PaintPortrait(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind, const FString& PortraitNation) const
 {
-	if (const FSlateBrush* B = PortraitFor(Name, Kind))
+	if (const FSlateBrush* B = PortraitFor(Name, Kind, -1, PortraitNation))
 	{
 		FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(Pos)), B);
 		DrawLines(Geometry, Out, Layer + 1, { Pos, Pos + FVector2D(Size.X, 0.f), Pos + Size, Pos + FVector2D(0.f, Size.Y), Pos }, Gold, 1.f);
 	}
 }
 
-void SCampaign1851Overlay::PaintPortraitBox(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind, int32 Age, int32 Rank) const
+void SCampaign1851Overlay::PaintPortraitBox(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind, int32 Age, int32 Rank, const FString& PortraitNation) const
 {
 	const FSlateBrush* White = FCoreStyle::Get().GetBrush("WhiteBrush");
 	// The mount, then the picture inside it, then the double gold frame.
 	FSlateDrawElement::MakeBox(Out, Layer, Geometry.ToPaintGeometry(Size, FSlateLayoutTransform(Pos)), White, ESlateDrawEffect::None, FLinearColor(0.035f, 0.028f, 0.02f, 1.f));
 	const float Pad = 8.f;
-	if (const FSlateBrush* B = PortraitFor(Name, Kind, Age))
+	if (const FSlateBrush* B = PortraitFor(Name, Kind, Age, PortraitNation))
 	{
 		FSlateDrawElement::MakeBox(Out, Layer + 1, Geometry.ToPaintGeometry(Size - FVector2D(2.f * Pad, 2.f * Pad), FSlateLayoutTransform(Pos + FVector2D(Pad, Pad))), B);
 	}
@@ -2247,7 +2298,7 @@ void SCampaign1851Overlay::PaintMinisterCard(const FGeometry& Geometry, FSlateWi
 	PaintText(Geometry, Out, Layer + 2, FString(Campaign1851Nations::PortfolioName(P)).ToUpper().Replace(TEXT("æ"), TEXT("Æ")).Replace(TEXT("ø"), TEXT("Ø")).Replace(TEXT("å"), TEXT("Å")),
 		Pos + FVector2D(22.f, 26.f), Serif(11), Gold, 0.f, false);
 	const FVector2D Picture(Pos.X + 22.f, Pos.Y + 48.f);
-	PaintPortraitBox(Geometry, Out, Layer + 2, Picture, FVector2D(190.f, 238.f), M.Name, 2);
+	PaintPortraitBox(Geometry, Out, Layer + 2, Picture, FVector2D(190.f, 238.f), M.Name, 2, -1, -1, PortraitNationForMinister(M));
 	const float TX = Picture.X + 212.f;
 	float Y = Picture.Y + 4.f;
 	PaintTextFit(Geometry, Out, Layer + 2, M.Name, FVector2D(TX, Y), Serif(22), Ink, Size.X - (TX - Pos.X) - 24.f);
@@ -2645,7 +2696,7 @@ void SCampaign1851Overlay::PaintUnitCard(const FGeometry& Geometry, FSlateWindow
 	if (Officers.IsValidIndex(ChiefIndex))
 	{
 		PaintPortraitBox(Geometry, Out, Layer + 2, FVector2D(Pos.X + Size.X - 82.f, Y - 6.f), FVector2D(62.f, 78.f), Officers[ChiefIndex].Name, Officers[ChiefIndex].bGeneral ? 1 : 0,
-			Map->GetDate().GetYear() - Officers[ChiefIndex].Born, Campaign1851Army::RankIndex(Officers[ChiefIndex].Rank));
+			Map->GetDate().GetYear() - Officers[ChiefIndex].Born, Campaign1851Army::RankIndex(Officers[ChiefIndex].Rank), Officers[ChiefIndex].Nation);
 	}
 	Line(Co != INDEX_NONE ? TEXT("Kaptajn") : TEXT("Chef"), Officers.IsValidIndex(ChiefIndex) ? FString::Printf(TEXT("%s %s (%d)"), *Officers[ChiefIndex].Rank, *Officers[ChiefIndex].Name, Campaign1851Army::OfficerRating(Officers[ChiefIndex]))
 		: FString(TEXT("ingen")), TEXT("Chefens samlede vurdering 0-100 (åbn officerens kort for evnerne)"));
@@ -3198,7 +3249,7 @@ void SCampaign1851Overlay::PaintCouncil(const FGeometry& Geometry, FSlateWindowE
 			const FCampaign1851Minister& Min = Map->GetMinister(P);
 			PaintText(Geometry, Out, Layer + 1, Campaign1851Nations::PortfolioName(P), FVector2D(X, Y), Serif(13), Ink, 0.f, false);
 			PaintTextFit(Geometry, Out, Layer + 1, Campaign1851Nations::PortfolioScope(P), FVector2D(X, Y + 15.f), Serif(9, EFace::Italic), MutedInk, 150.f);
-			PaintPortrait(Geometry, Out, Layer + 1, FVector2D(X + 158.f, Y - 8.f), FVector2D(28.f, 35.f), Min.Name, 2);
+			PaintPortrait(Geometry, Out, Layer + 1, FVector2D(X + 158.f, Y - 8.f), FVector2D(28.f, 35.f), Min.Name, 2, PortraitNationForMinister(Min));
 			PaintTextFit(Geometry, Out, Layer + 1, Min.Name, FVector2D(X + 192.f, Y), Serif(12), MinisterInfo == p ? Ink : Gold, 150.f);
 			// Click the picture or the name: his card.
 			Buttons.Add({ FVector2D(X + 156.f, Y - 9.f), FVector2D(X + 350.f, Y + 28.f), EButton::MinisterInfo, p });
@@ -5725,7 +5776,7 @@ void SCampaign1851Overlay::PaintOfficerCard(const FGeometry& Geometry, FSlateWin
 	PaintCloseX(Geometry, Out, Layer + 3, Pos + FVector2D(Size.X, 0.f), CloseOfficerCard);
 	// Left: the portrait in its frame. Right: the name, rank, post, rating and experience.
 	const FVector2D Picture(Pos.X + 22.f, Pos.Y + 46.f);
-	PaintPortraitBox(Geometry, Out, Layer + 2, Picture, FVector2D(178.f, PortraitH), O.Name, O.bGeneral ? 1 : 0, Map->GetDate().GetYear() - O.Born, Campaign1851Army::RankIndex(O.Rank));
+	PaintPortraitBox(Geometry, Out, Layer + 2, Picture, FVector2D(178.f, PortraitH), O.Name, O.bGeneral ? 1 : 0, Map->GetDate().GetYear() - O.Born, Campaign1851Army::RankIndex(O.Rank), O.Nation);
 	const float TX = Picture.X + 198.f, TW = Size.X - (TX - Pos.X) - 24.f;
 	float Y = Picture.Y + 8.f;
 	PaintTextFit(Geometry, Out, Layer + 2, O.Name, FVector2D(TX, Y), Serif(22), Ink, TW - 40.f);

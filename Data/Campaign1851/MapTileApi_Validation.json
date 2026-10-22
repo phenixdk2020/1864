@@ -1,0 +1,9 @@
+{
+  "status": "OK",
+  "engine": "UE 5.8",
+  "headers": 48,
+  "symbols": 121,
+  "includes": 21,
+  "pythonFiles": 4,
+  "note": "Header-/syntakskontrol; ingen C++-kompilering eller Unreal-Python-k?rsel."
+}

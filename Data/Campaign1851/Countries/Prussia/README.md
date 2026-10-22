@@ -2,7 +2,7 @@
 
 Dette er **delvise overlays**, ikke komplette erstatninger for kampagnefiler. Ingen import eller motor-/slagtest er udført. Ukendte tal er null og skal håndteres eksplicit af en integrationsproces. Konverter aldrig null til nul automatisk.
 
-Originalformater er læst fra R:/Onedrive/1864-Campaign/Data/Campaign1851. Der er ingen formel JSON Schema-fil i dette grundlag; Skema-kontrol.json dokumenterer de faktiske JSON-eksempler og inputhash. Egne metadatafelter omfatter fieldStatus, source, level, parent og note. Et historisk navnekatalog er ikke en udfyldt hær.
+Originalformater er læst fra C:/Projekter/1864-Campaign/Data/Campaign1851. Der er ingen formel JSON Schema-fil i dette grundlag; Skema-kontrol.json dokumenterer de faktiske JSON-eksempler og inputhash. Egne metadatafelter omfatter fieldStatus, source, level, parent og note. Et historisk navnekatalog er ikke en udfyldt hær.
 
 | Fil | Skemakilde | Indhold og datakvalitet |
 |---|---|---|

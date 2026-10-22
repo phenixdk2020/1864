@@ -142,3 +142,106 @@ Alle nabolande skal have samme inddeling som Danmark: amter/distrikter med græn
 - **Rækkefølge:** kanonens bevægelser og enkel forstilling med heste først (ingen menneskelig animation nødvendig), derefter besætningens animationer (leveres, eller HY-Motion på de enkle), til sidst koblingsanimationen.
 
 - **Lade-animationer til gammeldags gevær:** stående, knælende og liggende i to våbentyper (forlader og bagladning), delt i faser med markører så de kan strækkes til epokens ladetid; se Docs/Manglende-Animationer.md afsnit 6. Kobling til ladetid og lyd kommer bagefter.
+
+## Næste opgaver efter test af animationer og formationer (2026-10-22)
+
+Brugeren tester først animationer og formationer i slaget. Derefter i denne rækkefølge, med målet at kampagnekortet nærmer sig referencebilledet (Codex' byillustrationer i `Reference/Campaign1851/Scenery/DK/Towns/`):
+
+1. **Lys:** gør kortet og bygningerne belyste med ægte sollys, bløde skygger og skylys. Erstat de sorte, uigennemsigtige jordskygger med bløde, halvgennemsigtige. Tjek ydelsen med 250.000 træer.
+2. **Farver:** dæmpet, jordnær palet (halmgul, olivengrøn, brændt tegl) via farvekorrektion og blødere farver i kortfliserne.
+3. **Byernes opbygning:** huse langs gader og omkring et torv ved kirken, med gårdspladser, haver, stakitter og brønde i stedet for spredte rækker.
+4. **Jorden tæt på:** detaljeteksturer (græs, stub, plovfurer), læhegn i 3D langs markskel (brug brikken til jorddiger) og bløde vejkanter.
+5. **Flere gårdtyper efter region** (research: `Docs/Bygninger-DK-Research-2026-10-21.md`): tre- og tolænget gård (overalt, blandet med firlænget i Østdanmark), parallelgård (Nordjylland), vestjysk langhus (Syd- og Vestjylland), haubarg (marsken i Slesvig), niedersachsenhaus (gesten i Holsten og Lauenburg). Rækkefølge: billeder fra Codex, godkendelse, modeller fra Blender-agenten, valg efter region i koden.
+6. **Mere detaljerede bygninger tæt på:** strå- og tegltag med struktur og sprossevinduer; de nuværende modeller bruges længere væk.
+7. Bagefter de svenske, norske og preussiske byggestile.
+
+Enhedskameraet er lavet 2026-10-22 (G / Shift+G / FØLG).
+
+## Formationer og animations-QA (2026-10-22)
+
+- ~~Kolonnens sving~~ (løst 2026-10-22: marchkolonnen går i en bue på 3 m).
+- ~~Ankomst med ny front~~ (løst 2026-10-22: række for række og intet skub fra stående mænd). Tilbage: mænd passerer hinanden ned til 7–22 cm undervejs.
+- **KOLONNE stillestående** ligner en linje, til kompagniet marcherer (slangen dannes først i bevægelse).
+- **Linjens svingning:** den stive linje drejer om midten, og fløjen farer 14 m/s rundt ved march-start (se svingningsplanen fra 2026-10-21).
+- **Copilots P1/P2-punkter (ikke gjort):**
+  - svingning af linjen om et flydende omdrejningspunkt (forsøgt 2026-10-21, stoppet);
+  - overgang til og fra karré;
+  - underenheder (sektioner);
+  - fodfart mod animation;
+  - drejeanimationer;
+  - lokal undvigelse af forhindringer;
+  - lidt menneskelig uregelmæssighed i formationen.
+- **Animations-QA (brugerønske):** samme metode som formationerne, med testforløb kørt af kommandoer, målinger hvert sekund og grænseværdier. Målinger:
+  - håndflade til gevær/fanestang i alle klip;
+  - fodens glidning mod jorden;
+  - mundingens retning mod målet ved skud;
+  - ladefasernes rækkefølge og at manden står stille;
+  - faldne der ligger på jorden og ikke inde i en kammerat;
+  - tid til geleddet er lukket.
+
+## Udskudte opgaver 2026-10-20
+
+Slaget:
+- **Fanebæreren skal afprøves målrettet:** tæt kamera forfra og fra siden, både i linje og i kolonne. Med `-Strategy1864DrillTest=...:KILLCOLOURS` og billeder hvert sekund kontrolleres:
+  - at han står foran forreste geled og forrest i kolonnen;
+  - at han bruger klippene `ColourWalk`/`ColourIdle`, med stangen i hånden og 12° bagud;
+  - at fanen ligger på jorden, mens den er nede;
+  - at afløseren smider sit gevær og rejser fanen;
+  - at moralen giver −5 og +3 i loggen.
+  Faldet og afløsningen er allerede set i loggen (2026-10-19).
+- **Fanebærerens plads (brugerens beslutning, 2026-10-20):**
+  - I linjen står han ikke foran linjen, men som nr. 1 i 1. geled i højre forreste hjørne.
+  - Linje til kolonne sker altid ved højre om. Fanebæreren bliver derfor forreste mand i venstre række i teten og går først i slangen.
+  - Fra kolonne til linje bliver teten igen højre fløj, og han står igen som nr. 1 i 1. geled.
+  - Konsekvens for koden: eksercitsen skal altid gå ud fra højre fløj. I dag vælges den fløj, der ligger nærmest målet (`DrillEnterFlank` i `PlanColumnDrill`).
+  - Eksercitsen efter brugerens skitse (`Reference/Drill/Linje_Kolonne_Linje_Brugerskitse_2026-10-20.png`):
+    - Linjen gør højre om, og kolonnen går ud fra højre fløj som en slange.
+    - Ved målet kommer kolonnen ind fra den nye linjes venstre ende og går langs linjens akse, til teten når højre ende. Så gør alle venstre om, hvor de står.
+    - Ligger målet så kolonnen ellers ville komme ind fra højre, slår kolonnen et sving rundt, så den altid kommer ind fra venstre.
+  - **Ny beslutning (2026-10-20), erstatter "nr. 1 i 1. geled":**
+    - Fanebæreren (F) og en officer (O) står uden for gitteret.
+    - I linjen står F lige til højre for højre fløj ud for 1. geled, og O står yderst til højre.
+    - I kolonnen går O forrest foran midterrækken, og F går lige bag ham.
+  - **Faner (valgmulighed 3):**
+    - Én rigtig bataljonsfane, båret af fanekompagniet. Den kan erobres, påvirker moralen og tæller i rapporten.
+    - De øvrige kompagnier får et mindre kendemærke. Den historiske praksis tjekkes af `research`.
+    - Alle kompagnier får en synlig officer med sabel. Billeder til DK/SE/NO/PR laves af Codex 23 (2026-10-20); 3D-figuren laves derefter af `model3d` med Hunyuan.
+  - Fejl set i brugerens billede 2026-10-20: fanebæreren stod inde i forreste geled midt i linjen, og fanedugen gik ind i soldaterne. Et smidt gevær stod på skrå i stedet for at ligge på jorden.
+- **Svingning med flydende omdrejningspunkt (kun linje, ikke kolonne):** første forsøg blev rullet tilbage 2026-10-20, fordi det blev værre. Før næste forsøg:
+  - planlægges målet ved ankomst bedre (det sidste ben fik ikke sit startpunkt, så linjen drejede stadig på stedet til sidst);
+  - afprøves små drejninger under march for sig.
+  Referencen ligger i `R:\Onedrive\AI\Kompagni_3Geledder_Wheeling_Floating_Pivot_Samlet.zip`.
+- **Krav (brugeren, 2026-10-21): ingen mand må forsvinde fra sin plads og dukke op et andet sted.** Når et hul lukkes efter tab, skal man se manden gå derhen.
+  - Årsag i dag: `StepUpFiles` (`StrategyInfantryVisualComponent.cpp:971`) sætter den nye plads direkte (`Slot.X`). Kompagniet er stift, så manden hopper ca. 90 cm frem.
+  - Løsning: animér det som "slut op mod fanen" (`CloseFrom`/`CloseTo`, `UpdateCloseRanks`). Manden går frem med gangklippet og front mod fjenden, og bølgen går fil for fil.
+  - Det samme gælder, når en ny fanebærer træder ud af geleddet, og alle andre steder hvor en plads ændres.
+- **Fejl set i videooptagelse 2026-10-21:** efter ankomsten i linje forsvinder alle soldaterne i ca. 20 s, mens kameraet er tæt på; kun fanebæreren ses. De dukker op igen ved næste tab. Mistanke: de bagte crowd-figurers grænser opdateres ikke efter eksercitsen, så de bliver skjult (culling) ved et tæt kamera. Se `Saved/Codex/gap_check.png`.
+- **Enhedskamera (brugerønske 2026-10-21):** lavet 2026-10-22: G følger, Shift+G følger bag enheden, FØLG-knap i enhedspanelet. Afventer brugerens spiltest.
+- **Video af kamp (brugerønske 2026-10-21):** to kompagnier i ildkamp, tæt på: ladning, sigte, skud, mænd der falder og rækker der fyldes op. Brug `-Strategy1864Record` og `-Strategy1864FollowCam`.
+- **Tab pr. geled:** geværild forfra skal ramme forreste geled oftest, 2. geled en gang imellem og 3. næsten aldrig (ca. 78/20/2 %, skøn). Referencen er `Kompagni_1864_3Geledder_Historisk_Tab_Reform_Samlet.zip`. Rullet tilbage sammen med svingningen.
+- **Artilleriets besætning:** referencen er `Kanon_Animationer_Begge_Rettet_Samlet.zip`.
+  - Fodartilleri: fremrulning, svabring, ladning og indstødning med ladestokken i løbet, retning og skud.
+  - Kørende artilleri: under kørsel er heste og limber foran og mundingen bagud; derefter aftrækning, skud og påspænding igen.
+  - Kræver planlægning (figurer, klip, limber og heste); se også afsnittet om kanonbatteriet ovenfor.
+- **Rekvisitter:** kanonkugle, visker og ladestok er lavet i Blender (`SourceAssets/Artillery/Props/`), men ikke importeret. Mangler:
+  - kuglen skal have flere segmenter og en tydeligere jerntekstur;
+  - viskerens uldhoved har et spejlet mønster og ingen totter;
+  - import i Unreal med `unreal-integration`.
+- **Kavaleriet:** slange i kolonne og formation som infanteriet, samt animationer til dragoner og husarer.
+
+Kampagnen:
+- **Kortudvidelsen:** se planen og `Docs/Kortfliser.md`.
+  - Codex skal male de nye fliser med samme maler som Danmark, med ETOPO 2022-højder og uden søm. Kørslen er planlagt til 2026-10-20 kl. 22.17.
+  - Derefter følger Codex 21: flise-terræn i C++ med LOD og flisecache, gitre over 2048, kameraet og save v41.
+  - Til sidst import af fliserne i Unreal og kortbilleder.
+  - Tallene i `Docs/Kortudvidelse-Research-2026-10-20.md` er skøn og skal kontrolleres mod kilderne.
+- **Floder på det nye kort:** Elben (og andre floder i de nye områder) er kantede polylinjer og et hydrologisk skøn. Brug Natural Earth-floddata (`ne_10m_rivers_lake_centerlines`, kræver download) og glat forløbene.
+- **Portrætter til SE/NO/PR:** SE er færdig (42) og NO næsten (40). Mangler:
+  - PR (42) og NO Minister_08–09; Codex er planlagt til kl. 22.17;
+  - oprydning af `_qa_*`-filerne;
+  - import med `Content/Python/import_foreign_portraits.py`;
+  - afprøvning i spillet af, at hver nation får sine egne portrætter.
+- **Officerskarrierer og kampagneloggen:** bygget og valideret statisk, men ikke afprøvet i spillet (save v40, loggen i `Saved/CampaignLogs/`).
+
+Værktøj:
+- **Build via PowerShell** afbrød 2026-10-20 uden fejltekst (UBA). Kald `UnrealBuildTool.dll` direkte med `Engine/Binaries/ThirdParty/DotNet/10.0/win-x64/dotnet.exe` fra `Engine/Source`; det virker.

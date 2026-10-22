@@ -6,7 +6,7 @@ Unreal-porten af PROJECT 1864 (C++-modulet `Game1864`). Designmanual og Unity-pr
 
 | Kanal (branch)     | Lokal mappe              | Indhold                                                                  |
 |--------------------|--------------------------|--------------------------------------------------------------------------|
-| `channel-campaign` | `R:\Onedrive\1864-Campaign` | Det malede kampagnekort "Danmark 1851" (LAEA-projektion), byer, UI   |
+| `channel-campaign` | `C:\Projekter\1864-Campaign` | Det malede kampagnekort "Danmark 1851" (LAEA-projektion), byer, UI   |
 | `channel-battle`   | `R:\Onedrive\1864-Battle`   | 3D-slag: kompagnier, soldatfigur, animationer, taktisk kamera        |
 | `main`             | –                        | Fælles grundlag: projektfil, config, byggefiler, fælles materialer og MCP-værktøjer |
 

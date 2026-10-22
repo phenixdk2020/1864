@@ -238,6 +238,15 @@ struct FCampaign1851OfficerSave
 	UPROPERTY() uint8 Away = 0;
 	UPROPERTY() FString AwayUntil;
 	UPROPERTY() TArray<FString> Career;
+	// v40: same record for Danish and foreign officers; empty Nation in old saves means DK.
+	UPROPERTY() FString Nation;
+	UPROPERTY() bool bHistorical = false;
+	UPROPERTY() uint8 CareerStatus = 0;
+	UPROPERTY() int32 RankMonths = 0;
+	UPROPERTY() int32 CommandMonths = 0;
+	UPROPERTY() int32 BattlesServed = 0;
+	UPROPERTY() int32 Wounds = 0;
+	UPROPERTY() float CareerExperience = 0.f;
 };
 
 /**
@@ -273,8 +282,10 @@ public:
 	// 37: event files with windows, history and event references; War rows carry `events-format|37` (older saves close the undecided events already past).
 	// 38: neighbour mobilisation start day and stage.
 	// 39: national foreign treasuries; older saves transfer the existing district balances once.
-	static constexpr int32 CurrentVersion = 39;
+	// 40: all-nation officer careers, status, seniority, merit and identity.
+	static constexpr int32 CurrentVersion = 40;
 	UPROPERTY() TMap<FString, double> ForeignTreasuries;
+	UPROPERTY() TMap<FString, FString> CareerCommanderIds;
 
     // v32: exact report, prisoner pools, extended service entries and officer careers; old saves default to empty.
     UPROPERTY() FString LastAfterActionReport;

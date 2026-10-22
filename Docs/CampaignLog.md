@@ -44,3 +44,7 @@ Nye filer: `Source/Game1864/Private/Campaign1851DecisionLog.h`, `Source/Game1864
 Instrumenteret: `Source/Game1864/Public/Campaign1851Map.h` samt foelgende filer under `Source/Game1864/Private/` (alle med praefikset `Campaign1851`): `Army.cpp`, `Bridges.cpp`, `Diplomacy.cpp`, `Economy.cpp`, `Endgame.cpp`, `Forts.cpp`, `Manpower.cpp`, `Map.cpp`, `Ministers.cpp`, `Mobilisation.cpp`, `Nations.cpp`, `Navy.cpp`, `Neighbours.cpp`, `Network.cpp`, `Officers.cpp`, `PlayerController.cpp`, `Politics.cpp`, `Research.cpp`, `Resources.cpp`, `Supply.cpp` og `War.cpp`.
 
 Eksisterende aendringer i andre filer, inklusive historikfilen og Strategy1864, er ikke bearbejdet.
+
+## Officerskarrierer (2026-10-20, save v40)
+
+`LogOfficerCareer` benytter `ACampaign1851Map::LogCampaignDecision` med kind `other` og handling `OfficerCareer`. Nation er DK/SE/NO/PR. Strengfelter: `officer`, `name`, `rank`, `identity` (`historical`/`fictional`). Talfelter: `experience`, `seniorityMonths`, `commandMonths`, `battles`, `wounds`, `earnedExperience`, `status` (0 aktiv, 1 pensioneret, 2 død). Begrundelsen beskriver månedstjeneste, slag, udmærkelse, forfremmelse, udnævnelse, sår, fangenskab, tilbagekomst eller afgang. Årlig dansk skoletilgang har desuden handling `OfficerSchool`; kandidaterne får egne karriereposter. Alle numeriske regler er spilskøn; se [Officerskarrierer.md](Officerskarrierer.md). Historiske personer udskiftes ikke efter faste datoer.

@@ -96,6 +96,8 @@
 #include "../Visual/StrategyUniformPresetLibrary.h"
 #include "../Visual/StrategyHumanAnimationStateComponent.h"
 #include "../Visual/StrategyEquipmentVisualComponent.h"
+#include "../AI/StrategyFieldOfficerComponent.h"
+#include "Async/Async.h"
 #include "../Visual/StrategyVisualCompatibilityComponent.h"
 #include "../Visual/StrategyAnimationManifestLibrary.h"
 #include "../Visual/StrategyHorseAnimationStateComponent.h"
@@ -2098,6 +2100,8 @@ void AStrategyOOBTestScenario::Tick(float DeltaSeconds)
     }
     TickShots();
     TickDrillTest();
+    TickFollowCam(DeltaSeconds);
+    TickRecording();
     TickBattleLedger(DeltaSeconds);
     if (!BattleOutcome.IsEmpty()) { FinalizeAfterActionReport(); }
     if (bSkirmish && !bReportFinalized && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864TestReport")) && GetWorld()->GetTimeSeconds() >= 15.f)
@@ -2366,6 +2370,28 @@ void AStrategyOOBTestScenario::TickDrillTest()
             DrillTestText.ParseIntoArray(DrillTestPlan, TEXT(","));
     }
     UWorld* DrillTestWorld = GetWorld();
+    // -Strategy1864FormationMetric: once a second, how well every company named in the drill test stands on its places, with the
+    // status the player sees.
+    if (DrillTestWorld && !DrillTestPlan.IsEmpty() && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864FormationMetric")) &&
+        DrillTestWorld->GetTimeSeconds() >= DrillTestMetricNext)
+    {
+        DrillTestMetricNext = DrillTestWorld->GetTimeSeconds() + 1.0;
+        TSet<FString> DrillTestMetricIds;
+        for (const FString& DrillTestMetricStep : DrillTestPlan)
+        {
+            TArray<FString> DrillTestMetricParts;
+            DrillTestMetricStep.ParseIntoArray(DrillTestMetricParts, TEXT(":"));
+            if (DrillTestMetricParts.Num() > 1) DrillTestMetricIds.Add(DrillTestMetricParts[1]);
+        }
+        for (TActorIterator<AStrategyUnit> DrillTestMetricIt(DrillTestWorld); DrillTestMetricIt; ++DrillTestMetricIt)
+        {
+            bool bDrillTestMetricNamed = false;
+            for (const FString& DrillTestMetricId : DrillTestMetricIds) bDrillTestMetricNamed |= DrillTestMetricIt->StableUnitId.ToString().Contains(DrillTestMetricId);
+            if (!bDrillTestMetricNamed) continue;
+            if (const UStrategyInfantryVisualComponent* DrillTestMetricVisual = DrillTestMetricIt->FindComponentByClass<UStrategyInfantryVisualComponent>())
+                DrillTestMetricVisual->LogFormationMetric(AStrategyHUD::UnitStatus(*DrillTestMetricIt).Text);
+        }
+    }
     if (!DrillTestWorld || DrillTestNext >= DrillTestPlan.Num()) return;
     TArray<FString> DrillTestParts;
     DrillTestPlan[DrillTestNext].ParseIntoArray(DrillTestParts, TEXT(":"));
@@ -2379,6 +2405,32 @@ void AStrategyOOBTestScenario::TickDrillTest()
         UE_LOG(LogTemp, Warning, TEXT("PROJECT1864-DRILLTEST no unit %s"), *DrillTestParts[1]);
         return;
     }
+    // MOVE:<ahead m>:<right m>[:<front deg from the unit's front>]: a march order as a player's right-click (or right-drag with a
+    // front), measured from where the company stands and faces now.
+    if (DrillTestParts[2].Equals(TEXT("MOVE"), ESearchCase::IgnoreCase) && DrillTestParts.Num() > 4)
+    {
+        const FRotator DrillTestMoveFacing(0.f, DrillTestUnit->GetActorRotation().Yaw, 0.f);
+        FStrategyOrder DrillTestMove;
+        DrillTestMove.Type = EStrategyOrderType::Move;
+        DrillTestMove.TargetLocation = DrillTestUnit->GetActorLocation() +
+            DrillTestMoveFacing.RotateVector(FVector(FCString::Atof(*DrillTestParts[3]) * 100.f, FCString::Atof(*DrillTestParts[4]) * 100.f, 0.f));
+        DrillTestMove.bHasFacing = DrillTestParts.Num() > 5;
+        DrillTestMove.FacingYaw = DrillTestMove.bHasFacing ? DrillTestMoveFacing.Yaw + FCString::Atof(*DrillTestParts[5]) : 0.f;
+        DrillTestMove.Authority = EStrategyOrderAuthority::DirectPlayer;
+        DrillTestMove.WaypointRouteId = FGuid::NewGuid();
+        DrillTestUnit->OrderComponent->ResolveAttackDestination(DrillTestMove);
+        const bool bDrillTestMoveTaken = DrillTestUnit->OrderComponent->SetOrder(DrillTestMove);
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s MOVE to %s front=%s taken=%d"), *DrillTestUnit->StableUnitId.ToString(),
+            *DrillTestMove.TargetLocation.ToString(), DrillTestMove.bHasFacing ? *FString::Printf(TEXT("%.0f"), DrillTestMove.FacingYaw) : TEXT("-"), bDrillTestMoveTaken ? 1 : 0);
+        return;
+    }
+    if (DrillTestParts[2].Equals(TEXT("COLUMN"), ESearchCase::IgnoreCase))
+    {
+        DrillTestUnit->FormationReason = TEXT("drilltest: formationsknappen Kolonne");
+        DrillTestUnit->FormationComponent->SetFormation(EStrategyFormationType::MarchColumn);
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s COLUMN"), *DrillTestUnit->StableUnitId.ToString());
+        return;
+    }
     if (DrillTestParts[2].Equals(TEXT("LINE"), ESearchCase::IgnoreCase))
     {
         DrillTestUnit->FormationReason = TEXT("drilltest: formationsknappen Linje");
@@ -2386,11 +2438,66 @@ void AStrategyOOBTestScenario::TickDrillTest()
         UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s LINE"), *DrillTestUnit->StableUnitId.ToString());
         return;
     }
+    // SHOCK:<enemy id part>[:bearing]: the company stands 15 m from the enemy at that bearing from the enemy's front (0 ahead,
+    // 90 flank, 180 rear), fixes bayonets and strikes now; the factors are in the PROJECT1864-BAYONET log line.
+    if (DrillTestParts[2].Equals(TEXT("SHOCK"), ESearchCase::IgnoreCase) && DrillTestParts.Num() > 3 && DrillTestUnit->FieldOfficerComponent)
+    {
+        AStrategyUnit* DrillTestEnemy = nullptr;
+        for (TActorIterator<AStrategyUnit> DrillTestEnemyIt(DrillTestWorld); DrillTestEnemyIt; ++DrillTestEnemyIt)
+            if (DrillTestEnemyIt->StableUnitId.ToString().Contains(DrillTestParts[3])) { DrillTestEnemy = *DrillTestEnemyIt; break; }
+        if (!DrillTestEnemy) return;
+        const float DrillTestShockBearing = DrillTestParts.Num() > 4 ? FCString::Atof(*DrillTestParts[4]) : 0.f;
+        const FVector DrillTestShockDir = FRotator(0.f, DrillTestEnemy->GetActorRotation().Yaw + DrillTestShockBearing, 0.f).Vector();
+        FVector DrillTestShockAt = DrillTestEnemy->GetActorLocation() + DrillTestShockDir * 1500.f;
+        DrillTestShockAt.Z = DrillTestUnit->GetActorLocation().Z;
+        DrillTestUnit->SetActorLocationAndRotation(DrillTestShockAt, (-DrillTestShockDir).Rotation());
+        if (DrillTestUnit->EquipmentVisualComponent) DrillTestUnit->EquipmentVisualComponent->SetBayonetFixed(true);
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s SHOCK on %s from %.0f deg"), *DrillTestUnit->StableUnitId.ToString(),
+            *DrillTestEnemy->StableUnitId.ToString(), DrillTestShockBearing);
+        DrillTestUnit->FieldOfficerComponent->DebugResolveShock(DrillTestEnemy);
+        return;
+    }
+    if (DrillTestParts[2].Equals(TEXT("CROWDSTAT"), ESearchCase::IgnoreCase))
+    {
+        if (const UStrategyInfantryVisualComponent* DrillTestStatVisual = DrillTestUnit->FindComponentByClass<UStrategyInfantryVisualComponent>())
+        {
+            const APlayerController* DrillTestStatPC = DrillTestWorld->GetFirstPlayerController();
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-CROWDSTAT t=%.1f camera=%s %s"), DrillTestWorld->GetTimeSeconds(),
+                DrillTestStatPC && DrillTestStatPC->PlayerCameraManager ? *DrillTestStatPC->PlayerCameraManager->GetCameraLocation().ToString() : TEXT("-"),
+                *DrillTestStatVisual->DebugCrowdStat());
+        }
+        return;
+    }
+    if (DrillTestParts[2].Equals(TEXT("SQUARE"), ESearchCase::IgnoreCase))
+    {
+        DrillTestUnit->FormationReason = TEXT("drilltest: formationsknappen Karré");
+        DrillTestUnit->FormationComponent->SetFormation(EStrategyFormationType::Square);
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s SQUARE"), *DrillTestUnit->StableUnitId.ToString());
+        return;
+    }
     // Losses on demand, to see the files close in and the colours change hands: KILL:n men, or KILLCOLOURS.
     if (DrillTestParts[2].Equals(TEXT("KILL"), ESearchCase::IgnoreCase) && DrillTestParts.Num() > 3)
     {
-        const int32 DrillTestLoss = DrillTestUnit->ApplyStrengthLossWithCause(FCString::Atoi(*DrillTestParts[3]), TEXT("DrillTest"), nullptr);
-        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s KILL %d"), *DrillTestUnit->StableUnitId.ToString(), DrillTestLoss);
+        // Rifle fire from 100 m, one man at a time, as volleys hit.
+        // KILL:n[:degrees] - the shooters' bearing from the company's front, e.g. 0 ahead, 45 oblique right, 90 right flank, 180 behind.
+        const float DrillTestBearing = DrillTestParts.Num() > 4 ? (DrillTestParts[4].Equals(TEXT("BACK"), ESearchCase::IgnoreCase) ? 180.f : FCString::Atof(*DrillTestParts[4])) : 0.f;
+        const FString DrillTestDirectionName = FString::Printf(TEXT("%.0f deg"), DrillTestBearing);
+        const FVector DrillTestToShooters = FRotator(0.f, DrillTestUnit->GetActorRotation().Yaw + DrillTestBearing, 0.f).Vector();
+        int32 DrillTestLoss = 0;
+        for (int32 DrillTestShot = 0; DrillTestShot < FCString::Atoi(*DrillTestParts[3]); ++DrillTestShot)
+        {
+            DrillTestUnit->CasualtySourceLocation = DrillTestUnit->GetActorLocation() + DrillTestToShooters * 10000.f;
+            DrillTestLoss += DrillTestUnit->ApplyStrengthLossWithCause(1, TEXT("DrillTest"), nullptr);
+        }
+        int32 DrillTestTally[3][3] = {};
+        if (const UStrategyInfantryVisualComponent* DrillTestTallyVisual = DrillTestUnit->FindComponentByClass<UStrategyInfantryVisualComponent>())
+            for (int32 DrillTestSector = 0; DrillTestSector < 3; ++DrillTestSector)
+                for (int32 DrillTestLayer = 0; DrillTestLayer < 3; ++DrillTestLayer)
+                    DrillTestTally[DrillTestSector][DrillTestLayer] = DrillTestTallyVisual->HitLayerTally[DrillTestSector][DrillTestLayer];
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s KILL %d from %s; hits by layer from the shooters so far: ahead %d/%d/%d, oblique/flank %d/%d/%d, behind %d/%d/%d"),
+            *DrillTestUnit->StableUnitId.ToString(), DrillTestLoss, *DrillTestDirectionName,
+            DrillTestTally[0][0], DrillTestTally[0][1], DrillTestTally[0][2], DrillTestTally[1][0], DrillTestTally[1][1], DrillTestTally[1][2],
+            DrillTestTally[2][0], DrillTestTally[2][1], DrillTestTally[2][2]);
         return;
     }
     if (DrillTestParts[2].Equals(TEXT("KILLCOLOURS"), ESearchCase::IgnoreCase))
@@ -2416,6 +2523,97 @@ void AStrategyOOBTestScenario::TickDrillTest()
     DrillTestUnit->OrderComponent->SetOrder(DrillTestOrder);
     UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s MOVE to %s facing=%d %.1f"), *DrillTestUnit->StableUnitId.ToString(),
         *DrillTestOrder.TargetLocation.ToString(), DrillTestOrder.bHasFacing ? 1 : 0, DrillTestOrder.FacingYaw);
+}
+
+void AStrategyOOBTestScenario::TickRecording()
+{
+    if (!bRecordParsed)
+    {
+        bRecordParsed = true;
+        FString RecordPlan;
+        if (FParse::Value(FCommandLine::Get(), TEXT("Strategy1864Record="), RecordPlan, false))
+        {
+            TArray<FString> RecordParts;
+            RecordPlan.ParseIntoArray(RecordParts, TEXT(":"));
+            if (RecordParts.Num() >= 2) { RecordStart = FCString::Atof(*RecordParts[0]); RecordEnd = FCString::Atof(*RecordParts[1]); }
+        }
+    }
+    if (RecordStart < 0.f || !GetWorld()) return;
+    const float RecordNow = GetWorld()->GetTimeSeconds();
+    if (RecordNow < RecordStart || RecordNow > RecordEnd)
+    {
+        if (RecordNow > RecordEnd && RecordFrame > 0 && RecordStart >= 0.f)
+        {
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-RECORD: %d frames written to Saved/Recording"), RecordFrame);
+            RecordStart = -1.f;
+            if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864ShotsQuit")))
+            {
+                FTimerHandle RecordQuit;
+                GetWorld()->GetTimerManager().SetTimer(RecordQuit, []() { FPlatformMisc::RequestExit(false); }, 1.0f, false);
+            }
+        }
+        return;
+    }
+    const FString RecordFile = FPaths::ProjectSavedDir() / TEXT("Recording") / FString::Printf(TEXT("frame_%05d.png"), RecordFrame++);
+    FScreenshotRequest::RequestScreenshot(RecordFile, false, false);
+}
+
+void AStrategyOOBTestScenario::TickFollowCam(float FollowDeltaSeconds)
+{
+    if (!bFollowCamParsed)
+    {
+        bFollowCamParsed = true;
+        FString FollowPlan;
+        if (FParse::Value(FCommandLine::Get(), TEXT("Strategy1864FollowCam="), FollowPlan, false))
+        {
+            TArray<FString> FollowParts;
+            FollowPlan.ParseIntoArray(FollowParts, TEXT(":"));
+            if (FollowParts.Num() > 0)
+            {
+                bFollowCamActive = true;
+                FollowCamTarget = FollowParts[0];
+                if (FollowParts.Num() > 1) FollowCamDistance = FMath::Max(200.f, FCString::Atof(*FollowParts[1]));
+                if (FollowParts.Num() > 2) FollowCamSide = FCString::Atof(*FollowParts[2]);
+                bFollowCamFront = FollowParts.Num() > 3 && FollowParts[3].Equals(TEXT("FRONT"), ESearchCase::IgnoreCase);
+            }
+        }
+    }
+    UWorld* FollowWorld = GetWorld();
+    if (!bFollowCamActive || !FollowWorld) return;
+    // The unit gives the direction; the colours (FLAG) or the unit give the point to watch.
+    const bool bFollowFlag = FollowCamTarget.StartsWith(TEXT("FLAG"));
+    const FString FollowUnitId = bFollowFlag ? (FollowCamTarget.Mid(4).IsEmpty() ? FString(TEXT("DK")) : FollowCamTarget.Mid(4)) : FollowCamTarget;
+    AStrategyUnit* FollowUnit = nullptr;
+    for (TActorIterator<AStrategyUnit> FollowIt(FollowWorld); FollowIt; ++FollowIt)
+        if (FollowIt->StableUnitId.ToString().Contains(FollowUnitId)) { FollowUnit = *FollowIt; break; }
+    if (!FollowUnit) return;
+    FVector FollowAt = FollowUnit->GetActorLocation();
+    if (bFollowFlag)
+    {
+        // This company's own colours (the battalion's colour party nearby must not take the camera: 2026-10-21 recording).
+        for (TActorIterator<AStrategyColourFlag> FollowFlagIt(FollowWorld); FollowFlagIt; ++FollowFlagIt)
+            if (FollowFlagIt->GetFollowedActor() == FollowUnit) { FollowAt = FollowFlagIt->GetActorLocation(); break; }
+    }
+    const FVector FollowFwd = FollowUnit->GetActorForwardVector().GetSafeNormal2D() * (bFollowCamFront ? -1.f : 1.f);
+    const FVector FollowRight(-FollowFwd.Y, FollowFwd.X, 0.f);
+    const FVector FollowEyeWanted = FollowAt - FollowFwd * FollowCamDistance * 0.8f + FollowRight * FollowCamDistance * FollowCamSide +
+        FVector(0.f, 0.f, FollowCamDistance * 0.35f);
+    const FVector FollowLookWanted = FollowAt + FVector(0.f, 0.f, 80.f);
+    if (!bFollowCamPlaced)
+    {
+        FollowCamEye = FollowEyeWanted;
+        FollowCamLook = FollowLookWanted;
+        bFollowCamPlaced = true;
+    }
+    // Smooth, so a turning column or a re-forming line does not shake the picture (real time, also at x2/x5 speed).
+    const float FollowDt = FMath::Min(0.1f, FollowDeltaSeconds);
+    FollowCamEye = FMath::VInterpTo(FollowCamEye, FollowEyeWanted, FollowDt, 1.2f);
+    FollowCamLook = FMath::VInterpTo(FollowCamLook, FollowLookWanted, FollowDt, 2.5f);
+    if (!ShotCamera) ShotCamera = FollowWorld->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FollowCamEye, FRotator::ZeroRotator);
+    if (!ShotCamera) return;
+    ShotCamera->SetActorLocationAndRotation(FollowCamEye, (FollowCamLook - FollowCamEye).Rotation());
+    if (APlayerController* FollowPC = FollowWorld->GetFirstPlayerController())
+        if (FollowPC->GetViewTarget() != ShotCamera) FollowPC->SetViewTarget(ShotCamera);
 }
 
 void AStrategyOOBTestScenario::TickShots()
@@ -2477,13 +2675,26 @@ void AStrategyOOBTestScenario::TickShots()
             break;
         }
     }
+    // FLAG<unit>: aim at that company's colours (the bearer stands on the right flank, out of the centre shot). Optional 5th part
+    // FRONT puts the camera in front of the company looking back at it.
+    FVector ShotFlagAt = FVector::ZeroVector;
+    bool bShotFlag = false;
+    if (Parts[1].StartsWith(TEXT("FLAG")))
+    {
+        const FString ShotFlagUnitId = Parts[1].Mid(4).IsEmpty() ? FString(TEXT("DK")) : Parts[1].Mid(4);
+        for (TActorIterator<AStrategyUnit> It(World); It; ++It)
+            if (It->StableUnitId.ToString().Contains(ShotFlagUnitId)) { Target = *It; break; }
+        for (TActorIterator<AStrategyColourFlag> It(World); It && Target; ++It)
+            if (It->GetFollowedActor() == Target) { ShotFlagAt = It->GetActorLocation(); bShotFlag = true; break; }
+    }
     if (!Target)
     {
         ++NextShot;
         return;
     }
-    const FVector At = Target->GetActorLocation();
-    const FVector Fwd = Target->GetActorForwardVector().GetSafeNormal2D();
+    const FVector At = bShotFlag ? ShotFlagAt : Target->GetActorLocation();
+    const bool bShotFront = Parts.Num() > 4 && Parts[4].Equals(TEXT("FRONT"), ESearchCase::IgnoreCase);
+    const FVector Fwd = Target->GetActorForwardVector().GetSafeNormal2D() * (bShotFront ? -1.f : 1.f);
     const FVector Right(-Fwd.Y, Fwd.X, 0.0f);
     const FVector Eye = At - Fwd * Distance * 0.8f + Right * Distance * Side + FVector(0.0f, 0.0f, Distance * 0.4f);
     if (!ShotCamera)
@@ -2492,7 +2703,7 @@ void AStrategyOOBTestScenario::TickShots()
     }
     if (ShotCamera)
     {
-        ShotCamera->SetActorLocationAndRotation(Eye, (At + Fwd * Distance * 0.3f - Eye).Rotation());
+        if (!bFollowCamActive) ShotCamera->SetActorLocationAndRotation(Eye, (At + Fwd * Distance * 0.3f - Eye).Rotation());
         if (APlayerController* PC = World->GetFirstPlayerController())
         {
             PC->SetViewTarget(ShotCamera);
@@ -4862,6 +5073,33 @@ void AStrategyOOBTestScenario::TickBattleLedger(float DeltaSeconds)
 void AStrategyOOBTestScenario::FinalizeAfterActionReport()
 {
     if (bReportFinalized || !GetWorld()) { return; }
+    // Test runs (temporary, user 2026-10-21): the game closes itself 30 s after the report unless a key or button is pressed. A
+    // watchdog off the game thread, started before the report work, because the report screen has stalled (FlushAsyncLoading while
+    // the cache was busy) and then nothing on the game thread can close the game.
+    {
+        const TCHAR* WatchCmd = FCommandLine::Get();
+        if (!ReportAutoCloseCancel.IsValid() && (FParse::Param(WatchCmd, TEXT("Strategy1864AARAutoClose")) || FParse::Param(WatchCmd, TEXT("Strategy1864ShotsQuit")) ||
+            FCString::Strifind(WatchCmd, TEXT("Strategy1864DrillTest=")) || FCString::Strifind(WatchCmd, TEXT("Strategy1864Shots=")) ||
+            FCString::Strifind(WatchCmd, TEXT("Strategy1864Accept="))))
+        {
+            ReportAutoCloseCancel = MakeShared<std::atomic<bool>, ESPMode::ThreadSafe>(false);
+            TSharedPtr<std::atomic<bool>, ESPMode::ThreadSafe> WatchCancel = ReportAutoCloseCancel;
+            const double WatchDeadline = FPlatformTime::Seconds() + 30.0;
+            Async(EAsyncExecution::Thread, [WatchCancel, WatchDeadline]()
+            {
+                while (FPlatformTime::Seconds() < WatchDeadline)
+                {
+                    if (WatchCancel->load()) return;
+                    FPlatformProcess::Sleep(0.5f);
+                }
+                if (!WatchCancel->load())
+                {
+                    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-AAR: watchdog closes the test run 30 s after the report"));
+                    FPlatformMisc::RequestExit(true);
+                }
+            });
+        }
+    }
     {
         const bool bReportDecided = !BattleOutcome.IsEmpty();
         const bool bReportDecidedDraw = BattleOutcome.StartsWith(TEXT("UAFGJORT"));

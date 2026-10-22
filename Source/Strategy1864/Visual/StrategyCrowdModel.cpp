@@ -748,8 +748,22 @@ bool UStrategyCrowdModel::Bake(UWorld* World, USkeletalMesh* Soldier, UStaticMes
             }
             else if (RightHand != INDEX_NONE)
             {
-                const FVector Right = Space[RightHand].GetLocation();
-                const FVector Left = LeftHand != INDEX_NONE ? Space[LeftHand].GetLocation() : Right;
+                // The palms' centres (halfway to each hand bone's first child), not the wrists: the rifle lies in the grip
+                // (2026-10-22: it floated in front of the open hands at the ready).
+                auto CrowdPalm = [&](int32 CrowdHandBone)
+                {
+                    // The middle finger's root (the first child is often the thumb, almost on the wrist).
+                    int32 CrowdPalmFinger = INDEX_NONE;
+                    for (int32 CrowdPalmChild = CrowdHandBone + 1; CrowdPalmChild < NumBones; ++CrowdPalmChild)
+                    {
+                        if (RefSkeleton.GetParentIndex(CrowdPalmChild) != CrowdHandBone) continue;
+                        if (CrowdPalmFinger == INDEX_NONE || RefSkeleton.GetBoneName(CrowdPalmChild).ToString().Contains(TEXT("Middle"))) CrowdPalmFinger = CrowdPalmChild;
+                    }
+                    const FVector CrowdWrist = Space[CrowdHandBone].GetLocation();
+                    return CrowdPalmFinger == INDEX_NONE ? CrowdWrist : (CrowdWrist + Space[CrowdPalmFinger].GetLocation()) * 0.5f;
+                };
+                const FVector Right = CrowdPalm(RightHand);
+                const FVector Left = LeftHand != INDEX_NONE ? CrowdPalm(LeftHand) : Right;
                 FVector Dir = Left - Right;
                 if (Dir.Size() < 12.0f || !RifleBox.IsValid)
                 {

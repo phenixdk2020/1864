@@ -16,91 +16,91 @@ Læsestatus: læst. Lokator: Emnelisten. Et null er ukendt; status skøn er en k
 
 ## GAME-Nations1851.json
 
-[Nations1851.json](R:/Onedrive/1864-Campaign/Data/Campaign1851/Nations1851.json)
+[Nations1851.json](C:/Projekter/1864-Campaign/Data/Campaign1851/Nations1851.json)
 
 Læsestatus: læst. Lokator: JSON-pointer i Data-status.json. Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation.
 
 ## GAME-Nations_1825.json
 
-[Nations_1825.json](R:/Onedrive/1864-Campaign/Data/Campaign1851/Nations_1825.json)
+[Nations_1825.json](C:/Projekter/1864-Campaign/Data/Campaign1851/Nations_1825.json)
 
 Læsestatus: læst. Lokator: JSON-pointer i Data-status.json. Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation.
 
 ## GAME-Army1851.json
 
-[Army1851.json](R:/Onedrive/1864-Campaign/Data/Campaign1851/Army1851.json)
+[Army1851.json](C:/Projekter/1864-Campaign/Data/Campaign1851/Army1851.json)
 
 Læsestatus: læst. Lokator: JSON-pointer i Data-status.json. Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation.
 
 ## GAME-Army_1825.json
 
-[Army_1825.json](R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_1825.json)
+[Army_1825.json](C:/Projekter/1864-Campaign/Data/Campaign1851/Army_1825.json)
 
 Læsestatus: læst. Lokator: JSON-pointer i Data-status.json. Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation.
 
 ## GAME-Army_Neighbours_1851.json
 
-[Army_Neighbours_1851.json](R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_Neighbours_1851.json)
+[Army_Neighbours_1851.json](C:/Projekter/1864-Campaign/Data/Campaign1851/Army_Neighbours_1851.json)
 
 Læsestatus: læst. Lokator: JSON-pointer i Data-status.json. Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation.
 
 ## GAME-cities_neighbours_1851.json
 
-[cities_neighbours_1851.json](R:/Onedrive/1864-Campaign/Data/Campaign1851/cities_neighbours_1851.json)
+[cities_neighbours_1851.json](C:/Projekter/1864-Campaign/Data/Campaign1851/cities_neighbours_1851.json)
 
 Læsestatus: læst. Lokator: JSON-pointer i Data-status.json. Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation.
 
 ## GAME-Economy_1825.json
 
-[Economy_1825.json](R:/Onedrive/1864-Campaign/Data/Campaign1851/Economy_1825.json)
+[Economy_1825.json](C:/Projekter/1864-Campaign/Data/Campaign1851/Economy_1825.json)
 
 Læsestatus: læst. Lokator: JSON-pointer i Data-status.json. Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation.
 
 ## GAME-Population_1825.json
 
-[Population_1825.json](R:/Onedrive/1864-Campaign/Data/Campaign1851/Population_1825.json)
+[Population_1825.json](C:/Projekter/1864-Campaign/Data/Campaign1851/Population_1825.json)
 
 Læsestatus: læst. Lokator: JSON-pointer i Data-status.json. Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation.
 
 ## GAME-Officers1851.json
 
-[Officers1851.json](R:/Onedrive/1864-Campaign/Data/Campaign1851/Officers1851.json)
+[Officers1851.json](C:/Projekter/1864-Campaign/Data/Campaign1851/Officers1851.json)
 
 Læsestatus: læst. Lokator: JSON-pointer i Data-status.json. Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation.
 
 ## GAME-Events.json
 
-[Events.json](R:/Onedrive/1864-Campaign/Data/Campaign1851/Events.json)
+[Events.json](C:/Projekter/1864-Campaign/Data/Campaign1851/Events.json)
 
 Læsestatus: læst. Lokator: JSON-pointer i Data-status.json. Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation.
 
 ## GAME-Trade_1851.json
 
-[Trade_1851.json](R:/Onedrive/1864-Campaign/Data/Campaign1851/Trade_1851.json)
+[Trade_1851.json](C:/Projekter/1864-Campaign/Data/Campaign1851/Trade_1851.json)
 
 Læsestatus: læst. Lokator: JSON-pointer i Data-status.json. Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation.
 
 ## GAME-Army_Neighbours_1825.json
 
-[Army_Neighbours_1825.json](R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_Neighbours_1825.json)
+[Army_Neighbours_1825.json](C:/Projekter/1864-Campaign/Data/Campaign1851/Army_Neighbours_1825.json)
 
 Læsestatus: læst. Lokator: JSON-pointer i Data-status.json. Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation.
 
 ## GAME-cities_neighbours_1825.json
 
-[cities_neighbours_1825.json](R:/Onedrive/1864-Campaign/Data/Campaign1851/cities_neighbours_1825.json)
+[cities_neighbours_1825.json](C:/Projekter/1864-Campaign/Data/Campaign1851/cities_neighbours_1825.json)
 
 Læsestatus: læst. Lokator: JSON-pointer i Data-status.json. Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation.
 
 ## TEMPLATE
 
-[Landeskabelon](R:/Onedrive/1864-Campaign/Docs/Landeskabelon.md)
+[Landeskabelon](C:/Projekter/1864-Campaign/Docs/Landeskabelon.md)
 
 Læsestatus: læst. Lokator: 2.1–2.13, 3, 4.2. 
 
 ## NABO
 
-[Spillets nabokort og integrationsregler](R:/Onedrive/1864-Campaign/Docs/Naboer.md)
+[Spillets nabokort og integrationsregler](C:/Projekter/1864-Campaign/Docs/Naboer.md)
 
 Læsestatus: læst. Lokator: Syd for Danmark og Fase 0. B betyder kortnabo; onMap=false er korrekt for den nuværende motor.
 

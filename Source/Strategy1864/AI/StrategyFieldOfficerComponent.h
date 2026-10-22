@@ -70,6 +70,9 @@ public:
      *  it attack straight. OutMustMove: it is not at its place yet. */
     bool FlankPlan(AStrategyUnit* Enemy, float Radius, FVector& OutGoal, FString& OutNote, bool& bOutMustMove);
 
+    /** Test only (-Strategy1864DrillTest SHOCK): resolve a bayonet shock against Enemy now. */
+    void DebugResolveShock(AStrategyUnit* Enemy) { ResolveShock(Enemy); }
+
 private:
     bool UpdateDisengage(float DeltaTime);
     int32 DisengageSerial = 0;

@@ -42,7 +42,10 @@ void AStrategyColourFlag::Setup(AActor* InFollow, const FString& Nation, const F
         Model->bVisibleInRayTracing = false;
         Model->SetCastShadow(true);
         Model->SetRelativeScale3D(FVector(1.4f));
-        Model->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, 140.0f), FRotator(0.0f, 180.0f, 0.0f));
+        // The pole stands 23.3 cm from the model's origin (Flag_Standard_Split.fbx, measured in Blender 2026-10-22: pole centre
+        // x = -0.233 m, y = 0.014 m): shifted so its axis runs through the actor's origin, which the bearer's hand defines
+        // (it stood 33 cm beside his hand).
+        Model->SetRelativeLocationAndRotation(FVector(-23.3f * 1.4f, -1.4f * 1.4f, 140.0f), FRotator(0.0f, 180.0f, 0.0f));
         Model->RegisterComponent();
         UTexture* Flag = LoadObject<UTexture>(nullptr, *FString::Printf(TEXT("/Game/Units/Flags/T_Flag_%s.T_Flag_%s"), *Nation, *Nation));
         if (Flag && SetFlagTexture(Flag))

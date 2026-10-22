@@ -45,7 +45,10 @@ void ACampaign1851Camera::SetView(const FVector& InTarget, float InDistanceKm, f
 
 float ACampaign1851Camera::GetPitch() const
 {
-	const float T = FMath::GetMappedRangeValueClamped(FVector2D(MinDistanceKm, MaxDistanceKm), FVector2D(0.f, 1.f), Distance);
+    // Preserve the original Danish tilt curve and home framing; extra zoom only
+    // extends the already near-top-down overview beyond 1000 km.
+    const float CampaignPitchFarKm = FMath::Min(MaxDistanceKm, 1000.f);
+	const float T = FMath::GetMappedRangeValueClamped(FVector2D(MinDistanceKm, CampaignPitchFarKm), FVector2D(0.f, 1.f), Distance);
 	return FMath::Lerp(PitchNear, PitchFar, FMath::Pow(T, 0.55f));
 }
 

@@ -20,6 +20,7 @@ public:
 
     /** Build the flag for a nation ("DK", "SE", "PR", "AT") and follow the actor. */
     void Setup(AActor* InFollow, const FString& Nation, const FVector& Offset);
+    AActor* GetFollowedActor() const { return Follow.Get(); }
 
     /** Put any flag picture on the model's cloth (false without the model). */
     bool SetFlagTexture(UTexture* Flag);

@@ -58,6 +58,7 @@ Eksemplerne er argumenter, som kan tilføjes en relevant launcher (alle viderese
 | `CampaignMenuShot` | Tager startmenu-billede efter 10 realtidssekunder og afslutter processen 3 sekunder senere. | `-CampaignMenuShot` |
 | `CampaignDebugClicks` | Logger klik og valgændringer. | `-CampaignDebugClicks` |
 | `CampaignShotAt` | Skærmbilleder på kommaseparerede realtidspunkter. | `-CampaignShotAt=10,20` |
+| `Campaign1851OldScenery` | Bruger de gamle procedurale bygninger i stedet for de modellerede danske (Scenery/DK). | `-Campaign1851OldScenery` |
 | `CampaignUiShots` | UI-handlinger og billeder: sek:kommando;kommando,sek:kommando. | `-CampaignUiShots=10:window=research;rtab=1,20:clear` |
 | `CampaignUiShotsQuit` | Afslutter processen efter sidste UI-billede. | `-CampaignUiShotsQuit` |
 | `CampaignFight3D` | Sender første ikke-ventende kampagneslag til 3D og gemmer Autosave. | `-CampaignFight3D` |
@@ -70,7 +71,7 @@ Eksemplerne er argumenter, som kan tilføjes en relevant launcher (alle viderese
 | `CampaignEventWhy` | Logger daglig forklaring af et event uden at udløse det. | `-CampaignEventWhy=kiel` |
 | `CampaignEventLog` | Logger månedlige eventevalueringer, også ikke-aktuelle/afgjorte. | `-CampaignEventLog` |
 
-`CampaignUiShots` bruger realtid og tager billedet 1,5 sek. efter handlingerne. Kommandoer: `window`, `minister`, `officer`, `select`, `focus`, `kamporden`, `selectmany` (indeks med +), `genfield` (lat+lon), `split`, `unitcard`, `rtab`, `pool`, `unitco`, `oob`, `city`, `tab`, `civil`, `info`, `clear`. Vinduer her: none/army/officers/budget/towns/trains/chart/council/supply/foreign/research/navy/status. Listen er forskellig fra `CampaignOpenWindow`.
+`CampaignUiShots` bruger realtid og tager billedet 1,5 sek. efter handlingerne. Kommandoer: `window`, `minister`, `officer`, `select`, `focus`, `kamporden`, `selectmany` (indeks med +), `genfield` (lat+lon), `view` (lat+lon+afstand i km), `split`, `unitcard`, `rtab`, `pool`, `unitco`, `oob`, `city`, `tab`, `civil`, `info`, `clear`. Vinduer her: none/army/officers/budget/towns/trains/chart/council/supply/foreign/research/navy/status. Listen er forskellig fra `CampaignOpenWindow`.
 
 ## Slag
 
@@ -95,7 +96,7 @@ Kortvalg og scenarie er afgørende: duel-, Skirmish- og kampagneslag har forskel
 | `Strategy1864StartHour` | Starttid på dagen i timer. | `-Strategy1864StartHour=8` |
 | `Strategy1864NoFpsCap` | Undlader standardloftet på 60 FPS. | `-Strategy1864NoFpsCap` |
 | `Strategy1864FullLighting` | Beholder Lumen og dynamiske skygger i slaget (standard: slået fra, indtil animationerne er på plads; kampagnen får dem tilbage efter slaget). | `-Strategy1864FullLighting` |
-| `Strategy1864DrillTest` | Scriptede ordrer til at se kolonneeksercitsen: `sek:enhed:frem:højre[:front]`, `sek:enhed:LINE`, `sek:enhed:KILL:antal` eller `sek:enhed:KILLCOLOURS`, kommasepareret. | `-Strategy1864DrillTest=8:DK-SKIRMISH-C1:4000:13000:0` |
+| `Strategy1864DrillTest` | Scriptede ordrer til at se kolonneeksercitsen: `sek:enhed:frem:højre[:front]`, `sek:enhed:LINE`, `sek:enhed:SQUARE`, `sek:enhed:SHOCK:fjende[:grader]` (bajonetsammenstød nu, fra fjendens front/flanke/ryg), `sek:enhed:KILL:antal[:grader]` (skytternes retning fra fronten: 0 forfra, 90 højre flanke, 180 bagfra) eller `sek:enhed:KILLCOLOURS`, kommasepareret. | `-Strategy1864DrillTest=8:DK-SKIRMISH-C1:4000:13000:0` |
 | `Strategy1864ClockRate` | Slagsekunder pr. simulationssekund. | `-Strategy1864ClockRate=6` |
 | `Strategy1864FlatQA` | Beholder den flade QA-boks frem for engen. | `-Strategy1864FlatQA` |
 | `Strategy1864Field` | Indlæser slagmarksfil fra Saved/Battle. | `-Strategy1864Field=Battlefield_Test.json` |
@@ -116,7 +117,14 @@ Kortvalg og scenarie er afgørende: duel-, Skirmish- og kampagneslag har forskel
 | `Strategy1864TestOfficers` | Sårer dansk officer/fanger fjendtlig ved 20 s; afslutter/skriver resultat ved 30 s. | `-Strategy1864TestOfficers` |
 | `Strategy1864Pontoon` | Aktiverer pionerbroer i kampagneslagets opsætning. | `-Strategy1864Pontoon` |
 | `Strategy1864AutoFinish` | Afslutter kampagneslag efter simulationssekunder og skriver resultat. | `-Strategy1864AutoFinish=60` |
-| `Strategy1864Shots` | Billedplan: sek:del-af-enheds-id:kamerafstand-cm:sidefaktor; komma mellem trin; RIDER vælger ordonnans. | `-Strategy1864Shots=30:RIDER:4000:0.5` |
+| `Strategy1864Shots` | Billedplan: sek:del-af-enheds-id:kamerafstand-cm:sidefaktor[:FRONT]; komma mellem trin; RIDER vælger ordonnans; FLAG<enhed> (fx FLAGDK-SKIRMISH-C1) sigter på kompagniets fane; FRONT sætter kameraet foran enheden. | `-Strategy1864Shots=30:RIDER:4000:0.5` |
+| `Strategy1864AARAutoClose` | Testkørsler (midlertidigt): spillet lukker selv 30 s efter AAR, medmindre der trykkes en tast eller klikkes. Slået til automatisk ved `Strategy1864DrillTest=`, `Strategy1864Shots=`, `Strategy1864ShotsQuit` og `Strategy1864Accept=`. En vagt på en anden tråd lukker også, hvis spillet hænger i AAR. Start testkørsler med `-ddc=InstalledNoZenLocalFallback`, så ZenServer-dialogen "Wait for ZenServer?" ikke blokerer. | `-Strategy1864AARAutoClose` |
+| `Strategy1864FollowCam` | Kamera der følger blødt: FLAG<enhed> (fanen) eller en enhed; afstand i cm, sidefaktor, valgfrit FRONT (foran). Til videooptagelser. | `-Strategy1864FollowCam=FLAG:1200:0.5` |
+| `Strategy1864FollowUnit` | Spillets eget følg-kamera sættes på den første enhed, hvis id indeholder teksten; andet felt BEHIND (drejer med enheden) eller FREE (fast retning), tredje felt armlængde i cm (et tomt felt `::` virker ikke). | `-Strategy1864FollowUnit=DK:BEHIND:900` |
+| `Strategy1864ColourDiag` | Logger fanebærerens hånd, håndled og venstre hånd i hans eget koordinatsystem samt det aktuelle klip, hvert 2. sekund. | `-Strategy1864ColourDiag` |
+| `Strategy1864FormationMetric` | Hvert sekund for enhederne i `Strategy1864DrillTest`: vist status, mænd på plads (60 cm), største/95 %-afstand, mindste naboafstand, fanebærerens afstand, samt `Strategy1864FormationWhere` (mændenes midte, aktør, fanebærer). | `-Strategy1864FormationMetric` |
+| `Strategy1864DrillTest` MOVE/COLUMN | `MOVE:<frem m>:<højre m>[:<front grader>]` giver en marchordre i forhold til enheden; `COLUMN` skifter til kolonne. | `-Strategy1864DrillTest=3:C1:COLUMN,12:C1:MOVE:60:0` |
+| `Strategy1864Record` | Optager hvert tegnet billede mellem to spilsekunder til `Saved/Recording/frame_NNNNN.png`. Kør med `-benchmark -fps=30` for fast tidstrin, og saml med ffmpeg (`-framerate 30 -i frame_%05d.png`). Virker også med låst skærm. Med `-Strategy1864ShotsQuit` lukker spillet bagefter. | `-Strategy1864Record=10:130` |
 | `Strategy1864ShotsQuit` | Afslutter processen efter sidste billede; ventetid 2 simulationssekunder. | `-Strategy1864ShotsQuit` |
 | `Strategy1864DuelCamera` | Duelkameraets afstand i cm. | `-Strategy1864DuelCamera=2500` |
 | `Strategy1864DuelFocus` | Følger duelkompagni 0/1; uden gyldigt indeks bruges midten. | `-Strategy1864DuelFocus=0` |
@@ -212,3 +220,20 @@ Se [Audio.md](Audio.md) for WAV-generering, editorimport, HUD-indstillinger og m
 ## Vogntog i 3D-slaget (2026-10-11)
 
 `-Strategy1864Train` aktiverer teststandarder for vogne og to statiske trækheste pr. vogn i skirmish og øvrige testscenarier: bataljon 2 vogne/60 m, feltbatteri 1 pr. 2 kanoner/25 m, morterbatteri 1 pr. morter/25 m og brigade/divisionsstab 4 forsyningsvogne/250 m. Kampagnens eksplicitte `wagons`/`horses` fra Units.json har forrang, også nul. Log: `PROJECT1864-TRAIN`. Se [Wagons.md](Wagons.md) for erobring, ammunition, import og manuelle kontrolpunkter. Flaget er ikke kørt og giver ikke i sig selv tilladelse til spilstart.
+
+## Officerskarrierer — statisk kontrol (2026-10-20)
+
+`python -B Tools/Countries/validate_officer_careers.py` kontrollerer 1825/1851, historisk/fiktiv proveniens, save v40, hookpunkter og referencegrænser. Kør også `python -B Tools/Countries/validate_level_c.py` for byteidentisk genimport og eksisterende Niveau C-kobling. Ingen nye startflag; kommandoerne starter ikke spil/editor og udfører ikke build. Se [Officerskarrierer.md](Officerskarrierer.md) for model og senere runtime-kontrolbehov.
+
+## Videooptagelse af en testkørsel
+
+Start spillet vinduesvis på en fast plads (`-ResX=1280 -ResY=720 -WinX=40 -WinY=40 -ddc=InstalledNoZenLocalFallback`) og optag vinduets klientområde med ffmpeg (`-f gdigrab -framerate 30 -offset_x 40 -offset_y 40 -video_size 1280x720 -i desktop -c:v libx264 -crf 23 -pix_fmt yuv420p`). Kameraet styres med `-Strategy1864Shots` (det bliver stående mellem trinene). Find klientområdets præcise position med `GetClientRect`/`ClientToScreen` (DPI-bevidst), som i optagelsen af linje → kolonne → linje 2026-10-21.
+
+
+### CampaignTileStats: flise-terr?n (Codex 21)
+
+`-CampaignTileStats` giver l?bende `CAMPAIGN-TILES`-loglinjer (hvert 300. frame) med fundne fliser, aktuelt byggede meshes og tid siden fliseinitialisering. Uden flaget logges aktivering/fallback samt tiden til f?rste indsendte n?rflise. Dette er CPU-indsendelse, ikke en GPU-m?ling af f?rste viste frame.
+
+Forventet efter import: 251 fundne fliser; h?jst 24 aktive meshes, tre LOD'er (257/129/65), oversigt f?r teksturerne er klar. Hjemmevisningen over Danmark er u?ndret; kameraet kan panorere over manifestets udsnit og zoome til 2.500 km. Mangler manifestet, bruges den gamle rektangul?re kortvej og gamle gameplaygitre. Mangler importmaterialer/runtimeh?jder, bruges det gamle terr?n. En manglende individuel tekstur efter import beholder oversigtsfarven.
+
+Offline-kontrol uden spil/editor: `python -B Tools/Map1851/validate_runtime_tiles.py` og `python -B Tools/Campaign/validate_map_tile_api.py`; de ni eksisterende validatorer samles med `python -B Tools/Map1851/validate_tiles_all.py`. Importvejledning, assetkrav, cook/staging og begr?nsninger st?r i `Docs/Kortfliser.md`, afsnittet Codex 21. Flaget giver ikke tilladelse til at starte spil/editor eller k?re en launcher/import.

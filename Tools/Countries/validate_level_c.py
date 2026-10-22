@@ -38,7 +38,7 @@ def validate(root=ROOT):
             assert entry['commander'] in ids
             archived = read(data / entry['officerSource'])['generals']
             expected = [o for o in archived if o.get('nation', 'NO' if o['id'].startswith('G_NO_') else 'SE') == nation]
-            assert officers == expected, (year, nation, 'arkivpersoner ændret')
+            assert [{k: v for k, v in o.items() if k != 'historical'} for o in officers if o['historical']] == expected, (year, nation, 'arkivpersoner ændret')
             for officer in officers:
                 for stat in ('leadership', 'inspiration', 'initiative', 'tactical', 'staff', 'discipline', 'aggression', 'composure', 'political'):
                     assert 1 <= officer[stat] <= 10
@@ -96,7 +96,7 @@ def validate(root=ROOT):
     assert 'ResetForeignEconomies();' in source
     assert 'AddTransaction(' not in source, 'naboøkonomi må ikke debitere Danmark'
     save = (root / 'Source/Game1864/Public/Campaign1851SaveGame.h').read_text(encoding='utf-8-sig')
-    assert 'CurrentVersion = 39' in save and 'UPROPERTY() TMap<FString, double> ForeignTreasuries;' in save
+    assert 'CurrentVersion = 40' in save and 'UPROPERTY() TMap<FString, double> ForeignTreasuries;' in save
     controller = (private / 'Campaign1851PlayerController.cpp').read_text(encoding='utf-8-sig')
     assert 'Save->ForeignTreasuries = Map->GetForeignTreasuries();' in controller
     assert 'Save->SaveVersion >= 39' in controller and 'RestoreForeignTreasuries(Save->ForeignTreasuries)' in controller
@@ -121,7 +121,7 @@ def validate(root=ROOT):
     assert draft('PR', 8, 8) == 3
     assert treasury['DK'] == before['DK'] and treasury['NO'] == before['NO']
     assert json.loads(json.dumps(treasury)) == treasury
-    print(f'OK niveau C: {parsed} JSON; genimport x2 byteidentisk; statisk kommando/betaling/save v39; budgetreference: nul/delvis/genforsøg og DK-adskillelse.')
+    print(f'OK niveau C: {parsed} JSON; genimport x2 byteidentisk; statisk kommando/betaling/save v40; budgetreference: nul/delvis/genforsøg og DK-adskillelse.')
 
 
 if __name__ == '__main__':

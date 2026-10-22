@@ -797,7 +797,9 @@ def rgb(*c):
     return np.array(c, np.float32) / 255.0
 
 
-def paint(r, land, regions, lon, lat, seed, base=None):
+def paint(r, land, regions, lon, lat, seed, base=None, *, context=None, height_m=None, edge_fade=True):
+    paint_fbm = fbm if context is None else context.fbm
+    paint_cells = worley_cells if context is None else context.worley
     shape = land.shape
     px_km = r.km_per_px
 
@@ -806,12 +808,16 @@ def paint(r, land, regions, lon, lat, seed, base=None):
     dist_land = (ndimage.distance_transform_edt(land) * px_km).astype(np.float32)   # land pixels: distance to sea
 
     # --- Height: low coasts, rolling moraine in the east, flat outwash plains in the west (Jutland).
-    hills = fbm(shape, 6, 6, seed + 1)
-    ridges = 1.0 - np.abs(fbm(shape, 10, 4, seed + 2) * 2 - 1)
-    eastness = np.clip((lon - 8.4) / 1.6, 0.0, 1.0)             # West Jutland is flat
-    terrain = (0.55 * hills + 0.45 * ridges) * (0.35 + 0.65 * eastness)
-    height = terrain * np.clip(dist_land / 6.0, 0.0, 1.0) ** 0.6  # coasts come down to sea level
-    height = np.where(land, height, 0.0)
+    eastness = np.clip((lon - 8.4) / 1.6, 0.0, 1.0)
+    if height_m is None:
+        hills = paint_fbm(shape, 6, 6, seed + 1)
+        ridges = 1.0 - np.abs(paint_fbm(shape, 10, 4, seed + 2) * 2 - 1)
+        terrain = (0.55 * hills + 0.45 * ridges) * (0.35 + 0.65 * eastness)
+        height = terrain * np.clip(dist_land / 6.0, 0.0, 1.0) ** 0.6
+        height = np.where(land, height, 0.0)
+    else:
+        terrain = np.asarray(height_m, np.float32) / 3000.0
+        height = np.where(land, terrain, 0.0)
 
     # --- Hillshade (light from north-west). Shade the terrain only, not the coastal ramp,
     # otherwise every south-east facing shore gets a dark band.
@@ -827,11 +833,11 @@ def paint(r, land, regions, lon, lat, seed, base=None):
     lush, olive, field, forest = rgb(84, 112, 48), rgb(120, 126, 62), rgb(160, 152, 86), rgb(38, 62, 32)
     heath, dune = rgb(112, 92, 72), rgb(206, 192, 150)
 
-    broad = fbm(shape, 3, 4, seed + 3)
+    broad = paint_fbm(shape, 3, 4, seed + 3)
     colour = lerp(lush, olive, broad)
 
     # Field patchwork: each cell is grass, grain, fallow or ploughed; kept low-contrast.
-    cells = worley_cells(shape, 5, seed + 4)
+    cells = paint_cells(shape, 5, seed + 4)
     grain, fallow, ploughed = rgb(168, 158, 84), rgb(112, 132, 60), rgb(122, 102, 70)
     patch = np.zeros(shape + (3,), np.float32) + colour
     patch = np.where((cells < 0.22)[..., None], grain, patch)
@@ -841,9 +847,9 @@ def paint(r, land, regions, lon, lat, seed, base=None):
 
     # Woodland: many small woods, more in the east, plus the major historic forests.
     km_x, km_y = r.xy_grids()
-    forest_noise = fbm(shape, 45, 3, seed + 5)
+    forest_noise = paint_fbm(shape, 45, 3, seed + 5)
     forest_mask = np.clip((forest_noise - (0.70 - 0.06 * eastness)) * 10, 0, 1)
-    edge_noise = fbm(shape, 90, 3, seed + 9)
+    edge_noise = paint_fbm(shape, 90, 3, seed + 9)
     for f_lon, f_lat, radius in FORESTS:
         fx, fy = project(f_lon, f_lat)
         d = np.sqrt((km_x - fx) ** 2 + (km_y - fy) ** 2) / radius
@@ -854,8 +860,16 @@ def paint(r, land, regions, lon, lat, seed, base=None):
 
     # West Jutland heath (1851: large heather moors between the coast dunes and the ridge).
     jutland_heath = np.clip((9.25 - lon) / 0.7, 0, 1) * np.clip((lat - 55.3) / 0.4, 0, 1) * np.clip((57.3 - lat) / 0.4, 0, 1)
-    heath_noise = fbm(shape, 12, 4, seed + 6)
+    heath_noise = paint_fbm(shape, 12, 4, seed + 6)
     heath_mask = np.clip(jutland_heath * 1.2 * (0.3 + heath_noise) - 0.25, 0, 1)
+    if height_m is not None:
+        # New DEM-backed areas only: estimated cover, using the existing heath palette.
+        alpine = np.clip((height_m - 650) / 900, 0, .75)
+        northern = np.clip((lat - 62) / 9, 0, .4)
+        heath_mask = np.maximum(heath_mask, (alpine + northern) * heath_noise)
+        flat = np.clip(1 - np.hypot(gx, gy) * 4000, 0, 1)
+        bog = np.clip((broad - .58) * 5, 0, .4) * flat * (1 - forest_mask)
+        colour = lerp(colour, heath, bog)
     colour = lerp(colour, heath, np.clip(heath_mask, 0, 0.7))
 
     # Sandy shore and dunes: wider on the exposed west coast.
@@ -878,7 +892,7 @@ def paint(r, land, regions, lon, lat, seed, base=None):
     depth = np.clip(dist_sea / 10.0, 0, 1) ** 0.7
     sea = lerp(shallow, mid, np.clip(depth * 2, 0, 1))
     sea = lerp(sea, deep, np.clip(depth * 1.6 - 0.6, 0, 1))
-    sea_noise = fbm(shape, 5, 4, seed + 7)
+    sea_noise = paint_fbm(shape, 5, 4, seed + 7)
     sea *= (0.94 + 0.12 * sea_noise)[..., None]
     shore_shadow = np.exp(-dist_sea / 0.45)
     sea *= (1 - 0.28 * shore_shadow)[..., None]
@@ -902,20 +916,21 @@ def paint(r, land, regions, lon, lat, seed, base=None):
 
     # Soft edge: the sheet fades into the deep-sea background colour used by the Unity camera,
     # so the map has no hard rectangular border when zoomed out.
-    h, w = shape
-    ex = np.minimum(np.arange(w), np.arange(w)[::-1]) / (w * 0.12)
-    ey = np.minimum(np.arange(h), np.arange(h)[::-1]) / (h * 0.09)
-    fade = np.clip(np.minimum(ex[None, :], ey[:, None]), 0, 1) ** 1.5
-    edge_noise = fbm(shape, 20, 3, seed + 10)
-    fade = np.clip(fade * (0.8 + 0.4 * edge_noise), 0, 1)
-    # Target is darker than the camera background (18,33,51) because Unity's sun + ambient roughly
-    # lifts the albedo ~20%; lit, this lands on the background colour.
-    out = lerp(rgb(15, 28, 43) if base is None else base, out, fade.astype(np.float32))
+    if edge_fade:
+        h, w = shape
+        ex = np.minimum(np.arange(w), np.arange(w)[::-1]) / (w * 0.12)
+        ey = np.minimum(np.arange(h), np.arange(h)[::-1]) / (h * 0.09)
+        fade = np.clip(np.minimum(ex[None, :], ey[:, None]), 0, 1) ** 1.5
+        edge_noise = paint_fbm(shape, 20, 3, seed + 10)
+        fade = np.clip(fade * (0.8 + 0.4 * edge_noise), 0, 1)
+        # Target is darker than the camera background (18,33,51) because Unity's sun + ambient roughly
+        # lifts the albedo ~20%; lit, this lands on the background colour.
+        out = lerp(rgb(15, 28, 43) if base is None else base, out, fade.astype(np.float32))
 
     # Painterly softening: tiny blur plus fine grain.
     img = Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8))
     img = img.filter(ImageFilter.GaussianBlur(0.6))
-    grain = (fbm(shape, 180, 2, seed + 8) - 0.5) * 10
+    grain = (paint_fbm(shape, 180, 2, seed + 8) - 0.5) * 10
     arr = np.clip(np.asarray(img).astype(np.float32) + grain[..., None], 0, 255).astype(np.uint8)
     return arr, height, forest_mask, farmland.astype(np.float32)
 

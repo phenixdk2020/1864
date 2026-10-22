@@ -36,6 +36,8 @@ namespace Campaign1851Scenery
 	};
 
 	GAME1864_API UStaticMesh* Build(EPiece Piece, UMaterialInterface* Material);
+	/** Only the piece's soft drop shadow (null if it has none): laid under a modelled building that replaces the piece. */
+	GAME1864_API UStaticMesh* BuildShadow(EPiece Piece, UMaterialInterface* Material);
 
 	/**
 	 * A flat ribbon along each polyline (points in map-local units, already on the terrain):

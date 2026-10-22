@@ -2,6 +2,7 @@
 import ast
 import hashlib
 import json
+import math
 import shutil
 import subprocess
 import sys
@@ -32,20 +33,21 @@ def validate(nation):
   if key not in ('extentKm','extent','sizeKm','textureSize'):assert base[key]==original[key],('dansk kortdata',key)
  assert base['extentKm']['yMin']==original['extentKm']['yMin']
  assert base['extentKm']['xMin']==original['extentKm']['xMin'] and base['extentKm']['xMax']==original['extentKm']['xMax']
- assert base['extentKm']['yMax']==original['extentKm']['yMax']*2-original['extentKm']['yMin']
+ extended_in_head='northExtension' in original
+ assert math.isclose(base['extentKm']['yMax'],original['extentKm']['yMax'] if extended_in_head else original['extentKm']['yMax']*2-original['extentKm']['yMin'],rel_tol=0,abs_tol=1e-9)
  # Compare image pixels sequentially, not all decoded images at once.
  import io
  for name in ('Denmark1851_Amter.png','Denmark1851_Features.png','Denmark1851_Height.png'):
   with Image.open(io.BytesIO(head(name))) as old_image,Image.open(DATA/name) as new_image:
-   assert new_image.size==(old_image.width,old_image.height*2)
-   assert new_image.crop((0,old_image.height,new_image.width,new_image.height)).tobytes()==old_image.tobytes(),name
+   assert new_image.size==(old_image.width,old_image.height if extended_in_head else old_image.height*2)
+   assert new_image.crop((0,0 if extended_in_head else old_image.height,new_image.width,new_image.height)).tobytes()==old_image.tobytes(),name
  old_owner=np.frombuffer(head('Neighbours_Owners.bin'),dtype='u1')
  owner=np.frombuffer((DATA/'Neighbours_Owners.bin').read_bytes(),dtype='u1')
- assert np.array_equal(owner[len(old_owner):],old_owner),'det oprindelige ejergrid ændret'
+ assert np.array_equal(owner[0 if extended_in_head else len(old_owner):],old_owner),'det oprindelige ejergrid ændret'
  old_district=np.frombuffer(head('South_Districts.bin'),dtype='<u2')
  district=np.frombuffer((DATA/'South_Districts.bin').read_bytes(),dtype='<u2')
  protected=(old_owner!=2) # SE får nu egne distrikter; hav/DK/tyske distrikter er beskyttede.
- assert np.array_equal(district[len(old_district):][protected],old_district[protected])
+ assert np.array_equal(district[0 if extended_in_head else len(old_district):][protected],old_district[protected])
  for year in (1825,1851):
   c=read(DATA/f'cities_neighbours_{year}.json');a=read(DATA/f'Army_Neighbours_{year}.json')
   old_c=json.loads(head(f'cities_neighbours_{year}.json'))

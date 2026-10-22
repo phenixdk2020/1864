@@ -20,6 +20,7 @@ class ACampaign1851ConstructionSite;
 class UMaterialParameterCollection;
 class UStaticMesh;
 class FJsonObject;
+struct FStreamableHandle;
 
 /** A line of the state's monthly budget (the treasury window). */
 struct FCampaign1851BudgetLine
@@ -592,6 +593,15 @@ struct FCampaign1851Extent
  * Scale: 1 km = KmToUnits Unreal units; the map is centred on the actor. +X east, +Y south
  * (Unreal is left-handed, so north is -Y), +Z up.
  */
+/** Transient presentation cache; never serialized into campaign saves. */
+struct FCampaign1851RuntimeTile
+{
+    FIntPoint Key;
+    FCampaign1851Extent Bounds;
+    TArray<uint16> Heights;
+    TArray<uint8> Forest;
+};
+
 UCLASS()
 class GAME1864_API ACampaign1851Map : public AActor
 {
@@ -663,6 +673,8 @@ public:
 	static FString RegionName(const FString& Code);
 	const FCampaign1851Extent& GetBornholmExtent() const { return Bornholm; }
 	FVector2D GetSizeKm() const { return SizeKm; }
+    FVector2D GetNavigationSizeKm() const;
+    FVector2D GetNavigationCentre() const;
 	bool IsReady() const { return bReady; }
 
 	// ---- Campaign clock: days since 1 July 1851 00:00, running minute by minute (a 24-hour clock as in Hearts of Iron IV),
@@ -1524,6 +1536,8 @@ public:
 	/** Officers' pay per month (all officers, assigned or in the pool). */
 	double OfficerPayPerMonth() const;
 	TArray<FCampaign1851OfficerSave> SaveOfficers() const;
+	const TMap<FString, FString>& GetCareerCommanderIds() const { return ForeignCommanderIds; }
+	void RestoreCareerCommanderIds(const TMap<FString, FString>& CareerSavedIds) { ForeignCommanderIds = CareerSavedIds; }
 	void RestoreOfficers(const TArray<FCampaign1851OfficerSave>& Saves);
 
 	/** The army of 1851 in its garrisons (new game, or before loading). */
@@ -1588,7 +1602,28 @@ private:
 	bool LoadData();
 	bool LoadHeight();
 	float SampleHeight01(const FVector2D& Uv) const;
-	void BuildTerrain();
+    void BuildTerrain();
+    bool LoadMapTiles();
+    void UpdateMapTiles();
+    void BuildMapTile(int32 TileIndex, bool bTileTexturesNow = false);
+    float TileHeightAtKm(const FVector2D& TileKm) const;
+    float TileForestAtKm(const FVector2D& TileKm) const;
+    int32 FindMapTile(const FVector2D& TileKm) const;
+    FVector2D OwnerUvFromKm(const FVector2D& TileKm) const;
+    FCampaign1851Extent TileExtent, OwnerExtent, DistrictExtent;
+    int32 NeighbourDistrictW = 0, NeighbourDistrictH = 0;
+    bool bUseMapTiles = false;
+    bool bFullNeighbourGrid = false;
+    bool bTileFirstFrameLogged = false;
+    double TileStartSeconds = 0.0;
+    float TileLegacyDetailUvYScale = 1.f;
+    FVector2D TileOrigin, TileSpan;
+    TArray<FCampaign1851RuntimeTile> RuntimeTiles;
+    TArray<TSharedPtr<FStreamableHandle>> RuntimeTileHandles;
+    TMap<FIntPoint, int32> RuntimeTileLookup;
+    UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> RuntimeTileMeshes;
+    UPROPERTY(Transient) TObjectPtr<UMaterialInterface> TileMasterMaterial;
+    UPROPERTY(Transient) TObjectPtr<UMaterialInterface> TileOverviewMaterial;
 	void BuildMarkers();
 	bool LoadFeatures();
 	bool LoadHydro();
@@ -1867,6 +1902,12 @@ private:
 	int32 EnemyWarLosses = 0;
 	// Officers' careers (Campaign1851Career.cpp).
 	void VacateOfficer(int32 Officer);
+	void MonthlyOfficerCareers();
+	void GainOfficerExperience(FCampaign1851Officer& CareerOfficer, float CareerGain);
+	void LogOfficerCareer(FCampaign1851Officer& CareerOfficer, const FString& CareerAction);
+	void BattleOfficerCareer(FCampaign1851Officer& CareerOfficer, const FString& CareerPlace, float CareerLossShare, bool bCareerRisk);
+	bool HasOfficerVacancy(const FString& CareerRank) const;
+	void ReplaceForeignOfficers();
 	// Health.
 	void DailyHealth();
 	/** A battle's losses of a unit: the wounded to its lazaret, the prisoners counted. */

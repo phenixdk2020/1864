@@ -397,10 +397,11 @@ void ACampaign1851PlayerController::TryInit()
 	{
 		return;
 	}
-	const FVector2D Half = Map->GetSizeKm() * 0.5 * ACampaign1851Map::KmToUnits;
+	const FVector2D Half = Map->GetNavigationSizeKm() * 0.5 * ACampaign1851Map::KmToUnits;
 	FVector Home = Map->Project(55.55, 10.45);
 	Home.Z = 0.0;
 	Camera->Init(Home, 960.f, Half);
+	Camera->SetBounds(Map->GetNavigationCentre(), Half);
 
 	if (GEngine && GEngine->GameViewport)
 	{
@@ -1141,6 +1142,14 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 					else if (Key == TEXT("focus")) { Overlay->FocusOOB(FCString::Atoi(*Value)); Overlay->OpenWindow(W::Chart); }
 					else if (Key == TEXT("kamporden")) { Overlay->OpenWindow(W::Chart); Overlay->SetOOBContext(Overlay->GetSelectedRegiments()); }
 					else if (Key == TEXT("selectmany")) { TArray<FString> Parts; Value.ParseIntoArray(Parts, TEXT("+")); TArray<int32> Sel; for (const FString& P : Parts) { Sel.Add(FCString::Atoi(*P)); } Overlay->SetSelectedRegiments(Sel); }
+					else if (Key == TEXT("view"))
+					{
+						// view=lat+lon+distanceKm: the camera over that place (test screenshots of the map, 2026-10-21).
+						TArray<FString> ViewParts; Value.ParseIntoArray(ViewParts, TEXT("+"));
+						if (ViewParts.Num() >= 3)
+							if (ACampaign1851Camera* ViewCamera = Cast<ACampaign1851Camera>(GetPawn()))
+								ViewCamera->SetView(Map->Project(FCString::Atod(*ViewParts[0]), FCString::Atod(*ViewParts[1])), FCString::Atof(*ViewParts[2]), ViewCamera->GetYaw());
+					}
 					else if (Key == TEXT("genfield")) { TArray<FString> P; Value.ParseIntoArray(P, TEXT("+")); if (P.Num() >= 2) { Map->GenerateBattlefield(Map->KmAtWorld(Map->Project(FCString::Atod(*P[0]), FCString::Atod(*P[1]))), 8.f, TEXT("Test")); } }
 					else if (Key == TEXT("split")) { Map->SplitRegiment(FCString::Atoi(*Value)); }
 					else if (Key == TEXT("unitcard")) { Overlay->ToggleUnitCard(); }
@@ -1822,7 +1831,7 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 			if (New != INDEX_NONE)
 			{
 				const FCampaign1851Officer& O = Map->GetOfficers()[New];
-				Overlay->ShowToast(FString::Printf(TEXT("%s %s er ansat og venter på en post"), *O.Rank, *O.Name));
+				Overlay->ShowToast(FString::Printf(TEXT("%s %s er valgt til tjeneste: %s"), *O.Rank, *O.Name, *Map->OfficerRole(New)));
 			}
 			else
 			{
@@ -2731,6 +2740,7 @@ bool ACampaign1851PlayerController::SaveToSlot(const FString& Slot, bool bQuiet,
 	Save->Links = Map->SaveNetwork();
 	Save->Regiments = Map->SaveArmy();
 	Save->Officers = Map->SaveOfficers();
+	Save->CareerCommanderIds = Map->GetCareerCommanderIds();
 	Save->Trains = Map->SaveTrains();
 	Save->Formations = Map->SaveFormations();
 	Save->TrainOrders = Map->GetTrainOrders();
@@ -2822,6 +2832,7 @@ bool ACampaign1851PlayerController::LoadFromSlot(const FString& Slot)
 	if (Save->SaveVersion >= 7)
 	{
 		Map->RestoreOfficers(Save->Officers);
+		if (Save->SaveVersion >= 40) { Map->RestoreCareerCommanderIds(Save->CareerCommanderIds); }
 	}
 	if (Save->SaveVersion >= 10)
 	{

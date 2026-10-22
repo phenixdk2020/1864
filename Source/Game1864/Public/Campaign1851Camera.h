@@ -21,7 +21,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	UPROPERTY(EditAnywhere, Category = "Camera") float MinDistanceKm = 6.f;
-	UPROPERTY(EditAnywhere, Category = "Camera") float MaxDistanceKm = 1000.f;
+	UPROPERTY(EditAnywhere, Category = "Camera") float MaxDistanceKm = 2500.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float PitchNear = 32.f;
 	UPROPERTY(EditAnywhere, Category = "Camera") float PitchFar = 84.f;
 	/** Lens aperture at the closest zoom (smaller = more miniature blur); it closes to f/32 by 60 km. */

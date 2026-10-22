@@ -4,6 +4,20 @@ import json
 from pathlib import Path
 
 
+def career_reserves(nation, year):
+    """Fiktiv reservepulje; alle aldre, evner og erfaringstal er spilskøn."""
+    result = []
+    for index, rank in enumerate(('Kaptajn', 'Major', 'Oberstløjtnant', 'Oberst', 'Generalmajor')):
+        officer = dict(id=f'F_CAREER_{nation}_{year}_{index}',
+                       name=f'Fiktiv reserveofficer {nation} {index + 1}', rank=rank,
+                       born=year - 35 - index * 3, historical=False, experience=35 + index * 8,
+                       note='Fiktiv person; alder, rang og evner er spilskøn.')
+        officer.update({stat: 5 for stat in ('leadership', 'inspiration', 'initiative', 'tactical',
+                                           'staff', 'discipline', 'aggression', 'composure', 'political', 'caution')})
+        result.append(officer)
+    return result
+
+
 def integrate(root):
     data = Path(root) / 'Data/Campaign1851'
     def read(path):
@@ -32,6 +46,7 @@ def integrate(root):
                         'source': 'Countries/Prussia/GameReady/Officers1851.json'}]})
             else:
                 ministers = read(pack / nation / f'Ministers_{year}.json')['portfolios']
+            officers = [dict(officer, historical=True) for officer in officers] + career_reserves(nation, year)
             nations.append({'nation': nation, 'commander': officers[0]['id'],
                             'officerSource': source.relative_to(data).as_posix(),
                             'officers': officers, 'portfolios': ministers})

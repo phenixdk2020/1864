@@ -1652,13 +1652,6 @@ void ACampaign1851Map::AdvanceArmy(float DeltaDays, float DeltaSeconds)
 		const float MoraleTarget = 0.7f + 0.025f * Insp + 0.1f * (R.MeanSkill() - 50.f) / 50.f;
 		const float GarrisonRecovery = IsBilleted(R) && R.Morale < MoraleTarget ? 0.95f : 1.f;
 		R.Morale += (MoraleTarget - R.Morale) * FMath::Min(1.f, DeltaDays * 0.01f * (0.5f + Lead / 10.f) * GarrisonRecovery);
-		for (int32 o : { R.Chief, R.General })
-		{
-			if (Officers.IsValidIndex(o))
-			{
-				Officers[o].Experience = FMath::Min(100.f, Officers[o].Experience + DeltaDays * (R.IsMarching() ? 0.05f : 0.01f));
-			}
-		}
 	}
 	bool bAnyMoved = false;
 	for (int32 i = 0; i < Regiments.Num(); ++i)
@@ -2276,6 +2269,7 @@ bool ACampaign1851Map::AssignFormationCommander(int32 Officer, int32 Formation)
 		return false;
 	}
 	FCampaign1851Officer& O = Officers[Officer];
+	if (O.CareerStatus != 0 || O.Away != 0) { return false; }
 	// He leaves any post he had; whoever led the formation goes to the pool.
 	if (Officers.IsValidIndex(Formations[Index].Commander))
 	{
@@ -2421,6 +2415,7 @@ bool ACampaign1851Map::AssignFormationStaff(int32 Officer, int32 Formation, int3
 		return false;
 	}
 	FCampaign1851Officer& O = Officers[Officer];
+	if (O.CareerStatus != 0 || O.Away != 0) { return false; }
 	// He leaves whatever post he had (as for a commander); whoever held this one goes to the pool.
 	if (Regiments.IsValidIndex(O.Regiment))
 	{

@@ -807,7 +807,7 @@ UStaticMeshComponent* ACampaign1851Map::MakeRibbon(const TArray<TArray<FVector2D
 
 void ACampaign1851Map::RebuildNetworkMeshes()
 {
-	if (GridZ.Num() == 0)
+	if (GridZ.Num() == 0 && !bUseMapTiles)
 	{
 		return;
 	}

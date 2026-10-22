@@ -149,6 +149,11 @@ private:
     bool bBridgeSlotAcquired = false;
     bool bPreserveRoutedState = false;
     float PauseRemainingSeconds = 0.0f;
+    /** A new order while the men are still forming (a drill, a morph, or under 95 % on their places): the march waits for
+        them, at most FormationHoldMaxSeconds (2026-10-22: an order in the middle of a re-form scattered the company). */
+    bool bFormationHoldPending = false;
+    float FormationHoldStarted = 0.f;
+    static constexpr float FormationHoldMaxSeconds = 10.f;
 
     /** The campaign's field (for wading the brooks), looked up once. */
     TWeakObjectPtr<class AStrategyCampaignBattlefield> CachedField;

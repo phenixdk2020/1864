@@ -16,6 +16,10 @@
 #include "StrategyBattleQuality.h"
 #include "../AI/StrategyAITelemetryComponent.h"
 #include "Misc/CommandLine.h"
+#include "InputCoreTypes.h"
+#include "Async/Async.h"
+#include <atomic>
+#include "GameFramework/PlayerController.h"
 #include "Misc/Parse.h"
 #include "Misc/ConfigCacheIni.h"
 
@@ -185,6 +189,37 @@ void AStrategyHUD::UpdateSelectionBox(const FVector2D& ScreenPoint)
 void AStrategyHUD::EndSelectionBox()
 {
     bSelectionBoxActive = false;
+}
+
+AStrategyHUD::FUnitStatus AStrategyHUD::UnitStatus(const AStrategyUnit* Unit)
+{
+    FUnitStatus Status;
+    if (!Unit) return Status;
+    const UStrategyFireControlComponent* StatusFire = Unit->FireControlComponent;
+    const UStrategyInfantryVisualComponent* StatusVisual = Unit->FindComponentByClass<UStrategyInfantryVisualComponent>();
+    // The men decide too: below 95 % on their places (within 60 cm) it is still forming, whatever the timers say (2026-10-22:
+    // "HOLDER | Linie" stood over a company that was still a narrow column).
+    const UStrategyInfantryVisualComponent::FFormationFit StatusFit = StatusVisual ? StatusVisual->MeasureFormationFit(false) : UStrategyInfantryVisualComponent::FFormationFit();
+    const bool bStatusMenOut = StatusFit.Men > 0 && StatusFit.Ready < 0.95f;
+    Status.bReforming = Unit->UnitState == EStrategyUnitState::Reforming ||
+        (Unit->FormationTransition && Unit->FormationTransition->IsReforming()) ||
+        (StatusVisual && !StatusVisual->IsVisualFormationComplete()) || bStatusMenOut;
+    Status.bMoving = Unit->MovementExecutor && !Unit->MovementExecutor->GetExecutedVelocity().IsNearlyZero();
+    Status.bFiring = StatusFire && StatusFire->IsBattleFormationReady() && Unit->CombatComponent &&
+        Unit->CombatComponent->AmmunitionRounds > 0 && Unit->CombatComponent->FindBestTarget() &&
+        (!Unit->FireDisciplineComponent || Unit->FireDisciplineComponent->AllowsAutomaticFire()) &&
+        (!Unit->MovementExecutor || !Unit->MovementExecutor->HasMovementGoal() || Unit->MovementExecutor->IsHoldingForFire());
+    const bool bStatusAdvance = Unit->OrderComponent &&
+        (Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Advance ||
+         Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::AttackHere);
+    const bool bStatusDisengage = Unit->OrderComponent && Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Disengage;
+    const bool bStatusArrivalFront = StatusVisual && StatusVisual->HasVisualArrivalFrontReached();
+    const FString StatusForming = StatusFit.Men > 0 ? FString::Printf(TEXT("FORMERER %d/%d"), StatusFit.Placed, StatusFit.Men) : FString(TEXT("FORMERER"));
+    Status.Text = bStatusDisengage ? FString(TEXT("AFBRYDER")) : bStatusArrivalFront ?
+        (StatusVisual->IsVisualFormationComplete() && !bStatusMenOut ? FString(Status.bFiring ? TEXT("SKYDER") : TEXT("ANKOMMET")) : TEXT("ANKOMMET / ") + StatusForming) :
+        Status.bReforming ? StatusForming : FString(Status.bFiring ? TEXT("SKYDER") :
+        Status.bMoving ? (bStatusAdvance ? TEXT("RYKKER FREM") : TEXT("MARCHERER")) : TEXT("HOLDER"));
+    return Status;
 }
 
 void AStrategyHUD::Text(const FString& S, float X, float Y, const FLinearColor& Colour, float Scale)
@@ -375,7 +410,39 @@ void AStrategyHUD::DrawHUD()
         if (!ReportScenario->HasAfterActionReport()) { bReportSeen = false; bReportOpen = false; ReportPage = 0; }
         if (ReportScenario->HasAfterActionReport())
         {
-            if (!bReportSeen) { bReportSeen = true; bReportOpen = true; }
+            if (!bReportSeen)
+            {
+                bReportSeen = true; bReportOpen = true;
+                const TCHAR* ReportCmd = FCommandLine::Get();
+                bReportAutoCloseArmed = FParse::Param(ReportCmd, TEXT("Strategy1864AARAutoClose")) || FParse::Param(ReportCmd, TEXT("Strategy1864ShotsQuit")) ||
+                    FCString::Strifind(ReportCmd, TEXT("Strategy1864DrillTest=")) || FCString::Strifind(ReportCmd, TEXT("Strategy1864Shots=")) ||
+                    FCString::Strifind(ReportCmd, TEXT("Strategy1864Accept="));
+                ReportAutoCloseAt = FPlatformTime::Seconds() + 30.0;
+            }
+            if (bReportAutoCloseArmed)
+            {
+                // Any key or mouse button keeps the report open; otherwise the test game closes itself.
+                if (const APlayerController* ReportPC = GetOwningPlayerController())
+                    for (const FKey& ReportKey : { EKeys::LeftMouseButton, EKeys::RightMouseButton, EKeys::SpaceBar, EKeys::Enter, EKeys::Escape, EKeys::P })
+                        if (ReportPC->WasInputKeyJustPressed(ReportKey))
+                        {
+                            bReportAutoCloseArmed = false;
+                            ReportScenario->CancelAutoClose();
+                            break;
+                        }
+                const double ReportCloseIn = ReportAutoCloseAt - FPlatformTime::Seconds();
+                if (bReportAutoCloseArmed && ReportCloseIn <= 0.0)
+                {
+                    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-AAR: test run closes after 30 s of the report"));
+                    bReportAutoCloseArmed = false;
+                    FPlatformMisc::RequestExit(false);
+                }
+                else if (bReportAutoCloseArmed && Canvas)
+                {
+                    DrawText(FString::Printf(TEXT("Testkørsel: lukker om %d s - tryk en tast eller klik for at blive"), FMath::CeilToInt(ReportCloseIn)),
+                        FLinearColor(1.f, 0.85f, 0.4f), 20.f, Canvas->ClipY - 40.f, nullptr, 1.2f);
+                }
+            }
             if (bReportOpen) { DrawAfterActionReport(); return; }
             DrawButton(Canvas->ClipX - 460.f, 88.f, 150.f, 30.f, TEXT("VIS RAPPORT"), EAction::ReportToggle, 0, false);
         }
@@ -540,6 +607,19 @@ void AStrategyHUD::DrawHUD()
 
     DrawNatoSymbols();
     DrawUnitLog();
+    // The camera sticks to a unit: say which, and how to let go.
+    if (const AStrategyCameraPawn* HudCameraPawn = GetOwningPlayerController() ? Cast<AStrategyCameraPawn>(GetOwningPlayerController()->GetPawn()) : nullptr)
+    {
+        if (const AStrategyUnit* HudFollowed = HudCameraPawn->GetFollowedUnit(); HudFollowed && Canvas)
+        {
+            const FString HudFollowText = FString::Printf(TEXT("KAMERA FØLGER %s%s  ·  hjul: zoom  ·  Q/E: drej  ·  R/F: hæld  ·  G eller WASD: slip"),
+                *HudFollowed->DisplayName.ToString().ToUpper(), HudCameraPawn->bFollowTurnWithUnit ? TEXT(" (BAG ENHEDEN)") : TEXT(""));
+            float HudFollowW = 0.f, HudFollowH = 0.f;
+            GetTextSize(HudFollowText, HudFollowW, HudFollowH, nullptr, 0.9f);
+            DrawRect(FLinearColor(0.f, 0.f, 0.f, 0.55f), Canvas->ClipX * 0.5f - HudFollowW * 0.5f - 10.f, 60.f, HudFollowW + 20.f, HudFollowH + 8.f);
+            Text(HudFollowText, Canvas->ClipX * 0.5f - HudFollowW * 0.5f, 64.f, FLinearColor(0.95f, 0.86f, 0.55f, 1.f), 0.9f);
+        }
+    }
     DrawUnitHover();
 
     if (!bSelectionBoxActive)
@@ -922,29 +1002,16 @@ void AStrategyHUD::DrawFireCone(const AStrategyUnit* Unit, bool bWithLegend)
         if (Behind.Z > 0.0f)
         {
             const TCHAR* Formation = !Unit->FormationComponent ? TEXT("") :
+                ConeVisual && ConeVisual->IsDrillingToLine() ? TEXT("Kolonne → Linie") :
                 Unit->FormationComponent->CurrentFormation == EStrategyFormationType::Line ? TEXT("Linie") :
                 Unit->FormationComponent->CurrentFormation == EStrategyFormationType::Square ? TEXT("Karré") : TEXT("Kolonne");
             const FString Name = Unit->DisplayName.ToString();
             FString Info = FString::Printf(TEXT("%d mand | %s | Ild: %s"), Unit->CurrentStrength, Formation, bHold ? TEXT("HOLD") : *Fire->GetActiveRangeLabel().ToUpper());
             if (Unit->FieldOfficerComponent && Unit->FieldOfficerComponent->IsTakingFireCover()) Info += TEXT(" | ligger ned / spredt orden");
             else if (Unit->FieldOfficerComponent && Unit->FieldOfficerComponent->IsStandingUpFromFireCover()) Info += TEXT(" | rejser sig");
-            const bool bTagReforming = Unit->UnitState == EStrategyUnitState::Reforming ||
-                (Unit->FormationTransition && Unit->FormationTransition->IsReforming()) ||
-                (ConeVisual && !ConeVisual->IsVisualFormationComplete());
-            const bool bTagMoving = Unit->MovementExecutor && !Unit->MovementExecutor->GetExecutedVelocity().IsNearlyZero();
-            const bool bTagFiring = Fire->IsBattleFormationReady() && Unit->CombatComponent &&
-                Unit->CombatComponent->AmmunitionRounds > 0 && Unit->CombatComponent->FindBestTarget() &&
-                (!Unit->FireDisciplineComponent || Unit->FireDisciplineComponent->AllowsAutomaticFire()) &&
-                (!Unit->MovementExecutor || !Unit->MovementExecutor->HasMovementGoal() || Unit->MovementExecutor->IsHoldingForFire());
-            const bool bTagAdvance = Unit->OrderComponent &&
-                (Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Advance ||
-                 Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::AttackHere);
-            const bool bTagDisengage = Unit->OrderComponent && Unit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Disengage;
-            const bool bTagArrivalFront = ConeVisual && ConeVisual->HasVisualArrivalFrontReached();
-            const TCHAR* TagStatus = bTagDisengage ? TEXT("AFBRYDER") : bTagArrivalFront ?
-                (ConeVisual->IsVisualFormationComplete() ? (bTagFiring ? TEXT("SKYDER") : TEXT("ANKOMMET")) : TEXT("ANKOMMET / FORMERER")) :
-                bTagReforming ? TEXT("FORMERER") : bTagFiring ? TEXT("SKYDER") :
-                bTagMoving ? (bTagAdvance ? TEXT("RYKKER FREM") : TEXT("MARCHERER")) : TEXT("HOLDER");
+            const FUnitStatus TagUnitStatus = UnitStatus(Unit);
+            const bool bTagReforming = TagUnitStatus.bReforming, bTagFiring = TagUnitStatus.bFiring, bTagMoving = TagUnitStatus.bMoving;
+            const FString TagStatus = TagUnitStatus.Text;
             const FLinearColor TagColour = bTagReforming ? FLinearColor(1.f, 0.8f, 0.1f) :
                 bTagFiring ? FLinearColor(1.f, 0.15f, 0.1f) : bTagMoving ? FLinearColor(0.2f, 0.5f, 1.f) : FLinearColor(0.6f, 0.6f, 0.6f);
             Info = (SpecialOrderTag(Unit).IsEmpty() ? FString(TagStatus) : SpecialOrderTag(Unit)) + TEXT(" | ") + Info;
@@ -1383,6 +1450,11 @@ void AStrategyHUD::DrawCommandPanel(AStrategyUnit* Unit)
         DrawButton(HudX[1] + HudLeadW * 0.23f + DrillIndex * (HudPillW + 4.f), 165.f, HudPillW, 35.f, HudDrills[DrillIndex], HudUnlocked ? EAction::FireDrill : EAction::None, int32(HudModes[DrillIndex]), HudUnlocked && Unit->FireDrillComponent && Unit->FireDrillComponent->DrillMode == HudModes[DrillIndex], Unit);
     }
     DrawButton(HudX[0] + HudW[0] - 66.f, HudY + 4.f, 62.f, 20.f, bShowUnitLog ? TEXT("LOG: TIL") : TEXT("LOG"), EAction::UnitLog, 0, bShowUnitLog, Unit);
+    {
+        const AStrategyCameraPawn* HudFollowPawn = GetOwningPlayerController() ? Cast<AStrategyCameraPawn>(GetOwningPlayerController()->GetPawn()) : nullptr;
+        const bool bHudFollowing = HudFollowPawn && HudFollowPawn->GetFollowedUnit() == Unit;
+        DrawButton(HudX[0] + HudW[0] - 136.f, HudY + 4.f, 66.f, 20.f, bHudFollowing ? TEXT("FØLGER") : TEXT("FØLG (G)"), EAction::FollowCamera, 0, bHudFollowing, Unit);
+    }
     const EStrategyOrderType HudCurrent = Unit->OrderComponent ? Unit->OrderComponent->GetCurrentOrder().Type : EStrategyOrderType::None;
     const float HudOrderW = (HudW[2] - 5.f) / 2.f;
     const TCHAR* HudOrders[] = {TEXT("RYK FREM"), TEXT("TILBAGE"), TEXT("CHARGE"), TEXT("STOP")};
@@ -1797,6 +1869,16 @@ bool AStrategyHUD::HandleClick(const FVector2D& P)
                     break;
                 case EAction::UnitLog:
                     bShowUnitLog = !bShowUnitLog;
+                    break;
+                case EAction::FollowCamera:
+                    if (PC && Unit)
+                    {
+                        if (AStrategyCameraPawn* FollowCameraPawn = Cast<AStrategyCameraPawn>(PC->GetPawn()))
+                        {
+                            if (FollowCameraPawn->GetFollowedUnit() == Unit) FollowCameraPawn->StopUnitFollow();
+                            else FollowCameraPawn->FollowUnit(Unit, false);
+                        }
+                    }
                     break;
                 case EAction::ConeToggle:
                     if (Unit)

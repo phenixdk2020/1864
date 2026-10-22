@@ -1,0 +1,40 @@
+[
+  {
+    "seed": 1864,
+    "hashes": [
+      "bee32b1e9f50173ac7c52e1d6919a109fd482fad364eee09e5eeb0d245e9c5bb",
+      "feb253ddca13e78ebc0fa3bc144d540e14e5100e4ebc2a85035604e5362b7bd4",
+      "f5eaa447c56de60ec93d0ad3ff915d9342325673cd812a1e21a29bdd96f28269",
+      "845aa635dd65b854f91563232171eba8eb31cdae9f89214dbc0776145019c654"
+    ]
+  },
+  {
+    "seed": 1870,
+    "hashes": [
+      "97b1714a92b210eb21cb2e40f8c7522c6aacbc39973a530afe896b7423f3a75b",
+      "85d923831714a8b49fa25209e3ed2b2a27ef147569894575b1103c1b65051986",
+      "7dbca82639160b916182835f06a37be58eea2285bb5ed4cc1fceeda24ac39087",
+      "cd9428d5c664c9f81265eae878e1c348d4e3e86ed733833ee0a7a431c7fd27ad"
+    ]
+  },
+  {
+    "seed": 1864,
+    "scene": "mixed-monarchy",
+    "hashes": [
+      "16ba354f5c273c8c6742e4ef5854b4dd319096491d9defab8ce1b742b6aa268c",
+      "ca723c3ca282543fdf3311ea33636d4e03a9de88c1f92572f25dabf35b14c7ef",
+      "8f8f01872c1e089801e8e8804b44020d86a4b7239fe52c62753bbc9cbc3caf24",
+      "b9f08787d5629e7fc0b0b1fa1530d5dae88df9e6fcc6644cb32ff537b7260e47"
+    ]
+  },
+  {
+    "seed": 1870,
+    "scene": "mixed-monarchy",
+    "hashes": [
+      "37d067943fda220366d9419ea84d5fe8215a418a809dd3368f2123406459e2bb",
+      "7de0b8cb230f3a636757c2b56e3a79c0f0ebeeca5ac787d8917eeb9a3067e9a1",
+      "4fa0680dd1f835cead1470e7022ddc48205b9f554f22931857f0dfa9229a4cf7",
+      "f39e571368bb127c96df7193d612d2209c365d05d4fbfe2e5e3e622c241a82b5"
+    ]
+  }
+]

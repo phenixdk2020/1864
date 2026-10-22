@@ -10,6 +10,7 @@ class ACampaign1851Map;
 class ACampaign1851Camera;
 class APlayerController;
 struct FCampaign1851City;
+struct FCampaign1851Minister;
 
 /**
  * Screen overlay for the 1851 campaign map, painted directly each frame: title cartouche, legend,
@@ -361,7 +362,7 @@ private:
 	mutable FVector2D BuildingCardAnchor = FVector2D(-1.f, -1.f);   // set by the building list: where the building's card goes   // set by the selection panel: where the unit card goes
 	void PaintMinisterCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, int32 Portfolio) const;
 	/** A portrait in a frame of its own (dark mount, gold double frame). */
-	void PaintPortraitBox(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind, int32 Age = -1, int32 Rank = -1) const;
+	void PaintPortraitBox(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind, int32 Age = -1, int32 Rank = -1, const FString& PortraitNation = FString()) const;
 	/** The rank as a badge (epaulettes and stars) drawn over the portrait's lower corner: the picture is the person, this is the rank. */
 	void PaintRankBadge(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Corner, float Scale, int32 Rank) const;
 	int32 SelectedBridge = 0;
@@ -506,9 +507,11 @@ private:
 	TSharedPtr<FSlateBrush> FlagBrush;
 	/** Portraits (types of the time): officers, generals, ministers; one by the person's name. */
 	TArray<TSharedPtr<FSlateBrush>> OfficerPortraits, GeneralPortraits, MinisterPortraits;
-	const FSlateBrush* PortraitFor(const FString& Name, int32 Kind, int32 Age = -1) const;   // 0 officer, 1 general, 2 minister; Age picks the age group of the officers' pool
+	TMap<FString, TArray<TSharedPtr<FSlateBrush>>> NationPortraits;
+	FString PortraitNationForMinister(const FCampaign1851Minister& PortraitMinister) const;
+	const FSlateBrush* PortraitFor(const FString& Name, int32 Kind, int32 Age = -1, const FString& PortraitNation = FString()) const;   // 0 officer, 1 general, 2 minister; Age picks the age group of the officers' pool
 	TArray<TSharedPtr<FSlateBrush>> AgePortraits[3];   // officers by age: young, middle, old (no rank on the coat)
-	void PaintPortrait(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind) const;
+	void PaintPortrait(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& Pos, const FVector2D& Size, const FString& Name, int32 Kind, const FString& PortraitNation = FString()) const;
 	void PaintUnitCard(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& BottomLeft, int32 RegimentIndex) const;
 	void PaintStackList(const FGeometry& Geometry, FSlateWindowElementList& Out, int32 Layer, const FVector2D& CardPos, const FVector2D& CardSize, const TArray<const FCampaign1851Regiment*>& Sel) const;
 	int32 BuildingInfo = INDEX_NONE;

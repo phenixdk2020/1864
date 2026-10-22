@@ -4,7 +4,7 @@
 # restored if v9 imports lying down. Modelled on import_extras_from_mixamo.py (delete first: a replace-import keeps old settings).
 import unreal
 from pathlib import Path
-SRC = Path(r'R:\Onedrive\1864-Campaign\Saved\Codex\colour_bearer')
+SRC = Path(r'C:\Projekter\1864-Campaign\Saved\Codex\colour_bearer')
 CLIPS = [('ColourWalk', 'A_Combat_ColourWalk.fbx'), ('ColourIdle', 'A_Combat_ColourIdle.fbx')]
 skeleton = unreal.load_asset('/Game/Units/Human/Skeletons/SK_Human_1864')
 dest = '/Game/Units/Human/CombatAnimations'

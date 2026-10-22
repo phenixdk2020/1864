@@ -81,6 +81,26 @@ void AStrategyCameraPawn::SetKeySpeedFactor(float Factor)
 void AStrategyCameraPawn::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+    // Test flag: -Strategy1864FollowUnit=<id>[:BEHIND][:<arm cm>] sticks the camera to the first unit whose id contains <id>.
+    if (!bFollowUnitFlagParsed)
+    {
+        FString FollowFlag;
+        if (!FParse::Value(FCommandLine::Get(), TEXT("Strategy1864FollowUnit="), FollowFlag, false)) { bFollowUnitFlagParsed = true; }
+        else
+        {
+            TArray<FString> FollowFlagParts;
+            FollowFlag.ParseIntoArray(FollowFlagParts, TEXT(":"));
+            for (TActorIterator<AStrategyUnit> FollowFlagIt(GetWorld()); FollowFlagIt && FollowFlagParts.Num() > 0; ++FollowFlagIt)
+            {
+                if (!FollowFlagIt->StableUnitId.ToString().Contains(FollowFlagParts[0])) continue;
+                FollowUnit(*FollowFlagIt, FollowFlagParts.Num() > 1 && FollowFlagParts[1].Equals(TEXT("BEHIND"), ESearchCase::IgnoreCase));
+                if (FollowFlagParts.Num() > 2 && SpringArm) { PresetArmLength = FMath::Clamp(FCString::Atof(*FollowFlagParts[2]), MinZoom, MaxZoom); PresetPitch = -25.f; bPresetTransition = true; }
+                UE_LOG(LogTemp, Display, TEXT("Strategy1864FollowUnit|%s|behind=%d"), *FollowFlagIt->StableUnitId.ToString(), bFollowTurnWithUnit ? 1 : 0);
+                bFollowUnitFlagParsed = true;
+                break;
+            }
+        }
+    }
     // The camera runs in real time whatever the battle's speed (half speed, fast, paused).
     {
         const float Dilation = FMath::Max(0.05f, UGameplayStatics::GetGlobalTimeDilation(this));
@@ -193,6 +213,13 @@ void AStrategyCameraPawn::Tick(float DeltaTime)
                 }
                 const FVector Goal(Point.X, Point.Y, Point.Z + 100.f);
                 SetActorLocation(FMath::Lerp(GetActorLocation(), Goal, 1.f - FMath::Exp(-UnitFollowSmoothing * DeltaTime)));
+                if (bFollowTurnWithUnit)
+                {
+                    // Behind the unit: the view swings slowly round with its front (wheel, about-face).
+                    FRotator FollowTurn = GetActorRotation();
+                    FollowTurn.Yaw = FMath::RInterpTo(FollowTurn, FRotator(0.f, Followed->GetActorRotation().Yaw, 0.f), DeltaTime, 1.5f).Yaw;
+                    SetActorRotation(FollowTurn);
+                }
             }
             else
             {
@@ -370,6 +397,7 @@ void AStrategyCameraPawn::RotateCamera(float Value)
     {
         return;
     }
+    bFollowTurnWithUnit = false;   // the player turns: keep following, stop turning with the unit
 
     AddActorLocalRotation(FRotator(0.0f, Value * RotationSpeedDegrees * FApp::GetDeltaTime(), 0.0f));
 }
@@ -480,23 +508,28 @@ void AStrategyCameraPawn::ToggleFollowSelected()
     if (bFollowingUnit) { StopUnitFollow(); return; }
     if (AStrategyPlayerController* PC = Cast<AStrategyPlayerController>(GetController()))
     {
+        const bool bBehind = PC->IsInputKeyDown(EKeys::LeftShift) || PC->IsInputKeyDown(EKeys::RightShift);
         for (AStrategyUnit* Candidate : PC->GetSelectedUnits())
         {
-            if (IsValid(Candidate))
-            {
-                if (bFollowingProjectile) StopProjectileFollow(true);
-                FollowedUnit = Candidate;
-                bFollowingUnit = true;
-                bFocusTransition = false;
-                return;
-            }
+            if (IsValid(Candidate)) { FollowUnit(Candidate, bBehind); return; }
         }
     }
+}
+
+void AStrategyCameraPawn::FollowUnit(AStrategyUnit* Unit, bool bBehind)
+{
+    if (!IsValid(Unit)) return;
+    if (bFollowingProjectile) StopProjectileFollow(true);
+    FollowedUnit = Unit;
+    bFollowingUnit = true;
+    bFollowTurnWithUnit = bBehind;
+    bFocusTransition = false;
 }
 
 void AStrategyCameraPawn::StopUnitFollow()
 {
     bFollowingUnit = false;
+    bFollowTurnWithUnit = false;
     FollowedUnit.Reset();
 }
 
@@ -526,7 +559,7 @@ void AStrategyCameraPawn::FocusSelected()
 void AStrategyCameraPawn::ApplyPreset(float ArmLength, float Pitch)
 {
     if (bFollowingProjectile) StopProjectileFollow(true);
-    FocusSelected();
+    if (!bFollowingUnit) FocusSelected();   // following: the preset only sets distance and angle
     PresetArmLength = FMath::Clamp(ArmLength, MinZoom, MaxZoom);
     PresetPitch = Pitch;
     bPresetTransition = true;

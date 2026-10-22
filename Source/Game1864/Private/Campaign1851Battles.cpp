@@ -624,25 +624,53 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
         }
         return ReportRefuge;
     };
-    if (!O.bFromBattle3D)
     {
         TArray<TSharedPtr<FJsonValue>> ReportAutomaticOfficers;
-        for (const FCampaign1851Officer& ReportOfficer : Officers)
+        for (FCampaign1851Officer& ReportOfficer : Officers)
         {
             bool bReportParticipated = B.Regiments.Contains(ReportOfficer.Regiment) || B.Regiments.Contains(ReportOfficer.CaptainOf);
             for (int32 ReportRegiment : B.Regiments)
             {
                 if (Regiments.IsValidIndex(ReportRegiment) && ((ReportOfficer.Command != INDEX_NONE && Regiments[ReportRegiment].Command == ReportOfficer.Command) ||
-                    (ReportOfficer.Formation != 0 && Regiments[ReportRegiment].Formation == ReportOfficer.Formation) ||
-                    (ReportOfficer.StaffOf != 0 && Regiments[ReportRegiment].Formation == ReportOfficer.StaffOf))) { bReportParticipated = true; }
+                    (ReportOfficer.Formation != 0 && IsInside(Regiments[ReportRegiment].Formation, ReportOfficer.Formation)) ||
+                    (ReportOfficer.StaffOf != 0 && IsInside(Regiments[ReportRegiment].Formation, ReportOfficer.StaffOf)))) { bReportParticipated = true; }
             }
-            if (!bReportParticipated || ReportOfficer.Away != 0) { continue; }
+            if (!bReportParticipated || ReportOfficer.Away != 0 || ReportOfficer.CareerStatus != 0) { continue; }
             TSharedRef<FJsonObject> ReportOfficerJson = MakeShared<FJsonObject>();
             ReportOfficerJson->SetStringField(TEXT("id"), ReportOfficer.Id);
             ReportOfficerJson->SetStringField(TEXT("fate"), TEXT("well"));
             ReportAutomaticOfficers.Add(MakeShared<FJsonValueObject>(ReportOfficerJson));
+            int32 CareerStartMen = 0, CareerLostMen = 0;
+            for (int32 CareerRegiment : B.Regiments)
+            {
+                if (Regiments.IsValidIndex(CareerRegiment)) { CareerStartMen += Regiments[CareerRegiment].Men; CareerLostMen += O.UnitLosses.FindRef(CareerRegiment); }
+            }
+            BattleOfficerCareer(ReportOfficer, Place, float(CareerLostMen) / FMath::Max(1, CareerStartMen), !O.bFromBattle3D);
         }
-        RecordBattleOfficerCareers(ReportAutomaticOfficers, Place);
+        if (!O.bFromBattle3D) { RecordBattleOfficerCareers(ReportAutomaticOfficers, Place); }
+    }
+    if (Ci != INDEX_NONE)
+    {
+        TSet<FString> CareerEnemySeen;
+        for (const FCampaign1851NeighbourArmy& CareerArmy : NeighbourArmies)
+        {
+            if (CareerArmy.CorpsId != B.CorpsId || CareerArmy.Nation != ReportOpposingNation) { continue; }
+            TArray<FCampaign1851Officer>* CareerPool = ForeignOfficers.Find(CareerArmy.Nation);
+            if (!CareerPool) { continue; }
+            const FString CareerId = CareerArmy.OfficerId.IsEmpty() ? ForeignCommanderIds.FindRef(CareerArmy.Nation) : CareerArmy.OfficerId;
+            if (CareerEnemySeen.Contains(CareerId)) { continue; }
+            CareerEnemySeen.Add(CareerId);
+            FCampaign1851Officer* CareerChief = CareerPool->FindByPredicate([&](const FCampaign1851Officer& CareerCandidate) { return CareerCandidate.Id == CareerId; });
+            if (CareerChief) { BattleOfficerCareer(*CareerChief, Place, float(O.EnemyLosses) / FMath::Max(1, EnemyCorps[Ci].Men), true); }
+        }
+        if (CareerEnemySeen.Num() == 0)
+        {
+            TArray<FCampaign1851Officer>* CareerPool = ForeignOfficers.Find(ReportOpposingNation);
+            const FString CareerDefaultId = ForeignCommanderIds.FindRef(ReportOpposingNation);
+            FCampaign1851Officer* CareerChief = CareerPool ? CareerPool->FindByPredicate([&](const FCampaign1851Officer& CareerCandidate) { return CareerCandidate.Id == CareerDefaultId; }) : nullptr;
+            if (CareerChief) { BattleOfficerCareer(*CareerChief, Place, float(O.EnemyLosses) / FMath::Max(1, EnemyCorps[Ci].Men), true); }
+        }
+        ReplaceForeignOfficers();
     }
     const int32 ReportEnemyKilledBefore = EnemyKilled, ReportEnemyWoundedBefore = EnemyWounded, ReportEnemyCapturedBefore = EnemyCaptured;
     const int32 ReportRiflesBefore = CapturedRifles, ReportGunsBefore = CapturedGuns, ReportHorsesBefore = CapturedHorses, ReportWagonsBefore = CapturedWagons, ReportColoursBefore = CapturedColours;
@@ -714,13 +742,6 @@ void ACampaign1851Map::ApplyBattle(int32 BattleIndex, const FCampaign1851BattleO
             - (bReportGraded && !O.bDanishWin && !O.bDraw ? ReportDefeatMorale : 0.f), 0.05f, 1.f);
         R.Cohesion = FMath::Max(10.f, R.Cohesion - (O.bDanishWin ? 5.f : bReportGraded && !O.bDraw ? ReportDefeatCohesion : 20.f));
 		R.Experience = FMath::Min(100.f, R.Experience + 5.f);
-		for (const int32 o : { R.Chief, R.General })
-		{
-			if (Officers.IsValidIndex(o))
-			{
-				Officers[o].Experience = FMath::Min(100.f, Officers[o].Experience + (O.bDanishWin ? 6.f : 3.f));
-			}
-		}
 	}
     if (O.bExactReport)
     {

@@ -2548,6 +2548,191 @@ Risici/restarbejde: Unreal-save/load og UI er ikke runtime-testet; startkasser, 
   - Byggefejl rettet: navnekonflikt med UE's logkategorier `LogActor`/`LogType`, int→double-indsnævring og include-rækkefølge.
   - Validatoren er flyttet til `Tools/Campaign/validate_campaign_log.py`. Den syntetiske log gav 0 fejl.
 
+### 2026-10-20 — Niveau C: officerskarrierer (Codex)
+- Karrierer for DK, SE, NO og PR, valgt pr. scenarie:
+  - erfaring fra kommando, felttjeneste og slag, med begrænsede førings- og inspirationsbonusser;
+  - forfremmelse til ledige poster efter anciennitet eller fortjeneste;
+  - pension, slagdød, sår og afløsning fra officerspuljer.
+- Historiske officerer bevarer deres identitet, og deres afgang er et muligt udfald, ikke en fast dato. Nye reservepersoner er markeret som fiktive. Alle tal er spilskøn; se `Docs/Officerskarrierer.md`.
+- Koblet til månedsskiftet, slagresultaterne og kampagneloggen. Save v40, og ældre saves får standardværdier.
+- Validatorerne `validate_officer_careers.py` og `validate_level_c.py` består for 1825 og 1851. Buildet lykkedes. Ikke afprøvet i spillet.
+
+### 2026-10-20 — Nationale portrætter til Sverige, Norge og Preussen (Codex)
+- 126 generiske, fiktive olieportrætter, 42 pr. nation: 10 unge, 10 ældre og 6 gamle officerer, 6 generaler og 10 ministre. Formatet er 512×640 RGB som de danske. Kildefilerne ligger i `Reference/Campaign1851/Portraits/<SE|NO|PR>/`.
+- `SCampaign1851Overlay` vælger portræt efter personens nation, rolle og alder og bruger et dansk billede, hvis et sæt mangler. Det kompilerer.
+- `Content/Python/import_foreign_portraits.py` importerer til `/Game/Campaign1851/Portraits/<NAT>/`. Scriptet er endnu ikke kørt, så billederne vises først i spillet efter importen.
+- Usikre uniformsdetaljer er noteret i `PORTRAETTER.md`.
+
+### 2026-10-21 — Fanebæreren på højre fløj, ny fanebærer samler fanen op, ingen mand hopper
+- **Fanebærerens plads (brugerens beslutning):**
+  - I linje står han ved højre fløj ud for 1. geled, én mands afstand ude. Officeren skal stå uden for ham, når hans figur findes.
+  - I kolonne går han én række foran midterrækken.
+  - Den første fanebærer er højre fløjs mand i 1. geled.
+- **Altid højre om:** linje til kolonne går altid ud fra højre fløj. Ved ankomsten kommer kolonnen ind fra linjens venstre ende, så teten med fanen ender på højre fløj (`DrillEnterFlank`, `DrillFlank` og `DrillSide` er sat til 1).
+- **Ny fanebærer:** den nye mand går hen til fanen, knæler (stå-til-knæ), rejser sig med fanen (knæ-til-stå) og går på plads. Moralen får +3, når fanen er rejst. Hans gevær lægges fladt på jorden, også hvis geværmodellen er lavet stående.
+- **Rettet:**
+  - Fanebæreren var usynlig i crowd-tilstand (crowd-figurer har ingen model), så fanen svævede alene.
+  - Hele linjen rykkede sidelæns, når én mand tog fanen. Nu træder kun manden bagved frem.
+- **Ingen hop (brugerens krav):** når en mand træder frem i sin fil efter tab, går han nu frem i ca. 1,3 s med gangklippet. Tidligere hoppede han 90 cm. Loggen skriver `Strategy1864StepUp`.
+- **Testværktøj:** `-Strategy1864Shots` kan sigte på kompagniets fane (`FLAG<enhed>`) og sætte kameraet foran (`FRONT`).
+- **Afprøvet i 1 mod 1 med billedserier:** placering i linje og kolonne, fald, opsamling og fremtrædning.
+
+### 2026-10-21 — Tab falder på den side, der bliver beskudt (alle retninger, også karré)
+- **Geværild:** hver mands dybde måles langs skudlinjen fra den mand, der står nærmest skytterne. Mændene falder lagvis: ca. 78 % i det nærmeste lag, 20 % i det næste og 2 % i det tredje (skøn efter brugerens reference, 7/2/0 af 9).
+  - Et lag er geledafstanden ved ild forfra, filafstanden ved ild fra siden og en blanding ved skrå ild.
+  - Forfra rammes derfor 1. geled, bagfra 3. geled, fra siden den yderste fil og skråt hjørnet.
+  - I karré rammes hovedsageligt den side, der vender mod skytterne.
+  - Artilleri er uændret.
+- **Testkommandoer:** `KILL:antal[:grader]` (skytternes retning fra fronten) og `SQUARE` i `-Strategy1864DrillTest`.
+- **Afprøvet (30 træffere pr. retning, nærmeste/næste/tredje lag):**
+  - forfra 23/7/0;
+  - bagfra 25/4/1;
+  - fra højre flanke 22/8/0;
+  - skråt 45° 22/8/0;
+  - karré forfra 29/1/0.
+
+### 2026-10-21 — Nærkamp: øvelse, erfaring, bajonet og flanke; testkørsler lukker selv efter AAR
+- **Bajonetsammenstødet** (`ResolveShock`) vægter nu hver side med:
+  - bajonetøvelse (`DrillTraining`): ±12,5 % omkring gennemsnittet;
+  - mandskabets erfaring (`Experience`): op til +20 %;
+  - kaptajnens erfaring: ±5 %;
+  - påsat bajonet ×1,15, eller ×0,80 uden;
+  - angreb i flanke ×1,4 og i ryg ×1,7, målt fra fjendens front.
+  
+  Veteraner mister op til 30 % mindre moral. Ved standardværdierne er alle faktorer neutrale. Alle tal er spilskøn.
+- **Afprøvet med den nye testkommando `SHOCK:fjende[:grader]`** (sammenstød nu):
+  - forfra: forhold 1,44;
+  - flanke: forhold 2,01;
+  - ryg: forhold 2,44.
+  
+  Fjenden var overrasket uden bajonet i alle tre.
+- **AAR i testkørsler:** spillet lukker selv 30 s efter AAR, medmindre der trykkes en tast eller klikkes. En vagt på en anden tråd lukker også, hvis spillet hænger.
+  - Årsag: spillet frøs i `FlushAsyncLoading`, mens ZenServer-cachen var langsom efter en genstart.
+  - Testkørsler startes nu med `-ddc=InstalledNoZenLocalFallback`.
+  - Afprøvet: lukkede selv efter 30 s.
+
+### 2026-10-21 — Kortfliser v4 (Codex 20)
+- **Maling:** det oprindelige korts udenlandske land og alle nye områder er malet med samme maler og palet og med ETOPO 2022-terrænskygge (NOAA NCEI, DOI 10.25921/fd45-gt74). De grå felter og den mørke blok syd for Østersøen er fjernet, og overgangen mod monarkiet er blødt op.
+- **Bevaret:** monarkiets 3.135.400 pixels (Danmark, Slesvig, Holsten og Lauenborg) er byte-identiske i Color og Height.
+- **Omfang:** 251 fliser og 486 MiB i `Reference/Campaign1851/MapTiles`, som ikke er i git. Gitrene er 2951 × 3932 celler.
+- **Validering:** alle ni validatorer består, ifølge Codex.
+- **Mangler:**
+  - C++-delen (Codex 21: fliseterræn, cache og kamera) og importen i Unreal.
+  - Kanterne langs monarkiets grænse skal efterses: nærbilledet ved Holsten/Mecklenburg viser brunlige vifteformede pletter ved grænsen og en tynd lige streg på tværs.
+
+### 2026-10-21 — Kortfliser v5: grænsekanterne ved monarkiet (Codex 20)
+- Fejlen med brune kiler langs monarkiets grænse er fjernet. Den skyldtes opslag på den nærmeste monarkipixel; nu bruges et kontinuerligt farvefelt med blød overgang.
+- Den skrå streg var en forkert tegnet Elb. Den følger nu støttepunkter, men er stadig kantet og et skøn.
+- Ny kontrol `Tools/Map1851/border_artifacts.py` fanger rette streger og kiler ved grænsen.
+- Monarkiets pixels er byte-identiske i alle fem lag, og alle ni validatorer består ifølge Codex.
+- Det glatte Elbens forløb med rigtige floddata står i backloggen.
+
+### 2026-10-21 — Codex 21: kampagnefliser og streaming i C++
+- **Terræn:** fliseterræn med tre LOD'er, individuel culling og skørter mod sprækker mellem LOD'erne. De 24 nærmeste meshes caches, og der bygges højst ét mesh pr. tick.
+- **Teksturer:** Color og DetailMask streames asynkront. Oversigtsteksturen bruges, indtil fliserne er indlæst.
+- **Data:** 34,2 MB runtime-højder og skov i `Data/Campaign1851/MapTileHeights/`.
+- **Gitre:** de fulde scenariegitre bruger egne dimensioner og eget udsnit, og grænsescanningerne er samlet.
+- **Kamera:** maks-zoom er 2.500 km. Hjemmevisningen over Danmark er bevaret.
+- **Fallback:** mangler `MapTiles.json`, importmaterialerne eller højderne, bruges det gamle kort. Saveformatet er uændret (v40).
+- **Validering:** Codex' 11 validatorer består, og buildet lykkedes (orkestrator).
+- **Mangler:** importen med `Content/Python/import_map_tiles.py` og afprøvning i spillet.
+
+### 2026-10-21 — Kortfliser og portrætter importeret; første test af det store kort
+- **Kortfliser:** 251 fliser importeret som almindelige teksturer med mips og streaming, uden virtual textures (brugerens valg). Det giver 755 assets i `/Game/Campaign1851/MapTiles`.
+- **Portrætter:** de 126 SE/NO/PR-portrætter er importeret.
+- **Nyt testværktøj:** `CampaignUiShots` har fået kommandoen `view=lat+lon+km`.
+- **Første test:** Danmark ser ud som før, og hele kortet med Skandinavien og Nordtyskland kan ses zoomet ud.
+- **Problemer set:**
+  - første nærflise blev først bygget efter 88 s;
+  - Oslo og Berlin er slørede, og der står "Preparing textures";
+  - ved Berlin mangler en flise (gråt felt);
+  - kanten af kortet er sort, når man zoomer helt ud.
+
+### 2026-10-22 — Modellerede danske bygninger på kampagnekortet
+- **Fra billeder til modeller:**
+  - Research om danske bygninger 1825–64 ligger i `Docs/Bygninger-DK-Research-2026-10-21.md`.
+  - Codex lavede referencebilleder af 8 typer og 5 bybilleder (`Reference/Campaign1851/Scenery/DK/`), som brugeren har godkendt.
+  - Blender byggede lette modeller (102–507 trekanter) med én fælles tekstur (`Tools/Map1851/build_scenery_models.py` → `SourceAssets/Campaign1851/Scenery/DK/`).
+  - Kirken, stråtaget og møllen blev rettet efter brugerens gennemsyn.
+- **Import:** `Content/Python/import_scenery_dk.py` lægger modellerne i `/Game/Campaign1851/Scenery/DK`. Materialet `M_SceneryDK` er unlit, med fast lys fra nordvest som det malede kort.
+- **I spillet:** kortets scenery (`Campaign1851Map.cpp`) bruger modellerne i stedet for de procedurale kasser. Hver model skaleres til den gamle bygnings højde, og facaden vender mod gaden. `-Campaign1851OldScenery` giver de gamle bygninger.
+- **Afprøvet med kortbilleder af Odense, København og Fyn.**
+- **Mangler:** svenske, norske og preussiske typer; slagskygge under bygningerne (de gamle havde en bagt skygge); LOD-afstand.
+
+## 2026-10-22 — Skygge under de modellerede bygninger og lys tæt på
+
+- **Skygge:** `Campaign1851Scenery::BuildShadow` bygger kun den gamle brikkes bløde jordskygge (`FWriter::bShadowOnly`). `Campaign1851Map.cpp` lægger den som en ekstra HISM (`Scenery_<Type>_Shadow`) under hver modelleret bygning med de oprindelige transformationer, fordi de nye modeller ikke har en bagt jordskygge.
+- **Mørkt tæt på:** årsagen var ikke eksponeringen; niveauet har allerede manuel eksponering. Den nærmeste kortflise blev indlæst asynkront, så det første nærbillede viste det mørkere oversigtsark. Nu indlæser de fire fliser nærmest kameraet deres teksturer med det samme (`BuildMapTile(..., bTileTexturesNow)`), og farveteksturen tvinges i fuld opløsning i 15 s.
+- **Første billede:** første frame tog 80 s første gang, fordi Unreal byggede distance fields til de nye modeller; det ligger nu i DDC (73 s ved anden kørsel inkl. resten af opstarten).
+- **Kontrol:** build OK. Kortbilleder af Odense ved 12 km og 2,5 km samt København og Fyn: marker vises fra første billede, og skyggerne ligger mod sydøst under husene.
+
+## 2026-10-22 — Kameraet følger en enhed i slaget
+
+- **Taster:** G følgede allerede den valgte enhed (siden 389e1db), men det var ikke synligt og slap ved F1–F4. Nu sætter Shift+G kameraet bag enheden, og det drejer blødt med enhedens front (svingning, helt om). Q/E slipper drejningen, men ikke enheden.
+- **Zoom og vinkel:** hjul, R/F og forvalgene F1–F4 beholder enheden og ændrer kun afstand og vinkel. WASD, højretræk og G slipper den.
+- **HUD (`StrategyHUD.cpp`):** knappen FØLG (G) ved LOG i enhedspanelet og en linje øverst: "KAMERA FØLGER <enhed>" med tasterne.
+- **Testflag:** `-Strategy1864FollowUnit=<id>[:BEHIND][:<cm>]` (`StrategyCameraPawn.cpp`).
+
+## 2026-10-22 — Projektet flyttet til C:\Projekter\1864-Campaign
+
+- **Hvorfor:** R: er en langsom 2,5" bærbar-harddisk (Toshiba MQ01ABD075), og projektet lå i OneDrive, som låser filer under builds. C: er en Samsung NVMe SSD.
+- **Kopi:** hele projektet er kopieret med robocopy (17.738 filer, 11,3 GB inkl. `.git`). Originalen på `R:\Onedrive\1864-Campaign` er ikke slettet.
+- **Stier rettet:** launcherne `Start-*.bat`, `Tools/Animation/*.sh` og `build_artillery_props.py`, `Tools/Map1851/build_scenery_models.py`, `Content/Python/import_*.py`, kildefilerne under `Data/Campaign1851/Countries/` samt README, PROJEKT-OVERBLIK og Kortfliser. Historiske docs (HANDOVER, Arkiv) står uændret.
+- **Git:** de gamle Codex-worktrees under `R:\Onedrive\cx2` hører stadig til det gamle repo; deres metadata er fjernet i kopien. Nye worktrees laves fra C:.
+- **Build:** den kopierede `Intermediate/Build` indeholdt UBT's byggeplan (`Makefile.bin`) med R:-stier, så de første builds fra C: skrev til R:-mappen. `Intermediate/Build` er slettet i kopien; nu bygger Game1864Editor forfra på 230 s med alle filer på C:.
+
+## 2026-10-22 — Fanen og geværet i hånden
+
+- **Fanen:** stangen i `SM_Flag_Standard` står 23,3 cm fra modellens nulpunkt (målt i Blender på `Flag_Standard_Split.fbx`), så med skala 1,4 og 180° drejning stod den synlige stang 33 cm fra fanebærerens hånd. `StrategyColourFlag.cpp` flytter modellen, så stangens akse går gennem aktørens nulpunkt, som er hånden.
+- **Hånd = håndflade:** `UStrategyInfantryVisualComponent::PalmLocation` bruger midten mellem håndleddets knogle og langfingerens rod. Den bruges til fanestangen og til geværet på de nære figurer. Crowd-bagningen (`StrategyCrowdModel.cpp`) bruger samme regel for geværet i de stående stillinger, så geværet ligger i grebet og ikke foran åbne hænder. VAT-modellerne er bagt om (`bake_all_vat.py`, 48 bagninger, 0 fejl).
+- **Måling:** `-Strategy1864ColourDiag` logger fanebærerens hånd i hans eget koordinatsystem hvert 2. sekund.
+- **Kontrol:** nærbilleder forfra og fra siden (`-Strategy1864Shots` med FLAG og FRONT): stangen går gennem højre hånd, og geværet ligger i begge hænder.
+- **Tilbage:** fanebærerens hånd er åben i `A_Combat_ColourIdle`; den bør lukkes om stangen i selve animationen.
+
+## 2026-10-22 — Formationer der holder sammen (videoen 2026-10-22)
+
+Brugerens video og analyserne fra ChatGPT og Copilot viste en fanebærer langt fra kompagniet, en klump ved kolonne til linje, en "linje" der længe var en smal kolonne med "HOLDER | Linie", sammenfiltring ved en ny ordre og efternølere ved ankomst. Videoens forløb blev genskabt i en test og målt, før noget blev rettet.
+
+- **Test og måling:**
+  - `-Strategy1864DrillTest` har fået `MOVE:<frem m>:<højre m>[:<front grader>]` og `COLUMN`.
+  - `-Strategy1864FormationMetric` logger hvert sekund `Strategy1864FormationMetric` med den viste status, mænd på plads (inden for 60 cm), største og 95 %-afstand, mindste naboafstand og fanebærerens afstand til nærmeste mand. `Strategy1864FormationWhere` logger mændenes midte, aktøren og fanebæreren.
+  - Med `-Strategy1864DebugFormation` tegnes pladser (blå), mænd (gul) og røde streger over 2 m, og en lang omformning logger en "stuck man".
+  - Kode: `UStrategyInfantryVisualComponent::MeasureFormationFit` og `FormationPlace`.
+- **Fundne årsager og rettelser:**
+  - **Kort march i kolonne** (under 120 m) skiftede straks til linje (`StrategyFormationPolicyComponent.cpp`). Mændene gik så 35 s i kolonne under navnet "Linie", og en ny ordre midt i det sendte dem 40 m på 8 s. Nu bliver kolonnen i kolonne og folder sig ud ved målet (ankomst-eksercitsen).
+  - **LINIE under march:** eksercitsen blev afvist ("slot assignment clash"), fordi rækkerne presses sammen i et sving. Nu bruges hver mands faste række og plads i slangen, og ved sammenstød den nærmeste ledige plads (`PlanColumnDrill`).
+  - **Eksercitsen afbrudt efter 0,15 s,** fordi en officer genudstedte den samme hold-ordre med nyt løbenummer. Samme ordreindhold tæller nu ikke som ny ordre (`UpdateColumnDrill`).
+  - **Fanebæreren** hænger på aktørens rod og sprang 20–26 m, når aktøren flyttede sig til kolonnens hoved eller til den nye linje. Nu går han videre fra sin egen verdensposition, holder sig højst 2 rækker fra nærmeste mand, løber op til 4,5 m/s når han er sakket bagud, og følger slangens forreste række, mens linjen svinger ind i kolonne.
+  - **Status** (`AStrategyHUD::UnitStatus`, fælles for skilt og test) viser "FORMERER x/189", indtil mindst 95 % står på plads. Etiketten viser "Kolonne → Linie" under eksercitsen.
+  - **En ny marchordre** venter, til omformningen er færdig, dog højst 10 s (`UStrategyMovementExecutorComponent`, log `Strategy1864FormationHold`).
+- **Målt før/efter** (videoens forløb, 190 s):
+  - Fanebærer over 3 m fra nærmeste mand: 23 s (op til 22,5 m) før, 1 s (8,9 m) efter.
+  - Status "HOLDER"/"MARCHERER" med under 95 % på plads: forekom før, ikke efter.
+  - LINIE under march: eksercits i 36 s i stedet for en morph på 8 s.
+- **Tilbage:**
+  - Mænd presses ned til 1–19 cm i kolonnens 90°-sving.
+  - Efternølere ved ankomst med ny front: 62 mand fra bageste række er ca. 10 s længere om at nå frem, fordi de skal igennem de forreste.
+
+## 2026-10-22 — Kolonnens sving, efternølere ved ankomst og fanebærerens hop
+
+Fortsættelse af "Formationer der holder sammen". Målt i samme gentagelse af videoens forløb med `-Strategy1864FormationMetric`. Ny logning `Strategy1864FormationClosest` viser de to mænd, der står tættest, med deres række og bane.
+
+- **Kolonnens sving:**
+  - **Årsag:** aktøren fulgte rutens hjørner og drejede kun sin front, så sporet knækkede, og den indre banes mænd stod 1–19 cm fra hinanden ved hjørnet.
+  - **Rettelse:** en marchkolonne går nu fremad langs sin front og drejer med højst 3 m radius mod ruten (`StrategyMovementExecutorComponent.cpp`, "column arc"). Inden for drejecirklen (under 6 m og over 60°) går den lige som før.
+  - **Banernes retning:** den drejer højst som på samme radius pr. gået distance (`StrategyVisualFormationPath.h`).
+  - **Resultat:** ingen mænd under 35 cm i svinget.
+  - **Forsøgt og rullet tilbage:** at slippe hovedets lås ved skarpe hjørner. Det gav to mænd oven i hinanden under eksercitsen.
+- **Ankomst med ny front:**
+  - **Rækkefølge:** ved destination sorteres de nye pladser nu række for række som mændene (`PlanOrderlyReform`), så hver mand beholder række og fil.
+  - **Skub:** en mand på vej skubbes ikke længere tilbage af mænd, der står stille (`KeepReformSpacing`). Før gik han på stedet, til tiden løb ud, og hoppede så op til 10 m på plads. Kun mænd i bevægelse holder afstand til hinanden.
+  - **Resultat:** alle 189 mand står på plads 29 s efter start, uden hop.
+- **Fanebæreren:**
+  - **Årsag:** den stive linje drejer om sin midte, når en march begynder, og fløjen bevæger sig da op til 14 m/s.
+  - **Rettelse:** fanebæreren indhenter nu med dobbelt fart af sin afstand, mindst 4,5 m/s.
+  - **Resultat:** højst 3,5 m i 1 s, mod 8,9 m før.
+- **Tilbage:** under ankomstvandringen passerer mænd hinanden ned til 7–22 cm i kort tid. KOLONNE trykket stillestående ser stadig ud som en linje, til kompagniet marcherer, sådan som slangen er bygget. Linjens svingning om midten (14 m/s ved fløjen) venter på svingningsopgaven.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

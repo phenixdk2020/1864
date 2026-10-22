@@ -200,11 +200,29 @@ public:
     void RegisterColours() { bHasColours = true; }
     /** Test only (-Strategy1864DrillTest KILLCOLOURS): the colour bearer falls now. */
     void DebugKillColourBearer() { if (bColourBearerAlive && ColourBearer) KillColourBearer(); }
+    /** Test only (-Strategy1864DrillTest CROWDSTAT): where the drawn men are and what the baked crowd draws. */
+    FString DebugCrowdStat() const;
+    /** How well the drawn men stand on their places (2026-10-22): the share within FormationReadyGapCm of the formation's own
+        place, the worst and 95th-percentile gap, the closest two men (only when asked: n squared) and the colour bearer's gap to
+        the nearest man. */
+    struct FFormationFit { int32 Men = 0; int32 Placed = 0; float Ready = 1.f; float MaxGapCm = 0.f; float P95GapCm = 0.f; float MinNeighbourCm = 0.f; float BearerGapCm = -1.f; int32 ClosestA = INDEX_NONE; int32 ClosestB = INDEX_NONE; };
+    FFormationFit MeasureFormationFit(bool bNeighbours) const;
+    /** Where the formation itself puts this man once it stands (the new line on arrival or in a drill; its frame or trail otherwise). */
+    FVector FormationPlace(int32 PlaceIndex, bool bPlaceColumn) const;
+    /** The metric line (Strategy1864FormationMetric) with the status the HUD shows; with -Strategy1864DebugFormation also the
+        places (blue), the men (yellow) and a red line for every man more than 2 m from his place, for one second. */
+    void LogFormationMetric(const FString& ShownStatus) const;
+    static constexpr float FormationReadyGapCm = 60.f;
+    /** Test only: rifle hits so far by layer counted from the shooters (0 = nearest them); [ahead, oblique/flank, behind][layer]. */
+    int32 HitLayerTally[3][3] = {};
     /** Where the colours stand (the bearer's hand) or lie (fallen with him). False: no bearer yet, the flag keeps its old place. */
     bool GetColourTransform(FVector& OutColourLocation, float& OutColourYaw, bool& bOutColoursDown) const;
     /** The pole's lean back from vertical while carried (reference: Reference/Units/MultiView/Flag/Fane_March_*.png). */
     static constexpr float ColourCarryLeanDeg = 12.f;
     bool IsVisualFormationComplete() const { return !bEnabled || !bFormationPlanPending; }
+    /** The column is filing into line (the drill): the men still walk in column, though the unit's formation is already Line. */
+    bool IsDrillingToLine() const { return DrillActive && !DrillToColumn; }
+    bool IsDrilling() const { return DrillActive; }
     bool HasVisualArrivalFrontReached() const { return bArrivalReform && bArrivalFrontReached; }
 
     UFUNCTION(BlueprintCallable, Category="Strategy|Visual|Infantry")
@@ -412,6 +430,8 @@ private:
      *  of the column, carrying the colours. Shot, the colours fall; after 2-4 s the nearest front-rank man drops his rifle, picks
      *  them up and takes the bearer's place. */
     void UpdateColourBearer(float BearerDt);
+    /** The centre of a hand's palm: halfway from the hand bone to its first child (the grip of a rifle or a colour pole). */
+    static FVector PalmLocation(const USkeletalMeshComponent* PalmMesh, FName PalmHandBone);
     void PromoteColourBearer(bool bBearerInitial);
     void KillColourBearer();
     FVector ColourBearerTarget(float& OutBearerYaw) const;
@@ -423,6 +443,14 @@ private:
     bool bColoursDown = false;
     float ColourPromoteAt = -1.f;
     float ColourBearerYawVelocity = 0.f;
+    FVector ColourLastGoal = FVector::ZeroVector;   // -Strategy1864DebugFormation: logs a jump of the bearer's target
+    /** The bearer's own world place and facing, kept across a jump of the unit's actor (he is attached to its root). */
+    FVector ColourBearerWorld = FVector::ZeroVector;
+    FRotator ColourBearerWorldRotation = FRotator::ZeroRotator;
+    bool bColourBearerWorldValid = false;
+    // Taking up the fallen colours: 1 = kneeling down to them, 2 = rising with them; ends at ColourPickupEnd.
+    int32 ColourPickupPhase = 0;
+    float ColourPickupEnd = 0.f;
     FVector ColourDownLocation = FVector::ZeroVector;
     float ColourDownYaw = 0.f;
     /** "Slut op mod fanen": after losses only the files outside a gap side-step inwards, facing the front, as a ripple. */

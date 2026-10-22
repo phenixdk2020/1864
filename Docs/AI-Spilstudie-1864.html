@@ -3,103 +3,119 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI-spilstudie 1864</title>
+<title>AI Game Studio 1864</title>
 <style>
-:root{--bg:#f3efe6;--card:#fffdf8;--ink:#28231d;--muted:#6b6257;--line:#d6ccbb;--accent:#9e2a2b;--sec:#e9e3d6;
---c1:#2f6b3a;--c1b:#e4f0e2;--c2:#1f4e79;--c2b:#e2ebf5;--c3:#9a5a12;--c3b:#f7ead6;--c4:#9e2a2b;--c4b:#f6e2e0;--c5:#5a3f9e;--c5b:#ece6fa;--c6:#8a6d0b;--c6b:#f6f0d2;--c7:#1d6f7a;--c7b:#ddf0f2;--c8:#1f3f73;--c8b:#e1e7f4;--c9:#3b6d11;--c9b:#e8f1dc}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171b;--card:#1f2228;--ink:#ece6da;--muted:#a59d90;--line:#363a42;--accent:#f09595;--sec:#1a1d22;
---c1:#9fd6a8;--c1b:#1d2e21;--c2:#9cc3ea;--c2b:#1b2a3b;--c3:#f0bb72;--c3b:#352611;--c4:#f2a3a3;--c4b:#3a1f1f;--c5:#c4b5f5;--c5b:#2a2340;--c6:#e8cf6a;--c6b:#332c10;--c7:#8fd8e2;--c7b:#15303a;--c8:#a9bff0;--c8b:#1c2640;--c9:#b0d987;--c9b:#22301a}}
-:root[data-theme="dark"]{--bg:#15171b;--card:#1f2228;--ink:#ece6da;--muted:#a59d90;--line:#363a42;--accent:#f09595;--sec:#1a1d22;
---c1:#9fd6a8;--c1b:#1d2e21;--c2:#9cc3ea;--c2b:#1b2a3b;--c3:#f0bb72;--c3b:#352611;--c4:#f2a3a3;--c4b:#3a1f1f;--c5:#c4b5f5;--c5b:#2a2340;--c6:#e8cf6a;--c6b:#332c10;--c7:#8fd8e2;--c7b:#15303a;--c8:#a9bff0;--c8b:#1c2640;--c9:#b0d987;--c9b:#22301a}
+:root{--bg:#0b1220;--panel:#111b2e;--panel2:#16233b;--line:#2a4a7a;--glow:#3b82f6;--ink:#e8eef8;--muted:#9fb0c8;--red:#e0483e;--ok:#3fbf6f;--warn:#e7b04a}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
-main{max-width:1240px;margin:0 auto;padding:24px 16px 40px}
-header h1{font:700 32px/1.1 Georgia,serif;margin:0;letter-spacing:1px}
-header h1 b{color:var(--accent)}
-header p{margin:6px 0 0;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-size:12px}
-section{background:var(--sec);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:14px}
-section>h2{margin:0 0 10px;font:600 17px/1.2 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.5px}
-section>h2 span{color:var(--accent);margin-right:6px}
-.row{display:grid;gap:10px}
-.c3{grid-template-columns:1.2fr 1fr 1fr}
-.c2{grid-template-columns:1.3fr 1fr}
-@media (max-width:860px){.c3,.c2{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
-.card h3{margin:0 0 6px;font-size:15px}
-.card p{margin:0;color:var(--muted)}
-ul{margin:4px 0 0;padding-left:18px}
-li{margin:1px 0}
-.chk{list-style:none;padding-left:0}
-.chk li::before{content:"☐ ";color:var(--muted)}
-.chk li.ok::before{content:"☑ ";color:var(--c1)}
-.prompt{font-family:ui-monospace,Consolas,monospace;font-size:13px;background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:10px;margin-top:6px}
-.agents{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
-.agent{border-radius:10px;padding:10px 12px;border:1px solid}
-.agent h3{margin:0;font-size:14px}
-.agent .id{font:12px ui-monospace,Consolas,monospace;opacity:.85}
-.agent ul{font-size:13px;color:var(--ink)}
-.agent .tools{font-size:12px;margin-top:6px;color:var(--muted)}
-.a1{background:var(--c1b);border-color:var(--c1)}.a1 h3{color:var(--c1)}
-.a2{background:var(--c2b);border-color:var(--c2)}.a2 h3{color:var(--c2)}
-.a3{background:var(--c3b);border-color:var(--c3)}.a3 h3{color:var(--c3)}
-.a4{background:var(--c4b);border-color:var(--c4)}.a4 h3{color:var(--c4)}
-.a5{background:var(--c5b);border-color:var(--c5)}.a5 h3{color:var(--c5)}
-.a6{background:var(--c6b);border-color:var(--c6)}.a6 h3{color:var(--c6)}
-.a7{background:var(--c7b);border-color:var(--c7)}.a7 h3{color:var(--c7)}
-.a8{background:var(--c8b);border-color:var(--c8)}.a8 h3{color:var(--c8)}
-.a9{background:var(--c9b);border-color:var(--c9)}.a9 h3{color:var(--c9)}
-.status{display:inline-block;font-size:11px;border-radius:999px;padding:0 7px;margin-left:4px;border:1px solid currentColor;vertical-align:middle}
-.tools4{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
-.tool h3{display:flex;justify-content:space-between;gap:6px}
-.pin{grid-column:1/-1}
-.pin .apps{display:grid;gap:6px 18px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));margin-top:6px}
-.pin .apps div{font-size:13px}
-.pin .apps b{color:var(--c9)}
-.pipe{display:flex;flex-wrap:wrap;gap:6px;align-items:stretch}
-.pipe div{flex:1 1 110px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px;text-align:center;font-size:13px}
-.pipe div small{display:block;color:var(--muted);font-size:11px}
-.folders{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
-.folders code{font-size:13px;color:var(--accent)}
-footer{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;margin-top:14px;color:var(--muted);font-size:12px}
+body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#1b2d4d 0,transparent 60%),var(--bg);color:var(--ink);font:13px/1.45 "Segoe UI",system-ui,sans-serif}
+main{max-width:1500px;margin:0 auto;padding:18px 16px 30px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px}
+header h1{margin:0;font:700 40px/1 Georgia,serif;letter-spacing:1px}
+header h1 b{color:var(--red)}
+header p{margin:4px 0 0;color:var(--muted);letter-spacing:3px;text-transform:uppercase;font-size:12px}
+.quote{font:italic 18px Georgia,serif;color:#d9c9a3}
+.tags{font-size:11px;color:var(--muted);text-align:right;letter-spacing:1px}
+section{margin-top:12px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,rgba(22,35,59,.85),rgba(13,22,38,.85));box-shadow:0 0 0 1px rgba(59,130,246,.08),0 0 18px rgba(59,130,246,.10) inset;padding:10px 12px}
+section h2{margin:0 0 8px;font:700 15px/1.2 "Segoe UI",sans-serif;text-transform:uppercase;letter-spacing:1px}
+section h2 span{color:var(--red);margin-right:6px}
+.grid{display:grid;gap:10px}
+.g3{grid-template-columns:1.2fr 1fr 1fr}
+.g2{grid-template-columns:1.25fr 1fr}
+@media(max-width:900px){.g3,.g2{grid-template-columns:1fr}}
+.box{background:var(--panel);border:1px solid #23395d;border-radius:8px;padding:9px 11px}
+.box h3{margin:0 0 6px;font-size:13px}
+.box p{margin:0;color:var(--muted)}
+ul{margin:4px 0 0;padding-left:16px}li{margin:1px 0}
+.chk{list-style:none;padding:0}
+.chk li::before{content:"● ";color:var(--muted)}
+.chk li.ok::before{content:"✔ ";color:var(--ok)}
+.chk li.run::before{content:"◐ ";color:var(--warn)}
+.prompt{font-family:Consolas,monospace;font-size:12px;background:#0a1426;border:1px solid #23395d;border-radius:6px;padding:8px;color:#cfe0ff}
+.pm{display:flex;gap:12px;align-items:center}
+.bot{flex:none;width:66px;height:66px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#2c4f86,#0d1a2f);border:2px solid var(--glow);display:grid;place-items:center;font:700 18px Georgia,serif;color:#cfe0ff;box-shadow:0 0 14px rgba(59,130,246,.5)}
+.agents{display:grid;gap:8px;grid-template-columns:repeat(9,1fr)}
+@media(max-width:1300px){.agents{grid-template-columns:repeat(3,1fr)}}
+.ag{border-radius:8px;border:1px solid;padding:8px;min-height:190px;background:#0e1830}
+.ag h3{margin:-8px -8px 6px;padding:6px 8px;border-radius:7px 7px 0 0;font-size:12.5px;color:#fff}
+.ag .id{font:11px Consolas,monospace;color:var(--muted)}
+.ag ul{font-size:12px;padding-left:14px}
+.c1{border-color:#2f8f4e}.c1 h3{background:#1f6b3a}
+.c2{border-color:#2f5fae}.c2 h3{background:#22488a}
+.c3{border-color:#b36a1d}.c3 h3{background:#8c4f12}
+.c4{border-color:#b3352f}.c4 h3{background:#8a2420}
+.c5{border-color:#7b4bc4}.c5 h3{background:#5b3399}
+.c6{border-color:#b8962a}.c6 h3{background:#86691a}
+.c7{border-color:#2b8fa3}.c7 h3{background:#1d6a7a}
+.c8{border-color:#2f5fae}.c8 h3{background:#1d3f7a}
+.c9{border-color:#3fa05a}.c9 h3{background:#2a7a41}
+.tools{display:grid;gap:8px;grid-template-columns:2.2fr repeat(5,1fr)}
+@media(max-width:1100px){.tools{grid-template-columns:repeat(2,1fr)}}
+.tool h3{font-size:14px}
+.pin{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;font-size:12px;margin-top:4px}
+.pin b{color:#9fe0b0}
+.pipe{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.st{flex:1 1 100px;background:var(--panel);border:1px solid #23395d;border-radius:7px;padding:7px 6px;text-align:center;font-size:12px}
+.st small{display:block;color:var(--muted);font-size:10.5px}
+.ar{color:var(--glow);font-weight:700}
+.folders{display:flex;flex-wrap:wrap;gap:8px}
+.f{background:var(--panel);border:1px solid #23395d;border-radius:7px;padding:6px 10px;font-size:12px}
+.f code{color:#ffd38a}
+.badge{display:inline-block;font-size:10.5px;border-radius:999px;padding:0 7px;margin-left:4px;border:1px solid currentColor;vertical-align:middle}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.off{color:#9aa}
+footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:12px;color:var(--muted);font-size:12px}
+footer .big{font:700 26px Georgia,serif;color:var(--ink)}
 </style>
 </head>
 <body>
 <main>
 <header>
-<h1>AI GAME STUDIO <b>1864</b></h1>
-<p>Lokal AI-drevet produktion · fra idé til spil · Unreal Engine 5.8</p>
+  <div><h1>AI GAME STUDIO <b>1864</b></h1><p>Sådan er projektet organiseret – fra idé til spil</p></div>
+  <div class="quote">"Historien bliver levende – med dine idéer og AI"</div>
+  <div class="tags">ORKESTRATOR · 9 AGENTER<br>CODEX · PINOKIO · UNREAL 5.8<br>DU HAR DET SIDSTE ORD</div>
 </header>
 
 <section>
 <h2><span>1.</span>Dit projekt-cockpit</h2>
-<div class="row c3">
-  <div class="card"><h3>Du skriver kun til projektlederen</h3>
-    <p>I Claude-appen (Code-fanen eller Remote Control fra telefonen).</p>
-    <div class="prompt">Eksempel: Lav en norsk infanterist fra 1864 ud fra billederne i Reference/Units/Norwegian Infantry. Rig ham, giv ham march med skuldergevær og importér ham til Unreal.</div>
+<div class="grid g3">
+  <div class="box"><h3>Du skriver kun til projektlederen</h3>
+    <p>Claude-appen: Code-fanen på pc'en eller Remote Control fra telefonen. Billeder, zip-filer og skitser kan sendes direkte.</p>
+    <div class="prompt" style="margin-top:6px">Eksempel fra i dag: "Fanebæreren skal stå i højre forreste hjørne – en ny mand går hen og samler fanen op, når han falder."</div>
   </div>
-  <div class="card"><h3>Projektplan (eksempel)</h3>
+  <div class="box"><h3>Projektplan (i dag, eksempel)</h3>
     <ul class="chk">
-      <li class="ok">Research og kilder</li><li class="ok">Referencebilleder</li><li>3D-modellering</li><li>Teksturer</li><li>Blender-oprydning</li><li>Rigging og animation</li><li>Unreal-import og VAT</li><li>QA og billedserier</li>
+      <li class="ok">Fanebærer: plads, fald, opsamling</li>
+      <li class="ok">Tab på den side der beskydes (også karré)</li>
+      <li class="ok">Nærkamp: øvelse, erfaring, bajonet, flanke</li>
+      <li class="ok">Kort v5: Sverige, Norge, Preussen malet</li>
+      <li class="ok">Officersbilleder DK/SE/NO/PR</li>
+      <li class="run">Kort i C++: fliser og streaming (Codex 21)</li>
+      <li>Officer i 3D (Hunyuan)</li>
+      <li>Import af portrætter og fliser i Unreal</li>
     </ul>
   </div>
-  <div class="card"><h3>Færdigt resultat</h3>
+  <div class="box"><h3>Færdigt resultat</h3>
     <ul class="chk">
-      <li class="ok">3D-model (FBX)</li><li class="ok">Teksturer</li><li class="ok">Animationer bagt i VAT</li><li class="ok">Klar i Unreal</li><li class="ok">Historik i Docs/</li>
+      <li class="ok">Kode bygget og testet i 1 mod 1</li>
+      <li class="ok">Billedserier sendt til dig</li>
+      <li class="ok">Historik i Docs/ og backlog opdateret</li>
+      <li class="ok">Commit og push kun når du siger det</li>
     </ul>
-    <p style="margin-top:6px">Til sidst tester du selv i spillet.</p>
+    <p style="margin-top:6px">Til sidst spiltester du selv.</p>
   </div>
 </div>
 </section>
 
 <section>
 <h2><span>2.</span>AI-projektleder og fælles videnbase</h2>
-<div class="row c2">
-  <div class="card"><h3>Orkestrator: Claude Code (Opus)</h3>
-    <p>Forstår opgaven, planlægger, fordeler til agenterne, bygger, tester og rapporterer.</p>
-    <ul><li>Opgaveanalyse og plan (Plan Mode ved nye features)</li><li>Tildeler agenter og styrer rækkefølgen (ingen GPU-kollisioner)</li><li>Kvalitetssikring: læser hver agents resultat og diff</li><li>Bygger med Build.bat, kører testflag og billedserier</li><li>Rapporterer på dansk og fører historikken</li></ul>
+<div class="grid g2">
+  <div class="box pm"><div class="bot">PL</div>
+    <div><h3>Orkestrator: Claude Code</h3>
+      <p>Forstår opgaven, planlægger (Plan Mode ved nye features), fordeler til agenter og Codex, bygger, tester, ser billederne igennem og rapporterer på dansk.</p>
+      <ul><li>Kun ét tungt job ad gangen: build, Pinokio eller Codex</li><li>Læser hver agents resultat og kontrollerer filerne</li><li>Retter fejl, som agenterne efterlader (byggefejl, kanter)</li></ul>
+    </div>
   </div>
-  <div class="card"><h3>Fælles videnbase</h3>
-    <ul><li><b>AGENTS.md / CLAUDE.md:</b> regler for alle agenter</li><li><b>Docs/:</b> historik, Backlog, TestFlags, CampaignLog</li><li><b>Reference/:</b> uniformer, faner, kanoner, BILLEDLISTE.md</li><li><b>Data/Campaign1851/:</b> historiske tal (1825 og 1851)</li><li><b>Hukommelse:</b> dine tidligere ønsker og beslutninger</li></ul>
+  <div class="box"><h3>Fælles videnbase</h3>
+    <ul><li><b>AGENTS.md / CLAUDE.md</b> – regler for alle agenter</li><li><b>Docs/</b> – historik, Backlog, TestFlags, Kortfliser, research</li><li><b>Reference/</b> – uniformer, faner, kanoner, skitser</li><li><b>Data/Campaign1851/</b> – 1825- og 1851-scenarier</li><li><b>Hukommelse</b> – dine beslutninger mellem sessioner</li></ul>
   </div>
 </div>
 </section>
@@ -107,97 +123,77 @@ footer{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;margin
 <section>
 <h2><span>3.</span>Specialiserede AI-agenter</h2>
 <div class="agents">
-  <div class="agent a1"><h3>Research <span class="status">oprettet</span></h3><div class="id">research · Sonnet</div>
-    <ul><li>Historisk research 1825–1864</li><li>Uniformer, våben, eksercits</li><li>Befolkning, grænser, alliancer</li><li>Kilder; skøn markeres</li></ul></div>
-  <div class="agent a2"><h3>Koncept <span class="status">oprettet</span></h3><div class="id">koncept · Haiku</div>
-    <ul><li>Referencebriefs</li><li>BILLEDLISTE.md pr. nation</li><li>Prompts til billed-apps</li><li>Multiview-krav</li></ul></div>
-  <div class="agent a3"><h3>3D-generering <span class="status">oprettet</span></h3><div class="id">model3d · Sonnet</div>
-    <ul><li>Billede → 3D (Hunyuan3D, TRELLIS2)</li><li>Rekvisitter (Stable Fast 3D)</li><li>Varianter pr. nation</li><li>Én GPU-app ad gangen</li></ul></div>
-  <div class="agent a4"><h3>Tekstur <span class="status">oprettet</span></h3><div class="id">tekstur · Sonnet</div>
-    <ul><li>PBR-teksturer</li><li>Uniformsfarver pr. regiment</li><li>Rettelser med inpainting</li><li>Optimering af størrelse</li></ul></div>
-  <div class="agent a5"><h3>Blender <span class="status">oprettet</span></h3><div class="id">blender · Sonnet</div>
-    <ul><li>Model-oprydning, retopologi</li><li>UV og materialer</li><li>Skalering til Unreal</li><li>FBX-eksport (headless)</li></ul></div>
-  <div class="agent a6"><h3>Rigging og animation <span class="status">oprettet</span></h3><div class="id">rigging-animation · Sonnet</div>
-    <ul><li>Skelet og skinning</li><li>Mixamo-retargeting</li><li>Klip: march, skuldergevær, sidestep, fane</li><li>Gangfart målt i cm/s</li></ul></div>
-  <div class="agent a7"><h3>QA / test <span class="status">oprettet</span></h3><div class="id">qa-test · Haiku</div>
-    <ul><li>Validatorer og acceptancetests</li><li>Mesh-, tekstur- og klip-tjek</li><li>Logs fra testslag</li><li>Rapport med fil:linje</li></ul></div>
-  <div class="agent a8"><h3>Unreal-integration <span class="status">oprettet</span></h3><div class="id">unreal-integration · Sonnet</div>
-    <ul><li>Import med UnrealEditor-Cmd</li><li>Rotation roll 90, backup</li><li>VAT-bagning, BakeVersion</li><li>Kun når editoren er lukket</li></ul></div>
-  <div class="agent a9"><h3>Asset-manager <span class="status">oprettet</span></h3><div class="id">asset-manager · Haiku</div>
-    <ul><li>Navngivning og mappestruktur</li><li>SourceAssets ↔ Content</li><li>Versioner og backups</li><li>Kun lister; sletter intet</li></ul></div>
+  <div class="ag c1"><h3>Research</h3><div class="id">research · Sonnet</div><ul><li>Historie 1825–64</li><li>Faner, uniformer</li><li>Bytal, distrikter</li><li>Skøn markeres</li></ul></div>
+  <div class="ag c2"><h3>Koncept</h3><div class="id">koncept · Haiku</div><ul><li>Billedlister</li><li>Referencebriefs</li><li>Multiview-krav</li><li>Prompter</li></ul></div>
+  <div class="ag c3"><h3>3D-generering</h3><div class="id">model3d · Sonnet</div><ul><li>Hunyuan3D</li><li>TRELLIS2, SF3D</li><li>Figurer og ting</li><li>Kører alene</li></ul></div>
+  <div class="ag c4"><h3>Tekstur</h3><div class="id">tekstur · Sonnet</div><ul><li>PBR-teksturer</li><li>Uniformsfarver</li><li>Inpainting</li><li>Optimering</li></ul></div>
+  <div class="ag c5"><h3>Blender</h3><div class="id">blender · Sonnet</div><ul><li>Oprydning, UV</li><li>Kugle, visker, ladestok</li><li>FBX-eksport</li><li>Kun headless</li></ul></div>
+  <div class="ag c6"><h3>Rigging &amp; animation</h3><div class="id">rigging-animation · Sonnet</div><ul><li>Skelet, skinning</li><li>Skuldergevær, sidestep</li><li>Fanebærerklip</li><li>Gangfart i cm/s</li></ul></div>
+  <div class="ag c7"><h3>QA / test</h3><div class="id">qa-test · Haiku</div><ul><li>Validatorer</li><li>Acceptancetests</li><li>Logs og billeder</li><li>Fil:linje i rapport</li></ul></div>
+  <div class="ag c8"><h3>Unreal-integration</h3><div class="id">unreal-integration · Sonnet</div><ul><li>Import (roll 90)</li><li>VAT-bagning</li><li>Fliser og portrætter</li><li>Editor lukket</li></ul></div>
+  <div class="ag c9"><h3>Asset-manager</h3><div class="id">asset-manager · Haiku</div><ul><li>Navngivning</li><li>SourceAssets ↔ Content</li><li>Backups</li><li>Sletter intet</li></ul></div>
 </div>
-<div class="agents" style="margin-top:8px">
-  <div class="card"><h3>Kode-agenter</h3>
-    <ul><li><b>Codex</b> (OpenAI, via agenten <code>codex</code>): afgrænsede C++-opgaver og review på din maskine</li><li><b>GitHub Copilot coding agent</b>: tager GitHub-issues og laver pull requests i skyen <span class="status">ikke aktiveret</span></li></ul></div>
-  <div class="card"><h3>Hjælpeagenter <span class="status">findes</span></h3>
-    <ul><li><b>search:</b> finder kode og filer i repoet</li><li><b>docs:</b> slår UE 5.8-, Python- og Blender-API op</li></ul></div>
+<div class="grid g2" style="margin-top:8px">
+  <div class="box"><h3>Kode- og billedagenter</h3><ul>
+    <li><b>Codex</b> (OpenAI, via agenten <code>codex</code>): C++ og Python efter brief – officerskarrierer, kampagnelog, kortfliser – og <b>billeder</b>: 126 portrætter og 20 officersreferencer <span class="badge ok">aktiv</span> <span class="badge warn">brugsgrænse</span></li>
+    <li><b>GitHub Copilot coding agent</b>: issues → pull requests i skyen <span class="badge off">ikke aktiveret</span></li></ul></div>
+  <div class="box"><h3>Hjælpeagenter</h3><ul><li><b>search</b> – finder kode og filer i repoet</li><li><b>docs</b> – slår UE 5.8-, Python- og Blender-API op</li><li><b>Explore / Plan</b> – kortlægger og planlægger større opgaver</li></ul></div>
 </div>
 </section>
 
 <section>
 <h2><span>4.</span>Lokalt værktøjslag</h2>
-<div class="tools4">
-  <div class="card pin"><h3>Pinokio: kører lokale AI-apps (D:\pinokio)</h3>
-    <div class="apps">
-      <div><b>Hunyuan3D-2 LowVRAM:</b> billede → teksturert 3D-figur; hovedværktøj til soldater</div>
-      <div><b>ComfyUI Image to 3D:</b> TRELLIS2 (3D i høj kvalitet), GeometryPack (rens mesh), UniRig (auto-skelet)</div>
-      <div><b>Stable Fast 3D:</b> hurtige rekvisitter: kugle, visker, ladestok</div>
-      <div><b>AniGen:</b> animerbar figur fra ét billede; kandidat til heste</div>
-      <div><b>Puppeteer Auto-Rigger:</b> skelet, skinning og FBX-eksport</div>
-      <div><b>Mesh2Motion:</b> auto-rig og animationsprøve i browseren</div>
-      <div><b>ComfyUI:</b> konceptbilleder, multiview-referencer, teksturer</div>
-      <div><b>Fooocus:</b> hurtige konceptskitser</div>
-      <div><b>Stable Diffusion Forge:</b> inpainting, ikoner, kortgrafik</div>
-      <div><b>FaceFusion:</b> variation i portrætter og ansigter</div>
-      <div><b>FramePack Studio:</b> billede → video som bevægelsesreference</div>
-      <div><b>Wan2GP:</b> AI-video: referenceklip og trailer</div>
-    </div>
-  </div>
-  <div class="card tool"><h3>Blender 5.2</h3><p>Rigging, klip-redigering, spejling, FBX-eksport. Køres headless med scripts.</p></div>
-  <div class="card tool"><h3>Unreal Engine 5.8</h3><p>Spillet: kampagnekort og 3D-slag; import, VAT-bagning, byg og testflag.</p></div>
-  <div class="card tool"><h3>Mixamo (web)</h3><p>Færdige menneskeanimationer som råmateriale.</p></div>
-  <div class="card tool"><h3>Python</h3><p>Kortbygning, validatorer, loganalyse, Unreal- og Blender-scripts.</p></div>
-  <div class="card tool"><h3>PowerShell</h3><p>Build.bat, testkørsler, processtyring (er editoren lukket?).</p></div>
-  <div class="card tool"><h3>Visual Studio / MSVC</h3><p>C++-compileren bag buildet.</p></div>
-  <div class="card tool"><h3>Codex CLI</h3><p>OpenAIs kodeagent, kørt lokalt med brief og faste regler.</p></div>
-  <div class="card tool"><h3>Git, GitHub og Copilot</h3><p>Versionsstyring på branchen campaign. Copilot coding agent kræver aktivering på github.com og at branchen pushes.</p></div>
-  <div class="card tool"><h3>ffmpeg</h3><p>Billeder ud af dine optagelser, så fejl kan ses på tidspunkt.</p></div>
-  <div class="card tool"><h3>OneDrive</h3><p>Synkroniserer projektet; pause under store builds.</p></div>
+<div class="tools">
+  <div class="box tool"><h3>Pinokio <span class="badge">D:\pinokio</span></h3>
+    <div class="pin">
+      <div><b>Hunyuan3D-2</b> billede → 3D-figur</div><div><b>ComfyUI</b> Flux, billeder, teksturer</div>
+      <div><b>Image to 3D</b> TRELLIS2, UniRig</div><div><b>Fooocus</b> hurtige skitser</div>
+      <div><b>Stable Fast 3D</b> rekvisitter</div><div><b>SD Forge</b> inpainting, ikoner</div>
+      <div><b>AniGen</b> animerbar figur</div><div><b>FaceFusion</b> portrætvariation</div>
+      <div><b>Puppeteer</b> auto-rig, FBX</div><div><b>FramePack</b> billede → video</div>
+      <div><b>Mesh2Motion</b> rig i browser</div><div><b>Wan2GP</b> AI-video</div>
+    </div></div>
+  <div class="box tool"><h3>Blender 5.2</h3><p>Modellering, klip, FBX – headless med scripts</p></div>
+  <div class="box tool"><h3>Python</h3><p>Kortfliser, validatorer, loganalyse, import</p></div>
+  <div class="box tool"><h3>PowerShell</h3><p>Testkørsler, processtyring, build</p></div>
+  <div class="box tool"><h3>Git / GitHub</h3><p>Branch campaign → channel-campaign. Push kun på dit ja</p></div>
+  <div class="box tool"><h3>Unreal Engine 5.8</h3><p>Kampagnekort og 3D-slag. Build via UnrealBuildTool; tests med flag, lukker selv efter AAR</p></div>
 </div>
+<div class="box" style="margin-top:8px"><h3>Datakilder</h3><p>Natural Earth 10m (kyster, grænser) · NOAA ETOPO 2022 (højder) · historiske kilder via research · Mixamo (råanimationer) · dine referencebilleder, zip-filer og skitser</p></div>
 </section>
 
 <section>
 <h2><span>5.</span>Asset-pipeline og output</h2>
 <div class="pipe">
-  <div>Idé / prompt<small>dig</small></div>
-  <div>Research<small>research</small></div>
-  <div>Referencer<small>koncept</small></div>
-  <div>3D-model<small>model3d</small></div>
-  <div>Oprydning og UV<small>blender</small></div>
-  <div>Teksturer<small>tekstur</small></div>
-  <div>Rigging<small>rigging-animation</small></div>
-  <div>Animation<small>rigging-animation</small></div>
-  <div>Import og VAT<small>unreal-integration</small></div>
-  <div>QA og billeder<small>qa-test</small></div>
-  <div>Klar til spil<small>dig tester</small></div>
+  <div class="st">💡 Idé / prompt<small>dig</small></div><span class="ar">▶</span>
+  <div class="st">Research<small>research</small></div><span class="ar">▶</span>
+  <div class="st">Referencebilleder<small>koncept · Codex</small></div><span class="ar">▶</span>
+  <div class="st">3D-model<small>model3d · Hunyuan</small></div><span class="ar">▶</span>
+  <div class="st">Oprydning, UV<small>blender</small></div><span class="ar">▶</span>
+  <div class="st">Teksturer<small>tekstur</small></div><span class="ar">▶</span>
+  <div class="st">Rigging<small>rigging-animation</small></div><span class="ar">▶</span>
+  <div class="st">Animation<small>rigging-animation</small></div><span class="ar">▶</span>
+  <div class="st">Import + VAT<small>unreal-integration</small></div><span class="ar">▶</span>
+  <div class="st">Test + billeder<small>qa-test · orkestrator</small></div><span class="ar">▶</span>
+  <div class="st">Spiltest<small>dig</small></div>
 </div>
 </section>
 
 <section>
 <h2><span>6.</span>Projektmapper og resultater</h2>
 <div class="folders">
-  <div class="card"><code>Reference/</code><p>Research og referencebilleder pr. enhed og nation</p></div>
-  <div class="card"><code>SourceAssets/</code><p>Modeller, FBX-klip og kildefiler</p></div>
-  <div class="card"><code>Tools/Animation/</code><p>Blender-scripts til rigging og klip</p></div>
-  <div class="card"><code>Content/</code><p>Unreal-assets: figurer, VAT, materialer, kort</p></div>
-  <div class="card"><code>Content/Python/</code><p>Import- og bagescripts til Unreal</p></div>
-  <div class="card"><code>Source/</code><p>C++: Game1864 (kampagne) og Strategy1864 (slag)</p></div>
-  <div class="card"><code>Docs/</code><p>Historik, Backlog, testflag, denne side</p></div>
-  <div class="card"><code>Saved/Codex/</code><p>Briefs, svar og billedserier fra tests</p></div>
+  <div class="f">📁 <code>Reference/</code> research, billeder, kortfliser</div>
+  <div class="f">📁 <code>SourceAssets/</code> FBX, modeller, ETOPO, Natural Earth</div>
+  <div class="f">📁 <code>Tools/</code> Animation, Map1851, Countries, Campaign</div>
+  <div class="f">📁 <code>Content/</code> Unreal-assets, VAT, Python-import</div>
+  <div class="f">📁 <code>Source/</code> Game1864 (kampagne) · Strategy1864 (slag)</div>
+  <div class="f">📁 <code>Data/Campaign1851/</code> scenarier 1825/1851, gitre</div>
+  <div class="f">📁 <code>Docs/</code> historik, backlog, testflag</div>
+  <div class="f">📁 <code>Saved/Codex/</code> briefs, billedserier, previews</div>
 </div>
 </section>
 
-<footer><span>Pinokio-apps, Blender og Unreal kører lokalt</span><span>Claude, Codex og Copilot er skymodeller</span><span>Fuld kontrol: ingen commit eller push uden dit ja</span><span>Opdateret 2026-10-20</span></footer>
+<footer><span>Pinokio, Blender og Unreal kører lokalt · Claude, Codex og Copilot er skymodeller</span><span>Ingen commit eller push uden dit ja</span><span class="big">1864</span></footer>
 </main>
 </body>
 </html>

@@ -17,27 +17,80 @@ bool ACampaign1851Map::LoadNeighbours(FJsonObject& MapJson)
 	NeighbourArmyAtStart.Reset();
 	NeighbourDistricts.Reset();
 	NeighbourDistrictGrid.Reset();
+    NeighbourOwners.Reset();
+    NeighbourDistrictW = NeighbourDistrictH = 0;
 	NeighbourOwnerIds.Reset();
 	NeighbourColours.Reset();
 	FString NeighbourText;
 	TSharedPtr<FJsonObject> NeighbourJson;
-	if (!FFileHelper::LoadFileToString(NeighbourText, *(NeighbourDir / (TEXT("cities_neighbours_") + ActiveScenario().Id + TEXT(".json"))))
-		|| !FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(NeighbourText), NeighbourJson) || !NeighbourJson.IsValid())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|neighbours|ingen scenariedata; bevarer oprindeligt kort"));
-		return false;
-	}
-	const TSharedPtr<FJsonObject> NeighbourGrid = Campaign1851Json::Object(*NeighbourJson, TEXT("ownerGrid"));
-	if (!NeighbourGrid->TryGetNumberField(TEXT("width"), NeighbourOwnerW)
-		|| !NeighbourGrid->TryGetNumberField(TEXT("height"), NeighbourOwnerH)) { return false; }
-	if (NeighbourOwnerW <= 0 || NeighbourOwnerH <= 0 || NeighbourOwnerW > 2048 || NeighbourOwnerH > 2048
-		|| !FFileHelper::LoadFileToArray(NeighbourOwners, *(NeighbourDir / TEXT("Neighbours_Owners.bin")))
-		|| NeighbourOwners.Num() != NeighbourOwnerW * NeighbourOwnerH)
-	{
-		NeighbourOwners.Reset();
-		UE_LOG(LogTemp, Error, TEXT("CAMPAIGN-1851|neighbours|ugyldigt ejergrid"));
-		return false;
-	}
+    const bool bTileHasLegacyNeighbours = FFileHelper::LoadFileToString(NeighbourText, *(NeighbourDir / (TEXT("cities_neighbours_") + ActiveScenario().Id + TEXT(".json"))))
+        && FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(NeighbourText), NeighbourJson) && NeighbourJson.IsValid();
+    auto TileValidGridExtent = [](const FJsonObject& TileGrid) -> bool
+    {
+        const TSharedPtr<FJsonObject> TileBounds = Campaign1851Json::Object(TileGrid, TEXT("extentKm"));
+        double TileXMin = 0.0, TileXMax = 0.0, TileYMin = 0.0, TileYMax = 0.0;
+        return TileBounds->TryGetNumberField(TEXT("xMin"), TileXMin) && TileBounds->TryGetNumberField(TEXT("xMax"), TileXMax)
+            && TileBounds->TryGetNumberField(TEXT("yMin"), TileYMin) && TileBounds->TryGetNumberField(TEXT("yMax"), TileYMax)
+            && FMath::IsFinite(TileXMin) && FMath::IsFinite(TileXMax) && FMath::IsFinite(TileYMin) && FMath::IsFinite(TileYMax)
+            && TileXMax > TileXMin && TileYMax > TileYMin;
+    };
+    OwnerExtent = Extent;
+    DistrictExtent = Extent;
+    bFullNeighbourGrid = false;
+    TArray<uint8> TileFullDistrictBytes;
+    FString TileNeighbourText;
+    TSharedPtr<FJsonObject> TileNeighbourJson;
+    if (FPaths::FileExists(NeighbourDir / TEXT("MapTiles.json"))
+        && FFileHelper::LoadFileToString(TileNeighbourText, *(NeighbourDir / (TEXT("cities_neighbours_full_") + ActiveScenario().Id + TEXT(".json"))))
+        && FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(TileNeighbourText), TileNeighbourJson) && TileNeighbourJson.IsValid())
+    {
+        const TSharedPtr<FJsonObject> TileOwnerGrid = Campaign1851Json::Object(*TileNeighbourJson, TEXT("ownerGridFull"));
+        const TSharedPtr<FJsonObject> TileDistrictGrid = Campaign1851Json::Object(*TileNeighbourJson, TEXT("districtGridFull"));
+        int32 TileOwnerW = 0, TileOwnerH = 0, TileDistrictW = 0, TileDistrictH = 0;
+        TArray<uint8> TileOwnerBytes, TileDistrictBytes;
+        if (TileOwnerGrid->TryGetNumberField(TEXT("width"), TileOwnerW) && TileOwnerGrid->TryGetNumberField(TEXT("height"), TileOwnerH)
+            && TileDistrictGrid->TryGetNumberField(TEXT("width"), TileDistrictW) && TileDistrictGrid->TryGetNumberField(TEXT("height"), TileDistrictH)
+            && TileOwnerW > 0 && TileOwnerW <= 4096 && TileOwnerH > 0 && TileOwnerH <= 4096
+            && TileDistrictW > 0 && TileDistrictW <= 4096 && TileDistrictH > 0 && TileDistrictH <= 4096
+            && TileValidGridExtent(*TileOwnerGrid) && TileValidGridExtent(*TileDistrictGrid)
+            && FFileHelper::LoadFileToArray(TileOwnerBytes, *(NeighbourDir / Campaign1851Json::String(*TileOwnerGrid, TEXT("file"))))
+            && TileOwnerBytes.Num() == TileOwnerW * TileOwnerH
+            && FFileHelper::LoadFileToArray(TileDistrictBytes, *(NeighbourDir / Campaign1851Json::String(*TileDistrictGrid, TEXT("file"))))
+            && TileDistrictBytes.Num() == TileDistrictW * TileDistrictH * 2)
+        {
+            NeighbourJson = TileNeighbourJson;
+            NeighbourOwners = MoveTemp(TileOwnerBytes);
+            TileFullDistrictBytes = MoveTemp(TileDistrictBytes);
+            bFullNeighbourGrid = true;
+        }
+    }
+    if (!bFullNeighbourGrid && !bTileHasLegacyNeighbours)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|neighbours|ingen gyldige scenariedata; bevarer oprindeligt kort"));
+        return false;
+    }
+    const TSharedPtr<FJsonObject> NeighbourGrid = Campaign1851Json::Object(*NeighbourJson, bFullNeighbourGrid ? TEXT("ownerGridFull") : TEXT("ownerGrid"));
+    if (!NeighbourGrid->TryGetNumberField(TEXT("width"), NeighbourOwnerW)
+        || !NeighbourGrid->TryGetNumberField(TEXT("height"), NeighbourOwnerH)) { return false; }
+    if (NeighbourOwnerW <= 0 || NeighbourOwnerH <= 0 || NeighbourOwnerW > 4096 || NeighbourOwnerH > 4096
+        || (!bFullNeighbourGrid && !FFileHelper::LoadFileToArray(NeighbourOwners, *(NeighbourDir / Campaign1851Json::String(*NeighbourGrid, TEXT("file")))))
+        || NeighbourOwners.Num() != NeighbourOwnerW * NeighbourOwnerH)
+    {
+        NeighbourOwners.Reset();
+        UE_LOG(LogTemp, Error, TEXT("CAMPAIGN-1851|neighbours|ugyldigt ejergrid"));
+        return false;
+    }
+    auto TileReadGridExtent = [](const FJsonObject& TileGrid, FCampaign1851Extent& TileOut)
+    {
+        const TSharedPtr<FJsonObject> TileGridExtent = Campaign1851Json::Object(TileGrid, TEXT("extentKm"));
+        TileOut.XMin = TileGridExtent->GetNumberField(TEXT("xMin")); TileOut.XMax = TileGridExtent->GetNumberField(TEXT("xMax"));
+        TileOut.YMin = TileGridExtent->GetNumberField(TEXT("yMin")); TileOut.YMax = TileGridExtent->GetNumberField(TEXT("yMax"));
+    };
+    if (bFullNeighbourGrid) { TileReadGridExtent(*NeighbourGrid, OwnerExtent); }
+    const TSharedPtr<FJsonObject> TileDistrictMeta = Campaign1851Json::Object(*NeighbourJson, bFullNeighbourGrid ? TEXT("districtGridFull") : TEXT("districtGrid"));
+    TileDistrictMeta->TryGetNumberField(TEXT("width"), NeighbourDistrictW);
+    TileDistrictMeta->TryGetNumberField(TEXT("height"), NeighbourDistrictH);
+    if (bFullNeighbourGrid) { TileReadGridExtent(*TileDistrictMeta, DistrictExtent); }
 	const TSharedPtr<FJsonObject> NeighbourIds = Campaign1851Json::Object(*NeighbourGrid, TEXT("ids"));
 	const TArray<TSharedPtr<FJsonValue>>* SouthRows = nullptr;
 	if (NeighbourJson->TryGetArrayField(TEXT("districts"), SouthRows))
@@ -64,10 +117,12 @@ bool ACampaign1851Map::LoadNeighbours(FJsonObject& MapJson)
 			SouthRow->TryGetNumberField(TEXT("ruralTax"), SouthDistrict.RuralTax);
 			SouthDistrict.Reserve = SouthDistrict.Population * SouthDistrict.StartShare;
 		}
-		TArray<uint8> SouthGridBytes;
-		if (FFileHelper::LoadFileToArray(SouthGridBytes, *(NeighbourDir / TEXT("South_Districts.bin")))
-			&& SouthGridBytes.Num() == NeighbourOwnerW * NeighbourOwnerH * 2)
+        TArray<uint8> SouthGridBytes = MoveTemp(TileFullDistrictBytes);
+        if ((bFullNeighbourGrid || FFileHelper::LoadFileToArray(SouthGridBytes, *(NeighbourDir / Campaign1851Json::String(*TileDistrictMeta, TEXT("file")))))
+			&& NeighbourDistrictW > 0 && NeighbourDistrictW <= 4096 && NeighbourDistrictH > 0 && NeighbourDistrictH <= 4096
+            && SouthGridBytes.Num() == NeighbourDistrictW * NeighbourDistrictH * 2)
 		{
+            NeighbourDistrictGrid.Reserve(NeighbourDistrictW * NeighbourDistrictH);
 			for (int32 SouthByte = 0; SouthByte < SouthGridBytes.Num(); SouthByte += 2)
 			{
 				NeighbourDistrictGrid.Add(uint16(SouthGridBytes[SouthByte]) | (uint16(SouthGridBytes[SouthByte + 1]) << 8));
@@ -272,10 +327,16 @@ void ACampaign1851Map::RestoreForeignTreasuries(const TMap<FString, double>& Sav
 	}
 }
 
+FVector2D ACampaign1851Map::OwnerUvFromKm(const FVector2D& TileKm) const
+{
+    return FVector2D((TileKm.X - OwnerExtent.XMin) / (OwnerExtent.XMax - OwnerExtent.XMin),
+        (TileKm.Y - OwnerExtent.YMin) / (OwnerExtent.YMax - OwnerExtent.YMin));
+}
+
 FString ACampaign1851Map::TerritoryNation(const FVector2D& Km) const
 {
 	if (IsMonarchyLand(Km)) { return TEXT("DK"); }
-	const FVector2D NeighbourUv = UvFromKm(Km);
+	const FVector2D NeighbourUv = OwnerUvFromKm(Km);
 	if (NeighbourUv.X < 0 || NeighbourUv.X >= 1 || NeighbourUv.Y < 0 || NeighbourUv.Y >= 1) { return FString(); }
 	if (NeighbourOwners.Num() == 0) { return IsMonarchyLand(Km) ? FString(TEXT("DK")) : FString(); }
 	const int32 NeighbourX = FMath::Clamp(int32(NeighbourUv.X * NeighbourOwnerW), 0, NeighbourOwnerW - 1);
@@ -538,7 +599,7 @@ float ACampaign1851Map::NeighbourMarchPace(int32 CorpsId) const
 	const ECampaign1851Arm SouthArm = SouthArmy->Arm == TEXT("cavalry") ? ECampaign1851Arm::Cavalry : SouthArmy->Arm == TEXT("artillery") ? ECampaign1851Arm::Artillery : ECampaign1851Arm::Infantry;
 	const FCampaign1851Officer* ForeignChief = ForeignCommander(SouthArmy->Nation, SouthArmy->OfficerId);
 	const float ForeignStaffFactor = ForeignChief && !ForeignChief->Away
-		? Campaign1851Army::StaffPaceFactor(ForeignChief->Stat(ECampaign1851OfficerStat::Staff)) : SouthArmy->OfficerMarchFactor;
+		? Campaign1851Army::StaffPaceFactor(ForeignChief->Stat(ECampaign1851OfficerStat::Staff)) : 1.f;
 	return Campaign1851Army::MarchKmPerDay(SouthArm) * ForeignStaffFactor;
 }
 
@@ -666,6 +727,7 @@ TArray<FString> ACampaign1851Map::SaveNeighbours() const
 	TArray<FString> NeighbourLines;
 	for (const FCampaign1851NeighbourArmy& NeighbourArmy : NeighbourArmies)
 	{
+		NeighbourLines.Add(TEXT("career-officer|") + NeighbourArmy.Id + TEXT("|") + NeighbourArmy.OfficerId);
 		NeighbourLines.Add(FString::Printf(TEXT("mobilisation|%s|%.9f|%d"), *NeighbourArmy.Id, NeighbourArmy.MobilisationStartDay, NeighbourArmy.MobilisationStage));
 		if (NeighbourArmy.CorpsId) { NeighbourLines.Add(FString::Printf(TEXT("%s|%d"), *NeighbourArmy.Id, NeighbourArmy.CorpsId)); }
 		if (!NeighbourArmy.District.IsEmpty()) { NeighbourLines.Add(FString::Printf(TEXT("army-supply|%s|%.9f|%.9f"), *NeighbourArmy.Id, NeighbourArmy.FoodDays, NeighbourArmy.FodderDays)); }
@@ -696,6 +758,17 @@ void ACampaign1851Map::RestoreNeighbours(const TArray<FString>& Lines)
 	{
 		TArray<FString> NeighbourParts;
 		NeighbourLine.ParseIntoArray(NeighbourParts, TEXT("|"), false);
+		if (NeighbourParts.Num() == 3 && NeighbourParts[0] == TEXT("career-officer"))
+		{
+			FCampaign1851NeighbourArmy* CareerArmy = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& CareerCandidate) { return CareerCandidate.Id == NeighbourParts[1]; });
+			if (CareerArmy)
+			{
+				CareerArmy->OfficerId = NeighbourParts[2];
+				const FCampaign1851Officer* CareerChief = ForeignCommander(CareerArmy->Nation, CareerArmy->OfficerId);
+				CareerArmy->Chief = CareerChief ? CareerChief->Rank + TEXT(" ") + CareerChief->Name : FString(TEXT("Ledig chefspost"));
+			}
+			continue;
+		}
 		if (NeighbourParts.Num() == 4 && NeighbourParts[0] == TEXT("mobilisation"))
 		{
 			FCampaign1851NeighbourArmy* MobilisationArmy = NeighbourArmies.FindByPredicate([&](const FCampaign1851NeighbourArmy& MobilisationA) { return MobilisationA.Id == NeighbourParts[1]; });
@@ -750,85 +823,106 @@ void ACampaign1851Map::SetNeighbourPoliticalView(bool bPolitical)
 
 void ACampaign1851Map::BuildNeighbourMeshes()
 {
-	UMaterialInterface* NeighbourMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Campaign1851/M_Campaign1851Scenery.M_Campaign1851Scenery"));
-	if (!NeighbourMaterial || NeighbourOwners.Num() == 0) { return; }
-	const double NeighbourDx = SizeKm.X / NeighbourOwnerW, NeighbourDy = SizeKm.Y / NeighbourOwnerH;
-	for (const auto& NeighbourNation : NeighbourOwnerIds)
-	{
-		TArray<TArray<FVector>> NeighbourStrips, NeighbourBorders;
-		for (int32 NeighbourY = 0; NeighbourY < NeighbourOwnerH; ++NeighbourY)
-		{
-			for (int32 NeighbourX = 0; NeighbourX < NeighbourOwnerW; )
-			{
-				if (NeighbourOwners[NeighbourY * NeighbourOwnerW + NeighbourX] != NeighbourNation.Key) { ++NeighbourX; continue; }
-				const int32 NeighbourStartX = NeighbourX;
-				while (NeighbourX < NeighbourOwnerW && NeighbourOwners[NeighbourY * NeighbourOwnerW + NeighbourX] == NeighbourNation.Key) { ++NeighbourX; }
-				TArray<FVector>& NeighbourStrip = NeighbourStrips.AddDefaulted_GetRef();
-				for (int32 NeighbourSample = NeighbourStartX; NeighbourSample <= NeighbourX; ++NeighbourSample)
-				{
-					NeighbourStrip.Add(LocalAtKm(FVector2D(Extent.XMin + NeighbourSample * NeighbourDx, Extent.YMax - (NeighbourY + 0.5) * NeighbourDy)) + FVector(0, 0, 1.1));
-				}
-			}
-		}
-		for (int32 NeighbourY = 0; NeighbourY + 1 < NeighbourOwnerH; ++NeighbourY)
-		{
-			for (int32 NeighbourX = 0; NeighbourX + 1 < NeighbourOwnerW; ++NeighbourX)
-			{
-				const uint8 NeighbourId = NeighbourOwners[NeighbourY * NeighbourOwnerW + NeighbourX];
-				if (NeighbourId != NeighbourNation.Key) { continue; }
-				const FVector2D NeighbourCorner(Extent.XMin + (NeighbourX + 1) * NeighbourDx, Extent.YMax - (NeighbourY + 1) * NeighbourDy);
-				const uint8 NeighbourRight = NeighbourOwners[NeighbourY * NeighbourOwnerW + NeighbourX + 1];
-				const uint8 NeighbourBelow = NeighbourOwners[(NeighbourY + 1) * NeighbourOwnerW + NeighbourX];
-				if (NeighbourRight && NeighbourRight != NeighbourId) { NeighbourBorders.Add({ LocalAtKm(NeighbourCorner) + FVector(0,0,2.5), LocalAtKm(NeighbourCorner + FVector2D(0,NeighbourDy)) + FVector(0,0,2.5) }); }
-				if (NeighbourBelow && NeighbourBelow != NeighbourId) { NeighbourBorders.Add({ LocalAtKm(NeighbourCorner) + FVector(0,0,2.5), LocalAtKm(NeighbourCorner - FVector2D(NeighbourDx,0)) + FVector(0,0,2.5) }); }
-			}
-		}
-		for (int32 NeighbourBorderPass = 0; NeighbourBorderPass < 2; ++NeighbourBorderPass)
-		{
-			const FString NeighbourMeshName = TEXT("Neighbour_") + NeighbourNation.Value + (NeighbourBorderPass ? TEXT("_Border") : TEXT("_Political"));
-			UStaticMeshComponent* NeighbourMesh = NewObject<UStaticMeshComponent>(this, FName(*NeighbourMeshName));
-			NeighbourMesh->SetupAttachment(Root);
-			NeighbourMesh->SetStaticMesh(Campaign1851Scenery::BuildRibbons(NeighbourBorderPass ? NeighbourBorders : NeighbourStrips,
-				float(NeighbourBorderPass ? 0.08 * KmToUnits : NeighbourDy * 0.5 * KmToUnits),
-				NeighbourBorderPass ? FLinearColor(0.12f,0.10f,0.08f) : NeighbourColour(NeighbourNation.Value), NeighbourMaterial, *NeighbourMeshName));
-			NeighbourMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			NeighbourMesh->SetCastShadow(false);
-			NeighbourMesh->SetVisibility(NeighbourBorderPass != 0);
-			NeighbourMesh->RegisterComponent();
-			if (!NeighbourBorderPass) { NeighbourTerritoryMeshes.Add(NeighbourMesh); }
-			else { RiverMeshes.Add(NeighbourMesh); }
-		}
-	}
-	if (NeighbourDistrictGrid.Num() == NeighbourOwners.Num())
-	{
-		TArray<TArray<FVector>> SouthBorders;
-		for (int32 SouthY = 0; SouthY + 1 < NeighbourOwnerH; ++SouthY)
-		{
-			for (int32 SouthX = 0; SouthX + 1 < NeighbourOwnerW; ++SouthX)
-			{
-				const int32 SouthCell = SouthY * NeighbourOwnerW + SouthX;
-				const uint16 SouthId = NeighbourDistrictGrid[SouthCell];
-				if (!SouthId) { continue; }
-				const FVector2D SouthCorner(Extent.XMin + (SouthX + 1) * NeighbourDx, Extent.YMax - (SouthY + 1) * NeighbourDy);
-				if (NeighbourDistrictGrid[SouthCell + 1] && NeighbourDistrictGrid[SouthCell + 1] != SouthId
-					&& NeighbourOwners[SouthCell] == NeighbourOwners[SouthCell + 1])
-				{
-					SouthBorders.Add({ LocalAtKm(SouthCorner) + FVector(0,0,2.8), LocalAtKm(SouthCorner + FVector2D(0,NeighbourDy)) + FVector(0,0,2.8) });
-				}
-				if (NeighbourDistrictGrid[SouthCell + NeighbourOwnerW] && NeighbourDistrictGrid[SouthCell + NeighbourOwnerW] != SouthId
-					&& NeighbourOwners[SouthCell] == NeighbourOwners[SouthCell + NeighbourOwnerW])
-				{
-					SouthBorders.Add({ LocalAtKm(SouthCorner) + FVector(0,0,2.8), LocalAtKm(SouthCorner - FVector2D(NeighbourDx,0)) + FVector(0,0,2.8) });
-				}
-			}
-		}
-		UStaticMeshComponent* SouthBoundaryMesh = NewObject<UStaticMeshComponent>(this, FName(TEXT("SouthDistrictBorders")));
-		SouthBoundaryMesh->SetupAttachment(Root);
-		SouthBoundaryMesh->SetStaticMesh(Campaign1851Scenery::BuildRibbons(SouthBorders, float(0.045 * KmToUnits), FLinearColor(0.35f,0.27f,0.19f), NeighbourMaterial, TEXT("SouthDistrictBorders")));
-		SouthBoundaryMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		SouthBoundaryMesh->SetCastShadow(false);
-		SouthBoundaryMesh->SetVisibility(false);
-		SouthBoundaryMesh->RegisterComponent();
-		NeighbourTerritoryMeshes.Add(SouthBoundaryMesh);
-	}
+    UMaterialInterface* TilePoliticalMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Campaign1851/M_Campaign1851Scenery.M_Campaign1851Scenery"));
+    if (!TilePoliticalMaterial || NeighbourOwners.Num() == 0) { return; }
+    const double TileDx = (OwnerExtent.XMax - OwnerExtent.XMin) / NeighbourOwnerW;
+    const double TileDy = (OwnerExtent.YMax - OwnerExtent.YMin) / NeighbourOwnerH;
+    TMap<uint8, TArray<TArray<FVector>>> TilePoliticalStrips;
+    // The political tint is a coarse presentation only; gameplay and borders retain
+    // every 0.71 km cell. Bound ribbon geometry as well as raster scan complexity.
+    const int32 TilePoliticalStride = bFullNeighbourGrid ? 4 : 1;
+    for (int32 TileY = 0; TileY < NeighbourOwnerH; TileY += TilePoliticalStride)
+    {
+        for (int32 TileX = 0; TileX < NeighbourOwnerW; )
+        {
+            const int32 TileSampleY = FMath::Min(TileY + TilePoliticalStride / 2, NeighbourOwnerH - 1);
+            const uint8 TileId = NeighbourOwners[TileSampleY * NeighbourOwnerW + TileX];
+            const int32 TileStart = TileX;
+            TileX = FMath::Min(TileX + TilePoliticalStride, NeighbourOwnerW);
+            while (TileX < NeighbourOwnerW && NeighbourOwners[TileSampleY * NeighbourOwnerW + TileX] == TileId)
+            { TileX = FMath::Min(TileX + TilePoliticalStride, NeighbourOwnerW); }
+            if (!TileId) { continue; }
+            TArray<FVector>& TileStrip = TilePoliticalStrips.FindOrAdd(TileId).AddDefaulted_GetRef();
+            for (int32 TileSample = TileStart; TileSample < TileX; TileSample += TilePoliticalStride)
+            { TileStrip.Add(LocalAtKm(FVector2D(OwnerExtent.XMin + TileSample * TileDx, OwnerExtent.YMax - (TileY + FMath::Min(TilePoliticalStride, NeighbourOwnerH - TileY) * 0.5) * TileDy)) + FVector(0,0,1.1)); }
+            TileStrip.Add(LocalAtKm(FVector2D(OwnerExtent.XMin + TileX * TileDx, OwnerExtent.YMax - (TileY + FMath::Min(TilePoliticalStride, NeighbourOwnerH - TileY) * 0.5) * TileDy)) + FVector(0,0,1.1));
+        }
+    }
+    auto TileAttachRibbons = [&](const TArray<TArray<FVector>>& TileLines, double TileWidthKm, const FLinearColor& TileColour, const FString& TileName, bool bTilePolitical)
+    {
+        if (TileLines.Num() == 0) { return; }
+        UStaticMeshComponent* TileRibbon = NewObject<UStaticMeshComponent>(this, FName(*TileName));
+        TileRibbon->SetupAttachment(Root);
+        TileRibbon->SetStaticMesh(Campaign1851Scenery::BuildRibbons(TileLines, float(TileWidthKm * KmToUnits), TileColour, TilePoliticalMaterial, *TileName));
+        TileRibbon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        TileRibbon->SetCastShadow(false);
+        TileRibbon->SetVisibility(!bTilePolitical);
+        TileRibbon->RegisterComponent();
+        if (bTilePolitical) { NeighbourTerritoryMeshes.Add(TileRibbon); }
+        else { RiverMeshes.Add(TileRibbon); }
+    };
+    for (const auto& TileNation : TilePoliticalStrips)
+    {
+        const FString* TileNationName = NeighbourOwnerIds.Find(TileNation.Key);
+        if (TileNationName) { TileAttachRibbons(TileNation.Value, TileDy * TilePoliticalStride * 0.5, NeighbourColour(*TileNationName), TEXT("Neighbour_") + *TileNationName + TEXT("_Political"), true); }
+    }
+    // Two linear scans; adjacent collinear boundary cells are one ribbon, sampled every four cells.
+    // Each raster has its own dimensions and extent (districts need not match the owners).
+    auto TileScanBorders = [&](int32 TileW, int32 TileH, const FCampaign1851Extent& TileBounds, auto TileCell, bool bTileDistrict)
+    {
+        TArray<TArray<FVector>> TileLines;
+        const double TileGridDx = (TileBounds.XMax - TileBounds.XMin) / TileW;
+        const double TileGridDy = (TileBounds.YMax - TileBounds.YMin) / TileH;
+        for (int32 TileAxis = 0; TileAxis < 2; ++TileAxis)
+        {
+            const int32 TileOuter = TileAxis ? TileW - 1 : TileH - 1;
+            const int32 TileInner = TileAxis ? TileH : TileW;
+            for (int32 TileRow = 0; TileRow < TileOuter; ++TileRow)
+            {
+                auto TilePair = [&](int32 TileColumn) -> uint32
+                {
+                    const int32 TileX = TileAxis ? TileRow : TileColumn, TileY = TileAxis ? TileColumn : TileRow;
+                    const uint16 TileA = TileCell(TileX, TileY), TileB = TileCell(TileX + (TileAxis ? 1 : 0), TileY + (TileAxis ? 0 : 1));
+                    if (!TileA || !TileB || TileA == TileB) { return 0; }
+                    if (bTileDistrict)
+                    {
+                        const FVector2D TileKmA(TileBounds.XMin + (TileX + 0.5) * TileGridDx, TileBounds.YMax - (TileY + 0.5) * TileGridDy);
+                        const FVector2D TileKmB = TileKmA + FVector2D(TileAxis ? TileGridDx : 0.0, TileAxis ? 0.0 : -TileGridDy);
+                        // Suppress district lines across national borders, using owner raster coordinates.
+                        const FVector2D TileUvA = OwnerUvFromKm(TileKmA), TileUvB = OwnerUvFromKm(TileKmB);
+                        auto TileOwnerAt = [&](const FVector2D& TileUv) -> uint8
+                        {
+                            if (TileUv.X < 0 || TileUv.X >= 1 || TileUv.Y <= 0 || TileUv.Y > 1) { return 0; }
+                            const int32 TileOX = FMath::Clamp(int32(TileUv.X * NeighbourOwnerW), 0, NeighbourOwnerW - 1);
+                            const int32 TileOY = FMath::Clamp(int32((1.0 - TileUv.Y) * NeighbourOwnerH), 0, NeighbourOwnerH - 1);
+                            return NeighbourOwners[TileOY * NeighbourOwnerW + TileOX];
+                        };
+                        if (!TileOwnerAt(TileUvA) || TileOwnerAt(TileUvA) != TileOwnerAt(TileUvB)) { return 0; }
+                    }
+                    return (uint32(FMath::Min(TileA, TileB)) << 16) | FMath::Max(TileA, TileB);
+                };
+                for (int32 TileColumn = 0; TileColumn < TileInner; )
+                {
+                    const uint32 TileBoundary = TilePair(TileColumn);
+                    if (!TileBoundary) { ++TileColumn; continue; }
+                    const int32 TileStart = TileColumn++;
+                    while (TileColumn < TileInner && TilePair(TileColumn) == TileBoundary) { ++TileColumn; }
+                    TArray<FVector>& TileLine = TileLines.AddDefaulted_GetRef();
+                    auto TilePoint = [&](int32 TileAlong)
+                    {
+                        const double TileGX = TileAxis ? TileRow + 1.0 : double(TileAlong);
+                        const double TileGY = TileAxis ? double(TileAlong) : TileRow + 1.0;
+                        return LocalAtKm(FVector2D(TileBounds.XMin + TileGX * TileGridDx, TileBounds.YMax - TileGY * TileGridDy)) + FVector(0,0,bTileDistrict ? 2.8 : 2.5);
+                    };
+                    for (int32 TileAlong = TileStart; TileAlong < TileColumn; TileAlong += 4) { TileLine.Add(TilePoint(TileAlong)); }
+                    TileLine.Add(TilePoint(TileColumn));
+                }
+            }
+        }
+        TileAttachRibbons(TileLines, bTileDistrict ? 0.045 : 0.08, bTileDistrict ? FLinearColor(0.35f,0.27f,0.19f) : FLinearColor(0.12f,0.10f,0.08f),
+            bTileDistrict ? TEXT("SouthDistrictBorders") : TEXT("Neighbour_Borders"), bTileDistrict);
+    };
+    TileScanBorders(NeighbourOwnerW, NeighbourOwnerH, OwnerExtent, [&](int32 TileX, int32 TileY) -> uint16 { return NeighbourOwners[TileY * NeighbourOwnerW + TileX]; }, false);
+    if (NeighbourDistrictW > 0 && NeighbourDistrictH > 0 && NeighbourDistrictGrid.Num() == NeighbourDistrictW * NeighbourDistrictH)
+    { TileScanBorders(NeighbourDistrictW, NeighbourDistrictH, DistrictExtent, [&](int32 TileX, int32 TileY) -> uint16 { return NeighbourDistrictGrid[TileY * NeighbourDistrictW + TileX]; }, true); }
 }

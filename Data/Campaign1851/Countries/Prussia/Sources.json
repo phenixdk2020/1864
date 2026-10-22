@@ -20,7 +20,7 @@
     "GAME-Nations1851.json": {
       "id": "GAME-Nations1851.json",
       "title": "Nations1851.json",
-      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Nations1851.json",
+      "url": "C:/Projekter/1864-Campaign/Data/Campaign1851/Nations1851.json",
       "access": "læst",
       "locator": "JSON-pointer i Data-status.json",
       "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
@@ -28,7 +28,7 @@
     "GAME-Nations_1825.json": {
       "id": "GAME-Nations_1825.json",
       "title": "Nations_1825.json",
-      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Nations_1825.json",
+      "url": "C:/Projekter/1864-Campaign/Data/Campaign1851/Nations_1825.json",
       "access": "læst",
       "locator": "JSON-pointer i Data-status.json",
       "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
@@ -36,7 +36,7 @@
     "GAME-Army1851.json": {
       "id": "GAME-Army1851.json",
       "title": "Army1851.json",
-      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army1851.json",
+      "url": "C:/Projekter/1864-Campaign/Data/Campaign1851/Army1851.json",
       "access": "læst",
       "locator": "JSON-pointer i Data-status.json",
       "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
@@ -44,7 +44,7 @@
     "GAME-Army_1825.json": {
       "id": "GAME-Army_1825.json",
       "title": "Army_1825.json",
-      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_1825.json",
+      "url": "C:/Projekter/1864-Campaign/Data/Campaign1851/Army_1825.json",
       "access": "læst",
       "locator": "JSON-pointer i Data-status.json",
       "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
@@ -52,7 +52,7 @@
     "GAME-Army_Neighbours_1851.json": {
       "id": "GAME-Army_Neighbours_1851.json",
       "title": "Army_Neighbours_1851.json",
-      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_Neighbours_1851.json",
+      "url": "C:/Projekter/1864-Campaign/Data/Campaign1851/Army_Neighbours_1851.json",
       "access": "læst",
       "locator": "JSON-pointer i Data-status.json",
       "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
@@ -60,7 +60,7 @@
     "GAME-cities_neighbours_1851.json": {
       "id": "GAME-cities_neighbours_1851.json",
       "title": "cities_neighbours_1851.json",
-      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/cities_neighbours_1851.json",
+      "url": "C:/Projekter/1864-Campaign/Data/Campaign1851/cities_neighbours_1851.json",
       "access": "læst",
       "locator": "JSON-pointer i Data-status.json",
       "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
@@ -68,7 +68,7 @@
     "GAME-Economy_1825.json": {
       "id": "GAME-Economy_1825.json",
       "title": "Economy_1825.json",
-      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Economy_1825.json",
+      "url": "C:/Projekter/1864-Campaign/Data/Campaign1851/Economy_1825.json",
       "access": "læst",
       "locator": "JSON-pointer i Data-status.json",
       "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
@@ -76,7 +76,7 @@
     "GAME-Population_1825.json": {
       "id": "GAME-Population_1825.json",
       "title": "Population_1825.json",
-      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Population_1825.json",
+      "url": "C:/Projekter/1864-Campaign/Data/Campaign1851/Population_1825.json",
       "access": "læst",
       "locator": "JSON-pointer i Data-status.json",
       "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
@@ -84,7 +84,7 @@
     "GAME-Officers1851.json": {
       "id": "GAME-Officers1851.json",
       "title": "Officers1851.json",
-      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Officers1851.json",
+      "url": "C:/Projekter/1864-Campaign/Data/Campaign1851/Officers1851.json",
       "access": "læst",
       "locator": "JSON-pointer i Data-status.json",
       "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
@@ -92,7 +92,7 @@
     "GAME-Events.json": {
       "id": "GAME-Events.json",
       "title": "Events.json",
-      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Events.json",
+      "url": "C:/Projekter/1864-Campaign/Data/Campaign1851/Events.json",
       "access": "læst",
       "locator": "JSON-pointer i Data-status.json",
       "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
@@ -100,7 +100,7 @@
     "GAME-Trade_1851.json": {
       "id": "GAME-Trade_1851.json",
       "title": "Trade_1851.json",
-      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Trade_1851.json",
+      "url": "C:/Projekter/1864-Campaign/Data/Campaign1851/Trade_1851.json",
       "access": "læst",
       "locator": "JSON-pointer i Data-status.json",
       "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
@@ -108,7 +108,7 @@
     "GAME-Army_Neighbours_1825.json": {
       "id": "GAME-Army_Neighbours_1825.json",
       "title": "Army_Neighbours_1825.json",
-      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/Army_Neighbours_1825.json",
+      "url": "C:/Projekter/1864-Campaign/Data/Campaign1851/Army_Neighbours_1825.json",
       "access": "læst",
       "locator": "JSON-pointer i Data-status.json",
       "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
@@ -116,7 +116,7 @@
     "GAME-cities_neighbours_1825.json": {
       "id": "GAME-cities_neighbours_1825.json",
       "title": "cities_neighbours_1825.json",
-      "url": "R:/Onedrive/1864-Campaign/Data/Campaign1851/cities_neighbours_1825.json",
+      "url": "C:/Projekter/1864-Campaign/Data/Campaign1851/cities_neighbours_1825.json",
       "access": "læst",
       "locator": "JSON-pointer i Data-status.json",
       "note": "Spillets tal er spilvalg/udaterede periodemodeller; ingen historisk verifikation."
@@ -124,7 +124,7 @@
     "TEMPLATE": {
       "id": "TEMPLATE",
       "title": "Landeskabelon",
-      "url": "R:/Onedrive/1864-Campaign/Docs/Landeskabelon.md",
+      "url": "C:/Projekter/1864-Campaign/Docs/Landeskabelon.md",
       "access": "læst",
       "locator": "2.1–2.13, 3, 4.2",
       "note": ""
@@ -132,7 +132,7 @@
     "NABO": {
       "id": "NABO",
       "title": "Spillets nabokort og integrationsregler",
-      "url": "R:/Onedrive/1864-Campaign/Docs/Naboer.md",
+      "url": "C:/Projekter/1864-Campaign/Docs/Naboer.md",
       "access": "læst",
       "locator": "Syd for Danmark og Fase 0",
       "note": "B betyder kortnabo; onMap=false er korrekt for den nuværende motor."

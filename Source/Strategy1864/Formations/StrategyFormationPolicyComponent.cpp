@@ -202,12 +202,18 @@ void UStrategyFormationPolicyComponent::ApplyInitialMovementFormation(const FStr
         }
         bMarching = true;
     }
-    else if (IsColumn(Now) && Now != EStrategyFormationType::DefileColumn)
+    else if (IsColumn(Now) && Now != EStrategyFormationType::DefileColumn && bEnemyClose)
     {
-        OwnerUnit->FormationReason = bEnemyClose ? FString::Printf(TEXT("fjenden er allerede inden for %.0f m: bevæger sig i sin kampformation"), DeployDistanceCm(Enemy) / 100.0f)
-            : FString::Printf(TEXT("kort march (%.0f m): ingen kolonne"), DistanceCm / 100.0f);
+        OwnerUnit->FormationReason = FString::Printf(TEXT("fjenden er allerede inden for %.0f m: bevæger sig i sin kampformation"), DeployDistanceCm(Enemy) / 100.0f);
         OwnerUnit->FormationComponent->SetFormation(BattleFormation);
         bMarching = false;
+    }
+    else if (IsColumn(Now) && Now != EStrategyFormationType::DefileColumn)
+    {
+        // A short march for a column: it stays in column and forms line at the goal (the arrival drill). Forming line at once
+        // walked the column 35 s along the new front while it was labelled a line, and a new order in the middle of that
+        // scattered the men (2026-10-22 recording).
+        bMarching = true;
     }
 }
 

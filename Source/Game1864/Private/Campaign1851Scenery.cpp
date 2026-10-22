@@ -38,6 +38,8 @@ namespace
 
 		/** Darken faces near the ground (pieces standing on the map; not the road ribbons). */
 		bool bGroundShade = false;
+		/** Only the unlit drop shadow is written (under the modelled buildings, 2026-10-22). */
+		bool bShadowOnly = false;
 
 		FWriter()
 		{
@@ -49,6 +51,7 @@ namespace
 		/** Adds a triangle facing away from Inside (a point inside the solid it belongs to). */
 		void Tri(FVector3f A, FVector3f B, FVector3f C, const FLinearColor& Base, const FVector3f& Inside, bool bLit = true)
 		{
+			if (bShadowOnly && bLit) return;
 			// Unreal's front face normal is (P2 - P0) x (P1 - P0).
 			FVector3f N = FVector3f::CrossProduct(C - A, B - A).GetSafeNormal();
 			if (FVector3f::DotProduct(N, (A + B + C) / 3.f - Inside) < 0.f)
@@ -589,6 +592,15 @@ namespace Campaign1851Scenery
 		FWriter Writer;
 		BuildPiece(Writer, Piece);
 		return Finish(Writer, Material, FString::Printf(TEXT("SM_Campaign1851_%s"), Name(Piece)));
+	}
+
+	UStaticMesh* BuildShadow(EPiece Piece, UMaterialInterface* Material)
+	{
+		FWriter Writer;
+		Writer.bShadowOnly = true;
+		BuildPiece(Writer, Piece);
+		if (Writer.Mesh.Triangles().Num() == 0) return nullptr;
+		return Finish(Writer, Material, FString::Printf(TEXT("SM_Campaign1851_%s_Shadow"), Name(Piece)));
 	}
 
 	UStaticMesh* BuildColoured(const TArray<FVector>& Triangles, const TArray<FLinearColor>& Colours, UMaterialInterface* Material, const TCHAR* MeshName)

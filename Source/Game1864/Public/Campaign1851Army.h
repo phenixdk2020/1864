@@ -69,6 +69,15 @@ struct FCampaign1851Officer
 	FString Id;
 	FString Name;
 	FString Rank;
+	// Career tuning is a gameplay estimate; status: 0 active, 1 retired, 2 dead.
+	FString Nation = TEXT("DK");
+	bool bHistorical = false;
+	uint8 CareerStatus = 0;
+	int32 RankMonths = 0;
+	int32 CommandMonths = 0;
+	int32 BattlesServed = 0;
+	int32 Wounds = 0;
+	float CareerExperience = 0.f;
 	int32 Born = 1800;
 	bool bGeneral = false;
 	uint8 Stats[int32(ECampaign1851OfficerStat::Count)] = { 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 };
@@ -93,9 +102,14 @@ struct FCampaign1851Officer
 	FDateTime AwayUntil;
 	/** Dated participation, wounds, captivity and distinctions, appended when a battle is accepted. */
 	TArray<FString> Career;
-	bool IsFree() const { return Away == 0 && Regiment == INDEX_NONE && Command == INDEX_NONE && Formation == 0 && CaptainOf == INDEX_NONE && StaffOf == 0; }
+	bool IsFree() const { return CareerStatus == 0 && Away == 0 && Regiment == INDEX_NONE && Command == INDEX_NONE && Formation == 0 && CaptainOf == INDEX_NONE && StaffOf == 0; }
 
-	int32 Stat(ECampaign1851OfficerStat S) const { return Stats[int32(S)]; }
+	int32 Stat(ECampaign1851OfficerStat S) const
+	{
+		const int32 CareerBonus = (S == ECampaign1851OfficerStat::Leadership || S == ECampaign1851OfficerStat::Inspiration)
+			? FMath::Min(2, int32(CareerExperience / 25.f)) : 0;
+		return FMath::Min(10, int32(Stats[int32(S)]) + CareerBonus);
+	}
 };
 
 /**

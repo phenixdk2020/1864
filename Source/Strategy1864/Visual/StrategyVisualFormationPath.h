@@ -173,7 +173,17 @@ struct FStrategyVisualFormationPath
             if (Travel > KINDA_SMALL_NUMBER)
             {
                 TrailDistance += Travel;
-                Trail.Add({Lead, Facing, TrailDistance});
+                // The direction the lanes are set out from turns at most as on the head's turning radius per distance walked: at a
+                // sharp corner of the route (the actor turning almost on the spot) the inner lane's men otherwise land on the same
+                // point (2026-10-22 test: two men 1-19 cm apart at the corner). The trail itself keeps the true path.
+                float LaneYaw = Facing;
+                if (HeadTurnRadiusCm > 0.f)
+                {
+                    const float LaneMaxTurn = FMath::RadiansToDegrees(Travel / HeadTurnRadiusCm);
+                    LaneYaw = FRotator::NormalizeAxis(Trail.Last().Yaw +
+                        FMath::Clamp(FMath::FindDeltaAngleDegrees(Trail.Last().Yaw, Facing), -LaneMaxTurn, LaneMaxTurn));
+                }
+                Trail.Add({Lead, LaneYaw, TrailDistance});
                 // Bound memory by formation depth; retain a segment before the tail.
                 int32 Drop = 0;
                 while (Drop + 2 < Trail.Num() && Trail[Drop + 1].Distance < TrailDistance - Length) { ++Drop; }

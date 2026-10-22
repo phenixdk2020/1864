@@ -145,6 +145,8 @@ void UStrategyMovementExecutorComponent::BeginMovementForOrder(const FStrategyOr
     bDrillArrivalArmed = false;
     bHoldingForFire = false;
     ReleaseBridgeSlot();
+    bFormationHoldPending = true;
+    FormationHoldStarted = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
 
     if (AStrategyArtilleryBatteryUnit* Battery =
         Cast<AStrategyArtilleryBatteryUnit>(OwnerUnit))
@@ -450,6 +452,33 @@ void UStrategyMovementExecutorComponent::TickComponent(
     }
     if (!bHasMovementGoal) return;
 
+    // The men first finish the formation they are making (a line, not a column: gathering into column has its own hold).
+    if (bFormationHoldPending)
+    {
+        const AStrategyCompanyUnit* HoldCompany = Cast<AStrategyCompanyUnit>(OwnerUnit);
+        const UStrategyInfantryVisualComponent* HoldVisual = HoldCompany ? HoldCompany->InfantryVisualComponent.Get() : nullptr;
+        const bool bHoldLine = OwnerUnit->FormationComponent && OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Line;
+        bool bHoldForming = false;
+        if (HoldVisual && bHoldLine)
+        {
+            const UStrategyInfantryVisualComponent::FFormationFit HoldFit = HoldVisual->MeasureFormationFit(false);
+            bHoldForming = HoldVisual->IsDrilling() || !HoldVisual->IsVisualFormationComplete() || (HoldFit.Men > 0 && HoldFit.Ready < 0.95f);
+        }
+        const float HoldWaited = GetWorld()->GetTimeSeconds() - FormationHoldStarted;
+        if (bHoldForming && HoldWaited < FormationHoldMaxSeconds)
+        {
+            ExecutedVelocity = FVector::ZeroVector;
+            return;
+        }
+        bFormationHoldPending = false;
+        if (HoldWaited > 0.2f)
+        {
+            UE_LOG(LogTemp, Display, TEXT("Strategy1864FormationHold %s waited %.1f s for the men to form%s"), *OwnerUnit->StableUnitId.ToString(),
+                HoldWaited, bHoldForming ? TEXT(" (gave up: still forming)") : TEXT(""));
+            OwnerUnit->AddUnitLog(TEXT("Bevægelse"), TEXT("Venter på at formere"), FString::Printf(TEXT("%.0f s"), HoldWaited), 3.0f);
+        }
+    }
+
     if (PauseRemainingSeconds > 0.0f)
     {
         PauseRemainingSeconds = FMath::Max(0.0f, PauseRemainingSeconds - DeltaTime);
@@ -705,6 +734,26 @@ void UStrategyMovementExecutorComponent::TickComponent(
 
     FVector NewLocation =
         CurrentLocation + Direction * AppliedStep;
+    // A march column walks forward along its own front and turns towards the route on a 3 m radius (the head of the snake): it
+    // went along the route's corners and turned only its front, so the trail folded at every corner and the inner lane's men stood
+    // on one another (2026-10-22 test: 1-19 cm). Inside the turning circle (close and far off to the side) it walks straight.
+    bool bColumnArc = false;
+    float ColumnArcYaw = OwnerUnit->GetActorRotation().Yaw;
+    if (!bKeepFacingMove && !Direction.IsNearlyZero() && AppliedStep > KINDA_SMALL_NUMBER && OwnerUnit->FormationComponent &&
+        OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn)
+    {
+        const float ColumnArcRadius = 300.f;
+        const float ColumnArcOff = FMath::FindDeltaAngleDegrees(ColumnArcYaw, Direction.Rotation().Yaw);
+        if (!(HorizontalDistance < 2.f * ColumnArcRadius && FMath::Abs(ColumnArcOff) > 60.f))
+        {
+            const float ColumnArcMax = FMath::RadiansToDegrees(AppliedStep / ColumnArcRadius);
+            ColumnArcYaw = FRotator::NormalizeAxis(ColumnArcYaw + FMath::Clamp(ColumnArcOff, -ColumnArcMax, ColumnArcMax));
+            const FVector ColumnArcStep = FRotator(0.f, ColumnArcYaw, 0.f).Vector() * AppliedStep;
+            NewLocation.X = CurrentLocation.X + ColumnArcStep.X;
+            NewLocation.Y = CurrentLocation.Y + ColumnArcStep.Y;
+            bColumnArc = true;
+        }
+    }
 
     const float VerticalAlpha =
         FMath::Clamp(
@@ -725,7 +774,11 @@ void UStrategyMovementExecutorComponent::TickComponent(
         ExecutedVelocity.Z = 0.0f;
     }
 
-    if (bKeepFacingMove)
+    if (bColumnArc)
+    {
+        OwnerUnit->SetActorRotation(FRotator(0.f, ColumnArcYaw, 0.f));
+    }
+    else if (bKeepFacingMove)
     {
         // The front stays to the enemy.
         FRotator Front = OwnerUnit->GetActorRotation();
@@ -1123,7 +1176,8 @@ void UStrategyMovementExecutorComponent::ConfigureColumnDrillApproach(const FStr
     // The column enters the line axis from the side it comes from: the head (the actor in a column) stops two turn radii
     // short of the near flank on the middle-rank line, and the visual head curves in and walks to the far flank.
     // The order target is the line's middle-rank centre (front-anchored slots put the front rank one rank ahead).
-    const float DrillSide = FVector::DotProduct(DrillDirection, FStrategyColumnDrill::Right(DrillFacing)) >= 0.f ? 1.f : -1.f;
+    // Always from the line's left end towards its right (user's sketch 2026-10-20): the head, with the colours, ends on the right flank.
+    const float DrillSide = 1.f;
     const FVector DrillAxis = FStrategyColumnDrill::Right(DrillFacing) * DrillSide;
     FVector DrillGoal = DrillOrder.TargetLocation - DrillAxis * (DrillWidth * 0.5f + 2.f * DrillRadius);
     DrillGoal.Z = MovementGoal.Z;

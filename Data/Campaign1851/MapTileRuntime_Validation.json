@@ -1,0 +1,34 @@
+{
+  "status": "OK",
+  "manifestSHA256": "d9b533bbe9440135f74924de0c0b94bf548f82b1616d2e596e448fa7eead4e6c",
+  "tiles": 251,
+  "sharedEdges": 466,
+  "sourceSamples": 574790,
+  "runtimeBytes": 34217073,
+  "grids": [
+    {
+      "scenario": 1825,
+      "grid": "ownerGridFull",
+      "width": 2951,
+      "height": 3932
+    },
+    {
+      "scenario": 1825,
+      "grid": "districtGridFull",
+      "width": 2951,
+      "height": 3932
+    },
+    {
+      "scenario": 1851,
+      "grid": "ownerGridFull",
+      "width": 2951,
+      "height": 3932
+    },
+    {
+      "scenario": 1851,
+      "grid": "districtGridFull",
+      "width": 2951,
+      "height": 3932
+    }
+  ]
+}

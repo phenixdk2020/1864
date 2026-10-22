@@ -13,6 +13,8 @@
 #include "Dom/JsonObject.h"
 #include "Campaign1851Json.h"
 #include "Engine/StaticMesh.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "Engine/Texture2D.h"
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
@@ -51,7 +53,7 @@ namespace
 
 ACampaign1851Map::ACampaign1851Map()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	SetRootComponent(Root);
@@ -146,6 +148,7 @@ void ACampaign1851Map::BeginPlay()
 void ACampaign1851Map::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	if (bUseMapTiles && bReady) { UpdateMapTiles(); }
 }
 
 // ------------------------------------------------------------------ data
@@ -195,6 +198,7 @@ bool ACampaign1851Map::LoadData()
 	}
 	SizeKm = FVector2D(Extent.XMax - Extent.XMin, Extent.YMax - Extent.YMin);
 	Json->TryGetNumberField(TEXT("detailTileKm"), DetailTileKm);
+	LoadMapTiles();
 
 	// Population overlays retain map indices and geography for save compatibility.
 	if (ActiveScenario().Id == TEXT("1825"))
@@ -337,6 +341,7 @@ bool ACampaign1851Map::LoadHeight()
 
 float ACampaign1851Map::SampleHeight01(const FVector2D& Uv) const
 {
+    if (bUseMapTiles) { return TileHeightAtKm(FVector2D(Extent.XMin + Uv.X * SizeKm.X, Extent.YMin + Uv.Y * SizeKm.Y)) / (HeightRangeKm * float(KmToUnits)); }
 	if (Height.Num() == 0 || Uv.X < 0.0 || Uv.X > 1.0 || Uv.Y < 0.0 || Uv.Y > 1.0)
 	{
 		return 0.f;
@@ -356,7 +361,7 @@ FVector ACampaign1851Map::Project(double Lat, double Lon) const
 	const FVector2D Uv = Extent.ToUv(Lat, Lon);
 	const double X = (Uv.X - 0.5) * SizeKm.X * KmToUnits;
 	const double Y = -(Uv.Y - 0.5) * SizeKm.Y * KmToUnits;
-	const double Z = SampleHeight01(Uv) * HeightRangeKm * KmToUnits;
+	const double Z = bUseMapTiles ? TerrainZ(Uv) : SampleHeight01(Uv) * HeightRangeKm * KmToUnits;
 	return GetActorTransform().TransformPosition(FVector(X, Y, Z));
 }
 
@@ -373,6 +378,18 @@ float ACampaign1851Map::SizeClass(int32 Population)
 
 void ACampaign1851Map::BuildTerrain()
 {
+    if (bUseMapTiles)
+    {
+        // Overview is immediately usable; meshes are built one at a time after BeginPlay.
+        const FVector2D TileCentre = GetNavigationCentre();
+        WorldSheet->SetRelativeLocation(FVector(TileCentre.X, TileCentre.Y, -20.0));
+        const FVector2D TileSize = GetNavigationSizeKm();
+        WorldSheet->SetRelativeScale3D(FVector(TileSize.X * KmToUnits / 100.0, TileSize.Y * KmToUnits / 100.0, 1.0));
+        WorldSheet->SetMaterial(0, TileOverviewMaterial);
+        Terrain->SetVisibility(false);
+        Backdrop->SetVisibility(false);
+        return;
+    }
 	FMeshDescription Mesh;
 	FStaticMeshAttributes Attributes(Mesh);
 	Attributes.Register();
@@ -653,6 +670,7 @@ FVector2D ACampaign1851Map::UvFromKm(const FVector2D& Km) const
 
 float ACampaign1851Map::TerrainZ(const FVector2D& Uv) const
 {
+    if (bUseMapTiles) { return TileHeightAtKm(FVector2D(Extent.XMin + Uv.X * SizeKm.X, Extent.YMin + Uv.Y * SizeKm.Y)); }
 	const int32 VX = GridX + 1;
 	const double Gx = FMath::Clamp(Uv.X, 0.0, 1.0) * GridX, Gy = FMath::Clamp(Uv.Y, 0.0, 1.0) * GridY;
 	const int32 I = FMath::Min(int32(Gx), GridX - 1), J = FMath::Min(int32(Gy), GridY - 1);
@@ -679,22 +697,26 @@ bool ACampaign1851Map::IsMonarchyLand(const FVector2D& Km) const
 	}
 	if (NeighbourOwners.Num() > 0)
 	{
-		const int32 NeighbourLandX = FMath::Clamp(int32(Uv.X * NeighbourOwnerW), 0, NeighbourOwnerW - 1);
-		const int32 NeighbourLandY = FMath::Clamp(int32((1.0 - Uv.Y) * NeighbourOwnerH), 0, NeighbourOwnerH - 1);
+		const FVector2D NeighbourLandUv = OwnerUvFromKm(Km);
+		const int32 NeighbourLandX = FMath::Clamp(int32(NeighbourLandUv.X * NeighbourOwnerW), 0, NeighbourOwnerW - 1);
+		const int32 NeighbourLandY = FMath::Clamp(int32((1.0 - NeighbourLandUv.Y) * NeighbourOwnerH), 0, NeighbourOwnerH - 1);
 		const FString* NeighbourLandId = NeighbourOwnerIds.Find(NeighbourOwners[NeighbourLandY * NeighbourOwnerW + NeighbourLandX]);
 		if (NeighbourLandId && *NeighbourLandId != TEXT("DK")) { return false; }
 	}
+	if (Features.Num() == 0) { return false; }
 	const int32 X = int32(Uv.X * FeaturesW), Y = int32((1.0 - Uv.Y) * FeaturesH);  // row 0 = north
 	return Features[FMath::Clamp(Y, 0, FeaturesH - 1) * FeaturesW + FMath::Clamp(X, 0, FeaturesW - 1)].R > 127;
 }
 
 float ACampaign1851Map::Woodland(const FVector2D& Km) const
 {
+    if (bUseMapTiles && !IsMonarchyLand(Km)) { return TileForestAtKm(Km); }
 	const FVector2D Uv = UvFromKm(Km);
 	if (Uv.X < 0.0 || Uv.X >= 1.0 || Uv.Y < 0.0 || Uv.Y >= 1.0)
 	{
-		return 0.f;
+		return bUseMapTiles ? TileForestAtKm(Km) : 0.f;
 	}
+	if (Features.Num() == 0) { return 0.f; }
 	const int32 X = int32(Uv.X * FeaturesW), Y = int32((1.0 - Uv.Y) * FeaturesH);
 	return Features[FMath::Clamp(Y, 0, FeaturesH - 1) * FeaturesW + FMath::Clamp(X, 0, FeaturesW - 1)].G / 255.f;
 }
@@ -1175,7 +1197,52 @@ void ACampaign1851Map::BuildScenery()
 		const EPiece Piece = EPiece(p);
 		UHierarchicalInstancedStaticMeshComponent* Part = NewObject<UHierarchicalInstancedStaticMeshComponent>(this, *FString::Printf(TEXT("Scenery_%s"), Campaign1851Scenery::Name(Piece)));
 		Part->SetupAttachment(Root);
-		Part->SetStaticMesh(Campaign1851Scenery::Build(Piece, Material));
+		UStaticMesh* ProceduralPiece = Campaign1851Scenery::Build(Piece, Material);
+		// The modelled Danish buildings (2026-10-22, SourceAssets/Campaign1851/Scenery/DK, imported by Content/Python/import_scenery_dk.py)
+		// replace the procedural boxes where they exist: same height as the piece they replace, facade (+X in the model) turned to
+		// the piece's street side (-Y). -Campaign1851OldScenery keeps the procedural pieces.
+		const TCHAR* SceneryModelName = nullptr;
+		switch (Piece)
+		{
+		case EPiece::TownHouse: SceneryModelName = TEXT("SM_TownHouse_White"); break;
+		case EPiece::TownHouseOchre: SceneryModelName = TEXT("SM_TownHouse_Ochre"); break;
+		case EPiece::TownHouseTimber: SceneryModelName = TEXT("SM_TownHouse_Timber"); break;
+		case EPiece::MerchantHouse: SceneryModelName = TEXT("SM_MerchantHouse"); break;
+		case EPiece::Cottage: SceneryModelName = TEXT("SM_Cottage"); break;
+		case EPiece::Farm: SceneryModelName = TEXT("SM_Farm"); break;
+		case EPiece::Church: SceneryModelName = TEXT("SM_Church"); break;
+		case EPiece::Windmill: SceneryModelName = TEXT("SM_Windmill"); break;
+		default: break;
+		}
+		UStaticMesh* SceneryModel = SceneryModelName && !FParse::Param(FCommandLine::Get(), TEXT("Campaign1851OldScenery"))
+			? LoadObject<UStaticMesh>(nullptr, *FString::Printf(TEXT("/Game/Campaign1851/Scenery/DK/%s.%s"), SceneryModelName, SceneryModelName)) : nullptr;
+		if (SceneryModel && ProceduralPiece)
+		{
+			const FBox SceneryOldBox = ProceduralPiece->GetBoundingBox();
+			const FBox SceneryNewBox = SceneryModel->GetBoundingBox();
+			const double SceneryFit = SceneryOldBox.Max.Z / FMath::Max(1.0, SceneryNewBox.Max.Z);
+			const FTransform SceneryLocalFit(FRotator(0.f, -90.f, 0.f), FVector::ZeroVector, FVector(SceneryFit));
+			// The old piece's drop shadow, under the model (the models carry no baked ground shadow).
+			if (UStaticMesh* SceneryShadow = Campaign1851Scenery::BuildShadow(Piece, Material))
+			{
+				UHierarchicalInstancedStaticMeshComponent* ShadowPart = NewObject<UHierarchicalInstancedStaticMeshComponent>(this, *FString::Printf(TEXT("Scenery_%s_Shadow"), Campaign1851Scenery::Name(Piece)));
+				ShadowPart->SetupAttachment(Root);
+				ShadowPart->SetStaticMesh(SceneryShadow);
+				ShadowPart->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				ShadowPart->SetCastShadow(false);
+				ShadowPart->SetVisibility(false);
+				ShadowPart->RegisterComponent();
+				ShadowPart->AddInstances(Items[p], false, false);
+				Scenery.Add(ShadowPart);
+			}
+			for (FTransform& SceneryItem : Items[p]) SceneryItem = SceneryLocalFit * SceneryItem;
+			Part->SetStaticMesh(SceneryModel);
+			UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|scenery model|%s fit=%.5f"), SceneryModelName, SceneryFit);
+		}
+		else
+		{
+			Part->SetStaticMesh(ProceduralPiece);
+		}
 		Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		Part->SetCastShadow(false);
 		Part->SetVisibility(false);
@@ -1412,6 +1479,14 @@ namespace
 
 bool ACampaign1851Map::IsSea(const FVector2D& Km) const
 {
+    if (bFullNeighbourGrid && !IsMonarchyLand(Km))
+    {
+        const FVector2D TileSeaUv = OwnerUvFromKm(Km);
+        if (TileSeaUv.X < 0 || TileSeaUv.X >= 1 || TileSeaUv.Y <= 0 || TileSeaUv.Y > 1) { return true; }
+        const int32 TileSeaX = FMath::Clamp(int32(TileSeaUv.X * NeighbourOwnerW), 0, NeighbourOwnerW - 1);
+        const int32 TileSeaY = FMath::Clamp(int32((1.0 - TileSeaUv.Y) * NeighbourOwnerH), 0, NeighbourOwnerH - 1);
+        return NeighbourOwners[TileSeaY * NeighbourOwnerW + TileSeaX] == 0;
+    }
 	return !IsMonarchyLand(Km) && SampleHeight01(UvFromKm(Km)) < 0.002f;
 }
 
@@ -1983,6 +2058,7 @@ void ACampaign1851Map::CloseMonth()
 	GrowMonth();
 	MonthlyMateriel();
 	MonthlyFooting();
+	MonthlyOfficerCareers();
 	MonthlyWar();
 	MonthlyDiplomacy();
 	MonthlyResearch();
@@ -2026,6 +2102,9 @@ bool ACampaign1851Map::LoadAmtIds()
 
 int32 ACampaign1851Map::AmtAtWorld(const FVector& World) const
 {
+    // Amt ids remain Danish ids. Foreign districts use their own raster/legend,
+    // never overload this value with 256 + a foreign district index.
+    if (bUseMapTiles && !IsMonarchyLand(KmAtWorld(World))) { return 0; }
 	if (AmtIds.Num() == 0)
 	{
 		return 0;

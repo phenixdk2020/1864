@@ -58,13 +58,15 @@ bool ACampaign1851Map::LoadForeignOfficers()
 		{
 			const TSharedPtr<FJsonObject> ForeignRow = Campaign1851Json::Row(ForeignOfficerValue);
 			FCampaign1851Officer ForeignOfficer;
+			ForeignOfficer.Nation = ForeignId;
+			ForeignRow->TryGetBoolField(TEXT("historical"), ForeignOfficer.bHistorical);
 			ForeignOfficer.Born = 0; // unknown when the archive has null, never invent a birth year
 			if (!ForeignRow->TryGetStringField(TEXT("id"), ForeignOfficer.Id) || ForeignOfficer.Id.IsEmpty()) { continue; }
 			ForeignRow->TryGetStringField(TEXT("name"), ForeignOfficer.Name);
 			ForeignRow->TryGetStringField(TEXT("rank"), ForeignOfficer.Rank);
 			ForeignRow->TryGetNumberField(TEXT("born"), ForeignOfficer.Born);
 			ForeignRow->TryGetNumberField(TEXT("experience"), ForeignOfficer.Experience);
-			ForeignOfficer.bGeneral = true;
+			ForeignOfficer.bGeneral = ForeignOfficer.Rank.StartsWith(TEXT("General"));
 			// The country packs use 1-10 in BOTH scenarios (the Danish 1825 file uses 0-100).
 			for (int32 ForeignStat = 0; ForeignStat < NumStats; ++ForeignStat)
 			{
@@ -84,7 +86,7 @@ const FCampaign1851Officer* ACampaign1851Map::ForeignCommander(const FString& Na
 	const FString* ForeignDefault = ForeignCommanderIds.Find(NationId);
 	if (!ForeignPool || (OfficerId.IsEmpty() && !ForeignDefault)) { return nullptr; }
 	const FString& ForeignWanted = OfficerId.IsEmpty() ? *ForeignDefault : OfficerId;
-	return ForeignPool->FindByPredicate([&](const FCampaign1851Officer& ForeignOfficer) { return ForeignOfficer.Id == ForeignWanted; });
+	return ForeignPool->FindByPredicate([&](const FCampaign1851Officer& ForeignOfficer) { return ForeignOfficer.Id == ForeignWanted && ForeignOfficer.CareerStatus == 0 && ForeignOfficer.Away == 0; });
 }
 
 bool ACampaign1851Map::LoadOfficers()
@@ -109,6 +111,7 @@ bool ACampaign1851Map::LoadOfficers()
 		const TSharedPtr<FJsonObject> O = Campaign1851Json::Row(Value);
 		FCampaign1851Officer G;
 		if (!O->TryGetStringField(TEXT("id"), G.Id) || G.Id.IsEmpty()) { continue; }
+		O->TryGetBoolField(TEXT("historical"), G.bHistorical);
 		O->TryGetStringField(TEXT("name"), G.Name);
 		O->TryGetStringField(TEXT("rank"), G.Rank);
 		O->TryGetNumberField(TEXT("born"), G.Born);
@@ -191,6 +194,7 @@ FCampaign1851Officer ACampaign1851Map::MakeOfficer(FRandomStream& Rng, bool bGen
 
 void ACampaign1851Map::ResetOfficers()
 {
+	LoadForeignOfficers(); // A new game or pre-v7 load must not retain the previous foreign careers.
 	Officers = GeneralsAtStart;
 	NextOfficerNumber = 1;
 	// Every campaign its own officer corps (the seed); the historical generals vary a point here and there.
@@ -261,6 +265,7 @@ bool ACampaign1851Map::AssignCommandGeneral(int32 Officer, int32 Command)
 		return false;
 	}
 	FCampaign1851Officer& O = Officers[Officer];
+	if (O.CareerStatus != 0 || O.Away != 0) { return false; }
 	if (Officers.IsValidIndex(Commands[Command].General) && Commands[Command].General != Officer)
 	{
 		Officers[Commands[Command].General].Command = INDEX_NONE;   // the old commander goes to the pool
@@ -287,11 +292,14 @@ FString ACampaign1851Map::PromotionBlock(int32 Officer) const
 		return TEXT("-");
 	}
 	const FCampaign1851Officer& O = Officers[Officer];
+	if (O.CareerStatus != 0 || O.Away != 0) { return TEXT("Ikke i aktiv tjeneste"); }
 	const int32 Next = Campaign1851Army::RankIndex(O.Rank) + 1;
 	if (Next >= Campaign1851Army::Ranks().Num())
 	{
 		return TEXT("højeste rang");
 	}
+	if (!HasOfficerVacancy(Campaign1851Army::Ranks()[Next])) { return TEXT("Ingen ledig post for næste rang"); }
+	if (O.RankMonths < 24 && !(O.RankMonths >= 12 && O.BattlesServed >= 3)) { return TEXT("Kræver 24 måneders anciennitet eller 12 måneder og tre slag"); }
 	const float Need = Campaign1851Army::RankExperience(Next);
 	return O.Experience < Need ? FString::Printf(TEXT("%s kræver erfaring %.0f"), *Campaign1851Army::Ranks()[Next], Need) : FString();
 }
@@ -304,16 +312,40 @@ bool ACampaign1851Map::PromoteOfficer(int32 Officer)
 	}
 	FCampaign1851Officer& O = Officers[Officer];
 	const int32 Next = Campaign1851Army::RankIndex(O.Rank) + 1;
+	VacateOfficer(Officer);
 	O.Rank = Campaign1851Army::Ranks()[Next];
-	if (!O.bGeneral && Next >= Campaign1851Army::FirstGeneralRank)
+	O.RankMonths = 0;
+	LogOfficerCareer(O, TEXT("Forfremmet"));
+	O.bGeneral = Next >= Campaign1851Army::FirstGeneralRank;
+	// Consume the vacancy as part of promotion, so one post cannot create multiple promotions.
+	for (int32 CareerRegiment = 0; CareerRegiment < Regiments.Num(); ++CareerRegiment)
 	{
-		// A new general leaves his regiment: it needs a new chief, he a general's post.
-		if (Regiments.IsValidIndex(O.Regiment))
+		if (Regiments[CareerRegiment].Chief == INDEX_NONE && O.Rank == ChiefRank(Regiments[CareerRegiment].Arm))
 		{
-			Regiments[O.Regiment].Chief = INDEX_NONE;
+			AssignOfficer(Officer, CareerRegiment);
+			return true;
 		}
-		O.Regiment = INDEX_NONE;
-		O.bGeneral = true;
+	}
+	for (int32 CareerCommand = 0; CareerCommand < Commands.Num(); ++CareerCommand)
+	{
+		if (Commands[CareerCommand].General == INDEX_NONE && O.Rank == TEXT("Generalmajor"))
+		{
+			AssignCommandGeneral(Officer, CareerCommand);
+			return true;
+		}
+	}
+	for (const FCampaign1851Formation& CareerFormation : Formations)
+	{
+		const int32 CareerPosts[] = {CareerFormation.Commander, CareerFormation.Deputy, CareerFormation.StaffChief};
+		for (int32 CareerPost = 0; CareerPost < 3; ++CareerPost)
+		{
+			const TCHAR* CareerRequired = FormationPostRank(CareerFormation.Id, CareerPost);
+			if (CareerPosts[CareerPost] == INDEX_NONE && CareerRequired && O.Rank == CareerRequired)
+			{
+				AssignFormationStaff(Officer, CareerFormation.Id, CareerPost);
+				return true;
+			}
+		}
 	}
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|officers|%s promoted to %s"), *O.Name, *O.Rank);
 	return true;
@@ -448,12 +480,18 @@ TArray<int32> ACampaign1851Map::OfficerPool(bool bGenerals) const
 
 bool ACampaign1851Map::AssignOfficer(int32 Officer, int32 Regiment)
 {
-	if (!Officers.IsValidIndex(Officer) || !Regiments.IsValidIndex(Regiment) || Officers[Officer].Away == 3)
+	if (!Officers.IsValidIndex(Officer) || !Regiments.IsValidIndex(Regiment) || (Officers[Officer].Away != 0 || Officers[Officer].CareerStatus != 0))
 	{
 		return false;
 	}
 	FCampaign1851Officer& O = Officers[Officer];
 	FCampaign1851Regiment& R = Regiments[Regiment];
+	// Existing assignment can promote one step into a vacant chief post.
+	if (!O.bGeneral && R.Chief == INDEX_NONE && O.Rank != ChiefRank(R.Arm))
+	{
+		const int32 CareerNext = Campaign1851Army::RankIndex(O.Rank) + 1;
+		if (CareerNext < Campaign1851Army::Ranks().Num() && Campaign1851Army::Ranks()[CareerNext] == ChiefRank(R.Arm) && !PromoteOfficer(Officer)) { return false; }
+	}
 	int32& Post = O.bGeneral ? R.General : R.Chief;
 	if (Post == Officer)
 	{
@@ -472,6 +510,7 @@ bool ACampaign1851Map::AssignOfficer(int32 Officer, int32 Regiment)
 	LeaveStaffPost(Officer);
 	Post = Officer;
 	O.Regiment = Regiment;
+	LogOfficerCareer(O, TEXT("Udnævnt ved ") + R.Name);
 	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|officers|%s %s -> %s"), *O.Rank, *O.Name, *R.Name);
 	const auto LogActionResult = true;
 	if (LogActionResult && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("recruit"), TEXT("AssignOfficer"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("Officer"), double(Officer) }, { TEXT("Regiment"), double(Regiment) } }, {  }); }
@@ -480,6 +519,19 @@ bool ACampaign1851Map::AssignOfficer(int32 Officer, int32 Regiment)
 
 int32 ACampaign1851Map::RecruitOfficer(bool bGeneral, const TCHAR* RecruitmentRank)
 {
+	// Prefer a qualified pool officer; appointment itself remains with AssignOfficer.
+	const FString CareerRequestedRank = RecruitmentRank ? RecruitmentRank : bGeneral ? TEXT("Generalmajor") : TEXT("Major");
+	for (int32 CareerIndex = 0; CareerIndex < Officers.Num(); ++CareerIndex)
+	{
+		if (!Officers[CareerIndex].IsFree()) { continue; }
+		if (Officers[CareerIndex].Rank == CareerRequestedRank)
+		{
+			LogOfficerCareer(Officers[CareerIndex], TEXT("Udvalgt fra officerspuljen"));
+			return CareerIndex;
+		}
+		const int32 CareerNext = Campaign1851Army::RankIndex(Officers[CareerIndex].Rank) + 1;
+		if (CareerNext < Campaign1851Army::Ranks().Num() && Campaign1851Army::Ranks()[CareerNext] == CareerRequestedRank && PromoteOfficer(CareerIndex)) { return CareerIndex; }
+	}
 	const int32 Cost = OfficerCost(bGeneral);
 	if (Treasury < Cost)
 	{
@@ -490,6 +542,7 @@ int32 ACampaign1851Map::RecruitOfficer(bool bGeneral, const TCHAR* RecruitmentRa
 	FCampaign1851Officer O = MakeOfficer(Rng, bGeneral, RecruitmentRank ? RecruitmentRank : bGeneral ? TEXT("Generalmajor") : TEXT("Major"));
 	O.Id = FString::Printf(TEXT("R%d"), NextOfficerNumber++);
 	O.bRecruited = true;
+	LogOfficerCareer(O, TEXT("Ansat som fiktiv officer"));
 	AddTransaction(-Cost, FString::Printf(TEXT("%s: %s %s"), bGeneral ? TEXT("Udnævnelse") : TEXT("Officer ansat"), *O.Rank, *O.Name));
 	const auto LogActionResult = Officers.Add(O);
 	if (LogActionResult != INDEX_NONE && CampaignLogActor == TEXT("player")) { LogCampaignDecision(CampaignLogNation(), TEXT("recruit"), TEXT("RecruitOfficer"), TEXT("Ordre gennemført via kortets funktion"), FString(), { { TEXT("bGeneral"), double(bGeneral) } }, {  }); }
@@ -502,39 +555,8 @@ bool ACampaign1851Map::DismissOfficer(int32 Officer)
 	{
 		return false;
 	}
-	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|officers|dismissed %s %s"), *Officers[Officer].Rank, *Officers[Officer].Name);
-	Officers.RemoveAt(Officer);
-	// Posts point at officer indices: those after the removed one move down.
-	for (FCampaign1851Regiment& R : Regiments)
-	{
-		for (int32* Post : { &R.Chief, &R.General })
-		{
-			if (*Post > Officer)
-			{
-				--*Post;
-			}
-		}
-		for (int32& Post : R.Captains)
-		{
-			Post -= Post > Officer ? 1 : 0;
-		}
-	}
-	for (FCampaign1851Command& C : Commands)
-	{
-		if (C.General > Officer)
-		{
-			--C.General;
-		}
-	}
-	for (FCampaign1851Formation& F : Formations)
-	{
-		if (F.Commander > Officer)
-		{
-			--F.Commander;
-		}
-		F.Deputy -= F.Deputy > Officer ? 1 : 0;
-		F.StaffChief -= F.StaffChief > Officer ? 1 : 0;
-	}
+	Officers[Officer].CareerStatus = 1;
+	LogOfficerCareer(Officers[Officer], TEXT("Afskediget til pension"));
 	return true;
 }
 
@@ -555,6 +577,7 @@ double ACampaign1851Map::OfficerPayPerMonth() const
 	double Year = 0.0;
 	for (const FCampaign1851Officer& O : Officers)
 	{
+		if (O.CareerStatus != 0) { continue; }
 		Year += Campaign1851Army::RankPay(Campaign1851Army::RankIndex(O.Rank));
 	}
 	return Year / 12.0;
@@ -563,7 +586,9 @@ double ACampaign1851Map::OfficerPayPerMonth() const
 TArray<FCampaign1851OfficerSave> ACampaign1851Map::SaveOfficers() const
 {
 	TArray<FCampaign1851OfficerSave> Out;
-	for (const FCampaign1851Officer& O : Officers)
+	TArray<FCampaign1851Officer> CareerAll = Officers;
+	for (const auto& CareerNation : ForeignOfficers) { CareerAll.Append(CareerNation.Value); }
+	for (const FCampaign1851Officer& O : CareerAll)
 	{
 		FCampaign1851OfficerSave& S = Out.AddDefaulted_GetRef();
 		S.Id = O.Id;
@@ -579,6 +604,14 @@ TArray<FCampaign1851OfficerSave> ACampaign1851Map::SaveOfficers() const
 		S.CaptainOf = Regiments.IsValidIndex(O.CaptainOf) ? Regiments[O.CaptainOf].Id : FString();
 		S.Company = O.Company;
 		S.Career = O.Career;
+		S.Nation = O.Nation;
+		S.bHistorical = O.bHistorical;
+		S.CareerStatus = O.CareerStatus;
+		S.RankMonths = O.RankMonths;
+		S.CommandMonths = O.CommandMonths;
+		S.BattlesServed = O.BattlesServed;
+		S.Wounds = O.Wounds;
+		S.CareerExperience = O.CareerExperience;
 		S.Away = O.Away;
 		S.AwayUntil = O.Away != 0 ? O.AwayUntil.ToIso8601() : FString();
 	}
@@ -591,6 +624,9 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 	{
 		return;   // an older save: keep the 1851 officer corps
 	}
+	const bool bCareerForeignSaved = Saves.ContainsByPredicate([](const FCampaign1851OfficerSave& CareerSave) { return !CareerSave.Nation.IsEmpty() && CareerSave.Nation != TEXT("DK"); });
+	if (bCareerForeignSaved) { ForeignOfficers.Reset(); }
+	else { LoadForeignOfficers(); } // v39 and earlier have no foreign career state; reset even when loading over a running campaign.
 	Officers.Reset();
 	for (FCampaign1851Regiment& R : Regiments)
 	{
@@ -618,13 +654,29 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 		}
 		O.Experience = S.Experience;
 		O.Career = S.Career;
+		O.Nation = S.Nation;
+		O.bHistorical = S.bHistorical;
+		O.CareerStatus = S.CareerStatus;
+		O.RankMonths = S.RankMonths;
+		O.CommandMonths = S.CommandMonths;
+		O.BattlesServed = S.BattlesServed;
+		O.Wounds = S.Wounds;
+		O.CareerExperience = S.CareerExperience;
+		if (O.Nation.IsEmpty()) { O.Nation = TEXT("DK"); O.bHistorical = S.Id.StartsWith(TEXT("G_")) || S.Id.StartsWith(TEXT("H1825_")); }
 		O.Away = S.Away;
 		if (S.Away != 0) { FDateTime::ParseIso8601(*S.AwayUntil, O.AwayUntil); }
+		if (O.Nation != TEXT("DK")) { ForeignOfficers.FindOrAdd(O.Nation).Add(O); continue; }
+		if (S.Id.StartsWith(TEXT("R")) || S.Id.StartsWith(TEXT("O")) || S.Id.StartsWith(TEXT("K")))
+		{
+			NextOfficerNumber = FMath::Max(NextOfficerNumber, FCString::Atoi(*S.Id.RightChop(1)) + 1);
+		}
 		const int32 Index = Officers.Add(O);
+		if (O.CareerStatus != 0 || O.Away != 0) { continue; }
 		const int32 Regiment = FindRegiment(S.Regiment);
 		if (Regiment != INDEX_NONE)
 		{
-			AssignOfficer(Index, Regiment);
+			(Officers[Index].bGeneral ? Regiments[Regiment].General : Regiments[Regiment].Chief) = Index;
+			Officers[Index].Regiment = Regiment;
 		}
 		const int32 Command = Commands.IndexOfByPredicate([&S](const FCampaign1851Command& C) { return C.Id == S.Command; });
 		if (Command != INDEX_NONE)
@@ -638,10 +690,7 @@ void ACampaign1851Map::RestoreOfficers(const TArray<FCampaign1851OfficerSave>& S
 			Officers[Index].CaptainOf = CaptainOf;
 			Officers[Index].Company = S.Company;
 		}
-		if (S.Id.StartsWith(TEXT("R")) || S.Id.StartsWith(TEXT("O")))
-		{
-			NextOfficerNumber = FMath::Max(NextOfficerNumber, FCString::Atoi(*S.Id.RightChop(1)) + 1);
-		}
+
 	}
 }
 
@@ -876,6 +925,7 @@ FString ACampaign1851Map::OfficerRole(int32 Officer) const
 		return FString();
 	}
 	const FCampaign1851Officer& O = Officers[Officer];
+	if (O.CareerStatus != 0) { return O.CareerStatus == 2 ? TEXT("Død") : TEXT("Pensioneret"); }
 	if (O.Away != 0)
 	{
 		return O.Away == 3 ? FString::Printf(TEXT("Studieorlov (tilbage ca. %d.%d.%d)"), O.AwayUntil.GetDay(), O.AwayUntil.GetMonth(), O.AwayUntil.GetYear())
@@ -951,7 +1001,7 @@ void ACampaign1851Map::ApplyOfficerCasualties(const TArray<TSharedPtr<FJsonValue
 		}
 		const FString Id = J->GetStringField(TEXT("id"));
 		const FString ReportOfficerFate = J->GetStringField(TEXT("fate"));
-		if (ReportOfficerFate != TEXT("wounded") && ReportOfficerFate != TEXT("captured")) { continue; }
+		if (ReportOfficerFate != TEXT("wounded") && ReportOfficerFate != TEXT("captured") && ReportOfficerFate != TEXT("dead") && ReportOfficerFate != TEXT("killed")) { continue; }
 		const bool bCaptured = ReportOfficerFate == TEXT("captured");
 		const int32 Officer = Officers.IndexOfByPredicate([&Id](const FCampaign1851Officer& O) { return O.Id == Id; });
 		if (Officer == INDEX_NONE)
@@ -960,7 +1010,17 @@ void ACampaign1851Map::ApplyOfficerCasualties(const TArray<TSharedPtr<FJsonValue
 		}
 		VacateOfficer(Officer);
 		FCampaign1851Officer& O = Officers[Officer];
+		if (O.CareerStatus != 0 || O.Away != 0) { continue; }
+		if (ReportOfficerFate == TEXT("dead") || ReportOfficerFate == TEXT("killed") || (!bCaptured && Rng.FRand() < 0.03f))
+		{
+			O.CareerStatus = 2;
+			O.Away = 0;
+			LogOfficerCareer(O, TEXT("Faldet eller død af sår efter 3D-slag"));
+			continue;
+		}
+		if (!bCaptured) { ++O.Wounds; }
 		O.Away = bCaptured ? 2 : 1;
+		LogOfficerCareer(O, bCaptured ? TEXT("Taget til fange i 3D-slag") : TEXT("Såret i 3D-slag"));
 		if (bCaptured)
 		{
 			// An officer lost to the enemy is a blow at home (more for a senior one).
@@ -985,6 +1045,7 @@ void ACampaign1851Map::DailyOfficers()
 				: O.Away == 2 ? FString::Printf(TEXT("%s %s er udvekslet og kommer hjem"), *O.Rank, *O.Name) : FString::Printf(TEXT("%s %s er rask og kan få en post igen"), *O.Rank, *O.Name));
 			if (O.Away == 2) { EnemyOfficersHeld = FMath::Max(0, EnemyOfficersHeld - 1); }
 			O.Away = 0;
+			LogOfficerCareer(O, TEXT("Tilbage i tjeneste efter fravær"));
 		}
 	}
 }

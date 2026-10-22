@@ -1,0 +1,130 @@
+{
+  "date": "2026-10-21",
+  "status": "OK",
+  "manifestSHA256": "d9b533bbe9440135f74924de0c0b94bf548f82b1616d2e596e448fa7eead4e6c",
+  "tileCount": 251,
+  "pngCount": 1759,
+  "pngBytes": 509998373,
+  "gridSize": [
+    2951,
+    3932
+  ],
+  "gridCellKm": 0.71,
+  "legacyPixelsCompared": {
+    "Color": 3135400,
+    "Height": 3135400,
+    "Features": 783850,
+    "Amter": 783850,
+    "DetailMask": 783850
+  },
+  "monarchyPixelsCompared": {
+    "Color": 3135400,
+    "Height": 3135400,
+    "Features": 783850,
+    "Amter": 783850,
+    "DetailMask": 783850
+  },
+  "unchangedInteriorSeaPixels": 6509371,
+  "originalForeignLandPixels": 6259994,
+  "repaintedOriginalForeignPixels": 6259994,
+  "landTone": {
+    "danish": {
+      "count": 3128847,
+      "mean": [
+        75.62041033006727,
+        87.04612625673292,
+        42.487665584159274
+      ],
+      "std": [
+        15.549529842232383,
+        13.811404063977944,
+        9.178885553618848
+      ],
+      "saturation": 0.5158374962544824
+    },
+    "newLand": {
+      "count": 210839396,
+      "mean": [
+        75.22492518428577,
+        86.56386699191644,
+        42.38071186658114
+      ],
+      "std": [
+        18.189027751300543,
+        15.313328510407015,
+        8.134101719976819
+      ],
+      "saturation": 0.5097899329878054
+    },
+    "maxMeanError": 0.4822592648164772,
+    "meanTolerance": 3.0,
+    "saturationTolerance": 0.06
+  },
+  "passedValidators": [
+    "Tools/Map1851/validate_tiles.py",
+    "Tools/Map1851/validate_dem_tiles.py",
+    "Tools/Map1851/validate_tile_edges.py",
+    "Tools/Map1851/validate_tile_painter.py",
+    "Tools/Map1851/validate_neighbours.py",
+    "Tools/Countries/validate_level_c.py",
+    "Tools/Countries/validate_officer_careers.py",
+    "Tools/Countries/validate_sweden_norway.py",
+    "Tools/Countries/validate_prussia.py"
+  ],
+  "results": [
+    {
+      "file": "Tools/Map1851/validate_tiles.py",
+      "exitCode": 0,
+      "output": "{\"borderArtifacts\": {\"status\": \"OK\", \"borderTiles\": [[0, 0], [1, 0], [0, 1], [1, 1], [2, 1], [3, 1], [0, 2], [1, 2], [2, 2], [3, 2], [0, 3], [1, 3]], \"foreignBorderPixels\": 251139, \"unsupportedStraightLines\": 0, \"brownWedgeComponents\": 0, \"maxColourFieldSlopePerPixel\": 0.6320400238037109, \"slopeTolerance\": 1.0, \"negativeControls\": \"injected unsupported blue line, brown image wedge and triangular colour-field discontinuity rejected; authorised hydro accepted\", \"coverage\": \"All tiles intersecting the 128px exterior monarchy band, including Elbe/Lauenburg, Trave/Mecklenburg, Hamburg/Luebeck and Fehmarn; Kongeaa is internal protected monarchy.\"}, \"status\": \"OK\", \"adjacentTilePairs\": 466, \"maxMeanEdgeJump\": 4.020182291666667, \"originalBoundary\": {\"west\": {\"comparedPixels\": 1024, \"meanError\": 0.6712239583333334}, \"east\": {\"comparedPixels\": 3871, \"meanError\": 0.7751657625075347}, \"north\": {\"comparedPixels\": 3973, \"meanError\": 0.8582934809967279}, \"south\": {\"comparedPixels\": 3992, \"meanError\": 1.3442718770875084}}, \"monarchyBoundary\": {\"count\": 11757, \"meanAbsoluteRGBError\": [3.139343202666704, 2.531668684844958, 1.9762752809075967], \"meanRGBError\": [0.13814284329594037, 0.015888293604466686, 0.23468802353856597], \"localTones\": [{\"tile\": [1, 1], \"count\": 58, \"meanRGBError\": [13.403605230923358, 3.734758705928408, 11.362693194685312]}, {\"tile\": [0, 2], \"count\": 3, \"meanRGBError\": [36.89112091064453, 19.591041564941406, 1.9520975748697917]}, {\"tile\": [0, 3], \"count\": 2, \"meanRGBError\": [22.844390869140625, 14.227134704589844, 7.903907775878906]}, {\"tile\": [1, 3], \"count\": 11694, \"meanRGBError\": [0.059036613713579746, 0.04195673567261556, 0.18044658887278264]}], \"tolerance\": 3.0, \"note\": \"First 8 foreign pixels: mean colour compared to continuous original-land reference per tile and globally; absolute per-pixel error includes retained field grain. Protected pixels checked independently.\"}}\n{\"status\": \"OK\", \"tileCount\": 251, \"legacyPixelsCompared\": {\"Color\": 3135400, \"Height\": 3135400, \"Features\": 783850, \"Amter\": 783850, \"DetailMask\": 783850}, \"monarchyPixelsCompared\": {\"Color\": 3135400, \"Height\": 3135400, \"Features\": 783850, \"Amter\": 783850, \"DetailMask\": 783850}, \"unchangedInteriorSeaPixels\": 6509371, \"originalForeignLandPixels\": 6259994, \"repaintedOriginalForeignPixels\": 6259994, \"omittedSeaTilesChecked\": 49, \"scenarios\": [1825, 1851], \"colourSeams\": {\"west\": {\"land\": {\"status\": \"OK\", \"count\": 1832, \"insideMean\": [76.67794759825327, 91.17576419213974, 43.3231441048035], \"outsideMean\": [76.9792576419214, 91.51965065502183, 43.39301310043668], \"maxMeanError\": 0.34388646288209657, \"maxStdError\": 1.4313749032768985}, \"sea\": {\"status\": \"OK\", \"count\": 1735, \"insideMean\": [21.046109510086456, 42.66974063400576, 64.80806916426513], \"outsideMean\": [20.870893371757926, 42.52968299711816, 64.7014409221902], \"maxMeanError\": 0.17521613832852978, \"maxStdError\": 0.44396674348620735}}, \"east\": {\"land\": {\"status\": \"OK\", \"count\": 7456, \"insideMean\": [70.07671673819742, 84.38908261802575, 39.832081545064376], \"outsideMean\": [70.09831008583691, 84.43146459227468, 39.89726394849785], \"maxMeanError\": 0.06518240343347514, \"maxStdError\": 0.07018954644729902}, \"sea\": {\"status\": \"OK\", \"count\": 6705, \"insideMean\": [17.892915734526472, 38.99299030574198, 62.587322893363165], \"outsideMean\": [17.74392244593587, 38.779716629381056, 62.41297539149888], \"maxMeanError\": 0.2132736763609273, \"maxStdError\": 0.4123934461903529}}, \"north\": {\"land\": {\"status\": \"OK\", \"count\": 7620, \"insideMean\": [81.12690288713911, 92.76614173228346, 44.29803149606299], \"outsideMean\": [80.94776902887139, 92.47007874015748, 44.198425196850394], \"maxMeanError\": 0.2960629921259823, \"maxStdError\": 0.13286416370547816}, \"sea\": {\"status\": \"OK\", \"count\": 7136, \"insideMean\": [19.116872197309416, 40.20305493273543, 63.172645739910315], \"outsideMean\": [19.317544843049326, 40.47449551569507, 63.3507567264574], \"maxMeanError\": 0.2714405829596416, \"maxStdError\": 0.39801645652947215}}, \"south\": {\"land\": {\"status\": \"OK\", \"count\": 14928, \"insideMean\": [77.31337084673098, 89.02619239013933, 42.647307073954984], \"outsideMean\": [77.40487674169346, 89.02418274383709, 42.643488745980704], \"maxMeanError\": 0.09150589496248074, \"maxStdError\": 0.41727028005843003}, \"sea\": {\"status\": \"insufficient-samples\", \"count\": 4}}}, \"landTone\": {\"danish\": {\"count\": 3128847, \"mean\": [75.62041033006727, 87.04612625673292, 42.487665584159274], \"std\": [15.549529842232383, 13.811404063977944, 9.178885553618848], \"saturation\": 0.5158374962544824}, \"newLand\": {\"count\": 210839396, \"mean\": [75.22492518428577, 86.56386699191644, 42.38071186658114], \"std\": [18.189027751300543, 15.313328510407015, 8.134101719976819], \"saturation\": 0.5097899329878054}, \"maxMeanError\": 0.4822592648164772, \"meanTolerance\": 3.0, \"saturationTolerance\": 0.06}, \"blackNewLandPixels\": 0, \"tileEdges\": {\"borderArtifacts\": {\"status\": \"OK\", \"borderTiles\": [[0, 0], [1, 0], [0, 1], [1, 1], [2, 1], [3, 1], [0, 2], [1, 2], [2, 2], [3, 2], [0, 3], [1, 3]], \"foreignBorderPixels\": 251139, \"unsupportedStraightLines\": 0, \"brownWedgeComponents\": 0, \"maxColourFieldSlopePerPixel\": 0.6320400238037109, \"slopeTolerance\": 1.0, \"negativeControls\": \"injected unsupported blue line, brown image wedge and triangular colour-field discontinuity rejected; authorised hydro accepted\", \"coverage\": \"All tiles intersecting the 128px exterior monarchy band, including Elbe/Lauenburg, Trave/Mecklenburg, Hamburg/Luebeck and Fehmarn; Kongeaa is internal protected monarchy.\"}, \"status\": \"OK\", \"adjacentTilePairs\": 466, \"maxMeanEdgeJump\": 4.020182291666667, \"originalBoundary\": {\"west\": {\"comparedPixels\": 1024, \"meanError\": 0.6712239583333334}, \"east\": {\"comparedPixels\": 3871, \"meanError\": 0.7751657625075347}, \"north\": {\"comparedPixels\": 3973, \"meanError\": 0.8582934809967279}, \"south\": {\"comparedPixels\": 3992, \"meanError\": 1.3442718770875084}}, \"monarchyBoundary\": {\"count\": 11757, \"meanAbsoluteRGBError\": [3.139343202666704, 2.531668684844958, 1.9762752809075967], \"meanRGBError\": [0.13814284329594037, 0.015888293604466686, 0.23468802353856597], \"localTones\": [{\"tile\": [1, 1], \"count\": 58, \"meanRGBError\": [13.403605230923358, 3.734758705928408, 11.362693194685312]}, {\"tile\": [0, 2], \"count\": 3, \"meanRGBError\": [36.89112091064453, 19.591041564941406, 1.9520975748697917]}, {\"tile\": [0, 3], \"count\": 2, \"meanRGBError\": [22.844390869140625, 14.227134704589844, 7.903907775878906]}, {\"tile\": [1, 3], \"count\": 11694, \"meanRGBError\": [0.059036613713579746, 0.04195673567261556, 0.18044658887278264]}], \"tolerance\": 3.0, \"note\": \"First 8 foreign pixels: mean colour compared to continuous original-land reference per tile and globally; absolute per-pixel error includes retained field grain. Protected pixels checked independently.\"}}, \"minOmittedSeaStd\": 2.2165987990206397, \"note\": \"Kun monarkiets pixels er beskyttede; oprindeligt hav uden for 64-pixel rektangelkant kontrolleret uændret; fremmed land genmalet.\"}\n",
+      "stderr": ""
+    },
+    {
+      "file": "Tools/Map1851/validate_dem_tiles.py",
+      "exitCode": 0,
+      "output": "{\"status\": \"OK\", \"sampledLandHeights\": 50930, \"edgeExtendedSamples\": 853, \"maxUint16Error\": 0, \"tolerance\": 1, \"sourceCount\": 6, \"encoding\": \"round(clamp(metres,0,3000)/3000*65535)\"}\n",
+      "stderr": ""
+    },
+    {
+      "file": "Tools/Map1851/validate_tile_edges.py",
+      "exitCode": 0,
+      "output": "{\"borderArtifacts\": {\"status\": \"OK\", \"borderTiles\": [[0, 0], [1, 0], [0, 1], [1, 1], [2, 1], [3, 1], [0, 2], [1, 2], [2, 2], [3, 2], [0, 3], [1, 3]], \"foreignBorderPixels\": 251139, \"unsupportedStraightLines\": 0, \"brownWedgeComponents\": 0, \"maxColourFieldSlopePerPixel\": 0.6320400238037109, \"slopeTolerance\": 1.0, \"negativeControls\": \"injected unsupported blue line, brown image wedge and triangular colour-field discontinuity rejected; authorised hydro accepted\", \"coverage\": \"All tiles intersecting the 128px exterior monarchy band, including Elbe/Lauenburg, Trave/Mecklenburg, Hamburg/Luebeck and Fehmarn; Kongeaa is internal protected monarchy.\"}, \"status\": \"OK\", \"adjacentTilePairs\": 466, \"maxMeanEdgeJump\": 4.020182291666667, \"originalBoundary\": {\"west\": {\"comparedPixels\": 1024, \"meanError\": 0.6712239583333334}, \"east\": {\"comparedPixels\": 3871, \"meanError\": 0.7751657625075347}, \"north\": {\"comparedPixels\": 3973, \"meanError\": 0.8582934809967279}, \"south\": {\"comparedPixels\": 3992, \"meanError\": 1.3442718770875084}}, \"monarchyBoundary\": {\"count\": 11757, \"meanAbsoluteRGBError\": [3.139343202666704, 2.531668684844958, 1.9762752809075967], \"meanRGBError\": [0.13814284329594037, 0.015888293604466686, 0.23468802353856597], \"localTones\": [{\"tile\": [1, 1], \"count\": 58, \"meanRGBError\": [13.403605230923358, 3.734758705928408, 11.362693194685312]}, {\"tile\": [0, 2], \"count\": 3, \"meanRGBError\": [36.89112091064453, 19.591041564941406, 1.9520975748697917]}, {\"tile\": [0, 3], \"count\": 2, \"meanRGBError\": [22.844390869140625, 14.227134704589844, 7.903907775878906]}, {\"tile\": [1, 3], \"count\": 11694, \"meanRGBError\": [0.059036613713579746, 0.04195673567261556, 0.18044658887278264]}], \"tolerance\": 3.0, \"note\": \"First 8 foreign pixels: mean colour compared to continuous original-land reference per tile and globally; absolute per-pixel error includes retained field grain. Protected pixels checked independently.\"}}\n",
+      "stderr": ""
+    },
+    {
+      "file": "Tools/Map1851/validate_tile_painter.py",
+      "exitCode": 0,
+      "output": "OK painter: dansk standardoutput byteidentisk (2 seeds × 2 scener × 4 lag), overlapstøj/markmønstre, DEM pixel-is-area, filkant og 0–3000 m til uint16.\n",
+      "stderr": ""
+    },
+    {
+      "file": "Tools/Map1851/validate_neighbours.py",
+      "exitCode": 0,
+      "output": "CAMPAIGN-1851|neighbours|valideret|1825|122 byer|153 ruter|139 hære\nCAMPAIGN-1851|neighbours|valideret|1851|122 byer|153 ruter|139 hære\nOK niveau C 1825: 19 officerer; SE/NO ressorter og PR udenrigsminister; 3 separate økonomier; relation -20.\nOK niveau C 1851: 21 officerer; SE/NO ressorter og PR udenrigsminister; 3 separate økonomier; relation -20.\nOK niveau C: 125 JSON; genimport x2 byteidentisk; statisk kommando/betaling/save v40; budgetreference: nul/delvis/genforsøg og DK-adskillelse.\n",
+      "stderr": ""
+    },
+    {
+      "file": "Tools/Countries/validate_level_c.py",
+      "exitCode": 0,
+      "output": "OK niveau C 1825: 19 officerer; SE/NO ressorter og PR udenrigsminister; 3 separate økonomier; relation -20.\nOK niveau C 1851: 21 officerer; SE/NO ressorter og PR udenrigsminister; 3 separate økonomier; relation -20.\nOK niveau C: 125 JSON; genimport x2 byteidentisk; statisk kommando/betaling/save v40; budgetreference: nul/delvis/genforsøg og DK-adskillelse.\n",
+      "stderr": ""
+    },
+    {
+      "file": "Tools/Countries/validate_officer_careers.py",
+      "exitCode": 0,
+      "output": "OK officerskarrierer 1825: DK/SE/NO/PR, 26 unikke identiteter; historik og fiktive reserver.\nOK officerskarrierer 1851: DK/SE/NO/PR, 25 unikke identiteter; historik og fiktive reserver.\nOK save v40, ældre defaults, hookpunkter, proveniens og grænsetilfælde (statisk/reference).\n",
+      "stderr": ""
+    },
+    {
+      "file": "Tools/Countries/validate_sweden_norway.py",
+      "exitCode": 0,
+      "output": "OK 1825: 51 SE/NO-byer, 20 distrikter; ingen isolerede byer; PR-OOB/officerer/mobilisering; relation -20.\nOK 1851: 51 SE/NO-byer, 20 distrikter; ingen isolerede byer; PR-OOB/officerer/mobilisering; relation -20.\nOK SE/NO: 125 JSON; danske indeks/geografi/pixels og beskyttede gridceller bevaret; arkivhashes OK; fuld genimport x2 byte-idempotent.\nOK niveau C 1825: 19 officerer; SE/NO ressorter og PR udenrigsminister; 3 separate økonomier; relation -20.\nOK niveau C 1851: 21 officerer; SE/NO ressorter og PR udenrigsminister; 3 separate økonomier; relation -20.\nOK niveau C: 125 JSON; genimport x2 byteidentisk; statisk kommando/betaling/save v40; budgetreference: nul/delvis/genforsøg og DK-adskillelse.\n",
+      "stderr": ""
+    },
+    {
+      "file": "Tools/Countries/validate_prussia.py",
+      "exitCode": 0,
+      "output": "OK 1825: 51 SE/NO-byer, 20 distrikter; ingen isolerede byer; PR-OOB/officerer/mobilisering; relation -20.\nOK 1851: 51 SE/NO-byer, 20 distrikter; ingen isolerede byer; PR-OOB/officerer/mobilisering; relation -20.\nOK PR: 125 JSON; danske indeks/geografi/pixels og beskyttede gridceller bevaret; arkivhashes OK; fuld genimport x2 byte-idempotent.\nOK niveau C 1825: 19 officerer; SE/NO ressorter og PR udenrigsminister; 3 separate økonomier; relation -20.\nOK niveau C 1851: 21 officerer; SE/NO ressorter og PR udenrigsminister; 3 separate økonomier; relation -20.\nOK niveau C: 125 JSON; genimport x2 byteidentisk; statisk kommando/betaling/save v40; budgetreference: nul/delvis/genforsøg og DK-adskillelse.\n",
+      "stderr": ""
+    }
+  ]
+}

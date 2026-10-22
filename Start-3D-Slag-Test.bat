@@ -4,7 +4,7 @@ rem Saved\Battle\Battlefield_Test.json mangler (kraever at spillet har vaeret st
 rem Taster: O = kamporden, M = taktisk kort, INDSTILLINGER (oeverst) = fjendens skudvidde og fjenden angriber/forsvarer.
 set UE=I:\Spil\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe
 set PROJECT=%~dp0Game1864.uproject
-if not exist "%PROJECT%" set PROJECT=R:\Onedrive\1864-Campaign\Game1864.uproject
+if not exist "%PROJECT%" set PROJECT=C:\Projekter\1864-Campaign\Game1864.uproject
 if not exist "%~dp0Saved\Battle\Battlefield_Test.json" (
   echo Der er intet slagmarkskort endnu: koer Start-Slagmark-Generer.bat foerst.
   pause

@@ -78,7 +78,7 @@ public:
         return ProjectileFollowTarget.Get();
     }
 
-    /** Follows the first selected unit (G toggles). Any camera movement of the player's own ends it. */
+    /** Follows the first selected unit (G toggles; Shift+G also turns behind it). Panning ends it; zoom, tilt and the F1-F4 presets keep it. */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Camera|Follow")
     bool bFollowingUnit = false;
 
@@ -88,11 +88,22 @@ public:
     UFUNCTION(BlueprintCallable, Category="Strategy|Camera|Follow")
     void StopUnitFollow();
 
+    /** Sticks the camera to this unit; bBehind turns the view with the unit's front (Q/E hands the turning back). */
+    UFUNCTION(BlueprintCallable, Category="Strategy|Camera|Follow")
+    void FollowUnit(AStrategyUnit* Unit, bool bBehind);
+
+    AStrategyUnit* GetFollowedUnit() const { return bFollowingUnit ? FollowedUnit.Get() : nullptr; }
+
+    /** The view turns with the followed unit's front (Shift+G). */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Camera|Follow")
+    bool bFollowTurnWithUnit = false;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Camera|Follow")
     float UnitFollowSmoothing = 4.0f;
 
 private:
     TWeakObjectPtr<AStrategyUnit> FollowedUnit;
+    bool bFollowUnitFlagParsed = false;
     void MoveForward(float Value);
     void MoveRight(float Value);
     void ZoomCamera(float Value);

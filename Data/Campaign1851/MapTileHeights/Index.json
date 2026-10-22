@@ -1,0 +1,1766 @@
+{
+  "version": 1,
+  "manifestSHA256": "d9b533bbe9440135f74924de0c0b94bf548f82b1616d2e596e448fa7eead4e6c",
+  "heightSide": 257,
+  "forestSide": 65,
+  "encoding": "uint16-le + uint8 forest",
+  "tiles": [
+    {
+      "x": -2,
+      "y": 3,
+      "file": "MapTileHeights/Tile_-2_3.bin",
+      "bytes": 136323,
+      "sha256": "1c8e64fccd068605cfa287645d027e5a48cff25dec56793c324e9aa1ef9b2d0e"
+    },
+    {
+      "x": -2,
+      "y": 4,
+      "file": "MapTileHeights/Tile_-2_4.bin",
+      "bytes": 136323,
+      "sha256": "2310171520b09020a98a7cfa769982096430ba609689f14293e3d61566f810c3"
+    },
+    {
+      "x": -2,
+      "y": 5,
+      "file": "MapTileHeights/Tile_-2_5.bin",
+      "bytes": 136323,
+      "sha256": "255dc43656ad2f1d8d0ba2f8b5733aedff3013ef4c9ef825fb23beadc7b910ee"
+    },
+    {
+      "x": -2,
+      "y": 6,
+      "file": "MapTileHeights/Tile_-2_6.bin",
+      "bytes": 136323,
+      "sha256": "224ac393be7d2adb62de58557992902d009ff4ec45d67a7808174ccb3932e25a"
+    },
+    {
+      "x": -2,
+      "y": 7,
+      "file": "MapTileHeights/Tile_-2_7.bin",
+      "bytes": 136323,
+      "sha256": "26621a0cd54aed5d69ae51adce29504671b4e0a208287891d8d543ad3552a575"
+    },
+    {
+      "x": -1,
+      "y": -4,
+      "file": "MapTileHeights/Tile_-1_-4.bin",
+      "bytes": 136323,
+      "sha256": "9a38e6c27d1f8384119a029ca3386a2a1f06a5efbc1e84c14bc2a44dd890b0d7"
+    },
+    {
+      "x": -1,
+      "y": -3,
+      "file": "MapTileHeights/Tile_-1_-3.bin",
+      "bytes": 136323,
+      "sha256": "90af2f6fea4216d0d22a06ace3628b4f0fe7be7c825a99c03a6253c5c1bfd1f7"
+    },
+    {
+      "x": -1,
+      "y": -2,
+      "file": "MapTileHeights/Tile_-1_-2.bin",
+      "bytes": 136323,
+      "sha256": "909d4855ab9124ee4165bfe7267b8735709b2ecdfbaccd18091de96e99bf2374"
+    },
+    {
+      "x": -1,
+      "y": -1,
+      "file": "MapTileHeights/Tile_-1_-1.bin",
+      "bytes": 136323,
+      "sha256": "483b0a5a9b7a398e51f596a3e09680bea055e938028bada8898c1b82e891de8f"
+    },
+    {
+      "x": -1,
+      "y": 3,
+      "file": "MapTileHeights/Tile_-1_3.bin",
+      "bytes": 136323,
+      "sha256": "4ce9ed01cbaf097a7878f3153b90df4c866a772fd94180dc2dfd5bc15f10d7b6"
+    },
+    {
+      "x": -1,
+      "y": 4,
+      "file": "MapTileHeights/Tile_-1_4.bin",
+      "bytes": 136323,
+      "sha256": "dc33ea9c36774f7ac952dbbc709e0f2bc8e2869119e739fcafe541cdf82b2c75"
+    },
+    {
+      "x": -1,
+      "y": 5,
+      "file": "MapTileHeights/Tile_-1_5.bin",
+      "bytes": 136323,
+      "sha256": "82ba93e2ed68ccf4e8129d8732eb63feb495dc26f80e946740511016f189efe7"
+    },
+    {
+      "x": -1,
+      "y": 6,
+      "file": "MapTileHeights/Tile_-1_6.bin",
+      "bytes": 136323,
+      "sha256": "bc4a8cda5a3379ee4a6394d3c473b8534dd0e26bbc19d5c3ea49e9f631b953ff"
+    },
+    {
+      "x": -1,
+      "y": 7,
+      "file": "MapTileHeights/Tile_-1_7.bin",
+      "bytes": 136323,
+      "sha256": "4fcbe6d2dff54d240604c2e19e29aab46b9af2bf7b08240efc6acd2ac918f025"
+    },
+    {
+      "x": 0,
+      "y": -5,
+      "file": "MapTileHeights/Tile_0_-5.bin",
+      "bytes": 136323,
+      "sha256": "da2924eb3fcb941c8050aeab52d87144acfa88182fa7ef6cf45b948777872d44"
+    },
+    {
+      "x": 0,
+      "y": -4,
+      "file": "MapTileHeights/Tile_0_-4.bin",
+      "bytes": 136323,
+      "sha256": "6bdd5f781aab95bf0744493249c903403cbb1d6e6fe3b9a8892febdc97afd5e6"
+    },
+    {
+      "x": 0,
+      "y": -3,
+      "file": "MapTileHeights/Tile_0_-3.bin",
+      "bytes": 136323,
+      "sha256": "0455db41a215dd7d84f548d6e2cf6c62b61a789b4989ccd35304bc420afafaa1"
+    },
+    {
+      "x": 0,
+      "y": -2,
+      "file": "MapTileHeights/Tile_0_-2.bin",
+      "bytes": 136323,
+      "sha256": "178f62c17949b0bafd8c4a757138f919389438a32351a004a872185230f5b459"
+    },
+    {
+      "x": 0,
+      "y": -1,
+      "file": "MapTileHeights/Tile_0_-1.bin",
+      "bytes": 136323,
+      "sha256": "1e4a64ebb5b745646b8595fd893238984292887a6eec43c335758760ed6413f9"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "file": "MapTileHeights/Tile_0_0.bin",
+      "bytes": 136323,
+      "sha256": "6d21baf0aec12e361bad7b0c6318660f5192e7b93eb6c60ab0a7b4e1456d7206"
+    },
+    {
+      "x": 0,
+      "y": 1,
+      "file": "MapTileHeights/Tile_0_1.bin",
+      "bytes": 136323,
+      "sha256": "cc2516b50ab660ed97b8b382f0ecd191173238b6d8b0a973fe3de778b4d6102c"
+    },
+    {
+      "x": 0,
+      "y": 2,
+      "file": "MapTileHeights/Tile_0_2.bin",
+      "bytes": 136323,
+      "sha256": "5a019439abc49e013782c5e07f7f8453d57f8163a4450c8e6b950a51743beb81"
+    },
+    {
+      "x": 0,
+      "y": 3,
+      "file": "MapTileHeights/Tile_0_3.bin",
+      "bytes": 136323,
+      "sha256": "ed0b2bdaede6f940cb51a79ea8d3d0ff259c7187b13bca2897a2dbd5a3c5afb7"
+    },
+    {
+      "x": 0,
+      "y": 4,
+      "file": "MapTileHeights/Tile_0_4.bin",
+      "bytes": 136323,
+      "sha256": "90d9cb1a1694dd10840643a61a241076dba56e5f4a30f2b7c85e1cb219dedfe0"
+    },
+    {
+      "x": 0,
+      "y": 5,
+      "file": "MapTileHeights/Tile_0_5.bin",
+      "bytes": 136323,
+      "sha256": "fc5321728aef99d4e8c239ded02dd58bdc831ee902583a72b990ffea17a7d0ab"
+    },
+    {
+      "x": 0,
+      "y": 6,
+      "file": "MapTileHeights/Tile_0_6.bin",
+      "bytes": 136323,
+      "sha256": "5682cef9e2b7b12a83885865edbd60e92b4efcca42dd1150a941bc5187a2d741"
+    },
+    {
+      "x": 0,
+      "y": 7,
+      "file": "MapTileHeights/Tile_0_7.bin",
+      "bytes": 136323,
+      "sha256": "6dcd6a6b65e6ab68f3a03bcf1992183e7caade3dcc506d085e74f7ba1f3248b0"
+    },
+    {
+      "x": 1,
+      "y": -8,
+      "file": "MapTileHeights/Tile_1_-8.bin",
+      "bytes": 136323,
+      "sha256": "279ec6e643c3b6af66d69ab16c41ae92545c3a09073bfa5662537595b0d4d5fe"
+    },
+    {
+      "x": 1,
+      "y": -7,
+      "file": "MapTileHeights/Tile_1_-7.bin",
+      "bytes": 136323,
+      "sha256": "39226dc3567f98a60856b93b4b9890550348c44b5da28295459a0b5379ad91b2"
+    },
+    {
+      "x": 1,
+      "y": -6,
+      "file": "MapTileHeights/Tile_1_-6.bin",
+      "bytes": 136323,
+      "sha256": "05c50da047dbc3cdd3bcab92d44f1994aa020484cadd8f61c11138dc44e935b4"
+    },
+    {
+      "x": 1,
+      "y": -5,
+      "file": "MapTileHeights/Tile_1_-5.bin",
+      "bytes": 136323,
+      "sha256": "bbe6fa1cb974f0a647a7514e5abf213c70c0a3992265320a986e21e54962749a"
+    },
+    {
+      "x": 1,
+      "y": -4,
+      "file": "MapTileHeights/Tile_1_-4.bin",
+      "bytes": 136323,
+      "sha256": "eab45f476c69a18e0a6023300e46e563ad406c5bd69dc89471288dd1068e9ab9"
+    },
+    {
+      "x": 1,
+      "y": -3,
+      "file": "MapTileHeights/Tile_1_-3.bin",
+      "bytes": 136323,
+      "sha256": "5cc5d6055e04b75205bcea2931fd442e118c53d57b308033cc1eb4862159581f"
+    },
+    {
+      "x": 1,
+      "y": -2,
+      "file": "MapTileHeights/Tile_1_-2.bin",
+      "bytes": 136323,
+      "sha256": "81883625123567fe35a6190386ced06e312d8938edaedddc7a240370e9be7af1"
+    },
+    {
+      "x": 1,
+      "y": -1,
+      "file": "MapTileHeights/Tile_1_-1.bin",
+      "bytes": 136323,
+      "sha256": "4e448db20da17b0f01e7a4bdc148cadf56c8082baa8d21ca162e359b5f36f21c"
+    },
+    {
+      "x": 1,
+      "y": 0,
+      "file": "MapTileHeights/Tile_1_0.bin",
+      "bytes": 136323,
+      "sha256": "98ff1ca315b95aed980e89d7a2e39b246d5524ccf0ad0565f092da09d5354bbe"
+    },
+    {
+      "x": 1,
+      "y": 1,
+      "file": "MapTileHeights/Tile_1_1.bin",
+      "bytes": 136323,
+      "sha256": "bba58d9665690dd7eec3fa81a350011dec8f2921af57bdefe993f27919d95c56"
+    },
+    {
+      "x": 1,
+      "y": 2,
+      "file": "MapTileHeights/Tile_1_2.bin",
+      "bytes": 136323,
+      "sha256": "58bf21d9a0ceff57c1698b9133bf899439064828365a900e57734f10b887e043"
+    },
+    {
+      "x": 1,
+      "y": 3,
+      "file": "MapTileHeights/Tile_1_3.bin",
+      "bytes": 136323,
+      "sha256": "4e6562b4758a0d2cfa341dd462adcb9d6ce0722bf167626c540e9928a5585d1a"
+    },
+    {
+      "x": 1,
+      "y": 4,
+      "file": "MapTileHeights/Tile_1_4.bin",
+      "bytes": 136323,
+      "sha256": "100631f00eae088fc13d04fa2557d04a6628edd47109859b39e5f201c5be8e21"
+    },
+    {
+      "x": 1,
+      "y": 5,
+      "file": "MapTileHeights/Tile_1_5.bin",
+      "bytes": 136323,
+      "sha256": "761003e29083364cd176bd931940243cb588c448047beb431c6b5247dd740ca6"
+    },
+    {
+      "x": 1,
+      "y": 6,
+      "file": "MapTileHeights/Tile_1_6.bin",
+      "bytes": 136323,
+      "sha256": "6f3f167c65314c8e84739c6c7917f81c27b3c1221b272566c903924f1fcf4486"
+    },
+    {
+      "x": 1,
+      "y": 7,
+      "file": "MapTileHeights/Tile_1_7.bin",
+      "bytes": 136323,
+      "sha256": "640a209142a2fcf5a3ae31bab73a6176db34e9f42f89648f82dc96c052e8efc3"
+    },
+    {
+      "x": 2,
+      "y": -10,
+      "file": "MapTileHeights/Tile_2_-10.bin",
+      "bytes": 136323,
+      "sha256": "f063253f0ed39171f3c1a001d1ab91518d4f9ced6a6c0ff4b655cb9fd942fc52"
+    },
+    {
+      "x": 2,
+      "y": -9,
+      "file": "MapTileHeights/Tile_2_-9.bin",
+      "bytes": 136323,
+      "sha256": "3726610bdb7dd81cb6acb8e2ce27cd000e8acc11f779a5e38ccb9b6e46caaddf"
+    },
+    {
+      "x": 2,
+      "y": -8,
+      "file": "MapTileHeights/Tile_2_-8.bin",
+      "bytes": 136323,
+      "sha256": "bd00be9ccd74d3438e5d382dd8709092d541d590d3e11fd18b31dd29ffd4d0b2"
+    },
+    {
+      "x": 2,
+      "y": -7,
+      "file": "MapTileHeights/Tile_2_-7.bin",
+      "bytes": 136323,
+      "sha256": "8808291ed036bc18659e734775ddd0a94045d7ebdb9b15b6c9caf8a09e193a8b"
+    },
+    {
+      "x": 2,
+      "y": -6,
+      "file": "MapTileHeights/Tile_2_-6.bin",
+      "bytes": 136323,
+      "sha256": "ce38266ecdd90959a95bd92161b501bb7f02ea7519088585920da4966a0ba9c9"
+    },
+    {
+      "x": 2,
+      "y": -5,
+      "file": "MapTileHeights/Tile_2_-5.bin",
+      "bytes": 136323,
+      "sha256": "131ea62d8d8df46b9b316b70be4f98ec650edff2022f11954777c5ec9694c108"
+    },
+    {
+      "x": 2,
+      "y": -4,
+      "file": "MapTileHeights/Tile_2_-4.bin",
+      "bytes": 136323,
+      "sha256": "b701863dee3e8f59d28fff57fe3dbfdfbb1bf963a51a09e5dd82f7bc0fe9d299"
+    },
+    {
+      "x": 2,
+      "y": -3,
+      "file": "MapTileHeights/Tile_2_-3.bin",
+      "bytes": 136323,
+      "sha256": "873936d9fe2f756fef67c13790e764b286659391039d52434f577587c4eff685"
+    },
+    {
+      "x": 2,
+      "y": -2,
+      "file": "MapTileHeights/Tile_2_-2.bin",
+      "bytes": 136323,
+      "sha256": "a7d2feb9c619d06aff513e20267610c06d96feac160c8a4807c528703b26f0ff"
+    },
+    {
+      "x": 2,
+      "y": -1,
+      "file": "MapTileHeights/Tile_2_-1.bin",
+      "bytes": 136323,
+      "sha256": "e1c887ff1afa67e1ecbbcff278dad3b2e43e30428865364efbc928def6dd4e55"
+    },
+    {
+      "x": 2,
+      "y": 0,
+      "file": "MapTileHeights/Tile_2_0.bin",
+      "bytes": 136323,
+      "sha256": "6658ee9f6f7a185b001e26053e7090deeaff6bcc7f6ed77628b9af7424fb63f0"
+    },
+    {
+      "x": 2,
+      "y": 1,
+      "file": "MapTileHeights/Tile_2_1.bin",
+      "bytes": 136323,
+      "sha256": "c30fbb0893990a3fadf0125e2d73b9a9ea4dd8d3a4c2a8d7161256e503d59eff"
+    },
+    {
+      "x": 2,
+      "y": 2,
+      "file": "MapTileHeights/Tile_2_2.bin",
+      "bytes": 136323,
+      "sha256": "7ea2370bee6feeb42059d0b7d02b967c1eb65d81a6a73853f77e3292da9fb576"
+    },
+    {
+      "x": 2,
+      "y": 3,
+      "file": "MapTileHeights/Tile_2_3.bin",
+      "bytes": 136323,
+      "sha256": "c57902fbf0acc2c337e43d3a7159da7831513cf9cb67870e32a1f879f4969801"
+    },
+    {
+      "x": 2,
+      "y": 4,
+      "file": "MapTileHeights/Tile_2_4.bin",
+      "bytes": 136323,
+      "sha256": "59d4ec13ceaa2093d0eec05a211942c207b08c1c7e7b0e291e30ab287f13370a"
+    },
+    {
+      "x": 2,
+      "y": 5,
+      "file": "MapTileHeights/Tile_2_5.bin",
+      "bytes": 136323,
+      "sha256": "8a962d76d799d85c7885833d1c12e52da84346d3d0dd0eb197c206813f607c4c"
+    },
+    {
+      "x": 2,
+      "y": 6,
+      "file": "MapTileHeights/Tile_2_6.bin",
+      "bytes": 136323,
+      "sha256": "a021de04d7e7350c289663f4d50fe6fd28da514fac03e1ed584d03f5bab8e809"
+    },
+    {
+      "x": 2,
+      "y": 7,
+      "file": "MapTileHeights/Tile_2_7.bin",
+      "bytes": 136323,
+      "sha256": "294953e74df46d220b8dd95cf47d98ca0e222f980ef01c47f9e147d78ef80134"
+    },
+    {
+      "x": 3,
+      "y": -10,
+      "file": "MapTileHeights/Tile_3_-10.bin",
+      "bytes": 136323,
+      "sha256": "c15185e2ca6ec6c287cece8254c68760cb606e11c8baa175e50eec0f53350c18"
+    },
+    {
+      "x": 3,
+      "y": -9,
+      "file": "MapTileHeights/Tile_3_-9.bin",
+      "bytes": 136323,
+      "sha256": "727c5d88c41a6a2d82c9017abd37c72ff65ecfef5da419f825cb678189bd855e"
+    },
+    {
+      "x": 3,
+      "y": -8,
+      "file": "MapTileHeights/Tile_3_-8.bin",
+      "bytes": 136323,
+      "sha256": "08231c539eb39684b37aa9a0c15ec0186b3dd7e3309e5e6c30ed5ba242923965"
+    },
+    {
+      "x": 3,
+      "y": -7,
+      "file": "MapTileHeights/Tile_3_-7.bin",
+      "bytes": 136323,
+      "sha256": "4afb8cd64cce8152491704c31c0f0aa87a4fb155072e724f89711d4bc6953b82"
+    },
+    {
+      "x": 3,
+      "y": -6,
+      "file": "MapTileHeights/Tile_3_-6.bin",
+      "bytes": 136323,
+      "sha256": "0029984dd51eab5712bc18a41ec828b1ced981007547dd3291dea8f7b4d7a846"
+    },
+    {
+      "x": 3,
+      "y": -5,
+      "file": "MapTileHeights/Tile_3_-5.bin",
+      "bytes": 136323,
+      "sha256": "2a2ddbb23e1d38b0298ad416c56731a0569785c77d83665fae6a649b1d8a5e45"
+    },
+    {
+      "x": 3,
+      "y": -4,
+      "file": "MapTileHeights/Tile_3_-4.bin",
+      "bytes": 136323,
+      "sha256": "5356061a4e88fd2e01464bf62f6a547a21b4c1111a15bbf877ab2abb76826d13"
+    },
+    {
+      "x": 3,
+      "y": -3,
+      "file": "MapTileHeights/Tile_3_-3.bin",
+      "bytes": 136323,
+      "sha256": "126613084d0f725fc1d1b2aa5df54c16e8a3af844dae16e4a88bf876c73c40d3"
+    },
+    {
+      "x": 3,
+      "y": -2,
+      "file": "MapTileHeights/Tile_3_-2.bin",
+      "bytes": 136323,
+      "sha256": "ef65516e7de4582b2c5f37ba645fa8495be3f6d7f53742aec61a69cdac3aa87a"
+    },
+    {
+      "x": 3,
+      "y": -1,
+      "file": "MapTileHeights/Tile_3_-1.bin",
+      "bytes": 136323,
+      "sha256": "d099da5fe0b65941df2767d837c67a431b87893674d54a0d9896695c5e13ba4c"
+    },
+    {
+      "x": 3,
+      "y": 0,
+      "file": "MapTileHeights/Tile_3_0.bin",
+      "bytes": 136323,
+      "sha256": "dd9cfddcad9ab17587e0bdcbeadf6d3d656a0e0e578ae1f582a3dcf03210fe0c"
+    },
+    {
+      "x": 3,
+      "y": 1,
+      "file": "MapTileHeights/Tile_3_1.bin",
+      "bytes": 136323,
+      "sha256": "5858b594d45d7cd08a9ae1c3bc9f0d9ab5232b05e62cb89d26f283ad6042e77d"
+    },
+    {
+      "x": 3,
+      "y": 2,
+      "file": "MapTileHeights/Tile_3_2.bin",
+      "bytes": 136323,
+      "sha256": "129b298351db7298b1e7fa42e8c838fb9f4d5adf16f9032b268930073328e692"
+    },
+    {
+      "x": 3,
+      "y": 3,
+      "file": "MapTileHeights/Tile_3_3.bin",
+      "bytes": 136323,
+      "sha256": "5a1cb885ab95cc4c3cf0d113d2d286a50873b46265fdbedf7890fa9df1fd77d9"
+    },
+    {
+      "x": 3,
+      "y": 4,
+      "file": "MapTileHeights/Tile_3_4.bin",
+      "bytes": 136323,
+      "sha256": "4e536911dcb948bcb71787e5b96babf9291c07073d9ad39dc064b0dda74c4194"
+    },
+    {
+      "x": 3,
+      "y": 5,
+      "file": "MapTileHeights/Tile_3_5.bin",
+      "bytes": 136323,
+      "sha256": "b929247c08d5a64f4bd83371a6d3a8faaa65c69f3a2b049f756fc010dd72fa70"
+    },
+    {
+      "x": 3,
+      "y": 6,
+      "file": "MapTileHeights/Tile_3_6.bin",
+      "bytes": 136323,
+      "sha256": "ddf89325b96f4b656f57c00485049f9aef42ec6a274dedb87e2ae466d5d0bc13"
+    },
+    {
+      "x": 3,
+      "y": 7,
+      "file": "MapTileHeights/Tile_3_7.bin",
+      "bytes": 136323,
+      "sha256": "c21084638861584f53db63eb768651ee4389d53b1187ca679bec5a39e91dd1de"
+    },
+    {
+      "x": 4,
+      "y": -11,
+      "file": "MapTileHeights/Tile_4_-11.bin",
+      "bytes": 136323,
+      "sha256": "627d0bc0b72a6a7a0f5559d9f761d36561ad09f679fc4eebf04ade210c0a4f6e"
+    },
+    {
+      "x": 4,
+      "y": -10,
+      "file": "MapTileHeights/Tile_4_-10.bin",
+      "bytes": 136323,
+      "sha256": "7af51c7d0074d67f761b9d938f31c3f312754c7fd196bca6905b77e0132298cd"
+    },
+    {
+      "x": 4,
+      "y": -9,
+      "file": "MapTileHeights/Tile_4_-9.bin",
+      "bytes": 136323,
+      "sha256": "fbec318aa6479468bc3b33edff27faf8f9c2ed92e3df5ed13eb96debf2fe0c4a"
+    },
+    {
+      "x": 4,
+      "y": -8,
+      "file": "MapTileHeights/Tile_4_-8.bin",
+      "bytes": 136323,
+      "sha256": "c2306d9a4653619cfa9862d69042cb0c8fa31fd9dce707040f64e1b14c0bdae2"
+    },
+    {
+      "x": 4,
+      "y": -7,
+      "file": "MapTileHeights/Tile_4_-7.bin",
+      "bytes": 136323,
+      "sha256": "887678f16640f9e8b2a5ec5c6c9427db3c99b374fba25610216edf8cd380585d"
+    },
+    {
+      "x": 4,
+      "y": -6,
+      "file": "MapTileHeights/Tile_4_-6.bin",
+      "bytes": 136323,
+      "sha256": "5491fa6e4235caa481da3214f015507d037c513c239cc86e37e20dc38567c9c9"
+    },
+    {
+      "x": 4,
+      "y": -5,
+      "file": "MapTileHeights/Tile_4_-5.bin",
+      "bytes": 136323,
+      "sha256": "c0c0b97771372a5f853153dacce96fb0faf067ec0d0edd2dc0ec8e9fb1dc66c7"
+    },
+    {
+      "x": 4,
+      "y": -4,
+      "file": "MapTileHeights/Tile_4_-4.bin",
+      "bytes": 136323,
+      "sha256": "031920ef0b5d1b48ccc282d83baae57b886fab899605470203b29abffd66d9c4"
+    },
+    {
+      "x": 4,
+      "y": -3,
+      "file": "MapTileHeights/Tile_4_-3.bin",
+      "bytes": 136323,
+      "sha256": "57c1cd7860b890ce43b192c516499ba18ac1000e36bae8a9b5c4f7210b7a130e"
+    },
+    {
+      "x": 4,
+      "y": -2,
+      "file": "MapTileHeights/Tile_4_-2.bin",
+      "bytes": 136323,
+      "sha256": "ee4a87e31fb72699b24a18028652f86800199d52d423040525baf6285b88396c"
+    },
+    {
+      "x": 4,
+      "y": -1,
+      "file": "MapTileHeights/Tile_4_-1.bin",
+      "bytes": 136323,
+      "sha256": "a1832ff2d8223f197347ae28d677097323acd94d82d83e1a464868d15460f200"
+    },
+    {
+      "x": 4,
+      "y": 0,
+      "file": "MapTileHeights/Tile_4_0.bin",
+      "bytes": 136323,
+      "sha256": "a57abd967a388df4d1d5f149fa50fb94e9f7febb4446bce575e527ee4a56f555"
+    },
+    {
+      "x": 4,
+      "y": 1,
+      "file": "MapTileHeights/Tile_4_1.bin",
+      "bytes": 136323,
+      "sha256": "3a965034afe6f06d1655340ef5c4c7d6e5142fb66be441ba8a1006eb09daadb0"
+    },
+    {
+      "x": 4,
+      "y": 2,
+      "file": "MapTileHeights/Tile_4_2.bin",
+      "bytes": 136323,
+      "sha256": "33067c3a7700d723906329bc4592a07347514440ba92a739fb4dad379d0f00ec"
+    },
+    {
+      "x": 4,
+      "y": 3,
+      "file": "MapTileHeights/Tile_4_3.bin",
+      "bytes": 136323,
+      "sha256": "c8c18126a9f018b42c65f7398f9afa6fc8599bcc770622623ccfcd38c0f4d0df"
+    },
+    {
+      "x": 4,
+      "y": 4,
+      "file": "MapTileHeights/Tile_4_4.bin",
+      "bytes": 136323,
+      "sha256": "3860ac2d7f9c4bead3586297cf9c94ec372539cd117a1f28311200831643865f"
+    },
+    {
+      "x": 4,
+      "y": 5,
+      "file": "MapTileHeights/Tile_4_5.bin",
+      "bytes": 136323,
+      "sha256": "cb9323a44404eccfeaf098572e5fd8d836dcee3e64e4a706db2234cacb31fe72"
+    },
+    {
+      "x": 4,
+      "y": 6,
+      "file": "MapTileHeights/Tile_4_6.bin",
+      "bytes": 136323,
+      "sha256": "c45e23c049b078193f58ae53e67022b30041e943d0c47f2ddf75ae5dac433610"
+    },
+    {
+      "x": 4,
+      "y": 7,
+      "file": "MapTileHeights/Tile_4_7.bin",
+      "bytes": 136323,
+      "sha256": "5c2b7cb510915f122ba8c119ac85cf5c73a86032a348ec7146c86524e8f2942e"
+    },
+    {
+      "x": 5,
+      "y": -11,
+      "file": "MapTileHeights/Tile_5_-11.bin",
+      "bytes": 136323,
+      "sha256": "e303dad2082bd25b1edb55b04acf9df4305c34a5b0a297acf03605a77d9761be"
+    },
+    {
+      "x": 5,
+      "y": -10,
+      "file": "MapTileHeights/Tile_5_-10.bin",
+      "bytes": 136323,
+      "sha256": "064db18bbcdfe43b9f13bf409d65cc3e9a7a1b54277022cea7147e5d52f56e30"
+    },
+    {
+      "x": 5,
+      "y": -9,
+      "file": "MapTileHeights/Tile_5_-9.bin",
+      "bytes": 136323,
+      "sha256": "b00b5f3bbbbb0010ace89c66adae2b928082d3f264e3f5587483b058d8d975a5"
+    },
+    {
+      "x": 5,
+      "y": -8,
+      "file": "MapTileHeights/Tile_5_-8.bin",
+      "bytes": 136323,
+      "sha256": "b82c7157506ddbb1ce38e7d95a47766d367806195c66669bd6759986cd6abc5b"
+    },
+    {
+      "x": 5,
+      "y": -7,
+      "file": "MapTileHeights/Tile_5_-7.bin",
+      "bytes": 136323,
+      "sha256": "1f4c1bf560a05074a6e780e90ba92349e8c8757195cc24c0b1ce9af1040b6de2"
+    },
+    {
+      "x": 5,
+      "y": -6,
+      "file": "MapTileHeights/Tile_5_-6.bin",
+      "bytes": 136323,
+      "sha256": "11a2f1a18c9917d06b8292dae4ed4e3ece86b35a68e9f4f9963fc3315df775c9"
+    },
+    {
+      "x": 5,
+      "y": -5,
+      "file": "MapTileHeights/Tile_5_-5.bin",
+      "bytes": 136323,
+      "sha256": "d97e054867307b7e86376d2845c89ad38cfe4c74fc901795e627550fe99a2561"
+    },
+    {
+      "x": 5,
+      "y": -4,
+      "file": "MapTileHeights/Tile_5_-4.bin",
+      "bytes": 136323,
+      "sha256": "fd1df7b8745caa36ad5cb0796c7bf32e218b0a89a405c3255f77d440d2e3e933"
+    },
+    {
+      "x": 5,
+      "y": -3,
+      "file": "MapTileHeights/Tile_5_-3.bin",
+      "bytes": 136323,
+      "sha256": "5e93fcf327a57edcc94a2c4ee55b74312df3a854bd9e5aaefdcf34fa731538e0"
+    },
+    {
+      "x": 5,
+      "y": -2,
+      "file": "MapTileHeights/Tile_5_-2.bin",
+      "bytes": 136323,
+      "sha256": "ccd9d1619136e1eb03732af467f442405e7a0af1a514b72cfc6e1f397c27de91"
+    },
+    {
+      "x": 5,
+      "y": -1,
+      "file": "MapTileHeights/Tile_5_-1.bin",
+      "bytes": 136323,
+      "sha256": "ce173b10ac50a951fe600ef220645ab63cd251a1edf3e0a4ea2dd823da302261"
+    },
+    {
+      "x": 5,
+      "y": 0,
+      "file": "MapTileHeights/Tile_5_0.bin",
+      "bytes": 136323,
+      "sha256": "cf6b7468b6eda116e8e05910f07e646a6db9f5e590dd2c40ed4eac2df562603c"
+    },
+    {
+      "x": 5,
+      "y": 1,
+      "file": "MapTileHeights/Tile_5_1.bin",
+      "bytes": 136323,
+      "sha256": "64853b6ee59a0012e4437461eb368c542b833c998f684d6f30e057aa65f08a26"
+    },
+    {
+      "x": 5,
+      "y": 2,
+      "file": "MapTileHeights/Tile_5_2.bin",
+      "bytes": 136323,
+      "sha256": "6f206723218e867f09271bced0d789ee45740bca0eedf83fb4a3e843bdf91e75"
+    },
+    {
+      "x": 5,
+      "y": 3,
+      "file": "MapTileHeights/Tile_5_3.bin",
+      "bytes": 136323,
+      "sha256": "0dd006b5c1ec9ed07fbb73ef1671d2a54447db6a20efa98381785386c52da90e"
+    },
+    {
+      "x": 5,
+      "y": 4,
+      "file": "MapTileHeights/Tile_5_4.bin",
+      "bytes": 136323,
+      "sha256": "16d9298e2ff47d8c96b863c04f8879f94e6d4ae51555d708df5faf123d155f41"
+    },
+    {
+      "x": 5,
+      "y": 5,
+      "file": "MapTileHeights/Tile_5_5.bin",
+      "bytes": 136323,
+      "sha256": "d9f569a6b152584e7f78abc0843dc855bb7000f93aa59778b5ba2a0ef722e108"
+    },
+    {
+      "x": 5,
+      "y": 6,
+      "file": "MapTileHeights/Tile_5_6.bin",
+      "bytes": 136323,
+      "sha256": "3abccf5a362569511ddc590dd04f601d30fb7cd8cf687e6b67fec279c18481f6"
+    },
+    {
+      "x": 5,
+      "y": 7,
+      "file": "MapTileHeights/Tile_5_7.bin",
+      "bytes": 136323,
+      "sha256": "46eada523cc6e17054d13c24797894868c0286b6dd2b1e9165173db6c0d7e18e"
+    },
+    {
+      "x": 6,
+      "y": -11,
+      "file": "MapTileHeights/Tile_6_-11.bin",
+      "bytes": 136323,
+      "sha256": "6dadd2b8c882db698fd6699d9239a87cedeb75e121099391fe688bd34ace2bd9"
+    },
+    {
+      "x": 6,
+      "y": -10,
+      "file": "MapTileHeights/Tile_6_-10.bin",
+      "bytes": 136323,
+      "sha256": "7ef0df4d143098491837cdb80a0561d5aa128e85a1ea136b5d2ed2076a83c532"
+    },
+    {
+      "x": 6,
+      "y": -9,
+      "file": "MapTileHeights/Tile_6_-9.bin",
+      "bytes": 136323,
+      "sha256": "2bb1247ee6b85621898f2ce9c47a3980c2481531719c564f940c6d33672befed"
+    },
+    {
+      "x": 6,
+      "y": -8,
+      "file": "MapTileHeights/Tile_6_-8.bin",
+      "bytes": 136323,
+      "sha256": "b3a0bbcf1b904a312da34899533d4267a40201216be67a5bd3cc3e878324879c"
+    },
+    {
+      "x": 6,
+      "y": -7,
+      "file": "MapTileHeights/Tile_6_-7.bin",
+      "bytes": 136323,
+      "sha256": "80b961f292b2470797e889d4c733be4345995aeb0d3690b0fc68bba185da225f"
+    },
+    {
+      "x": 6,
+      "y": -6,
+      "file": "MapTileHeights/Tile_6_-6.bin",
+      "bytes": 136323,
+      "sha256": "fe630d60be25bc2a5578a9b367dfbb904407f59957a47c43536614b80df8c5c3"
+    },
+    {
+      "x": 6,
+      "y": -5,
+      "file": "MapTileHeights/Tile_6_-5.bin",
+      "bytes": 136323,
+      "sha256": "a34e64c73fc54afc9103fac3757547cd3705440fb8517c0bbc53fde658b2bc04"
+    },
+    {
+      "x": 6,
+      "y": -4,
+      "file": "MapTileHeights/Tile_6_-4.bin",
+      "bytes": 136323,
+      "sha256": "5d14e4275f260c96dcc568ab8ed52a8e7b7c96d43fff87380432a4697632cea2"
+    },
+    {
+      "x": 6,
+      "y": -3,
+      "file": "MapTileHeights/Tile_6_-3.bin",
+      "bytes": 136323,
+      "sha256": "e147069a464ba43044970878bd04dc3a3b2b3f90cf0d9587b3159ba95074b4e9"
+    },
+    {
+      "x": 6,
+      "y": -2,
+      "file": "MapTileHeights/Tile_6_-2.bin",
+      "bytes": 136323,
+      "sha256": "f568aa3736e76c7ee8c318d17085afba170fe6a7c25222d13ccc303d8679eb64"
+    },
+    {
+      "x": 6,
+      "y": -1,
+      "file": "MapTileHeights/Tile_6_-1.bin",
+      "bytes": 136323,
+      "sha256": "84fa1e716da96f533da43b5a22a2974ab1acfb329f8bf9dcd706ab5fa635fa9e"
+    },
+    {
+      "x": 6,
+      "y": 0,
+      "file": "MapTileHeights/Tile_6_0.bin",
+      "bytes": 136323,
+      "sha256": "1ad9064df78add3a988c0fedbf44ccba0572892fef256cf89cf48bdfbccccd01"
+    },
+    {
+      "x": 6,
+      "y": 1,
+      "file": "MapTileHeights/Tile_6_1.bin",
+      "bytes": 136323,
+      "sha256": "fa42c10d21d6901b3eff2409095feb24c945076d8c54a8eddc3acb4a06a2c4c1"
+    },
+    {
+      "x": 6,
+      "y": 2,
+      "file": "MapTileHeights/Tile_6_2.bin",
+      "bytes": 136323,
+      "sha256": "50d07eb45f216ea4e2329cb67ae2346bdb97aa4caeab61a1ddb70921b81473cf"
+    },
+    {
+      "x": 6,
+      "y": 3,
+      "file": "MapTileHeights/Tile_6_3.bin",
+      "bytes": 136323,
+      "sha256": "a7523fa31d948c4816d967cfa6d73fe90d9bca7c5239038d8e31d2704db46a11"
+    },
+    {
+      "x": 6,
+      "y": 4,
+      "file": "MapTileHeights/Tile_6_4.bin",
+      "bytes": 136323,
+      "sha256": "c8a01532c1f661db89d79223a081e333c9f782aae324067c65216d1140b42c5a"
+    },
+    {
+      "x": 6,
+      "y": 5,
+      "file": "MapTileHeights/Tile_6_5.bin",
+      "bytes": 136323,
+      "sha256": "4af1495e72ee1b2cbc0daa1805e300d85f98c8c4a262b978c535df895313437e"
+    },
+    {
+      "x": 6,
+      "y": 6,
+      "file": "MapTileHeights/Tile_6_6.bin",
+      "bytes": 136323,
+      "sha256": "79e686f53aac7bdd8b1aa89c5a1280339c9a3e2b762f42802160721bfc9ef194"
+    },
+    {
+      "x": 6,
+      "y": 7,
+      "file": "MapTileHeights/Tile_6_7.bin",
+      "bytes": 136323,
+      "sha256": "4dc293628c4ccafdd059b2e2ff990a14f992ffaf936a3777b70e873a8cdf0753"
+    },
+    {
+      "x": 7,
+      "y": -11,
+      "file": "MapTileHeights/Tile_7_-11.bin",
+      "bytes": 136323,
+      "sha256": "82e11c41d30cf3a3b4e9131b979de3737a325477477aabe09c8f298a43cd674c"
+    },
+    {
+      "x": 7,
+      "y": -10,
+      "file": "MapTileHeights/Tile_7_-10.bin",
+      "bytes": 136323,
+      "sha256": "53555f85b7b7cdb11e66381ee85bfd2221937c4d83126215a73eb59db00c1d9e"
+    },
+    {
+      "x": 7,
+      "y": -9,
+      "file": "MapTileHeights/Tile_7_-9.bin",
+      "bytes": 136323,
+      "sha256": "5c136a1502bc1d34546ab672fdc8b78115b8e9258b45e2af777a06ce6dddc5cb"
+    },
+    {
+      "x": 7,
+      "y": -8,
+      "file": "MapTileHeights/Tile_7_-8.bin",
+      "bytes": 136323,
+      "sha256": "773297a495d6483135245955d2fee25dc7b0391d8dc552d26fcad2840ac1159d"
+    },
+    {
+      "x": 7,
+      "y": -7,
+      "file": "MapTileHeights/Tile_7_-7.bin",
+      "bytes": 136323,
+      "sha256": "aa6eececa6d186e39350c5977b0196b3ab7ab2251bb421c1cc275727149854b9"
+    },
+    {
+      "x": 7,
+      "y": -6,
+      "file": "MapTileHeights/Tile_7_-6.bin",
+      "bytes": 136323,
+      "sha256": "e3fe1f53d2b04e1777e7c2f00f7b0ced077b6f6e4aea493d223afbdef4fb8e18"
+    },
+    {
+      "x": 7,
+      "y": -5,
+      "file": "MapTileHeights/Tile_7_-5.bin",
+      "bytes": 136323,
+      "sha256": "e2c444bb19eb2c2bbf2f95e670fdd6032feb8ab3cc78175bd9b893cf57ad89c2"
+    },
+    {
+      "x": 7,
+      "y": -4,
+      "file": "MapTileHeights/Tile_7_-4.bin",
+      "bytes": 136323,
+      "sha256": "f28740ee047f6931c1b7c7767a4e5479f1fd5281f40945a40ce05f555320d597"
+    },
+    {
+      "x": 7,
+      "y": -3,
+      "file": "MapTileHeights/Tile_7_-3.bin",
+      "bytes": 136323,
+      "sha256": "fd1e3d291d55843532ad77f5caac097ef247bc211c6018998b65791a2da0df55"
+    },
+    {
+      "x": 7,
+      "y": -2,
+      "file": "MapTileHeights/Tile_7_-2.bin",
+      "bytes": 136323,
+      "sha256": "989d076dddd2981120c4308bec6d759df89e112bc3c91a35522ac3b4302f1345"
+    },
+    {
+      "x": 7,
+      "y": -1,
+      "file": "MapTileHeights/Tile_7_-1.bin",
+      "bytes": 136323,
+      "sha256": "1743dad5850e0a848db3e3930b6bcec100306b588aff1622e31cbc79d848e155"
+    },
+    {
+      "x": 7,
+      "y": 0,
+      "file": "MapTileHeights/Tile_7_0.bin",
+      "bytes": 136323,
+      "sha256": "2e6e6c2e903c849eb9ff2321db734c845fda1b54326bb11ddf8137ab41961003"
+    },
+    {
+      "x": 7,
+      "y": 1,
+      "file": "MapTileHeights/Tile_7_1.bin",
+      "bytes": 136323,
+      "sha256": "d983f65729d44067d93bd9a464d8676b1653a0f2f62a0882a887fccfd71a5af1"
+    },
+    {
+      "x": 7,
+      "y": 2,
+      "file": "MapTileHeights/Tile_7_2.bin",
+      "bytes": 136323,
+      "sha256": "54bfb1e8596bc69dc994cbd049c954955f58a8883e86bd4bdbb9b130b219d512"
+    },
+    {
+      "x": 7,
+      "y": 3,
+      "file": "MapTileHeights/Tile_7_3.bin",
+      "bytes": 136323,
+      "sha256": "669cb54042d2f7501ab033dadd355a06bccb4da406277b2c392624a3f3d4ec62"
+    },
+    {
+      "x": 7,
+      "y": 4,
+      "file": "MapTileHeights/Tile_7_4.bin",
+      "bytes": 136323,
+      "sha256": "5d5109d3514002c765f47a2fea38080ec5f06e4136e19a8990f070ae54d84b07"
+    },
+    {
+      "x": 7,
+      "y": 5,
+      "file": "MapTileHeights/Tile_7_5.bin",
+      "bytes": 136323,
+      "sha256": "dc7110809ed5d9d25f7f9c87e7c133e6167ad05f573a08ec65358f4237e732a9"
+    },
+    {
+      "x": 7,
+      "y": 6,
+      "file": "MapTileHeights/Tile_7_6.bin",
+      "bytes": 136323,
+      "sha256": "392abc3c5a34c5c0e3e80d6ba90a76779f8f3cc0ce093dd9e0143cd13ec17b5a"
+    },
+    {
+      "x": 7,
+      "y": 7,
+      "file": "MapTileHeights/Tile_7_7.bin",
+      "bytes": 136323,
+      "sha256": "dcd87332c07cc278c902e77446a6bcfdf5977b01af14de260ee3fe5deae72a06"
+    },
+    {
+      "x": 8,
+      "y": -11,
+      "file": "MapTileHeights/Tile_8_-11.bin",
+      "bytes": 136323,
+      "sha256": "ac84b891a6cdf37ef4fd82fecd6e62640dd248e5bbbc0893a0dba48b5779767a"
+    },
+    {
+      "x": 8,
+      "y": -10,
+      "file": "MapTileHeights/Tile_8_-10.bin",
+      "bytes": 136323,
+      "sha256": "f4224a55ea82d2df1e8906dfaa111744fff420b3e0e97de9d850667ea493789b"
+    },
+    {
+      "x": 8,
+      "y": -9,
+      "file": "MapTileHeights/Tile_8_-9.bin",
+      "bytes": 136323,
+      "sha256": "c1ddc39096db01070efb02a611b3a95672e75bf5defd159a29609dc202cd8930"
+    },
+    {
+      "x": 8,
+      "y": -8,
+      "file": "MapTileHeights/Tile_8_-8.bin",
+      "bytes": 136323,
+      "sha256": "8816e3a3e7c641374a2d98109d1a9dede338ff9decb43266820d42b06be06b0c"
+    },
+    {
+      "x": 8,
+      "y": -7,
+      "file": "MapTileHeights/Tile_8_-7.bin",
+      "bytes": 136323,
+      "sha256": "f8b63fc0fb5f046b4d7b8a112ed6d410174887a1766b21bb38cfed918cbefea5"
+    },
+    {
+      "x": 8,
+      "y": -6,
+      "file": "MapTileHeights/Tile_8_-6.bin",
+      "bytes": 136323,
+      "sha256": "29a684aa3e45a4caab0c181dd442bdbabb762870f6821c1f13c7095baf10f25a"
+    },
+    {
+      "x": 8,
+      "y": -5,
+      "file": "MapTileHeights/Tile_8_-5.bin",
+      "bytes": 136323,
+      "sha256": "4812a59f92fe4c1108e27cbe921386955a74b6dad8ac39fb0d10c697b979899f"
+    },
+    {
+      "x": 8,
+      "y": -4,
+      "file": "MapTileHeights/Tile_8_-4.bin",
+      "bytes": 136323,
+      "sha256": "6d05c755e7cd457e58dade57fe6b2bd677e647468c9819cf37c8d8ea5e5e67c7"
+    },
+    {
+      "x": 8,
+      "y": -3,
+      "file": "MapTileHeights/Tile_8_-3.bin",
+      "bytes": 136323,
+      "sha256": "c75e208019efa7aa06318081ea105fb63c197e34bf30e6d25445b7fdc7c5c113"
+    },
+    {
+      "x": 8,
+      "y": -2,
+      "file": "MapTileHeights/Tile_8_-2.bin",
+      "bytes": 136323,
+      "sha256": "66c4b220479549b502e175e13a1be65189c96fa335fdd5e7a3585d25e36473a9"
+    },
+    {
+      "x": 8,
+      "y": -1,
+      "file": "MapTileHeights/Tile_8_-1.bin",
+      "bytes": 136323,
+      "sha256": "4e9a2404bb37a4e46ef6c483668c06f6ce1e7fe6db77f1d499d0303e49e8dd42"
+    },
+    {
+      "x": 8,
+      "y": 0,
+      "file": "MapTileHeights/Tile_8_0.bin",
+      "bytes": 136323,
+      "sha256": "6c74a1e54e8cfaa4d723a6afe4b43a454637f4652778ca6e40cd18d142814b29"
+    },
+    {
+      "x": 8,
+      "y": 1,
+      "file": "MapTileHeights/Tile_8_1.bin",
+      "bytes": 136323,
+      "sha256": "1ba90e4e71ed4684f4e48f2caa11cbbdac573602a407be265953fe290674b4d3"
+    },
+    {
+      "x": 8,
+      "y": 2,
+      "file": "MapTileHeights/Tile_8_2.bin",
+      "bytes": 136323,
+      "sha256": "3c038a10c41802db56284565e3066977eccc3d94ab59c63bce66d9a293271501"
+    },
+    {
+      "x": 8,
+      "y": 3,
+      "file": "MapTileHeights/Tile_8_3.bin",
+      "bytes": 136323,
+      "sha256": "2af86622d9c9f397ce4e34e1b908c6f5810ff2427d49643a9265738f09b38e98"
+    },
+    {
+      "x": 8,
+      "y": 4,
+      "file": "MapTileHeights/Tile_8_4.bin",
+      "bytes": 136323,
+      "sha256": "4f0b9e671ab8b8907b7bf9c334823f49449ef53af2fd575c90045d4c8af4c296"
+    },
+    {
+      "x": 8,
+      "y": 5,
+      "file": "MapTileHeights/Tile_8_5.bin",
+      "bytes": 136323,
+      "sha256": "7d7d0b28f71c52773631efb75499f988b741941c9bb3f756f0c3123d72bcf9bf"
+    },
+    {
+      "x": 8,
+      "y": 6,
+      "file": "MapTileHeights/Tile_8_6.bin",
+      "bytes": 136323,
+      "sha256": "4d9dada935a662c5e1472f0cb7e80699b51b28b2c82595c0d834900e2c5d0606"
+    },
+    {
+      "x": 8,
+      "y": 7,
+      "file": "MapTileHeights/Tile_8_7.bin",
+      "bytes": 136323,
+      "sha256": "25f99e7868acbea371ad16acd779480a9376e6448d29f0fd2e0eb4edfccd4cb3"
+    },
+    {
+      "x": 9,
+      "y": -11,
+      "file": "MapTileHeights/Tile_9_-11.bin",
+      "bytes": 136323,
+      "sha256": "a15832857d63a8d5ff0b3be984f006d9f554b9389943cef4e7da19092b1d383a"
+    },
+    {
+      "x": 9,
+      "y": -10,
+      "file": "MapTileHeights/Tile_9_-10.bin",
+      "bytes": 136323,
+      "sha256": "1de7d91a1905914901664fb08f4d4e53b290aca2b7110ed6cc1f88fba047a50b"
+    },
+    {
+      "x": 9,
+      "y": -9,
+      "file": "MapTileHeights/Tile_9_-9.bin",
+      "bytes": 136323,
+      "sha256": "a792c58e737d5d17ae36be368751da1bd4d2de11841564fb9bcce8ec9817fe17"
+    },
+    {
+      "x": 9,
+      "y": -8,
+      "file": "MapTileHeights/Tile_9_-8.bin",
+      "bytes": 136323,
+      "sha256": "06c2368abf39c374cea14ec4d88912fa416b64b9da284de53e9c63619197874c"
+    },
+    {
+      "x": 9,
+      "y": -7,
+      "file": "MapTileHeights/Tile_9_-7.bin",
+      "bytes": 136323,
+      "sha256": "73dcaab87709a5c4c18c7653b99239eaf692fbcb2612b4ad4c1153b10514b29d"
+    },
+    {
+      "x": 9,
+      "y": -6,
+      "file": "MapTileHeights/Tile_9_-6.bin",
+      "bytes": 136323,
+      "sha256": "a484d0792a2a5b5f33485b93a5cc3a74844ebe7e0f55c34bbf88e78af4ddd01b"
+    },
+    {
+      "x": 9,
+      "y": -5,
+      "file": "MapTileHeights/Tile_9_-5.bin",
+      "bytes": 136323,
+      "sha256": "0e5d318941449c8edd460f18268ddff03937e4b2ad22685dfa893e158e6f36c3"
+    },
+    {
+      "x": 9,
+      "y": -4,
+      "file": "MapTileHeights/Tile_9_-4.bin",
+      "bytes": 136323,
+      "sha256": "c2c3b72575d0907ba361f1394336c9453bde5230a0eeb4455a549e4c7d65c981"
+    },
+    {
+      "x": 9,
+      "y": -3,
+      "file": "MapTileHeights/Tile_9_-3.bin",
+      "bytes": 136323,
+      "sha256": "55fcafa5dab3cec2a00dcf337402083eba978f9ee71cb8a153dcc7029522a759"
+    },
+    {
+      "x": 9,
+      "y": -2,
+      "file": "MapTileHeights/Tile_9_-2.bin",
+      "bytes": 136323,
+      "sha256": "ed721c671762fef2e848e9e7c9ac00c01c22daa9e0038decf4eb8c8716931435"
+    },
+    {
+      "x": 9,
+      "y": -1,
+      "file": "MapTileHeights/Tile_9_-1.bin",
+      "bytes": 136323,
+      "sha256": "74550cf748bfaab2e5a89a48848ae84698de73060c38184f07de7518476ce28c"
+    },
+    {
+      "x": 9,
+      "y": 0,
+      "file": "MapTileHeights/Tile_9_0.bin",
+      "bytes": 136323,
+      "sha256": "4eca91eaa43571fcd5ba03585a2076cce31e2bed2f306b02f976dc5bc2116971"
+    },
+    {
+      "x": 9,
+      "y": 1,
+      "file": "MapTileHeights/Tile_9_1.bin",
+      "bytes": 136323,
+      "sha256": "fa1928b5d1777c87498502ee81e20e6befefd5b2bdfa27d9fb3bd35615dd3ca1"
+    },
+    {
+      "x": 9,
+      "y": 2,
+      "file": "MapTileHeights/Tile_9_2.bin",
+      "bytes": 136323,
+      "sha256": "1aa5e43585bb70da88fac36a7a16298903697d5686920d8d9c99590a650f833e"
+    },
+    {
+      "x": 9,
+      "y": 3,
+      "file": "MapTileHeights/Tile_9_3.bin",
+      "bytes": 136323,
+      "sha256": "285504ceb44114798a49e1fe129ea8835817c40595ff3f0bbbe8e58c7cd41c43"
+    },
+    {
+      "x": 9,
+      "y": 4,
+      "file": "MapTileHeights/Tile_9_4.bin",
+      "bytes": 136323,
+      "sha256": "42cd7bc33ac05c5e0ab9814153f8d6c1f9a913bc7477419e55fb304c5265eb93"
+    },
+    {
+      "x": 9,
+      "y": 5,
+      "file": "MapTileHeights/Tile_9_5.bin",
+      "bytes": 136323,
+      "sha256": "139e4630b94dea7baf0f04aa1e422ce3430962aa37d168101004fda2fb1385af"
+    },
+    {
+      "x": 9,
+      "y": 6,
+      "file": "MapTileHeights/Tile_9_6.bin",
+      "bytes": 136323,
+      "sha256": "21ed655bab77093b852aa14d8c78cb4881a9ee8f098fe1922baac39df9492cd3"
+    },
+    {
+      "x": 9,
+      "y": 7,
+      "file": "MapTileHeights/Tile_9_7.bin",
+      "bytes": 136323,
+      "sha256": "711d5234e4a536451b4324d89d4ce4081344aa22ad49263a8b15c9fdcb6d19e8"
+    },
+    {
+      "x": 10,
+      "y": -11,
+      "file": "MapTileHeights/Tile_10_-11.bin",
+      "bytes": 136323,
+      "sha256": "1d4f2c535a44f7ecc2d30c242343601daf5a16e29213784ea43af65405729780"
+    },
+    {
+      "x": 10,
+      "y": -10,
+      "file": "MapTileHeights/Tile_10_-10.bin",
+      "bytes": 136323,
+      "sha256": "9f722f94092b27222bb06fac92bfbc4fb4a57aabde5d15a6cd41bec725fcdad7"
+    },
+    {
+      "x": 10,
+      "y": -9,
+      "file": "MapTileHeights/Tile_10_-9.bin",
+      "bytes": 136323,
+      "sha256": "9f92a7a2bdeea44edce2f3b79ff1caed1c00c7fdde358d642626d478dbf64800"
+    },
+    {
+      "x": 10,
+      "y": -8,
+      "file": "MapTileHeights/Tile_10_-8.bin",
+      "bytes": 136323,
+      "sha256": "d729b88c042156094f2d3ad04538aa0fa797d71014885e60c587bb1ae62d00d2"
+    },
+    {
+      "x": 10,
+      "y": -7,
+      "file": "MapTileHeights/Tile_10_-7.bin",
+      "bytes": 136323,
+      "sha256": "b734e903598f165c305abe0bc80b1d554b426539caf9d54081764ee3150be231"
+    },
+    {
+      "x": 10,
+      "y": -6,
+      "file": "MapTileHeights/Tile_10_-6.bin",
+      "bytes": 136323,
+      "sha256": "517ad8314e6d64313fcef9477266c6a16d809fa69a3a62f9de1f7717e452e82b"
+    },
+    {
+      "x": 10,
+      "y": -5,
+      "file": "MapTileHeights/Tile_10_-5.bin",
+      "bytes": 136323,
+      "sha256": "7342021f405cc900568fafc4ca5516903bafac55f80ca61f0d94ddd3915493d2"
+    },
+    {
+      "x": 10,
+      "y": -4,
+      "file": "MapTileHeights/Tile_10_-4.bin",
+      "bytes": 136323,
+      "sha256": "8d9dc36d1b3ca8370397eba475199b484852034623b4ce6070aee4bb00af86fe"
+    },
+    {
+      "x": 10,
+      "y": -3,
+      "file": "MapTileHeights/Tile_10_-3.bin",
+      "bytes": 136323,
+      "sha256": "51eaba207e35ec6773106aeea8df91fa5194abd068fb325b4e9b498a1f24b3ca"
+    },
+    {
+      "x": 10,
+      "y": -2,
+      "file": "MapTileHeights/Tile_10_-2.bin",
+      "bytes": 136323,
+      "sha256": "b97e41e8e2cc2c5f6621ab4d97d4da8376b28ba8bec7771429a97805dd3ab8e1"
+    },
+    {
+      "x": 10,
+      "y": -1,
+      "file": "MapTileHeights/Tile_10_-1.bin",
+      "bytes": 136323,
+      "sha256": "6f94b42c4883afaf341deb74c8775b393c74aabd383a76f8f6ce3065317e6749"
+    },
+    {
+      "x": 10,
+      "y": 0,
+      "file": "MapTileHeights/Tile_10_0.bin",
+      "bytes": 136323,
+      "sha256": "27d7e7f154668991175eeeb44e8ca9ba3832379a2286a72f7fbb451630f39fb4"
+    },
+    {
+      "x": 10,
+      "y": 1,
+      "file": "MapTileHeights/Tile_10_1.bin",
+      "bytes": 136323,
+      "sha256": "80de0195e77c34a413a5aba9247d29fa19d2767ab2c4a22de1e1b7ed17135da2"
+    },
+    {
+      "x": 10,
+      "y": 2,
+      "file": "MapTileHeights/Tile_10_2.bin",
+      "bytes": 136323,
+      "sha256": "7f3ad06d10aaff157a093aabf942369241e43ad6bd731e8f5395af6e18144aa4"
+    },
+    {
+      "x": 10,
+      "y": 3,
+      "file": "MapTileHeights/Tile_10_3.bin",
+      "bytes": 136323,
+      "sha256": "8c4e750f3c98d961a3efba578fbae43a9cabd7d6f5ae2de02a6df319c860ec38"
+    },
+    {
+      "x": 10,
+      "y": 4,
+      "file": "MapTileHeights/Tile_10_4.bin",
+      "bytes": 136323,
+      "sha256": "06d449f242f1b87d5e9bcbf027b0746bee9a34f250bb377a36778a6d2a0fe2ad"
+    },
+    {
+      "x": 10,
+      "y": 5,
+      "file": "MapTileHeights/Tile_10_5.bin",
+      "bytes": 136323,
+      "sha256": "bbd0c0d0d78d3be8e821f50818d3e8ee1e2ce84c8f163f2bceb92e62eb7dd869"
+    },
+    {
+      "x": 10,
+      "y": 6,
+      "file": "MapTileHeights/Tile_10_6.bin",
+      "bytes": 136323,
+      "sha256": "2fb1adc53071477904341e7ad312ecb3acd3e3a0bb2856a9fa0d4ad9bfa9a853"
+    },
+    {
+      "x": 10,
+      "y": 7,
+      "file": "MapTileHeights/Tile_10_7.bin",
+      "bytes": 136323,
+      "sha256": "a34a63743adf4abf817e810f86ebe161b26b0c80dd29e67c4c7a239e998a93d0"
+    },
+    {
+      "x": 11,
+      "y": -11,
+      "file": "MapTileHeights/Tile_11_-11.bin",
+      "bytes": 136323,
+      "sha256": "1f1bce04e308ce6462ae672cae16c78c0fcf7712bbdbb7bdcb57fa327ff475df"
+    },
+    {
+      "x": 11,
+      "y": -10,
+      "file": "MapTileHeights/Tile_11_-10.bin",
+      "bytes": 136323,
+      "sha256": "653005d50229837aebc29e19b048b82b9606c2bdfcd4471aaf86c8399003d460"
+    },
+    {
+      "x": 11,
+      "y": -9,
+      "file": "MapTileHeights/Tile_11_-9.bin",
+      "bytes": 136323,
+      "sha256": "bc1aaafb85542d2cffe34becddee2b65329a6c058860c47583f896e609ec49ea"
+    },
+    {
+      "x": 11,
+      "y": -8,
+      "file": "MapTileHeights/Tile_11_-8.bin",
+      "bytes": 136323,
+      "sha256": "bf6b2fe390224aeb86193a51d2d137c7168c26e9b104d7528e1739e705a445a3"
+    },
+    {
+      "x": 11,
+      "y": -7,
+      "file": "MapTileHeights/Tile_11_-7.bin",
+      "bytes": 136323,
+      "sha256": "5f435ce60a6850a85343c0aedb609c4acc2889ed7f4a4a05b1c1ac9606e594e6"
+    },
+    {
+      "x": 11,
+      "y": -6,
+      "file": "MapTileHeights/Tile_11_-6.bin",
+      "bytes": 136323,
+      "sha256": "479c513d20b52e7d77044c1a1e3e30f7bc22468443c81a01758b785d613c4172"
+    },
+    {
+      "x": 11,
+      "y": -5,
+      "file": "MapTileHeights/Tile_11_-5.bin",
+      "bytes": 136323,
+      "sha256": "84d6c6093b31c004d9bb3c3f5ace0ea7230fc33cbceeb8e0792496fee37a0cb8"
+    },
+    {
+      "x": 11,
+      "y": -4,
+      "file": "MapTileHeights/Tile_11_-4.bin",
+      "bytes": 136323,
+      "sha256": "f005e34ec407cf2252d29524f30e4a6aa368128afdfa71b271ba46b7b1addfc6"
+    },
+    {
+      "x": 11,
+      "y": -3,
+      "file": "MapTileHeights/Tile_11_-3.bin",
+      "bytes": 136323,
+      "sha256": "fbebb8a2ea3f20245ada53ceeb8fa26a7fac7cfe034a4b1de44928e8fe727427"
+    },
+    {
+      "x": 11,
+      "y": -2,
+      "file": "MapTileHeights/Tile_11_-2.bin",
+      "bytes": 136323,
+      "sha256": "cef8df96dc303b0a08732163b7944dae5f2d2be3d81b33b74092fcae84b7427b"
+    },
+    {
+      "x": 11,
+      "y": -1,
+      "file": "MapTileHeights/Tile_11_-1.bin",
+      "bytes": 136323,
+      "sha256": "9f897548fd0892c3cbe8ef113a1a7a744dd68b259629b92bff5c054a70cba9bb"
+    },
+    {
+      "x": 11,
+      "y": 0,
+      "file": "MapTileHeights/Tile_11_0.bin",
+      "bytes": 136323,
+      "sha256": "4d3d3ffbe85e53907049037030c92bc8649f1976145a48b257d94d84b8de65a5"
+    },
+    {
+      "x": 11,
+      "y": 1,
+      "file": "MapTileHeights/Tile_11_1.bin",
+      "bytes": 136323,
+      "sha256": "d25a330cb50c7a041d0734e93a90b699d0c952131f7e411327c6b5752a14b601"
+    },
+    {
+      "x": 11,
+      "y": 2,
+      "file": "MapTileHeights/Tile_11_2.bin",
+      "bytes": 136323,
+      "sha256": "d21ac7965fe150d42c6d5bcdcc303a3a700b77410d0eaf8179af83fedb3507ba"
+    },
+    {
+      "x": 11,
+      "y": 3,
+      "file": "MapTileHeights/Tile_11_3.bin",
+      "bytes": 136323,
+      "sha256": "c22b8d49335c8d529d83d85c64001178b5be99e4d579cc0365a49f2db9442b48"
+    },
+    {
+      "x": 11,
+      "y": 4,
+      "file": "MapTileHeights/Tile_11_4.bin",
+      "bytes": 136323,
+      "sha256": "0b145c480c59d023c33d93212c0b8c2ea25c8c6c262b50e06f3e32d1cd5f5a0f"
+    },
+    {
+      "x": 11,
+      "y": 5,
+      "file": "MapTileHeights/Tile_11_5.bin",
+      "bytes": 136323,
+      "sha256": "49ad98dc3f99e56f45b0192b8252a0f452c5439dd170f10725760a0f94d2397c"
+    },
+    {
+      "x": 11,
+      "y": 6,
+      "file": "MapTileHeights/Tile_11_6.bin",
+      "bytes": 136323,
+      "sha256": "f06ccc0de578a8dea558f1628b54d8c718a129d2781514049ec22270f7b8a9de"
+    },
+    {
+      "x": 11,
+      "y": 7,
+      "file": "MapTileHeights/Tile_11_7.bin",
+      "bytes": 136323,
+      "sha256": "99187c71fa53381874319fa43ab38a94a336b64a862fb60800a0c21deb451259"
+    },
+    {
+      "x": 12,
+      "y": -12,
+      "file": "MapTileHeights/Tile_12_-12.bin",
+      "bytes": 136323,
+      "sha256": "c3e60e9373a486aa27d1237fe9087e8738d7618fecfb3fcc5e324dc59ec31cd2"
+    },
+    {
+      "x": 12,
+      "y": -11,
+      "file": "MapTileHeights/Tile_12_-11.bin",
+      "bytes": 136323,
+      "sha256": "36ffbb4e86319bc09001322d1c93f2c8560264484237bee4f27a734bc17e3a64"
+    },
+    {
+      "x": 12,
+      "y": -10,
+      "file": "MapTileHeights/Tile_12_-10.bin",
+      "bytes": 136323,
+      "sha256": "c9621a3ece1a1adec5b41b1f71aef09aca51e1c36558fd14d8221298975f4155"
+    },
+    {
+      "x": 12,
+      "y": -9,
+      "file": "MapTileHeights/Tile_12_-9.bin",
+      "bytes": 136323,
+      "sha256": "5041b696f962044fcb32b89428b93e0999455ecf62cbbff560de7eec33a8d121"
+    },
+    {
+      "x": 12,
+      "y": -8,
+      "file": "MapTileHeights/Tile_12_-8.bin",
+      "bytes": 136323,
+      "sha256": "67be3de7f123088c2883753150df02d422d0f90cddf0a10b49b825fe56ec5a76"
+    },
+    {
+      "x": 12,
+      "y": -7,
+      "file": "MapTileHeights/Tile_12_-7.bin",
+      "bytes": 136323,
+      "sha256": "3c54f500f1a272b7cca2d31d1f561e6e1fbd256209a12571235a0ee7ebf67816"
+    },
+    {
+      "x": 12,
+      "y": -6,
+      "file": "MapTileHeights/Tile_12_-6.bin",
+      "bytes": 136323,
+      "sha256": "769cd410fd8dfc9daaae53f042e84c97449f75e32084ad841836d0eca1f61ab7"
+    },
+    {
+      "x": 12,
+      "y": -5,
+      "file": "MapTileHeights/Tile_12_-5.bin",
+      "bytes": 136323,
+      "sha256": "b394abefa30bbb44353279ab8ec52cbce2a53b63ff9ce0b98ef67c7141e1e8c0"
+    },
+    {
+      "x": 12,
+      "y": -4,
+      "file": "MapTileHeights/Tile_12_-4.bin",
+      "bytes": 136323,
+      "sha256": "53346de5200115d28e40a95a0e5ce9e89eaff20faffbad009ea791a0660aba87"
+    },
+    {
+      "x": 12,
+      "y": -3,
+      "file": "MapTileHeights/Tile_12_-3.bin",
+      "bytes": 136323,
+      "sha256": "9f39ca395501a06204c21a461950f91d260506adbedaaed6b67b80c3a22dadea"
+    },
+    {
+      "x": 12,
+      "y": -2,
+      "file": "MapTileHeights/Tile_12_-2.bin",
+      "bytes": 136323,
+      "sha256": "adc28378eb648b3dc909d5d6813c4fb7377f434c5bca585b321601c1b0154ed2"
+    },
+    {
+      "x": 12,
+      "y": -1,
+      "file": "MapTileHeights/Tile_12_-1.bin",
+      "bytes": 136323,
+      "sha256": "ec3402fbc129c326948af5703d7c643c1326ac67df4f65d9bd97de82964976d8"
+    },
+    {
+      "x": 12,
+      "y": 0,
+      "file": "MapTileHeights/Tile_12_0.bin",
+      "bytes": 136323,
+      "sha256": "4719143194bb41adacd9686400dee2daa1585e2981b3976ad8e026aa5ab0e0ae"
+    },
+    {
+      "x": 12,
+      "y": 1,
+      "file": "MapTileHeights/Tile_12_1.bin",
+      "bytes": 136323,
+      "sha256": "c0ea5ba19318e67014621d3bea753c5256e67f7a7a44bf54e0bb4e86e1dfc351"
+    },
+    {
+      "x": 12,
+      "y": 2,
+      "file": "MapTileHeights/Tile_12_2.bin",
+      "bytes": 136323,
+      "sha256": "7fa50bbb8726e9f2b4ded6eb79d2b91b3b78a3c182a25f7c4e993bace5d346bb"
+    },
+    {
+      "x": 12,
+      "y": 3,
+      "file": "MapTileHeights/Tile_12_3.bin",
+      "bytes": 136323,
+      "sha256": "bdcb64a19d4f57f1b3c09a6a8fc5e75bdc14fb6559fabca7da26fba47500dde7"
+    },
+    {
+      "x": 12,
+      "y": 4,
+      "file": "MapTileHeights/Tile_12_4.bin",
+      "bytes": 136323,
+      "sha256": "c0fca04b1f02298526869b2018733663e169819de42e233af28d83c9faf97ed2"
+    },
+    {
+      "x": 12,
+      "y": 5,
+      "file": "MapTileHeights/Tile_12_5.bin",
+      "bytes": 136323,
+      "sha256": "830fa202d426f8132387426e8ac7f90a8011f2c28511386b08409f3d13c7da0d"
+    },
+    {
+      "x": 12,
+      "y": 6,
+      "file": "MapTileHeights/Tile_12_6.bin",
+      "bytes": 136323,
+      "sha256": "195de642272002156d4c3636d4dd6bb3dd3bf46954489567e6cc37fcce8c0c53"
+    },
+    {
+      "x": 12,
+      "y": 7,
+      "file": "MapTileHeights/Tile_12_7.bin",
+      "bytes": 136323,
+      "sha256": "7aad0776ce99281db2283f48b3f14de335fb6ceef195065bb44808875fd9858e"
+    }
+  ]
+}

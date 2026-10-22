@@ -14,6 +14,7 @@
 #include "../Artillery/StrategyArtilleryBatteryUnit.h"
 #include "../Artillery/StrategyArtilleryFireMissionComponent.h"
 #include "../Combat/StrategyFireControlComponent.h"
+#include "../Combat/StrategyFireDrillComponent.h"
 #include "../Combat/StrategyThreatReactionComponent.h"
 #include "../Command/StrategyCommandComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
@@ -1215,21 +1216,39 @@ void UStrategyFieldOfficerComponent::UpdateBayonetCharge()
 
 void UStrategyFieldOfficerComponent::ResolveShock(AStrategyUnit* Enemy)
 {
-    // Who gives way: numbers, spirit and order on each side (a square stands better; a line taken in flank worse).
-    auto Weight = [](const AStrategyUnit* U)
+    // Who gives way: numbers, spirit and order on each side (a square stands better; a line taken in flank worse), and since
+    // 2026-10-21 (user) the men's bayonet drill, their experience, the officer's experience, fixed bayonets and the angle of the
+    // attack. All factors are estimates for play and neutral at the defaults (drill 50, men's experience 0, officer 50).
+    auto ShockWeight = [](const AStrategyUnit* ShockUnit, float& OutShockFactor)
     {
-        float W = FMath::Max(1, U->CurrentStrength) * (U->Morale / 100.0f) * (0.7f + U->Cohesion / 300.0f);
-        if (U->FormationComponent && U->FormationComponent->CurrentFormation == EStrategyFormationType::Square) { W *= 1.25f; }
-        return W;
+        float ShockW = FMath::Max(1, ShockUnit->CurrentStrength) * (ShockUnit->Morale / 100.0f) * (0.7f + ShockUnit->Cohesion / 300.0f);
+        if (ShockUnit->FormationComponent && ShockUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square) { ShockW *= 1.25f; }
+        const float ShockDrill = ShockUnit->FireDrillComponent ? FMath::Clamp(ShockUnit->FireDrillComponent->DrillTraining, 0.f, 100.f) : 50.f;
+        const float ShockVeterans = FMath::Clamp(ShockUnit->Experience, 0.f, 100.f);
+        const float ShockOfficer = ShockUnit->OfficerProfileComponent ? FMath::Clamp(ShockUnit->OfficerProfileComponent->Experience, 0.f, 100.f) : 50.f;
+        const bool bShockBayonet = ShockUnit->EquipmentVisualComponent && ShockUnit->EquipmentVisualComponent->bBayonetFixed;
+        OutShockFactor = (0.875f + 0.25f * ShockDrill / 100.f)     // bayonet drill: -12.5 % .. +12.5 % around the average
+            * (1.0f + 0.20f * ShockVeterans / 100.f)              // veterans: up to +20 %
+            * (0.95f + 0.10f * ShockOfficer / 100.f)              // the captain: -5 % .. +5 %
+            * (bShockBayonet ? 1.15f : 0.80f);                     // caught without the bayonet fixed
+        return ShockW * OutShockFactor;
     };
-    const float Ratio = FMath::Clamp(Weight(OwnerUnit) / FMath::Max(1.0f, Weight(Enemy)), 0.4f, 2.5f);
+    float OwnShockFactor = 1.f, EnemyShockFactor = 1.f;
+    const float OwnShockWeight = ShockWeight(OwnerUnit, OwnShockFactor);
+    const float EnemyShockWeight = ShockWeight(Enemy, EnemyShockFactor);
+    // Taken in flank or rear: measured from the enemy's front to where the attack comes from.
+    const FVector ShockFromLocal = Enemy->GetActorTransform().InverseTransformVectorNoScale(OwnerUnit->GetActorLocation() - Enemy->GetActorLocation());
+    const float ShockAngle = FMath::Abs(FMath::RadiansToDegrees(FMath::Atan2(ShockFromLocal.Y, ShockFromLocal.X)));
+    const float ShockAngleFactor = ShockAngle > 120.f ? 1.7f : ShockAngle > 60.f ? 1.4f : 1.0f;
+    const float Ratio = FMath::Clamp(OwnShockWeight * ShockAngleFactor / FMath::Max(1.0f, EnemyShockWeight), 0.4f, 2.5f);
     const int32 EnemyLoss = FMath::RoundToInt(OwnerUnit->CurrentStrength * DecisionRandom.FRandRange(0.05f, 0.10f) * Ratio);
     const int32 OwnLoss = FMath::RoundToInt(Enemy->CurrentStrength * DecisionRandom.FRandRange(0.03f, 0.07f) / Ratio);
     if (UStrategyBattleAudio* MeleeAudio = UStrategyBattleAudio::Find(this)) MeleeAudio->Clash(Enemy->GetActorLocation());
     if (Enemy->UnitState == EStrategyUnitState::Routed) { Enemy->CaptureBattlePrisoners(OwnerUnit); }
     Enemy->ApplyStrengthLossWithCause(EnemyLoss, TEXT("Melee"), OwnerUnit);
     OwnerUnit->ApplyStrengthLossWithCause(OwnLoss, TEXT("Melee"), Enemy);
-    Enemy->Morale = FMath::Clamp(Enemy->Morale - 20.0f * Ratio, 0.0f, 100.0f);
+    // Veterans give way less: up to 30 % less loss of spirit.
+    Enemy->Morale = FMath::Clamp(Enemy->Morale - 20.0f * Ratio * (1.0f - 0.3f * FMath::Clamp(Enemy->Experience, 0.f, 100.f) / 100.f), 0.0f, 100.0f);
     Enemy->Cohesion = FMath::Clamp(Enemy->Cohesion - 25.0f * Ratio, 0.0f, 100.0f);
     const bool bWon = Ratio > 1.15f || Enemy->Morale < 30.0f;
     if (bWon)
@@ -1249,7 +1268,7 @@ void UStrategyFieldOfficerComponent::ResolveShock(AStrategyUnit* Enemy)
     }
     else
     {
-        OwnerUnit->Morale = FMath::Clamp(OwnerUnit->Morale - 15.0f, 0.0f, 100.0f);
+        OwnerUnit->Morale = FMath::Clamp(OwnerUnit->Morale - 15.0f * (1.0f - 0.3f * FMath::Clamp(OwnerUnit->Experience, 0.f, 100.f) / 100.f), 0.0f, 100.0f);
         OwnerUnit->Cohesion = FMath::Clamp(OwnerUnit->Cohesion - 15.0f, 0.0f, 100.0f);
     }
     // The charge is over: the company halts where it struck and re-forms.
@@ -1269,8 +1288,9 @@ void UStrategyFieldOfficerComponent::ResolveShock(AStrategyUnit* Enemy)
     EndCharge();
     Decide(bWon ? TEXT("Bajonetangrebet lykkedes") : TEXT("Bajonetangrebet slået tilbage"),
         FString::Printf(TEXT("%s mistede %d, vi %d"), *Enemy->DisplayName.ToString(), EnemyLoss, OwnLoss));
-    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-BAYONET: %s -> %s ratio %.2f enemy -%d own -%d %s"), *OwnerUnit->DisplayName.ToString(), *Enemy->DisplayName.ToString(),
-        Ratio, EnemyLoss, OwnLoss, bWon ? TEXT("won") : TEXT("repulsed"));
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-BAYONET: %s -> %s ratio %.2f enemy -%d own -%d %s (factors own %.2f enemy %.2f angle %.0f deg x%.1f)"),
+        *OwnerUnit->DisplayName.ToString(), *Enemy->DisplayName.ToString(),
+        Ratio, EnemyLoss, OwnLoss, bWon ? TEXT("won") : TEXT("repulsed"), OwnShockFactor, EnemyShockFactor, ShockAngle, ShockAngleFactor);
 }
 
 void UStrategyFieldOfficerComponent::SetDeterministicRandomSeed(int32 Seed)
