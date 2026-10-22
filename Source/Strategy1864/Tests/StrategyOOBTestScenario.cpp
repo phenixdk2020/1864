@@ -2424,6 +2424,13 @@ void AStrategyOOBTestScenario::TickDrillTest()
             *DrillTestMove.TargetLocation.ToString(), DrillTestMove.bHasFacing ? *FString::Printf(TEXT("%.0f"), DrillTestMove.FacingYaw) : TEXT("-"), bDrillTestMoveTaken ? 1 : 0);
         return;
     }
+    // AIOFF: the company's own officer AI off (the panel's AI: OFF), so a test march is not halted by his reactions to losses.
+    if (DrillTestParts[2].Equals(TEXT("AIOFF"), ESearchCase::IgnoreCase))
+    {
+        DrillTestUnit->bOfficerAIEnabled = false;
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s AIOFF"), *DrillTestUnit->StableUnitId.ToString());
+        return;
+    }
     if (DrillTestParts[2].Equals(TEXT("COLUMN"), ESearchCase::IgnoreCase))
     {
         DrillTestUnit->FormationReason = TEXT("drilltest: formationsknappen Kolonne");

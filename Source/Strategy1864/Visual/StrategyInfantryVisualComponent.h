@@ -227,7 +227,7 @@ public:
     bool IsDrillingToLine() const { return DrillActive && !DrillToColumn; }
     bool IsDrilling() const { return DrillActive; }
     /** Men are stepping up into gaps or side-stepping towards the colours. */
-    bool IsClosingRanks() const { return bClosingRanksStep || bClosingRanksPending; }
+    bool IsClosingRanks() const;
     bool HasVisualArrivalFrontReached() const { return bArrivalReform && bArrivalFrontReached; }
 
     UFUNCTION(BlueprintCallable, Category="Strategy|Visual|Infantry")
@@ -311,6 +311,7 @@ private:
     /** After losses in a line: the man directly behind a gap steps forward in his own file (2nd to 1st rank, then 3rd to 2nd). */
     void ScheduleStepUp();   // StepUpFiles after a short, morale-scaled delay
     void StepUpFiles();
+    void StepUpColumn();
     struct FPendingKill { int32 Count = 0; FVector Location = FVector::ZeroVector; float Time = 0.0f; bool bCone = false; FVector Origin = FVector::ZeroVector; };
     TArray<FPendingKill> PendingKills;
     int32 PendingKillCount = 0;

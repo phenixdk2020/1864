@@ -2771,6 +2771,21 @@ Brugerens video (`Optagelse 2026-10-22 182230.mp4`, 3:00): efter 7 tab under ild
 - **Fanebærer i kolonne:** går nu `ColourColumnLeadCm` = 1,8 m foran forreste række (før én række, 75 cm). Målt 1,4–1,5 m til nærmeste mand under march.
 - **Tilbage:** mænd passerer hinanden ned til 11–30 cm i korte øjeblikke under sammenrykningen; ingen varige overlap.
 
+## 2026-10-22 — Kolonnen slutter op efter tab under march
+
+Brugeren: "falder den 1. eller 2. mand i kolonnen, så skal den bagerste mand slutte op". Før skete der intet, før kolonnen standsede (opfyldningen virkede kun i linje, og den samlede sammenrykning venter på, at kompagniet står stille).
+
+- **Ny `StepUpColumn`:** 2 s efter et tab (op til 4 s ved lav moral) rykker mændene bag hullet i hver bane én plads frem pr. hul. Den nærmeste starter først, de næste 0,3 s efter hinanden. Kolonnen går videre, og halen bliver kortere. Gælder kun slangekolonnen og ikke, mens den stadig dannes.
+- **Fejl fundet undervejs:**
+  - **Front:** mens forreste række fyldes op, lå kolonnens front ifølge pladserne et øjeblik længere tilbage. Slangens hoved blev trukket baglæns, sporet foldede sig, og mænd fra forskellige rækker endte på samme punkt (1–8 cm). Fronten holdes nu fast under opfyldningen (`UpdateCloseRanks`).
+  - **Status:** en marcherende kolonne med et ventende "slut op" viste "FORMERER" hele tiden. `IsClosingRanks` tæller nu kun den ventende sammenrykning i linje.
+- **Ny testkommando:** `AIOFF` slår kompagniets officers-AI fra, ligesom knappen AI: OFF. Ellers stopper officeren en kolonne under beskydning og sætter den i linje (korrekt adfærd, men den skjuler testen).
+- **Resultat** (6 + 6 tab under march): mindst 56 cm mellem mænd, fanebæreren 1,4–2,0 m foran. "MARCHERER" igen 6 s efter hvert tab.
+
+**Hvor ofte samles formationen** (svar til brugeren):
+- **Opfyldning i filen** (linje) eller banen (kolonne): 2 s efter første tab, op til 4 s ved lav moral.
+- **"Slut op mod fanen" / samlet ny formation:** 8 s efter seneste tab, dog senest 20 s efter første (ganget med 1–2 ved lav moral). Kun når kompagniet står stille og ikke er i gang med at formere.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

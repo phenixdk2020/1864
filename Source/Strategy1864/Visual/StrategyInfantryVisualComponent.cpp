@@ -970,8 +970,64 @@ void UStrategyInfantryVisualComponent::ScheduleStepUp()
     bStepUpPending = true;
 }
 
+bool UStrategyInfantryVisualComponent::IsClosingRanks() const
+{
+    // A marching column closes its ranks only when it halts, so a pending close does not count as forming while it marches.
+    const bool bClosingColumn = OwnerCompany && OwnerCompany->FormationComponent &&
+        OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn;
+    return bClosingRanksStep || (bClosingRanksPending && !bClosingColumn);
+}
+
+void UStrategyInfantryVisualComponent::StepUpColumn()
+{
+    // March column (user 2026-10-22: "if the first or second man of the column falls, the rear man closes up"): in every lane the
+    // men behind a hole move up one place each, the nearest first, while the column walks on; the tail gets shorter. Only for the
+    // snake, whose men know their row and lane; not while it is still forming (the ramp sets the places itself).
+    if (!OwnerCompany || !OwnerCompany->FormationComponent || bSnakeRamp || DrillActive ||
+        OwnerCompany->FormationComponent->CurrentFormation != EStrategyFormationType::MarchColumn ||
+        SoldierSettle.Num() != SoldierComponents.Num()) return;
+    bool bStepColumnKnown = false;
+    for (const FSettle& StepColumnMan : SoldierSettle) bStepColumnKnown |= StepColumnMan.SnakeRow > 0;
+    if (!bStepColumnKnown) return;
+    const float StepColumnRow = SnakeRowSpacing > 0.f ? SnakeRowSpacing : OwnerCompany->FormationComponent->SoldierLateralSpacingCm;
+    int32 StepColumnMovers = 0;
+    for (int32 StepColumnLane = 0; StepColumnLane < 3; ++StepColumnLane)
+    {
+        TArray<int32> StepColumnFile;
+        for (int32 StepColumnIndex = 0; StepColumnIndex < SoldierSettle.Num(); ++StepColumnIndex)
+            if (SoldierSettle[StepColumnIndex].bPlaced && SoldierSettle[StepColumnIndex].SnakeLane == StepColumnLane) StepColumnFile.Add(StepColumnIndex);
+        StepColumnFile.Sort([this](int32 A, int32 B) { return SoldierSettle[A].SnakeRow < SoldierSettle[B].SnakeRow; });
+        int32 StepColumnHoles = 0;
+        for (int32 StepColumnK = 0; StepColumnK < StepColumnFile.Num(); ++StepColumnK)
+        {
+            FSettle& StepColumnMan = SoldierSettle[StepColumnFile[StepColumnK]];
+            if (StepColumnMan.SnakeRow == StepColumnK) continue;
+            ++StepColumnHoles;
+            const FVector StepColumnFrom = StepColumnMan.Slot;
+            StepColumnMan.SnakeRow = StepColumnK;
+            StepColumnMan.CloseFrom = StepColumnFrom;
+            StepColumnMan.CloseTo = FVector(-StepColumnK * StepColumnRow, StepColumnFrom.Y, StepColumnFrom.Z);
+            // The man right behind the hole goes first, those behind him follow a step later each (at most 2 s).
+            StepColumnMan.CloseStart = VisualAnimationTime + FMath::Min(2.f, 0.3f * StepColumnHoles);
+            StepColumnMan.CloseDuration = FMath::Max(0.8f, FVector::Dist2D(StepColumnMan.CloseTo, StepColumnMan.CloseFrom) / 70.f);
+            StepColumnMan.bActive = true;
+            ++StepColumnMovers;
+        }
+    }
+    if (StepColumnMovers > 0)
+    {
+        bClosingRanksStep = true;
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864StepUp %s column: %d men close up in their lanes"), *OwnerCompany->StableUnitId.ToString(), StepColumnMovers);
+    }
+}
+
 void UStrategyInfantryVisualComponent::StepUpFiles()
 {
+    if (OwnerCompany && OwnerCompany->FormationComponent && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn)
+    {
+        StepUpColumn();
+        return;
+    }
     if (!OwnerCompany || !OwnerCompany->FormationComponent ||
         OwnerCompany->FormationComponent->CurrentFormation != EStrategyFormationType::Line ||
         SoldierSettle.Num() != SoldierComponents.Num() || SoldierSlots.Num() != SoldierComponents.Num())
@@ -4153,6 +4209,11 @@ bool UStrategyInfantryVisualComponent::CloseRanksTowardColours()
 void UStrategyInfantryVisualComponent::UpdateCloseRanks()
 {
     bool bCloseStill = false;
+    // A march column keeps its front where it was while men step up into a hole in the front row: the snake's head is set from the
+    // front, and a front that slid back folded the trail and stacked men of different rows on one spot (2026-10-22 test).
+    const bool bCloseColumn = OwnerCompany && OwnerCompany->FormationComponent &&
+        OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn && VisualPath.SlotBounds.IsValid;
+    const float CloseColumnFront = bCloseColumn ? VisualPath.SlotBounds.Max.X : 0.f;
     VisualPath.SlotBounds = FBox(ForceInit);
     for (FSettle& CloseMan : SoldierSettle)
     {
@@ -4166,6 +4227,7 @@ void UStrategyInfantryVisualComponent::UpdateCloseRanks()
         }
         if (CloseMan.bPlaced) VisualPath.SlotBounds += CloseMan.Slot;
     }
+    if (bCloseColumn && VisualPath.SlotBounds.IsValid && VisualPath.SlotBounds.Max.X < CloseColumnFront) VisualPath.SlotBounds.Max.X = CloseColumnFront;
     bClosingRanksStep = bCloseStill;
 }
 
@@ -4627,12 +4689,29 @@ void UStrategyInfantryVisualComponent::LogFormationMetric(const FString& ShownSt
         *OwnerCompany->StableUnitId.ToString(), GetWorld()->GetTimeSeconds(), *ShownStatus, MetricFormation, MetricFit.Placed, MetricFit.Men,
         MetricFit.MaxGapCm, MetricFit.P95GapCm, MetricFit.MinNeighbourCm, MetricFit.BearerGapCm, DrillActive ? 1 : 0, bFormationPlanPending ? 1 : 0,
         bArrivalReform ? 1 : 0, OwnerCompany->MovementExecutor ? OwnerCompany->MovementExecutor->GetExecutedVelocity().Size2D() : 0.f);
+    if (VisualPath.Trail.Num() >= 2)
+    {
+        float MetricMinSlotX = 0.f;
+        for (const FSettle& MetricSlotMan : SoldierSettle) MetricMinSlotX = FMath::Min(MetricMinSlotX, float(MetricSlotMan.Slot.X));
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864FormationTrail %s t=%.1f trail=%d first=%.0f now=%.0f bounds-max-x=%.0f min-slot-x=%.0f wanted-tail=%.0f ramp=%d closing=%d"),
+            *OwnerCompany->StableUnitId.ToString(), GetWorld()->GetTimeSeconds(), VisualPath.Trail.Num(), VisualPath.Trail[0].Distance, VisualPath.TrailDistance,
+            VisualPath.SlotBounds.IsValid ? VisualPath.SlotBounds.Max.X : -1.f, MetricMinSlotX,
+            VisualPath.TrailDistance - ((VisualPath.SlotBounds.IsValid ? VisualPath.SlotBounds.Max.X : 0.f) - MetricMinSlotX), bSnakeRamp ? 1 : 0, bClosingRanksStep ? 1 : 0);
+    }
     if (SoldierSettle.IsValidIndex(MetricFit.ClosestA) && SoldierSettle.IsValidIndex(MetricFit.ClosestB) && MetricFit.MinNeighbourCm < 35.f)
         UE_LOG(LogTemp, Display, TEXT("Strategy1864FormationClosest %s t=%.1f %.0f cm: man %d row %d lane %d slot %s / man %d row %d lane %d slot %s at %s"),
             *OwnerCompany->StableUnitId.ToString(), GetWorld()->GetTimeSeconds(), MetricFit.MinNeighbourCm,
             MetricFit.ClosestA, SoldierSettle[MetricFit.ClosestA].SnakeRow, SoldierSettle[MetricFit.ClosestA].SnakeLane, *SoldierSettle[MetricFit.ClosestA].Slot.ToString(),
             MetricFit.ClosestB, SoldierSettle[MetricFit.ClosestB].SnakeRow, SoldierSettle[MetricFit.ClosestB].SnakeLane, *SoldierSettle[MetricFit.ClosestB].Slot.ToString(),
             SoldierComponents[MetricFit.ClosestA] ? *SoldierComponents[MetricFit.ClosestA]->GetComponentLocation().ToString() : TEXT("-"));
+    if (SoldierSettle.IsValidIndex(MetricFit.ClosestA) && SoldierSettle.IsValidIndex(MetricFit.ClosestB) && MetricFit.MinNeighbourCm < 35.f)
+        for (const int32 MetricPairMan : {MetricFit.ClosestA, MetricFit.ClosestB})
+            if (SoldierComponents[MetricPairMan])
+                UE_LOG(LogTemp, Display, TEXT("Strategy1864FormationClosestMan %d goal-gap=%.0f active=%d close-start-in=%.1f placed=%d visible=%d clip=%s"),
+                    MetricPairMan, FVector::Dist2D(SoldierComponents[MetricPairMan]->GetRelativeLocation(), SoldierSettle[MetricPairMan].Goal),
+                    SoldierSettle[MetricPairMan].bActive ? 1 : 0, SoldierSettle[MetricPairMan].CloseStart >= 0.f ? SoldierSettle[MetricPairMan].CloseStart - VisualAnimationTime : -1.f,
+                    SoldierSettle[MetricPairMan].bPlaced ? 1 : 0, SoldierComponents[MetricPairMan]->IsVisible() ? 1 : 0,
+                    SoldierClips.IsValidIndex(MetricPairMan) && SoldierClips[MetricPairMan].Clip.IsValid() ? *SoldierClips[MetricPairMan].Clip->GetName() : TEXT("-"));
     if (!FParse::Param(FCommandLine::Get(), TEXT("Strategy1864DebugFormation")) || !VisualPath.bInitialized || !OwnerCompany->FormationComponent) return;
     const bool bDrawColumn = (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn ||
         OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::DefileColumn) && VisualPath.Trail.Num() >= 2;
