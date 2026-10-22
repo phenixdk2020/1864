@@ -2757,6 +2757,20 @@ Brugerens video (`Tab_og_fane_2026-10-22.mp4` ved 6 s, dobbelt fart) og en ChatG
   - Klippets sideskridt er brede.
   - Et sideskridtklip med kortere skridt og geværet på skulderen fra start ville være bedst; det er en opgave for `rigging-animation`.
 
+## 2026-10-22 — Linjen bliver en dyb blok efter tab i ildkamp; fanebæreren for tæt på kolonnen
+
+Brugerens video (`Optagelse 2026-10-22 182230.mp4`, 3:00): efter 7 tab under ildkamp i linje stod kompagniet i ca. 15 s som en dyb blok. I kolonne gik fanebæreren næsten oven i forreste række.
+
+- **Genskabt** i et testslag (`-Strategy1864SkirmishAttack`, `-Strategy1864FormationMetric`, 9 min): efter 7 tab skrev loggen "181 men walk up into the gaps" og senere "132".
+- **Årsag:** "slut op mod fanen" centrerede en kortere bageste række på dens eget antal. Med lige og ulige antal stod den en halv fil (37,5 cm) skævt, og opfyldningen (`StepUpFiles`) samlede med en tolerance på netop 37,5 cm to filer til én med 4–6 mand. Mand nr. 4–6 blev sendt bag 3. geled.
+- **Rettelse** (`StrategyInfantryVisualComponent.cpp`):
+  - en kort række placeres på forreste rækkes filgitter;
+  - tolerancen for en fil er 40 % af filafstanden;
+  - en fil får aldrig flere mand, end der er geledder.
+- **Resultat:** samme ildkamp fra 189 til 122 mand. Hver opfyldning flytter 5–20 mand, linjen forbliver en linje (se optagelse `Saved/Ildkamp_tab_2026-10-22.mp4`).
+- **Fanebærer i kolonne:** går nu `ColourColumnLeadCm` = 1,8 m foran forreste række (før én række, 75 cm). Målt 1,4–1,5 m til nærmeste mand under march.
+- **Tilbage:** mænd passerer hinanden ned til 11–30 cm i korte øjeblikke under sammenrykningen; ingen varige overlap.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

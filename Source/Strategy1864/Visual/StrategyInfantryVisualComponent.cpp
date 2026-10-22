@@ -979,7 +979,7 @@ void UStrategyInfantryVisualComponent::StepUpFiles()
         return;
     }
     const float RankSpacing = FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierRankSpacingCm);
-    const float FileTolerance = FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierLateralSpacingCm * 0.5f);
+    const float FileTolerance = FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierLateralSpacingCm * 0.4f);
     const int32 Ranks = FMath::Max(1, OwnerCompany->FormationComponent->RankCount);
     TArray<int32> Done;
     int32 StepUpMovers = 0;
@@ -993,6 +993,8 @@ void UStrategyInfantryVisualComponent::StepUpFiles()
         for (int32 j = 0; j < SoldierSettle.Num(); ++j)
             if (SoldierSettle[j].bPlaced && StepUpPlace(j).X <= 0.5f && FMath::Abs(StepUpPlace(j).Y - StepUpPlace(i).Y) <= FileTolerance) { File.Add(j); Done.Add(j); }
         File.Sort([&](int32 A, int32 B) { return StepUpPlace(A).X > StepUpPlace(B).X; });
+        // A file never holds more men than there are ranks: the extra men (two files read as one) keep their places.
+        if (File.Num() > Ranks) File.SetNum(Ranks);
         for (int32 k = 0; k < File.Num(); ++k)
         {
             FSettle& Settle = SoldierSettle[File[k]];
@@ -4124,8 +4126,11 @@ bool UStrategyInfantryVisualComponent::CloseRanksTowardColours()
         for (int32 CloseOrder = 0; CloseOrder < CloseRow.Num(); ++CloseOrder)
         {
             FSettle& CloseMan = SoldierSettle[CloseRow[CloseOrder]];
-            // Centred on the colours; a short rear rank stands in the middle.
-            const FVector CloseTo(CloseFrontX - CloseRank * CloseRankSpacing, (CloseOrder - (CloseRow.Num() - 1) * 0.5f) * CloseLateral, 0.f);
+            // Centred on the colours; a short rear rank stands in the middle, on the front rank's file grid (centred on its own count
+            // it stood half a file off when the counts differed in odd/even, and the next step-up read two files as one and sent the
+            // fourth to sixth man of each behind the third rank: the 'deep block' of the user's video at 3:00, 2026-10-22).
+            const int32 CloseGridStart = (CloseFiles - CloseRow.Num()) / 2;
+            const FVector CloseTo(CloseFrontX - CloseRank * CloseRankSpacing, (CloseGridStart + CloseOrder - (CloseFiles - 1) * 0.5f) * CloseLateral, 0.f);
             const float CloseDistance = FVector::Dist2D(CloseMan.Slot, CloseTo);
             if (CloseDistance < 5.f) { CloseMan.CloseStart = -1.f; CloseMan.Slot = CloseTo; continue; }
             CloseMan.CloseFrom = CloseMan.Slot;
@@ -4194,7 +4199,7 @@ FVector UStrategyInfantryVisualComponent::ColourBearerTarget(float& OutBearerYaw
             {
                 const float BearerHeadYaw = SoldierComponents[BearerHeadMan]->GetComponentRotation().Yaw - SoldierMeshYawOffset;
                 OutBearerYaw = BearerHeadYaw;
-                const float BearerLead = SnakeRowSpacing > 0.f ? SnakeRowSpacing : BearerRank;
+                const float BearerLead = ColourColumnLeadCm;
                 return BearerHeadAt + FRotator(0.f, BearerHeadYaw, 0.f).Vector() * BearerLead;
             }
         }
@@ -4219,7 +4224,7 @@ FVector UStrategyInfantryVisualComponent::ColourBearerTarget(float& OutBearerYaw
             BearerFrontYaw = SoldierComponents[BearerFrontIndex]->GetComponentRotation().Yaw - SoldierMeshYawOffset;
             ++BearerFrontMen;
         }
-        const float BearerFrontAhead = SnakeRowSpacing > 0.f ? SnakeRowSpacing : BearerRank;
+        const float BearerFrontAhead = ColourColumnLeadCm;
         if (BearerFrontMen > 0 && (VisualPath.Trail.Num() < 2 || FVector::Dist2D(BearerFrontSum / BearerFrontMen, VisualPath.HeadPos) > 2.f * BearerFrontAhead))
         {
             OutBearerYaw = BearerFrontYaw;
@@ -4233,7 +4238,7 @@ FVector UStrategyInfantryVisualComponent::ColourBearerTarget(float& OutBearerYaw
     if (BearerColumn)
     {
         OutBearerYaw = VisualPath.HeadYaw;
-        const float BearerAhead = SnakeRowSpacing > 0.f ? SnakeRowSpacing : BearerRank;
+        const float BearerAhead = ColourColumnLeadCm;
         return VisualPath.HeadPos + FRotator(0.f, VisualPath.HeadYaw, 0.f).Vector() * BearerAhead;
     }
     const float BearerFront = VisualPath.SlotBounds.IsValid ? VisualPath.SlotBounds.Max.X : 0.f;
@@ -4396,7 +4401,7 @@ void UStrategyInfantryVisualComponent::UpdateColourBearer(float BearerDt)
     {
         // He keeps with the men: never more than two ranks from the nearest of them, whatever the formation's target says
         // (2026-10-22 tests: 20-26 m away when a column formed standing and right after a drill into line).
-        const float BearerKeepCm = 2.f * (OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->SoldierRankSpacingCm : 90.f);
+        const float BearerKeepCm = FMath::Max(ColourColumnLeadCm + 30.f, 2.f * (OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->SoldierRankSpacingCm : 90.f));
         FVector BearerNearest = BearerGoal;
         float BearerNearestGap = TNumericLimits<float>::Max();
         for (const USkeletalMeshComponent* BearerKeepMan : SoldierComponents)

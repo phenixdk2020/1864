@@ -219,6 +219,9 @@ public:
     bool GetColourTransform(FVector& OutColourLocation, float& OutColourYaw, bool& bOutColoursDown) const;
     /** The pole's lean back from vertical while carried (reference: Reference/Units/MultiView/Flag/Fane_March_*.png). */
     static constexpr float ColourCarryLeanDeg = 12.f;
+    /** In column the colour bearer walks this far ahead of the front row (one row, 75 cm, put him nearly on their heels with the
+        walk's long stride: user's video 2026-10-22). */
+    static constexpr float ColourColumnLeadCm = 180.f;
     bool IsVisualFormationComplete() const { return !bEnabled || !bFormationPlanPending; }
     /** The column is filing into line (the drill): the men still walk in column, though the unit's formation is already Line. */
     bool IsDrillingToLine() const { return DrillActive && !DrillToColumn; }
