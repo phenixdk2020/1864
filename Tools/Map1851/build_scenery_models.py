@@ -39,7 +39,7 @@ TILES = {
     "thatch": (0, 0), "tile": (1, 0), "ochre": (2, 0), "white": (3, 0),
     "timber_ochre": (0, 1), "timber_white": (1, 1), "brick": (2, 1), "window": (3, 1),
     "door_green": (0, 2), "door_ox": (1, 2), "gateway": (2, 2), "tar": (3, 2),
-    "sail": (0, 3), "cobbles": (1, 3), "grass": (2, 3), "wood_stone": (3, 3),
+    "sail": (0, 3), "cobbles": (1, 3), "timber_brick": (2, 3), "wood_stone": (3, 3),   # (2,3) was "grass" (unused by models) until 2026-10-23
 }
 # under-felter (u0,v0,u1,v1) i et felt
 FULL = (0, 0, 1, 1)
@@ -439,6 +439,44 @@ def t_grass():
     return T
 
 
+def t_timber_brick():
+    """Fachwerk with muted red-brick infill (Niedersachsen hall house); oak frame like timber(), stone plinth at the bottom."""
+    T = np.ones((S, S, 3)) * C(206, 196, 178)
+    bh, bw = 16, 40
+    row = yy // bh
+    ly = yy % bh
+    off = (row % 2) * (bw // 2)
+    cx = (xx + off) % bw
+    col = (xx + off) // bw
+    rr = np.random.RandomState(141).rand(S // bh + 2, S // bw + 3)[row, col]
+    br = C(176, 92, 70)[None, None, :] * (0.78 + 0.4 * rr[..., None])
+    T = np.where(((ly >= 2) & (cx >= 2))[..., None], br, T)
+    T *= (0.9 + 0.18 * fbm(142, 8, 8, 3))[..., None]
+    pl = 0.07
+    u, v = xx / S, yy / S
+    pwu = 22 / S
+    m = np.zeros((S, S))
+    for pu in (0.0, 0.5, 1.0):
+        m = np.maximum(m, abs(u - pu) < pwu * 0.5)
+    m = np.maximum(m, v > 0.975)
+    m = np.maximum(m, abs(v - (pl + 0.012)) < 0.016)
+    m = np.maximum(m, abs(v - 0.55) < pwu * 0.45)
+    m = m.astype(float)
+    m[v < pl] = 0
+    for (a, b, c, d) in ((0.5, 0.075, 0.0, 0.55), (0.5, 0.55, 1.0, 0.975)):
+        mk = seg_mask(u, v, a, b, c, d, pwu * 0.9).astype(float)
+        mk[v < pl] = 0
+        m = np.maximum(m, mk)
+    sh = np.zeros((S, S))
+    sh[:, 2:] = m[:, :-2]
+    sh[:-2, :] = np.maximum(sh[:-2, :], m[2:, :])
+    blend(T, sh * (1 - m), C(50, 38, 30), 0.4)
+    wood = C(62, 48, 38)[None, None, :] * (0.8 + 0.4 * fbm(143, 2, 60, 2)[..., None])
+    blend(T, m, wood)
+    plinth(T, pl, 144, (96, 92, 84))
+    return T
+
+
 def t_wood_stone():
     T = np.zeros((S, S, 3))
     # oeverst: vejrbidt traeplanke (vandrette aarer)
@@ -458,7 +496,7 @@ def t_wood_stone():
 PAINT = {"thatch": t_thatch, "tile": t_tile, "ochre": t_ochre, "white": t_white, "timber_ochre": t_timber_ochre,
          "timber_white": t_timber_white, "brick": t_brick, "window": t_window, "door_green": lambda: t_door("green"),
          "door_ox": lambda: t_door("ox"), "gateway": t_gateway, "tar": t_tar, "sail": t_sail, "cobbles": t_cobbles,
-         "grass": t_grass, "wood_stone": t_wood_stone}
+         "timber_brick": t_timber_brick, "wood_stone": t_wood_stone}
 
 
 def build_atlas():

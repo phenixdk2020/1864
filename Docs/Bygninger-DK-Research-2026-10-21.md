@@ -46,5 +46,41 @@ Gråbrunt strå, rødorange tegl, okker og kalkhvid (lidt støvet creme), tjære
 5. Danish village church c. 1840: whitewashed Romanesque nave with small round-arched windows, brick tower with stepped gable, red tile or lead roof, no neo-Gothic details.
 6. Danish Dutch-type windmill c. 1850: tarred octagonal body with a gallery and rotating cap, four sail wings, on a low mound by a village.
 
+## Gårdtyper (tillæg 2026-10-23)
+
+V = verificeret i den angivne kilde; S = skøn eller endnu ikke verificeret regional/periodisk generalisering. Kilder tilgået 2026-10-23. Alle seks referencetyper hører til scenery-slotten **Farm**; dette er en foreslået datamapping, ingen kode eller scenariedata er ændret. Billederne er generiske fortolkninger ca. 1830–1850, ikke dokumentation for en bestemt gård i 1825.
+
+### Farm_Trelaenget — trelænget gård
+
+- **Region og form:** V: Lex beskriver True ved Aarhus med tre længer før udbygning til fire. S: Øerne/Østjylland som samlet distributionsområde og en helt sammenbygget U-plan med én åben gårdside er vores typevalg, ikke et verificeret hyppighedskort.
+- **Materialer og tag:** V: Bindingsværk dominerede dansk gårdbyggeri indtil anden halvdel af 1800-tallet; True-eksemplet er stråtækt. S: Sort tømmer, cremehvide tavl, taghældning og sammenbygning i netop denne kombination. Kilde: [Lex: bondegård](https://lex.dk/bondeg%C3%A5rd).
+
+### Farm_Tolaenget — tolænget vinkelgård
+
+- **Region og form:** S: En mindre gård med bolig og én udlænge i ret vinkel vælges som mulig variant flere steder; påstanden »mindre gårde overalt« er ikke verificeret for 1825–1851. V: Lex knytter vinkelgårdens brede indpas blandt småejendomme til udstykninger omkring 1920. Vores tidlige L-form må derfor ikke bruges som dokumenteret landsdækkende standard.
+- **Materialer og tag:** S: Kalket bindingsværk og stråtag er valgt som periodisk fortolkning, ikke som særskilt verificerede kendetegn for en landsdækkende tolænget type. Kilder: [Lex: bondegård](https://lex.dk/bondeg%C3%A5rd), [Realdania: Kend din gård](https://realdania.dk/-/media/realdaniadk/publikationer/faglige-publikationer/kend-din-g%C3%A5rd.pdf). Realdania-PDF'en blev fundet via søgeindekset, men kunne ikke åbnes fuldt; den bruges derfor kun som videre læsning, ikke som selvstændigt V-belæg her.
+
+### Farm_Parallel — parallelgård
+
+- **Region og form:** V: Nord for Limfjorden og nordlige Ringkøbing Amt; to parallelle længer, bolig i den ene og stald/lade i den anden. S: Den viste afstand og helt åbne ender uden hegn.
+- **Materialer og tag:** S: Lys kalk, mørkt bindingsværk, gråbrunt stråtag og brolægning er generiske billedvalg; planbetegnelsen fastlægger ikke materialerne. Kilder: [Lex: parallelgård](https://lex.dk/parallelg%C3%A5rd), [Lex: bondegård](https://lex.dk/bondeg%C3%A5rd).
+
+### Farm_VestjyskLanghus — vest-/sydjysk langhus
+
+- **Region og form:** V: Den slesvigske gård har bolig og stald i en lang hovedlænge, som kan stå alene. S: Navnet »vestjysk langhus«, udbredelse i hele Vest-/Sydjylland samt lade under samme tag er vores sammensatte referencetype, ikke en verificeret ensartet typologi.
+- **Materialer og tag:** V: Lex beskriver mørkerøde tegl og forekomst af tørve-/markstensvægge i træfattige jyske områder. S: At kombinere alle materialerne i én bygning med lavt strå-/lyngtag og tjæret gavl er en fortolkning. Billedets jord-/stensnit er ikke sikkert identificerbart som tørv. Kilder: [Lex: bondegård](https://lex.dk/bondeg%C3%A5rd), [Grænseforeningen: Slesvigsk gård](https://graenseforeningen.dk/leksikon/slesvigsk-gaard). Den foreslåede Wikipedia-side »Vestjysk langhus« kunne ikke hentes og bruges ikke som V-belæg.
+
+### Farm_Haubarg — Ejdersted/Eiderstedt-marsken
+
+- **Region og form:** V: Eiderstedt-type med bolig og husdyr under fælles tag; den valgte firestolpevariant har et centralt kvadratisk opbevaringsrum. Andre stolpetal findes. Stolperne er skjulte i billederne.
+- **Materialer og tag:** V: Meget stort stråtag; Wikipedia angiver ofte 15–20 m, mens Frilandsmuseets Rothelau-eksempel beskrives med et 12 m højt pyramideformet tag. S: Billedets præcise højde, lave røde teglmure, lille frontgavl og proportioner. Kilder: [Wikipedia: Haubarg](https://en.wikipedia.org/wiki/Haubarg), [Frilandsmuseet: Huse, møller og gårde](https://frilandsmuseet.dk/oplevelser/huse-gaarde-og-moeller). Ejdersted ligger ved Slesvigs vestkyst; Lex-artiklens formulering »Østslesvig« bruges ikke som geografisk belæg.
+
+### Farm_Niedersachsen — Niederdeutsches Hallenhaus
+
+- **Region og form:** V: Udbredt i Holsten/syd for Ejderen; hal med bolig, stald og lade under ét tag samt stor gavlport, »Grote Dör«. S: Gest-/Lauenburg-placeringen som vores specifikke kortvariant er ikke særskilt verificeret her.
+- **Materialer og tag:** V: Tømmerskelet oprindeligt af eg, bindingsværk med blandt andet tegludfyldning og traditionel rørtækning. S: Røde tavl, præcis fagdeling og enkle krydsede gavlbrædder som regional detalje. Gavlporten ses i Iso og skjules naturligt i Side; den flyttes ikke til langsiden. Kilder: [Wikipedia: Low German house](https://en.wikipedia.org/wiki/Low_German_house), [Frilandsmuseet: hallehuset fra Ostenfeld](https://frilandsmuseet.dk/oplevelser/huse-gaarde-og-moeller).
+
+S for alle billeder: mål, farver, slid, åbningernes antal og placering, gårdbelægning og kameradata er kunstneriske skøn. Typefordeling er en visuel planlægningsreference, ikke en implementeret historisk sandsynlighedsmodel.
+
 ## Kilder
 lex.dk ("Bondegård", "Bindingsværk", "Hus – husbygning", "Vindmølle", kirkeartikler), Realdania "Kend din gård", Wikipedia ("Haubarg", "Low German house", "Købmandsgård", "Vindmølle"), Bolius "Stråtag". Huller: Frilandsmuseet, Danmarks Kirker og Slots- og Kulturstyrelsen bør læses for at lukke de skønnede punkter.

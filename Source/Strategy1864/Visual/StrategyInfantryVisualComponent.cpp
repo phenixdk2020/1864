@@ -138,6 +138,12 @@ UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Rifle_Aiming_Idle.A_Rifle_Aiming_Idle")));
     DeathWalkingAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Walking_To_Dying.A_Walking_To_Dying")));
+    DeathMarchFrontAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_DeathMarchFront.A_Combat_DeathMarchFront")));
+    DeathMarchBackAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_DeathMarchBack.A_Combat_DeathMarchBack")));
+    DeathMarchCrumpleAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_DeathMarchCrumple.A_Combat_DeathMarchCrumple")));
 }
 
 void UStrategyInfantryVisualComponent::BeginPlay()
@@ -329,9 +335,12 @@ void UStrategyInfantryVisualComponent::TickComponent(
         RebuildFormation();
         bScaleOnlyRebuild = false;
     }
-    if (bClosingRanksPending && PendingKillCount == 0 && !bFormationPlanPending && !bArrivalReform &&
-        (GetWorld()->GetTimeSeconds() - LastLossTimeSeconds > 8.0f * CloseRanksSlowdown || GetWorld()->GetTimeSeconds() - FirstPendingLossTimeSeconds > 20.0f * CloseRanksSlowdown) &&
-        !(OwnerCompany->FormationTransition && OwnerCompany->FormationTransition->IsReforming()) && !VisualPath.bMovingVisuals)
+    // The 1863 drill book: the line closes in towards the colours continually, also while it advances and fires; a column (and any
+    // other formation) re-forms only when it halts.
+    const bool bCloseWhileMoving = OwnerCompany->FormationComponent && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Line && bRigidCompany;
+    if (bClosingRanksPending && PendingKillCount == 0 && !bFormationPlanPending && !bArrivalReform && !DrillActive &&
+        (GetWorld()->GetTimeSeconds() - LastLossTimeSeconds > 3.0f * CloseRanksSlowdown || GetWorld()->GetTimeSeconds() - FirstPendingLossTimeSeconds > 8.0f * CloseRanksSlowdown) &&
+        !(OwnerCompany->FormationTransition && OwnerCompany->FormationTransition->IsReforming()) && (bCloseWhileMoving || !VisualPath.bMovingVisuals))
     {
         bClosingRanksPending = false;
         // In line: the files close in towards the colours by side-stepping; otherwise (column, square, spread) the old re-form.
@@ -966,7 +975,9 @@ void UStrategyInfantryVisualComponent::ScheduleStepUp()
     const float StepUpNow = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
     const float StepUpSlowdown = OwnerCompany ? 1.0f + (1.0f - FMath::Clamp(OwnerCompany->Morale, 0.f, 100.f) / 100.f) : 1.0f;
     // The first loss sets the moment; further losses before it do not push it back (the men behind are already moving up).
-    if (!bStepUpPending) { StepUpDueSeconds = StepUpNow + 2.0f * StepUpSlowdown; }
+    // The 1863 drill book (user 2026-10-22): the man behind steps up at once; only the moment he needs to step forward, longer
+    // when the company is shaken.
+    if (!bStepUpPending) { StepUpDueSeconds = StepUpNow + 0.5f * StepUpSlowdown + (StepUpSlowdown - 1.f); }
     bStepUpPending = true;
 }
 
@@ -1189,7 +1200,14 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
             Soldier->RemoveTickPrerequisiteComponent(this);
             Soldier->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
             const int32 Variant = Near && FMath::FRand() < 0.6f ? 2 : FMath::RandRange(0, 2);
-            const TSoftObjectPtr<UAnimSequence>& Death = bMoving && !DeathWalkingAsset.IsNull() && FMath::FRand() < 0.5f ? DeathWalkingAsset
+            // Marching with shouldered arms (a column): one of the three deaths that start from that very pose, so he does not jump out
+            // of the march into a standing death (user 2026-10-22).
+            const UAnimSequence* DeathFromClip = SoldierClips.IsValidIndex(i) ? SoldierClips[i].Clip.Get() : nullptr;
+            const bool bDeathFromShoulder = DeathFromClip && (DeathFromClip == WalkShoulderAsset.Get() || DeathFromClip == ShoulderUpAsset.Get() ||
+                DeathFromClip == ShoulderDownAsset.Get()) && DeathMarchFrontAsset.Get() && DeathMarchBackAsset.Get() && DeathMarchCrumpleAsset.Get();
+            const TSoftObjectPtr<UAnimSequence>& Death = bDeathFromShoulder ?
+                (Variant == 0 ? DeathMarchFrontAsset : Variant == 1 ? DeathMarchCrumpleAsset : DeathMarchBackAsset)
+                : bMoving && !DeathWalkingAsset.IsNull() && FMath::FRand() < 0.5f ? DeathWalkingAsset
                 : Variant == 0 ? DeathAsset : Variant == 1 ? DeathAsset2 : DeathAsset3;
             const float Rate = FMath::FRandRange(0.9f, 1.1f);
             Soldier->SetPlayRate(Rate);
@@ -1312,7 +1330,7 @@ bool UStrategyInfantryVisualComponent::EnsureAssetsLoaded()
     LoadedRifleMesh = RifleMeshAsset.LoadSynchronous();
     LoadedRifleBayonetMesh = RifleBayonetMeshAsset.LoadSynchronous();
     LoadedBattleFadeMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/EngineDebugMaterials/M_SimpleTranslucent.M_SimpleTranslucent"));
-    const TSoftObjectPtr<UAnimSequence>* BattleAnimationAssets[] = { &IdleStandingAsset, &WalkStandingAsset, &RunStandingAsset, &AimStandingAsset, &FireStandingAsset, &ReloadStandingAsset, &IdleKneelingAsset, &AimKneelingAsset, &FireKneelingAsset, &ReloadKneelingAsset, &IdleProneAsset, &CrawlProneAsset, &FireProneAsset, &ReloadProneAsset, &BayonetChargeAsset, &BayonetThrustAsset, &DeathAsset, &DeathAsset2, &DeathAsset3, &RaiseToAimAsset, &LoadAsset, &RiseFromLoadAsset, &ReadyAsset, &AimHoldAsset, &DeathWalkingAsset, &WalkShoulderAsset, &ShoulderUpAsset, &ShoulderDownAsset, &SideStepAsset, &SideStepLeftAsset, &ColourWalkAsset, &ColourIdleAsset };
+    const TSoftObjectPtr<UAnimSequence>* BattleAnimationAssets[] = { &IdleStandingAsset, &WalkStandingAsset, &RunStandingAsset, &AimStandingAsset, &FireStandingAsset, &ReloadStandingAsset, &IdleKneelingAsset, &AimKneelingAsset, &FireKneelingAsset, &ReloadKneelingAsset, &IdleProneAsset, &CrawlProneAsset, &FireProneAsset, &ReloadProneAsset, &BayonetChargeAsset, &BayonetThrustAsset, &DeathAsset, &DeathAsset2, &DeathAsset3, &RaiseToAimAsset, &LoadAsset, &RiseFromLoadAsset, &ReadyAsset, &AimHoldAsset, &DeathWalkingAsset, &DeathMarchFrontAsset, &DeathMarchBackAsset, &DeathMarchCrumpleAsset, &WalkShoulderAsset, &ShoulderUpAsset, &ShoulderDownAsset, &SideStepAsset, &SideStepLeftAsset, &ColourWalkAsset, &ColourIdleAsset };
     CrowdStanceClips.Reset();
     for (const TCHAR* CrowdStanceName : { TEXT("A_Rifle_Stand_To_Kneel"), TEXT("A_Rifle_Kneel_To_Stand"), TEXT("A_Rifle_Kneel_To_Prone"), TEXT("A_Rifle_Prone_To_Kneel") })
     {
@@ -2274,7 +2292,8 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         // Closing ranks: a side-step with the front kept, to the right or (mirrored clip) to the left.
         const bool bCloseStepping = Settle.CloseStart >= 0.f && VisualAnimationTime >= Settle.CloseStart;
         const bool bCloseSideways = FMath::Abs(Settle.CloseTo.Y - Settle.CloseFrom.Y) > FMath::Abs(Settle.CloseTo.X - Settle.CloseFrom.X);
-        if (bCloseStepping && bCloseSideways && SideStepAsset.Get())
+        // Marching on while closing in: he walks on and edges across (no side-step clip on the move).
+        if (bCloseStepping && bCloseSideways && SideStepAsset.Get() && ActualMarchSpeed < 20.f)
             TravelClip = Settle.CloseTo.Y < Settle.CloseFrom.Y && SideStepLeftAsset.Get() ? SideStepLeftAsset.Get() : SideStepAsset.Get();
         {
             // Past the walk clip's comfortable rate (about 3x) the man runs: the Run clip at its own foot speed (420 cm/s), so double
@@ -2871,7 +2890,7 @@ bool UStrategyInfantryVisualComponent::EnsureCrowdModel()
         &IdleStandingAsset, &WalkStandingAsset, &RunStandingAsset, &AimStandingAsset, &FireStandingAsset, &ReloadStandingAsset,
         &IdleKneelingAsset, &AimKneelingAsset, &FireKneelingAsset, &ReloadKneelingAsset, &IdleProneAsset, &CrawlProneAsset,
         &FireProneAsset, &ReloadProneAsset, &BayonetChargeAsset, &BayonetThrustAsset, &DeathAsset, &DeathAsset2, &DeathAsset3,
-        &RaiseToAimAsset, &LoadAsset, &RiseFromLoadAsset, &ReadyAsset, &AimHoldAsset, &DeathWalkingAsset, &SideStepAsset, &SideStepLeftAsset };
+        &RaiseToAimAsset, &LoadAsset, &RiseFromLoadAsset, &ReadyAsset, &AimHoldAsset, &DeathWalkingAsset, &DeathMarchFrontAsset, &DeathMarchBackAsset, &DeathMarchCrumpleAsset, &SideStepAsset, &SideStepLeftAsset };
     TArray<UAnimSequence*> Clips;
     for (const TSoftObjectPtr<UAnimSequence>* Asset : All)
     {

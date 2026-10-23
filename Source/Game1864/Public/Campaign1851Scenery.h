@@ -32,6 +32,14 @@ namespace Campaign1851Scenery
 		Knick,           // a hedge on an earth bank, 4 units long along X (stretched to the segment)
 		StoneDike,       // a low wall of field stones, 4 units long
 		Ditch,           // a water-filled ditch between grass banks, 4 units long
+		// Regional farm types (2026-10-23, approved reference images in Reference/Campaign1851/Scenery/DK); procedurally they fall
+		// back to the four-wing Farm, the modelled SM_Farm_* replace them.
+		FarmThree,       // trelænget gård: three wings, the yard open on one side (the islands, east Jutland)
+		FarmTwo,         // tolænget / angle farm: the smaller farms everywhere
+		FarmParallel,    // parallelgård: two parallel long wings (north Jutland)
+		FarmLanghus,     // vestjysk langhus: dwelling, byre and barn under one roof (west and south Jutland)
+		FarmHaubarg,     // haubarg: one huge pyramid roof (the Schleswig marsh)
+		FarmNiedersachsen, // Niedersachsenhaus / Hallenhaus with the great gable door (Holstein, Lauenburg)
 		Count
 	};
 

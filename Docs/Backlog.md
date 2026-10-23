@@ -179,6 +179,15 @@ Enhedskameraet er lavet 2026-10-22 (G / Shift+G / FØLG).
   - faldne der ligger på jorden og ikke inde i en kammerat;
   - tid til geleddet er lukket.
 
+## Større omorganisering efter tab (eksercerreglementet 1863)
+Ved store tab sammendrog officererne kompagniet ved et ophold i kampen til færre delinger (eller sammenlagde kompagnier i bataljonen). Mangler: et "omorganiser"-trin, når et kompagni er under ca. 50 % og står stille, og senere sammenlægning af kompagnier i bataljonen.
+
+## Kendte fejl og næste trin (2026-10-23)
+- **Sammenrykning under march:** to mænd i bageste geled kan gå 9 cm fra hinanden i op til 6 s, når en flankemand lige er sendt et geled tilbage.
+- **Lys-forsøg** (plan punkt 1): lit materiale på de modellerede bygninger, sol og skylys, bløde skygger; FPS-måling før og efter.
+- **Preussens bygninger** (Codex-kvote); derefter modeller for SE/NO/PR og valg af bygningssæt pr. land på kortet.
+- **Dæmpet palet** i `build_map.py` og ny maling af fliserne (plan punkt 2, anden del).
+
 ## Udskudte opgaver 2026-10-20
 
 Slaget:

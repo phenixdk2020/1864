@@ -740,6 +740,21 @@ void ACampaign1851Map::BuildScenery()
 		Items[int32(Piece)].Emplace(FRotator(0.f, Yaw, 0.f), LocalAtKm(Km) - FVector(0.0, 0.0, 0.3), FVector(Scale, Scale, Scale * ScaleZ) * PieceScale);
 	};
 
+	// The farm type of the region (user 2026-10-23, approved images): chosen from the place itself, never with a roll of the main
+	// random stream, so the rest of the scenery stays where it was. Sources: Docs/Bygninger-DK-Research-2026-10-21.md, section 1.
+	auto FarmPieceAt = [this](const FVector2D& FarmKm)
+	{
+		const FVector2D FarmLatLon = Extent.Projection.Inverse(FarmKm);
+		const double FarmLat = FarmLatLon.X, FarmLon = FarmLatLon.Y;
+		// A stable number 0..1 for the spot (a few farms of another type in every region).
+		const float FarmMix = FMath::Frac(FMath::Sin(float(FarmKm.X) * 12.9898f + float(FarmKm.Y) * 78.233f) * 43758.547f);
+		if (HedgeKindAt(FarmKm) == EHedgeKind::Ditch) return FarmLat < 55.0 ? EPiece::FarmHaubarg : EPiece::FarmLanghus;   // the marsh
+		if (FarmLat < 54.45) return FarmMix < 0.8f ? EPiece::FarmNiedersachsen : EPiece::FarmTwo;                          // Holstein, Lauenburg
+		if (FarmLat > 56.6 && FarmLon < 10.7) return FarmMix < 0.6f ? EPiece::FarmParallel : EPiece::FarmTwo;              // north Jutland
+		if (FarmLon < 9.3) return FarmMix < 0.7f ? EPiece::FarmLanghus : EPiece::FarmTwo;                                  // west and south Jutland
+		return FarmMix < 0.35f ? EPiece::Farm : FarmMix < 0.7f ? EPiece::FarmThree : EPiece::FarmTwo;                       // the islands, east Jutland, east Schleswig
+	};
+
 	// Spatial hash so buildings keep their distance (radii in km).
 	struct FFootprint { FVector2D Km; float Radius; };
 	TMap<FIntPoint, TArray<FFootprint>> Taken;
@@ -809,6 +824,7 @@ void ACampaign1851Map::BuildScenery()
 	}
 
 	// ---- Towns: whitewashed and yellow houses with red roofs along a street grid, churches in the core.
+	TownStreetLinesKm.Reset();
 	struct FTown { FVector2D Km; float RadiusKm; };
 	TArray<FTown> Towns;
 	for (FCampaign1851City& City : Cities)
@@ -875,51 +891,131 @@ void ACampaign1851Map::BuildScenery()
 			}
 		}
 
-		const float Street = Rng.FRandRange(0.f, 90.f);
-		const int32 Churches = FMath::Clamp(1 + int32(Pop / 12000.f), 1, 6);
-		for (int32 c = 0, Tries = 0; c < Churches && Tries < 400; ++Tries)
+		// The town is laid out along streets (user 2026-10-22, after the reference town image): a main street through the centre,
+		// a market square by the church, a cross street from 1,500 people and a grid of blocks from 8,000. The houses stand along
+		// the streets with their fronts to them, close in the core and looser on the edge; merchants' houses ring the square and
+		// line the quay of a harbour town. Each town has its own random stream (from its name), so it looks the same every time.
+		FRandomStream TownRng(int32(GetTypeHash(City.Name)));
+		const float Street = TownRng.FRandRange(0.f, 90.f);
+		const FVector2D TownU(FMath::Cos(FMath::DegreesToRadians(Street)), FMath::Sin(FMath::DegreesToRadians(Street)));
+		const FVector2D TownV(-TownU.Y, TownU.X);
+		auto TownAt = [&](float U, float V) { return Centre + TownU * U + TownV * V; };
+		// Harbour side: the direction from the centre in which the water is nearest (none for an inland town).
+		FVector2D TownSea = FVector2D::ZeroVector;
+		for (int32 TownDir = 0; TownDir < 16 && TownSea.IsZero(); ++TownDir)
 		{
-			const float D = (c == 0 ? 0.15f + Tries * 0.02f : Radius * 0.6f * FMath::Sqrt(Rng.FRand()));
-			const float A = Rng.FRandRange(0.f, UE_TWO_PI);
-			const FVector2D Km = Centre + FVector2D(FMath::Cos(A), FMath::Sin(A)) * D;
+			const float TownA = UE_TWO_PI * TownDir / 16.f;
+			const FVector2D TownProbe(FMath::Cos(TownA), FMath::Sin(TownA));
+			for (float TownD = 0.3f; TownD <= Radius; TownD += 0.3f)
+				if (!IsMonarchyLand(Centre + TownProbe * TownD)) { if (TownD < Radius * 0.8f) TownSea = TownProbe; break; }
+		}
+		// Streets in the town's own frame (U along the main street, V across), as segments.
+		struct FTownStreet { FVector2D A, B; bool bMain; };
+		TArray<FTownStreet> TownStreets;
+		const float TownLength = Radius * 0.95f;
+		const float TownBend = TownRng.FRandRange(-0.18f, 0.18f) * Radius;   // the main street bends a little, as old streets do
+		TownStreets.Add({ FVector2D(-TownLength, TownBend), FVector2D(0.f, 0.f), true });
+		TownStreets.Add({ FVector2D(0.f, 0.f), FVector2D(TownLength, -TownBend), true });
+		if (Pop >= 1500.f) TownStreets.Add({ FVector2D(0.f, -TownLength * 0.7f), FVector2D(0.f, TownLength * 0.7f), true });
+		// A grid of blocks from 3,000 people (the houses are large symbols on the map: below that a few streets carry them all);
+		// a small town of 1,500-3,000 gets one back street on each side of the main street.
+		if (Pop >= 1500.f)
+		{
+			const float TownBlock = 0.6f;
+			const int32 TownBlocks = Pop >= 3000.f ? 99 : 1;
+			for (int32 TownK = 1; TownK <= TownBlocks && TownK * TownBlock < TownLength * 0.8f; ++TownK)
+			{
+				for (const float TownSide : { -1.f, 1.f })
+				{
+					const float TownOff = TownSide * TownK * TownBlock;
+					const float TownHalf = FMath::Sqrt(FMath::Max(0.f, FMath::Square(TownLength * 0.85f) - TownOff * TownOff));
+					TownStreets.Add({ FVector2D(-TownHalf, TownOff), FVector2D(TownHalf, TownOff), false });   // parallel to the main street
+					if (Pop >= 3000.f) TownStreets.Add({ FVector2D(TownOff, -TownHalf), FVector2D(TownOff, TownHalf), false });   // across it
+				}
+			}
+		}
+		// The square: kept free in the middle; the first church on its north side.
+		const float TownSquare = Pop >= 3000.f ? 0.32f : 0.22f;
+		Take(Centre, TownSquare);
+		const int32 Churches = FMath::Clamp(1 + int32(Pop / 12000.f), 1, 6);
+		for (int32 c = 0, Tries = 0; c < Churches && Tries < 200; ++Tries)
+		{
+			const FVector2D Km = c == 0 ? TownAt(0.f, TownSquare + 0.14f + Tries * 0.02f)
+				: TownAt(TownRng.FRandRange(-0.7f, 0.7f) * TownLength, (TownRng.FRand() < 0.5f ? -1.f : 1.f) * (0.3f + 0.6f * TownRng.FRand()) * TownLength * 0.5f);
 			if (IsMonarchyLand(Km) && IsFree(Km, 0.12f))
 			{
-				Place(EPiece::Church, Km, Street + (Rng.FRand() < 0.5f ? 0.f : 180.f), City.bCapital ? 1.25f : 1.05f);
+				Place(EPiece::Church, Km, Street + (TownRng.FRand() < 0.5f ? 0.f : 180.f), City.bCapital ? 1.25f : 1.05f);
 				Take(Km, 0.12f);
 				++c;
 			}
 		}
-
 		const int32 Houses = FMath::Clamp(int32(Pop / 22.f), 45, 2600);
-		for (int32 h = 0, Tries = 0; h < Houses && Tries < Houses * 8; ++Tries)
+		int32 TownPlaced = 0;
+		auto TownHouse = [&](const FVector2D& Km, float FrontYaw, bool bSquareFront)
 		{
-			const float D = Radius * Rng.FRand();  // uniform radius = dense core, thinning suburbs
-			const float A = Rng.FRandRange(0.f, UE_TWO_PI);
-			const FVector2D Km = Centre + FVector2D(FMath::Cos(A), FMath::Sin(A)) * D;
-			if (!IsMonarchyLand(Km) || !IsFree(Km, 0.04f))
-			{
-				continue;
-			}
-			const float Core = 1.f - D / Radius;  // taller houses in the centre
-			// Merchants' brick houses crowd the core; plastered and half-timbered houses everywhere else.
-			const float Kind = Rng.FRand();
-			const EPiece Piece = Core > 0.55f && Kind < 0.35f ? EPiece::MerchantHouse
+			if (TownPlaced >= Houses || !IsMonarchyLand(Km) || !IsFree(Km, 0.04f)) return;
+			const float D = float(FVector2D::Distance(Km, Centre));
+			const float Core = FMath::Clamp(1.f - D / Radius, 0.f, 1.f);
+			// Fewer houses towards the edge (gardens and gaps), none beyond the town.
+			if (D > Radius || TownRng.FRand() > 0.35f + 0.65f * Core) return;
+			const bool bQuay = !TownSea.IsZero() && !IsMonarchyLand(Km + TownSea * 0.25f);
+			const float Kind = TownRng.FRand();
+			const EPiece Piece = (bSquareFront || bQuay) && Kind < 0.7f ? EPiece::MerchantHouse
+				: Core > 0.55f && Kind < 0.3f ? EPiece::MerchantHouse
 				: Kind < 0.55f ? EPiece::TownHouse : Kind < 0.75f ? EPiece::TownHouseOchre : EPiece::TownHouseTimber;
-			// Plain houses grow a little taller towards the core; the brick merchants' houses are tall already.
-			Place(Piece, Km, Street + (Rng.FRand() < 0.5f ? 0.f : 90.f) + Rng.FRandRange(-5.f, 5.f),
-				Rng.FRandRange(0.8f, 1.1f), Piece == EPiece::MerchantHouse ? Rng.FRandRange(0.9f, 1.05f) : Rng.FRandRange(0.85f, 1.05f) + 0.25f * Core);
+			Place(Piece, Km, FrontYaw + TownRng.FRandRange(-3.f, 3.f), TownRng.FRandRange(0.85f, 1.05f),
+				Piece == EPiece::MerchantHouse ? TownRng.FRandRange(0.9f, 1.05f) : TownRng.FRandRange(0.85f, 1.05f) + 0.25f * Core);
 			Take(Km, 0.04f);
-			++h;
-		}
+			++TownPlaced;
+		};
+		// Round the square first, then along every street, front row before back row.
+		for (int32 TownEdge = 0; TownEdge < 4; ++TownEdge)
+			for (float TownS = -TownSquare; TownS <= TownSquare + 0.01f; TownS += 0.2f)
+			{
+				const float TownR = TownSquare + 0.12f;
+				const FVector2D TownLocal = TownEdge == 0 ? FVector2D(TownS, TownR) : TownEdge == 1 ? FVector2D(TownS, -TownR) : TownEdge == 2 ? FVector2D(TownR, TownS) : FVector2D(-TownR, TownS);
+				TownHouse(TownAt(TownLocal.X, TownLocal.Y), Street + TownEdge * 90.f, true);
+			}
+		TArray<TArray<FVector2D>> TownStreetLines;
+		for (const float TownRow : { 0.12f, 0.33f })
+			for (const FTownStreet& TownStreet : TownStreets)
+			{
+				const FVector2D TownDir = (TownStreet.B - TownStreet.A).GetSafeNormal();
+				const FVector2D TownN(-TownDir.Y, TownDir.X);
+				const float TownLen = float(FVector2D::Distance(TownStreet.A, TownStreet.B));
+				const float TownYaw = Street + FMath::RadiansToDegrees(FMath::Atan2(TownDir.Y, TownDir.X));
+				for (float TownS = 0.1f; TownS < TownLen; TownS += 0.2f)
+					for (const float TownSide : { -1.f, 1.f })
+					{
+						const FVector2D TownLocal = TownStreet.A + TownDir * TownS + TownN * (TownSide * TownRow);
+						if (TownRow > 0.2f && (!TownStreet.bMain || TownLocal.Size() > TownLength * 0.55f)) continue;   // a back row only in the core of the main streets
+						TownHouse(TownAt(TownLocal.X, TownLocal.Y), TownYaw + (TownSide > 0.f ? 90.f : -90.f), false);
+					}
+				if (TownRow < 0.2f)
+				{
+					TArray<FVector2D> TownLine;
+					for (float TownS = 0.f; TownS <= TownLen + 0.01f; TownS += 0.2f)
+					{
+						const FVector2D TownLocal = TownStreet.A + TownDir * FMath::Min(TownS, TownLen);
+						const FVector2D TownKm = TownAt(TownLocal.X, TownLocal.Y);
+						if (FVector2D::Distance(TownKm, Centre) <= Radius && IsMonarchyLand(TownKm)) TownLine.Add(TownKm);
+						else if (TownLine.Num() >= 2) { TownStreetLines.Add(TownLine); TownLine.Reset(); }
+						else TownLine.Reset();
+					}
+					if (TownLine.Num() >= 2) TownStreetLines.Add(TownLine);
+				}
+			}
+		TownStreetLinesKm.Append(TownStreetLines);
+		UE_LOG(LogTemp, Verbose, TEXT("CAMPAIGN-1851|town|%s|pop=%.0f|houses=%d/%d|streets=%d|harbour=%d"), *City.Name, Pop, TownPlaced, Houses, TownStreets.Num(), TownSea.IsZero() ? 0 : 1);
 		// Windmills on the town's edge, where the wind comes off the fields.
 		const int32 Mills = FMath::Clamp(1 + int32(Pop / 6000.f), 1, 4);
 		for (int32 m = 0, Tries = 0; m < Mills && Tries < 60; ++Tries)
 		{
-			const float A = Rng.FRandRange(0.f, UE_TWO_PI);
-			const FVector2D Km = Centre + FVector2D(FMath::Cos(A), FMath::Sin(A)) * (Radius + Rng.FRandRange(0.3f, 1.2f));
+			const float A = TownRng.FRandRange(0.f, UE_TWO_PI);
+			const FVector2D Km = Centre + FVector2D(FMath::Cos(A), FMath::Sin(A)) * (Radius + TownRng.FRandRange(0.3f, 1.2f));
 			if (IsMonarchyLand(Km) && IsFree(Km, 0.06f))
 			{
-				Place(EPiece::Windmill, Km, Rng.FRandRange(-30.f, 30.f), Rng.FRandRange(0.9f, 1.1f));   // sails to the west wind
+				Place(EPiece::Windmill, Km, TownRng.FRandRange(-30.f, 30.f), TownRng.FRandRange(0.9f, 1.1f));   // sails to the west wind
 				Take(Km, 0.06f);
 				++m;
 			}
@@ -1072,7 +1168,7 @@ void ACampaign1851Map::BuildScenery()
 				const float R = bFarm ? 0.1f : 0.035f;
 				if (IsMonarchyLand(P) && IsFree(P, R))
 				{
-					Place(bFarm ? EPiece::Farm : EPiece::Cottage, P, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.8f, 1.1f));
+					Place(bFarm ? FarmPieceAt(P) : EPiece::Cottage, P, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.8f, 1.1f));
 					Take(P, R);
 					++i;
 				}
@@ -1080,7 +1176,7 @@ void ACampaign1851Map::BuildScenery()
 		}
 		else if (Site.Kind == ESite::Farm && IsFree(Km, 0.1f))
 		{
-			Place(EPiece::Farm, Km, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.8f, 1.05f));
+			Place(FarmPieceAt(Km), Km, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.8f, 1.05f));
 			Take(Km, 0.1f);
 			// Haystacks in the fields round the farm.
 			for (int32 k = Rng.RandRange(0, 3); k > 0; --k)
@@ -1099,6 +1195,30 @@ void ACampaign1851Map::BuildScenery()
 			Place(EPiece::Cottage, Km, Rng.FRandRange(0.f, 360.f), Rng.FRandRange(0.85f, 1.1f));
 			Take(Km, 0.035f);
 		}
+	}
+
+	// ---- Trees along the main roads outside the towns (user 2026-10-22, the reference town image: rows of trees by the roads).
+	// In stretches: a row of trees on one side for a few hundred metres, then open road. Their own random stream.
+	{
+		FRandomStream RoadTreeRng(1849);
+		int32 RoadTrees = 0;
+		for (int32 RoadTreeIndex = 1; RoadTreeIndex + 1 < RoadSamples.Num(); ++RoadTreeIndex)
+		{
+			const FVector2D RoadTreeAt = RoadSamples[RoadTreeIndex];
+			const FVector2D RoadTreeAlong = (RoadSamples[RoadTreeIndex + 1] - RoadSamples[RoadTreeIndex - 1]).GetSafeNormal();
+			// A stretch is planted where a slow noise along the road is high (about a third of the road).
+			const float RoadTreeStretch = FMath::PerlinNoise2D(RoadTreeAt * 1.7);
+			if (RoadTreeAlong.IsNearlyZero() || RoadTreeStretch < 0.12f || RoadTreeRng.FRand() < 0.2f) continue;
+			const float RoadTreeSide = FMath::PerlinNoise2D(RoadTreeAt * 0.6 + FVector2D(31.0, 7.0)) > 0.f ? 1.f : -1.f;
+			// Just clear of the road's own reserved strip (its samples hold 0.065 km, the tree 0.05 km).
+			const FVector2D RoadTreeKm = RoadTreeAt + FVector2D(-RoadTreeAlong.Y, RoadTreeAlong.X) * (RoadTreeSide * 0.14f);
+			if (!IsMonarchyLand(RoadTreeKm) || InTown(RoadTreeKm, 0.3f) || Woodland(RoadTreeKm) > 0.3f || IsFreshWater(RoadTreeKm, 0.1f) || !IsFree(RoadTreeKm, 0.02f))
+				continue;
+			Place(RoadTreeRng.FRand() < 0.35f ? EPiece::Oak : EPiece::Broadleaf, RoadTreeKm, RoadTreeRng.FRandRange(0.f, 360.f), RoadTreeRng.FRandRange(0.75f, 1.0f));
+			Take(RoadTreeKm, 0.02f);
+			++RoadTrees;
+		}
+		UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|scenery|road trees=%d"), RoadTrees);
 	}
 
 	// ---- Field boundaries round the farms and villages (Campaign1851Hydro.cpp): a grid of fields about each,
@@ -1210,6 +1330,12 @@ void ACampaign1851Map::BuildScenery()
 		case EPiece::MerchantHouse: SceneryModelName = TEXT("SM_MerchantHouse"); break;
 		case EPiece::Cottage: SceneryModelName = TEXT("SM_Cottage"); break;
 		case EPiece::Farm: SceneryModelName = TEXT("SM_Farm"); break;
+		case EPiece::FarmThree: SceneryModelName = TEXT("SM_Farm_Trelaenget"); break;
+		case EPiece::FarmTwo: SceneryModelName = TEXT("SM_Farm_Tolaenget"); break;
+		case EPiece::FarmParallel: SceneryModelName = TEXT("SM_Farm_Parallel"); break;
+		case EPiece::FarmLanghus: SceneryModelName = TEXT("SM_Farm_VestjyskLanghus"); break;
+		case EPiece::FarmHaubarg: SceneryModelName = TEXT("SM_Farm_Haubarg"); break;
+		case EPiece::FarmNiedersachsen: SceneryModelName = TEXT("SM_Farm_Niedersachsen"); break;
 		case EPiece::Church: SceneryModelName = TEXT("SM_Church"); break;
 		case EPiece::Windmill: SceneryModelName = TEXT("SM_Windmill"); break;
 		default: break;
@@ -1267,6 +1393,8 @@ void ACampaign1851Map::BuildScenery()
 	{
 		Dense.Add(Resample(Line, 0.2));
 	}
+	// The town streets (not lanes for the battlefield generator) are drawn with the lanes.
+	Dense.Append(TownStreetLinesKm);
 	Lanes = BuildRibbons(Dense, 0.075f, Srgb(160, 126, 88), TEXT("Lanes"), Material);
 	// Ferries: pale dashes across the water, 350 m on / 250 m off.
 	Dense.Reset();

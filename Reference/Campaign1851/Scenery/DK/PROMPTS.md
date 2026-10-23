@@ -88,7 +88,74 @@ Filer: `Windmill_Dutch_Iso.png`, `Windmill_Dutch_Side.png`.
 Danish Dutch-type windmill c.1840–1850, tapering tar-black octagonal timber body, continuous timber gallery and wooden railing, small rotating rounded cap, exactly four traditional wooden lattice sail wings on a single hub, sailcloth partly unfurled, low masonry base, no auxiliary buildings, no tail fan, no steel sails.
 ```
 
+### Farm_Trelaenget
+
+Filer: `Farm_Trelaenget_Iso.png`, `Farm_Trelaenget_Side.png`.
+
+```text
+Three-wing Danish farm c.1830–1850: exactly THREE connected single-storey wings forming a U around a rectangular cobbled courtyard, enclosed on three sides and completely OPEN on the fourth side facing camera. Dwelling in rear wing, stable and barn in side wings at right angles; black tarred half-timber posts, cream limewash infill, low walls, grey-brown thatched roofs, small domestic windows and plain barn doors. No fourth wing, no gate spanning opening, no detached buildings.
+```
+
+Usikkerhed: S: Øerne/Østjylland er en valgt regional anvendelse, ikke dokumenteret ensartet udbredelse. Den åbne U-form har historiske paralleller; sammenbygning, sort tømmer, kalkfarve, stråtag, mål og brolægning er skøn.
+
+### Farm_Tolaenget
+
+Filer: `Farm_Tolaenget_Iso.png`, `Farm_Tolaenget_Side.png`.
+
+```text
+Two-wing Danish angle farm c.1830–1850: exactly TWO connected single-storey wings forming a simple L, one long dwelling wing and ONE shorter stable/barn wing at a right angle. Small open yard in the inside angle; the other two sides are entirely open. Low cream limewashed half-timber walls, tar-black posts, small domestic windows, plain barn door, steep grey-brown thatch. No third or fourth wing, no detached buildings.
+```
+
+Usikkerhed: S: L-formen er valgt til mindre gårde; landsdækkende hyppighed i 1825–1851 er ikke verificeret. Lex daterer vinkelgårdens brede indpas blandt småejendomme til omkring 1920. Materialer og tag er en generisk periodetolkning.
+
+### Farm_Parallel
+
+Filer: `Farm_Parallel_Iso.png`, `Farm_Parallel_Side.png`.
+
+```text
+North Jutland parallel farm c.1830–1850: exactly TWO separate long single-storey rectangular wings parallel to each other, one dwelling wing with small windows and chimney, one stable/barn wing with plain doors. Open cobbled yard between, BOTH ends entirely open. NO connecting cross-wing, NO U or L shape, no detached third building. Cream limewash walls and modest dark timber framing, grey-brown thatched roofs. Treat the two wings as ONE isolated farm compound.
+```
+
+Usikkerhed: S: Bindingsværkets farver, taghældning, længernes relative størrelse og brolægning er skøn. V: To parallelle længer og nordjysk udbredelse støttes af Lex, se researchtillægget.
+
+### Farm_VestjyskLanghus
+
+Filer: `Farm_VestjyskLanghus_Iso.png`, `Farm_VestjyskLanghus_Side.png`.
+
+```text
+West/south Jutland longhouse farm c.1830–1850: ONE very long LOW single-storey rectangular building under ONE continuous low grey-brown heather-thatch roof. Dwelling at one end, byre in middle and barn at other end, all under the SAME roof. Low dark-red brick walls with rough fieldstone foundation and a short earth/peat wall section towards barn end, simple tarred timber gable cladding, small dwelling windows and simple stable/barn doors. Modest chimney over dwelling. NO courtyard, NO wings, NO additional buildings.
+```
+
+Usikkerhed: S: Sammenstillingen af mørkerøde tegl, tørv/marksten, lyngtækning og tjæret gavl er et modelleringsskøn, ikke en verificeret standardtype. Billedets jord-/stensnit kan ikke identificeres sikkert som tørv.
+
+### Farm_Haubarg
+
+Filer: `Farm_Haubarg_Iso.png`, `Farm_Haubarg_Side.png`.
+
+```text
+Generic Eiderstedt Schleswig marsh Haubarg c.1830–1850: ONE broad nearly square farm building, enormous steep pyramid-like hipped grey-brown thatched roof visually about 15–20 metres high dominating very LOW red-brick perimeter walls. Central tall hay/barn hall structurally carried by FOUR internal great timber pillars, unseen beneath roof; dwelling and stable contained under this SAME roof. Tiny modest front gable over entrance subordinate to gigantic main roof, small dwelling windows and barn door. Exterior only, no cutaway, NO open courtyard, NO separate wings or buildings. Roof is a vast four-sided hipped mass with short ridge, not an ordinary longhouse saddle roof.
+```
+
+Usikkerhed: S: Den konkrete højde, lave teglmure, lille frontgavl og tagproportioner er skøn. V: Fire indvendige stolper og fælles stort stråtag er kildebelagt; 15–20 m er en generel angivelse, mens Frilandsmuseets eksempel har 12 m tag. Indvendige stolper er skjult og kan ikke billedkontrolleres.
+
+### Farm_Niedersachsen
+
+Filer: `Farm_Niedersachsen_Iso.png`, `Farm_Niedersachsen_Side.png`.
+
+```text
+Generic Holstein/Lauenburg geest Niederdeutsches Hallenhaus c.1830–1850: ONE broad rectangular aisled hall farmhouse, dwelling, stables and threshing hall under ONE large steep grey-brown reed-thatched roof. Substantial oak Fachwerk frame with muted red-brick infill, low side eaves and tall timber-framed entrance gable with ONE very large central double plank barn door (Grote Dor), dwarfing small side windows. Simple crossed gable boards (Giebelzier), modest and uncarved. No inscription or lettering. No courtyard, NO side wings or detached buildings. Isometric view must clearly show entrance gable and long side.
+```
+
+Usikkerhed: S: Den specifikke gest-/Lauenburg-placering, fagdeling, farver, skorsten og enkle krydsbrædder er skøn. V: Hallenhausets fælles tag, bindingsværk, rørtækning og store gavlport er dokumenteret. Side skjuler naturligt gavlporten; den flyttes ikke til langsiden.
+
 ## Skøn og usikkerheder
+
+- Farm_Trelaenget: S: Øerne/Østjylland er en valgt regional anvendelse, ikke dokumenteret ensartet udbredelse. Den åbne U-form har historiske paralleller; sammenbygning, sort tømmer, kalkfarve, stråtag, mål og brolægning er skøn.
+- Farm_Tolaenget: S: L-formen er valgt til mindre gårde; landsdækkende hyppighed i 1825–1851 er ikke verificeret. Lex daterer vinkelgårdens brede indpas blandt småejendomme til omkring 1920. Materialer og tag er en generisk periodetolkning.
+- Farm_Parallel: S: Bindingsværkets farver, taghældning, længernes relative størrelse og brolægning er skøn. V: To parallelle længer og nordjysk udbredelse støttes af Lex, se researchtillægget.
+- Farm_VestjyskLanghus: S: Sammenstillingen af mørkerøde tegl, tørv/marksten, lyngtækning og tjæret gavl er et modelleringsskøn, ikke en verificeret standardtype. Billedets jord-/stensnit kan ikke identificeres sikkert som tørv.
+- Farm_Haubarg: S: Den konkrete højde, lave teglmure, lille frontgavl og tagproportioner er skøn. V: Fire indvendige stolper og fælles stort stråtag er kildebelagt; 15–20 m er en generel angivelse, mens Frilandsmuseets eksempel har 12 m tag. Indvendige stolper er skjult og kan ikke billedkontrolleres.
+- Farm_Niedersachsen: S: Den specifikke gest-/Lauenburg-placering, fagdeling, farver, skorsten og enkle krydsbrædder er skøn. V: Hallenhausets fælles tag, bindingsværk, rørtækning og store gavlport er dokumenteret. Side skjuler naturligt gavlporten; den flyttes ikke til langsiden.
 
 - Alle konkrete mål, proportioner, vinduesantal, fagdelinger, dørplaceringer, detaljer og slidspor er kunstneriske skøn. Visningerne er ikke et metrisk konsistent tegningssæt.
 - Researchens farvepalet er skøn: gråbrunt strå, rødorange tegl, støvet kalkhvid, okker, tjæresort, mørkegrøn og okseblodsrød. Digitale farver er ikke pigmentmålinger.
@@ -101,6 +168,31 @@ Danish Dutch-type windmill c.1840–1850, tapering tar-black octagonal timber bo
 - Gårdens Side viser udvendig facade; gårdspladsens brønd og mødding kan naturligt være skjult. Møllens Side er vingesidens ortografiske elevation.
 
 ## Kontrol og leveringsstatus
+
+### Tillæg: seks gårdtyper, 2026-10-23
+
+12 nye PNG-filer: seks Iso og seks Side, 1024 × 1024. Genereret med det indbyggede image_gen-værktøj. Farm_Firlaenget_Iso er stilreference for alle seks nye Iso; hvert Side bruger sit tilsvarende Iso. Fælles- og kameraprompter ovenfor genbruges ordret. Typepromptens plan overstyrer fællespromptens parentes om fire længer. Parallelgårdens to længer er ét gårdanlæg. Ingen bybilleder er lavet; midlertidige referenceark var derfor ikke nødvendige.
+
+Alle 12 er visuelt gennemgået for hovedform, tekst, mennesker og fremmede bygninger. Farm_Trelaenget_Side blev regenereret, fordi første forsøg viste gårdsiden med perspektiv. Den leverede variant viser udvendig langfacade. Vinduer, døre, fagdeling og proportioner kan variere mellem Iso og Side. Baggrunden er lys grå med blød lysvariation og kontaktskygge, ikke en ensfarvet pixelmaske. Enkelte små vækstspor ved sokkel/dør er bevaret som i stilreferencen. Kameravinkler er visuelt vurderet, ikke målt. Større kvadratiske originaler skaleres med bikubisk filtrering til 1024 × 1024.
+
+Kontaktark: `Saved/Codex/scenery_dk_farms_sheet.png`, seks nye Iso samt uændret Farm_Firlaenget_Iso. Mærkater findes kun på kontaktarket; felterne viser former, ikke fælles målestok.
+
+Ekstra instruktion efter typeprompten til Iso (fra Farm_Tolaenget og frem):
+
+```text
+The type-specific farm plan overrides the common prompt's four-wing parenthetical. Input reference is for consistent restrained realistic miniature STYLE, thatch texture, materials and lighting only; replace its plan with the requested type. One isolated farm compound, generous margins, no text or people.
+```
+
+Første Farm_Trelaenget_Iso brugte samme prioritering med denne formulering:
+
+```text
+The type-specific THREE-wing plan overrides the common prompt's four-wing parenthetical. Input image is a STYLE AND MATERIAL reference only; keep its restrained realistic miniature rendering but replace the closed four-wing plan with this open U plan. No well or dunghill needed. One farm compound only.
+```
+
+Side bruger den eksisterende ekstra instruktion om at bevare Iso-bygningens materialer og hovedform. Desuden præciseres udvendig langfacade uden vigende vægge: udlænger skjules bag boliglængen; gavlport/frontgavl forbliver på deres oprindelige, skjulte facade. Haubargens store tag og langhusets sammenhængende tag bevares.
+
+Den følgende leveringsstatus gælder de oprindelige otte typer.
+
 
 Færdigt: 16 PNG-filer, otte Iso og otte Side, alle kontrolleret til 1024 × 1024. Alle visninger er visuelt gennemgået. Iso blev genereret før Side. Ingen navngivne bygninger eller fotografiske bygningsreferencer er brugt.
 

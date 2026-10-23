@@ -111,4 +111,15 @@ void ACampaign1851Camera::Apply()
 	FPostProcessSettings& P = Camera->PostProcessSettings;
 	P.DepthOfFieldFocalDistance = Distance * ACampaign1851Map::KmToUnits;
 	P.DepthOfFieldFstop = FMath::GetMappedRangeValueClamped(FVector2D(MinDistanceKm, 60.f), FVector2D(TiltShiftFstop, 32.f), Distance);
+	// Close in, the softer palette of the reference town painting (user 2026-10-22): less saturated, warmer, shadows lifted a
+	// little; from 15 km out the map keeps its own colours.
+	const float GradeClose = FMath::GetMappedRangeValueClamped(FVector2D(4.f, 15.f), FVector2D(1.f, 0.f), Distance);
+	P.bOverride_WhiteTemp = true;
+	P.WhiteTemp = FMath::Lerp(6500.f, 5900.f, GradeClose);
+	P.bOverride_ColorSaturation = true;
+	const float GradeSaturation = FMath::Lerp(1.08f, 0.9f, GradeClose);
+	P.ColorSaturation = FVector4(GradeSaturation, GradeSaturation, GradeSaturation, 1.f);
+	P.bOverride_ColorGammaShadows = true;
+	const float GradeShadows = FMath::Lerp(1.f, 1.08f, GradeClose);
+	P.ColorGammaShadows = FVector4(GradeShadows, GradeShadows, GradeShadows, 1.f);
 }

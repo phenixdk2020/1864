@@ -88,6 +88,10 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")
     TSoftObjectPtr<UAnimSequence> DeathWalkingAsset;
+    /** Deaths that start from the shoulder-arms march (column): forward, on the back, crumpling to the knees (2026-10-22). */
+    TSoftObjectPtr<UAnimSequence> DeathMarchFrontAsset;
+    TSoftObjectPtr<UAnimSequence> DeathMarchBackAsset;
+    TSoftObjectPtr<UAnimSequence> DeathMarchCrumpleAsset;
 
     /** The firing cycle uses a reload matching the soldier's current stance. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Animation")

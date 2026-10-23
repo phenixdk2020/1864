@@ -1,4 +1,4 @@
-# Imports the eight Danish campaign-map scenery models (SourceAssets/Campaign1851/Scenery/DK, made by
+# Imports the Danish campaign-map scenery models (SourceAssets/Campaign1851/Scenery/DK, made by
 # Tools/Map1851/build_scenery_models.py) as static meshes under /Game/Campaign1851/Scenery/DK, with their shared
 # texture atlas and one unlit material that matches the painted map: the atlas lit by a fixed north-west light in the
 # material (the map is unlit). Run with the editor closed:
@@ -11,7 +11,8 @@ dest = '/Game/Campaign1851/Scenery/DK'
 tools = unreal.AssetToolsHelpers.get_asset_tools()
 lib = unreal.EditorAssetLibrary
 MEL = unreal.MaterialEditingLibrary
-TYPES = ['TownHouse_Ochre', 'TownHouse_White', 'TownHouse_Timber', 'MerchantHouse', 'Cottage', 'Farm', 'Church', 'Windmill']
+TYPES = ['TownHouse_Ochre', 'TownHouse_White', 'TownHouse_Timber', 'MerchantHouse', 'Cottage', 'Farm', 'Church', 'Windmill',
+         'Farm_Trelaenget', 'Farm_Tolaenget', 'Farm_Parallel', 'Farm_VestjyskLanghus', 'Farm_Haubarg', 'Farm_Niedersachsen']
 
 # The atlas.
 task = unreal.AssetImportTask()

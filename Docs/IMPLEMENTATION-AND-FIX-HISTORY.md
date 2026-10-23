@@ -2786,6 +2786,37 @@ Brugeren: "falder den 1. eller 2. mand i kolonnen, så skal den bagerste mand sl
 - **Opfyldning i filen** (linje) eller banen (kolonne): 2 s efter første tab, op til 4 s ved lav moral.
 - **"Slut op mod fanen" / samlet ny formation:** 8 s efter seneste tab, dog senest 20 s efter første (ganget med 1–2 ved lav moral). Kun når kompagniet står stille og ikke er i gang med at formere.
 
+## 2026-10-22/23 — Død i kolonne, tider efter eksercerreglementet 1863, byer med gader, gårdtyper efter egn
+
+**Slag**
+- **Tre nye dødsklip fra "skuldr gevær"** (`A_Combat_DeathMarchFront/Back/Crumple`, `Tools/Animation/build_march_death_set.py`, import `Content/Python/import_march_deaths.py`). En soldat, der dør under march med geværet på skulderen, får ét af dem (`KillSoldiers`). VAT er bagt om. Testet med tab under march i kolonne og nærvideo.
+- **Tider efter eksercerreglementet 1863** (brugerens oplæg):
+  - opfyldning i filen efter 0,5 s (før 2 s), mere ved lav moral;
+  - sammenrykning mod fanen 3 s efter sidste tab, højst 8 s (før 8/20 s);
+  - en linje rykker nu også sammen under fremrykning og ildkamp. Mændene går skråt, uden sideskridtklip, mens linjen marcherer.
+- **Målt** (linje i fremrykning, 3 × 8 tab): opfyldning 0,7 s efter tabet, sammenrykning 3,6 s efter, uden at fremrykningen stopper.
+- **Kendt fejl:** under sammenrykning i march kan to mænd i bageste geled gå 9 cm fra hinanden i op til 6 s. Det er den mand, der lige er sendt et geled tilbage. Står på Backlog.
+
+**Kampagnekort** (plan godkendt 2026-10-22)
+- **Byer med gader** (`Campaign1851Map.cpp`, byblokken):
+  - hver by bygges med sin egen tilfældighed (seed fra bynavnet), så den ser ens ud hver gang;
+  - hovedgade med et lille knæk og torv i midten med kirken på nordsiden og købmandsgårde rundt om torvet;
+  - tværgade og bagstræder fra 1.500 indbyggere, gadenet af karréer (0,6 km) fra 3.000;
+  - huse med front mod gaden, tættere i midten, og købmandsgårde på kajen i havnebyer;
+  - gaderne tegnes med landsbyvejene, men indgår ikke i `LaneLinesKm` til slagmarksgeneratoren.
+- **Vejtræer:** 9.553 træer langs landevejene i strækninger, med egen tilfældighed.
+- **Farvekorrektion tæt på** (`Campaign1851Camera.cpp`): under 4 km mætning 0,9, hvidbalance 5.900 K og lidt løftede skygger. Overgangen sker gradvist frem til 15 km, og længere ude er kortet uændret.
+- **Gårdtyper efter egn** (billeder godkendt 2026-10-23, modeller fra `Tools/Map1851/build_scenery_farms.py`, 180–290 trekanter, ét nyt felt i atlasset):
+  - `EPiece::FarmThree/FarmTwo/FarmParallel/FarmLanghus/FarmHaubarg/FarmNiedersachsen`;
+  - typen vælges ud fra stedet (`FarmPieceAt`: marsk, breddegrad, længdegrad og en stabil blanding pr. sted), ikke med en tilfældig trækning:
+    - marsken syd for 55°: haubarg; marsken nord for 55°: langhus;
+    - Holsten og Lauenburg: niedersachsenhaus;
+    - Nordjylland: parallelgård;
+    - Vest- og Sydjylland: langhus;
+    - øerne og Østjylland: firlænget, trelænget og tolænget.
+- **Ikke ændret:** parcel-detaljen toner allerede først ud ved 70–140 km (1 enhed = 10 m). Plan-punktet om 120 m byggede på en misforståelse.
+- **Sverige og Norge:** referencebilleder og research fra Codex (`Reference/Campaign1851/Scenery/SE|NO/`, `Docs/Bygninger-SE|NO-Research-2026-10-22.md`). Preussen venter på Codex-kvoten.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

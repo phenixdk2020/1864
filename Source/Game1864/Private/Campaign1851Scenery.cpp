@@ -453,6 +453,7 @@ void BuildPiece(FWriter& W, Campaign1851Scenery::EPiece Piece)
 			W.Facade(FVector2f(0.f, 0.f), 5.5f, 3.4f, 2.2f, 1, Glass, Door);
 			W.Box(FVector3f(0.6f, -0.25f, 3.9f), FVector3f(1.1f, 0.25f, 5.3f), Plaster);
 			break;
+		case EPiece::FarmThree: case EPiece::FarmTwo: case EPiece::FarmParallel: case EPiece::FarmLanghus: case EPiece::FarmHaubarg: case EPiece::FarmNiedersachsen:
 		case EPiece::Farm:
 			W.DropShadow(7.f, 7.f, 1.8f);
 			// Four wings round the yard: the dwelling (stuehus) whitewashed with windows, barns and stables with doors.
@@ -568,7 +569,8 @@ namespace Campaign1851Scenery
 	const TCHAR* Name(EPiece Piece)
 	{
 		static const TCHAR* Names[] = { TEXT("TownHouse"), TEXT("TownHouseOchre"), TEXT("Cottage"), TEXT("Farm"), TEXT("Church"), TEXT("Broadleaf"), TEXT("Conifer"),
-			TEXT("TownHouseTimber"), TEXT("MerchantHouse"), TEXT("Windmill"), TEXT("Oak"), TEXT("Haystack"), TEXT("Knick"), TEXT("StoneDike"), TEXT("Ditch") };
+			TEXT("TownHouseTimber"), TEXT("MerchantHouse"), TEXT("Windmill"), TEXT("Oak"), TEXT("Haystack"), TEXT("Knick"), TEXT("StoneDike"), TEXT("Ditch"),
+			TEXT("FarmThree"), TEXT("FarmTwo"), TEXT("FarmParallel"), TEXT("FarmLanghus"), TEXT("FarmHaubarg"), TEXT("FarmNiedersachsen") };
 		return Names[FMath::Clamp(int32(Piece), 0, int32(EPiece::Count) - 1)];
 	}
 

@@ -1586,6 +1586,8 @@ protected:
 	/** Village lanes, generated with the scenery. */
 	UPROPERTY(Transient)
 	TObjectPtr<UStaticMeshComponent> Lanes;
+	/** The town streets (km), drawn with the lanes; not part of the lanes the battlefield generator reads. */
+	TArray<TArray<FVector2D>> TownStreetLinesKm;
 
 	/** Rivers by class and the lakes (Campaign1851Hydro.cpp). */
 	UPROPERTY(Transient)
