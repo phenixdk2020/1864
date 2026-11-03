@@ -67,7 +67,11 @@ void UStrategyCavalryChargeComponent::BeginCharge()
     }
 
     if (!bChargeActive)
+    {
         if (UStrategyBattleAudio* ChargeAudio = UStrategyBattleAudio::Find(this)) ChargeAudio->Charge(OwnerCavalry, true);
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-CAVALRY %s chok-start ryttere=%d/%d moral=%.0f"), *OwnerCavalry->DisplayName.ToString(),
+            OwnerCavalry->CurrentStrength, OwnerCavalry->InitialStrength, OwnerCavalry->Morale);
+    }
     bChargeActive = true;
     bLastChargeRepulsed = false;
     ChargeMomentum = 0.0f;
@@ -233,6 +237,9 @@ bool UStrategyCavalryChargeComponent::IsSteadySquare(const AStrategyUnit* Target
 
 void UStrategyCavalryChargeComponent::RepelCharge(AStrategyUnit* Target)
 {
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-CAVALRY %s afvist af karre %s moral=%.0f sammenhold=%.0f ryttere=%d/%d"),
+        *OwnerCavalry->DisplayName.ToString(), *Target->DisplayName.ToString(), Target->Morale, Target->Cohesion,
+        OwnerCavalry->CurrentStrength, OwnerCavalry->InitialStrength);
     // Approach volleys use the ordinary fire system and consume ammunition normally.
     if (Target->CombatComponent) { Target->CombatComponent->TryFireAt(OwnerCavalry); }
     bLastChargeRepulsed = true;
@@ -269,6 +276,10 @@ void UStrategyCavalryChargeComponent::ResolveImpact(AStrategyUnit* Target)
         FMath::Max(0.1f, Target->Morale / 100.0f) * FMath::Max(0.1f, Target->Cohesion / 100.0f));
     const float ImpactRatio = FMath::Clamp(AttackingPower / DefendingPower, 0.2f, 3.0f);
     const int32 ImpactLoss = FMath::RoundToInt(AttackingPower * ImpactLossPerRider * DirectionShock * FormationShock * ImpactRatio);
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-CAVALRY %s sammenstoed %s formation=%d reform=%d moral=%.0f sammenhold=%.0f facing=%.2f momentum=%.2f ryttere=%d/%d"),
+        *OwnerCavalry->DisplayName.ToString(), *Target->DisplayName.ToString(), int32(ImpactFormation),
+        Target->FormationTransition && Target->FormationTransition->IsReforming() ? 1 : 0, Target->Morale, Target->Cohesion, ImpactFacing, ChargeMomentum,
+        OwnerCavalry->CurrentStrength, OwnerCavalry->InitialStrength);
     if (UStrategyBattleAudio* ImpactAudio = UStrategyBattleAudio::Find(this)) ImpactAudio->Clash(Target->GetActorLocation());
     if (Target->UnitState == EStrategyUnitState::Routed) { Target->CaptureBattlePrisoners(OwnerCavalry); }
     Target->ApplyStrengthLossWithCause(ImpactLoss, TEXT("CavalryCharge"), OwnerCavalry);
@@ -277,6 +288,7 @@ void UStrategyCavalryChargeComponent::ResolveImpact(AStrategyUnit* Target)
     Target->Cohesion = FMath::Max(0.0f, Target->Cohesion - ImpactCohesionShock * ImpactShare * FormationShock);
     const int32 CavalryLoss = FMath::RoundToInt(DefendingPower * ImpactLossPerRider / FMath::Max(1.0f, DirectionShock * FormationShock * ImpactRatio));
     OwnerCavalry->ApplyStrengthLossWithCause(CavalryLoss, TEXT("CavalryCharge"), Target);
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-CAVALRY %s sammenstoed-tab fjenden %d, egne %d"), *OwnerCavalry->DisplayName.ToString(), ImpactLoss, CavalryLoss);
     OwnerCavalry->Morale = FMath::Max(0.0f, OwnerCavalry->Morale - ImpactMoraleShock * float(CavalryLoss) / FMath::Max(1, OwnerCavalry->InitialStrength));
     OwnerCavalry->Cohesion = FMath::Max(0.0f, OwnerCavalry->Cohesion - ImpactCohesionShock * float(CavalryLoss) / FMath::Max(1, OwnerCavalry->InitialStrength));
     if (ImpactFormation == EStrategyFormationType::Square && Target->IsCombatEffective() && Target->FormationComponent &&

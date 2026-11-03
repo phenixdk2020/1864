@@ -24,6 +24,10 @@ class STRATEGY1864_API UStrategyInfantryVisualComponent : public UActorComponent
     GENERATED_BODY()
 
 public:
+    const TArray<TObjectPtr<USkeletalMeshComponent>>& GetSoldierFigures() const { return SoldierComponents; }
+    USkeletalMeshComponent* GetLivingColourBearer() const { return bColourBearerAlive ? ColourBearer.Get() : nullptr; }
+    void QueueAimedVictims(const TArray<TWeakObjectPtr<USkeletalMeshComponent>>& AimedVictims, bool bAimedBearer);
+
     static void SelectNearestFigures(UWorld* World, const FVector& Camera, int32 Budget = 24);
     UStrategyInfantryVisualComponent();
 
@@ -305,6 +309,8 @@ private:
     UAnimSequence* ResolveAnimation(bool& bOutLooping) const;
     void DestroyVisualComponents();
     /** Soldiers hit: out of the ranks, a death animation, and left lying (Docs: the duel test). */
+    TArray<TWeakObjectPtr<USkeletalMeshComponent>> AimedQueuedVictims;
+
     void KillSoldiers(int32 Count, const FVector* Near = nullptr, const FVector* ConeOrigin = nullptr);
     /** Men lost to a shot still in the air fall when it strikes, next to the strike (the artillery's registry). */
     void QueueKills(int32 Count);
@@ -346,6 +352,18 @@ private:
 
     UPROPERTY(Transient)
     TObjectPtr<UAnimSequence> LastAnimationAsset;
+
+    /** The man's place on the ground: the unit's frame is level, the field is not (on a slope one end of a line would stand in
+     *  the hill and the other in the air). PlaneWorld is his place in the unit's level frame; his height above the unit's
+     *  origin is kept above the ground under him. The ground is sampled again only when he has moved 30 cm.
+     *  HeightAboveGround is his slot's own height (kneeling etc.), not taken from the leaning unit frame. */
+    FVector SoldierOnGround(int32 GroundIndex, const FVector& PlaneWorld, float HeightAboveGround, bool bGroundTarget = false);
+    /** Per man: X, Y where the ground was last sampled, Z the ground there (Z below -1e8: not sampled). */
+    TArray<FVector> SoldierGroundSamples;
+    TArray<FVector> SoldierGroundTargetSamples;   // the same for each man's target place
+    float SoldierGroundUnitZ = 0.f;   // the unit's height when the samples were taken
+    void GroundProbe(const TCHAR* ProbeWhere, const USceneComponent* ProbeSoldier);   // -Strategy1864GroundProbe
+    double GroundProbeLast = -100.0;
 
     UPROPERTY(Transient)
     TArray<TObjectPtr<USkeletalMeshComponent>> SoldierComponents;

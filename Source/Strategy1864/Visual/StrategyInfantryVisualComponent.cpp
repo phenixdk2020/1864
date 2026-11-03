@@ -875,11 +875,15 @@ void UStrategyInfantryVisualComponent::MarchDust(float Now)
 
 void UStrategyInfantryVisualComponent::HandleCasualtyVisualEvent(int32 AppliedLoss, FVector SourceLocation)
 {
-    if (!bEnabled || !OwnerCompany || AppliedLoss <= 0) return;
+    // A volley that took no man must not leave its picked victims for a later shell or an undirected loss.
+    if (!bEnabled || !OwnerCompany || AppliedLoss <= 0) { AimedQueuedVictims.Reset(); return; }
     // Compare total represented strength, so fractional losses accumulate across the figure divisor.
-    const bool bDirectedFire = !OwnerCompany->CasualtySourceLocation.IsNearlyZero();
+    // Picked victims mean an aimed volley even from a shooter at the world origin: it is never queued as a shell's delayed kill.
+    const bool bDirectedFire = !AimedQueuedVictims.IsEmpty() || !OwnerCompany->CasualtySourceLocation.IsNearlyZero();
     if (bDirectedFire) SourceLocation = OwnerCompany->CasualtySourceLocation;
-    const int32 FiguresLost = FMath::Max(0, SoldierComponents.Num() - PendingKillCount - GetDesiredVisualCount());
+    const int32 AimedFinalBearerLoss = !AimedQueuedVictims.IsEmpty() && bColourBearerAlive && ColourBearer &&
+        OwnerCompany->CurrentStrength == 0 && AimedQueuedVictims.Contains(TWeakObjectPtr<USkeletalMeshComponent>(ColourBearer.Get())) ? 1 : 0;
+    const int32 FiguresLost = FMath::Max(0, SoldierComponents.Num() - PendingKillCount - GetDesiredVisualCount()) + AimedFinalBearerLoss;
     FStrategyImpactRegistry::FImpact CasualtyImpact;
     const float CasualtyNow = GetWorld()->GetTimeSeconds();
     const int32 StandingBeforeCasualty = SoldierComponents.Num();
@@ -1114,6 +1118,70 @@ void UStrategyInfantryVisualComponent::ProcessPendingKills()
     }
 }
 
+void UStrategyInfantryVisualComponent::QueueAimedVictims(
+    const TArray<TWeakObjectPtr<USkeletalMeshComponent>>& AimedVictims, bool bAimedBearer)
+{
+    AimedQueuedVictims = AimedVictims;
+    if (bAimedBearer && bColourBearerAlive && ColourBearer &&
+        !AimedQueuedVictims.Contains(TWeakObjectPtr<USkeletalMeshComponent>(ColourBearer.Get())))
+        AimedQueuedVictims.Add(TWeakObjectPtr<USkeletalMeshComponent>(ColourBearer.Get()));
+}
+
+void UStrategyInfantryVisualComponent::GroundProbe(const TCHAR* ProbeWhere, const USceneComponent* ProbeSoldier)
+{
+    // Test (-Strategy1864GroundProbe): every 2 s a company logs man 0's feet against the computed and the visible ground, and
+    // the lowest and highest man over his ground.
+    static const bool bGroundProbe = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864GroundProbe"));
+    if (!bGroundProbe || !ProbeSoldier || !OwnerCompany || !GetWorld()) return;
+    const double ProbeNow = GetWorld()->GetTimeSeconds();
+    if (ProbeNow - GroundProbeLast < 2.0) return;
+    GroundProbeLast = ProbeNow;
+    const FVector ProbeFeet = ProbeSoldier->GetComponentLocation();
+    FHitResult ProbeHit;
+    FCollisionQueryParams ProbeParams(SCENE_QUERY_STAT(Strategy1864GroundProbe), false, OwnerCompany);
+    const bool bProbeHit = GetWorld()->LineTraceSingleByChannel(ProbeHit, ProbeFeet + FVector(0, 0, 5000), ProbeFeet - FVector(0, 0, 5000), ECC_Visibility, ProbeParams);
+    float ProbeLow = 1.e9f, ProbeHigh = -1.e9f;
+    int32 ProbeLowIndex = -1;
+    for (int32 ProbeIndex = 0; ProbeIndex < SoldierComponents.Num(); ++ProbeIndex)
+    {
+        if (!SoldierComponents[ProbeIndex]) continue;
+        const FVector ProbeAt = SoldierComponents[ProbeIndex]->GetComponentLocation();
+        const float ProbeOff = float(ProbeAt.Z - UStrategyTerrainQueryLibrary::GetEffectiveGroundZ(this, ProbeAt));
+        if (ProbeOff < ProbeLow) { ProbeLow = ProbeOff; ProbeLowIndex = ProbeIndex; }
+        ProbeHigh = FMath::Max(ProbeHigh, ProbeOff);
+    }
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-GROUNDPROBE %s %s feet=%.0f computed=%.0f visible=%.0f (%s) actor=%.0f men=%d feet-over-ground min=%.0f (man %d) max=%.0f"), *OwnerCompany->StableUnitId.ToString(), ProbeWhere,
+        ProbeFeet.Z, UStrategyTerrainQueryLibrary::GetEffectiveGroundZ(this, ProbeFeet), bProbeHit ? ProbeHit.ImpactPoint.Z : -1.0,
+        bProbeHit && ProbeHit.GetActor() ? *ProbeHit.GetActor()->GetName() : TEXT("-"), OwnerCompany->GetActorLocation().Z, SoldierComponents.Num(), ProbeLow, ProbeLowIndex, ProbeHigh);
+}
+
+FVector UStrategyInfantryVisualComponent::SoldierOnGround(int32 GroundIndex, const FVector& PlaneWorld, float HeightAboveGround, bool bGroundTarget)
+{
+    if (!OwnerCompany) return PlaneWorld;
+    // Men fall and the list shrinks: then every man samples his ground afresh.
+    // So does a unit lifted or lowered more than 2 m (set down on a newly built field, or a long climb): the samples were taken
+    // on the old ground, and a man who has not moved sideways would keep them.
+    const float GroundUnitZ = float(OwnerCompany->GetActorLocation().Z);
+    if (SoldierGroundSamples.Num() != SoldierComponents.Num() || FMath::Abs(GroundUnitZ - SoldierGroundUnitZ) > 200.f)
+    {
+        SoldierGroundSamples.Init(FVector(0.f, 0.f, -1.e9f), SoldierComponents.Num());
+        SoldierGroundTargetSamples.Init(FVector(0.f, 0.f, -1.e9f), SoldierComponents.Num());
+        SoldierGroundUnitZ = GroundUnitZ;
+    }
+    // The target and the man's own place each keep their sample: one shared would be taken afresh twice a frame on the march.
+    TArray<FVector>& GroundSamples = bGroundTarget ? SoldierGroundTargetSamples : SoldierGroundSamples;
+    if (!GroundSamples.IsValidIndex(GroundIndex)) return PlaneWorld;
+    FVector& GroundSample = GroundSamples[GroundIndex];
+    if (GroundSample.Z < -1.e8f || FVector::DistSquared2D(GroundSample, PlaneWorld) > 30.f * 30.f)
+    {
+        GroundSample = FVector(PlaneWorld.X, PlaneWorld.Y, UStrategyTerrainQueryLibrary::GetEffectiveGroundZ(this, PlaneWorld));
+    }
+    // His height above the ground is his slot's own (feet, kneeling), not the height his place has in the unit's frame: that
+    // frame may lean with the slope (a man 20 m down the column would sink metres), and the origin may cut a crest between the
+    // route's points. The men follow the ground, not the origin.
+    return FVector(PlaneWorld.X, PlaneWorld.Y, GroundSample.Z + HeightAboveGround);
+}
+
 void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* Near, const FVector* ConeOrigin)
 {
     // Remove only the chosen figures; all surviving figure identities and slots remain intact.
@@ -1121,16 +1189,29 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
     const bool bMoving = OwnerCompany && OwnerCompany->HumanAnimationStateComponent &&
         (OwnerCompany->HumanAnimationStateComponent->CurrentAction == EStrategyHumanAnimationAction::Walk ||
          OwnerCompany->HumanAnimationStateComponent->CurrentAction == EStrategyHumanAnimationAction::Run);
-    for (int32 k = 0; k < Count && SoldierComponents.Num() > 0; ++k)
+    int32 AimedQueueCursor = 0;
+    for (int32 k = 0; k < Count && (SoldierComponents.Num() > 0 || AimedQueueCursor < AimedQueuedVictims.Num()); ++k)
     {
+        int32 AimedChosenIndex = INDEX_NONE;
+        bool AimedChosenBearer = false;
+        while (AimedQueueCursor < AimedQueuedVictims.Num())
+        {
+            USkeletalMeshComponent* AimedQueuedMan = AimedQueuedVictims[AimedQueueCursor++].Get();
+            if (!IsValid(AimedQueuedMan)) continue;
+            if (bColourBearerAlive && AimedQueuedMan == ColourBearer.Get()) { AimedChosenBearer = true; break; }
+            AimedChosenIndex = SoldierComponents.IndexOfByKey(AimedQueuedMan);
+            if (AimedChosenIndex != INDEX_NONE) break;
+        }
+        if (AimedChosenBearer) { KillColourBearer(); continue; }
+        if (SoldierComponents.IsEmpty()) break;
         // The colour bearer is one man of the company: he falls as often as any other (front-rank fire hits him more).
-        if (bColourBearerAlive && ColourBearer && !(Near && ConeOrigin) && FMath::RandRange(0, SoldierComponents.Num()) == 0)
+        if (AimedChosenIndex == INDEX_NONE && bColourBearerAlive && ColourBearer && !(Near && ConeOrigin) && FMath::RandRange(0, SoldierComponents.Num()) == 0)
         {
             KillColourBearer();
             continue;
         }
-        int32 i = FMath::RandRange(0, SoldierComponents.Num() - 1);
-        if (Near && ConeOrigin)
+        int32 i = AimedChosenIndex != INDEX_NONE ? AimedChosenIndex : FMath::RandRange(0, SoldierComponents.Num() - 1);
+        if (AimedChosenIndex == INDEX_NONE && Near && ConeOrigin)
         {
             // Case shot: anyone in the cone from the gun (about 11 degrees either side of its line) may fall;
             // outside it, no one. If the cone is empty of men, those nearest its line.
@@ -1157,7 +1238,7 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
         // Rifle fire: the men fall where the bullets arrive, on the side facing the shooters (in line the front rank from ahead, the rear
         // rank from behind, the outer files from a flank; in square mostly the face turned to the shooters). Without a known direction:
         // random. The men behind step up (StepUpFiles), the line closes later.
-        if (OwnerCompany && !OwnerCompany->CasualtySourceLocation.IsNearlyZero() && !(Near && ConeOrigin))
+        if (AimedChosenIndex == INDEX_NONE && OwnerCompany && !OwnerCompany->CasualtySourceLocation.IsNearlyZero() && !(Near && ConeOrigin))
         {
             const FVector ShotLocal = OwnerCompany->GetActorTransform().InverseTransformPosition(OwnerCompany->CasualtySourceLocation);
             const float ShotAngle = FMath::Abs(FMath::RadiansToDegrees(FMath::Atan2(ShotLocal.Y, ShotLocal.X)));   // 0 = straight ahead
@@ -1254,6 +1335,10 @@ void UStrategyInfantryVisualComponent::KillSoldiers(int32 Count, const FVector* 
         if (SoldierBusyUntil.IsValidIndex(i)) { SoldierBusyUntil.RemoveAt(i); }
         if (SoldierFirePhase.IsValidIndex(i)) { SoldierFirePhase.RemoveAt(i); }
     }
+    AimedQueuedVictims.Reset();
+    // A wiped-out company leaves no colour bearer standing alone, aimed fire or not.
+    if (SoldierComponents.IsEmpty() && bColourBearerAlive && ColourBearer && OwnerCompany && OwnerCompany->CurrentStrength == 0)
+        KillColourBearer();
 }
 
 void UStrategyInfantryVisualComponent::AlignWeapons()
@@ -1623,8 +1708,9 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
         {
             // Only newly created figures are placed immediately; existing men always walk.
             float InitialDrawnYaw = 0.f;
-            Soldier->SetRelativeLocation(VisualPath.bInitialized ? OwnerCompany->GetActorTransform().InverseTransformPosition(
-                VisualPath.Goal(Settle.Slot, false, InitialDrawnYaw)) : Settle.Slot);
+            const FVector InitialPlane = VisualPath.bInitialized ? VisualPath.Goal(Settle.Slot, false, InitialDrawnYaw)
+                : OwnerCompany->GetActorTransform().TransformPosition(Settle.Slot);
+            Soldier->SetRelativeLocation(OwnerCompany->GetActorTransform().InverseTransformPosition(SoldierOnGround(VisualIndex, InitialPlane, float(Settle.Slot.Z))));
             Soldier->SetRelativeRotation(FRotator(0.0f, Slot.FacingYaw + SoldierMeshYawOffset, 0.0f));
             Settle.bPlaced = true;
             Settle.bActive = false;
@@ -2233,7 +2319,7 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         const float SpecialFigureSpeed = bSpreadCrawling ? FMath::Min(FigureSpeed, VisualWalkSpeed * 0.40f) : FigureSpeed;
         FVector FigureWorld = VisualUnit.TransformPosition(Here);
         const FVector FigureBefore = FigureWorld;
-        const FVector FigureTarget = VisualUnit.TransformPosition(Settle.Goal);
+        const FVector FigureTarget = SoldierOnGround(i, VisualUnit.TransformPosition(Settle.Goal), float(Settle.Slot.Z), true);
         // Integrate presentation velocity every frame, with braking near the slot.
         // Substeps affect no orders, simulation positions, collision or game clocks.
         float MorphAlpha = -1.f;
@@ -2245,7 +2331,7 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             MorphAlpha = Alpha;
             const float Eased = Alpha * Alpha * (3.f - 2.f * Alpha);
             const FVector Local = FMath::Lerp(Settle.ReformStartLocal, Settle.Goal, Eased);
-            FigureWorld = VisualUnit.TransformPosition(Local);
+            FigureWorld = SoldierOnGround(i, VisualUnit.TransformPosition(Local), float(Settle.Slot.Z));
             Settle.WorldVelocity = DeltaTime > 0.f ? (FigureWorld - FigureBefore) / DeltaTime : FVector::ZeroVector;
             if (Alpha >= 1.f) Settle.ReformDeadline = -1.f;
         }
@@ -2270,8 +2356,12 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             FigureWorld = FigureTarget;
         }
         else FStrategyVisualFormationPath::SmoothTravel(FigureWorld, Settle.WorldVelocity, FigureTarget, DeltaTime, SpecialFigureSpeed);
+        // The smoothing runs in three dimensions and lags behind the target on a slope (half a metre into a 13° rise): the man
+        // himself is set on the ground where he is, not only his target.
+        FigureWorld = SoldierOnGround(i, FigureWorld, float(Settle.Slot.Z));
         const FVector Step = FigureWorld - FigureBefore;
         Soldier->SetRelativeLocation(VisualUnit.InverseTransformPosition(FigureWorld));
+        if (i == 0) GroundProbe(TEXT("walk"), Soldier);
         // He faces the way he runs while he is far from his place, and turns to the front as he comes in.
         const float RunYaw = VisualUnit.InverseTransformVectorNoScale(Settle.WorldVelocity).Rotation().Yaw + SoldierMeshYawOffset;
         const bool bFigureBackstep = OwnerCompany->OrderComponent &&
@@ -3918,7 +4008,9 @@ bool UStrategyInfantryVisualComponent::UpdateColumnDrill(float DrillDt)
         const float DrillLateral = FMath::Lerp(DrillMan.DrillLateral, DrillMan.DrillFinalLateral, DrillSpacingAlpha) +
             DrillMan.DrillLaneShift * DrillLaneSpacing * DrillTailAlpha;
         float DrillYaw = 0.f;
-        const FVector DrillWorld = FStrategyColumnDrill::Sample(DrillPath, DrillS, DrillLateral, DrillYaw);
+        // The drill path keeps the height the column's origin had where it passed (its trail), not today's: a man on it stands
+        // on his own ground.
+        const FVector DrillWorld = SoldierOnGround(DrillIndex, FStrategyColumnDrill::Sample(DrillPath, DrillS, DrillLateral, DrillYaw), 0.f);
         // The man's own ground speed this frame (inner/outer lane, lane widening): it drives his stride, so feet do not slide.
         const FVector DrillWasWorld = VisualPath.PreviousUnit.TransformPosition(DrillSoldier->GetRelativeLocation());
         const float DrillGroundSpeed = DrillDt > 0.f ? float(FVector::Dist2D(DrillWasWorld, DrillWorld)) / DrillDt : 0.f;
@@ -3933,6 +4025,7 @@ bool UStrategyInfantryVisualComponent::UpdateColumnDrill(float DrillDt)
             DrillYaw - DrillUnit.Rotator().Yaw + SoldierMeshYawOffset, DrillDt, 120.f);
         DrillRotation.Roll = 0.f;
         DrillSoldier->SetRelativeLocation(DrillUnit.InverseTransformPosition(DrillWorld));
+        if (DrillIndex == 0) GroundProbe(TEXT("drill"), DrillSoldier);
         DrillSoldier->SetRelativeRotation(DrillRotation);
         DrillFacingComplete &= FMath::Abs(FMath::FindDeltaAngleDegrees(DrillRotation.Yaw,
             DrillYaw - DrillUnit.Rotator().Yaw + SoldierMeshYawOffset)) < 0.1f;

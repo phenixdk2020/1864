@@ -8,6 +8,7 @@
 #include "../Formations/StrategyFormationTransitionComponent.h"
 
 #include "StrategyAITelemetryComponent.h"
+#include "StrategyBattalionPlanComponent.h"
 #include "StrategyDecisionLog.h"
 #include "StrategyDoctrineComponent.h"
 #include "StrategyOfficerProfileComponent.h"
@@ -518,6 +519,13 @@ void UStrategyFieldOfficerComponent::TickComponent(float DeltaTime, ELevelTick T
         TEXT("mission uden ny accepteret ordre: ikke erstattet; alternativer uden for den besøgte gren: ikke evalueret"));
 }
 
+// The battalion leader's plan on the HQ this unit answers to (null without one).
+static UStrategyBattalionPlanComponent* FieldBattalionPlan(const AStrategyUnit* FieldUnit)
+{
+    if (!FieldUnit || !FieldUnit->CommandComponent || !IsValid(FieldUnit->CommandComponent->CurrentCommandParent)) return nullptr;
+    return FieldUnit->CommandComponent->CurrentCommandParent->FindComponentByClass<UStrategyBattalionPlanComponent>();
+}
+
 void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
 {
     if (!OwnerUnit || !Enemy || !OwnerUnit->CommandComponent || !IsValid(OwnerUnit->CommandComponent->CurrentCommandParent))
@@ -567,25 +575,42 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
         return;
     }
     const int32 MaxPlaces = Skill < 0.55f ? 1 : 9;
-    // A reserve: a cautious, level-headed leader with four companies or more keeps the rearmost back, behind the fire base, to
-    // put in where it is needed (-Strategy1864HoldReserve forces it for a test).
-    AStrategyUnit* Reserve = nullptr;
+    // A battalion of four companies or more always keeps about a quarter back (rounded down, at least one: the doctrine of the
+    // period, Taktik 1867 p.509); the odds the plan sees decide only how soon it goes in. A company once put in stays in.
+    // Without a plan, -Strategy1864HoldReserve forces it for a test.
+    TArray<AStrategyUnit*> Reserves;
     {
-        const UStrategyOfficerProfileComponent* Leader = OwnerUnit->CommandComponent->CurrentCommandParent->OfficerProfileComponent;
-        const float Hold = Leader ? Leader->Caution * 0.4f + Leader->TacticalSkill * 0.3f - Leader->Aggression * 0.2f : 20.0f;
-        if (Group.Num() >= 4 && (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864HoldReserve")) || Hold > 32.0f))
+        UStrategyBattalionPlanComponent* ReservePlan = FieldBattalionPlan(OwnerUnit);
+        if (ReservePlan) { ReservePlan->Evaluate(); }
+        const bool bReserveWanted = ReservePlan ? ReservePlan->WantsReserve() : FParse::Param(FCommandLine::Get(), TEXT("Strategy1864HoldReserve"));
+        int32 ReserveWanted = Group.Num() >= 4 && bReserveWanted ? FMath::Max(1, Group.Num() / 4) : 0;
+        for (const AStrategyUnit* U : Group)
         {
-            float Farthest = -1.0f;
+            if (U->FieldOfficerComponent && U->FieldOfficerComponent->bReserveReleased) { --ReserveWanted; }
+        }
+        if (ReserveWanted > 0)
+        {
+            // Those behind the middle and out of the line of fire: far from the enemy, close to the group's axis.
+            FVector ReserveCentre = FVector::ZeroVector;
+            for (const AStrategyUnit* U : Group) { ReserveCentre += U->GetActorLocation(); }
+            ReserveCentre /= float(Group.Num());
+            const FVector ReserveAxis = (ReserveCentre - Enemy->GetActorLocation()).GetSafeNormal2D();
+            const FVector ReserveSide(-ReserveAxis.Y, ReserveAxis.X, 0.0f);
+            TArray<AStrategyUnit*> ReserveCandidates;
             for (AStrategyUnit* U : Group)
             {
-                const float D = FVector::Dist2D(U->GetActorLocation(), Enemy->GetActorLocation());
-                if (const UStrategyFieldOfficerComponent* ReserveOfficer = U->FieldOfficerComponent)
-                {
-                    if (ReserveOfficer->bReserveReleased) { continue; }
-                }
-                if (D > Farthest) { Farthest = D; Reserve = U; }
+                if (!U->FieldOfficerComponent || !U->FieldOfficerComponent->bReserveReleased) { ReserveCandidates.Add(U); }
             }
-            Group.Remove(Reserve);
+            auto ReserveScore = [&](const AStrategyUnit* U)
+            {
+                const FVector ReserveRel = U->GetActorLocation() - Enemy->GetActorLocation();
+                return FVector::DotProduct(ReserveRel, ReserveAxis) - 0.5f * FMath::Abs(FVector::DotProduct(ReserveRel, ReserveSide));
+            };
+            Algo::Sort(ReserveCandidates, [&](const AStrategyUnit* A, const AStrategyUnit* B) { return ReserveScore(A) > ReserveScore(B); });
+            // The line keeps at least two companies (a fire base and a flank).
+            ReserveWanted = FMath::Min(ReserveWanted, FMath::Min(ReserveCandidates.Num(), Group.Num() - 2));
+            for (int32 ReserveIndex = 0; ReserveIndex < ReserveWanted; ++ReserveIndex) { Reserves.Add(ReserveCandidates[ReserveIndex]); }
+            for (AStrategyUnit* U : Reserves) { Group.Remove(U); }
         }
     }
     FVector Centre = FVector::ZeroVector;
@@ -620,13 +645,13 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
                 C->FlankRole, Skill, C->FlankK, MaxPlaces, Captain ? Captain->Discipline : -1.f, *Group[Base]->StableUnitId.ToString()),
             TEXT("andre roller: midterkompagni er ildbase; flankeregel begrænses af maxPlaces og disciplinudfald; ingen ekstra RNG i loggen"));
     }
-    if (Reserve)
+    for (int32 ReserveIndex = 0; ReserveIndex < Reserves.Num(); ++ReserveIndex)
     {
-        if (UStrategyFieldOfficerComponent* C = Reserve->FindComponentByClass<UStrategyFieldOfficerComponent>())
+        if (UStrategyFieldOfficerComponent* C = Reserves[ReserveIndex]->FindComponentByClass<UStrategyFieldOfficerComponent>())
         {
             if (C->ReserveHeldSince < 0.0f) { C->ReserveHeldSince = Now; }
             C->FlankRole = 3;
-            C->FlankK = 0;
+            C->FlankK = ReserveIndex;   // a second reserve company stands beside the first
             C->FlankSkill = Skill;
             C->FlankUntil = Now + 90.0f;
             C->FlankSince = Now;
@@ -638,8 +663,8 @@ void UStrategyFieldOfficerComponent::AssignFlanks(AStrategyUnit* Enemy)
     {
         if (UStrategyFieldOfficerComponent* C = U->FindComponentByClass<UStrategyFieldOfficerComponent>()) { C->FlankSince = Now; }
     }
-    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FLANK: %d companies against %s: %s is the fire base%s"), Group.Num() + (Reserve ? 1 : 0), *Enemy->DisplayName.ToString(), *Group[Base]->DisplayName.ToString(),
-        Reserve ? *FString::Printf(TEXT(", %s in reserve"), *Reserve->DisplayName.ToString()) : TEXT(""));
+    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-FLANK: %d companies against %s: %s is the fire base%s"), Group.Num() + Reserves.Num(), *Enemy->DisplayName.ToString(), *Group[Base]->DisplayName.ToString(),
+        Reserves.Num() > 0 ? *FString::Printf(TEXT(", %d in reserve (%s)"), Reserves.Num(), *Reserves[0]->DisplayName.ToString()) : TEXT(""));
 }
 
 float UStrategyFieldOfficerComponent::PreferredFraction() const
@@ -688,10 +713,28 @@ FVector UStrategyFieldOfficerComponent::ApproachGoalAt(AStrategyUnit* Enemy, flo
     FVector Back = (BasePlace - Target).GetSafeNormal2D();
     if (FlankRole == 3)
     {
-        // The reserve stands ninety metres behind the fire base, until the base is hurt, the time is up, or the base is gone.
-        const bool bRelease = !Base || !Base->IsCombatEffective() || Base->CurrentStrength < Base->InitialStrength * 0.75f || Base->Morale < 55.0f || (ReserveHeldSince >= 0.0f && Now - ReserveHeldSince > 240.0f);
+        // The reserve stands 120 m behind the fire base (Taktik 1867: second line to main body), until the base is hurt, the time
+        // is up, or the base is gone. How hurt depends on the odds: outnumbered he closes a gap at once (see GetReserveReleaseShare).
+        const UStrategyBattalionPlanComponent* ReleasePlan = FieldBattalionPlan(OwnerUnit);
+        const float ReleaseShare = ReleasePlan ? ReleasePlan->GetReserveReleaseShare() : 0.75f;
+        const float ReleaseMorale = ReleasePlan && ReleasePlan->IsOutnumbered() ? 70.0f : 55.0f;
+        bool bRelease = !Base || !Base->IsCombatEffective() || Base->CurrentStrength < Base->InitialStrength * ReleaseShare || Base->Morale < ReleaseMorale || (ReserveHeldSince >= 0.0f && Now - ReserveHeldSince > 240.0f);
+        // The leader's own reasons. Outnumbered: early, to close a gap (above) or meet a threat to a wing. With the odds: late, to
+        // decide the fight once the pinned enemy is shaken, or to follow up a break.
+        const TCHAR* ReleaseReason = bRelease ? TEXT("hul") : nullptr;
+        if (ReleasePlan)
+        {
+            const AStrategyUnit* ReleaseTarget = ReleasePlan->GetMainTarget();
+            const bool bReleaseOdds = ReleasePlan->GetStrengthRatio() >= ReleasePlan->ReserveRatio;
+            if (!bRelease && !ReleasePlan->WantsReserve()) { bRelease = true; ReleaseReason = TEXT("for-faa-kompagnier"); }
+            else if (!bRelease && ReleasePlan->HasWingThreat()) { bRelease = true; ReleaseReason = TEXT("flanketrussel"); }
+            else if (!bRelease && bReleaseOdds && ReleasePlan->GetPhase() == EStrategyBattalionPhase::Flank && ReleaseTarget && ReleaseTarget->Morale < 55.0f)
+            { bRelease = true; ReleaseReason = TEXT("afgoerelse"); }
+            else if (!bRelease && ReleasePlan->GetPhase() == EStrategyBattalionPhase::Exploit) { bRelease = true; ReleaseReason = TEXT("gennembrud"); }
+        }
         if (bRelease)
         {
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-RESERVE %s indsat grund=%s"), *OwnerUnit->DisplayName.ToString(), ReleaseReason ? ReleaseReason : TEXT("-"));
             STRATEGY1864_DECISION(OwnerUnit, TEXT("Reserve"), TEXT("Sæt reserve ind"), TEXT("Ildbase tabt/svækket eller holdtid udløbet"),
                 FString::Printf(TEXT("basePresent=%d baseEffective=%d baseStrength=%d baseInitial=%d baseMorale=%.2f reserveAge=%.2f"),
                     Base != nullptr, Base && Base->IsCombatEffective(), Base ? Base->CurrentStrength : 0, Base ? Base->InitialStrength : 0,
@@ -703,12 +746,28 @@ FVector UStrategyFieldOfficerComponent::ApproachGoalAt(AStrategyUnit* Enemy, flo
             return Target + (Own - Target).GetSafeNormal2D() * Radius;
         }
         OutNote = TEXT("i reserve");
-        return BasePlace + Back * 9000.0f;
+        const FVector ReserveBeside(-Back.Y, Back.X, 0.0f);
+        const float ReserveOffset = FlankK == 0 ? 0.0f : ((FlankK + 1) / 2) * 7200.0f * (FlankK % 2 == 1 ? 1.0f : -1.0f);
+        // Behind where the base is going, not where it stands: on the march the reserve follows instead of falling back.
+        const FVector ReserveBasePlace = Base && Base->OrderComponent && Base->OrderComponent->IsPhysicallyExecuting() && Base->OrderComponent->GetCurrentOrder().IsValidOrder()
+            ? Base->OrderComponent->GetCurrentOrder().TargetLocation : BasePlace;
+        return ReserveBasePlace + Back * 12000.0f + ReserveBeside * ReserveOffset;
     }
     if (FlankRole == 1)
     {
         OutNote = TEXT("ildbasen: holder og skyder");
         return Target + Back * Radius;
+    }
+    // A flank goes round only once the fire base holds the enemy under fire; until then it keeps abreast of the base.
+    if (FieldBattalionPlan(OwnerUnit))
+    {
+        // The flank's own target must be under our fire (the base is engaging it), not just any enemy.
+        const bool bFlankFoePinned = Foe->CombatComponent && Foe->CombatComponent->UnderFireRemainingSeconds > 0.0f;
+        if (!bFlankFoePinned && Base)
+        {
+            OutNote = TEXT("flanken venter på ildbasen");
+            return Target + Back.RotateAngleAxis(FlankSign * 12.0f * FlankK, FVector::UpVector) * (Radius * 1.15f);
+        }
     }
     // A flank: at an angle to the enemy (45 degrees for the next to the base, 90 for the second), at the same fire distance.
     const float Angle = FMath::Min(80.0f, 45.0f * FlankK) * FMath::Lerp(0.7f, 1.1f, FlankSkill);   // a good leader sends them wider round
@@ -848,14 +907,32 @@ void UStrategyFieldOfficerComponent::ThinkInfantry(AStrategyUnit* Enemy, float D
     }
     const FStrategyOrder Order = OwnerUnit->OrderComponent->GetCurrentOrder();
     const bool bMoving = OwnerUnit->OrderComponent->IsPhysicallyExecuting();
-    if (IsOffensive() && !bMoving)
+    // The reserve is told off when the attack is under way, not first at the firing line: a battalion marching on a seen enemy
+    // shares out the roles at once, and the company kept back leaves the march for its place behind the fire base.
+    bool bReserveLeavesMarch = false;
+    if (IsOffensive() && bMoving && Distance < 60000.0f)
+    {
+        if (GetWorld()->GetTimeSeconds() > FlankUntil || !FlankEnemy.IsValid())
+        {
+            const UStrategyBattalionPlanComponent* MarchPlan = FieldBattalionPlan(OwnerUnit);
+            if (MarchPlan && MarchPlan->WantsReserve()) { AssignFlanks(Enemy); }
+        }
+        // On its way the reserve still weighs every think whether it must go in (a gap does not wait for it to stand still).
+        bReserveLeavesMarch = FlankRole == 3;
+    }
+    if (IsOffensive() && (!bMoving || bReserveLeavesMarch))
     {
         FString ApproachNote;
         FVector Foe = Enemy->GetActorLocation();
         FVector Goal = ApproachGoal(Enemy, Range, ApproachNote, Foe);
+        if (bMoving && FlankRole == 3 && Order.Type == EStrategyOrderType::Advance && FVector::Dist2D(Goal, Order.TargetLocation) < 6000.0f)
+        {
+            return;   // already on its way to (about) the same place behind the base
+        }
         // On to the fire distance, or (for a flank) to the place at an angle to the enemy, even when already within range.
         const bool bFlankToGo = (FlankRole == 2 || FlankRole == 3) && FVector::Dist2D(OwnerUnit->GetActorLocation(), Goal) > 2000.0f;
-        if (Distance > Range * 0.95f || bFlankToGo)
+        // A reserve just released on the march must leave its waiting place even when already within range.
+        if (Distance > Range * 0.95f || bFlankToGo || (bReserveLeavesMarch && FlankRole != 3))
         {
             if (Order.IsValidOrder() && FVector::Dist2D(Goal, Order.TargetLocation) > 40000.0f)
             {
@@ -923,12 +1000,64 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
         return;
     }
     const FStrategyOrder Order = OwnerUnit->OrderComponent->GetCurrentOrder();
-    if (Order.Type == EStrategyOrderType::Charge && OwnerUnit->OrderComponent->IsPhysicallyExecuting())
+    // A pursuit goes at most 250 m from where it began; then the squadron breaks off and rallies.
+    bool bCavalryLeashHit = false;
+    if (bCavalryPursuing && FVector::Dist2D(OwnerUnit->GetActorLocation(), CavalryPursuitOrigin) > 25000.0f)
     {
-        STRATEGY1864_DECISION(OwnerUnit, TEXT("Rytterofficer"), TEXT("Fortsæt charge"), TEXT("Aktivt charge har forrang"),
-            FString::Printf(TEXT("distanceCm=%.1f"), Distance), TEXT("nyt mål/withdraw/vent: ikke valgt under aktivt charge"));
-        return;
+        bCavalryPursuing = false;
+        bCavalryLeashHit = true;
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-CAVALRY %s forfoelgelse-slut 250 m naaet"), *OwnerUnit->DisplayName.ToString());
     }
+    if (!bCavalryLeashHit && Order.Type == EStrategyOrderType::Charge && OwnerUnit->OrderComponent->IsPhysicallyExecuting())
+    {
+        // The target has formed a steady square while the squadron rode in: it breaks off and rallies instead of riding into the
+        // bayonets and the fire (horses refuse a formed square). Too close to wheel away (25 m), it goes through with it.
+        // A square still forming with good morale and cohesion counts too while the squadron is over 100 m off: it will be
+        // closed before the horses arrive (Test 4: the reaction square formed during a 400 m charge and cost 48 of 80 riders).
+        const AStrategyUnit* ChargeSquare = nullptr;
+        bool bChargeSquareForming = false;
+        if (!bCavalryPursuing && OwnerUnit->ContactComponent)
+        {
+            for (const FStrategyContactRecord& AbortContact : OwnerUnit->ContactComponent->GetKnownContacts())
+            {
+                const AStrategyUnit* AbortFoe = AbortContact.ObservedUnit.Get();
+                FString AbortWhy;
+                if (!AbortContact.bCurrentlyVisible || !IsValid(AbortFoe) || AbortFoe->Side == OwnerUnit->Side || !AbortFoe->FormationComponent ||
+                    AbortFoe->FormationComponent->CurrentFormation != EStrategyFormationType::Square ||
+                    FVector::Dist2D(AbortFoe->GetActorLocation(), Order.TargetLocation) >= 8000.0f) continue;
+                const bool bAbortForming = AbortFoe->FormationTransition && AbortFoe->FormationTransition->IsReforming() &&
+                    AbortFoe->Morale >= 50.0f && AbortFoe->Cohesion >= 45.0f && AbortFoe->IsCombatEffective() &&
+                    FVector::Dist2D(AbortFoe->GetActorLocation(), OwnerUnit->GetActorLocation()) > 10000.0f;
+                if (bAbortForming || !IsOpenToCharge(AbortFoe, AbortWhy))
+                {
+                    ChargeSquare = AbortFoe;
+                    bChargeSquareForming = bAbortForming;
+                    break;
+                }
+            }
+        }
+        if (!ChargeSquare || FVector::Dist2D(ChargeSquare->GetActorLocation(), OwnerUnit->GetActorLocation()) < 2500.0f)
+        {
+            STRATEGY1864_DECISION(OwnerUnit, TEXT("Rytterofficer"), TEXT("Fortsæt charge"), TEXT("Aktivt charge har forrang"),
+                FString::Printf(TEXT("distanceCm=%.1f"), Distance), TEXT("nyt mål/withdraw/vent: ikke valgt under aktivt charge"));
+            return;
+        }
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-CAVALRY %s afbryder-chok %s %s (%.0f m, moral %.0f, sammenhold %.0f)"), *OwnerUnit->DisplayName.ToString(),
+            *ChargeSquare->DisplayName.ToString(), bChargeSquareForming ? TEXT("danner karre") : TEXT("staar i fast karre"),
+            FVector::Dist2D(ChargeSquare->GetActorLocation(), OwnerUnit->GetActorLocation()) / 100.0f, ChargeSquare->Morale, ChargeSquare->Cohesion);
+        // The charge order goes first: the rally move or the fall back may send no order (already at the point, cooldown).
+        OwnerUnit->OrderComponent->ClearOrder();
+        // Without a rally point the rally below sends no order: fall back instead.
+        FVector AbortRallyPoint;
+        const UStrategyBattalionPlanComponent* AbortPlan = FieldBattalionPlan(OwnerUnit);
+        if (!AbortPlan || !AbortPlan->GetRallyPoint(AbortRallyPoint))
+        {
+            FallBack(FString::Printf(TEXT("%s står i fast karré: chokket afbrydes"), *ChargeSquare->DisplayName.ToString()), 30000.0f);
+            return;
+        }
+        LastChargeTime = GetWorld()->GetTimeSeconds() - 5.0f;   // the rally below takes it back behind the own line
+    }
+    if (!(Order.Type == EStrategyOrderType::Charge && OwnerUnit->OrderComponent->IsPhysicallyExecuting())) { bCavalryPursuing = false; }
     if (PlayerOrderUnderWay() || !Enemy ||
         IsFinishedPlayerOrder(OwnerUnit, Order))
     {
@@ -938,6 +1067,80 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
         return;
     }
     const float Now = GetWorld()->GetTimeSeconds();
+    // A squadron under a battalion with a plan has a mission from its leader: cover the open flank and wait for a chance.
+    const UStrategyBattalionPlanComponent* CavalryPlan = Cavalry && OwnerUnit->bOfficerAIEnabled ? FieldBattalionPlan(OwnerUnit) : nullptr;
+    auto CavalryMoveTo = [&](const FVector& CavalryPoint, float CavalryFacingYaw, const TCHAR* CavalryWhat, const FString& CavalryWhy)
+    {
+        if (FVector::Dist2D(OwnerUnit->GetActorLocation(), CavalryPoint) < 3000.0f) return false;
+        if (Now - LastMissionOrderTime < 8.0f && FVector::Dist2D(CavalryPoint, LastMissionPoint) < 2000.0f) return true;   // already on the way
+        FStrategyOrder CavalryMove;
+        CavalryMove.Type = EStrategyOrderType::Move;
+        CavalryMove.TargetLocation = CavalryPoint;
+        CavalryMove.FacingYaw = CavalryFacingYaw;
+        CavalryMove.bHasFacing = true;
+        CavalryMove.Authority = EStrategyOrderAuthority::OfficerAI;
+        if (!OwnerUnit->OrderComponent->SetOrder(CavalryMove)) return false;
+        LastMissionOrderTime = Now;
+        LastMissionPoint = CavalryPoint;
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-CAVALRY %s %s %s"), *OwnerUnit->DisplayName.ToString(), CavalryWhat, *CavalryWhy);
+        Decide(CavalryWhat, CavalryWhy);
+        return true;
+    };
+    // After a charge: back behind the own line to re-form (30-60 s once there), then ready again.
+    // A broken enemy close by is pursued first (Routed units are not combat effective, so the charge search below skips them).
+    AStrategyUnit* CavalryBrokenFoe = nullptr;
+    if (CavalryPlan && !bCavalryLeashHit && OwnerUnit->ContactComponent)
+        for (const FStrategyContactRecord& PursuitContact : OwnerUnit->ContactComponent->GetKnownContacts())
+            if (AStrategyUnit* PursuitFoe = PursuitContact.ObservedUnit.Get())
+                if (PursuitContact.bCurrentlyVisible && PursuitFoe->Side != OwnerUnit->Side && PursuitFoe->Side != EStrategySide::Neutral &&
+                    PursuitFoe->UnitState == EStrategyUnitState::Routed && PursuitFoe->CurrentStrength > 0 &&
+                    FVector::Dist2D(PursuitFoe->GetActorLocation(), OwnerUnit->GetActorLocation()) < 25000.0f) { CavalryBrokenFoe = PursuitFoe; break; }
+    if (CavalryBrokenFoe && Cavalry && OwnerUnit->Morale > 45.0f && Now >= CavalryRallyUntil)
+    {
+        FStrategyOrder Pursuit;
+        Pursuit.Type = EStrategyOrderType::Charge;
+        Pursuit.TargetLocation = CavalryBrokenFoe->GetActorLocation();
+        Pursuit.FacingYaw = (CavalryBrokenFoe->GetActorLocation() - OwnerUnit->GetActorLocation()).Rotation().Yaw;
+        Pursuit.bHasFacing = true;
+        Pursuit.Authority = EStrategyOrderAuthority::OfficerAI;
+        if (OwnerUnit->OrderComponent->SetOrder(Pursuit))
+        {
+            LastChargeTime = Now;
+            bCavalryPursuing = true;
+            CavalryPursuitOrigin = OwnerUnit->GetActorLocation();
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-CAVALRY %s forfoelg %s"), *OwnerUnit->DisplayName.ToString(), *CavalryBrokenFoe->DisplayName.ToString());
+            Decide(TEXT("Forfølger"), FString::Printf(TEXT("%s flygter: højst 250 m"), *CavalryBrokenFoe->DisplayName.ToString()));
+            return;
+        }
+    }
+    // After a charge: back behind the own line, then 30-60 s to re-form once there, then ready again.
+    if (CavalryPlan && LastChargeTime > 0.0f && Now - LastChargeTime > 4.0f && CavalryRallyUntil < LastChargeTime)
+    {
+        CavalryRallyUntil = Now + 120.0f;   // the ride back; the re-forming time starts on arrival
+        bCavalryRallyArrived = false;
+        if (CavalryPlan->GetRallyPoint(CavalryRallyPoint))
+        {
+            CavalryRallyPoint.Z = OwnerUnit->GetActorLocation().Z;
+            CavalryMoveTo(CavalryRallyPoint, (CavalryRallyPoint - OwnerUnit->GetActorLocation()).Rotation().Yaw + 180.0f, TEXT("samling"),
+                TEXT("efter chokket: rider tilbage bag egne linjer for at slutte op"));
+        }
+        else
+        {
+            CavalryRallyPoint = OwnerUnit->GetActorLocation();
+        }
+        return;
+    }
+    if (CavalryPlan && Now < CavalryRallyUntil)
+    {
+        if (!bCavalryRallyArrived && FVector::Dist2D(OwnerUnit->GetActorLocation(), CavalryRallyPoint) < 3000.0f)
+        {
+            bCavalryRallyArrived = true;
+            CavalryRallyUntil = Now + DecisionRandom.FRandRange(30.0f, 60.0f);
+            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-CAVALRY %s samlet-ved-punktet slutter op %.0f s"), *OwnerUnit->DisplayName.ToString(), CavalryRallyUntil - Now);
+        }
+        Decide(TEXT("Samler sig"), FString::Printf(TEXT("%s (%.0f s)"), bCavalryRallyArrived ? TEXT("Slutter op efter chokket") : TEXT("Rider tilbage for at samles"), CavalryRallyUntil - Now));
+        return;
+    }
     // A target open to a charge within six hundred metres (the nearest such, not just the nearest enemy).
     AStrategyUnit* Target = nullptr;
     FString Why;
@@ -1040,7 +1243,7 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
         FString::Printf(TEXT("target=%s offensive=%d morale=%.1f chargeAge=%.2f cavalryComponent=%d distanceCm=%.1f"),
             Target ? *Target->StableUnitId.ToString() : TEXT("-"), IsOffensive(), OwnerUnit->Morale, Now - LastChargeTime, Cavalry != nullptr, Distance),
         TEXT("CHARGE afvises uden åbent mål, offensiv ordre, moral>55, cooldown>45 og CavalryUnit; ellers prøves ordreautoritet"));
-    if (Target && IsOffensive() && Order.Type != EStrategyOrderType::None &&
+    if (Target && (IsOffensive() || CavalryPlan) && (Order.Type != EStrategyOrderType::None || CavalryPlan) &&
         OwnerUnit->Morale > 55.0f && Now - LastChargeTime > 45.0f && Cavalry)
     {
         FStrategyOrder Charge;
@@ -1059,11 +1262,41 @@ void UStrategyFieldOfficerComponent::ThinkCavalry(AStrategyUnit* Enemy, float Di
                 FString::Printf(TEXT("target=%s distanceCm=%.1f"), *Target->StableUnitId.ToString(), Best), TEXT("CHARGE: SetOrder returnerede false"));
         return;
     }
+    // A steady square: never charge it, but stay in sight as a threat so he keeps in square while our infantry fires into it.
+    if (CavalryPlan)
+    {
+        for (const FStrategyContactRecord& SquareContact : OwnerUnit->ContactComponent->GetKnownContacts())
+        {
+            AStrategyUnit* SquareFoe = SquareContact.ObservedUnit.Get();
+            FString SquareWhy;
+            if (!SquareContact.bCurrentlyVisible || !IsValid(SquareFoe) || SquareFoe->Side == OwnerUnit->Side || SquareFoe->Echelon != EStrategyEchelon::Company ||
+                !SquareFoe->FormationComponent || SquareFoe->FormationComponent->CurrentFormation != EStrategyFormationType::Square || IsOpenToCharge(SquareFoe, SquareWhy)) continue;
+            const float SquareDistance = FVector::Dist2D(SquareFoe->GetActorLocation(), OwnerUnit->GetActorLocation());
+            if (SquareDistance > 45000.0f) continue;
+            // 400 m: a square opens fire at about 200 m (Taktik 1867 p.127), so the threat stands outside it.
+            FVector SquareHold = SquareFoe->GetActorLocation() + (OwnerUnit->GetActorLocation() - SquareFoe->GetActorLocation()).GetSafeNormal2D() * 40000.0f;
+            SquareHold.Z = OwnerUnit->GetActorLocation().Z;
+            if (!CavalryMoveTo(SquareHold, (SquareFoe->GetActorLocation() - SquareHold).Rotation().Yaw, TEXT("truer-karre"),
+                FString::Printf(TEXT("%s står i fast karré: holdes i karré, mens fodfolket skyder (%.0f m)"), *SquareFoe->DisplayName.ToString(), SquareDistance / 100.0f)))
+            {
+                Decide(TEXT("Truer karréen"), FString::Printf(TEXT("%s holdes i karré"), *SquareFoe->DisplayName.ToString()));
+            }
+            return;
+        }
+    }
     // Formed infantry close by: out of its fire (a squadron cannot stand against a line or a square).
     if (Enemy->Echelon == EStrategyEchelon::Company && Distance < 25000.0f && !IsWavering(Enemy))
     {
         FallBack(FString::Printf(TEXT("Holder afstand til formeret fodfolk (%s, %.0f m)"), *Enemy->DisplayName.ToString(), Distance / 100.0f), 20000.0f);
         return;
+    }
+    // The mission: wait beside the open flank, out of musket range, for the fire base to pin the enemy.
+    FVector CavalryWait;
+    if (CavalryPlan && CavalryPlan->GetCavalryWaitPoint(OwnerUnit, CavalryWait))
+    {
+        const AStrategyUnit* CavalryMain = CavalryPlan->GetMainTarget();
+        const float CavalryWaitYaw = CavalryMain ? (CavalryMain->GetActorLocation() - CavalryWait).Rotation().Yaw : OwnerUnit->GetActorRotation().Yaw;
+        if (CavalryMoveTo(CavalryWait, CavalryWaitYaw, TEXT("mission"), TEXT("dækker den åbne flanke og venter på en chance"))) return;
     }
     Decide(TEXT("Lurer"), FString::Printf(TEXT("Venter på en åbning; nærmeste fjende %.0f m"), Distance / 100.0f));
 }

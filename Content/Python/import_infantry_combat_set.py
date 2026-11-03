@@ -6,7 +6,7 @@ manifest=json.loads((source/'manifest.json').read_text())
 # Only the extra clips are (re)imported. The original eight (Idle, Walk, Aim, Fire, three deaths, ReloadStanding) are NEVER re-imported:
 # a re-import on 2026-10-13 changed A_Combat_Walk and the marching men lay down in the baked crowd.
 extras=[]
-for extra in (source/'manifest_extra.json', source/'manifest_cav.json', source/'manifest_shoulder.json'):
+for extra in (source/'manifest_extra.json', source/'manifest_cav.json', source/'manifest_cav_rider.json', source/'manifest_shoulder.json'):
     if extra.exists():
         extras+=json.loads(extra.read_text())['clips']
 manifest['clips']=extras
@@ -34,6 +34,7 @@ for clip in manifest['clips']:
     ui.automated_import_should_detect_type=False
     ui.mesh_type_to_import=unreal.FBXImportType.FBXIT_ANIMATION
     ui.override_animation_name=name
+    ui.anim_sequence_import_data.set_editor_property('import_rotation', unreal.Rotator(roll=90, pitch=0, yaw=0))
     task=unreal.AssetImportTask()
     task.filename=str(source/clip['file'])
     task.destination_path=dest

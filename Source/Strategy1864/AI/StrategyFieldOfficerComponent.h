@@ -70,6 +70,12 @@ public:
      *  it attack straight. OutMustMove: it is not at its place yet. */
     bool FlankPlan(AStrategyUnit* Enemy, float Radius, FVector& OutGoal, FString& OutNote, bool& bOutMustMove);
 
+    /** Read-only state for the acceptance fixtures (StrategyBehaviourTests): flank role (0 none, 1 fire base, 2 flank, 3 reserve),
+     *  whether the reserve has been put in, and the world time until which a squadron rallies after a charge. */
+    int32 GetFlankRole() const { return FlankRole; }
+    bool IsReserveReleased() const { return bReserveReleased; }
+    float GetCavalryRallyUntil() const { return CavalryRallyUntil; }
+
     /** Test only (-Strategy1864DrillTest SHOCK): resolve a bayonet shock against Enemy now. */
     void DebugResolveShock(AStrategyUnit* Enemy) { ResolveShock(Enemy); }
 
@@ -140,6 +146,13 @@ private:
     float LastChargeTime = -1000.0f;
     float LastFlankOrderTime = -1000.0f;       // the squadron's ride round to a pinned company's flank
     FVector LastFlankStage = FVector::ZeroVector;
+    float CavalryRallyUntil = -1000.0f;        // after a charge the squadron re-forms behind its own line until then
+    float LastMissionOrderTime = -1000.0f;     // the squadron's last move to its waiting or holding place
+    FVector LastMissionPoint = FVector::ZeroVector;
+    FVector CavalryRallyPoint = FVector::ZeroVector;
+    bool bCavalryRallyArrived = false;
+    bool bCavalryPursuing = false;              // a pursuit is limited to 250 m from where it began
+    FVector CavalryPursuitOrigin = FVector::ZeroVector;
     float LastFallBackTime = -1000.0f;
     float BayonetUntil = 0.0f;
     float NormalSpeed = 0.0f;

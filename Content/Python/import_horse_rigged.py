@@ -1,5 +1,7 @@
 # Manuel import: UnrealEditor-Cmd Game1864.uproject -run=pythonscript -script=<denne fil>
-# Runtime bruger fortsat SM_Horse_Static. Dette script starter Blender kun hvis mesh-FBX mangler.
+# StrategyCavalryVisualComponent bruger SK_Horse_1864 + A_Horse_* naar de findes (ellers den statiske hest SM_Horse_Static).
+# Mesh-FBX ligger i SourceAssets/Horse (Tools/Animation/export_horse_mesh_b1.py); Blender startes kun hvis den mangler.
+# Kør kun naar hverken UnrealEditor, Build.bat eller spillet koerer.
 import os
 import shutil
 import subprocess
@@ -9,7 +11,7 @@ ROOT = unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir())
 DEST = '/Game/Units/Horse'
 BLEND = os.environ.get('PROJECT1864_HORSE_BLEND',
     'R:/Onedrive/Dokumenter/Unreal Projects/Game1864/Reference/Units/MultiView/Items/Horse_1_rigged_v3.blend')
-MESH_FBX = os.environ.get('PROJECT1864_HORSE_FBX', os.path.join(ROOT, 'Saved', 'HorseImport', 'Horse_1_rigged_v3.fbx'))
+MESH_FBX = os.environ.get('PROJECT1864_HORSE_FBX', os.path.join(ROOT, 'SourceAssets', 'Horse', 'Horse_1_rigged_v3.fbx'))
 TOOLS = unreal.AssetToolsHelpers.get_asset_tools()
 
 
@@ -18,30 +20,12 @@ def export_mesh_if_needed():
         return
     blender = os.environ.get('PROJECT1864_BLENDER') or shutil.which('blender')
     if not blender:
-        raise RuntimeError('Angiv PROJECT1864_BLENDER eller en eksporteret PROJECT1864_HORSE_FBX')
+        raise RuntimeError('Angiv PROJECT1864_BLENDER eller en eksporteret PROJECT1864_HORSE_FBX (SourceAssets/Horse/Horse_1_rigged_v3.fbx)')
     if not os.path.isfile(BLEND):
         raise FileNotFoundError(BLEND)
-    os.makedirs(os.path.dirname(os.path.abspath(MESH_FBX)), exist_ok=True)
-    export_script = os.path.join(os.path.dirname(os.path.abspath(MESH_FBX)), 'export_horse_mesh.py')
-    with open(export_script, 'w', encoding='utf-8') as stream:
-        stream.write("""import bpy
-bpy.ops.object.select_all(action='DESELECT')
-rigs = [obj for obj in bpy.context.scene.objects if obj.type == 'ARMATURE']
-if len(rigs) != 1:
-    raise RuntimeError('Forventede præcis én hesterig')
-rig = rigs[0]
-rig.select_set(True)
-bpy.context.view_layer.objects.active = rig
-for obj in bpy.context.scene.objects:
-    if obj.type == 'MESH' and any(mod.type == 'ARMATURE' and mod.object == rig for mod in obj.modifiers):
-        obj.select_set(True)
-if len(bpy.context.selected_objects) < 2:
-    raise RuntimeError('Ingen mesh bundet til hesteriggen')
-bpy.ops.export_scene.fbx(filepath=%r, use_selection=True, object_types={'ARMATURE', 'MESH'},
-    add_leaf_bones=False, bake_anim=False, axis_forward='-Z', axis_up='Y',
-    apply_unit_scale=True, use_armature_deform_only=False)
-""" % MESH_FBX)
-    subprocess.run([blender, '--background', BLEND, '--python-exit-code', '1', '--python', export_script], check=True)
+    # Tools/Animation/export_horse_mesh_b1.py writes SourceAssets/Horse/Horse_1_rigged_v3.fbx (one armature + its mesh; the blend holds a duplicate pair).
+    subprocess.run([blender, '--background', BLEND, '--python-exit-code', '1', '--python',
+                    os.path.join(ROOT, 'Tools', 'Animation', 'export_horse_mesh_b1.py')], check=True)
     if not os.path.isfile(MESH_FBX):
         raise RuntimeError('Blender skrev ingen mesh-FBX')
 
@@ -62,6 +46,8 @@ def import_fbx(filename, name, skeletal_mesh, skeleton=None):
         properties['skeleton'] = skeleton
     for key, value in properties.items():
         options.set_editor_property(key, value)
+    if not skeletal_mesh:
+        options.anim_sequence_import_data.set_editor_property('import_rotation', unreal.Rotator(roll=90, pitch=0, yaw=0))
     task = unreal.AssetImportTask()
     for key, value in {'filename': filename, 'destination_path': DEST, 'destination_name': name,
                        'automated': True, 'replace_existing': False, 'save': True,
@@ -92,7 +78,7 @@ def main():
         raise RuntimeError('SK_Horse_1864 skal være et SkeletalMesh-asset')
     imported_skeleton = mesh.get_editor_property('skeleton')
     if not skeleton:
-        if not imported_skeleton or not unreal.EditorAssetLibrary.rename_asset(imported_skeleton.get_path_name(), DEST + '/SK_Horse_1864_Skeleton'):
+        if not imported_skeleton or (imported_skeleton.get_path_name().split('.')[0] != DEST + '/SK_Horse_1864_Skeleton' and not unreal.EditorAssetLibrary.rename_asset(imported_skeleton.get_path_name(), DEST + '/SK_Horse_1864_Skeleton')):
             raise RuntimeError('Kunne ikke navngive hesteskelettet')
         skeleton = unreal.load_asset(DEST + '/SK_Horse_1864_Skeleton')
     if imported_skeleton != skeleton:
@@ -111,7 +97,7 @@ def main():
             raise RuntimeError('Forkert hesteskelet: ' + name)
         unreal.log('PROJECT1864-TRAIN HORSE-IMPORT PASS ' + name)
     unreal.EditorAssetLibrary.save_directory(DEST, only_if_is_dirty=False, recursive=True)
-    unreal.log('PROJECT1864-TRAIN HORSE-IMPORT DONE; statisk fallback er uændret')
+    unreal.log('PROJECT1864-TRAIN HORSE-IMPORT DONE; statisk fallback SM_Horse_Static er uændret')
 
 
 if __name__ == '__main__':

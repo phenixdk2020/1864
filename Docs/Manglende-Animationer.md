@@ -67,23 +67,25 @@ Kanonbesætning (menige ved kanon) og kanon som bevægeligt objekt (kan animeres
 | 30 | **Kanonen kører (hjul drejer, rekyl-animation af selve kanonen)** | Prop-animation. |
 | 31 | **Morter: lade fra munding, tænde, træde tilbage** | Morterbesætning. |
 
-## 5. Mangler - kavaleri (heste findes kun som statisk mesh i dag)
+## 5. Mangler - kavaleri (opdateret 2026-11-03: hest og rytterklip findes som kilder, import og test mangler)
 
-Der findes ingen hesteanimationer. Hest og rytter skal laves som to animationer på to skeletter (eller ét hest+rytter-skelet).
+Hest og rytter er to skeletter (`SK_Horse_1864` og det fælles menneskeskelet). Hesteklippene (`Reference/Animations/Horse/`, genereret af `Tools/Animation/horse_gaits_blender.py`) og rytterklippene (`Tools/Animation/build_cavalry_rider_set.py`, `build_cavalry_sabre_set.py`) er lavet og bruges af `StrategyCavalryVisualComponent`. **Intet af det er importeret i Unreal eller set i spil endnu.**
 
-| # | Animation | Bemærkning |
+| # | Animation | Status |
 |---|---|---|
-| 32 | **Hest: stå, gå, trav, kanter (canter), galop (loops)** | Fire gangarter med tydeligt forskellig fart (cm/s kan målsættes af mig). |
-| 33 | **Hest: vende (venstre/højre)** | Gerne som blend, ellers to klip. |
-| 34 | **Hest: stejle, falde (såret), ligge død** | Stejle bruges ved charge mod karré. |
-| 35 | **Hest: græsse / hvile** | Bivuak. |
-| 36 | **Rytter: sidde (idle), trav, galop (loops)** | Følger hestens knogler. |
-| 37 | **Rytter: sabelhug højre, sabelhug venstre, parade** | Charge og melee. |
-| 38 | **Rytter: lanse i vandret anslag (loop i galop)** | Lansere. |
-| 39 | **Rytter: skyde med pistol/karabin (stillesidende)** | Dragoner og husarer. |
-| 40 | **Rytter: sidde af, sidde på (overgang)** | Dragoner (stig af og kæmp til fods). |
-| 41 | **Rytter: falde af hesten, ligge** | Tab. |
-| 42 | **Rytter: sidde på heste i kolonne, fire i bredden (loop med anden afstand)** | Marchgang. |
+| 32 | **Hest: stå, gå, trav, kanter (canter), galop (loops)** | **Findes** (`A_Horse_Stand/Walk/Trot/Canter/Gallop`, på stedet, 30 fps). Fodens jordhastighed i klippet: 0 / 60 / 179 / 357 / 757 cm/s; spillets tærskler er 80/350/650/900. Skridtlængden er for kort til spillets fart (gå er ca. 45 cm pr. fodisæt mod ca. 1,5 m i virkeligheden), så afspilningshastigheden begrænses og fødderne glider; klippene bør regenereres med længere skridt. |
+| 33 | **Hest: vende (venstre/højre)** | Mangler som klip. Erstattet af en hældning (op til 14 grader) i koden. |
+| 34 | **Hest: stejle, falde (såret), ligge død** | **Findes** (`A_Horse_Rear` 2,37 s, `A_Horse_Fall` 1,97 s, falder mod venstre og bliver liggende på sidste billede). Rear bruges ved afvist chok, Fall ved tab. Ingen separat "ligge død". |
+| 35 | **Hest: græsse / hvile** | Mangler. |
+| 36 | **Rytter: sidde (idle), trav, galop (loops)** | **Findes** (`A_Combat_CavWalk`, `CavTrotRise` lettende trav, `CavCanter`, `CavGallop`; idle er den holdte "Reload sitting"-pose). Tidsat til hesteklippene, samme billedantal. |
+| 37 | **Rytter: sabelhug højre, sabelhug venstre, parade** | **Delvist:** `CavSabreDraw` (træk), `CavSabreSlash` (kombo, første sving bruges), `CavSabreFight`; plus `CavCharge` (stående i bøjlerne). Hug venstre og parade mangler som egne klip. |
+| 38 | **Rytter: lanse i vandret anslag (loop i galop)** | Mangler. |
+| 39 | **Rytter: skyde med pistol/karabin (stillesidende)** | Mangler. |
+| 40 | **Rytter: sidde af, sidde på (overgang)** | Mangler. |
+| 41 | **Rytter: falde af hesten, ligge** | **Findes** (`A_Combat_CavFall`, 60 billeder, kastes til højre og lander på ryggen). |
+| 42 | **Rytter: sidde på heste i kolonne, fire i bredden (loop med anden afstand)** | Mangler som eget klip; kolonnen bruger gangartsklippene. |
+
+Kendte begrænsninger: sablen er en statisk rekvisit, der følger rytterens placering og ikke hånden under træk og hug; rytterens ben er "Reload sitting"-sædets og er ikke tilpasset en hest; rytterklippene er kun set som pind-figurer.
 
 ## 6. Mangler - civile og forsyning (senere)
 

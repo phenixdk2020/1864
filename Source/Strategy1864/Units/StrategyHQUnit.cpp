@@ -5,6 +5,7 @@
 #include "../AI/StrategyHQFollowComponent.h"
 #include "../AI/StrategyCommandZoneComponent.h"
 #include "../AI/StrategyCavalryTaskingComponent.h"
+#include "../AI/StrategyBattalionPlanComponent.h"
 #include "../Visual/StrategyHQVisualComponent.h"
 
 AStrategyHQUnit::AStrategyHQUnit()
@@ -15,6 +16,7 @@ AStrategyHQUnit::AStrategyHQUnit()
     CommandZoneComponent = CreateDefaultSubobject<UStrategyCommandZoneComponent>(TEXT("CommandZoneComponent"));
     CavalryTaskingComponent = CreateDefaultSubobject<UStrategyCavalryTaskingComponent>(TEXT("CavalryTaskingComponent"));
     StaffVisualComponent = CreateDefaultSubobject<UStrategyHQVisualComponent>(TEXT("StaffVisualComponent"));
+    BattalionPlanComponent = CreateDefaultSubobject<UStrategyBattalionPlanComponent>(TEXT("BattalionPlanComponent"));
     ApplyHQLevelDefaults();
 }
 

@@ -1,0 +1,88 @@
+{
+  "clips": [
+    {
+      "name": "CavWalk",
+      "file": "A_Combat_CavWalk.fbx",
+      "frames": 33,
+      "fps": 30,
+      "duration": 1.0666666666666667,
+      "bones": 41,
+      "horse_clip": "A_Horse_Walk",
+      "hips_travel_cm": [
+        1.6,
+        0.6,
+        1.8
+      ]
+    },
+    {
+      "name": "CavTrotRise",
+      "file": "A_Combat_CavTrotRise.fbx",
+      "frames": 21,
+      "fps": 30,
+      "duration": 0.6666666666666666,
+      "bones": 41,
+      "horse_clip": "A_Horse_Trot",
+      "hips_travel_cm": [
+        0.0,
+        8.6,
+        3.5
+      ]
+    },
+    {
+      "name": "CavCanter",
+      "file": "A_Combat_CavCanter.fbx",
+      "frames": 19,
+      "fps": 30,
+      "duration": 0.6,
+      "bones": 41,
+      "horse_clip": "A_Horse_Canter",
+      "hips_travel_cm": [
+        0.0,
+        5.9,
+        7.0
+      ]
+    },
+    {
+      "name": "CavGallop",
+      "file": "A_Combat_CavGallop.fbx",
+      "frames": 14,
+      "fps": 30,
+      "duration": 0.43333333333333335,
+      "bones": 41,
+      "horse_clip": "A_Horse_Gallop",
+      "hips_travel_cm": [
+        0.0,
+        11.9,
+        5.0
+      ]
+    },
+    {
+      "name": "CavCharge",
+      "file": "A_Combat_CavCharge.fbx",
+      "frames": 14,
+      "fps": 30,
+      "duration": 0.43333333333333335,
+      "bones": 41,
+      "horse_clip": "A_Horse_Gallop",
+      "hips_travel_cm": [
+        0.0,
+        15.9,
+        4.0
+      ]
+    },
+    {
+      "name": "CavFall",
+      "file": "A_Combat_CavFall.fbx",
+      "frames": 60,
+      "fps": 30,
+      "duration": 1.9666666666666666,
+      "bones": 41,
+      "horse_clip": "A_Horse_Fall",
+      "hips_travel_cm": [
+        75.0,
+        119.2,
+        105.0
+      ]
+    }
+  ]
+}

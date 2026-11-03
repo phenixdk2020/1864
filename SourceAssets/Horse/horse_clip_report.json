@@ -1,0 +1,114 @@
+{
+  "A_Horse_Canter.fbx": {
+    "frames": 19,
+    "fps": 30,
+    "length_s": 0.6,
+    "bones": 36,
+    "root_motion_cm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "stance_hoof_speed_cm_s": 357.0,
+    "pelvis_z_range_cm": [
+      98.5,
+      113.2
+    ]
+  },
+  "A_Horse_Fall.fbx": {
+    "frames": 60,
+    "fps": 30,
+    "length_s": 1.967,
+    "bones": 36,
+    "root_motion_cm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "stance_hoof_speed_cm_s": 0.0,
+    "pelvis_z_range_cm": [
+      1.7,
+      105.8
+    ]
+  },
+  "A_Horse_Gallop.fbx": {
+    "frames": 14,
+    "fps": 30,
+    "length_s": 0.433,
+    "bones": 36,
+    "root_motion_cm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "stance_hoof_speed_cm_s": 757.1,
+    "pelvis_z_range_cm": [
+      95.9,
+      115.7
+    ]
+  },
+  "A_Horse_Rear.fbx": {
+    "frames": 72,
+    "fps": 30,
+    "length_s": 2.367,
+    "bones": 36,
+    "root_motion_cm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "stance_hoof_speed_cm_s": 0.0,
+    "pelvis_z_range_cm": [
+      72.7,
+      105.8
+    ]
+  },
+  "A_Horse_Stand.fbx": {
+    "frames": 120,
+    "fps": 30,
+    "length_s": 3.967,
+    "bones": 36,
+    "root_motion_cm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "stance_hoof_speed_cm_s": 0.0,
+    "pelvis_z_range_cm": [
+      105.5,
+      106.0
+    ]
+  },
+  "A_Horse_Trot.fbx": {
+    "frames": 21,
+    "fps": 30,
+    "length_s": 0.667,
+    "bones": 36,
+    "root_motion_cm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "stance_hoof_speed_cm_s": 178.6,
+    "pelvis_z_range_cm": [
+      102.5,
+      109.1
+    ]
+  },
+  "A_Horse_Walk.fbx": {
+    "frames": 33,
+    "fps": 30,
+    "length_s": 1.067,
+    "bones": 36,
+    "root_motion_cm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "stance_hoof_speed_cm_s": 60.0,
+    "pelvis_z_range_cm": [
+      104.8,
+      106.8
+    ]
+  }
+}

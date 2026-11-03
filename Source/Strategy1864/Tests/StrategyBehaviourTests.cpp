@@ -16,6 +16,11 @@
 #include "../Combat/StrategyThreatReactionComponent.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
 #include "../AI/StrategyAutonomousBattleAIComponent.h"
+#include "../AI/StrategyBattalionPlanComponent.h"
+#include "../Terrain/StrategyTerrainQueryLibrary.h"
+#include "../AI/StrategyOfficerProfileComponent.h"
+#include "../Units/StrategyHQUnit.h"
+#include "../Command/StrategyCommandComponent.h"
 #include "../Visual/StrategyEquipmentVisualComponent.h"
 #include "../Navigation/StrategyRiverBarrier.h"
 #include "../Engineering/StrategyDefensivePosition.h"
@@ -67,7 +72,8 @@ bool AStrategyOOBTestScenario::BeginBehaviourAcceptance()
         TEXT("MOVE"), TEXT("STOPFIRE"), TEXT("NEW-HOLD"), TEXT("DELAY"), TEXT("SPREAD"), TEXT("SCREEN"),
         TEXT("WORKS"), TEXT("WORKS-CANCEL"), TEXT("CONTACT"), TEXT("ROE"), TEXT("AMMO"), TEXT("ROUT"), TEXT("DESTINATION"), TEXT("SQUARE-ZONES"),
         TEXT("LONG-MOVE"), TEXT("SQUARE-GATES"), TEXT("FIREBLOCK"), TEXT("DISENGAGE"), TEXT("WORKS-MOVE"), TEXT("SUSPEND-WAYPOINT"), TEXT("CLEAR-SUSPEND"), TEXT("RELOAD"),
-        TEXT("SCREEN-SQUARE"), TEXT("SPREAD-MOVE"), TEXT("ARTILLERY-DEPLOY"), TEXT("DRAGOON"), TEXT("CAVALRY-STILL"), TEXT("ADVANCE-FIRE"), TEXT("ATTACK-MOVING"), TEXT("ATTACK-APPROACH"), TEXT("LOSS-RANKS")};
+        TEXT("SCREEN-SQUARE"), TEXT("SPREAD-MOVE"), TEXT("ARTILLERY-DEPLOY"), TEXT("DRAGOON"), TEXT("CAVALRY-STILL"), TEXT("ADVANCE-FIRE"), TEXT("ATTACK-MOVING"), TEXT("ATTACK-APPROACH"), TEXT("LOSS-RANKS"),
+        TEXT("RESERVE-HOLD"), TEXT("RESERVE-NONE"), TEXT("RESERVE-COMMIT"), TEXT("CAV-FLANK"), TEXT("CAV-SQUARE"), TEXT("CAV-RALLY")};
     if (bAcceptanceAll) AcceptanceIds = AvailableAcceptanceIds;
     else AcceptanceIds.Add(RequestedAcceptance.ToUpper());
     FParse::Value(FCommandLine::Get(), TEXT("Strategy1864AcceptTimeout="), AcceptanceTimeout);
@@ -121,7 +127,8 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
         AcceptanceId == TEXT("STOPFIRE") || AcceptanceId == TEXT("SUSPEND-WAYPOINT") ||
         AcceptanceId == TEXT("SPREAD-MOVE") || AcceptanceId == TEXT("ADVANCE-FIRE") ||
         AcceptanceId == TEXT("ATTACK-MOVING") || AcceptanceId == TEXT("ATTACK-APPROACH") ||
-        AcceptanceId == TEXT("T7") || AcceptanceId == TEXT("DISENGAGE");
+        AcceptanceId == TEXT("T7") || AcceptanceId == TEXT("DISENGAGE") ||
+        AcceptanceId == TEXT("RESERVE-COMMIT") || AcceptanceId == TEXT("CAV-RALLY");   // march in, then wait out a 70-100 s rally
     const float AcceptanceCaseTimeout = AcceptanceTimeout * (bAcceptanceMarchBudget ? 4.f : 1.f);
     if (AcceptanceElapsed >= AcceptanceCaseTimeout)
     {
@@ -383,11 +390,243 @@ void AStrategyOOBTestScenario::TickBehaviourAcceptance(float DeltaSeconds)
             }
             else AcceptanceCompany->bOfficerAIEnabled = true;
         }
+        else if (AcceptanceId.StartsWith(TEXT("RESERVE-")) || AcceptanceId.StartsWith(TEXT("CAV-")))
+        {
+            // Battalion plan fixtures: a battalion HQ with its plan, Danish companies under it, an enemy that does not fire (no losses
+            // to disturb the odds), and for CAV-* a squadron beside the enemy. The HQ and the fixture company are the real ones.
+            const bool bAcceptPlanReserve = AcceptanceId.StartsWith(TEXT("RESERVE-"));
+            AStrategyHQUnit* AcceptPlanHq = SpawnHQ(TEXT("ACCEPT-HQ"), TEXT("Accept bataljon"), static_cast<uint8>(EStrategyHQLevel::Battalion),
+                AcceptanceStart + FVector(-9000.0f, 0.0f, 0.0f), nullptr);
+            if (!AcceptPlanHq || !AcceptPlanHq->BattalionPlanComponent || !AcceptPlanHq->OrderComponent || !AcceptanceCompany->CommandComponent)
+            { FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: bataljonsstab/plan mangler")); return; }
+            if (AcceptPlanHq->OfficerProfileComponent)
+            {
+                // A level-headed leader (as -Strategy1864HoldReserve gives the skirmish's major), so the flank plan is not dropped on skill.
+                AcceptPlanHq->OfficerProfileComponent->TacticalSkill = 75.0f;
+                AcceptPlanHq->OfficerProfileComponent->Initiative = 65.0f;
+                AcceptPlanHq->OfficerProfileComponent->StaffQuality = 65.0f;
+                AcceptPlanHq->OfficerProfileComponent->Caution = 70.0f;
+                AcceptPlanHq->OfficerProfileComponent->Aggression = 45.0f;
+            }
+            AcceptanceCompany->CommandComponent->SetOrganicParent(AcceptPlanHq);
+            // Placed on the ground at the same height above it as the start: a unit moved at the start's Z stands inside a rise
+            // of the map, and nobody can see it (the plan then lost the enemy after its first look).
+            const float AcceptGroundOffset = AcceptanceStart.Z - UStrategyTerrainQueryLibrary::ProjectPointToTerrain(this, AcceptanceStart).Z;
+            auto AcceptOnGround = [this, AcceptGroundOffset](const FVector& AcceptPlace)
+            {
+                return UStrategyTerrainQueryLibrary::ProjectPointToTerrain(this, AcceptPlace) + FVector(0.0f, 0.0f, AcceptGroundOffset);
+            };
+            AcceptanceOther->SetActorLocation(AcceptOnGround(AcceptanceStart + FVector(bAcceptPlanReserve ? 25000.0f : 30000.0f, 0.0f, 0.0f)));
+            if (bAcceptPlanReserve)
+            {
+                const bool bAcceptNone = AcceptanceId == TEXT("RESERVE-NONE");
+                const int32 AcceptDaneCount = bAcceptNone ? 2 : 4;
+                const int32 AcceptFoeCount = bAcceptNone ? 2 : 1;
+                AcceptanceCompany->OrderComponent->ClearOrder();   // Configure's player HOLD would refuse the officers' own orders
+                AcceptanceCompany->bOfficerAIEnabled = true;
+                for (int32 AcceptDane = 1; AcceptDane < AcceptDaneCount; ++AcceptDane)
+                {
+                    AStrategyCompanyUnit* AcceptExtraDane = SpawnCompany(FName(*FString::Printf(TEXT("ACCEPT-DK%d"), AcceptDane + 1)),
+                        FString::Printf(TEXT("Accept dansk %d. kp."), AcceptDane + 1), AcceptDane + 1,
+                        AcceptOnGround(AcceptanceStart + FVector(0.0f, AcceptDane * 7200.0f, 0.0f)), AcceptPlanHq, static_cast<uint8>(EStrategySide::Denmark));
+                    if (!AcceptExtraDane) { FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: dansk kompagni mangler")); return; }
+                    Strategy1864Acceptance::Configure(AcceptExtraDane);
+                    AcceptExtraDane->OrderComponent->ClearOrder();
+                    AcceptExtraDane->bOfficerAIEnabled = true;
+                }
+                for (int32 AcceptFoe = 1; AcceptFoe < AcceptFoeCount; ++AcceptFoe)
+                {
+                    AStrategyCompanyUnit* AcceptExtraFoe = SpawnCompany(FName(*FString::Printf(TEXT("ACCEPT-EN%d"), AcceptFoe + 1)),
+                        FString::Printf(TEXT("Accept modpart %d."), AcceptFoe + 1), AcceptFoe + 1,
+                        AcceptOnGround(AcceptanceStart + FVector(25000.0f, AcceptFoe * 7200.0f, 0.0f)), nullptr, static_cast<uint8>(EStrategySide::Enemy));
+                    if (!AcceptExtraFoe) { FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: fjendtligt kompagni mangler")); return; }
+                    Strategy1864Acceptance::Configure(AcceptExtraFoe);
+                    AcceptExtraFoe->SetActorRotation(FRotator(0, 180, 0));
+                }
+                // The battalion attacks as in -Strategy1864SkirmishAttack: the leader's own order, his captains lead it from there.
+                // The 200 m march (about 130 s) outlasts the cases' minute: the reserve must be told off during it.
+                FStrategyOrder AcceptPlanAttack;
+                AcceptPlanAttack.Type = EStrategyOrderType::AttackHere;
+                AcceptPlanAttack.TargetLocation = AcceptanceStart + FVector(20000.0f, 0.0f, 0.0f);
+                AcceptPlanAttack.FacingYaw = 0.0f;
+                AcceptPlanAttack.bHasFacing = true;
+                AcceptPlanAttack.Authority = EStrategyOrderAuthority::OfficerAI;
+                if (!AcceptPlanHq->OrderComponent->SetOrder(AcceptPlanAttack))
+                { FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: bataljonens angrebsordre afvist")); return; }
+            }
+            else
+            {
+                if (AcceptanceId == TEXT("CAV-SQUARE")) AcceptanceOther->FormationComponent->SetFormation(EStrategyFormationType::Square);
+                // The squadron stands beside the enemy company (200 m off its flank), facing it. The company is kept "under fire" by hand.
+                AcceptanceCavalry = SpawnCavalry(TEXT("ACCEPT-SQN"), TEXT("Accept eskadron"), AcceptOnGround(AcceptanceOther->GetActorLocation() + FVector(0.0f, -20000.0f, 0.0f)), AcceptPlanHq);
+                if (!AcceptanceCavalry || !AcceptanceCavalry->FieldOfficerComponent) { FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: eskadron mangler")); return; }
+                AcceptanceCavalry->Side = EStrategySide::Denmark;
+                AcceptanceCavalry->SetActorRotation(FRotator(0, 90, 0));
+                // CAV-SQUARE lets the square form first (a square in mid-reform is open to a charge), then wakes the squadron.
+                AcceptanceCavalry->bOfficerAIEnabled = AcceptanceId != TEXT("CAV-SQUARE");
+                AcceptanceOther->CombatComponent->UnderFireRemainingSeconds = 20.0f;
+            }
+        }
         else if (AcceptanceId == TEXT("LOSS-RANKS")) { /* no setup: the check below runs on the fixture company without ticking */ }
         else if (AcceptanceId != TEXT("ROE")) { FinishBehaviourAcceptanceCase(false, TEXT("UNKNOWN_ID: se Docs/TestFlags.md")); return; }
     }
     if (AcceptancePhase == 0) return;
     const float AcceptanceSinceEvent = AcceptanceElapsed - AcceptanceEventAt;
+    if (AcceptanceId.StartsWith(TEXT("RESERVE-")))
+    {
+        const AStrategyHQUnit* AcceptPlanHq = AcceptanceCompany->CommandComponent ? Cast<AStrategyHQUnit>(AcceptanceCompany->CommandComponent->CurrentCommandParent.Get()) : nullptr;
+        const UStrategyBattalionPlanComponent* AcceptPlan = AcceptPlanHq ? AcceptPlanHq->BattalionPlanComponent.Get() : nullptr;
+        if (!AcceptPlan) { FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: kompagniet har ingen bataljonsplan")); return; }
+        // The Danish companies of the fixture and their flank roles (0 none, 1 fire base, 2 flank, 3 reserve).
+        int32 AcceptDanes = 0, AcceptReserves = 0;
+        AStrategyUnit* AcceptReserveUnit = nullptr;
+        AStrategyUnit* AcceptBaseUnit = nullptr;
+        for (AStrategyUnit* AcceptUnit : GetSpawnedUnits())
+        {
+            if (!IsValid(AcceptUnit) || AcceptUnit->Side != EStrategySide::Denmark || AcceptUnit->Echelon != EStrategyEchelon::Company || !AcceptUnit->FieldOfficerComponent) continue;
+            ++AcceptDanes;
+            const int32 AcceptRole = AcceptUnit->FieldOfficerComponent->GetFlankRole();
+            if (AcceptRole == 3) { ++AcceptReserves; AcceptReserveUnit = AcceptUnit; }
+            else if (AcceptRole == 1) AcceptBaseUnit = AcceptUnit;
+        }
+        if (AcceptanceId == TEXT("RESERVE-HOLD"))
+        {
+            if (AcceptReserves > 1)
+            { FinishBehaviourAcceptanceCase(false, FString::Printf(TEXT("%d kompagnier i reserve; kun een tilladt"), AcceptReserves)); return; }
+            if (AcceptReserves == 1 && AcceptPlan->WantsReserve())
+            {
+                AcceptanceCheck(AcceptDanes == 4, TEXT("4 kompagnier mod 1 set fjende: planen vil have reserve, praecis et kompagni har rolle 3")); return;
+            }
+            if (AcceptanceSinceEvent > 60.0f)
+            { FinishBehaviourAcceptanceCase(false, FString::Printf(TEXT("ingen reserve inden 60s: reserver=%d wantsReserve=%d ratio=%.2f"), AcceptReserves, AcceptPlan->WantsReserve(), AcceptPlan->GetStrengthRatio())); return; }
+        }
+        else if (AcceptanceId == TEXT("RESERVE-NONE"))
+        {
+            if (AcceptReserves > 0 || AcceptPlan->WantsReserve())
+            { FinishBehaviourAcceptanceCase(false, FString::Printf(TEXT("reserve holdt trods lige odds: reserver=%d wantsReserve=%d ratio=%.2f"), AcceptReserves, AcceptPlan->WantsReserve(), AcceptPlan->GetStrengthRatio())); return; }
+            if (AcceptanceSinceEvent > 25.0f)
+            {
+                // Not vacuous: the leader has seen the enemy (a main target), and the plan has weighed it.
+                AcceptanceCheck(AcceptDanes == 2 && AcceptPlan->GetMainTarget() != nullptr && AcceptPlan->GetStrengthRatio() > 0.0f,
+                    TEXT("2 kompagnier mod 2 set fjende: ingen reserve i 25s")); return;
+            }
+        }
+        else if (AcceptanceId == TEXT("RESERVE-COMMIT"))
+        {
+            if (AcceptancePhase == 1)
+            {
+                // Wait until the reserve is told off and on its way behind the fire base (it re-weighs also on the march).
+                if (AcceptReserves == 1 && AcceptReserveUnit && AcceptBaseUnit && AcceptPlan->WantsReserve() &&
+                    AcceptReserveUnit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Advance && AcceptReserveUnit->FieldOfficerComponent->GetFlankRole() == 3)
+                {
+                    AcceptanceFar = Cast<AStrategyCompanyUnit>(AcceptReserveUnit);
+                    AcceptBaseUnit->CurrentStrength = FMath::FloorToInt(AcceptBaseUnit->InitialStrength * 0.6f);   // below 75 %, above the break line
+                    AcceptancePhase = 2;
+                    AcceptanceEventAt = AcceptanceElapsed;
+                    return;
+                }
+                if (AcceptanceSinceEvent > 45.0f)
+                { FinishBehaviourAcceptanceCase(false, FString::Printf(TEXT("FIXTURE: ingen reserve paa vej bag ildbasen inden 45s: reserver=%d base=%d"), AcceptReserves, AcceptBaseUnit != nullptr)); return; }
+            }
+            else
+            {
+                if (!IsValid(AcceptanceFar)) { FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: reservekompagniet forsvandt")); return; }
+                if (AcceptanceFar->FieldOfficerComponent->GetFlankRole() != 3)
+                {
+                    AcceptanceCheck(true, TEXT("ildbasen under 75 % -> reserven forlod rolle 3 inden 15s")); return;
+                }
+                if (AcceptanceSinceEvent > 15.0f)
+                { FinishBehaviourAcceptanceCase(false, TEXT("reserven blev ikke sat ind inden 15s efter at ildbasen faldt under 75 %")); return; }
+            }
+        }
+        return;
+    }
+    if (AcceptanceId.StartsWith(TEXT("CAV-")))
+    {
+        if (!IsValid(AcceptanceCavalry) || !AcceptanceCavalry->FieldOfficerComponent || !AcceptanceCavalry->OrderComponent || !AcceptanceOther->CombatComponent)
+        { FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: eskadron forsvandt")); return; }
+        const float AcceptNow = GetWorld()->GetTimeSeconds();
+        const bool bAcceptCharging = AcceptanceCavalry->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Charge;
+        if (AcceptanceId == TEXT("CAV-FLANK"))
+        {
+            AcceptanceOther->CombatComponent->UnderFireRemainingSeconds = 20.0f;   // our fire base holds the company down
+            if (bAcceptCharging)
+            { AcceptanceCheck(AcceptanceCavalry->Side == EStrategySide::Denmark, TEXT("fastholdt kompagni, eskadron paa flanken: Charge-ordre givet")); return; }
+            if (AcceptanceSinceEvent > 30.0f)
+            { FinishBehaviourAcceptanceCase(false, FString::Printf(TEXT("ingen Charge-ordre inden 30s; kontakt=%d order=%d"),
+                AcceptanceCavalry->ContactComponent && AcceptanceCavalry->ContactComponent->HasCurrentContact(AcceptanceOther), int32(AcceptanceCavalry->OrderComponent->GetCurrentOrder().Type))); return; }
+        }
+        else if (AcceptanceId == TEXT("CAV-SQUARE"))
+        {
+            AcceptanceOther->CombatComponent->UnderFireRemainingSeconds = 20.0f;
+            if (bAcceptCharging)
+            { FinishBehaviourAcceptanceCase(false, TEXT("eskadronen gav Charge-ordre mod en fast karre")); return; }
+            if (AcceptancePhase == 1)
+            {
+                // Wait for the square to stand (formed, not reforming), then wake the squadron.
+                if (AcceptanceSinceEvent > 3.0f && AcceptanceOther->FormationComponent->CurrentFormation == EStrategyFormationType::Square &&
+                    !AcceptanceOther->FormationTransition->IsReforming())
+                {
+                    AcceptanceCavalry->bOfficerAIEnabled = true;
+                    AcceptancePhase = 2;
+                    AcceptanceEventAt = AcceptanceElapsed;
+                }
+                else if (AcceptanceSinceEvent > 30.0f)
+                { FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: karreen blev ikke dannet inden 30s")); return; }
+            }
+            else if (AcceptanceSinceEvent > 30.0f)
+            {
+                // Not vacuous: the squadron saw the square (within the last 20 s: from its threat post 400 m off a rise may hide it
+                // for a moment), and the square stood the whole time.
+                bool bAcceptSawSquare = false;
+                if (AcceptanceCavalry->ContactComponent)
+                {
+                    for (const FStrategyContactRecord& AcceptSquareContact : AcceptanceCavalry->ContactComponent->GetKnownContacts())
+                    {
+                        if (AcceptSquareContact.ObservedUnit.Get() == AcceptanceOther && AcceptSquareContact.SecondsSinceSeen <= 20.0f) bAcceptSawSquare = true;
+                    }
+                }
+                AcceptanceCheck(bAcceptSawSquare &&
+                    AcceptanceOther->FormationComponent->CurrentFormation == EStrategyFormationType::Square,
+                    TEXT("fast karre i 30s: ingen Charge-ordre, eskadronen saa karreen")); return;
+            }
+        }
+        else if (AcceptanceId == TEXT("CAV-RALLY"))
+        {
+            const float AcceptRallyUntil = AcceptanceCavalry->FieldOfficerComponent->GetCavalryRallyUntil();
+            if (AcceptancePhase == 1)
+            {
+                AcceptanceOther->CombatComponent->UnderFireRemainingSeconds = 20.0f;
+                if (bAcceptCharging)
+                {
+                    // The charge is given by the officer; it is stopped here so the outcome of a real shock cannot decide the fixture.
+                    AcceptanceCavalry->OrderComponent->ClearOrder();
+                    AcceptanceOther->CombatComponent->UnderFireRemainingSeconds = 0.0f;
+                    AcceptancePhase = 2;
+                    AcceptanceEventAt = AcceptanceElapsed;
+                }
+                else if (AcceptanceSinceEvent > 30.0f)
+                { FinishBehaviourAcceptanceCase(false, TEXT("FIXTURE: ingen Charge-ordre inden 30s, saa ingen samling at proeve")); return; }
+            }
+            else if (AcceptancePhase == 2)
+            {
+                // The rally starts a few seconds after the charge (4 s plus the officer's next look).
+                if (AcceptRallyUntil > AcceptNow) { AcceptanceSnapshot.X = AcceptRallyUntil; AcceptancePhase = 3; AcceptanceEventAt = AcceptanceElapsed; }
+                else if (AcceptanceSinceEvent > 15.0f)
+                { FinishBehaviourAcceptanceCase(false, TEXT("eskadronen gik ikke i samling inden 15s efter chokket")); return; }
+            }
+            else
+            {
+                const float AcceptRallyLeft = AcceptanceSnapshot.X - AcceptNow;
+                if (AcceptRallyLeft < -1.0f)
+                {
+                    AcceptanceCheck(AcceptRallyUntil <= AcceptNow && AcceptanceCavalry->IsCombatEffective() && AcceptanceCavalry->Morale > 45.0f,
+                        TEXT("samling efter chokket, derefter klar igen (rallyUntil udloebet, kampdygtig)")); return;
+                }
+            }
+        }
+        return;
+    }
     if (AcceptanceId == TEXT("ATTACK-MOVING") || AcceptanceId == TEXT("ATTACK-APPROACH"))
     {
         const FStrategyOrder AcceptanceTrackingOrder = AcceptanceCompany->OrderComponent->GetCurrentOrder();

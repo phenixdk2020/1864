@@ -138,6 +138,11 @@ public:
 
 private:
 
+    float CalculateHitChance(float DistanceCm, const AStrategyUnit* Target) const;
+    int32 ResolveAimedHits(int32 AimedShotCount, float AimedDistanceCm, AStrategyUnit* AimedTarget,
+        class UStrategyInfantryVisualComponent* AimedShooterVisual,
+        class UStrategyInfantryVisualComponent* AimedTargetVisual);
+
     int32 ResolveHits(
         int32 ShotCount,
         float DistanceCm,

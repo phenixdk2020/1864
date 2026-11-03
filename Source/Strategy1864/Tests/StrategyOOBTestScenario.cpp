@@ -500,6 +500,21 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
             }
         }
     }
+    // -Strategy1864SkirmishDanishCavalry: only a Danish squadron under the major, on the open flank (4 vs 1 with horse, no guns).
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864SkirmishDanishCavalry")) && Major)
+    {
+        const float DanishCavalryFlankY = -((DaneCount - 1) * 0.5f * 7200.0f + 9000.0f);
+        if (ACavalryUnit* DanishSquadron = SpawnCavalry(TEXT("DK-SKIRMISH-SQN"), TEXT("1. Eskadron Husarer"),
+            DanishLine + FVector(-3000.0f, DanishCavalryFlankY, 0.0f), Major))
+        {
+            DanishSquadron->Side = EStrategySide::Denmark;
+            DanishSquadron->bPlayerControllable = true;
+            DanishSquadron->bOfficerAIEnabled = true;
+            DanishSquadron->SetActorRotation(FRotator::ZeroRotator);
+            DanishSquadron->RefreshDebugLabel();
+            ConfigureRuntimeQALabel(DanishSquadron);
+        }
+    }
     if (bSkirmishCavalry || FParse::Param(FCommandLine::Get(), TEXT("Strategy1864EnemyDefends")))
     {
         SetEnemyAttacking(false);

@@ -26,6 +26,10 @@
 #include "../Artillery/StrategyArtilleryDamageComponent.h"
 #include "../Terrain/StrategyTerrainAwarenessComponent.h"
 #include "../Logistics/StrategySupplyWagonUnit.h"
+#include "../Visual/StrategyInfantryVisualComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "EngineUtils.h"
 #include "Engine/World.h"
 
@@ -252,11 +256,24 @@ bool UStrategyCombatComponent::TryFireAt(AStrategyUnit* Target)
     AmmunitionRounds -= ShotCount;
     bOutOfAmmo = AmmunitionRounds <= 0;
 
-    int32 Hits = ResolveHits(
-        ShotCount,
-        DistanceCm,
-        Target);
-    if (Target->CombatComponent) { Hits = Target->CombatComponent->ScaleIncomingCasualties(Hits, false); }
+    int32 Hits = 0;
+    UStrategyInfantryVisualComponent* AimedShooterVisual = nullptr;
+    UStrategyInfantryVisualComponent* AimedTargetVisual = nullptr;
+    if (FParse::Param(FCommandLine::Get(), TEXT("Strategy1864AimedFire")) &&
+        !Cast<AStrategyArtilleryBatteryUnit>(Target) && !Cast<AStrategySupplyWagonUnit>(Target))
+    {
+        AimedShooterVisual = OwnerUnit->FindComponentByClass<UStrategyInfantryVisualComponent>();
+        AimedTargetVisual = Target->FindComponentByClass<UStrategyInfantryVisualComponent>();
+    }
+    if (AimedShooterVisual && AimedTargetVisual && AimedShooterVisual->bEnabled && AimedTargetVisual->bEnabled)
+    {
+        Hits = ResolveAimedHits(ShotCount, DistanceCm, Target, AimedShooterVisual, AimedTargetVisual);
+    }
+    else
+    {
+        Hits = ResolveHits(ShotCount, DistanceCm, Target);
+        if (Target->CombatComponent) { Hits = Target->CombatComponent->ScaleIncomingCasualties(Hits, false); }
+    }
     TotalHitsInflicted += FMath::Max(0, Hits);
 
     if (Hits > 0)
@@ -479,74 +496,7 @@ int32 UStrategyCombatComponent::ResolveHits(
         return 0;
     }
 
-    const float ActiveRangeCm =
-        FMath::Max(1.0f, OwnerUnit->FireControlComponent->GetActiveRangeCm());
-
-    // Close fire is deadly: inside the close band (about 40 m) the hit chance is more than doubled, inside the medium band 1.6x.
-    // (Linear fall-off with distance as before, then the band bonus.)
-    const float CloseBand = OwnerUnit->FireControlComponent->CloseRangeCm;
-    const float MediumBand = OwnerUnit->FireControlComponent->MediumRangeCm;
-    const float RangeBonus = DistanceCm <= CloseBand ? 2.4f : DistanceCm <= MediumBand ? 1.6f : 1.0f;
-    const float RangeFactor =
-        FMath::Clamp(1.0f - (DistanceCm / ActiveRangeCm) * 0.55f, 0.25f, 1.0f) * RangeBonus;
-
-    const float ConditionMultiplier =
-        OwnerUnit->ConditionComponent
-        ? OwnerUnit->ConditionComponent->GetAccuracyMultiplier()
-        : 1.0f;
-
-    const float FireDrillAccuracyMultiplier =
-        OwnerUnit->FireDrillComponent
-        ? OwnerUnit->FireDrillComponent->GetVolleyCoordinationMultiplier()
-        : 1.0f;
-
-    const float StanceTargetMultiplier =
-        IsValid(Target) && Target->StanceComponent
-        ? Target->StanceComponent->GetIncomingHitMultiplier()
-        : 1.0f;
-
-    const float CoverMultiplier =
-        IsValid(Target) && Target->DirectionalCoverComponent
-        ? Target->DirectionalCoverComponent->CalculateIncomingHitMultiplier(
-            OwnerUnit->GetActorLocation())
-        : 1.0f;
-
-    const float SkirmisherTargetMultiplier =
-        IsValid(Target) && Target->SkirmisherComponent
-        ? Target->SkirmisherComponent->GetIncomingHitMultiplier()
-        : 1.0f;
-
-    const float OccupiedPositionMultiplier =
-        IsValid(Target) && Target->PositionOccupancyComponent
-        ? Target->PositionOccupancyComponent->GetIncomingHitMultiplier(
-            OwnerUnit->GetActorLocation())
-        : 1.0f;
-
-    const float TerrainExposureMultiplier =
-        IsValid(Target) && Target->TerrainAwarenessComponent
-        ? Target->TerrainAwarenessComponent->GetIncomingHitMultiplierFrom(
-            OwnerUnit->GetActorLocation())
-        : 1.0f;
-
-    const float SmokeTransmission =
-        OwnerUnit->VisibilityComponent && IsValid(Target)
-        ? OwnerUnit->VisibilityComponent->GetSmokeTransmissionTo(Target)
-        : 1.0f;
-
-    const float HitChance =
-        FMath::Clamp(
-            BaseHitChance *
-            RangeFactor *
-            ConditionMultiplier *
-            FireDrillAccuracyMultiplier *
-            StanceTargetMultiplier *
-            CoverMultiplier *
-            SkirmisherTargetMultiplier *
-            OccupiedPositionMultiplier *
-            TerrainExposureMultiplier *
-            SmokeTransmission,
-            0.0f,
-            1.0f);
+    const float HitChance = CalculateHitChance(DistanceCm, Target);
 
     int32 Hits = 0;
 
@@ -737,4 +687,213 @@ void UStrategyCombatComponent::CancelMarchUnderFire()
     if (!OwnerUnit || !OwnerUnit->IsCombatEffective() || !OwnerUnit->OrderComponent || !OwnerUnit->MovementExecutor) return;
     if (OwnerUnit->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Move)
         OwnerUnit->MovementExecutor->HaltForFire();
+}
+
+float UStrategyCombatComponent::CalculateHitChance(float DistanceCm, const AStrategyUnit* Target) const
+{
+    const float ActiveRangeCm =
+        FMath::Max(1.0f, OwnerUnit->FireControlComponent->GetActiveRangeCm());
+
+    // Close fire is deadly: inside the close band (about 40 m) the hit chance is more than doubled, inside the medium band 1.6x.
+    // (Linear fall-off with distance as before, then the band bonus.)
+    const float CloseBand = OwnerUnit->FireControlComponent->CloseRangeCm;
+    const float MediumBand = OwnerUnit->FireControlComponent->MediumRangeCm;
+    const float RangeBonus = DistanceCm <= CloseBand ? 2.4f : DistanceCm <= MediumBand ? 1.6f : 1.0f;
+    const float RangeFactor =
+        FMath::Clamp(1.0f - (DistanceCm / ActiveRangeCm) * 0.55f, 0.25f, 1.0f) * RangeBonus;
+
+    const float ConditionMultiplier =
+        OwnerUnit->ConditionComponent
+        ? OwnerUnit->ConditionComponent->GetAccuracyMultiplier()
+        : 1.0f;
+
+    const float FireDrillAccuracyMultiplier =
+        OwnerUnit->FireDrillComponent
+        ? OwnerUnit->FireDrillComponent->GetVolleyCoordinationMultiplier()
+        : 1.0f;
+
+    const float StanceTargetMultiplier =
+        IsValid(Target) && Target->StanceComponent
+        ? Target->StanceComponent->GetIncomingHitMultiplier()
+        : 1.0f;
+
+    const float CoverMultiplier =
+        IsValid(Target) && Target->DirectionalCoverComponent
+        ? Target->DirectionalCoverComponent->CalculateIncomingHitMultiplier(
+            OwnerUnit->GetActorLocation())
+        : 1.0f;
+
+    const float SkirmisherTargetMultiplier =
+        IsValid(Target) && Target->SkirmisherComponent
+        ? Target->SkirmisherComponent->GetIncomingHitMultiplier()
+        : 1.0f;
+
+    const float OccupiedPositionMultiplier =
+        IsValid(Target) && Target->PositionOccupancyComponent
+        ? Target->PositionOccupancyComponent->GetIncomingHitMultiplier(
+            OwnerUnit->GetActorLocation())
+        : 1.0f;
+
+    const float TerrainExposureMultiplier =
+        IsValid(Target) && Target->TerrainAwarenessComponent
+        ? Target->TerrainAwarenessComponent->GetIncomingHitMultiplierFrom(
+            OwnerUnit->GetActorLocation())
+        : 1.0f;
+
+    const float SmokeTransmission =
+        OwnerUnit->VisibilityComponent && IsValid(Target)
+        ? OwnerUnit->VisibilityComponent->GetSmokeTransmissionTo(Target)
+        : 1.0f;
+
+    return
+        FMath::Clamp(
+            BaseHitChance *
+            RangeFactor *
+            ConditionMultiplier *
+            FireDrillAccuracyMultiplier *
+            StanceTargetMultiplier *
+            CoverMultiplier *
+            SkirmisherTargetMultiplier *
+            OccupiedPositionMultiplier *
+            TerrainExposureMultiplier *
+            SmokeTransmission,
+            0.0f,
+            1.0f);
+
+}
+
+int32 UStrategyCombatComponent::ResolveAimedHits(int32 AimedShotCount, float AimedDistanceCm,
+    AStrategyUnit* AimedTarget, UStrategyInfantryVisualComponent* AimedShooterVisual,
+    UStrategyInfantryVisualComponent* AimedTargetVisual)
+{
+    const auto& AimedShooters = AimedShooterVisual->GetSoldierFigures();
+    const auto& AimedTargets = AimedTargetVisual->GetSoldierFigures();
+    USkeletalMeshComponent* AimedBearer = AimedTargetVisual->GetLivingColourBearer();
+    const FVector AimedDirection = (AimedTarget->GetActorLocation() - OwnerUnit->GetActorLocation()).GetSafeNormal2D();
+    const FVector AimedLateral(-AimedDirection.Y, AimedDirection.X, 0.f);
+    TArray<int32> AimedShooterOrder;
+    TArray<int32> AimedCandidates;
+    float AimedNearest = TNumericLimits<float>::Max();
+    float AimedShooterMin = TNumericLimits<float>::Max(), AimedShooterMax = -TNumericLimits<float>::Max();
+    float AimedTargetMin = TNumericLimits<float>::Max(), AimedTargetMax = -TNumericLimits<float>::Max();
+    for (int32 AimedIndex = 0; AimedIndex < AimedShooters.Num(); ++AimedIndex)
+    {
+        if (!IsValid(AimedShooters[AimedIndex])) continue;
+        AimedShooterOrder.Add(AimedIndex);
+        const float AimedSide = FVector::DotProduct(AimedShooters[AimedIndex]->GetComponentLocation(), AimedLateral);
+        AimedShooterMin = FMath::Min(AimedShooterMin, AimedSide);
+        AimedShooterMax = FMath::Max(AimedShooterMax, AimedSide);
+    }
+    AimedShooterOrder.Sort([&](int32 AimedLeft, int32 AimedRight)
+    {
+        const double AimedLeftDepth = FVector::DotProduct(AimedShooters[AimedLeft]->GetComponentLocation(), AimedDirection);
+        const double AimedRightDepth = FVector::DotProduct(AimedShooters[AimedRight]->GetComponentLocation(), AimedDirection);
+        return AimedLeftDepth == AimedRightDepth ? AimedLeft < AimedRight : AimedLeftDepth > AimedRightDepth;
+    });
+    for (int32 AimedIndex = 0; AimedIndex < AimedTargets.Num(); ++AimedIndex)
+    {
+        if (!IsValid(AimedTargets[AimedIndex])) continue;
+        AimedCandidates.Add(AimedIndex);
+        const FVector AimedPosition = AimedTargets[AimedIndex]->GetComponentLocation();
+        AimedNearest = FMath::Min(AimedNearest, float(FVector::DotProduct(AimedPosition, AimedDirection)));
+        const float AimedSide = FVector::DotProduct(AimedPosition, AimedLateral);
+        AimedTargetMin = FMath::Min(AimedTargetMin, AimedSide);
+        AimedTargetMax = FMath::Max(AimedTargetMax, AimedSide);
+    }
+    const FVector AimedLocalDirection = AimedTarget->GetActorTransform().InverseTransformVectorNoScale(-AimedDirection);
+    const float AimedRankSpacing = FMath::Max(1.f, AimedTarget->FormationComponent ? AimedTarget->FormationComponent->SoldierRankSpacingCm : 90.f);
+    const float AimedFileSpacing = FMath::Max(1.f, AimedTarget->FormationComponent ? AimedTarget->FormationComponent->SoldierLateralSpacingCm : 60.f);
+    const float AimedLayer = FMath::Max(30.f, float(FMath::Abs(AimedLocalDirection.X) * AimedRankSpacing + FMath::Abs(AimedLocalDirection.Y) * AimedFileSpacing));
+    TArray<int32> AimedFront, AimedFirstTwo;
+    for (int32 AimedIndex : AimedCandidates)
+    {
+        const float AimedDepth = FVector::DotProduct(AimedTargets[AimedIndex]->GetComponentLocation(), AimedDirection) - AimedNearest;
+        if (AimedDepth <= AimedLayer * 0.6f) AimedFront.Add(AimedIndex);
+        if (AimedDepth <= AimedLayer * 1.6f) AimedFirstTwo.Add(AimedIndex);
+    }
+    AimedFront.Sort([&](int32 AimedLeft, int32 AimedRight)
+    {
+        const double AimedLeftSide = FVector::DotProduct(AimedTargets[AimedLeft]->GetComponentLocation(), AimedLateral);
+        const double AimedRightSide = FVector::DotProduct(AimedTargets[AimedRight]->GetComponentLocation(), AimedLateral);
+        return AimedLeftSide == AimedRightSide ? AimedLeft < AimedRight : AimedLeftSide < AimedRightSide;
+    });
+    TArray<TWeakObjectPtr<USkeletalMeshComponent>> AimedVictims;
+    int32 AimedStrayCount = 0, AimedMissCount = 0, AimedWastedCount = 0;
+    const float AimedChance = CalculateHitChance(AimedDistanceCm, AimedTarget);
+    for (int32 AimedShot = 0; AimedShot < AimedShotCount; ++AimedShot)
+    {
+        const int32 AimedShooterIndex = AimedShooterOrder.IsValidIndex(AimedShot) ? AimedShooterOrder[AimedShot] : INDEX_NONE;
+        int32 AimedTargetIndex = INDEX_NONE;
+        USkeletalMeshComponent* AimedMan = nullptr;
+        if (AimedShooterIndex != INDEX_NONE && (!AimedFront.IsEmpty() || AimedBearer))
+        {
+            if (AimedBearer && RandomStream.FRand() < 0.04f) AimedMan = AimedBearer;
+            else if (!AimedFront.IsEmpty())
+            {
+                const float AimedFraction = (float(FVector::DotProduct(AimedShooters[AimedShooterIndex]->GetComponentLocation(), AimedLateral)) - AimedShooterMin) /
+                    FMath::Max(1.f, AimedShooterMax - AimedShooterMin);
+                int32 AimedOpposite = 0;
+                float AimedBest = TNumericLimits<float>::Max();
+                for (int32 AimedPlace = 0; AimedPlace < AimedFront.Num(); ++AimedPlace)
+                {
+                    const float AimedOtherFraction = (float(FVector::DotProduct(AimedTargets[AimedFront[AimedPlace]]->GetComponentLocation(), AimedLateral)) - AimedTargetMin) /
+                        FMath::Max(1.f, AimedTargetMax - AimedTargetMin);
+                    const float AimedDifference = FMath::Abs(AimedFraction - AimedOtherFraction);
+                    if (AimedDifference < AimedBest) { AimedBest = AimedDifference; AimedOpposite = AimedPlace; }
+                }
+                if (RandomStream.FRand() < 0.35f)
+                    AimedOpposite = RandomStream.RandRange(FMath::Max(0, AimedOpposite - 2), FMath::Min(AimedFront.Num() - 1, AimedOpposite + 2));
+                AimedTargetIndex = AimedFront[AimedOpposite];
+                if (RandomStream.FRand() < 0.10f && !AimedFirstTwo.IsEmpty())
+                    AimedTargetIndex = AimedFirstTwo[RandomStream.RandRange(0, AimedFirstTwo.Num() - 1)];
+                AimedMan = AimedTargets[AimedTargetIndex];
+            }
+            else AimedMan = AimedBearer;
+        }
+        const float AimedRoll = RandomStream.FRand();
+        USkeletalMeshComponent* AimedVictim = nullptr;
+        FString AimedOutcome = TEXT("miss");
+        if (AimedMan && AimedRoll < AimedChance) AimedVictim = AimedMan;
+        else if (AimedMan && AimedRoll < AimedChance * 1.3f)
+        {
+            float AimedBestDistance = TNumericLimits<float>::Max();
+            int32 AimedStrayIndex = INDEX_NONE;
+            for (int32 AimedIndex : AimedCandidates)
+            {
+                if (AimedTargets[AimedIndex] == AimedMan) continue;
+                const float AimedSeparation = FVector::DistSquared2D(AimedTargets[AimedIndex]->GetComponentLocation(), AimedMan->GetComponentLocation());
+                if (AimedSeparation < AimedBestDistance)
+                { AimedBestDistance = AimedSeparation; AimedVictim = AimedTargets[AimedIndex]; AimedStrayIndex = AimedIndex; }
+            }
+            if (AimedBearer && AimedBearer != AimedMan &&
+                FVector::DistSquared2D(AimedBearer->GetComponentLocation(), AimedMan->GetComponentLocation()) < AimedBestDistance)
+            { AimedVictim = AimedBearer; AimedStrayIndex = INDEX_NONE; }
+            if (AimedVictim) AimedOutcome = AimedStrayIndex == INDEX_NONE ? TEXT("stray:bearer") : FString::Printf(TEXT("stray:%d"), AimedStrayIndex);
+        }
+        if (AimedVictim)
+        {
+            const TWeakObjectPtr<USkeletalMeshComponent> AimedWeakVictim(AimedVictim);
+            if (AimedVictims.Contains(AimedWeakVictim)) { AimedOutcome = TEXT("wasted"); ++AimedWastedCount; }
+            else
+            {
+                AimedVictims.Add(AimedWeakVictim);
+                if (AimedVictim == AimedMan) AimedOutcome = TEXT("hit");
+                else ++AimedStrayCount;
+            }
+        }
+        else ++AimedMissCount;
+        const FString AimedTargetLabel = AimedMan == AimedBearer && AimedMan ? TEXT("bearer") : FString::FromInt(AimedTargetIndex);
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864AimedShot %s man %d -> %s man %s %s dist=%.1f chance=%.2f"),
+            *OwnerUnit->StableUnitId.ToString(), AimedShooterIndex, *AimedTarget->StableUnitId.ToString(),
+            *AimedTargetLabel, *AimedOutcome, AimedDistanceCm / 100.f, AimedChance * 100.f);
+    }
+    const int32 AimedHits = AimedVictims.Num();
+    const int32 AimedScaled = AimedTarget->CombatComponent ? AimedTarget->CombatComponent->ScaleIncomingCasualties(AimedHits, false) : AimedHits;
+    while (AimedVictims.Num() > AimedScaled) AimedVictims.RemoveAt(AimedVictims.Num() - 1);
+    const bool AimedBearerHit = AimedBearer && AimedVictims.Contains(TWeakObjectPtr<USkeletalMeshComponent>(AimedBearer));
+    AimedTargetVisual->QueueAimedVictims(AimedVictims, AimedBearerHit);
+    UE_LOG(LogTemp, Display, TEXT("Strategy1864AimedVolley %s -> %s shots=%d hits=%d stray=%d miss=%d wasted=%d scaled=%d"),
+        *OwnerUnit->StableUnitId.ToString(), *AimedTarget->StableUnitId.ToString(), AimedShotCount, AimedHits,
+        AimedStrayCount, AimedMissCount, AimedWastedCount, AimedScaled);
+    return AimedScaled;
 }

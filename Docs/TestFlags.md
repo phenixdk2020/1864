@@ -86,7 +86,8 @@ Kortvalg og scenarie er afgørende: duel-, Skirmish- og kampagneslag har forskel
 | `Strategy1864DebugDecisions` | Logger officer-/reaktionsvurderinger, inputs, årsager og afviste alternativer med PROJECT1864-DECISION; også gentagne evalueringer. Kontaktlaget logger sidste position, heading, alder, observationstid, confidence, usikkerhedsradius og kilde ved hver kontaktscanning. Ingen taktisk effekt. | `-Strategy1864DebugDecisions` |
 | `Strategy1864DebugOfficer` | Logger officerens ordre/fjende/flankerolle og spredt orden. | `-Strategy1864DebugOfficer` |
 | `Strategy1864DebugDisengage` | Logger AFBRYD-start, faktiske 9 m-bagtrin, udmarch og afslutning med enheds-id, afstand og seneste salvetid. Starter ikke et slag. | `-Strategy1864DebugDisengage` |
-| `Strategy1864HoldReserve` | Tilskynder bataljonschefen til reserve (kræver gruppestørrelse/aktiv AI). | `-Strategy1864HoldReserve` |
+| `Strategy1864HoldReserve` | Tvinger bataljonschefen til at holde en reserve (mindst 3 kompagnier, aktiv AI) og giver ham en rolig profil. Uden flaget holder en bataljon med mindst 4 kompagnier altid reserve (1/4 af kompagnierne rundet ned, mindst 1; 8+ kompagnier giver 2); styrkeforholdet mod den set fjende (fog of war) styrer kun, hvornår reserven indsættes. Se `PROJECT1864-RESERVE` nedenfor. | `-Strategy1864HoldReserve` |
+| `Strategy1864SkirmishDanishCavalry` | Tilføjer en dansk eskadron `DK-SKIRMISH-SQN` under bataljons-HQ `DK-SKIRMISH-HQ` (og dermed under bataljonsplanen), på den åbne flanke, med officer-AI. Ny 2026-11-03, ikke bygget eller testet. | `-Strategy1864SkirmishDanishCavalry` |
 | `Strategy1864Grass` | 0 udelader græs ved kampagneslagmarkens opbygning. | `-Strategy1864Grass=0` |
 | `Strategy1864FieldLOD` | Mænd pr. figur; mindst 1; tilsidesætter gemt figurskala ved start. | `-Strategy1864FieldLOD=5` |
 | `Strategy1864NoHud` | Springer HUD-tegning over. | `-Strategy1864NoHud` |
@@ -99,7 +100,8 @@ Kortvalg og scenarie er afgørende: duel-, Skirmish- og kampagneslag har forskel
 | `Strategy1864DrillTest` | Scriptede ordrer til at se kolonneeksercitsen: `sek:enhed:frem:højre[:front]`, `sek:enhed:LINE`, `sek:enhed:SQUARE`, `sek:enhed:SHOCK:fjende[:grader]` (bajonetsammenstød nu, fra fjendens front/flanke/ryg), `sek:enhed:KILL:antal[:grader]` (skytternes retning fra fronten: 0 forfra, 90 højre flanke, 180 bagfra) eller `sek:enhed:KILLCOLOURS`, kommasepareret. | `-Strategy1864DrillTest=8:DK-SKIRMISH-C1:4000:13000:0` |
 | `Strategy1864ClockRate` | Slagsekunder pr. simulationssekund. | `-Strategy1864ClockRate=6` |
 | `Strategy1864FlatQA` | Beholder den flade QA-boks frem for engen. | `-Strategy1864FlatQA` |
-| `Strategy1864Field` | Indlæser slagmarksfil fra Saved/Battle. | `-Strategy1864Field=Battlefield_Test.json` |
+| `Strategy1864Field` | Indlæser slagmarksfil fra Saved/Battle. `Battlefield_Bakke.json` er Nyborg med bølgede bakker op til ca. 13° (testkort til terræn). | `-Strategy1864Field=Battlefield_Bakke.json` |
+| `Strategy1864GroundProbe` | Hvert 2. sekund logger et kompagni `PROJECT1864-GROUNDPROBE`: mand 0's fødder mod beregnet og synlig jord (sporstråle) samt laveste og højeste mand over jorden i cm. | `-Strategy1864GroundProbe` |
 | `Strategy1864Duel` | Livgarden mod svensk infanteri; Duel-kort aktiverer også dette. | `-Strategy1864Duel` |
 | `Strategy1864FullOOB` | Vælger fuld kamporden frem for duel; OOB-kort aktiverer også dette. | `-Strategy1864FullOOB` |
 | `Strategy1864Battle` | Kampagneslag-id; uden Field vælges Battlefield_Battle_N.json. | `-Strategy1864Battle=1` |
@@ -117,6 +119,7 @@ Kortvalg og scenarie er afgørende: duel-, Skirmish- og kampagneslag har forskel
 | `Strategy1864TestOfficers` | Sårer dansk officer/fanger fjendtlig ved 20 s; afslutter/skriver resultat ved 30 s. | `-Strategy1864TestOfficers` |
 | `Strategy1864Pontoon` | Aktiverer pionerbroer i kampagneslagets opsætning. | `-Strategy1864Pontoon` |
 | `Strategy1864AutoFinish` | Afslutter kampagneslag efter simulationssekunder og skriver resultat. | `-Strategy1864AutoFinish=60` |
+| `Strategy1864AimedFire` | Sidespor med skud fra mand til mand; slået fra som standard. Logger sigte, træf, strejfere og spildte skud. | `Start-Test-1-Kompagni-mod-Kompagni.bat -Strategy1864AimedFire -log` |
 | `Strategy1864Shots` | Billedplan: sek:del-af-enheds-id:kamerafstand-cm:sidefaktor[:FRONT]; komma mellem trin; RIDER vælger ordonnans; FLAG<enhed> (fx FLAGDK-SKIRMISH-C1) sigter på kompagniets fane; FRONT sætter kameraet foran enheden. | `-Strategy1864Shots=30:RIDER:4000:0.5` |
 | `Strategy1864AARAutoClose` | Testkørsler (midlertidigt): spillet lukker selv 30 s efter AAR, medmindre der trykkes en tast eller klikkes. Slået til automatisk ved `Strategy1864DrillTest=`, `Strategy1864Shots=`, `Strategy1864ShotsQuit` og `Strategy1864Accept=`. En vagt på en anden tråd lukker også, hvis spillet hænger i AAR. Start testkørsler med `-ddc=InstalledNoZenLocalFallback`, så ZenServer-dialogen "Wait for ZenServer?" ikke blokerer. | `-Strategy1864AARAutoClose` |
 | `Strategy1864FollowCam` | Kamera der følger blødt: FLAG<enhed> (fanen) eller en enhed; afstand i cm, sidefaktor, valgfrit FRONT (foran). Til videooptagelser. | `-Strategy1864FollowCam=FLAG:1200:0.5` |
@@ -137,9 +140,11 @@ Kortvalg og scenarie er afgørende: duel-, Skirmish- og kampagneslag har forskel
 | `Strategy1864Haze` | Tågetæthed ved initialisering. | `-Strategy1864Haze=0.01` |
 | `Strategy1864Exposure` | Eksponeringskorrektion. | `-Strategy1864Exposure=-0.4` |
 | `Strategy1864Horsemen` | 0 deaktiverer eskadronens rytterfigurer. | `-Strategy1864Horsemen=0` |
-| `Strategy1864HorseYaw` | Hestemodellens lokale drejning i grader. | `-Strategy1864HorseYaw=-90` |
+| `Strategy1864HorseYaw` | Hestemodellens lokale drejning i grader (uden flag: automatisk for den rigge hest, ellers 0 eller -90 efter modellens akse). | `-Strategy1864HorseYaw=-90` |
 | `Strategy1864Saddle` | Sadelhøjde i cm. | `-Strategy1864Saddle=160` |
-| `Strategy1864Seat` | Rytterens sædeparameter i cm. | `-Strategy1864Seat=48` |
+| `Strategy1864Seat` | Rytterens sædeparameter i cm (standard 48; bækkenet under sadelknoglen). | `-Strategy1864Seat=48` |
+| `Strategy1864SaddleLift` | Rytterens bækken over `saddle_root`-knoglen i cm (standard 6). | `-Strategy1864SaddleLift=6` |
+| `Strategy1864StaticHorse` | Forskellig fra 0 bruger den gamle statiske hestemodel i stedet for den rigge hest `SK_Horse_1864` (standard 0). | `-Strategy1864StaticHorse=1` |
 | `Strategy1864AnimationAudit` | Logger animationskontrol for infanteri. | `-Strategy1864AnimationAudit` |
 | `Strategy1864CrowdFar` | Afstand i cm til fjernfigurer/VAT. | `-Strategy1864CrowdFar=30000` |
 | `Strategy1864Crowd` | 0 deaktiverer infanteriets crowd-visning. | `-Strategy1864Crowd=0` |
@@ -165,6 +170,24 @@ Patchen retter også 9–10 s-hullet i resume-check, en ugyldig broreference, SE
 ID'er: **T1–T10**, **MOVE, STOPFIRE, NEW-HOLD, DELAY, SPREAD, SCREEN, WORKS, WORKS-CANCEL, CONTACT, ROE, AMMO, ROUT, DESTINATION, SQUARE-ZONES, LONG-MOVE, SQUARE-GATES, FIREBLOCK, DISENGAGE, WORKS-MOVE**. Assertionerne bruger rigtige komponenter. T1 kontrollerer carré-start inden X=5 s, HALT/bajonetter/snapshot, mindst20s release, reformering og resume; det er ikke en charge-overlevelsesprøve. T3 kontrollerer lokal moralsmitte/cooldown og forventes at afsløre den manglende smitteregel. T7 marcherer to kompagnier fra samme bred over QA-bro og observerer ejerskab, flodposition og ankomst.
 
 **T2/T4/T5/T6/T8/T9/T10 giver `FAIL NOT_IMPLEMENTED`**, fordi fulde designkontrakter mangler. De er automatiske mangelrapporter, ikke implementerede fulde fixtures. DELAY beviser ikke T4, og DESTINATION/SQUARE-ZONES beviser ikke HUD eller salveandele. AFBRYD, charge, artilleri/morterbeskyttelse, UI, save/load, audio og mange designvariationer kræver stadig manuel test/videre fixtures. Se [Test-Skema-Enhedsadfaerd.md](Test-Skema-Enhedsadfaerd.md) for alle rækker og afgrænsninger.
+
+**Bataljonsplan, reserve og eskadron (2026-11-03; bygget OK, accepttests og testslag: kørsel i gang, ingen resultater endnu).** Seks nye ID'er (`AcceptAll` kører dem også, så samlet antal ID'er er 6 højere end ovenfor). Alle bruger en rigtig bataljons-HQ (`ACCEPT-HQ`) med `BattalionPlanComponent`, et ikke-skydende modparts-kompagni og de rigtige officerkomponenter; ingen forventet output indsprøjtes. Timeouten er ×4 for `RESERVE-COMMIT` og `CAV-RALLY`, fordi marchen ind og en 70–100 s samling skal nå at ske.
+
+| ID | Opsætning | Bestået når |
+|---|---|---|
+| `RESERVE-HOLD` | 4 danske kompagnier under HQ med angrebsordre (som `SkirmishAttack`) mod 1 modpart på 250 m (fixturen sætter enhederne på terrænet). Reserven holdes nu altid (grund=doktrin), uanset styrkeforhold. | Inden 60 s har planen `WantsReserve()` og præcis ét dansk kompagni FlankRole 3 (reserve). Flere end ét giver FAIL. |
+| `RESERVE-NONE` | 2 danske kompagnier mod 2 modparter (under 4 kompagnier, så ingen reserve; grund=under-4-kompagnier). | Ingen reserve og `WantsReserve()` falsk i 25 s, og planen har set fjenden (hovedmål sat, styrkeforhold over 0), så testen ikke er tom. |
+| `RESERVE-COMMIT` | Som `RESERVE-HOLD`; når reserven står rolig bag ildbasen sænkes ildbasens styrke til 60 %. | Reserven forlader rolle 3 inden 15 s. |
+| `CAV-FLANK` | Dansk eskadron under HQ 200 m fra siden af et modpartskompagni, der holdes "under ild" ved at sætte `UnderFireRemainingSeconds` hvert billede. | Eskadronens ordre bliver `Charge` inden 30 s. |
+| `CAV-SQUARE` | Som `CAV-FLANK`, men modparten står først i en færdigdannet karré (eskadronens AI tændes først, når karréen står). | Ingen `Charge`-ordre i 30 s, og eskadronen har set karréen. |
+| `CAV-RALLY` | Som `CAV-FLANK`. Når chargen er givet, ryddes ordren (så et rigtigt chok ikke afgør testen). | Eskadronens samling (`CavalryRallyUntil`) starter inden 15 s, og efter dens udløb er eskadronen kampdygtig igen (moral over 45). |
+
+Eksempel: `& .\Start-Test-Adfaerd.bat -Strategy1864Accept=RESERVE-HOLD`. Dette er et eksempel; ikke kørt.
+
+**Log-præfikser for bataljonsplanen** (alle `Display`):
+- `PROJECT1864-RESERVE <hq> hold grund=doktrin | ingen grund=under-4-kompagnier|ingen-fjende-set ratio= egne= set-fjende= kompagnier=` når planen skifter mellem at holde og ikke holde reserve (bataljon med mindst 4 kompagnier holder altid reserve); `PROJECT1864-RESERVE <kompagni> indsat grund=hul|for-faa-kompagnier|flanketrussel|afgoerelse|gennembrud` når reserven sættes ind ("overtal-tabt" er fjernet).
+- `PROJECT1864-BATTALION <hq> fase=naermer-sig|fastholder|omgaar|udnytter grund=... ratio= maal=` ved skift af fase.
+- `PROJECT1864-CAVALRY <eskadron> mission|samling|truer-karre ...` (flytning til ventepunkt, samling efter chok, holder en fast karré i trusler på 400 m) og `PROJECT1864-CAVALRY <eskadron> forfoelg <mål> <m>` (forfølger en brudt fjende inden for 250 m). Selve chargen i flanken står i enhedens egen log som "Charge i flanke/ryg".
 
 Eksakt samlet kommando fra projektroden: `& .\Start-Test-Adfaerd.bat`. Enkeltcase: `& .\Start-Test-Adfaerd.bat -Strategy1864Accept=CONTACT -Strategy1864AcceptSpeed=1`. Direkte start:
 
@@ -193,6 +216,7 @@ Launcherens indhold er autoritativt; flere ældre `rem`-kommentarer beskriver au
 | `Start-Test-2-Bataillon-mod-Kompagni.bat` | Skirmish=1, Danes=4, HoldReserve, Swedes, EnemyDefends, Passive. Bemærk stavningen Bataillon i filnavnet. |
 | `Start-Test-Adfaerd.bat` | Skirmish-kort, FlatQA, AcceptAll (eller enkelt Accept), DebugDecisions, nosplash/unattended; venter og afslutter med testens exitkode. |
 | `Start-Test-3-Rytteri.bat` | Skirmish=1, Danes=2, Cavalry, Swedes, EnemyDefends, Passive. |
+| `Start-Test-4-Bataljon-Rytteri.bat` | Skirmish=1, Danes=4, SkirmishDanishCavalry, Swedes, EnemyDefends, SkirmishAttack (ikke passiv: bataljonen angriber, reserven vurderes af planen, eskadronen har en mission). Ny 2026-11-03, ikke kørt. |
 
 Eksempel i PowerShell: `& .\Start-Test-3-Rytteri.bat -Strategy1864DebugOfficer "-Strategy1864Shots=30:RIDER:4000:0.5"`. Dette er et eksempel; ikke kørt ved dokumentopdateringen.
 
@@ -224,6 +248,16 @@ Se [Audio.md](Audio.md) for WAV-generering, editorimport, HUD-indstillinger og m
 ## Officerskarrierer — statisk kontrol (2026-10-20)
 
 `python -B Tools/Countries/validate_officer_careers.py` kontrollerer 1825/1851, historisk/fiktiv proveniens, save v40, hookpunkter og referencegrænser. Kør også `python -B Tools/Countries/validate_level_c.py` for byteidentisk genimport og eksisterende Niveau C-kobling. Ingen nye startflag; kommandoerne starter ikke spil/editor og udfører ikke build. Se [Officerskarrierer.md](Officerskarrierer.md) for model og senere runtime-kontrolbehov.
+
+## Video-QA (2026-10-28)
+
+`Tools/QA/battle_video_qa.py` kører en scriptet testkamp og laver en rapport med fund fra tre bedømmere. Scriptet bygger på `-Strategy1864DrillTest`, `-Strategy1864FollowCam`, `-Strategy1864Record`, `-Strategy1864FormationMetric`, `-Strategy1864NoHud`, `-Strategy1864ShotsQuit` og `-benchmark -fps=10`. Bedømmerne er Ollama `qwen3-vl:8b-instruct`, Codex og Copilot.
+
+- `python Tools/QA/battle_video_qa.py list` viser scenarierne: `linje-ild`, `kolonne-march`, `tab-i-kolonne`, `tab-under-march`, `fane` og `linje-kolonne-linje`.
+- `python Tools/QA/battle_video_qa.py all tab-i-kolonne` starter spillet, optager og bedømmer. Rapporten ligger i `Saved/QA/<dato>-<scenarie>/rapport.md`.
+- Enkelte trin køres med `--run <mappe>`: `metrics`, `extract`, `review` (`--skip ollama,codex,copilot`) og `report`. `import --frames … --log …` laver en kørsel ud fra en ældre optagelse.
+- Spillets log skrives til kørselsmappen (`-ABSLOG`), og billederne flyttes ud af `Saved/Recording`. Gamle billeder blandes derfor ikke ind.
+- Scriptet nægter at starte, hvis UnrealEditor eller spillet kører, eller hvis GPU'en bruger over 6 GB. Se `Tools/QA/README.md`.
 
 ## Videooptagelse af en testkørsel
 

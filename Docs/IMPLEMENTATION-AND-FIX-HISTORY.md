@@ -2817,6 +2817,134 @@ Brugeren: "falder den 1. eller 2. mand i kolonnen, så skal den bagerste mand sl
 - **Ikke ændret:** parcel-detaljen toner allerede først ud ved 70–140 km (1 enhed = 10 m). Plan-punktet om 120 m byggede på en misforståelse.
 - **Sverige og Norge:** referencebilleder og research fra Codex (`Reference/Campaign1851/Scenery/SE|NO/`, `Docs/Bygninger-SE|NO-Research-2026-10-22.md`). Preussen venter på Codex-kvoten.
 
+## 2026-10-28 — Video-QA af 3D-slagene (Ollama, Codex, Copilot)
+
+**Værktøj** (plan godkendt 2026-10-28): `Tools/QA/battle_video_qa.py` med `scenarios.json`, `battle_rubric.md`, `review_schema.json` og `README.md`. Ingen ændringer i spilkoden.
+
+- **capture:** starter testkampen med `-Strategy1864DrillTest`, `-Strategy1864FollowCam`, `-Strategy1864Record`, `-Strategy1864FormationMetric` og `-benchmark -fps=10`.
+  - Loggen skrives med `-ABSLOG` til kørselsmappen, og billederne fra denne kørsel flyttes ud af `Saved/Recording`.
+  - Scriptet nægter at starte, hvis Unreal eller spillet kører, eller hvis GPU'en bruger over 6 GB. VRAM, som Ollama selv holder, tæller ikke med.
+- **extract** (ffmpeg): video, ét nøglebillede i sekundet, striber med 6 billeder 0,2 s fra hinanden (3×2), nærbilleder af midten og et kontaktark.
+- **metrics:** `Strategy1864FormationMetric`/`Closest` læses til en tidslinje. Markeringer: naboafstand under 40 cm, under 80 % på plads uden omformning, og fanebærer under 40 cm eller over 4,5 m fra nærmeste mand.
+- **review:**
+  - Ollama `qwen3-vl:8b-instruct` med kort engelsk tjekliste og JSON-skema, `keep_alive=0` bagefter;
+  - Codex `exec -s read-only --output-schema` og Copilot `-p` med shell og skrivning nægtet. Begge får højst 8 billeder plus målingsuddrag;
+  - Codex og Copilot kaldes via deres .exe, ikke npm-.cmd'en, som brød prompten ved linjeskift.
+- **report:** et fund er bekræftet, hvis målingerne støtter det, eller hvis to bedømmere ser det, hvoraf mindst én ikke er Ollama. Ollama alene er kun grovsortering.
+
+**Første runde:** seks scenarier og en tørkørsel på optagelsen fra 23/10, samlet i `Saved/QA/2026-10-28-oversigt.md`. Kontrollerede fund:
+
+- **Sammenrykning under march** (kendt): ned til 4 cm. Fanget af både målinger og Copilot.
+- **Opsamling af fanen:** han knæler ca. 1 m fra stangen.
+- **Døde stables oven i hinanden** ved mange tab på én gang.
+- **Kolonnen marcherer gennem en falden mand.**
+- **Den blå marchrute** ses i optagelserne.
+
+**Rettet undervejs:** tjeklisten sagde, at fanebæreren i linje står i midten. Han står ved højre fløj (valgt 2026-10-20), og de fire fund om det er afvist.
+
+**Mangler:**
+- `linje-ild` når ikke frem til ildkampen inden for 120–180 s (ingen skud i loggen), så scenariet skal have en ny ordre;
+- rytteri og kanoner er ikke med endnu.
+
+**2026-10-28 — Individuelt rettet infanteriild som valgfrit sidespor (Codex).** Tilføjet `-Strategy1864AimedFire`, hvor skytter vælger konkrete fjendtlige figurer, og skud kan ramme, strejfe, forfejle eller spildes på allerede ramte mænd. Udpegede ofre overføres via svage komponentreferencer, mens ekstra skalerede tab bruger eksisterende offerudvælgelse. Standardforløbets træfberegning og tilfældighedsløkke er bevaret. Bygget; ikke testet i slag endnu.
+
+**2026-10-28 — Danske byers opbygning og vejoverlap (Codex).** Bygader reserveres nu før husplacering, og bygningernes modelmål bestemmer sikkerhedsafstanden. Husplacering kontrolleres mod øvrige bygninger, veje, gader, broer og jernbaner. Byerne får størrelsesklasser, torv og åbne gård-/havearealer. Gård-/trægridets tilfældighedsstrøm er fastholdt. Hver dansk by logger `CAMPAIGN-1851|scenery|town <navn> houses= street-points= overlaps=`. Bygget og set i spillet (`Saved/QA/2026-10-28-byer`): ingen overlap, men byerne er for tynde — Odense og Aarhus har 6 huse, Fredericia og Thisted 1, og ingen by uden for København når klasse A (10–15 huse).
+
+#### 2026-11-03 — Rettelser fra fejlrapporten (1. november)
+- Byernes kantgader har nu hver sit komponentnavn (`TownEdgeStreet_<by>_<nr>`). Det ens navn gav "UObject overwrite"-hitches.
+- `TownUpdatePlots()` kører højst én gang i sekundet fra `Tick()` i stedet for hvert billede. Byggeprojekter opdaterer stadig straks.
+- Husene og kirkerne i byer uden kantgrunde (København m.fl.) reserveres fast i `TownBaseReservations`, så nye bygninger ikke kan lande oven i dem.
+- København m.fl.: hvis ringen om torvet ikke har plads til kirken, søges hele kernen igennem, nærmeste plads først. Ellers skrives en advarsel.
+- Fanebæreren falder, når hans kompagni er udslettet, også uden `-Strategy1864AimedFire`. Før kunne han blive stående alene.
+- QA-scenariet `linje-ild` starter uden `-Strategy1864SkirmishPassive` og med `-Strategy1864SkirmishAttack` (ny nøgle `drop_args` i scenarios.json).
+- Ikke bygget og ikke testet i spil. Garnisonsgrund i Rønne og Altona og Odenses ene reserverede grund er ikke rettet.
+
+#### 2026-11-03 — Bataljonsplan, reserve som vurdering og eskadronens mission
+Allan: "en fast reserve er ikke en regel - det er en vurdering, hvis fog of war viser overtal i styrke, så brug reserve, ellers commit reserven med det samme."
+- **Ny `UStrategyBattalionPlanComponent`** (`AI/StrategyBattalionPlanComponent.*`) på bataljons-HQ (`BattalionPlanComponent`). Hvert 5. sekund:
+  - sammenligner den egen kampværdi (mænd, moral og våbenart) med den fjende, bataljonens enheder kan se nu (kontakter, fog of war, aldrig fjendens sande styrke);
+  - holder kun reserve, hvis forholdet er mindst 1,5 : 1 og der er mindst 3 kompagnier (eller flaget `-Strategy1864HoldReserve`);
+  - sætter en fase (nærmer sig, fastholder, omgår, udnytter), vælger hovedmål efter trusselsscore (styrke, våben, moral, front og afstand) og giver eskadronen et ventepunkt ved den åbne flanke og et samlingspunkt bag linjen.
+- **Feltofficer:** `AssignFlanks` holder kun et reservekompagni, hvis planen vil det. Reserven sættes ind straks, når oddsene forsvinder (`overtal-tabt`), eller ved hul i ildbasen, fjendtligt rytteri mod flanken eller gennembrud. Flankerne venter ("flanken venter på ildbasen"), til ildbasen har fjenden under ild.
+- **Eskadronens mission:** (1) ventepunkt ved den åbne flanke uden for musketrækkevidde; (2) chok i flanke/ryg på et kompagni, der holdes fast af egen ild; (3) holder en fast karré i trusler på 250 m i stedet for at storme den; (4) samler sig efter chokket bag egne linjer i 30–60 s (efter fremmarchen); (5) forfølger en brudt fjende højst 250 m.
+- **Test:** flaget `-Strategy1864SkirmishDanishCavalry`, launcheren `Start-Test-4-Bataljon-Rytteri.bat` og seks accept-ID'er (`RESERVE-HOLD`, `RESERVE-NONE`, `RESERVE-COMMIT`, `CAV-FLANK`, `CAV-SQUARE`, `CAV-RALLY`) i `StrategyBehaviourTests.cpp`. Tre læsegettere (`GetFlankRole`, `IsReserveReleased`, `GetCavalryRallyUntil`) er føjet til feltofficeren til fixturerne. Se `Docs/TestFlags.md`.
+- **Ikke bygget og ikke testet.** Hverken koden, fixturerne eller launcheren er kompileret eller kørt. Tallene (1,5 : 1, 250 m, 30–60 s) er balanceestimater.
+
+#### 2026-11-03 — Kavaleri: skeletal hest og ryttere der følger hesten (del B, kode og klip klar, ikke importeret)
+- **Hesten:** `Horse_1_rigged_v3.blend` eksporteret headless til `SourceAssets/Horse/Horse_1_rigged_v3.fbx` (`Tools/Animation/export_horse_mesh_b1.py`; blend-filen har et dublet rig/mesh-par, kun `.001`-parret som klippene er lavet fra eksporteres; 39 knogler inkl. `saddle_root`). Klippene i `Reference/Animations/Horse/` er målt: alle er på stedet (rod-bevægelse 0), 30 fps, Stand 3,97 s, Walk 1,07 s, Trot 0,67 s, Canter 0,60 s, Gallop 0,43 s, Rear 2,37 s, Fall 1,97 s. Fodens jordhastighed i klippet: Walk 60, Trot 179, Canter 357, Gallop 757 cm/s (rapport `SourceAssets/Horse/horse_clip_report.json`). `import_horse_rigged.py` bruger nu den FBX og kalder eksportscriptet, hvis den mangler. **Importen er ikke kørt** (overdraget til unreal-integration).
+- **`StrategyCavalryVisualComponent`:** den statiske hest og sinusvugningen er erstattet af `SK_Horse_1864` med enkeltknude-animation. Gangart efter hver hests egen fart med tærsklerne fra `UStrategyHorseAnimationStateComponent` (80/350/650/900 cm/s, 10 % hysterese), afspilningshastighed = fart / klippets fodhastighed, begrænset pr. gangart (Walk 0,9–2,2, Trot 0,9–1,8, Canter 0,85–1,5, Gallop 0,9–1,4); ny gangart starter på samme brøkdel af cyklussen. Hesten hælder op til 14° ind i sving (efter vinkelhastighed og fart). Chok giver galop; en afvist chok (`bLastChargeRepulsed`) giver `A_Horse_Rear`; tab giver `A_Horse_Fall` (hesten falder altid mod sin venstre side) i stedet for de 82 graders vip. Fremad-retningen og skalaen (219 cm) findes ud fra hvilepositionen (pelvis til head) og grænserne, ikke ud fra en antaget importakse (`-Strategy1864HorseYaw=` overstyrer). Mangler `SK_Horse_1864`, bruges den gamle statiske hest uændret (`-Strategy1864StaticHorse=1` tvinger det).
+- **Rytteren:** sidder på hestens `saddle_root`-knogle (aflæst som sidst tegnet; uden for skærm bruges sadelhøjden), hælder med hesten og spiller et klip, der følger hestens egen afspilningsklokke: `A_Combat_CavWalk`, `CavTrotRise` (lettende trav), `CavCanter`, `CavGallop`, `CavCharge` (stående i bøjlerne ved chok), `CavFall`. Sablen trækkes ved chokkets start (`CavSabreDraw`, hver rytter lidt forskudt), der hugges ved kontakt (`CavSabreSlash`, første 1,4 s), rytteren falder med sit eget klip, og klippets jordniveau (rytterens rod 81,3 cm over jorden) sættes ved faldet. Mangler et rytterklip, bruges sædeposen eller det gamle faldklip.
+- **Rytterklippene:** `Tools/Animation/build_cavalry_rider_set.py` (nyt) tager "Reload sitting"-sædet og flytter bækkenet (op/frem/hældning), læner overkroppen og løser begge ben med to-knogle-IK, så fødderne bliver i sadlen; bækkenets op/ned er tidsat til hesteklippets egen bækkenkurve (to billeders forsinkelse). Klippene har præcis hesteklippets billedantal (Walk 33, Trot 21, Canter 19, Gallop 14, Fall 60). Gennemsyn: `SourceAssets/InfantryCombat/Preview/Cav*_sheet.png` (pind-figurer på pind-hest). `build_cavalry_sabre_set.py` er kørt igen; de tre sabelklip er nu eksporteret med -Z/Y (Armature 0), som de øvrige korrigerede ekstraklip; de tidligere filer ligger som `.prev.fbx`.
+- **Ikke bygget, ikke importeret, ikke set i spil.** Før spillet viser det: importér hest og rytterklip (se overdragelsen), tilføj `manifest_cav_rider.json` til `import_infantry_combat_set.py` og kør `bake_all_vat.py` (uden bagte rytterklip falder rytterne tilbage til skeletal tegning).
+
+## 2026-11-03 — Rigget hest og rytterklip importeret i Unreal
+
+- `import_horse_rigged.py` kørt via `UnrealEditor-Cmd -run=pythonscript`: `/Game/Units/Horse/SK_Horse_1864`, `SK_Horse_1864_Skeleton` og `A_Horse_Stand/Walk/Trot/Canter/Gallop/Rear/Fall` (kilde `Reference/Animations/Horse`). Scriptet omdøbte skelettet til sig selv og fejlede; rettet, så omdøbning springes over, når navnet allerede passer. Hesteklippene importeres nu med `import_rotation` roll=90.
+- `import_infantry_combat_set.py` har fået `manifest_cav_rider.json` og roll=90 på alle importerede klip. Importeret på `SK_Human_1864`: `A_Combat_CavWalk/TrotRise/Canter/Gallop/Charge/Fall` samt genimporteret `CavSabreDraw/Slash/Fight` (de gamle .uasset er gemt i `Backup_2026-11-03_CavClips/` og slettet før genimport). `*.prev.fbx` er ikke importeret.
+- Stierne matcher dem, `StrategyCavalryVisualComponent.cpp` loader. VAT ikke bagt; `BakeVersion` (6) er uændret. Intet bygget.
+
+## 2026-11-03 — Reserve efter periodens doktrin
+
+Besluttet af Allan ud fra `Docs/Taktik-Doktrin-1825-1864.md`. Ændret: `AI/StrategyBattalionPlanComponent.{h,cpp}` og `AI/StrategyFieldOfficerComponent.cpp`.
+
+- **Altid reserve:** en bataljon med mindst 4 kompagnier holder altid reserve, 1/4 af kompagnierne rundet ned, mindst 1 (4-7 kp giver 1, 8+ giver 2). Under 4 kompagnier: ingen reserve. Linjen beholder mindst 2 kompagnier. Flere reservekompagnier står side om side 120 m bag ildbasen (før 90 m). Et indsat kompagni går ikke tilbage i reserve.
+- **Indsættelse efter styrkeforhold (ReserveRatio 1,5):**
+  - Undertal (under 1:1), tidligt: ildbasen under 90 % mand eller moral under 70 (grund=hul), eller flanketrussel (grund=flanketrussel): fjendtligt rytteri inden 500 m, eller en set fjendtlig enhed mere end 60 m ud over linjens ende og højst 200 m foran den, inden 500 m.
+  - Overtal (1,5:1 eller mere), sent: ildbasen under 75 % eller moral under 55 (hul); afgørelse når fasen er "omgaar" og hovedmålets moral er under 55 (grund=afgoerelse); gennembrud når fjenden vakler (fase udnytter, grund=gennembrud); plus flanketrussel.
+  - Mellem 1 og 1,5 glider styrketærsklen lineært fra 90 % til 75 %. Holdetid højst 240 s. Grunden "overtal-tabt" er fjernet; ny grund "for-faa-kompagnier".
+- **Fog of war:** en kontakt tæller i 20 s efter den sidst blev set (`SeenMemorySeconds`), fordi accepttestene viste, at planen mistede fjenden efter 5 s.
+- **Rytteri (doktrin):** ventepost mindst 400 m fra målet (før 300 m, `CavalryWaitMinCm`); truer en fast karré fra 400 m (før 250 m); samlingspunkt 240 m bag linjens midte (før 60 m, `RallyBehindCm`).
+- **Log:** `PROJECT1864-RESERVE <hq> hold grund=doktrin | ingen grund=under-4-kompagnier|ingen-fjende-set`; `PROJECT1864-RESERVE <kp> indsat grund=hul|for-faa-kompagnier|flanketrussel|afgoerelse|gennembrud`.
+- **Status:** bygget OK. Accepttests: se "Reserven udtages, når angrebet begynder" nedenfor.
+
+## 2026-11-03 — Soldaterne følger terrænet
+
+- `StrategyInfantryVisualComponent`: ny `SoldierOnGround()`. Hver soldat sættes på jorden under sig selv (`GetEffectiveGroundZ`), med sin højde over enhedens origo bevaret (knælende osv.). Før stod alle i enhedens vandrette plan, så på en skråning stod den ene ende af en linje i bakken og den anden i luften. Jorden måles igen, når manden har flyttet sig 30 cm (cache `SoldierGroundSamples`, nulstilles når listen skrumper ved tab).
+- Bruges i den almindelige gang mod pladsen (`FigureTarget`), kolonne-eksercitsen (`DrillWorld`) og den første placering.
+- Testet visuelt på Nyborg-slagmarken (`-Strategy1864Field=Battlefield_Kort.json`, DrillTest-march 400 m): fødderne på jorden. Terrænet her er svagt (ca. 1°); stejl skråning og ydeevne med mange kompagnier er ikke målt.
+- Accepttest-fixturen for bataljonsplanen sætter nu enhederne på terrænet og fjenden på 250 m; CAV-SQUARE tæller karréen som set inden for 20 s.
+
+## 2026-11-03 — Reserven udtages, når angrebet begynder
+
+- **Fejl:** under en angrebsordre marcherede alle kompagnier frem til skudhold, og rollerne (ildbase, flanke, reserve) blev først delt ud, da de standsede. Reserven gik altså med helt op i ildlinjen og trak sig derefter tilbage. En reserve på vej til sin plads blev heller aldrig sat ind, fordi frigivelsen kun blev vurderet, når kompagniet stod stille.
+- `StrategyFieldOfficerComponent.cpp`:
+  - Et offensivt kompagni, der marcherer mod en set fjende inden for 600 m, deler rollerne ud med det samme (`AssignFlanks`), når planen vil have en reserve.
+  - Reservekompagniet forlader marchen og vurderer ved hver tænkning, om det skal sættes ind. En ny Advance-ordre gives kun, når pladsen flytter sig mere end 60 m.
+  - Reservens plads er 120 m bag det sted, ildbasen er på vej hen, og ikke bag dens nuværende position. Reserven følger derfor efter og falder ikke tilbage.
+- `StrategyBehaviourTests.cpp`: RESERVE-COMMIT svækker ildbasen, så snart reserven er udtaget og på vej (før ventede testen på, at reserven stod stille).
+- **Accepttests:** RESERVE-HOLD, RESERVE-NONE, RESERVE-COMMIT og CAV-SQUARE består alle.
+
+## 2026-11-03 — Soldaterne på stejl bakke; rytteriet afbryder chok mod fast karré
+
+- **Testkort:** `Saved/Battle/Battlefield_Bakke.json` er Nyborg-kortet med bølgede bakker på op til ca. 13°. De rigtige slagmarker har højst ca. 5° (Nyborg, 3,8 km ude).
+- **Fejl fundet på bakken:** soldater i kolonne sank op til 55 cm ned i jorden. Højden over jorden blev taget fra `Settle.Goal.Z`, og for mænd i kolonne er det et punkt på enhedens spor, ikke mandens egen højde.
+- **Rettelser i `StrategyInfantryVisualComponent`:**
+  - `SoldierOnGround(Index, Plane, HeightAboveGround)` tager nu mandens egen højde fra pladsen (`Settle.Slot.Z`), ikke fra den visuelle ramme, der kan hælde med skråningen.
+  - Kolonne-eksercitsen bruger 0.
+  - Også selve positionen sættes på jorden efter udjævningen, ikke kun målet. Udjævningen sker i tre dimensioner og halter på en skråning.
+  - Bevægelsen med formationsskifte (morph) følger også jorden.
+  - De gemte jordprøver nulstilles, når enheden løftes eller sænkes mere end 2 m, for eksempel ved et nyt kort.
+- **Måling:** nyt testflag `-Strategy1864GroundProbe`. På bakkekortet står alle mænd i alle kompagnier nu inden for ±5 cm af jorden, under både march og kolonne. Før lå de op til 55 cm under. Ydeevnen er ikke målt.
+- **Rytteri (`ThinkCavalry`):**
+  - Fundet i Test 4: eskadronen chokerede et vaklende kompagni, der var ved at danne formation. 11 s senere stod fjenden i karré, og eskadronen red ind alligevel og mistede 48 af 80 ryttere.
+  - Nu bryder et chok, der er i gang, af, når målet (inden for 80 m af chokpunktet) står i en fast karré, og eskadronen er mere end 25 m fra den. Med en bataljonsplan rider den til samlingspunktet, og ellers falder den 300 m tilbage.
+  - Log: `PROJECT1864-CAVALRY <eskadron> afbryder-chok <mål> staar i fast karre`.
+
+## 2026-11-03 — Chok mod karré under dannelse; fund fra Copilot og Codex
+
+- **Rytteriet:** afbrydelsen ovenfor greb ikke i Test 4.
+  - Årsag: karréen var stadig under dannelse (`IsReforming`), og en karré under dannelse regnes ikke som fast.
+  - Nu afbrydes chokket også mod en karré under dannelse med moral over 50 og sammenhold over 45, når eskadronen er mere end 100 m væk.
+  - Chokordren fjernes før samlingen (Codex-fund: samlingen eller tilbagefaldet kunne sende ingen ordre).
+  - Uden samlingspunkt falder eskadronen tilbage (Copilot-fund).
+  - Test 4: afbrudt på 273 m, eskadronen samlede sig, og alle 80 ryttere var i live ved 200 s.
+- **Ny log:** `chok-start`, `sammenstoed` (målets formation, reform, moral og sammenhold, tab på begge sider) og `afvist af karre`.
+- **Reserven:** en reserve, der frigives under marchen, rykker nu frem, også når den allerede er inden for skudafstand (Codex-fund).
+- **Salvens ofre:** listen over udpegede ofre (`AimedQueuedVictims`) ryddes, når salven ikke fældede nogen. En salve med udpegede ofre køes aldrig som en granats forsinkede tab (Codex-fund). Før kunne en senere granat ramme de forkerte mænd.
+- **Jordprøver:** mændenes mål har nu deres egen cache (Copilot-fund). Bakketesten viser ±6 cm.
+- **Fanebæreren:** kontrolleret; han projiceres selv på terrænet.
+- **Accepttests:** RESERVE-HOLD, RESERVE-NONE, RESERVE-COMMIT og CAV-SQUARE består alle.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
