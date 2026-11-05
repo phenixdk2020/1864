@@ -7,6 +7,7 @@
 #include "../AI/StrategyCavalryTaskingComponent.h"
 #include "../AI/StrategyBattalionPlanComponent.h"
 #include "../Visual/StrategyHQVisualComponent.h"
+#include "../Movement/StrategyMovementExecutorComponent.h"
 
 AStrategyHQUnit::AStrategyHQUnit()
 {
@@ -17,6 +18,8 @@ AStrategyHQUnit::AStrategyHQUnit()
     CavalryTaskingComponent = CreateDefaultSubobject<UStrategyCavalryTaskingComponent>(TEXT("CavalryTaskingComponent"));
     StaffVisualComponent = CreateDefaultSubobject<UStrategyHQVisualComponent>(TEXT("StaffVisualComponent"));
     BattalionPlanComponent = CreateDefaultSubobject<UStrategyBattalionPlanComponent>(TEXT("BattalionPlanComponent"));
+    // The staff ride: their horses get up to speed like the cavalry's (an estimate).
+    if (MovementExecutor) MovementExecutor->AccelerationCmPerSecondSquared = 250.0f;
     ApplyHQLevelDefaults();
 }
 

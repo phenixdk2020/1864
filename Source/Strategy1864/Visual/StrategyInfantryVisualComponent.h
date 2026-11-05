@@ -454,6 +454,8 @@ private:
     void UpdateSettling(float DeltaTime);
     void PlanOrderlyReform(bool bDestination, const FTransform& ReformFrame);
     bool PlanColumnDrill();
+    /** Column -> line: the spare row behind the column's tail for a man whose place another holds (INDEX_NONE: line -> column). */
+    int32 DrillSpareRow = INDEX_NONE;
     /** The colour bearer (user 2026-10-18): one man of the company, out of the file/rank grid, in FRONT of the line and at the head
      *  of the column, carrying the colours. Shot, the colours fall; after 2-4 s the nearest front-rank man drops his rifle, picks
      *  them up and takes the bearer's place. */
@@ -462,7 +464,33 @@ private:
     static FVector PalmLocation(const USkeletalMeshComponent* PalmMesh, FName PalmHandBone);
     void PromoteColourBearer(bool bBearerInitial);
     void KillColourBearer();
-    FVector ColourBearerTarget(float& OutBearerYaw) const;
+    /** OutBearerLeads: he leads a column (or the men forming one) rather than standing beside the right flank of a line. */
+    FVector ColourBearerTarget(float& OutBearerYaw, bool* OutBearerLeads = nullptr) const;
+    /** The company's officer (captain; user 2026-11-03): a figure of his own with sabre and scabbard (Final_v5). In line on the
+     *  right of the front rank beyond the colours, on the march ahead of the colours, in a square at its centre. He falls when
+     *  he is wounded or taken (OfficerProfileComponent Fate) or the company is gone. No figure until the assets are imported. */
+    void UpdateOfficerFigure(float OfficerDt);
+    bool SpawnOfficerFigure();
+    UPROPERTY(Transient) TObjectPtr<USkeletalMeshComponent> OfficerFigure;
+    UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> OfficerSaber;
+    UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> OfficerScabbard;
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> OfficerWalkAsset;
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> OfficerWalkSheathedAsset;
+    /** Holds the loaded officer clips: a soft pointer alone lets them be collected, and .Get() then returns null (2026-11-05: he
+     *  walked in his rest clip, the sabre pointing down). */
+    UPROPERTY(Transient) TArray<TObjectPtr<UAnimSequence>> OfficerClipsHeld;
+    bool bOfficerSaberDrawn = true;
+    double OfficerProbeLast = -100.0;
+    void SetOfficerSaberDrawn(bool bOfficerDraw);
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> OfficerIdleAsset;
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> OfficerOrderAsset;
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> OfficerDeathAsset;
+    bool bOfficerTried = false;
+    bool bOfficerDown = false;
+    bool bOfficerWorldValid = false;
+    FVector OfficerWorld = FVector::ZeroVector;
+    FRotator OfficerWorldRotation = FRotator::ZeroRotator;
+    float OfficerYawVelocity = 0.f;
     UPROPERTY(Transient) TObjectPtr<USkeletalMeshComponent> ColourBearer;
     UPROPERTY(Transient) TArray<TObjectPtr<USkeletalMeshComponent>> FallenColourBearers;
     UPROPERTY(Transient) TArray<TObjectPtr<UStaticMeshComponent>> DroppedRifles;

@@ -31,6 +31,11 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Movement")
     float MoveSpeedCmPerSecond = 600.0f;
 
+    /** How fast the pace is gained (cm/s per second; 0: at once, as a body of foot). Horses get up to speed over a few seconds
+     *  (user 2026-11-05: "de skal lige op i fart"); they slow down twice as fast. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Movement")
+    float AccelerationCmPerSecondSquared = 0.0f;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Movement")
     float ArrivalToleranceCm = 50.0f;
 
@@ -109,6 +114,9 @@ private:
     UPROPERTY(Transient)
     FStrategyOrder SuspendedMission;
     float AttackRetargetElapsed = 1.0f;
+    /** The pace actually reached (AccelerationCmPerSecondSquared > 0) and when the unit last took a step (a pause starts it at 0). */
+    float AcceleratedSpeedCmPerSecond = 0.0f;
+    float AcceleratedLastStep = -1.0f;
     float AttackLateralSlotCm = 0.0f;
     float AttackStandRangeCm = 0.0f;
     float FireReactionQuietSeconds = 0.0f;

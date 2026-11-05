@@ -717,7 +717,7 @@ void UStrategyMovementExecutorComponent::TickComponent(
 
     // A side-step goes at three fifths of the pace when the way is more than 50 degrees off the front.
     const float SidestepMultiplier = bKeepFacingMove && FMath::Abs(FMath::FindDeltaAngleDegrees(OwnerUnit->GetActorRotation().Yaw, Direction.Rotation().Yaw)) > 50.0f ? 0.6f : 1.0f;
-    const float Step =
+    const float WantedSpeed =
         MoveSpeedCmPerSecond *
         (OwnerUnit->FormationComponent && OwnerUnit->FormationComponent->CurrentFormation == EStrategyFormationType::Square ? SquareMoveSpeedMultiplier : 1.0f) *
         SidestepMultiplier *
@@ -727,8 +727,20 @@ void UStrategyMovementExecutorComponent::TickComponent(
         StanceMultiplier *
         NCOMovementMultiplier *
         ArtilleryMobilityMultiplier *
-        SupplyMobilityMultiplier *
-        DeltaTime;
+        SupplyMobilityMultiplier;
+    // Horses gain their pace over a few seconds rather than at once, and lose it twice as fast; a pause in the steps (a halt, a
+    // new order after standing) starts them from a walk again.
+    float ReachedSpeed = WantedSpeed;
+    if (AccelerationCmPerSecondSquared > 0.0f && GetWorld())
+    {
+        const float AccelerationNow = GetWorld()->GetTimeSeconds();
+        if (AcceleratedLastStep < 0.0f || AccelerationNow - AcceleratedLastStep > 0.5f) AcceleratedSpeedCmPerSecond = FMath::Min(WantedSpeed, 120.0f);
+        AcceleratedLastStep = AccelerationNow;
+        const float AccelerationRate = WantedSpeed >= AcceleratedSpeedCmPerSecond ? AccelerationCmPerSecondSquared : 2.0f * AccelerationCmPerSecondSquared;
+        AcceleratedSpeedCmPerSecond = FMath::FInterpConstantTo(AcceleratedSpeedCmPerSecond, WantedSpeed, DeltaTime, AccelerationRate);
+        ReachedSpeed = AcceleratedSpeedCmPerSecond;
+    }
+    const float Step = ReachedSpeed * DeltaTime;
     const float AppliedStep =
         FMath::Min(Step, FlatDelta.Size());
 

@@ -2945,6 +2945,52 @@ Besluttet af Allan ud fra `Docs/Taktik-Doktrin-1825-1864.md`. Ændret: `AI/Strat
 - **Fanebæreren:** kontrolleret; han projiceres selv på terrænet.
 - **Accepttests:** RESERVE-HOLD, RESERVE-NONE, RESERVE-COMMIT og CAV-SQUARE består alle.
 
+## 2026-11-05 — Kompagniets officer i slaget
+
+- **Blender** (`Tools/Animation/build_officer_clips_1864.py`, output `SourceAssets/Units1864/Officer/Final_v5/`):
+  - officerens 41 knogler passer til soldaternes skelet `SK_Human_1864`;
+  - klip: `Walk` med sablen på skulderen, `WalkSheathed` med sablen i skeden og venstre hånd på fæstet, `Idle` (hvil), `Order` (sabel frem) og `Death`;
+  - benene i begge gangklip er soldatens march (137,7 cm/s), så fødderne ikke glider;
+  - fire nationer: DK, SE, PR og NO.
+- **Import** (`Content/Python/import_officer_1864.py`, `/Game/Units/Human/Officer/`): 4 meshes, sabel og skede samt 5 klip. Højden er 199,1 cm mod soldatens 199,4.
+- **Slaget** (`StrategyInfantryVisualComponent`: `SpawnOfficerFigure`, `UpdateOfficerFigure`, `SetOfficerSaberDrawn`):
+  - **Placering** (Allans tegning, et skøn, der ikke er kontrolleret mod reglementet):
+    - i linje yderst på højre fløj ud for fanen;
+    - under march forrest, med fanen bag sig;
+    - i karré i midten.
+  - **Sablen:** i skeden under march i kolonne, ellers trukket. Den skifter plads med det samme, fordi der endnu ikke findes et klip, der trækker den.
+  - **Nation:** vælges ud fra side og enhedsnavn, indtil enheden får en nation.
+  - **Fald:** han falder, når han er såret eller taget til fange (`OfficerProfileComponent->Fate`), eller når kompagniet er udslettet.
+- **Fejl fundet:**
+  - Klippene blev smidt ud af hukommelsen, fordi kun en blød peger holdt dem. Så gik han i hvileklippet med sablen nedad. Nu holdes de af `OfficerClipsHeld`.
+  - Hvil- og ordreposen står cirka 8 cm for lavt (tæerne −9 cm). Han løftes midlertidigt i koden, indtil klippene er rettet i Blender.
+- **Måling:** `-Strategy1864GroundProbe` logger nu `PROJECT1864-OFFICERPROBE`: klip, sabel, hånd og fødder over jorden.
+
+## 2026-11-05 — Kolonne til linje uden krydsende mænd; hestene accelererer; testbilleder ved minimeret vindue
+
+- **Kolonne til linje** (`PlanColumnDrill`):
+  - Allan så "en enkelt mand som gik igennem hele formationen, og forsinkede dem".
+  - I Test 4 havde to mænd samme plads bagerst. Den anden blev sendt til den eneste ledige plads, som var fanebærerens ved hovedet, 62 rotter væk, og det skete i alle fire kompagnier.
+  - Nu får linjen en reserverot bagerst. En mand, der støder sammen med en anden, flyttes højst 2 rotter eller ind i reserveroten. Linjen får også mindst lige så mange rotter som kolonnen har rækker.
+  - Test 4 bagefter: manden flyttes 1 rot, og drillens forventede tid faldt fra 74 til 42 s.
+  - Det følger reglementet: højre om fra linje til kolonne og venstre om tilbage, og ingen soldat skifter plads.
+- **Hestene** (`UStrategyMovementExecutorComponent::AccelerationCmPerSecondSquared`):
+  - Rytteri og stab = 250 cm/s². De starter i skridt og når 9 m/s på cirka 3,5 s, og de bremser dobbelt så hurtigt.
+  - Fodfolket er uændret (0 = straks).
+  - Allan: "de skal lige op i fart".
+- **Testbilleder:**
+  - Et minimeret spilvindue har en billedbuffer på 8×8, og skærmbilledet gik ned i D3D12 (to gange).
+  - Nu springes billedet over, når vinduet er minimeret. `SlateCore` er tilføjet til modulet.
+- **Sigtede skud (`-Strategy1864AimedFire`), 1 mod 1:**
+
+  | | Skud | Træffere | Træfprocent | Spildte skud |
+  |---|---|---|---|---|
+  | Danskerne (angriber) | 687 | 56 | 8,2 % | 58 |
+  | Svenskerne (forsvarer) | 868 | 117 | 13,5 % | 28 |
+
+  - Danskerne samlede ilden på få mænd. Målfordelingen skal undersøges.
+- **Accepttests:** RESERVE-HOLD, -NONE, -COMMIT og CAV-SQUARE, -FLANK, -RALLY består alle.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

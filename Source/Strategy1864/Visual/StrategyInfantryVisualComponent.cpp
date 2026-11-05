@@ -16,6 +16,7 @@
 #include "../Combat/StrategyStanceComponent.h"
 #include "../Combat/StrategySkirmisherComponent.h"
 #include "../AI/StrategyFieldOfficerComponent.h"
+#include "../AI/StrategyOfficerProfileComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "../Units/StrategyCompanyUnit.h"
 #include "StrategyEquipmentVisualComponent.h"
@@ -77,6 +78,16 @@ UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
         FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_ColourWalk.A_Combat_ColourWalk")));
     ColourIdleAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Human/CombatAnimations/A_Combat_ColourIdle.A_Combat_ColourIdle")));
+    OfficerWalkAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/Officer/A_Officer_Walk.A_Officer_Walk")));
+    OfficerWalkSheathedAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/Officer/A_Officer_WalkSheathed.A_Officer_WalkSheathed")));
+    OfficerIdleAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/Officer/A_Officer_Idle.A_Officer_Idle")));
+    OfficerOrderAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/Officer/A_Officer_Order.A_Officer_Order")));
+    OfficerDeathAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/Officer/A_Officer_Death.A_Officer_Death")));
 
     RunStandingAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Danish/Livgarden1864/Animations/A_Running.A_Running")));
@@ -352,6 +363,7 @@ void UStrategyInfantryVisualComponent::TickComponent(
     }
     UpdateSettling(DeltaTime);
     UpdateColourBearer(DeltaTime);
+    UpdateOfficerFigure(DeltaTime);
     ApplyPendingStance(GetWorld()->GetTimeSeconds());
     MarchDust(GetWorld()->GetTimeSeconds());
     RefreshAnimation(false);
@@ -3716,6 +3728,7 @@ bool UStrategyInfantryVisualComponent::PlanColumnDrill()
     const float DrillRankSpacing = OwnerCompany->FormationComponent->SoldierRankSpacingCm;
     if (DrillFileSpacing <= 0.f || DrillRankSpacing <= 0.f) return DrillReject(TEXT("zero spacing"));
     int32 DrillRows = (SoldierComponents.Num() + 2) / 3;
+    DrillSpareRow = INDEX_NONE;
     if (DrillEntering)
     {
         // The line as it stands: losses and the colour bearer (out of the grid) leave holes, so count its files from the
@@ -3723,6 +3736,19 @@ bool UStrategyInfantryVisualComponent::PlanColumnDrill()
         float DrillHalfSpan = 0.f;
         for (const FSettle& DrillSpanMan : SoldierSettle) DrillHalfSpan = FMath::Max(DrillHalfSpan, FMath::Abs(DrillSpanMan.Slot.Y));
         DrillRows = FMath::Max(DrillRows, FMath::RoundToInt(2.f * DrillHalfSpan / DrillFileSpacing) + 1);
+    }
+    else
+    {
+        // Column -> line is a quarter turn: each man keeps his row as his file. A column with losses is longer than its head count
+        // (its rows keep their holes), so the line gets as many files as the column has rows; the clamp below otherwise piled the
+        // rear rows onto one place and sent the extra men to a free place, at times the far end of the line, through the
+        // company (user 2026-11-05: "en enkelt mand gik igennem hele formationen og forsinkede dem").
+        for (const FSettle& DrillRowMan : SoldierSettle) DrillRows = FMath::Max(DrillRows, DrillRowMan.SnakeRow + 1);
+        // One spare row behind the tail: two men read into the same place (Test 4 2026-11-05: man 188, row 62, in every company)
+        // while the only free place was at the head, where the colour bearer left the front rank. The second man stays at the
+        // tail in the spare row instead of walking 62 files up through the company (see the clash below).
+        DrillSpareRow = DrillRows;
+        ++DrillRows;
     }
     const float DrillWidth = (DrillRows - 1) * DrillFileSpacing;
     const FStrategyOrder DrillCurrentOrder = OwnerCompany->OrderComponent->GetCurrentOrder();
@@ -3824,8 +3850,10 @@ bool UStrategyInfantryVisualComponent::PlanColumnDrill()
             }
         }
         if (DrillBest > DrillFileSpacing * 2.5) return DrillReject(TEXT("a man is not on the column trail"));
-        const int32 DrillRow = bDrillSnakeKnown ? FMath::Clamp(SoldierSettle[DrillIndex].SnakeRow, 0, DrillRows - 1) :
-            FMath::Clamp(FMath::RoundToInt((DrillHeadS - DrillS0) / DrillColumnRowSpacing), 0, DrillRows - 1);
+        // (The spare row is only for clashes: nobody is read into it.)
+        const int32 DrillLastRow = DrillSpareRow >= 0 ? DrillSpareRow - 1 : DrillRows - 1;
+        const int32 DrillRow = bDrillSnakeKnown ? FMath::Clamp(SoldierSettle[DrillIndex].SnakeRow, 0, DrillLastRow) :
+            FMath::Clamp(FMath::RoundToInt((DrillHeadS - DrillS0) / DrillColumnRowSpacing), 0, DrillLastRow);
         const int32 DrillLane = bDrillSnakeKnown ? FMath::Clamp(SoldierSettle[DrillIndex].SnakeLane, 0, 2) :
             FMath::Clamp(FMath::RoundToInt(DrillOffset / DrillFileSpacing) + 1, 0, 2);
         const int32 DrillRank = DrillFlank > 0.f ? DrillLane : 2 - DrillLane;
@@ -3833,16 +3861,23 @@ bool UStrategyInfantryVisualComponent::PlanColumnDrill()
         int32 DrillSlotId = DrillFile * 3 + DrillRank;
         if (DrillUsed.Contains(DrillSlotId))
         {
-            // The nearest free place (as the snake's seeding does) rather than refusing the drill.
+            // A free place at most two files off; else the spare row behind the tail (a man never crosses the company to a hole
+            // at the other end: the holes close up afterwards); only without either the nearest free place anywhere.
+            const int32 DrillSpareFile = DrillSpareRow < 0 ? INDEX_NONE : (DrillFlank > 0.f ? DrillRows - 1 - DrillSpareRow : DrillSpareRow);
             int32 DrillFree = INDEX_NONE;
             int32 DrillFreeCost = TNumericLimits<int32>::Max();
-            for (int32 DrillTry = 0; DrillTry < DrillRows * 3; ++DrillTry)
-            {
-                if (DrillUsed.Contains(DrillTry)) continue;
-                const int32 DrillTryCost = FMath::Abs(DrillTry / 3 - DrillFile) * 3 + FMath::Abs(DrillTry % 3 - DrillRank);
-                if (DrillTryCost < DrillFreeCost) { DrillFreeCost = DrillTryCost; DrillFree = DrillTry; }
-            }
+            for (int32 DrillPass = 0; DrillPass < 3 && DrillFree == INDEX_NONE; ++DrillPass)
+                for (int32 DrillTry = 0; DrillTry < DrillRows * 3; ++DrillTry)
+                {
+                    if (DrillUsed.Contains(DrillTry)) continue;
+                    const int32 DrillTryFiles = FMath::Abs(DrillTry / 3 - DrillFile);
+                    if ((DrillPass == 0 && DrillTryFiles > 2) || (DrillPass == 1 && DrillTry / 3 != DrillSpareFile)) continue;
+                    const int32 DrillTryCost = DrillTryFiles * 3 + FMath::Abs(DrillTry % 3 - DrillRank);
+                    if (DrillTryCost < DrillFreeCost) { DrillFreeCost = DrillTryCost; DrillFree = DrillTry; }
+                }
             if (DrillFree == INDEX_NONE) return DrillReject(TEXT("slot assignment clash (no free place on the trail)"));
+            UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s to-line clash: man %d row %d lane %d moved %d files to file %d rank %d"),
+                *OwnerCompany->StableUnitId.ToString(), DrillIndex, DrillRow, DrillLane, FMath::Abs(DrillFree / 3 - DrillFile), DrillFree / 3, DrillFree % 3);
             DrillSlotId = DrillFree;
         }
         DrillUsed.Add(DrillSlotId);
@@ -4343,8 +4378,9 @@ void UStrategyInfantryVisualComponent::UpdateCloseRanks()
     bClosingRanksStep = bCloseStill;
 }
 
-FVector UStrategyInfantryVisualComponent::ColourBearerTarget(float& OutBearerYaw) const
+FVector UStrategyInfantryVisualComponent::ColourBearerTarget(float& OutBearerYaw, bool* OutBearerLeads) const
 {
+    if (OutBearerLeads) *OutBearerLeads = false;
     // In front: one rank ahead of the front rank in line, one row ahead of the head in column (he leads the snake).
     const float BearerRank = OwnerCompany && OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->SoldierRankSpacingCm : 90.f;
     const FTransform BearerUnit = OwnerCompany->GetActorTransform();
@@ -4374,6 +4410,7 @@ FVector UStrategyInfantryVisualComponent::ColourBearerTarget(float& OutBearerYaw
                 const float BearerHeadYaw = SoldierComponents[BearerHeadMan]->GetComponentRotation().Yaw - SoldierMeshYawOffset;
                 OutBearerYaw = BearerHeadYaw;
                 const float BearerLead = ColourColumnLeadCm;
+                if (OutBearerLeads) *OutBearerLeads = true;
                 return BearerHeadAt + FRotator(0.f, BearerHeadYaw, 0.f).Vector() * BearerLead;
             }
         }
@@ -4402,6 +4439,7 @@ FVector UStrategyInfantryVisualComponent::ColourBearerTarget(float& OutBearerYaw
         if (BearerFrontMen > 0 && (VisualPath.Trail.Num() < 2 || FVector::Dist2D(BearerFrontSum / BearerFrontMen, VisualPath.HeadPos) > 2.f * BearerFrontAhead))
         {
             OutBearerYaw = BearerFrontYaw;
+            if (OutBearerLeads) *OutBearerLeads = true;
             return BearerFrontSum / BearerFrontMen + FRotator(0.f, BearerFrontYaw, 0.f).Vector() * BearerFrontAhead;
         }
     }
@@ -4412,6 +4450,7 @@ FVector UStrategyInfantryVisualComponent::ColourBearerTarget(float& OutBearerYaw
     if (BearerColumn)
     {
         OutBearerYaw = VisualPath.HeadYaw;
+        if (OutBearerLeads) *OutBearerLeads = true;
         const float BearerAhead = ColourColumnLeadCm;
         return VisualPath.HeadPos + FRotator(0.f, VisualPath.HeadYaw, 0.f).Vector() * BearerAhead;
     }
@@ -4639,6 +4678,176 @@ void UStrategyInfantryVisualComponent::UpdateColourBearer(float BearerDt)
         UE_LOG(LogTemp, Display, TEXT("Strategy1864Colours %s new bearer kneels at the colours: at %s yaw %.0f, colours foot %s"), *OwnerCompany->StableUnitId.ToString(),
             *ColourBearer->GetComponentLocation().ToString(), ColourBearer->GetComponentRotation().Yaw - SoldierMeshYawOffset, *ColourDownLocation.ToString());
     }
+}
+
+bool UStrategyInfantryVisualComponent::SpawnOfficerFigure()
+{
+    // Which nation's coat: the unit carries no nation yet, so the side and the unit's id/name decide (a stopgap until it does).
+    const FString OfficerId = OwnerCompany->StableUnitId.ToString();
+    const FString OfficerName = OwnerCompany->DisplayName.ToString();
+    const bool bOfficerDanish = OwnerCompany->Side == EStrategySide::Denmark || OwnerCompany->Side == EStrategySide::Allied;
+    const TCHAR* OfficerNation = bOfficerDanish ? TEXT("DK")
+        : (OfficerId.Contains(TEXT("-SE-")) || OfficerId.Contains(TEXT("-SV-")) || OfficerName.StartsWith(TEXT("Sv"))) ? TEXT("SE")
+        : (OfficerId.Contains(TEXT("-NO-")) || OfficerName.StartsWith(TEXT("No"))) ? TEXT("NO") : TEXT("PR");
+    USkeletalMesh* OfficerMesh = LoadObject<USkeletalMesh>(nullptr,
+        *FString::Printf(TEXT("/Game/Units/Human/Officer/SK_Officer_1864_%s.SK_Officer_1864_%s"), OfficerNation, OfficerNation), nullptr, LOAD_NoWarn | LOAD_Quiet);
+    if (!OfficerMesh)
+        OfficerMesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Units/Human/Officer/SK_Officer_1864_DK.SK_Officer_1864_DK"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+    if (!OfficerMesh)
+    {
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864Officer %s: no officer mesh imported (/Game/Units/Human/Officer)"), *OfficerId);
+        return false;
+    }
+    OfficerFigure = NewObject<USkeletalMeshComponent>(OwnerCompany, NAME_None, RF_Transient);
+    OfficerFigure->SetSkeletalMeshAsset(OfficerMesh);
+    OfficerFigure->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    OfficerFigure->SetGenerateOverlapEvents(false);
+    OfficerFigure->SetCastShadow(true);
+    OfficerFigure->bVisibleInRayTracing = false;
+    OfficerFigure->SetupAttachment(OwnerCompany->SceneRoot);
+    OfficerFigure->RegisterComponent();
+    OfficerFigure->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+    OfficerFigure->AddTickPrerequisiteComponent(this);
+    // Sabre in the right hand and scabbard at the left hip: the bone-relative transforms measured in Blender (Final_v4 notes.md;
+    // the scale makes up for the rig's own scale).
+    auto OfficerProp = [this](const TCHAR* OfficerPropPath, FName OfficerBone, const FTransform& OfficerPropTransform) -> UStaticMeshComponent*
+    {
+        UStaticMesh* OfficerPropMesh = LoadObject<UStaticMesh>(nullptr, OfficerPropPath, nullptr, LOAD_NoWarn | LOAD_Quiet);
+        if (!OfficerPropMesh) return nullptr;
+        UStaticMeshComponent* OfficerPropComponent = NewObject<UStaticMeshComponent>(OwnerCompany, NAME_None, RF_Transient);
+        OfficerPropComponent->SetStaticMesh(OfficerPropMesh);
+        OfficerPropComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        OfficerPropComponent->SetGenerateOverlapEvents(false);
+        OfficerPropComponent->SetCastShadow(false);
+        OfficerPropComponent->bVisibleInRayTracing = false;
+        OfficerPropComponent->RegisterComponent();
+        OfficerPropComponent->AttachToComponent(OfficerFigure, FAttachmentTransformRules::SnapToTargetNotIncludingScale, OfficerBone);
+        OfficerPropComponent->SetRelativeTransform(OfficerPropTransform);
+        return OfficerPropComponent;
+    };
+    OfficerSaber = OfficerProp(TEXT("/Game/Units/Human/Officer/SM_Officer_Saber.SM_Officer_Saber"), RightHandBoneName,
+        FTransform(FRotator(-38.611339f, -44.486661f, -148.198385f), FVector(8.859873f, -10.981565f, 4.255536f), FVector(1.106196f)));
+    OfficerScabbard = OfficerProp(TEXT("/Game/Units/Human/Officer/SM_Officer_Scabbard.SM_Officer_Scabbard"), TEXT("Hips"),
+        FTransform(FRotator(-20.730171f, 84.857239f, -90.000003f), FVector(33.243320f, -9.561045f, -19.432434f), FVector(1.106196f)));
+    for (TSoftObjectPtr<UAnimSequence>* OfficerClipAsset : { &OfficerIdleAsset, &OfficerWalkAsset, &OfficerWalkSheathedAsset, &OfficerOrderAsset, &OfficerDeathAsset })
+        if (UAnimSequence* OfficerLoadedClip = OfficerClipAsset->LoadSynchronous()) OfficerClipsHeld.AddUnique(OfficerLoadedClip);
+    if (UAnimSequence* OfficerStartIdle = OfficerIdleAsset.Get()) OfficerFigure->PlayAnimation(OfficerStartIdle, true);
+    UE_LOG(LogTemp, Display, TEXT("Strategy1864Officer %s: %s officer, sabre %d, scabbard %d, clips %d of 5"), *OfficerId, *OfficerMesh->GetName(),
+        OfficerSaber ? 1 : 0, OfficerScabbard ? 1 : 0, OfficerClipsHeld.Num());
+    return true;
+}
+
+void UStrategyInfantryVisualComponent::SetOfficerSaberDrawn(bool bOfficerDraw)
+{
+    if (!OfficerSaber || !OfficerFigure || bOfficerSaberDrawn == bOfficerDraw) return;
+    bOfficerSaberDrawn = bOfficerDraw;
+    // Sheathed it sits in the scabbard: the sabre and the scabbard share their origin and axis, so it takes the scabbard's transform
+    // on the hips (Final_v5 notes.md, "Sabel i skede").
+    OfficerSaber->AttachToComponent(OfficerFigure, FAttachmentTransformRules::SnapToTargetNotIncludingScale, bOfficerDraw ? RightHandBoneName : FName(TEXT("Hips")));
+    OfficerSaber->SetRelativeTransform(bOfficerDraw
+        ? FTransform(FRotator(-38.611339f, -44.486661f, -148.198385f), FVector(8.859873f, -10.981565f, 4.255536f), FVector(1.106196f))
+        : FTransform(FRotator(-20.730171f, 84.857239f, -90.000003f), FVector(33.243320f, -9.561045f, -19.432434f), FVector(1.106196f)));
+}
+
+void UStrategyInfantryVisualComponent::UpdateOfficerFigure(float OfficerDt)
+{
+    if (!OwnerCompany || !GetWorld() || OfficerDt <= 0.f || bOfficerDown || !VisualPath.bInitialized || SoldierComponents.IsEmpty()) return;
+    if (!OfficerFigure)
+    {
+        if (bOfficerTried) return;
+        bOfficerTried = true;
+        if (!SpawnOfficerFigure()) return;
+    }
+    // He falls when wounded or taken (an officer is never killed outright in the battle's ledger), or when his company is gone.
+    const UStrategyOfficerProfileComponent* OfficerProfile = OwnerCompany->OfficerProfileComponent;
+    if ((OfficerProfile && OfficerProfile->Fate != 0) || OwnerCompany->CurrentStrength <= 0)
+    {
+        bOfficerDown = true;
+        if (UAnimSequence* OfficerFall = OfficerDeathAsset.Get() ? OfficerDeathAsset.Get() : DeathAsset.Get())
+        { OfficerFigure->PlayAnimation(OfficerFall, false); OfficerFigure->SetPlayRate(1.f); }
+        OwnerCompany->AddUnitLog(TEXT("Officer"), TEXT("kaptajnen er faldet"), OfficerProfile && OfficerProfile->Fate == 2 ? TEXT("taget til fange") : TEXT("såret"), 0.0f);
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864Officer %s officer fell (fate %d)"), *OwnerCompany->StableUnitId.ToString(), OfficerProfile ? OfficerProfile->Fate : -1);
+        return;
+    }
+    // His place (user 2026-11-03, the drawn company; an estimate, not checked against the regulations): in line on the right of the
+    // front rank, one file beyond the colours; on the march at the head, one lead ahead of the colours; in a square at its centre.
+    const float OfficerLateral = OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->SoldierLateralSpacingCm : 60.f;
+    float OfficerYaw = 0.f;
+    bool bOfficerLeads = false;
+    const FVector OfficerBase = ColourBearerTarget(OfficerYaw, &bOfficerLeads);
+    FVector OfficerGoal;
+    if (OwnerCompany->FormationComponent && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Square)
+    {
+        OfficerYaw = OwnerCompany->GetActorRotation().Yaw;
+        OfficerGoal = OwnerCompany->GetActorLocation();
+    }
+    else if (bOfficerLeads) OfficerGoal = OfficerBase + FRotator(0.f, OfficerYaw, 0.f).Vector() * ColourColumnLeadCm;
+    else OfficerGoal = OfficerBase + FRotator(0.f, OfficerYaw, 0.f).RotateVector(FVector(0.f, OfficerLateral, 0.f));
+    // Like the colour bearer he keeps with the men (never more than two ranks beyond the nearest) and walks on from his own place in
+    // the world, so a jump of the unit's actor does not carry him.
+    const float OfficerRank = OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->SoldierRankSpacingCm : 90.f;
+    const float OfficerKeepCm = FMath::Max(2.f * ColourColumnLeadCm + 30.f, 3.f * OfficerRank);
+    FVector OfficerNearest = OfficerGoal;
+    float OfficerNearestGap = TNumericLimits<float>::Max();
+    for (const USkeletalMeshComponent* OfficerKeepMan : SoldierComponents)
+    {
+        if (!OfficerKeepMan) continue;
+        const float OfficerKeepGap = FVector::Dist2D(OfficerKeepMan->GetComponentLocation(), OfficerGoal);
+        if (OfficerKeepGap < OfficerNearestGap) { OfficerNearestGap = OfficerKeepGap; OfficerNearest = OfficerKeepMan->GetComponentLocation(); }
+    }
+    if (OfficerNearestGap < TNumericLimits<float>::Max() && OfficerNearestGap > OfficerKeepCm)
+        OfficerGoal = OfficerNearest + (OfficerGoal - OfficerNearest).GetSafeNormal2D() * OfficerKeepCm;
+    OfficerGoal = UStrategyTerrainQueryLibrary::ProjectPointToTerrain(this, OfficerGoal);
+    FVector OfficerHere = bOfficerWorldValid ? OfficerWorld : OfficerGoal;
+    FRotator OfficerRotation = bOfficerWorldValid ? OfficerWorldRotation : FRotator(0.f, OfficerYaw + SoldierMeshYawOffset, 0.f);
+    const FVector OfficerTo = OfficerGoal - OfficerHere;
+    const float OfficerDistance = OfficerTo.Size2D();
+    const float OfficerMarch = OwnerCompany->MovementExecutor ? OwnerCompany->MovementExecutor->MoveSpeedCmPerSecond : 150.f;
+    const float OfficerCatchUp = OfficerDistance > 2.f * OfficerRank ? FMath::Max(450.f, OfficerDistance * 2.f) : 0.f;
+    const float OfficerSpeed = FMath::Min(OfficerDistance * 3.f, FMath::Max3(150.f, OfficerMarch * 1.3f, OfficerCatchUp));
+    const float OfficerStep = FMath::Min(OfficerDistance, OfficerSpeed * OfficerDt);
+    if (OfficerDistance > 1.f) OfficerHere += OfficerTo.GetSafeNormal2D() * OfficerStep;
+    OfficerHere.Z = OfficerGoal.Z;
+    const bool bOfficerWalking = OfficerStep / OfficerDt > 25.f;
+    OfficerRotation.Pitch = 0.f; OfficerRotation.Roll = 0.f;
+    OfficerRotation.Yaw = FStrategyVisualFormationPath::SmoothFacing(OfficerRotation.Yaw, OfficerYawVelocity,
+        (bOfficerWalking ? OfficerTo.Rotation().Yaw : OfficerYaw) + SoldierMeshYawOffset, OfficerDt, 160.f);
+    OfficerFigure->SetWorldLocationAndRotation(OfficerHere, OfficerRotation);
+    OfficerWorld = OfficerHere;
+    OfficerWorldRotation = OfficerRotation;
+    bOfficerWorldValid = true;
+    // On the march in column the sabre is in its scabbard (user 2026-10-28, Backlog); formed up, in line or square or in a fight, it is
+    // drawn: at the shoulder when he walks, forward when the company is engaged (giving the orders), at rest otherwise. No draw or
+    // sheath clip yet (the soldiers' sabre clips do not reach his hilt, 33-39 cm short): the sabre changes place at once.
+    // (Only in a march column: a line on the move counts as led too, and there it is drawn.)
+    const EStrategyFormationType OfficerFormation = OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->CurrentFormation : EStrategyFormationType::Line;
+    const bool bOfficerSheathed = (OfficerFormation == EStrategyFormationType::MarchColumn || OfficerFormation == EStrategyFormationType::DefileColumn) &&
+        bOfficerWalking && OwnerCompany->UnitState != EStrategyUnitState::Engaged && OfficerWalkSheathedAsset.Get();
+    SetOfficerSaberDrawn(!bOfficerSheathed);
+    UAnimSequence* OfficerClip = bOfficerSheathed ? OfficerWalkSheathedAsset.Get() : bOfficerWalking ? OfficerWalkAsset.Get()
+        : (OwnerCompany->UnitState == EStrategyUnitState::Engaged && OfficerOrderAsset.Get()) ? OfficerOrderAsset.Get() : OfficerIdleAsset.Get();
+    if (OfficerClip && OfficerFigure->GetSingleNodeInstance() && OfficerFigure->GetSingleNodeInstance()->GetAnimationAsset() != OfficerClip)
+        OfficerFigure->PlayAnimation(OfficerClip, true);
+    // The rest and order poses (Final_v5) stand about 8 cm low: toes 9 cm under the ground against -2..+7 cm in the walk, and the sabre's
+    // point in the ground (probe 2026-11-05). Lifted here until the clips are rebuilt in Blender.
+    if (OfficerClip == OfficerIdleAsset.Get() || OfficerClip == OfficerOrderAsset.Get())
+        OfficerFigure->SetWorldLocation(OfficerHere + FVector(0.f, 0.f, 8.f));
+    // -Strategy1864GroundProbe: what he plays and where the sabre's point is against his hand, every 2 s (2026-11-05: it looked down).
+    static const bool bOfficerProbe = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864GroundProbe"));
+    if (bOfficerProbe && OfficerSaber && GetWorld()->GetTimeSeconds() - OfficerProbeLast > 2.0 && OfficerFigure->GetSingleNodeInstance())
+    {
+        OfficerProbeLast = GetWorld()->GetTimeSeconds();
+        const FBox OfficerSaberBox = OfficerSaber->Bounds.GetBox();
+        const FVector OfficerHand = OfficerFigure->GetSocketLocation(RightHandBoneName);
+        const UAnimationAsset* OfficerPlaying = OfficerFigure->GetSingleNodeInstance()->GetAnimationAsset();
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-OFFICERPROBE %s clip=%s walking=%d drawn=%d speed=%.0f over ground: hand %.0f sabre %.0f..%.0f feet L%.0f R%.0f toes L%.0f R%.0f"),
+            *OwnerCompany->StableUnitId.ToString(), OfficerPlaying ? *OfficerPlaying->GetName() : TEXT("-"), bOfficerWalking ? 1 : 0, bOfficerSaberDrawn ? 1 : 0,
+            OfficerStep / OfficerDt, OfficerHand.Z - OfficerGoal.Z, OfficerSaberBox.Min.Z - OfficerGoal.Z, OfficerSaberBox.Max.Z - OfficerGoal.Z,
+            OfficerFigure->GetSocketLocation(TEXT("LeftFoot")).Z - OfficerGoal.Z, OfficerFigure->GetSocketLocation(TEXT("RightFoot")).Z - OfficerGoal.Z,
+            OfficerFigure->GetSocketLocation(TEXT("LeftToeBase")).Z - OfficerGoal.Z, OfficerFigure->GetSocketLocation(TEXT("RightToeBase")).Z - OfficerGoal.Z);
+    }
+    // The walk is the soldiers' shoulder march under him (same root speed, 137.7 cm/s).
+    OfficerFigure->SetPlayRate(bOfficerWalking ? FMath::Clamp((OfficerStep / OfficerDt) / 137.70097f, 0.3f, 2.5f) : 1.f);
 }
 
 FVector UStrategyInfantryVisualComponent::PalmLocation(const USkeletalMeshComponent* PalmMesh, FName PalmHandBone)

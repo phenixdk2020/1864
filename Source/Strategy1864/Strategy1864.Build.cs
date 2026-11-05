@@ -28,6 +28,7 @@ public class Strategy1864 : ModuleRules
                 "RHI",
                 "MeshDescription",          // the crowd model (far soldiers built as a static mesh)
                 "StaticMeshDescription",
+                "SlateCore",                // the test screenshots: is the game window minimised (SWindow)
                 "Game1864"   // the campaign: the scenery pieces for the battlefield from the campaign
             });
     }

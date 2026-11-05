@@ -4,6 +4,9 @@
 #include "../Player/StrategyBattleQuality.h"
 
 #include "Misc/CommandLine.h"
+#include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
+#include "Widgets/SWindow.h"
 #include "Misc/DateTime.h"
 #include "Misc/PackageName.h"
 #include "../Campaign/StrategyCampaignBattlefield.h"
@@ -2660,8 +2663,23 @@ void AStrategyOOBTestScenario::TickShots()
         if (Now >= ShotTakeAt)
         {
             const FString File = FPaths::ProjectSavedDir() / TEXT("Screenshots") / FString::Printf(TEXT("battle_shot_%02d.png"), NextShot);
-            FScreenshotRequest::RequestScreenshot(File, false, false);
-            UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SHOT: %s (%s)"), *File, *ShotPlan[NextShot]);
+            // A minimised window has an 8x8 back buffer: the capture asserts in D3D12 and takes the game down (2026-11-05, twice).
+            // Skip it. The viewport keeps reporting its old size while minimised, so the window itself is asked.
+            FVector2D ShotViewSize = FVector2D::ZeroVector;
+            bool bShotMinimised = false;
+            if (GEngine && GEngine->GameViewport)
+            {
+                GEngine->GameViewport->GetViewportSize(ShotViewSize);
+                const TSharedPtr<SWindow> ShotWindow = GEngine->GameViewport->GetWindow();
+                bShotMinimised = ShotWindow.IsValid() && ShotWindow->IsWindowMinimized();
+            }
+            if (!bShotMinimised && ShotViewSize.X >= 64.0 && ShotViewSize.Y >= 64.0)
+            {
+                FScreenshotRequest::RequestScreenshot(File, false, false);
+                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SHOT: %s (%s)"), *File, *ShotPlan[NextShot]);
+            }
+            else
+                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SHOT skipped: window minimised (%.0fx%.0f) (%s)"), ShotViewSize.X, ShotViewSize.Y, *ShotPlan[NextShot]);
             ShotTakeAt = -1.0f;
             ++NextShot;
             if (NextShot >= ShotPlan.Num() && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864ShotsQuit")))

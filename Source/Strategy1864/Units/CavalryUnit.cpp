@@ -26,6 +26,8 @@ ACavalryUnit::ACavalryUnit()
     {
         MovementExecutor->MoveSpeedCmPerSecond = 900.0f;
         MovementExecutor->TurnSpeedDegreesPerSecond = 80.0f;   // horsemen wheel faster than a column of foot
+        // From a halt to the 9 m/s pace in about 3.5 s, to the charge's gallop a few seconds more (an estimate, not a sourced figure).
+        MovementExecutor->AccelerationCmPerSecondSquared = 250.0f;
     }
 
     CavalryVisualComponent =

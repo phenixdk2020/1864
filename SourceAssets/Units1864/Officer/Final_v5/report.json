@@ -1,0 +1,307 @@
+{
+ "speed_const_cm_s": 137.70097,
+ "pose_diff_vs_DK": {
+  "March_Skulder": 0.23598690330982208,
+  "Ordre": 0,
+  "Hvil": 5.960464477539063e-08
+ },
+ "soldier_walk_frames": 30,
+ "soldier_walk_mesh_minz_cm": -1.48,
+ "death_src_frames": 104,
+ "mesh_bbox_m": {
+  "DK": [
+   -0.44,
+   -0.189,
+   -0.998,
+   0.512,
+   0.291,
+   0.993
+  ],
+  "SE": [
+   -0.437,
+   -0.184,
+   -0.998,
+   0.502,
+   0.291,
+   0.993
+  ],
+  "PR": [
+   -0.437,
+   -0.174,
+   -0.998,
+   0.433,
+   0.291,
+   0.993
+  ],
+  "NO": [
+   -0.437,
+   -0.178,
+   -0.998,
+   0.482,
+   0.291,
+   0.993
+  ]
+ },
+ "walk_ground_z_cm": -9.98,
+ "walk_minz_cm": [
+  -9.98,
+  -2.63
+ ],
+ "walk_foot_stance": {
+  "Left": {
+   "flat_frames": 9,
+   "speed_cm_s_median": 146.25,
+   "speed_cm_s_min_max": [
+    120.6,
+    162.2
+   ]
+  },
+  "Right": {
+   "flat_frames": 10,
+   "speed_cm_s_median": 149.8,
+   "speed_cm_s_min_max": [
+    129.9,
+    163.3
+   ]
+  }
+ },
+ "walk_root_motion_cm": [
+  0.0,
+  0.0
+ ],
+ "idle_lift_cm": 89.79,
+ "order_lift_cm": 89.79,
+ "death_first_frame_blend": "Hvil-pose -> soldat DeathFront over 8 (krop) / 14 (arme) frames",
+ "death_src_hips_start_cm": [
+  0.09,
+  97.52,
+  -0.13
+ ],
+ "death_src_hips_end_cm": [
+  27.5,
+  21.61,
+  106.67
+ ],
+ "clips": [
+  {
+   "name": "A_Officer_Walk",
+   "file": "A_Officer_Walk.fbx",
+   "frames": 30,
+   "fps": 30
+  },
+  {
+   "name": "A_Officer_WalkSheathed",
+   "file": "A_Officer_WalkSheathed.fbx",
+   "frames": 30,
+   "fps": 30
+  },
+  {
+   "name": "A_Officer_Idle",
+   "file": "A_Officer_Idle.fbx",
+   "frames": 90,
+   "fps": 30
+  },
+  {
+   "name": "A_Officer_Order",
+   "file": "A_Officer_Order.fbx",
+   "frames": 60,
+   "fps": 30
+  },
+  {
+   "name": "A_Officer_Death",
+   "file": "A_Officer_Death.fbx",
+   "frames": 104,
+   "fps": 30
+  }
+ ],
+ "walk_bone_dir_err_deg_max": 6.99,
+ "sabre_clips": {
+  "A_Combat_SabreDraw": {
+   "frames": 16,
+   "bones_in_file": 41,
+   "min_hand_to_hilt_cm": 39.1,
+   "frame_of_min_0based": 15,
+   "frames_within_4cm_of_min_0based": [
+    13,
+    15
+   ],
+   "dist_series_palm_to_hilt": [
+    68.4,
+    68.4,
+    68.1,
+    67.4,
+    66.2,
+    64.4,
+    63.9,
+    64.2,
+    63.5,
+    59.2,
+    53.3,
+    48.6,
+    45.9,
+    43.1,
+    40.1,
+    39.1
+   ]
+  },
+  "A_Combat_SabreSheath": {
+   "frames": 51,
+   "bones_in_file": 41,
+   "min_hand_to_hilt_cm": 32.5,
+   "frame_of_min_0based": 38,
+   "frames_within_4cm_of_min_0based": [
+    36,
+    39
+   ],
+   "dist_series_palm_to_hilt": [
+    80.8,
+    81.3,
+    82.6,
+    84.5,
+    86.6,
+    88.2,
+    90.0,
+    93.2,
+    96.9,
+    100.7,
+    103.9,
+    106.2,
+    108.1,
+    108.2,
+    106.4,
+    104.7,
+    103.3,
+    101.5,
+    99.5,
+    99.2,
+    99.4,
+    99.4,
+    98.9,
+    97.4,
+    95.3,
+    92.7,
+    89.6,
+    85.8,
+    81.3,
+    76.0,
+    70.6,
+    65.3,
+    60.0,
+    52.7,
+    45.2,
+    38.4,
+    33.9,
+    32.6,
+    32.5,
+    34.5,
+    38.4,
+    45.1,
+    52.8,
+    59.2,
+    64.5,
+    68.6,
+    70.8,
+    71.9,
+    72.5,
+    73.1,
+    74.1
+   ]
+  },
+  "A_Combat_SabreSheath2": {
+   "frames": 26,
+   "bones_in_file": 41,
+   "min_hand_to_hilt_cm": 39.1,
+   "frame_of_min_0based": 0,
+   "frames_within_4cm_of_min_0based": [
+    0,
+    3
+   ],
+   "dist_series_palm_to_hilt": [
+    39.1,
+    40.1,
+    41.3,
+    42.8,
+    44.7,
+    48.4,
+    52.9,
+    57.1,
+    60.4,
+    62.8,
+    65.0,
+    66.9,
+    68.6,
+    69.5,
+    70.1,
+    70.7,
+    71.0,
+    71.0,
+    70.8,
+    70.4,
+    70.2,
+    69.4,
+    68.7,
+    68.4,
+    68.3,
+    68.4
+   ]
+  },
+  "A_Combat_SabreWithdraw": {
+   "frames": 46,
+   "bones_in_file": 41,
+   "min_hand_to_hilt_cm": 37.1,
+   "frame_of_min_0based": 19,
+   "frames_within_4cm_of_min_0based": [
+    16,
+    21
+   ],
+   "dist_series_palm_to_hilt": [
+    76.4,
+    76.3,
+    76.2,
+    76.0,
+    75.9,
+    76.0,
+    76.1,
+    75.8,
+    74.7,
+    72.6,
+    69.3,
+    63.5,
+    56.5,
+    49.5,
+    44.0,
+    41.8,
+    40.8,
+    39.3,
+    37.7,
+    37.1,
+    38.1,
+    40.9,
+    45.5,
+    54.6,
+    67.7,
+    82.8,
+    96.5,
+    108.8,
+    114.3,
+    112.3,
+    107.0,
+    100.2,
+    93.2,
+    87.9,
+    84.9,
+    82.7,
+    81.0,
+    79.8,
+    79.5,
+    79.6,
+    79.8,
+    80.1,
+    80.4,
+    80.6,
+    80.7,
+    80.8
+   ]
+  }
+ }
+}

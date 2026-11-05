@@ -26,9 +26,23 @@
     - trusselsvurdering og reserve (implementeret, utestet);
     - sidetrin (uændret).
   - Animationer: Docs/Manglende-Animationer.md afsnit 5, klip 32–41. Rigget hest og rytterklip importeret 2026-11-03.
-- Officerer:
-  - Codex-natkøen 30/10 nåede ikke at rette sablen i hånden, skulderen og fødderne færdigt (Final_v4);
-  - import i Unreal mangler.
+- Officerer (2026-11-05: i slaget, importeret og testet med probe; se historikken):
+  - mangler:
+    - egne klip til at trække sablen og stikke den i skeden, med IK til fæstet. Soldaternes sabelklip når ikke fæstet (33–39 cm væk); nu skifter sablen plads med det samme;
+    - hvil- og ordreklippet står cirka 8 cm for lavt. Det er løftet i koden og bør rettes i Blender;
+    - dødsklippet hopper, når han falder under march;
+    - han er ikke set i karré, og hans fald er ikke set (`Fate`);
+    - nærbilleder af officeren kræver et kamera på ham, fordi skærmbilledet sigter mod kompagniets midte.
+- Underofficer: ingen rolle endnu (idé i Backlog).
+- **Kolonne til linje (Allan 2026-11-05):** "en enkelt mand gik igennem hele formationen og forsinkede dem". Formation til kolonne er højre om 90°, kolonne til formation er venstre om 90°; ingen soldat skifter plads.
+  - Rettet og bygget 2026-11-05 (`PlanColumnDrill`): linjen får en reserverot bagerst. En mand, der støder sammen med en anden, flyttes højst 2 rotter eller til reserven. Test 4: manden flyttes nu 1 rot, før 62.
+  - Tilbage: 2. kompagni venter stadig 10 s én gang ("gave up: still forming"); årsagen er ikke fundet. Hvorfor to mænd deler plads i kolonnen, er heller ikke fundet.
+- **Hestene accelererer (Allan 2026-11-05):** rytteri og stab får `AccelerationCmPerSecondSquared` = 250 (0 til 9 m/s på cirka 3,5 s), bygget. Accepttestene RESERVE-* og CAV-* (6) består alle. Ikke set visuelt.
+- **Nedbrud ved minimeret vindue** under testens skærmbilleder: rettet og bygget. Billedet springes over, når vinduet er minimeret (SWindow).
+- **Sigtede skud (`-Strategy1864AimedFire`) 2026-11-05:** danskerne ramte 8,2 %, svenskerne 13,5 %. Danskerne samler ilden på få mænd (én fik 87 skud), og 58 skud blev spildt. Målfordelingen skal undersøges.
+- **De 2 HQ-officerer til hest (Allan 2026-11-05):** "skal også kigges på - med animationer og det hele".
+  - I dag: statisk hest (`SM_Horse_Static`) og en soldat, der sidder frosset (`StrategyHQVisualComponent`).
+  - Plan: genbrug rytteriets riggede hest (`SK_Horse_1864`) med gangarter og rytterklippene. Rytteren er officersfiguren med sabel og skede.
 - Natkøens øvrige opgaver blev ikke kørt:
   - Odense kompakt og hurtigere opstart;
   - huse på veje og vand;
