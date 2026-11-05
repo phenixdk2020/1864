@@ -2,6 +2,15 @@
 # StrategyCavalryVisualComponent bruger SK_Horse_1864 + A_Horse_* naar de findes (ellers den statiske hest SM_Horse_Static).
 # Mesh-FBX ligger i SourceAssets/Horse (Tools/Animation/export_horse_mesh_b1.py); Blender startes kun hvis den mangler.
 # Kør kun naar hverken UnrealEditor, Build.bat eller spillet koerer.
+#
+# 2026-11-05 (hest laa ned i alle klip): aarsag var import_rotation roll=90 paa hesteklippene. Hestens mesh blev importeret uden rotation
+# (ref-pose Z op: pelvis z=105,8, head z=148,8, hove z=4,1), men klippene blev roteret 90 grader om X, saa hele skelettet blev evalueret med hoejden
+# i Y (pelvis (59,8, 105,8, 0)) og hesten laa paa siden/med maven paa jorden i alle gangarter. Hesteklippene er eksporteret med samme akser som meshet
+# (Blender axis_forward -Z, axis_up Y; Tools/Animation/horse_gaits_blender.py), saa de skal importeres med roll=0 (HORSE_CLIP_ROLL). Menneskeklippene
+# beholder roll=90 (deres mesh/armatur er ikke ens med hestens); roll=90 er altsaa ikke en generel regel for alle Blender-klip, men skal maales mod meshets ref-pose.
+# Gamle klip kopieres foer sletning til /Game/Units/Horse/Backup_20261105 (kun hvis mappen ikke findes), og klippene slettes og importeres paany
+# (replace_existing=False). Skelet og mesh er korrekte og beholdes. Efter importen kontrolleres at pelvis/saddle_root i klip frame 0 ligger i Z-hoejde
+# med ref-posen (maal med AnimPoseExtensions, ikke med oejet).
 import os
 import shutil
 import subprocess
@@ -13,6 +22,9 @@ BLEND = os.environ.get('PROJECT1864_HORSE_BLEND',
     'R:/Onedrive/Dokumenter/Unreal Projects/Game1864/Reference/Units/MultiView/Items/Horse_1_rigged_v3.blend')
 MESH_FBX = os.environ.get('PROJECT1864_HORSE_FBX', os.path.join(ROOT, 'SourceAssets', 'Horse', 'Horse_1_rigged_v3.fbx'))
 TOOLS = unreal.AssetToolsHelpers.get_asset_tools()
+HORSE_CLIP_ROLL = float(os.environ.get('PROJECT1864_HORSE_CLIP_ROLL', '0'))
+BACKUP_DIR = DEST + '/Backup_20261105'
+CLIP_NAMES = ['A_Horse_' + gait for gait in ('Stand', 'Walk', 'Trot', 'Canter', 'Gallop', 'Rear', 'Fall')]
 
 
 def export_mesh_if_needed():
@@ -47,7 +59,7 @@ def import_fbx(filename, name, skeletal_mesh, skeleton=None):
     for key, value in properties.items():
         options.set_editor_property(key, value)
     if not skeletal_mesh:
-        options.anim_sequence_import_data.set_editor_property('import_rotation', unreal.Rotator(roll=90, pitch=0, yaw=0))
+        options.anim_sequence_import_data.set_editor_property('import_rotation', unreal.Rotator(roll=HORSE_CLIP_ROLL, pitch=0, yaw=0))
     task = unreal.AssetImportTask()
     for key, value in {'filename': filename, 'destination_path': DEST, 'destination_name': name,
                        'automated': True, 'replace_existing': False, 'save': True,
@@ -59,6 +71,21 @@ def import_fbx(filename, name, skeletal_mesh, skeleton=None):
     if not isinstance(asset, expected):
         raise RuntimeError('Import fejlede: ' + name)
     return asset
+
+
+def backup_and_delete_clips():
+    # Sikkerhedskopi af de nuvaerende klip (kun foerste gang), derefter slettes de, saa de importeres frisk med den rette rotation.
+    if not unreal.EditorAssetLibrary.does_directory_exist(BACKUP_DIR):
+        unreal.EditorAssetLibrary.make_directory(BACKUP_DIR)
+        for name in CLIP_NAMES:
+            if unreal.EditorAssetLibrary.does_asset_exist(DEST + '/' + name):
+                if not unreal.EditorAssetLibrary.duplicate_asset(DEST + '/' + name, BACKUP_DIR + '/' + name):
+                    raise RuntimeError('Backup fejlede: ' + name)
+    for name in CLIP_NAMES:
+        if unreal.EditorAssetLibrary.does_asset_exist(DEST + '/' + name):
+            if not unreal.EditorAssetLibrary.does_asset_exist(BACKUP_DIR + '/' + name):
+                raise RuntimeError('Ingen backup, sletter ikke: ' + name)
+            unreal.EditorAssetLibrary.delete_asset(DEST + '/' + name)
 
 
 def main():
@@ -90,6 +117,8 @@ def main():
         for slot in slots:
             slot.set_editor_property('material_interface', material)
         mesh.set_editor_property('materials', slots)
+    if os.environ.get('PROJECT1864_HORSE_KEEP_CLIPS') != '1':
+        backup_and_delete_clips()
     for filename in animation_files:
         name = os.path.splitext(os.path.basename(filename))[0]
         clip = unreal.load_asset(DEST + '/' + name) or import_fbx(filename, name, False, skeleton)

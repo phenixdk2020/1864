@@ -42,7 +42,11 @@
 - **Sigtede skud (`-Strategy1864AimedFire`) 2026-11-05:** danskerne ramte 8,2 %, svenskerne 13,5 %. Danskerne samler ilden på få mænd (én fik 87 skud), og 58 skud blev spildt. Målfordelingen skal undersøges.
 - **De 2 HQ-officerer til hest (Allan 2026-11-05):** "skal også kigges på - med animationer og det hele".
   - I dag: statisk hest (`SM_Horse_Static`) og en soldat, der sidder frosset (`StrategyHQVisualComponent`).
-  - Plan: genbrug rytteriets riggede hest (`SK_Horse_1864`) med gangarter og rytterklippene. Rytteren er officersfiguren med sabel og skede.
+  - Gjort 2026-11-05: staben rider rytteriets riggede hest med gangarter, og rytteren er officersfiguren med sablen i skeden. Samtidig er hestens klip rettet; de lå ned siden 3/11 (roll 90).
+  - Tilbage:
+    - nation: den svenske stab fik en preussisk officer, fordi enheden ikke har en nation;
+    - rytterens sæde i sadlen er ikke målt;
+    - galop er ikke set i spillet.
 - Natkøens øvrige opgaver blev ikke kørt:
   - Odense kompakt og hurtigere opstart;
   - huse på veje og vand;

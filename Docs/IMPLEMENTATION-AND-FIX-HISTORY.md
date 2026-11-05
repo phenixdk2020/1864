@@ -2991,6 +2991,21 @@ Besluttet af Allan ud fra `Docs/Taktik-Doktrin-1825-1864.md`. Ændret: `AI/Strat
   - Danskerne samlede ilden på få mænd. Målfordelingen skal undersøges.
 - **Accepttests:** RESERVE-HOLD, -NONE, -COMMIT og CAV-SQUARE, -FLANK, -RALLY består alle.
 
+## 2026-11-05 — Hestene stod ikke; staben rider på den riggede hest
+
+- **Fejl siden 3/11:**
+  - Den riggede hests klip blev importeret med `import_rotation roll=90` som menneskeklippene. Hesteklippene er eksporteret med samme akser som hestens mesh, så skelettet blev drejet 90°, og hesten lå ned med benene under sig i alle klip, også Stand.
+  - Klippene er genimporteret med roll 0 (`Content/Python/import_horse_rigged.py`, `HORSE_CLIP_ROLL`; de gamle ligger i `/Game/Units/Horse/Backup_20261105`).
+  - Målt: bækkenet står 101,7 cm over hovene, som i hvileposen; før 0,4 cm.
+  - Set i spillet: husarer og stab står og rider.
+- **Staben** (`StrategyHQVisualComponent`, Allan: "skal også kigges på - med animationer og det hele"):
+  - de 2–3 ryttere rider nu rytteriets riggede hest med gangart, skridtlængde og fart som rytteriet (accelererer også);
+  - rytteren er officersfiguren med sablen i skeden, og hans rytterklip følger hestens skridt;
+  - uden de nye assets bruges den gamle statiske hest og en siddende soldat.
+- **Tilbage:**
+  - staben vælger officerens nation ud fra side og navn, så den svenske stab fik en preussisk officer;
+  - rytterens højde i sadlen er ikke målt efter hestens rettelse.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
