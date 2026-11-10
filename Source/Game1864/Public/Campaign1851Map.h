@@ -1586,6 +1586,8 @@ protected:
 	/** Village lanes, generated with the scenery. */
 	UPROPERTY(Transient)
 	TObjectPtr<UStaticMeshComponent> Lanes;
+	UPROPERTY()
+	TObjectPtr<UStaticMeshComponent> TownMinorStreetMesh;
 	/** The town streets (km), drawn with the lanes; not part of the lanes the battlefield generator reads. */
 	TArray<TArray<FVector2D>> TownStreetLinesKm;
 
@@ -1661,6 +1663,34 @@ private:
 	TArray<FCampaign1851River> Rivers;
 	TArray<FCampaign1851Lake> Lakes;
 	TMap<FIntPoint, TArray<FIntPoint>> RiverCells;   // 1 km cell -> (river, segment)
+	struct FTownVisualPlot
+	{
+		int32 TownCity, TownOrdinal;
+		FVector2D TownKm;
+		double TownRadius;
+		bool TownActive;
+		UHierarchicalInstancedStaticMeshComponent* TownComponent;
+		FTransform TownTransform;
+	};
+	TArray<FTownVisualPlot> TownVisualPlots; // Derived visuals only; Scenery retains the components.
+	TMap<int32, TArray<FVector2D>> TownReservedPlots;
+	TMap<int32, TArray<FVector2D>> TownEdgePlots; // Ordered, terrain-validated candidates; derived only.
+	TMap<int32, TArray<UStaticMeshComponent*>> TownEdgeStreets;
+	TMap<int32, int32> TownLoggedEdgeSites;
+	// Derived class data; reconstructed with the visuals, never serialized. Missing entry preserves C.
+	struct FTownPopulationLayout
+	{
+		int32 TownMinimumPopulation, TownBaseHouses, TownPeoplePerHouse, TownReservedCount;
+		int32 TownHouseCount(int32 TownPopulation) const
+		{
+			return TownBaseHouses + FMath::Max(0, TownPopulation - TownMinimumPopulation) / TownPeoplePerHouse;
+		}
+	};
+	TMap<int32, FTownPopulationLayout> TownPopulationLayouts;
+	void TownUpdatePlots();
+	TArray<TPair<FVector2D, double>> TownHouseReservations;
+	TArray<TPair<FVector2D, double>> TownBaseReservations; // Fixed houses and churches of towns outside TownEdgePlots; never reset.
+	double TownPlotsNextUpdateSeconds = 0.0;
 	void BuildScenery();
 	/** Drapes polylines (projected km) on the terrain as a ribbon mesh. */
 	UStaticMeshComponent* BuildRibbons(const TArray<TArray<FVector2D>>& Lines, float WidthKm, const FLinearColor& Colour, const TCHAR* Name, UMaterialInterface* Material);

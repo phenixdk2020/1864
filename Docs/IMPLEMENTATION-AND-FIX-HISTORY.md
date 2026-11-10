@@ -3006,6 +3006,31 @@ Besluttet af Allan ud fra `Docs/Taktik-Doktrin-1825-1864.md`. Ændret: `AI/Strat
   - staben vælger officerens nation ud fra side og navn, så den svenske stab fik en preussisk officer;
   - rytterens højde i sadlen er ikke målt efter hestens rettelse.
 
+## 2026-11-05 — Byerne på kampagnekortet: København, A-byer, Odense, Altona, garnisonsgrunde
+
+Før-billeder: `Saved/QA/2026-11-05-byer/foer` (log `Saved/Logs/towns_foer.log`). Rettet i `Campaign1851Map.cpp` (bygget, ikke set i spillet endnu):
+- **København:** kirken fik aldrig plads (fodaftryk ≥ 300 m mellem 600 m-karréer). Kirkens grund vælges nu mod hovedgaderne alene, og sidegaderne skæres om den.
+- **Klasse A og København (kun 1825):** huse og kirker i B-størrelse (før ca. 2,5 × større), gadenet i alle A-byer, husantal 30 + (indb. − 5.000)/150, 50–200 (før 14, færre end B-byerne), København inden for ca. 2,4 km fra torvet (før 6 km), ingen huse eller gader i floder.
+- **Sokler:** grænsen for sokler under A-byernes og 1851-byernes huse er nu 0,5 m i verdensrum som i B/C (før fik alle huse en sokkel).
+- **Odense kompakt:** ringgader (0,45/0,75/1,05 km) om torvet i B-byerne, så husene ikke spildes ud på vækstgrundene (Odense: extent 5,2 km og kun 1 fri grund).
+- **Hurtigere opstart:** C-byerne genberegner kun veje nær byen; B-byerne tester kun veje inden for 12 km (alle byer tog ca. 31 s, Odense 2,5 s).
+- **Garnisonsgrund:** findes ingen grund ved landevejen (Rønne, Altona), søges den fladeste grund i en ring uden for byen.
+- **Altona:** Natural Earths moderne Hamborg omfatter Altona, så området var udland i landmasken. `Tools/Map1851/patch_altona.py` gør landet nord for Elben mellem Wedel og Nobistor dansk i `Denmark1851_Features.png` og ejer-/distriktsgitrene (1825 og 1851; grænsen er et skøn). Skal køres igen efter `build_map.py`/`export_neighbours.py`.
+- **Målt efter (log `towns_efter1.log`, billeder `Saved/QA/2026-11-05-byer/efter1`):** København 115 huse, kirke 1, extent 4,7 km (før 11 km); Altona 53 huse og kirke (før 0); Slesvig 56, Kiel 53, Flensborg 76 (før 10–14); Odense extent 2,1 km (før 5,2) med 2 frie grunde (før 1); ingen "no garrison plot"; alle byer bygges på ca. 11 s (før 31 s). Billederne er ikke gennemset.
+- **Copilot-fund rettet bagefter, ikke bygget:** hovedstadens kirkeforvalg er begrænset til 1825 (`TownClassA`), så 1851 er uændret.
+- **Ikke gjort:** Landskabets gårde kan have flyttet sig, fordi garnisonsgrundene ved Rønne/Altona ændrer udelukkelseskortet.
+
+## 2026-11-07 — Test af ny bystil (`-CampaignTownStyle2`)
+
+Efter sammenligning med andre spil (`Saved/QA/2026-11-05-byer/sammenligning.html`) og Allans valg "tættere huse + træer". Kun B-byerne og kun med flaget; standardspillet er uændret.
+- Fem ringe om torvet (0,26–0,82 km) bruges kun til at stille husene op; de tegnes ikke og holdes ikke fri.
+- Et løvtræ ved hvert hus (bag, ved gavlen eller hjørnet), hvor stammen ikke rører hus, gade eller vej.
+- Forkastet undervejs: flade plader til bygrund og torv (sank i terrænet eller stak op som hvide kiler).
+- Set (`stil4`): Odense og Aarhus er tætte klynger med træer; ikke prøvet på A- og C-byer, vækst eller gem/indlæs.
+- Prøvet og fravalgt af Allan ("Uden stræder"): ringene som smalle, lyse stræder i Odense (`stil5`); husene stod mere spredt. Koden er fjernet igen.
+- **Gjort til standard i 1825** (Allan "ja, gør det"); `-CampaignTownStyleOld` giver den gamle stil, og 1851 er uændret. C-byer får havetræer; A-byer og København tegner kun hovedgaderne og får havetræer. Bygget og set (`standard1`): Bogense og Odense er gode; Slesvig og København er stadig spredte (gadenet med 600 m-karréer); i Altona løber monarkiets røde grænsebånd nu langs Elben og øst om byen gennem de yderste huse.
+- **2026-11-08, A-byer og København som B-byer** (Allan "ja, gør det"): i 1825-stilen bruger A-byerne (≥ 8.000) og København B-byernes layout med ringe ud til 1,8 km. Husantal som B (30 + 1 pr. 150 over 5.000); København 200 + 1 pr. 10.000 (210). De store byer må sætte kirken op til 600 m fra torvet (København fandt ellers ingen vejfri plads og fik ingen by). Målt (`standard2`/`standard3`): Slesvig 56 huse/1,8 km, Kiel 53/1,8 km, Flensborg 93/2,2 km, Altona 166/3,3 km, København 162 af 210 (land rækker ikke) og kirke, Odense uændret 49. Den gamle A-sti (gadenet) bruges nu kun i 1851 og med `-CampaignTownStyleOld`.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.
