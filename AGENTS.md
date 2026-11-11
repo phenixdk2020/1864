@@ -34,10 +34,12 @@ Resultat fra slag (tab, moral, territorial gevinst) føres tilbage til campaign-
 
 ## Visuel stil
 
-By-ikoner på campaign-kortet følger "Isometric Miniature Town"-konceptet: små isometriske bygningsklynger der skalerer i antal/størrelse efter bytype:
-- **C — Minor Town:** 2–3 bygninger
-- **B — Regional Town:** 5–6 bygninger + kirke
-- **A — Development City:** 10–15 bygninger, tydeligt urbant centrum
+Byerne på campaign-kortet følger "Isometric Miniature Town"-konceptet. Standarden i scenarie 1825 blev godkendt af Allan 2026-11-11 (billeder i `Saved/QA/2026-11-05-byer/standard1-3`): tætte klynger om torv og kirke, et havetræ ved husene, ingen tegnede ringgader (kun landeveje, hovedgader og torvets kant), og husantallet følger befolkningen:
+- **C — under 5.000 indb.:** cirka 18–22 huse og kirke i to gader.
+- **B — 5.000–7.999 indb.:** 30 huse + 1 pr. 150 indb. over 5.000 (34–49), kirke, ringe om torvet ud til 0,82 km.
+- **A — fra 8.000 indb.:** samme layout som B med ringe ud til 1,8 km og samme husformel (Slesvig 56, Altona 166); København 200 + 1 pr. 10.000 over 5.000.
+
+Scenarie 1851 bruger stadig det ældre layout. `-CampaignTownStyleOld` viser 1825 i den gamle stil.
 
 ## Koden i dag
 

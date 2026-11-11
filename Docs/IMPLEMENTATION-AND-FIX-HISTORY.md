@@ -3031,6 +3031,18 @@ Efter sammenligning med andre spil (`Saved/QA/2026-11-05-byer/sammenligning.html
 - **Gjort til standard i 1825** (Allan "ja, gør det"); `-CampaignTownStyleOld` giver den gamle stil, og 1851 er uændret. C-byer får havetræer; A-byer og København tegner kun hovedgaderne og får havetræer. Bygget og set (`standard1`): Bogense og Odense er gode; Slesvig og København er stadig spredte (gadenet med 600 m-karréer); i Altona løber monarkiets røde grænsebånd nu langs Elben og øst om byen gennem de yderste huse.
 - **2026-11-08, A-byer og København som B-byer** (Allan "ja, gør det"): i 1825-stilen bruger A-byerne (≥ 8.000) og København B-byernes layout med ringe ud til 1,8 km. Husantal som B (30 + 1 pr. 150 over 5.000); København 200 + 1 pr. 10.000 (210). De store byer må sætte kirken op til 600 m fra torvet (København fandt ellers ingen vejfri plads og fik ingen by). Målt (`standard2`/`standard3`): Slesvig 56 huse/1,8 km, Kiel 53/1,8 km, Flensborg 93/2,2 km, Altona 166/3,3 km, København 162 af 210 (land rækker ikke) og kirke, Odense uændret 49. Den gamle A-sti (gadenet) bruges nu kun i 1851 og med `-CampaignTownStyleOld`.
 
+## 2026-11-11 — Bystilen godkendt; byvækst, Altona-grænse (Codex) og broerne
+
+- **Godkendt som standard** af Allan; AGENTS.md "Visuel stil" beskriver nu standarden (husantal efter befolkning).
+- **Codex** (`Campaign1851Map.cpp`): store byer får op til 6 frie byggegrunde 2,5–10,5 km ude, når vækstbanken ingen finder (Altona 0 → 6, København stadig 0); huse og havetræer holdes ca. 150 m fra udenlandsk land (ikke hav), så Altonas yderste huse står fri af grænsebåndet; havetræerne tændes sammen med deres hus ved vækst og indlæsning. Codex fandt ingen fejl i befolkningsvæksten.
+- **Broerne blev aldrig tegnet** siden kortfliserne: `RebuildBridgeMeshes` krævede det gamle højdegitter (`GridZ`). Nu tegnes de som vejene.
+- **Navne:** broer i Skåne hed "ved København"/"ved Rønne"; nu efter nærmeste by af enhver nation (Malmø, Ystad).
+- **Falske havbroer:** en kystvej, der kun strejfer den forenklede kyst, er ingen bro (vand på begge sider kræves): 110 → 94 broer. Brostatus i gamle gemte spil følger bro-id'et, som kan have flyttet sig.
+- **København:** Knippelsbro blev flyttet mod syd ud i havnen (fortegnsfejl: km-rummets Y er nord); Langebro og Knippelsbro spænder nu over den forenklede havn (op til 1,6 km) fra byen til Christianshavn.
+- **Broer før byer:** broerne findes nu før byerne bygges, så husene holdes fri af dem; torvet må have en broende (ellers fik København og Randers ingen by).
+- Set (`Saved/QA/2026-11-05-byer/broer1-4`): København, Randers, Rendsborg, Malmø. Ikke committet.
+- **Frie byggegrunde i alle byer** (Allan: "det skal vel fikses så alle har ledige byggegrunde"): reservesøgningen gælder nu alle 1825-byer med B-layout (Odense og Rendsborg 2 → 6), og det første, usynlige byggennemløb efterlader ikke længere husreservationer (`TownBaseReservations` nulstilles før det rigtige gennemløb; Københavns 6,5 km store første gennemløb optog alle dens grunde, 0 → 6). Log (`towns_grunde2.log`): alle byer har 4 (C) eller 6 (B/A) frie grunde. Afvisningsårsager logges som "free plots", hvis en by mangler grunde.
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

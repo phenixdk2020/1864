@@ -29,6 +29,18 @@ void ACampaign1851Map::DetectBridges()
 	{
 		Links[l].FerryKm = LinkFerryKm0[l];
 	}
+	// The bridge is named after the nearest town of any nation: the bridges in Skåne were "ved København" (2026-11-11).
+	auto BridgeTownName = [this](const FVector2D& BridgeKm, const FString& BridgeFallback)
+	{
+		int32 BridgeBest = INDEX_NONE;
+		double BridgeBestKm = 1e9;
+		for (int32 BridgeCity = 0; BridgeCity < Cities.Num(); ++BridgeCity)
+		{
+			const double BridgeDistance = FVector2D::Distance(TownKm(BridgeCity), BridgeKm);
+			if (BridgeDistance < BridgeBestKm) { BridgeBestKm = BridgeDistance; BridgeBest = BridgeCity; }
+		}
+		return Cities.IsValidIndex(BridgeBest) ? Cities[BridgeBest].Name : BridgeFallback;
+	};
 	// One bridge for all the roads over the same water: a new find near an old one joins it.
 	auto AddBridge = [&](FCampaign1851Bridge B, bool bOwnName = false)
 	{
@@ -104,12 +116,17 @@ void ACampaign1851Map::DetectBridges()
 			else if (!bWet && WetFrom >= 0.f)
 			{
 				const float Span = d - WetFrom;
-				if (Span >= 0.02f && Span <= 0.9f)
+				// Water on both sides of the road: a coast road that only clips the simplified shore is no crossing
+				// (two "bridges" on land by Malmø, 2026-11-11).
+				const FVector2D BridgeMid = AlongLine(L.Km, (WetFrom + d) * 0.5f);
+				const FVector2D BridgeAlong = (AlongLine(L.Km, FMath::Min(Len, d)) - AlongLine(L.Km, WetFrom)).GetSafeNormal();
+				const FVector2D BridgeAcross(-BridgeAlong.Y, BridgeAlong.X);
+				const bool bBridgeCrossing = IsSea(BridgeMid + BridgeAcross * 0.25) && IsSea(BridgeMid - BridgeAcross * 0.25);
+				if (Span >= 0.02f && Span <= 0.9f && bBridgeCrossing)
 				{
 					FCampaign1851Bridge B;
 					B.Link = l;
-					const int32 Town = NearestTown(AlongLine(L.Km, (WetFrom + d) * 0.5f));
-					B.Name = FString::Printf(TEXT("Broen ved %s"), Cities.IsValidIndex(Town) ? *Cities[Town].Name : *Near);
+					B.Name = FString::Printf(TEXT("Broen ved %s"), *BridgeTownName(AlongLine(L.Km, (WetFrom + d) * 0.5f), Near));
 					B.Km = AlongLine(L.Km, (WetFrom + d) * 0.5f);
 					B.EndA = AlongLine(L.Km, FMath::Max(0.f, WetFrom - 0.03f));
 					B.EndB = AlongLine(L.Km, FMath::Min(Len, d + 0.03f));
@@ -142,13 +159,16 @@ void ACampaign1851Map::DetectBridges()
 			if (!bWet && From > -1e8)
 			{
 				const double Gap = FMath::Abs((From + t) * 0.5);
-				if (Gap < BestGap && t - From < 1.2) { BestGap = Gap; BestFrom = From; BestTo = t; }
+				// The simplified harbour is about 1.5 km wide: the bridge spans it to reach both shores (2026-11-11).
+				if (Gap < BestGap && t - From < 1.6) { BestGap = Gap; BestFrom = From; BestTo = t; }
 				From = -1e9;
 			}
 		}
 		if (BestGap > 1e8)
 		{
-			continue;   // no water there on the map
+			// No short stretch of water on the map's line: the bridge's own ends.
+			BestFrom = -FVector2D::Distance(A, C) * 0.5 + 0.03;
+			BestTo = FVector2D::Distance(A, C) * 0.5 - 0.03;
 		}
 		B.EndA = Mid + Dir * (BestFrom - 0.03);
 		B.EndB = Mid + Dir * (BestTo + 0.03);
@@ -161,11 +181,14 @@ void ACampaign1851Map::DetectBridges()
 	// (north, towards the harbour) are kept about 0.7 km apart along the water, same IDs, state and links.
 	FCampaign1851Bridge* CopenhagenLong = Bridges.FindByPredicate([](const FCampaign1851Bridge& CopenhagenBridge) { return CopenhagenBridge.Name == TEXT("Langebro"); });
 	FCampaign1851Bridge* CopenhagenKnip = Bridges.FindByPredicate([](const FCampaign1851Bridge& CopenhagenBridge) { return CopenhagenBridge.Name == TEXT("Knippelsbro"); });
-	if (CopenhagenLong && CopenhagenKnip)
+	// Only when both found the same stretch of water (2026-11-11: with their own lines they usually lie apart).
+	if (CopenhagenLong && CopenhagenKnip && FVector2D::Distance(CopenhagenLong->Km, CopenhagenKnip->Km) < 0.4)
 	{
 		const FVector2D CopenhagenDirection = (CopenhagenLong->EndB - CopenhagenLong->EndA).GetSafeNormal();
 		FVector2D CopenhagenOffset(-CopenhagenDirection.Y * 0.7, CopenhagenDirection.X * 0.7);
-		if (CopenhagenOffset.Y > 0.0) { CopenhagenOffset = -CopenhagenOffset; }   // world Y is south: Knippelsbro lies north of Langebro
+		// Km space has north as +Y (only Unreal's world Y is south): Knippelsbro lies north of Langebro. It was moved south into
+		// the open harbour (2026-11-11).
+		if (CopenhagenOffset.Y < 0.0) { CopenhagenOffset = -CopenhagenOffset; }
 		CopenhagenKnip->EndA = CopenhagenLong->EndA + CopenhagenOffset;
 		CopenhagenKnip->EndB = CopenhagenLong->EndB + CopenhagenOffset;
 		CopenhagenKnip->Km = CopenhagenLong->Km + CopenhagenOffset;
@@ -224,8 +247,7 @@ void ACampaign1851Map::DetectBridges()
 					const double Half = FMath::Max(double(RiverDrawnKm(Rv.Class)) * 0.5 + 0.04, 0.06);
 					FCampaign1851Bridge B;
 					B.Link = l;
-					const int32 Town = NearestTown(X);
-					B.Name = FString::Printf(TEXT("Broen over %s ved %s"), *Rv.Name, Cities.IsValidIndex(Town) ? *Cities[Town].Name : TEXT("?"));
+					B.Name = FString::Printf(TEXT("Broen over %s ved %s"), *Rv.Name, *BridgeTownName(X, TEXT("?")));
 					B.Km = X;
 					B.EndA = X - Dir * Half;
 					B.EndB = X + Dir * Half;
@@ -339,7 +361,9 @@ void ACampaign1851Map::RebuildBridgeMeshes()
 		if (M) { M->DestroyComponent(); }
 	}
 	BridgeMeshes.Reset();
-	if (GridZ.Num() == 0)
+	// With the map tiles there is no GridZ (LocalAtKm reads the tile heights): the bridges were never drawn, only their signs
+	// (2026-11-11, as RebuildNetworkMeshes).
+	if (GridZ.Num() == 0 && !bUseMapTiles)
 	{
 		return;
 	}

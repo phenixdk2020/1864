@@ -123,6 +123,9 @@ void ACampaign1851Map::BeginPlay()
 	BuildNeighbourMeshes();
 	if (bFeatures)
 	{
+		// The bridges first, so the towns keep their houses off them (houses stood on Knippelsbro, 2026-11-11);
+		// ResetNetwork finds the same bridges again.
+		DetectBridges();
 		BuildScenery();
 	}
 	else
@@ -1166,8 +1169,10 @@ void ACampaign1851Map::BuildScenery()
 					for (const FCampaign1851Railway& TownRail : Railways)
 						for (int32 TownI = 1; TownI < TownRail.Km.Num(); ++TownI)
 							if (!TownSegmentClear(TownPlot, TownRail.Km[TownI - 1], TownRail.Km[TownI], 0.1)) return false;
-					for (const FCampaign1851Bridge& TownBridge : Bridges)
-						if (!TownSegmentClear(TownPlot, TownBridge.EndA, TownBridge.EndB, 0.125)) return false;
+					// The square itself may hold a bridge end (the bridge in the middle of Randers and København, 2026-11-11).
+					if (TownPlot.Model >= 0)
+						for (const FCampaign1851Bridge& TownBridge : Bridges)
+							if (!TownSegmentClear(TownPlot, TownBridge.EndA, TownBridge.EndB, 0.125)) return false;
 					if (City.bHasPlot && !TownSegmentClear(TownPlot, City.PlotKm, City.PlotKm, 0.25)) return false;
 					// Saved sites mask occupancy later; they must not change the candidate sequence.
 					return true;
@@ -1475,8 +1480,31 @@ void ACampaign1851Map::BuildScenery()
 					}
 					return false;
 				};
-				auto TownLandClear = [&](const FTownPlot& TownPlot)
+				// Resolve foreign owners once; owner 0 is sea, and missing/out-of-grid data is not foreign land.
+				bool TownForeignOwners[256] = {};
+				if (TownStyle2)
+					for (const auto& TownForeignOwnerPair : NeighbourOwnerIds)
+						TownForeignOwners[TownForeignOwnerPair.Key] = TownForeignOwnerPair.Key != 0 && !TownForeignOwnerPair.Value.IsEmpty() && TownForeignOwnerPair.Value != TEXT("DK");
+				auto TownForeignNear = [&](const FVector2D& TownKmPoint, double TownMargin)
 				{
+					if (!TownStyle2 || NeighbourOwners.Num() == 0 || NeighbourOwnerW <= 0 || NeighbourOwnerH <= 0) return false;
+					for (double TownForeignRadius : { 0.0, TownMargin * 0.5, TownMargin })
+						for (int32 TownForeignDirection = 0; TownForeignDirection < (TownForeignRadius > 0 ? 12 : 1); ++TownForeignDirection)
+						{
+							const double TownForeignAngle = TownForeignDirection * UE_TWO_PI / 12;
+							const FVector2D TownForeignPoint = TownKmPoint + FVector2D(FMath::Cos(TownForeignAngle), FMath::Sin(TownForeignAngle)) * TownForeignRadius;
+							const FVector2D TownForeignUv = OwnerUvFromKm(TownForeignPoint);
+							if (TownForeignUv.X < 0 || TownForeignUv.X >= 1 || TownForeignUv.Y <= 0 || TownForeignUv.Y > 1) continue;
+							const int32 TownForeignX = FMath::Clamp(int32(TownForeignUv.X * NeighbourOwnerW), 0, NeighbourOwnerW - 1);
+							const int32 TownForeignY = FMath::Clamp(int32((1.0 - TownForeignUv.Y) * NeighbourOwnerH), 0, NeighbourOwnerH - 1);
+							const int32 TownForeignCell = TownForeignY * NeighbourOwnerW + TownForeignX;
+							if (NeighbourOwners.IsValidIndex(TownForeignCell) && TownForeignOwners[NeighbourOwners[TownForeignCell]] && !IsMonarchyLand(TownForeignPoint)) return true;
+						}
+					return false;
+				};
+				auto TownLandClear = [&](const FTownPlot& TownPlot, bool TownHouseBorder = false)
+				{
+					if (TownHouseBorder && TownStyle2 && TownForeignNear(TownPosition(TownPlot.TownMid), 0.15 + TownPlot.TownHalf.Size())) return false;
 					const int32 TownNX = FMath::Max(1, FMath::CeilToInt(TownPlot.TownHalf.X * 100));
 					const int32 TownNY = FMath::Max(1, FMath::CeilToInt(TownPlot.TownHalf.Y * 100));
 					for (int32 TownX = 0; TownX <= TownNX; ++TownX)
@@ -1491,8 +1519,10 @@ void ACampaign1851Map::BuildScenery()
 					for (const FCampaign1851Railway& TownRail : Railways)
 						for (int32 TownI = 1; TownI < TownRail.Km.Num(); ++TownI)
 							if (!TownSegmentClear(TownPlot, TownRail.Km[TownI - 1], TownRail.Km[TownI], 0.1)) return false;
-					for (const FCampaign1851Bridge& TownBridge : Bridges)
-						if (!TownSegmentClear(TownPlot, TownBridge.EndA, TownBridge.EndB, 0.125)) return false;
+					// The square itself may hold a bridge end (the bridge in the middle of Randers and København, 2026-11-11).
+					if (TownPlot.TownModel >= 0)
+						for (const FCampaign1851Bridge& TownBridge : Bridges)
+							if (!TownSegmentClear(TownPlot, TownBridge.EndA, TownBridge.EndB, 0.125)) return false;
 					return !City.bHasPlot || TownSegmentClear(TownPlot, City.PlotKm, City.PlotKm, 0.25);
 				};
 				// Keep the square near the marker; only its land footprint may move it (<=300 m).
@@ -1690,7 +1720,7 @@ void ACampaign1851Map::BuildScenery()
 								const FTownPlot TownShape = TownMakePlot(TownModel, FVector2D::ZeroVector, TownAngle, TownSide < 0);
 								const FVector2D TownMid = TownPoint - TownOrigin + TownRotate(FVector2D(0, TownSide * (TownShape.TownHalf.Y + (TownMain ? 0.065 : TownClass.TownStreetWidthKm * 0.5) + TownLayoutRandom.FRandRange(0.006f, 0.018f))), TownAngle);
 								const FTownPlot TownPlot = TownMakePlot(TownModel, TownMid, TownAngle, TownSide < 0);
-								if (TownLandClear(TownPlot) && TownRoadClear(TownPlot) && TownPlotsSeparate(TownPlot, TownSquare)) TownCandidates.Add(TownPlot);
+								if (TownLandClear(TownPlot, true) && TownRoadClear(TownPlot) && TownPlotsSeparate(TownPlot, TownSquare)) TownCandidates.Add(TownPlot);
 							}
 						TownAlong = FMath::Fmod(TownAlong - TownLength, 0.045);
 						if (TownAlong < 0) TownAlong += 0.045;
@@ -1745,7 +1775,7 @@ void ACampaign1851Map::BuildScenery()
 						for (int32 TownHouse = 0; TownHouse < 4; ++TownHouse)
 						{
 							const FTownPlot TownGrowth = TownMakePlot((TownFront + TownHouse) % 3, TownMid + TownD * (-0.22 + TownHouse * 0.145), TownAngle, TownFront % 2 == 0);
-							bool TownGrowthClear = TownLandClear(TownGrowth) && TownRoadClear(TownGrowth);
+							bool TownGrowthClear = TownLandClear(TownGrowth, true) && TownRoadClear(TownGrowth);
 							for (const TArray<FVector2D>& TownRoad : TownGrowthRoads)
 								for (int32 TownI = 1; TownI < TownRoad.Num(); ++TownI)
 									if (!TownSegmentClear(TownGrowth, TownRoad[TownI - 1], TownRoad[TownI], TownClass.TownStreetWidthKm * 0.5)) TownGrowthClear = false;
@@ -1758,6 +1788,52 @@ void ACampaign1851Map::BuildScenery()
 						if (TownStreetMesh) TownStreetMesh->SetVisibility(false);
 						TownEdgeStreets.FindOrAdd(TownCityIndex).Add(TownStreetMesh);
 					}
+				// Every 1825 town of this layout, not only the large ones: Odense and Rendsborg had 2 of 6 (Allan 2026-11-11).
+				if (TownStyle2)
+				{
+					// A continuation can cross the dense core or the sea even when an inland parcel is free.
+					// Keep the original bank/order; top up genuinely free slots without a connecting street or random draws.
+					auto TownReserveUnoccupied = [&](const FVector2D& TownReserveKm)
+					{
+						for (const FTownPlot& TownReserveHouse : TownPlan)
+							if (FVector2D::Distance(TownPosition(TownReserveHouse.TownMid), TownReserveKm) < 0.3 + TownReserveHouse.TownHalf.Size()) return false;
+						for (const auto& TownReserveOtherHouse : TownHouseReservations)
+							if (FVector2D::Distance(TownReserveOtherHouse.Key, TownReserveKm) < 0.3 + TownReserveOtherHouse.Value) return false;
+						for (const ACampaign1851ConstructionSite* TownReserveProject : Projects)
+							if (TownReserveProject && FVector2D::Distance(TownReserveProject->PlotKm, TownReserveKm) < 0.3 + TownReserveProject->PlotRadiusKm) return false;
+						return true;
+					};
+					int32 TownReserveFreeCount = 0;
+					int32 TownReserveMisses[4] = {};   // occupied, spacing, road/land, growth street
+					for (const FVector2D& TownReserveExisting : TownEdges)
+						if (TownReserveUnoccupied(TownReserveExisting)) ++TownReserveFreeCount;
+					// Stay inside the 12 km road cache, including the reserve footprint.
+					for (double TownFallbackRadius = 2.5; TownFallbackRadius <= 10.5 && TownReserveFreeCount < TownBlockPopulation.TownReservedCount; TownFallbackRadius += 0.5)
+						for (int32 TownFallbackDirection = 0; TownFallbackDirection < 48 && TownReserveFreeCount < TownBlockPopulation.TownReservedCount; ++TownFallbackDirection)
+						{
+							const double TownFallbackAngle = TownFallbackDirection * UE_TWO_PI / 48;
+							const FVector2D TownFallbackMid = FVector2D(FMath::Cos(TownFallbackAngle), FMath::Sin(TownFallbackAngle)) * TownFallbackRadius;
+							const FVector2D TownFallbackKm = TownPosition(TownFallbackMid);
+							if (!TownReserveUnoccupied(TownFallbackKm)) { ++TownReserveMisses[0]; continue; }
+							bool TownFallbackClear = true;
+							for (const FVector2D& TownFallbackExisting : TownEdges)
+								if (FVector2D::Distance(TownFallbackExisting, TownFallbackKm) < 0.65) TownFallbackClear = false;
+							if (!TownFallbackClear) { ++TownReserveMisses[1]; continue; }
+							const FTownPlot TownFallbackReserve = { -1, TownFallbackMid, FVector2D(0.3, 0.3), FVector2D::ZeroVector, 0, 1, 0 };
+							if (!TownRoadClear(TownFallbackReserve) || !TownLandClear(TownFallbackReserve)) { ++TownReserveMisses[2]; continue; }
+							for (const TArray<FVector2D>& TownFallbackRoad : TownGrowthRoads)
+								for (int32 TownFallbackSegment = 1; TownFallbackSegment < TownFallbackRoad.Num(); ++TownFallbackSegment)
+									if (!TownSegmentClear(TownFallbackReserve, TownFallbackRoad[TownFallbackSegment - 1], TownFallbackRoad[TownFallbackSegment], TownClass.TownStreetWidthKm * 0.5)) TownFallbackClear = false;
+							if (!TownFallbackClear) { ++TownReserveMisses[3]; continue; }
+							TownEdges.Add(TownFallbackKm);
+							TownMinorClearings.Add({ TownFallbackKm, 0.45f });
+							TownEdgeStreets.FindOrAdd(TownCityIndex).Add(nullptr);
+							++TownReserveFreeCount;
+						}
+					if (TownReserveFreeCount < TownBlockPopulation.TownReservedCount)
+						UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|town %s free plots %d/%d; misses occupied=%d spacing=%d road-or-land=%d growth=%d"), *City.Name,
+							TownReserveFreeCount, TownBlockPopulation.TownReservedCount, TownReserveMisses[0], TownReserveMisses[1], TownReserveMisses[2], TownReserveMisses[3]);
+				}
 				if (TownPlan.Num() - 1 < TownBlockPopulation.TownHouseCount(City.Population))
 					UE_LOG(LogTemp, Warning, TEXT("CAMPAIGN-1851|town %s only %d/%d house candidates on land"), *City.Name, TownPlan.Num() - 1, TownBlockPopulation.TownHouseCount(City.Population));
 				for (const FTownPlot& TownPlot : TownPlan) TownMinorClearings.Add({ TownPosition(TownPlot.TownMid), float(TownPlot.TownHalf.Size() + 0.05) });
@@ -1772,6 +1848,7 @@ void ACampaign1851Map::BuildScenery()
 				UStaticMesh* TownCube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
 				UMaterialInstanceDynamic* TownStone = UMaterialInstanceDynamic::Create(LoadObject<UMaterialInterface>(nullptr, FlatColourPath), this);
 				if (TownStone) TownStone->SetVectorParameterValue(TEXT("Color"), Srgb(205, 203, 195));
+				UStaticMesh* TownGardenMesh = TownStyle2 ? Campaign1851Scenery::Build(EPiece::Broadleaf, Material) : nullptr;
 				for (int32 TownIndex = 0; TownIndex < TownPlan.Num(); ++TownIndex)
 				{
 					const FTownPlot& TownPlot = TownPlan[TownIndex];
@@ -1813,7 +1890,7 @@ void ACampaign1851Map::BuildScenery()
 					FVector TownBase = LocalAtKm(TownPosition(TownPlot.TownPivot));
 					TownBase.Z = TownHigh - TownMesh->GetBoundingBox().Min.Z * TownFit * TownPlot.TownScale * PieceScale;
 					TownAddVisual(TownMesh, nullptr, FTransform(FRotator(0, TownFacing, 0), TownBase, FVector(TownFit * TownPlot.TownScale * PieceScale)));
-					if (TownStyle2 && TownIndex > 0 && TownActive)
+					if (TownStyle2 && TownIndex > 0)
 					{
 						// A garden tree behind (or else beside) every house, where it touches no house, street or road.
 						const double TownTreeX = TownPlot.TownHalf.X + 0.02, TownTreeY = TownPlot.TownHalf.Y + 0.02;
@@ -1823,10 +1900,12 @@ void ACampaign1851Map::BuildScenery()
 						{
 							// The trunk's footprint only (the crown may reach over a roof or a garden, 2026-11-07).
 							const FTownPlot TownTreePlot = { -1, TownCorner(TownPlot, TownTreeOffset), FVector2D(0.012, 0.012), FVector2D::ZeroVector, 0, 1, 0 };
-							bool TownTreeClear = TownRoadClear(TownTreePlot) && IsMonarchyLand(TownPosition(TownTreePlot.TownMid)) && !IsFreshWater(TownPosition(TownTreePlot.TownMid), 0.02f);
+							bool TownTreeClear = !TownForeignNear(TownPosition(TownTreePlot.TownMid), 0.15 + TownTreePlot.TownHalf.Size())
+								&& TownRoadClear(TownTreePlot) && IsMonarchyLand(TownPosition(TownTreePlot.TownMid)) && !IsFreshWater(TownPosition(TownTreePlot.TownMid), 0.02f);
 							for (const FTownPlot& TownOther : TownPlan) if (TownTreeClear && !TownPlotsSeparate(TownTreePlot, TownOther)) TownTreeClear = false;
 							if (!TownTreeClear) continue;
-							TownGardenTrees.Emplace(FRotator(0.f, float(TownIndex * 37 % 360), 0.f), LocalAtKm(TownPosition(TownTreePlot.TownMid)) - FVector(0.0, 0.0, 0.3), FVector(0.45f + 0.06f * (TownIndex % 3)) * PieceScale);
+							// Share the house ordinal, so saved population and later growth toggle the tree with its house/plinth.
+							TownAddVisual(TownGardenMesh, nullptr, FTransform(FRotator(0.f, float(TownIndex * 37 % 360), 0.f), LocalAtKm(TownPosition(TownTreePlot.TownMid)) - FVector(0.0, 0.0, 0.3), FVector(0.45f + 0.06f * (TownIndex % 3)) * PieceScale));
 							break;
 						}
 					}
@@ -2194,6 +2273,9 @@ void ACampaign1851Map::BuildScenery()
 	for (int32 TownPieceIndex = 0; TownPieceIndex < PieceCount; ++TownPieceIndex) Items[TownPieceIndex].Reset();
 	Towns.Reset();
 	TownStreetLinesKm.Reset();
+	// The first pass only shapes the countryside: its houses are no reservations (2026-11-11: København's 6.5 km of
+	// first-pass houses left none of its free building plots free).
+	TownBaseReservations.Reset();
 	TownBuild(false);
 	Items[int32(EPiece::Windmill)] = TownCountrysideMills;
 	Taken = TownCountrysideTaken;
