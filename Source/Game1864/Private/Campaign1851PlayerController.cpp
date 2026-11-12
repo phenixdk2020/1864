@@ -1158,6 +1158,10 @@ void ACampaign1851PlayerController::PlayerTick(float DeltaTime)
 					else if (Key == TEXT("unitco")) { Overlay->SetUnitCardCompany(FCString::Atoi(*Value)); }
 					else if (Key == TEXT("oob")) { Overlay->ToggleOOB(); }
 					else if (Key == TEXT("city")) { Overlay->SetSelectedCity(Map->FindCity(Value)); }
+					// Test of town growth and of the towns after saving and loading (2026-11-12).
+					else if (Key == TEXT("grow")) { Map->DebugScaleTownPopulation(FCString::Atof(*Value)); }
+					else if (Key == TEXT("save")) { SaveToSlot(Value, true); }
+					else if (Key == TEXT("load")) { LoadFromSlot(Value); }
 					else if (Key == TEXT("tab")) { Overlay->SetTownTab(FCString::Atoi(*Value)); }
 					else if (Key == TEXT("civil")) { Overlay->SetCivilTab(Value == TEXT("1")); }
 					else if (Key == TEXT("info")) { Overlay->ToggleBuildingInfo(FCString::Atoi(*Value)); }

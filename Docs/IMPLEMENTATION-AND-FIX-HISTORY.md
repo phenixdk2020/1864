@@ -3043,6 +3043,13 @@ Efter sammenligning med andre spil (`Saved/QA/2026-11-05-byer/sammenligning.html
 - Set (`Saved/QA/2026-11-05-byer/broer1-4`): København, Randers, Rendsborg, Malmø. Ikke committet.
 - **Frie byggegrunde i alle byer** (Allan: "det skal vel fikses så alle har ledige byggegrunde"): reservesøgningen gælder nu alle 1825-byer med B-layout (Odense og Rendsborg 2 → 6), og det første, usynlige byggennemløb efterlader ikke længere husreservationer (`TownBaseReservations` nulstilles før det rigtige gennemløb; Københavns 6,5 km store første gennemløb optog alle dens grunde, 0 → 6). Log (`towns_grunde2.log`): alle byer har 4 (C) eller 6 (B/A) frie grunde. Afvisningsårsager logges som "free plots", hvis en by mangler grunde.
 
+## 2026-11-12 — Byvækst og gem/indlæs testet
+
+- **Testkommandoer** i `-CampaignUiShots`: `grow=F` (alle monarkiets byers befolkning gange F, husene opdateres straks; `ACampaign1851Map::DebugScaleTownPopulation`), `save=Slot` og `load=Slot`. Står i `Docs/TestFlags.md`.
+- **Testet** (`Saved/QA/2026-11-05-byer/vaekst1-2`, log `towns_vaekst2.log`): Odense ×1,6 (7.900 → 12.640), gemt, ×0,5, indlæst. Efter indlæsning er befolkningen 12.640 og byen ser ud som efter væksten; husene flytter sig ikke.
+- **Rettet:** en voksende B-by lagde de nye huse langs landevejene op til 3 km ud. Nu har B-byerne de samme ekstra ringe ud til 1,8 km som A-byerne; husene tages nærmest først, så byerne er uændrede ved start (Odense 49 huse) og vokser i klyngen.
+- Ikke undersøgt særskilt: huse på veje og vand i B/C-byer (loggen viser overlaps=0).
+
 ### Næste skridt
 - Åbne `Strategy1864`-slaget fra kampagnen med terræn fra `Battlefield_N.json` og enheder fra `Units.json`. Typerne til det findes allerede i `StrategyBattlefieldGenerationTypes.h`.
 - Skrive `BattleResult_N.json` med tab pr. kompagni og officerernes skæbne og vende tilbage til kampagnen.

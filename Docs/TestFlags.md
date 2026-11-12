@@ -71,7 +71,7 @@ Eksemplerne er argumenter, som kan tilføjes en relevant launcher (alle viderese
 | `CampaignEventWhy` | Logger daglig forklaring af et event uden at udløse det. | `-CampaignEventWhy=kiel` |
 | `CampaignEventLog` | Logger månedlige eventevalueringer, også ikke-aktuelle/afgjorte. | `-CampaignEventLog` |
 
-`CampaignUiShots` bruger realtid og tager billedet 1,5 sek. efter handlingerne. Kommandoer: `window`, `minister`, `officer`, `select`, `focus`, `kamporden`, `selectmany` (indeks med +), `genfield` (lat+lon), `view` (lat+lon+afstand i km), `split`, `unitcard`, `rtab`, `pool`, `unitco`, `oob`, `city`, `tab`, `civil`, `info`, `clear`. Vinduer her: none/army/officers/budget/towns/trains/chart/council/supply/foreign/research/navy/status. Listen er forskellig fra `CampaignOpenWindow`.
+`CampaignUiShots` bruger realtid og tager billedet 1,5 sek. efter handlingerne. Kommandoer: `window`, `minister`, `officer`, `select`, `focus`, `kamporden`, `selectmany` (indeks med +), `genfield` (lat+lon), `view` (lat+lon+afstand i km), `split`, `unitcard`, `rtab`, `pool`, `unitco`, `oob`, `city`, `tab`, `civil`, `info`, `clear`, `grow` (alle monarkiets byers befolkning gange tallet, fx `grow=1.5`), `save` og `load` (gem/indlæs en slot, fx `save=GrowTest`). Vinduer her: none/army/officers/budget/towns/trains/chart/council/supply/foreign/research/navy/status. Listen er forskellig fra `CampaignOpenWindow`.
 
 ## Slag
 

@@ -649,6 +649,8 @@ public:
 	FVector Project(double Lat, double Lon) const;
 
 	const TArray<FCampaign1851City>& GetCities() const { return Cities; }
+	/** Test of town growth (-CampaignUiShots grow=F): every monarchy town's population times F, houses updated at once. */
+	void DebugScaleTownPopulation(float TownFactor);
 	const TArray<FCampaign1851Label>& GetLabels() const { return Labels; }
 	const TArray<FCampaign1851Amt>& GetAmter() const { return Amter; }
 	const FCampaign1851Amt* FindAmt(int32 Id) const { return Amter.FindByPredicate([Id](const FCampaign1851Amt& A) { return A.Id == Id; }); }

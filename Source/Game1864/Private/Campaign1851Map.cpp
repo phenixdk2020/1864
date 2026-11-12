@@ -161,6 +161,14 @@ void ACampaign1851Map::Tick(float DeltaSeconds)
 	}
 }
 
+void ACampaign1851Map::DebugScaleTownPopulation(float TownFactor)
+{
+	for (FCampaign1851City& TownGrowthCity : Cities)
+		if (!TownGrowthCity.bForeign) TownGrowthCity.Population = FMath::RoundToInt(TownGrowthCity.Population * TownFactor);
+	UE_LOG(LogTemp, Display, TEXT("CAMPAIGN-1851|town-growth-test|factor=%.2f"), TownFactor);
+	TownUpdatePlots();
+}
+
 // Reconstruct occupancy from population and saved site coordinates, never from event order.
 void ACampaign1851Map::TownUpdatePlots()
 {
@@ -1686,7 +1694,9 @@ void ACampaign1851Map::BuildScenery()
 				// -CampaignTownStyle2 (Allan 2026-11-07, "tættere huse + træer"): five rings close round the market, so the houses
 				// stand in rows round the square instead of strung out.
 				TArray<double> TownRingRadii = TownStyle2 ? TArray<double>{ 0.26, 0.40, 0.54, 0.68, 0.82 } : TArray<double>{ 0.45, 0.75, 1.05 };
-				if (TownStyle2 && TownBlockLarge) for (double TownMoreRing = 0.96; TownMoreRing <= 1.8; TownMoreRing += 0.14) TownRingRadii.Add(TownMoreRing);   // up to about 200 houses
+				// Further rings for the large towns and for growth: houses are taken nearest first, so a B town only reaches them as it
+				// grows (Odense at 1.6 times its people spread 3 km along the roads, 2026-11-12).
+				if (TownStyle2) for (double TownMoreRing = 0.96; TownMoreRing <= 1.8; TownMoreRing += 0.14) TownRingRadii.Add(TownMoreRing);   // up to about 200 houses
 				for (const double TownRingRadius : TownRingRadii)
 					for (int32 TownPiece = 0; TownPiece < 12; ++TownPiece)
 					{
