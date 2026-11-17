@@ -1,6 +1,6 @@
 # Backlog: status for de 20 opgaver (campaign-kortet)
 
-Resterende byarbejde: Befolkningsstyret lokal kulissev?kst i 1851-layoutet er ikke bekræftet. De ?vrige klasser f?r sokler, men deres eksisterende bylog har endnu ikke sokkel-/reservationsopt?lling. Afventer visuel kontrol af Bogense: sokler, veje/vand, Textile_Mill og kaserne. Dynamiske nye veje eller bygninger over allerede reserverede v?kstfelter kr?ver yderligere kontrol.
+Resterende byarbejde: Befolkningsstyret lokal kulissevækst i 1851-layoutet er ikke bekræftet. De øvrige klasser får sokler, men deres eksisterende bylog har endnu ikke sokkel-/reservationsoptælling. Afventer visuel kontrol af Bogense: sokler, veje/vand, Textile_Mill og kaserne. Dynamiske nye veje eller bygninger over allerede reserverede vækstfelter kræver yderligere kontrol.
 
 Nabokort, 2026-10-10: minimal scenarie-/kortintegration er implementeret. Se `Naboer.md` for status og resterende arbejde: build/spiltest efter anmodning, v31/v32-save-rundtur, kildeverifikation, hydrografi/vegetation, taktiske nabofæstninger og omplanlægning ved ændret passage. Generelt nationskrigssystem og fuld udenlandsk økonomi er fortsat ikke implementeret.
 
@@ -253,12 +253,12 @@ Værktøj:
 - **`linje-ild`:** Bygget 2026-11-03, mangler spiltest: kontrollér, at scenariet når frem til ild, så salver, ladning og røg kan bedømmes.
 - **Video-QA for rytteri og kanoner** (Test 3 og 4) og for animationer: nærkontrol af hove, gangartsskift og ladegreb; se TASKS.md.
 
-## Byer: opf?lgning 2026-10-28
+## Byer: opfølgning 2026-10-28
 
-- [ ] K?benhavn: unders?g kyst-/vandmasken og bygninger i vand. Ikke rettet sammen med Bogense.
+- [ ] København: undersøg kyst-/vandmasken og bygninger i vand. Ikke rettet sammen med Bogense.
 - [ ] Bogense, 1825: kontrollér land/vand og vejtilslutninger ved 0,7 km zoom.
 
-## Klasse B: regionalbyer ? 2026-10-29
+## Klasse B: regionalbyer — 2026-10-29
 
-- 1825-klassen er 5.000?7.999 indbyggere efter den godkendte C-gr?nse p? 5.000 og den eksisterende storbygr?nse p? 8.000. Omfatter Helsing?r 6.600, Odense 7.900, Aalborg 6.600, Aarhus 6.000, Randers 5.900, Rendsborg 7.500 og Gl?ckstadt 5.700. Befolkningerne er projektets afrundede sk?n i `Tools/Map1851/cities_1825.json`, ikke folket?llinger fra 1825. Udenlandske byer og Bornholm f?lger fortsat deres eksisterende spor.
-- [ ] Bygget 2026-11-12, mangler spiltest: alle B-byer, især kystbyer; kontrollér sammenhængende vejtilslutninger, land/vand, byggeri uden nedrivning samt vækst og gem/indlæs uden for Odense. Loggens `overlaps=0` er ikke en uafh?ngig runtime-m?ling.
+- 1825-klassen er 5.000–7.999 indbyggere efter den godkendte C-grænse på 5.000 og den eksisterende storbygrænse på 8.000. Omfatter Helsingør 6.600, Odense 7.900, Aalborg 6.600, Aarhus 6.000, Randers 5.900, Rendsborg 7.500 og Glückstadt 5.700. Befolkningerne er projektets afrundede skøn i `Tools/Map1851/cities_1825.json`, ikke folketællinger fra 1825. Udenlandske byer og Bornholm følger fortsat deres eksisterende spor.
+- [ ] Bygget 2026-11-12, mangler spiltest: alle B-byer, især kystbyer; kontrollér sammenhængende vejtilslutninger, land/vand, byggeri uden nedrivning samt vækst og gem/indlæs uden for Odense. Loggens `overlaps=0` er ikke en uafhængig runtime-måling.

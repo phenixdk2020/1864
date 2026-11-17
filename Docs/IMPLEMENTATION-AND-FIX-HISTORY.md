@@ -1489,7 +1489,7 @@ Fri ild fyldte to kasser, fordi søjlens bredde afhang af niveauet; nu har alle 
 - Skatter, handelsgrundlag, landbrugskrisens priser, råvarepriser, kredit og bygningskontrakternes pris/lønbetaling følger 1825-satser. Civilvirkninger bruger individuelle periode-skøn.
 - Gemmeformat, by-/amtsrækkefølge og tidligere nationsindeks bevares. Eksportør skriver samme overlay til runtime-data og kortværktøjets Resources-output.
 - Kontrol: JSON-dækning, amts-/bysummer, reproducerbar eksport, statisk kildegennemgang og git diff --check. Spillet er hverken bygget eller kørt; runtime-gemning er ikke afprøvet.
-### 2026-10-08 ? Valg af størrelse ved indkaldelse
+### 2026-10-08 — Valg af størrelse ved indkaldelse
 
 - Ny størrelsesvælger: 1/2/4 kompagnier eller eskadroner; fodartilleri 2/4/8 kanoner; ridende batteri og morterer 2/4/6 skyts med bevaret fuld normering.
 - Fælles beregning af rekrutter, geværer, uniformer, læder, heste, skyts, vogne og pris. Manglende heste medregnes i pris og betalingsevne; manglende geværer kan kun importeres med adgang til import.
@@ -1526,14 +1526,14 @@ Codex' tre 1825-delopgaver (hær og våben, officerer og ministre, nationer/byer
 ### 2026-10-08 – Startmenu (Codex) med midlertidige testslag, rytterkolonne
 Startmenuen (scenarie, land, afvigelse, NYT SPIL, INDLÆS SPIL, AFSLUT; spilmenuen under Esc er reduceret) er merget fra Codex. Oven på den: baggrund (Data/Campaign1851/MenuBackground.jpg, et HUD-frit billede fra 3D-slaget) og to midlertidige knapper, TEST 1 MOD 1 og TEST 4 MOD 1, som starter testbanen med samme flag som Start-Test-1/2 (de fjernes igen). Nye testflag: -Strategy1864NoHud (HUD skjult til rene skærmbilleder) og -CampaignMenuShot (skærmbillede af startmenuen). Rytteriet: kolonnen er tre i bredden, men fik tilfældig forskydning (25 cm langs, 12 cm på tværs) og et sidste led langt til siden; nu næsten ingen forskydning i kolonne og et kort sidste led midtstilles. Ikke set på skærmbillede.
 
-### 2026-10-08 ? Skov i taktiske slag: synlighed, skjul og d?kning
+### 2026-10-08 — Skov i taktiske slag: synlighed, skjul og dækning
 
-- Kampagneslagmarkens `woodDensity` gemmes som et querybart 0?1-grid. Manglende data og testenge giver sikkert 0. Skovdybde m?les i densitetsv?gtede meter med h?jst 40 midpoint-samples pr. foresp?rgsel.
-- F?lles skovkontrol i synlighedskomponenten bruges af kontaktregistrering, trusselsreaktion, ildkontrol, artilleri og kavalerisk?rm. Standard: 50 m blokerer, mindre dybde reducerer synsafstand; t?t skov skjuler over 120 m med 8 sekunders afsl?ring efter skud. Affyring oph?ver aldrig blokerende skov, bakker eller fysisk LOS.
-- Infanteri f?r op til 25 % reduceret indg?ende tr?feffekt i skov eller inden for 15 m af skovkant/knick mod skytten. Eksisterende st?rkere d?kning bevares. Hedge-segmenter indekseres ved indl?sning og afstand/retning kontrolleres ved brug.
-- Taktisk kort viser m?rkere skovfelter, udelader fjender uden aktuel venlig kontakt (ogs? fra kortets udstr?kning) og m?rker egne skjulte enheder med ?skjult?. Fast rasterbudget og eksisterende kontaktdata undg?r ekstra LOS-scanninger hver frame.
-- `-Strategy1864DebugForest` logger skovkontrollens dybde, afstand, skjul og afg?relse. Ingen nye kampagne-savefelter.
-- Validering: statisk kodegennemgang og diffkontrol; spil/editor er ikke bygget eller startet, og ?ndringerne er ikke committet efter brugerens instruktion.
+- Kampagneslagmarkens `woodDensity` gemmes som et querybart 0–1-grid. Manglende data og testenge giver sikkert 0. Skovdybde måles i densitetsvægtede meter med højst 40 midpoint-samples pr. forespørgsel.
+- Fælles skovkontrol i synlighedskomponenten bruges af kontaktregistrering, trusselsreaktion, ildkontrol, artilleri og kavaleriskærm. Standard: 50 m blokerer, mindre dybde reducerer synsafstand; tæt skov skjuler over 120 m med 8 sekunders afsløring efter skud. Affyring ophæver aldrig blokerende skov, bakker eller fysisk LOS.
+- Infanteri får op til 25 % reduceret indgående træfeffekt i skov eller inden for 15 m af skovkant/knick mod skytten. Eksisterende stærkere dækning bevares. Hedge-segmenter indekseres ved indlæsning og afstand/retning kontrolleres ved brug.
+- Taktisk kort viser mærkere skovfelter, udelader fjender uden aktuel venlig kontakt (også fra kortets udstrækning) og mærker egne skjulte enheder med "skjult". Fast rasterbudget og eksisterende kontaktdata undgår ekstra LOS-scanninger hver frame.
+- `-Strategy1864DebugForest` logger skovkontrollens dybde, afstand, skjul og afgørelse. Ingen nye kampagne-savefelter.
+- Validering: statisk kodegennemgang og diffkontrol; spil/editor er ikke bygget eller startet, og ændringerne er ikke committet efter brugerens instruktion.
 ### 2026-10-08 — Datadrevet event-system, MVP E-1–E-6
 
 - De seks 1825-events og syv 1851-events er flyttet fra hardcodede tabeller til `Events_1825.json` og `Events.json`. Månedsloopet afgør events ud fra et lukket fakta-/udtrykssprog med sammenligninger, `og` og `ikke`; `bSkip` er fjernet.
@@ -1603,14 +1603,14 @@ Fejl: efter indkaldelsesstørrelsen blev en selvstændig `if (Button == UnitSize
 - Afsluttes efter 10 sekunder uden ild, ved fjende inden for 150 m, ny march-/angrebsordre, formationsskift, karré, bajonetangreb eller deaktiveret officer. Tidligere afstande gendannes; march venter 3 sekunder på rejsning, også ved gentagne ordrer. Karré får normal afstand tilbage før dannelsen.
 - Enhedstag og AI-DIAG viser 'ligger ned / spredt orden' og 'Rejser sig'. DebugOfficer logger start og slut. Offensiv doktrin alene starter ikke angreb; officerens bajonet-/rytterangreb kræver offensiv ordre. Eksisterende testflag er bevaret.
 - Validering: statisk gennemgang af ordre-, formations-, bevægelses-, visuel- og ildveje samt git diff --check. Ingen build, spilstart eller commit; adfærden er ikke afprøvet i Unreal.
-### 2026-10-08 ? Visuel drejning af fodfolk og rytteri
+### 2026-10-08 — Visuel drejning af fodfolk og rytteri
 
-- Figurerne f?lger en separat, udj?vnet visuel front. Linjen svinger om enden af forreste/bageste geled; drejehastigheden begr?nses efter formationens radius, s? de yderste figurer kan f?lge med, og de inderste bev?ger sig langsommere. Arvet actor-rotation kompenseres f?r hvert visuelt skridt.
-- Fodfolk genbruger FSettle/UpdateSettling med gang/l?b til pladsen, tangentretning under bev?gelse og h?jst 120?/s egen vending. Gangens animationshastighed f?lger figurens skridt, ogs? i crowd/VAT. Eksisterende figurer teleporteres ikke ved store formationsskift; settle-data f?lger den rigtige mand ved tab.
-- Marchkolonnens filer f?lger f?rerens afstandssamplede rute med forsinkelse efter geledets dybde. Rytteri bruger samme visuelle rute og drejning; hest og rytter vender sammen, og hestenes gang f?lger deres individuelle bev?gelse.
-- F?lles drejeberegning aktiveres ved mere end 1? yaw-afvigelse og afsluttes glidende. Slotgr?nser caches ved layout, og en f?lles rutehistorik afgr?nses efter kolonnens l?ngde; ingen nye terr?n- eller navigationsopslag pr. mand.
-- Kun visuelle komponenter er ?ndret. Enhedspositioner, bev?gelseseksekvering, simulation og angrebsordrer er u?ndrede; ?ndringen giver ingen enhed ret til selv at starte et angreb.
-- Validering: statisk diff-kontrol og numerisk kontrol af pivot, buer, hastighedsgr?nse og yaw over ?180?. Ikke bygget eller startet; visuel kontrol i Unreal mangler. Ingen commit.
+- Figurerne følger en separat, udjævnet visuel front. Linjen svinger om enden af forreste/bageste geled; drejehastigheden begrænses efter formationens radius, så de yderste figurer kan følge med, og de inderste bevæger sig langsommere. Arvet actor-rotation kompenseres før hvert visuelt skridt.
+- Fodfolk genbruger FSettle/UpdateSettling med gang/løb til pladsen, tangentretning under bevægelse og højst 120°/s egen vending. Gangens animationshastighed følger figurens skridt, også i crowd/VAT. Eksisterende figurer teleporteres ikke ved store formationsskift; settle-data følger den rigtige mand ved tab.
+- Marchkolonnens filer følger førerens afstandssamplede rute med forsinkelse efter geledets dybde. Rytteri bruger samme visuelle rute og drejning; hest og rytter vender sammen, og hestenes gang følger deres individuelle bevægelse.
+- Fælles drejeberegning aktiveres ved mere end 1° yaw-afvigelse og afsluttes glidende. Slotgrænser caches ved layout, og en fælles rutehistorik afgrænses efter kolonnens længde; ingen nye terræn- eller navigationsopslag pr. mand.
+- Kun visuelle komponenter er ændret. Enhedspositioner, bevægelseseksekvering, simulation og angrebsordrer er uændrede; ændringen giver ingen enhed ret til selv at starte et angreb.
+- Validering: statisk diff-kontrol og numerisk kontrol af pivot, buer, hastighedsgrænse og yaw over ±180°. Ikke bygget eller startet; visuel kontrol i Unreal mangler. Ingen commit.
 ### 2026-10-08 — Rytteri-test med svensk husareskadron
 
 - Tilføjet `-Strategy1864SkirmishCavalry`: én fjendtlig husareskadron 40 m til siden på fjendens linje, cirka 450 m fra danskerne. Defensiv grundholdning og aktiv officer-AI; en indledende `Advance`-ordre med `OfficerAI`-autoritet mod nærmeste danske kompagni får eskadronen frem. `ThinkCavalry` vælger åbne mål og undgår faste karréer. Fast infanterilinje er nu også et muligt mål for rytteri med en igangværende fremryknings-/angrebsordre; tidligere blev kun kolonner og vaklende mål accepteret.
@@ -2014,8 +2014,8 @@ Fortsat den afbrudte nabointegration efter gennemgang af partial diff. Tilføjet
 - Bygget uden fejl; rapporttesten kører, grader og kampagnevirkning er ikke afprøvet i et rigtigt kampagneslag.
 ### 2026-10-11 — Vogntog og heste i 3D-slaget
 
-- Gennemgået og færdiggjort de delvise ændringer: vogntog med afstandssamplet positionsspor, terrænprojektion, to statiske heste pr. vogn, kropsbevægelse, korrekt vognstørrelse og ISM-grupper med begrænsede nærskygger. Stabens tegnede centrum f?lges ogs?. Hjulene er ikke separate meshdele.
-- Kampagnens wagons/horses konfigurerer bataljons-, rytter- og batteritog; teststandarder aktiveres med Strategy1864Train. Rideheste reserveres f?r begr?nsning af store kampagnetal; alle stabe udelukkes fra vognerobring/-beskyttelse. Heste fordeles uden at genbruge batteriets trækheste eller rytteriets rideheste. Morterbatterier bruger mortervogne under transport og tomme vogne ved opstilling.
+- Gennemgået og færdiggjort de delvise ændringer: vogntog med afstandssamplet positionsspor, terrænprojektion, to statiske heste pr. vogn, kropsbevægelse, korrekt vognstørrelse og ISM-grupper med begrænsede nærskygger. Stabens tegnede centrum følges også. Hjulene er ikke separate meshdele.
+- Kampagnens wagons/horses konfigurerer bataljons-, rytter- og batteritog; teststandarder aktiveres med Strategy1864Train. Rideheste reserveres før begrænsning af store kampagnetal; alle stabe udelukkes fra vognerobring/-beskyttelse. Heste fordeles uden at genbruge batteriets trækheste eller rytteriets rideheste. Morterbatterier bruger mortervogne under transport og tomme vogne ved opstilling.
 - Eksisterende skademål/erobring og BattleLedger registrerer vogn-/hestetab og transporterede morterer; døde/erobrede morterer fjernes fra operativt antal. Vogntab forbindes også med regimentets kampagneresultat. Ammunitionsvogne genforsyner kompagnier inden for 150 m fra endelig last med PROJECT1864-TRAIN-logning.
 - Manuel import_horse_rigged.py opretter SK_Horse_1864, fælles skelet og syv hesteklip til senere brug; runtime bruger stadig static mesh. Importscriptets assetnavne rettet til opgavens navngivning. Docs/Wagons.md, TestFlags.md og Performance-Battle.md beskriver adfærd og begrænsninger.
 - Kontrol: statisk gennemlæsning, UE 5.8-headerkontrol, Python-syntaks og git diff --check. Ingen build, spil/editorstart, import eller commit; visuel kontrol og performancemåling udestår.
