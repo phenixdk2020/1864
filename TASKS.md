@@ -1,15 +1,60 @@
 # Åbne opgaver (1864-Campaign)
 
 ## I gang
-- Fejlrapporten 2026-11-01: kodefejlene er rettet 2026-11-03 (se historikken). Tilbage:
-  - bygge og kontrollere København (kirken) og Odense i spillet;
-  - garnisonsgrund i Rønne og Altona;
-  - kun 1 reserveret grund i Odense.
+- **Animationer, overtaget fra Opus-sessionen 2026-11-13 (Allan: "både karre, formation, slaget og ryttere", "ret også infanteriets animationer, så den ikke glitcher", "tag også kanoner hvis du får styr på det andet"). Intet committet. Se historikken 2026-11-13.**
+  - QA-optagelser ligger på `F:864-QA` (junctions `Saved/QA` og `Saved/Recording`).
+  - Gjort, bygget og set:
+    - sadlen (var 110 gange for stor, `saddle_root` bærer skala 109,8);
+    - hestens hale genopbygget og importeret (`reimport_horse_mesh_1864.py`, backup `Backup_20261113`);
+    - `eksercits-ild` med ny tidsplan: begge kolonne-til-linje-driller fuldføres;
+    - ildkamp på 50 m (`ildkamp`, `ildkamp-naer`, `ENGAGE`, `-Strategy1864SkirmishApart`): salver, røg og tab ses;
+    - følgekamera `:SIDE`, scenarierne `rytteri-side` og `eksercits-naer`.
+  - Åbent:
+    - **Karréen:** linje ↔ karré svinger som en dør, og kolonne ↔ karré går rundt om karréen (2026-11-15, se historikken). Målt: linje 43/49 cm, kolonne 25/52 cm. Tilbage: Allan skal se `Saved/QA/2026-11-15-karre-sving/karre-sving.mp4` og `Saved/QA/2026-11-15-kolonne-karre/kolonne-karre.mp4`; kompagnier med tab falder tilbage til glidningen i kolonne ↔ karré; fjendens karré under rytteritrussel blev afvist fra linje (`fronts-apart`); en kolonne, der svinger, afvises.
+    - **Ildkampen:** kun første geled skyder (drill `FrontRank` er standard), de to bageste står i anlæg hele tiden; hele kompagniet skuldrer og rykker sammen efter hvert tab (20 gange på 90 s). Røgen er store hvide skiver. Afgøres med Allan (to-geleds ild som standard?).
+    - **Rytteri:** hove mod jorden og gangartsskift er ikke bedømt (QA kunne ikke se det); halen er stiv; rytterfigurerne mangler VAT-bagning (`bake_all_vat.py`).
+    - **Kanoner:** kanonen op af jorden, kommandøren fri af rekylen, kanonen frem straks efter skuddet og gang uden gevær (2026-11-15, `Saved/QA/2026-11-15-kanon`). Tilbage:
+      - ladegrebene set tæt på, vanter og hjul som før;
+      - **tab og moral ved kanonen (Allan 2026-11-15, kortlagt, ikke lavet):** de overlevende overtager ikke de faldnes poster; reserve og ammunitionsmand falder først på skærmen, mens reglerne tager kanonfolkene først; rytteri overløber ikke kanonerne; et batteri på flugt ses ikke (figurerne bliver ved kanonen); muligt, ikke afprøvet: et flygtende batteri kan stadig skyde, og dets tilbagetrækning fejler, fordi et opstillet batteri ikke kan flytte sig.
+
+- Byerne 2026-11-05 (se historikken): København-kirken, A-byer, Odense kompakt, Altona, garnisonsgrunde og opstartstid rettet og bygget. Tilbage:
+  - huse på veje og vand i B/C-byerne er ikke undersøgt;
+  - bystil godkendt 2026-11-11; Codex-rettelser (vækstgrunde, Altona-grænse, træer ved vækst) og broerne rettet, bygget og set; ikke committet. Alle byer har nu 4/6 frie byggegrunde; vækst og gem/indlæs testet 2026-11-12 (testkommandoerne grow/save/load). Tilbage: huse på veje og vand i B/C-byer ikke undersøgt særskilt.
+
+- **Slaget 2026-11-05, bygget men IKKE committet:**
+  - **Karré:**
+    - tre geledder;
+    - ét mand pr. hjørne;
+    - fane og officer i midten;
+    - opslutning indefra ved tab (`StepUpSquare`); karréen trækkes først sammen under 45 %;
+    - ordnet dannelse, hvor rækkefølgen bevares ind og ud.
+    - QA: `Saved/QA/2026-11-05-karre-135407`.
+    - Tilbage:
+      - overgangene klumper stadig (7–9 cm mellem mænd ved 7–8 s og 46–47 s), fordi mændene går i lige linje; der skal en rigtig karré-eksercits til, hvor fløjene svinger tilbage, og midten står;
+      - mændene drejer i ét ryk og vender mod slutretningen, mens de går;
+      - de døde ligger i linjen.
+  - **Officer:**
+    - trækker sablen og stikker den i skeden med egne klip (importeret, bygget);
+    - hvilehøjden er rettet;
+    - nation på enhederne (`NationCode`), så staben og officeren får rigtig uniform.
+  - **Kanonbesætning:**
+    - `StrategyGunCrewVisualComponent` med 8 poster pr. kanon og rekyl er bygget og set (48 mand pr. batteri);
+    - klippene for skala 2,2 er importeret (`/Game/Units/Artillery/Crew`, hofterne rettet ved import);
+    - tilbage:
+      - (gjort 2026-11-07: kanonen i skala 1,6; 1,6-klippene importeret; posterne efter `Crew_scale1.6/notes.md`; svaberen ansætter også; kommandøren går til fænghullet ved Prime)
+      - (gjort 2026-11-07: fire artillerister DK/NO/SE/PR rigget, `Final_v1`, og importeret som `/Game/Units/Artillery/Crew/SK_Artillery_1864_*`; besætningen bruger dem. Set i spillet med DK)
+      - (gjort 2026-11-08: forstilling med riggede heste og kusk, oprotsning og afprotsning, `StrategyLimberVisualComponent`; video sendt)
+      - Tilbage:
+        - ladecyklussen: QA 2026-11-08 (afstand 20 m) fandt besætningen klumpet, lange stilstande og løs stang; nærbillede-QA i gang (`Saved/QA/2026-11-08-kanon-094515`);
+        - vanter: fingrene bøjer ikke om svaberen;
+        - hjulene drejer ikke.
+  - **Mesh2Motion (CC0):** 18 klip overført og importeret 2026-11-08 (se historikken). Brugt: hestenes Idle2/Eat i forstillingen. Ikke brugt endnu: Death (hest), Push (hjulmænd), knælende og fald.
+  - **QA-værktøjet:** npm-Codex (codex-cli 0.165.0) er installeret.
 
 ## Næste
 - **Tysk OCR:** tesseract deu eller lokal vision-model, så de østrigske reglementer og Preussen 1847 kan læses; danske reglementer søges manuelt på kb.dk.
 - **4 mod 1 og kavaleri (Allan 2026-11-03):** "her vil jeg se samarbejde og at de holder 1 kompagni i reserve og bruger kavaleriet klogt. Og også de rigtige animationer på kavaleriet."
-  - Status 2026-11-03: bygget og kørt. Testslag 4: reserve holdt (doktrin) og indsat (hul), husarer chokerede og samlede sig (39 s). Accept: RESERVE-NONE, CAV-FLANK, CAV-SQUARE, CAV-RALLY PASS; RESERVE-HOLD/-COMMIT FAIL i fixturen (kompagnierne får ingen ordre og ser ikke fjenden: "Ingen fjende i syne", order=0).
+  - Status 2026-11-03: bygget og kørt. Testslag 4: reserve holdt (doktrin) og indsat (hul), husarer chokerede og samlede sig (39 s). Accept: RESERVE-NONE, CAV-FLANK, CAV-SQUARE, CAV-RALLY PASS; RESERVE-HOLD/-COMMIT PASS (fixturen rettet 2026-11-03).
     - bataljonsplan med reserve efter doktrin (2026-11-03): bataljon med mindst 4 kompagnier holder altid reserve, indsættelse efter styrkeforhold (se Docs/TestFlags.md);
     - eskadronens mission (flankechok, karré, samling, forfølgelse);
     - flag, launcher `Start-Test-4-Bataljon-Rytteri.bat` og seks accept-ID'er (`RESERVE-*`, `CAV-*`), se Docs/TestFlags.md.
@@ -20,7 +65,7 @@
     - (kontrolleret: fanebæreren projiceres selv på terrænet)
     - (løst 2026-11-03: Codex-fundene er rettet og bygget: salvens ofreliste, en frigivet reserve inden for skudafstand og fjernelse af chokordren; accepttestene PASS)
     - Test 4 stopper ved sidste skærmbillede (420 s), før slaget er slut, og giver ingen rapport; forlæng skærmbillederne for at få slutresultatet.
-    - hestens skridt er for korte (glidende fødder), sablen følger ikke hånden.
+    - (2026-11-08: gangartsgrænser efter klippenes skridt og sablen i hånden under chok; bygget, QA i gang på `Saved/QA/2026-11-08-rytteri-095248`)
   - Udgangspunkt: Docs/Backlog.md, "Fund fra 4-mod-1-testene", punkt (1)–(3):
     - rytteri-tasking (implementeret, utestet);
     - trusselsvurdering og reserve (implementeret, utestet);
@@ -47,7 +92,4 @@
     - nation: den svenske stab fik en preussisk officer, fordi enheden ikke har en nation;
     - rytterens sæde i sadlen er ikke målt;
     - galop er ikke set i spillet.
-- Natkøens øvrige opgaver blev ikke kørt:
-  - Odense kompakt og hurtigere opstart;
-  - huse på veje og vand;
-  - København og A-byer.
+- Natkøens opgaver: Odense kompakt, hurtigere opstart, København og A-byer udført 2026-11-05 (ikke set); huse på veje og vand mangler.
