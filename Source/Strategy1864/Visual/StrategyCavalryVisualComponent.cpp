@@ -6,10 +6,12 @@
 #include "../Units/CavalryUnit.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../Combat/StrategyCavalryChargeComponent.h"
+#include "../Orders/StrategyOrderComponent.h"
 #include "../Formations/StrategyFormationComponent.h"
 #include "../Player/StrategyBattleQuality.h"
 #include "../Terrain/StrategyTerrainQueryLibrary.h"
 #include "Animation/AnimSequence.h"
+#include "Animation/AnimSingleNodeInstance.h"
 #include "StrategyCrowdModel.h"
 #include "Components/MeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -30,8 +32,8 @@ namespace
     // The skeletal horse and its seven clips (Content/Python/import_horse_rigged.py) and the rider clips (Tools/Animation/build_cavalry_rider_set.py).
     const TCHAR* CavHorseSkPath = TEXT("/Game/Units/Horse/SK_Horse_1864.SK_Horse_1864");
     const TCHAR* CavHorseClipPaths[5] = {
-        TEXT("/Game/Units/Horse/A_Horse_Stand.A_Horse_Stand"), TEXT("/Game/Units/Horse/A_Horse_Walk.A_Horse_Walk"),
-        TEXT("/Game/Units/Horse/A_Horse_Trot.A_Horse_Trot"), TEXT("/Game/Units/Horse/A_Horse_Canter.A_Horse_Canter"),
+        TEXT("/Game/Units/Horse/A_Horse_Stand.A_Horse_Stand"), TEXT("/Game/Units/Horse/A_Horse_M2M_Walk.A_Horse_M2M_Walk"),
+        TEXT("/Game/Units/Horse/A_Horse_M2M_Trot.A_Horse_M2M_Trot"), TEXT("/Game/Units/Horse/A_Horse_Canter.A_Horse_Canter"),
         TEXT("/Game/Units/Horse/A_Horse_Gallop.A_Horse_Gallop")};
     const TCHAR* CavHorseRearPath = TEXT("/Game/Units/Horse/A_Horse_Rear.A_Horse_Rear");
     const TCHAR* CavHorseFallPath = TEXT("/Game/Units/Horse/A_Horse_Fall.A_Horse_Fall");
@@ -46,9 +48,9 @@ namespace
     const TCHAR* CavRiderFallPath = TEXT("/Game/Units/Human/CombatAnimations/A_Combat_CavFall.A_Combat_CavFall");
     const FName CavSaddleBone(TEXT("saddle_root"));
     // Foot speed of each horse clip on the ground, measured on the clips (Tools/Animation/export_horse_mesh_b1.py): Stand, Walk, Trot, Canter, Gallop.
-    const float CavClipSpeedCmS[5] = {0.f, 60.f, 179.f, 357.f, 757.f};
-    const float CavRateMin[5] = {1.f, 0.9f, 0.9f, 0.85f, 0.9f};
-    const float CavRateMax[5] = {1.f, 2.2f, 1.8f, 1.5f, 1.4f};
+    const float CavClipSpeedCmS[5] = {0.f, 132.f, 250.f, 357.f, 757.f};
+    const float CavRateMin[5] = {1.f, 0.45f, 0.75f, 0.85f, 0.8f};
+    const float CavRateMax[5] = {1.f, 1.6f, 1.6f, 1.8f, 1.6f};
     const float CavRiderRootAboveGroundWhenFallenCm = 81.3f;   // the ground the CavFall clip was built for (saddle 118 cm * 1.1 - pelvis 48.7 cm)
     const float CavSlashSeconds = 1.4f;                         // the first swing of the combo clip
 
@@ -110,11 +112,32 @@ void UStrategyCavalryVisualComponent::EndPlay(const EEndPlayReason::Type Reason)
     Super::EndPlay(Reason);
 }
 
+USkeletalMesh* UStrategyCavalryVisualComponent::ChooseRiderModel() const
+{
+    // The squadron's own rider (SourceAssets/Units1864/Cavalry/Final_v1, rigged to the soldiers' skeleton, Allan 2026-11-12: "det er
+    // vel ikke en video af husarer" - every squadron rode the Life Guard's infantryman): a husar when the unit is called so, else a
+    // dragoon; the nation's other kind, then the Danish dragoon, then the old figure stand in (Norway has none yet).
+    const FString CavNation = OwnerCavalry ? OwnerCavalry->GetNationCodeOrDefault() : FString(TEXT("DK"));
+    const bool bCavHusar = OwnerCavalry && (OwnerCavalry->DisplayName.ToString().Contains(TEXT("Husar")) || OwnerCavalry->DisplayName.ToString().Contains(TEXT("Hussar")));
+    const FString CavKinds[2] = { bCavHusar ? TEXT("Husar") : TEXT("Dragon"), bCavHusar ? TEXT("Dragon") : TEXT("Husar") };
+    TArray<FString> CavRiderTries;
+    for (const FString& CavKind : CavKinds) CavRiderTries.Add(CavNation + TEXT("_") + CavKind);
+    if (CavNation == TEXT("NO")) CavRiderTries.Add(bCavHusar ? TEXT("SE_Husar") : TEXT("SE_Dragon"));
+    CavRiderTries.Add(TEXT("DK_Dragon"));
+    for (const FString& CavTry : CavRiderTries)
+        if (USkeletalMesh* CavFound = LoadObject<USkeletalMesh>(nullptr, *FString::Printf(TEXT("/Game/Units/Cavalry/Riders/SK_Cavalry_1864_%s.SK_Cavalry_1864_%s"), *CavTry, *CavTry),
+            nullptr, LOAD_NoWarn | LOAD_Quiet)) return CavFound;
+    return LoadObject<USkeletalMesh>(nullptr, RiderPath);
+}
+
 bool UStrategyCavalryVisualComponent::LoadAssets()
 {
     HorseModel = LoadObject<UStaticMesh>(nullptr, HorsePath);
-    RiderModel = LoadObject<USkeletalMesh>(nullptr, RiderPath);
-    SabreModel = LoadObject<UStaticMesh>(nullptr, SabrePath);
+    RiderModel = ChooseRiderModel();
+    // The 1864 cavalry sabre (95 cm, grip at the origin, blade along +Z) and the saddle; the old sabre stands in without them.
+    SabreModel = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Units/Cavalry/Props/SM_Saber_1864.SM_Saber_1864"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+    if (!SabreModel) SabreModel = LoadObject<UStaticMesh>(nullptr, SabrePath);
+    SaddleModel = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Units/Cavalry/Props/SM_Saddle_1864.SM_Saddle_1864"), nullptr, LOAD_NoWarn | LOAD_Quiet);
     SeatClip = LoadObject<UAnimSequence>(nullptr, SeatPath);
     FallClip = LoadObject<UAnimSequence>(nullptr, FallPath);
     // Skeletal horse: all five gaits are required; rear, fall and the rider clips are optional (the old assets stand in).
@@ -142,7 +165,8 @@ bool UStrategyCavalryVisualComponent::LoadAssets()
     RiderSlashClip = LoadObject<UAnimSequence>(nullptr, CavRiderSlashPath);
     RiderFallClip = LoadObject<UAnimSequence>(nullptr, CavRiderFallPath);
     RiderSeatCm = Flag(TEXT("Strategy1864Seat="), 48.0f);
-    SaddleLiftCm = Flag(TEXT("Strategy1864SaddleLift="), 6.0f);
+    // In the saddle: its seat is about 20 cm above saddle_root at the horse's scale (Props/notes.md), the pelvis a little above the seat.
+    SaddleLiftCm = Flag(TEXT("Strategy1864SaddleLift="), SaddleModel ? 24.0f : 6.0f);
     if (bSkeletalHorse)
     {
         // Scaled to a horse's length (its long side is the forward axis), its feet on the ground. The forward sign comes
@@ -198,6 +222,27 @@ UStrategyCavalryVisualComponent::FHorseman UStrategyCavalryVisualComponent::Make
         H.HorseSk->bEnableUpdateRateOptimizations = true;
         H.HorseSk->SetRelativeScale3D(FVector(HorseScale));
         H.HorseSk->RegisterComponent();
+        // The saddle on the horse's saddle_root (SourceAssets/Units1864/Cavalry/Props: exported in the bone's own frame, no offset;
+        // Allan 2026-11-12: "hvor er sadlerne"). It goes with the horse, also when it falls.
+        if (SaddleModel)
+        {
+            UStaticMeshComponent* CavSaddle = NewObject<UStaticMeshComponent>(OwnerCavalry);
+            CavSaddle->SetStaticMesh(SaddleModel);
+            CavSaddle->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            CavSaddle->bVisibleInRayTracing = false;
+            CavSaddle->SetCastShadow(false);
+            CavSaddle->SetupAttachment(H.HorseSk, TEXT("saddle_root"));
+            // The horse's own size, whatever scale the bone carries (2026-11-13: the recordings of 11-12 were filled by brown
+            // sheets, the saddle about 100 times too large; the import measured it 84 cm, so the scale came from the socket).
+            CavSaddle->SetUsingAbsoluteScale(true);
+            CavSaddle->SetRelativeScale3D(FVector(HorseScale));
+            CavSaddle->RegisterComponent();
+            if (Horsemen.Num() == 0)
+            {
+                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SADDLEPROBE socket scale %s saddle world scale %s"),
+                    *H.HorseSk->GetSocketTransform(TEXT("saddle_root")).GetScale3D().ToString(), *CavSaddle->GetComponentScale().ToString());
+            }
+        }
         H.CavPhase = FMath::FRand();
         PlayHorseClip(H, HorseGaitClips[0], true, H.CavPhase, 1.f);
     }
@@ -385,6 +430,21 @@ void UStrategyCavalryVisualComponent::TickComponent(float DeltaTime, ELevelTick 
     {
         return;
     }
+    // The rider is chosen again once the unit has its name and nation (at BeginPlay the test battle had not set them yet, 2026-11-12:
+    // both squadrons rode the Prussian dragoon).
+    if (!bRiderChosen && !OwnerCavalry->StableUnitId.IsNone())
+    {
+        bRiderChosen = true;
+        USkeletalMesh* CavChosen = ChooseRiderModel();
+        if (CavChosen && CavChosen != RiderModel)
+        {
+            RiderModel = CavChosen;
+            for (FHorseman& CavRemount : Horsemen) if (CavRemount.Rider && CavRemount.Rider->GetSkeletalMeshAsset()) CavRemount.Rider->SetSkeletalMeshAsset(CavChosen);
+            if (SabrePoser) SabrePoser->SetSkeletalMeshAsset(CavChosen);
+        }
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-CAVRIDER %s (%s, %s): %s"), *OwnerCavalry->StableUnitId.ToString(), *OwnerCavalry->DisplayName.ToString(),
+            *OwnerCavalry->GetNationCodeOrDefault(), RiderModel ? *RiderModel->GetName() : TEXT("-"));
+    }
     if (OwnerCavalry->HorseMesh && OwnerCavalry->HorseMesh->IsVisible()) { OwnerCavalry->HorseMesh->SetVisibility(false, true); }
     if (OwnerCavalry->QAPlaceholderMesh && OwnerCavalry->QAPlaceholderMesh->IsVisible()) { OwnerCavalry->QAPlaceholderMesh->SetVisibility(false); }
     const int32 Strength = FMath::Max(0, OwnerCavalry->CurrentStrength);
@@ -438,6 +498,9 @@ void UStrategyCavalryVisualComponent::UpdatePace(float DeltaTime)
     LastLocation = Here;
     SpeedCmS = FMath::Lerp(SpeedCmS, Moved, 1.f - FMath::Exp(-4.f * DeltaTime));
     const bool bCharge = OwnerCavalry->ChargeComponent && OwnerCavalry->ChargeComponent->IsChargeActive();
+    // The sabres come out with the order to charge, while the squadron rides at the enemy, not only in the last rush (2026-11-10:
+    // a charge called off at 270 m before a square never showed a sabre).
+    const bool bSabresOut = bCharge || (OwnerCavalry->OrderComponent && OwnerCavalry->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Charge);
     // The gait thresholds are those of the horse animation state component (80 / 350 / 650 / 900 cm/s by default).
     float CavThresholds[4] = {80.f, 350.f, 650.f, 900.f};
     if (const UStrategyHorseAnimationStateComponent* CavGaitState = OwnerCavalry->HorseAnimationStateComponent)
@@ -447,6 +510,11 @@ void UStrategyCavalryVisualComponent::UpdatePace(float DeltaTime)
         CavThresholds[2] = CavGaitState->CanterThresholdCmPerSecond;
         CavThresholds[3] = CavGaitState->GallopThresholdCmPerSecond;
     }
+    // The drawn gait changes up where the clip's stride still covers the ground (2026-11-03 backlog: the strides were too short,
+    // the hooves slid): a walk at most 2.4 x its 60 cm/s, a trot 1.8 x 179, a canter 1.8 x 357 (CavRateMax).
+    CavThresholds[1] = FMath::Min(CavThresholds[1], 190.f);
+    CavThresholds[2] = FMath::Min(CavThresholds[2], 400.f);
+    CavThresholds[3] = FMath::Min(CavThresholds[3], 640.f);
     if (bCharge != bChargePrev)
     {
         // The charge begins: every rider draws his sabre (a little apart). It ends: a square repelled it (the horses rear) or it hit (the riders slash).
@@ -612,12 +680,62 @@ void UStrategyCavalryVisualComponent::UpdatePace(float DeltaTime)
             H.Rider->SetRelativeLocation(CavRiderRoot);
             H.Rider->SetRelativeRotation(H.HorseSk ? CavFacingQuat * CavLeanQuat * FRotator(0.f, -90.f, 0.f).Quaternion()
                                                    : FRotator(-6.f * FMath::Min(Gait, 1.f), -90.f + RelativeFacing, 0.f).Quaternion());
-            // Keep the sabre's held hand pose before releasing skeletal geometry. It remains a static prop.
-            if (H.Sabre && H.Sabre->GetAttachSocketName() != NAME_None)
+            // The sabre in the hand (2026-11-08, backlog "sablen følger ikke hånden": it was let go of the hand bone and stood still
+            // by the rider): while it is out (the charge, the slash) the rider's bones are posed at the drawn clip's time, so the
+            // sabre on the RightHand socket follows the cut. Only then: the rest of the time the rider is drawn baked.
+            // The baked rider has no skeletal mesh (the crowd takes it off when he is drawn far), so his hand is read from one hidden
+            // poser per squadron set to his clip and time (2026-11-08: the sabre sat on the empty socket inside the horse).
+            if (H.Sabre && (bSabresOut || H.bCavSlash) && CavRiderClip && RiderModel)
             {
-                H.Rider->TickAnimation(0.f, false);
-                H.Rider->RefreshBoneTransforms();
-                H.Sabre->AttachToComponent(H.Rider, FAttachmentTransformRules::KeepWorldTransform);
+                if (!SabrePoser)
+                {
+                    SabrePoser = NewObject<USkeletalMeshComponent>(OwnerCavalry, NAME_None, RF_Transient);
+                    SabrePoser->SetSkeletalMeshAsset(RiderModel);
+                    SabrePoser->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+                    SabrePoser->SetVisibility(false);
+                    SabrePoser->SetCastShadow(false);
+                    SabrePoser->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+                    SabrePoser->SetComponentTickEnabled(false);
+                    SabrePoser->RegisterComponent();
+                }
+                if (!SabrePoser->GetSingleNodeInstance() || SabrePoser->GetSingleNodeInstance()->GetAnimationAsset() != CavRiderClip)
+                {
+                    SabrePoser->PlayAnimation(CavRiderClip, false);
+                    SabrePoser->bPauseAnims = true;
+                }
+                SabrePoser->SetPosition(FMath::Min(CavRiderPose, CavRiderClip->GetPlayLength()), false);
+                SabrePoser->TickAnimation(0.f, false);
+                SabrePoser->RefreshBoneTransforms();
+                const FTransform CavHandInRider = SabrePoser->GetSocketTransform(TEXT("RightHand"), RTS_Component);
+                if (H.Sabre->GetAttachParent() != H.Rider || H.Sabre->GetAttachSocketName() != NAME_None)
+                    H.Sabre->AttachToComponent(H.Rider, FAttachmentTransformRules::KeepWorldTransform);
+                // Riding at the enemy (the gait clips, which hold no sabre) the blade is carried forward and up from the hand, not along
+                // the reins backwards (2026-11-10 recording); in the draw and the slash it follows the hand as the clip turns it.
+                const bool bCavCarry = CavRiderClip != RiderDrawClip.Get() && CavRiderClip != RiderSlashClip.Get();
+                if (bCavCarry && H.Sabre->GetStaticMesh())
+                {
+                    const FBox CavBladeBox = H.Sabre->GetStaticMesh()->GetBoundingBox();
+                    const FVector CavBladeSize = CavBladeBox.GetSize();
+                    const int32 CavBladeAxis = CavBladeSize.X >= CavBladeSize.Y && CavBladeSize.X >= CavBladeSize.Z ? 0 : (CavBladeSize.Y >= CavBladeSize.Z ? 1 : 2);
+                    FVector CavBladeLocal = FVector::ZeroVector;
+                    CavBladeLocal[CavBladeAxis] = CavBladeBox.GetCenter()[CavBladeAxis] >= 0. ? 1.f : -1.f;   // the blade runs from the grip at the origin
+                    // Upright and a little forward, as carried at the shoulder (Allan 2026-11-12: "jeg kan heller ikke se deres
+                    // sabler" - pointed forward, the blades were end-on to the camera and could not be seen). The rider mesh faces +Y.
+                    const FVector CavBladeWanted = FVector(0.f, FMath::Sin(FMath::DegreesToRadians(25.f)), FMath::Cos(FMath::DegreesToRadians(25.f)));
+                    H.Sabre->SetRelativeTransform(FTransform(FQuat::FindBetweenNormals(CavBladeLocal, CavBladeWanted), CavHandInRider.GetLocation()));
+                }
+                else
+                {
+                    H.Sabre->SetRelativeTransform(CavHandInRider);
+                }
+                if (&H == &Horsemen[0] && Now - SabreProbeLast > 2.0)
+                {
+                    SabreProbeLast = Now;
+                    UE_LOG(LogTemp, Display, TEXT("PROJECT1864-SABREPROBE %s clip=%s pose=%.2f hand-in-rider=(%.0f %.0f %.0f) sabre-visible=%d rider-mesh=%d sabre-mesh=%s"),
+                        *OwnerCavalry->StableUnitId.ToString(), *CavRiderClip->GetName(), CavRiderPose, CavHandInRider.GetLocation().X, CavHandInRider.GetLocation().Y,
+                        CavHandInRider.GetLocation().Z, H.Sabre->IsVisible() ? 1 : 0, H.Rider->GetSkeletalMeshAsset() ? 1 : 0,
+                        H.Sabre->GetStaticMesh() ? *H.Sabre->GetStaticMesh()->GetName() : TEXT("-"));
+                }
             }
             UStrategyCrowdSubsystem::DrawAuxiliary(H.Rider, RiderModel, CavRiderClip, CavRiderPose);
         }
@@ -625,7 +743,7 @@ void UStrategyCavalryVisualComponent::UpdatePace(float DeltaTime)
         ++CentroidFigureCount;
         if (H.Sabre)
         {
-            H.Sabre->SetVisibility(bCharge || H.bCavSlash);
+            H.Sabre->SetVisibility(bSabresOut || H.bCavSlash);
         }
         // Dust from the hooves at the trot and gallop (a few horsemen, now and then).
         if (Gait > 0.55f && Now >= H.NextDust)

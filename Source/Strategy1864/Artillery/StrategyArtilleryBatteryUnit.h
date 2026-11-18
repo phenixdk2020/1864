@@ -93,6 +93,14 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Artillery")
     TObjectPtr<UStrategyArtilleryCrewAnimationComponent> CrewAnimationComponent;
 
+    /** The gun crews as figures at their posts (StrategyGunCrewVisualComponent). */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Artillery")
+    TObjectPtr<class UStrategyGunCrewVisualComponent> GunCrewVisualComponent;
+
+    /** The limbers with their rigged teams and drivers, limbering and unlimbering (StrategyLimberVisualComponent). */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Artillery")
+    TObjectPtr<class UStrategyLimberVisualComponent> LimberVisualComponent;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Strategy|Artillery")
     int32 PersonnelEvacuatedOnAbandon = 0;
 

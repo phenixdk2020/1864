@@ -56,6 +56,9 @@ public:
     EStrategyArtilleryCrewActivity GetActivityForStation(
         int32 StationIndex) const;
 
+    /** The reload drill after a salvo is running (DrillElapsedSeconds of DrillDurationSeconds): the guns' recoil follows it. */
+    bool IsReloadDrillActive() const { return bReloadDrillActive; }
+
     void HandleArtilleryShotResolved(
         AStrategyUnit* Target,
         EStrategyArtilleryAmmoType AmmoType,

@@ -26,3 +26,9 @@ Content/Collections/
 SourceAssets/NaturalEarth/
 SourceAssets/ETOPO2022/
 Reference/Campaign1851/MapTiles/
+
+# Store scannede reglementer (over GitHubs 100 MB-graense); kilder i Reference/Historisk/KILDER.md
+Reference/Historisk/*.pdf
+# Lokale vaerktoejsfiler
+.playwright-mcp/
+Backup_2026-11-03_CavClips/

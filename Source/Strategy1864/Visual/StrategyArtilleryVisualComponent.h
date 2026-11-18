@@ -34,12 +34,23 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Artillery")
     float ColumnIntervalCm = 900.0f;
 
+    /** How far a fired gun runs back (cm; an estimate: a light field gun recoiled one to two metres). */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Visual|Artillery")
+    float RecoilCm = 130.0f;
+
+    /** A piece as drawn: where it stands (the recoil included), the way its muzzle points, and whether it is whole and unlimbered. */
+    bool GetGunPlacement(int32 GunIndex, FVector& OutLocation, FVector& OutMuzzle, bool& bOutInAction, bool bSettled = false) const;
+    int32 GetDrawnGunCount() const;
+
 private:
     void Rebuild();
     void UpdateTransport();
     FStrategyVisualFormationPath ArtilleryVisualPath;
     TArray<FTransform> GunGoals;
     TArray<FVector> GunVelocities;
+    TArray<FVector> GunSettledPlaces;   // each piece's smoothed place in the unit frame, before its recoil
+    float GunRecoilNow = 0.f;           // the recoil drawn this frame (cm, all pieces fire together)
+    bool bGunGroundLogged = false;
     TArray<float> GunTurnVelocities;
 
     UPROPERTY(Transient)

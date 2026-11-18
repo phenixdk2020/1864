@@ -334,6 +334,7 @@ private:
     float FollowCamDistance = 1500.f;
     float FollowCamSide = 0.5f;
     bool bFollowCamFront = false;
+    bool bFollowCamSideOn = false;
     FVector FollowCamEye = FVector::ZeroVector;
     FVector FollowCamLook = FVector::ZeroVector;
     bool bFollowCamPlaced = false;

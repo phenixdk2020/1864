@@ -406,9 +406,22 @@ private:
         float ReformDeadline = -1.f;
         FVector ReformTarget = FVector::ZeroVector;
         FVector ReformStartLocal = FVector::ZeroVector;   // v2 rigid morph: where he stood in the unit's frame when the change began
+        // Square swing (line <-> square, 2026-11-15): 0 none, 1 into the square, 2 out of it; his wing (-1 left, +1 right), and his
+        // place on the wing's arm (distance from the front corner along it, depth behind its outer line) in the line and in the square.
+        uint8 SquareSwingKind = 0;
+        float SquareSwingSide = 1.f;
+        float SquareSwingLineAlong = 0.f;
+        float SquareSwingLineDepth = 0.f;
+        float SquareSwingPlaceAlong = 0.f;
+        float SquareSwingPlaceDepth = 0.f;
+        float SquareSwingBulge = 0.f;      // a man who changes rank steps out round the tip of the arm by this much on the way
+        // Column <-> square (kinds 3 into the square, 4 out of it): his own way from his place in the column round to his place in
+        // the square (up to five corners, in the unit's frame) and its length.
+        FVector2D SquareWrapPath[5] = { FVector2D::ZeroVector, FVector2D::ZeroVector, FVector2D::ZeroVector, FVector2D::ZeroVector, FVector2D::ZeroVector };
+        uint8 SquareWrapPoints = 0;
+        float SquareWrapDelta = 0.f;
         float ReformStartTime = 0.f;
-        float ReformDuration = 0.f;
-        float StartRemaining = 0.f;
+        float ReformDuration = 0.f;        float StartRemaining = 0.f;
         float HaltRemaining = 0.f;
         float SlotYaw = 0.f;
         float Yaw = 0.0f;
@@ -454,6 +467,37 @@ private:
     void UpdateSettling(float DeltaTime);
     void PlanOrderlyReform(bool bDestination, const FTransform& ReformFrame);
     bool PlanColumnDrill();
+    /** Line <-> square as two swings of each wing on one clock (Allan 2026-11-14: "sving som en dør"): the wing swings back about the
+        front corner, then its outer part swings in about the rear corner. False: not possible here, the straight walk is used. */
+    bool PlanSquareSwing(bool bSquareSwingInto, const FTransform& SquareSwingFrame, const TArray<int32>& SquareSwingMen,
+        const TArray<FVector>& SquareSwingSlots, const TArray<FVector>& SquareSwingStarts, TArray<int32>& SquareSwingTargets, float& OutSquareSwingSeconds);
+    FVector SquareSwingPoint(const FSettle& SquareSwingSettle, float SquareSwingProgress) const;
+    /** March column <-> square: the column marches into the square and its files go round it (2026-11-15). False: the straight walk. */
+    bool PlanSquareWrap(bool bSquareWrapInto, const FTransform& SquareWrapFrame, const TArray<int32>& SquareWrapMen,
+        const TArray<FVector>& SquareWrapSlots, const TArray<FVector>& SquareWrapStarts, TArray<int32>& SquareWrapTargets, float& OutSquareWrapSeconds);
+    FVector SquareWrapPoint(const FSettle& SquareWrapSettle, float SquareWrapTravel) const;
+    float SquareWrapLongestCm = 0.f;   // the longest way of the column <-> square plan: the common clock runs over it
+    bool bSquareWrapRunning = false;
+    FTransform SquareSwingPlanFrame = FTransform::Identity;   // the frame the swing or the way round was laid in: the men are drawn in it
+    bool SquareSwingRunning = false;
+    float SquareSwingFrontX = 0.f;     // the square's outer front line in the unit's frame
+    float SquareSwingHalf = 0.f;       // half the outer side
+    float SquareSwingArm = 0.f;        // front corner to rear corner
+    float SquareSwingSplit = 1.f;      // the share of the clock the first swing takes
+    float SquareSwingStarted = 0.f;
+    float SquareSwingLeadSide = -1.f;  // the wing whose rear half swings in first, so the two tips do not meet in the middle
+    /** Square: the places as formed (local slot, facing yaw), and the step from within into the holes of the outer ranks. */
+    TArray<FVector> SquarePlaces;
+    TArray<float> SquarePlaceYaws;
+    void StepUpSquare();
+    /** Where every man is going while the company changes formation (user 2026-11-05, after Iron Ranks): a small gold spot on the
+     *  ground at his new place, gone when he is there or has fallen. The player's own companies only. */
+    void UpdateSlotMarkers();
+    void ApplySquareKneel();
+    /** Per man: the kneeling twin his baked (crowd) figure draws in a square's outer rank, else null. */
+    UPROPERTY(Transient) TArray<TObjectPtr<UAnimSequence>> SquareKneelTwins;
+    UPROPERTY(Transient) TObjectPtr<class UInstancedStaticMeshComponent> SlotMarkers;
+    bool bSlotMarkersTried = false;
     /** Column -> line: the spare row behind the column's tail for a man whose place another holds (INDEX_NONE: line -> column). */
     int32 DrillSpareRow = INDEX_NONE;
     /** The colour bearer (user 2026-10-18): one man of the company, out of the file/rank grid, in FRONT of the line and at the head
@@ -476,6 +520,10 @@ private:
     UPROPERTY(Transient) TObjectPtr<UStaticMeshComponent> OfficerScabbard;
     UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> OfficerWalkAsset;
     UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> OfficerWalkSheathedAsset;
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> OfficerSabreDrawAsset;
+    UPROPERTY(Transient) TSoftObjectPtr<UAnimSequence> OfficerSabreSheathAsset;
+    int32 OfficerSabreAction = 0;   // 1 drawing, 2 sheathing (the clip plays to its end)
+    float OfficerSabreActionStart = 0.f;
     /** Holds the loaded officer clips: a soft pointer alone lets them be collected, and .Get() then returns null (2026-11-05: he
      *  walked in his rest clip, the sabre pointing down). */
     UPROPERTY(Transient) TArray<TObjectPtr<UAnimSequence>> OfficerClipsHeld;

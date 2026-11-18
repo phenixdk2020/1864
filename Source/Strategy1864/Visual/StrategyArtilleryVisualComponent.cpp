@@ -1,8 +1,10 @@
 #include "StrategyArtilleryVisualComponent.h"
+#include "StrategyLimberVisualComponent.h"
 
 #include "../Artillery/StrategyArtilleryBatteryUnit.h"
 #include "../Artillery/StrategyMortarBatteryUnit.h"
 #include "../Artillery/StrategyMortarDeploymentComponent.h"
+#include "../Artillery/StrategyArtilleryCrewAnimationComponent.h"
 #include "../Units/StrategyWagonTrainComponent.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
@@ -11,12 +13,15 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "../Terrain/StrategyTerrainQueryLibrary.h"
 
 namespace
 {
     // The models as imported (Content/Python/import_units_1864.py): about 2 m long. The gun's muzzle points
     // along +Y, the mortar's along -X; a field gun with its trail is some 4.5 m.
-    constexpr float CannonScale = 2.2f;
+    // 1.6 (was 2.2): the muzzle at 125 cm and wheels of 1.47 m, a light field gun's (the crew's clips are fitted to it; 2.2 put the
+    // muzzle at shoulder height, 172 cm).
+    constexpr float CannonScale = 1.6f;
     constexpr float CannonYaw = -90.0f;
     constexpr float MortarScale = 1.1f;
     constexpr float MortarYaw = 180.0f;
@@ -63,12 +68,59 @@ void UStrategyArtilleryVisualComponent::TickComponent(float DeltaTime, ELevelTic
     ArtilleryVisualPath.Advance(GetOwner()->GetActorTransform(), DeltaTime, false, 160.f);
     Guns->SetWorldLocation(ArtilleryVisualPath.Center);
     Guns->SetWorldRotation(FRotator(0.f, ArtilleryVisualPath.Facing, 0.f));
+    // The recoil follows the crew's reload drill after a salvo: back at once (0.3 s), it stands there while the crew sponges and
+    // loads, and is run forward again in the drill's last tenth (ReturnToBattery). All the pieces fire together.
+    GunRecoilNow = 0.f;
+    const AStrategyArtilleryBatteryUnit* RecoilBattery = Cast<AStrategyArtilleryBatteryUnit>(GetOwner());
+    if (!bMortar && RecoilBattery && RecoilBattery->CrewAnimationComponent && RecoilBattery->CrewAnimationComponent->IsReloadDrillActive())
+    {
+        const UStrategyArtilleryCrewAnimationComponent* RecoilDrill = RecoilBattery->CrewAnimationComponent;
+        // Back fast and running out (an ease-out over half a second, not a jump of 1.3 m in three frames: QA 2026-11-08).
+        const float RecoilOut = FMath::Min(1.f, RecoilDrill->DrillElapsedSeconds / 0.5f);
+        // Run forward again at once (2026-11-15): back in half a second, then pushed into battery during the rest of the drill's first
+        // phase (RecoilReact, its first 8 %), so that the crew sponges, loads and primes a piece that stands where their posts are. It
+        // used to stand back until the drill's last tenth: the commander behind the trail stood inside it, the sponge worked in the air.
+        const float RecoilReturnSeconds = FMath::Max(0.8f, 0.08f * RecoilDrill->DrillDurationSeconds - 0.5f);
+        GunRecoilNow = RecoilCm * (RecoilDrill->DrillElapsedSeconds < 0.5f ? 1.f - FMath::Square(1.f - RecoilOut)
+            : FMath::Max(0.f, 1.f - (RecoilDrill->DrillElapsedSeconds - 0.5f) / RecoilReturnSeconds));
+    }
+    if (GunSettledPlaces.Num() != GunGoals.Num())
+    {
+        GunSettledPlaces.SetNum(GunGoals.Num());
+        for (int32 SettleIndex = 0; SettleIndex < GunGoals.Num(); ++SettleIndex)
+        {
+            FTransform SettleShown;
+            GunSettledPlaces[SettleIndex] = Guns->GetInstanceTransform(SettleIndex, SettleShown, false) ? SettleShown.GetLocation() : GunGoals[SettleIndex].GetLocation();
+        }
+    }
     for (int32 GunIndex = 0; GunIndex < GunGoals.Num(); ++GunIndex)
     {
         FTransform GunShown;
         if (!Guns->GetInstanceTransform(GunIndex, GunShown, false)) continue;
-        FVector GunPosition = GunShown.GetLocation();
+        FVector GunPosition = GunSettledPlaces[GunIndex];
         FStrategyVisualFormationPath::SmoothTravel(GunPosition, GunVelocities[GunIndex], GunGoals[GunIndex].GetLocation(), DeltaTime, 420.f);
+        GunSettledPlaces[GunIndex] = GunPosition;
+        // On the ground (Allan 2026-11-14: "det ligner at kanonen stod lidt nede i jorden"): the pieces stood at the unit's own
+        // height with the model's origin there, whatever the ground under each of them and wherever the model's wheels end. The
+        // lowest point of the model, at the size it is drawn, is set on the terrain under the piece. A wrecked piece lies as it lay.
+        if (Guns->GetStaticMesh() && GunGoals[GunIndex].GetRotation().Rotator().Roll == 0.f)
+        {
+            const FTransform GunGroundFrame = Guns->GetComponentTransform();
+            const FVector GunGroundWorld = GunGroundFrame.TransformPosition(FVector(GunPosition.X, GunPosition.Y, 0.f));
+            const float GunGroundZ = UStrategyTerrainQueryLibrary::GetEffectiveGroundZ(this, GunGroundWorld);
+            const float GunGroundScaleZ = FMath::Max(0.01f, float(GunGroundFrame.GetScale3D().Z));
+            const float GunModelLowest = float(Guns->GetStaticMesh()->GetBoundingBox().Min.Z) * float(GunGoals[GunIndex].GetScale3D().Z) * GunGroundScaleZ;
+            GunPosition.Z = (GunGroundZ - GunModelLowest - float(GunGroundFrame.GetLocation().Z)) / GunGroundScaleZ;
+            if (GunIndex == 0 && !bGunGroundLogged)
+            {
+                bGunGroundLogged = true;
+                UE_LOG(LogTemp, Display, TEXT("PROJECT1864-GUNGROUND %s model-lowest-cm=%.1f ground-z=%.1f unit-z=%.1f raised-cm=%.1f"), *GetOwner()->GetName(),
+                    GunModelLowest, GunGroundZ, float(GunGroundFrame.GetLocation().Z), GunPosition.Z * GunGroundScaleZ);
+            }
+        }
+        // A whole piece in action runs back along its trail (the model's muzzle points along its +Y).
+        if (GunRecoilNow > 0.f && GunGoals[GunIndex].GetRotation().Rotator().Roll == 0.f)
+            GunPosition -= GunShown.GetRotation().RotateVector(FVector(0.f, 1.f, 0.f)).GetSafeNormal2D() * GunRecoilNow * GunGoals[GunIndex].GetScale3D().X / FMath::Max(0.01f, CannonScale);
         FRotator GunRotation = GunShown.Rotator();
         GunRotation.Yaw = FStrategyVisualFormationPath::SmoothFacing(GunRotation.Yaw, GunTurnVelocities[GunIndex], GunGoals[GunIndex].Rotator().Yaw, DeltaTime, 120.f);
         const float GunAlpha = 1.f - FMath::Exp(-12.f * DeltaTime);
@@ -97,6 +149,24 @@ void UStrategyArtilleryVisualComponent::TickComponent(float DeltaTime, ELevelTic
     UpdateTransport();
     Guns->MarkRenderStateDirty();
     ArtilleryVisualPath.PreviousUnit = GetOwner()->GetActorTransform();
+}
+
+int32 UStrategyArtilleryVisualComponent::GetDrawnGunCount() const
+{
+    return Guns ? Guns->GetInstanceCount() : 0;
+}
+
+bool UStrategyArtilleryVisualComponent::GetGunPlacement(int32 GunIndex, FVector& OutLocation, FVector& OutMuzzle, bool& bOutInAction, bool bSettled) const
+{
+    FTransform PlacementShown;
+    if (!Guns || !GunGoals.IsValidIndex(GunIndex) || !Guns->GetInstanceTransform(GunIndex, PlacementShown, true)) return false;
+    OutLocation = PlacementShown.GetLocation();
+    // Without the recoil: where the piece stands in battery (the crew's posts and the limber's are kept from it).
+    if (bSettled && GunSettledPlaces.IsValidIndex(GunIndex)) OutLocation = Guns->GetComponentTransform().TransformPosition(GunSettledPlaces[GunIndex]);
+    // The cannon's muzzle points along the model's +Y, the mortar's along -X.
+    OutMuzzle = PlacementShown.GetRotation().RotateVector(bMortar ? FVector(-1.f, 0.f, 0.f) : FVector(0.f, 1.f, 0.f)).GetSafeNormal2D();
+    bOutInAction = !bBuiltLimbered && GunGoals[GunIndex].GetRotation().Rotator().Roll == 0.f && GunGoals[GunIndex].GetScale3D().X > 0.f;
+    return true;
 }
 
 bool UStrategyArtilleryVisualComponent::GetDrawnCenter(FVector& OutTrainCenter) const
@@ -180,6 +250,14 @@ void UStrategyArtilleryVisualComponent::UpdateTransport()
     const bool bTransportEnabled = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864Train")) ||
         (TransportBattery->WagonTrainComponent && TransportBattery->WagonTrainComponent->WagonCount >= 0);
     if (!bTransportEnabled) return;
+    // The rigged teams draw the limbers now (StrategyLimberVisualComponent); the old static team only stands in without them.
+    if (TransportBattery->LimberVisualComponent && TransportBattery->LimberVisualComponent->IsDrawing())
+    {
+        if (BatteryLimbers) BatteryLimbers->SetVisibility(false);
+        if (BatteryTeamHorses) BatteryTeamHorses->SetVisibility(false);
+        if (BatteryHarness) BatteryHarness->SetVisibility(false);
+        return;
+    }
     if (!bTransportAssetsAttempted)
     {
         bTransportAssetsAttempted = true;

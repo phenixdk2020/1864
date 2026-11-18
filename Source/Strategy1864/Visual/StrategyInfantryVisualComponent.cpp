@@ -1,4 +1,5 @@
 #include "StrategyInfantryVisualComponent.h"
+#include "Algo/Reverse.h"
 #include "../Player/StrategyBattlePerformance.h"
 #include "HAL/IConsoleManager.h"
 #include "../Movement/StrategyMovementExecutorComponent.h"
@@ -82,6 +83,10 @@ UStrategyInfantryVisualComponent::UStrategyInfantryVisualComponent()
         FSoftObjectPath(TEXT("/Game/Units/Human/Officer/A_Officer_Walk.A_Officer_Walk")));
     OfficerWalkSheathedAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Human/Officer/A_Officer_WalkSheathed.A_Officer_WalkSheathed")));
+    OfficerSabreDrawAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/Officer/A_Officer_SabreDraw.A_Officer_SabreDraw")));
+    OfficerSabreSheathAsset = TSoftObjectPtr<UAnimSequence>(
+        FSoftObjectPath(TEXT("/Game/Units/Human/Officer/A_Officer_SabreSheath.A_Officer_SabreSheath")));
     OfficerIdleAsset = TSoftObjectPtr<UAnimSequence>(
         FSoftObjectPath(TEXT("/Game/Units/Human/Officer/A_Officer_Idle.A_Officer_Idle")));
     OfficerOrderAsset = TSoftObjectPtr<UAnimSequence>(
@@ -354,14 +359,21 @@ void UStrategyInfantryVisualComponent::TickComponent(
         !(OwnerCompany->FormationTransition && OwnerCompany->FormationTransition->IsReforming()) && (bCloseWhileMoving || !VisualPath.bMovingVisuals))
     {
         bClosingRanksPending = false;
+        // A square stands fast under losses: the men from behind have stepped up into the holes of the outer ranks (StepUpSquare),
+        // and it is drawn in to a smaller square only when fewer than 45 % of its places are held (an estimate). It used to be
+        // re-formed at every loss, everyone to a new place, the living over the fallen (QA 2026-11-05).
+        const bool bSquareHolds = OwnerCompany->FormationComponent && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Square &&
+            SquarePlaces.Num() > 0 && SoldierComponents.Num() >= FMath::CeilToInt(0.45f * SquarePlaces.Num());
         // In line: the files close in towards the colours by side-stepping; otherwise (column, square, spread) the old re-form.
-        if (!CloseRanksTowardColours())
+        if (bSquareHolds) {}
+        else if (!CloseRanksTowardColours())
         {
             bStepUpPending = false;   // the full re-form also fills the files
             RebuildFormation();
         }
     }
     UpdateSettling(DeltaTime);
+    UpdateSlotMarkers();
     UpdateColourBearer(DeltaTime);
     UpdateOfficerFigure(DeltaTime);
     ApplyPendingStance(GetWorld()->GetTimeSeconds());
@@ -369,6 +381,7 @@ void UStrategyInfantryVisualComponent::TickComponent(
     RefreshAnimation(false);
     UpdateStanceTransitions();
     UpdatePersonalActions();
+    ApplySquareKneel();
     UpdateCrowdMode();
     AlignWeapons();
     UpdateFormationBounds();
@@ -1048,11 +1061,200 @@ void UStrategyInfantryVisualComponent::StepUpColumn()
     }
 }
 
+void UStrategyInfantryVisualComponent::ApplySquareKneel()
+{
+    // In a square the front (outer) rank kneels and the ranks behind fire over it standing (the drill books; QA 2026-11-05: "de
+    // yderste soldater kan knæle, mens de bageste står"). The company's clips are chosen for all; here the outer rank's standing
+    // clip is swapped for its kneeling twin at the same point of the clip (the record of the chosen clip is left as it is).
+    // Near men are skeletal figures (their clip is swapped); far men are drawn baked from the company's clip record, so they get the
+    // twin through SquareKneelTwins (2026-11-07: the outer rank stood, all 64 of them drawn baked).
+    if (!OwnerCompany || !OwnerCompany->FormationComponent || OwnerCompany->FormationComponent->CurrentFormation != EStrategyFormationType::Square ||
+        SquarePlaces.IsEmpty() || SoldierSettle.Num() != SoldierComponents.Num())
+    {
+        if (!SquareKneelTwins.IsEmpty()) { SquareKneelTwins.Reset(); bCrowdDirty = true; }
+        return;
+    }
+    if (SquareKneelTwins.Num() != SoldierComponents.Num()) SquareKneelTwins.SetNum(SoldierComponents.Num());
+    const TPair<UAnimSequence*, UAnimSequence*> KneelTwins[] = {
+        { IdleStandingAsset.Get(), IdleKneelingAsset.Get() }, { ReadyAsset.Get(), IdleKneelingAsset.Get() },
+        { AimHoldAsset.Get(), AimKneelingAsset.Get() }, { FireStandingAsset.Get(), FireKneelingAsset.Get() },
+        { ReloadStandingAsset.Get(), ReloadKneelingAsset.Get() }, { AimStandingAsset.Get(), AimKneelingAsset.Get() },
+        { LoadAsset.Get(), ReloadKneelingAsset.Get() }, { BayonetChargeAsset.Get(), AimKneelingAsset.Get() } };
+    static TSet<FName> KneelUnmatched;   // once per clip name: what the outer rank plays that has no kneeling twin
+    FVector KneelMiddle = FVector::ZeroVector;
+    for (const FVector& KneelPlace : SquarePlaces) KneelMiddle += KneelPlace;
+    KneelMiddle /= float(SquarePlaces.Num());
+    const auto KneelDepth = [&](const FVector& KneelAt) { const FVector KneelRel = KneelAt - KneelMiddle; return FMath::Max(FMath::Abs(float(KneelRel.X)), FMath::Abs(float(KneelRel.Y))); };
+    float KneelOuter = 0.f;
+    for (const FVector& KneelPlace : SquarePlaces) KneelOuter = FMath::Max(KneelOuter, KneelDepth(KneelPlace));
+    const float KneelBand = 0.5f * FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierRankSpacingCm);
+    for (int32 KneelMan = 0; KneelMan < SoldierComponents.Num(); ++KneelMan)
+    {
+        USkeletalMeshComponent* KneelSoldier = SoldierComponents[KneelMan];
+        const bool bKneeler = KneelSoldier && SoldierSettle[KneelMan].ReformDeadline < 0.f && SoldierSettle[KneelMan].CloseStart < 0.f &&
+            KneelOuter - KneelDepth(SoldierSettle[KneelMan].Slot) <= KneelBand;
+        // The baked figure's twin, from the clip the company chose for him.
+        UAnimSequence* KneelBakedTwin = nullptr;
+        if (bKneeler && SoldierClips.IsValidIndex(KneelMan))
+            for (const TPair<UAnimSequence*, UAnimSequence*>& KneelTwin : KneelTwins)
+                if (KneelTwin.Key && KneelTwin.Value && SoldierClips[KneelMan].Clip.Get() == KneelTwin.Key) { KneelBakedTwin = KneelTwin.Value; break; }
+        if (bKneeler && !KneelBakedTwin && SoldierClips.IsValidIndex(KneelMan) && SoldierClips[KneelMan].Clip.IsValid() &&
+            !KneelUnmatched.Contains(SoldierClips[KneelMan].Clip->GetFName()))
+        {
+            KneelUnmatched.Add(SoldierClips[KneelMan].Clip->GetFName());
+            UE_LOG(LogTemp, Display, TEXT("Strategy1864SquareKneel %s outer rank (baked) plays %s: no kneeling twin"), *OwnerCompany->StableUnitId.ToString(), *SoldierClips[KneelMan].Clip->GetName());
+        }
+        if (SquareKneelTwins[KneelMan] != KneelBakedTwin) { SquareKneelTwins[KneelMan] = KneelBakedTwin; bCrowdDirty = true; }
+        if (!bKneeler || !KneelSoldier->IsVisible()) continue;
+        UAnimSingleNodeInstance* KneelNode = KneelSoldier->GetSingleNodeInstance();
+        const UAnimationAsset* KneelNow = KneelNode ? KneelNode->GetAnimationAsset() : nullptr;
+        bool bKneelKnown = false;
+        for (const TPair<UAnimSequence*, UAnimSequence*>& KneelTwin : KneelTwins) bKneelKnown |= KneelNow && (KneelNow == KneelTwin.Key || KneelNow == KneelTwin.Value);
+        if (KneelNow && !bKneelKnown && !KneelUnmatched.Contains(KneelNow->GetFName()))
+        {
+            KneelUnmatched.Add(KneelNow->GetFName());
+            UE_LOG(LogTemp, Display, TEXT("Strategy1864SquareKneel %s outer rank plays %s: no kneeling twin"), *OwnerCompany->StableUnitId.ToString(), *KneelNow->GetName());
+        }
+        for (const TPair<UAnimSequence*, UAnimSequence*>& KneelTwin : KneelTwins)
+        {
+            if (!KneelTwin.Key || !KneelTwin.Value || KneelNow != KneelTwin.Key) continue;
+            const float KneelFraction = KneelTwin.Key->GetPlayLength() > 0.f ? KneelNode->GetCurrentTime() / KneelTwin.Key->GetPlayLength() : 0.f;
+            const bool bKneelLoop = KneelNode->IsLooping();
+            KneelSoldier->PlayAnimation(KneelTwin.Value, bKneelLoop);
+            KneelSoldier->SetPosition(FMath::Clamp(KneelFraction, 0.f, 1.f) * KneelTwin.Value->GetPlayLength(), false);
+            break;
+        }
+    }
+}
+
+void UStrategyInfantryVisualComponent::UpdateSlotMarkers()
+{
+    if (!OwnerCompany || !OwnerCompany->bPlayerControllable || !GetWorld()) return;
+    if (!SlotMarkers)
+    {
+        if (bSlotMarkersTried) return;
+        bSlotMarkersTried = true;
+        UStaticMesh* MarkerMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
+        UMaterialInterface* MarkerBase = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+        if (!MarkerMesh) return;
+        SlotMarkers = NewObject<UInstancedStaticMeshComponent>(OwnerCompany, NAME_None, RF_Transient);
+        SlotMarkers->SetStaticMesh(MarkerMesh);
+        SlotMarkers->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        SlotMarkers->SetCastShadow(false);
+        SlotMarkers->bVisibleInRayTracing = false;
+        SlotMarkers->SetupAttachment(OwnerCompany->GetRootComponent());
+        SlotMarkers->SetUsingAbsoluteLocation(true);
+        SlotMarkers->SetUsingAbsoluteRotation(true);
+        SlotMarkers->SetUsingAbsoluteScale(true);
+        SlotMarkers->RegisterComponent();
+        SlotMarkers->SetWorldTransform(FTransform::Identity);
+        if (MarkerBase)
+        {
+            UMaterialInstanceDynamic* MarkerGold = UMaterialInstanceDynamic::Create(MarkerBase, SlotMarkers);
+            MarkerGold->SetVectorParameterValue(TEXT("Color"), FLinearColor(1.0f, 0.78f, 0.25f));
+            SlotMarkers->SetMaterial(0, MarkerGold);
+        }
+    }
+    // The places of the men still on their way (a fallen man is no longer in the list: his spot goes with him).
+    TArray<FTransform> MarkerSpots;
+    const FTransform MarkerUnit = OwnerCompany->GetActorTransform();
+    for (int32 MarkerMan = 0; MarkerMan < SoldierSettle.Num() && MarkerMan < SoldierComponents.Num(); ++MarkerMan)
+    {
+        const FSettle& MarkerSettle = SoldierSettle[MarkerMan];
+        if (!SoldierComponents[MarkerMan] || !MarkerSettle.bPlaced || MarkerSettle.ReformDeadline < 0.f) continue;
+        FVector MarkerAt = bArrivalReform ? MarkerSettle.ReformTarget : MarkerUnit.TransformPosition(MarkerSettle.Goal);
+        if (FVector::Dist2D(MarkerAt, SoldierComponents[MarkerMan]->GetComponentLocation()) < 40.f) continue;
+        // A spot 32 cm across, lifted above the battlefield grass (it hid a flat one).
+        MarkerAt.Z = UStrategyTerrainQueryLibrary::GetEffectiveGroundZ(this, MarkerAt) + 18.f;
+        MarkerSpots.Emplace(FRotator::ZeroRotator, MarkerAt, FVector(0.32f, 0.32f, 0.015f));
+    }
+    SlotMarkers->SetVisibility(!MarkerSpots.IsEmpty());
+    if (SlotMarkers->GetInstanceCount() != MarkerSpots.Num())
+    {
+        SlotMarkers->ClearInstances();
+        SlotMarkers->AddInstances(MarkerSpots, false, true);
+    }
+    else if (!MarkerSpots.IsEmpty())
+    {
+        SlotMarkers->BatchUpdateInstancesTransforms(0, MarkerSpots, true, true, false);
+    }
+}
+
+void UStrategyInfantryVisualComponent::StepUpSquare()
+{
+    // Square (user 2026-11-05): a man of the outer rank falls, the nearest man of an inner rank on the same face steps out into his
+    // place, and the hole he leaves is filled from further in; the square keeps its places, the holes gather in the inner rank.
+    if (!OwnerCompany || !OwnerCompany->FormationComponent || SquarePlaces.Num() != SquarePlaceYaws.Num() || SquarePlaces.IsEmpty() ||
+        SoldierSettle.Num() != SoldierComponents.Num()) return;
+    const float SquareRankSpacing = FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierRankSpacingCm);
+    const auto SquarePlaceOf = [this](int32 SquareMan) { const FSettle& SquareSettle = SoldierSettle[SquareMan]; return SquareSettle.CloseStart >= 0.f ? SquareSettle.CloseTo : SquareSettle.Slot; };
+    // Depth is measured from the square's own middle (it stands behind the unit's origin: its front face is the line's front rank).
+    FVector SquareMiddle = FVector::ZeroVector;
+    for (const FVector& SquareMiddlePlace : SquarePlaces) SquareMiddle += SquareMiddlePlace;
+    SquareMiddle /= float(SquarePlaces.Num());
+    const auto SquareDepth = [&](const FVector& SquareAt, float SquareYaw) { return float(FVector::DotProduct(SquareAt - SquareMiddle, FRotator(0.f, SquareYaw, 0.f).Vector())); };
+    // Each face's outermost depth: a place's rank is counted in from there.
+    TMap<int32, float> SquareFaceOuter;
+    for (int32 SquarePlace = 0; SquarePlace < SquarePlaces.Num(); ++SquarePlace)
+    {
+        const int32 SquareFace = FMath::RoundToInt(SquarePlaceYaws[SquarePlace] / 90.f);
+        float& SquareOuter = SquareFaceOuter.FindOrAdd(SquareFace, -TNumericLimits<float>::Max());
+        SquareOuter = FMath::Max(SquareOuter, SquareDepth(SquarePlaces[SquarePlace], SquarePlaceYaws[SquarePlace]));
+    }
+    const auto SquareRankOf = [&](const FVector& SquareAt, float SquareYaw)
+    {
+        const float* SquareOuter = SquareFaceOuter.Find(FMath::RoundToInt(SquareYaw / 90.f));
+        return SquareOuter ? FMath::RoundToInt((*SquareOuter - SquareDepth(SquareAt, SquareYaw)) / SquareRankSpacing) : 0;
+    };
+    const int32 SquareRanks = FMath::Max(1, OwnerCompany->FormationComponent->RankCount);
+    int32 SquareMovers = 0;
+    for (int32 SquareFillRank = 0; SquareFillRank < SquareRanks - 1; ++SquareFillRank)
+        for (int32 SquarePlace = 0; SquarePlace < SquarePlaces.Num(); ++SquarePlace)
+        {
+            const FVector SquareHole = SquarePlaces[SquarePlace];
+            const float SquareYaw = SquarePlaceYaws[SquarePlace];
+            if (SquareRankOf(SquareHole, SquareYaw) != SquareFillRank) continue;
+            bool bSquareHeld = false;
+            for (int32 SquareMan = 0; SquareMan < SoldierSettle.Num() && !bSquareHeld; ++SquareMan)
+                bSquareHeld = SoldierSettle[SquareMan].bPlaced && FVector::Dist2D(SquarePlaceOf(SquareMan), SquareHole) < 25.f;
+            if (bSquareHeld) continue;
+            // The nearest man of a rank further in on the same face.
+            int32 SquareFiller = INDEX_NONE;
+            float SquareBest = 3.5f * SquareRankSpacing;
+            for (int32 SquareMan = 0; SquareMan < SoldierSettle.Num(); ++SquareMan)
+            {
+                const FSettle& SquareSettle = SoldierSettle[SquareMan];
+                if (!SquareSettle.bPlaced || FMath::Abs(FMath::FindDeltaAngleDegrees(SquareSettle.SlotYaw, SquareYaw)) > 10.f) continue;
+                const FVector SquareFrom = SquarePlaceOf(SquareMan);
+                if (SquareRankOf(SquareFrom, SquareYaw) <= SquareFillRank) continue;
+                const float SquareGap = FVector::Dist2D(SquareFrom, SquareHole);
+                if (SquareGap < SquareBest) { SquareBest = SquareGap; SquareFiller = SquareMan; }
+            }
+            if (SquareFiller == INDEX_NONE) continue;
+            FSettle& SquareStepper = SoldierSettle[SquareFiller];
+            SquareStepper.CloseFrom = SquareStepper.Slot;
+            SquareStepper.CloseTo = FVector(SquareHole.X, SquareHole.Y, SquareStepper.Slot.Z);
+            SquareStepper.CloseStart = VisualAnimationTime + 0.25f * SquareFillRank;
+            SquareStepper.CloseDuration = FMath::Max(0.8f, FVector::Dist2D(SquareStepper.CloseTo, SquareStepper.CloseFrom) / 70.f);
+            SquareStepper.Goal = SquareStepper.CloseTo;
+            SquareStepper.bActive = true;
+            bClosingRanksStep = true;
+            ++SquareMovers;
+        }
+    if (SquareMovers > 0)
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864StepUp %s square: %d men step out into the holes of the outer ranks"), *OwnerCompany->StableUnitId.ToString(), SquareMovers);
+}
+
 void UStrategyInfantryVisualComponent::StepUpFiles()
 {
     if (OwnerCompany && OwnerCompany->FormationComponent && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn)
     {
         StepUpColumn();
+        return;
+    }
+    if (OwnerCompany && OwnerCompany->FormationComponent && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Square)
+    {
+        StepUpSquare();
         return;
     }
     if (!OwnerCompany || !OwnerCompany->FormationComponent ||
@@ -1747,8 +1949,16 @@ void UStrategyInfantryVisualComponent::RebuildFormation()
         }
         SoldierSlots[VisualIndex] = Slot.SlotIndex >= 0 ? Slot.SlotIndex : VisualIndex;
     }
+    // A square's places are kept as formed, so its holes can be filled from within (StepUpSquare).
+    if (!bScaleOnlyRebuild)
+    {
+        SquarePlaces.Reset();
+        SquarePlaceYaws.Reset();
+        if (OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Square)
+            for (const FSettle& SquarePlaceMan : SoldierSettle) { SquarePlaces.Add(SquarePlaceMan.Slot); SquarePlaceYaws.Add(SquarePlaceMan.SlotYaw); }
+    }
+    // (A square forms orderly too: each man walks to his place. Left out, the men stood in the square in 0.2 s: QA 2026-11-05.)
     if (!bScaleOnlyRebuild && VisualPath.bInitialized &&
-        OwnerCompany->FormationComponent->CurrentFormation != EStrategyFormationType::Square &&
         !(OwnerCompany->StanceComponent && OwnerCompany->StanceComponent->Stance == EStrategyStance::Prone) &&
         !(DrawnScreen && (DrawnScreen->State == EStrategySkirmisherState::Deploying || DrawnScreen->IsDeployed())))
     {
@@ -1884,6 +2094,9 @@ void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, cons
 {
     DrillActive = false;
     DrillPath.Reset();
+    SquareSwingRunning = false;
+    bSquareWrapRunning = false;
+    for (FSettle& SquareSwingClear : SoldierSettle) SquareSwingClear.SquareSwingKind = 0;
     // Once per change, never a per-frame assignment/path search. Preserve figure identity and clips.
     if (bDestination) ArrivalFormationOrigin = ReformFrame.GetLocation();
     TArray<int32> ReformMen;
@@ -1945,10 +2158,107 @@ void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, cons
         // and the rear rank walked through the others and came in ten seconds late (2026-10-22 test).
         return !FMath::IsNearlyEqual(ReformAOffset.X, ReformBOffset.X, 1.f) ? ReformAOffset.X > ReformBOffset.X : ReformAOffset.Y < ReformBOffset.Y;
     });
+    // Into and out of a square the men keep their order (user 2026-11-05, QA: "de vælter rundt"; the two ends of the line crossed in
+    // the middle and piled up): rank by rank, the line from left to right is laid round the square from the rear of its left face,
+    // up that face, across the front and down the right face, the two ends closing the rear - the wings fold back. A square leaves
+    // the same way into the line. Order kept, the paths do not cross.
+    const bool bReformToSquare = OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Square;
+    const bool bReformFromSquare = CachedFormationValue == uint8(EStrategyFormationType::Square) && !bReformToSquare;
+    // Line <-> square: the wings swing (PlanSquareSwing). Where that cannot be done the ordered straight walk below stands in.
+    float SquareSwingBudget = 0.f;
+    const bool bSquareSwingPlannedLine = !bDestination && ReformMen.Num() == ReformTargets.Num() &&
+        (bReformToSquare ? CachedFormationValue == uint8(EStrategyFormationType::Line) :
+            bReformFromSquare && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Line) &&
+        PlanSquareSwing(bReformToSquare, ReformFrame, ReformMen, ReformSlots, ReformStarts, ReformTargets, SquareSwingBudget);
+    // March column <-> square: the column marches into the square and round it (PlanSquareWrap).
+    bSquareWrapRunning = !bSquareSwingPlannedLine && !bDestination && ReformMen.Num() == ReformTargets.Num() &&
+        (bReformToSquare ? CachedFormationValue == uint8(EStrategyFormationType::MarchColumn) :
+            bReformFromSquare && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::MarchColumn) &&
+        PlanSquareWrap(bReformToSquare, ReformFrame, ReformMen, ReformSlots, ReformStarts, ReformTargets, SquareSwingBudget);
+    const bool bSquareSwingPlanned = bSquareSwingPlannedLine || bSquareWrapRunning;
+    if (bSquareSwingPlanned) SquareSwingPlanFrame = ReformFrame;
+    // Out of the square into column the column forms straight behind the unit, where the plan laid it: the old march's trail is
+    // let go (2026-11-15: the column's places lay on the trail, a metre or two beside the plan's, and the men were drawn across to
+    // them each by his own progress - neighbours came within 5 cm).
+    if (bSquareWrapRunning && !bReformToSquare) { VisualPath.Trail.Reset(); VisualPath.TrailDistance = 0.f; }
+    if (!bSquareSwingPlanned && !bDestination && (bReformToSquare || bReformFromSquare) && ReformMen.Num() == ReformTargets.Num())
+    {
+        // A place's rank and its order round the formation: in a square the rank counts in from the outer face and the order is
+        // the angle about the centre (rear-left -180 .. front 0 .. rear-right +180); in a line the rank counts back from the front
+        // and the order is left to right.
+        const auto ReformSquareKey = [&](const TArray<FVector>& ReformPoints, bool bReformSquare, TArray<int32>& OutRanks, TArray<float>& OutOrder)
+        {
+            // A square is measured from its own middle (it stands behind the unit's origin).
+            FVector ReformMiddle = FVector::ZeroVector;
+            if (bReformSquare && ReformPoints.Num() > 0) { for (const FVector& ReformMid : ReformPoints) ReformMiddle += ReformMid; ReformMiddle /= float(ReformPoints.Num()); }
+            const auto ReformDepthOf = [&](const FVector& ReformPoint)
+            { const FVector ReformRel = ReformPoint - ReformMiddle; return bReformSquare ? FMath::Max(FMath::Abs(float(ReformRel.X)), FMath::Abs(float(ReformRel.Y))) : float(ReformPoint.X); };
+            float ReformOuter = -TNumericLimits<float>::Max();
+            for (const FVector& ReformPoint : ReformPoints) ReformOuter = FMath::Max(ReformOuter, ReformDepthOf(ReformPoint));
+            OutRanks.Reset(); OutOrder.Reset();
+            for (const FVector& ReformPoint : ReformPoints)
+            {
+                const FVector ReformRel = ReformPoint - ReformMiddle;
+                OutRanks.Add(FMath::RoundToInt((ReformOuter - ReformDepthOf(ReformPoint)) / ReformRankSpacing));
+                OutOrder.Add(bReformSquare ? FMath::RadiansToDegrees(FMath::Atan2(float(ReformRel.Y), float(ReformRel.X))) : float(ReformPoint.Y));
+            }
+        };
+        TArray<FVector> ReformManPoints;
+        for (int32 ReformMan : ReformMen) ReformManPoints.Add(ReformSourceFrame.InverseTransformPosition(ReformStarts[ReformMan]));
+        TArray<int32> ReformManRanks, ReformSlotRanks;
+        TArray<float> ReformManOrder, ReformSlotOrder;
+        ReformSquareKey(ReformManPoints, bReformFromSquare, ReformManRanks, ReformManOrder);
+        ReformSquareKey(ReformSlots, bReformToSquare, ReformSlotRanks, ReformSlotOrder);
+        TArray<int32> ReformManOrderIndex, ReformSlotOrderIndex;
+        for (int32 ReformK = 0; ReformK < ReformMen.Num(); ++ReformK) { ReformManOrderIndex.Add(ReformK); ReformSlotOrderIndex.Add(ReformK); }
+        ReformManOrderIndex.Sort([&](int32 A, int32 B) { return ReformManRanks[A] != ReformManRanks[B] ? ReformManRanks[A] < ReformManRanks[B] : ReformManOrder[A] < ReformManOrder[B]; });
+        ReformSlotOrderIndex.Sort([&](int32 A, int32 B) { return ReformSlotRanks[A] != ReformSlotRanks[B] ? ReformSlotRanks[A] < ReformSlotRanks[B] : ReformSlotOrder[A] < ReformSlotOrder[B]; });
+        if (bReformFromSquare && bReformColumn)
+        {
+            // Square to column (QA 2026-11-12: "alle løber på tværs i en uformelig sværm", the outer rank went to the front third of
+            // the column from all four faces): the men are taken round the square file by file (by angle, the outer man of a file
+            // first), the column's places row by row along its length, so each face files into its own stretch of the column. The
+            // column is walked from whichever end makes the shorter way.
+            FVector ReformColumnMin(TNumericLimits<float>::Max()), ReformColumnMax(-TNumericLimits<float>::Max());
+            for (const FVector& ReformColumnSlot : ReformSlots) { ReformColumnMin = ReformColumnMin.ComponentMin(ReformColumnSlot); ReformColumnMax = ReformColumnMax.ComponentMax(ReformColumnSlot); }
+            const bool bReformColumnAlongX = (ReformColumnMax.X - ReformColumnMin.X) >= (ReformColumnMax.Y - ReformColumnMin.Y);
+            const auto ReformColumnLength = [&](int32 ReformSlotIndex) { return bReformColumnAlongX ? float(ReformSlots[ReformSlotIndex].X) : float(ReformSlots[ReformSlotIndex].Y); };
+            const auto ReformColumnAcross = [&](int32 ReformSlotIndex) { return bReformColumnAlongX ? float(ReformSlots[ReformSlotIndex].Y) : float(ReformSlots[ReformSlotIndex].X); };
+            ReformSlotOrderIndex.Sort([&](int32 A, int32 B) { return !FMath::IsNearlyEqual(ReformColumnLength(A), ReformColumnLength(B), 10.f) ? ReformColumnLength(A) > ReformColumnLength(B) : ReformColumnAcross(A) < ReformColumnAcross(B); });
+            // The ring round the square is opened at one of its four corners (never in the middle of a face, which would send the
+            // face's two halves to the two ends of the column), the corner and the column's end chosen for the shortest ways.
+            const int32 ReformColumnCount = FMath::Min(ReformManOrderIndex.Num(), ReformSlotOrderIndex.Num());
+            double ReformBest = TNumericLimits<double>::Max();
+            TArray<int32> ReformBestMen;
+            bool bReformBestReversed = false;
+            for (const float ReformCut : { -135.f, -45.f, 45.f, 135.f })
+            {
+                TArray<int32> ReformCutMen = ReformManOrderIndex;
+                const auto ReformCutKey = [&](int32 ReformIndex) { return FMath::Fmod(ReformManOrder[ReformIndex] - ReformCut + 720.f, 360.f); };
+                ReformCutMen.Sort([&](int32 A, int32 B) { return !FMath::IsNearlyEqual(ReformCutKey(A), ReformCutKey(B), 4.f) ? ReformCutKey(A) < ReformCutKey(B) : ReformManRanks[A] < ReformManRanks[B]; });
+                for (const bool bReformReversed : { false, true })
+                {
+                    double ReformSum = 0.;
+                    for (int32 ReformK = 0; ReformK < ReformColumnCount; ++ReformK)
+                        ReformSum += FVector::Dist2D(ReformStarts[ReformMen[ReformCutMen[ReformK]]],
+                            ReformEndpoints[ReformSlotOrderIndex[bReformReversed ? ReformColumnCount - 1 - ReformK : ReformK]]);
+                    if (ReformSum < ReformBest) { ReformBest = ReformSum; ReformBestMen = ReformCutMen; bReformBestReversed = bReformReversed; }
+                }
+            }
+            ReformManOrderIndex = ReformBestMen;
+            if (bReformBestReversed) Algo::Reverse(ReformSlotOrderIndex);
+        }
+        const TArray<int32> ReformMenBefore = ReformMen;
+        for (int32 ReformK = 0; ReformK < ReformMen.Num(); ++ReformK)
+        {
+            ReformMen[ReformK] = ReformMenBefore[ReformManOrderIndex[ReformK]];
+            ReformTargets[ReformK] = ReformSlotOrderIndex[ReformK];
+        }
+    }
     // Uncross straight segments by exchanging endpoints. Every exchange strictly shortens total travel.
     // Collinear paths also exchange when the shorter pairing removes overtaking.
     FormationCrossingsAvoided = 0;
-    bool bReformExchanged = true;
+    bool bReformExchanged = !bSquareSwingPlanned;   // the swing's pairing is its own: an exchange would break the arm
     while (bReformExchanged)
     {
         bReformExchanged = false;
@@ -2002,6 +2312,7 @@ void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, cons
             if (OwnerCompany->FormationTransition) OwnerCompany->FormationTransition->ExtendReformSeconds(ReformBudget + 0.3f);
         }
     }
+    if (bSquareSwingPlanned) ReformBudget = SquareSwingBudget;
     FormationPlanStarted = VisualAnimationTime;
     FormationLongestPath = 0.f;
     bFormationPlanPending = !ReformMen.IsEmpty();
@@ -2025,13 +2336,745 @@ void UStrategyInfantryVisualComponent::PlanOrderlyReform(bool bDestination, cons
         ReformSettle.ReformStartLocal = ReformFrame.InverseTransformPosition(ReformStart);
         ReformSettle.ReformStartTime = VisualAnimationTime;
         ReformSettle.ReformDuration = ReformBudget;
+        if (bSquareSwingPlanned)
+        {
+            // One clock for the wings; the front only closes in.
+            // (The men who only step to their place take the first swing's time: sooner, the corner man stood where the wing's
+            // first man had not yet left.)
+            // (Column <-> square: all on the one clock, as the plan was walked through. Out of the square each man with his own start
+            // and his own half-second to get going was tried first: the men with a short way went at 5 m/s and ran into the others,
+            // 5 cm measured where the plan had 41, 2026-11-15.)
+            if (ReformSettle.SquareSwingKind == 0 && !bSquareWrapRunning)
+            {
+                ReformSettle.ReformDuration = FMath::Max(0.6f, ReformBudget * SquareSwingSplit);
+                // Out of the square the rear opens first; the wings' first swing, and these men with it, comes after.
+                if (!bReformToSquare) ReformSettle.ReformStartTime = VisualAnimationTime + FMath::Max(0.f, ReformBudget - ReformSettle.ReformDuration);
+            }
+            ReformSettle.ReformDeadline = ReformSettle.ReformStartTime + ReformSettle.ReformDuration;
+        }
+        else if (!bDestination && !bReformColumn)
+        {
+            // Each man his own walk (user 2026-11-05, QA: "det er ikke flydende" - all set off in one frame, the far men sprinted at
+            // 7.5 m/s and all clicked into place together): a walking pace with half a second to get going and to stop, and the files
+            // setting off one after the other (rank by rank a little later), so the company moves as men, not as one body.
+            const float ReformManPath = float(FVector::Dist2D(ReformStart, ReformSettle.ReformTarget));
+            const float ReformManPace = 220.f;
+            // (Tried 2026-11-07: the longest walks first so all land within three seconds - Allan: "meget værre", 140 men landed at
+            // once in a pile. Back to the file-by-file start, which he found much better.)
+            const float ReformManDelay = FMath::Min(1.6f, 0.025f * float(ReformOrder % FMath::Max(1, ReformMen.Num() / FMath::Max(1, OwnerCompany->FormationComponent->RankCount))))
+                + 0.15f * float(ReformOrder / FMath::Max(1, ReformMen.Num() / FMath::Max(1, OwnerCompany->FormationComponent->RankCount)));
+            ReformSettle.ReformStartTime = VisualAnimationTime + ReformManDelay;
+            ReformSettle.ReformDuration = FMath::Max(0.6f, ReformManPath / ReformManPace + 0.5f);
+            ReformSettle.ReformDeadline = ReformSettle.ReformStartTime + ReformSettle.ReformDuration;
+        }
         ReformSettle.WorldVelocity = FVector::ZeroVector;
         ReformSettle.bActive = true;
     }
 }
 
+namespace
+{
+    // A point a given way along a man's way round the square (up to five corners).
+    FVector2D SquareWrapAlong(const FVector2D* SquareWrapPath, int32 SquareWrapPoints, float SquareWrapDistance)
+    {
+        for (int32 SquareWrapLeg = 0; SquareWrapLeg + 1 < SquareWrapPoints; ++SquareWrapLeg)
+        {
+            const float SquareWrapLegLength = float(FVector2D::Distance(SquareWrapPath[SquareWrapLeg], SquareWrapPath[SquareWrapLeg + 1]));
+            if (SquareWrapDistance <= SquareWrapLegLength || SquareWrapLeg + 2 == SquareWrapPoints)
+                return FMath::Lerp(SquareWrapPath[SquareWrapLeg], SquareWrapPath[SquareWrapLeg + 1],
+                    SquareWrapLegLength > 0.f ? FMath::Clamp(SquareWrapDistance / SquareWrapLegLength, 0.f, 1.f) : 0.f);
+            SquareWrapDistance -= SquareWrapLegLength;
+        }
+        return SquareWrapPoints > 0 ? SquareWrapPath[SquareWrapPoints - 1] : FVector2D::ZeroVector;
+    }
+}
+
+FVector UStrategyInfantryVisualComponent::SquareWrapPoint(const FSettle& SquareWrapSettle, float SquareWrapTravel) const
+{
+    const FVector2D SquareWrapAt = SquareWrapAlong(SquareWrapSettle.SquareWrapPath, SquareWrapSettle.SquareWrapPoints, FMath::Clamp(SquareWrapTravel, 0.f, SquareWrapSettle.SquareWrapDelta));
+    return FVector(SquareWrapAt.X, SquareWrapAt.Y, SquareWrapSettle.Slot.Z);
+}
+
+bool UStrategyInfantryVisualComponent::PlanSquareWrap(bool bSquareWrapInto, const FTransform& SquareWrapFrame, const TArray<int32>& SquareWrapMen,
+    const TArray<FVector>& SquareWrapSlots, const TArray<FVector>& SquareWrapStarts, TArray<int32>& SquareWrapTargets, float& OutSquareWrapSeconds)
+{
+    // March column <-> square (Allan 2026-11-15: "Ja, videre med kolonne"). The column marches on into the square it is to form:
+    // the men of the two outer files turn out to their own side at the front and go round that side, the middle file's men turn
+    // right and left by turns along the front rank; each goes to the far end of his ring first, so nobody overtakes. The last rows
+    // close the two places the column itself came through: the middle of the front, then the middle of the rear. Out of the square
+    // the same film runs back. The ways are laid here and then walked through in thought: if two men come nearer than 30 cm
+    // anywhere on the way the plan is dropped and the straight walk is used as before.
+    const TCHAR* SquareWrapKindText = bSquareWrapInto ? TEXT("column-to-square") : TEXT("square-to-column");
+    const auto SquareWrapReject = [&](const TCHAR* SquareWrapWhy)
+    {
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s start kind=%s men=%d accepted=0 reason=%s"),
+            *OwnerCompany->StableUnitId.ToString(), SquareWrapKindText, SquareWrapMen.Num(), SquareWrapWhy);
+        return false;
+    };
+    const int32 SquareWrapCount = SquareWrapMen.Num();
+    if (SquareWrapCount < 24 || SquareWrapCount != SquareWrapSlots.Num() || SquareWrapCount != SquareWrapTargets.Num()) return SquareWrapReject(TEXT("too-few-or-uneven"));
+    if (OwnerCompany->StanceComponent && OwnerCompany->StanceComponent->Stance == EStrategyStance::Prone) return SquareWrapReject(TEXT("prone"));
+    if (OwnerCompany->SkirmisherComponent && (OwnerCompany->SkirmisherComponent->State == EStrategySkirmisherState::Deploying || OwnerCompany->SkirmisherComponent->IsDeployed()))
+        return SquareWrapReject(TEXT("screen-out"));
+    const int32 SquareWrapRanks = FMath::Max(1, OwnerCompany->FormationComponent->RankCount);
+    if (OwnerCompany->FormationComponent->ColumnWidth != 3) return SquareWrapReject(TEXT("column-not-three-wide"));
+    const float SquareWrapRankSpacing = FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierRankSpacingCm);
+    const float SquareWrapFileSpacing = FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierLateralSpacingCm);
+    TArray<FVector> SquareWrapStandPoints;
+    for (int32 SquareWrapMan : SquareWrapMen) SquareWrapStandPoints.Add(SquareWrapFrame.InverseTransformPosition(SquareWrapStarts[SquareWrapMan]));
+    const TArray<FVector>& SquareWrapColumnPoints = bSquareWrapInto ? SquareWrapStandPoints : SquareWrapSlots;
+    const TArray<FVector>& SquareWrapRingPoints = bSquareWrapInto ? SquareWrapSlots : SquareWrapStandPoints;
+    float SquareWrapFront = -TNumericLimits<float>::Max(), SquareWrapRear = TNumericLimits<float>::Max(), SquareWrapWide = 0.f;
+    for (const FVector& SquareWrapRingPoint : SquareWrapRingPoints)
+    {
+        SquareWrapFront = FMath::Max(SquareWrapFront, float(SquareWrapRingPoint.X));
+        SquareWrapRear = FMath::Min(SquareWrapRear, float(SquareWrapRingPoint.X));
+        SquareWrapWide = FMath::Max(SquareWrapWide, FMath::Abs(float(SquareWrapRingPoint.Y)));
+    }
+    const float SquareWrapLength = SquareWrapFront - SquareWrapRear;
+    if (SquareWrapWide < 2.f * SquareWrapRankSpacing || FMath::Abs(SquareWrapLength - 2.f * SquareWrapWide) > SquareWrapRankSpacing) return SquareWrapReject(TEXT("not-a-square"));
+    // The places of the square: ring, side of the column's axis, and how far along the ring from the middle of the front.
+    struct FSquareWrapPlace { int32 Index = INDEX_NONE; int32 Ring = 0; int32 Side = 1; float Along = 0.f; FVector2D At = FVector2D::ZeroVector; bool bRear = false; bool bFront = false; bool bUsed = false; };
+    struct FSquareWrapWalker { int32 Index = INDEX_NONE; FVector2D At = FVector2D::ZeroVector; int32 Row = 0; int32 Lane = 0; bool bDone = false; };
+    struct FSquareWrapWay { int32 Walker = INDEX_NONE; int32 Place = INDEX_NONE; FVector2D Path[5]; int32 Points = 0; float Delta = 0.f; };
+    const float SquareWrapTolerance = 0.3f * SquareWrapRankSpacing;
+    TArray<FSquareWrapPlace> SquareWrapPlaces;
+    for (int32 SquareWrapRingIndex = 0; SquareWrapRingIndex < SquareWrapRingPoints.Num(); ++SquareWrapRingIndex)
+    {
+        const FVector& SquareWrapRingPoint = SquareWrapRingPoints[SquareWrapRingIndex];
+        const float SquareWrapFromFront = SquareWrapFront - float(SquareWrapRingPoint.X), SquareWrapFromRear = float(SquareWrapRingPoint.X) - SquareWrapRear;
+        const float SquareWrapFromLeft = float(SquareWrapRingPoint.Y) + SquareWrapWide, SquareWrapFromRight = SquareWrapWide - float(SquareWrapRingPoint.Y);
+        FSquareWrapPlace SquareWrapPlace;
+        SquareWrapPlace.Index = SquareWrapRingIndex;
+        SquareWrapPlace.Ring = FMath::RoundToInt32(FMath::Min(FMath::Min(SquareWrapFromFront, SquareWrapFromRear), FMath::Min(SquareWrapFromLeft, SquareWrapFromRight)) / SquareWrapRankSpacing);
+        if (SquareWrapPlace.Ring < 0 || SquareWrapPlace.Ring >= SquareWrapRanks) return SquareWrapReject(TEXT("ring-out-of-range"));
+        const float SquareWrapRingDepth = SquareWrapPlace.Ring * SquareWrapRankSpacing;
+        const float SquareWrapRingHalf = SquareWrapWide - SquareWrapRingDepth;
+        SquareWrapPlace.Side = SquareWrapRingPoint.Y >= 0. ? 1 : -1;
+        SquareWrapPlace.At = FVector2D(SquareWrapRingPoint.X, SquareWrapRingPoint.Y);
+        const bool bSquareWrapOnFront = FMath::Abs(SquareWrapFromFront - SquareWrapRingDepth) <= SquareWrapTolerance;
+        const bool bSquareWrapOnRear = FMath::Abs(SquareWrapFromRear - SquareWrapRingDepth) <= SquareWrapTolerance;
+        const bool bSquareWrapOnSide = FMath::Abs((SquareWrapPlace.Side > 0 ? SquareWrapFromRight : SquareWrapFromLeft) - SquareWrapRingDepth) <= SquareWrapTolerance;
+        if (bSquareWrapOnFront) SquareWrapPlace.Along = FMath::Abs(float(SquareWrapRingPoint.Y));
+        else if (bSquareWrapOnSide) SquareWrapPlace.Along = SquareWrapRingHalf + (SquareWrapFromFront - SquareWrapRingDepth);
+        else if (bSquareWrapOnRear) SquareWrapPlace.Along = SquareWrapRingHalf + (SquareWrapLength - 2.f * SquareWrapRingDepth) + (SquareWrapRingHalf - FMath::Abs(float(SquareWrapRingPoint.Y)));
+        else return SquareWrapReject(TEXT("square-not-formed"));
+        SquareWrapPlace.bFront = bSquareWrapOnFront;
+        SquareWrapPlace.bRear = bSquareWrapOnRear && !bSquareWrapOnSide && !bSquareWrapOnFront;
+        SquareWrapPlaces.Add(SquareWrapPlace);
+    }
+    // The column: three files along the unit's own axis, row behind row.
+    float SquareWrapHead = -TNumericLimits<float>::Max();
+    for (const FVector& SquareWrapColumnPoint : SquareWrapColumnPoints) SquareWrapHead = FMath::Max(SquareWrapHead, float(SquareWrapColumnPoint.X));
+    if (SquareWrapHead > SquareWrapFront + SquareWrapRankSpacing) return SquareWrapReject(TEXT("column-ahead-of-square"));
+    // The column as it stands: on the march its files are a rank's spacing apart and its rows a file's (the line turned to its
+    // flank), formed up at the halt the other way round. Both are read off the men themselves.
+    float SquareWrapLaneSpacing = 0.f;
+    for (const FVector& SquareWrapColumnPoint : SquareWrapColumnPoints) SquareWrapLaneSpacing = FMath::Max(SquareWrapLaneSpacing, FMath::Abs(float(SquareWrapColumnPoint.Y)));
+    if (SquareWrapLaneSpacing < 0.5f * SquareWrapFileSpacing || SquareWrapLaneSpacing > 1.6f * SquareWrapRankSpacing) return SquareWrapReject(TEXT("column-not-straight"));
+    TArray<FSquareWrapWalker> SquareWrapWalkers;
+    TArray<float> SquareWrapRowLevels;
+    for (int32 SquareWrapColumnIndex = 0; SquareWrapColumnIndex < SquareWrapColumnPoints.Num(); ++SquareWrapColumnIndex)
+    {
+        const FVector& SquareWrapColumnPoint = SquareWrapColumnPoints[SquareWrapColumnIndex];
+        FSquareWrapWalker SquareWrapWalker;
+        SquareWrapWalker.Index = SquareWrapColumnIndex;
+        SquareWrapWalker.At = FVector2D(SquareWrapColumnPoint.X, SquareWrapColumnPoint.Y);
+        SquareWrapWalker.Lane = FMath::RoundToInt32(float(SquareWrapColumnPoint.Y) / SquareWrapLaneSpacing);
+        if (FMath::Abs(SquareWrapWalker.Lane) > 1 || FMath::Abs(float(SquareWrapColumnPoint.Y) - SquareWrapWalker.Lane * SquareWrapLaneSpacing) > 0.25f * SquareWrapLaneSpacing)
+            return SquareWrapReject(TEXT("column-not-straight"));
+        bool bSquareWrapKnownRow = false;
+        for (const float SquareWrapRowLevel : SquareWrapRowLevels) bSquareWrapKnownRow |= FMath::Abs(SquareWrapRowLevel - float(SquareWrapColumnPoint.X)) < 20.f;
+        if (!bSquareWrapKnownRow) SquareWrapRowLevels.Add(float(SquareWrapColumnPoint.X));
+        SquareWrapWalkers.Add(SquareWrapWalker);
+    }
+    SquareWrapRowLevels.Sort([](float A, float B) { return A > B; });
+    for (FSquareWrapWalker& SquareWrapWalker : SquareWrapWalkers)
+        for (int32 SquareWrapRowIndex = 0; SquareWrapRowIndex < SquareWrapRowLevels.Num(); ++SquareWrapRowIndex)
+            if (FMath::Abs(SquareWrapRowLevels[SquareWrapRowIndex] - float(SquareWrapWalker.At.X)) < 20.f) { SquareWrapWalker.Row = SquareWrapRowIndex; break; }
+    const TArray<FSquareWrapPlace> SquareWrapPlacesClean = SquareWrapPlaces;
+    const TArray<FSquareWrapWalker> SquareWrapWalkersClean = SquareWrapWalkers;
+    // Laid twice (the front closed by just the places in the column's way, or by whole rows) and the better one walked.
+    TArray<FSquareWrapWay> SquareWrapBestWays;
+    float SquareWrapBestNearest = -1.f, SquareWrapBestLongest = 0.f;
+    int32 SquareWrapBestLeftOver = 0;
+    const TCHAR* SquareWrapFailure = TEXT("no-plan");
+    for (int32 SquareWrapAttempt = 0; SquareWrapAttempt < 2; ++SquareWrapAttempt)
+    {
+    const bool bSquareWrapWholeRows = SquareWrapAttempt == 1;
+    SquareWrapPlaces = SquareWrapPlacesClean;
+    SquareWrapWalkers = SquareWrapWalkersClean;
+    bool bSquareWrapAttemptFailed = false;
+    TArray<FSquareWrapWay> SquareWrapWays;
+    // The places in the column's own way (within a man's width of one of its three files) are held back for the last rows: they
+    // march straight up and step aside into them. Each time the rearmost men free take them; of these the last to come up takes
+    // the place nearest his own file, those before him step further aside.
+    const float SquareWrapInTheWay = SquareWrapLaneSpacing + 45.f;
+    // Which places are held back: 1 the rear's middle (the gate), 2 the front's middle (closed last but for the gate).
+    TArray<uint8> SquareWrapHeldFor;
+    SquareWrapHeldFor.SetNumZeroed(SquareWrapPlaces.Num());
+    int32 SquareWrapHeldCount = 0;
+    for (int32 SquareWrapPlaceIndex = 0; SquareWrapPlaceIndex < SquareWrapPlaces.Num(); ++SquareWrapPlaceIndex)
+    {
+        const FSquareWrapPlace& SquareWrapPlace = SquareWrapPlaces[SquareWrapPlaceIndex];
+        if (FMath::Abs(float(SquareWrapPlace.At.Y)) >= SquareWrapInTheWay) continue;
+        SquareWrapHeldFor[SquareWrapPlaceIndex] = SquareWrapPlace.bRear ? 1 : SquareWrapPlace.bFront ? 2 : 0;
+        SquareWrapHeldCount += SquareWrapHeldFor[SquareWrapPlaceIndex] != 0 ? 1 : 0;
+    }
+    if (bSquareWrapWholeRows)
+    {
+        // Whole rows close the front: the next front places from the middle outwards are held back too, until the rows come out even.
+        for (int32 SquareWrapPad = (3 - SquareWrapHeldCount % 3) % 3; SquareWrapPad > 0; --SquareWrapPad)
+        {
+            int32 SquareWrapNext = INDEX_NONE;
+            for (int32 SquareWrapPlaceIndex = 0; SquareWrapPlaceIndex < SquareWrapPlaces.Num(); ++SquareWrapPlaceIndex)
+            {
+                const FSquareWrapPlace& SquareWrapPlace = SquareWrapPlaces[SquareWrapPlaceIndex];
+                if (!SquareWrapPlace.bFront || SquareWrapHeldFor[SquareWrapPlaceIndex] != 0) continue;
+                if (SquareWrapNext == INDEX_NONE || FMath::Abs(SquareWrapPlace.At.Y) < FMath::Abs(SquareWrapPlaces[SquareWrapNext].At.Y) - 0.5 ||
+                    (FMath::Abs(SquareWrapPlace.At.Y) < FMath::Abs(SquareWrapPlaces[SquareWrapNext].At.Y) + 0.5 && SquareWrapPlace.Ring > SquareWrapPlaces[SquareWrapNext].Ring))
+                    SquareWrapNext = SquareWrapPlaceIndex;
+            }
+            if (SquareWrapNext == INDEX_NONE) break;
+            SquareWrapHeldFor[SquareWrapNext] = 2;
+        }
+    }
+    const auto SquareWrapReserve = [&](int32 SquareWrapRing, bool bSquareWrapRearFace, bool bSquareWrapMiddleFirst)
+    {
+        TArray<int32> SquareWrapHeld;
+        for (int32 SquareWrapPlaceIndex = 0; SquareWrapPlaceIndex < SquareWrapPlaces.Num(); ++SquareWrapPlaceIndex)
+        {
+            const FSquareWrapPlace& SquareWrapPlace = SquareWrapPlaces[SquareWrapPlaceIndex];
+            if (!SquareWrapPlace.bUsed && SquareWrapPlace.Ring == SquareWrapRing && SquareWrapHeldFor[SquareWrapPlaceIndex] == (bSquareWrapRearFace ? 1 : 2))
+                SquareWrapHeld.Add(SquareWrapPlaceIndex);
+        }
+        TArray<int32> SquareWrapFree;
+        for (int32 SquareWrapWalkerIndex = 0; SquareWrapWalkerIndex < SquareWrapWalkers.Num(); ++SquareWrapWalkerIndex)
+            if (!SquareWrapWalkers[SquareWrapWalkerIndex].bDone) SquareWrapFree.Add(SquareWrapWalkerIndex);
+        SquareWrapFree.Sort([&](int32 A, int32 B)
+        {
+            const FSquareWrapWalker& WalkerA = SquareWrapWalkers[A]; const FSquareWrapWalker& WalkerB = SquareWrapWalkers[B];
+            if (WalkerA.Row != WalkerB.Row) return WalkerA.Row > WalkerB.Row;
+            if (FMath::Abs(WalkerA.Lane) != FMath::Abs(WalkerB.Lane)) return bSquareWrapMiddleFirst ? FMath::Abs(WalkerA.Lane) < FMath::Abs(WalkerB.Lane) : FMath::Abs(WalkerA.Lane) > FMath::Abs(WalkerB.Lane);
+            return WalkerA.Lane < WalkerB.Lane;
+        });
+        SquareWrapFree.SetNum(FMath::Min(SquareWrapFree.Num(), SquareWrapHeld.Num()));
+        // The men and the places in order across; of two men of one file the one behind takes the place nearer the file (he comes
+        // last and steps the least aside).
+        SquareWrapFree.Sort([&](int32 A, int32 B)
+        {
+            const FSquareWrapWalker& WalkerA = SquareWrapWalkers[A]; const FSquareWrapWalker& WalkerB = SquareWrapWalkers[B];
+            return WalkerA.Lane != WalkerB.Lane ? WalkerA.Lane < WalkerB.Lane : WalkerA.At.X < WalkerB.At.X;
+        });
+        SquareWrapHeld.Sort([&](int32 A, int32 B) { return SquareWrapPlaces[A].At.Y < SquareWrapPlaces[B].At.Y; });
+        SquareWrapHeld.SetNum(FMath::Min(SquareWrapFree.Num(), SquareWrapHeld.Num()));
+        for (bool bSquareWrapSwapped = true; bSquareWrapSwapped;)
+        {
+            bSquareWrapSwapped = false;
+            for (int32 SquareWrapA = 0; SquareWrapA < SquareWrapHeld.Num(); ++SquareWrapA)
+            for (int32 SquareWrapB = 0; SquareWrapB < SquareWrapHeld.Num(); ++SquareWrapB)
+            {
+                const FSquareWrapWalker& WalkerA = SquareWrapWalkers[SquareWrapFree[SquareWrapA]]; const FSquareWrapWalker& WalkerB = SquareWrapWalkers[SquareWrapFree[SquareWrapB]];
+                if (SquareWrapA == SquareWrapB || WalkerA.Lane != WalkerB.Lane || WalkerA.At.X >= WalkerB.At.X) continue;
+                if (FMath::Abs(SquareWrapPlaces[SquareWrapHeld[SquareWrapA]].At.Y - WalkerA.At.Y) > FMath::Abs(SquareWrapPlaces[SquareWrapHeld[SquareWrapB]].At.Y - WalkerB.At.Y) + 0.1)
+                { SquareWrapHeld.Swap(SquareWrapA, SquareWrapB); bSquareWrapSwapped = true; }
+            }
+        }
+        for (int32 SquareWrapK = 0; SquareWrapK < SquareWrapHeld.Num(); ++SquareWrapK)
+        {
+            const int32 SquareWrapWalkerIndex = SquareWrapFree[SquareWrapK];
+            FSquareWrapWalker& SquareWrapWalker = SquareWrapWalkers[SquareWrapWalkerIndex];
+            FSquareWrapPlace& SquareWrapPlace = SquareWrapPlaces[SquareWrapHeld[SquareWrapK]];
+            SquareWrapWalker.bDone = true; SquareWrapPlace.bUsed = true;
+            // Straight up his file, the last 60 cm turned towards the place.
+            const float SquareWrapAhead = float(SquareWrapPlace.At.X - SquareWrapWalker.At.X);
+            const float SquareWrapTurnIn = FMath::Min(60.f, FMath::Abs(SquareWrapAhead)) * (SquareWrapAhead >= 0.f ? 1.f : -1.f);
+            FSquareWrapWay SquareWrapWay;
+            SquareWrapWay.Walker = SquareWrapWalkerIndex; SquareWrapWay.Place = SquareWrapPlace.Index;
+            SquareWrapWay.Path[0] = SquareWrapWalker.At;
+            SquareWrapWay.Path[1] = FVector2D(SquareWrapPlace.At.X - SquareWrapTurnIn, SquareWrapWalker.At.Y);
+            SquareWrapWay.Path[2] = SquareWrapPlace.At;
+            SquareWrapWay.Points = 3;
+            SquareWrapWays.Add(SquareWrapWay);
+        }
+    };
+    for (int32 SquareWrapRing = 0; SquareWrapRing < SquareWrapRanks; ++SquareWrapRing) SquareWrapReserve(SquareWrapRing, true, false);
+    for (int32 SquareWrapRing = SquareWrapRanks - 1; SquareWrapRing >= 0; --SquareWrapRing) SquareWrapReserve(SquareWrapRing, false, true);
+    // The rest go round: each ring's places on each side, the furthest first.
+    TMap<int32, TArray<int32>> SquareWrapOpen;   // key: side (0 left, 1 right) * 8 + ring
+    for (int32 SquareWrapPlaceIndex = 0; SquareWrapPlaceIndex < SquareWrapPlaces.Num(); ++SquareWrapPlaceIndex)
+        if (!SquareWrapPlaces[SquareWrapPlaceIndex].bUsed)
+            SquareWrapOpen.FindOrAdd((SquareWrapPlaces[SquareWrapPlaceIndex].Side > 0 ? 8 : 0) + SquareWrapPlaces[SquareWrapPlaceIndex].Ring).Add(SquareWrapPlaceIndex);
+    for (TPair<int32, TArray<int32>>& SquareWrapOpenList : SquareWrapOpen)
+        SquareWrapOpenList.Value.Sort([&](int32 A, int32 B) { return SquareWrapPlaces[A].Along > SquareWrapPlaces[B].Along; });
+    const auto SquareWrapTake = [&](int32 SquareWrapSide, int32 SquareWrapRing)
+    {
+        TArray<int32>* SquareWrapList = SquareWrapOpen.Find((SquareWrapSide > 0 ? 8 : 0) + SquareWrapRing);
+        if (!SquareWrapList || SquareWrapList->IsEmpty()) return int32(INDEX_NONE);
+        const int32 SquareWrapTaken = (*SquareWrapList)[0];
+        SquareWrapList->RemoveAt(0);
+        return SquareWrapTaken;
+    };
+    TArray<int32> SquareWrapOrder;
+    for (int32 SquareWrapWalkerIndex = 0; SquareWrapWalkerIndex < SquareWrapWalkers.Num(); ++SquareWrapWalkerIndex)
+        if (!SquareWrapWalkers[SquareWrapWalkerIndex].bDone) SquareWrapOrder.Add(SquareWrapWalkerIndex);
+    // Row by row from the head; in a row the outer men before the middle man (on the front rank they are ahead of him).
+    SquareWrapOrder.Sort([&](int32 A, int32 B)
+    {
+        const FSquareWrapWalker& WalkerA = SquareWrapWalkers[A]; const FSquareWrapWalker& WalkerB = SquareWrapWalkers[B];
+        if (WalkerA.Row != WalkerB.Row) return WalkerA.Row < WalkerB.Row;
+        if (FMath::Abs(WalkerA.Lane) != FMath::Abs(WalkerB.Lane)) return FMath::Abs(WalkerA.Lane) > FMath::Abs(WalkerB.Lane);
+        return WalkerA.Lane < WalkerB.Lane;
+    });
+    TArray<int32> SquareWrapLeftOver;
+    int32 SquareWrapMiddleTurn = 1, SquareWrapMiddleRow = MIN_int32, SquareWrapMiddleSide = 0, SquareWrapAlternate[2] = { 0, 0 };
+    for (int32 SquareWrapWalkerIndex : SquareWrapOrder)
+    {
+        FSquareWrapWalker& SquareWrapWalker = SquareWrapWalkers[SquareWrapWalkerIndex];
+        if (SquareWrapWalker.Row != SquareWrapMiddleRow)
+        {
+            // Which way this row's middle man turns: right and left by turns (set when the row has one going round).
+            SquareWrapMiddleRow = SquareWrapWalker.Row;
+            SquareWrapMiddleSide = 0;
+            for (int32 SquareWrapOther : SquareWrapOrder)
+                if (SquareWrapWalkers[SquareWrapOther].Row == SquareWrapWalker.Row && SquareWrapWalkers[SquareWrapOther].Lane == 0)
+                { SquareWrapMiddleSide = SquareWrapMiddleTurn; SquareWrapMiddleTurn = -SquareWrapMiddleTurn; break; }
+        }
+        int32 SquareWrapGot = INDEX_NONE, SquareWrapSide = 0;
+        if (SquareWrapWalker.Lane == 0)
+        {
+            // The middle file along the outer (front) rank.
+            SquareWrapSide = SquareWrapMiddleSide;
+            SquareWrapGot = SquareWrapTake(SquareWrapSide, 0);
+        }
+        else
+        {
+            SquareWrapSide = SquareWrapWalker.Lane;
+            // The head row stands on the front rank already; the others turn out on the second and third rank by turns (never back to
+            // a rank behind them), and onto the front rank only in a row whose middle man turns the same way after them.
+            if (SquareWrapWalker.At.X > SquareWrapFront - 1.f) SquareWrapGot = SquareWrapTake(SquareWrapSide, 0);
+            else
+            {
+                int32& SquareWrapTurn = SquareWrapAlternate[SquareWrapSide > 0 ? 1 : 0];
+                bool bSquareWrapRankAhead = false;
+                for (int32 SquareWrapTry = 0; SquareWrapTry < 2 && SquareWrapGot == INDEX_NONE; ++SquareWrapTry)
+                {
+                    const int32 SquareWrapRing = FMath::Min(SquareWrapRanks - 1, SquareWrapTry == 0 ? 1 + SquareWrapTurn % 2 : 2 - SquareWrapTurn % 2);
+                    if (SquareWrapRing < 1 || SquareWrapFront - SquareWrapRing * SquareWrapRankSpacing < SquareWrapWalker.At.X - 1.f) continue;
+                    bSquareWrapRankAhead = true;
+                    SquareWrapGot = SquareWrapTake(SquareWrapSide, SquareWrapRing);
+                }
+                if (SquareWrapGot != INDEX_NONE) ++SquareWrapTurn;
+                // Between two ranks with none of his own ahead of him: half a pace back to the rank just behind him.
+                for (int32 SquareWrapRing = 1; !bSquareWrapRankAhead && SquareWrapGot == INDEX_NONE && SquareWrapRing < SquareWrapRanks; ++SquareWrapRing)
+                {
+                    const float SquareWrapBack = float(SquareWrapWalker.At.X) - (SquareWrapFront - SquareWrapRing * SquareWrapRankSpacing);
+                    if (SquareWrapBack > 0.f && SquareWrapBack <= 0.5f * SquareWrapRankSpacing) SquareWrapGot = SquareWrapTake(SquareWrapSide, SquareWrapRing);
+                }
+                if (SquareWrapGot == INDEX_NONE && SquareWrapMiddleSide == SquareWrapSide) SquareWrapGot = SquareWrapTake(SquareWrapSide, 0);
+            }
+        }
+        if (SquareWrapGot == INDEX_NONE) { SquareWrapLeftOver.Add(SquareWrapWalkerIndex); continue; }
+        FSquareWrapPlace& SquareWrapPlace = SquareWrapPlaces[SquareWrapGot];
+        const float SquareWrapRingDepth = SquareWrapPlace.Ring * SquareWrapRankSpacing;
+        const float SquareWrapRingHalf = SquareWrapWide - SquareWrapRingDepth;
+        FSquareWrapWay SquareWrapWay;
+        SquareWrapWay.Walker = SquareWrapWalkerIndex; SquareWrapWay.Place = SquareWrapPlace.Index;
+        SquareWrapWay.Path[0] = SquareWrapWalker.At;
+        SquareWrapWay.Path[1] = FVector2D(SquareWrapFront - SquareWrapRingDepth, SquareWrapWalker.At.Y);
+        SquareWrapWay.Path[2] = FVector2D(SquareWrapFront - SquareWrapRingDepth, SquareWrapSide * SquareWrapRingHalf);
+        SquareWrapWay.Path[3] = FVector2D(SquareWrapRear + SquareWrapRingDepth, SquareWrapSide * SquareWrapRingHalf);
+        SquareWrapWay.Path[4] = FVector2D(SquareWrapRear + SquareWrapRingDepth, 0.f);
+        SquareWrapWay.Points = 5;
+        SquareWrapWay.Delta = float(FMath::Abs(SquareWrapWay.Path[1].X - SquareWrapWalker.At.X)) + (SquareWrapPlace.Along - FMath::Abs(float(SquareWrapWalker.At.Y)));
+        if (SquareWrapWay.Delta < 0.f) { bSquareWrapAttemptFailed = true; SquareWrapFailure = TEXT("place-behind-file"); break; }
+        SquareWrapPlace.bUsed = true; SquareWrapWalker.bDone = true;
+        SquareWrapWays.Add(SquareWrapWay);
+    }
+    // A man with no place on his ring takes the nearest place left: up his file, then across.
+    for (int32 SquareWrapWalkerIndex : SquareWrapLeftOver)
+    {
+        FSquareWrapWalker& SquareWrapWalker = SquareWrapWalkers[SquareWrapWalkerIndex];
+        int32 SquareWrapBest = INDEX_NONE;
+        for (int32 SquareWrapPlaceIndex = 0; SquareWrapPlaceIndex < SquareWrapPlaces.Num(); ++SquareWrapPlaceIndex)
+            if (!SquareWrapPlaces[SquareWrapPlaceIndex].bUsed && (SquareWrapBest == INDEX_NONE ||
+                FVector2D::DistSquared(SquareWrapPlaces[SquareWrapPlaceIndex].At, SquareWrapWalker.At) < FVector2D::DistSquared(SquareWrapPlaces[SquareWrapBest].At, SquareWrapWalker.At)))
+                SquareWrapBest = SquareWrapPlaceIndex;
+        if (SquareWrapBest == INDEX_NONE) { bSquareWrapAttemptFailed = true; SquareWrapFailure = TEXT("places-missing"); break; }
+        FSquareWrapPlace& SquareWrapPlace = SquareWrapPlaces[SquareWrapBest];
+        SquareWrapPlace.bUsed = true; SquareWrapWalker.bDone = true;
+        FSquareWrapWay SquareWrapWay;
+        SquareWrapWay.Walker = SquareWrapWalkerIndex; SquareWrapWay.Place = SquareWrapPlace.Index;
+        SquareWrapWay.Path[0] = SquareWrapWalker.At;
+        SquareWrapWay.Path[1] = FVector2D(SquareWrapPlace.At.X, SquareWrapWalker.At.Y);
+        SquareWrapWay.Path[2] = SquareWrapPlace.At;
+        SquareWrapWay.Points = 3;
+        SquareWrapWays.Add(SquareWrapWay);
+    }
+    if (bSquareWrapAttemptFailed || SquareWrapWays.Num() != SquareWrapCount) { if (!bSquareWrapAttemptFailed) SquareWrapFailure = TEXT("ways-missing"); continue; }
+    float SquareWrapLongest = 0.f;
+    for (FSquareWrapWay& SquareWrapWay : SquareWrapWays)
+    {
+        if (SquareWrapWay.Points == 3)
+            SquareWrapWay.Delta = float(FVector2D::Distance(SquareWrapWay.Path[0], SquareWrapWay.Path[1]) + FVector2D::Distance(SquareWrapWay.Path[1], SquareWrapWay.Path[2]));
+        SquareWrapLongest = FMath::Max(SquareWrapLongest, SquareWrapWay.Delta);
+    }
+    if (SquareWrapLongest <= 0.f) { SquareWrapFailure = TEXT("no-way"); continue; }
+    // The walk through in thought: everybody at one pace, each halting at his place. The nearest two men come on the way.
+    float SquareWrapNearest = TNumericLimits<float>::Max();
+    {
+        TArray<FVector2D> SquareWrapAtStep;
+        SquareWrapAtStep.SetNum(SquareWrapWays.Num());
+        const int32 SquareWrapSteps = FMath::Clamp(FMath::CeilToInt(SquareWrapLongest / 40.f), 20, 160);
+        for (int32 SquareWrapStep = 0; SquareWrapStep <= SquareWrapSteps; ++SquareWrapStep)
+        {
+            const float SquareWrapTravel = SquareWrapLongest * float(SquareWrapStep) / float(SquareWrapSteps);
+            for (int32 SquareWrapWayIndex = 0; SquareWrapWayIndex < SquareWrapWays.Num(); ++SquareWrapWayIndex)
+                SquareWrapAtStep[SquareWrapWayIndex] = SquareWrapAlong(SquareWrapWays[SquareWrapWayIndex].Path, SquareWrapWays[SquareWrapWayIndex].Points,
+                    FMath::Min(SquareWrapTravel, SquareWrapWays[SquareWrapWayIndex].Delta));
+            for (int32 SquareWrapA = 0; SquareWrapA < SquareWrapAtStep.Num(); ++SquareWrapA)
+            for (int32 SquareWrapB = SquareWrapA + 1; SquareWrapB < SquareWrapAtStep.Num(); ++SquareWrapB)
+                SquareWrapNearest = FMath::Min(SquareWrapNearest, float(FVector2D::DistSquared(SquareWrapAtStep[SquareWrapA], SquareWrapAtStep[SquareWrapB])));
+        }
+        SquareWrapNearest = FMath::Sqrt(SquareWrapNearest);
+    }
+    if (SquareWrapNearest > SquareWrapBestNearest)
+    {
+        SquareWrapBestNearest = SquareWrapNearest;
+        SquareWrapBestLongest = SquareWrapLongest;
+        SquareWrapBestLeftOver = SquareWrapLeftOver.Num();
+        SquareWrapBestWays = SquareWrapWays;
+    }
+    }
+    // (22 cm for a moment on the way: tight, but the straight walk it stands in for brought men within 4-13 cm and crossed them.
+    // Formed, the inner ring's men stand 52 cm apart.)
+    if (SquareWrapBestNearest < 22.f)
+    {
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s start kind=%s men=%d accepted=0 reason=%s nearest-cm=%.1f longest-cm=%.0f file-spacing-cm=%.0f rows=%d"),
+            *OwnerCompany->StableUnitId.ToString(), SquareWrapKindText, SquareWrapCount, SquareWrapBestNearest < 0.f ? SquareWrapFailure : TEXT("too-close"),
+            SquareWrapBestNearest, SquareWrapBestLongest, SquareWrapLaneSpacing, SquareWrapRowLevels.Num());
+        return false;
+    }
+    const float SquareWrapLongest = SquareWrapBestLongest;
+    const float SquareWrapNearest = SquareWrapBestNearest;
+    const TArray<FSquareWrapWay>& SquareWrapWays = SquareWrapBestWays;
+    SquareWrapWalkers = SquareWrapWalkersClean;
+    // The clock. Into the square inside the time it takes to form, at a run if need be (never longer: it is open to cavalry until it
+    // stands); out of it at a quick pace, the march held meanwhile as the straight walk held it.
+    float SquareWrapSeconds = 0.f;
+    if (bSquareWrapInto)
+    {
+        SquareWrapSeconds = SquareWrapLongest / 250.f;
+        if (OwnerCompany->FormationTransition && OwnerCompany->FormationTransition->ReformRemainingSeconds > 0.f)
+            SquareWrapSeconds = FMath::Min(SquareWrapSeconds, OwnerCompany->FormationTransition->ReformRemainingSeconds - 0.5f);
+        if (SquareWrapSeconds < SquareWrapLongest / 420.f) return SquareWrapReject(TEXT("no-time"));
+    }
+    else
+    {
+        SquareWrapSeconds = FMath::Max(3.f, SquareWrapLongest / 330.f);
+        if (OwnerCompany->FormationTransition) OwnerCompany->FormationTransition->ExtendReformSeconds(SquareWrapSeconds + 0.3f);
+    }
+    SquareSwingRunning = true;
+    SquareSwingStarted = VisualAnimationTime;
+    SquareWrapLongestCm = SquareWrapLongest;
+    for (const FSquareWrapWay& SquareWrapWay : SquareWrapWays)
+    {
+        const int32 SquareWrapColumnIndex = SquareWrapWalkers[SquareWrapWay.Walker].Index;
+        const int32 SquareWrapOrderIndex = bSquareWrapInto ? SquareWrapColumnIndex : SquareWrapWay.Place;
+        SquareWrapTargets[SquareWrapOrderIndex] = bSquareWrapInto ? SquareWrapWay.Place : SquareWrapColumnIndex;
+        FSettle& SquareWrapSettle = SoldierSettle[SquareWrapMen[SquareWrapOrderIndex]];
+        SquareWrapSettle.SquareSwingKind = bSquareWrapInto ? 3 : 4;
+        SquareWrapSettle.SquareWrapPoints = uint8(SquareWrapWay.Points);
+        for (int32 SquareWrapCorner = 0; SquareWrapCorner < 5; ++SquareWrapCorner) SquareWrapSettle.SquareWrapPath[SquareWrapCorner] = SquareWrapWay.Path[FMath::Min(SquareWrapCorner, SquareWrapWay.Points - 1)];
+        SquareWrapSettle.SquareWrapDelta = SquareWrapWay.Delta;
+    }
+    OutSquareWrapSeconds = SquareWrapSeconds;
+    UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s start kind=%s men=%d accepted=1 longest-cm=%.0f seconds=%.2f nearest-cm=%.1f left-over=%d"),
+        *OwnerCompany->StableUnitId.ToString(), SquareWrapKindText, SquareWrapCount, SquareWrapLongest, SquareWrapSeconds, SquareWrapNearest, SquareWrapBestLeftOver);
+    return true;
+}
+
+FVector UStrategyInfantryVisualComponent::SquareSwingPoint(const FSettle& SquareSwingSettle, float SquareSwingProgress) const
+{
+    // Progress 0 is the line, 1 the square. The first swing (the whole wing about the front corner) takes SquareSwingSplit of the
+    // clock, the second (the part beyond the rear corner, about that corner) the rest. A man's place along the arm and his depth
+    // behind its outer line go from the line's to the square's during the first swing (the inner rings are shorter than the line),
+    // so the second swing is rigid.
+    const float SquareSwingFirst = SquareSwingSplit > 0.f ? FMath::Clamp(SquareSwingProgress / SquareSwingSplit, 0.f, 1.f) : 1.f;
+    float SquareSwingSecond = SquareSwingSplit < 1.f ? FMath::Clamp((SquareSwingProgress - SquareSwingSplit) / (1.f - SquareSwingSplit), 0.f, 1.f) : 0.f;
+    // The two rear halves a fifth of the second swing apart: swinging in together their tips met in the middle (worked out
+    // 2026-11-15: 11 cm; apart 43 cm at the least).
+    const float SquareSwingLead = 0.2f;
+    SquareSwingSecond = SquareSwingSettle.SquareSwingSide == SquareSwingLeadSide ? FMath::Min(1.f, SquareSwingSecond / (1.f - SquareSwingLead)) :
+        FMath::Max(0.f, (SquareSwingSecond - SquareSwingLead) / (1.f - SquareSwingLead));
+    const float SquareSwingAlong = FMath::Lerp(SquareSwingSettle.SquareSwingLineAlong, SquareSwingSettle.SquareSwingPlaceAlong, SquareSwingFirst) +
+        SquareSwingSettle.SquareSwingBulge * FMath::Sin(UE_PI * SquareSwingFirst);
+    const float SquareSwingDepth = FMath::Lerp(SquareSwingSettle.SquareSwingLineDepth, SquareSwingSettle.SquareSwingPlaceDepth, SquareSwingFirst);
+    const float SquareSwingAngle = SquareSwingFirst * UE_HALF_PI;
+    const float SquareSwingFold = SquareSwingAngle + SquareSwingSecond * UE_HALF_PI;
+    // The left wing (Y < 0), mirrored for the right. Along the arm from the front corner, and inwards from its outer line.
+    const FVector2D SquareSwingCorner(SquareSwingFrontX, -SquareSwingHalf);
+    const FVector2D SquareSwingArmDir(-FMath::Sin(SquareSwingAngle), -FMath::Cos(SquareSwingAngle));
+    const FVector2D SquareSwingArmIn(-FMath::Cos(SquareSwingAngle), FMath::Sin(SquareSwingAngle));
+    FVector2D SquareSwingAt;
+    if (SquareSwingAlong <= SquareSwingArm)
+    {
+        SquareSwingAt = SquareSwingCorner + SquareSwingArmDir * SquareSwingAlong + SquareSwingArmIn * SquareSwingDepth;
+    }
+    else
+    {
+        const FVector2D SquareSwingRearCorner = SquareSwingCorner + SquareSwingArmDir * SquareSwingArm;
+        const FVector2D SquareSwingRearDir(-FMath::Sin(SquareSwingFold), -FMath::Cos(SquareSwingFold));
+        const FVector2D SquareSwingRearIn(-FMath::Cos(SquareSwingFold), FMath::Sin(SquareSwingFold));
+        SquareSwingAt = SquareSwingRearCorner + SquareSwingRearDir * (SquareSwingAlong - SquareSwingArm) + SquareSwingRearIn * SquareSwingDepth;
+    }
+    return FVector(SquareSwingAt.X, SquareSwingAt.Y * (SquareSwingSettle.SquareSwingSide < 0.f ? 1.f : -1.f), SquareSwingSettle.Slot.Z);
+}
+
+bool UStrategyInfantryVisualComponent::PlanSquareSwing(bool bSquareSwingInto, const FTransform& SquareSwingFrame, const TArray<int32>& SquareSwingMen,
+    const TArray<FVector>& SquareSwingSlots, const TArray<FVector>& SquareSwingStarts, TArray<int32>& SquareSwingTargets, float& OutSquareSwingSeconds)
+{
+    // Line <-> square (Allan 2026-11-14, after seeing both: "B: sving som en dør"). The middle of the line stands and is the square's
+    // front; each wing swings back as one stiff arm about the front corner and becomes the side, and the part of it beyond the rear
+    // corner swings in about that corner and closes half the rear. One clock for all, so the arm stays straight and nobody crosses;
+    // the ranks keep their depth, the line's front rank is the square's outer ring. Out of the square the same, backwards.
+    // The straight walk it replaces crossed (2026-11-13: 3 cm between men; the line is 46 m wide, the square 12 m). Everything is
+    // worked out here first; a man is touched only when the whole plan holds, else the straight walk is used as before.
+    const TCHAR* SquareSwingKindText = bSquareSwingInto ? TEXT("to-square-swing") : TEXT("from-square-swing");
+    const auto SquareSwingReject = [&](const TCHAR* SquareSwingWhy)
+    {
+        UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s start kind=%s men=%d accepted=0 reason=%s"),
+            *OwnerCompany->StableUnitId.ToString(), SquareSwingKindText, SquareSwingMen.Num(), SquareSwingWhy);
+        return false;
+    };
+    const int32 SquareSwingCount = SquareSwingMen.Num();
+    if (SquareSwingCount < 24 || SquareSwingCount != SquareSwingSlots.Num() || SquareSwingCount != SquareSwingTargets.Num()) return SquareSwingReject(TEXT("too-few-or-uneven"));
+    if (OwnerCompany->StanceComponent && OwnerCompany->StanceComponent->Stance == EStrategyStance::Prone) return SquareSwingReject(TEXT("prone"));
+    if (OwnerCompany->SkirmisherComponent && (OwnerCompany->SkirmisherComponent->State == EStrategySkirmisherState::Deploying || OwnerCompany->SkirmisherComponent->IsDeployed()))
+        return SquareSwingReject(TEXT("screen-out"));
+    const int32 SquareSwingRanks = FMath::Max(1, OwnerCompany->FormationComponent->RankCount);
+    const float SquareSwingRankSpacing = FMath::Max(1.f, OwnerCompany->FormationComponent->SoldierRankSpacingCm);
+    // Where the men stand and the places they go to, both in the unit's frame. One of the two sets is the line, the other the square.
+    TArray<FVector> SquareSwingStandPoints;
+    for (int32 SquareSwingMan : SquareSwingMen) SquareSwingStandPoints.Add(SquareSwingFrame.InverseTransformPosition(SquareSwingStarts[SquareSwingMan]));
+    const TArray<FVector>& SquareSwingLinePoints = bSquareSwingInto ? SquareSwingStandPoints : SquareSwingSlots;
+    const TArray<FVector>& SquareSwingRingPoints = bSquareSwingInto ? SquareSwingSlots : SquareSwingStandPoints;
+    // The square's outline from its own points.
+    float SquareSwingFront = -TNumericLimits<float>::Max(), SquareSwingRear = TNumericLimits<float>::Max(), SquareSwingWide = 0.f;
+    for (const FVector& SquareSwingRingPoint : SquareSwingRingPoints)
+    {
+        SquareSwingFront = FMath::Max(SquareSwingFront, float(SquareSwingRingPoint.X));
+        SquareSwingRear = FMath::Min(SquareSwingRear, float(SquareSwingRingPoint.X));
+        SquareSwingWide = FMath::Max(SquareSwingWide, FMath::Abs(float(SquareSwingRingPoint.Y)));
+    }
+    const float SquareSwingLength = SquareSwingFront - SquareSwingRear;
+    if (SquareSwingWide < 2.f * SquareSwingRankSpacing || FMath::Abs(SquareSwingLength - 2.f * SquareSwingWide) > SquareSwingRankSpacing) return SquareSwingReject(TEXT("not-a-square"));
+    float SquareSwingLineFront = -TNumericLimits<float>::Max();
+    for (const FVector& SquareSwingLinePoint : SquareSwingLinePoints) SquareSwingLineFront = FMath::Max(SquareSwingLineFront, float(SquareSwingLinePoint.X));
+    if (FMath::Abs(SquareSwingLineFront - SquareSwingFront) > 0.5f * SquareSwingRankSpacing) return SquareSwingReject(TEXT("fronts-apart"));
+    // A man or place on a wing's arm: how far along it from the front corner, how deep behind its outer line.
+    struct FSquareSwingSpot { int32 Index = INDEX_NONE; float Along = 0.f; float Depth = 0.f; float Across = 0.f; };
+    TArray<TArray<FSquareSwingSpot>> SquareSwingLineRanks, SquareSwingFrontPlaces, SquareSwingLeftPlaces, SquareSwingRightPlaces;
+    SquareSwingLineRanks.SetNum(SquareSwingRanks); SquareSwingFrontPlaces.SetNum(SquareSwingRanks);
+    SquareSwingLeftPlaces.SetNum(SquareSwingRanks); SquareSwingRightPlaces.SetNum(SquareSwingRanks);
+    const float SquareSwingTolerance = 0.3f * SquareSwingRankSpacing;
+    for (int32 SquareSwingLineIndex = 0; SquareSwingLineIndex < SquareSwingLinePoints.Num(); ++SquareSwingLineIndex)
+    {
+        const FVector& SquareSwingLinePoint = SquareSwingLinePoints[SquareSwingLineIndex];
+        const float SquareSwingLineDepth = SquareSwingFront - float(SquareSwingLinePoint.X);
+        const int32 SquareSwingLineRank = FMath::RoundToInt32(SquareSwingLineDepth / SquareSwingRankSpacing);
+        if (SquareSwingLineRank < 0 || SquareSwingLineRank >= SquareSwingRanks || FMath::Abs(SquareSwingLineDepth - SquareSwingLineRank * SquareSwingRankSpacing) > SquareSwingTolerance)
+            return SquareSwingReject(TEXT("line-not-formed"));
+        FSquareSwingSpot SquareSwingLineSpot;
+        SquareSwingLineSpot.Index = SquareSwingLineIndex; SquareSwingLineSpot.Depth = SquareSwingLineDepth; SquareSwingLineSpot.Across = float(SquareSwingLinePoint.Y);
+        SquareSwingLineRanks[SquareSwingLineRank].Add(SquareSwingLineSpot);
+    }
+    for (int32 SquareSwingRingIndex = 0; SquareSwingRingIndex < SquareSwingRingPoints.Num(); ++SquareSwingRingIndex)
+    {
+        const FVector& SquareSwingRingPoint = SquareSwingRingPoints[SquareSwingRingIndex];
+        const float SquareSwingFromFront = SquareSwingFront - float(SquareSwingRingPoint.X), SquareSwingFromRear = float(SquareSwingRingPoint.X) - SquareSwingRear;
+        const float SquareSwingFromLeft = float(SquareSwingRingPoint.Y) + SquareSwingWide, SquareSwingFromRight = SquareSwingWide - float(SquareSwingRingPoint.Y);
+        const int32 SquareSwingRing = FMath::RoundToInt32(FMath::Min(FMath::Min(SquareSwingFromFront, SquareSwingFromRear), FMath::Min(SquareSwingFromLeft, SquareSwingFromRight)) / SquareSwingRankSpacing);
+        if (SquareSwingRing < 0 || SquareSwingRing >= SquareSwingRanks) return SquareSwingReject(TEXT("ring-out-of-range"));
+        const float SquareSwingRingDepth = SquareSwingRing * SquareSwingRankSpacing;
+        const bool bSquareSwingOnFront = FMath::Abs(SquareSwingFromFront - SquareSwingRingDepth) <= SquareSwingTolerance;
+        const bool bSquareSwingOnRear = FMath::Abs(SquareSwingFromRear - SquareSwingRingDepth) <= SquareSwingTolerance;
+        const bool bSquareSwingOnLeft = FMath::Abs(SquareSwingFromLeft - SquareSwingRingDepth) <= SquareSwingTolerance;
+        const bool bSquareSwingOnRight = FMath::Abs(SquareSwingFromRight - SquareSwingRingDepth) <= SquareSwingTolerance;
+        FSquareSwingSpot SquareSwingRingSpot;
+        SquareSwingRingSpot.Index = SquareSwingRingIndex;
+        SquareSwingRingSpot.Across = float(SquareSwingRingPoint.Y);
+        if (bSquareSwingOnFront && !bSquareSwingOnRight)
+        {
+            // The front face with its left corner (the right corner is the right face's own, as the places are laid out).
+            SquareSwingRingSpot.Depth = SquareSwingFromFront;
+            SquareSwingFrontPlaces[SquareSwingRing].Add(SquareSwingRingSpot);
+        }
+        else if (bSquareSwingOnLeft || bSquareSwingOnRight)
+        {
+            SquareSwingRingSpot.Along = SquareSwingFromFront;
+            SquareSwingRingSpot.Depth = bSquareSwingOnLeft ? SquareSwingFromLeft : SquareSwingFromRight;
+            (bSquareSwingOnLeft ? SquareSwingLeftPlaces : SquareSwingRightPlaces)[SquareSwingRing].Add(SquareSwingRingSpot);
+        }
+        else if (bSquareSwingOnRear)
+        {
+            // The rear face, each half to the wing on its side: beyond the rear corner on that wing's arm.
+            const bool bSquareSwingRearLeft = SquareSwingRingPoint.Y < 0.;
+            SquareSwingRingSpot.Along = SquareSwingLength + (bSquareSwingRearLeft ? SquareSwingFromLeft : SquareSwingFromRight);
+            SquareSwingRingSpot.Depth = SquareSwingFromRear;
+            (bSquareSwingRearLeft ? SquareSwingLeftPlaces : SquareSwingRightPlaces)[SquareSwingRing].Add(SquareSwingRingSpot);
+        }
+        else return SquareSwingReject(TEXT("square-not-formed"));
+    }
+    // Rank by rank: the men nearest the corners go to the places nearest them on the same ring. The rings do not hold the same number
+    // as the line's ranks (189 men: 64/64/61 against 63/63/63); the men over in one rank take the places left on a wing's other rings,
+    // at the tip of the arm.
+    // (A man who stands inside the corner - before it on the arm - only steps to his place: swung, he went out in front of the line.)
+    struct FSquareSwingPair { int32 Line = INDEX_NONE; int32 Ring = INDEX_NONE; int32 Side = 0; float LineAlong = 0.f; float LineDepth = 0.f; float PlaceAlong = 0.f; float PlaceDepth = 0.f; };
+    TArray<FSquareSwingPair> SquareSwingPairs;
+    TArray<FSquareSwingSpot> SquareSwingSpareMen[2], SquareSwingSparePlaces[2];
+    int32 SquareSwingBalance[2] = { 0, 0 };
+    const auto SquareSwingAcrossLess = [](const FSquareSwingSpot& A, const FSquareSwingSpot& B) { return A.Across < B.Across; };
+    const auto SquareSwingAlongLess = [](const FSquareSwingSpot& A, const FSquareSwingSpot& B) { return A.Along < B.Along; };
+    for (int32 SquareSwingRank = 0; SquareSwingRank < SquareSwingRanks; ++SquareSwingRank)
+    {
+        TArray<FSquareSwingSpot>& SquareSwingRankMen = SquareSwingLineRanks[SquareSwingRank];
+        SquareSwingRankMen.Sort(SquareSwingAcrossLess);
+        SquareSwingFrontPlaces[SquareSwingRank].Sort(SquareSwingAcrossLess);
+        SquareSwingLeftPlaces[SquareSwingRank].Sort(SquareSwingAlongLess);
+        SquareSwingRightPlaces[SquareSwingRank].Sort(SquareSwingAlongLess);
+        const int32 SquareSwingFrontCount = SquareSwingFrontPlaces[SquareSwingRank].Num();
+        const int32 SquareSwingWingMen = SquareSwingRankMen.Num() - SquareSwingFrontCount;
+        if (SquareSwingWingMen < 0) return SquareSwingReject(TEXT("rank-too-short"));
+        int32 SquareSwingTake[2] = { SquareSwingLeftPlaces[SquareSwingRank].Num(), SquareSwingRightPlaces[SquareSwingRank].Num() };
+        int32 SquareSwingOver = SquareSwingWingMen - SquareSwingTake[0] - SquareSwingTake[1];
+        for (; SquareSwingOver > 0; --SquareSwingOver)
+        {
+            const int32 SquareSwingTo = SquareSwingBalance[0] <= SquareSwingBalance[1] ? 0 : 1;
+            ++SquareSwingTake[SquareSwingTo]; ++SquareSwingBalance[SquareSwingTo];
+        }
+        for (; SquareSwingOver < 0; ++SquareSwingOver)
+        {
+            int32 SquareSwingFromSide = SquareSwingBalance[0] >= SquareSwingBalance[1] ? 0 : 1;
+            if (SquareSwingTake[SquareSwingFromSide] <= 0) SquareSwingFromSide = 1 - SquareSwingFromSide;
+            if (SquareSwingTake[SquareSwingFromSide] <= 0) return SquareSwingReject(TEXT("rank-too-short"));
+            --SquareSwingTake[SquareSwingFromSide]; --SquareSwingBalance[SquareSwingFromSide];
+        }
+        // The front: the middle of the rank, left to right. They only close in a little.
+        for (int32 SquareSwingK = 0; SquareSwingK < SquareSwingFrontCount; ++SquareSwingK)
+        {
+            FSquareSwingPair SquareSwingPair;
+            SquareSwingPair.Line = SquareSwingRankMen[SquareSwingTake[0] + SquareSwingK].Index;
+            SquareSwingPair.Ring = SquareSwingFrontPlaces[SquareSwingRank][SquareSwingK].Index;
+            SquareSwingPairs.Add(SquareSwingPair);
+        }
+        for (int32 SquareSwingSideIndex = 0; SquareSwingSideIndex < 2; ++SquareSwingSideIndex)
+        {
+            const TArray<FSquareSwingSpot>& SquareSwingPlaces = SquareSwingSideIndex == 0 ? SquareSwingLeftPlaces[SquareSwingRank] : SquareSwingRightPlaces[SquareSwingRank];
+            for (int32 SquareSwingK = 0; SquareSwingK < FMath::Max(SquareSwingTake[SquareSwingSideIndex], SquareSwingPlaces.Num()); ++SquareSwingK)
+            {
+                // The wing's men from the corner outwards: the left wing from its right end, the right wing from its left end.
+                const int32 SquareSwingManAt = SquareSwingSideIndex == 0 ? SquareSwingTake[0] - 1 - SquareSwingK : SquareSwingRankMen.Num() - SquareSwingTake[1] + SquareSwingK;
+                const bool bSquareSwingHasMan = SquareSwingK < SquareSwingTake[SquareSwingSideIndex];
+                const bool bSquareSwingHasPlace = SquareSwingK < SquareSwingPlaces.Num();
+                FSquareSwingSpot SquareSwingManSpot;
+                if (bSquareSwingHasMan)
+                {
+                    SquareSwingManSpot = SquareSwingRankMen[SquareSwingManAt];
+                    // (Not held at nil: an inner-rank man inside the corner starts a little before it on the arm, exactly where he stands.)
+                    SquareSwingManSpot.Along = SquareSwingSideIndex == 0 ? -SquareSwingWide - SquareSwingManSpot.Across : SquareSwingManSpot.Across - SquareSwingWide;
+                }
+                if (bSquareSwingHasMan && bSquareSwingHasPlace)
+                {
+                    FSquareSwingPair SquareSwingPair;
+                    SquareSwingPair.Line = SquareSwingManSpot.Index; SquareSwingPair.Ring = SquareSwingPlaces[SquareSwingK].Index;
+                    SquareSwingPair.Side = SquareSwingManSpot.Along < 0.f ? 0 : (SquareSwingSideIndex == 0 ? -1 : 1);
+                    SquareSwingPair.LineAlong = SquareSwingManSpot.Along; SquareSwingPair.LineDepth = SquareSwingManSpot.Depth;
+                    SquareSwingPair.PlaceAlong = SquareSwingPlaces[SquareSwingK].Along; SquareSwingPair.PlaceDepth = SquareSwingPlaces[SquareSwingK].Depth;
+                    SquareSwingPairs.Add(SquareSwingPair);
+                }
+                else if (bSquareSwingHasMan) SquareSwingSpareMen[SquareSwingSideIndex].Add(SquareSwingManSpot);
+                else SquareSwingSparePlaces[SquareSwingSideIndex].Add(SquareSwingPlaces[SquareSwingK]);
+            }
+        }
+    }
+    for (int32 SquareSwingSideIndex = 0; SquareSwingSideIndex < 2; ++SquareSwingSideIndex)
+    {
+        if (SquareSwingSpareMen[SquareSwingSideIndex].Num() != SquareSwingSparePlaces[SquareSwingSideIndex].Num()) return SquareSwingReject(TEXT("wings-uneven"));
+        SquareSwingSpareMen[SquareSwingSideIndex].Sort(SquareSwingAlongLess);
+        SquareSwingSparePlaces[SquareSwingSideIndex].Sort(SquareSwingAlongLess);
+        for (int32 SquareSwingK = 0; SquareSwingK < SquareSwingSpareMen[SquareSwingSideIndex].Num(); ++SquareSwingK)
+        {
+            FSquareSwingPair SquareSwingPair;
+            SquareSwingPair.Line = SquareSwingSpareMen[SquareSwingSideIndex][SquareSwingK].Index; SquareSwingPair.Ring = SquareSwingSparePlaces[SquareSwingSideIndex][SquareSwingK].Index;
+            SquareSwingPair.Side = SquareSwingSpareMen[SquareSwingSideIndex][SquareSwingK].Along < 0.f ? 0 : (SquareSwingSideIndex == 0 ? -1 : 1);
+            SquareSwingPair.LineAlong = SquareSwingSpareMen[SquareSwingSideIndex][SquareSwingK].Along; SquareSwingPair.LineDepth = SquareSwingSpareMen[SquareSwingSideIndex][SquareSwingK].Depth;
+            SquareSwingPair.PlaceAlong = SquareSwingSparePlaces[SquareSwingSideIndex][SquareSwingK].Along; SquareSwingPair.PlaceDepth = SquareSwingSparePlaces[SquareSwingSideIndex][SquareSwingK].Depth;
+            SquareSwingPairs.Add(SquareSwingPair);
+        }
+    }
+    if (SquareSwingPairs.Num() != SquareSwingCount) return SquareSwingReject(TEXT("pairs-missing"));
+    // The clock: the tip of the arm walks the two arcs. Into the square inside the time the square takes to form (never longer:
+    // it is open to cavalry until it stands); out of it at a brisk pace, the time held as the straight walk held it.
+    float SquareSwingReach = 0.f, SquareSwingBeyond = 0.f, SquareSwingTip[2] = { 0.f, 0.f };
+    for (const FSquareSwingPair& SquareSwingPair : SquareSwingPairs)
+    {
+        if (SquareSwingPair.Side == 0) continue;
+        SquareSwingTip[SquareSwingPair.Side < 0 ? 0 : 1] = FMath::Max(SquareSwingTip[SquareSwingPair.Side < 0 ? 0 : 1], SquareSwingPair.PlaceAlong);
+        SquareSwingReach = FMath::Max(SquareSwingReach, FMath::Max(SquareSwingPair.LineAlong, SquareSwingPair.PlaceAlong));
+        SquareSwingBeyond = FMath::Max(SquareSwingBeyond, SquareSwingPair.PlaceAlong - SquareSwingLength);
+    }
+    SquareSwingBeyond = FMath::Max(0.f, SquareSwingBeyond);
+    if (SquareSwingReach <= 0.f) return SquareSwingReject(TEXT("no-wings"));
+    const float SquareSwingLongest = UE_HALF_PI * (SquareSwingReach + SquareSwingBeyond);
+    float SquareSwingSeconds = 0.f;
+    if (bSquareSwingInto)
+    {
+        SquareSwingSeconds = SquareSwingLongest / 160.f;
+        if (OwnerCompany->FormationTransition && OwnerCompany->FormationTransition->ReformRemainingSeconds > 0.f)
+            SquareSwingSeconds = FMath::Min(SquareSwingSeconds, OwnerCompany->FormationTransition->ReformRemainingSeconds - 0.5f);
+        if (SquareSwingSeconds < SquareSwingLongest / 420.f) return SquareSwingReject(TEXT("no-time"));
+    }
+    else
+    {
+        // (300 cm/s was tried first: the rear halves opened in three seconds at a run and looked like a scramble, QA 2026-11-15.)
+        SquareSwingSeconds = FMath::Max(3.f, SquareSwingLongest / 240.f);
+        if (OwnerCompany->FormationTransition) OwnerCompany->FormationTransition->ExtendReformSeconds(SquareSwingSeconds + 0.3f);
+    }
+    // The plan holds: the places and the men's swings.
+    SquareSwingFrontX = SquareSwingFront;
+    SquareSwingHalf = SquareSwingWide;
+    SquareSwingArm = SquareSwingLength;
+    SquareSwingSplit = SquareSwingReach / (SquareSwingReach + SquareSwingBeyond);
+    SquareSwingRunning = true;
+    SquareSwingStarted = VisualAnimationTime;
+    // The wing whose rear half is the shorter swings in first; the longer one closes the middle after it.
+    SquareSwingLeadSide = SquareSwingTip[0] <= SquareSwingTip[1] ? -1.f : 1.f;
+    for (const FSquareSwingPair& SquareSwingPair : SquareSwingPairs)
+    {
+        const int32 SquareSwingOrder = bSquareSwingInto ? SquareSwingPair.Line : SquareSwingPair.Ring;
+        SquareSwingTargets[SquareSwingOrder] = bSquareSwingInto ? SquareSwingPair.Ring : SquareSwingPair.Line;
+        FSettle& SquareSwingSettle = SoldierSettle[SquareSwingMen[SquareSwingOrder]];
+        SquareSwingSettle.SquareSwingKind = SquareSwingPair.Side == 0 ? 0 : (bSquareSwingInto ? 1 : 2);
+        SquareSwingSettle.SquareSwingSide = float(SquareSwingPair.Side);
+        SquareSwingSettle.SquareSwingLineAlong = SquareSwingPair.LineAlong;
+        SquareSwingSettle.SquareSwingLineDepth = SquareSwingPair.LineDepth;
+        SquareSwingSettle.SquareSwingPlaceAlong = SquareSwingPair.PlaceAlong;
+        SquareSwingSettle.SquareSwingPlaceDepth = SquareSwingPair.PlaceDepth;
+        // A man who takes a place in another ring goes round the tip of the arm, not through the men of his own file.
+        SquareSwingSettle.SquareSwingBulge = FMath::Abs(SquareSwingPair.PlaceDepth - SquareSwingPair.LineDepth) > 0.5f * SquareSwingRankSpacing ? 120.f : 0.f;
+    }
+    OutSquareSwingSeconds = SquareSwingSeconds;
+    UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s start kind=%s men=%d accepted=1 longest-cm=%.0f seconds=%.2f arm-cm=%.0f beyond-cm=%.0f spare-left=%d spare-right=%d"),
+        *OwnerCompany->StableUnitId.ToString(), SquareSwingKindText, SquareSwingCount, SquareSwingLongest, SquareSwingSeconds,
+        SquareSwingReach, SquareSwingBeyond, SquareSwingSpareMen[0].Num(), SquareSwingSpareMen[1].Num());
+    return true;
+}
+
 void UStrategyInfantryVisualComponent::KeepReformSpacing(float DeltaTime)
 {
+    // The square swing keeps its own order on one clock; a push aside would bend the arm.
+    if (SquareSwingRunning) return;
     // Small local presentation correction, not navigation/collision in the simulation.
     // Spatial buckets bound neighbour work; no all-pairs search or terrain trace in the frame loop.
     const float ReformClearance = FMath::Min(60.f, FMath::Min(
@@ -2083,7 +3126,30 @@ void UStrategyInfantryVisualComponent::KeepReformSpacing(float DeltaTime)
                     // A man on his way steps in between men who already stand (files are 75 cm apart); only men on the move keep apart
                     // from each other. Pushed back by a rank that stood in his way, he walked on the spot until the time ran out and then
                     // jumped 10 m into his place (2026-10-22 test).
-                    if (bReformMoveA != bReformMoveB) continue;
+                    if (bReformMoveA != bReformMoveB)
+                    {
+                        // Give way (Allan 2026-11-08 "ja, prøv den"): a man on his way past one who already stands slides aside,
+                        // sideways to his own walk only (never back, so he does not walk on the spot), and fading out 2.0-1.2 m
+                        // from his place so that he still lands in it. Into a square the last men otherwise brushed through the
+                        // standing ranks at 3-14 cm.
+                        const int32 ReformWalker = bReformMoveA ? ReformMan : ReformOther;
+                        const int32 ReformStander = bReformMoveA ? ReformOther : ReformMan;
+                        FVector ReformAside = FormationStepPositions[ReformWalker] - FormationStepPositions[ReformStander];
+                        ReformAside.Z = 0.f;
+                        FVector ReformHeading = SoldierSettle[ReformWalker].WorldVelocity;
+                        ReformHeading.Z = 0.f;
+                        if (ReformHeading.SizeSquared() > 1.f)
+                        {
+                            ReformHeading.Normalize();
+                            ReformAside -= ReformHeading * FVector::DotProduct(ReformAside, ReformHeading);
+                            if (ReformAside.SizeSquared() < 1.f) ReformAside = FVector(-ReformHeading.Y, ReformHeading.X, 0.f) * (ReformWalker < ReformStander ? 1.f : -1.f);
+                        }
+                        if (ReformAside.IsNearlyZero()) continue;
+                        const float ReformToGoal = float(FVector::Dist2D(FormationStepPositions[ReformWalker], ReformUnit.TransformPosition(SoldierSettle[ReformWalker].Goal)));
+                        const float ReformFade = FMath::Clamp((ReformToGoal - 120.f) / 80.f, 0.f, 1.f);
+                        FormationStepPositions[ReformWalker] += ReformAside.GetSafeNormal() * (ReformClearance - ReformDistance) * 0.5f * ReformFade;
+                        continue;
+                    }
                     if (ReformDistance <= 0.01f)
                     {
                         ReformAway = FormationStepStarts[ReformMan] - FormationStepStarts[ReformOther];
@@ -2263,6 +3329,14 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         {
             continue;
         }
+        // Out of the square into column the film runs back: he stands as he stood until the men behind him on his way have gone
+        // (not frozen in a stride), about a metre before the clock reaches him.
+        if (Settle.SquareSwingKind == 4 && Settle.ReformDeadline >= 0.f && Settle.ReformDuration > 0.f &&
+            (1.f - FMath::Clamp((VisualAnimationTime - Settle.ReformStartTime) / Settle.ReformDuration, 0.f, 1.f)) * SquareWrapLongestCm > Settle.SquareWrapDelta + 100.f)
+        {
+            bAny = true;
+            continue;
+        }
         Settle.StartRemaining = FMath::Max(0.f, Settle.StartRemaining - DeltaTime);
         Settle.HaltRemaining = FMath::Max(0.f, Settle.HaltRemaining - DeltaTime);
         if (Settle.StartRemaining > 0.f)
@@ -2277,9 +3351,13 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         FVector Here = Soldier->GetRelativeLocation();
         FVector Delta = Settle.Goal - Here;
         const float Distance = Delta.Size();
-        if (Settle.ReformDeadline >= 0.f && Distance <= 0.1f)
+        // Arrival is judged on the ground plane: his place is in the flat formation, his feet on the terrain, so the height between
+        // them is never nil on a field that is not flat (QA 2026-11-07: the men stood mid-stride in the walk clip and the company
+        // never counted as formed, "plan=1" for the rest of the battle).
+        const float ArrivedDistance = Delta.Size2D();
+        if (Settle.ReformDeadline >= 0.f && ArrivedDistance <= 0.5f)
             Settle.ReformDeadline = -1.f;
-        if (Distance <= 0.1f && !bVisualTravel)
+        if (ArrivedDistance <= 0.5f && !bVisualTravel)
         {
             Settle.ReformDeadline = -1.f;
             if (bArrivalReform && bArrivalHasLiveFront && Settle.Slot.X >= ArrivalLiveFrontX - 1.f)
@@ -2287,6 +3365,9 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             Settle.WorldVelocity = FVector::ZeroVector;
             FRotator ArrivedRotation = Soldier->GetRelativeRotation();
             ArrivedRotation.Yaw = FStrategyVisualFormationPath::SmoothFacing(ArrivedRotation.Yaw, Settle.YawVelocity, Settle.Yaw, DeltaTime, 120.f);
+            // Within a degree and a half he is turned: set exactly, so he stops (the spring crept towards 0.1 degree and never got
+            // there - the men stood in the walk clip mid-stride and the company never counted as formed: QA 2026-11-07).
+            if (FMath::Abs(FMath::FindDeltaAngleDegrees(ArrivedRotation.Yaw, Settle.Yaw)) <= 1.5f) { ArrivedRotation.Yaw = Settle.Yaw; Settle.YawVelocity = 0.f; }
             ArrivedRotation.Roll = FMath::FInterpTo(ArrivedRotation.Roll, 0.f, DeltaTime, 8.f);
             Soldier->SetRelativeRotation(ArrivedRotation);
             Settle.bActive = Settle.HaltRemaining > 0.f || FMath::Abs(FMath::FindDeltaAngleDegrees(ArrivedRotation.Yaw, Settle.Yaw)) > 0.1f;
@@ -2335,17 +3416,34 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
         // Integrate presentation velocity every frame, with braking near the slot.
         // Substeps affect no orders, simulation positions, collision or game clocks.
         float MorphAlpha = -1.f;
-        if (!bSpreadCrawling && bRigidCompany && !bArrivalReform && Settle.ReformDeadline >= 0.f && Settle.ReformDuration > 0.f)
+        if (!bSpreadCrawling && (bRigidCompany || Settle.SquareSwingKind != 0) && !bArrivalReform && Settle.ReformDeadline >= 0.f && Settle.ReformDuration > 0.f)
         {
             // v2: the change of formation is a straight glide from the old slot to the new one in the unit's own frame, so the
             // whole company morphs as one body while it marches (no men chasing a moving slot through world space).
             const float Alpha = FMath::Clamp((VisualAnimationTime - Settle.ReformStartTime) / Settle.ReformDuration, 0.f, 1.f);
             MorphAlpha = Alpha;
-            const float Eased = Alpha * Alpha * (3.f - 2.f * Alpha);
-            const FVector Local = FMath::Lerp(Settle.ReformStartLocal, Settle.Goal, Eased);
-            FigureWorld = SoldierOnGround(i, VisualUnit.TransformPosition(Local), float(Settle.Slot.Z));
+            // A walker's speed: half a second to get going, an even pace, half a second to stop (a trapezoid, not the S-curve that
+            // made a long path a sprint in the middle).
+            const float MorphT = Alpha * Settle.ReformDuration;
+            const float MorphRamp = FMath::Min(0.5f, Settle.ReformDuration * 0.5f);
+            const float MorphRate = 1.f / FMath::Max(0.01f, Settle.ReformDuration - MorphRamp);
+            const float Eased = MorphT < MorphRamp ? 0.5f * MorphRate * MorphT * MorphT / MorphRamp
+                : MorphT < Settle.ReformDuration - MorphRamp ? 0.5f * MorphRate * MorphRamp + MorphRate * (MorphT - MorphRamp)
+                : 1.f - 0.5f * MorphRate * FMath::Square(Settle.ReformDuration - MorphT) / MorphRamp;
+            // (Tried 2026-11-07: detours round the square's rear corners and behind the line, each rank its own lane - QA and Allan:
+            // "mange glitches til og fra karré", sharp bends, lone runners and waiting groups. Removed; the straight walk stays.)
+            // The square swing: his place on the swinging arm at this point of the clock (out of the square the clock runs back).
+            // Column <-> square: his own way round the square; into it all at one pace, each halting at his place.
+            const FVector Local = Settle.SquareSwingKind == 3 ? SquareWrapPoint(Settle, Eased * SquareWrapLongestCm) :
+                Settle.SquareSwingKind == 4 ? SquareWrapPoint(Settle, (1.f - Eased) * SquareWrapLongestCm) :
+                Settle.SquareSwingKind != 0 ? SquareSwingPoint(Settle, Settle.SquareSwingKind == 1 ? Eased : 1.f - Eased) :
+                FMath::Lerp(Settle.ReformStartLocal, Settle.Goal, Eased);
+            // The swing and the way round are drawn in the frame they were laid in (2026-11-15: drawn in the unit's own frame the
+            // men on the move stood a metre or two off from those still waiting in the square, and walked into them - 4 cm).
+            FVector MorphWorld = (Settle.SquareSwingKind != 0 ? SquareSwingPlanFrame : VisualUnit).TransformPosition(Local);
+            FigureWorld = SoldierOnGround(i, MorphWorld, float(Settle.Slot.Z));
             Settle.WorldVelocity = DeltaTime > 0.f ? (FigureWorld - FigureBefore) / DeltaTime : FVector::ZeroVector;
-            if (Alpha >= 1.f) Settle.ReformDeadline = -1.f;
+            if (Alpha >= 1.f || (Settle.SquareSwingKind == 3 && Eased * SquareWrapLongestCm >= Settle.SquareWrapDelta)) { Settle.ReformDeadline = -1.f; Settle.SquareSwingKind = 0; }
         }
         else if (!bSpreadCrawling && (Settle.ReformDeadline >= 0.f || bArrivalReform))
         {
@@ -2380,14 +3478,20 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
             OwnerCompany->OrderComponent->GetCurrentOrder().Type == EStrategyOrderType::Disengage;
         // Changing formation: the man walks facing the way he goes (never sideways or backwards), and turns to the front over the last
         // fifth of the way.
-        const bool bMorphWalking = bRigidCompany && !bArrivalReform && !bFigureBackstep && MorphAlpha >= 0.f && MorphAlpha < 0.8f &&
-            Settle.WorldVelocity.SizeSquared2D() > 60.f * 60.f;
+        // He faces the way he goes until the last metre and a half, then turns to his place's front (not at a fixed fraction of the
+        // time, which turned the far men while they still ran: QA 2026-11-05).
+        // (In the square swing every man of the arm faces the way the arm goes, the slow men by the corner too, until he is nearly
+        // in his place: with the common rule the men by the corner faced their new front at once and the arm looked ragged, QA 2026-11-15.)
+        const bool bSquareSwingStep = Settle.SquareSwingKind != 0 && !bArrivalReform && MorphAlpha > 0.f && MorphAlpha < 1.f &&
+            Distance > 40.f && Settle.WorldVelocity.SizeSquared2D() > 4.f * 4.f;
+        const bool bMorphWalking = bSquareSwingStep || ((bRigidCompany || Settle.SquareSwingKind != 0) && !bArrivalReform && !bFigureBackstep && MorphAlpha > 0.f && MorphAlpha < 1.f &&
+            Distance > 150.f && Settle.WorldVelocity.SizeSquared2D() > 20.f * 20.f);
         const float Yaw = bMorphWalking ? RunYaw : bFigureBackstep || Step.Size() >= Distance - 0.1f || (bRigidCompany && !bArrivalReform) ? Settle.Yaw :
             (bVisualTravel || Distance > (bArrivalReform ? 0.1f : 30.f) ? RunYaw : Settle.Yaw);
         FRotator Rot = Soldier->GetRelativeRotation();
         const float FigureTurn = FMath::FindDeltaAngleDegrees(Rot.Yaw, Yaw);
         Rot.Roll = FMath::FInterpTo(Rot.Roll, FMath::Clamp(FigureTurn * 0.08f, -4.f, 4.f), DeltaTime, 8.f);
-        Rot.Yaw = FStrategyVisualFormationPath::SmoothFacing(Rot.Yaw, Settle.YawVelocity, Yaw, DeltaTime, 120.f);
+        Rot.Yaw = FStrategyVisualFormationPath::SmoothFacing(Rot.Yaw, Settle.YawVelocity, Yaw, DeltaTime, MorphAlpha >= 0.f ? 240.f : 120.f);
         Soldier->SetRelativeRotation(Rot);
         Soldier->bPauseAnims = false;
         UAnimSequence* TravelClip = (!bSlotReforming || bArrivalReform || bRigidCompany) && Walk ? Walk : Run;
@@ -2513,6 +3617,18 @@ void UStrategyInfantryVisualComponent::UpdateSettling(float DeltaTime)
                 *OwnerCompany->StableUnitId.ToString(), VisualAnimationTime - FormationPlanStarted,
                 FormationLongestPath, FormationCrossingsAvoided, bArrivalReform ? 1 : 0);
         bFormationPlanPending = false;
+        if (SquareSwingRunning)
+        {
+            SquareSwingRunning = false;
+            double SquareSwingNearest = TNumericLimits<double>::Max();
+            for (int32 SquareSwingA = 0; SquareSwingA < SoldierComponents.Num(); ++SquareSwingA)
+            for (int32 SquareSwingB = SquareSwingA + 1; SquareSwingB < SoldierComponents.Num(); ++SquareSwingB)
+                if (SoldierComponents[SquareSwingA] && SoldierComponents[SquareSwingB])
+                    SquareSwingNearest = FMath::Min(SquareSwingNearest, FVector::Dist2D(SoldierComponents[SquareSwingA]->GetComponentLocation(), SoldierComponents[SquareSwingB]->GetComponentLocation()));
+            UE_LOG(LogTemp, Display, TEXT("Strategy1864Drill %s complete kind=%s elapsed=%.3f min-2d-cm=%.3f"),
+                *OwnerCompany->StableUnitId.ToString(), bSquareWrapRunning ? TEXT("square-wrap") : TEXT("square-swing"), VisualAnimationTime - SquareSwingStarted, SquareSwingNearest);
+            bSquareWrapRunning = false;
+        }
     }
     {
         // After AFBRYD (backing out step by step) the company gathers: an orderly re-placement into its slots.
@@ -3329,7 +4445,16 @@ void UStrategyInfantryVisualComponent::RebuildCrowdInstances()
             const int32 CrowdId = CrowdExistingId ? *CrowdExistingId : !CrowdFreeIds.IsEmpty() ? CrowdFreeIds.Pop(EAllowShrinking::No) : CrowdInstances->AddInstance(CrowdPose, bCrowdWorld);
             if (!CrowdExistingId) CrowdIds.Add(CrowdFigure, CrowdId);
             CrowdInstances->UpdateInstanceTransform(CrowdId, CrowdPose, bCrowdWorld, false, false);
-            DataFor(CrowdClips.IsValidIndex(CrowdFigureIndex) ? &CrowdClips[CrowdFigureIndex] : nullptr, Data);
+            // A square's kneeling outer rank (ApplySquareKneel): the baked figure kneels too.
+            if (!bCrowdWorld && &CrowdFigures == &SoldierComponents && SquareKneelTwins.IsValidIndex(CrowdFigureIndex) && SquareKneelTwins[CrowdFigureIndex] &&
+                CrowdClips.IsValidIndex(CrowdFigureIndex))
+            {
+                FPlayedClip CrowdKneel = CrowdClips[CrowdFigureIndex];
+                CrowdKneel.Clip = SquareKneelTwins[CrowdFigureIndex].Get();
+                DataFor(&CrowdKneel, Data);
+            }
+            else
+                DataFor(CrowdClips.IsValidIndex(CrowdFigureIndex) ? &CrowdClips[CrowdFigureIndex] : nullptr, Data);
             WriteCrowdColours(Data);
             const float CrowdDistance = FVector::Distance(CrowdFigure->GetComponentLocation(), CrowdLODCamera);
             Data[17] = CrowdDistance > 3000.f ? 1.f : 0.f;
@@ -4381,6 +5506,18 @@ void UStrategyInfantryVisualComponent::UpdateCloseRanks()
 FVector UStrategyInfantryVisualComponent::ColourBearerTarget(float& OutBearerYaw, bool* OutBearerLeads) const
 {
     if (OutBearerLeads) *OutBearerLeads = false;
+    // In a square the colours stand in its middle, where the men are drawn (user 2026-11-05: he went out into a corner, the
+    // line's rule beside the right-flank man).
+    if (OwnerCompany && OwnerCompany->FormationComponent && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Square &&
+        !(DrillActive && !DrillToColumn))
+    {
+        OutBearerYaw = OwnerCompany->GetActorRotation().Yaw;
+        FVector SquareMiddle = FVector::ZeroVector;
+        int32 SquareMen = 0;
+        for (const USkeletalMeshComponent* SquareMan : SoldierComponents)
+            if (SquareMan) { SquareMiddle += SquareMan->GetComponentLocation(); ++SquareMen; }
+        return SquareMen > 0 ? SquareMiddle / SquareMen : OwnerCompany->GetActorLocation();
+    }
     // In front: one rank ahead of the front rank in line, one row ahead of the head in column (he leads the snake).
     const float BearerRank = OwnerCompany && OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->SoldierRankSpacingCm : 90.f;
     const FTransform BearerUnit = OwnerCompany->GetActorTransform();
@@ -4610,7 +5747,8 @@ void UStrategyInfantryVisualComponent::UpdateColourBearer(float BearerDt)
         BearerGoal = BearerGrip + BearerSide * 40.f;
         BearerYaw = (-BearerSide).Rotation().Yaw;
     }
-    if (!bColoursDown)
+    const bool bBearerInSquare = OwnerCompany->FormationComponent && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Square;
+    if (!bColoursDown && !bBearerInSquare)   // (in a square the middle is far from every man)
     {
         // He keeps with the men: never more than two ranks from the nearest of them, whatever the formation's target says
         // (2026-10-22 tests: 20-26 m away when a column formed standing and right after a drill into line).
@@ -4682,15 +5820,11 @@ void UStrategyInfantryVisualComponent::UpdateColourBearer(float BearerDt)
 
 bool UStrategyInfantryVisualComponent::SpawnOfficerFigure()
 {
-    // Which nation's coat: the unit carries no nation yet, so the side and the unit's id/name decide (a stopgap until it does).
+    // Which nation's coat: the unit's nation (DK for the Danish side, PR for any other when it has none); DK if that is not modelled.
     const FString OfficerId = OwnerCompany->StableUnitId.ToString();
-    const FString OfficerName = OwnerCompany->DisplayName.ToString();
-    const bool bOfficerDanish = OwnerCompany->Side == EStrategySide::Denmark || OwnerCompany->Side == EStrategySide::Allied;
-    const TCHAR* OfficerNation = bOfficerDanish ? TEXT("DK")
-        : (OfficerId.Contains(TEXT("-SE-")) || OfficerId.Contains(TEXT("-SV-")) || OfficerName.StartsWith(TEXT("Sv"))) ? TEXT("SE")
-        : (OfficerId.Contains(TEXT("-NO-")) || OfficerName.StartsWith(TEXT("No"))) ? TEXT("NO") : TEXT("PR");
+    const FString OfficerNation = OwnerCompany->GetNationCodeOrDefault();
     USkeletalMesh* OfficerMesh = LoadObject<USkeletalMesh>(nullptr,
-        *FString::Printf(TEXT("/Game/Units/Human/Officer/SK_Officer_1864_%s.SK_Officer_1864_%s"), OfficerNation, OfficerNation), nullptr, LOAD_NoWarn | LOAD_Quiet);
+        *FString::Printf(TEXT("/Game/Units/Human/Officer/SK_Officer_1864_%s.SK_Officer_1864_%s"), *OfficerNation, *OfficerNation), nullptr, LOAD_NoWarn | LOAD_Quiet);
     if (!OfficerMesh)
         OfficerMesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Units/Human/Officer/SK_Officer_1864_DK.SK_Officer_1864_DK"), nullptr, LOAD_NoWarn | LOAD_Quiet);
     if (!OfficerMesh)
@@ -4729,10 +5863,11 @@ bool UStrategyInfantryVisualComponent::SpawnOfficerFigure()
         FTransform(FRotator(-38.611339f, -44.486661f, -148.198385f), FVector(8.859873f, -10.981565f, 4.255536f), FVector(1.106196f)));
     OfficerScabbard = OfficerProp(TEXT("/Game/Units/Human/Officer/SM_Officer_Scabbard.SM_Officer_Scabbard"), TEXT("Hips"),
         FTransform(FRotator(-20.730171f, 84.857239f, -90.000003f), FVector(33.243320f, -9.561045f, -19.432434f), FVector(1.106196f)));
-    for (TSoftObjectPtr<UAnimSequence>* OfficerClipAsset : { &OfficerIdleAsset, &OfficerWalkAsset, &OfficerWalkSheathedAsset, &OfficerOrderAsset, &OfficerDeathAsset })
+    for (TSoftObjectPtr<UAnimSequence>* OfficerClipAsset : { &OfficerIdleAsset, &OfficerWalkAsset, &OfficerWalkSheathedAsset, &OfficerOrderAsset, &OfficerDeathAsset,
+        &OfficerSabreDrawAsset, &OfficerSabreSheathAsset })
         if (UAnimSequence* OfficerLoadedClip = OfficerClipAsset->LoadSynchronous()) OfficerClipsHeld.AddUnique(OfficerLoadedClip);
     if (UAnimSequence* OfficerStartIdle = OfficerIdleAsset.Get()) OfficerFigure->PlayAnimation(OfficerStartIdle, true);
-    UE_LOG(LogTemp, Display, TEXT("Strategy1864Officer %s: %s officer, sabre %d, scabbard %d, clips %d of 5"), *OfficerId, *OfficerMesh->GetName(),
+    UE_LOG(LogTemp, Display, TEXT("Strategy1864Officer %s: %s officer, sabre %d, scabbard %d, clips %d of 7"), *OfficerId, *OfficerMesh->GetName(),
         OfficerSaber ? 1 : 0, OfficerScabbard ? 1 : 0, OfficerClipsHeld.Num());
     return true;
 }
@@ -4776,10 +5911,11 @@ void UStrategyInfantryVisualComponent::UpdateOfficerFigure(float OfficerDt)
     bool bOfficerLeads = false;
     const FVector OfficerBase = ColourBearerTarget(OfficerYaw, &bOfficerLeads);
     FVector OfficerGoal;
-    if (OwnerCompany->FormationComponent && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Square)
+    const bool bOfficerInSquare = OwnerCompany->FormationComponent && OwnerCompany->FormationComponent->CurrentFormation == EStrategyFormationType::Square;
+    if (bOfficerInSquare)
     {
-        OfficerYaw = OwnerCompany->GetActorRotation().Yaw;
-        OfficerGoal = OwnerCompany->GetActorLocation();
+        // The middle of the square (the colour bearer's target there), one file beside the colours.
+        OfficerGoal = OfficerBase + FRotator(0.f, OfficerYaw, 0.f).RotateVector(FVector(0.f, OfficerLateral * 1.5f, 0.f));
     }
     else if (bOfficerLeads) OfficerGoal = OfficerBase + FRotator(0.f, OfficerYaw, 0.f).Vector() * ColourColumnLeadCm;
     else OfficerGoal = OfficerBase + FRotator(0.f, OfficerYaw, 0.f).RotateVector(FVector(0.f, OfficerLateral, 0.f));
@@ -4795,7 +5931,7 @@ void UStrategyInfantryVisualComponent::UpdateOfficerFigure(float OfficerDt)
         const float OfficerKeepGap = FVector::Dist2D(OfficerKeepMan->GetComponentLocation(), OfficerGoal);
         if (OfficerKeepGap < OfficerNearestGap) { OfficerNearestGap = OfficerKeepGap; OfficerNearest = OfficerKeepMan->GetComponentLocation(); }
     }
-    if (OfficerNearestGap < TNumericLimits<float>::Max() && OfficerNearestGap > OfficerKeepCm)
+    if (!bOfficerInSquare && OfficerNearestGap < TNumericLimits<float>::Max() && OfficerNearestGap > OfficerKeepCm)
         OfficerGoal = OfficerNearest + (OfficerGoal - OfficerNearest).GetSafeNormal2D() * OfficerKeepCm;
     OfficerGoal = UStrategyTerrainQueryLibrary::ProjectPointToTerrain(this, OfficerGoal);
     FVector OfficerHere = bOfficerWorldValid ? OfficerWorld : OfficerGoal;
@@ -4816,22 +5952,45 @@ void UStrategyInfantryVisualComponent::UpdateOfficerFigure(float OfficerDt)
     OfficerWorld = OfficerHere;
     OfficerWorldRotation = OfficerRotation;
     bOfficerWorldValid = true;
-    // On the march in column the sabre is in its scabbard (user 2026-10-28, Backlog); formed up, in line or square or in a fight, it is
-    // drawn: at the shoulder when he walks, forward when the company is engaged (giving the orders), at rest otherwise. No draw or
-    // sheath clip yet (the soldiers' sabre clips do not reach his hilt, 33-39 cm short): the sabre changes place at once.
-    // (Only in a march column: a line on the move counts as led too, and there it is drawn.)
+    // In a march column the sabre is in its scabbard (user 2026-10-28, Backlog); formed up, in line or square or in a fight, it is
+    // drawn: at the shoulder when he walks, forward when the company is engaged (giving the orders), at rest otherwise. Standing he
+    // draws and sheathes it with his own clips (the sabre goes from scabbard to hand at the grip, Final_v5: draw 0.4 s, sheath 0.8 s);
+    // walking, it changes place at once. (A line on the move counts as led too, so the formation decides, not bOfficerLeads.)
     const EStrategyFormationType OfficerFormation = OwnerCompany->FormationComponent ? OwnerCompany->FormationComponent->CurrentFormation : EStrategyFormationType::Line;
-    const bool bOfficerSheathed = (OfficerFormation == EStrategyFormationType::MarchColumn || OfficerFormation == EStrategyFormationType::DefileColumn) &&
-        bOfficerWalking && OwnerCompany->UnitState != EStrategyUnitState::Engaged && OfficerWalkSheathedAsset.Get();
-    SetOfficerSaberDrawn(!bOfficerSheathed);
-    UAnimSequence* OfficerClip = bOfficerSheathed ? OfficerWalkSheathedAsset.Get() : bOfficerWalking ? OfficerWalkAsset.Get()
-        : (OwnerCompany->UnitState == EStrategyUnitState::Engaged && OfficerOrderAsset.Get()) ? OfficerOrderAsset.Get() : OfficerIdleAsset.Get();
-    if (OfficerClip && OfficerFigure->GetSingleNodeInstance() && OfficerFigure->GetSingleNodeInstance()->GetAnimationAsset() != OfficerClip)
-        OfficerFigure->PlayAnimation(OfficerClip, true);
-    // The rest and order poses (Final_v5) stand about 8 cm low: toes 9 cm under the ground against -2..+7 cm in the walk, and the sabre's
-    // point in the ground (probe 2026-11-05). Lifted here until the clips are rebuilt in Blender.
-    if (OfficerClip == OfficerIdleAsset.Get() || OfficerClip == OfficerOrderAsset.Get())
-        OfficerFigure->SetWorldLocation(OfficerHere + FVector(0.f, 0.f, 8.f));
+    const bool bOfficerWantSheathed = (OfficerFormation == EStrategyFormationType::MarchColumn || OfficerFormation == EStrategyFormationType::DefileColumn) &&
+        OwnerCompany->UnitState != EStrategyUnitState::Engaged && OfficerWalkSheathedAsset.Get();
+    const float OfficerSabreNow = GetWorld()->GetTimeSeconds();
+    if (OfficerSabreAction == 0 && bOfficerWantSheathed == bOfficerSaberDrawn)
+    {
+        UAnimSequence* OfficerSabreClip = bOfficerWantSheathed ? OfficerSabreSheathAsset.Get() : OfficerSabreDrawAsset.Get();
+        if (!bOfficerWalking && OfficerSabreClip)
+        {
+            OfficerSabreAction = bOfficerWantSheathed ? 2 : 1;
+            OfficerSabreActionStart = OfficerSabreNow;
+            OfficerFigure->PlayAnimation(OfficerSabreClip, false);
+        }
+        else
+        {
+            SetOfficerSaberDrawn(!bOfficerWantSheathed);
+        }
+    }
+    UAnimSequence* OfficerClip = nullptr;
+    if (OfficerSabreAction != 0)
+    {
+        UAnimSequence* OfficerActionClip = OfficerSabreAction == 1 ? OfficerSabreDrawAsset.Get() : OfficerSabreSheathAsset.Get();
+        const float OfficerActionAge = OfficerSabreNow - OfficerSabreActionStart;
+        SetOfficerSaberDrawn(OfficerSabreAction == 1 ? OfficerActionAge >= 0.4f : OfficerActionAge < 0.8f);
+        if (!OfficerActionClip || OfficerActionAge >= OfficerActionClip->GetPlayLength()) OfficerSabreAction = 0;
+        else OfficerClip = OfficerActionClip;
+    }
+    const bool bOfficerSheathed = !bOfficerSaberDrawn;
+    if (!OfficerClip)
+    {
+        OfficerClip = bOfficerWalking ? (bOfficerSheathed ? OfficerWalkSheathedAsset.Get() : OfficerWalkAsset.Get())
+            : (!bOfficerSheathed && OwnerCompany->UnitState == EStrategyUnitState::Engaged && OfficerOrderAsset.Get()) ? OfficerOrderAsset.Get() : OfficerIdleAsset.Get();
+        if (OfficerClip && OfficerFigure->GetSingleNodeInstance() && OfficerFigure->GetSingleNodeInstance()->GetAnimationAsset() != OfficerClip)
+            OfficerFigure->PlayAnimation(OfficerClip, true);
+    }
     // -Strategy1864GroundProbe: what he plays and where the sabre's point is against his hand, every 2 s (2026-11-05: it looked down).
     static const bool bOfficerProbe = FParse::Param(FCommandLine::Get(), TEXT("Strategy1864GroundProbe"));
     if (bOfficerProbe && OfficerSaber && GetWorld()->GetTimeSeconds() - OfficerProbeLast > 2.0 && OfficerFigure->GetSingleNodeInstance())
@@ -4847,7 +6006,7 @@ void UStrategyInfantryVisualComponent::UpdateOfficerFigure(float OfficerDt)
             OfficerFigure->GetSocketLocation(TEXT("LeftToeBase")).Z - OfficerGoal.Z, OfficerFigure->GetSocketLocation(TEXT("RightToeBase")).Z - OfficerGoal.Z);
     }
     // The walk is the soldiers' shoulder march under him (same root speed, 137.7 cm/s).
-    OfficerFigure->SetPlayRate(bOfficerWalking ? FMath::Clamp((OfficerStep / OfficerDt) / 137.70097f, 0.3f, 2.5f) : 1.f);
+    OfficerFigure->SetPlayRate(bOfficerWalking && OfficerSabreAction == 0 ? FMath::Clamp((OfficerStep / OfficerDt) / 137.70097f, 0.3f, 2.5f) : 1.f);
 }
 
 FVector UStrategyInfantryVisualComponent::PalmLocation(const USkeletalMeshComponent* PalmMesh, FName PalmHandBone)

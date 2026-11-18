@@ -89,6 +89,9 @@ public:
         return MobilityState == EStrategyArtilleryMobilityState::Manhandling;
     }
 
+    /** Limbering up (the limber teams drive to the trails meanwhile). */
+    bool IsLimbering() const { return MobilityState == EStrategyArtilleryMobilityState::Limbering; }
+
     UFUNCTION(BlueprintPure, Category="Strategy|Artillery")
     bool IsTransitioning() const
     {

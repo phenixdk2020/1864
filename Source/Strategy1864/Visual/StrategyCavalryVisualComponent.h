@@ -93,6 +93,8 @@ private:
     };
 
     bool LoadAssets();
+    USkeletalMesh* ChooseRiderModel() const;
+    bool bRiderChosen = false;
     void EnsureCount(int32 Count);
     void Layout(bool bPreserveSlots);
     FHorseman MakeHorseman();
@@ -105,7 +107,11 @@ private:
     UPROPERTY() TObjectPtr<ACavalryUnit> OwnerCavalry;
     UPROPERTY() TObjectPtr<UStaticMesh> HorseModel;
     UPROPERTY() TObjectPtr<UStaticMesh> SabreModel;
+    UPROPERTY() TObjectPtr<UStaticMesh> SaddleModel;
     UPROPERTY() TObjectPtr<USkeletalMesh> RiderModel;
+    /** A hidden rider posed at each charging rider's clip and time to place his sabre in his hand (the baked riders have no bones). */
+    UPROPERTY(Transient) TObjectPtr<USkeletalMeshComponent> SabrePoser;
+    float SabreProbeLast = -100.f;
     UPROPERTY() TObjectPtr<UAnimSequence> SeatClip;
     UPROPERTY() TObjectPtr<UAnimSequence> FallClip;
     UPROPERTY() TObjectPtr<USkeletalMesh> HorseSkeletal;

@@ -86,20 +86,30 @@ TArray<FStrategyFormationSlot> UStrategyFormationComponent::GenerateSoldierSlots
 
     if (CurrentFormation == EStrategyFormationType::Square)
     {
+        // Each face as deep as the line (user 2026-11-05: "tre geledder"; it was one man deep and some 35 m a side): the front
+        // rank outermost, the others one rank spacing further in, each a little shorter, so the faces meet at the corners.
         const int32 SideCount = 4;
+        const int32 SquareRanks = LineRanksFor(GetOwner(), RankCount, Strength);
         const int32 PerSide = FMath::Max(1, FMath::CeilToInt(static_cast<float>(Strength) / SideCount));
-        const float HalfExtent = FMath::Max(300.0f, (PerSide - 1) * SoldierLateralSpacingCm * 0.5f);
+        const int32 FilesPerSide = FMath::Max(1, FMath::CeilToInt(static_cast<float>(PerSide) / SquareRanks));
+        const float OuterHalf = FMath::Max(300.0f + (SquareRanks - 1) * SoldierRankSpacingCm, FilesPerSide * SoldierLateralSpacingCm * 0.5f);
 
         for (int32 Index = 0; Index < Strength; ++Index)
         {
-            // Round-robin gives each side floor(N/4) or ceil(N/4) men.
+            // Round-robin gives each side floor(N/4) or ceil(N/4) men; on a side they fill file by file, front rank first.
             const int32 Side = Index % SideCount;
-            const int32 Along = Index / SideCount;
+            const int32 OnSide = Index / SideCount;
             const int32 MenOnSide = Strength / SideCount + (Side < Strength % SideCount ? 1 : 0);
+            const int32 SquareRank = OnSide % SquareRanks;
+            const int32 Along = OnSide / SquareRanks;
+            const int32 SideFiles = FMath::Max(1, FMath::CeilToInt(static_cast<float>(MenOnSide) / SquareRanks));
+            const float HalfExtent = OuterHalf - SquareRank * SoldierRankSpacingCm;
+            // Each side runs from its own corner to one place short of the next: the four corners are held once. (Corner to
+            // corner put two men on the same spot at every corner; QA 2026-11-05, Saved/QA/2026-11-05-karre.)
             const float Alpha =
-                MenOnSide <= 1
+                SideFiles <= 1
                 ? 0.5f
-                : static_cast<float>(Along) / static_cast<float>(MenOnSide - 1);
+                : static_cast<float>(Along) / static_cast<float>(SideFiles);
             const float Offset = FMath::Lerp(-HalfExtent, HalfExtent, Alpha);
 
             FVector LocalOffset = FVector::ZeroVector;
@@ -128,6 +138,11 @@ TArray<FStrategyFormationSlot> UStrategyFormationComponent::GenerateSoldierSlots
                     SlotYaw = FacingYaw - 90.0f;
                     break;
             }
+
+            // The square's front face is the line's front rank (the line's slots have their front rank at X = 0): the middle files
+            // stand fast as the front, the wings fold back into the sides and the rear (user 2026-11-05, "karré-eksercits"; centred
+            // on the line the whole company walked forward and piled up).
+            LocalOffset -= Forward * OuterHalf;
 
             FStrategyFormationSlot Slot;
             Slot.WorldLocation = FormationCenter + LocalOffset;

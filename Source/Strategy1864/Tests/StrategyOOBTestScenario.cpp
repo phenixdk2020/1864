@@ -11,6 +11,8 @@
 #include "Misc/PackageName.h"
 #include "../Campaign/StrategyCampaignBattlefield.h"
 #include "../Visual/StrategyColourFlag.h"
+#include "../Visual/StrategyArtilleryVisualComponent.h"
+#include "../Movement/StrategyMovementExecutorComponent.h"
 #include "../Visual/StrategyCourierRider.h"
 #include "../Player/StrategyHUD.h"
 #include "Dom/JsonObject.h"
@@ -336,7 +338,12 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
     const bool bSkirmishPassive = bSkirmishCavalry || FParse::Param(FCommandLine::Get(), TEXT("Strategy1864SkirmishPassive"));
     // The cavalry test opens at 450 m; existing infantry tests remain at 400 m.
     const FVector Middle = Origin + FVector(15000.0f, -7000.0f, 0.0f);
-    const FVector DanishLine = Middle - FVector(20000.0f, 0.0f, 0.0f), EnemyLine = Middle + FVector(bSkirmishCavalry ? 25000.0f : 20000.0f, 0.0f, 0.0f);
+    // -Strategy1864SkirmishApart=<m>: the two lines that far apart (default 400 m, 450 m with cavalry), so a recording can begin
+    // close to the fire fight (QA 2026-11-13: the companies never came within range in the recorded minutes).
+    float SkirmishApartMetres = 0.f;
+    FParse::Value(FCommandLine::Get(), TEXT("Strategy1864SkirmishApart="), SkirmishApartMetres);
+    const float SkirmishHalfApartCm = SkirmishApartMetres > 0.f ? SkirmishApartMetres * 50.f : 20000.0f;
+    const FVector DanishLine = Middle - FVector(SkirmishHalfApartCm, 0.0f, 0.0f), EnemyLine = Middle + FVector(SkirmishApartMetres > 0.f ? SkirmishHalfApartCm : (bSkirmishCavalry ? 25000.0f : 20000.0f), 0.0f, 0.0f);
     const int32 Lod = Strategy1864BattleQuality::GetFigureDivisor();
 
     AStrategyHQUnit* Major = SpawnHQ(TEXT("DK-SKIRMISH-HQ"), TEXT("1. Bataillon"), static_cast<uint8>(EStrategyHQLevel::Battalion), DanishLine - FVector(9000.0f, 0.0f, 0.0f), nullptr);
@@ -359,7 +366,10 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
     if (EnemyMajor)
     {
         EnemyMajor->Side = FoeSide;
+        EnemyMajor->NationCode = bSwedes ? FName(TEXT("SE")) : FName(TEXT("PR"));
+        EnemyMajor->DisplayName = FText::FromString(bSwedes ? TEXT("Sv. Bataillon") : TEXT("Pr. Bataillon"));
     }
+    if (Major) Major->NationCode = FName(TEXT("DK"));
     if (Major && Major->OfficerProfileComponent && FParse::Param(FCommandLine::Get(), TEXT("Strategy1864HoldReserve")))
     {
         // A level-headed battalion leader who knows his craft and does not throw everything in at once.
@@ -380,6 +390,7 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
             DanishLine + FVector(0.0f, (c - (DaneCount - 1) * 0.5f) * 7200.0f, 0.0f), Major, static_cast<uint8>(EStrategySide::Denmark)))
         {
             Company->bPlayerControllable = true;
+            Company->NationCode = FName(TEXT("DK"));
             if (bSkirmishPassive && Company->DoctrineComponent)
             {
                 // The player gives the orders: the company's own AI reacts (front, fire, square) but does not seek the fight.
@@ -402,6 +413,7 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
             float EnemyTurnDegrees = 0.f;
             FParse::Value(FCommandLine::Get(), TEXT("Strategy1864EnemyTurn="), EnemyTurnDegrees);
             Company->SetActorRotation(FRotator(0.0f, 180.0f + EnemyTurnDegrees, 0.0f));
+            Company->NationCode = bSwedes ? FName(TEXT("SE")) : FName(TEXT("PR"));
             Company->bPlayerControllable = false;
             if (Company->AutonomousBattleAIComponent)
             {
@@ -455,6 +467,7 @@ void AStrategyOOBTestScenario::BuildSkirmish(int32 EnemyCompanies)
             auto Own = [&](AStrategyUnit* U)
             {
                 U->Side = bDane ? EStrategySide::Denmark : FoeSide;
+                U->NationCode = bDane ? FName(TEXT("DK")) : bSwedes ? FName(TEXT("SE")) : FName(TEXT("PR"));
                 U->bPlayerControllable = bDane;
                 U->bOfficerAIEnabled = true;
                 U->SetActorRotation(FRotator(0.0f, bDane ? 0.0f : 180.0f, 0.0f));
@@ -2449,6 +2462,42 @@ void AStrategyOOBTestScenario::TickDrillTest()
         UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s AIOFF"), *DrillTestUnit->StableUnitId.ToString());
         return;
     }
+    // LIMBER / UNLIMBER: a battery limbers up or unlimbers (its own deployment), for the limber teams' test (2026-11-08).
+    if (DrillTestParts[2].Equals(TEXT("LIMBER"), ESearchCase::IgnoreCase) || DrillTestParts[2].Equals(TEXT("UNLIMBER"), ESearchCase::IgnoreCase))
+    {
+        AStrategyArtilleryBatteryUnit* DrillTestBattery = Cast<AStrategyArtilleryBatteryUnit>(DrillTestUnit);
+        const bool bDrillTestLimber = DrillTestParts[2].Equals(TEXT("LIMBER"), ESearchCase::IgnoreCase);
+        const bool bDrillTestTaken = DrillTestBattery && DrillTestBattery->DeploymentComponent &&
+            (bDrillTestLimber ? DrillTestBattery->DeploymentComponent->RequestLimber() : DrillTestBattery->DeploymentComponent->RequestDeploy());
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s %s taken=%d (limbered=%d deployed=%d ground-ok=%d moving=%d)"), *DrillTestUnit->StableUnitId.ToString(), *DrillTestParts[2], bDrillTestTaken ? 1 : 0,
+            DrillTestBattery && DrillTestBattery->DeploymentComponent && DrillTestBattery->DeploymentComponent->IsLimbered() ? 1 : 0,
+            DrillTestBattery && DrillTestBattery->DeploymentComponent && DrillTestBattery->DeploymentComponent->IsDeployed() ? 1 : 0,
+            DrillTestBattery && DrillTestBattery->DeploymentComponent && DrillTestBattery->DeploymentComponent->CanDeployAtCurrentLocation() ? 1 : 0,
+            DrillTestBattery && DrillTestBattery->MovementExecutor && DrillTestBattery->MovementExecutor->HasMovementGoal() ? 1 : 0);
+        return;
+    }
+    // ENGAGE:<enemy id part>:<metres>: a march order to a place that far in front of the enemy, on the way from him to the company,
+    // fronting him - the walk into musket range for a fire fight.
+    if (DrillTestParts[2].Equals(TEXT("ENGAGE"), ESearchCase::IgnoreCase) && DrillTestParts.Num() > 4)
+    {
+        AStrategyUnit* DrillTestFoe = nullptr;
+        for (TActorIterator<AStrategyUnit> DrillTestFoeIt(DrillTestWorld); DrillTestFoeIt; ++DrillTestFoeIt)
+            if (DrillTestFoeIt->StableUnitId.ToString().Contains(DrillTestParts[3])) { DrillTestFoe = *DrillTestFoeIt; break; }
+        if (!DrillTestFoe) { UE_LOG(LogTemp, Warning, TEXT("PROJECT1864-DRILLTEST no enemy %s"), *DrillTestParts[3]); return; }
+        const FVector DrillTestFoeToUs = (DrillTestUnit->GetActorLocation() - DrillTestFoe->GetActorLocation()).GetSafeNormal2D();
+        FStrategyOrder DrillTestEngage;
+        DrillTestEngage.Type = EStrategyOrderType::Move;
+        DrillTestEngage.TargetLocation = DrillTestFoe->GetActorLocation() + DrillTestFoeToUs * FCString::Atof(*DrillTestParts[4]) * 100.f;
+        DrillTestEngage.TargetLocation.Z = DrillTestUnit->GetActorLocation().Z;
+        DrillTestEngage.bHasFacing = true;
+        DrillTestEngage.FacingYaw = (-DrillTestFoeToUs).Rotation().Yaw;
+        DrillTestEngage.Authority = EStrategyOrderAuthority::DirectPlayer;
+        DrillTestEngage.WaypointRouteId = FGuid::NewGuid();
+        const bool bDrillTestEngageTaken = DrillTestUnit->OrderComponent->SetOrder(DrillTestEngage);
+        UE_LOG(LogTemp, Display, TEXT("PROJECT1864-DRILLTEST %s ENGAGE %s to %s front=%.0f taken=%d"), *DrillTestUnit->StableUnitId.ToString(),
+            *DrillTestFoe->StableUnitId.ToString(), *DrillTestEngage.TargetLocation.ToString(), DrillTestEngage.FacingYaw, bDrillTestEngageTaken ? 1 : 0);
+        return;
+    }
     if (DrillTestParts[2].Equals(TEXT("COLUMN"), ESearchCase::IgnoreCase))
     {
         DrillTestUnit->FormationReason = TEXT("drilltest: formationsknappen Kolonne");
@@ -2600,6 +2649,8 @@ void AStrategyOOBTestScenario::TickFollowCam(float FollowDeltaSeconds)
                 if (FollowParts.Num() > 1) FollowCamDistance = FMath::Max(200.f, FCString::Atof(*FollowParts[1]));
                 if (FollowParts.Num() > 2) FollowCamSide = FCString::Atof(*FollowParts[2]);
                 bFollowCamFront = FollowParts.Num() > 3 && FollowParts[3].Equals(TEXT("FRONT"), ESearchCase::IgnoreCase);
+                // SIDE: straight from the flank and low, so legs, hooves and seats can be judged (QA 2026-11-13: from behind they could not).
+                bFollowCamSideOn = FollowParts.Num() > 3 && FollowParts[3].Equals(TEXT("SIDE"), ESearchCase::IgnoreCase);
             }
         }
     }
@@ -2607,7 +2658,10 @@ void AStrategyOOBTestScenario::TickFollowCam(float FollowDeltaSeconds)
     if (!bFollowCamActive || !FollowWorld) return;
     // The unit gives the direction; the colours (FLAG) or the unit give the point to watch.
     const bool bFollowFlag = FollowCamTarget.StartsWith(TEXT("FLAG"));
-    const FString FollowUnitId = bFollowFlag ? (FollowCamTarget.Mid(4).IsEmpty() ? FString(TEXT("DK")) : FollowCamTarget.Mid(4)) : FollowCamTarget;
+    // GUN<battery>: one of the battery's middle guns as drawn (2026-11-08: the battery's own origin left the guns 20 m off).
+    const bool bFollowGun = FollowCamTarget.StartsWith(TEXT("GUN"));
+    const FString FollowUnitId = bFollowFlag ? (FollowCamTarget.Mid(4).IsEmpty() ? FString(TEXT("DK")) : FollowCamTarget.Mid(4))
+        : bFollowGun ? FollowCamTarget.Mid(3) : FollowCamTarget;
     AStrategyUnit* FollowUnit = nullptr;
     for (TActorIterator<AStrategyUnit> FollowIt(FollowWorld); FollowIt; ++FollowIt)
         if (FollowIt->StableUnitId.ToString().Contains(FollowUnitId)) { FollowUnit = *FollowIt; break; }
@@ -2619,10 +2673,24 @@ void AStrategyOOBTestScenario::TickFollowCam(float FollowDeltaSeconds)
         for (TActorIterator<AStrategyColourFlag> FollowFlagIt(FollowWorld); FollowFlagIt; ++FollowFlagIt)
             if (FollowFlagIt->GetFollowedActor() == FollowUnit) { FollowAt = FollowFlagIt->GetActorLocation(); break; }
     }
+    if (bFollowGun)
+    {
+        if (const AStrategyArtilleryBatteryUnit* FollowBattery = Cast<AStrategyArtilleryBatteryUnit>(FollowUnit))
+        {
+            if (FollowBattery->ArtilleryVisualComponent)
+            {
+                FVector FollowGunAt, FollowGunMuzzle;
+                bool bFollowGunInAction = false;
+                const int32 FollowGunIndex = FollowBattery->ArtilleryVisualComponent->GetDrawnGunCount() / 2;
+                if (FollowBattery->ArtilleryVisualComponent->GetGunPlacement(FollowGunIndex, FollowGunAt, FollowGunMuzzle, bFollowGunInAction))
+                    FollowAt = FollowGunAt;
+            }
+        }
+    }
     const FVector FollowFwd = FollowUnit->GetActorForwardVector().GetSafeNormal2D() * (bFollowCamFront ? -1.f : 1.f);
     const FVector FollowRight(-FollowFwd.Y, FollowFwd.X, 0.f);
-    const FVector FollowEyeWanted = FollowAt - FollowFwd * FollowCamDistance * 0.8f + FollowRight * FollowCamDistance * FollowCamSide +
-        FVector(0.f, 0.f, FollowCamDistance * 0.35f);
+    const FVector FollowEyeWanted = FollowAt - FollowFwd * FollowCamDistance * (bFollowCamSideOn ? 0.f : 0.8f) + FollowRight * FollowCamDistance * FollowCamSide +
+        FVector(0.f, 0.f, FollowCamDistance * (bFollowCamSideOn ? 0.12f : 0.35f));
     const FVector FollowLookWanted = FollowAt + FVector(0.f, 0.f, 80.f);
     if (!bFollowCamPlaced)
     {

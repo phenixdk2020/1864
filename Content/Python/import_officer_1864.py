@@ -1,6 +1,6 @@
 # Imports the 1864 officer (captain) from SourceAssets/Units1864/Officer/Final_v5 (see notes.md and report.json there) into
 # /Game/Units/Human/Officer: SK_Officer_1864_{DK,SE,PR,NO} (existing skeleton SK_Human_1864, never changed), SM_Officer_Saber/Scabbard
-# and the clips A_Officer_{Walk,WalkSheathed,Idle,Order,Death}. Re-runnable: an existing asset is first copied to
+# and the clips A_Officer_{Walk,WalkSheathed,Idle,Order,Death,SabreDraw,SabreSheath}. Re-runnable: an existing asset is first copied to
 # /Game/Units/Human/Officer/Backup_<date>/ (once per date), then deleted (a replace-import keeps old settings).
 # Run (PowerShell, no editor/game running):
 #   UnrealEditor-Cmd.exe Game1864.uproject -run=pythonscript -script=<this file> -unattended -nosplash -stdout
@@ -23,7 +23,7 @@ TOOLS = unreal.AssetToolsHelpers.get_asset_tools()
 EAL = unreal.EditorAssetLibrary
 MESHES = ['DK', 'SE', 'PR', 'NO']
 PROPS = [('SM_Officer_Saber', '/Game/Units/Items/M_Saber'), ('SM_Officer_Scabbard', '/Game/Units/Items/M_Scabbard')]
-CLIPS = ['A_Officer_Walk', 'A_Officer_WalkSheathed', 'A_Officer_Idle', 'A_Officer_Order', 'A_Officer_Death']
+CLIPS = ['A_Officer_Walk', 'A_Officer_WalkSheathed', 'A_Officer_Idle', 'A_Officer_Order', 'A_Officer_Death', 'A_Officer_SabreDraw', 'A_Officer_SabreSheath']
 CLIP_ROTATION = unreal.Rotator(roll=90, pitch=0, yaw=0)
 LOG = 'OFFICER-IMPORT '
 failures = []
@@ -176,15 +176,21 @@ def main():
     say('REF SK_DK_Livgarden_1864 ' + mesh_bounds_text(soldier))
     for r in ['A_Combat_WalkShoulder', 'A_Combat_Idle', 'A_Combat_DeathFront', 'A_Combat_ColourWalk']:
         say('REF %s %s' % (r, clip_text(unreal.load_asset('/Game/Units/Human/CombatAnimations/' + r))))
-    for tag in MESHES:
-        import_mesh(tag, skeleton)
-    for name, mat in PROPS:
-        import_prop(name, mat)
-    for name in CLIPS:
+    # OFFICER_CLIPS_ONLY=A_Officer_Idle,A_Officer_Order (env var): import only those clips, leave meshes/props/other clips untouched.
+    only = [c.strip() for c in os.environ.get('OFFICER_CLIPS_ONLY', '').split(',') if c.strip()]
+    clips = [c for c in CLIPS if c in only] if only else CLIPS
+    if only:
+        say('CLIPS ONLY: ' + ', '.join(clips))
+    else:
+        for tag in MESHES:
+            import_mesh(tag, skeleton)
+        for name, mat in PROPS:
+            import_prop(name, mat)
+    for name in clips:
         seq = import_clip(name, skeleton)
         if seq:
             say('%s OK %s' % (name, clip_text(seq)))
-    for name in ['SK_Officer_1864_' + t for t in MESHES] + [p[0] for p in PROPS] + CLIPS:
+    for name in (clips if only else ['SK_Officer_1864_' + t for t in MESHES] + [p[0] for p in PROPS] + CLIPS):
         if not EAL.does_asset_exist(DEST + '/' + name):
             fail('asset missing ' + name)
     EAL.save_directory(DEST, only_if_is_dirty=False, recursive=True)

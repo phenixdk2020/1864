@@ -1,0 +1,404 @@
+{
+ "_comment": "Video-QA scenarios for the 3D battles (Tools/QA/battle_video_qa.py). Times are world seconds (same clock as -Strategy1864DrillTest, -Strategy1864Record and the FormationMetric t=). Drill plans are the ones proven in the 2026-10-20..23 test runs.",
+ "editor": "I:/Spil/Epic Games/UE_5.8/Engine/Binaries/Win64/UnrealEditor.exe",
+ "map": "/Game/Maps/Strategy1864_Skirmish",
+ "base_args": [
+  "-game",
+  "-windowed",
+  "-ResX=1280",
+  "-ResY=720",
+  "-Strategy1864Skirmish=1",
+  "-Strategy1864SkirmishDanes=1",
+  "-Strategy1864SkirmishSwedes",
+  "-Strategy1864EnemyDefends",
+  "-Strategy1864SkirmishPassive",
+  "-ddc=InstalledNoZenLocalFallback",
+  "-Strategy1864NoHud",
+  "-Strategy1864FormationMetric",
+  "-Strategy1864ShotsQuit",
+  "-log"
+ ],
+ "scenarios": {
+  "eksercits-ild": {
+   "title": "Kompagniet: linje til kolonne mod fjenden og tilbage i linje, linje til karré, karré til kolonne, linje igen og ildkamp (Allan 2026-11-12)",
+   "fps": 10,
+   "drill": "3:DK-SKIRMISH-C1:COLUMN,12:DK-SKIRMISH-C1:MOVE:80:0,50:DK-SKIRMISH-C1:LINE,100:DK-SKIRMISH-C1:SQUARE,135:DK-SKIRMISH-C1:COLUMN,160:DK-SKIRMISH-C1:LINE",
+   "follow": "FLAGDK-SKIRMISH-C1:1500:0.7",
+   "record": [
+    2,
+    245
+   ],
+   "timeout_s": 1200,
+   "drop_args": [
+    "-Strategy1864SkirmishPassive"
+   ],
+   "extra_args": [
+    "-Strategy1864SkirmishAttack"
+   ],
+   "focus": [
+    "column",
+    "ranks",
+    "turn",
+    "overlap",
+    "volley",
+    "reload",
+    "bearer"
+   ]
+  },
+  "linje-ild": {
+   "title": "Linje mod linje: fremrykning, skud og ladning",
+   "fps": 10,
+   "drill": "8:DK-SKIRMISH-C1:4000:13000:0",
+   "follow": "FLAGDK-SKIRMISH-C1:2200:0.6",
+   "record": [
+    120,
+    180
+   ],
+   "timeout_s": 900,
+   "drop_args": [
+    "-Strategy1864SkirmishPassive"
+   ],
+   "extra_args": [
+    "-Strategy1864SkirmishAttack"
+   ],
+   "focus": [
+    "volley",
+    "reload",
+    "smoke",
+    "rifle_hand",
+    "overlap",
+    "ground",
+    "ranks"
+   ]
+  },
+  "kolonne-march": {
+   "title": "Kolonne på march med drejninger og tilbage i linje",
+   "fps": 10,
+   "drill": "3:DK-SKIRMISH-C1:COLUMN,12:DK-SKIRMISH-C1:MOVE:60:0,40:DK-SKIRMISH-C1:MOVE:0:-90,62:DK-SKIRMISH-C1:LINE,110:DK-SKIRMISH-C1:MOVE:50:0",
+   "follow": "FLAGDK-SKIRMISH-C1:1700:0.9:FRONT",
+   "record": [
+    3,
+    90
+   ],
+   "timeout_s": 900,
+   "focus": [
+    "column",
+    "turn",
+    "foot_slide",
+    "bearer",
+    "overlap",
+    "rifle_hand"
+   ]
+  },
+  "tab-i-kolonne": {
+   "title": "Tab i kolonne under march: opslutning, sammenrykning og march-død",
+   "fps": 10,
+   "drill": "2:DK-SKIRMISH-C1:AIOFF,3:DK-SKIRMISH-C1:COLUMN,12:DK-SKIRMISH-C1:MOVE:0:-150,30:DK-SKIRMISH-C1:KILL:6,45:DK-SKIRMISH-C1:KILL:6",
+   "follow": "FLAGDK-SKIRMISH-C1:1300:0.8",
+   "record": [
+    26,
+    62
+   ],
+   "timeout_s": 900,
+   "focus": [
+    "overlap",
+    "step_up",
+    "closing",
+    "death_pose",
+    "bearer",
+    "column"
+   ]
+  },
+  "tab-under-march": {
+   "title": "Tab i linje under march: sammenrykning mens kompagniet går (kendt fejl: to mænd 9 cm fra hinanden)",
+   "fps": 10,
+   "drill": "2:DK-SKIRMISH-C1:AIOFF,4:DK-SKIRMISH-C1:MOVE:45:0,8:DK-SKIRMISH-C1:KILL:8,16:DK-SKIRMISH-C1:KILL:8,24:DK-SKIRMISH-C1:KILL:8",
+   "follow": "FLAGDK-SKIRMISH-C1:1500:0.8:FRONT",
+   "record": [
+    6,
+    44
+   ],
+   "timeout_s": 900,
+   "focus": [
+    "overlap",
+    "closing",
+    "step_up",
+    "ranks",
+    "death_pose",
+    "bearer"
+   ]
+  },
+  "fane": {
+   "title": "Fanen falder og samles op",
+   "fps": 10,
+   "drill": "2:DK-SKIRMISH-C1:AIOFF,5:DK-SKIRMISH-C1:KILL:15,15:DK-SKIRMISH-C1:KILLCOLOURS,30:DK-SKIRMISH-C1:KILL:10:90,40:DK-SKIRMISH-C1:KILLCOLOURS",
+   "follow": "FLAGDK-SKIRMISH-C1:1200:0.5",
+   "record": [
+    12,
+    56
+   ],
+   "timeout_s": 900,
+   "focus": [
+    "flag_hand",
+    "bearer",
+    "death_pose",
+    "closing",
+    "overlap"
+   ]
+  },
+  "karre": {
+   "title": "Karré: dannes fra linje, tab i karréen, tilbage til linje (Allan 2026-11-05: noget sker med mændene i karré; officeren ikke i midten, fanebæreren ud i hjørnet)",
+   "fps": 10,
+   "drill": "2:DK-SKIRMISH-C1:AIOFF,5:DK-SKIRMISH-C1:SQUARE,22:DK-SKIRMISH-C1:KILL:8,32:DK-SKIRMISH-C1:KILL:8,45:DK-SKIRMISH-C1:LINE",
+   "follow": "FLAGDK-SKIRMISH-C1:1800:0.7",
+   "record": [
+    3,
+    60
+   ],
+   "timeout_s": 900,
+   "focus": [
+    "overlap",
+    "ranks",
+    "closing",
+    "bearer",
+    "turn",
+    "foot_slide",
+    "death_pose",
+    "other"
+   ]
+  },
+  "kanon": {
+   "title": "Kanonbesætning i nærbillede: opstilling, svabre, lade, ansætte, tænde, rekyl (Allan 2026-11-08: kanon animationer)",
+   "fps": 10,
+   "drill": "2:DK-SKIRMISH-C1:AIOFF",
+   "follow": "GUNDK-SKIRMISH-BTY:320:1.0",
+   "record": [
+    10,
+    70
+   ],
+   "timeout_s": 900,
+   "drop_args": [
+    "-Strategy1864SkirmishPassive"
+   ],
+   "extra_args": [
+    "-Strategy1864SkirmishArms"
+   ],
+   "focus": [
+    "foot_slide",
+    "rifle_hand",
+    "turn",
+    "overlap",
+    "other"
+   ]
+  },
+  "forstilling": {
+   "title": "Batteriet protser af, marcherer 40 m til siden og protser op igen: forstillingens heste og kuske (Allan 2026-11-08: limber og unlimber)",
+   "fps": 10,
+   "drill": "1:EN-SKIRMISH-BTY:AIOFF,1:EN-SKIRMISH-MRT:AIOFF,2:EN-SKIRMISH-BTY:LIMBER,2:EN-SKIRMISH-MRT:LIMBER,2:DK-SKIRMISH-BTY:AIOFF,5:DK-SKIRMISH-BTY:LIMBER,20:DK-SKIRMISH-BTY:MOVE:0:40,60:DK-SKIRMISH-BTY:UNLIMBER",
+   "follow": "GUNDK-SKIRMISH-BTY:2200:0.6",
+   "record": [
+    4,
+    95
+   ],
+   "timeout_s": 900,
+   "extra_args": [
+    "-Strategy1864SkirmishArms"
+   ],
+   "focus": [
+    "foot_slide",
+    "turn",
+    "overlap",
+    "other"
+   ]
+  },
+  "rytteri": {
+   "title": "Husarerne rykker frem og chokerer: gangarter, hovenes skridt og sablen i hånden (backlog: glidende hove, sablen følger ikke hånden)",
+   "fps": 10,
+   "drill": "2:DK-SKIRMISH-C1:AIOFF",
+   "follow": "EN-SKIRMISH-SQN:1300:1.0",
+   "record": [
+    3,
+    60
+   ],
+   "timeout_s": 900,
+   "drop_args": [
+    "-Strategy1864SkirmishPassive"
+   ],
+   "extra_args": [
+    "-Strategy1864SkirmishArms"
+   ],
+   "focus": [
+    "foot_slide",
+    "turn",
+    "overlap",
+    "other"
+   ]
+  },
+  "linje-kolonne-linje": {
+   "title": "Eksercits: linje til kolonne og tilbage til linje",
+   "fps": 10,
+   "drill": "2:DK-SKIRMISH-C1:AIOFF,3:DK-SKIRMISH-C1:COLUMN,25:DK-SKIRMISH-C1:LINE",
+   "follow": "FLAGDK-SKIRMISH-C1:1700:0.9:FRONT",
+   "record": [
+    2,
+    45
+   ],
+   "timeout_s": 900,
+   "focus": [
+    "column",
+    "ranks",
+    "turn",
+    "overlap",
+    "foot_slide",
+    "bearer"
+   ]
+  },
+  "rytteri-side": {
+   "title": "Husarerne set fra siden: hestens ben og hove i hver gangart, rytterens sæde og sablen (QA 2026-11-13)",
+   "fps": 10,
+   "drill": "2:DK-SKIRMISH-C1:AIOFF",
+   "follow": "EN-SKIRMISH-SQN:3000:1.0:SIDE",
+   "record": [
+    3,
+    45
+   ],
+   "timeout_s": 900,
+   "drop_args": [
+    "-Strategy1864SkirmishPassive"
+   ],
+   "extra_args": [
+    "-Strategy1864SkirmishArms"
+   ],
+   "focus": [
+    "foot_slide",
+    "turn",
+    "overlap",
+    "other"
+   ]
+  },
+  "eksercits-naer": {
+   "title": "Kompagniet tæt på forfra: vendinger, fødder og geværføring under linje-kolonne-linje og karré (QA 2026-11-13)",
+   "fps": 10,
+   "drill": "3:DK-SKIRMISH-C1:COLUMN,12:DK-SKIRMISH-C1:MOVE:80:0,50:DK-SKIRMISH-C1:LINE,100:DK-SKIRMISH-C1:SQUARE,135:DK-SKIRMISH-C1:COLUMN,160:DK-SKIRMISH-C1:LINE",
+   "follow": "FLAGDK-SKIRMISH-C1:900:0.5:FRONT",
+   "record": [
+    2,
+    245
+   ],
+   "timeout_s": 1200,
+   "drop_args": [
+    "-Strategy1864SkirmishPassive"
+   ],
+   "extra_args": [
+    "-Strategy1864SkirmishAttack"
+   ],
+   "focus": [
+    "column",
+    "ranks",
+    "turn",
+    "overlap",
+    "volley",
+    "reload",
+    "bearer"
+   ]
+  },
+  "ildkamp": {
+   "title": "Ildkamp: kompagniet går i linje ind på 50 m af det svenske kompagni; salver, ladning og fald (Allan 2026-11-12)",
+   "fps": 10,
+   "drill": "3:DK-SKIRMISH-C1:ENGAGE:EN-SKIRMISH-C1:50",
+   "follow": "FLAGDK-SKIRMISH-C1:1400:0.8",
+   "record": [
+    60,
+    150
+   ],
+   "timeout_s": 900,
+   "drop_args": [
+    "-Strategy1864SkirmishPassive"
+   ],
+   "extra_args": [
+    "-Strategy1864SkirmishAttack",
+    "-Strategy1864SkirmishApart=170"
+   ],
+   "focus": [
+    "volley",
+    "reload",
+    "smoke",
+    "rifle_hand",
+    "overlap",
+    "ground",
+    "ranks"
+   ]
+  },
+  "ildkamp-naer": {
+   "title": "Ildkamp tæt på fra siden: ladegreb, anlæg, skud og fald (QA 2026-11-13)",
+   "fps": 10,
+   "drill": "3:DK-SKIRMISH-C1:ENGAGE:EN-SKIRMISH-C1:50",
+   "follow": "FLAGDK-SKIRMISH-C1:800:0.5:FRONT",
+   "record": [
+    95,
+    140
+   ],
+   "timeout_s": 900,
+   "drop_args": [
+    "-Strategy1864SkirmishPassive"
+   ],
+   "extra_args": [
+    "-Strategy1864SkirmishAttack",
+    "-Strategy1864SkirmishApart=170"
+   ],
+   "focus": [
+    "volley",
+    "reload",
+    "smoke",
+    "rifle_hand",
+    "overlap",
+    "ground",
+    "ranks"
+   ]
+  },
+  "karre-sving": {
+   "title": "Karré-svinget: linje til karré og tilbage til linje, fløjene svinger som en dør (Allan 2026-11-14)",
+   "fps": 10,
+   "drill": "5:DK-SKIRMISH-C1:SQUARE,40:DK-SKIRMISH-C1:LINE",
+   "follow": "FLAGDK-SKIRMISH-C1:2600:0.0",
+   "record": [
+    3,
+    62
+   ],
+   "timeout_s": 1200,
+   "drop_args": [],
+   "extra_args": [],
+   "focus": [
+    "column",
+    "ranks",
+    "turn",
+    "overlap",
+    "volley",
+    "reload",
+    "bearer"
+   ]
+  },
+  "kolonne-karre": {
+   "title": "Kolonne til karré og tilbage til kolonne: kolonnen marcherer ind i karréen og rundt om den (Allan 2026-11-15)",
+   "fps": 10,
+   "drill": "3:DK-SKIRMISH-C1:COLUMN,12:DK-SKIRMISH-C1:MOVE:200:0,75:DK-SKIRMISH-C1:SQUARE,110:DK-SKIRMISH-C1:COLUMN",
+   "follow": "FLAGDK-SKIRMISH-C1:2600:0.0",
+   "record": [
+    70,
+    140
+   ],
+   "timeout_s": 1200,
+   "drop_args": [],
+   "extra_args": [],
+   "focus": [
+    "column",
+    "ranks",
+    "turn",
+    "overlap",
+    "volley",
+    "reload",
+    "bearer"
+   ]
+  }
+ }
+}

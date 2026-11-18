@@ -292,6 +292,17 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Identity")
     FText DisplayName;
 
+    /** The nation whose men these are (DK, SE, PR, NO, ...): the officer's and the staff's uniform. None: decided from the side. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Identity")
+    FName NationCode;
+
+    /** NationCode, else DK for the Danish side and PR for any other. */
+    FString GetNationCodeOrDefault() const
+    {
+        if (!NationCode.IsNone()) return NationCode.ToString();
+        return Side == EStrategySide::Denmark || Side == EStrategySide::Allied ? TEXT("DK") : TEXT("PR");
+    }
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Strategy|Unit")
     EStrategySide Side = EStrategySide::Neutral;
 

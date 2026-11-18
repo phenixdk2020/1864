@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["findings"],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["image", "kind", "severity", "where", "description", "confidence", "code_hint"],
+        "properties": {
+          "image": { "type": "string", "description": "File name of the image the finding is seen in" },
+          "kind": {
+            "type": "string",
+            "enum": ["overlap", "rifle_hand", "flag_hand", "bearer", "ground", "ranks", "column", "step_up", "closing",
+                     "death_pose", "volley", "reload", "smoke", "foot_slide", "turn", "other"]
+          },
+          "severity": { "type": "integer", "minimum": 1, "maximum": 3 },
+          "where": { "type": "string", "description": "Where in the image (Danish)" },
+          "description": { "type": "string", "description": "What is wrong (Danish)" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "code_hint": { "type": "string", "description": "Likely cause in code, or empty" }
+        }
+      }
+    }
+  }
+}

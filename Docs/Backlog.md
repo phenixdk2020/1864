@@ -39,6 +39,15 @@ Status pr. 2026-10-08: de oprindelige 20 opgaver blev registreret som lavet i v0
 - Søtransport af tropper er endnu ikke lavet.
 - Testbeløbet i statskassen (5.000.000 rd.) skal ned på 150.000 før rigtigt spil.
 
+## Slaget 2026-11-05 til 11-15: bygget, åbne punkter (detaljer i TASKS.md)
+
+- **Karré:** linje ↔ karré og kolonne ↔ karré er bygget (målt 43/49 og 25/52 cm). Allan skal se `Saved/QA/2026-11-15-karre-sving/karre-sving.mp4` og `Saved/QA/2026-11-15-kolonne-karre/kolonne-karre.mp4`. Tilbage: kompagnier med tab falder tilbage til glidning, fjendens karré under rytteritrussel afvises fra linje, og en svingende kolonne afvises.
+- **Ildkampen:** kun første geled skyder (`FrontRank`). Allan skal afgøre, om to-geleds ild skal være standard. Hele kompagniet skuldrer og rykker sammen efter hvert tab, og røgen er store hvide skiver.
+- **Kanonbatteriet:** besætning med 8 poster pr. kanon, rekyl og forstilling er bygget. Tilbage: ladegrebene tæt på, vanter, hjul der drejer, og tab og moral ved kanonen (Allan 2026-11-15, kortlagt, ikke lavet): de overlevende overtager ikke de faldnes poster, rytteri overløber ikke kanonerne, og et batteri på flugt ses ikke.
+- **Rytteri:** hove mod jorden og gangartsskift er ikke bedømt, halen er stiv, og rytterfigurerne mangler VAT-bagning.
+- **Officerer:** hvileklippet står cirka 8 cm for lavt, dødsklippet hopper, og officeren er ikke set i karré.
+- **Kolonne til linje:** 2. kompagni venter 10 s; årsagen er ikke fundet.
+
 ## Senere (ikke prioriteret endnu)
 - Sverige-Norge med eget kort, og andre landes kort (Preussen, Østrig).
 - Søtransport af regimenter mellem havne.

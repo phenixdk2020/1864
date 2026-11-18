@@ -22,8 +22,8 @@ namespace
     // The cavalry's rigged horse and the rider clips (StrategyCavalryVisualComponent), ridden by the officer (Final_v5).
     const TCHAR* StaffHorseSkPath = TEXT("/Game/Units/Horse/SK_Horse_1864.SK_Horse_1864");
     const TCHAR* StaffHorseClipPaths[5] = {
-        TEXT("/Game/Units/Horse/A_Horse_Stand.A_Horse_Stand"), TEXT("/Game/Units/Horse/A_Horse_Walk.A_Horse_Walk"),
-        TEXT("/Game/Units/Horse/A_Horse_Trot.A_Horse_Trot"), TEXT("/Game/Units/Horse/A_Horse_Canter.A_Horse_Canter"),
+        TEXT("/Game/Units/Horse/A_Horse_Stand.A_Horse_Stand"), TEXT("/Game/Units/Horse/A_Horse_M2M_Walk.A_Horse_M2M_Walk"),
+        TEXT("/Game/Units/Horse/A_Horse_M2M_Trot.A_Horse_M2M_Trot"), TEXT("/Game/Units/Horse/A_Horse_Canter.A_Horse_Canter"),
         TEXT("/Game/Units/Horse/A_Horse_Gallop.A_Horse_Gallop")};
     const TCHAR* StaffRiderClipPaths[5] = {   // index 0 is the held seat (StaffSeatPath)
         TEXT(""), TEXT("/Game/Units/Human/CombatAnimations/A_Combat_CavWalk.A_Combat_CavWalk"),
@@ -35,10 +35,11 @@ namespace
     const FName StaffSaddleBone(TEXT("saddle_root"));
     // As the cavalry: the horse's length, the gait thresholds (cm/s), each horse clip's own ground speed and the play rate range.
     const float StaffHorseLengthCm = 219.0f;
-    const float StaffGaitThresholds[4] = {80.f, 350.f, 650.f, 900.f};
-    const float StaffClipSpeedCmS[5] = {0.f, 60.f, 179.f, 357.f, 757.f};
-    const float StaffRateMin[5] = {1.f, 0.9f, 0.9f, 0.85f, 0.9f};
-    const float StaffRateMax[5] = {1.f, 2.2f, 1.8f, 1.5f, 1.4f};
+    // The gait changes where the clip's stride still covers the ground (no sliding hooves, 2026-11-08).
+    const float StaffGaitThresholds[4] = {80.f, 190.f, 400.f, 640.f};
+    const float StaffClipSpeedCmS[5] = {0.f, 132.f, 250.f, 357.f, 757.f};
+    const float StaffRateMin[5] = {1.f, 0.45f, 0.75f, 0.85f, 0.8f};
+    const float StaffRateMax[5] = {1.f, 1.6f, 1.6f, 1.8f, 1.6f};
     const float StaffRiderSeatCm = 48.0f;   // the seated pose's pelvis above its root
     const float StaffSaddleLiftCm = 6.0f;   // the pelvis above the saddle_root bone
     // The sabre and the scabbard on the officer's hips (Final_v5 notes.md: the sabre sheathed shares the scabbard's transform).
@@ -83,12 +84,11 @@ bool UStrategyHQVisualComponent::Build()
     if (!OwnerHQ) return false;
     HorseModel = LoadObject<UStaticMesh>(nullptr, StaffHorsePath);
     SeatClip = LoadObject<UAnimSequence>(nullptr, StaffSeatPath);
-    // The rider: the officer of the staff's nation (the unit has no nation yet: its side and name decide), else the old soldier.
-    const FString StaffName = OwnerHQ->DisplayName.ToString() + TEXT(" ") + OwnerHQ->StableUnitId.ToString();
-    const bool bStaffDanish = OwnerHQ->Side == EStrategySide::Denmark || OwnerHQ->Side == EStrategySide::Allied;
-    const TCHAR* StaffNation = bStaffDanish ? TEXT("DK") : StaffName.Contains(TEXT("Sv")) || StaffName.Contains(TEXT("-SE")) ? TEXT("SE") : TEXT("PR");
-    RiderModel = LoadObject<USkeletalMesh>(nullptr, *FString::Printf(TEXT("/Game/Units/Human/Officer/SK_Officer_1864_%s.SK_Officer_1864_%s"), StaffNation, StaffNation),
+    // The rider: the officer of the staff's nation, else the old soldier.
+    const FString StaffNation = OwnerHQ->GetNationCodeOrDefault();
+    RiderModel = LoadObject<USkeletalMesh>(nullptr, *FString::Printf(TEXT("/Game/Units/Human/Officer/SK_Officer_1864_%s.SK_Officer_1864_%s"), *StaffNation, *StaffNation),
         nullptr, LOAD_NoWarn | LOAD_Quiet);
+    if (!RiderModel) RiderModel = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Units/Human/Officer/SK_Officer_1864_DK.SK_Officer_1864_DK"), nullptr, LOAD_NoWarn | LOAD_Quiet);
     bOfficerRider = RiderModel != nullptr;
     if (!RiderModel) RiderModel = LoadObject<USkeletalMesh>(nullptr, StaffRiderPath);
     // The rigged horse needs all five gaits; the rider's clips are optional (the held seat stands in).

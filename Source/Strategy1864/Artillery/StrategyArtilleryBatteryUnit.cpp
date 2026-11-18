@@ -2,6 +2,8 @@
 #include "../Units/StrategyWagonTrainComponent.h"
 #include "StrategyMortarBatteryUnit.h"
 #include "../Visual/StrategyArtilleryVisualComponent.h"
+#include "../Visual/StrategyGunCrewVisualComponent.h"
+#include "../Visual/StrategyLimberVisualComponent.h"
 
 #include "StrategyArtilleryDeploymentComponent.h"
 #include "StrategyArtilleryAmmunitionComponent.h"
@@ -67,6 +69,14 @@ AStrategyArtilleryBatteryUnit::AStrategyArtilleryBatteryUnit()
     CrewAnimationComponent =
         CreateDefaultSubobject<UStrategyArtilleryCrewAnimationComponent>(
             TEXT("CrewAnimationComponent"));
+
+    GunCrewVisualComponent =
+        CreateDefaultSubobject<UStrategyGunCrewVisualComponent>(
+            TEXT("GunCrewVisualComponent"));
+
+    LimberVisualComponent =
+        CreateDefaultSubobject<UStrategyLimberVisualComponent>(
+            TEXT("LimberVisualComponent"));
 }
 
 void AStrategyArtilleryBatteryUnit::BeginPlay()
