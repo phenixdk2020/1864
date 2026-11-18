@@ -1,0 +1,1393 @@
+{
+  "DK": {
+    "nation": "DK",
+    "height_m": 1.9882,
+    "soldier_height_m": 1.9912,
+    "shift_m": [
+      0.0002,
+      0.0,
+      -0.0015
+    ],
+    "triangles": 40000,
+    "vertices": 24892,
+    "arm_fit": {
+      "iter0": {
+        "LeftForeArm": [
+          0.384,
+          -0.041,
+          0.094
+        ],
+        "LeftHand": [
+          0.464,
+          -0.054,
+          -0.034
+        ],
+        "RightForeArm": [
+          -0.394,
+          -0.048,
+          0.068
+        ],
+        "RightHand": [
+          -0.459,
+          -0.053,
+          -0.038
+        ]
+      },
+      "iter1": {
+        "LeftForeArm": [
+          0.382,
+          -0.05,
+          0.097
+        ],
+        "LeftHand": [
+          0.463,
+          -0.053,
+          -0.032
+        ],
+        "RightForeArm": [
+          -0.393,
+          -0.059,
+          0.072
+        ],
+        "RightHand": [
+          -0.459,
+          -0.06,
+          -0.036
+        ]
+      },
+      "targets": {
+        "LeftForeArm": [
+          0.379,
+          -0.051,
+          0.102
+        ],
+        "LeftHand": [
+          0.453,
+          -0.051,
+          -0.016
+        ],
+        "RightForeArm": [
+          -0.389,
+          -0.059,
+          0.079
+        ],
+        "RightHand": [
+          -0.457,
+          -0.059,
+          -0.032
+        ]
+      }
+    },
+    "max_nearest_dist_m": 0.0979,
+    "wrist": {
+      "Left": {
+        "skin_t_percentiles_m": [
+          0.042,
+          0.09,
+          0.097,
+          0.112,
+          0.124,
+          0.146
+        ],
+        "wrist_t_m": 0.09,
+        "pivot_t_m": 0.128,
+        "blend_centre_t_m": 0.128,
+        "pivot_lateral_m": 0.051,
+        "hand_t_m": 0.143,
+        "skin_samples": 388,
+        "cuff_vertices_moved_to_forearm": 1174,
+        "hand_vertices": 640
+      },
+      "Right": {
+        "skin_t_percentiles_m": [
+          0.002,
+          0.067,
+          0.072,
+          0.083,
+          0.097,
+          0.125
+        ],
+        "wrist_t_m": 0.067,
+        "pivot_t_m": 0.104,
+        "blend_centre_t_m": 0.104,
+        "pivot_lateral_m": 0.049,
+        "hand_t_m": 0.129,
+        "skin_samples": 518,
+        "cuff_vertices_moved_to_forearm": 1335,
+        "hand_vertices": 770
+      }
+    },
+    "skin_vertices": 4775,
+    "hand_mode": "rigid",
+    "hand_vertices_merged_to_hand_bone": 1829,
+    "vertices_without_weights_fallback_hips": 0,
+    "texture": "SK_Artillery_1864_DK_Texture_0.png",
+    "texture_size": [
+      2048,
+      2048
+    ],
+    "fbx": "SK_Artillery_1864_DK.fbx",
+    "verify": {
+      "bones": 41,
+      "armature_scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "armature_location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "names_match_SK_Human": true,
+      "parents_match": true,
+      "max_bind_matrix_dev": 9e-07,
+      "mesh_bounds_m": [
+        -0.483,
+        -0.17,
+        -1.0,
+        0.476,
+        0.189,
+        0.989
+      ],
+      "mesh_triangles": 40000,
+      "max_influences": 4,
+      "vertices_weight_sum_not_1": 0,
+      "vertex_groups": 22,
+      "mesh_object_parent": "Armature.001",
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "preview_metrics": {
+      "Sponge48": {
+        "edge_stretch_max": 15.25,
+        "edge_stretch_p9999": 11.85,
+        "edges_over_2x": 267,
+        "edge_growth_max_cm": 11.1,
+        "edges_growing_over_2cm": 130,
+        "worst_edge_rest_mid_m": [
+          -0.359,
+          -0.122,
+          -0.025
+        ],
+        "worst_edge_rest_len_cm": 0.78,
+        "bounds_m": [
+          -0.22,
+          -0.35,
+          -0.02,
+          0.58,
+          0.28,
+          1.87
+        ]
+      },
+      "Sponge70": {
+        "edge_stretch_max": 28.03,
+        "edge_stretch_p9999": 11.62,
+        "edges_over_2x": 253,
+        "edge_growth_max_cm": 12.8,
+        "edges_growing_over_2cm": 131,
+        "worst_edge_rest_mid_m": [
+          0.391,
+          -0.147,
+          -0.005
+        ],
+        "worst_edge_rest_len_cm": 1.72,
+        "bounds_m": [
+          -0.28,
+          -0.39,
+          -0.02,
+          0.44,
+          0.23,
+          1.93
+        ]
+      },
+      "Ram38": {
+        "edge_stretch_max": 26.86,
+        "edge_stretch_p9999": 11.07,
+        "edges_over_2x": 246,
+        "edge_growth_max_cm": 11.2,
+        "edges_growing_over_2cm": 132,
+        "worst_edge_rest_mid_m": [
+          0.391,
+          -0.147,
+          -0.005
+        ],
+        "worst_edge_rest_len_cm": 1.72,
+        "bounds_m": [
+          -0.22,
+          -0.33,
+          -0.02,
+          0.59,
+          0.28,
+          1.87
+        ]
+      },
+      "Load38": {
+        "edge_stretch_max": 15.44,
+        "edge_stretch_p9999": 6.52,
+        "edges_over_2x": 367,
+        "edge_growth_max_cm": 9.5,
+        "edges_growing_over_2cm": 196,
+        "worst_edge_rest_mid_m": [
+          -0.479,
+          -0.079,
+          0.025
+        ],
+        "worst_edge_rest_len_cm": 2.86,
+        "bounds_m": [
+          -0.47,
+          -0.49,
+          -0.02,
+          0.39,
+          0.12,
+          1.86
+        ]
+      },
+      "Walk8": {
+        "edge_stretch_max": 34.0,
+        "edge_stretch_p9999": 8.63,
+        "edges_over_2x": 249,
+        "edge_growth_max_cm": 8.2,
+        "edges_growing_over_2cm": 113,
+        "worst_edge_rest_mid_m": [
+          0.404,
+          -0.146,
+          -0.007
+        ],
+        "worst_edge_rest_len_cm": 2.13,
+        "bounds_m": [
+          -0.32,
+          -0.54,
+          -0.01,
+          0.34,
+          0.45,
+          1.95
+        ]
+      },
+      "Walk22": {
+        "edge_stretch_max": 29.7,
+        "edge_stretch_p9999": 9.69,
+        "edges_over_2x": 176,
+        "edge_growth_max_cm": 5.6,
+        "edges_growing_over_2cm": 66,
+        "worst_edge_rest_mid_m": [
+          -0.399,
+          -0.153,
+          -0.017
+        ],
+        "worst_edge_rest_len_cm": 0.95,
+        "bounds_m": [
+          -0.33,
+          -0.56,
+          -0.01,
+          0.38,
+          0.4,
+          1.95
+        ]
+      },
+      "Death30": {
+        "edge_stretch_max": 46.97,
+        "edge_stretch_p9999": 7.31,
+        "edges_over_2x": 525,
+        "edge_growth_max_cm": 6.3,
+        "edges_growing_over_2cm": 273,
+        "worst_edge_rest_mid_m": [
+          -0.403,
+          -0.155,
+          -0.021
+        ],
+        "worst_edge_rest_len_cm": 1.54,
+        "bounds_m": [
+          -1.71,
+          -0.75,
+          -1.69,
+          0.18,
+          0.13,
+          -0.37
+        ]
+      }
+    }
+  },
+  "NO": {
+    "nation": "NO",
+    "height_m": 1.9878,
+    "soldier_height_m": 1.9912,
+    "shift_m": [
+      0.0006,
+      0.0,
+      -0.0016
+    ],
+    "triangles": 40000,
+    "vertices": 25727,
+    "arm_fit": {
+      "iter0": {
+        "LeftForeArm": [
+          0.367,
+          -0.019,
+          0.077
+        ],
+        "LeftHand": [
+          0.44,
+          -0.035,
+          -0.052
+        ],
+        "RightForeArm": [
+          -0.383,
+          -0.034,
+          0.061
+        ],
+        "RightHand": [
+          -0.449,
+          -0.05,
+          -0.044
+        ]
+      },
+      "iter1": {
+        "LeftForeArm": [
+          0.363,
+          -0.027,
+          0.077
+        ],
+        "LeftHand": [
+          0.437,
+          -0.038,
+          -0.053
+        ],
+        "RightForeArm": [
+          -0.378,
+          -0.036,
+          0.058
+        ],
+        "RightHand": [
+          -0.441,
+          -0.05,
+          -0.049
+        ]
+      },
+      "targets": {
+        "LeftForeArm": [
+          0.358,
+          -0.027,
+          0.085
+        ],
+        "LeftHand": [
+          0.437,
+          -0.038,
+          -0.054
+        ],
+        "RightForeArm": [
+          -0.373,
+          -0.035,
+          0.069
+        ],
+        "RightHand": [
+          -0.443,
+          -0.051,
+          -0.053
+        ]
+      }
+    },
+    "max_nearest_dist_m": 0.0567,
+    "wrist": {
+      "Left": {
+        "skin_t_percentiles_m": [
+          0.045,
+          0.154,
+          0.165,
+          0.177,
+          0.186,
+          0.208
+        ],
+        "wrist_t_m": 0.111,
+        "pivot_t_m": 0.125,
+        "blend_centre_t_m": 0.136,
+        "pivot_lateral_m": 0.019,
+        "hand_t_m": 0.161,
+        "skin_samples": 187,
+        "cuff_vertices_moved_to_forearm": 1049,
+        "hand_vertices": 574
+      },
+      "Right": {
+        "skin_t_percentiles_m": [
+          0.03,
+          0.131,
+          0.145,
+          0.159,
+          0.17,
+          0.189
+        ],
+        "wrist_t_m": 0.091,
+        "pivot_t_m": 0.106,
+        "blend_centre_t_m": 0.116,
+        "pivot_lateral_m": 0.019,
+        "hand_t_m": 0.141,
+        "skin_samples": 225,
+        "cuff_vertices_moved_to_forearm": 1121,
+        "hand_vertices": 642
+      }
+    },
+    "skin_vertices": 4221,
+    "hand_mode": "rigid",
+    "hand_vertices_merged_to_hand_bone": 1915,
+    "vertices_without_weights_fallback_hips": 0,
+    "texture": "SK_Artillery_1864_NO_Texture_0.png",
+    "texture_size": [
+      2048,
+      2048
+    ],
+    "fbx": "SK_Artillery_1864_NO.fbx",
+    "verify": {
+      "bones": 41,
+      "armature_scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "armature_location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "names_match_SK_Human": true,
+      "parents_match": true,
+      "max_bind_matrix_dev": 9e-07,
+      "mesh_bounds_m": [
+        -0.466,
+        -0.186,
+        -1.0,
+        0.458,
+        0.194,
+        0.988
+      ],
+      "mesh_triangles": 40000,
+      "max_influences": 4,
+      "vertices_weight_sum_not_1": 0,
+      "vertex_groups": 22,
+      "mesh_object_parent": "Armature.001",
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "preview_metrics": {
+      "Sponge48": {
+        "edge_stretch_max": 16.24,
+        "edge_stretch_p9999": 12.78,
+        "edges_over_2x": 560,
+        "edge_growth_max_cm": 13.0,
+        "edges_growing_over_2cm": 337,
+        "worst_edge_rest_mid_m": [
+          -0.342,
+          -0.092,
+          -0.057
+        ],
+        "worst_edge_rest_len_cm": 1.18,
+        "bounds_m": [
+          -0.24,
+          -0.34,
+          -0.02,
+          0.54,
+          0.26,
+          1.87
+        ]
+      },
+      "Sponge70": {
+        "edge_stretch_max": 17.43,
+        "edge_stretch_p9999": 11.58,
+        "edges_over_2x": 474,
+        "edge_growth_max_cm": 12.6,
+        "edges_growing_over_2cm": 297,
+        "worst_edge_rest_mid_m": [
+          0.398,
+          -0.136,
+          -0.017
+        ],
+        "worst_edge_rest_len_cm": 0.82,
+        "bounds_m": [
+          -0.29,
+          -0.45,
+          -0.02,
+          0.46,
+          0.22,
+          1.93
+        ]
+      },
+      "Ram38": {
+        "edge_stretch_max": 16.47,
+        "edge_stretch_p9999": 10.76,
+        "edges_over_2x": 478,
+        "edge_growth_max_cm": 11.2,
+        "edges_growing_over_2cm": 292,
+        "worst_edge_rest_mid_m": [
+          0.398,
+          -0.136,
+          -0.017
+        ],
+        "worst_edge_rest_len_cm": 0.82,
+        "bounds_m": [
+          -0.24,
+          -0.38,
+          -0.02,
+          0.55,
+          0.26,
+          1.87
+        ]
+      },
+      "Load38": {
+        "edge_stretch_max": 16.77,
+        "edge_stretch_p9999": 9.6,
+        "edges_over_2x": 586,
+        "edge_growth_max_cm": 10.8,
+        "edges_growing_over_2cm": 363,
+        "worst_edge_rest_mid_m": [
+          -0.209,
+          0.056,
+          0.15
+        ],
+        "worst_edge_rest_len_cm": 2.87,
+        "bounds_m": [
+          -0.44,
+          -0.5,
+          -0.02,
+          0.37,
+          0.12,
+          1.82
+        ]
+      },
+      "Walk8": {
+        "edge_stretch_max": 16.73,
+        "edge_stretch_p9999": 10.3,
+        "edges_over_2x": 540,
+        "edge_growth_max_cm": 8.9,
+        "edges_growing_over_2cm": 316,
+        "worst_edge_rest_mid_m": [
+          -0.226,
+          -0.06,
+          0.187
+        ],
+        "worst_edge_rest_len_cm": 0.87,
+        "bounds_m": [
+          -0.29,
+          -0.54,
+          -0.01,
+          0.31,
+          0.45,
+          1.95
+        ]
+      },
+      "Walk22": {
+        "edge_stretch_max": 15.15,
+        "edge_stretch_p9999": 8.57,
+        "edges_over_2x": 392,
+        "edge_growth_max_cm": 8.0,
+        "edges_growing_over_2cm": 224,
+        "worst_edge_rest_mid_m": [
+          -0.212,
+          0.048,
+          0.138
+        ],
+        "worst_edge_rest_len_cm": 0.92,
+        "bounds_m": [
+          -0.3,
+          -0.56,
+          -0.01,
+          0.35,
+          0.4,
+          1.95
+        ]
+      },
+      "Death30": {
+        "edge_stretch_max": 27.59,
+        "edge_stretch_p9999": 12.31,
+        "edges_over_2x": 775,
+        "edge_growth_max_cm": 13.7,
+        "edges_growing_over_2cm": 491,
+        "worst_edge_rest_mid_m": [
+          0.204,
+          0.047,
+          0.148
+        ],
+        "worst_edge_rest_len_cm": 2.13,
+        "bounds_m": [
+          -1.7,
+          -0.73,
+          -1.69,
+          0.18,
+          0.12,
+          -0.37
+        ]
+      }
+    }
+  },
+  "SE": {
+    "nation": "SE",
+    "height_m": 1.9945,
+    "soldier_height_m": 1.9912,
+    "shift_m": [
+      -0.0013,
+      0.0,
+      -0.0004
+    ],
+    "triangles": 40000,
+    "vertices": 24540,
+    "arm_fit": {
+      "iter0": {
+        "LeftForeArm": [
+          0.326,
+          0.015,
+          0.055
+        ],
+        "LeftHand": [
+          0.372,
+          0.005,
+          -0.091
+        ],
+        "RightForeArm": [
+          -0.336,
+          0.01,
+          0.032
+        ],
+        "RightHand": [
+          -0.378,
+          0.005,
+          -0.091
+        ]
+      },
+      "iter1": {
+        "LeftForeArm": [
+          0.328,
+          0.011,
+          0.057
+        ],
+        "LeftHand": [
+          0.376,
+          -0.011,
+          -0.085
+        ],
+        "RightForeArm": [
+          -0.336,
+          0.0,
+          0.036
+        ],
+        "RightHand": [
+          -0.38,
+          -0.024,
+          -0.081
+        ]
+      },
+      "targets": {
+        "LeftForeArm": [
+          0.322,
+          0.014,
+          0.07
+        ],
+        "LeftHand": [
+          0.376,
+          -0.011,
+          -0.087
+        ],
+        "RightForeArm": [
+          -0.332,
+          0.004,
+          0.04
+        ],
+        "RightHand": [
+          -0.381,
+          -0.024,
+          -0.082
+        ]
+      }
+    },
+    "max_nearest_dist_m": 0.0837,
+    "wrist": {
+      "Left": {
+        "skin_t_percentiles_m": [
+          0.047,
+          0.062,
+          0.078,
+          0.115,
+          0.151,
+          0.176
+        ],
+        "wrist_t_m": 0.069,
+        "pivot_t_m": 0.131,
+        "blend_centre_t_m": 0.129,
+        "pivot_lateral_m": 0.053,
+        "hand_t_m": 0.169,
+        "skin_samples": 562,
+        "cuff_vertices_moved_to_forearm": 815,
+        "hand_vertices": 798
+      },
+      "Right": {
+        "skin_t_percentiles_m": [
+          0.008,
+          0.025,
+          0.042,
+          0.075,
+          0.104,
+          0.135
+        ],
+        "wrist_t_m": 0.037,
+        "pivot_t_m": 0.105,
+        "blend_centre_t_m": 0.097,
+        "pivot_lateral_m": 0.051,
+        "hand_t_m": 0.137,
+        "skin_samples": 669,
+        "cuff_vertices_moved_to_forearm": 825,
+        "hand_vertices": 846
+      }
+    },
+    "skin_vertices": 6193,
+    "hand_mode": "rigid",
+    "hand_vertices_merged_to_hand_bone": 2001,
+    "vertices_without_weights_fallback_hips": 0,
+    "texture": "SK_Artillery_1864_SE_Texture_0.png",
+    "texture_size": [
+      2048,
+      2048
+    ],
+    "fbx": "SK_Artillery_1864_SE.fbx",
+    "verify": {
+      "bones": 41,
+      "armature_scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "armature_location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "names_match_SK_Human": true,
+      "parents_match": true,
+      "max_bind_matrix_dev": 9e-07,
+      "mesh_bounds_m": [
+        -0.408,
+        -0.191,
+        -1.0,
+        0.4,
+        0.201,
+        0.995
+      ],
+      "mesh_triangles": 40000,
+      "max_influences": 4,
+      "vertices_weight_sum_not_1": 0,
+      "vertex_groups": 22,
+      "mesh_object_parent": "Armature.001",
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "preview_metrics": {
+      "Sponge48": {
+        "edge_stretch_max": 6.48,
+        "edge_stretch_p9999": 4.89,
+        "edges_over_2x": 304,
+        "edge_growth_max_cm": 8.3,
+        "edges_growing_over_2cm": 173,
+        "worst_edge_rest_mid_m": [
+          -0.304,
+          -0.007,
+          -0.067
+        ],
+        "worst_edge_rest_len_cm": 2.93,
+        "bounds_m": [
+          -0.2,
+          -0.34,
+          -0.02,
+          0.52,
+          0.26,
+          1.86
+        ]
+      },
+      "Sponge70": {
+        "edge_stretch_max": 7.76,
+        "edge_stretch_p9999": 5.99,
+        "edges_over_2x": 277,
+        "edge_growth_max_cm": 5.9,
+        "edges_growing_over_2cm": 129,
+        "worst_edge_rest_mid_m": [
+          0.351,
+          0.034,
+          -0.061
+        ],
+        "worst_edge_rest_len_cm": 2.99,
+        "bounds_m": [
+          -0.37,
+          -0.43,
+          -0.02,
+          0.42,
+          0.23,
+          1.93
+        ]
+      },
+      "Ram38": {
+        "edge_stretch_max": 7.32,
+        "edge_stretch_p9999": 5.59,
+        "edges_over_2x": 249,
+        "edge_growth_max_cm": 5.1,
+        "edges_growing_over_2cm": 108,
+        "worst_edge_rest_mid_m": [
+          0.168,
+          0.061,
+          0.269
+        ],
+        "worst_edge_rest_len_cm": 0.8,
+        "bounds_m": [
+          -0.2,
+          -0.37,
+          -0.02,
+          0.52,
+          0.26,
+          1.86
+        ]
+      },
+      "Load38": {
+        "edge_stretch_max": 9.04,
+        "edge_stretch_p9999": 6.27,
+        "edges_over_2x": 271,
+        "edge_growth_max_cm": 14.3,
+        "edges_growing_over_2cm": 190,
+        "worst_edge_rest_mid_m": [
+          -0.322,
+          0.016,
+          -0.077
+        ],
+        "worst_edge_rest_len_cm": 3.01,
+        "bounds_m": [
+          -0.53,
+          -0.5,
+          -0.02,
+          0.36,
+          0.12,
+          1.87
+        ]
+      },
+      "Walk8": {
+        "edge_stretch_max": 6.06,
+        "edge_stretch_p9999": 4.79,
+        "edges_over_2x": 200,
+        "edge_growth_max_cm": 4.8,
+        "edges_growing_over_2cm": 58,
+        "worst_edge_rest_mid_m": [
+          -0.175,
+          0.009,
+          0.266
+        ],
+        "worst_edge_rest_len_cm": 1.2,
+        "bounds_m": [
+          -0.28,
+          -0.56,
+          -0.0,
+          0.27,
+          0.41,
+          1.95
+        ]
+      },
+      "Walk22": {
+        "edge_stretch_max": 11.89,
+        "edge_stretch_p9999": 4.47,
+        "edges_over_2x": 210,
+        "edge_growth_max_cm": 4.0,
+        "edges_growing_over_2cm": 58,
+        "worst_edge_rest_mid_m": [
+          -0.322,
+          0.016,
+          -0.077
+        ],
+        "worst_edge_rest_len_cm": 3.01,
+        "bounds_m": [
+          -0.28,
+          -0.59,
+          -0.0,
+          0.35,
+          0.36,
+          1.95
+        ]
+      },
+      "Death30": {
+        "edge_stretch_max": 9.23,
+        "edge_stretch_p9999": 7.07,
+        "edges_over_2x": 346,
+        "edge_growth_max_cm": 6.6,
+        "edges_growing_over_2cm": 106,
+        "worst_edge_rest_mid_m": [
+          0.168,
+          0.061,
+          0.269
+        ],
+        "worst_edge_rest_len_cm": 0.8,
+        "bounds_m": [
+          -1.72,
+          -0.66,
+          -1.65,
+          0.16,
+          0.11,
+          -0.45
+        ]
+      }
+    }
+  },
+  "PR": {
+    "nation": "PR",
+    "height_m": 1.9937,
+    "soldier_height_m": 1.9912,
+    "shift_m": [
+      -0.0019,
+      0.0,
+      -0.0005
+    ],
+    "triangles": 40000,
+    "vertices": 24081,
+    "arm_fit": {
+      "iter0": {
+        "LeftForeArm": [
+          0.353,
+          -0.01,
+          0.069
+        ],
+        "LeftHand": [
+          0.426,
+          -0.026,
+          -0.061
+        ],
+        "RightForeArm": [
+          -0.373,
+          -0.02,
+          0.055
+        ],
+        "RightHand": [
+          -0.432,
+          -0.043,
+          -0.053
+        ]
+      },
+      "iter1": {
+        "LeftForeArm": [
+          0.352,
+          -0.015,
+          0.069
+        ],
+        "LeftHand": [
+          0.425,
+          -0.03,
+          -0.061
+        ],
+        "RightForeArm": [
+          -0.369,
+          -0.022,
+          0.056
+        ],
+        "RightHand": [
+          -0.428,
+          -0.053,
+          -0.05
+        ]
+      },
+      "targets": {
+        "LeftForeArm": [
+          0.348,
+          -0.015,
+          0.077
+        ],
+        "LeftHand": [
+          0.425,
+          -0.03,
+          -0.06
+        ],
+        "RightForeArm": [
+          -0.366,
+          -0.02,
+          0.061
+        ],
+        "RightHand": [
+          -0.429,
+          -0.053,
+          -0.051
+        ]
+      }
+    },
+    "max_nearest_dist_m": 0.0803,
+    "wrist": {
+      "Left": {
+        "skin_t_percentiles_m": [
+          0.056,
+          0.13,
+          0.138,
+          0.152,
+          0.16,
+          0.185
+        ],
+        "wrist_t_m": 0.107,
+        "pivot_t_m": 0.122,
+        "blend_centre_t_m": 0.132,
+        "pivot_lateral_m": 0.014,
+        "hand_t_m": 0.157,
+        "skin_samples": 335,
+        "cuff_vertices_moved_to_forearm": 954,
+        "hand_vertices": 686
+      },
+      "Right": {
+        "skin_t_percentiles_m": [
+          0.041,
+          0.115,
+          0.124,
+          0.137,
+          0.146,
+          0.184
+        ],
+        "wrist_t_m": 0.084,
+        "pivot_t_m": 0.105,
+        "blend_centre_t_m": 0.109,
+        "pivot_lateral_m": 0.012,
+        "hand_t_m": 0.134,
+        "skin_samples": 396,
+        "cuff_vertices_moved_to_forearm": 901,
+        "hand_vertices": 829
+      }
+    },
+    "skin_vertices": 4045,
+    "hand_mode": "rigid",
+    "hand_vertices_merged_to_hand_bone": 1867,
+    "vertices_without_weights_fallback_hips": 0,
+    "texture": "SK_Artillery_1864_PR_Texture_0.png",
+    "texture_size": [
+      2048,
+      2048
+    ],
+    "fbx": "SK_Artillery_1864_PR.fbx",
+    "verify": {
+      "bones": 41,
+      "armature_scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "armature_location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "names_match_SK_Human": true,
+      "parents_match": true,
+      "max_bind_matrix_dev": 9e-07,
+      "mesh_bounds_m": [
+        -0.455,
+        -0.205,
+        -1.0,
+        0.447,
+        0.208,
+        0.994
+      ],
+      "mesh_triangles": 40000,
+      "max_influences": 4,
+      "vertices_weight_sum_not_1": 0,
+      "vertex_groups": 22,
+      "mesh_object_parent": "Armature.001",
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "preview_metrics": {
+      "Sponge48": {
+        "edge_stretch_max": 9.63,
+        "edge_stretch_p9999": 5.86,
+        "edges_over_2x": 171,
+        "edge_growth_max_cm": 9.1,
+        "edges_growing_over_2cm": 71,
+        "worst_edge_rest_mid_m": [
+          -0.341,
+          -0.106,
+          -0.055
+        ],
+        "worst_edge_rest_len_cm": 1.42,
+        "bounds_m": [
+          -0.23,
+          -0.35,
+          -0.02,
+          0.55,
+          0.26,
+          1.86
+        ]
+      },
+      "Sponge70": {
+        "edge_stretch_max": 13.36,
+        "edge_stretch_p9999": 8.33,
+        "edges_over_2x": 167,
+        "edge_growth_max_cm": 12.0,
+        "edges_growing_over_2cm": 89,
+        "worst_edge_rest_mid_m": [
+          0.361,
+          -0.114,
+          -0.032
+        ],
+        "worst_edge_rest_len_cm": 0.97,
+        "bounds_m": [
+          -0.31,
+          -0.44,
+          -0.02,
+          0.45,
+          0.23,
+          1.93
+        ]
+      },
+      "Ram38": {
+        "edge_stretch_max": 12.85,
+        "edge_stretch_p9999": 8.19,
+        "edges_over_2x": 150,
+        "edge_growth_max_cm": 11.4,
+        "edges_growing_over_2cm": 77,
+        "worst_edge_rest_mid_m": [
+          0.355,
+          -0.112,
+          -0.035
+        ],
+        "worst_edge_rest_len_cm": 0.96,
+        "bounds_m": [
+          -0.23,
+          -0.37,
+          -0.02,
+          0.55,
+          0.26,
+          1.86
+        ]
+      },
+      "Load38": {
+        "edge_stretch_max": 6.32,
+        "edge_stretch_p9999": 4.73,
+        "edges_over_2x": 231,
+        "edge_growth_max_cm": 5.2,
+        "edges_growing_over_2cm": 114,
+        "worst_edge_rest_mid_m": [
+          0.348,
+          -0.113,
+          -0.041
+        ],
+        "worst_edge_rest_len_cm": 1.82,
+        "bounds_m": [
+          -0.46,
+          -0.5,
+          -0.02,
+          0.37,
+          0.12,
+          1.85
+        ]
+      },
+      "Walk8": {
+        "edge_stretch_max": 7.7,
+        "edge_stretch_p9999": 5.3,
+        "edges_over_2x": 116,
+        "edge_growth_max_cm": 6.6,
+        "edges_growing_over_2cm": 52,
+        "worst_edge_rest_mid_m": [
+          0.348,
+          -0.113,
+          -0.041
+        ],
+        "worst_edge_rest_len_cm": 1.82,
+        "bounds_m": [
+          -0.3,
+          -0.55,
+          -0.01,
+          0.3,
+          0.42,
+          1.95
+        ]
+      },
+      "Walk22": {
+        "edge_stretch_max": 12.05,
+        "edge_stretch_p9999": 4.33,
+        "edges_over_2x": 107,
+        "edge_growth_max_cm": 3.3,
+        "edges_growing_over_2cm": 37,
+        "worst_edge_rest_mid_m": [
+          -0.18,
+          0.043,
+          0.266
+        ],
+        "worst_edge_rest_len_cm": 1.11,
+        "bounds_m": [
+          -0.3,
+          -0.58,
+          -0.01,
+          0.35,
+          0.38,
+          1.95
+        ]
+      },
+      "Death30": {
+        "edge_stretch_max": 5.86,
+        "edge_stretch_p9999": 4.87,
+        "edges_over_2x": 225,
+        "edge_growth_max_cm": 5.7,
+        "edges_growing_over_2cm": 92,
+        "worst_edge_rest_mid_m": [
+          0.166,
+          0.056,
+          0.265
+        ],
+        "worst_edge_rest_len_cm": 2.52,
+        "bounds_m": [
+          -1.71,
+          -0.73,
+          -1.67,
+          0.17,
+          0.12,
+          -0.39
+        ]
+      }
+    }
+  },
+  "soldier_baseline": {
+    "preview_metrics": {
+      "Sponge48": {
+        "edge_stretch_max": 8.72,
+        "edge_stretch_p9999": 5.05,
+        "edges_over_2x": 159,
+        "edge_growth_max_cm": 10.9,
+        "edges_growing_over_2cm": 74,
+        "worst_edge_rest_mid_m": [
+          -0.181,
+          0.01,
+          0.262
+        ],
+        "worst_edge_rest_len_cm": 1.42,
+        "bounds_m": [
+          -0.23,
+          -0.35,
+          -0.02,
+          0.54,
+          0.29,
+          1.87
+        ]
+      },
+      "Sponge70": {
+        "edge_stretch_max": 6.45,
+        "edge_stretch_p9999": 5.72,
+        "edges_over_2x": 129,
+        "edge_growth_max_cm": 10.1,
+        "edges_growing_over_2cm": 71,
+        "worst_edge_rest_mid_m": [
+          0.17,
+          0.049,
+          0.263
+        ],
+        "worst_edge_rest_len_cm": 1.85,
+        "bounds_m": [
+          -0.31,
+          -0.4,
+          -0.02,
+          0.45,
+          0.23,
+          1.93
+        ]
+      },
+      "Ram38": {
+        "edge_stretch_max": 6.0,
+        "edge_stretch_p9999": 5.29,
+        "edges_over_2x": 141,
+        "edge_growth_max_cm": 9.3,
+        "edges_growing_over_2cm": 76,
+        "worst_edge_rest_mid_m": [
+          0.17,
+          0.049,
+          0.263
+        ],
+        "worst_edge_rest_len_cm": 1.85,
+        "bounds_m": [
+          -0.23,
+          -0.34,
+          -0.02,
+          0.54,
+          0.29,
+          1.87
+        ]
+      },
+      "Load38": {
+        "edge_stretch_max": 8.64,
+        "edge_stretch_p9999": 5.78,
+        "edges_over_2x": 132,
+        "edge_growth_max_cm": 10.8,
+        "edges_growing_over_2cm": 78,
+        "worst_edge_rest_mid_m": [
+          -0.181,
+          0.01,
+          0.262
+        ],
+        "worst_edge_rest_len_cm": 1.42,
+        "bounds_m": [
+          -0.45,
+          -0.49,
+          -0.02,
+          0.38,
+          0.14,
+          1.83
+        ]
+      },
+      "Walk8": {
+        "edge_stretch_max": 9.08,
+        "edge_stretch_p9999": 5.13,
+        "edges_over_2x": 143,
+        "edge_growth_max_cm": 11.5,
+        "edges_growing_over_2cm": 87,
+        "worst_edge_rest_mid_m": [
+          -0.181,
+          0.01,
+          0.262
+        ],
+        "worst_edge_rest_len_cm": 1.42,
+        "bounds_m": [
+          -0.29,
+          -0.55,
+          -0.01,
+          0.32,
+          0.46,
+          1.95
+        ]
+      },
+      "Walk22": {
+        "edge_stretch_max": 7.64,
+        "edge_stretch_p9999": 4.56,
+        "edges_over_2x": 130,
+        "edge_growth_max_cm": 9.4,
+        "edges_growing_over_2cm": 92,
+        "worst_edge_rest_mid_m": [
+          -0.181,
+          0.01,
+          0.262
+        ],
+        "worst_edge_rest_len_cm": 1.42,
+        "bounds_m": [
+          -0.29,
+          -0.57,
+          -0.01,
+          0.37,
+          0.42,
+          1.95
+        ]
+      },
+      "Death30": {
+        "edge_stretch_max": 9.58,
+        "edge_stretch_p9999": 6.89,
+        "edges_over_2x": 227,
+        "edge_growth_max_cm": 12.2,
+        "edges_growing_over_2cm": 139,
+        "worst_edge_rest_mid_m": [
+          -0.181,
+          0.01,
+          0.262
+        ],
+        "worst_edge_rest_len_cm": 1.42,
+        "bounds_m": [
+          -1.7,
+          -0.72,
+          -1.7,
+          0.18,
+          0.12,
+          -0.38
+        ]
+      }
+    }
+  }
+}

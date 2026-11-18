@@ -1,0 +1,14 @@
+{
+  "nation": "PR",
+  "bones": 41,
+  "same_names": true,
+  "same_parents": true,
+  "rest_matrix_max_error": 8.7738037109375e-05,
+  "triangles": 18000,
+  "uv_layers": 1,
+  "z_min": -4.0372793591814116e-05,
+  "height_m": 1.800040325109876,
+  "unweighted_vertices": 0,
+  "texture_identical": true,
+  "armature_modifier": true
+}

@@ -1,0 +1,39 @@
+2026-10-30 05:57:12,792 - hy3dgen.shapgen - INFO - Try to load model from local path: C:\Users\allan/.cache/hy3dgen\tencent/Hunyuan3D-2mv\hunyuan3d-dit-v2-mv
+2026-10-30 05:57:12,795 - hy3dgen.shapgen - INFO - Model path not exists, try to download from huggingface
+Traceback (most recent call last):
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\env\lib\site-packages\huggingface_hub\_snapshot_download.py", line 165, in snapshot_download
+    repo_info = api.repo_info(repo_id=repo_id, repo_type=repo_type, revision=revision)
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\env\lib\site-packages\huggingface_hub\utils\_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\env\lib\site-packages\huggingface_hub\hf_api.py", line 2867, in repo_info
+    return method(
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\env\lib\site-packages\huggingface_hub\utils\_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\env\lib\site-packages\huggingface_hub\hf_api.py", line 2660, in model_info
+    r = get_session().get(path, headers=headers, timeout=timeout, params=params)
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\env\lib\site-packages\requests\sessions.py", line 671, in get
+    return self.request("GET", url, params=params, **kwargs)
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\env\lib\site-packages\requests\sessions.py", line 651, in request
+    resp = self.send(prep, **send_kwargs)
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\env\lib\site-packages\requests\sessions.py", line 784, in send
+    r = adapter.send(request, **kwargs)
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\env\lib\site-packages\huggingface_hub\utils\_http.py", line 107, in send
+    raise OfflineModeIsEnabled(
+huggingface_hub.errors.OfflineModeIsEnabled: Cannot reach https://huggingface.co/api/models/tencent/Hunyuan3D-2mv/revision/main: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\gradio_app.py", line 844, in <module>
+    i23d_worker = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained(
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\hy3dgen\shapegen\pipelines.py", line 217, in from_pretrained
+    config_path, ckpt_path = smart_load_model(
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\hy3dgen\shapegen\utils.py", line 116, in smart_load_model
+    raise e
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\hy3dgen\shapegen\utils.py", line 105, in smart_load_model
+    path = snapshot_download(
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\env\lib\site-packages\huggingface_hub\utils\_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+  File "D:\Pinokio\api\Hunyuan3d-2-lowvram.git\app\env\lib\site-packages\huggingface_hub\_snapshot_download.py", line 236, in snapshot_download
+    raise LocalEntryNotFoundError(
+huggingface_hub.errors.LocalEntryNotFoundError: Cannot find an appropriate cached snapshot folder for the specified revision on the local disk and outgoing traffic has been disabled. To enable repo look-ups and downloads online, set 'HF_HUB_OFFLINE=0' as environment variable.

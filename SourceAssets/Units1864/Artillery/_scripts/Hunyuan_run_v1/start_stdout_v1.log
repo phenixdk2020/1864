@@ -1,0 +1,41 @@
+Loading example img list ...
+Loading example txt list ...
+Loading example mv list ...
+[1m[95m************ Memory Management for the GPU Poor (mmgp 3.2.7) by DeepBeepMeep ************[0m[0m
+Hooked to model 'i23d_workerconditioner' (SingleImageEncoder)
+Hooked to model 'i23d_workermodel' (Hunyuan3DDiT)
+Hooked to model 'i23d_workervae' (ShapeVAE)
+Hooked to model 'texgen_workerdelight_modelvae' (AutoencoderKL)
+Hooked to model 'texgen_workerdelight_modeltext_encoder' (CLIPTextTransformer)
+Hooked to model 'texgen_workerdelight_modelunet' (UNet2DConditionModel)
+Hooked to model 'texgen_workermultiview_modelvae' (AutoencoderKL)
+Hooked to model 'texgen_workermultiview_modeltext_encoder' (CLIPTextTransformer)
+Hooked to model 'texgen_workermultiview_modelunet' (UNet2p5DConditionModel)
+new /
+INFO:     127.0.0.1:57547 - "GET /config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57555 - "GET /config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57556 - "GET /config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57596 - "GET /config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57597 - "GET /gradio_api/info?serialize=False HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57598 - "GET /gradio_api/heartbeat/1d503fbe-9585-44be-861d-822197d2006b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57600 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57601 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57602 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57603 - "POST /gradio_api/queue/join HTTP/1.1" 200 OK
+Created new folder: C:/Projekter/1864-Campaign/SourceAssets/Units1864/Artillery/_scripts/Hunyuan_run_v1/cache\4b7e6ebf-c1db-4a83-8fbf-325806099c3c
+INFO:     127.0.0.1:57604 - "GET /gradio_api/queue/data?session_hash=1d503fbe-9585-44be-861d-822197d2006b HTTP/1.1" 200 OK
+Find html file C:/Projekter/1864-Campaign/SourceAssets/Units1864/Artillery/_scripts/Hunyuan_run_v1/cache\4b7e6ebf-c1db-4a83-8fbf-325806099c3c\textured_mesh.html, True, relative HTML path is /static/4b7e6ebf-c1db-4a83-8fbf-325806099c3c\textured_mesh.html
+INFO:     127.0.0.1:59152 - "GET /gradio_api/file%3DC%3A%5CProjekter%5C1864-Campaign%5CSourceAssets%5CUnits1864%5CArtillery%5C_scripts%5CHunyuan_run_v1%5Cgradio_temp%5Cedf3db9a4da479fb2f91b3799c2dd64fb70d36549596c3a961d12b45cefe54df%5Cwhite_mesh.glb HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59153 - "GET /gradio_api/file%3DC%3A%5CProjekter%5C1864-Campaign%5CSourceAssets%5CUnits1864%5CArtillery%5C_scripts%5CHunyuan_run_v1%5Cgradio_temp%5C91fd2593b602f2383ef878b69131afcafb0018b5264d5245a4571ef0b84244dd%5Ctextured_mesh.glb HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59200 - "GET /config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59201 - "GET /gradio_api/info?serialize=False HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59202 - "GET /gradio_api/heartbeat/b446d722-ef78-4483-a0af-77f7c079ea4e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59205 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59207 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59208 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59209 - "POST /gradio_api/queue/join HTTP/1.1" 200 OK
+Created new folder: C:/Projekter/1864-Campaign/SourceAssets/Units1864/Artillery/_scripts/Hunyuan_run_v1/cache\bdff4701-1499-4057-9157-9bfcff0b8011
+INFO:     127.0.0.1:59210 - "GET /gradio_api/queue/data?session_hash=b446d722-ef78-4483-a0af-77f7c079ea4e HTTP/1.1" 200 OK
+Find html file C:/Projekter/1864-Campaign/SourceAssets/Units1864/Artillery/_scripts/Hunyuan_run_v1/cache\bdff4701-1499-4057-9157-9bfcff0b8011\textured_mesh.html, True, relative HTML path is /static/bdff4701-1499-4057-9157-9bfcff0b8011\textured_mesh.html
+INFO:     127.0.0.1:63095 - "GET /gradio_api/file%3DC%3A%5CProjekter%5C1864-Campaign%5CSourceAssets%5CUnits1864%5CArtillery%5C_scripts%5CHunyuan_run_v1%5Cgradio_temp%5Ce84daf98bfde4b75af34a922df3d3b7eeef45bc94b87da363e94e515ee0bdd35%5Cwhite_mesh.glb HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63096 - "GET /gradio_api/file%3DC%3A%5CProjekter%5C1864-Campaign%5CSourceAssets%5CUnits1864%5CArtillery%5C_scripts%5CHunyuan_run_v1%5Cgradio_temp%5C794b68fec15773dc8b5f684fcdd84a055173dca1947220004086fda68a8970e3%5Ctextured_mesh.glb HTTP/1.1" 200 OK

@@ -1,0 +1,1672 @@
+{
+  "SE_Husar": {
+    "nation": "SE_Husar",
+    "height_m": 1.9937,
+    "soldier_height_m": 1.9912,
+    "shift_m": [
+      -0.0029,
+      0.0,
+      -0.0006
+    ],
+    "triangles": 40000,
+    "vertices": 25387,
+    "arm_fit": {
+      "iter0": {
+        "LeftForeArm": [
+          0.312,
+          0.002,
+          0.055
+        ],
+        "LeftHand": [
+          0.341,
+          -0.011,
+          -0.096
+        ],
+        "RightForeArm": [
+          -0.326,
+          -0.016,
+          0.031
+        ],
+        "RightHand": [
+          -0.356,
+          -0.013,
+          -0.093
+        ]
+      },
+      "iter1": {
+        "LeftForeArm": [
+          0.304,
+          -0.013,
+          0.053
+        ],
+        "LeftHand": [
+          0.354,
+          -0.037,
+          -0.088
+        ],
+        "RightForeArm": [
+          -0.316,
+          -0.033,
+          0.03
+        ],
+        "RightHand": [
+          -0.355,
+          -0.044,
+          -0.091
+        ]
+      },
+      "targets": {
+        "LeftForeArm": [
+          0.294,
+          -0.008,
+          0.063
+        ],
+        "LeftHand": [
+          0.353,
+          -0.036,
+          -0.084
+        ],
+        "RightForeArm": [
+          -0.306,
+          -0.028,
+          0.04
+        ],
+        "RightHand": [
+          -0.355,
+          -0.043,
+          -0.086
+        ]
+      }
+    },
+    "max_nearest_dist_m": 0.092,
+    "bridge_faces_removed": {
+      "Left": 143,
+      "Right": 70
+    },
+    "wrist": {
+      "Left": {
+        "skin_t_percentiles_m": [
+          0.031,
+          0.041,
+          0.076,
+          0.127,
+          0.18,
+          0.218
+        ],
+        "wrist_t_m": 0.065,
+        "pivot_t_m": 0.139,
+        "blend_centre_t_m": 0.125,
+        "pivot_lateral_m": 0.067,
+        "hand_t_m": 0.165,
+        "skin_samples": 180,
+        "cuff_vertices_moved_to_forearm": 930,
+        "hand_vertices": 578
+      },
+      "Right": {
+        "skin_t_percentiles_m": [
+          -0.016,
+          -0.008,
+          0.026,
+          0.081,
+          0.122,
+          0.194
+        ],
+        "wrist_t_m": 0.038,
+        "pivot_t_m": 0.101,
+        "blend_centre_t_m": 0.098,
+        "pivot_lateral_m": 0.072,
+        "hand_t_m": 0.138,
+        "skin_samples": 177,
+        "cuff_vertices_moved_to_forearm": 783,
+        "hand_vertices": 540
+      }
+    },
+    "skin_vertices": 6439,
+    "hand_mode": "rigid",
+    "hand_vertices_merged_to_hand_bone": 1831,
+    "vertices_without_weights_fallback_hips": 0,
+    "unpose_max_vertex_move_cm": 12.0,
+    "unpose_bones": [
+      "LeftArm",
+      "LeftForeArm",
+      "LeftHand",
+      "LeftHandIndex1",
+      "LeftHandIndex2",
+      "LeftHandIndex3",
+      "LeftHandIndex4",
+      "LeftHandThumb1",
+      "LeftHandThumb2",
+      "LeftHandThumb3",
+      "LeftHandThumb4",
+      "RightArm",
+      "RightForeArm",
+      "RightHand",
+      "RightHandIndex1",
+      "RightHandIndex2",
+      "RightHandIndex3",
+      "RightHandIndex4",
+      "RightHandThumb1",
+      "RightHandThumb2",
+      "RightHandThumb3",
+      "RightHandThumb4"
+    ],
+    "hat_region_vertices": 2090,
+    "hat_region_head_weight_over_95pct": 1.0,
+    "hat_region_lowest_non_head_z_m": null,
+    "right_hand_mesh_centroid_to_bone_cm_rest": 11.1,
+    "right_hand_vertices": 921,
+    "right_hand_centroid_in_RightHand_bone_space_cm": [
+      1.67,
+      10.33,
+      3.71
+    ],
+    "soldier_right_hand_centroid_in_bone_space_cm": [
+      0.62,
+      8.22,
+      0.78
+    ],
+    "feet_mean_y_m": -0.01,
+    "islands_dropped": {
+      "components": 6,
+      "faces": 52,
+      "largest": 16,
+      "main_component_faces": 39735
+    },
+    "faces_kept": 39735,
+    "vertices_kept": 25278,
+    "loose_vertices_dropped": 109,
+    "texture": "SK_Cavalry_1864_SE_Husar_Texture_0.png",
+    "texture_size": [
+      2048,
+      2048
+    ],
+    "fbx": "SK_Cavalry_1864_SE_Husar.fbx",
+    "verify": {
+      "bones": 41,
+      "armature_scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "armature_location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "names_match_SK_Human": true,
+      "parents_match": true,
+      "max_bind_matrix_dev": 9e-07,
+      "mesh_bounds_m": [
+        -0.473,
+        -0.175,
+        -1.0,
+        0.459,
+        0.192,
+        0.994
+      ],
+      "mesh_triangles": 39735,
+      "max_influences": 4,
+      "vertices_weight_sum_not_1": 0,
+      "vertex_groups": 22,
+      "mesh_object_parent": "Armature.001",
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "preview_metrics": {
+      "rest_hand": {
+        "right_hand_mesh_to_bone_cm": 10.9,
+        "left_hand_mesh_to_bone_cm": 10.7,
+        "hat_max_dev_from_head_bone_cm": 0.0,
+        "bone_head_max_dev_vs_clip_cm": null
+      },
+      "Walk14": {
+        "edge_stretch_max": 18.31,
+        "edge_stretch_p9999": 12.81,
+        "edges_over_2x": 1391,
+        "edge_growth_max_cm": 17.9,
+        "edges_growing_over_2cm": 848,
+        "worst_edge_rest_mid_m": [
+          0.219,
+          0.001,
+          0.179
+        ],
+        "worst_edge_rest_len_cm": 3.38,
+        "bounds_m": [
+          -0.47,
+          -0.77,
+          -0.01,
+          0.21,
+          0.22,
+          1.31
+        ],
+        "right_hand_mesh_to_bone_cm": 10.9,
+        "left_hand_mesh_to_bone_cm": 10.7,
+        "hat_max_dev_from_head_bone_cm": 0.1,
+        "bone_head_max_dev_vs_clip_cm": 13.35
+      },
+      "Gallop8": {
+        "edge_stretch_max": 16.37,
+        "edge_stretch_p9999": 11.59,
+        "edges_over_2x": 1339,
+        "edge_growth_max_cm": 17.2,
+        "edges_growing_over_2cm": 804,
+        "worst_edge_rest_mid_m": [
+          0.219,
+          0.001,
+          0.179
+        ],
+        "worst_edge_rest_len_cm": 3.38,
+        "bounds_m": [
+          -0.47,
+          -0.79,
+          0.0,
+          0.2,
+          0.22,
+          1.26
+        ],
+        "right_hand_mesh_to_bone_cm": 10.9,
+        "left_hand_mesh_to_bone_cm": 10.7,
+        "hat_max_dev_from_head_bone_cm": 0.1,
+        "bone_head_max_dev_vs_clip_cm": 13.08
+      },
+      "Charge8": {
+        "edge_stretch_max": 15.14,
+        "edge_stretch_p9999": 10.6,
+        "edges_over_2x": 1290,
+        "edge_growth_max_cm": 17.3,
+        "edges_growing_over_2cm": 779,
+        "worst_edge_rest_mid_m": [
+          0.219,
+          0.001,
+          0.179
+        ],
+        "worst_edge_rest_len_cm": 3.38,
+        "bounds_m": [
+          -0.47,
+          -0.79,
+          0.01,
+          0.2,
+          0.22,
+          1.38
+        ],
+        "right_hand_mesh_to_bone_cm": 10.9,
+        "left_hand_mesh_to_bone_cm": 10.7,
+        "hat_max_dev_from_head_bone_cm": 0.1,
+        "bone_head_max_dev_vs_clip_cm": 13.15
+      },
+      "SabreDraw10": {
+        "edge_stretch_max": 18.56,
+        "edge_stretch_p9999": 12.86,
+        "edges_over_2x": 576,
+        "edge_growth_max_cm": 8.6,
+        "edges_growing_over_2cm": 279,
+        "worst_edge_rest_mid_m": [
+          -0.003,
+          -0.025,
+          -0.257
+        ],
+        "worst_edge_rest_len_cm": 0.49,
+        "bounds_m": [
+          -0.36,
+          -0.54,
+          -0.05,
+          0.35,
+          0.28,
+          1.44
+        ],
+        "right_hand_mesh_to_bone_cm": 10.9,
+        "left_hand_mesh_to_bone_cm": 10.7,
+        "hat_max_dev_from_head_bone_cm": 0.0,
+        "bone_head_max_dev_vs_clip_cm": 5.93
+      }
+    }
+  },
+  "soldier_baseline": {
+    "preview_metrics": {
+      "Walk14": {
+        "edge_stretch_max": 15.34,
+        "edge_stretch_p9999": 12.42,
+        "edges_over_2x": 766,
+        "edge_growth_max_cm": 23.5,
+        "edges_growing_over_2cm": 537,
+        "worst_edge_rest_mid_m": [
+          0.17,
+          0.049,
+          0.263
+        ],
+        "worst_edge_rest_len_cm": 1.85,
+        "bounds_m": [
+          -0.47,
+          -0.77,
+          -0.0,
+          0.22,
+          0.26,
+          1.25
+        ],
+        "bone_head_max_dev_vs_clip_cm": 13.35
+      },
+      "Gallop8": {
+        "edge_stretch_max": 14.82,
+        "edge_stretch_p9999": 12.19,
+        "edges_over_2x": 727,
+        "edge_growth_max_cm": 23.2,
+        "edges_growing_over_2cm": 515,
+        "worst_edge_rest_mid_m": [
+          0.17,
+          0.049,
+          0.263
+        ],
+        "worst_edge_rest_len_cm": 1.85,
+        "bounds_m": [
+          -0.47,
+          -0.78,
+          0.01,
+          0.22,
+          0.26,
+          1.23
+        ],
+        "bone_head_max_dev_vs_clip_cm": 13.08
+      },
+      "Charge8": {
+        "edge_stretch_max": 14.96,
+        "edge_stretch_p9999": 12.24,
+        "edges_over_2x": 702,
+        "edge_growth_max_cm": 23.2,
+        "edges_growing_over_2cm": 485,
+        "worst_edge_rest_mid_m": [
+          0.17,
+          0.049,
+          0.263
+        ],
+        "worst_edge_rest_len_cm": 1.85,
+        "bounds_m": [
+          -0.47,
+          -0.79,
+          0.02,
+          0.22,
+          0.26,
+          1.34
+        ],
+        "bone_head_max_dev_vs_clip_cm": 13.15
+      },
+      "SabreDraw10": {
+        "edge_stretch_max": 8.0,
+        "edge_stretch_p9999": 5.21,
+        "edges_over_2x": 537,
+        "edge_growth_max_cm": 9.1,
+        "edges_growing_over_2cm": 315,
+        "worst_edge_rest_mid_m": [
+          -0.174,
+          0.071,
+          0.274
+        ],
+        "worst_edge_rest_len_cm": 2.9,
+        "bounds_m": [
+          -0.37,
+          -0.57,
+          -0.06,
+          0.35,
+          0.3,
+          1.42
+        ],
+        "bone_head_max_dev_vs_clip_cm": 5.93
+      }
+    }
+  },
+  "PR_Husar": {
+    "nation": "PR_Husar",
+    "height_m": 1.9906,
+    "soldier_height_m": 1.9912,
+    "shift_m": [
+      0.0,
+      0.0,
+      -0.0005
+    ],
+    "triangles": 40000,
+    "vertices": 24161,
+    "arm_fit": {
+      "iter0": {
+        "LeftForeArm": [
+          0.36,
+          0.0,
+          0.072
+        ],
+        "LeftHand": [
+          0.416,
+          -0.016,
+          -0.068
+        ],
+        "RightForeArm": [
+          -0.376,
+          -0.002,
+          0.049
+        ],
+        "RightHand": [
+          -0.427,
+          -0.013,
+          -0.065
+        ]
+      },
+      "iter1": {
+        "LeftForeArm": [
+          0.362,
+          -0.003,
+          0.072
+        ],
+        "LeftHand": [
+          0.43,
+          -0.019,
+          -0.061
+        ],
+        "RightForeArm": [
+          -0.375,
+          -0.005,
+          0.05
+        ],
+        "RightHand": [
+          -0.435,
+          -0.017,
+          -0.059
+        ]
+      },
+      "targets": {
+        "LeftForeArm": [
+          0.356,
+          -0.002,
+          0.081
+        ],
+        "LeftHand": [
+          0.434,
+          -0.02,
+          -0.069
+        ],
+        "RightForeArm": [
+          -0.37,
+          -0.004,
+          0.056
+        ],
+        "RightHand": [
+          -0.441,
+          -0.019,
+          -0.069
+        ]
+      }
+    },
+    "max_nearest_dist_m": 0.1367,
+    "bridge_faces_removed": {
+      "Left": 0,
+      "Right": 0
+    },
+    "wrist": {
+      "Left": {
+        "skin_t_percentiles_m": [
+          0.153,
+          0.156,
+          0.165,
+          0.178,
+          0.187,
+          0.215
+        ],
+        "wrist_t_m": 0.12,
+        "pivot_t_m": 0.122,
+        "blend_centre_t_m": 0.145,
+        "pivot_lateral_m": 0.03,
+        "hand_t_m": 0.17,
+        "skin_samples": 206,
+        "cuff_vertices_moved_to_forearm": 712,
+        "hand_vertices": 491
+      },
+      "Right": {
+        "skin_t_percentiles_m": [
+          0.127,
+          0.132,
+          0.138,
+          0.151,
+          0.158,
+          0.191
+        ],
+        "wrist_t_m": 0.097,
+        "pivot_t_m": 0.101,
+        "blend_centre_t_m": 0.122,
+        "pivot_lateral_m": 0.031,
+        "hand_t_m": 0.147,
+        "skin_samples": 227,
+        "cuff_vertices_moved_to_forearm": 790,
+        "hand_vertices": 532
+      }
+    },
+    "skin_vertices": 2636,
+    "hand_mode": "rigid",
+    "hand_vertices_merged_to_hand_bone": 1381,
+    "vertices_without_weights_fallback_hips": 0,
+    "unpose_max_vertex_move_cm": 2.3,
+    "unpose_bones": [
+      "LeftArm",
+      "LeftForeArm",
+      "LeftHand",
+      "LeftHandIndex1",
+      "LeftHandIndex2",
+      "LeftHandIndex3",
+      "LeftHandIndex4",
+      "LeftHandThumb1",
+      "LeftHandThumb2",
+      "LeftHandThumb3",
+      "LeftHandThumb4",
+      "RightArm",
+      "RightForeArm",
+      "RightHand",
+      "RightHandIndex1",
+      "RightHandIndex2",
+      "RightHandIndex3",
+      "RightHandIndex4",
+      "RightHandThumb1",
+      "RightHandThumb2",
+      "RightHandThumb3",
+      "RightHandThumb4"
+    ],
+    "hat_region_vertices": 2358,
+    "hat_region_head_weight_over_95pct": 1.0,
+    "hat_region_lowest_non_head_z_m": null,
+    "right_hand_mesh_centroid_to_bone_cm_rest": 9.5,
+    "right_hand_vertices": 819,
+    "right_hand_centroid_in_RightHand_bone_space_cm": [
+      2.26,
+      9.23,
+      -0.54
+    ],
+    "soldier_right_hand_centroid_in_bone_space_cm": [
+      0.62,
+      8.22,
+      0.78
+    ],
+    "feet_mean_y_m": 0.038,
+    "islands_dropped": {
+      "components": 1,
+      "faces": 44,
+      "largest": 44,
+      "main_component_faces": 39956
+    },
+    "faces_kept": 39956,
+    "vertices_kept": 24115,
+    "loose_vertices_dropped": 46,
+    "texture": "SK_Cavalry_1864_PR_Husar_Texture_0.png",
+    "texture_size": [
+      2048,
+      2048
+    ],
+    "fbx": "SK_Cavalry_1864_PR_Husar.fbx",
+    "verify": {
+      "bones": 41,
+      "armature_scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "armature_location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "names_match_SK_Human": true,
+      "parents_match": true,
+      "max_bind_matrix_dev": 9e-07,
+      "mesh_bounds_m": [
+        -0.477,
+        -0.227,
+        -1.0,
+        0.47,
+        0.221,
+        0.991
+      ],
+      "mesh_triangles": 39956,
+      "max_influences": 4,
+      "vertices_weight_sum_not_1": 0,
+      "vertex_groups": 22,
+      "mesh_object_parent": "Armature.001",
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "preview_metrics": {
+      "rest_hand": {
+        "right_hand_mesh_to_bone_cm": 9.2,
+        "left_hand_mesh_to_bone_cm": 9.2,
+        "hat_max_dev_from_head_bone_cm": 0.0,
+        "bone_head_max_dev_vs_clip_cm": null
+      },
+      "Walk14": {
+        "edge_stretch_max": 10.03,
+        "edge_stretch_p9999": 8.73,
+        "edges_over_2x": 826,
+        "edge_growth_max_cm": 13.0,
+        "edges_growing_over_2cm": 550,
+        "worst_edge_rest_mid_m": [
+          0.173,
+          0.079,
+          0.271
+        ],
+        "worst_edge_rest_len_cm": 2.39,
+        "bounds_m": [
+          -0.47,
+          -0.8,
+          -0.0,
+          0.22,
+          0.23,
+          1.33
+        ],
+        "right_hand_mesh_to_bone_cm": 9.2,
+        "left_hand_mesh_to_bone_cm": 9.2,
+        "hat_max_dev_from_head_bone_cm": 0.2,
+        "bone_head_max_dev_vs_clip_cm": 13.35
+      },
+      "Gallop8": {
+        "edge_stretch_max": 10.03,
+        "edge_stretch_p9999": 8.73,
+        "edges_over_2x": 809,
+        "edge_growth_max_cm": 12.9,
+        "edges_growing_over_2cm": 545,
+        "worst_edge_rest_mid_m": [
+          0.173,
+          0.079,
+          0.271
+        ],
+        "worst_edge_rest_len_cm": 2.39,
+        "bounds_m": [
+          -0.48,
+          -0.81,
+          0.01,
+          0.21,
+          0.25,
+          1.31
+        ],
+        "right_hand_mesh_to_bone_cm": 9.2,
+        "left_hand_mesh_to_bone_cm": 9.2,
+        "hat_max_dev_from_head_bone_cm": 0.2,
+        "bone_head_max_dev_vs_clip_cm": 13.08
+      },
+      "Charge8": {
+        "edge_stretch_max": 10.03,
+        "edge_stretch_p9999": 8.73,
+        "edges_over_2x": 780,
+        "edge_growth_max_cm": 13.0,
+        "edges_growing_over_2cm": 515,
+        "worst_edge_rest_mid_m": [
+          0.173,
+          0.079,
+          0.271
+        ],
+        "worst_edge_rest_len_cm": 2.39,
+        "bounds_m": [
+          -0.48,
+          -0.82,
+          0.02,
+          0.21,
+          0.24,
+          1.43
+        ],
+        "right_hand_mesh_to_bone_cm": 9.2,
+        "left_hand_mesh_to_bone_cm": 9.2,
+        "hat_max_dev_from_head_bone_cm": 0.2,
+        "bone_head_max_dev_vs_clip_cm": 13.15
+      },
+      "SabreDraw10": {
+        "edge_stretch_max": 6.83,
+        "edge_stretch_p9999": 4.0,
+        "edges_over_2x": 278,
+        "edge_growth_max_cm": 4.7,
+        "edges_growing_over_2cm": 194,
+        "worst_edge_rest_mid_m": [
+          -0.015,
+          0.01,
+          -0.259
+        ],
+        "worst_edge_rest_len_cm": 2.52,
+        "bounds_m": [
+          -0.35,
+          -0.52,
+          -0.05,
+          0.36,
+          0.29,
+          1.43
+        ],
+        "right_hand_mesh_to_bone_cm": 9.2,
+        "left_hand_mesh_to_bone_cm": 9.2,
+        "hat_max_dev_from_head_bone_cm": 0.1,
+        "bone_head_max_dev_vs_clip_cm": 5.93
+      }
+    }
+  },
+  "PR_Dragon": {
+    "nation": "PR_Dragon",
+    "height_m": 1.994,
+    "soldier_height_m": 1.9912,
+    "shift_m": [
+      -0.0019,
+      0.0,
+      -0.0004
+    ],
+    "triangles": 40000,
+    "vertices": 24326,
+    "arm_fit": {
+      "iter0": {
+        "LeftForeArm": [
+          0.346,
+          0.002,
+          0.066
+        ],
+        "LeftHand": [
+          0.41,
+          -0.015,
+          -0.071
+        ],
+        "RightForeArm": [
+          -0.36,
+          -0.018,
+          0.046
+        ],
+        "RightHand": [
+          -0.424,
+          -0.03,
+          -0.06
+        ]
+      },
+      "iter1": {
+        "LeftForeArm": [
+          0.345,
+          -0.001,
+          0.065
+        ],
+        "LeftHand": [
+          0.413,
+          -0.017,
+          -0.068
+        ],
+        "RightForeArm": [
+          -0.354,
+          -0.021,
+          0.044
+        ],
+        "RightHand": [
+          -0.418,
+          -0.031,
+          -0.063
+        ]
+      },
+      "targets": {
+        "LeftForeArm": [
+          0.338,
+          0.0,
+          0.078
+        ],
+        "LeftHand": [
+          0.415,
+          -0.018,
+          -0.072
+        ],
+        "RightForeArm": [
+          -0.351,
+          -0.021,
+          0.052
+        ],
+        "RightHand": [
+          -0.421,
+          -0.032,
+          -0.069
+        ]
+      }
+    },
+    "max_nearest_dist_m": 0.0628,
+    "bridge_faces_removed": {
+      "Left": 0,
+      "Right": 0
+    },
+    "wrist": {
+      "Left": {
+        "skin_t_percentiles_m": [
+          0.153,
+          0.158,
+          0.166,
+          0.178,
+          0.188,
+          0.216
+        ],
+        "wrist_t_m": 0.121,
+        "pivot_t_m": 0.132,
+        "blend_centre_t_m": 0.146,
+        "pivot_lateral_m": 0.028,
+        "hand_t_m": 0.171,
+        "skin_samples": 237,
+        "cuff_vertices_moved_to_forearm": 990,
+        "hand_vertices": 666
+      },
+      "Right": {
+        "skin_t_percentiles_m": [
+          0.118,
+          0.126,
+          0.133,
+          0.143,
+          0.151,
+          0.176
+        ],
+        "wrist_t_m": 0.088,
+        "pivot_t_m": 0.103,
+        "blend_centre_t_m": 0.113,
+        "pivot_lateral_m": 0.013,
+        "hand_t_m": 0.138,
+        "skin_samples": 229,
+        "cuff_vertices_moved_to_forearm": 907,
+        "hand_vertices": 658
+      }
+    },
+    "skin_vertices": 7435,
+    "hand_mode": "rigid",
+    "hand_vertices_merged_to_hand_bone": 1927,
+    "vertices_without_weights_fallback_hips": 0,
+    "unpose_max_vertex_move_cm": 5.2,
+    "unpose_bones": [
+      "LeftArm",
+      "LeftForeArm",
+      "LeftHand",
+      "LeftHandIndex1",
+      "LeftHandIndex2",
+      "LeftHandIndex3",
+      "LeftHandIndex4",
+      "LeftHandThumb1",
+      "LeftHandThumb2",
+      "LeftHandThumb3",
+      "LeftHandThumb4",
+      "RightArm",
+      "RightForeArm",
+      "RightHand",
+      "RightHandIndex1",
+      "RightHandIndex2",
+      "RightHandIndex3",
+      "RightHandIndex4",
+      "RightHandThumb1",
+      "RightHandThumb2",
+      "RightHandThumb3",
+      "RightHandThumb4"
+    ],
+    "hat_region_vertices": 739,
+    "hat_region_head_weight_over_95pct": 1.0,
+    "hat_region_lowest_non_head_z_m": null,
+    "right_hand_mesh_centroid_to_bone_cm_rest": 8.6,
+    "right_hand_vertices": 1004,
+    "right_hand_centroid_in_RightHand_bone_space_cm": [
+      2.81,
+      8.06,
+      1.36
+    ],
+    "soldier_right_hand_centroid_in_bone_space_cm": [
+      0.62,
+      8.22,
+      0.78
+    ],
+    "feet_mean_y_m": 0.028,
+    "islands_dropped": {
+      "components": 1,
+      "faces": 20,
+      "largest": 20,
+      "main_component_faces": 39980
+    },
+    "faces_kept": 39980,
+    "vertices_kept": 24290,
+    "loose_vertices_dropped": 36,
+    "texture": "SK_Cavalry_1864_PR_Dragon_Texture_0.png",
+    "texture_size": [
+      2048,
+      2048
+    ],
+    "fbx": "SK_Cavalry_1864_PR_Dragon.fbx",
+    "verify": {
+      "bones": 41,
+      "armature_scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "armature_location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "names_match_SK_Human": true,
+      "parents_match": true,
+      "max_bind_matrix_dev": 9e-07,
+      "mesh_bounds_m": [
+        -0.471,
+        -0.175,
+        -1.0,
+        0.463,
+        0.187,
+        0.994
+      ],
+      "mesh_triangles": 39980,
+      "max_influences": 4,
+      "vertices_weight_sum_not_1": 0,
+      "vertex_groups": 22,
+      "mesh_object_parent": "Armature.001",
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "preview_metrics": {
+      "rest_hand": {
+        "right_hand_mesh_to_bone_cm": 8.4,
+        "left_hand_mesh_to_bone_cm": 8.7,
+        "hat_max_dev_from_head_bone_cm": 0.0,
+        "bone_head_max_dev_vs_clip_cm": null
+      },
+      "Walk14": {
+        "edge_stretch_max": 45.57,
+        "edge_stretch_p9999": 14.38,
+        "edges_over_2x": 906,
+        "edge_growth_max_cm": 11.1,
+        "edges_growing_over_2cm": 498,
+        "worst_edge_rest_mid_m": [
+          0.169,
+          0.05,
+          0.264
+        ],
+        "worst_edge_rest_len_cm": 2.58,
+        "bounds_m": [
+          -0.49,
+          -0.79,
+          -0.0,
+          0.22,
+          0.26,
+          1.25
+        ],
+        "right_hand_mesh_to_bone_cm": 8.4,
+        "left_hand_mesh_to_bone_cm": 8.7,
+        "hat_max_dev_from_head_bone_cm": 0.1,
+        "bone_head_max_dev_vs_clip_cm": 13.35
+      },
+      "Gallop8": {
+        "edge_stretch_max": 57.45,
+        "edge_stretch_p9999": 14.38,
+        "edges_over_2x": 870,
+        "edge_growth_max_cm": 10.9,
+        "edges_growing_over_2cm": 486,
+        "worst_edge_rest_mid_m": [
+          0.169,
+          0.05,
+          0.264
+        ],
+        "worst_edge_rest_len_cm": 2.58,
+        "bounds_m": [
+          -0.49,
+          -0.8,
+          0.0,
+          0.22,
+          0.26,
+          1.2
+        ],
+        "right_hand_mesh_to_bone_cm": 8.4,
+        "left_hand_mesh_to_bone_cm": 8.7,
+        "hat_max_dev_from_head_bone_cm": 0.1,
+        "bone_head_max_dev_vs_clip_cm": 13.08
+      },
+      "Charge8": {
+        "edge_stretch_max": 54.2,
+        "edge_stretch_p9999": 14.38,
+        "edges_over_2x": 823,
+        "edge_growth_max_cm": 10.9,
+        "edges_growing_over_2cm": 462,
+        "worst_edge_rest_mid_m": [
+          0.169,
+          0.05,
+          0.264
+        ],
+        "worst_edge_rest_len_cm": 2.58,
+        "bounds_m": [
+          -0.49,
+          -0.81,
+          0.01,
+          0.22,
+          0.26,
+          1.32
+        ],
+        "right_hand_mesh_to_bone_cm": 8.4,
+        "left_hand_mesh_to_bone_cm": 8.7,
+        "hat_max_dev_from_head_bone_cm": 0.1,
+        "bone_head_max_dev_vs_clip_cm": 13.15
+      },
+      "SabreDraw10": {
+        "edge_stretch_max": 9.77,
+        "edge_stretch_p9999": 4.8,
+        "edges_over_2x": 312,
+        "edge_growth_max_cm": 4.7,
+        "edges_growing_over_2cm": 170,
+        "worst_edge_rest_mid_m": [
+          -0.021,
+          -0.009,
+          -0.267
+        ],
+        "worst_edge_rest_len_cm": 2.39,
+        "bounds_m": [
+          -0.37,
+          -0.53,
+          -0.05,
+          0.37,
+          0.28,
+          1.42
+        ],
+        "right_hand_mesh_to_bone_cm": 8.4,
+        "left_hand_mesh_to_bone_cm": 8.7,
+        "hat_max_dev_from_head_bone_cm": 0.0,
+        "bone_head_max_dev_vs_clip_cm": 5.93
+      }
+    }
+  },
+  "SE_Dragon": {
+    "nation": "SE_Dragon",
+    "height_m": 1.9941,
+    "soldier_height_m": 1.9912,
+    "shift_m": [
+      -0.0018,
+      0.0,
+      -0.0005
+    ],
+    "triangles": 40000,
+    "vertices": 24219,
+    "arm_fit": {
+      "iter0": {
+        "LeftForeArm": [
+          0.322,
+          -0.018,
+          0.06
+        ],
+        "LeftHand": [
+          0.354,
+          -0.015,
+          -0.089
+        ],
+        "RightForeArm": [
+          -0.332,
+          -0.021,
+          0.034
+        ],
+        "RightHand": [
+          -0.355,
+          -0.014,
+          -0.089
+        ]
+      },
+      "iter1": {
+        "LeftForeArm": [
+          0.323,
+          -0.034,
+          0.063
+        ],
+        "LeftHand": [
+          0.369,
+          -0.073,
+          -0.074
+        ],
+        "RightForeArm": [
+          -0.335,
+          -0.044,
+          0.044
+        ],
+        "RightHand": [
+          -0.369,
+          -0.086,
+          -0.073
+        ]
+      },
+      "targets": {
+        "LeftForeArm": [
+          0.316,
+          -0.026,
+          0.066
+        ],
+        "LeftHand": [
+          0.374,
+          -0.077,
+          -0.085
+        ],
+        "RightForeArm": [
+          -0.33,
+          -0.034,
+          0.04
+        ],
+        "RightHand": [
+          -0.374,
+          -0.091,
+          -0.085
+        ]
+      }
+    },
+    "max_nearest_dist_m": 0.0817,
+    "bridge_faces_removed": {
+      "Left": 0,
+      "Right": 0
+    },
+    "wrist": {
+      "Left": {
+        "skin_t_percentiles_m": [
+          0.052,
+          0.064,
+          0.085,
+          0.117,
+          0.142,
+          0.179
+        ],
+        "wrist_t_m": 0.065,
+        "pivot_t_m": 0.119,
+        "blend_centre_t_m": 0.119,
+        "pivot_lateral_m": 0.053,
+        "hand_t_m": 0.165,
+        "skin_samples": 638,
+        "cuff_vertices_moved_to_forearm": 754,
+        "hand_vertices": 860
+      },
+      "Right": {
+        "skin_t_percentiles_m": [
+          0.028,
+          0.039,
+          0.06,
+          0.093,
+          0.116,
+          0.15
+        ],
+        "wrist_t_m": 0.041,
+        "pivot_t_m": 0.092,
+        "blend_centre_t_m": 0.092,
+        "pivot_lateral_m": 0.056,
+        "hand_t_m": 0.141,
+        "skin_samples": 653,
+        "cuff_vertices_moved_to_forearm": 777,
+        "hand_vertices": 905
+      }
+    },
+    "skin_vertices": 5526,
+    "hand_mode": "rigid",
+    "hand_vertices_merged_to_hand_bone": 1922,
+    "vertices_without_weights_fallback_hips": 0,
+    "unpose_max_vertex_move_cm": 12.6,
+    "unpose_bones": [
+      "LeftArm",
+      "LeftForeArm",
+      "LeftHand",
+      "LeftHandIndex1",
+      "LeftHandIndex2",
+      "LeftHandIndex3",
+      "LeftHandIndex4",
+      "LeftHandThumb1",
+      "LeftHandThumb2",
+      "LeftHandThumb3",
+      "LeftHandThumb4",
+      "RightArm",
+      "RightForeArm",
+      "RightHand",
+      "RightHandIndex1",
+      "RightHandIndex2",
+      "RightHandIndex3",
+      "RightHandIndex4",
+      "RightHandThumb1",
+      "RightHandThumb2",
+      "RightHandThumb3",
+      "RightHandThumb4"
+    ],
+    "hat_region_vertices": 1330,
+    "hat_region_head_weight_over_95pct": 1.0,
+    "hat_region_lowest_non_head_z_m": null,
+    "right_hand_mesh_centroid_to_bone_cm_rest": 10.4,
+    "right_hand_vertices": 1017,
+    "right_hand_centroid_in_RightHand_bone_space_cm": [
+      -2.03,
+      8.05,
+      6.32
+    ],
+    "soldier_right_hand_centroid_in_bone_space_cm": [
+      0.62,
+      8.22,
+      0.78
+    ],
+    "feet_mean_y_m": -0.014,
+    "islands_dropped": {
+      "components": 0,
+      "faces": 0,
+      "largest": 0,
+      "main_component_faces": 40000
+    },
+    "faces_kept": 40000,
+    "vertices_kept": 24219,
+    "loose_vertices_dropped": 0,
+    "texture": "SK_Cavalry_1864_SE_Dragon_Texture_0.png",
+    "texture_size": [
+      2048,
+      2048
+    ],
+    "fbx": "SK_Cavalry_1864_SE_Dragon.fbx",
+    "verify": {
+      "bones": 41,
+      "armature_scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "armature_location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "names_match_SK_Human": true,
+      "parents_match": true,
+      "max_bind_matrix_dev": 9e-07,
+      "mesh_bounds_m": [
+        -0.478,
+        -0.186,
+        -1.0,
+        0.464,
+        0.192,
+        0.994
+      ],
+      "mesh_triangles": 40000,
+      "max_influences": 4,
+      "vertices_weight_sum_not_1": 0,
+      "vertex_groups": 22,
+      "mesh_object_parent": "Armature.001",
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "preview_metrics": {
+      "rest_hand": {
+        "right_hand_mesh_to_bone_cm": 10.2,
+        "left_hand_mesh_to_bone_cm": 9.8,
+        "hat_max_dev_from_head_bone_cm": 0.0,
+        "bone_head_max_dev_vs_clip_cm": null
+      },
+      "Walk14": {
+        "edge_stretch_max": 13.02,
+        "edge_stretch_p9999": 9.14,
+        "edges_over_2x": 1042,
+        "edge_growth_max_cm": 12.6,
+        "edges_growing_over_2cm": 533,
+        "worst_edge_rest_mid_m": [
+          0.185,
+          0.041,
+          0.265
+        ],
+        "worst_edge_rest_len_cm": 2.39,
+        "bounds_m": [
+          -0.47,
+          -0.74,
+          -0.01,
+          0.23,
+          0.23,
+          1.28
+        ],
+        "right_hand_mesh_to_bone_cm": 10.3,
+        "left_hand_mesh_to_bone_cm": 9.7,
+        "hat_max_dev_from_head_bone_cm": 0.1,
+        "bone_head_max_dev_vs_clip_cm": 13.35
+      },
+      "Gallop8": {
+        "edge_stretch_max": 13.01,
+        "edge_stretch_p9999": 8.67,
+        "edges_over_2x": 1000,
+        "edge_growth_max_cm": 12.3,
+        "edges_growing_over_2cm": 492,
+        "worst_edge_rest_mid_m": [
+          0.177,
+          0.083,
+          0.269
+        ],
+        "worst_edge_rest_len_cm": 1.56,
+        "bounds_m": [
+          -0.47,
+          -0.75,
+          0.0,
+          0.22,
+          0.23,
+          1.25
+        ],
+        "right_hand_mesh_to_bone_cm": 10.3,
+        "left_hand_mesh_to_bone_cm": 9.7,
+        "hat_max_dev_from_head_bone_cm": 0.1,
+        "bone_head_max_dev_vs_clip_cm": 13.08
+      },
+      "Charge8": {
+        "edge_stretch_max": 13.02,
+        "edge_stretch_p9999": 8.29,
+        "edges_over_2x": 955,
+        "edge_growth_max_cm": 12.4,
+        "edges_growing_over_2cm": 474,
+        "worst_edge_rest_mid_m": [
+          0.185,
+          0.041,
+          0.265
+        ],
+        "worst_edge_rest_len_cm": 2.39,
+        "bounds_m": [
+          -0.47,
+          -0.75,
+          0.01,
+          0.22,
+          0.23,
+          1.37
+        ],
+        "right_hand_mesh_to_bone_cm": 10.3,
+        "left_hand_mesh_to_bone_cm": 9.7,
+        "hat_max_dev_from_head_bone_cm": 0.1,
+        "bone_head_max_dev_vs_clip_cm": 13.15
+      },
+      "SabreDraw10": {
+        "edge_stretch_max": 12.15,
+        "edge_stretch_p9999": 8.49,
+        "edges_over_2x": 448,
+        "edge_growth_max_cm": 6.0,
+        "edges_growing_over_2cm": 194,
+        "worst_edge_rest_mid_m": [
+          -0.006,
+          0.011,
+          -0.253
+        ],
+        "worst_edge_rest_len_cm": 0.54,
+        "bounds_m": [
+          -0.37,
+          -0.56,
+          -0.05,
+          0.37,
+          0.29,
+          1.42
+        ],
+        "right_hand_mesh_to_bone_cm": 10.3,
+        "left_hand_mesh_to_bone_cm": 9.8,
+        "hat_max_dev_from_head_bone_cm": 0.0,
+        "bone_head_max_dev_vs_clip_cm": 5.93
+      }
+    }
+  },
+  "DK_Dragon": {
+    "nation": "DK_Dragon",
+    "height_m": 1.9913,
+    "soldier_height_m": 1.9912,
+    "shift_m": [
+      -0.0004,
+      0.0,
+      0.001
+    ],
+    "triangles": 40000,
+    "vertices": 26133,
+    "arm_fit": {
+      "iter0": {
+        "LeftForeArm": [
+          0.341,
+          0.026,
+          0.068
+        ],
+        "LeftHand": [
+          0.414,
+          -0.008,
+          -0.059
+        ],
+        "RightForeArm": [
+          -0.359,
+          0.018,
+          0.052
+        ],
+        "RightHand": [
+          -0.421,
+          -0.017,
+          -0.051
+        ]
+      },
+      "iter1": {
+        "LeftForeArm": [
+          0.339,
+          0.03,
+          0.067
+        ],
+        "LeftHand": [
+          0.421,
+          0.003,
+          -0.056
+        ],
+        "RightForeArm": [
+          -0.351,
+          0.026,
+          0.058
+        ],
+        "RightHand": [
+          -0.428,
+          -0.015,
+          -0.031
+        ]
+      },
+      "targets": {
+        "LeftForeArm": [
+          0.334,
+          0.03,
+          0.075
+        ],
+        "LeftHand": [
+          0.421,
+          0.003,
+          -0.056
+        ],
+        "RightForeArm": [
+          -0.35,
+          0.028,
+          0.052
+        ],
+        "RightHand": [
+          -0.437,
+          -0.02,
+          -0.042
+        ]
+      }
+    },
+    "max_nearest_dist_m": 0.1022,
+    "bridge_faces_removed": {
+      "Left": 37,
+      "Right": 30
+    },
+    "wrist": {},
+    "skin_vertices": 4747,
+    "hand_mode": "rigid",
+    "hand_vertices_merged_to_hand_bone": 3515,
+    "vertices_without_weights_fallback_hips": 0,
+    "unpose_max_vertex_move_cm": 7.7,
+    "unpose_bones": [
+      "LeftArm",
+      "LeftForeArm",
+      "LeftHand",
+      "LeftHandIndex1",
+      "LeftHandIndex2",
+      "LeftHandIndex3",
+      "LeftHandIndex4",
+      "LeftHandThumb1",
+      "LeftHandThumb2",
+      "LeftHandThumb3",
+      "LeftHandThumb4",
+      "RightArm",
+      "RightForeArm",
+      "RightHand",
+      "RightHandIndex1",
+      "RightHandIndex2",
+      "RightHandIndex3",
+      "RightHandIndex4",
+      "RightHandThumb1",
+      "RightHandThumb2",
+      "RightHandThumb3",
+      "RightHandThumb4"
+    ],
+    "hat_region_vertices": 1983,
+    "hat_region_head_weight_over_95pct": 1.0,
+    "hat_region_lowest_non_head_z_m": null,
+    "right_hand_mesh_centroid_to_bone_cm_rest": 12.0,
+    "right_hand_vertices": 1022,
+    "right_hand_centroid_in_RightHand_bone_space_cm": [
+      2.37,
+      10.24,
+      5.8
+    ],
+    "soldier_right_hand_centroid_in_bone_space_cm": [
+      0.62,
+      8.22,
+      0.78
+    ],
+    "feet_mean_y_m": 0.031,
+    "islands_dropped": {
+      "components": 1,
+      "faces": 37,
+      "largest": 37,
+      "main_component_faces": 39896
+    },
+    "faces_kept": 39896,
+    "vertices_kept": 26093,
+    "loose_vertices_dropped": 40,
+    "texture": "SK_Cavalry_1864_DK_Dragon_Texture_0.png",
+    "texture_size": [
+      2048,
+      2048
+    ],
+    "fbx": "SK_Cavalry_1864_DK_Dragon.fbx",
+    "verify": {
+      "bones": 41,
+      "armature_scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "armature_location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "names_match_SK_Human": true,
+      "parents_match": true,
+      "max_bind_matrix_dev": 9e-07,
+      "mesh_bounds_m": [
+        -0.463,
+        -0.185,
+        -1.0,
+        0.466,
+        0.198,
+        0.992
+      ],
+      "mesh_triangles": 39896,
+      "max_influences": 4,
+      "vertices_weight_sum_not_1": 0,
+      "vertex_groups": 22,
+      "mesh_object_parent": "Armature.001",
+      "modifiers": [
+        "ARMATURE"
+      ]
+    },
+    "preview_metrics": {
+      "rest_hand": {
+        "right_hand_mesh_to_bone_cm": 11.5,
+        "left_hand_mesh_to_bone_cm": 10.4,
+        "hat_max_dev_from_head_bone_cm": 0.0,
+        "bone_head_max_dev_vs_clip_cm": null
+      },
+      "Walk14": {
+        "edge_stretch_max": 21.01,
+        "edge_stretch_p9999": 11.47,
+        "edges_over_2x": 1091,
+        "edge_growth_max_cm": 19.3,
+        "edges_growing_over_2cm": 665,
+        "worst_edge_rest_mid_m": [
+          0.183,
+          0.086,
+          0.224
+        ],
+        "worst_edge_rest_len_cm": 3.59,
+        "bounds_m": [
+          -0.48,
+          -0.79,
+          -0.0,
+          0.24,
+          0.24,
+          1.27
+        ],
+        "right_hand_mesh_to_bone_cm": 11.6,
+        "left_hand_mesh_to_bone_cm": 10.4,
+        "hat_max_dev_from_head_bone_cm": 0.1,
+        "bone_head_max_dev_vs_clip_cm": 13.35
+      },
+      "Gallop8": {
+        "edge_stretch_max": 20.73,
+        "edge_stretch_p9999": 10.77,
+        "edges_over_2x": 1046,
+        "edge_growth_max_cm": 19.1,
+        "edges_growing_over_2cm": 628,
+        "worst_edge_rest_mid_m": [
+          0.183,
+          0.086,
+          0.224
+        ],
+        "worst_edge_rest_len_cm": 3.59,
+        "bounds_m": [
+          -0.48,
+          -0.8,
+          0.01,
+          0.24,
+          0.24,
+          1.24
+        ],
+        "right_hand_mesh_to_bone_cm": 11.6,
+        "left_hand_mesh_to_bone_cm": 10.4,
+        "hat_max_dev_from_head_bone_cm": 0.1,
+        "bone_head_max_dev_vs_clip_cm": 13.08
+      },
+      "Charge8": {
+        "edge_stretch_max": 20.47,
+        "edge_stretch_p9999": 10.16,
+        "edges_over_2x": 1010,
+        "edge_growth_max_cm": 19.1,
+        "edges_growing_over_2cm": 599,
+        "worst_edge_rest_mid_m": [
+          0.183,
+          0.086,
+          0.224
+        ],
+        "worst_edge_rest_len_cm": 3.59,
+        "bounds_m": [
+          -0.48,
+          -0.8,
+          0.02,
+          0.24,
+          0.24,
+          1.35
+        ],
+        "right_hand_mesh_to_bone_cm": 11.6,
+        "left_hand_mesh_to_bone_cm": 10.4,
+        "hat_max_dev_from_head_bone_cm": 0.1,
+        "bone_head_max_dev_vs_clip_cm": 13.15
+      },
+      "SabreDraw10": {
+        "edge_stretch_max": 19.76,
+        "edge_stretch_p9999": 7.8,
+        "edges_over_2x": 553,
+        "edge_growth_max_cm": 8.7,
+        "edges_growing_over_2cm": 274,
+        "worst_edge_rest_mid_m": [
+          -0.177,
+          0.122,
+          0.25
+        ],
+        "worst_edge_rest_len_cm": 3.85,
+        "bounds_m": [
+          -0.36,
+          -0.54,
+          -0.05,
+          0.35,
+          0.29,
+          1.43
+        ],
+        "right_hand_mesh_to_bone_cm": 11.6,
+        "left_hand_mesh_to_bone_cm": 10.4,
+        "hat_max_dev_from_head_bone_cm": 0.0,
+        "bone_head_max_dev_vs_clip_cm": 5.93
+      }
+    }
+  }
+}

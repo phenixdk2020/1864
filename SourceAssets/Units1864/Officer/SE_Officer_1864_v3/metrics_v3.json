@@ -1,0 +1,31 @@
+{
+  "nation": "SE",
+  "triangles": 18000,
+  "bones": 41,
+  "same_rest_names_hierarchy": true,
+  "source_skeleton": "SourceAssets/Units1864/DK_Infantry_1864.fbx",
+  "auto_unweighted": 0,
+  "corrected_vertices": 8456,
+  "uv_layers": 1,
+  "texture": [
+    2048,
+    2048
+  ],
+  "height_m": 1.8,
+  "posed_bounds": [
+    [
+      0.2969397008419037,
+      0.9569851160049438
+    ],
+    [
+      -0.6587516665458679,
+      0.32654431462287903
+    ],
+    [
+      0.012597918510437012,
+      1.6574211120605469
+    ]
+  ],
+  "clip": "A_Combat_Walk.fbx",
+  "frame": 12
+}

@@ -1,0 +1,14 @@
+{
+  "nation": "DK",
+  "bones": 41,
+  "same_names": true,
+  "same_parents": true,
+  "rest_matrix_max_error": 8.7738037109375e-05,
+  "triangles": 17999,
+  "uv_layers": 1,
+  "z_min": 0.00025552636361680925,
+  "height_m": 1.7997443067433778,
+  "unweighted_vertices": 0,
+  "texture_identical": true,
+  "armature_modifier": true
+}

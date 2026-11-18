@@ -1,0 +1,680 @@
+{
+ "fps": 30,
+ "gun_scale": 1.6,
+ "soldier_height_cm": 199,
+ "gun_game_scale_cm": {
+  "scale": 1.6,
+  "mesh_size_cm_unscaled": [
+   130.7,
+   199.3,
+   96.2
+  ],
+  "muzzle_f": 159.1,
+  "muzzle_u": 125.2,
+  "muzzle_outer_radius": 17.8,
+  "trail_end_f": -159.7,
+  "axle_f": 60.9,
+  "axle_u": 77.0,
+  "wheel_radius": 73.5,
+  "wheel_outer_l": 104.0,
+  "wheel_rim_outer_l": 85.6,
+  "wheel_rim_inner_l": 68.8,
+  "wheel_inner_l": 84.8,
+  "vent_f": 1.6,
+  "vent_u": 151.3,
+  "barrel_top_at_0.2_u": 142.9,
+  "breech_top_u": 151.3,
+  "cascabel_f": -72.0,
+  "mesh_origin_height_above_ground": 77.6,
+  "trail_end_top_u": 42.2,
+  "trail_half_width": 15.3,
+  "zmin_blender": -0.5
+ },
+ "clips": {
+  "StandBy": {
+   "file": "A_Gun_StandBy.fbx",
+   "frames": 90,
+   "seconds": 3.0,
+   "loop": true,
+   "first_equals_last": false,
+   "station": {
+    "F_ground_point_cm": [
+     -72.7,
+     -54.5
+    ],
+    "heading_deg_from_muzzle_dir_toward_left": 90.0,
+    "unreal_gun_mesh_local_cm": [
+     -54.5,
+     -72.7,
+     -77.6
+    ],
+    "unreal_gun_mesh_forward_xy": [
+     1.0,
+     0.0
+    ]
+   },
+   "max_ik_miss_cm": {
+    "LeftFoot": 0.0,
+    "RightFoot": 0.0,
+    "LeftHand": 0.0,
+    "RightHand": 0.0
+   },
+   "root_motion": {
+    "excursion_x_z_y_cm": [
+     2.0,
+     0.0,
+     0.7
+    ],
+    "net_first_to_last_x_z_y_cm": [
+     -0.07,
+     0.0,
+     -0.05
+    ]
+   },
+   "foot_slide": {
+    "Left": {
+     "on_ground_frames": 90,
+     "of": 90,
+     "max_horizontal_move_per_frame_cm": 0.0
+    },
+    "Right": {
+     "on_ground_frames": 90,
+     "of": 90,
+     "max_horizontal_move_per_frame_cm": 0.0
+    }
+   },
+   "mesh_lowest_point_vs_ground_cm_min_max": [
+    0.04,
+    0.06
+   ],
+   "events_1based": {}
+  },
+  "Sponge": {
+   "file": "A_Gun_Sponge.fbx",
+   "frames": 91,
+   "seconds": 3.0,
+   "loop": false,
+   "first_equals_last": true,
+   "station": {
+    "F_ground_point_cm": [
+     210.9,
+     -24.7
+    ],
+    "heading_deg_from_muzzle_dir_toward_left": 75.0,
+    "unreal_gun_mesh_local_cm": [
+     -24.7,
+     210.9,
+     -77.6
+    ],
+    "unreal_gun_mesh_forward_xy": [
+     0.966,
+     0.259
+    ]
+   },
+   "max_ik_miss_cm": {
+    "LeftFoot": 0.0,
+    "RightFoot": 0.0,
+    "LeftHand": 0.0,
+    "RightHand": 0.0
+   },
+   "root_motion": {
+    "excursion_x_z_y_cm": [
+     22.3,
+     6.0,
+     6.5
+    ],
+    "net_first_to_last_x_z_y_cm": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "foot_slide": {
+    "Left": {
+     "on_ground_frames": 69,
+     "of": 91,
+     "max_horizontal_move_per_frame_cm": 0.35
+    },
+    "Right": {
+     "on_ground_frames": 91,
+     "of": 91,
+     "max_horizontal_move_per_frame_cm": 0.0
+    }
+   },
+   "mesh_lowest_point_vs_ground_cm_min_max": [
+    0.06,
+    0.08
+   ],
+   "events_1based": {
+    "deepest_insertion_frames": [
+     31,
+     55
+    ],
+    "twist_frames": [
+     31,
+     55
+    ]
+   },
+   "prop": {
+    "asset": "SM_Sponge",
+    "bone": "RightHand",
+    "socket_unreal": {
+     "location_cm": [
+      3.2,
+      -6.0,
+      45.0
+     ],
+     "rotation_PYR_deg": [
+      0.0,
+      90.0,
+      180.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "socket_blender_bone_local": [
+     [
+      0.0,
+      -1.0,
+      0.0,
+      3.2
+     ],
+     [
+      -1.0,
+      0.0,
+      0.0,
+      6.0
+     ],
+     [
+      0.0,
+      0.0,
+      -1.0,
+      45.0
+     ],
+     [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ]
+    ],
+    "right_hand_on_shaft_z_cm": 45.0,
+    "left_hand_on_shaft_z_cm": 80.0,
+    "check": {
+     "deepest_tip_F_cm": [
+      130.3,
+      -0.0,
+      125.2
+     ],
+     "deepest_frame_1based": 31,
+     "muzzle_face_f_cm": 159.1,
+     "bore_axis_u_cm": 125.2,
+     "tip_inside_muzzle_cm": 28.8,
+     "tip_offset_from_bore_axis_l_u_cm": [
+      -0.0,
+      -0.0
+     ],
+     "tip_at_start_F_cm": [
+      172.3,
+      0.0,
+      125.2
+     ]
+    }
+   }
+  },
+  "Load": {
+   "file": "A_Gun_Load.fbx",
+   "frames": 76,
+   "seconds": 2.5,
+   "loop": false,
+   "first_equals_last": true,
+   "station": {
+    "F_ground_point_cm": [
+     130.0,
+     38.0
+    ],
+    "heading_deg_from_muzzle_dir_toward_left": 0.0,
+    "unreal_gun_mesh_local_cm": [
+     38.0,
+     130.0,
+     -77.6
+    ],
+    "unreal_gun_mesh_forward_xy": [
+     0.0,
+     1.0
+    ]
+   },
+   "max_ik_miss_cm": {
+    "LeftFoot": 0.0,
+    "RightFoot": 0.0,
+    "LeftHand": 0.0,
+    "RightHand": 2.74
+   },
+   "root_motion": {
+    "excursion_x_z_y_cm": [
+     0.0,
+     9.0,
+     2.7
+    ],
+    "net_first_to_last_x_z_y_cm": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "foot_slide": {
+    "Left": {
+     "on_ground_frames": 76,
+     "of": 76,
+     "max_horizontal_move_per_frame_cm": 0.0
+    },
+    "Right": {
+     "on_ground_frames": 76,
+     "of": 76,
+     "max_horizontal_move_per_frame_cm": 0.0
+    }
+   },
+   "mesh_lowest_point_vs_ground_cm_min_max": [
+    0.06,
+    0.08
+   ],
+   "events_1based": {
+    "ball_taken_frame": 15,
+    "ball_released_frame": 45
+   },
+   "prop": {
+    "asset": "SM_Cannonball_12pdr",
+    "bone": "RightHand",
+    "socket_unreal": {
+     "location_cm": [
+      4.2,
+      -6.0,
+      0.0
+     ],
+     "rotation_PYR_deg": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "socket_blender_bone_local": [
+     [
+      1.0,
+      0.0,
+      0.0,
+      4.2
+     ],
+     [
+      0.0,
+      1.0,
+      0.0,
+      6.0
+     ],
+     [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ]
+    ],
+    "visible_frames_1based": [
+     15,
+     45
+    ],
+    "ball_center_F_at_release_cm": [
+     153.1,
+     0.0,
+     124.2
+    ]
+   }
+  },
+  "Ram": {
+   "file": "A_Gun_Ram.fbx",
+   "frames": 76,
+   "seconds": 2.5,
+   "loop": false,
+   "first_equals_last": true,
+   "station": {
+    "F_ground_point_cm": [
+     210.9,
+     -24.7
+    ],
+    "heading_deg_from_muzzle_dir_toward_left": 75.0,
+    "unreal_gun_mesh_local_cm": [
+     -24.7,
+     210.9,
+     -77.6
+    ],
+    "unreal_gun_mesh_forward_xy": [
+     0.966,
+     0.259
+    ]
+   },
+   "max_ik_miss_cm": {
+    "LeftFoot": 0.0,
+    "RightFoot": 0.0,
+    "LeftHand": 0.0,
+    "RightHand": 0.0
+   },
+   "root_motion": {
+    "excursion_x_z_y_cm": [
+     25.5,
+     6.8,
+     7.4
+    ],
+    "net_first_to_last_x_z_y_cm": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "foot_slide": {
+    "Left": {
+     "on_ground_frames": 56,
+     "of": 76,
+     "max_horizontal_move_per_frame_cm": 0.0
+    },
+    "Right": {
+     "on_ground_frames": 76,
+     "of": 76,
+     "max_horizontal_move_per_frame_cm": 0.0
+    }
+   },
+   "mesh_lowest_point_vs_ground_cm_min_max": [
+    0.06,
+    0.08
+   ],
+   "events_1based": {
+    "thrust_1_frame": 23,
+    "thrust_2_frame": 41
+   },
+   "prop": {
+    "asset": "SM_Rammer",
+    "bone": "RightHand",
+    "socket_unreal": {
+     "location_cm": [
+      3.2,
+      -6.0,
+      45.0
+     ],
+     "rotation_PYR_deg": [
+      0.0,
+      90.0,
+      180.0
+     ],
+     "scale": [
+      1.0,
+      1.0,
+      1.0
+     ]
+    },
+    "socket_blender_bone_local": [
+     [
+      0.0,
+      -1.0,
+      0.0,
+      3.2
+     ],
+     [
+      -1.0,
+      0.0,
+      0.0,
+      6.0
+     ],
+     [
+      0.0,
+      0.0,
+      -1.0,
+      45.0
+     ],
+     [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ]
+    ],
+    "right_hand_on_shaft_z_cm": 45.0,
+    "left_hand_on_shaft_z_cm": 80.0,
+    "check": {
+     "deepest_tip_F_cm": [
+      124.3,
+      -0.0,
+      125.2
+     ],
+     "deepest_frame_1based": 41,
+     "muzzle_face_f_cm": 159.1,
+     "bore_axis_u_cm": 125.2,
+     "tip_inside_muzzle_cm": 34.8,
+     "tip_offset_from_bore_axis_l_u_cm": [
+      -0.0,
+      -0.0
+     ],
+     "tip_at_start_F_cm": [
+      172.3,
+      0.0,
+      125.2
+     ]
+    }
+   }
+  },
+  "Prime": {
+   "file": "A_Gun_Prime.fbx",
+   "frames": 61,
+   "seconds": 2.0,
+   "loop": false,
+   "first_equals_last": true,
+   "station": {
+    "F_ground_point_cm": [
+     -5.8,
+     -42.0
+    ],
+    "heading_deg_from_muzzle_dir_toward_left": 100.0,
+    "unreal_gun_mesh_local_cm": [
+     -42.0,
+     -5.8,
+     -77.6
+    ],
+    "unreal_gun_mesh_forward_xy": [
+     0.985,
+     -0.174
+    ]
+   },
+   "max_ik_miss_cm": {
+    "LeftFoot": 0.06,
+    "RightFoot": 0.0,
+    "LeftHand": 0.0,
+    "RightHand": 0.0
+   },
+   "root_motion": {
+    "excursion_x_z_y_cm": [
+     22.0,
+     16.4,
+     7.1
+    ],
+    "net_first_to_last_x_z_y_cm": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "foot_slide": {
+    "Left": {
+     "on_ground_frames": 20,
+     "of": 61,
+     "max_horizontal_move_per_frame_cm": 0.01
+    },
+    "Right": {
+     "on_ground_frames": 25,
+     "of": 61,
+     "max_horizontal_move_per_frame_cm": 0.0
+    }
+   },
+   "mesh_lowest_point_vs_ground_cm_min_max": [
+    0.04,
+    9.08
+   ],
+   "events_1based": {
+    "friction_tube_in_vent_frame": 23,
+    "lanyard_pull_frame_FIRE": 45,
+    "recoil_flinch_frames": [
+     45,
+     55
+    ]
+   }
+  },
+  "Aim": {
+   "file": "A_Gun_Aim.fbx",
+   "frames": 90,
+   "seconds": 3.0,
+   "loop": true,
+   "first_equals_last": false,
+   "station": {
+    "F_ground_point_cm": [
+     -168.7,
+     0.0
+    ],
+    "heading_deg_from_muzzle_dir_toward_left": 0.0,
+    "unreal_gun_mesh_local_cm": [
+     0.0,
+     -168.7,
+     -77.6
+    ],
+    "unreal_gun_mesh_forward_xy": [
+     0.0,
+     1.0
+    ]
+   },
+   "max_ik_miss_cm": {
+    "LeftFoot": 0.0,
+    "RightFoot": 0.0,
+    "LeftHand": 1.05,
+    "RightHand": 0.14
+   },
+   "root_motion": {
+    "excursion_x_z_y_cm": [
+     0.0,
+     0.0,
+     2.0
+    ],
+    "net_first_to_last_x_z_y_cm": [
+     0.0,
+     0.0,
+     -0.14
+    ]
+   },
+   "foot_slide": {
+    "Left": {
+     "on_ground_frames": 90,
+     "of": 90,
+     "max_horizontal_move_per_frame_cm": 0.0
+    },
+    "Right": {
+     "on_ground_frames": 90,
+     "of": 90,
+     "max_horizontal_move_per_frame_cm": 0.0
+    }
+   },
+   "mesh_lowest_point_vs_ground_cm_min_max": [
+    0.08,
+    0.08
+   ],
+   "events_1based": {
+    "signal_frames": [
+     49,
+     73
+    ]
+   }
+  },
+  "Push_Loop": {
+   "file": "A_Gun_Push_Loop.fbx",
+   "frames": 36,
+   "seconds": 1.2,
+   "loop": true,
+   "first_equals_last": false,
+   "station": {
+    "F_ground_point_cm": [
+     -27.3,
+     -121.2
+    ],
+    "heading_deg_from_muzzle_dir_toward_left": 60.0,
+    "unreal_gun_mesh_local_cm": [
+     -121.2,
+     -27.3,
+     -77.6
+    ],
+    "unreal_gun_mesh_forward_xy": [
+     0.866,
+     0.5
+    ]
+   },
+   "max_ik_miss_cm": {
+    "LeftFoot": 0.0,
+    "RightFoot": 0.0,
+    "LeftHand": 0.0,
+    "RightHand": 0.0
+   },
+   "root_motion": {
+    "excursion_x_z_y_cm": [
+     2.4,
+     0.0,
+     1.0
+    ],
+    "net_first_to_last_x_z_y_cm": [
+     -0.21,
+     0.0,
+     -0.17
+    ]
+   },
+   "foot_slide": {
+    "Left": {
+     "on_ground_frames": 23,
+     "of": 36,
+     "max_horizontal_move_per_frame_cm": 1.82
+    },
+    "Right": {
+     "on_ground_frames": 23,
+     "of": 36,
+     "max_horizontal_move_per_frame_cm": 1.82
+    }
+   },
+   "mesh_lowest_point_vs_ground_cm_min_max": [
+    0.04,
+    0.1
+   ],
+   "events_1based": {
+    "step_length_cm": 40.0,
+    "swing_frames": 14.0,
+    "foot_swing_forward_direction_rig": [
+     -0.866,
+     0.0,
+     0.5
+    ]
+   },
+   "stance_speed": {
+    "Left": {
+     "stance_frames": 22,
+     "speed_cm_s_median": 54.5
+    },
+    "Right": {
+     "stance_frames": 22,
+     "speed_cm_s_median": 54.5
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,21 @@
+{
+  "nation": "DK",
+  "triangles": 40000,
+  "textures": [
+    {
+      "file": "DK_Officer_1864_Texture_0_v1.png",
+      "size": [
+        2048,
+        2048
+      ]
+    }
+  ],
+  "meshes": [
+    {
+      "triangles": 40000,
+      "boundary_edges_raw": 9944,
+      "boundary_edges_welded": 0,
+      "watertight_welded": true
+    }
+  ]
+}

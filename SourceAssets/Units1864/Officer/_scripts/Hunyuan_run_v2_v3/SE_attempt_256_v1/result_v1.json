@@ -1,0 +1,37 @@
+[
+  {
+    "value": "C:\\Projekter\\1864-Campaign\\SourceAssets\\Units1864\\Officer\\Hunyuan_run_v2\\SE_attempt_256_v1\\a467588a2bda2ec563bf09a70cbe2d021fe0b66a7e8b90f9f1153550739bfa9c\\white_mesh.glb",
+    "__type__": "update"
+  },
+  {
+    "value": "C:\\Projekter\\1864-Campaign\\SourceAssets\\Units1864\\Officer\\Hunyuan_run_v2\\SE_attempt_256_v1\\72966ff1d93336d94a990345a41a947bc91745064fffe0aac07e31a59e48ad20\\textured_mesh.glb",
+    "__type__": "update"
+  },
+  "\n        <div style='height: 690; width: 100%;'>\n        <iframe src=\"/static/b66896f3-b68b-4736-a523-5c0fc37f9b43\\textured_mesh.html\" height=\"690\" width=\"100%\" frameborder=\"0\"></iframe>\n        </div>\n    ",
+  {
+    "model": {
+      "shapegen": "tencent/Hunyuan3D-2mv/hunyuan3d-dit-v2-mv",
+      "texgen": "tencent/Hunyuan3D-2"
+    },
+    "params": {
+      "caption": null,
+      "steps": 30,
+      "guidance_scale": 5.0,
+      "seed": 1234,
+      "octree_resolution": 256,
+      "check_box_rembg": true,
+      "num_chunks": 8000
+    },
+    "number_of_faces": 134816,
+    "number_of_vertices": 67412,
+    "time": {
+      "remove background": 1.308098554611206,
+      "shape generation": 70.30739569664001,
+      "export to trimesh": 0.03400444984436035,
+      "face reduction": 1.5364539623260498,
+      "texture generation": 63.52426195144653,
+      "total": 136.73121428489685
+    }
+  },
+  1234
+]

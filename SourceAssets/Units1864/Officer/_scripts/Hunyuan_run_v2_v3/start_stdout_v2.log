@@ -1,0 +1,64 @@
+Loading example img list ...
+Loading example txt list ...
+Loading example mv list ...
+[1m[95m************ Memory Management for the GPU Poor (mmgp 3.2.7) by DeepBeepMeep ************[0m[0m
+Hooked to model 'i23d_workerconditioner' (SingleImageEncoder)
+Hooked to model 'i23d_workermodel' (Hunyuan3DDiT)
+Hooked to model 'i23d_workervae' (ShapeVAE)
+Hooked to model 'texgen_workerdelight_modelvae' (AutoencoderKL)
+Hooked to model 'texgen_workerdelight_modeltext_encoder' (CLIPTextTransformer)
+Hooked to model 'texgen_workerdelight_modelunet' (UNet2DConditionModel)
+Hooked to model 'texgen_workermultiview_modelvae' (AutoencoderKL)
+Hooked to model 'texgen_workermultiview_modeltext_encoder' (CLIPTextTransformer)
+Hooked to model 'texgen_workermultiview_modelunet' (UNet2p5DConditionModel)
+new /
+INFO:     127.0.0.1:57933 - "GET /gradio_api/info HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57936 - "GET /gradio_api/info HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57945 - "GET /config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57946 - "GET /gradio_api/info?serialize=False HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57947 - "GET /gradio_api/heartbeat/bb0006b8-d3be-4ba6-996e-1a7bec038782 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57948 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57950 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57951 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57952 - "POST /gradio_api/queue/join HTTP/1.1" 200 OK
+Created new folder: C:/Projekter/1864-Campaign/SourceAssets/Units1864/Officer/Hunyuan_run_v2/cache\292bc7fc-0f78-4fab-8e22-7b1b9256fbef
+INFO:     127.0.0.1:57953 - "GET /gradio_api/queue/data?session_hash=bb0006b8-d3be-4ba6-996e-1a7bec038782 HTTP/1.1" 200 OK
+Find html file C:/Projekter/1864-Campaign/SourceAssets/Units1864/Officer/Hunyuan_run_v2/cache\292bc7fc-0f78-4fab-8e22-7b1b9256fbef\textured_mesh.html, True, relative HTML path is /static/292bc7fc-0f78-4fab-8e22-7b1b9256fbef\textured_mesh.html
+INFO:     127.0.0.1:51596 - "GET /gradio_api/file%3DC%3A%5CProjekter%5C1864-Campaign%5CSourceAssets%5CUnits1864%5COfficer%5CHunyuan_run_v2%5Cgradio_temp%5Cddb1f6c67972caeac9878d964a583b69aea28f85a3259ae5554a70b5c057d3e6%5Cwhite_mesh.glb HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51597 - "GET /gradio_api/file%3DC%3A%5CProjekter%5C1864-Campaign%5CSourceAssets%5CUnits1864%5COfficer%5CHunyuan_run_v2%5Cgradio_temp%5Cf1f9b82317875c5aecdcd467a795a7096941678b2a87dc0cc0925d2f9cd67e86%5Ctextured_mesh.glb HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51607 - "GET /config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51608 - "GET /gradio_api/info?serialize=False HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51609 - "GET /gradio_api/heartbeat/bc0920dd-a2e8-438d-9921-83c76557b99e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51611 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51612 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51613 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51614 - "POST /gradio_api/queue/join HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51615 - "GET /gradio_api/queue/data?session_hash=bc0920dd-a2e8-438d-9921-83c76557b99e HTTP/1.1" 200 OK
+Created new folder: C:/Projekter/1864-Campaign/SourceAssets/Units1864/Officer/Hunyuan_run_v2/cache\b66896f3-b68b-4736-a523-5c0fc37f9b43
+Find html file C:/Projekter/1864-Campaign/SourceAssets/Units1864/Officer/Hunyuan_run_v2/cache\b66896f3-b68b-4736-a523-5c0fc37f9b43\textured_mesh.html, True, relative HTML path is /static/b66896f3-b68b-4736-a523-5c0fc37f9b43\textured_mesh.html
+INFO:     127.0.0.1:57289 - "GET /gradio_api/file%3DC%3A%5CProjekter%5C1864-Campaign%5CSourceAssets%5CUnits1864%5COfficer%5CHunyuan_run_v2%5Cgradio_temp%5C24dd5ed81e5532e8c04e1453456cae588511ac61d4a8dcd98674a57a02fde5f7%5Cwhite_mesh.glb HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57290 - "GET /gradio_api/file%3DC%3A%5CProjekter%5C1864-Campaign%5CSourceAssets%5CUnits1864%5COfficer%5CHunyuan_run_v2%5Cgradio_temp%5C666b57034ac479190705bfadaeff70a18a0dd0279a8cfbdfba8408af4f40357d%5Ctextured_mesh.glb HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57295 - "GET /config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57296 - "GET /gradio_api/info?serialize=False HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57297 - "GET /gradio_api/heartbeat/46e90385-4522-4580-850f-afb99524da1f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57299 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57300 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57301 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57302 - "POST /gradio_api/queue/join HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57303 - "GET /gradio_api/queue/data?session_hash=46e90385-4522-4580-850f-afb99524da1f HTTP/1.1" 200 OK
+Created new folder: C:/Projekter/1864-Campaign/SourceAssets/Units1864/Officer/Hunyuan_run_v2/cache\fae96c34-323c-4f7d-85b2-f08cfd53c3f6
+Find html file C:/Projekter/1864-Campaign/SourceAssets/Units1864/Officer/Hunyuan_run_v2/cache\fae96c34-323c-4f7d-85b2-f08cfd53c3f6\textured_mesh.html, True, relative HTML path is /static/fae96c34-323c-4f7d-85b2-f08cfd53c3f6\textured_mesh.html
+INFO:     127.0.0.1:56998 - "GET /gradio_api/file%3DC%3A%5CProjekter%5C1864-Campaign%5CSourceAssets%5CUnits1864%5COfficer%5CHunyuan_run_v2%5Cgradio_temp%5C06c9c426c317f3d0c0c3d18061098e5b9f452f6d53a46c2f4a8944c467253313%5Cwhite_mesh.glb HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56999 - "GET /gradio_api/file%3DC%3A%5CProjekter%5C1864-Campaign%5CSourceAssets%5CUnits1864%5COfficer%5CHunyuan_run_v2%5Cgradio_temp%5C59d9502f1146cc07eec9eae3a1d3da667acefb73582353830ce6450157746e10%5Ctextured_mesh.glb HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57001 - "GET /config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57002 - "GET /gradio_api/info?serialize=False HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57003 - "GET /gradio_api/heartbeat/387b1eee-f7d0-4508-885a-901c68e8beab HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57005 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57006 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57007 - "POST /gradio_api/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57008 - "POST /gradio_api/queue/join HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57009 - "GET /gradio_api/queue/data?session_hash=387b1eee-f7d0-4508-885a-901c68e8beab HTTP/1.1" 200 OK
+Created new folder: C:/Projekter/1864-Campaign/SourceAssets/Units1864/Officer/Hunyuan_run_v2/cache\70ea7759-763a-47c3-bb38-03b9724d8a07
+Find html file C:/Projekter/1864-Campaign/SourceAssets/Units1864/Officer/Hunyuan_run_v2/cache\70ea7759-763a-47c3-bb38-03b9724d8a07\textured_mesh.html, True, relative HTML path is /static/70ea7759-763a-47c3-bb38-03b9724d8a07\textured_mesh.html
+INFO:     127.0.0.1:57117 - "GET /gradio_api/file%3DC%3A%5CProjekter%5C1864-Campaign%5CSourceAssets%5CUnits1864%5COfficer%5CHunyuan_run_v2%5Cgradio_temp%5Cde5b6227d3dbcb9d9e7533e447754c691d8831e6094ba59fe30e801bcacbcc4a%5Cwhite_mesh.glb HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57118 - "GET /gradio_api/file%3DC%3A%5CProjekter%5C1864-Campaign%5CSourceAssets%5CUnits1864%5COfficer%5CHunyuan_run_v2%5Cgradio_temp%5C7f8b0ab900be37e41940bd70915c7e2b31b1149c1685a9659bd04b5178eb2e92%5Ctextured_mesh.glb HTTP/1.1" 200 OK

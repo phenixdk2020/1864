@@ -1,0 +1,1136 @@
+{
+  "nation": "PR",
+  "poses": {
+    "March_Skulder": {
+      "frames": [
+        {
+          "frame": 1,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 2,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 3,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 4,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 5,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 6,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 7,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 8,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 9,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 10,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 11,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 12,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 13,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 14,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 15,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 16,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 17,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 18,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 19,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 20,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 21,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 22,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 23,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 24,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 25,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 26,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 27,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 28,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 29,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 30,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        },
+        {
+          "frame": 31,
+          "grip_to_palm_cm": 0.108246,
+          "socket_anchor_error_cm": 2.1073424255447017e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.05446,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.01722,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 196.10903
+        }
+      ],
+      "grip_to_palm_cm": 0.1082459222729916,
+      "blade_penetration_cm": 0,
+      "scabbard_penetration_cm": 0,
+      "geometric_cavity_measurement": {
+        "distance_cm": 0.1082459222729916,
+        "grip_centre_prop_local_m": [
+          -0.004603606648743153,
+          0.0019349619979038835,
+          0.022389613091945648
+        ],
+        "palm_centre_prop_local_m": [
+          -0.005204463377594948,
+          0.002367486711591482,
+          0.021599922329187393
+        ],
+        "hilt_samples": 3461,
+        "skin_samples": 1385,
+        "method": "Independent least-squares ellipse centres from hilt vertices and evaluated inner-skin vertices within 6 mm of the hilt, central grip crop; fixed section aspect 2.1."
+      }
+    },
+    "Ordre": {
+      "frames": [
+        {
+          "frame": 1,
+          "grip_to_palm_cm": 0.10825,
+          "socket_anchor_error_cm": 0.0,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 7.31101,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.0345,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 170.93173
+        },
+        {
+          "frame": 31,
+          "grip_to_palm_cm": 0.10825,
+          "socket_anchor_error_cm": 0.0,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 7.31101,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.0345,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 170.93173
+        }
+      ],
+      "grip_to_palm_cm": 0.1082504776989357,
+      "blade_penetration_cm": 0,
+      "scabbard_penetration_cm": 0,
+      "geometric_cavity_measurement": {
+        "distance_cm": 0.1082504776989357,
+        "grip_centre_prop_local_m": [
+          -0.004603606648743153,
+          0.0019349619979038835,
+          0.022389613091945648
+        ],
+        "palm_centre_prop_local_m": [
+          -0.005204545333981514,
+          0.002367432462051511,
+          0.021599892526865005
+        ],
+        "hilt_samples": 3461,
+        "skin_samples": 1385,
+        "method": "Independent least-squares ellipse centres from hilt vertices and evaluated inner-skin vertices within 6 mm of the hilt, central grip crop; fixed section aspect 2.1."
+      }
+    },
+    "Hvil": {
+      "frames": [
+        {
+          "frame": 1,
+          "grip_to_palm_cm": 0.108245,
+          "socket_anchor_error_cm": 1.4901161193847656e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.72407,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.0345,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 0.29999
+        },
+        {
+          "frame": 31,
+          "grip_to_palm_cm": 0.108245,
+          "socket_anchor_error_cm": 1.4901161193847656e-06,
+          "blade": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.72407,
+            "sample_vertices": 14087
+          },
+          "whole_saber_including_hilt": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.0345,
+            "sample_vertices": 28039
+          },
+          "scabbard": {
+            "max_penetration_cm": 0,
+            "inside_sample_vertices": 0,
+            "triangle_intersections": 0,
+            "minimum_surface_clearance_cm": 0.55696,
+            "sample_vertices": 25235
+          },
+          "tip_ground_clearance_cm": 0.29999
+        }
+      ],
+      "grip_to_palm_cm": 0.10824489169615123,
+      "blade_penetration_cm": 0,
+      "scabbard_penetration_cm": 0,
+      "geometric_cavity_measurement": {
+        "distance_cm": 0.10824489169615123,
+        "grip_centre_prop_local_m": [
+          -0.004603606648743153,
+          0.0019349619979038835,
+          0.022389613091945648
+        ],
+        "palm_centre_prop_local_m": [
+          -0.005204446613788605,
+          0.0023674876429140568,
+          0.021599924191832542
+        ],
+        "hilt_samples": 3461,
+        "skin_samples": 1385,
+        "method": "Independent least-squares ellipse centres from hilt vertices and evaluated inner-skin vertices within 6 mm of the hilt, central grip crop; fixed section aspect 2.1."
+      }
+    }
+  },
+  "method": "Evaluated LBS body. BVH triangle intersections plus multi-ray inside tests of prop vertices; blade x>=0.13 m. All 31 march frames checked.",
+  "remaining_problems": [
+    "Håndens modellering og hudmateriale er stiliseret; ikke anatomisk færdig til nærfilm.",
+    "Unreal-import og runtime er ikke testet.",
+    "Nationalt eksercits er ikke historisk verificeret."
+  ],
+  "saber_socket": {
+    "bone": "RightHand",
+    "source_bone": "mixamorig:RightHand",
+    "location_cm": [
+      8.859872817993164,
+      -10.981565475463867,
+      4.25553560256958
+    ],
+    "rotation_degrees": {
+      "pitch": -38.61133941583805,
+      "yaw": -44.48666130969385,
+      "roll": -148.19838468618852
+    },
+    "quaternion_xyzw": [
+      0.8744009137153625,
+      -0.2597481608390808,
+      -0.3921750485897064,
+      0.11896544694900513
+    ],
+    "scale": [
+      1.1061959838867188,
+      1.1061959075927734,
+      1.1061961364746093
+    ],
+    "matrix_blender_bone_local": [
+      [
+        61.66592025756836,
+        39.9267463684082,
+        -82.70348358154297,
+        8.859872817993164
+      ],
+      [
+        60.570716857910156,
+        -92.56163024902344,
+        0.4771609306335449,
+        10.981565475463867
+      ],
+      [
+        -69.0304183959961,
+        -45.550987243652344,
+        -73.46158599853516,
+        4.25553560256958
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "scabbard_socket": {
+    "bone": "Hips",
+    "source_bone": "mixamorig:Hips",
+    "location_cm": [
+      33.24332046508789,
+      -9.561044692993164,
+      -19.43243408203125
+    ],
+    "rotation_degrees": {
+      "pitch": -20.7301705461223,
+      "yaw": 84.85723888967375,
+      "roll": -90.00000250447816
+    },
+    "quaternion_xyzw": [
+      0.42757806181907654,
+      0.5631847381591797,
+      0.3753742277622223,
+      0.5992447137832642
+    ],
+    "scale": [
+      1.1061961364746093,
+      1.1061962127685547,
+      1.1061962127685547
+    ],
+    "matrix_blender_bone_local": [
+      [
+        9.273724555969238,
+        -3.509829044342041,
+        110.17431640625,
+        33.24332046508789
+      ],
+      [
+        -103.0413818359375,
+        38.99810791015625,
+        9.915688514709473,
+        9.561044692993164
+      ],
+      [
+        -39.155731201171875,
+        -103.4578628540039,
+        7.486136723855452e-07,
+        -19.43243408203125
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "palm_landmark": "Uafhængige ellipsefit til fæstets vertices og den evaluerede inderside af fingrene. Socket-anchor-fejl er en separat kontrol.",
+  "unreal_conversion_source": "UE 5.8 FbxUtilsImport.cpp ConvertPos/ConvertRotToQuat; FbxMainImport.cpp MakeName fjerner namespace.",
+  "roundtrip_static": {
+    "bones": 41,
+    "triangles": 29930,
+    "rest_matrix_max_error": 8.7738037109375e-05,
+    "max_influences": 4,
+    "weights_normalised": true
+  }
+}
